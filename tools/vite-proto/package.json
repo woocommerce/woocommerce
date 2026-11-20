@@ -11,7 +11,9 @@
     "dev:admin": "vite --config dev/vite.config.mjs"
   },
   "dependencies": {
+    "@jridgewell/remapping": "^2.3.5",
     "@vitejs/plugin-react": "^6.3.0",
+    "magic-string": "^0.30.21",
     "rolldown": "1.2.19",
     "sass-embedded": "^1.100.0",
     "vite": "8.3.8"

@@ -13,14 +13,22 @@
  * - Named shared chunks (wc-blocks-vendors and so on) are their own files
  *   with the names PHP registers.
  * - Lazy chunks are their own files, loaded by a script tag.
+ *
+ * The linker leaves Rolldown's code as it is. The registry resolves each
+ * `require()` at run time: a path to another chunk, or `wc-g:wp.data` for
+ * the `window.wp.data` global. Everything else the linker needs comes from
+ * Rolldown's chunk metadata.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { rolldown, watch } from 'rolldown';
-import { parseAst } from 'rolldown/parseAst';
+import { parseAst, parseAstAsync } from 'rolldown/parseAst';
+import MagicString from 'magic-string';
+import { styleMark, isStyle } from './css.mjs';
 
-const EXTERNAL = 'wc-ext:';
+// An external becomes `require( 'wc-g:wp.data' )`; the runtime reads the global.
+const EXTERNAL = 'wc-g:';
 const ENTRY = '\0wc-entry:';
 const ENTRY_FILE = 'wc-entry-file:';
 const I18N_FUNCTIONS = new Set( [ '__', '_x', '_n', '_nx' ] );
@@ -129,6 +137,10 @@ async function rewriteSource( ctx, code, id, config, state ) {
 				: hash( path.relative( config.root, resolved.id ), 8 );
 			state.lazyNames.set( key, Boolean( named ) );
 			state.lazyModules.set( key, resolved.id );
+			if ( ! state.lazyKeysByModule.has( id ) ) {
+				state.lazyKeysByModule.set( id, new Set() );
+			}
+			state.lazyKeysByModule.get( id ).add( key );
 			edits.push( [ node.start, `__wcLazy(${ JSON.stringify( key ) }, () => ` ] );
 			edits.push( [ node.end, ')' ] );
 		}
@@ -192,9 +204,14 @@ export function classicPlugin( config, state ) {
 				if ( path.isAbsolute( source ) ) {
 					return null;
 				}
-				// Kept external so Rolldown lists it per chunk; the linker
-				// swaps the require for the global.
-				return { id: EXTERNAL + source, external: true, moduleSideEffects: false };
+				// Kept external so Rolldown lists it per chunk. The id names
+				// the global, which the runtime reads when the require runs.
+				const externalId = EXTERNAL + [].concat( external ).join( '.' );
+				if ( ! state.externalRequests.has( externalId ) ) {
+					state.externalRequests.set( externalId, new Set() );
+				}
+				state.externalRequests.get( externalId ).add( source );
+				return { id: externalId, external: true, moduleSideEffects: false };
 			},
 		},
 		load: {
@@ -252,13 +269,84 @@ export function classicPlugin( config, state ) {
 	};
 }
 
-const literalValue = ( literal ) =>
-	// The literal comes from our own build output.
-	// eslint-disable-next-line no-new-func
-	new Function( `return ${ literal }` )();
+/**
+ * What the linker needs from one Rolldown chunk. Most of it comes from
+ * Rolldown's chunk metadata; the code itself stays as Rolldown wrote it, and
+ * the runtime resolves `require()` calls to other chunks and to externals.
+ *
+ * - `css`: the style marks of the style modules in the chunk.
+ * - `lazy`: lazy chunk key to the chunk that holds the lazily loaded module.
+ * - `externals`: externals the chunk's code requires, including requires in
+ *   bundled CommonJS code, which Rolldown does not list as chunk imports.
+ * - `__wcT( 'translators: …', call )` becomes `( /* translators: … *\/ call )`,
+ *   edited on the parsed code so strings that look alike stay untouched.
+ */
+async function analyzeChunk( chunk, chunkOfModule, state ) {
+	const modules = Object.keys( chunk.modules );
+	const css = modules.filter( isStyle ).map( styleMark );
+	const lazy = new Map();
+	for ( const id of modules ) {
+		for ( const key of state.lazyKeysByModule.get( id ) || [] ) {
+			const target = chunkOfModule.get( state.lazyModules.get( key ) );
+			if ( target ) {
+				lazy.set( key, target );
+			}
+		}
+	}
+	const externals = new Set();
+	for ( const match of chunk.code.matchAll( /["'`](wc-g:[\w$.]+)["'`]/g ) ) {
+		externals.add( match[ 1 ] );
+	}
+	const ms = new MagicString( chunk.code );
+	if ( chunk.code.includes( '__wcT(' ) ) {
+		const ast = await parseAstAsync( chunk.code, { lang: 'js' } );
+		walk( ast, ( node ) => {
+			if (
+				node.type !== 'CallExpression' ||
+				node.callee.type !== 'Identifier' ||
+				node.callee.name !== '__wcT'
+			) {
+				return;
+			}
+			const [ comment, call ] = node.arguments;
+			const text = stringOf( comment );
+			if ( text !== null && call ) {
+				ms.overwrite(
+					node.start,
+					call.start,
+					`(/* ${ text.replace( /\*\//g, '* /' ) } */`
+				);
+			}
+		} );
+	}
+	// Shorter form of the export getters Rolldown writes. Only size depends
+	// on this: if Rolldown writes them differently, nothing matches and the
+	// getters stay as they are.
+	let exportHelper = false;
+	for ( const match of chunk.code.matchAll( EXPORT_GETTER ) ) {
+		exportHelper = true;
+		ms.overwrite(
+			match.index,
+			match.index + match[ 0 ].length,
+			`__wcX(${ match[ 1 ] },()=>${ match[ 2 ] })`
+		);
+	}
+	return { ms, code: ms.toString(), css, lazy, externals, exportHelper };
+}
 
-const LAZY_CALL =
-	/__wcLazy\(\s*(["'`])([^"'`]+)\1\s*,\s*\(\)\s*=>\s*Promise\.resolve\(\)\.then\(\(\)\s*=>\s*(?:\/\*[^*]*\*\/\s*)?(?:[\w$.]+\()?require\(\s*(["'])([^"']+)\3\s*\)/g;
+const EXPORT_GETTER =
+	/Object\.defineProperty\(exports,\s*("[^"\\]+"),\s*\{\s*enumerable:\s*(?:!0|true),\s*get:\s*function\s*\(\)\s*\{\s*return ([\w$]+);?\s*\}\s*\}\)/g;
+
+// The minifier writes many strings as template literals.
+function stringOf( node ) {
+	if ( node?.type === 'Literal' && typeof node.value === 'string' ) {
+		return node.value;
+	}
+	if ( node?.type === 'TemplateLiteral' && node.expressions.length === 0 ) {
+		return node.quasis[ 0 ].value.cooked;
+	}
+	return null;
+}
 
 /**
  * Turn Rolldown's chunks into the files PHP expects.
@@ -272,42 +360,16 @@ async function link( ctx, bundle, config, state ) {
 
 	// Rewrite each chunk's code: registry ids, translator comments, CSS marks.
 	const info = new Map();
+	const chunkOfModule = new Map();
 	for ( const chunk of chunks ) {
-		const dir = path.posix.dirname( chunk.fileName );
-		const css = [];
-		const lazy = new Map();
-		const externals = new Set();
-		let code = chunk.code.replace(
-			/require\(\s*(["'])(\.{1,2}\/[^"']+)\1\s*\)/g,
-			( match, quote, relative ) => {
-				const target = path.posix.join( dir, relative );
-				return byFile.has( target )
-					? `require(${ JSON.stringify( target ) })`
-					: match;
-			}
-		);
-		for ( const match of code.matchAll( LAZY_CALL ) ) {
-			lazy.set( match[ 2 ], match[ 4 ] );
+		for ( const id of Object.keys( chunk.modules ) ) {
+			chunkOfModule.set( id, chunk.fileName );
 		}
-		code = code
-			.replace(
-				/require\(\s*(["'])wc-ext:([^"']+)\1\s*\)/g,
-				( match, quote, request ) => {
-					// Also covers a require() inside bundled CommonJS code,
-					// which Rolldown does not list as a chunk import.
-					externals.add( request );
-					return globalExpression( config.toGlobal( request ) );
-				}
-			)
-			.replace(
-				/__wcT\((`(?:[^`\\]|\\.)*`|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'),\s*/g,
-				( match, literal ) =>
-					`(/* ${ literalValue( literal ).replace( /\*\//g, '* /' ) } */`
-			)
-			.replace( /__wcCss\(["'`]([0-9a-f]+)["'`]\)/g, ( match, index ) => {
-				css.push( index );
-				return '0';
-			} );
+	}
+	const rewritten = await Promise.all(
+		chunks.map( ( chunk ) => analyzeChunk( chunk, chunkOfModule, state ) )
+	);
+	chunks.forEach( ( chunk, index ) => {
 		let kind = 'common';
 		let entry = null;
 		let named = null;
@@ -327,16 +389,8 @@ async function link( ctx, bundle, config, state ) {
 		} else if ( chunk.isDynamicEntry ) {
 			kind = 'lazy';
 		}
-		const exportHelper = /Object\.defineProperty\(exports,/.test( code );
-		if ( exportHelper ) {
-			// Shorter form of the live export getters Rolldown writes.
-			code = code.replace(
-				/Object\.defineProperty\(exports,\s*("[^"]+"),\s*\{\s*enumerable:\s*(?:!0|true),\s*get:\s*function\s*\(\)\s*\{\s*return ([\w$]+);?\s*\}\s*\}\)/g,
-				'__wcX($1,()=>$2)'
-			);
-		}
-		info.set( chunk.fileName, { chunk, code, css, lazy, kind, entry, named, exportHelper, externals } );
-	}
+		info.set( chunk.fileName, { chunk, ...rewritten[ index ], kind, entry, named } );
+	} );
 
 	// Name the lazy files after the first key that points at them.
 	const lazyFile = new Map();
@@ -523,7 +577,11 @@ async function link( ctx, bundle, config, state ) {
 	}
 	const core =
 		'var R=self.__NAME__||(self.__NAME__={d:{},c:{},w:[],s:{},z:{},' +
-		'r:function(i){var m=R.c[i];if(!m){m=R.c[i]={exports:{}};R.d[i].call(m.exports,m,m.exports,R.r)}return m.exports},' +
+		'r:function(i){var m=R.c[i];if(!m){m=R.c[i]={exports:{}};R.d[i].call(m.exports,m,m.exports,function(p){return R.q(i,p)})}return m.exports},' +
+		// A require() from chunk i: a global for an external, else another
+		// chunk by its path relative to chunk i.
+		'q:function(i,p){var o=window,s;if(p.indexOf("wc-g:")===0){s=p.slice(5).split(".");for(var k=0;k<s.length;k++)o=o[s[k]];return o}' +
+		's=i.split("/");s.pop();p.split("/").forEach(function(x){x===".."?s.pop():x!=="."&&s.push(x)});return R.r(s.join("/"))},' +
 		't:function(e){for(var k=0;k<e[0].length;k++)if(!R.d[e[0][k]])return 0;R.r(e[1]);return 1},' +
 		'f:function(i,f){if(!R.d[i]){R.d[i]=f;var w=R.w;R.w=[];w.forEach(function(e){R.t(e)||R.w.push(e)})}},' +
 		'e:function(d,i){var e=[d,i];R.t(e)||R.w.push(e)}});';
@@ -638,11 +696,13 @@ async function link( ctx, bundle, config, state ) {
 			for ( const file of reach( roots[ 0 ] ) ) {
 				for ( const imported of info.get( file ).chunk.imports ) {
 					if ( imported.startsWith( EXTERNAL ) ) {
-						handles.add( config.toHandle( imported.slice( EXTERNAL.length ) ) );
+						info.get( file ).externals.add( imported );
 					}
 				}
-				for ( const request of info.get( file ).externals ) {
-					handles.add( config.toHandle( request ) );
+				for ( const id of info.get( file ).externals ) {
+					for ( const request of state.externalRequests.get( id ) || [] ) {
+						handles.add( config.toHandle( request ) );
+					}
 				}
 			}
 			dependencies = [ ...handles ].sort();
@@ -806,6 +866,8 @@ export function rolldownOptions( config, state ) {
 export const newState = () => ( {
 	lazyNames: new Map(),
 	lazyModules: new Map(),
+	lazyKeysByModule: new Map(),
+	externalRequests: new Map(),
 	logCounts: {},
 } );
 

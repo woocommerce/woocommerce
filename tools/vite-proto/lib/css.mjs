@@ -1,8 +1,8 @@
 /**
  * Styles: Sass, PostCSS and RTL, the same steps webpack's loaders run.
  *
- * Rolldown has no CSS pipeline, so a style import becomes a `__wcCss( n )`
- * mark in the JavaScript. After bundling, the marks say which styles ended
+ * Rolldown has no CSS pipeline, so a style import becomes an empty module.
+ * After bundling, Rolldown's chunk metadata says which style modules ended
  * up in which chunk, and the planner joins them into the files webpack
  * writes.
  */
@@ -140,6 +140,12 @@ const profiles = {
 	},
 };
 
+/** A style file's mark: a short hash of its path, stable across builds. */
+export const styleMark = ( file ) =>
+	createHash( 'sha1' ).update( path.relative( REPO, file ) ).digest( 'hex' ).slice( 0, 12 );
+
+export const isStyle = ( id ) => /\.(s[ac]ss|css)$/.test( id );
+
 export function createCss(
 	kind,
 	{ production = true, minifier = 'cssnano', sass: sassFlavor = 'sass' } = {}
@@ -151,11 +157,7 @@ export function createCss(
 	// not depend on the order files happen to load in.
 	const files = new Map();
 	const index = new Map();
-	const markFor = ( file ) =>
-		createHash( 'sha1' )
-			.update( path.relative( REPO, file ) )
-			.digest( 'hex' )
-			.slice( 0, 12 );
+	const markFor = styleMark;
 	const assets = new Map();
 	const mtimes = new Map();
 	const stats = { sassMs: 0, postcssMs: 0, modules: 0 };
@@ -364,7 +366,9 @@ export function cssMarkPlugin( css ) {
 					}
 				}
 				return {
-					code: `__wcCss("${ css.mark( id ) }");`,
+					// Empty: the linker finds style modules in Rolldown's
+					// chunk metadata.
+					code: ( css.mark( id ), '' ),
 					moduleType: 'js',
 					moduleSideEffects: 'no-treeshake',
 				};

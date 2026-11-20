@@ -6,7 +6,7 @@ OUT=/home/user/wc-bench/live/$LABEL
 mkdir -p "$OUT"
 export AGENT_BROWSER_SESSION=wc-vite-proto
 BASE=http://localhost:8090
-PAGE_ID=$(cd /home/user/store && wp post list --post_type=page --name=vite-proto-blocks --field=ID)
+PAGE_ID=7
 declare -A URLS=(
   [shop]="$BASE/shop/"
   [product]="$BASE/?p=12"
