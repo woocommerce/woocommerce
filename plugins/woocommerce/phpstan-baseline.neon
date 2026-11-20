@@ -11401,73 +11401,19 @@ parameters:
 			path: includes/class-wc-form-handler.php
 
 		-
-			message: '#^Cannot call method get_billing_city\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method get_billing_country\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method get_billing_postcode\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method get_billing_state\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method get_checkout_order_received_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
 			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/class-wc-form-handler.php
 
 		-
 			message: '#^Cannot call method get_order_key\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: includes/class-wc-form-handler.php
 
 		-
 			message: '#^Cannot call method has_status\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method needs_payment\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method payment_complete\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method save\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method set_payment_method\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/class-wc-form-handler.php
@@ -30446,18 +30392,6 @@ parameters:
 		-
 			message: '#^Method WC_Shortcode_Checkout\:\:output\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Parameter \#1 \$email of function sanitize_email expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Parameter \#1 \$nonce of function wp_verify_nonce expects string, string\|false\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: includes/shortcodes/class-wc-shortcode-checkout.php
 
@@ -64467,30 +64401,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Utilities/URL.php
-
-		-
-			message: '#^@param Automattic\\WooCommerce\\Internal\\Utilities\\WC_Order \$order does not accept actual type of parameter\: WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Internal/Utilities/Users.php
-
-		-
-			message: '#^Cannot call method get_billing_email\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Utilities/Users.php
-
-		-
-			message: '#^Cannot call method get_customer_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Utilities/Users.php
-
-		-
-			message: '#^Cannot call method get_date_created\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Utilities/Users.php
 
 		-
 			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
