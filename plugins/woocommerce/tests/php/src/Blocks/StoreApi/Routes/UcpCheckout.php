@@ -228,6 +228,41 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * Version cases for the `UCP-Agent` header.
+	 *
+	 * @return array<string, array{string, int}>
+	 */
+	public function provider_agent_versions(): array {
+		return array(
+			'supported' => array( Utils::VERSION, 201 ),
+			'newer'     => array( '2099-01-01', 422 ),
+			'older'     => array( '2026-01-23', 422 ),
+		);
+	}
+
+	/**
+	 * Only the protocol version the store implements is served.
+	 *
+	 * @dataProvider provider_agent_versions
+	 *
+	 * @param string $version Version in the header.
+	 * @param int    $status Expected HTTP status.
+	 */
+	public function test_agent_version_is_negotiated( string $version, int $status ): void {
+		$response = $this->request(
+			'POST',
+			'/checkout-sessions',
+			array( 'line_items' => array( $this->line_item( 0, 1 ) ) ),
+			array( 'UCP-Agent' => 'profile="https://agent.example/profile.json"; version="' . $version . '"' )
+		);
+
+		$this->assertSame( $status, $response->get_status() );
+		if ( 422 === $status ) {
+			$this->assertSame( 'version_unsupported', $response->get_data()['messages'][0]['code'] );
+		}
+	}
+
+	/**
 	 * @testdox Creating from a cart keeps the cart id and contents; a checkout without a buyer email is incomplete.
 	 */
 	public function test_create_from_cart_id(): void {

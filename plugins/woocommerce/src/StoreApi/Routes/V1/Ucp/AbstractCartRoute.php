@@ -76,9 +76,9 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	/**
 	 * Answer the request, under the `Idempotency-Key` it carries.
 	 *
-	 * A payload the route cannot read is refused before the key is claimed, so a 415 never
-	 * touches the store. After that the key is settled before anything else runs: a replay
-	 * must not load a session or resolve a cart id, since a retried `cancel` has to return the
+	 * An unsupported version or a payload the route cannot read is refused before the key is
+	 * claimed, so a 422 or 415 never touches the store. After that the key is settled before
+	 * anything else runs: a replay must not load a session or resolve a cart id, since a retried `cancel` has to return the
 	 * stored response rather than the `not_found` its own first run left behind.
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -88,7 +88,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$refusal = Utils::refuse_non_json_payload( $request, $this->capability() );
+		$refusal = Utils::refuse_unsupported_version( $request, $this->capability() ) ?? Utils::refuse_non_json_payload( $request, $this->capability() );
 		if ( null !== $refusal ) {
 			return $this->add_response_headers( $refusal );
 		}
