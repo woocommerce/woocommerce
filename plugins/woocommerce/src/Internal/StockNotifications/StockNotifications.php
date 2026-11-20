@@ -213,7 +213,7 @@ class StockNotifications implements RegisterHooksInterface {
 	 * feature_is_enabled() builds the translated feature definitions, which is not safe
 	 * that early. Every other caller should use is_enabled().
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @return bool
 	 */

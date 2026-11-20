@@ -41,7 +41,7 @@ defined( 'ABSPATH' ) || exit;
  * cannot see the transition. This class listens to the generic action and re-fires one
  * narrow, ID-first action per topic, which integrations can use directly as well.
  *
- * @since 11.3.0
+ * @since 11.4.0
  */
 class WebhooksController {
 
@@ -198,7 +198,7 @@ class WebhooksController {
 			 * it. Re-activating a cancelled notification is not a verification and only fires
 			 * `woocommerce_stock_notification_status_changed`.
 			 *
-			 * @since 11.3.0
+			 * @since 11.4.0
 			 *
 			 * @param int          $notification_id The notification ID.
 			 * @param Notification $notification    The notification.
@@ -214,7 +214,7 @@ class WebhooksController {
 			 * Fires when a stock notification's status becomes sent, after the back-in-stock email
 			 * went out, whether the processor or an admin sent it.
 			 *
-			 * @since 11.3.0
+			 * @since 11.4.0
 			 *
 			 * @param int          $notification_id The notification ID.
 			 * @param Notification $notification    The notification.
@@ -232,7 +232,7 @@ class WebhooksController {
 			 * anonymized it. Read `$notification->get_cancellation_source()` to tell them apart.
 			 * After a privacy erasure the notification no longer identifies the shopper.
 			 *
-			 * @since 11.3.0
+			 * @since 11.4.0
 			 *
 			 * @param int          $notification_id The notification ID.
 			 * @param Notification $notification    The notification.
