@@ -295,10 +295,14 @@ class Filterer {
 			{$in_stock_clause}";
 
 		if ( ! empty( $term_ids ) ) {
+			// In lookup mode, selected attributes are not in the main tax query.
+			// Apply them here too, so counts obey the same restrictions as the product list.
 			$attributes_to_filter_by = \WC_Query::get_layered_nav_chosen_attributes();
 
 			if ( ! empty( $attributes_to_filter_by ) ) {
 				foreach ( $attributes_to_filter_by as $filter_taxonomy => $data ) {
+					// A Color OR count must still offer Blue when Red is selected, but must keep
+					// Size=Small if that is selected too. AND counts retain their own selection.
 					if ( 'or' === $data['query_type'] && $filter_taxonomy === $taxonomy && 'or' === $query_type ) {
 						continue;
 					}
@@ -317,6 +321,10 @@ class Filterer {
 					$terms_count   = count( $selected_term_ids );
 					$term_ids_list = $this->get_term_ids_sql( $selected_term_ids );
 					if ( 'or' === $data['query_type'] ) {
+						// Any selected term may match; unlike AND below, no all-terms count is needed.
+						// Return parent IDs and check stock on the matching rows, so an in-stock
+						// Large variation cannot make an out-of-stock Small selection count.
+						// The derived table follows the product query's materializable subquery pattern.
 						$query['where'] .= "
 							AND product_or_parent_id IN ( SELECT product_or_parent_id FROM (
 								SELECT product_or_parent_id
