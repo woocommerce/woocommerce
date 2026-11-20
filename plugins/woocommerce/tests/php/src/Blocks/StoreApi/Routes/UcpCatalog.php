@@ -456,6 +456,30 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A selection matching only variants outside the price filter should be relaxed until one inside it matches.
+	 */
+	public function test_product_detail_relaxes_a_selection_the_price_filter_excludes(): void {
+		$id   = (string) \WC_Helper_Product::create_variation_product()->get_id();
+		$data = $this->post(
+			'/catalog/product',
+			array(
+				'id'       => $id,
+				'selected' => array(
+					array(
+						'name'  => 'size',
+						'label' => 'small',
+					),
+				),
+				'filters'  => array( 'price' => array( 'min' => 1500 ) ),
+			)
+		)->get_data();
+
+		$this->assertSame( 'success', $data['ucp']['status'] );
+		$this->assertSame( array(), $data['product']['selected'] );
+		$this->assertSame( 1500, $data['product']['variants'][0]['price']['amount'] );
+	}
+
+	/**
 	 * A variant id puts that variation first, takes its options as the selection,
 	 * and overrides a conflicting request selection.
 	 */

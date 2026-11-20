@@ -303,10 +303,12 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			$selected = $this->variation_options_by_id( $item )[ $variation_id ] ?? array();
 		}
 
+		// Only matches inside the price filter stop the relaxation, as for the featured selection.
+		$in_range = $this->filter_by_price( $product, array_map( 'intval', array_column( (array) $item['variations'], 'id' ) ) );
 		$matching = array();
 
 		while ( ! empty( $selected ) ) {
-			$matching = $this->match_selection( $item, $selected );
+			$matching = array_values( array_intersect( $this->match_selection( $item, $selected ), $in_range ) );
 
 			if ( ! empty( $matching ) ) {
 				break;
