@@ -70,7 +70,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
-	 * @throws \Throwable When holding stock fails for a reason other than stock, or a hook refuses the order.
+	 * @throws \Throwable When holding stock fails for a reason other than stock, or a hook throws.
 	 *
 	 * @return \WP_REST_Response
 	 */
@@ -156,6 +156,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 
 		try {
 			wc_reserve_stock_for_order( $order );
+			$this->record_attribution( $order, $request );
 		} catch ( ReserveStockException $e ) {
 			wc_release_coupons_for_order( $order );
 
@@ -163,13 +164,11 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			// stays a draft, which the payment page refuses.
 			return $this->ucp_error( Utils::cart_error_code( (string) $e->getErrorCode() ), wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200, '$.line_items' );
 		} catch ( \Throwable $e ) {
-			// A filter on the way to the hold can throw anything, and the coupon holds must not outlive the attempt.
+			// A hook on the way can throw anything, and the coupon holds must not outlive the attempt.
 			wc_release_coupons_for_order( $order );
 
 			throw $e;
 		}
-
-		$this->record_attribution( $order, $request );
 
 		// The payment page only takes an order awaiting payment, which a checkout draft is not.
 		$order->set_status( OrderStatus::PENDING );

@@ -1150,6 +1150,32 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Complete gives the coupon holds back when recording attribution throws.
+	 */
+	public function test_complete_releases_coupon_holds_when_attribution_throws(): void {
+		$coupon  = \WC_Helper_Coupon::create_coupon(
+			'once',
+			array(
+				'coupon_amount' => '1',
+				'usage_limit'   => '1',
+			)
+		);
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'once' ) ) ) );
+
+		$throw = static function () {
+			throw new \RuntimeException( 'Broken listener.' );
+		};
+		add_action( 'woocommerce_order_save_attribution_data', $throw, 1 );
+		$response = $this->request( 'POST', $path . '/complete' );
+		remove_action( 'woocommerce_order_save_attribution_data', $throw, 1 );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 0, (int) $coupon->get_data_store()->get_tentative_usage_count( $coupon->get_id() ) );
+	}
+
+	/**
 	 * @testdox Complete cancels the order a hook refused after it was saved, so a retry keeps the usage-limited coupon.
 	 */
 	public function test_complete_cancels_the_order_when_the_processed_hook_throws(): void {
