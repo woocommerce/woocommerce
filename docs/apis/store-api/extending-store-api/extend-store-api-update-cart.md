@@ -54,6 +54,20 @@ extensionCartUpdate( {
 
 ## Things to consider
 
+### Declare the scripts you use as dependencies
+
+`wc.blocksCheckout` comes from the `wc-blocks-checkout` script, and `wc.wcBlocksData` from `wc-blocks-data-store`. The Cart and Checkout blocks load them, but other pages, such as pages that only show the Mini-Cart, do not. List them as dependencies of the script that calls `extensionCartUpdate`, so they load on every page where your script runs:
+
+```php
+wp_enqueue_script(
+	'my-extension-cart-update',
+	$script_url,
+	array( 'wc-blocks-checkout', 'wc-blocks-data-store' ),
+	$version,
+	true
+);
+```
+
 ### Extensions cannot update the client-side cart state themselves
 
 You may be wondering why it's not possible to just make a custom AJAX endpoint for your extension that will update the cart. As mentioned, extensions are not permitted to update the client-side cart's state, because doing this incorrectly would cause the entire block to break, preventing the user from continuing their checkout. Instead you _must_ do this through the `extensionCartUpdate` function.
