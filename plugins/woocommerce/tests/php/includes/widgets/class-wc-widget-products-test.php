@@ -38,6 +38,25 @@ class WC_Widget_Products_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Sales ordering works when another filter joins the lookup table under a different alias.
+	 */
+	public function test_sales_ordering_with_differently_aliased_lookup_join(): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$join    = static function ( $sql ) use ( $wpdb ) {
+			return $sql . " LEFT JOIN {$wpdb->wc_product_meta_lookup} ext ON {$wpdb->posts}.ID = ext.product_id ";
+		};
+		add_filter( 'posts_join', $join, 5 );
+
+		$query = ( new WC_Widget_Products() )->get_products( array(), array( 'orderby' => 'sales' ) );
+
+		$this->assertSame( '', $wpdb->last_error, 'The sales query should remain valid.' );
+		$this->assertContains( $product->get_id(), wp_list_pluck( $query->posts, 'ID' ), 'The product should remain visible.' );
+		$this->assertStringContainsString( "{$wpdb->wc_product_meta_lookup} wc_product_meta_lookup", $query->request, 'The query needs its own lookup alias.' );
+	}
+
+	/**
 	 * Sales ordering comes from wc_product_meta_lookup, breaks ties deterministically, keeps products
 	 * that have no lookup row last, and steps aside for a filter that changes the ordering.
 	 */

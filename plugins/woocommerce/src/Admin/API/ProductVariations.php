@@ -8,6 +8,7 @@
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -109,9 +110,8 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 						AND attr_search_meta.meta_key LIKE 'attribute_%' ";
 		}
 
-		if ( wc_product_sku_enabled() && ! strstr( $join, 'wc_product_meta_lookup' ) ) {
-			$join .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup
-						ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
+		if ( wc_product_sku_enabled() ) {
+			$join = wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $join );
 		}
 
 		return $join;
