@@ -131,6 +131,166 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox OR counts retain the attribute archive with and without cached counts.
+	 *
+	 * @testWith [true, true]
+	 *           [true, false]
+	 *           [false, true]
+	 *           [false, false]
+	 *
+	 * @param bool $use_lookup Whether to use the attribute lookup table.
+	 * @param bool $cache_counts Whether to cache counts.
+	 */
+	public function test_or_counts_retain_attribute_archive( bool $use_lookup, bool $cache_counts ): void {
+		global $wp_the_query;
+
+		$this->set_use_lookup_table( $use_lookup );
+		add_filter( 'woocommerce_layered_nav_count_maybe_cache', static fn() => $cache_counts );
+		$this->create_product_attribute( 'FacetModel', array( 'Alpha', 'Beta', 'Shared' ) );
+		$this->create_simple_product( array( 'FacetModel' => array( 'Alpha', 'Shared' ) ), true );
+		$this->create_simple_product( array( 'FacetModel' => array( 'Alpha' ) ), true );
+		$this->create_simple_product( array( 'FacetModel' => array( 'Beta', 'Shared' ) ), true );
+
+		$terms = wp_list_pluck(
+			get_terms(
+				array(
+					'taxonomy'   => 'pa_facetmodel',
+					'hide_empty' => false,
+				)
+			),
+			'term_id',
+			'name'
+		);
+		$sut   = wc_get_container()->get( Filterer::class );
+
+		foreach ( array( 'alpha', 'beta', 'alpha' ) as $archive ) {
+			\WC_Query::reset_chosen_attributes();
+			$wp_the_query->query(
+				array(
+					'post_type' => 'product',
+					'taxonomy'  => 'pa_facetmodel',
+					'term'      => $archive,
+				)
+			);
+			$counts = $sut->get_filtered_term_product_counts( array_values( $terms ), 'pa_facetmodel', 'or' );
+			$this->assertSame( 1, $counts[ $terms['Shared'] ], 'Shared is counted inside the current archive only.' );
+			$this->assertSame( 'alpha' === $archive ? 2 : 0, $counts[ $terms['Alpha'] ] ?? 0, 'Alpha counts must not leak between archives.' );
+			$this->assertSame( 'beta' === $archive ? 1 : 0, $counts[ $terms['Beta'] ] ?? 0, 'Beta counts must not leak between archives.' );
+		}
+
+		$_GET['filter_facetmodel']     = 'shared';
+		$_GET['query_type_facetmodel'] = 'or';
+		\WC_Query::reset_chosen_attributes();
+		$wp_the_query->query(
+			array(
+				'post_type' => 'product',
+				'taxonomy'  => 'pa_facetmodel',
+				'term'      => 'alpha',
+			)
+		);
+		$this->assertSame( 1, $wp_the_query->found_posts, 'Clicking Shared must match its displayed count.' );
+		$counts = $sut->get_filtered_term_product_counts( array_values( $terms ), 'pa_facetmodel', 'or' );
+		$this->assertSame( 2, $counts[ $terms['Alpha'] ], 'OR counts ignore the selection but keep the archive.' );
+		$this->assertSame( 0, $counts[ $terms['Beta'] ] ?? 0, 'Unrelated models remain excluded after selection.' );
+	}
+
+	/**
+	 * @testdox Archive counts retain query-hook changes without inheriting generated filter aliases.
+	 *
+	 * @testWith [true, true, false]
+	 *           [true, false, false]
+	 *           [false, true, false]
+	 *           [false, false, false]
+	 *           [true, true, true]
+	 *           [true, false, true]
+	 *           [false, true, true]
+	 *           [false, false, true]
+	 *
+	 * @param bool $use_lookup Whether to use the attribute lookup table.
+	 * @param bool $use_attribute_var Whether the archive uses its attribute query variable.
+	 * @param bool $change_archive Whether a query hook changes the archive.
+	 */
+	public function test_or_archive_counts_ignore_generated_filter_aliases( bool $use_lookup, bool $use_attribute_var, bool $change_archive ): void {
+		global $wp_the_query;
+
+		$this->set_use_lookup_table( $use_lookup );
+		$this->create_product_attribute( 'FacetModel', array( 'Alpha', 'Beta', 'Shared', 'Other' ) );
+		$this->create_product_attribute( 'FacetColor', array( 'Blue' ) );
+		$this->create_simple_product(
+			array(
+				'FacetModel' => array( 'Alpha', 'Other' ),
+				'FacetColor' => array( 'Blue' ),
+			),
+			true
+		);
+		$this->create_simple_product(
+			array(
+				'FacetModel' => array( 'Alpha', 'Shared' ),
+				'FacetColor' => array( 'Blue' ),
+			),
+			true
+		);
+		$this->create_simple_product(
+			array(
+				'FacetModel' => array( 'Beta', 'Shared' ),
+				'FacetColor' => array( 'Blue' ),
+			),
+			true
+		);
+
+		if ( $use_attribute_var ) {
+			$_GET['filter_facetmodel']     = 'shared';
+			$_GET['query_type_facetmodel'] = 'or';
+			$query                         = array( 'pa_facetmodel' => 'alpha' );
+		} else {
+			$_GET['filter_facetcolor']     = 'blue';
+			$_GET['query_type_facetcolor'] = 'or';
+			$query                         = array(
+				'taxonomy' => 'pa_facetmodel',
+				'term'     => 'alpha',
+			);
+		}
+		\WC_Query::reset_chosen_attributes();
+		$change_archive_term = static function ( $query ) use ( $use_attribute_var ) {
+			$query->set( $use_attribute_var ? 'pa_facetmodel' : 'term', 'beta' );
+		};
+		if ( $change_archive ) {
+			add_action( 'woocommerce_product_query', $change_archive_term );
+		}
+		try {
+			$wp_the_query->query( array_merge( array( 'post_type' => 'product' ), $query ) );
+		} finally {
+			remove_action( 'woocommerce_product_query', $change_archive_term );
+		}
+		$this->assertSame( $change_archive || $use_attribute_var ? 1 : 2, (int) $wp_the_query->found_posts );
+
+		$terms = wp_list_pluck(
+			get_terms(
+				array(
+					'taxonomy'   => 'pa_facetmodel',
+					'hide_empty' => false,
+				)
+			),
+			'term_id',
+			'name'
+		);
+		$sut   = wc_get_container()->get( Filterer::class );
+		// Secondary queries during rendering must not replace the main archive snapshot.
+		new \WP_Query(
+			array(
+				'post_type' => 'product',
+				'taxonomy'  => 'pa_facetmodel',
+				'term'      => 'alpha',
+			)
+		);
+		$counts = $sut->get_filtered_term_product_counts( array_values( $terms ), 'pa_facetmodel', 'or' );
+		$this->assertSame( $change_archive ? 0 : 2, $counts[ $terms['Alpha'] ] ?? 0, 'The archive must not inherit the selected model constraint.' );
+		$this->assertSame( $change_archive ? 0 : 1, $counts[ $terms['Other'] ] ?? 0, 'An unselected model in the archive remains an alternative.' );
+		$this->assertSame( 1, $counts[ $terms['Shared'] ], 'Shared must only count products in the effective archive.' );
+		$this->assertSame( $change_archive ? 1 : 0, $counts[ $terms['Beta'] ] ?? 0, 'Another selected taxonomy must not disable archive scoping.' );
+	}
+
+	/**
 	 * Save a product and delete any lookup table data that may have been automatically inserted
 	 * (for the purposes of unit testing we want to insert this data manually)
 	 *
