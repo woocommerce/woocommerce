@@ -23,7 +23,7 @@ WooCommerce is a WordPress e-commerce plugin organized as a monorepo with:
 The `.ai/skills/` directory contains procedural HOW-TO instructions:
 
 - **`woocommerce-backend-dev`** - Backend PHP conventions and unit tests. **Invoke before writing any PHP test files.**
-- **`woocommerce-dev-cycle`** - Testing and linting workflows (PHP, JS, markdown)
+- **`woocommerce-dev-cycle`** - Testing and linting workflows (PHP, JS, markdown), and checks across supported PHP and MySQL/MariaDB versions
 - **`woocommerce-local-env`** - Local environment setup, wp-env commands, and WooCommerce build watchers
 - **`woocommerce-copy-guidelines`** - UI text standards (sentence case rules)
 - **`woocommerce-code-review`** - Code review standards and critical violations to flag
@@ -169,6 +169,7 @@ Two rules matter for agents:
 - PHP tests run in Docker via `wp-env`
 - WordPress and WooCommerce auto-installed
 - Uses PHPUnit 9.6.24 with PHP 8.1
+- Runs MariaDB only. CI adds a few PHP versions but no MySQL, so passing tests don't show that SQL behaves the same on MySQL (see "Do not assume one PHP version or database engine" under Backward Compatibility)
 
 For detailed test commands, see `woocommerce-dev-cycle` skill.
 
@@ -209,6 +210,8 @@ WordPress exposes more contracts than class and function signatures. The followi
 
 **Do not assume install layout.** WordPress could be configured to run in a subdirectory, with relocated `wp-content`, and behind reverse proxies. Never build paths or URLs by concatenation from the domain root; derive them (`plugins_url()`, `plugin_dir_path()`, `wp_upload_dir()`, and mind the `home_url()` vs `site_url()` distinction). A path that works on a root install and breaks elsewhere is a compatibility bug, not an edge case.
 
+**Do not assume one PHP version or database engine.** WooCommerce supports every PHP version from its `Requires PHP` header up to the latest release, and every MySQL and MariaDB version WordPress supports, but the test environment and CI only run MariaDB and a few PHP versions. Check behavior across versions when a change adds raw SQL (especially `LIKE`, `REGEXP`, collation- or charset-sensitive comparisons, or statements that write many rows), reads or rewrites serialized data, adds a database migration, or relies on PHP built-ins whose behavior or warnings changed between versions. Don't accommodate configurations WordPress doesn't support, or data sizes real stores don't reach. The `woocommerce-dev-cycle` skill's [compatibility testing guide](.ai/skills/woocommerce-dev-cycle/compatibility-testing.md) has the procedure and the known engine differences.
+
 ### PRs that change Core and themes
 
 Flag any PR that changes both WooCommerce Core (`plugins/woocommerce/`) and themes (`themes/`) as a **potential compatibility change**. Updating themes alongside Core can hide a breaking change for stores that update Core without updating their theme.
@@ -237,6 +240,9 @@ Database migrations live in `WC_Install::$db_updates`. Read that class for the c
 
 - Each key runs once per site. After a site's database version moves past a key, nothing added to that key later will run there. A key must also never be ahead of the version it ships in.
 - While the version is `X.Y.0-dev`, add new migrations to the plain `X.Y.0` key, even if it already has callbacks. Sequential keys (`X.Y.0-1`, `X.Y.0-2`) are only needed once beta 1 of `X.Y.0` has shipped, because testers on that beta already have their database at `X.Y.0` and would skip anything added to the plain key.
+- After an update, a site's database version is the greater of the WooCommerce version and the last key. To ship a migration in a patch release, pick a key above the database version sites on the previous release already have and below the next release's keys. For example, sites on `X.Y.1` are at `X.Y.1`, so a migration shipping in `X.Y.2` can use `X.Y.1-1`, which also passes the version guard test before the release branch's version is bumped. Use the same key on trunk and every release branch that ships the migration, so sites that skip the patch still run it.
+- Check keys with PHP's `version_compare()`, not by eye. It treats `-` as `.`, so `X.Y.Z-1` and `X.Y.Z.1` compare equal and a site that ran one skips the other.
+- Two PRs that add the same key don't conflict at runtime: PHP keeps only the last duplicate key in the `$db_updates` array literal and silently drops the other's callbacks. When both ship, combine them into one array.
 - To test a migration locally, set the `woocommerce_db_version` and `woocommerce_version` options to the previous release, for example with `wp option update woocommerce_db_version 11.1.0` and the same for `woocommerce_version`. The next page load schedules every callback above that version through Action Scheduler. `wp wc update` runs them immediately instead.
 - Feature flag defaults are persisted, so changing `enabled_by_default` alone doesn't change behavior on existing sites. Ship a migration or remove the flag.
 
