@@ -1,5 +1,8 @@
 // admin-ui's Page has no width option, so this matches the column Core's own settings pages use.
+// Positioned so absolutely positioned descendants, like visually hidden text, stay inside the Page's
+// scroll area. Otherwise they can sit below the Page and let the whole stage scroll past the form.
 .woocommerce-settings__content {
+	position: relative;
 	box-sizing: border-box;
 	margin-inline: auto;
 	max-width: 680px;
