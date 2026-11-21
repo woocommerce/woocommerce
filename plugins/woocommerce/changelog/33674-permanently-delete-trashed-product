@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow permanently deleting a trashed product using the same product object.
