@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\Block_Delimiter;
 
 /**
@@ -168,7 +169,7 @@ class MiniCart extends AbstractBlock {
 	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = array() ) {
-		if ( is_cart() || is_checkout() ) {
+		if ( $this->is_cart_or_checkout_page() ) {
 			return;
 		}
 
@@ -298,7 +299,7 @@ class MiniCart extends AbstractBlock {
 		 * In the cart and checkout pages, the block is either rendered hidden or removed.
 		 * It is not interactive, so it can fall back to the existing implementation.
 		 */
-		if ( is_cart() || is_checkout() ) {
+		if ( $this->is_cart_or_checkout_page() ) {
 			return $content . $this->get_markup( MiniCartUtils::migrate_attributes_to_color_panel( $attributes ) );
 		}
 
@@ -687,7 +688,7 @@ class MiniCart extends AbstractBlock {
 		</span>
 		' . $this->get_cart_price_markup( $attributes );
 
-		if ( is_cart() || is_checkout() ) {
+		if ( $this->is_cart_or_checkout_page() ) {
 			if ( $this->should_not_render_mini_cart( $attributes ) ) {
 				return '';
 			}
@@ -813,5 +814,19 @@ class MiniCart extends AbstractBlock {
 
 		$context['woocommerce/productCollection/referenceType'] = 'cart';
 		return $context;
+	}
+
+	/**
+	 * Check whether the current page is the cart or checkout page, where the block is not interactive.
+	 *
+	 * Goes through LegacyProxy so tests can mock the result: once WOOCOMMERCE_CART or WOOCOMMERCE_CHECKOUT
+	 * is defined, is_cart() or is_checkout() returns true for the rest of the request.
+	 *
+	 * @return bool
+	 */
+	private function is_cart_or_checkout_page(): bool {
+		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+
+		return (bool) $legacy_proxy->call_function( 'is_cart' ) || (bool) $legacy_proxy->call_function( 'is_checkout' );
 	}
 }
