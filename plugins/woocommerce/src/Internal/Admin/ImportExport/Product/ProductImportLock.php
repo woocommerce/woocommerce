@@ -12,6 +12,8 @@ namespace Automattic\WooCommerce\Internal\Admin\ImportExport\Product;
  * to the run that created the placeholders. Both entry points hold this lock for the duration
  * of their run to keep their cleanup passes apart. Each run gets its own token, so a run that
  * loses the lock to a stale takeover finds out on its next refresh instead of touching the new run's state.
+ * Runs refresh the lock on `woocommerce_product_import_before_import`, so an importer class swapped in through
+ * `woocommerce_product_csv_importer_class` must fire that action before each row.
  *
  * @since 11.4.0
  */
