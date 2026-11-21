@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep a fixed-cart coupon from discounting more than its amount when cart quantities are fractional.
