@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show product and stock counts in the order and stock activity panels using the store's number separators.
