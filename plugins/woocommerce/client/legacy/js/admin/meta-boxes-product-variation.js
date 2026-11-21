@@ -359,24 +359,106 @@ jQuery( function ( $ ) {
 		},
 
 		/**
-		 * Sets a price for every variation
+		 * Fill missing prices one page at a time, preserving variation form hooks.
 		 */
-		set_variations_price: function () {
-			var variation_price = $( '.wc_input_variations_price' ).val();
-			var product_type = $( 'select#product-type' ).val();
-			var input_type =
-				'variable-subscription' === product_type
+		set_variations_price: async function () {
+			const options = $( '#variable_product_options' );
+			if ( options.data( 'adding-prices' ) ) {
+				return;
+			}
+
+			const variation_price = $( '.wc_input_variations_price' ).val();
+			const input_type =
+				'variable-subscription' === $( '#product-type' ).val()
 					? 'variable_subscription_sign_up_fee'
 					: 'variable_regular_price';
-			var input = $( `.wc_input_price[name^=${ input_type }]` );
-
-			// We don't want to override prices already set
-			input.each( function ( index, el ) {
-				if ( '0' === $( el ).val() || '' === $( el ).val() ) {
-					$( el ).val( variation_price ).trigger( 'change' );
+			const wrapper = options.find( '.woocommerce_variations' );
+			const current_page = parseInt( wrapper.attr( 'data-page' ), 10 ) || 1;
+			const total_pages =
+				parseInt( wrapper.attr( 'data-total_pages' ), 10 ) || 1;
+			const pages = [ current_page ];
+			for ( let page = 1; page <= total_pages; page++ ) {
+				if ( page !== current_page ) {
+					pages.push( page );
 				}
-			} );
-			wc_meta_boxes_product_variations_ajax.save_variations();
+			}
+
+			options.data( 'adding-prices', true ).block( { message: null } );
+			try {
+				for ( const page of pages ) {
+					// Save the current page first so pending edits survive pagination.
+					if ( page !== current_page ) {
+						await wc_meta_boxes_product_variations_ajax.load_variations(
+							page
+						);
+					}
+
+					wrapper
+						.find( `.wc_input_price[name^=${ input_type }]` )
+						.each( function () {
+							if (
+								'0' === $( this ).val() ||
+								'' === $( this ).val()
+							) {
+								$( this )
+									.val( variation_price )
+									.trigger( 'change' );
+							}
+						} );
+					options.trigger(
+						'woocommerce_variations_save_variations_button'
+					);
+
+					const need_update = wrapper.find( '.variation-needs-update' );
+					if ( need_update.length ) {
+						await new Promise( ( resolve, reject ) => {
+							wc_meta_boxes_product_variations_ajax.save_changes(
+								( error ) => {
+									if ( error ) {
+										need_update.addClass(
+											'variation-needs-update'
+										);
+										$(
+											'button.cancel-variation-changes, button.save-variation-changes'
+										).prop( 'disabled', false );
+										options
+											.find( '#woocommerce_errors' )
+											.remove();
+										wrapper.before( error );
+										reject(
+											new Error(
+												'Variation validation failed'
+											)
+										);
+									} else {
+										resolve();
+									}
+								},
+								reject
+							);
+						} );
+					}
+					$( '.variations-defaults select' ).each( function () {
+						$( this ).attr( 'data-current', $( this ).val() );
+					} );
+				}
+				await wc_meta_boxes_product_variations_ajax.load_variations(
+					current_page
+				);
+			} catch ( error ) {
+				window.alert(
+					woocommerce_admin_meta_boxes_variations.i18n_add_prices_failed
+				);
+			} finally {
+				const page =
+					parseInt( wrapper.attr( 'data-page' ), 10 ) || current_page;
+				$( '.variations-pagenav .page-selector' ).val( page );
+				wc_meta_boxes_product_variations_pagenav.change_classes(
+					page,
+					total_pages
+				);
+				options.removeData( 'adding-prices' ).unblock();
+			}
 		},
 
 		/**
