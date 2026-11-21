@@ -1835,6 +1835,7 @@ class WC_Install {
 
 		// Clear table caches.
 		delete_transient( 'wc_attribute_taxonomies' );
+		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 		TaxesDataStore::flush_lookup_columns_cache();
 		OrdersStatsDataStore::flush_payment_method_column_cache();
 
