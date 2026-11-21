@@ -570,12 +570,16 @@ class WC_Tax {
 	 * 1. Uses the explicitly configured shipping tax class from WooCommerce settings if not set to 'inherit'
 	 * 2. If tax_class is provided (per-item shipping), uses that specific class
 	 * 3. If no tax_class provided (per-order shipping), analyzes cart items to determine the appropriate class:
+	 *    - Uses the standard tax class when the cart is not loaded, which is the case outside front-end
+	 *      requests (WP-Cron, REST API, non-AJAX admin)
 	 *    - Returns empty array if cart has no taxable items
 	 *    - For multiple tax classes: prioritizes standard rate, then uses first class found in tax class hierarchy
 	 *    - For single tax class: uses that class directly
 	 * 4. Returns only rates that have shipping tax enabled for the determined tax class
 	 *    - If no shipping rates exist for the tax class, returns empty array (no fallback to standard rates)
 	 *    - This ensures tax class inheritance works correctly - if a tax class doesn't apply to shipping, no shipping tax is charged
+	 * 5. Matches rates against the customer's location (see get_tax_location()). Pass a customer to get rates for a
+	 *    specific destination; without one the location can come back empty, and then no rates match.
 	 *
 	 * @param string|null      $tax_class Optional. Specific tax class slug to get rates for. If null, determines from cart contents.
 	 * @param WC_Customer|null $customer Optional. Customer object to get location from. Uses current customer if null.
@@ -648,14 +652,15 @@ class WC_Tax {
 	 * Standard tax class takes priority, followed by the first non-standard class
 	 * found in the configured tax class hierarchy.
 	 *
-	 * @return string|null The shipping tax class slug, or null if no taxable items are found.
+	 * @return string|null The shipping tax class slug, the standard tax class if the cart is empty
+	 *                     or not loaded, or null if no taxable items are found.
 	 */
 	private static function get_shipping_tax_class_from_cart_items() {
 		$standard_tax_class = '';
 		$cart               = WC()->cart;
 
-		// Check if cart has items before proceeding.
-		if ( ! $cart->get_cart() ) {
+		// A cart that is missing (cron, REST, non-AJAX admin) behaves like an empty one.
+		if ( ! $cart instanceof WC_Cart || ! $cart->get_cart() ) {
 			return $standard_tax_class;
 		}
 

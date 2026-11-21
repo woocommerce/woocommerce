@@ -560,4 +560,57 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 		$this->expectException( InvalidArgumentException::class );
 		$this->call_sanitize_cost->call( $this->sut, $value );
 	}
+
+	/**
+	 * @testDox Per-item shipping tax does not fatal when the cart is not loaded.
+	 */
+	public function test_add_rate_per_item_tax_without_cart(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'Test Sales Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Taxes are off at this point and WC_Shipping_Flat_Rate reads tax_status from instance_form_fields,
+		// which get_option() does not see, so both have to be set for add_rate() to calculate tax at all.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+		$this->sut->tax_status = 'taxable';
+
+		// WooCommerce only loads the cart on front-end requests, so WC()->cart is null
+		// during WP-Cron, REST API and non-AJAX admin requests.
+		$cart      = WC()->cart;
+		WC()->cart = null;
+
+		try {
+			$this->sut->add_rate(
+				array(
+					'id'       => 'flat_rate_no_cart',
+					'label'    => 'Flat rate',
+					'cost'     => array(
+						'item_key' => 10,
+						'order'    => 5,
+					),
+					'calc_tax' => 'per_item',
+				)
+			);
+		} finally {
+			WC()->cart = $cart;
+		}
+
+		$this->assertArrayHasKey( 'flat_rate_no_cart', $this->sut->rates, 'The rate should be added without a cart' );
+
+		$taxes = $this->sut->rates['flat_rate_no_cart']->get_taxes();
+		$this->assertArrayHasKey( $tax_rate_id, $taxes, 'The order cost should be taxed at the standard tax class' );
+		$this->assertEqualsWithDelta( 0.5, $taxes[ $tax_rate_id ], 0.0001, 'The order cost of 5 should be taxed at 10 percent' );
+		$this->assertCount( 1, $taxes, 'The item cost has no cart item to read a tax class from, so it is skipped' );
+	}
 }
