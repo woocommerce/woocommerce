@@ -125,17 +125,7 @@ class CatalogLookup extends AbstractCatalogRoute {
 			$resolved = $this->resolve_product( $id );
 
 			if ( null === $resolved ) {
-				$messages[] = array(
-					'type'         => 'info',
-					'code'         => 'not_found',
-					'content'      => sprintf(
-						/* translators: %s: product identifier. */
-						__( 'Product "%s" not found.', 'woocommerce' ),
-						$id
-					),
-					'path'         => '$.ids',
-					'content_type' => 'plain',
-				);
+				$messages[] = $this->not_found_message( $id );
 				continue;
 			}
 
@@ -149,8 +139,8 @@ class CatalogLookup extends AbstractCatalogRoute {
 			}
 
 			$groups[ $product_id ]['inputs'][] = array(
-				'id'           => $id,
-				'variation_id' => $resolved['variation_id'],
+				'id'         => $id,
+				'variant_id' => $resolved['variant_id'],
 			);
 		}
 
@@ -160,7 +150,17 @@ class CatalogLookup extends AbstractCatalogRoute {
 
 		$products = array();
 		foreach ( $groups as $group ) {
-			$products[] = $this->mapper()->map_lookup_product( $group['product'], $group['inputs'] );
+			$product = $this->mapper()->map_lookup_product( $group['product'], $group['inputs'] );
+
+			// `variants` cannot be empty: identifiers that yielded none are misses.
+			if ( empty( $product['variants'] ) ) {
+				foreach ( $group['inputs'] as $input ) {
+					$messages[] = $this->not_found_message( $input['id'] );
+				}
+				continue;
+			}
+
+			$products[] = $product;
 		}
 
 		$messages = array_merge(
@@ -178,5 +178,25 @@ class CatalogLookup extends AbstractCatalogRoute {
 		}
 
 		return new \WP_REST_Response( $response, 200 );
+	}
+
+	/**
+	 * Build the message reporting an identifier that resolved to nothing.
+	 *
+	 * @param string $id Requested identifier.
+	 * @return array
+	 */
+	private function not_found_message( string $id ): array {
+		return array(
+			'type'         => 'info',
+			'code'         => 'not_found',
+			'content'      => sprintf(
+				/* translators: %s: product identifier. */
+				__( 'Product "%s" not found.', 'woocommerce' ),
+				$id
+			),
+			'path'         => '$.ids',
+			'content_type' => 'plain',
+		);
 	}
 }
