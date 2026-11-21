@@ -197,6 +197,70 @@ class Utils {
 	}
 
 	/**
+	 * Refuse a request whose `UCP-Agent` header names a protocol version other than VERSION.
+	 *
+	 * No `supported_versions` are published, so only an exact match is served. A header without a version is not refused.
+	 * https://ucp.dev/2026-04-08/specification/overview/#request-time-validation
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @param string           $capability One of the CAPABILITY_* constants.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return \WP_REST_Response|null The 422 refusal, or null when the version is served.
+	 */
+	public static function refuse_unsupported_version( \WP_REST_Request $request, string $capability ): ?\WP_REST_Response {
+		$version = self::quoted_header_parameter( (string) $request->get_header( 'UCP-Agent' ), 'version' );
+
+		if ( '' === $version || self::VERSION === $version ) {
+			return null;
+		}
+
+		return self::error_response(
+			$capability,
+			'version_unsupported',
+			/* translators: 1: protocol version the agent asked for, 2: protocol version the store implements. */
+			sprintf( __( 'UCP version %1$s is not supported. This store implements version %2$s.', 'woocommerce' ), $version, self::VERSION ),
+			'unrecoverable',
+			422
+		);
+	}
+
+	/**
+	 * Unescaped value of one double-quoted parameter, matched by its exact name.
+	 *
+	 * A match counts only outside quotes, at the start of the header or after whitespace, a semicolon or a comma.
+	 *
+	 * @param string $header Header value.
+	 * @param string $name   Parameter name.
+	 * @return string Empty when the parameter is absent.
+	 */
+	public static function quoted_header_parameter( string $header, string $name ): string {
+		// Each match is one whole quoted string, `\"` and `\\` escapes included, so text inside a value is never read as a parameter.
+		preg_match_all( '/"((?:[^"\\\\]++|\\\\.)*+)"/', $header, $strings, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
+
+		$prefix = $name . '=';
+		foreach ( $strings as $string ) {
+			$start = $string[0][1] - strlen( $prefix );
+			if ( $start < 0 || substr( $header, $start, strlen( $prefix ) ) !== $prefix ) {
+				continue;
+			}
+
+			if ( 0 === $start || false !== strpos( " \t;,", $header[ $start - 1 ] ) ) {
+				return strtr(
+					$string[1][0],
+					array(
+						'\\"'  => '"',
+						'\\\\' => '\\',
+					)
+				);
+			}
+		}
+
+		return '';
+	}
+
+	/**
 	 * Read a parameter from the JSON document alone.
 	 *
 	 * `get_param()` would also resolve it from the form body or the query string. UCP defines
