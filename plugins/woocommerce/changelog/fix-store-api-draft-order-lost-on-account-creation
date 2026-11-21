@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reuse the failed order when a shopper retries block checkout after it created their account and the payment failed.
