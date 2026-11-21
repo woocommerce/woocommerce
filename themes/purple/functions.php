@@ -102,6 +102,30 @@ endif;
 
 add_action( 'init', 'purple_register_pattern_categories' );
 
+if ( ! function_exists( 'purple_block_attribute_string' ) ) :
+	/**
+	 * Encode a string as a JSON string literal for a block comment attribute.
+	 *
+	 * Patterns print translated block names and placeholders straight into
+	 * the block comment JSON. HTML escaping is wrong there: the block parser
+	 * decodes JSON, not HTML, so "&" would reach the editor as "&amp;", and a
+	 * translation containing a backslash would break the JSON and drop every
+	 * attribute of the block. Reuse the encoding core applies when it
+	 * serializes block attributes, which also keeps "--", "<" and ">" from
+	 * ending the comment.
+	 *
+	 * Usage in a pattern: {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Name', 'Block name', 'purple' ) ); ?>}}
+	 *
+	 * @param string $value Attribute value, usually a translated string.
+	 * @return string JSON string literal, including the surrounding quotes.
+	 */
+	function purple_block_attribute_string( string $value ): string {
+		// serialize_block_attributes() encodes ["value"]; drop the brackets.
+		return substr( serialize_block_attributes( array( $value ) ), 1, -1 );
+	}
+
+endif;
+
 if ( ! function_exists( 'purple_get_woocommerce_stylesheets' ) ) :
 	/**
 	 * WooCommerce compatibility stylesheets that apply to the installed version.
