@@ -34,22 +34,34 @@ export const isStoreApiRequest = ( options ) => {
 /**
  * Updates the stored nonce within localStorage so it is persisted between page loads.
  *
- * @param {string} nonce     Incoming nonce string.
- * @param {number} timestamp Timestamp from server of nonce.
+ * @param {string}        nonce     Incoming nonce string.
+ * @param {number|string} timestamp Timestamp from server of nonce.
+ * @param {boolean}       trusted   True when the nonce comes from a live
+ *                                  server response rather than page markup
+ *                                  that may have been served from a cache.
  */
-const updateNonce = ( nonce, timestamp ) => {
-	// If the "new" nonce matches the current nonce, we don't need to update.
-	if ( nonce === currentNonce ) {
+const updateNonce = ( nonce, timestamp, trusted = false ) => {
+	// If the "new" nonce matches the current nonce, we don't need to update,
+	// unless it comes from a live server response: the stored timestamp may
+	// be wrong (e.g. ahead of server time) and must be refreshed even when
+	// the nonce itself has not rotated.
+	if ( nonce === currentNonce && ! trusted ) {
 		return;
 	}
 
-	// Only update the nonce if newer. It might be coming from cache.
-	if ( currentTimestamp && timestamp < currentTimestamp ) {
+	const parsedTimestamp = Number( timestamp ) || 0;
+
+	// Nonces embedded in page markup can come from cached HTML, so only accept
+	// them when newer than the stored one. Live server responses always win:
+	// their timestamp is the current server time, so a stored timestamp ahead
+	// of it cannot be legitimate (e.g. clock skew or a previously stored
+	// client-generated timestamp) and must not block the fresh nonce.
+	if ( ! trusted && currentTimestamp && parsedTimestamp < currentTimestamp ) {
 		return;
 	}
 
 	currentNonce = nonce;
-	currentTimestamp = timestamp || Date.now() / 1000; // Convert ms to seconds to match php time()
+	currentTimestamp = parsedTimestamp || Date.now() / 1000; // Convert ms to seconds to match php time()
 
 	// Update the persisted values.
 	window.localStorage.setItem(
@@ -77,7 +89,9 @@ const setNonce = ( headers ) => {
 			: headers[ 'Nonce-Timestamp' ];
 
 	if ( nonce ) {
-		updateNonce( nonce, timestamp );
+		// Headers come from a live server response, so trust them over the
+		// stored nonce regardless of the stored timestamp.
+		updateNonce( nonce, timestamp, true );
 	}
 };
 
