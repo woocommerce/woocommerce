@@ -228,4 +228,37 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 
 		$this->assertSame( array(), $this->registry->get()['preloadedApiRequestPaths'] );
 	}
+
+	/**
+	 * @testdox `preloadedCart` holds the preloaded cart response for the cart data store.
+	 */
+	public function test_preloaded_cart_holds_the_hydrated_cart() {
+		$this->registry->hydrate_api_request( '/wc/store/v1/cart' );
+
+		$this->registry->initialize_core_data();
+
+		$cart = $this->registry->get()['preloadedCart'];
+		$this->assertArrayHasKey( 'body', $cart );
+		$this->assertArrayHasKey( 'headers', $cart );
+		$this->assertArrayHasKey( 'items', $cart['body'] );
+	}
+
+	/**
+	 * @testdox `preloadedCart` is null when the cart was not preloaded.
+	 */
+	public function test_preloaded_cart_is_null_without_hydration() {
+		$this->registry->initialize_core_data();
+
+		$this->assertNull( $this->registry->get()['preloadedCart'] );
+	}
+
+	/**
+	 * @testdox The preloading middleware serves every preloaded response but the cart's, so a later cart request reads the server.
+	 */
+	public function test_preloading_middleware_leaves_out_the_cart() {
+		$this->registry->hydrate_api_request( '/wc/store/v1/cart' );
+		$this->registry->hydrate_api_request( '/wc/store/v1/products' );
+
+		$this->assertSame( array( '/wc/store/v1/products' ), array_keys( $this->registry->preloading_middleware_requests() ) );
+	}
 }
