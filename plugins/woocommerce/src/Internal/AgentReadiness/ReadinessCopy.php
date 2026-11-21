@@ -28,6 +28,28 @@ final class ReadinessCopy {
 
 
 	/**
+	 * The preview details found line for the page that lacks them: the home page, a product page, or both.
+	 *
+	 * @param string $missing 'home', 'product' or 'both' (StoreOutputChecks::open_graph_missing()).
+	 * @param string $product Name of the product whose page failed, or '' when unknown.
+	 */
+	private static function open_graph_found( string $missing, string $product ): string {
+		if ( 'home' === $missing ) {
+			return __( 'Your home page doesn’t have preview details, which AI assistants use to show it as a card.', 'woocommerce' );
+		}
+		if ( 'both' === $missing ) {
+			return '' === $product
+				? __( 'Your home page and a product page don’t have preview details, which AI assistants use to show them as cards.', 'woocommerce' )
+				/* translators: %s: product name. */
+				: sprintf( __( 'Your home page and the %s page don’t have preview details, which AI assistants use to show them as cards.', 'woocommerce' ), $product );
+		}
+		return '' === $product
+			? __( 'A product page doesn’t have preview details, which AI assistants use to show it as a card.', 'woocommerce' )
+			/* translators: %s: product name. */
+			: sprintf( __( 'The %s page doesn’t have preview details, which AI assistants use to show it as a card.', 'woocommerce' ), $product );
+	}
+
+	/**
 	 * The found line of a page check that names the product whose page failed, with %s for its name. Null for a check without one.
 	 *
 	 * @param string $id Check id.
@@ -100,6 +122,9 @@ final class ReadinessCopy {
 		if ( 'llms_txt_valid' === $id && '' !== $store_name ) {
 			/* translators: %s: store name. */
 			$check[4] = sprintf( __( 'Make # %s the first line of the file. Do this in your SEO plugin’s llms.txt settings, or in the llms.txt file in your site’s root folder.', 'woocommerce' ), $store_name );
+		}
+		if ( 'open_graph_tags' === $id && '' !== $source ) {
+			$check[3] = self::open_graph_found( $source, $product );
 		}
 		if ( 'llms_txt_links_resolve' === $id ) {
 			if ( '' !== $link ) {
@@ -221,7 +246,8 @@ final class ReadinessCopy {
 				return self::product(
 					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
 					self::title( $count, $names, _n( 'Add a description to %s', 'Add a description to %s', $count, 'woocommerce' ), __( 'Add a description to a product', 'woocommerce' ), sprintf( _n( 'Add a description to %s product', 'Add a description to %s products', $count, 'woocommerce' ), $n ) ),
-					__( 'AI shopping apps use the description to explain a product to shoppers.', 'woocommerce' )
+					__( 'AI shopping apps use the description to explain a product to shoppers.', 'woocommerce' ),
+					_n( 'Add a main or short description to your product.', 'Add a main or short description to your products.', $count, 'woocommerce' )
 				);
 			case 'uncategorised':
 				return self::product(
@@ -372,7 +398,7 @@ final class ReadinessCopy {
 				__( 'Add preview details to your pages', 'woocommerce' ),
 				__( 'These details, also called Open Graph tags, let AI assistants show your pages as a card with a title and image.', 'woocommerce' ),
 				__( 'Some pages don’t have preview details. AI assistants use these to show a page as a card with a title and image.', 'woocommerce' ),
-				__( 'Most SEO plugins can add them in their social or sharing settings, where they’re often called Open Graph tags.', 'woocommerce' ),
+				__( 'Most SEO plugins can add them, often as Open Graph tags in their social settings.', 'woocommerce' ),
 			),
 			'open_graph_from_core'           => array(
 				__( 'Product pages keep WooCommerce’s preview details', 'woocommerce' ),

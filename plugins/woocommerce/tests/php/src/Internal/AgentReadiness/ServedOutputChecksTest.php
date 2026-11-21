@@ -181,6 +181,27 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failing Open Graph check records which page lacks the tags: the home page, the product page, which it names, or both.
+	 */
+	public function test_open_graph_names_the_page_without_tags(): void {
+		$store = $this->good_store();
+		$cases = array(
+			'home'    => array( self::page( '', '', false ), $store[ $this->product_path() ][1] ),
+			'product' => array( $store['/'][1], self::page( '', '', false ) ),
+			'both'    => array( self::page( '', '', false ), self::page( '', '', false ) ),
+		);
+		foreach ( $cases as $source => $pages ) {
+			$store['/']                     = array( 200, $pages[0] );
+			$store[ $this->product_path() ] = array( 200, $pages[1] );
+			$this->serve( $store );
+			$check = array_column( $this->sut->all(), null, 'id' )['open_graph_tags'];
+			$this->assertFalse( $check['ok'], $source );
+			$this->assertSame( $source, $check['source'], $source );
+			$this->assertSame( 'home' === $source ? 0 : $this->product->get_id(), $check['product'], 'The product is named when its page lacks the tags: ' . $source );
+		}
+	}
+
+	/**
 	 * @testdox llms.txt without a heading fails the format check; a broken store link fails, an unreachable or blocked one is couldn't check, and a blocked llms.txt is too.
 	 */
 	public function test_llms_txt(): void {

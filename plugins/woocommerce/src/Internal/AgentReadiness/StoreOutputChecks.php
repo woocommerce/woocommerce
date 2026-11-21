@@ -107,6 +107,11 @@ class StoreOutputChecks {
 			if ( 'llms_txt_present' === $check['id'] ) {
 				$source = $this->llms_txt_source( $responses, $ok );
 			}
+			if ( 'open_graph_tags' === $check['id'] && false === $ok ) {
+				// Which page lacks the tags picks the found line: home, product or both. A failing product page is named.
+				$source = self::open_graph_missing( $responses );
+				$failed = 'home' === $source ? null : $responses->product();
+			}
 			$seen_at = $conflict ? self::seen_at( (string) ( $check['seen_at'] ?? '' ), $responses ) : '';
 			if ( 'llms_txt_links_resolve' === $check['id'] && false === $ok ) {
 				// Where the file comes from picks the fix, and the broken link is named.
@@ -135,6 +140,22 @@ class StoreOutputChecks {
 			$responses->focus( null );
 		}
 		return $results;
+	}
+
+	/**
+	 * Which page the Open Graph check failed on: 'home', 'product' or 'both'. The product page is the
+	 * one in focus, the sample's first that failed.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private static function open_graph_missing( StoreResponses $responses ): string {
+		$missing = static fn( ?array $page ): bool => null !== $page && ! ( self::has_open_graph( $page['body'], 'og:title' ) && self::has_open_graph( $page['body'], 'og:image' ) );
+		$home    = $missing( $responses->home_page() );
+		$product = $missing( $responses->product_page() );
+		if ( $home && $product ) {
+			return 'both';
+		}
+		return $home ? 'home' : 'product';
 	}
 
 	/**

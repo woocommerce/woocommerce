@@ -84,6 +84,12 @@ body:has(.wc-sales-readiness) {
 		color: var(--wc-sr-muted);
 	}
 
+	// What a Fix first issue affects, in bold before its line.
+	&__impact {
+		color: var(--wpds-color-foreground-content-neutral);
+		font-weight: 600;
+	}
+
 	// No orphans: balance the last line of text.
 	:is(p, .components-text, [class*="__body-"]) {
 		text-wrap: pretty;
@@ -276,13 +282,18 @@ body:has(.wc-sales-readiness) {
 	// The badge follows the title's last word, so a long title wraps without leaving it on a line of its own.
 	&__title {
 		display: block;
-		margin-block-end: -2px;
 		font-weight: 600;
 
-		> span {
-			display: inline-flex;
-			margin-inline-start: var(--wpds-dimension-gap-sm);
-			vertical-align: middle;
+		// The badge is taller than the 20px line, so it overlaps the line by 2px each side instead of adding a gap.
+		&-end {
+			white-space: nowrap;
+
+			> span {
+				display: inline-flex;
+				margin-block: -2px;
+				margin-inline-start: var(--wpds-dimension-gap-sm);
+				vertical-align: middle;
+			}
 		}
 	}
 

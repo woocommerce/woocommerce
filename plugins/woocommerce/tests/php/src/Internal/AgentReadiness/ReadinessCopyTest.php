@@ -125,6 +125,27 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The preview details found line names the page without them: the home page, a product page, or both, with the product's name when known.
+	 */
+	public function test_open_graph_found_names_the_page(): void {
+		$found = static fn( string $source, string $product = '' ): string => ReadinessCopy::store_check( 'open_graph_tags', $source, $product )['found'];
+		$this->assertSame( 'Your home page doesn’t have preview details, which AI assistants use to show it as a card.', $found( 'home' ) );
+		$this->assertSame( 'The Blue hoodie page doesn’t have preview details, which AI assistants use to show it as a card.', $found( 'product', 'Blue hoodie' ) );
+		$this->assertSame( 'A product page doesn’t have preview details, which AI assistants use to show it as a card.', $found( 'product' ) );
+		$this->assertSame( 'Your home page and the Blue hoodie page don’t have preview details, which AI assistants use to show them as cards.', $found( 'both', 'Blue hoodie' ) );
+		$this->assertStringStartsWith( 'Some pages don’t have preview details.', $found( '' ), 'An older report without the page keeps the general line' );
+		$this->assertSame( 'Most SEO plugins can add them, often as Open Graph tags in their social settings.', ReadinessCopy::store_check( 'open_graph_tags', 'home' )['fix'] );
+	}
+
+	/**
+	 * @testdox The description fix line matches the number of products.
+	 */
+	public function test_description_fix_line(): void {
+		$this->assertSame( 'Add a main or short description to your product.', ReadinessCopy::product_check( 'missing_product_text', 1 )['fix'] );
+		$this->assertSame( 'Add a main or short description to your products.', ReadinessCopy::product_check( 'missing_product_text', 4 )['fix'] );
+	}
+
+	/**
 	 * @testdox The image size line names Google, the only AI app with the rule, and no date: rules.json moves it to can't be listed when the rule starts.
 	 */
 	public function test_image_size_line_names_google(): void {

@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event';
 /**
  * Internal dependencies
  */
-import { SectionCard } from '../components/section-card';
+import { DeclaredCard, SectionCard } from '../components/section-card';
 import type { CheckRow, RowState, Section } from '../types';
 
 jest.mock( '../tracks', () => ( { trackReadiness: jest.fn() } ) );
@@ -109,5 +109,45 @@ describe( 'SectionCard', () => {
 		expect(
 			screen.getByRole( 'link', { name: 'Add a product' } )
 		).toHaveAttribute( 'href', '#new' );
+	} );
+} );
+
+describe( 'DeclaredCard', () => {
+	it( 'lists items under their group, and says which were found, not found or not checked', async () => {
+		const { container } = render(
+			<DeclaredCard
+				declared={ {
+					title: 'What does your store share with AI assistants?',
+					badge: { intent: 'none', text: 'Optional' },
+					text: 'These are other files and code that some AI assistants use to learn about your store.',
+					groups: [
+						{
+							title: 'Files in your root folder',
+							items: [
+								{ name: 'ai.txt usage file', found: true },
+								{ name: 'AGENTS.md', found: false },
+							],
+						},
+						{
+							title: 'Not checked yet',
+							items: [ { name: 'TDMRep', found: null } ],
+						},
+					],
+				} }
+			/>
+		);
+
+		await userEvent.click(
+			screen.getByText( 'What does your store share with AI assistants?' )
+		);
+
+		const groups = container.querySelectorAll(
+			'.wc-sales-readiness-tier-group'
+		);
+		expect( groups ).toHaveLength( 2 );
+		expect( groups[ 0 ] ).toHaveTextContent( 'Files in your root folder' );
+		expect( groups[ 0 ] ).toHaveTextContent( 'Found: ai.txt usage file' );
+		expect( groups[ 0 ] ).toHaveTextContent( 'Not found: AGENTS.md' );
+		expect( groups[ 1 ] ).toHaveTextContent( 'Not checked yet: TDMRep' );
 	} );
 } );
