@@ -682,6 +682,68 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() rebuilds line items from a changed cart even when an extension set the order's cart hash to match it.
+	 */
+	public function test_update_order_from_cart_rebuilds_line_items_when_an_extension_set_the_cart_hash(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		CouponHelper::create_coupon(
+			'ten-percent',
+			'publish',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$order = $this->sut->create_order_from_cart();
+		$order->save();
+		$this->assertSame( 10.0, (float) $order->get_total(), 'The order should start at the undiscounted product price.' );
+
+		WC()->cart->apply_coupon( 'ten-percent' );
+		WC()->cart->calculate_totals();
+		// Subscriptions sets the cart hash of the renewal order it resumes on every cart load, before checkout syncs the order.
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
+
+		$this->sut->update_order_from_cart( $order );
+
+		$line_items = $order->get_items();
+		$this->assertSame( 9.0, (float) reset( $line_items )->get_total(), 'The line item should be rebuilt with the coupon discount.' );
+		$this->assertSame( 9.0, (float) $order->get_total(), 'The order total should include the coupon discount.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps unchanged line items, but still updates the cart hash when only the cart total changes.
+	 */
+	public function test_update_order_from_cart_keeps_line_items_and_updates_cart_hash_when_only_the_total_changes(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$order = $this->sut->create_order_from_cart();
+		$order->save();
+		$line_item_ids = array_keys( $order->get_items() );
+
+		$add_fee = static function ( \WC_Cart $cart ) {
+			$cart->add_fee( 'Handling', 5 );
+		};
+		add_action( 'woocommerce_cart_calculate_fees', $add_fee );
+
+		try {
+			$this->sut->update_order_from_cart( $order );
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_cart_calculate_fees', $add_fee );
+		}
+
+		$this->assertSame( $line_item_ids, array_keys( $order->get_items() ), 'Line items should be kept when the cart contents did not change.' );
+		$this->assertSame( 15.0, (float) $order->get_total(), 'The order total should include the new fee.' );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash should follow the cart total so checkout can resume the order.' );
+	}
+
+	/**
 	 * @testdox update_order_from_cart() keeps the shopper's session choice on the order even when the default payment method filter returns nothing.
 	 */
 	public function test_update_order_from_cart_keeps_the_session_payment_choice_with_a_callback(): void {
