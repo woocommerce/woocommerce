@@ -6,7 +6,9 @@ import { Button } from '@wordpress/components';
 import { dispatch, useSelect } from '@wordpress/data';
 import { useContext } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { removeQueryArgs } from '@wordpress/url';
 import { recordEvent } from '@woocommerce/tracks';
+import { useUser } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -36,6 +38,7 @@ interface InstallProps {
 
 export default function Install( props: InstallProps ) {
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
+	const { currentUserCan } = useUser();
 
 	const loading: boolean = useSelect(
 		( select ) => {
@@ -168,7 +171,14 @@ export default function Install( props: InstallProps ) {
 						product_zip_slug: props.subscription.zip_slug,
 						product_id: props.subscription.product_id,
 						product_current_version: props.subscription.version,
-						product_install_url: url,
+						product_install_url: url
+							? removeQueryArgs(
+									url,
+									'token',
+									'signature',
+									'product-key'
+								)
+							: url,
 					} );
 
 					stopInstall();
@@ -182,6 +192,10 @@ export default function Install( props: InstallProps ) {
 				.catch( handleInstallError );
 		}
 	};
+
+	if ( ! currentUserCan( 'install_plugins' ) ) {
+		return null;
+	}
 
 	return (
 		<Button
