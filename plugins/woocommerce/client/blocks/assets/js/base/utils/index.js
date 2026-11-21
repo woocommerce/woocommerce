@@ -18,3 +18,4 @@ export * from './keyby';
 export * from './pick';
 export * from './get-inline-styles';
 export * from './use-return-focus';
+export * from './hydrate-interactivity-regions';
