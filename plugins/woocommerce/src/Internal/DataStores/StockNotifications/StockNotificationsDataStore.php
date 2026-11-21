@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\DataStores\StockNotifications;
 
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
@@ -98,7 +99,10 @@ CREATE TABLE $table_name (
 	PRIMARY KEY  (id),
 	KEY product_status_attempt (product_id, status, date_last_attempt_gmt, id),
 	KEY user_lookup (user_id, product_id, status),
-	KEY email_lookup (user_email, product_id, status)
+	KEY email_lookup (user_email, product_id, status),
+	KEY date_created (date_created_gmt, status, product_id),
+	KEY date_notified (date_notified_gmt),
+	KEY date_cancelled (date_cancelled_gmt)
 ) $collate;
 CREATE TABLE $meta_table_name (
 	id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -197,6 +201,9 @@ CREATE TABLE $meta_table_name (
 		$notification->set_id( $notification_id );
 		$notification->save_meta_data();
 		$notification->apply_changes();
+
+		// After reading insert_id: invalidating can add an option row, which overwrites it.
+		ReportsCache::invalidate();
 
 		/**
 		 * Action: woocommerce_new_stock_notification
@@ -313,6 +320,11 @@ CREATE TABLE $meta_table_name (
 			if ( false === $result ) {
 				return new \WP_Error( 'db_update_error', 'Could not update stock notification in the database.' );
 			}
+
+			// Only the props the Analytics report reads; bookkeeping saves such as send attempts keep the cache.
+			if ( array_intersect( array( 'product_id', 'status', 'date_created', 'date_notified', 'date_cancelled', 'cancellation_source' ), array_keys( $changes ) ) ) {
+				ReportsCache::invalidate();
+			}
 		}
 
 		$notification->save_meta_data();
@@ -367,6 +379,7 @@ CREATE TABLE $meta_table_name (
 
 		if ( $deleted > 0 ) {
 			$this->data_store_meta->delete_by_notification_id( $notification_id );
+			ReportsCache::invalidate();
 
 			/**
 			 * Action: woocommerce_delete_stock_notification
