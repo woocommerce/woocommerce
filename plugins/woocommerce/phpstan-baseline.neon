@@ -39752,12 +39752,6 @@ parameters:
 			path: src/Admin/API/Reports/Customers/DataStore.php
 
 		-
-			message: '#^Cannot call method get_id\(\) on Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WC_Order\|WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:add_sql_query_params\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -39820,12 +39814,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:sync_on_order_delete\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:sync_order_customer\(\) should return \-1\|true but returns bool\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Customers/DataStore.php
 
