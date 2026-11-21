@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
  */
 import type { Field } from '@wordpress/dataviews';
 import type { ChequeSettings } from '../types';
+import { editSetting, getSettingValue } from '../../offline/settings';
 
 export const field: Field< ChequeSettings > = {
 	id: 'instructions',
@@ -19,10 +20,13 @@ export const field: Field< ChequeSettings > = {
 		'woocommerce'
 	),
 	getValue: ( { item } ) => {
-		const setting = item.settings.instructions;
-		return typeof setting === 'string' ? setting : ( setting?.value ?? '' );
+		const value = getSettingValue( item.settings.instructions );
+		return typeof value === 'string' ? value : '';
 	},
-	setValue: ( { value } ) => ( {
-		settings: { instructions: String( value ) },
-	} ),
+	setValue: ( { item, value } ) =>
+		editSetting(
+			item.settings,
+			'instructions',
+			typeof value === 'string' ? value : ''
+		),
 };
