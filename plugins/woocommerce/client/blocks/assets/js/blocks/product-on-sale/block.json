@@ -14,6 +14,10 @@
 		"html": false,
 		"inserter": false
 	},
+	"style": [
+		"wc-blocks-style",
+		"wc-blocks-style-all-products"
+	],
 	"textdomain": "woocommerce",
 	"attributes": {
 		"columns": {

@@ -715,10 +715,10 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 	/**
 	 * Get the frontend style handle for this block type.
 	 *
-	 * @return string[]
+	 * @return string[]|null
 	 */
 	protected function get_block_type_style() {
 		// Currently these blocks rely on the styles from the All Products block.
-		return [ 'wc-blocks-style', 'wc-blocks-style-all-products' ];
+		return array( 'wc-blocks-style', 'wc-blocks-style-all-products' );
 	}
 }
