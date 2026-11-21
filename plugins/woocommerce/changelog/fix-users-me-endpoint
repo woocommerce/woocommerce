@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return the WooCommerce user fields again in the WordPress users REST endpoint when users request their own data.
