@@ -230,6 +230,7 @@ class Utils {
 	 * Unescaped value of one double-quoted parameter, matched by its exact name.
 	 *
 	 * A match counts only outside quotes, at the start of the header or after whitespace, a semicolon or a comma.
+	 * A repeated name resolves to its last occurrence, as RFC 8941 requires for a dictionary key.
 	 *
 	 * @param string $header Header value.
 	 * @param string $name   Parameter name.
@@ -240,6 +241,7 @@ class Utils {
 		preg_match_all( '/"((?:[^"\\\\]++|\\\\.)*+)"/', $header, $strings, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
 
 		$prefix = $name . '=';
+		$value  = '';
 		foreach ( $strings as $string ) {
 			$start = $string[0][1] - strlen( $prefix );
 			if ( $start < 0 || substr( $header, $start, strlen( $prefix ) ) !== $prefix ) {
@@ -247,7 +249,8 @@ class Utils {
 			}
 
 			if ( 0 === $start || false !== strpos( " \t;,", $header[ $start - 1 ] ) ) {
-				return strtr(
+				// Keep scanning rather than return: the last matching occurrence wins.
+				$value = strtr(
 					$string[1][0],
 					array(
 						'\\"'  => '"',
@@ -257,7 +260,7 @@ class Utils {
 			}
 		}
 
-		return '';
+		return $value;
 	}
 
 	/**
