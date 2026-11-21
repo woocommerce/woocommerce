@@ -1,0 +1,8 @@
+# Keep the experimental compiler outside the monorepo dependency graph.
+packages:
+    - '.'
+minimumReleaseAge: 1440
+strictDepBuilds: true
+allowBuilds: {}
+blockExoticSubdeps: true
+trustPolicy: no-downgrade
