@@ -424,7 +424,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test update_addresses_in_order updates both shipping and billing addresses.
+	 * @testdox Completes a repriced shipping address while preserving the billing tax location.
 	 */
 	public function test_update_addresses_in_order_updates_addresses() {
 		$order = \WC_Helper_Order::create_order();
@@ -465,6 +465,30 @@ class HelperTest extends \WC_Unit_Test_Case {
 			),
 		);
 
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_postcode( '12345' );
+		$order->set_shipping_state( 'CA' );
+		$order->set_shipping_city( 'San Francisco' );
+		$billing_address = $order->get_address( 'billing' );
+		$amount          = array(
+			'value'         => wc_format_decimal( $order->get_total(), 2 ),
+			'currency_code' => $order->get_currency(),
+		);
+		$paypal_order_details['purchase_units'][0]['amount'] = $amount;
+		$order->update_meta_data(
+			PayPalConstants::PAYPAL_ORDER_META_ADDRESS_CONTEXT,
+			array(
+				'shipping_address' => $order->get_address( 'shipping' ),
+				'expected_address' => array(
+					'country_code' => 'US',
+					'postal_code'  => '12345',
+					'admin_area_1' => 'CA',
+					'admin_area_2' => 'San Francisco',
+				),
+				'callback_amount'  => $amount,
+			)
+		);
+
 		Helper::update_addresses_in_order( $order, $paypal_order_details );
 
 		// Verify shipping address was updated.
@@ -481,12 +505,12 @@ class HelperTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'Jane', $order->get_billing_first_name() );
 		$this->assertEquals( 'Smith', $order->get_billing_last_name() );
 		$this->assertEquals( 'jane.smith@example.com', $order->get_billing_email() );
-		$this->assertEquals( 'US', $order->get_billing_country() );
-		$this->assertEquals( '54321', $order->get_billing_postcode() );
-		$this->assertEquals( 'NY', $order->get_billing_state() );
-		$this->assertEquals( 'New York', $order->get_billing_city() );
-		$this->assertEquals( '456 Broadway', $order->get_billing_address_1() );
-		$this->assertEquals( 'Suite 100', $order->get_billing_address_2() );
+		$this->assertEquals( $billing_address['country'], $order->get_billing_country() );
+		$this->assertEquals( $billing_address['postcode'], $order->get_billing_postcode() );
+		$this->assertEquals( $billing_address['state'], $order->get_billing_state() );
+		$this->assertEquals( $billing_address['city'], $order->get_billing_city() );
+		$this->assertEquals( $billing_address['address_1'], $order->get_billing_address_1() );
+		$this->assertEquals( $billing_address['address_2'], $order->get_billing_address_2() );
 
 		// Verify meta flag was set.
 		$this->assertEquals( 'yes', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, true ) );
@@ -569,10 +593,12 @@ class HelperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test update_addresses_in_order handles partial address data.
+	 * @testdox Does not replace a legacy priced destination with partial address data.
 	 */
 	public function test_update_addresses_in_order_handles_partial_address_data() {
-		$order = \WC_Helper_Order::create_order();
+		$order             = \WC_Helper_Order::create_order();
+		$original_shipping = $order->get_address( 'shipping' );
+		$original_billing  = $order->get_address( 'billing' );
 		$order->save();
 
 		$paypal_order_details = array(
@@ -603,15 +629,9 @@ class HelperTest extends \WC_Unit_Test_Case {
 
 		Helper::update_addresses_in_order( $order, $paypal_order_details );
 
-		// Shipping country should be set, other fields should be empty strings.
-		$this->assertEquals( 'US', $order->get_shipping_country() );
-		$this->assertEquals( '', $order->get_shipping_postcode() );
-		$this->assertEquals( '', $order->get_shipping_state() );
-
-		// Billing should have given name and postal code.
-		$this->assertEquals( 'Jane', $order->get_billing_first_name() );
-		$this->assertEquals( '', $order->get_billing_last_name() );
-		$this->assertEquals( '12345', $order->get_billing_postcode() );
+		$this->assertSame( $original_shipping, $order->get_address( 'shipping' ) );
+		$this->assertSame( $original_billing, $order->get_address( 'billing' ) );
+		$this->assertSame( 'yes', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESS_REVIEW ) );
 
 		// Clean up.
 		$order->delete( true );
