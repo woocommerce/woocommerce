@@ -141,7 +141,8 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @throws RouteException On error.
 	 * @throws InvalidStockLevelsInCartException On error.
 	 *
-	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
+	 * @param \WP_REST_Request $request Request object.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
 	 * @return \WP_REST_Response|\WP_Error
 	 */
