@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix stock report exports that could skip or repeat products when many share the same stock status and quantity.
