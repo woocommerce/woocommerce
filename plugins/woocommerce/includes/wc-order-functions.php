@@ -990,7 +990,7 @@ function wc_update_total_sales_counts( $order_id ) {
 	}
 
 	$recorded_sales  = $order->get_data_store()->get_recorded_sales( $order );
-	$reflected_order = in_array( $order->get_status(), array( OrderStatus::CANCELLED, OrderStatus::TRASH ), true );
+	$reflected_order = in_array( $order->get_status(), array( OrderStatus::CANCELLED, OrderStatus::FAILED, OrderStatus::TRASH ), true );
 
 	if ( ! $reflected_order && 'woocommerce_before_delete_order' === current_action() ) {
 		$reflected_order = true;
@@ -1029,6 +1029,7 @@ function wc_update_total_sales_counts( $order_id ) {
 add_action( 'woocommerce_order_status_completed', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_processing', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_failed', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_completed_to_cancelled', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_processing_to_cancelled', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_on-hold_to_cancelled', 'wc_update_total_sales_counts' );
