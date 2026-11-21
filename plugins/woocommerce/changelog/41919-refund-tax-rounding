@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent refunds from exceeding the order total due to tax rounding when subtotal rounding is disabled.
