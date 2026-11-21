@@ -85,9 +85,7 @@ class WebhookHandler {
 		if ( PayPalConstants::STATUS_APPROVED === $status ) {
 			\WC_Gateway_Paypal::log( 'PayPal payment approved. Order ID: ' . $order->get_id() );
 			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $status );
-			// Clear the shipping callback token by setting it to an empty string.
-			// This is done to prevent the token from being used again for the same order.
-			// We are not deleting the meta key as we use the existence of the meta key to determine if the token was ever generated for this order.
+			// Shipping updates are no longer allowed after approval.
 			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, '' );
 			$order->save();
 			$order->add_order_note(
