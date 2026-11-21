@@ -94,10 +94,11 @@ describe( 'RowLink', () => {
 				} }
 			/>
 		);
-		expect(
-			screen.getByRole( 'link', {
-				name: 'Edit your refund and returns policy page',
-			} )
-		).toHaveTextContent( 'Edit page' );
+		const link = screen.getByRole( 'link', {
+			name: 'Edit page',
+			description: 'Edit your refund and returns policy page',
+		} );
+		expect( link ).toHaveAccessibleName( 'Edit page' );
+		expect( link ).toHaveTextContent( 'Edit page' );
 	} );
 } );

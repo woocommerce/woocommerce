@@ -245,11 +245,15 @@ describe( 'AiShopping', () => {
 			} )
 		);
 
-		expect(
-			screen.getByRole( 'link', {
-				name: 'Edit your refund and returns policy page',
-			} )
-		).toHaveAttribute( 'href', '/post.php?post=5&action=edit' );
+		const link = screen.getByRole( 'link', {
+			name: 'Edit page',
+			description: 'Edit your refund and returns policy page',
+		} );
+		expect( link ).toHaveAccessibleName( 'Edit page' );
+		expect( link ).toHaveAttribute(
+			'href',
+			'/post.php?post=5&action=edit'
+		);
 		expect( screen.queryByText( 'Required' ) ).toBeNull();
 	} );
 

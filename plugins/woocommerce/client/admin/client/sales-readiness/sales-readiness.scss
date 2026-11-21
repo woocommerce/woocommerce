@@ -67,8 +67,12 @@ body:has(.wc-sales-readiness) {
 	--wc-sr-link: var(--wpds-color-foreground-interactive-brand);
 
 	color: var(--wpds-color-foreground-content-neutral);
-	// The page's background reaches the bottom of the screen, also when the cards are short.
-	min-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
+
+	// The AI shopping health page's background reaches the bottom of the screen, also when the cards are
+	// short. Not the Overview and AI shopping panels, which sit inside the settings form.
+	&:not(.wc-sales-readiness--overview):not(.wc-ai-shopping) {
+		min-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
+	}
 
 	&__content {
 		box-sizing: border-box;

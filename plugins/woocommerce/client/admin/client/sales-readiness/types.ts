@@ -15,7 +15,7 @@ export interface ViewLink {
 	/** Empty when the text is shown without a link. */
 	href: string;
 	text: string;
-	/** What screen readers hear in place of the text, when the text repeats (Edit page). */
+	/** What screen readers also hear, as the button's description, when the text repeats (Edit page). */
 	sr?: string;
 }
 

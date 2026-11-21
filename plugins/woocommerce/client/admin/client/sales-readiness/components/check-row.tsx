@@ -3,6 +3,7 @@
  */
 import { Badge, Icon, Link, Stack, Text, VisuallyHidden } from '@wordpress/ui';
 import { Button } from '@wordpress/components';
+import { useInstanceId } from '@wordpress/compose';
 import { Path, SVG } from '@wordpress/primitives';
 import { createInterpolateElement } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
@@ -21,6 +22,22 @@ import type {
 import { trackReadiness, type Surface } from '../tracks';
 
 /**
+ * A shared button text such as "Edit page" keeps its accessible name, so voice control finds it by what
+ * it shows (WCAG 2.5.3); screen readers also hear which policy it is for, as its description.
+ *
+ * @param sr The button's full action, such as "Edit your refund and returns policy page", or none.
+ */
+export const useSrDescription = ( sr?: string ) => {
+	const id = useInstanceId( useSrDescription, 'wc-sales-readiness-sr' );
+	return sr
+		? {
+				props: { 'aria-describedby': id },
+				description: <VisuallyHidden id={ id }>{ sr }</VisuallyHidden>,
+			}
+		: { props: {}, description: null };
+};
+
+/**
  * Where to fix it: an outline button when it has a URL, plain text otherwise.
  */
 export const RowLink = ( {
@@ -31,16 +48,20 @@ export const RowLink = ( {
 	onClick?: () => void;
 } ) => {
 	const href = safeHref( link.href );
+	const sr = useSrDescription( link.sr );
 	return href ? (
-		<Button
-			variant="secondary"
-			size="compact"
-			href={ href }
-			onClick={ onClick }
-			aria-label={ link.sr || undefined }
-		>
-			{ link.text }
-		</Button>
+		<>
+			<Button
+				variant="secondary"
+				size="compact"
+				href={ href }
+				onClick={ onClick }
+				{ ...sr.props }
+			>
+				{ link.text }
+			</Button>
+			{ sr.description }
+		</>
 	) : (
 		<Text variant="body-sm" className="wc-sales-readiness__muted">
 			{ link.text }
