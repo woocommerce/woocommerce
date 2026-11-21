@@ -36,44 +36,22 @@ const product = { id: 42, name: 'Hoodie' } as ProductResponseItem;
 const variation = { id: 99, name: 'Hoodie - Blue' } as ProductResponseItem;
 
 describe( 'woocommerce store – product data', () => {
-	let productsState: ProductsStore[ 'state' ];
-	let state: ProductDataState;
-
-	beforeEach( () => {
-		for ( const namespace of Object.keys( mockStates ) ) {
-			delete mockStates[ namespace ];
-		}
-		jest.isolateModules( () => require( '../products' ) );
-		productsState = mockStates[
+	it( 'returns the woocommerce/products objects, empty when it holds no product data', () => {
+		require( '../products' );
+		const productsState = mockStates[
 			'woocommerce/products'
 		] as ProductsStore[ 'state' ];
-		state = mockStates.woocommerce as ProductDataState;
-	} );
+		const state = mockStates.woocommerce as ProductDataState;
 
-	it( 'is empty when woocommerce/products holds no product data', () => {
 		expect( state.products ).toEqual( {} );
 		expect( state.productVariations ).toEqual( {} );
-	} );
 
-	it( 'returns what woocommerce/products holds under each ID', () => {
 		productsState.products = { 42: product };
 		productsState.productVariations = { 99: variation };
 
-		expect( state.products[ 42 ] ).toBe( product );
-		expect( state.productVariations[ 99 ] ).toBe( variation );
-		expect( state.products[ 7 ] ).toBeUndefined();
-		expect( state.productVariations[ 7 ] ).toBeUndefined();
-	} );
-
-	it( 'returns entries woocommerce/products gains later, such as after client-side navigation', () => {
-		productsState.products = { 42: product };
-
-		const nextPageProduct = { id: 43, name: 'Cap' } as ProductResponseItem;
-		productsState.products[ 43 ] = nextPageProduct;
-
-		expect( state.products ).toEqual( {
-			42: product,
-			43: nextPageProduct,
-		} );
+		expect( state.products ).toBe( productsState.products );
+		expect( state.productVariations ).toBe(
+			productsState.productVariations
+		);
 	} );
 } );

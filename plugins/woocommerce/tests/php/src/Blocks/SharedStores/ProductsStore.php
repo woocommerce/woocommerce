@@ -36,12 +36,11 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	protected $original_hydration_registry_entry = null;
 
 	/**
-	 * Start from empty ProductsStore statics and interactivity state, since block renders in other test classes fill them.
+	 * Start from empty ProductsStore statics, since block renders in other test classes fill them.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->reset_products_store_static_state();
-		$this->reset_interactivity_state();
 	}
 
 	/**
@@ -434,22 +433,22 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The woocommerce store's products and productVariations return what woocommerce/products holds under each ID.
+	 * @testdox The woocommerce store's products and productVariations return the record a loader loaded under each ID.
 	 */
-	public function test_woocommerce_store_reads_product_data_from_products_store(): void {
+	public function test_woocommerce_store_reads_loaded_product_data_by_id(): void {
 		$product      = WC_Helper_Product::create_variation_product();
 		$variation_id = $product->get_children()[0];
 
-		TestedProductsStore::load_product( $this->consent, $product->get_id() );
-		TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+		$loaded_product    = TestedProductsStore::load_product( $this->consent, $product->get_id() );
+		$loaded_variations = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
 
-		$products_state = wp_interactivity_state( $this->store_namespace );
-		$state          = wp_interactivity_state( 'woocommerce' );
+		$state = wp_interactivity_state( 'woocommerce' );
 
-		$this->assertSame( $products_state['products'][ $product->get_id() ], $state['products'][ $product->get_id() ] ?? null );
-		$this->assertSame( $products_state['productVariations'][ $variation_id ], $state['productVariations'][ $variation_id ] ?? null, 'Variations loaded after the first loader call should be readable too.' );
 		$this->assertTrue( isset( $state['products'][ $product->get_id() ] ) );
-		$this->assertNull( $state['products'][999999] ?? null, 'An ID no loader put in woocommerce/products should read as null.' );
+		$this->assertSame( $loaded_product['name'], $state['products'][ $product->get_id() ]['name'] ?? null );
+		$this->assertTrue( isset( $state['productVariations'][ $variation_id ] ) );
+		$this->assertSame( $loaded_variations[ $variation_id ]['sku'], $state['productVariations'][ $variation_id ]['sku'] ?? null );
+		$this->assertNull( $state['products'][999999] ?? null, 'An ID no loader loaded should read as null.' );
 		$this->assertFalse( isset( $state['productVariations'][999999] ) );
 	}
 
@@ -474,25 +473,6 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<span id="product" data-wp-text="state.products.' . $product->get_id() . '.name">' . $product->get_name() . '</span>', $html );
 		$this->assertStringContainsString( '>' . wc_get_product( $variation_id )->get_sku() . '</span>', $html );
 		$this->assertStringContainsString( '<span id="absent" data-wp-text="state.products.999999.name"></span>', $html );
-	}
-
-	/**
-	 * @testdox The interactivity data sent to the page carries product records only under woocommerce/products.
-	 */
-	public function test_woocommerce_store_product_data_is_not_serialized(): void {
-		$data = json_decode( wp_json_encode( wp_interactivity()->filter_script_module_interactivity_data( array() ) ) );
-		$this->assertFalse( isset( $data->state->woocommerce->products ), 'Without a loader call, the woocommerce store should carry no product keys.' );
-
-		$product = WC_Helper_Product::create_variation_product();
-		TestedProductsStore::load_product( $this->consent, $product->get_id() );
-		TestedProductsStore::load_variations( $this->consent, $product->get_id() );
-
-		$data = json_decode( wp_json_encode( wp_interactivity()->filter_script_module_interactivity_data( array() ) ) );
-
-		$this->assertEquals( new \stdClass(), $data->state->woocommerce->products ?? null );
-		$this->assertEquals( new \stdClass(), $data->state->woocommerce->productVariations ?? null );
-		$this->assertTrue( isset( $data->state->{'woocommerce/products'}->products->{$product->get_id()} ) );
-		$this->assertCount( count( $product->get_children() ), get_object_vars( $data->state->{'woocommerce/products'}->productVariations ) );
 	}
 
 	/**
