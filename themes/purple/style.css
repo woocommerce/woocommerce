@@ -33,6 +33,21 @@ body {
 }
 
 /* ==========================================================================
+   Header — Navigation
+   ========================================================================== */
+
+/* Core's submenu z-index of 2 sits under WooCommerce's in-page controls,
+ * such as the sticky Product Filters (10) and the carousel buttons (22).
+ * Match the Customer Account dropdown (100), which stays under drawers and
+ * dialogs. Raising the whole header would cap the mobile overlay instead. */
+header.wp-block-template-part
+	.wp-block-navigation
+	.has-child
+	.wp-block-navigation__submenu-container {
+	z-index: 100;
+}
+
+/* ==========================================================================
    WooCommerce — Mini cart
    ========================================================================== */
 
