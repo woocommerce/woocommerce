@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reduce repeated blocking PayPal account lookups after connection or authentication failures
