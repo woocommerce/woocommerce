@@ -124,6 +124,21 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that opting out also clears a legacy WP-Cron tracker send.
+	 */
+	public function test_opting_out_clears_legacy_wp_cron_tracker_send() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		wp_schedule_single_event( time() + 60, 'woocommerce_tracker_send_event', array( true ) );
+
+		update_option( 'woocommerce_allow_tracking', 'no' );
+
+		$this->assertFalse(
+			wp_next_scheduled( 'woocommerce_tracker_send_event', array( true ) ),
+			'Opting out should clear a pending WP-Cron tracker send'
+		);
+	}
+
+	/**
 	 * Helper method to clear all scheduled actions.
 	 */
 	private function clear_scheduled_actions() {

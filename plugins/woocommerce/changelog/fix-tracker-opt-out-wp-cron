@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop usage tracking from sending after opt-out when a pending first-send job was still scheduled.

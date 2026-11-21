@@ -84,16 +84,16 @@ class TrackingOptIn {
 			// Get the previous value of the tracking.
 			$prev_value = get_option( 'woocommerce_allow_tracking', 'no' );
 
-			// Opt in to tracking and schedule the first data update.
-			// Same mechanism as in WC_Admin_Setup_Wizard::wc_setup_store_setup_save().
+			// Opt in to tracking via Action Scheduler (not WP-Cron). schedule_tracking_action()
+			// is also called from the option-update hook when it fires; calling it here covers
+			// the add_option path when the option row was missing.
 			update_option( 'woocommerce_allow_tracking', 'yes' );
+			WC()->schedule_tracking_action();
 
 			// Track woocommerce_allow_tracking_toggled in case was set as 'no' before.
 			if ( class_exists( 'WC_Tracks' ) && 'no' === $prev_value ) {
 				WC_Tracks::track_woocommerce_allow_tracking_toggled( $prev_value, 'yes', 'usage_tracking_note' );
 			}
-
-			wp_schedule_single_event( time() + 10, 'woocommerce_tracker_send_event', array( true ) );
 		}
 	}
 }

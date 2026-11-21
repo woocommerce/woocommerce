@@ -40,6 +40,14 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	// phpcs:enable
 
 	/**
+	 * Enable tracking for tests that exercise the send path.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+	}
+
+	/**
 	 * Test the tracking of wc_admin being disabled via filter.
 	 */
 	public function test_wc_admin_disabled_get_tracking_data() {
@@ -297,6 +305,31 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		WC()->handle_tracking_setting_change( 'yes', 'no' );
 
 		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Opting out should discard pending retry state.' );
+	}
+
+	/**
+	 * @testdox Should not send when tracking is opted out, even with override.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $override Whether to request an override send.
+	 */
+	public function test_send_tracking_data_does_not_send_when_opted_out( bool $override ): void {
+		update_option( 'woocommerce_allow_tracking', 'no' );
+		$requests = 0;
+		$intercept = function () use ( &$requests ) {
+			++$requests;
+			return array( 'response' => array( 'code' => 200 ) );
+		};
+		add_filter( 'pre_http_request', $intercept );
+
+		WC_Tracker::send_tracking_data( $override );
+
+		$this->assertSame( 0, $requests, 'Opted-out stores must not post tracking data.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_last_send' ), 'Opted-out stores must not record a send time.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_last_attempt' ), 'Opted-out stores must not record an attempt time.' );
+		remove_filter( 'pre_http_request', $intercept );
 	}
 
 	/**

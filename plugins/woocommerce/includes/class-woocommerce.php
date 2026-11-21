@@ -1868,6 +1868,9 @@ final class WooCommerce {
 		}
 		if ( false === wc_string_to_bool( $value ) ) {
 			as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce' );
+			// Legacy WP-Cron path (e.g. older inbox-note opt-in) is separate from Action Scheduler.
+			// Use wp_unschedule_hook so events scheduled with args (array( true )) are cleared too.
+			wp_unschedule_hook( 'woocommerce_tracker_send_event' );
 			delete_option( 'woocommerce_tracker_send_failures' );
 		} else {
 			$this->schedule_tracking_action();
