@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update the webhook author when a different user changes its delivery URL.

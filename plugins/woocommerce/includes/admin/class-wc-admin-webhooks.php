@@ -92,8 +92,14 @@ class WC_Admin_Webhooks {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$delivery_url = ! empty( $_POST['webhook_delivery_url'] ) ? esc_url_raw( wp_unslash( $_POST['webhook_delivery_url'] ) ) : '';
 
-		if ( wc_is_valid_url( $delivery_url ) ) {
+		// An untouched form sends back the URL it displayed. That URL can differ from the stored one when a filter changes it, and it is not a change.
+		if ( wc_is_valid_url( $delivery_url ) && esc_url_raw( $webhook->get_delivery_url() ) !== $delivery_url ) {
 			$webhook->set_delivery_url( $delivery_url );
+		}
+
+		// Payloads are built as the author, so whoever changes where they go becomes the author.
+		if ( array_key_exists( 'delivery_url', $webhook->get_changes() ) ) {
+			$webhook->set_user_id( get_current_user_id() );
 		}
 
 		// Secret.
@@ -126,7 +132,7 @@ class WC_Admin_Webhooks {
 			if ( wc_is_webhook_valid_topic( $topic ) ) {
 				$webhook->set_topic( $topic );
 			} else {
-				$errors[] = __( 'Webhook topic unknown. Please select a valid topic.', 'woocommerce' );
+				$errors[] = __( 'This webhook topic is not supported. Choose a different topic.', 'woocommerce' );
 			}
 		}
 
