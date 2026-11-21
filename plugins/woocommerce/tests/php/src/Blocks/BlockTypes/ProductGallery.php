@@ -340,6 +340,43 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should translate the gallery dialog label and the carousel role description.
+	 */
+	public function test_product_gallery_accessible_labels_are_translatable(): void {
+		$data = $this->create_product_with_gallery( 1 );
+
+		add_filter(
+			'gettext_woocommerce',
+			static function ( $translation, $text ) {
+				return 'Product gallery' === $text ? 'Galeria de imagens do produto' : $translation;
+			},
+			10,
+			2
+		);
+		add_filter(
+			'gettext_with_context_woocommerce',
+			static function ( $translation, $text, $context ) {
+				return 'carousel' === $text && 'ARIA role description of the product image slider' === $context ? 'carrossel' : $translation;
+			},
+			10,
+			3
+		);
+
+		$markup = $this->render_product_gallery( $data['product']->get_id() );
+
+		$this->assertMatchesRegularExpression(
+			'/<dialog[^>]*aria-label="Galeria de imagens do produto"/',
+			$markup,
+			'The gallery dialog should use the translated label.'
+		);
+		$this->assertStringContainsString( 'aria-roledescription="carrossel"', $markup, 'The large image list should use the translated role description.' );
+		$this->assertStringNotContainsString( 'Product Gallery', $markup, 'No untranslated gallery label should remain.' );
+		$this->assertStringNotContainsString( '"carousel"', $markup, 'No untranslated role description should remain.' );
+
+		$this->cleanup_product_data( $data );
+	}
+
+	/**
 	 * Test that the ProductGallery block handles invalid product IDs correctly.
 	 */
 	public function test_product_gallery_render_with_invalid_product() {
