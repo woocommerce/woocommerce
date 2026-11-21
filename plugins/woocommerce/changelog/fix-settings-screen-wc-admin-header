@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Hide the WooCommerce admin header on the experimental settings screen; flag-only screen.
+
