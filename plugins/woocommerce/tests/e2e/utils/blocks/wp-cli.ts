@@ -132,7 +132,9 @@ export async function saveBlocksCliContainerId() {
 
 /**
  * Runs a WP-CLI command inside the single-container E2E environment's `cli`
- * container (started via `wp-env --config .wp-env.e2e.json`).
+ * container. The `wp-env:e2e` script targets the base `.wp-env.e2e.json` by
+ * default, or the variant named by `E2E_WP_ENV_CONFIG` when a plugin-installing
+ * environment (Gutenberg, object cache) is running.
  */
 export async function wpCLI( command: string ) {
 	return await blocksCli.wpCLI( command );
