@@ -30,8 +30,8 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
  * The product is the one the customer signed up for, so a variation is its own row.
  *
  * The table stores UTC dates while the base class assumes site-time columns, so the date handling
- * below converts at query time. Intervals use the current UTC offset, which mis-buckets the hour
- * around a DST switch. Accepted for sign-up counts; the fix would be local-time columns, like wc_order_stats.
+ * below converts at query time: period bounds to UTC in PHP, interval buckets to site time in SQL
+ * via TimeInterval::local_datetime_sql(), which honours DST per row.
  */
 class DataStore extends ReportsDataStore implements DataStoreInterface {
 
@@ -149,15 +149,23 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Returns SQL that shifts a UTC date column to site time, using the current UTC offset.
+	 * Returns SQL that converts a UTC date column to site time, honouring DST per row.
 	 *
 	 * @param string $table_name Table name.
 	 * @param string $column     Date column name.
+	 * @param array  $query_args Query parameters; `after` and `before` bound the DST transitions considered,
+	 *                           and every query using this expression is limited to that period.
 	 * @return string
 	 */
-	protected function get_local_datetime_sql( $table_name, $column ) {
-		$offset = (int) wc_timezone_offset();
-		return "DATE_ADD( {$table_name}.`{$column}`, INTERVAL {$offset} SECOND )";
+	protected function get_local_datetime_sql( $table_name, $column, $query_args ) {
+		$after  = $query_args['after'] ?? null;
+		$before = $query_args['before'] ?? null;
+
+		return TimeInterval::local_datetime_sql(
+			"{$table_name}.`{$column}`",
+			$after instanceof \DateTimeInterface ? $after->getTimestamp() : time(),
+			$before instanceof \DateTimeInterface ? $before->getTimestamp() : time()
+		);
 	}
 
 	/**
@@ -168,12 +176,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param string $interval   Time interval, e.g. day, week, month.
 	 * @param string $table_name Table name.
 	 * @param string $column     Date column name.
+	 * @param array  $query_args Query parameters.
 	 * @return string
 	 */
-	protected function get_interval_sql( $interval, $table_name, $column ) {
+	protected function get_interval_sql( $interval, $table_name, $column, $query_args ) {
 		return str_replace(
 			"{$table_name}.`{$column}`",
-			$this->get_local_datetime_sql( $table_name, $column ),
+			$this->get_local_datetime_sql( $table_name, $column, $query_args ),
 			TimeInterval::db_datetime_format( $interval, $table_name, $column )
 		);
 	}
@@ -213,7 +222,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		if ( ! empty( $query_args['interval'] ) ) {
 			$this->clear_sql_clause( 'select' );
-			$this->add_sql_clause( 'select', $this->get_interval_sql( $query_args['interval'], $table_name, $this->date_column_name ) );
+			$this->add_sql_clause( 'select', $this->get_interval_sql( $query_args['interval'], $table_name, $this->date_column_name, $query_args ) );
 		}
 	}
 

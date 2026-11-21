@@ -83,6 +83,53 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should bucket each sign-up and send with the DST offset in force on its date, not the current one.
+	 */
+	public function test_intervals_honour_dst_per_row(): void {
+		update_option( 'timezone_string', 'America/Los_Angeles' );
+		// 07:30 UTC is 23:30 the day before in winter (PST, UTC-8) and 00:30 the same day in summer
+		// (PDT, UTC-7). Shifting both by the current offset misplaces one of them in either season.
+		$winter = '2026-01-16 07:30:00';
+		$summer = '2026-07-16 07:30:00';
+		$this->insert_row( 1, NotificationStatus::SENT, $winter, 'winter@example.com', $winter );
+		$this->insert_row( 1, NotificationStatus::SENT, $summer, 'summer@example.com', $summer );
+		// Either side of the 2026-11-01 09:00 UTC fall-back: 00:30 PDT and 23:30 PST, both on 2026-11-01.
+		foreach ( array( '2026-11-01 07:30:00', '2026-11-02 07:30:00' ) as $i => $date ) {
+			$this->insert_row( 1, NotificationStatus::SENT, $date, "autumn-{$i}@example.com", $date );
+		}
+
+		$cases = array(
+			'2026-01-15' => array(
+				'2026-01-15' => 1,
+				'2026-01-16' => 0,
+			),
+			'2026-07-15' => array(
+				'2026-07-15' => 0,
+				'2026-07-16' => 1,
+			),
+			// A range containing the transition: one interval per local day, none stray.
+			'2026-10-31' => array(
+				'2026-10-31' => 0,
+				'2026-11-01' => 2,
+				'2026-11-02' => 0,
+			),
+		);
+		foreach ( $cases as $day => $expected ) {
+			$stats     = $this->get_stats(
+				array(
+					'after'  => $day . 'T00:00:00',
+					'before' => array_key_last( $expected ) . 'T23:59:59',
+					'order'  => 'asc',
+				)
+			);
+			$intervals = array_map( array( $this, 'flatten_interval' ), $stats['intervals'] );
+
+			$this->assertSame( $expected, array_column( $intervals, 'signups', 'interval' ), "Sign-ups around {$day} land on their local day." );
+			$this->assertSame( $expected, array_column( $intervals, 'notifications_sent', 'interval' ), "Sends around {$day} land on their local day." );
+		}
+	}
+
+	/**
 	 * @testdox Should compute totals from non-pending sign-ups and sends in the period.
 	 */
 	public function test_totals(): void {

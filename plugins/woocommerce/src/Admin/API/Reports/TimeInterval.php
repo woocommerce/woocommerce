@@ -716,4 +716,49 @@ class TimeInterval {
 
 		return false;
 	}
+
+	/**
+	 * Returns SQL that converts a UTC datetime column to site-local time, honouring DST per row.
+	 *
+	 * The site timezone's DST transitions inside the window are baked into a CASE, so each row is
+	 * shifted by the offset in force on its date. It relies on PHP's timezone data only, so it
+	 * works without MySQL timezone tables (and on SQLite) and agrees with the interval ids PHP
+	 * builds for the same report. Sites using a manual UTC offset have no DST, so a fixed shift
+	 * is exact.
+	 *
+	 * Rows outside the window get the offset at the nearest window edge, so callers must limit
+	 * the query to the window.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $column_sql   Fully qualified UTC datetime column, e.g. `orders.date_created_gmt`.
+	 * @param int    $window_start Unix timestamp. Start of the range the query reads.
+	 * @param int    $window_end   Unix timestamp. End of the range the query reads.
+	 * @return string SQL expression producing a local DATETIME.
+	 */
+	public static function local_datetime_sql( string $column_sql, int $window_start, int $window_end ): string {
+		$transitions = '' === get_option( 'timezone_string' ) ? false : wp_timezone()->getTransitions( $window_start, $window_end );
+		if ( ! is_array( $transitions ) || array() === $transitions ) {
+			return "DATE_ADD({$column_sql}, INTERVAL " . (int) wc_timezone_offset() . ' SECOND)';
+		}
+
+		// The first entry describes the offset already in effect at the window start;
+		// each later entry is a transition inside the window.
+		$case  = '';
+		$count = count( $transitions );
+		for ( $i = 0; $i < $count - 1; $i++ ) {
+			$boundary = gmdate( 'Y-m-d H:i:s', $transitions[ $i + 1 ]['ts'] );
+			$offset   = (int) $transitions[ $i ]['offset'];
+			$case    .= "WHEN {$column_sql} < '{$boundary}' THEN DATE_ADD({$column_sql}, INTERVAL {$offset} SECOND) ";
+		}
+
+		$last_offset = (int) $transitions[ $count - 1 ]['offset'];
+		$last_shift  = "DATE_ADD({$column_sql}, INTERVAL {$last_offset} SECOND)";
+
+		if ( '' === $case ) {
+			return $last_shift;
+		}
+
+		return "CASE {$case}ELSE {$last_shift} END";
+	}
 }
