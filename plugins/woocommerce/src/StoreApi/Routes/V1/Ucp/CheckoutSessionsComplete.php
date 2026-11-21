@@ -260,7 +260,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 * @return string
 	 */
 	private function agent_profile_host( string $header ): string {
-		$profile = $this->quoted_header_parameter( $header, 'profile' );
+		$profile = Utils::quoted_header_parameter( $header, 'profile' );
 		$host    = strtolower( (string) wp_parse_url( $profile, PHP_URL_HOST ) );
 
 		if ( '' === $host ) {
@@ -270,49 +270,6 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		$valid = filter_var( $host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME );
 
 		return is_string( $valid ) ? $valid : 'ucp';
-	}
-
-	/**
-	 * Value of one double-quoted parameter, matched by its exact name.
-	 *
-	 * A match counts only outside quotes, at the start of the header or after whitespace or a semicolon.
-	 *
-	 * @param string $header Header value.
-	 * @param string $name   Parameter name.
-	 * @return string Empty when the parameter is absent.
-	 */
-	private function quoted_header_parameter( string $header, string $name ): string {
-		$prefix = $name . '="';
-		$offset = 0;
-		$length = strlen( $header );
-
-		while ( $offset < $length ) {
-			$start = strpos( $header, $prefix, $offset );
-			if ( false === $start ) {
-				return '';
-			}
-
-			// An even number of quotes before the name means it is outside a value.
-			$outside_quotes = 0 === ( substr_count( substr( $header, 0, $start ), '"' ) % 2 );
-			$is_parameter   = 0 === $start;
-			if ( ! $is_parameter ) {
-				$previous     = substr( $header, $start - 1, 1 );
-				$is_parameter = ' ' === $previous || "\t" === $previous || ';' === $previous;
-			}
-
-			if ( $outside_quotes && $is_parameter ) {
-				$value_start = $start + strlen( $prefix );
-				$end         = strpos( $header, '"', $value_start );
-				if ( false === $end ) {
-					return '';
-				}
-				return substr( $header, $value_start, $end - $value_start );
-			}
-
-			$offset = $start + strlen( $prefix );
-		}
-
-		return '';
 	}
 
 	/**
