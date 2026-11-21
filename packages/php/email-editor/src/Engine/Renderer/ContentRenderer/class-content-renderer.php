@@ -13,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Content;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Block_Template;
 use WP_Block_Type_Registry;
@@ -473,6 +474,10 @@ class Content_Renderer {
 	 * @return string The content wrapped with horizontal padding, or unchanged if no padding.
 	 */
 	private function add_root_horizontal_padding( string $content, array $email_attrs ): string {
+		if ( ! Html_Processing_Helper::has_visible_content( $content ) ) {
+			return $content;
+		}
+
 		$padding_left  = $this->sum_padding_values(
 			$email_attrs['root-padding-left'] ?? null,
 			$email_attrs['container-padding-left'] ?? null

@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Pre
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 
 /**
  * This preprocessor is responsible for setting default spacing values for blocks.
@@ -136,6 +137,7 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	 * @return array
 	 */
 	private function add_block_gaps( array $parsed_blocks, string $gap = '', $parent_block = null, array $root_padding = array(), bool $apply_root_padding = false, array $container_padding = array(), array $variables_map = array(), string $gap_padding_side = 'padding-left' ): array {
+		$follows_visible_block = false;
 		foreach ( $parsed_blocks as $key => $block ) {
 			$block_name        = $block['blockName'] ?? '';
 			$parent_block_name = $parent_block['blockName'] ?? '';
@@ -144,12 +146,13 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 
 			/**
 			 * Do not add a gap to:
-			 * - first child
+			 * - first child, or one preceded only by HTML that shows nothing (e.g. a `<style>` tag)
 			 * - parent block is a buttons block (where buttons are side by side).
 			 */
-			if ( 0 !== $key && $gap && 'core/buttons' !== $parent_block_name ) {
+			if ( $follows_visible_block && $gap && 'core/buttons' !== $parent_block_name ) {
 				$block['email_attrs']['margin-top'] = $gap;
 			}
+			$follows_visible_block = $follows_visible_block || ! $this->is_html_without_visible_content( $block );
 
 			// Handle horizontal gap for columns: apply physical padding to column children (except the first).
 			// Only an explicitly defined column blockGap is applied. We intentionally do not
@@ -221,6 +224,17 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 		}
 
 		return $parsed_blocks;
+	}
+
+	/**
+	 * Check whether a block is raw HTML that shows nothing in the email, such as only a `<style>` tag.
+	 *
+	 * @param array $block Parsed block.
+	 * @return bool
+	 */
+	private function is_html_without_visible_content( array $block ): bool {
+		return in_array( $block['blockName'] ?? null, array( null, 'core/html' ), true )
+			&& ! Html_Processing_Helper::has_visible_content( $block['innerHTML'] ?? '' );
 	}
 
 	/**
