@@ -1,6 +1,7 @@
 ---
 post_title: Colors
 sidebar_label: Colors
+sidebar_position: 6
 ---
 
 # Colors
