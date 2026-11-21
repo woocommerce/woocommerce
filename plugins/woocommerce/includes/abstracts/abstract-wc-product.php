@@ -2472,7 +2472,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$files     = $this->get_downloads();
 		$file_path = isset( $files[ $download_id ] ) ? $files[ $download_id ]->get_file() : '';
 
-		// allow overriding based on the particular file being requested.
+		/**
+		 * Filters the path for a specific product download.
+		 *
+		 * This filter runs whenever `WC_Product::get_file_download_path()` is called and does not provide customer or order context. For the final path in the standard customer download flow, use the `woocommerce_download_product_filepath` filter.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param string     $file_path   File path.
+		 * @param WC_Product $product     Product object.
+		 * @param string     $download_id Download ID.
+		 */
 		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );
 	}
 

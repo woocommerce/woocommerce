@@ -124,9 +124,12 @@ class WC_Download_Handler {
 		$download = new WC_Customer_Download( current( $download_ids ) );
 
 		/**
-		 * Filter download filepath.
+		 * Filters the final file path in WooCommerce's standard customer download flow.
+		 *
+		 * Use this filter for temporary, signed, or customer-specific paths. It runs after the `woocommerce_product_file_download_path` filter and provides order and customer download context.
 		 *
 		 * @since 4.0.0
+		 *
 		 * @param string $file_path File path.
 		 * @param string $email_address Email address.
 		 * @param WC_Order|bool $order Order object or false.
