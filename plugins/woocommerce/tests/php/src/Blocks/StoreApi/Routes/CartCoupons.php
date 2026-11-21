@@ -231,9 +231,9 @@ class CartCoupons extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Deleting all coupons should remove their discount from the draft order.
+	 * @testdox Deleting all coupons updates the cart and leaves an existing draft order unchanged.
 	 */
-	public function test_delete_items_removes_discount_from_draft_order(): void {
+	public function test_delete_items_leaves_draft_order_unchanged(): void {
 		$this->coupon->set_amount( 5 );
 		$this->coupon->save();
 		wc()->cart->calculate_totals();
@@ -242,17 +242,20 @@ class CartCoupons extends ControllerTestCase {
 		wc()->session->set( 'store_api_draft_order', $draft_order->get_id() );
 
 		$this->assertEquals( 15, $draft_order->get_total() );
+		$this->assertNotEmpty( $draft_order->get_coupon_codes() );
 
 		$request = new \WP_REST_Request( 'DELETE', '/wc/store/v1/cart/coupons' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$response = rest_get_server()->dispatch( $request );
 
 		$this->assertSame( 200, $response->get_status() );
+		$this->assertEmpty( wc()->cart->get_applied_coupons() );
+		$this->assertEquals( 0, wc()->cart->get_discount_total() );
 
 		$draft_order = wc_get_order( $draft_order->get_id() );
-		$this->assertEmpty( $draft_order->get_coupon_codes() );
-		$this->assertEquals( 0, $draft_order->get_discount_total() );
-		$this->assertEquals( 20, $draft_order->get_total() );
+		$this->assertNotEmpty( $draft_order->get_coupon_codes(), 'Cart routes should leave draft orders unchanged.' );
+		$this->assertEquals( 5, $draft_order->get_discount_total() );
+		$this->assertEquals( 15, $draft_order->get_total() );
 	}
 
 	/**
