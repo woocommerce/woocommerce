@@ -226,6 +226,81 @@ describe( 'TableCard', () => {
 				.closest( '.woocommerce-table__preface' )
 		).toBeInTheDocument();
 	} );
+
+	it( 'should show a column added to headers after the first render', () => {
+		const headers = [
+			{ key: 'date', label: 'Date' },
+			{ key: 'orders', label: 'Orders' },
+		];
+		const props = {
+			title: 'My table',
+			isLoading: false,
+			rowsPerPage: 5,
+			totalRows: 1,
+		};
+		const { rerender } = render(
+			<TableCard { ...props } headers={ headers } rows={ [] } />
+		);
+
+		rerender(
+			<TableCard
+				{ ...props }
+				headers={ [ ...headers, { key: 'demo', label: 'Demo' } ] }
+				rows={ [
+					[
+						{ display: 'Jan 1', value: 'Jan 1' },
+						{ display: '2', value: 2 },
+						{ display: 'x', value: 'x' },
+					],
+				] }
+			/>
+		);
+
+		expect(
+			screen.getByRole( 'columnheader', { name: 'Demo' } )
+		).toBeInTheDocument();
+		expect( screen.getByText( 'x' ) ).toBeInTheDocument();
+	} );
+
+	it( 'should keep a column hidden by the user when headers change', async () => {
+		const headers = [
+			{ key: 'date', label: 'Date' },
+			{ key: 'orders', label: 'Orders' },
+		];
+		const props = {
+			title: 'My table',
+			isLoading: false,
+			rows: [],
+			rowsPerPage: 5,
+			totalRows: 0,
+		};
+		const { rerender } = render(
+			<TableCard { ...props } headers={ headers } />
+		);
+
+		await userEvent.click(
+			screen.getByTitle( 'Choose which values to display', {
+				selector: 'button',
+			} )
+		);
+		await userEvent.click(
+			screen.getByRole( 'menuitemcheckbox', { name: 'Orders' } )
+		);
+
+		rerender(
+			<TableCard
+				{ ...props }
+				headers={ [ ...headers, { key: 'demo', label: 'Demo' } ] }
+			/>
+		);
+
+		expect(
+			screen.queryByRole( 'columnheader', { name: 'Orders' } )
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole( 'columnheader', { name: 'Demo' } )
+		).toBeInTheDocument();
+	} );
 } );
 
 describe( 'Table', () => {
