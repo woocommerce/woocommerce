@@ -10,9 +10,9 @@ namespace Automattic\WooCommerce\Blocks\SharedStores;
  * Each read returns what `woocommerce/products` holds under that ID at that moment,
  * and the view serializes as an empty object, so the page carries each record once.
  *
- * Temporary: once every block reads product data from the `woocommerce` store, that
- * store holds the data itself, these views go away, and code that reads it by ID
- * doesn't change.
+ * Temporary: once every block reads product data from the `woocommerce` store, the
+ * loaders write the data there directly and this class is deleted. Code that reads
+ * it by ID doesn't change.
  *
  * @internal
  *
