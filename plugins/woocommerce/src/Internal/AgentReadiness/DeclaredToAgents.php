@@ -74,7 +74,7 @@ class DeclaredToAgents {
 
 	/**
 	 * Where an item lives, for grouping on the page: 'root' for a file in the site's root folder,
-	 * 'address' for one under /.well-known, 'code' for page markup, 'extra' for anything else.
+	 * 'address' for one under /.well-known, 'code' for page markup, headers and Markdown versions.
 	 *
 	 * @since 11.4.0
 	 *
@@ -89,8 +89,8 @@ class DeclaredToAgents {
 		if ( 'mcp-server-card' === $id ) {
 			return 'address';
 		}
-		$code = array( 'sameas-links', 'site-search-action', 'webmcp-forms-schema', 'markdown-alternate-link', 'code-block-language', 'editorial-metadata', 'site-search-autocomplete' );
-		return in_array( $id, $code, true ) ? 'code' : 'extra';
+		// WooCommerce's guidance is part of llms.txt; everything else is in the page code or headers.
+		return 'llms-txt-woocommerce-guidance' === $id ? 'root' : 'code';
 	}
 
 	/**

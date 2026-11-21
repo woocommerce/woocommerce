@@ -89,15 +89,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	);
 
 	/**
-	 * Checks that also show in another question's card, counted in each card's badge (Tracks counts them
-	 * once): "Discourage search engines"
-	 * keeps AI assistants from the store's pages (Store access, its group) and from finding it.
-	 */
-	private const ALSO_IN = array(
-		'search_visible' => array( 'find' ),
-	);
-
-	/**
 	 * Badge intents of the design system, by the badge class the PHP pages use.
 	 */
 	private const INTENTS = array(
@@ -187,7 +178,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			array(
 				'id'         => self::PAGE_ID,
 				'parent'     => 'woocommerce',
-				'title'      => __( 'AI sales readiness', 'woocommerce' ),
+				'title'      => __( 'AI shopping health', 'woocommerce' ),
 				'path'       => self::PATH,
 				'capability' => 'manage_woocommerce',
 			)
@@ -275,7 +266,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				: sprintf( __( 'Product checks covered the %s products you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
 		}
 		return array(
-			'title'        => __( 'AI sales readiness', 'woocommerce' ),
+			'title'        => __( 'AI shopping health', 'woocommerce' ),
 			'description'  => __( 'Check how well AI assistants can find and shop your store, and what to improve first.', 'woocommerce' ),
 			'last_checked' => self::last_checked( $report ),
 			'checked_note' => $truncated,
@@ -291,8 +282,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				) : null,
 			),
 			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
-			// Setup steps also show in the Setup checklist; here they sit in the card of the question they answer.
-			'sections'     => null === $report ? array() : $this->sections( $visible, $launched, $report ),
+			// Setup steps live in the Setup checklist and, while one blocks sales, in Fix first; the cards hold what the scan read.
+			'sections'     => null === $report ? array() : $this->sections( array_values( array_filter( $visible, static fn( array $check ): bool => ! self::is_setup_step( $check ) ) ), $launched, $report ),
 			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ),
 			'overview'     => array(
 				'shopping' => $this->shopping_card( $checks ),
@@ -406,7 +397,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'link'  => $action[3],
 			);
 		}
-		$copy = ReadinessCopy::store_check( $check['id'], (string) ( $check['source'] ?? '' ), self::product_name( (int) ( $check['product'] ?? 0 ) ), (string) ( $check['seen_at'] ?? '' ) );
+		$product_id = (int) ( $check['product'] ?? 0 );
+		$copy       = ReadinessCopy::store_check( $check['id'], (string) ( $check['source'] ?? '' ), self::product_name( $product_id ), (string) ( $check['seen_at'] ?? '' ), $product_id > 0 );
 		if ( null !== $copy ) {
 			return array(
 				'title' => $copy['action'],
@@ -908,7 +900,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'root'    => __( 'Files in your root folder', 'woocommerce' ),
 			'address' => __( 'Files at standard addresses', 'woocommerce' ),
 			'code'    => __( 'In your page code', 'woocommerce' ),
-			'extra'   => __( 'Extra details for AI assistants', 'woocommerce' ),
 			'unknown' => __( 'Not checked yet', 'woocommerce' ),
 		);
 		$groups = array_fill_keys( array_keys( $titles ), array() );
@@ -945,7 +936,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			}
 		}
 		return array(
-			'title'  => __( 'What does your store share with AI assistants?', 'woocommerce' ),
+			'title'  => __( 'Extra details for AI assistants', 'woocommerce' ),
 			'badge'  => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
 			'text'   => $text,
 			'groups' => array_values(
@@ -1100,10 +1091,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				$sections[] = self::no_products_section( $id, $group[0], $unreadable );
 				continue;
 			}
-			// When no scanned check could run, one row says why in their place; setup steps still show.
-			$scanned    = array_filter( $group[1], static fn( array $check ): bool => ! self::is_setup_step( $check ) );
-			$cant       = array() !== $report && self::none_ran( $scanned );
-			$checks     = $cant ? array_diff_key( $group[1], $scanned ) : $group[1];
+			// When no check could run, one row says why in their place.
+			$cant       = array() !== $report && self::none_ran( $group[1] );
+			$checks     = $cant ? array() : $group[1];
 			$folded     = array_filter( $checks, static fn( array $check ): bool => true === $check['ok'] );
 			$rows       = self::check_rows( array_values( array_diff_key( $checks, $folded ) ), $launched );
 			$sections[] = array(
@@ -1149,10 +1139,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		);
 		foreach ( $checks as $check ) {
 			// A report from before checks named their question has no group; the next scan fills it in.
-			foreach ( array_merge( array( $check['group'] ?? '' ), self::ALSO_IN[ $check['id'] ] ?? array() ) as $group ) {
-				if ( isset( $groups[ $group ] ) ) {
-					$groups[ $group ][1][] = $check;
-				}
+			$group = $check['group'] ?? '';
+			if ( isset( $groups[ $group ] ) ) {
+				$groups[ $group ][1][] = $check;
 			}
 		}
 		return $groups;

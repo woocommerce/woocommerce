@@ -77,7 +77,7 @@ describe( 'CheckRow', () => {
 		const { container } = renderRow(
 			row( {
 				id: 'ucp_profile',
-				text: 'Test it in UCP Playground, or ask your host.',
+				text: 'Test it in UCP Playground, or ask your hosting provider.',
 				text_link: {
 					href: 'https://ucpplayground.com/',
 					text: 'UCP Playground',
@@ -89,7 +89,7 @@ describe( 'CheckRow', () => {
 			screen.getByRole( 'link', { name: /UCP Playground/ } )
 		).toHaveAttribute( 'href', 'https://ucpplayground.com/' );
 		expect( container ).toHaveTextContent(
-			'Test it in UCP Playground, or ask your host.'
+			'Test it in UCP Playground, or ask your hosting provider.'
 		);
 	} );
 

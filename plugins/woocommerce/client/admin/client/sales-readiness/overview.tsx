@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Badge, Card, Text } from '@wordpress/ui';
-import { Button, Spinner } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -46,14 +46,14 @@ export default function SalesReadinessOverview( {
 		initialView
 	);
 
+	// No spinner while the view loads, as on the AI shopping health page.
 	if ( ! view ) {
+		if ( ! error && ! connect ) {
+			return null;
+		}
 		return (
 			<div className="wc-sales-readiness wc-sales-readiness--overview">
-				{ error ? (
-					<ErrorNotice message={ error } reload={ reload } />
-				) : (
-					<Spinner />
-				) }
+				{ error && <ErrorNotice message={ error } reload={ reload } /> }
 				{ connect && <AgentConnect connect={ connect } /> }
 			</div>
 		);

@@ -49,6 +49,28 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 			$this->assertStringContainsString( 'Blue hoodie', ReadinessCopy::store_check( $id, '', 'Blue hoodie' )['found'], $id );
 			$this->assertStringNotContainsString( 'Blue hoodie', ReadinessCopy::store_check( $id )['found'], "{$id} without a name" );
 		}
+		$this->assertSame( 'On the Blue hoodie page, the code doesn’t include your returns policy, so AI assistants can’t tell shoppers whether they can return an item.', ReadinessCopy::store_check( 'product_return_policy_schema', '', 'Blue hoodie' )['found'], 'The returns line names the page, as the shipping and where-to-buy lines do' );
+	}
+
+	/**
+	 * @testdox Without a product name, a page check's line is its named line about "a product page"; only checks fixed by one store setting, or that also read the home page, say it store-wide.
+	 */
+	public function test_unnamed_lines_follow_the_named_ones(): void {
+		$named = new \ReflectionMethod( ReadinessCopy::class, 'named_found' );
+		$named->setAccessible( true );
+		$store_wide = array( 'product_shipping_schema', 'product_return_policy_schema', 'content_in_raw_html', 'product_review_markup', 'viewport_meta', 'html_lang_and_charset', 'images_have_alt' );
+		$all        = new \ReflectionMethod( ReadinessCopy::class, 'store_checks' );
+		$all->setAccessible( true );
+		$checked = 0;
+		foreach ( array_keys( $all->invoke( null ) ) as $id ) {
+			if ( null === $named->invoke( null, $id ) || in_array( $id, $store_wide, true ) ) {
+				continue;
+			}
+			$line = ReadinessCopy::store_check( $id, '', 'Blue hoodie' )['found'];
+			$this->assertSame( str_replace( array( 'On the Blue hoodie page', 'The Blue hoodie page', 'Blue hoodie has' ), array( 'On a product page', 'A product page', 'A product has' ), $line ), ReadinessCopy::store_check( $id )['found'], $id );
+			++$checked;
+		}
+		$this->assertGreaterThanOrEqual( 10, $checked );
 	}
 
 	/**
@@ -57,7 +79,7 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 	public function test_broken_llms_txt_link_names_the_link_and_fits_the_fix(): void {
 		$copy = ReadinessCopy::store_check( 'llms_txt_links_resolve', 'file', '', 'https://example.com/old-sale/' );
 		$this->assertStringContainsString( 'doesn’t open: example.com/old-sale/.', $copy['found'] );
-		$this->assertStringContainsString( 'llms.txt file in your site’s root folder', $copy['fix'] );
+		$this->assertStringContainsString( 'llms.txt file in your store’s root folder', $copy['fix'] );
 		$this->assertStringContainsString( 'plugin that adds your llms.txt file', ReadinessCopy::store_check( 'llms_txt_links_resolve', 'other' )['fix'] );
 		$this->assertStringContainsString( 'WooCommerce adds these links', ReadinessCopy::store_check( 'llms_txt_links_resolve', 'woocommerce' )['fix'] );
 		$general = ReadinessCopy::store_check( 'llms_txt_links_resolve' );
@@ -108,7 +130,7 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 		$name = get_option( 'blogname' );
 		update_option( 'blogname', 'Blue Sky & Co' );
 		try {
-			$this->assertSame( 'Make # Blue Sky & Co the first line of the file. Do this in your SEO plugin’s llms.txt settings, or in the llms.txt file in your site’s root folder.', ReadinessCopy::store_check( 'llms_txt_valid' )['fix'] );
+			$this->assertSame( 'Make # Blue Sky & Co the first line of the file. Do this in your SEO plugin’s llms.txt settings, or in the llms.txt file in your store’s root folder.', ReadinessCopy::store_check( 'llms_txt_valid' )['fix'] );
 			update_option( 'blogname', '' );
 			$this->assertSame( 'Add your store’s name as the file’s first heading.', ReadinessCopy::store_check( 'llms_txt_valid' )['fix'] );
 		} finally {

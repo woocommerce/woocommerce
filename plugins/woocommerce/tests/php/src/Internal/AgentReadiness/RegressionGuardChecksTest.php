@@ -267,6 +267,20 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The Mini-Cart block's empty item images, whose alt a script fills in, need no alt; a lazy-loaded image without one still fails.
+	 */
+	public function test_mini_cart_item_images_need_no_alt(): void {
+		$mini_cart  = '<td class="wc-block-cart-item__image" aria-hidden="true"><img data-wp-bind--hidden="context.isImageHidden" data-wp-bind--src="state.itemThumbnail" data-wp-bind--alt="state.cartItemName" data-wp-on--error="actions.hideImage"></td>';
+		$store      = $this->healthy_store();
+		$store['/'] = array( 200, '<html lang="en"><body><img alt="Logo" src="logo.png">' . $mini_cart . '</body></html>', array( 'content-type' => 'text/html; charset=UTF-8' ) );
+		$this->assertTrue( $this->results( $store )['images_have_alt'], 'The Mini-Cart block in a header doesn\'t fail the check' );
+
+		remove_all_filters( 'pre_http_request' );
+		$store['/'] = array( 200, '<html lang="en"><body>' . $mini_cart . '<img data-src="hero.jpg" class="lazyload"></body></html>', array( 'content-type' => 'text/html; charset=UTF-8' ) );
+		$this->assertFalse( $this->results( $store )['images_have_alt'], 'A lazy-loaded image with no src and no alt still needs alt' );
+	}
+
+	/**
 	 * @testdox Structured data with another name or price than the product fails.
 	 */
 	public function test_schema_mismatch(): void {
