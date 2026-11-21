@@ -676,7 +676,8 @@ class StoreOutputChecks {
 	 * The robots.txt crawlers get. '' when the store answered that there is none.
 	 * Null when it could not be read: the request failed, or the body is a page.
 	 *
-	 * Loaded from the host root, also when WordPress is in a subdirectory.
+	 * Loaded from the host root, also when WordPress is in a subdirectory. With plain permalinks
+	 * WordPress answers /robots.txt with a page, so crawlers get no rules: that reads as none.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
@@ -688,8 +689,11 @@ class StoreOutputChecks {
 		if ( in_array( $response['status'], array( 404, 410 ), true ) ) {
 			return '';
 		}
+		if ( ! str_starts_with( ltrim( $response['body'] ), '<' ) ) {
+			return $response['body'];
+		}
 		// A theme or a login wall that answers every URL with a page is not a robots.txt.
-		return str_starts_with( ltrim( $response['body'] ), '<' ) ? null : $response['body'];
+		return '' === (string) get_option( 'permalink_structure' ) ? '' : null;
 	}
 
 	/**
@@ -706,7 +710,8 @@ class StoreOutputChecks {
 		);
 		$defaults = array( '/sitemap_index.xml', '/sitemap.xml' );
 		if ( function_exists( 'wp_sitemaps_get_server' ) && wp_sitemaps_get_server()->sitemaps_enabled() ) {
-			$defaults[] = '/wp-sitemap.xml';
+			// /?sitemap=index with plain permalinks.
+			$defaults[] = (string) get_sitemap_url( 'index' );
 		}
 		return array_values( array_unique( array_merge( $listed, $defaults ) ) );
 	}
@@ -1683,6 +1688,10 @@ class StoreOutputChecks {
 		if ( 1 === preg_match( '#<loc>[^<]*(?:product-sitemap|wp-sitemap-posts-product-)[^<]*\.xml\s*</loc>#i', $xml ) ) {
 			return true;
 		}
+		// Plain permalinks: the WordPress product sitemap, or a product page (?product=slug).
+		if ( '' === (string) get_option( 'permalink_structure' ) && 1 === preg_match( '#<loc>[^<]*[?&](?:amp;)?(?:sitemap-subtype=product(?:&|\s*</loc>)|product=[^<&]+\s*</loc>)#i', $xml ) ) {
+			return true;
+		}
 		// The fixed part of the product base, before a tag such as %product_cat%.
 		$base = trim( (string) strtok( (string) ( wc_get_permalink_structure()['product_base'] ?? '' ), '%' ), '/' );
 		return '' !== $base && 1 === preg_match( '#<loc>[^<]*/' . preg_quote( $base, '#' ) . '/[^<]+</loc>#i', $xml );
@@ -1745,7 +1754,12 @@ class StoreOutputChecks {
 	 */
 	private static function store_page_urls( StoreResponses $responses ): array {
 		$product = $responses->product();
-		return array_values( array_filter( array( home_url( '/' ), wc_get_page_permalink( 'shop', '' ), null === $product ? '' : (string) $product->get_permalink() ) ) );
+		$shop    = wc_get_page_permalink( 'shop', '' );
+		// With plain permalinks the shop page redirects to the product archive, a URL with a query string that fetches don't follow.
+		if ( '' !== $shop && '' === (string) get_option( 'permalink_structure' ) ) {
+			$shop = (string) get_post_type_archive_link( 'product' );
+		}
+		return array_values( array_filter( array( home_url( '/' ), $shop, null === $product ? '' : (string) $product->get_permalink() ) ) );
 	}
 
 	/**
