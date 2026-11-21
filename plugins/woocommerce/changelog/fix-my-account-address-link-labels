@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use "Add billing address" style labels on the My Account addresses page instead of pasting the capitalized heading into the link.
