@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent the last item in stock from being sold twice when two customers check out at nearly the same time.
