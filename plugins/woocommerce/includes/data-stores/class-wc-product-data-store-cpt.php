@@ -319,6 +319,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->read_visibility( $product );
 		$this->read_product_data( $product );
 		$this->read_extra_data( $product );
+		$this->correct_stale_scheduled_sale_price( $product );
 		$product->set_object_read( true );
 
 		/**
@@ -532,6 +533,41 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $this->cogs_feature_is_enabled() ) {
 			$this->load_cogs_data( $product );
+		}
+	}
+
+	/**
+	 * Correct a stale stored `_price` when a scheduled sale started or ended before its Action Scheduler event ran.
+	 *
+	 * Runs at the end of read(), after extension data stores have set their own price props, and before the object is
+	 * marked as read. The corrected price is therefore the loaded value rather than a change, and any later set_price()
+	 * call is kept as-is. Variations re-derive their price on read in their own data store.
+	 *
+	 * @param WC_Product $product Product object being read.
+	 */
+	private function correct_stale_scheduled_sale_price( WC_Product $product ): void {
+		$sale_price    = (string) $product->get_sale_price( 'edit' );
+		$regular_price = (string) $product->get_regular_price( 'edit' );
+		$stored_price  = (string) $product->get_price( 'edit' );
+		if ( '' === $sale_price || '' === $regular_price || '' === $stored_price || (float) $regular_price <= (float) $sale_price ) {
+			return;
+		}
+
+		// An unscheduled sale's price is set at save time, so it can't go stale.
+		$date_from = $product->get_date_on_sale_from( 'edit' );
+		$date_to   = $product->get_date_on_sale_to( 'edit' );
+		if ( ! $date_from && ! $date_to ) {
+			return;
+		}
+
+		// Check the dates directly: subclasses override is_on_sale() (Product Bundles does), and it may load other products.
+		$now     = time();
+		$on_sale = ! ( ( $date_from && $date_from->getTimestamp() > $now ) || ( $date_to && $date_to->getTimestamp() < $now ) );
+
+		// Stale only when the stored price is the price for the other side of the boundary. Any other value is a custom price.
+		$stale_price = $on_sale ? $regular_price : $sale_price;
+		if ( (float) $stale_price === (float) $stored_price ) {
+			$product->set_price( $on_sale ? $sale_price : $regular_price );
 		}
 	}
 
