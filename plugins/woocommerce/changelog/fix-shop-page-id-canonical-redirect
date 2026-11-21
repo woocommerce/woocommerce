@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Redirect shop page ID URLs to the shop instead of an arbitrary product.
