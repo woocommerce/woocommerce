@@ -274,7 +274,7 @@ const product = state.products[ productId ];
 
 For now the `woocommerce` store reads this data from `woocommerce/products` instead of holding a copy, so each record is sent to the page once. This has two consequences:
 
--   On the server, `products` and `productVariations` aren't arrays, so read them by ID only. `is_array()` is false for them, `foreach` finds no entries, and array functions such as `array_key_exists()` don't accept them (a `TypeError` on PHP 8). They exist only once a loader has run in the request.
+-   On the server, `products` and `productVariations` aren't arrays, so read them by ID only. `is_array()` is false for them, `foreach` finds no entries, and array functions such as `array_key_exists()` don't accept them (a `TypeError` on PHP 8). They exist only once a loader has loaded data in the request.
 -   In the serialized interactivity data, `woocommerce` carries them as empty objects. The client reads the data once the `@woocommerce/stores/woocommerce` module loads, so a block that binds it must load that module.
 
 ### The `addCartItem` outcome contract
