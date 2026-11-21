@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop products without a price from defaulting to zero and skewing catalog price filters.

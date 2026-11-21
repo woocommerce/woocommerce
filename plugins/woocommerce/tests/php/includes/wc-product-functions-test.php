@@ -1063,6 +1063,67 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Min/max price lookup regeneration sets prices for priced products, 0 for free products, and NULL for unpriced products.
+	 */
+	public function test_min_max_price_lookup_regeneration(): void {
+		global $wpdb;
+
+		// 1. Priced product.
+		$priced_product = WC_Helper_Product::create_simple_product();
+		$priced_product->set_regular_price( 25 );
+		$priced_product->save();
+
+		// 2. Free product ($0).
+		$free_product = WC_Helper_Product::create_simple_product();
+		$free_product->set_regular_price( 0 );
+		$free_product->save();
+
+		// 3. Unpriced product (empty regular price).
+		$unpriced_product = WC_Helper_Product::create_simple_product();
+		delete_post_meta( $unpriced_product->get_id(), '_price' );
+		delete_post_meta( $unpriced_product->get_id(), '_regular_price' );
+
+		// Seed the unpriced product with stale 0.0000 in lookup table to verify repair.
+		$wpdb->update(
+			$wpdb->wc_product_meta_lookup,
+			array(
+				'min_price' => 0.0000,
+				'max_price' => 0.0000,
+			),
+			array( 'product_id' => $unpriced_product->get_id() )
+		);
+
+		wc_update_product_lookup_tables_column( 'min_max_price' );
+		$this->assertSame( '', $wpdb->last_error, 'Regeneration must complete without a database error.' );
+
+		$priced_row = $wpdb->get_row(
+			$wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $priced_product->get_id() ),
+			ARRAY_A
+		);
+		$this->assertSame( 25.0, (float) $priced_row['min_price'] );
+		$this->assertSame( 25.0, (float) $priced_row['max_price'] );
+
+		$free_row = $wpdb->get_row(
+			$wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $free_product->get_id() ),
+			ARRAY_A
+		);
+		$this->assertSame( 0.0, (float) $free_row['min_price'] );
+		$this->assertSame( 0.0, (float) $free_row['max_price'] );
+
+		$unpriced_row = $wpdb->get_row(
+			$wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $unpriced_product->get_id() ),
+			ARRAY_A
+		);
+		$this->assertNull( $unpriced_row['min_price'], 'Unpriced product min_price should be NULL after regeneration.' );
+		$this->assertNull( $unpriced_row['max_price'], 'Unpriced product max_price should be NULL after regeneration.' );
+
+		// Cleanup.
+		$priced_product->delete( true );
+		$free_product->delete( true );
+		$unpriced_product->delete( true );
+	}
+
+	/**
 	 * Read stock lookup values for a named product fixture.
 	 *
 	 * @param array<string, int> $fixtures Named product IDs.
