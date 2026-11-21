@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add Waiting and Days waiting columns to the Analytics Stock report when Back in stock notifications is enabled.
