@@ -207,7 +207,7 @@ class WC_Email extends WC_Settings_API {
 		"/\r/",                                                  // Non-legal carriage return.
 		'/&(nbsp|#0*160);/i',                                    // Non-breaking space.
 		'/&(quot|rdquo|ldquo|#0*8220|#0*8221|#0*147|#0*148);/i', // Double quotes.
-		'/&(apos|rsquo|lsquo|#0*8216|#0*8217);/i',               // Single quotes.
+		'/&(apos|rsquo|lsquo|#0*39|#x0*27|#0*8216|#0*8217);/i',  // Single quotes.
 		'/&gt;/i',                                               // Greater-than.
 		'/&lt;/i',                                               // Less-than.
 		'/&#0*38;/i',                                            // Ampersand.
