@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Orders;
 
+use Automattic\WooCommerce\Internal\OrderReviews\Endpoint;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalEndpoint;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
@@ -26,16 +28,72 @@ class TexturizeExclusions implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Add `address` to the tags wptexturize() skips on the order received and view order pages.
+	 * Skip texturizing address elements on block-theme requests that show a customer email.
 	 *
-	 * Block themes texturize the whole template HTML, including the customer details.
+	 * Block themes texturize the whole template HTML, including customer details.
 	 *
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
 	public function skip_address_texturize_on_order_pages(): void {
-		if ( wp_is_block_theme() && ( is_order_received_page() || is_view_order_page() ) ) {
+		if ( $this->should_skip_address_texturize() ) {
 			add_filter( 'no_texturize_tags', array( $this, 'add_address_tag' ) );
 		}
+	}
+
+	/**
+	 * Whether this block-theme request shows a customer email inside an address element.
+	 *
+	 * @return bool
+	 */
+	private function should_skip_address_texturize(): bool {
+		if ( ! wp_is_block_theme() ) {
+			return false;
+		}
+
+		if ( is_order_received_page() || is_view_order_page() || $this->is_review_order_page() ) {
+			return true;
+		}
+
+		if ( is_wc_endpoint_url( OrderWithdrawalEndpoint::ENDPOINT_KEY ) ) {
+			return true;
+		}
+
+		return $this->queued_notices_contain_address_markup();
+	}
+
+	/**
+	 * Whether this request is the Review Order page for an order.
+	 *
+	 * A review-order query var on any other page does not count, matching Endpoint::render_shortcode().
+	 *
+	 * @return bool
+	 */
+	private function is_review_order_page(): bool {
+		global $wp;
+
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		return $page_id > 0 && is_page( $page_id ) && isset( $wp->query_vars[ Endpoint::QUERY_VAR ] );
+	}
+
+	/**
+	 * Whether a queued notice contains an address element.
+	 *
+	 * Guest verification resends redirect to the product or shop page after wc_add_notice(), so those requests are not a fixed endpoint.
+	 *
+	 * @return bool
+	 */
+	private function queued_notices_contain_address_markup(): bool {
+		foreach ( wc_get_notices() as $group ) {
+			foreach ( (array) $group as $notice ) {
+				$message = $notice['notice'] ?? $notice;
+				if ( is_string( $message ) && false !== strpos( $message, '<address' ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**

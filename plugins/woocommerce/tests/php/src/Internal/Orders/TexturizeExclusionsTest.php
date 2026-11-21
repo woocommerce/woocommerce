@@ -3,8 +3,22 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
+use Automattic\WooCommerce\Internal\OrderReviews\Endpoint;
 use Automattic\WooCommerce\Internal\Orders\TexturizeExclusions;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalEndpoint;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormState;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormView;
+use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountView;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
+use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Helper_Order;
+use WC_Helper_Product;
 use WC_Order;
 use WC_Unit_Test_Case;
 
@@ -14,6 +28,8 @@ use WC_Unit_Test_Case;
  * @covers \Automattic\WooCommerce\Internal\Orders\TexturizeExclusions
  */
 class TexturizeExclusionsTest extends WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The System Under Test.
@@ -44,6 +60,7 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		switch_theme( $this->original_theme );
+		wp_set_current_user( 0 );
 		parent::tearDown();
 	}
 
@@ -98,6 +115,295 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox On the Review Order and order withdrawal pages, address content is not texturized, while other text is.
+	 *
+	 * @testWith ["review-order"]
+	 *           ["order-withdrawal"]
+	 *
+	 * @param string $page Email page under test.
+	 */
+	public function test_skips_address_texturize_on_block_theme_email_pages( string $page ): void {
+		$this->open_block_theme_email_page( $page );
+
+		$this->sut->skip_address_texturize_on_order_pages();
+		$text = $this->texturize_to_text( "<address>o'neil--shop@48x17.com</address><p>3x4 -- done</p>" );
+
+		$this->assertStringContainsString( "o'neil--shop@48x17.com", $text, 'Address content should not be texturized.' );
+		$this->assertStringContainsString( '3×4 — done', $text, 'Text outside the address should still be texturized.' );
+	}
+
+	/**
+	 * @testdox A review-order query var on another page still texturizes address content.
+	 */
+	public function test_texturizes_address_when_review_order_query_var_is_on_another_page(): void {
+		global $wp;
+
+		$other_page_id  = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		$review_page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_review_order_page_id', $review_page_id );
+		$this->go_to( get_permalink( $other_page_id ) );
+		$wp->query_vars[ Endpoint::QUERY_VAR ] = '15';
+
+		$this->sut->skip_address_texturize_on_order_pages();
+
+		$this->assertStringNotContainsString(
+			"o'neil--shop@48x17.com",
+			$this->texturize_to_text( "<address>o'neil--shop@48x17.com</address>" ),
+			'Address content should be texturized.'
+		);
+	}
+
+	/**
+	 * @testdox A queued notice that contains an address element skips texturizing that element, and other text still changes.
+	 */
+	public function test_skips_address_texturize_when_a_queued_notice_contains_address_markup(): void {
+		$this->go_to( get_permalink( self::factory()->post->create( array( 'post_type' => 'page' ) ) ) );
+		wc_add_notice( "<address>o'neil--shop@48x17.com</address>", 'success' );
+
+		$this->sut->skip_address_texturize_on_order_pages();
+		$text = $this->texturize_to_text( "<address>o'neil--shop@48x17.com</address><p>3x4 -- done</p>" );
+
+		$this->assertStringContainsString( "o'neil--shop@48x17.com", $text, 'Address content should not be texturized.' );
+		$this->assertStringContainsString( '3×4 — done', $text, 'Text outside the address should still be texturized.' );
+	}
+
+	/**
+	 * @testdox A queued notice without an address element still texturizes address content.
+	 */
+	public function test_texturizes_address_when_queued_notices_have_no_address_markup(): void {
+		$this->go_to( get_permalink( self::factory()->post->create( array( 'post_type' => 'page' ) ) ) );
+		wc_add_notice( 'Please confirm your address.', 'success' );
+
+		$this->sut->skip_address_texturize_on_order_pages();
+
+		$this->assertStringNotContainsString(
+			"o'neil--shop@48x17.com",
+			$this->texturize_to_text( "<address>o'neil--shop@48x17.com</address>" ),
+			'Address content should be texturized.'
+		);
+	}
+
+	/**
+	 * @testdox Address content is texturized when the WooCommerce session is missing.
+	 */
+	public function test_texturizes_address_when_the_session_is_missing(): void {
+		$this->go_to( get_permalink( self::factory()->post->create( array( 'post_type' => 'page' ) ) ) );
+		$session      = WC()->session;
+		WC()->session = null;
+
+		try {
+			$this->sut->skip_address_texturize_on_order_pages();
+			$this->assertStringNotContainsString(
+				"o'neil--shop@48x17.com",
+				$this->texturize_to_text( "<address>o'neil--shop@48x17.com</address>" ),
+				'Address content should be texturized.'
+			);
+		} finally {
+			WC()->session = $session;
+		}
+	}
+
+	/**
+	 * @testdox Both Review Order meta lines keep the billing email as entered, and a neighboring paragraph is still texturized.
+	 */
+	public function test_review_order_meta_line_survives_texturize_on_block_themes(): void {
+		$this->open_block_theme_email_page( 'review-order' );
+		$this->sut->skip_address_texturize_on_order_pages();
+
+		// The meta line shows the email only to the signed-in customer who owns the order.
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_billing_email( "o'neil--shop@48x17.com" );
+		$order->set_billing_first_name( 'Pat' );
+		$order->set_billing_last_name( 'Lee' );
+		$order->save();
+
+		foreach ( $order->get_items() as $item ) {
+			if ( $item instanceof \WC_Order_Item_Product ) {
+				wp_update_post(
+					array(
+						'ID'             => $item->get_product_id(),
+						'comment_status' => 'open',
+					)
+				);
+			}
+		}
+
+		$form  = wc_get_template_html( 'order/customer-review-order.php', array( 'order' => $order ) );
+		$empty = wc_get_template_html(
+			'order/customer-review-order-empty.php',
+			array(
+				'order'          => $order,
+				'reviewed_count' => 1,
+			)
+		);
+
+		$this->assertStringContainsString( '<address class="woocommerce-breadcrumb woocommerce-review-order__meta">', $form, 'The form meta line should be an address element.' );
+		$this->assertStringContainsString( '<address class="woocommerce-breadcrumb woocommerce-review-order__meta">', $empty, 'The empty-state meta line should be an address element.' );
+		$this->assertStringContainsString( 'woocommerce-review-order__form', $form, 'The form template should render the review form.' );
+		$this->assert_literal_email( wp_kses_post( $form ) . '<p>3x4 -- done</p>' );
+		$this->assert_literal_email( wp_kses_post( $empty ) . '<p>3x4 -- done</p>' );
+	}
+
+	/**
+	 * @testdox The My Account verification notice keeps the email and the quotes around it, and neighboring text is still texturized.
+	 */
+	public function test_account_verification_notice_survives_texturize_on_block_themes(): void {
+		$notice = $this->resend_as_customer();
+
+		$this->sut->skip_address_texturize_on_order_pages();
+		$html = wc_kses_notice( $notice ) . '<p>3x4 -- done</p>';
+		$this->assert_literal_email( $html );
+		$this->assertStringContainsString( 'to "o\'neil--shop@48x17.com"', $this->texturize_to_text( $html ), 'The quote after the email should stay straight.' );
+	}
+
+	/**
+	 * @testdox The guest verification notice keeps the email on the product page it redirects to, and neighboring text is still texturized.
+	 */
+	public function test_guest_verification_notice_survives_texturize_on_block_themes(): void {
+		$notice = $this->resend_as_guest();
+
+		$this->sut->skip_address_texturize_on_order_pages();
+		$this->assertStringContainsString( '<address>', $notice, 'The guest notice should wrap the sentence in an address element.' );
+		$this->assert_literal_email( wc_kses_notice( $notice ) . '<p>3x4 -- done</p>' );
+	}
+
+	/**
+	 * @testdox Classic themes get verification notices without an address element, since they do not texturize notices.
+	 */
+	public function test_classic_themes_get_verification_notices_without_address(): void {
+		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test requires a classic theme.' );
+
+		$this->assertStringNotContainsString( '<address', $this->resend_as_customer(), 'The account notice should not use an address element.' );
+		wc_clear_notices();
+		$this->assertStringNotContainsString( '<address', $this->resend_as_guest(), 'The guest notice should not use an address element.' );
+	}
+
+	/**
+	 * @testdox Classic themes get the withdrawal and Review Order templates without an address element.
+	 */
+	public function test_classic_themes_get_templates_without_address(): void {
+		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test requires a classic theme.' );
+
+		$email = "o'neil--shop@48x17.com";
+		$view  = new OrderWithdrawalFormView();
+		$data  = $this->withdrawal_form_data( $email, 'None' );
+		$order = WC_Helper_Order::create_order();
+
+		$templates = array(
+			'withdrawal confirmation' => wc_get_template_html(
+				'myaccount/form-order-withdrawal.php',
+				$view->get_template_args( new OrderWithdrawalFormState( 'confirmation', $data, array() ), 'https://example.test/withdraw/', 'https://example.test/shop/' )
+			),
+			'withdrawal review'       => wc_get_template_html(
+				'myaccount/form-order-withdrawal.php',
+				$view->get_template_args( new OrderWithdrawalFormState( 'review', $data, array() ), 'https://example.test/withdraw/', 'https://example.test/shop/' )
+			),
+			'review order'            => wc_get_template_html( 'order/customer-review-order.php', array( 'order' => $order ) ),
+			'review order empty'      => wc_get_template_html(
+				'order/customer-review-order-empty.php',
+				array(
+					'order'          => $order,
+					'reviewed_count' => 1,
+				)
+			),
+		);
+
+		foreach ( $templates as $name => $html ) {
+			$this->assertStringNotContainsString( '<address', $html, "The {$name} template should not use an address element." );
+		}
+		// Each withdrawal screen has one note without the email, so the email note makes two paragraphs.
+		$note = '<p class="woocommerce-order-withdrawal-content__note">';
+		$this->assertSame( 2, substr_count( $templates['withdrawal confirmation'], $note ), 'The confirmation email note should stay a paragraph.' );
+		$this->assertSame( 2, substr_count( $templates['withdrawal review'], $note ), 'The review email note should stay a paragraph.' );
+		$this->assertStringContainsString( esc_html( $email ), $templates['withdrawal review'], 'The review rows should still show the email.' );
+
+		$meta = '<p class="woocommerce-breadcrumb woocommerce-review-order__meta">';
+		$this->assertStringContainsString( $meta, $templates['review order'], 'The form meta line should stay a paragraph.' );
+		$this->assertStringContainsString( $meta, $templates['review order empty'], 'The empty-state meta line should stay a paragraph.' );
+	}
+
+	/**
+	 * @testdox Withdrawal notes and the email review row keep the email as entered, and another row is still texturized.
+	 */
+	public function test_withdrawal_email_survives_texturize_on_block_themes(): void {
+		$this->open_block_theme_email_page( 'order-withdrawal' );
+		$this->sut->skip_address_texturize_on_order_pages();
+
+		$email = "o'neil--shop@48x17.com";
+		$view  = new OrderWithdrawalFormView();
+		$data  = $this->withdrawal_form_data( $email, '3x4 -- done' );
+
+		$confirmation = wc_get_template_html(
+			'myaccount/form-order-withdrawal.php',
+			$view->get_template_args( new OrderWithdrawalFormState( 'confirmation', $data, array() ), 'https://example.test/withdraw/', 'https://example.test/shop/' )
+		);
+		$review       = wc_get_template_html(
+			'myaccount/form-order-withdrawal.php',
+			$view->get_template_args( new OrderWithdrawalFormState( 'review', $data, array() ), 'https://example.test/withdraw/', 'https://example.test/shop/' )
+		);
+
+		$this->assertStringContainsString( '<address class="woocommerce-order-withdrawal-content__note">', $confirmation, 'The note that contains the email should be an address element.' );
+		$this->assertStringContainsString( '<p class="woocommerce-order-withdrawal-content__note">', $confirmation, 'The note without an email should stay a paragraph.' );
+		$this->assert_literal_email( wp_kses_post( $confirmation ) . '<p>3x4 -- done</p>' );
+
+		$this->assertStringContainsString( '<address>' . esc_html( $email ) . '</address>', $review, 'The email review row should wrap the address element.' );
+		$this->assert_literal_email( wp_kses_post( $review ) );
+	}
+
+	/**
+	 * @testdox A withdrawal review row with no key keeps the escaped text path and is still texturized.
+	 */
+	public function test_withdrawal_review_row_without_a_key_is_texturized(): void {
+		$this->open_block_theme_email_page( 'order-withdrawal' );
+		$this->sut->skip_address_texturize_on_order_pages();
+
+		$html = wc_get_template_html(
+			'myaccount/form-order-withdrawal.php',
+			array(
+				'screen'      => 'review',
+				'data'        => array(
+					'email' => "o'neil--shop@48x17.com",
+				),
+				'review_rows' => array(
+					array(
+						'label' => 'Details',
+						'value' => '3x4 -- done',
+					),
+				),
+			)
+		);
+
+		$text = $this->texturize_to_text( wp_kses_post( $html ) );
+
+		$this->assertStringContainsString( "o'neil--shop@48x17.com", $text, 'The email note should not be texturized.' );
+		$this->assertStringContainsString( '3×4 — done', $text, 'A review row without a key should still be texturized.' );
+		$this->assertStringNotContainsString( '3x4 -- done', $text, 'A review row without a key should still be texturized.' );
+	}
+
+	/**
+	 * @testdox Classic themes still texturize address content when a notice contains an address element.
+	 */
+	public function test_texturizes_address_on_classic_themes_when_a_notice_contains_address_markup(): void {
+		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test requires a classic theme.' );
+		$this->go_to( get_permalink( self::factory()->post->create( array( 'post_type' => 'page' ) ) ) );
+		wc_add_notice( '<address>kept</address>', 'success' );
+
+		$this->sut->skip_address_texturize_on_order_pages();
+
+		$this->assertStringNotContainsString(
+			"o'neil--shop@48x17.com",
+			$this->texturize_to_text( "<address>o'neil--shop@48x17.com</address>" ),
+			'Address content should be texturized.'
+		);
+	}
+
+	/**
 	 * @testdox On the view order page, the customer details template shows the billing email and address as entered, after kses and wptexturize().
 	 */
 	public function test_customer_details_template_survives_texturize_on_view_order_page(): void {
@@ -112,6 +418,217 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( "o'neil--shop@48x17.com", $text, 'The billing email should not be texturized.' );
 		$this->assertStringContainsString( '12--14 Main St', $text, 'The billing address should not be texturized.' );
+	}
+
+	/**
+	 * Resend a pending verification as the signed-in customer and return the queued success notice.
+	 *
+	 * @return string
+	 */
+	private function resend_as_customer(): string {
+		$this->enable_stock_notifications_feature();
+		$capture = static function () {
+			throw new \RuntimeException( 'Redirected.' );
+		};
+		add_filter( 'wp_redirect', $capture );
+
+		try {
+			$this->open_block_theme_email_page( 'stock-notifications' );
+
+			$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+			wp_set_current_user( $user_id );
+
+			$product      = WC_Helper_Product::create_simple_product();
+			$notification = new Notification();
+			$notification->set_product_id( $product->get_id() );
+			$notification->set_user_id( $user_id );
+			$notification->set_user_email( "o'neil--shop@48x17.com" );
+			$notification->set_status( NotificationStatus::PENDING );
+			$notification->save();
+
+			$service = $this->createMock( NotificationManagementService::class );
+			$service->method( 'resend_verification_email' )->willReturn( true );
+
+			$endpoint = new MyAccountEndpoint();
+			$endpoint->init( $service, new MyAccountView() );
+
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			$_GET = array(
+				MyAccountEndpoint::ACTION_FIELD => MyAccountEndpoint::ACTION_RESEND,
+				'notification_id'               => (string) $notification->get_id(),
+				'_wpnonce'                      => wp_create_nonce( MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_RESEND, $notification->get_id() ) ),
+			);
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+			try {
+				$endpoint->maybe_handle_action();
+				$this->fail( 'Expected the resend action to redirect.' );
+			} catch ( \RuntimeException $exception ) {
+				$this->assertSame( 'Redirected.', $exception->getMessage() );
+			}
+
+			$notices = wc_get_notices( 'success' );
+			$this->assertCount( 1, $notices, 'The resend should queue one success notice.' );
+
+			return $notices[0]['notice'];
+		} finally {
+			remove_filter( 'wp_redirect', $capture );
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$_GET = array();
+			$this->restore_stock_notifications_feature_option();
+		}
+	}
+
+	/**
+	 * Resend a pending verification as a guest and return the queued success notice.
+	 *
+	 * @return string
+	 */
+	private function resend_as_guest(): string {
+		wp_set_current_user( 0 );
+		$this->enable_stock_notifications_feature();
+		$capture = static function () {
+			throw new \RuntimeException( 'Redirected.' );
+		};
+		add_filter( 'wp_redirect', $capture );
+
+		try {
+			$this->go_to( get_permalink( self::factory()->post->create( array( 'post_type' => 'page' ) ) ) );
+
+			$product      = WC_Helper_Product::create_simple_product();
+			$notification = new Notification();
+			$notification->set_product_id( $product->get_id() );
+			$notification->set_user_email( "o'neil--shop@48x17.com" );
+			$notification->set_status( NotificationStatus::PENDING );
+			$notification->save();
+
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			$_GET[ NotificationManagementService::RESEND_QUERY_ARG ] = (string) $notification->get_id();
+			$_GET['_wpnonce']                                        = wp_create_nonce( NotificationManagementService::RESEND_NONCE_ACTION . '_' . $notification->get_id() );
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+			$email_manager = $this->createMock( EmailManager::class );
+			$email_manager->expects( $this->once() )->method( 'send_verify_email' );
+			$service = new NotificationManagementService();
+			$service->init( $email_manager );
+
+			try {
+				$service->maybe_process_resend_request();
+				$this->fail( 'Expected the guest resend to redirect.' );
+			} catch ( \RuntimeException $exception ) {
+				$this->assertSame( 'Redirected.', $exception->getMessage() );
+			}
+
+			$notices = wc_get_notices( 'success' );
+			$this->assertCount( 1, $notices, 'The guest resend should queue one success notice.' );
+
+			return $notices[0]['notice'];
+		} finally {
+			remove_filter( 'wp_redirect', $capture );
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			unset( $_GET[ NotificationManagementService::RESEND_QUERY_ARG ], $_GET['_wpnonce'] );
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+			$this->restore_stock_notifications_feature_option();
+		}
+	}
+
+	/**
+	 * Form data for a withdrawal screen.
+	 *
+	 * @param string $email   Customer email.
+	 * @param string $details Additional details.
+	 * @return array<string,string>
+	 */
+	private function withdrawal_form_data( string $email, string $details ): array {
+		return array(
+			OrderWithdrawalFormProcessor::FIELD_FIRST_NAME => 'Pat',
+			OrderWithdrawalFormProcessor::FIELD_LAST_NAME  => 'Lee',
+			OrderWithdrawalFormProcessor::FIELD_EMAIL      => $email,
+			OrderWithdrawalFormProcessor::FIELD_EMAIL_CONFIRMATION => $email,
+			OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '1001',
+			OrderWithdrawalFormProcessor::FIELD_WITHDRAWAL_TYPE => OrderWithdrawalFormProcessor::WITHDRAWAL_TYPE_SPECIFIC,
+			OrderWithdrawalFormProcessor::FIELD_ADDITIONAL_DETAILS => $details,
+		);
+	}
+
+	/**
+	 * Assert an email inside the HTML stays literal and a neighboring 3x4 sentence is texturized.
+	 *
+	 * @param string $html HTML that already includes the neighboring sentence.
+	 */
+	private function assert_literal_email( string $html ): void {
+		$text = $this->texturize_to_text( $html );
+
+		$this->assertStringContainsString( "o'neil--shop@48x17.com", $text, 'The email should not be texturized.' );
+		$this->assertStringNotContainsString( '48×17', $text, 'The email should not gain a multiplication sign.' );
+		$this->assertStringContainsString( '3×4 — done', $text, 'Neighboring text should still be texturized.' );
+		$this->assertStringNotContainsString( '3x4 -- done', $text, 'Neighboring text should still be texturized.' );
+	}
+
+	/**
+	 * Open a block-theme page that shows a customer email.
+	 *
+	 * @param string $page review-order, order-withdrawal, or stock-notifications.
+	 */
+	private function open_block_theme_email_page( string $page ): void {
+		if ( 'review-order' === $page ) {
+			$this->go_to_review_order_page();
+			return;
+		}
+
+		if ( 'order-withdrawal' === $page ) {
+			update_option( 'woocommerce_feature_order_withdrawal_enabled', 'yes' );
+			wc_get_container()->get( OrderWithdrawalController::class )->register_feature_hooks();
+			$this->go_to_account_endpoint( OrderWithdrawalEndpoint::ENDPOINT_KEY );
+			return;
+		}
+
+		if ( 'stock-notifications' === $page ) {
+			new MyAccountEndpoint();
+			$this->go_to_account_endpoint( MyAccountEndpoint::ENDPOINT );
+			return;
+		}
+
+		$this->fail( 'Unknown email page.' );
+	}
+
+	/**
+	 * Load the Review Order page with its order query var set.
+	 */
+	private function go_to_review_order_page(): void {
+		global $wp;
+
+		$page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_review_order_page_id', $page_id );
+		$this->go_to( add_query_arg( Endpoint::QUERY_VAR, '15', get_permalink( $page_id ) ) );
+
+		// go_to() only keeps query vars WordPress already lists. The endpoint guard reads this one.
+		if ( ! isset( $wp->query_vars[ Endpoint::QUERY_VAR ] ) ) {
+			$wp->query_vars[ Endpoint::QUERY_VAR ] = '15';
+		}
+	}
+
+	/**
+	 * Load a My Account endpoint page.
+	 *
+	 * is_wc_endpoint_url() reads the slug query var. Rewrite rules set that on a pretty-permalink request. This helper sets it when the query-argument request did not.
+	 *
+	 * @param string $key Endpoint key passed to is_wc_endpoint_url().
+	 */
+	private function go_to_account_endpoint( string $key ): void {
+		global $wp;
+
+		$page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_myaccount_page_id', $page_id );
+
+		$query_vars = WC()->query->get_query_vars();
+		$slug       = isset( $query_vars[ $key ] ) && is_string( $query_vars[ $key ] ) && '' !== $query_vars[ $key ] ? $query_vars[ $key ] : $key;
+
+		$this->go_to( add_query_arg( $slug, '', get_permalink( $page_id ) ) );
+
+		if ( ! isset( $wp->query_vars[ $slug ] ) ) {
+			$wp->query_vars[ $slug ] = '';
+		}
 	}
 
 	/**
