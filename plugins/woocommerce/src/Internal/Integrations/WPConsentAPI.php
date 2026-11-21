@@ -60,17 +60,10 @@ class WPConsentAPI {
 		);
 
 		/**
-		 * Modify the "allowTracking" flag consent if the user has consented to marketing.
-		 *
-		 * Wp-consent-api will initialize the modules on "init" with priority 9,
-		 * So this code needs to be run after that.
+		 * Don't put the visitor's consent in the "allowTracking" flag: full-page caches serve the same HTML to
+		 * every visitor. wp-consent-api-integration.js checks consent in the browser and enables tracking.
 		 */
-		add_filter(
-			'wc_order_attribution_allow_tracking',
-			function() {
-				return function_exists( 'wp_has_consent' ) && wp_has_consent( self::$consent_category );
-			}
-		);
+		add_filter( 'wc_order_attribution_allow_tracking', '__return_false' );
 	}
 
 	/**
@@ -99,10 +92,11 @@ class WPConsentAPI {
 			true
 		);
 
-		// Add data for the script above. `wp_enqueue_script` API does not allow data attributes,
+		// Add data for the scripts. `wp_enqueue_script` API does not allow data attributes,
 		// so we need a separate script tag and pollute the global scope.
+		// Print it before order-attribution.js, so its page-load init knows the consent integration decides.
 		wp_add_inline_script(
-			'wp-consent-api-integration',
+			'wc-order-attribution',
 			sprintf(
 				'window.wc_order_attribution.params.consentCategory = %s;',
 				wp_json_encode( self::$consent_category, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )

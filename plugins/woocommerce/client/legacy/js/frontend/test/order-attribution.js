@@ -149,3 +149,52 @@ describe( 'Order attribution sourcebuster.js init', () => {
 		);
 	} );
 } );
+
+describe( 'Order attribution tracking on page load', () => {
+	let cookieSetter;
+
+	const loadWithParams = ( params ) => {
+		window.sbjs = { init: jest.fn(), get: {} };
+		window.wc_order_attribution = {
+			fields: {
+				source_type: 'current.typ',
+			},
+			params: Object.assign( { prefix: 'wc_order_attribution_' }, params ),
+		};
+		// The first suite already defined the custom element.
+		jest.spyOn( window.customElements, 'define' ).mockImplementation( () => {} );
+		cookieSetter = jest.spyOn( document, 'cookie', 'set' );
+		jest.isolateModules( () => require( '../order-attribution' ) );
+	};
+
+	afterEach( () => {
+		delete window.wc_order_attribution;
+		delete window.sbjs;
+		jest.restoreAllMocks();
+	} );
+
+	test( 'keeps the cookies and waits when the WP Consent API integration decides', () => {
+		// The page may come from a cache, so `allowTracking: false` may belong to another visitor.
+		loadWithParams( { allowTracking: false, consentCategory: 'marketing' } );
+
+		expect( cookieSetter ).not.toHaveBeenCalledWith(
+			expect.stringContaining( 'max-age=-999' )
+		);
+		expect( window.sbjs.init ).not.toHaveBeenCalled();
+	} );
+
+	test( 'removes the cookies when tracking is disabled without a consent integration', () => {
+		loadWithParams( { allowTracking: false } );
+
+		expect( cookieSetter ).toHaveBeenCalledWith(
+			expect.stringMatching( /^sbjs_current=;.*max-age=-999/ )
+		);
+		expect( window.sbjs.init ).not.toHaveBeenCalled();
+	} );
+
+	test( 'starts tracking when tracking is allowed', () => {
+		loadWithParams( { allowTracking: true, consentCategory: 'marketing' } );
+
+		expect( window.sbjs.init ).toHaveBeenCalled();
+	} );
+} );

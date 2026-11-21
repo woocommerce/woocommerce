@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the order attribution source on cached pages when WP Consent API is active, and set no tracking cookies before consent.
