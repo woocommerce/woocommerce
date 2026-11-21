@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Let every cart and checkout validation path remove an auto-apply coupon the customer can no longer keep, instead of reporting it removed while it stays applied.
