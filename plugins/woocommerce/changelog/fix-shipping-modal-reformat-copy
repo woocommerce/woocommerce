@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a wrong shipping method cost when its settings are re-opened before a page reload.
