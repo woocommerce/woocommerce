@@ -195,17 +195,22 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Archive counts use the original request rather than generated filter aliases.
+	 * @testdox Archive counts retain query-hook changes without inheriting generated filter aliases.
 	 *
-	 * @testWith [true, true]
-	 *           [true, false]
-	 *           [false, true]
-	 *           [false, false]
+	 * @testWith [true, true, false]
+	 *           [true, false, false]
+	 *           [false, true, false]
+	 *           [false, false, false]
+	 *           [true, true, true]
+	 *           [true, false, true]
+	 *           [false, true, true]
+	 *           [false, false, true]
 	 *
 	 * @param bool $use_lookup Whether to use the attribute lookup table.
 	 * @param bool $use_attribute_var Whether the archive uses its attribute query variable.
+	 * @param bool $change_archive Whether a query hook changes the archive.
 	 */
-	public function test_or_archive_counts_ignore_generated_filter_aliases( bool $use_lookup, bool $use_attribute_var ): void {
+	public function test_or_archive_counts_ignore_generated_filter_aliases( bool $use_lookup, bool $use_attribute_var, bool $change_archive ): void {
 		global $wp_the_query;
 
 		$this->set_use_lookup_table( $use_lookup );
@@ -246,9 +251,20 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			);
 		}
 		\WC_Query::reset_chosen_attributes();
-		$wp_the_query->query( array_merge( array( 'post_type' => 'product' ), $query ) );
+		$change_archive_term = static function ( $query ) use ( $use_attribute_var ) {
+			$query->set( $use_attribute_var ? 'pa_facetmodel' : 'term', 'beta' );
+		};
+		if ( $change_archive ) {
+			add_action( 'woocommerce_product_query', $change_archive_term );
+		}
+		try {
+			$wp_the_query->query( array_merge( array( 'post_type' => 'product' ), $query ) );
+		} finally {
+			remove_action( 'woocommerce_product_query', $change_archive_term );
+		}
+		$this->assertSame( $change_archive || $use_attribute_var ? 1 : 2, (int) $wp_the_query->found_posts );
 
-		$terms  = wp_list_pluck(
+		$terms = wp_list_pluck(
 			get_terms(
 				array(
 					'taxonomy'   => 'pa_facetmodel',
@@ -258,12 +274,20 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			'term_id',
 			'name'
 		);
-		$sut    = wc_get_container()->get( Filterer::class );
+		$sut   = wc_get_container()->get( Filterer::class );
+		// Secondary queries during rendering must not replace the main archive snapshot.
+		new \WP_Query(
+			array(
+				'post_type' => 'product',
+				'taxonomy'  => 'pa_facetmodel',
+				'term'      => 'alpha',
+			)
+		);
 		$counts = $sut->get_filtered_term_product_counts( array_values( $terms ), 'pa_facetmodel', 'or' );
-		$this->assertSame( 2, $counts[ $terms['Alpha'] ], 'The archive must not inherit the selected model constraint.' );
-		$this->assertSame( 1, $counts[ $terms['Other'] ], 'An unselected model in the archive remains an alternative.' );
-		$this->assertSame( 1, $counts[ $terms['Shared'] ], 'Shared must only count products in Alpha.' );
-		$this->assertSame( 0, $counts[ $terms['Beta'] ] ?? 0, 'Another selected taxonomy must not disable archive scoping.' );
+		$this->assertSame( $change_archive ? 0 : 2, $counts[ $terms['Alpha'] ] ?? 0, 'The archive must not inherit the selected model constraint.' );
+		$this->assertSame( $change_archive ? 0 : 1, $counts[ $terms['Other'] ] ?? 0, 'An unselected model in the archive remains an alternative.' );
+		$this->assertSame( 1, $counts[ $terms['Shared'] ], 'Shared must only count products in the effective archive.' );
+		$this->assertSame( $change_archive ? 1 : 0, $counts[ $terms['Beta'] ] ?? 0, 'Another selected taxonomy must not disable archive scoping.' );
 	}
 
 	/**

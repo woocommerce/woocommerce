@@ -28,6 +28,13 @@ class Filterer {
 	private $lookup_table_name;
 
 	/**
+	 * Main-query inputs captured before WordPress generates taxonomy aliases.
+	 *
+	 * @var array|null
+	 */
+	private $archive_query_vars;
+
+	/**
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @internal
@@ -36,6 +43,22 @@ class Filterer {
 	final public function init( LookupDataStore $data_store ) {
 		$this->data_store        = $data_store;
 		$this->lookup_table_name = $data_store->get_lookup_table_name();
+		add_action( 'parse_tax_query', array( $this, 'handle_parse_tax_query' ) );
+	}
+
+	/**
+	 * Capture effective inputs after query hooks, before compatibility aliases are added.
+	 *
+	 * @internal
+	 * @param \WP_Query $query Query whose taxonomy variables were parsed.
+	 */
+	public function handle_parse_tax_query( $query ): void {
+		if ( $query->is_main_query() ) {
+			// WordPress parses again after pre_get_posts, including WooCommerce query hooks.
+			// Each parse replaces the snapshot; secondary queries must not overwrite it.
+			$this->archive_query_vars = $query->query_vars;
+			unset( $this->archive_query_vars['tax_query'] );
+		}
 	}
 
 	/**
@@ -173,12 +196,11 @@ class Filterer {
 			// stay: links from a Model=Alpha archive still require products to have Alpha.
 			$main_query = \WC_Query::get_main_query();
 			if ( $main_query && $main_query->is_tax() ) {
-				// Use the original request: query_vars may contain taxonomy/term aliases generated
-				// from a selected filter. Neither is_tax( $taxonomy ) nor get_queried_object()
-				// can identify the archive reliably after those filter clauses have been added.
+				// The snapshot retains archive changes made by query hooks, but excludes
+				// taxonomy/term aliases WordPress later generates from selected filters.
 				// parse_tax_query() builds clauses only; it does not fetch products.
 				$archive_query      = new \WP_Query();
-				$archive_query_vars = $archive_query->fill_query_vars( $main_query->query );
+				$archive_query_vars = $archive_query->fill_query_vars( $this->archive_query_vars ?? $main_query->query );
 				unset( $archive_query_vars['tax_query'] );
 				$archive_query->parse_tax_query( $archive_query_vars );
 				foreach ( $archive_query->tax_query->queries ?? array() as $archive_clause ) {
