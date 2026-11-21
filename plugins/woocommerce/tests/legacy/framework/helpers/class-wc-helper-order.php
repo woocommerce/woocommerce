@@ -151,4 +151,32 @@ class WC_Helper_Order {
 
 		return $order;
 	}
+
+	/**
+	 * Create an unpaid order for one product, without shipping or address fixtures.
+	 *
+	 * @since 11.4.0
+	 * @param WC_Product $product Product to order.
+	 * @param int        $quantity Item quantity.
+	 * @return WC_Order Order.
+	 */
+	public static function create_unpaid_order( WC_Product $product, int $quantity = 1 ): WC_Order {
+		$order = wc_create_order();
+		$order->add_product( $product, $quantity );
+		$order->set_status( OrderStatus::PENDING );
+		$order->calculate_totals();
+		$order->save();
+		return $order;
+	}
+
+	/**
+	 * Expire only the given order's stock hold.
+	 *
+	 * @since 11.4.0
+	 * @param WC_Order $order Order whose hold expires.
+	 */
+	public static function expire_stock_hold( WC_Order $order ): void {
+		global $wpdb;
+		$wpdb->update( $wpdb->wc_reserved_stock, array( 'expires' => '2000-01-01 00:00:00' ), array( 'order_id' => $order->get_id() ) );
+	}
 }
