@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Tie the back-in-stock "Notify me" prompt to the variation form it appears under, so a product page with more than one add-to-cart form no longer shows, hides, or signs shoppers up for a variation picked in the other form.
