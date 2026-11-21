@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<ruleset name="Model checking POC">
+	<exclude-pattern>*/artifacts/*</exclude-pattern>
+	<rule ref="../../phpcs.xml">
+		<!-- This standalone CLI emits text and uses native streams without WordPress. -->
+		<exclude name="WordPress.Security.EscapeOutput"/>
+		<exclude name="WordPress.WP.AlternativeFunctions.file_system_operations_fwrite"/>
+	</rule>
+	<!-- Example and test classes use the same PSR-4 names as src/. -->
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>*/examples/*</exclude-pattern>
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>*/examples/*</exclude-pattern>
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+</ruleset>
