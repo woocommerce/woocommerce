@@ -10,6 +10,8 @@ use WP_Block;
  * Product Filter: Active Block.
  */
 final class ProductFilterActive extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -116,33 +118,5 @@ final class ProductFilterActive extends AbstractBlock {
 				''
 			)
 		);
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
-
-	/**
-	 * Disable the editor style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_editor_style() {
-		return null;
-	}
-
-	/**
-	 * Disable the script handle for this block type. We use block.json to load the script.
-	 *
-	 * @param string|null $key The key of the script to get.
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }

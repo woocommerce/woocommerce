@@ -47486,12 +47486,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AttributeFilter.php
 
 		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AttributeFilter.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Cart\:\:enqueue_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -49862,12 +49856,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductsByAttribute.php
 
 		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/RatingFilter.php
-
-		-
 			message: '#^Access to offset ''posts_per_page'' on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Query\.$#'
 			identifier: class.notFound
 			count: 2
@@ -50200,12 +50188,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\StockFilter\:\:get_stock_status_query_var_values\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/StockFilter.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/StockFilter.php
 

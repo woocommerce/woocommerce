@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  * Product Filter: Clear Button Block.
  */
 final class ProductFilterClearButton extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -15,17 +16,6 @@ final class ProductFilterClearButton extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'product-filter-clear-button';
-
-	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
-	}
 
 	/**
 	 * Include and render the block.
