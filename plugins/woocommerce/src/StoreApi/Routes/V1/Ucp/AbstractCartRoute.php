@@ -570,16 +570,17 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			}
 
 			$resolved = Utils::resolve_variant_id( (string) $line_item['item']['id'] );
-			$product  = $resolved['product'] ?? null;
 
 			// The payload is well formed; the store simply has nothing orderable under that
 			// id. A business outcome, so 200 like every other refusal. An id matching no
 			// product is `not_found`; one matching a product a cart line cannot hold — a
 			// variable parent, grouped, external or otherwise unpurchasable — exists but is
 			// unavailable.
-			if ( ! $product instanceof \WC_Product ) {
+			if ( null === $resolved ) {
 				return $this->ucp_error( 'not_found', __( 'Product not found.', 'woocommerce' ), 'unrecoverable', 200, $path . '.item.id' );
 			}
+
+			$product = $resolved['product'];
 
 			if ( $product instanceof \WC_Product_Variable || ! $product->is_purchasable() ) {
 				$message = $product instanceof \WC_Product_Variable
@@ -654,8 +655,8 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 
 		foreach ( $this->cart_controller->get_cart_items() as $key => $cart_item ) {
 			$key        = (string) $key;
-			$product_id = $cart_item['data'] instanceof \WC_Product_Variation
-				? Utils::variant_id( $cart_item['data'], (array) $cart_item['variation'] )
+			$product_id = $cart_item['variation_id']
+				? Utils::variant_id( (int) $cart_item['variation_id'], (array) $cart_item['variation'] )
 				: (string) $cart_item['product_id'];
 			$quantity   = (int) $cart_item['quantity'];
 
@@ -677,14 +678,11 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		}
 
 		foreach ( $by_product as $item_id => $quantity ) {
-			list( $product_id, $values ) = Utils::parse_variant_id( (string) $item_id );
+			list( $product_id, $attributes ) = Utils::parse_variant_id( (string) $item_id );
 
 			$variation = array();
-			foreach ( $values as $attribute => $value ) {
-				$variation[] = array(
-					'attribute' => 'attribute_' . $attribute,
-					'value'     => $value,
-				);
+			foreach ( $attributes as $attribute => $value ) {
+				$variation[] = compact( 'attribute', 'value' );
 			}
 
 			$this->cart_controller->add_to_cart(

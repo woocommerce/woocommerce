@@ -52,10 +52,9 @@ class UcpCartItemSchema extends CartItemSchema {
 	 */
 	public function get_item_response( $cart_item ) {
 		$response = parent::get_item_response( $cart_item );
-		$product  = $cart_item['data'] ?? null;
 
-		if ( ! empty( $response ) && $product instanceof \WC_Product_Variation ) {
-			$response['catalog_id'] = Utils::variant_id( $product, (array) ( $cart_item['variation'] ?? array() ) );
+		if ( ! empty( $response ) && ! empty( $cart_item['variation_id'] ) ) {
+			$response['catalog_id'] = Utils::variant_id( (int) $cart_item['variation_id'], (array) ( $cart_item['variation'] ?? array() ) );
 		}
 
 		return $response;

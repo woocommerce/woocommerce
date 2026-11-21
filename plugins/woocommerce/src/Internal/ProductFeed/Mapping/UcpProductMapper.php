@@ -7,6 +7,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Ucp\UcpProductSchema;
 use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\Internal\ProductVariations\VariationMatcher;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
@@ -238,18 +239,20 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			return $this->map_product( $product );
 		}
 
-		$item = $this->item( $product );
+		$item                      = $this->item( $product );
+		list( $axes, $attributes ) = $this->variation_data( $product, $item );
 
 		// UCP: a variant id fully determines the selection state, so the
 		// request's `selected` is ignored rather than merged.
 		if ( '' !== $variant_id ) {
-			$selected = $this->variant_options( $product, $item, $variant_id );
+			list( $variation_id, $values ) = Utils::parse_variant_id( $variant_id );
+			$selected                      = $this->options( array_diff( array_merge( $attributes[ $variation_id ] ?? array(), $values ), array( '' ) ), $axes );
 		}
 
 		$matching = array();
 
 		while ( ! empty( $selected ) ) {
-			$matching = $this->match_selection( $item, $selected );
+			$matching = $this->match_selection( $attributes, $this->selected_values( $selected, $axes ) );
 
 			if ( ! empty( $matching ) ) {
 				break;
@@ -259,7 +262,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 		}
 
 		$required           = '' !== $variant_id ? array( $variant_id ) : array();
-		$mapped             = $this->map_item( $product, $item, $required, false, empty( $matching ) ? null : $matching, $selected );
+		$mapped             = $this->map_item( $product, $item, $required, false, empty( $matching ) ? null : $matching, (array) $this->selected_values( $selected, $axes ) );
 		$mapped['selected'] = $selected;
 
 		return $mapped;
@@ -319,7 +322,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * @param array       $required_variation_ids Variant ids the per-product cap must not drop.
 	 * @param bool        $only_required Build only the named variations.
 	 * @param array|null  $candidates Variation ids to build from, or null for every visible one.
-	 * @param array       $selected Selected options narrowing the values of "Any" attributes.
+	 * @param array       $selected Selected values by attribute key, narrowing "Any" attributes.
 	 * @return array
 	 */
 	private function map_item( \WC_Product $product, array $item, array $required_variation_ids, bool $only_required, ?array $candidates = null, array $selected = array() ): array {
@@ -492,9 +495,9 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * Build variants from product, bounded by the per-product cap.
 	 *
 	 * A variation leaving attributes as "Any" yields one variant per value it can be
-	 * sold with. Variants are enumerated lazily and the loop stops at the cap, so
-	 * nothing past it is built. Named variants go first, so the cap can only drop
-	 * variants nobody asked for by id.
+	 * sold with. Variants are listed lazily and the loop stops at the cap, so nothing
+	 * past it is built. Named variants go first, so the cap can only drop variants
+	 * nobody asked for by id.
 	 *
 	 * @param \WC_Product $product WooCommerce product.
 	 * @param array       $item Its Store API item response.
@@ -502,7 +505,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * @param array       $required_variant_ids Variant ids the request named directly.
 	 * @param bool        $only_required Build nothing beyond what the request named.
 	 * @param array|null  $candidates Variation ids to build from, or null for every visible one.
-	 * @param array       $selected Selected options narrowing the values of "Any" attributes.
+	 * @param array       $selected Selected values by attribute key, narrowing "Any" attributes.
 	 * @return array
 	 */
 	private function build_variants( \WC_Product $product, array $item, string $currency, array $required_variant_ids, bool $only_required, ?array $candidates, array $selected = array() ): array {
@@ -510,86 +513,60 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			return array( $this->build_simple_variant( $product, $item, $currency ) );
 		}
 
-		$children   = array_fill_keys( array_map( 'intval', null === $candidates ? $product->get_visible_children() : $candidates ), true );
-		$variations = array();
-		foreach ( (array) $item['variations'] as $variation ) {
-			if ( isset( $children[ (int) $variation['id'] ] ) ) {
-				$variations[ (int) $variation['id'] ] = $variation;
-			}
+		list( $axes, $attributes ) = $this->variation_data( $product, $item );
+		if ( null !== $candidates ) {
+			$attributes = array_intersect_key( $attributes, array_flip( $candidates ) );
 		}
 
-		$axes      = $this->variation_axes( $product, $item );
-		$selection = $this->selection_labels( $selected );
-		// Only a priced variation claims a combination: core ignores the rest when matching.
-		$priced = $product->get_variation_prices( true )['price'] ?? array();
-		$specs  = array();
-		$taken  = array();
-		$seen   = array();
-		$bare   = array();
+		// Only an "Any" variation can lose values to an earlier one, so only a product with one pays for the cart's rules.
+		$earlier = array_filter( $attributes, static fn( $own ) => in_array( '', $own, true ) )
+			? wc_get_container()->get( VariationMatcher::class )->get_variation_attributes( $product )
+			: array();
+		$specs   = array();
+		$stream  = array();
 
-		foreach ( $required_variant_ids as $required_id ) {
-			$parsed    = Utils::parse_variant_id( (string) $required_id );
-			$variation = $variations[ $parsed[0] ?? 0 ] ?? null;
+		foreach ( $required_variant_ids as $variant_id ) {
+			list( $variation_id, $values ) = Utils::parse_variant_id( (string) $variant_id );
 
-			if ( null === $variation ) {
-				continue;
-			}
-
-			// A bare variation id leads with its first variant; the rest follow below.
-			$named = ! empty( $parsed[1] );
-			if ( ! $named ) {
-				$bare[ $parsed[0] ] = true;
-			}
-
-			foreach ( $this->expansions( $variation, $axes, $named ? $this->named_values( $parsed[1], $axes ) + $selection : $selection ) as $spec ) {
-				// A named variant was resolved by the route, so it is taken as given.
-				if ( $named ? $spec['id'] !== (string) $required_id : $this->is_shadowed( $spec, $item, $priced ) ) {
-					continue;
-				}
-
-				if ( ! isset( $taken[ $spec['id'] ] ) ) {
-					$specs[]                = $spec;
-					$taken[ $spec['id'] ]   = true;
-					$seen[ $spec['combo'] ] = true;
-				}
+			foreach ( $this->variant_specs( $variation_id, $attributes[ $variation_id ] ?? null, $axes, $values + $selected, $earlier ) as $spec ) {
+				$specs[ $spec['id'] ] = $spec;
 				break;
 			}
+
+			// A bare variation id leads with its first variant and stands for the others too.
+			if ( empty( $values ) ) {
+				$stream[] = $variation_id;
+			}
 		}
 
-		$floor = count( $specs );
-
-		if ( $only_required && empty( $bare ) ) {
-			// Bounded by the request's own id cap; nothing left out, nothing to
-			// disclose.
-			$variants              = $this->build_variation_list( $specs, $currency );
-			$this->variant_budget -= count( $variants );
-
-			return $variants;
+		if ( ! $only_required ) {
+			$stream = array_merge( $stream, array_keys( $attributes ) );
 		}
 
 		// The floor keeps named variants and at least one variant: an empty
 		// `variants` array would violate the schema's `minItems: 1`.
-		$cap      = max( 1, $floor, min( self::MAX_VARIANTS_PER_PRODUCT, $this->variant_budget ) );
-		$stream   = $only_required ? array_intersect_key( $variations, $bare ) : $variations;
-		$complete = true;
+		$cap   = max( 1, count( $specs ), min( self::MAX_VARIANTS_PER_PRODUCT, $this->variant_budget ) );
+		$total = 0;
 
-		foreach ( $stream as $variation ) {
-			foreach ( $this->expansions( $variation, $axes, $selection ) as $spec ) {
-				// As on the storefront, a combination two variations cover goes to the first.
-				if ( isset( $taken[ $spec['id'] ] ) || isset( $seen[ $spec['combo'] ] ) || $this->is_shadowed( $spec, $item, $priced ) ) {
+		foreach ( array_unique( $stream ) as $variation_id ) {
+			foreach ( $this->variant_specs( $variation_id, $attributes[ $variation_id ] ?? null, $axes, $selected, $earlier ) as $spec ) {
+				if ( isset( $specs[ $spec['id'] ] ) ) {
 					continue;
 				}
 
 				if ( count( $specs ) >= $cap ) {
-					$complete = false;
+					// An upper bound, counted without listing: values an earlier variation takes are not netted out.
+					foreach ( array_unique( $stream ) as $id ) {
+						$sizes = array();
+						foreach ( $attributes[ $id ] ?? array() as $key => $value ) {
+							$sizes[] = '' === $value && ! isset( $selected[ $key ] ) ? count( $axes[ $key ]['terms'] ) : 1;
+						}
+						$total += (int) array_product( $sizes );
+					}
 					break 2;
 				}
 
-				$specs[] = $spec;
-
-				if ( isset( $priced[ $spec['variation_id'] ] ) ) {
-					$seen[ $spec['combo'] ] = true;
-				}
+				$specs[ $spec['id'] ] = $spec;
 			}
 		}
 
@@ -597,13 +574,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 
 		$this->variant_budget -= count( $variants );
 
-		// Past the cap the total is an upper bound: shared combinations are not netted out.
-		$total = count( $specs );
-		if ( ! $complete ) {
-			$total = max( $total + 1, array_sum( array_map( fn( $variation ) => $this->expansion_count( $variation, $axes, $selection ), $stream ) ) );
-		}
-
-		$this->record_truncation( $item, count( $variants ), $total );
+		$this->record_truncation( $item, count( $variants ), 0 === $total ? 0 : max( $total, count( $variants ) + 1 ) );
 
 		return $variants;
 	}
@@ -640,268 +611,188 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	}
 
 	/**
-	 * Describe each variation attribute of a product by its label.
-	 *
-	 * Keys come from the product, not the item: variant ids must carry the key the cart reads.
+	 * Read a variable product's variation attributes and each visible variation's values for them.
 	 *
 	 * @param \WC_Product $product The variable product.
 	 * @param array       $item Its Store API item response.
-	 * @return array Attribute label => `{ key, terms }`, terms being names by slug.
+	 * @return array{0: array<string, array{name: string, terms: array<string>}>, 1: array<int, array<string, string>>}
+	 *         `{ name, terms }` by attribute key as the cart reads it, terms being names by slug; and
+	 *         values by attribute key for each variation id, '' for "Any".
 	 */
-	private function variation_axes( \WC_Product $product, array $item ): array {
+	private function variation_data( \WC_Product $product, array $item ): array {
 		$names = $this->term_names( $item );
 		$axes  = array();
+		$keys  = array();
 
-		foreach ( $product->get_attributes() as $key => $attribute ) {
-			if ( ! $attribute instanceof \WC_Product_Attribute || ! $attribute->get_variation() ) {
+		foreach ( $product->get_attributes() as $attribute ) {
+			if ( $attribute instanceof \WC_Product_Attribute && $attribute->get_variation() ) {
+				$name          = wc_attribute_label( $attribute->get_name(), $product );
+				$key           = wc_variation_attribute_name( $attribute->get_name() );
+				$keys[ $name ] = $key;
+				$axes[ $key ]  = array(
+					'name'  => $name,
+					'terms' => $names[ $name ] ?? array(),
+				);
+			}
+		}
+
+		$attributes = array();
+
+		foreach ( (array) $item['variations'] as $variation ) {
+			$attributes[ (int) $variation['id'] ] = array();
+
+			foreach ( (array) $variation['attributes'] as $attribute ) {
+				if ( isset( $keys[ $attribute['name'] ] ) ) {
+					$attributes[ (int) $variation['id'] ][ $keys[ $attribute['name'] ] ] = (string) $attribute['value'];
+				}
+			}
+		}
+
+		return array( $axes, $attributes );
+	}
+
+	/**
+	 * Present attribute values as options.
+	 *
+	 * @param array $values Values by attribute key.
+	 * @param array $axes Variation attributes, from variation_data().
+	 * @return array List of `{ name, label }`.
+	 */
+	private function options( array $values, array $axes ): array {
+		$options = array();
+
+		foreach ( $values as $key => $value ) {
+			$options[] = array(
+				'name'  => $axes[ $key ]['name'] ?? (string) $key,
+				'label' => $axes[ $key ]['terms'][ $value ] ?? (string) $value,
+			);
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Resolve selected options to attribute values, a label naming a term by its name or slug.
+	 *
+	 * @param array $selected Selected option values, each `{ name, label }`.
+	 * @param array $axes Variation attributes, from variation_data().
+	 * @return array|null Values by attribute key, or null when an option names no value the product has.
+	 */
+	private function selected_values( array $selected, array $axes ): ?array {
+		$values = array();
+
+		foreach ( $selected as $option ) {
+			if ( ! isset( $option['name'], $option['label'] ) ) {
 				continue;
 			}
 
-			$name          = wc_attribute_label( $attribute->get_name(), $product );
-			$axes[ $name ] = array(
-				'key'   => (string) $key,
-				'terms' => $names[ $name ] ?? array(),
-			);
-		}
-
-		return $axes;
-	}
-
-	/**
-	 * Index selected options as lowercase label by lowercase option name.
-	 *
-	 * @param array $selected Selected option values, each `{ name, label }`.
-	 * @return array
-	 */
-	private function selection_labels( array $selected ): array {
-		$selection = array();
-
-		foreach ( $selected as $option ) {
-			if ( isset( $option['name'], $option['label'] ) ) {
-				$selection[ strtolower( (string) $option['name'] ) ] = strtolower( (string) $option['label'] );
-			}
-		}
-
-		return $selection;
-	}
-
-	/**
-	 * Turn the values a variant id carries into a selection of its "Any" attributes.
-	 *
-	 * @param array $values Values by attribute key.
-	 * @param array $axes Variation attributes, from variation_axes().
-	 * @return array Lowercase value by lowercase option name.
-	 */
-	private function named_values( array $values, array $axes ): array {
-		$selection = array();
-
-		foreach ( $axes as $name => $axis ) {
-			if ( isset( $values[ $axis['key'] ] ) ) {
-				$selection[ strtolower( (string) $name ) ] = strtolower( (string) $values[ $axis['key'] ] );
-			}
-		}
-
-		return $selection;
-	}
-
-	/**
-	 * List the values a variation can be sold with, attribute by attribute.
-	 *
-	 * An attribute it fixes has one value. One it leaves as "Any" has every term,
-	 * or only the term the selection names.
-	 *
-	 * @param array $variation A `variations` entry of the parent item.
-	 * @param array $axes Variation attributes, from variation_axes().
-	 * @param array $selection Lowercase label by lowercase option name.
-	 * @return array|null List of `{ name, key, open, values }`, values being labels by slug; null when nothing is sellable.
-	 */
-	private function variation_choices( array $variation, array $axes, array $selection ): ?array {
-		$choices = array();
-
-		foreach ( (array) $variation['attributes'] as $attribute ) {
-			$name  = (string) $attribute['name'];
-			$terms = $axes[ $name ]['terms'] ?? array();
-			$open  = null === $attribute['value'] || '' === (string) $attribute['value'];
-
-			if ( ! $open ) {
-				$value  = (string) $attribute['value'];
-				$values = array( $value => (string) ( $terms[ $value ] ?? $value ) );
-			} else {
-				$values = array_map( 'strval', $terms );
-				$wanted = $selection[ strtolower( $name ) ] ?? null;
-
-				if ( null !== $wanted ) {
-					$values = array_filter(
-						$values,
-						static function ( $label, $slug ) use ( $wanted ) {
-							return strtolower( (string) $slug ) === $wanted || strtolower( $label ) === $wanted;
-						},
-						ARRAY_FILTER_USE_BOTH
-					);
+			foreach ( $axes as $key => $axis ) {
+				foreach ( 0 === strcasecmp( $axis['name'], (string) $option['name'] ) ? $axis['terms'] : array() as $slug => $name ) {
+					if ( 0 === strcasecmp( (string) $slug, (string) $option['label'] ) || 0 === strcasecmp( $name, (string) $option['label'] ) ) {
+						$values[ $key ] = (string) $slug;
+						continue 3;
+					}
 				}
 			}
 
-			if ( empty( $values ) ) {
-				return null;
-			}
-
-			$choices[] = array(
-				'name'   => $name,
-				'key'    => (string) ( $axes[ $name ]['key'] ?? '' ),
-				'open'   => $open,
-				'values' => $values,
-			);
+			return null;
 		}
 
-		return $choices;
+		return $values;
 	}
 
 	/**
-	 * Count the variants a variation yields.
+	 * List the variants a variation is sold as: one per combination of values for its "Any"
+	 * attributes, less those an earlier variation takes, as on the storefront and in the cart.
 	 *
-	 * @param array $variation A `variations` entry of the parent item.
-	 * @param array $axes Variation attributes, from variation_axes().
-	 * @param array $selection Lowercase label by lowercase option name.
-	 * @return int
+	 * @param int        $variation_id Variation id.
+	 * @param array|null $own Its values by attribute key, '' for "Any"; null yields nothing.
+	 * @param array      $axes Variation attributes, from variation_data().
+	 * @param array      $narrow Values to hold attributes to, by attribute key.
+	 * @param array      $earlier The product's variations in matching order, from VariationMatcher::get_variation_attributes().
+	 * @return \Generator Yields `{ id, variation_id, options }`.
 	 */
-	private function expansion_count( array $variation, array $axes, array $selection ): int {
-		$choices = $this->variation_choices( $variation, $axes, $selection );
-
-		return null === $choices ? 0 : (int) array_product( array_map( fn( $choice ) => count( $choice['values'] ), $choices ) );
-	}
-
-	/**
-	 * Enumerate the variants a variation yields, one per combination of its "Any" values.
-	 *
-	 * A generator, so a variation with many combinations costs only what the caller consumes.
-	 *
-	 * @param array $variation A `variations` entry of the parent item.
-	 * @param array $axes Variation attributes, from variation_axes().
-	 * @param array $selection Lowercase label by lowercase option name.
-	 * @return \Generator Yields `{ id, variation_id, options, values, combo }`, values being slugs by attribute label.
-	 */
-	private function expansions( array $variation, array $axes, array $selection ): \Generator {
-		$choices = $this->variation_choices( $variation, $axes, $selection );
-
-		if ( null === $choices ) {
+	private function variant_specs( int $variation_id, ?array $own, array $axes, array $narrow, array $earlier ): \Generator {
+		if ( null === $own ) {
 			return;
 		}
 
-		$slugs    = array_map( fn( $choice ) => array_map( 'strval', array_keys( $choice['values'] ) ), $choices );
-		$position = array_fill( 0, count( $choices ), 0 );
+		$sets = array();
+		foreach ( $own as $key => $value ) {
+			$values       = '' !== $value ? array( $value ) : array_map( 'strval', array_keys( $axes[ $key ]['terms'] ) );
+			$sets[ $key ] = isset( $narrow[ $key ] ) ? array_intersect( $values, array( $narrow[ $key ] ) ) : $values;
+		}
 
-		while ( true ) {
-			$options = array();
-			$chosen  = array();
-			$combo   = array();
-			$values  = array();
+		// Whole values go before anything is combined; only a claim on several
+		// attributes at once is left to check per combination.
+		$claims = array();
+		foreach ( in_array( '', $own, true ) ? $earlier : array() as $earlier_id => $fixed ) {
+			if ( $earlier_id === $variation_id ) {
+				break;
+			}
 
-			foreach ( $choices as $index => $choice ) {
-				$slug      = $slugs[ $index ][ $position[ $index ] ];
-				$options[] = array(
-					'name'  => $choice['name'],
-					'label' => $choice['values'][ $slug ],
-				);
-				$combo[]   = $choice['name'] . '=' . $slug;
+			if ( null === $fixed ) {
+				continue;
+			}
 
-				$values[ $choice['name'] ] = $slug;
+			$claim = array();
+			foreach ( array_diff( $fixed, array( '' ) ) as $key => $value ) {
+				if ( ! in_array( $value, $sets[ $key ] ?? array(), true ) ) {
+					continue 2;
+				}
 
-				if ( $choice['open'] ) {
-					$chosen[ $choice['key'] ] = $slug;
+				if ( count( $sets[ $key ] ) > 1 ) {
+					$claim[ $key ] = $value;
+				}
+			}
+
+			if ( empty( $claim ) ) {
+				return;
+			}
+
+			if ( count( $claim ) > 1 ) {
+				$claims[] = $claim;
+			} else {
+				$sets[ key( $claim ) ] = array_diff( $sets[ key( $claim ) ], $claim );
+			}
+		}
+
+		foreach ( $this->combinations( $sets ) as $values ) {
+			foreach ( $claims as $claim ) {
+				if ( ! array_diff_assoc( $claim, $values ) ) {
+					continue 2;
 				}
 			}
 
 			yield array(
-				'id'           => Utils::build_variant_id( (int) $variation['id'], $chosen ),
-				'variation_id' => (int) $variation['id'],
-				'options'      => $options,
-				'values'       => $values,
-				'combo'        => implode( "\n", $combo ),
+				'id'           => Utils::variant_id( $variation_id, $values ),
+				'variation_id' => $variation_id,
+				'options'      => $this->options( $values, $axes ),
 			);
+		}
+	}
 
-			// Advance like an odometer, last attribute fastest.
-			for ( $index = count( $choices ) - 1; $index >= 0; $index-- ) {
-				if ( ++$position[ $index ] < count( $slugs[ $index ] ) ) {
-					continue 2;
-				}
-
-				$position[ $index ] = 0;
-			}
-
+	/**
+	 * Walk the cartesian product of value sets, last set fastest.
+	 *
+	 * @param array $sets Values by key.
+	 * @return \Generator Yields one value by key.
+	 */
+	private function combinations( array $sets ): \Generator {
+		if ( empty( $sets ) ) {
+			yield array();
 			return;
 		}
-	}
 
-	/**
-	 * Whether an earlier variation already covers a variant of an "Any" variation.
-	 *
-	 * The cart refuses such a variant, as the storefront resolves its options to the earlier one.
-	 *
-	 * @param array $spec Variant, from expansions().
-	 * @param array $item Store API item response of the variable product.
-	 * @param array $priced Variation ids with a price, as keys.
-	 * @return bool
-	 */
-	private function is_shadowed( array $spec, array $item, array $priced ): bool {
-		if ( (string) $spec['variation_id'] === $spec['id'] ) {
-			return false;
-		}
+		$key    = array_key_first( $sets );
+		$values = $sets[ $key ];
+		unset( $sets[ $key ] );
 
-		foreach ( (array) $item['variations'] as $variation ) {
-			if ( (int) $variation['id'] === $spec['variation_id'] ) {
-				return false;
-			}
-
-			if ( ! isset( $priced[ (int) $variation['id'] ] ) ) {
-				continue;
-			}
-
-			foreach ( (array) $variation['attributes'] as $attribute ) {
-				$fixed = null !== $attribute['value'] && '' !== (string) $attribute['value'];
-
-				if ( $fixed && ( $spec['values'][ (string) $attribute['name'] ] ?? null ) !== (string) $attribute['value'] ) {
-					continue 2;
-				}
-			}
-
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Read the options a named variant fixes, as selected options.
-	 *
-	 * A bare variation id fixes only what the variation itself does.
-	 *
-	 * @param \WC_Product $product The variable product.
-	 * @param array       $item Its Store API item response.
-	 * @param string      $variant_id Variant id.
-	 * @return array List of `{ name, label }`.
-	 */
-	private function variant_options( \WC_Product $product, array $item, string $variant_id ): array {
-		list( $variation_id, $values ) = Utils::parse_variant_id( $variant_id ) ?? array( 0, array() );
-
-		if ( empty( $values ) ) {
-			return $this->variation_options_by_id( $item )[ $variation_id ] ?? array();
-		}
-
-		$axes = $this->variation_axes( $product, $item );
-
-		foreach ( (array) $item['variations'] as $variation ) {
-			if ( (int) $variation['id'] !== $variation_id ) {
-				continue;
-			}
-
-			foreach ( $this->expansions( $variation, $axes, $this->named_values( $values, $axes ) ) as $spec ) {
-				if ( $spec['id'] === $variant_id ) {
-					return $spec['options'];
-				}
+		foreach ( $values as $value ) {
+			foreach ( $this->combinations( $sets ) as $rest ) {
+				yield array( $key => $value ) + $rest;
 			}
 		}
-
-		return array();
 	}
 
 	/**
@@ -1072,40 +963,6 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	}
 
 	/**
-	 * Build each visible variation's selected options from the parent item.
-	 *
-	 * An attribute left as "Any" on a variation has a null value and is omitted.
-	 *
-	 * @param array $item Store API item response of the variable product.
-	 * @return array Variation id => list of `{ name, label }`.
-	 */
-	private function variation_options_by_id( array $item ): array {
-		$names   = $this->term_names( $item );
-		$options = array();
-
-		foreach ( (array) $item['variations'] as $variation ) {
-			$selected = array();
-
-			foreach ( (array) $variation['attributes'] as $attribute ) {
-				if ( null === $attribute['value'] || '' === (string) $attribute['value'] ) {
-					continue;
-				}
-
-				$name       = (string) $attribute['name'];
-				$value      = (string) $attribute['value'];
-				$selected[] = array(
-					'name'  => $name,
-					'label' => $names[ $name ][ $value ] ?? $value,
-				);
-			}
-
-			$options[ (int) $variation['id'] ] = $selected;
-		}
-
-		return $options;
-	}
-
-	/**
 	 * Build product options for variable products.
 	 *
 	 * Lists the values the visible variations actually use, in the attribute's
@@ -1253,63 +1110,22 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	}
 
 	/**
-	 * Find the visible variations carrying every selected option value.
+	 * Find the visible variations a selection can be bought as.
 	 *
-	 * Matches on the parent item's variation attributes, so no variation is loaded
-	 * to be rejected. A label matches a term's name or its slug, case-insensitively,
-	 * and a variation left as "Any" for an attribute accepts every label, as the
+	 * A variation left as "Any" for an attribute accepts each of its values, as the
 	 * storefront does.
 	 *
-	 * @param array $item Store API item response of the variable product.
-	 * @param array $selected Selected option values, each `{ name, label }`.
+	 * @param array      $attributes Values by attribute key for each variation id, from variation_data().
+	 * @param array|null $selected Selected values by attribute key, from selected_values().
 	 * @return array Matching variation ids.
 	 */
-	private function match_selection( array $item, array $selected ): array {
-		$selection = $this->selection_labels( $selected );
-
-		if ( empty( $selection ) ) {
-			return array();
-		}
-
-		$names = $this->term_names( $item );
-
-		// A name no variation attribute carries can never match; without this
-		// check the "Any" rule below would accept it on every variation.
-		$terms = array();
-		foreach ( $names as $name => $labels ) {
-			$terms[ strtolower( (string) $name ) ] = array_map( 'strtolower', array_merge( array_map( 'strval', array_keys( $labels ) ), array_values( $labels ) ) );
-		}
-
-		if ( array_diff_key( $selection, $terms ) ) {
-			return array();
-		}
-
+	private function match_selection( array $attributes, ?array $selected ): array {
 		$matching = array();
 
-		foreach ( (array) $item['variations'] as $variation ) {
-			$values = array();
-			foreach ( (array) $variation['attributes'] as $attribute ) {
-				if ( null === $attribute['value'] || '' === (string) $attribute['value'] ) {
-					continue;
-				}
-
-				$name  = (string) $attribute['name'];
-				$value = (string) $attribute['value'];
-
-				$values[ strtolower( $name ) ] = array(
-					strtolower( $value ),
-					strtolower( $names[ $name ][ $value ] ?? $value ),
-				);
+		foreach ( $attributes as $variation_id => $own ) {
+			if ( ! empty( $selected ) && ! array_diff_assoc( array_intersect_key( array_diff( $own, array( '' ) ), $selected ), $selected ) ) {
+				$matching[] = $variation_id;
 			}
-
-			foreach ( $selection as $name => $label ) {
-				// An "Any" attribute accepts only a label naming one of its terms.
-				if ( ! in_array( $label, $values[ $name ] ?? $terms[ $name ], true ) ) {
-					continue 2;
-				}
-			}
-
-			$matching[] = (int) $variation['id'];
 		}
 
 		return $matching;

@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Utilities\Ucp;
 
+use Automattic\WooCommerce\Internal\ProductVariations\VariationMatcher;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -204,95 +205,82 @@ class Utils {
 	}
 
 	/**
-	 * Split a variant id into its product id and the values it carries for "Any" attributes.
+	 * Name a variation as the catalog does: its id, then the values chosen for the attributes
+	 * it leaves as "Any", e.g. `123:pa_size=large&pa_color=red`.
 	 *
-	 * A variation leaving an attribute as "Any" is sold once per value, so its variants are
-	 * named `<variation id>:<attribute key>=<value>`, with further pairs joined by `&`.
-	 *
-	 * @param string $id Variant id.
-	 * @return array{0: int, 1: array<string, string>}|null Product id and values by attribute key, or null when malformed.
-	 */
-	public static function parse_variant_id( string $id ): ?array {
-		$parts = explode( ':', $id, 2 );
-
-		if ( ! ctype_digit( $parts[0] ) ) {
-			return null;
-		}
-
-		$values = array();
-
-		foreach ( isset( $parts[1] ) ? explode( '&', $parts[1] ) : array() as $pair ) {
-			$pair = explode( '=', $pair, 2 );
-
-			if ( 2 !== count( $pair ) || '' === $pair[0] || '' === $pair[1] ) {
-				return null;
-			}
-
-			$values[ rawurldecode( $pair[0] ) ] = rawurldecode( $pair[1] );
-		}
-
-		return array( (int) $parts[0], $values );
-	}
-
-	/**
-	 * Build a variant id from a variation id and the values chosen for its "Any" attributes.
-	 *
-	 * @param int                   $variation_id Variation id.
-	 * @param array<string, string> $values Chosen values by attribute key, in the product's attribute order.
+	 * @param int   $variation_id Variation id.
+	 * @param array $attributes Attribute values by `attribute_` key; only "Any" attributes are read.
 	 * @return string
 	 */
-	public static function build_variant_id( int $variation_id, array $values ): string {
-		$pairs = array();
-
-		foreach ( $values as $key => $value ) {
-			$pairs[] = rawurlencode( (string) $key ) . '=' . rawurlencode( (string) $value );
-		}
-
-		return empty( $pairs ) ? (string) $variation_id : $variation_id . ':' . implode( '&', $pairs );
-	}
-
-	/**
-	 * Build the variant id of a variation holding the given attribute values.
-	 *
-	 * Only the attributes the variation leaves as "Any" enter the id; a value for any other is ignored.
-	 *
-	 * @param \WC_Product_Variation $variation The variation.
-	 * @param array                 $values Attribute values by key, with or without the `attribute_` prefix.
-	 * @return string
-	 */
-	public static function variant_id( \WC_Product_Variation $variation, array $values ): string {
+	public static function variant_id( int $variation_id, array $attributes ): string {
 		$chosen = array();
 
-		foreach ( $variation->get_attributes() as $key => $own_value ) {
-			$value = (string) ( $values[ $key ] ?? $values[ 'attribute_' . $key ] ?? '' );
-
-			if ( '' === (string) $own_value && '' !== $value ) {
-				$chosen[ (string) $key ] = $value;
+		foreach ( wc_get_product_variation_attributes( $variation_id ) as $key => $own ) {
+			if ( '' === $own && '' !== (string) ( $attributes[ $key ] ?? '' ) ) {
+				$chosen[ substr( $key, strlen( 'attribute_' ) ) ] = (string) $attributes[ $key ];
 			}
 		}
 
-		return self::build_variant_id( (int) $variation->get_id(), $chosen );
+		return $variation_id . ( $chosen ? ':' . http_build_query( $chosen, '', '&', PHP_QUERY_RFC3986 ) : '' );
 	}
 
 	/**
-	 * Load the product a variant id names, with the id in its canonical form.
+	 * Split a variant id into its product id and the attribute values it carries.
 	 *
 	 * @param string $id Product or variant id.
-	 * @return array{product: \WC_Product, id: string}|null Null when malformed, unknown, or carrying a
-	 *                                                      value for something other than an "Any" attribute.
+	 * @return array{0: int, 1: array<string, string>} Product id, 0 when malformed, and values by `attribute_` key.
+	 */
+	public static function parse_variant_id( string $id ): array {
+		$parts = explode( ':', $id, 2 );
+
+		parse_str( $parts[1] ?? '', $values );
+
+		$attributes = array();
+		foreach ( $values as $key => $value ) {
+			if ( is_string( $value ) ) {
+				$attributes[ 'attribute_' . $key ] = $value;
+			}
+		}
+
+		return array( ctype_digit( $parts[0] ) ? (int) $parts[0] : 0, $attributes );
+	}
+
+	/**
+	 * Load the product an id from the catalog names.
+	 *
+	 * A variant id is held to the cart's rules: canonical, a value the attribute offers for
+	 * every "Any" attribute or for none, and no earlier variation matching them.
+	 *
+	 * @param string $id Product or variant id.
+	 * @return array{product: \WC_Product, id: string}|null The product and its canonical id, or null when nothing matched.
 	 */
 	public static function resolve_variant_id( string $id ): ?array {
-		$parsed  = self::parse_variant_id( $id );
-		$product = null === $parsed ? null : wc_get_product( $parsed[0] );
+		list( $product_id, $values ) = self::parse_variant_id( $id );
 
-		if ( ! $product instanceof \WC_Product ) {
+		$product   = wc_get_product( $product_id );
+		$canonical = self::variant_id( $product_id, $values );
+
+		// Leading zeros aside, only the id the catalog hands out resolves.
+		if ( ! $product instanceof \WC_Product || $product_id . (string) strstr( $id, ':' ) !== $canonical ) {
 			return null;
 		}
 
-		$canonical = $product instanceof \WC_Product_Variation ? self::variant_id( $product, $parsed[1] ) : (string) $product->get_id();
+		if ( $product instanceof \WC_Product_Variation && $values ) {
+			$variation = array_merge( wc_get_product_variation_attributes( $product_id ), $values );
+			$parent    = wc_get_product( $product->get_parent_id() );
+			$offered   = $parent instanceof \WC_Product ? $parent->get_attributes() : array();
 
-		if ( count( self::parse_variant_id( $canonical )[1] ) !== count( $parsed[1] ) ) {
-			return null;
+			foreach ( $values as $key => $value ) {
+				$attribute = $offered[ substr( $key, strlen( 'attribute_' ) ) ] ?? null;
+
+				if ( ! $attribute instanceof \WC_Product_Attribute || ! in_array( $value, array_map( 'strval', $attribute->get_slugs() ), true ) ) {
+					return null;
+				}
+			}
+
+			if ( in_array( '', $variation, true ) || wc_get_container()->get( VariationMatcher::class )->has_earlier_match( $product, $variation ) ) {
+				return null;
+			}
 		}
 
 		return array(

@@ -125,7 +125,6 @@ class CatalogLookup extends AbstractCatalogRoute {
 			$resolved = $this->resolve_product( $id );
 
 			if ( null === $resolved ) {
-				$messages[] = $this->not_found_message( $id );
 				continue;
 			}
 
@@ -149,18 +148,33 @@ class CatalogLookup extends AbstractCatalogRoute {
 		$this->mapper()->begin_response();
 
 		$products = array();
+		$found    = array();
 		foreach ( $groups as $group ) {
 			$product = $this->mapper()->map_lookup_product( $group['product'], $group['inputs'] );
 
-			// `variants` cannot be empty: identifiers that yielded none are misses.
-			if ( empty( $product['variants'] ) ) {
-				foreach ( $group['inputs'] as $input ) {
-					$messages[] = $this->not_found_message( $input['id'] );
-				}
-				continue;
+			foreach ( $product['variants'] as $variant ) {
+				$found += array_flip( array_column( $variant['inputs'], 'id' ) );
 			}
 
-			$products[] = $product;
+			// `variants` cannot be empty: a product none of its identifiers reached is left out.
+			if ( ! empty( $product['variants'] ) ) {
+				$products[] = $product;
+			}
+		}
+
+		// Every identifier has an outcome: a variant carrying it, or a miss.
+		foreach ( array_diff( $ids, array_keys( $found ) ) as $id ) {
+			$messages[] = array(
+				'type'         => 'info',
+				'code'         => 'not_found',
+				'content'      => sprintf(
+					/* translators: %s: product identifier. */
+					__( 'Product "%s" not found.', 'woocommerce' ),
+					$id
+				),
+				'path'         => '$.ids',
+				'content_type' => 'plain',
+			);
 		}
 
 		$messages = array_merge(
@@ -178,25 +192,5 @@ class CatalogLookup extends AbstractCatalogRoute {
 		}
 
 		return new \WP_REST_Response( $response, 200 );
-	}
-
-	/**
-	 * Build the message reporting an identifier that resolved to nothing.
-	 *
-	 * @param string $id Requested identifier.
-	 * @return array
-	 */
-	private function not_found_message( string $id ): array {
-		return array(
-			'type'         => 'info',
-			'code'         => 'not_found',
-			'content'      => sprintf(
-				/* translators: %s: product identifier. */
-				__( 'Product "%s" not found.', 'woocommerce' ),
-				$id
-			),
-			'path'         => '$.ids',
-			'content_type' => 'plain',
-		);
 	}
 }

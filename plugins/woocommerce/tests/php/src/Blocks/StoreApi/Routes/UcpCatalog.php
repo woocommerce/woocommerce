@@ -420,7 +420,7 @@ class UcpCatalog extends ControllerTestCase {
 		);
 		// Number 2 goes to the huge/blue/2 variation, which comes first, as on the storefront.
 		$this->assertSame(
-			array( $variation_id . ':pa_number=0', (string) $children[4], $variation_id . ':pa_number=1' ),
+			array( $variation_id . ':pa_number=0', $variation_id . ':pa_number=1', (string) $children[4] ),
 			wp_list_pluck( $data['product']['variants'], 'id' )
 		);
 	}

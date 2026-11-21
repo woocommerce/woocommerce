@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\ProductFeed\Mapping\UcpProductMapper;
-use Automattic\WooCommerce\Internal\ProductVariations\VariationMatcher;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Ucp\UcpProductSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
@@ -174,11 +173,9 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	protected function resolve_product( string $identifier ) {
 		$resolved   = Utils::resolve_variant_id( $identifier );
 		$product    = $resolved['product'] ?? null;
-		$variation  = null;
 		$variant_id = '';
 
-		if ( $product instanceof \WC_Product_Variation ) {
-			$variation  = $product;
+		if ( null !== $resolved && $product instanceof \WC_Product_Variation ) {
 			$variant_id = $resolved['id'];
 			$product    = wc_get_product( $product->get_parent_id() );
 		}
@@ -196,36 +193,8 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 		// A named variation the storefront would not offer — disabled, or out of
 		// stock while the store hides out-of-stock items — is a miss even when
 		// its parent is otherwise fine.
-		if ( $variation instanceof \WC_Product_Variation && ( ! $product instanceof \WC_Product_Variable || ! in_array( (int) $variation->get_id(), array_map( 'intval', $product->get_visible_children() ), true ) ) ) {
+		if ( '' !== $variant_id && ( ! $product instanceof \WC_Product_Variable || ! in_array( (int) $variant_id, array_map( 'intval', $product->get_visible_children() ), true ) ) ) {
 			return null;
-		}
-
-		$values = $variation instanceof \WC_Product_Variation ? Utils::parse_variant_id( $variant_id )[1] : array();
-
-		// Values are all or nothing: a variant names every "Any" attribute of its variation.
-		if ( ! empty( $values ) && count( $values ) !== count( array_keys( array_map( 'strval', $variation->get_attributes() ), '', true ) ) ) {
-			return null;
-		}
-
-		// A value the variant id carries must be one the attribute offers.
-		foreach ( $values as $key => $value ) {
-			$attribute = $product->get_attributes()[ $key ] ?? null;
-
-			if ( ! $attribute instanceof \WC_Product_Attribute || ! in_array( $value, array_map( 'strval', $attribute->get_slugs() ), true ) ) {
-				return null;
-			}
-		}
-
-		// As in the cart: options an earlier variation covers resolve to that one, not this.
-		if ( ! empty( $values ) ) {
-			$attributes = array();
-			foreach ( array_merge( $variation->get_attributes(), $values ) as $key => $value ) {
-				$attributes[ 'attribute_' . $key ] = $value;
-			}
-
-			if ( wc_get_container()->get( VariationMatcher::class )->has_earlier_match( $variation, $attributes ) ) {
-				return null;
-			}
 		}
 
 		return array(
