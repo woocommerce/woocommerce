@@ -235,11 +235,11 @@ class Custom_Inner_Block_Extend_Store_Endpoint {
  * Include the dependencies needed to instantiate the block.
  */
 add_action(
-	'woocommerce_blocks_loaded',
+	'woocommerce_init',
 	function() {
 		require_once __DIR__ . '/custom-inner-block-blocks-integration.php';
 
-		// Initialize our store endpoint extension when WC Blocks is loaded.
+		// Initialize our store endpoint extension when WooCommerce is loaded.
 		Custom_Inner_Block_Extend_Store_Endpoint::init();
 
 		add_action(
