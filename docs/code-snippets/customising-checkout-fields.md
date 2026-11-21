@@ -147,6 +147,7 @@ Here's a full list of fields in the array passed to `woocommerce_checkout_fields
     -   `shipping_postcode`
     -   `shipping_country`
     -   `shipping_state`
+    -   `shipping_phone`
 -   Account
     -   `account_username`
     -   `account_password`
@@ -176,6 +177,9 @@ In specific cases you need to use the **`woocommerce_default_address_fields`** f
 -   `city`
 -   `state`
 -   `postcode`
+-   `phone`
+
+On the shortcode checkout, the address, city, state, postcode and phone fields also follow country-specific rules. The checkout applies these rules again when the customer changes their country. So if you change the label, required state or priority of these fields with `woocommerce_checkout_fields` or `woocommerce_billing_fields`, the change can be lost. Use `woocommerce_default_address_fields` for these fields instead.
 
 For example, to make the `address_1` field optional:
 
@@ -399,11 +403,15 @@ This is the result:
 
 ### Make phone number not required
 
+Phone is a default address field, so this changes both the billing and the shipping phone:
+
 ```php
-add_filter( 'woocommerce_billing_fields', 'wc_npr_filter_phone', 10, 1 );
+add_filter( 'woocommerce_default_address_fields', 'wc_npr_filter_phone', 10, 1 );
 
 function wc_npr_filter_phone( $address_fields ) {
-	$address_fields['billing_phone']['required'] = false;
+	if ( isset( $address_fields['phone'] ) ) {
+		$address_fields['phone']['required'] = false;
+	}
 	return $address_fields;
 }
 ```
