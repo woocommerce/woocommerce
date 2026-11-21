@@ -5,7 +5,7 @@ This folder contains the Interactivity API (iAPI) stores that WooCommerce blocks
 Stores in this folder:
 
 -   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format.
--   [`woocommerce`](#woocommerce-store) — loaded from the `@woocommerce/stores/woocommerce` script module; cart state and actions (with mutation batching for performance). `addCartItem` resolves with a structured per-call outcome (`AddCartItemOutcome`) instead of `void`, and the store's cross-cutting side effects (sync event, legacy event, screen-reader announcement) fire exactly once per batch cycle, not once per request — see below.
+-   [`woocommerce`](#woocommerce-store) — loaded from the `@woocommerce/stores/woocommerce` script module; the product and variation data of `woocommerce/products`, read-only, and cart state and actions (with mutation batching for performance). `addCartItem` resolves with a structured per-call outcome (`AddCartItemOutcome`) instead of `void`, and the store's cross-cutting side effects (sync event, legacy event, screen-reader announcement) fire exactly once per batch cycle, not once per request — see below.
 
 ---
 
@@ -237,7 +237,45 @@ For variable products, `findProduct` returns `null` when no variation matches th
 
 ## `woocommerce` store
 
-The `woocommerce` Interactivity API store (`base/stores/woocommerce/`) is served as the script module `@woocommerce/stores/woocommerce`, and blocks load it from that id. It holds cart state and actions, with mutation batching for performance. This section covers the `addCartItem` outcome contract and the once-per-cycle cross-cutting side effects below — it is not a write-up of the store's full state shape, its other actions, or the rest of the mutation batcher's internals.
+The `woocommerce` Interactivity API store (`base/stores/woocommerce/`) is served as the script module `@woocommerce/stores/woocommerce`, and blocks load it from that id. It holds cart state and actions, with mutation batching for performance, and exposes the product data of `woocommerce/products`. This section covers that product data, the `addCartItem` outcome contract, and the once-per-cycle cross-cutting side effects below — it is not a write-up of the store's full state shape, its other actions, or the rest of the mutation batcher's internals.
+
+### Product data
+
+`state.products` and `state.productVariations` hold the same products and variations as the [`woocommerce/products` store](#woocommerceproducts-store), keyed by ID, in Store API format (`ProductResponseItem`, without `images`). An ID with no entry reads as `undefined` on the client and `null` on the server. The data is loaded the same way as for `woocommerce/products`, through the `ProductsStore` loaders, and it is read-only: nothing writes product data to the `woocommerce` store.
+
+Read it in directives, on the server and the client:
+
+```html
+<div data-wp-interactive="woocommerce">
+	<span data-wp-text="state.products.42.name"></span>
+</div>
+```
+
+From PHP, while directives are processed, index the state by ID:
+
+```php
+$state   = wp_interactivity_state( 'woocommerce' );
+$product = $state['products'][ $product_id ] ?? null;
+```
+
+From JS, with the `ProductDataState` type exported by `@woocommerce/stores/woocommerce`:
+
+```ts
+import type { ProductDataState } from '@woocommerce/stores/woocommerce';
+
+const { state } = store< { state: ProductDataState } >(
+	'woocommerce',
+	{},
+	{ lock: universalLock }
+);
+
+const product = state.products[ productId ];
+```
+
+For now the `woocommerce` store reads this data from `woocommerce/products` instead of holding a copy, so each record is sent to the page once. This has two consequences:
+
+-   On the server, `products` and `productVariations` aren't arrays, so read them by ID only. `is_array()` is false for them, `foreach` finds no entries, and array functions such as `array_key_exists()` don't accept them (a `TypeError` on PHP 8). They exist only once a loader has run in the request.
+-   In the serialized interactivity data, `woocommerce` carries them as empty objects. The client reads the data once the `@woocommerce/stores/woocommerce` module loads, so a block that binds it must load that module.
 
 ### The `addCartItem` outcome contract
 
