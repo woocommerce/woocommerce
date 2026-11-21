@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+use Automattic\WooCommerce\Internal\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CustomerUpdate;
 
 /**
@@ -321,7 +322,7 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 	private function with_extensions( callable $register, callable $test ): void {
 		$saved = array();
 		foreach ( array( 'resources', 'fields', 'validators', 'filters', 'syncs' ) as $name ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property = new \ReflectionProperty( AbilityExtensions::class, $name );
 			$property->setAccessible( true );
 			$saved[ $name ] = $property->getValue();
 			$property->setValue( null, array() );
@@ -335,7 +336,7 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 			$test( new CustomerUpdate( CustomerUpdate::ABILITY_NAME, CustomerUpdate::get_registration_args() ) );
 		} finally {
 			foreach ( $saved as $name => $value ) {
-				$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+				$property = new \ReflectionProperty( AbilityExtensions::class, $name );
 				$property->setAccessible( true );
 				$property->setValue( null, $value );
 			}

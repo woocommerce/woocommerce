@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Internal\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductReviewAbilityTrait;
@@ -140,7 +141,7 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 
 		$formatted = self::format_review( $saved, true, true );
 		if ( is_wp_error( $formatted ) ) {
-			return $changed ? ExtensibleAbilities::saved_write_error( $formatted, 'product_review', (int) $saved->comment_ID ) : $formatted;
+			return $changed ? AbilityExtensions::saved_write_error( $formatted, 'product_review', (int) $saved->comment_ID ) : $formatted;
 		}
 
 		return array(

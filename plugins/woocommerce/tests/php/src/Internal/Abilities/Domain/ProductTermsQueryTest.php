@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Internal\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
@@ -47,7 +48,7 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		foreach ( array( 'resources', 'fields' ) as $name ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property = new \ReflectionProperty( AbilityExtensions::class, $name );
 			$property->setAccessible( true );
 			$this->saved_state[ $name ] = $property->getValue();
 			$property->setValue( null, array() );
@@ -61,7 +62,7 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		foreach ( $this->saved_state as $name => $value ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property = new \ReflectionProperty( AbilityExtensions::class, $name );
 			$property->setAccessible( true );
 			$property->setValue( null, $value );
 		}
