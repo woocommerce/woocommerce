@@ -12,6 +12,7 @@ import {
 /**
  * Internal dependencies
  */
+import { DEFAULT_CAROUSEL_COLUMNS } from '../../constants';
 import { DisplayLayoutControlProps, LayoutOptions } from '../../types';
 import { getDefaultDisplayLayout, sanitizeDisplayLayout } from '../../utils';
 
@@ -29,11 +30,19 @@ interface ColumnsControlProps extends DisplayLayoutControlProps {
 
 const ColumnsControl = ( props: ColumnsControlProps ) => {
 	const { maxColumns, hideResponsiveToggle } = props;
-	const { type, columns, shrinkColumns } = props.displayLayout;
-	const showColumnsControl = type === LayoutOptions.GRID;
+	const { type, columns, shrinkColumns, carouselColumns } =
+		props.displayLayout;
+	const isGridLayout = type === LayoutOptions.GRID;
+	const isCarouselLayout = type === LayoutOptions.CAROUSEL;
+	const showColumnsControl = isGridLayout || isCarouselLayout;
 
 	const defaultLayout = getDefaultDisplayLayout();
-	const columnCount = columns ?? defaultLayout.columns;
+	const defaultMaxColumns = 6;
+	const effectiveMaxColumns = maxColumns ?? defaultMaxColumns;
+	const columnCount = isCarouselLayout
+		? ( carouselColumns ??
+			Math.min( DEFAULT_CAROUSEL_COLUMNS, effectiveMaxColumns ) )
+		: ( columns ?? defaultLayout.columns );
 
 	const onShrinkColumnsToggleChange = ( value: boolean ) => {
 		props.setAttributes( {
@@ -44,9 +53,13 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 		} );
 	};
 
-	const onPanelDeselect = () => {
+	const onColumnsDeselect = () => {
 		props.setAttributes( {
-			displayLayout: sanitizeDisplayLayout( defaultLayout ),
+			displayLayout: sanitizeDisplayLayout( {
+				...props.displayLayout,
+				columns: defaultLayout.columns,
+				carouselColumns: DEFAULT_CAROUSEL_COLUMNS,
+			} ),
 		} );
 	};
 
@@ -54,24 +67,36 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 		if ( value === undefined ) {
 			return;
 		}
+		const columnsKey = isCarouselLayout ? 'carouselColumns' : 'columns';
 		props.setAttributes( {
 			displayLayout: sanitizeDisplayLayout( {
 				...props.displayLayout,
-				columns: value,
+				[ columnsKey ]: value,
 			} ),
 		} );
 	};
 
-	const defaultMaxColumns = 6;
-	const effectiveMaxColumns = maxColumns ?? defaultMaxColumns;
+	const hasCustomColumnCount = () =>
+		isCarouselLayout
+			? DEFAULT_CAROUSEL_COLUMNS !== columnCount
+			: defaultLayout.columns !== columnCount;
+
+	const onShrinkColumnsDeselect = () => {
+		props.setAttributes( {
+			displayLayout: sanitizeDisplayLayout( {
+				...props.displayLayout,
+				shrinkColumns: true,
+			} ),
+		} );
+	};
 
 	return showColumnsControl ? (
 		<>
 			<ToolsPanelItem
 				label={ columnsLabel }
-				hasValue={ () => defaultLayout.columns !== columnCount }
+				hasValue={ hasCustomColumnCount }
 				isShownByDefault
-				onDeselect={ onPanelDeselect }
+				onDeselect={ onColumnsDeselect }
 			>
 				<RangeControl
 					__next40pxDefaultSize
@@ -90,7 +115,7 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 						defaultLayout?.shrinkColumns !== shrinkColumns
 					}
 					isShownByDefault
-					onDeselect={ onPanelDeselect }
+					onDeselect={ onShrinkColumnsDeselect }
 				>
 					<ToggleControl
 						__nextHasNoMarginBottom

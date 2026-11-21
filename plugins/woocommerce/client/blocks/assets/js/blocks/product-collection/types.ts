@@ -61,7 +61,12 @@ export interface ProductCollectionDisplayLayout {
 	 */
 	columns?: number;
 	/**
-	 * Whether Grid columns shrink on smaller screens. Omitted for Stack and Carousel.
+	 * How many products the Carousel shows at once.
+	 * Carousels save this value. Omitted for Stack and Grid.
+	 */
+	carouselColumns?: number;
+	/**
+	 * Whether columns shrink on smaller screens. Omitted for Stack.
 	 */
 	shrinkColumns?: boolean;
 }

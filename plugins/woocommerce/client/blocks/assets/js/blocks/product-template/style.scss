@@ -87,6 +87,73 @@ $min-product-width: 150px;
 /**
  * Carousel layout
  */
+$carousel-columns: (
+	1: (
+		span: 85%,
+		padding: 7.5%,
+		align: start,
+	),
+	2: (
+		span: 85%,
+		padding: 6%,
+		align: start,
+	),
+	3: (
+		span: 85.5%,
+		padding: 30%,
+		align: center,
+	),
+	4: (
+		span: 88%,
+		padding: 4%,
+		align: start,
+	),
+	5: (
+		span: 90%,
+		padding: 30%,
+		align: center,
+	),
+	6: (
+		span: 90%,
+		padding: 1.7%,
+		align: start,
+	),
+);
+// Breakpoint at which the responsive layout first shows each column count.
+// Below 600px it shows two.
+$carousel-shrink-steps: (
+	600px: 3,
+	960px: 4,
+	1280px: 5,
+	1440px: 6,
+);
+$carousel-narrow-columns: 2;
+
+@function carousel-product-width($columns) {
+	$share: map.get(map.get($carousel-columns, $columns), span);
+
+	@return math.div($share, $columns);
+}
+
+@mixin carousel-scroll-for-count($count) {
+	$style: map.get($carousel-columns, $count);
+
+	scroll-padding: 0 #{ map.get($style, padding) };
+
+	.wc-block-product {
+		scroll-snap-align: map.get($style, align);
+	}
+}
+
+// The collection is the query container so rules can style the carousel.
+// The carousel is the scroll container, and a container query cannot style
+// the element that defines the container.
+.wp-block-woocommerce-product-collection:has(
+		.is-product-collection-layout-carousel
+	) {
+	container-type: inline-size;
+	container-name: carousel;
+}
 
 .is-product-collection-layout-carousel {
 	overflow-x: auto;
@@ -94,8 +161,6 @@ $min-product-width: 150px;
 	scroll-snap-type: x mandatory;
 	scroll-padding: 0 30%;
 	position: relative; // Create new stacking context
-	container-type: inline-size;
-	container-name: carousel;
 
 	.wc-block-product {
 		box-sizing: border-box;
@@ -103,33 +168,66 @@ $min-product-width: 150px;
 		padding: 4px;
 		scroll-snap-align: center;
 		flex-basis: 0;
-		// Show 2 products in 85% of available space.
-		min-width: 42.5%;
+		min-width: carousel-product-width($carousel-narrow-columns);
 		max-width: 400px;
 
-		@container carousel (min-width: 600px) {
-			// Show 3 products in 85.5% of available space.
-			min-width: 28.5%;
+		@each $breakpoint, $step-columns in $carousel-shrink-steps {
+			@container carousel (min-width: #{$breakpoint}) {
+				min-width: carousel-product-width($step-columns);
+			}
 		}
+	}
 
-		@container carousel (min-width: 782px) {
-			// Show 3 products in 87% of available space.
-			min-width: 29%;
+	&[class*="columns-"] {
+		.wc-block-product {
+			flex-basis: var(--carousel-column-width);
+			flex-grow: 0;
+			flex-shrink: 0;
+			min-width: var(--carousel-column-width);
+			max-width: var(--carousel-column-width);
 		}
+	}
 
-		@container carousel (min-width: 960px) {
-			// Show 4 products in 88% of available space.
-			min-width: 22%;
+	&.wc-block-product-template__carousel-responsive {
+		display: flex;
+		flex-wrap: nowrap;
+		// Inherited by products. Wider steps below override it per column count.
+		--carousel-visible-width: #{carousel-product-width($carousel-narrow-columns)};
+
+		.wc-block-product {
+			flex-shrink: 1;
+			min-width: max(
+				var(--carousel-visible-width),
+				var(--carousel-column-width)
+			);
 		}
+	}
 
-		@container carousel (min-width: 1280px) {
-			// Show 5 products in 90% of available space.
-			min-width: 18%;
-		}
+	@each $columns in map.keys($carousel-columns) {
+		&.columns-#{ $columns } {
+			--carousel-column-width: #{carousel-product-width($columns)};
+			@include carousel-scroll-for-count($columns);
 
-		@container carousel (min-width: 1440px) {
-			// Show 6 products in 90% of available space.
-			min-width: 15%;
+			&.wc-block-product-template__carousel-responsive {
+				// Below 600px the carousel shows two products, but never more
+				// than the selected count.
+				$narrow-columns: $carousel-narrow-columns;
+				@if $columns < $carousel-narrow-columns {
+					$narrow-columns: $columns;
+				}
+
+				@include carousel-scroll-for-count($narrow-columns);
+				--carousel-visible-width: #{carousel-product-width($narrow-columns)};
+
+				@each $breakpoint, $step-columns in $carousel-shrink-steps {
+					@if $step-columns <= $columns {
+						@container carousel (min-width: #{$breakpoint}) {
+							@include carousel-scroll-for-count($step-columns);
+							--carousel-visible-width: #{carousel-product-width($step-columns)};
+						}
+					}
+				}
+			}
 		}
 	}
 }
