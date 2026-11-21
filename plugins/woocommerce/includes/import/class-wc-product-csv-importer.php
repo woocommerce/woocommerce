@@ -150,8 +150,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		$headers = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ); // @codingStandardsIgnoreLine
 
-		// fgetcsv() returns false for an empty file; leave the keys empty so the empty-file error can be shown instead of fataling on array_map().
-		$this->raw_keys = is_array( $headers ) ? array_map( 'trim', $headers ) : array();
+		// fgetcsv() returns false for an empty file and array( null ) for a blank line; leave the keys empty instead of passing either on.
+		$this->raw_keys = is_array( $headers ) && array( null ) !== $headers ? array_map( 'trim', $headers ) : array();
 
 		if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
 			$this->raw_keys = array_map( array( $this, 'adjust_character_encoding' ), $this->raw_keys );
