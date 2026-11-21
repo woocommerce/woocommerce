@@ -262,6 +262,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Gets WHERE time clause of SQL request with date-related constraints.
 	 *
+	 * Download log timestamps are stored in UTC, so the site-time period is converted to UTC.
+	 *
 	 * @override ReportsDataStore::add_time_period_sql_params()
 	 *
 	 * @param array  $query_args Parameters supplied by the user.
@@ -271,17 +273,29 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function add_time_period_sql_params( $query_args, $table_name ) {
 		$where_time = '';
 		if ( $query_args['before'] ) {
-			$datetime_str = $query_args['before']->format( TimeInterval::$sql_datetime_format );
+			$datetime_str = $this->get_utc_datetime_string( $query_args['before'] );
 			$where_time  .= " AND {$table_name}.timestamp <= '$datetime_str'";
 
 		}
 
 		if ( $query_args['after'] ) {
-			$datetime_str = $query_args['after']->format( TimeInterval::$sql_datetime_format );
+			$datetime_str = $this->get_utc_datetime_string( $query_args['after'] );
 			$where_time  .= " AND {$table_name}.timestamp >= '$datetime_str'";
 		}
 
 		return $where_time;
+	}
+
+	/**
+	 * Formats a site-time date as a UTC SQL datetime string.
+	 *
+	 * @param \DateTime $datetime Date in the site timezone.
+	 * @return string
+	 */
+	protected function get_utc_datetime_string( $datetime ) {
+		$utc = clone $datetime;
+		$utc->setTimezone( new \DateTimeZone( 'UTC' ) );
+		return $utc->format( TimeInterval::$sql_datetime_format );
 	}
 
 	/**
