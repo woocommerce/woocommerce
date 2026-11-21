@@ -1259,7 +1259,7 @@ class OrderController {
 							continue;
 						}
 
-						// Check stock based on all items in the cart and consider any held stock within pending orders.
+						// Check stock based on all items in the cart and consider any stock held by other orders.
 						$held_stock     = wc_get_held_stock_quantity( $product, $order->get_id() );
 						$required_stock = $quantities[ $product->get_stock_managed_by_id() ];
 
