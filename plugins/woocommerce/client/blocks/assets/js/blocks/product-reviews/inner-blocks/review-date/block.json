@@ -60,5 +60,9 @@
 				"style": true
 			}
 		}
-	}
+	},
+	"style": [
+		"wc-blocks-style",
+		"file:../product-review-date.css"
+	]
 }

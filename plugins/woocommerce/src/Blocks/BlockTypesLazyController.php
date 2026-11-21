@@ -88,6 +88,7 @@ final class BlockTypesLazyController {
 			$this->get_order_confirmation_blocks(),
 			$this->get_add_to_cart_with_options_blocks(),
 			$this->get_product_display_element_blocks(),
+			$this->get_product_reviews_blocks(),
 		);
 		foreach ( $block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
@@ -331,5 +332,28 @@ final class BlockTypesLazyController {
 		}
 
 		return $list;
+	}
+
+	/**
+	 * Side effect free and stateless product review blocks.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_product_reviews_blocks(): array {
+		// AllReviews, ReviewsByCategory, ReviewsByProduct: excluded — override get_block_type_script() with a shared frontend handle.
+		return array(
+			'product-reviews'                     => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviews::class,
+			'product-review-rating'               => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewRating::class,
+			'product-reviews-title'               => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewsTitle::class,
+			'product-review-form'                 => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewForm::class,
+			'product-review-date'                 => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewDate::class,
+			'product-review-content'              => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewContent::class,
+			'product-review-author-name'          => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewAuthorName::class,
+			'product-reviews-pagination'          => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewsPagination::class,
+			'product-reviews-pagination-next'     => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewsPaginationNext::class,
+			'product-reviews-pagination-previous' => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewsPaginationPrevious::class,
+			'product-reviews-pagination-numbers'  => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewsPaginationNumbers::class,
+			'product-review-template'             => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewTemplate::class,
+		);
 	}
 }
