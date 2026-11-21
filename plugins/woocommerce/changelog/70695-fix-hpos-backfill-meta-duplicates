@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix duplicate order meta in the posts table after a partial HPOS backfill with compatibility sync on.
