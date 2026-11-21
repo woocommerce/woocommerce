@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve cents when refunding orders paid in a currency with more decimal places than the store setting.
