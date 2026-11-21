@@ -249,10 +249,11 @@ abstract class CustomMetaDataStore {
 	public function get_meta_keys( int $limit = 100 ): array {
 		global $wpdb;
 
+		$table = $this->get_db_info()['table'];
 		return $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT DISTINCT meta_key FROM %i WHERE meta_key != '' AND meta_key NOT BETWEEN '_' AND '_z' AND meta_key NOT LIKE %s ORDER BY meta_key ASC LIMIT %d",
-				$this->get_db_info()['table'],
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+				"SELECT DISTINCT meta_key FROM {$table} WHERE meta_key != '' AND meta_key NOT BETWEEN '_' AND '_z' AND meta_key NOT LIKE %s ORDER BY meta_key ASC LIMIT %d",
 				$wpdb->esc_like( '_' ) . '%',
 				$limit
 			)
