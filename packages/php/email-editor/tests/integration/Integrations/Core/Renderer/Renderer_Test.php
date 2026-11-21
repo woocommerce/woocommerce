@@ -23,6 +23,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		'core/columns',
 		'core/column',
 		'core/heading',
+		'core/image',
 		'core/paragraph',
 		'core/list',
 		'core/list-item',
@@ -285,6 +286,34 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$style    = $this->extractBlockStyle( $rendered['html'], 'wp-block-column-test', 'td' );
 		$this->assertStringContainsString( 'color: #ff6900', $style ); // luminous-vivid-orange is #ff6900.
 		$this->assertStringContainsString( 'background-color: #000', $style ); // black is #000.
+	}
+
+	/**
+	 * Test columns whose saved widths add up to more than 100% are shrunk to fit the email, images included.
+	 */
+	public function testItShrinksColumnsThatAddUpToMoreThanTheEmailWidth(): void {
+		$column        = '<!-- wp:column {"width":"100%"} --><div class="wp-block-column" style="flex-basis:100%"><!-- wp:image {"sizeSlug":"large"} --><figure class="wp-block-image size-large"><img src="https://example.com/image.jpg" alt=""/></figure><!-- /wp:image --></div><!-- /wp:column -->';
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:columns --><div class="wp-block-columns">' . $column . $column . '</div><!-- /wp:columns -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+
+		preg_match_all( '/<td[^>]*class="[^"]*wp-block-column[^"]*"[^>]*width="([^"]+)"/', $rendered['html'], $column_widths );
+		preg_match_all( '/<img(?=[^>]*example\.com\/image\.jpg)[^>]*width="(\d+)"/', $rendered['html'], $image_widths );
+		$this->assertCount( 2, $column_widths[1] );
+		$this->assertCount( 2, $image_widths[1] );
+
+		$this->assertMatchesRegularExpression( '/^\d+$/', $column_widths[1][0], 'The column cell declares the shrunk width in whole pixels, not the saved 100%.' );
+		$column_width = (float) $column_widths[1][0];
+		$this->assertSame( $column_widths[1][0], $column_widths[1][1] );
+		$this->assertLessThanOrEqual( 660, $column_width * 2, 'Both columns fit within the 660px email.' );
+		$this->assertLessThanOrEqual( $column_width, (float) $image_widths[1][0], 'The image is no wider than its column.' );
+		$this->assertLessThanOrEqual( $column_width, (float) $image_widths[1][1], 'The image is no wider than its column.' );
 	}
 
 	/**
