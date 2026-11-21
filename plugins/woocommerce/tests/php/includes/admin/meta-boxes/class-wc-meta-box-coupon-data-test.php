@@ -79,6 +79,41 @@ class WC_Meta_Box_Coupon_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox save() registers an error when the coupon code is empty.
+	 * @testWith [""]
+	 *           ["   "]
+	 *
+	 * @param string $coupon_code Coupon code entered on the edit screen.
+	 */
+	public function test_save_registers_empty_coupon_code_error( string $coupon_code ): void {
+		$post_id = $this->create_coupon_post( $coupon_code, 'draft' );
+		$post    = $this->get_coupon_post( $post_id );
+
+		$this->set_coupon_post_data();
+
+		WC_Meta_Box_Coupon_Data::save( $post_id, $post );
+
+		$this->assertContains( 'A coupon code is required before the coupon can be published.', WC_Admin_Meta_Boxes::$meta_box_errors );
+		$this->assertSame( 'draft', get_post_status( $post_id ) );
+	}
+
+	/**
+	 * @testdox save() keeps a published coupon with a code published.
+	 */
+	public function test_save_keeps_published_coupon_with_code_published(): void {
+		$post_id = $this->create_coupon_post( 'metabox-has-code' );
+		$post    = $this->get_coupon_post( $post_id );
+
+		$this->set_coupon_post_data();
+
+		WC_Meta_Box_Coupon_Data::save( $post_id, $post );
+
+		$this->assertSame( array(), WC_Admin_Meta_Boxes::$meta_box_errors );
+		$this->assertSame( 'publish', get_post_status( $post_id ) );
+		$this->assertSame( 'metabox-has-code', get_post_field( 'post_title', $post_id ) );
+	}
+
+	/**
 	 * @testdox save() persists coupon fields from posted metabox data.
 	 */
 	public function test_save_persists_posted_coupon_fields(): void {
@@ -148,14 +183,15 @@ class WC_Meta_Box_Coupon_Data_Test extends WC_Unit_Test_Case {
 	 * Create a coupon post for metabox save tests.
 	 *
 	 * @param string $coupon_code Coupon code.
+	 * @param string $post_status Post status.
 	 * @return int
 	 */
-	private function create_coupon_post( string $coupon_code ): int {
+	private function create_coupon_post( string $coupon_code, string $post_status = 'publish' ): int {
 		return $this->factory()->post->create(
 			array(
 				'post_title'  => $coupon_code,
 				'post_type'   => 'shop_coupon',
-				'post_status' => 'publish',
+				'post_status' => $post_status,
 			)
 		);
 	}
