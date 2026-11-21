@@ -454,7 +454,11 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 
 		return array(
 			'title'     => __( 'Setup checklist', 'woocommerce' ),
-			'badge'     => array() === $open ? null : array(
+			// As in the design: the steps left, or All steps done in green once none are.
+			'badge'     => array() === $open ? array(
+				'intent' => 'stable',
+				'text'   => __( 'All steps done', 'woocommerce' ),
+			) : array(
 				'intent' => 'none',
 				/* translators: %d: number of setup steps left. */
 				'text'   => sprintf( _n( '%d step left', '%d steps left', count( $open ), 'woocommerce' ), count( $open ) ),

@@ -19,6 +19,11 @@ export interface ViewLink {
 	sr?: string;
 }
 
+/** A name to link inside a line, and where it starts when it could also appear earlier. */
+export interface TextLink extends ViewLink {
+	at?: number;
+}
+
 export type RowState = 'open' | 'required' | 'unknown' | 'pass';
 
 export interface CheckRow {
@@ -36,7 +41,7 @@ export interface CheckRow {
 	link: ViewLink | null;
 	seen_at: ViewLink | null;
 	/** A name in the text to link, such as a tool to test with. */
-	text_link?: ViewLink | null;
+	text_link?: TextLink | null;
 }
 
 export interface FixFirstItem {

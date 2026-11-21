@@ -397,7 +397,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'not set up yet'      => array( 'every_step', null, '#^Let shoppers find and buy your products through AI assistants\.$#', null, 'Set up AI shopping', '#^Your store is ready for AI shopping\. Turn it on to let AI assistants find your products\.$#' ),
 			'steps left'          => array( 'coming_soon', 'yes', '#^AI assistants can\'t shop your store yet\. \d+ steps? left\.$#', 'Needs attention', 'Continue setup', '#^Finish \d+ required steps? to get your store ready for AI shopping\.$#' ),
 			'optional steps left' => array( 'optional_left', 'yes', '#^AI assistants can shop your store\. 1 step left\.$#', 'Active', 'View settings', '#^Your store is ready for AI shopping\. You have 1 optional step left\.$#' ),
-			'policy page left'    => array( 'policy_left', 'yes', '#^AI assistants can shop your store\. 1 step left\.$#', 'Active', 'Continue setup', '#^Finish 1 required step to get your store ready for AI shopping\.$#' ),
+			'policy page left'    => array( 'policy_left', 'yes', '#^AI assistants can shop your store\. 1 step left\.$#', 'Needs attention', 'Continue setup', '#^Finish 1 required step to get your store ready for AI shopping\.$#' ),
 			'all steps done'      => array( 'every_step', 'yes', '#^AI assistants can shop your store\.$#', 'Active', 'View settings', '#^Your store is ready for AI shopping\.$#' ),
 			'turned off'          => array( 'every_step', 'no', '#^AI shopping is off\.$#', null, 'View settings', '#^Your store is ready for AI shopping\. Turn it on to let AI assistants find your products\.$#' ),
 			'off, steps left'     => array( 'coming_soon', 'no', '#^AI shopping is off\.$#', 'Needs attention', 'Continue setup', '#^Finish \d+ required steps? to get your store ready for AI shopping\.$#' ),
@@ -437,6 +437,18 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$shopping = $this->view()['overview']['shopping'];
 
 		$this->assertMatchesRegularExpression( $checklist, $page['checklist']['summary'] );
+		if ( 'every_step' === $store ) {
+			$this->assertSame(
+				array(
+					'intent' => 'stable',
+					'text'   => 'All steps done',
+				),
+				$page['checklist']['badge'],
+				'As in the design, a green badge once no step is left'
+			);
+		} else {
+			$this->assertMatchesRegularExpression( '#^\d+ steps? left$#', $page['checklist']['badge']['text'] );
+		}
 		$this->assertSame( 'yes' === $ucp, $page['ucp']['enabled'], 'The switch shows the setting' );
 		$this->assertSame( 'coming_soon' === $store, null !== $page['coming_soon'], 'Coming soon mode has its notice' );
 		$this->assertMatchesRegularExpression( $text, $shopping['text'] );
@@ -1424,7 +1436,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		WC_Helper_Product::create_simple_product();
 		WC_Helper_Product::create_simple_product();
 		wc_get_container()->get( AgentReadiness::class )->refresh_report();
-		$this->row( 'Add a brand to 4 products' );
+		$this->assertStringContainsString( 'agent_readiness=', $this->row( 'Add a brand to 4 products' )['link']['href'], 'Several products open the Products list filtered to them' );
 		$counted = array_filter( (array) $this->view()['fix_first']['items'], static fn( array $item ): bool => false !== strpos( $item['title'], ' 4 products' ) );
 		$this->assertNotEmpty( $counted, 'Fix first has a product fix that counts the products' );
 	}
@@ -1463,9 +1475,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'Required by', $json );
 		$this->assertStringNotContainsString( 'Harder to find on', $json, 'Only channels that can\'t list the product are tagged' );
 		$this->assertSame( 'View product', $brand['link']['text'], 'One product, as in the design' );
-		$this->assertStringContainsString( 'agent_readiness=', $brand['link']['href'], 'The link opens the Products list filtered to the failing products' );
+		$this->assertStringContainsString( 'post=' . $product->get_id() . '&action=edit', $brand['link']['href'], 'One product opens its edit page, not a list of one' );
 		$this->assertStringNotContainsString( 'main image has no alt text', $json, 'Store readiness covers alt text' );
-		$this->assertStringNotContainsString( 'post=' . $product->get_id(), $json, 'No example products' );
 		$this->assertSame( 'Let search engines index your store', $this->step( $this->shopping(), 'search_visible' )['title'], 'Hidden from search engines is a setup step' );
 		$this->assertNull( $view['checked_note'] );
 
@@ -1742,7 +1753,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With AI shopping on, a failing connection URL is Required and in Fix first, and failing catalog search is a Warning that says what came back.
+	 * @testdox With AI shopping on, a failing connection URL is Required and in Fix first, and failing catalog search is a Warning, with the status code kept off the page.
 	 */
 	public function test_failing_ucp_profile_is_required_and_endpoint_a_warning(): void {
 		$this->make_every_step_pass();
@@ -1783,7 +1794,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			),
 			$rows['ucp_endpoints_live']['badge']
 		);
-		$this->assertStringEndsWith( 'The last answer was 403 text/html.', $rows['ucp_endpoints_live']['text'] );
+		$this->assertStringNotContainsString( '403', $rows['ucp_endpoints_live']['text'], 'The status code is for support, not the merchant' );
 	}
 
 	/**

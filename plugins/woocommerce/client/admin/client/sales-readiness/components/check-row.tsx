@@ -12,7 +12,12 @@ import type { ReactNode } from 'react';
  * Internal dependencies
  */
 import { safeHref } from '../safe-href';
-import type { CheckRow as CheckRowData, ViewBadge, ViewLink } from '../types';
+import type {
+	CheckRow as CheckRowData,
+	TextLink,
+	ViewBadge,
+	ViewLink,
+} from '../types';
 import { trackReadiness, type Surface } from '../tracks';
 
 /**
@@ -184,9 +189,16 @@ const TextWithLink = ( {
 	link,
 }: {
 	text: string;
-	link?: ViewLink | null;
+	link?: TextLink | null;
 } ) => {
-	const at = link?.text ? text.indexOf( link.text ) : -1;
+	// The server says where the name starts, so a name that also appears earlier isn't linked there.
+	let at = link?.text ? text.indexOf( link.text ) : -1;
+	if (
+		link?.at !== undefined &&
+		text.slice( link.at, link.at + link.text.length ) === link.text
+	) {
+		at = link.at;
+	}
 	if ( ! link || at < 0 ) {
 		return <>{ text }</>;
 	}

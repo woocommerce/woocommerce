@@ -152,10 +152,6 @@ final class ReadinessCopy {
 			);
 			$check[4] = $fixes[ $source ] ?? $check[4];
 		}
-		if ( 'ucp_endpoints_live' === $id && '' !== $source ) {
-			/* translators: %s: HTTP status and content type, such as 403 text/html. */
-			$check[3] .= ' ' . sprintf( __( 'The last answer was %s.', 'woocommerce' ), $source );
-		}
 		return array(
 			'title'      => $check[0],
 			'action'     => $check[1],
