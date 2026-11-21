@@ -107,6 +107,11 @@ class StoreOutputChecks {
 			if ( 'llms_txt_present' === $check['id'] ) {
 				$source = $this->llms_txt_source( $responses, $ok );
 			}
+			if ( 'open_graph_tags' === $check['id'] && false === $ok ) {
+				// Which page lacks the tags picks the found line: home, product or both. A failing product page is named.
+				$source = self::open_graph_missing( $responses );
+				$failed = 'home' === $source ? null : $responses->product();
+			}
 			$seen_at = $conflict ? self::seen_at( (string) ( $check['seen_at'] ?? '' ), $responses ) : '';
 			if ( 'llms_txt_links_resolve' === $check['id'] && false === $ok ) {
 				// Where the file comes from picks the fix, and the broken link is named.
@@ -135,6 +140,22 @@ class StoreOutputChecks {
 			$responses->focus( null );
 		}
 		return $results;
+	}
+
+	/**
+	 * Which page the Open Graph check failed on: 'home', 'product' or 'both'. The product page is the
+	 * one in focus, the sample's first that failed.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private static function open_graph_missing( StoreResponses $responses ): string {
+		$missing = static fn( ?array $page ): bool => null !== $page && ! ( self::has_open_graph( $page['body'], 'og:title' ) && self::has_open_graph( $page['body'], 'og:image' ) );
+		$home    = $missing( $responses->home_page() );
+		$product = $missing( $responses->product_page() );
+		if ( $home && $product ) {
+			return 'both';
+		}
+		return $home ? 'home' : 'product';
 	}
 
 	/**
@@ -349,7 +370,7 @@ class StoreOutputChecks {
 				'name'    => __( 'Pages let search and AI answers quote them', 'woocommerce' ),
 				'label'   => __( 'Pages ask search and AI answers not to quote them', 'woocommerce' ),
 				'why'     => __( 'A nosnippet or max-snippet robots rule keeps AI answers from quoting your pages, so your products get left out.', 'woocommerce' ),
-				'fix'     => __( 'Remove nosnippet and max-snippet from the robots settings in your SEO plugin, or ask your host about an X-Robots-Tag header.', 'woocommerce' ),
+				'fix'     => __( 'Remove nosnippet and max-snippet from the robots settings in your SEO plugin, or ask your hosting provider about an X-Robots-Tag header.', 'woocommerce' ),
 				'fix_url' => '',
 			),
 			array(
@@ -371,7 +392,7 @@ class StoreOutputChecks {
 				'name'    => __( 'Pages let search and AI crawlers index them', 'woocommerce' ),
 				'label'   => __( 'Pages ask search and AI crawlers not to index them', 'woocommerce' ),
 				'why'     => __( 'A noindex, noai or noimageai robots rule keeps your pages and products out of search and AI answers.', 'woocommerce' ),
-				'fix'     => __( 'Remove noindex, noai and noimageai from the robots settings in your SEO plugin, or ask your host about an X-Robots-Tag header.', 'woocommerce' ),
+				'fix'     => __( 'Remove noindex, noai and noimageai from the robots settings in your SEO plugin, or ask your hosting provider about an X-Robots-Tag header.', 'woocommerce' ),
 				'fix_url' => '',
 			),
 			array(
@@ -575,7 +596,7 @@ class StoreOutputChecks {
 			'name'     => __( 'Store serves its UCP profile', 'woocommerce' ),
 			'label'    => __( 'UCP profile isn\'t served', 'woocommerce' ),
 			'why'      => __( 'Agents read /.well-known/ucp to find your catalog. UCP is on, but visitors don\'t get the profile.', 'woocommerce' ),
-			'fix'      => __( 'Save Settings > Permalinks to refresh the rules. If it still fails, ask your host whether caching or a firewall blocks /.well-known/ucp.', 'woocommerce' ),
+			'fix'      => __( 'Save Settings > Permalinks to refresh the rules. If it still fails, ask your hosting provider whether caching or a firewall blocks /.well-known/ucp.', 'woocommerce' ),
 			'fix_url'  => admin_url( 'options-permalink.php' ),
 			'conflict' => true,
 			'seen_at'  => home_url( '/.well-known/ucp' ),
@@ -602,7 +623,7 @@ class StoreOutputChecks {
 			'name'    => __( 'UCP endpoint answers', 'woocommerce' ),
 			'label'   => __( 'UCP endpoint is blocked or doesn\'t answer', 'woocommerce' ),
 			'why'     => __( 'Agents search your catalog and build carts through this endpoint; when it\'s blocked they can\'t find your products.', 'woocommerce' ),
-			'fix'     => __( 'Ask your host or security plugin to allow requests to the WordPress REST API under /wp-json/wc/ucp/.', 'woocommerce' ),
+			'fix'     => __( 'Ask your hosting provider or security plugin to allow requests to the WordPress REST API under /wp-json/wc/ucp/.', 'woocommerce' ),
 			'fix_url' => '',
 		);
 		$checks[] = array(
@@ -1811,7 +1832,8 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether every image has an alt attribute. An empty alt marks a decorative image and counts;
-	 * images hidden from assistive technology don't need one.
+	 * images hidden from assistive technology don't need one, nor do templates whose alt a script
+	 * fills in, such as the Mini-Cart block's empty item images.
 	 *
 	 * @param string $html Page HTML.
 	 */
@@ -1829,7 +1851,8 @@ class StoreOutputChecks {
 			// A tracking pixel or an image hidden from assistive technology needs no alt.
 			$pixel  = '1' === (string) $tags->get_attribute( 'width' ) && '1' === (string) $tags->get_attribute( 'height' );
 			$hidden = 'true' === strtolower( (string) $tags->get_attribute( 'aria-hidden' ) ) || in_array( strtolower( (string) $tags->get_attribute( 'role' ) ), array( 'presentation', 'none' ), true );
-			if ( ! $pixel && ! $hidden ) {
+			$bound  = null !== $tags->get_attribute( 'data-wp-bind--alt' );
+			if ( ! $pixel && ! $hidden && ! $bound ) {
 				return false;
 			}
 		}

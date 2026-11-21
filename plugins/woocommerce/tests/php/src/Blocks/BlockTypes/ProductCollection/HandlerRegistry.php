@@ -175,27 +175,29 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		->getMock();
 
 		$expected_product_ids = array( 2, 3, 4 );
+		$reference_id         = WC_Helper_Product::create_simple_product()->get_id();
+		wp_set_object_terms( $reference_id, array(), 'product_cat' );
 
-		// Reference 1 has no categories or tags; keep force-display off so
+		// The reference has no categories or tags; keep force-display off so
 		// wc_get_related_products() short-circuits to an empty set instead of querying the
 		// data store. The mocked woocommerce_related_products filter then drives the result,
 		// independent of any products in the database.
 		add_filter( 'woocommerce_product_related_posts_force_display', '__return_false', 0 );
 		$related_filter->expects( $this->exactly( 2 ) )
 			->method( '__invoke' )
-			->with( array(), 1 )
+			->with( array(), $reference_id )
 			->willReturn( $expected_product_ids );
 		add_filter( 'woocommerce_related_products', array( $related_filter, '__invoke' ), 10, 2 );
 
 		// Frontend.
 		$parsed_block                                       = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['collection']                = 'woocommerce/product-collection/related';
-		$parsed_block['attrs']['query']['productReference'] = 1;
+		$parsed_block['attrs']['query']['productReference'] = $reference_id;
 		$result_frontend                                    = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		// Editor.
 		$request = Utils::build_request(
-			array( 'productReference' => 1 )
+			array( 'productReference' => $reference_id )
 		);
 		$request->set_param(
 			'productCollectionQueryContext',
@@ -210,6 +212,66 @@ class HandlerRegistry extends \WP_UnitTestCase {
 
 		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_frontend['post__in'] );
 		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_editor['post__in'] );
+	}
+
+	/**
+	 * Collections that use a product reference, combined with the statuses that hide a product from visitors.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function provider_reference_collections_and_hidden_statuses(): array {
+		$data = array();
+		foreach ( array( 'related', 'upsells', 'cross-sells' ) as $collection ) {
+			foreach ( array( 'draft', 'pending', 'private', 'future', 'trash' ) as $status ) {
+				$data[ "$collection of a $status product" ] = array( "woocommerce/product-collection/$collection", $status );
+			}
+		}
+		return $data;
+	}
+
+	/**
+	 * @testdox Collections only resolve a product reference that the current user can view.
+	 *
+	 * @dataProvider provider_reference_collections_and_hidden_statuses
+	 *
+	 * @param string $collection Collection name, e.g. woocommerce/product-collection/upsells.
+	 * @param string $status     Status that hides the referenced product from visitors.
+	 */
+	public function test_collection_ignores_reference_the_user_cannot_view( string $collection, string $status ) {
+		$linked_product = WC_Helper_Product::create_simple_product();
+		$hidden_product = WC_Helper_Product::create_simple_product( false );
+		$hidden_product->set_upsell_ids( array( $linked_product->get_id() ) );
+		$hidden_product->set_cross_sell_ids( array( $linked_product->get_id() ) );
+		$hidden_product->set_status( $status );
+		if ( 'future' === $status ) {
+			$hidden_product->set_date_created( time() + DAY_IN_SECONDS );
+		}
+		$hidden_product->save();
+
+		// Let the related collection find the linked product through a shared category.
+		wp_set_object_terms( $linked_product->get_id(), array( 'Hidden category' ), 'product_cat' );
+		wp_set_object_terms( $hidden_product->get_id(), array( 'Hidden category' ), 'product_cat' );
+
+		$parsed_block                                       = Utils::get_base_parsed_block();
+		$parsed_block['attrs']['collection']                = $collection;
+		$parsed_block['attrs']['query']['productReference'] = $hidden_product->get_id();
+
+		// The editor queries the public wp/v2/product route, so anyone can send this request.
+		$request = Utils::build_request( array( 'productReference' => $hidden_product->get_id() ) );
+		$request->set_param( 'productCollectionQueryContext', array( 'collection' => $collection ) );
+
+		wp_set_current_user( 0 );
+		$visitor_frontend = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+		$visitor_editor   = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$admin_frontend = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+		$admin_editor   = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		$this->assertSame( array( -1 ), $visitor_frontend['post__in'], 'A visitor should get no products on the frontend.' );
+		$this->assertSame( array( -1 ), $visitor_editor['post__in'], 'A visitor should get no products from the REST API.' );
+		$this->assertEquals( array( $linked_product->get_id() ), array_values( $admin_frontend['post__in'] ), 'Users who can edit the reference should keep the frontend results.' );
+		$this->assertEquals( array( $linked_product->get_id() ), array_values( $admin_editor['post__in'] ), 'Users who can edit the reference should keep the editor preview.' );
 	}
 
 	/**

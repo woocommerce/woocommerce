@@ -66,6 +66,10 @@ class CheckoutSessions extends AbstractCheckoutRoute {
 						'description' => __( 'Shipping postal address.', 'woocommerce' ),
 						'type'        => 'object',
 					),
+					'discounts'        => array(
+						'description' => __( 'Discount codes to apply, replacing any applied before.', 'woocommerce' ),
+						'type'        => 'object',
+					),
 				),
 			),
 			'schema' => array( $this->schema, 'get_public_item_schema' ),
@@ -101,6 +105,11 @@ class CheckoutSessions extends AbstractCheckoutRoute {
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		$checkout_id = $this->route_cart_id( $request );
+		$codes       = $this->parse_discount_codes( $request );
+
+		if ( $codes instanceof \WP_REST_Response ) {
+			return $codes;
+		}
 
 		if ( '' !== $checkout_id ) {
 			// The cart is the source of truth, so `line_items` is ignored; an update can change it.
@@ -140,10 +149,11 @@ class CheckoutSessions extends AbstractCheckoutRoute {
 			return $error;
 		}
 
-		$state = array( 'created_at' => time() );
+		$context = $this->apply_discount_codes( $codes );
+		$state   = array( 'created_at' => time() );
 		$this->save_checkout_state( $state );
 
-		return $this->checkout_response( $checkout_id, $state, 201 );
+		return $this->checkout_response( $checkout_id, $state, 201, null, $context );
 	}
 
 	/**

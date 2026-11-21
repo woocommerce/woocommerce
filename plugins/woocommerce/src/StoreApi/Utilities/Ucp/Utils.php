@@ -40,6 +40,11 @@ class Utils {
 	const CAPABILITY_CHECKOUT = 'dev.ucp.shopping.checkout';
 
 	/**
+	 * Extension of the cart and checkout capabilities that takes discount codes.
+	 */
+	const CAPABILITY_DISCOUNT = 'dev.ucp.shopping.discount';
+
+	/**
 	 * Whether the UCP routes are registered.
 	 *
 	 * @return bool
@@ -62,20 +67,27 @@ class Utils {
 	/**
 	 * Build the `ucp` envelope every UCP response carries.
 	 *
-	 * UCP requires `capabilities` to name only the capability relevant to the
-	 * operation being answered, so each response declares exactly one.
+	 * UCP requires `capabilities` to name only what is relevant to the operation being
+	 * answered: its own capability, and the extensions declared on it.
 	 *
 	 * @param string $capability One of the CAPABILITY_* constants.
 	 * @param string $status Response status, `success` or `error`.
 	 * @return array
 	 */
 	public static function response_metadata( string $capability, string $status ): array {
+		$declarations = self::capability_declarations();
+		$capabilities = array( $capability => array( $declarations[ $capability ] ?? array( 'version' => self::VERSION ) ) );
+
+		foreach ( $declarations as $name => $declaration ) {
+			if ( in_array( $capability, $declaration['extends'] ?? array(), true ) ) {
+				$capabilities[ $name ] = array( $declaration );
+			}
+		}
+
 		return array(
 			'version'      => self::VERSION,
 			'status'       => $status,
-			'capabilities' => array(
-				$capability => array( self::capability_declaration( $capability ) ),
-			),
+			'capabilities' => $capabilities,
 		);
 	}
 
@@ -112,17 +124,17 @@ class Utils {
 			unset( $declarations[ self::CAPABILITY_CHECKOUT ] );
 		}
 
-		return $declarations;
-	}
+		// A store with coupons turned off has no code to apply.
+		if ( wc_coupons_enabled() ) {
+			$declarations[ self::CAPABILITY_DISCOUNT ] = array(
+				'version' => self::VERSION,
+				'extends' => array_values( array_intersect( array( self::CAPABILITY_CART, self::CAPABILITY_CHECKOUT ), array_keys( $declarations ) ) ),
+				'spec'    => 'https://ucp.dev/' . self::VERSION . '/specification/discount',
+				'schema'  => 'https://ucp.dev/' . self::VERSION . '/schemas/shopping/discount.json',
+			);
+		}
 
-	/**
-	 * Spec and schema references for a capability.
-	 *
-	 * @param string $capability One of the CAPABILITY_* constants.
-	 * @return array
-	 */
-	private static function capability_declaration( string $capability ): array {
-		return self::capability_declarations()[ $capability ] ?? array( 'version' => self::VERSION );
+		return $declarations;
 	}
 
 	/**

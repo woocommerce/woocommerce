@@ -173,7 +173,7 @@ class ReadinessCheckPageTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A failing page check names the product whose page failed, and falls back to "a product page" once it is gone.
+	 * @testdox A failing page check names the product whose page failed, and falls back to "on a product page" once it is gone, also for a check that reads the home page too.
 	 */
 	public function test_failing_page_check_names_its_product(): void {
 		$failing_copy = new \ReflectionMethod( ReadinessCheckPage::class, 'failing_copy' );
@@ -195,6 +195,11 @@ class ReadinessCheckPageTest extends WC_Unit_Test_Case {
 		$this->assertStringStartsWith( 'On the Blue hoodie & cap page, the name, price, and stock aren’t in the page code', $failing_copy->invoke( null, $check )['text'] );
 
 		$product->delete( true );
-		$this->assertStringStartsWith( 'A product page doesn’t include these details', $failing_copy->invoke( null, $check )['text'] );
+		$this->assertStringStartsWith( 'On a product page, the name, price, and stock aren’t in the page code', $failing_copy->invoke( null, $check )['text'] );
+
+		$check['id'] = 'viewport_meta';
+		$this->assertStringStartsWith( 'On a product page, the code doesn’t tell browsers how to size it', $failing_copy->invoke( null, $check )['text'], 'A check that also reads the home page doesn\'t blame it for a deleted product\'s page' );
+		$check['product'] = 0;
+		$this->assertStringStartsWith( 'Your home page doesn’t tell browsers how to size it', $failing_copy->invoke( null, $check )['text'], 'With no product, the home page failed' );
 	}
 }

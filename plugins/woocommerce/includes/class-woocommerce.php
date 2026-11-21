@@ -705,7 +705,7 @@ final class WooCommerce {
 	 * pages, so callers can skip the same work — block and template registration, site tracking.
 	 *
 	 * This is a rendering decision only. StoreApi\Authentication keeps its own, narrower check
-	 * and does not treat UCP as Store API: its filters assume a browser client with a nonce,
+	 * and gives UCP only its rate limiting: its other filters assume a browser client with a nonce,
 	 * which a UCP agent never sends, so UCP routes must not inherit them.
 	 *
 	 * @return bool
