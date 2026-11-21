@@ -647,9 +647,17 @@ const browserPopstateHandler = fromCallback( ( { sendBack } ) => {
 	const popstateHandler = () => {
 		sendBack( { type: 'EXTERNAL_URL_UPDATE' } );
 	};
+	const pageshowHandler = ( event: PageTransitionEvent ) => {
+		// A cached page can restore a completed loader instead of the step in the URL.
+		if ( event.persisted ) {
+			popstateHandler();
+		}
+	};
 	window.addEventListener( 'popstate', popstateHandler );
+	window.addEventListener( 'pageshow', pageshowHandler );
 	return () => {
 		window.removeEventListener( 'popstate', popstateHandler );
+		window.removeEventListener( 'pageshow', pageshowHandler );
 	};
 } );
 
@@ -1551,15 +1559,17 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 									}: {
 										event: DoneActorEvent< Extension[] >;
 									} ) => {
-										// Skip the plugins page
-										// When there is 0 plugin returned from the server
-										// Or all the plugins are activated already.
+										// Keep explicit navigation to this step available after installation.
+										const { step } = getQuery() as {
+											step?: string;
+										};
 										return (
 											event.output.length === 0 ||
-											event.output.every(
-												( plugin: Extension ) =>
-													plugin.is_activated
-											)
+											( step !== 'plugins' &&
+												event.output.every(
+													( plugin: Extension ) =>
+														plugin.is_activated
+												) )
 										);
 									},
 								},
