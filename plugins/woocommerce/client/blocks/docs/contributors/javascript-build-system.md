@@ -9,39 +9,38 @@
 -   [Styling](#styling)
 -   [Relevant files](#relevant-files)
 
-WooCommerce Blocks uses Webpack to build the files that will be consumed by browsers. There are several different Webpack configs in order to build files for different contexts of the plugin. They can all be found in [`webpack.config.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/6da64165025e7a2afc1782e4b278d72536e7b754/webpack.config.js#L162-L169), but this is a quick summary:
+WooCommerce Blocks uses [Rolldown](https://rolldown.rs) to build the files that will be consumed by browsers. The build lives in [`bin/rolldown/`](../../bin/rolldown/) and the shared parts in [`packages/js/rolldown-build`](../../../../../../packages/js/rolldown-build/README.md). There are several builds for different contexts of the plugin:
 
--   `CoreConfig`: config for shared libraries like settings, blocks data or some HOCs and context.
--   `MainConfig`: config that builds the JS files used by blocks in the editor and is responsible for registering the blocks in Gutenberg.
--   `FrontendConfig`: config that builds the JS files used by blocks in the store frontend.
--   `PaymentsConfig`: config that builds the JS files used by payment methods in the Cart and Checkout blocks.
--   `ExtensionsConfig`: config that builds extension integrations.
--   `StylingConfig`: config that builds CSS files. You can read more about it in the page [CSS build system](css-build-system.md).
+-   `core`: shared libraries like settings, blocks data or some HOCs and context.
+-   `main`: the JS files used by blocks in the editor, which register the blocks in Gutenberg.
+-   `frontend`: the JS files used by blocks in the store frontend.
+-   `payments`: the JS files used by payment methods in the Cart and Checkout blocks.
+-   `extensions`: extension integrations.
+-   `styling`: CSS files. You can read more about it in the page [CSS build system](css-build-system.md).
+-   Interactivity API script modules, the dependency detection script and `block.json` files.
 
-Details on each config can be found in [`webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-configs.js). Entry points are declared in [`webpack-entries.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-entries.js).
+Each build is described in [`bin/rolldown/config.mjs`](../../bin/rolldown/config.mjs). Entry points are declared in [`bin/entries.js`](../../bin/entries.js).
 
 ## Environment variables
 
-Different builds are generated depending on the variable `NODE_ENV`. It can have two values: `production` or `development`. Production builds include tree-shaking, minification and other performance enhancements, while development builds are focused on development and include source maps. You can read more about [environment variables](https://webpack.js.org/guides/environment-variables/) in Webpack docs.
+`pnpm build` writes a production build: minified, without propTypes. `--dev` or `NODE_ENV=development` writes a development build with source maps, and `pnpm start` watches and rebuilds development builds.
 
 ## Babel
 
-Most of our code is transpiled by Babel. This allows us to use the latest JavaScript technologies without affecting browser support.
-
-Some of the Babel plugins we use can be found in [`webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-configs.js).
+The build does not use Babel. Rolldown compiles TypeScript and JSX itself and targets the browsers WordPress supports. Jest still uses Babel.
 
 ## External scripts
 
 Several scripts are loaded as externals. That means that they can be imported in WooCommerce Blocks as any other package, but instead of being bundled in our built files, they are loaded from an external file provided by WordPress (or Gutenberg, if enabled).
 
-[`@wordpress/dependency-extraction-webpack-plugin`](https://developer.wordpress.org/block-editor/packages/packages-dependency-extraction-webpack-plugin/) is used to automatize dependency extraction for common WP scripts.
+The build uses the same externals rules as [`@wordpress/dependency-extraction-webpack-plugin`](https://developer.wordpress.org/block-editor/packages/packages-dependency-extraction-webpack-plugin/), and writes an `.asset.php` file with the dependencies of each script.
 
 In practice, that means the dependency version is:
 
 -   deterministic when running WooCommerce Blocks in isolation (e.g. unit tests). In this case, the dependency will have a version as stated in `package.json`,
 -   non-deterministic when run in the WordPress ecosystem. Depending on the WordPress or Gutenberg version the user has installed, the version of external dependencies may also vary.
 
-[`@wordpress/dependency-extraction-webpack-plugin`](https://developer.wordpress.org/block-editor/packages/packages-dependency-extraction-webpack-plugin/) script is applied to each of the build processes: Core, Main, Frontend, Payments, Extensions.
+These rules apply to each of the builds: Core, Main, Frontend, Payments, Extensions.
 
 ### `wordpress-components` and `wordpress-components-slotfill` alias
 
@@ -51,7 +50,7 @@ We also have one other alias `wordpress-components-slotfill`, used to import the
 
 It is pinned to `@wordpress/components@29.5.4`, matching the version in the `wp-min` catalog in the root `pnpm-workspace.yaml`, so the slot fill resolves to the same `@wordpress/components` the rest of the package already builds against rather than a separate copy. The version is hardcoded because pnpm cannot combine the `catalog:` protocol with an `npm:` alias — re-pin it manually whenever the `wp-min` catalog bumps `@wordpress/components`.
 
-The alias exists so the slot fill is bundled into the front-end instead of externalized. Because the specifier does not start with `@wordpress/`, the Dependency Extraction Webpack Plugin leaves it alone rather than mapping it to `window.wp.components` (which is not loaded on the storefront). It is tree-shaken, so only the small amount of code needed for slot fill functionality is bundled.
+The alias exists so the slot fill is bundled into the front-end instead of externalized. Because the specifier does not start with `@wordpress/`, the externals rules leave it alone rather than mapping it to `window.wp.components` (which is not loaded on the storefront). It is tree-shaken, so only the small amount of code needed for slot fill functionality is bundled.
 
 If you need to build front-end components in future, you should use Ariakit to build them. See examples like the [Button](../../assets/js/base/components/button/index.tsx) component for how to build components using Ariakit.
 
@@ -66,7 +65,7 @@ There are several aliases for internal imports which make importing files across
 
 Aliases also ease refactors because imports no longer depend on the exact location of the file.
 
-All available aliases can be found in [`webpack-helpers.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/6da64165025e7a2afc1782e4b278d72536e7b754/bin/webpack-helpers.js#L36-L91).
+All available aliases can be found in [`bin/build-helpers.js`](../../bin/build-helpers.js).
 
 ## Styling
 
@@ -74,12 +73,11 @@ CSS builds follow a separate path from JS builds, more details can be found in t
 
 ## Relevant files
 
-Webpack config is split between several files:
-
--   [`webpack.config.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/webpack.config.js): Top level webpack config.
--   [`bin/webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-configs.js): Code for generating each build config. This most closely resembles a classic webpack config - if you're looking for something, start here.
--   [`bin/webpack-entries.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-entries.js): Code for generating [webpack `entry` definitions](https://webpack.js.org/concepts/entry-points/) and mapping source files to entry points. If you're adding a new block or module to the build, start here.
--   [`bin/webpack-helpers.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-helpers.js): Includes utils to load external code at run time, e.g. some dependencies from Woo and WordPress core.
+-   [`bin/rolldown/build.mjs`](../../bin/rolldown/build.mjs) and [`bin/rolldown/watch.mjs`](../../bin/rolldown/watch.mjs): the build and watch commands.
+-   [`bin/rolldown/config.mjs`](../../bin/rolldown/config.mjs): the options of each build. If you're looking for something, start here.
+-   [`bin/rolldown/styles.mjs`](../../bin/rolldown/styles.mjs) and [`bin/rolldown/modules.mjs`](../../bin/rolldown/modules.mjs): stylesheets, Interactivity API script modules, the dependency detection script and `block.json` files.
+-   [`bin/entries.js`](../../bin/entries.js): mapping source files to entry points. If you're adding a new block or module to the build, start here.
+-   [`bin/build-helpers.js`](../../bin/build-helpers.js): aliases, and the WooCommerce packages loaded as externals at run time.
 
 <!-- FEEDBACK -->
 

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useArgs } from 'storybook/preview-api';
-import type { StoryFn, Meta } from '@storybook/react-webpack5';
+import type { StoryFn, Meta } from '@storybook/react-vite';
 
 /**
  * Internal dependencies

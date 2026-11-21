@@ -106,6 +106,7 @@
 		"@wordpress/browserslist-config": "next",
 		"css-loader": "catalog:tooling",
 		"eslint": "catalog:tooling",
+		"eslint-import-resolver-webpack": "^0.13.11",
 		"stylelint": "catalog:tooling",
 		"jest": "catalog:tooling",
 		"jest-cli": "catalog:tooling",

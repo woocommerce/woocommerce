@@ -42,7 +42,7 @@ pnpm install --frozen-lockfile
 
 ## Building the Blocks client
 
-Building is required before the blocks work in WordPress. Both commands below compile the client with `webpack` and write the result to `plugins/woocommerce/assets/client/blocks`:
+Building is required before the blocks work in WordPress. Both commands below compile the client with Rolldown and write the result to `plugins/woocommerce/assets/client/blocks`:
 
 ```sh
 # Build the Blocks client once.
@@ -52,7 +52,7 @@ pnpm --filter='@woocommerce/plugin-woocommerce' build:blocks
 pnpm --filter='@woocommerce/block-library' watch:build
 ```
 
-To build every part of the WooCommerce plugin instead of the Blocks client alone, run `pnpm --filter='@woocommerce/plugin-woocommerce' build`. The [JavaScript Build System](javascript-build-system.md) document explains how the webpack configuration is put together.
+To build every part of the WooCommerce plugin instead of the Blocks client alone, run `pnpm --filter='@woocommerce/plugin-woocommerce' build`. The [JavaScript Build System](javascript-build-system.md) document explains how the build is put together.
 
 ## Running WooCommerce locally
 

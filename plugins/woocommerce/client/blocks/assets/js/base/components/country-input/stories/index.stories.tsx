@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { StoryFn, Meta } from '@storybook/react-webpack5';
+import type { StoryFn, Meta } from '@storybook/react-vite';
 import { useDispatch } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
 import { validationStore } from '@woocommerce/block-data';

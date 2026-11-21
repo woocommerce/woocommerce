@@ -3,10 +3,33 @@
  */
 import { createRequire } from 'node:module';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { mergeConfig, defaultClientConditions } from 'vite';
+import { storybookVite } from '@woocommerce/rolldown-build/storybook';
 
 const require = createRequire( import.meta.url );
+const BLOCKS = path.resolve(
+	path.dirname( fileURLToPath( import.meta.url ) ),
+	'..'
+);
+const tsConfig = require( '../tsconfig.base.json' );
 
-/** @type {import('@storybook/react-webpack5').StorybookConfig} */
+// The tsconfig path aliases, as the build uses them. `@wordpress/*` paths
+// point at type folders, and `.d.ts` mappings only exist for `tsc`, so skip
+// both and let those resolve from node_modules.
+const tsconfigAliases = Object.entries( tsConfig.compilerOptions.paths )
+	.filter(
+		( [ key, [ target ] ] ) =>
+			! key.startsWith( '@wordpress' ) && ! target.endsWith( '.d.ts' )
+	)
+	.map( ( [ key, [ target ] ] ) => ( {
+		find: key.replace( '/*', '' ),
+		replacement: path.resolve( BLOCKS, target.replace( '/*', '' ) ),
+	} ) );
+
+const exact = ( name ) => new RegExp( `^${ name.replace( /\//g, '\\/' ) }$` );
+
+/** @type {import('@storybook/react-vite').StorybookConfig} */
 const storybookConfig = {
 	stories: [
 		// WooCommerce Blocks stuff (anywhere in repo!)
@@ -26,31 +49,39 @@ const storybookConfig = {
 	docs: {
 		defaultName: 'Docs',
 	},
-	// webpackFinal field was added in following PR: https://github.com/woocommerce/woocommerce-blocks/pull/7514
-	// This fixes "storybook build issue" related to framer-motion library.
-	// Solution is from this comment: https://github.com/storybookjs/storybook/issues/16690#issuecomment-971579785
-	webpackFinal: async ( config ) => {
-		config.module ??= {};
-		config.module.rules ??= [];
-		config.module.rules.push( {
-			test: /\.mjs$/,
-			include: /node_modules/,
-			type: 'javascript/auto',
-		} );
-		// https://github.com/storybookjs/storybook/discussions/22650#discussioncomment-6414161
-		config.resolve ??= {};
-		config.resolve.alias = {
-			...config.resolve.alias,
-			'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),
-			react: path.dirname( require.resolve( 'react/package.json' ) ),
-			'react-dom': path.dirname(
-				require.resolve( 'react-dom/package.json' )
-			),
-		};
-		return config;
-	},
+	viteFinal: ( config ) =>
+		mergeConfig( config, {
+			...storybookVite( 'blocks' ),
+			resolve: {
+				alias: [
+					{
+						find: exact( '@woocommerce/block-settings' ),
+						replacement:
+							require.resolve( './__mocks__/woocommerce-block-settings.js' ),
+					},
+					{
+						find: exact( '@woocommerce/base-hooks' ),
+						replacement:
+							require.resolve( './__mocks__/woocommerce-base-hooks.js' ),
+					},
+					{
+						find: 'wordpress-components',
+						replacement: path.dirname(
+							require.resolve(
+								'wordpress-components/package.json',
+								{ paths: [ BLOCKS ] }
+							)
+						),
+					},
+					...tsconfigAliases,
+				],
+				// Load `@woocommerce/*` packages from source, like the build.
+				conditions: [ 'wc-source', ...defaultClientConditions ],
+				dedupe: [ 'react', 'react-dom' ],
+			},
+		} ),
 	framework: {
-		name: '@storybook/react-webpack5',
+		name: '@storybook/react-vite',
 		options: {},
 	},
 };

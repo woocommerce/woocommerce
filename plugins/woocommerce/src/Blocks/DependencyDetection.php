@@ -36,7 +36,7 @@ final class DependencyDetection {
 	 * Maps window.wc.* property names to their required script handles.
 	 *
 	 * This is the source of truth for both PHP and JS dependency detection.
-	 * Based on wcDepMap and wcHandleMap in client/blocks/bin/webpack-helpers.js.
+	 * Based on wcDepMap and wcHandleMap in client/blocks/bin/build-helpers.js.
 	 *
 	 * @var array<string, string>
 	 */

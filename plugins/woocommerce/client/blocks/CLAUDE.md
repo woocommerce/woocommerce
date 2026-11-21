@@ -34,7 +34,7 @@ pnpm --filter=@woocommerce/plugin-woocommerce env:start:blocks        # Start + 
 
 # Analysis
 pnpm --filter=@woocommerce/block-library knip                         # Find unused code (dead code detector)
-pnpm --filter=@woocommerce/block-library analyze-bundles              # Webpack bundle analysis
+pnpm --filter=@woocommerce/block-library analyze-bundles              # Bundle report (bundle-report.html)
 ```
 
 ## Directory Structure
@@ -61,7 +61,7 @@ client/blocks/
 │       └── entities/        # Runtime-only external; not an extension API
 ├── tests/
 │   └── js/                  # Jest unit tests
-├── bin/                     # Build scripts (webpack configs, ESLint plugin)
+├── bin/                     # Build scripts (bin/rolldown), entries, ESLint plugin
 └── storybook/               # Storybook config
 ```
 
@@ -160,14 +160,14 @@ add_action('woocommerce_blocks_cart_block_registration', function($registry) {
 
 Block scripts are only enqueued when the block is actually rendered on the page, not globally.
 
-## Webpack Externals (`window.wc.*`)
+## Build Externals (`window.wc.*`)
 
 API stability and asset externalization are separate concepts. Supported
 extension contracts live in `packages/public-api/`; runtime-only packages live
-in `packages/internal/`. Both kinds may be built as webpack externals and
+in `packages/internal/`. Both kinds may be built as externals and
 exposed on `window.wc`.
 
-The mapping lives in `bin/webpack-helpers.js` (`wcDepMap`):
+The mapping lives in `bin/build-helpers.js` (`wcDepMap`):
 
 | Import | Global | Script handle |
 | ------ | ------ | ------------- |
@@ -198,11 +198,11 @@ That field does not determine whether a browser API is public.
 
 ## Build System
 
-Webpack is configured with **11 separate configs** in `bin/webpack-configs.js`:
+The build uses Rolldown, with **several builds** in `bin/rolldown/config.mjs` and the shared linker in `packages/js/rolldown-build`:
 
 - Core, Main, Frontend, Extensions, Payments, Styling, Site Editor, Interactivity, Cart/Checkout Frontend, Dependency Detection
 
-Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP enqueues run against the final asset locations with no copy step. TypeScript uses **60+ path aliases** defined in `tsconfig.base.json`.
+The build writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP enqueues run against the final asset locations with no copy step. TypeScript uses **60+ path aliases** defined in `tsconfig.base.json`.
 
 `@woocommerce/entities` resolves to pure entity helpers that are bundled into consumers and can be tree-shaken. The `wc-entities` entry registers those entities as a side effect. It temporarily retains deprecated utility exports on `wc.wcEntities` for backward compatibility. Manual registration helpers also remain available as deprecated compatibility wrappers.
 

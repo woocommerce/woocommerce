@@ -144,6 +144,7 @@
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"eslint": "catalog:tooling",
+		"eslint-import-resolver-webpack": "^0.13.11",
 		"jest": "catalog:tooling",
 		"jest-cli": "catalog:tooling",
 		"jest-environment-jsdom": "catalog:tooling",

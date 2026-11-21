@@ -68,9 +68,8 @@ Local runtime-only packages live in `packages/internal/`. Their handles and
 globals are implementation details and do not carry a backward-compatibility
 guarantee.
 
-The unified build defines these groups as `publicApiPackages` and
-`internalRuntimePackages` in
-`bin/webpack-config-block-editor-unified-assets.js`. Other `@woocommerce/*`
+The unified build lists these packages as `editorExternalPackages` in
+`bin/rolldown/config.mjs`. Other `@woocommerce/*`
 imports are bundled into `wc-block-library` for the unified editor build. Their
 standalone handles may still be registered for frontend assets or third-party
 scripts.

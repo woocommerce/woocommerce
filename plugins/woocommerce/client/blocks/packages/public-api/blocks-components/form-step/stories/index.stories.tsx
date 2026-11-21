@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { StoryFn, Meta } from '@storybook/react-webpack5';
+import type { StoryFn, Meta } from '@storybook/react-vite';
 import { ValidatedTextInput } from '@woocommerce/blocks-checkout';
 import { useState } from '@wordpress/element';
 

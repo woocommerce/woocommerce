@@ -238,13 +238,12 @@ export default [
 		},
 		settings: {
 			jsdoc: { mode: 'typescript' },
-			// List of modules that are externals in our webpack config.
+			// List of modules that are externals in our build.
 			// This helps the `import/no-extraneous-dependencies` and
 			//`import/no-unresolved` rules account for them.
 			'import/core-modules': coreModules,
 			'import/resolver': {
 				node: {},
-				webpack: {},
 				typescript: {},
 			},
 		},

@@ -1,9 +1,8 @@
 #!/bin/bash
 
 # Copies every block.json under the Blocks source tree into the built assets directory so the PHP
-# test suites can read block metadata without a full build. Mirrors the CopyWebpackPlugin rules in
-# https://github.com/woocommerce/woocommerce/blob/84d1da7be3cbd3d8f40b17ad58729f668fd82b6a/plugins/woocommerce/client/blocks/bin/webpack-configs.js#L229-L256
-# and must stay in sync with them. Unlike a plain copy, it first removes the previously generated
+# test suites can read block metadata without a full build. Mirrors copyBlockJson() in
+# bin/rolldown/modules.mjs and must stay in sync with it. Unlike a plain copy, it first removes the previously generated
 # manifests so an edited or deleted source manifest cannot leave a stale copy behind.
 
 # Move to the project root
@@ -21,7 +20,7 @@ const path = require( 'node:path' );
 
 const sourceDirectory = path.resolve( 'plugins/woocommerce/client/blocks/assets/js' );
 const targetDirectory = path.resolve( 'plugins/woocommerce/assets/client/blocks' );
-// Keep in sync with genericBlocks in webpack-entries.js.
+// Keep in sync with genericBlocks in bin/entries.js.
 const genericBlocks = new Set( [
 	'accordion-group',
 	'accordion-header',
