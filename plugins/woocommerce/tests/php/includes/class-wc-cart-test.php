@@ -3157,4 +3157,18 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( $cart_item_key, 'Add to cart should reject a variation when an earlier variation matches.' );
 		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
 	}
+
+	/**
+	 * @testdox set_quantity() returns false and leaves the cart unchanged when the item key is not in the cart.
+	 */
+	public function test_set_quantity_returns_false_for_unknown_cart_item_key(): void {
+		$product  = WC_Helper_Product::create_simple_product();
+		$item_key = WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$result = WC()->cart->set_quantity( 'not-a-cart-item-key', 2 );
+
+		$this->assertFalse( $result, 'set_quantity() should return false for an unknown cart item key.' );
+		$this->assertSame( array( $item_key ), array_keys( WC()->cart->get_cart_contents() ), 'No cart entry should be added for an unknown key.' );
+		$this->assertSame( 1, WC()->cart->get_cart_item( $item_key )['quantity'], 'The existing item quantity should not change.' );
+	}
 }
