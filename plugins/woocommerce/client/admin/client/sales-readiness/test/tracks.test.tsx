@@ -32,6 +32,7 @@ const checkedView: ReadinessView = {
 		message: '',
 		link: null,
 	},
+	support_url: 'https://woocommerce.com/my-account/create-a-ticket/',
 	fix_first: {
 		title: 'Fix first',
 		ranking: 'Ranked by products.',

@@ -101,9 +101,6 @@ class StoreOutputChecks {
 			if ( 'ucp_profile_version' === $check['id'] && false === $ok ) {
 				$source = self::served_version( $responses );
 			}
-			if ( 'ucp_endpoints_live' === $check['id'] && false === $ok ) {
-				$source = self::search_seen( $responses );
-			}
 			if ( 'llms_txt_present' === $check['id'] ) {
 				$source = $this->llms_txt_source( $responses, $ok );
 			}
@@ -113,6 +110,11 @@ class StoreOutputChecks {
 				$failed = 'home' === $source ? null : $responses->product();
 			}
 			$seen_at = $conflict ? self::seen_at( (string) ( $check['seen_at'] ?? '' ), $responses ) : '';
+			// A 5xx is couldn't check, not failed, and support still needs to see what the store answered and where.
+			if ( 'ucp_endpoints_live' === $check['id'] && true !== $ok && ! $pending ) {
+				$source  = self::search_seen( $responses );
+				$seen_at = '' !== $source ? self::catalog_search_url( $responses ) : '';
+			}
 			if ( 'llms_txt_links_resolve' === $check['id'] && false === $ok ) {
 				// Where the file comes from picks the fix, and the broken link is named.
 				$source  = $this->llms_txt_source( $responses, true );
