@@ -22,6 +22,22 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	private $received = array();
 
 	/**
+	 * Assert that the message has the retry hint once: from WordPress since 7.2, from WooCommerce before.
+	 *
+	 * @param string $message The error message.
+	 */
+	private function assert_retry_hint_once( string $message ): void {
+		$core_hint = 'Check the outcome before retrying';
+		$woo_hint  = 'Check the current state before you run it again';
+		if ( is_wp_version_compatible( '7.2' ) ) {
+			$this->assertStringContainsString( $core_hint, $message );
+			$this->assertStringNotContainsString( $woo_hint, $message );
+		} else {
+			$this->assertStringContainsString( $woo_hint, $message );
+		}
+	}
+
+	/**
 	 * Build a test ability with a boolean, an integer, a list of unique integers and a nested boolean field.
 	 *
 	 * @return Ability
@@ -66,6 +82,149 @@ class AbilityTest extends \WC_Unit_Test_Case {
 				},
 			)
 		);
+	}
+
+	/**
+	 * @testdox Should say that the callback ran when the output is invalid, so the caller checks the state before a retry.
+	 */
+	public function test_invalid_output_says_the_callback_ran(): void {
+		$runs    = 0;
+		$ability = new Ability(
+			'test/invalid-output',
+			array(
+				'label'               => 'Invalid output',
+				'description'         => 'Returns output that does not match its schema.',
+				'category'            => 'woocommerce',
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => function () use ( &$runs ) {
+					++$runs;
+					return 'not an object';
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		$result = $ability->execute();
+
+		$this->assertSame( 1, $runs );
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_output', $result->get_error_code() );
+		$this->assert_retry_hint_once( $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should keep the original message when a read-only ability returns invalid output.
+	 */
+	public function test_invalid_output_of_a_read_only_ability_has_no_retry_hint(): void {
+		$ability = new Ability(
+			'test/invalid-output-read-only',
+			array(
+				'label'               => 'Invalid output',
+				'description'         => 'Returns output that does not match its schema.',
+				'category'            => 'woocommerce',
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => fn() => 'not an object',
+				'permission_callback' => '__return_true',
+				'meta'                => array( 'annotations' => array( 'readonly' => true ) ),
+			)
+		);
+
+		$result = $ability->execute();
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_output', $result->get_error_code() );
+		$this->assertStringNotContainsString( 'may already be saved', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should keep the message of an error that the execute callback returns.
+	 */
+	public function test_callback_error_has_no_retry_hint(): void {
+		$ability = new Ability(
+			'test/callback-error',
+			array(
+				'label'               => 'Callback error',
+				'description'         => 'Returns its own error.',
+				'category'            => 'woocommerce',
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => fn() => new \WP_Error( 'ability_invalid_output', 'The callback failed.' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		$result = $ability->execute();
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'The callback failed.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should keep the message of an error that the wp_pre_execute_ability filter returns.
+	 */
+	public function test_short_circuit_error_has_no_retry_hint(): void {
+		if ( version_compare( get_bloginfo( 'version' ), '7.1-alpha', '<' ) ) {
+			$this->markTestSkipped( 'The wp_pre_execute_ability filter exists since WordPress 7.1.' );
+		}
+
+		$ability = new Ability(
+			'test/short-circuit-error',
+			array(
+				'label'               => 'Short-circuit error',
+				'description'         => 'Never runs its callback.',
+				'category'            => 'woocommerce',
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => fn() => array(),
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		$short_circuit = fn() => new \WP_Error( 'ability_invalid_output', 'The filter failed.' );
+		add_filter( 'wp_pre_execute_ability', $short_circuit );
+
+		$result = $ability->execute();
+
+		remove_filter( 'wp_pre_execute_ability', $short_circuit );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'The filter failed.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should keep every error from the output validation filter when it adds the retry hint.
+	 */
+	public function test_invalid_output_keeps_every_error(): void {
+		if ( version_compare( get_bloginfo( 'version' ), '7.1-alpha', '<' ) ) {
+			$this->markTestSkipped( 'The wp_ability_validate_output filter exists since WordPress 7.1.' );
+		}
+
+		$filter = function ( $is_valid ) {
+			$is_valid->add( 'output_policy', 'The output breaks a policy.', array( 'field' => 'name' ) );
+			return $is_valid;
+		};
+		add_filter( 'wp_ability_validate_output', $filter );
+
+		$ability = new Ability(
+			'test/invalid-output-many-errors',
+			array(
+				'label'               => 'Invalid output',
+				'description'         => 'Returns output that does not match its schema.',
+				'category'            => 'woocommerce',
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => fn() => 'not an object',
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		$result = $ability->execute();
+		remove_filter( 'wp_ability_validate_output', $filter );
+
+		$this->assertWPError( $result );
+		$this->assertSame( array( 'ability_invalid_output', 'output_policy' ), $result->get_error_codes() );
+		$this->assert_retry_hint_once( $result->get_error_message() );
+		$this->assertSame( 'The output breaks a policy.', $result->get_error_message( 'output_policy' ) );
+		$data = $result->get_error_data( 'output_policy' );
+		$this->assertArrayHasKey( 'field', $data );
+		$this->assertSame( 'name', $data['field'] );
 	}
 
 	/**

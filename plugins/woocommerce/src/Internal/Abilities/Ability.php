@@ -22,6 +22,13 @@ defined( 'ABSPATH' ) || exit;
 class Ability extends \WP_Ability {
 
 	/**
+	 * Whether the execute callback of the current run returned output, so WordPress validated it.
+	 *
+	 * @var bool
+	 */
+	private $callback_returned_output = false;
+
+	/**
 	 * Apply the schema default. Before WordPress 7.2, also convert valid input to
 	 * the schema types, as WordPress 7.2 does in execute().
 	 *
@@ -129,5 +136,58 @@ class Ability extends \WP_Ability {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Run the ability, and tell the caller that it ran when its output is invalid.
+	 *
+	 * WordPress validates the output after the execute callback ran, so the callback
+	 * may already have saved changes. The message says so, because some callers,
+	 * such as MCP clients, receive only the message. Read-only abilities keep the
+	 * original message, because they saved nothing.
+	 *
+	 * WordPress 7.2 adds this hint itself, so this override returns the result unchanged there.
+	 * Remove this override, do_execute() and $callback_returned_output when WooCommerce
+	 * requires WordPress 7.2.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $input Optional. The input data for the ability. Default `null`.
+	 * @return mixed|\WP_Error The result of the ability execution, or a WP_Error.
+	 */
+	public function execute( $input = null ) {
+		$result                         = parent::execute( $input );
+		$callback_returned_output       = $this->callback_returned_output;
+		$this->callback_returned_output = false;
+
+		if ( is_wp_version_compatible( '7.2' ) || ! $callback_returned_output || ! is_wp_error( $result ) || 'ability_invalid_output' !== $result->get_error_code() || true === ( $this->get_meta_item( 'annotations' )['readonly'] ?? null ) ) {
+			return $result;
+		}
+
+		$error = clone $result;
+
+		$error->errors['ability_invalid_output'][0] = sprintf(
+			/* translators: %s: error message. */
+			__( '%s The ability ran, so its changes may already be saved. Check the current state before you run it again.', 'woocommerce' ),
+			$error->get_error_message()
+		);
+
+		return $error;
+	}
+
+	/**
+	 * Run the execute callback, and record whether it returned output instead of an error.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $input Optional. The input data for the ability. Default `null`.
+	 * @return mixed|\WP_Error The result of the execute callback, or a WP_Error.
+	 */
+	protected function do_execute( $input = null ) {
+		$result = parent::do_execute( $input );
+
+		$this->callback_returned_output = ! is_wp_error( $result );
+
+		return $result;
 	}
 }
