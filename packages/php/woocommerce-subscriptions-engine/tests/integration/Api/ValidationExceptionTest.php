@@ -25,12 +25,13 @@ class ValidationExceptionTest extends EngineIntegrationTestCase {
 	 * Params a message for each code needs.
 	 */
 	private const SAMPLE_PARAMS = array(
-		ValidationErrorCode::REQUIRED       => array(),
-		ValidationErrorCode::INVALID_TYPE   => array( 'type' => 'string' ),
-		ValidationErrorCode::OUT_OF_BOUNDS  => array( 'min' => 1 ),
-		ValidationErrorCode::NOT_IN_ENUM    => array( 'allowed' => array( 'day', 'week' ) ),
-		ValidationErrorCode::INVALID_VALUE  => array(),
-		ValidationErrorCode::NOT_REGISTERED => array( 'value' => 'seasonal' ),
+		ValidationErrorCode::REQUIRED        => array(),
+		ValidationErrorCode::INVALID_TYPE    => array( 'type' => 'string' ),
+		ValidationErrorCode::OUT_OF_BOUNDS   => array( 'min' => 1 ),
+		ValidationErrorCode::NOT_IN_ENUM     => array( 'allowed' => array( 'day', 'week' ) ),
+		ValidationErrorCode::INVALID_VALUE   => array(),
+		ValidationErrorCode::INVALID_PATTERN => array( 'pattern' => '^[a-z]+$' ),
+		ValidationErrorCode::NOT_REGISTERED  => array( 'value' => 'seasonal' ),
 	);
 
 	/**

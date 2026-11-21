@@ -89,15 +89,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	);
 
 	/**
-	 * Checks that also show in another question's card, counted in each card's badge (Tracks counts them
-	 * once): "Discourage search engines"
-	 * keeps AI assistants from the store's pages (Store access, its group) and from finding it.
-	 */
-	private const ALSO_IN = array(
-		'search_visible' => array( 'find' ),
-	);
-
-	/**
 	 * Badge intents of the design system, by the badge class the PHP pages use.
 	 */
 	private const INTENTS = array(
@@ -187,7 +178,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			array(
 				'id'         => self::PAGE_ID,
 				'parent'     => 'woocommerce',
-				'title'      => __( 'AI sales readiness', 'woocommerce' ),
+				'title'      => __( 'AI shopping health', 'woocommerce' ),
 				'path'       => self::PATH,
 				'capability' => 'manage_woocommerce',
 			)
@@ -270,12 +261,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$available = (int) ( $report['available'] ?? 0 );
 			$truncated = $available > ProductScan::PRODUCT_LIMIT
 				/* translators: 1: number of products checked, 2: number of products in the store. */
-				? sprintf( __( 'Checked the %1$s products you changed most recently, out of %2$s.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ), number_format_i18n( $available ) )
+				? sprintf( __( 'Product checks covered the %1$s products you updated most recently, out of %2$s. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ), number_format_i18n( $available ) )
 				/* translators: %s: number of products checked. Reports from before the total was stored. */
-				: sprintf( __( 'Checked the %s products you changed most recently.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
+				: sprintf( __( 'Product checks covered the %s products you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
 		}
 		return array(
-			'title'        => __( 'AI sales readiness', 'woocommerce' ),
+			'title'        => __( 'AI shopping health', 'woocommerce' ),
 			'description'  => __( 'Check how well AI assistants can find and shop your store, and what to improve first.', 'woocommerce' ),
 			'last_checked' => self::last_checked( $report ),
 			'checked_note' => $truncated,
@@ -291,8 +282,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				) : null,
 			),
 			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
-			// Setup steps also show in the Setup checklist; here they sit in the card of the question they answer.
-			'sections'     => null === $report ? array() : $this->sections( $visible, $launched, $report ),
+			// Setup steps live in the Setup checklist and, while one blocks sales, in Fix first; the cards hold what the scan read.
+			'sections'     => null === $report ? array() : $this->sections( array_values( array_filter( $visible, static fn( array $check ): bool => ! self::is_setup_step( $check ) ) ), $launched, $report ),
 			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ),
 			'overview'     => array(
 				'shopping' => $this->shopping_card( $checks ),
@@ -410,7 +401,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'sr'    => $button[1],
 			);
 		}
-		$copy = ReadinessCopy::store_check( $check['id'], (string) ( $check['source'] ?? '' ), self::product_name( (int) ( $check['product'] ?? 0 ) ), (string) ( $check['seen_at'] ?? '' ) );
+		$product_id = (int) ( $check['product'] ?? 0 );
+		$copy       = ReadinessCopy::store_check( $check['id'], (string) ( $check['source'] ?? '' ), self::product_name( $product_id ), (string) ( $check['seen_at'] ?? '' ), $product_id > 0 );
 		if ( null !== $copy ) {
 			return array(
 				'title' => $copy['action'],
@@ -663,7 +655,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks Store checks shown on the page.
 	 * @param array<string, mixed>                                                                                                                                                                           $report Stored report.
-	 * @return array<int, array{id:string,tier:int,title:string,why:string,link:array{href:string,text:string}|null,share:float|null,rank:float,count:int}>
+	 * @return array<int, array{id:string,tier:int,title:string,why:string,link:array{href:string,text:string}|null,share:float|null,store:bool,rank:float,count:int}>
 	 */
 	private function fix_first_items( array $checks, array $report ): array {
 		$required = array();
@@ -684,6 +676,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'why'   => $copy['text'],
 				'link'  => self::fix_link( $copy['url'], $copy['link'] ?? '', $copy['sr'] ?? '' ),
 				'share' => null,
+				'store' => true,
 				// A store-wide issue affects every product, so it ranks as all sales.
 				'rank'  => 1.0,
 				'count' => PHP_INT_MAX,
@@ -711,6 +704,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'why'   => $issue['why'],
 				'link'  => self::products_link( $count, (string) ( $check['id'] ?? '' ), $linked ),
 				'share' => $share,
+				'store' => false,
 				'rank'  => $rank,
 				'count' => 0.0 < $rank ? $count : $count * max( 1, $apps ),
 			);
@@ -723,12 +717,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * The Fix first card: items under a heading for what each group of issues stops, with a line on
-	 * how it is ranked. A product issue's line starts with its share of sales. With nothing to fix,
+	 * how it is ranked. Each issue says in bold what it affects. With nothing to fix,
 	 * there is no card, as in the design.
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks Store checks shown on the page.
 	 * @param array<string, mixed>                                                                                                                                                                           $report Stored report.
-	 * @return array{title:string,ranking:string,link:array{href:string,text:string}|null,items:array<int, array{id:string,tier:string,badge:array{intent:string,text:string}|null,title:string,why:string,link:array{href:string,text:string}|null}>}|null
+	 * @return array{title:string,ranking:string,link:array{href:string,text:string}|null,items:array<int, array{id:string,tier:string,badge:array{intent:string,text:string}|null,title:string,impact:string|null,why:string,link:array{href:string,text:string}|null}>}|null
 	 */
 	private function fix_first( array $checks, array $report ): ?array {
 		$items = $this->fix_first_items( $checks, $report );
@@ -740,24 +734,19 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			2 => __( 'Needed to list products', 'woocommerce' ),
 			3 => __( 'Helps shoppers find products', 'woocommerce' ),
 		);
-		$days  = (int) ( is_array( $report['sales'] ?? null ) ? ( $report['sales']['days'] ?? 0 ) : 0 );
-		$first = true;
-		$list  = array();
+		// Store-wide issues say so only when the card compares sales; the ranking line gives the period.
+		$by_sales = array() !== array_filter( $items, static fn( array $item ): bool => ( $item['share'] ?? 0.0 ) > 0.0 );
+		$list     = array();
 		foreach ( $items as $item ) {
-			$why = $item['why'];
-			if ( null !== $item['share'] ) {
-				// The first share says over which period; the rest only give the share.
-				$why   = trim( self::sales_text( $item['share'], $first ? $days : 0 ) . ' ' . $why );
-				$first = false;
-			}
 			$list[] = array(
-				'id'    => $item['id'],
-				'tier'  => $tiers[ $item['tier'] ],
+				'id'     => $item['id'],
+				'tier'   => $tiers[ $item['tier'] ],
 				// The same Required badge as the AI shopping Setup checklist, so this tier stands out.
-				'badge' => 0 === $item['tier'] ? self::badge_data( self::required_badge() ) : null,
-				'title' => $item['title'],
-				'why'   => $why,
-				'link'  => $item['link'],
+				'badge'  => 0 === $item['tier'] ? self::badge_data( self::required_badge() ) : null,
+				'title'  => $item['title'],
+				'impact' => null !== $item['share'] ? self::sales_impact( $item['share'] ) : ( $by_sales && $item['store'] && 0 !== $item['tier'] ? __( 'Affects your whole store.', 'woocommerce' ) : null ),
+				'why'    => $item['why'],
+				'link'   => $item['link'],
 			);
 		}
 		return array(
@@ -806,36 +795,19 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * "18% of your sales in the last 90 days.", or "18% of your sales." without the period.
+	 * What a product issue costs in sales, shown in bold before its line: "Affects 18% of your sales.".
 	 *
 	 * @param float $share Share of sales, from 0 to 1.
-	 * @param int   $days  Days the share covers, or 0 to leave the period out.
 	 */
-	private static function sales_text( float $share, int $days ): string {
+	private static function sales_impact( float $share ): string {
 		if ( 0.0 === $share ) {
-			/* translators: %d: number of days. */
-			return $days > 0 ? sprintf( __( 'No sales in the last %d days.', 'woocommerce' ), $days ) : __( 'No sales.', 'woocommerce' );
+			return __( 'These products had no recent sales.', 'woocommerce' );
 		}
-		if ( $days > 0 ) {
-			/* translators: 1: share of sales, such as 18%, 2: number of days. */
-			return sprintf( __( '%1$s of your sales in the last %2$d days.', 'woocommerce' ), self::percent( $share ), $days );
+		if ( $share < 0.005 ) {
+			return __( 'Affects less than 1% of your sales.', 'woocommerce' );
 		}
-		/* translators: %s: share of sales, such as 18%. */
-		return sprintf( __( '%s of your sales.', 'woocommerce' ), self::percent( $share ) );
-	}
-
-
-	/**
-	 * A share as a whole percentage; under 1% but above none reads "under 1%".
-	 *
-	 * @param float $share Share from 0 to 1.
-	 */
-	private static function percent( float $share ): string {
-		if ( $share > 0 && $share < 0.005 ) {
-			return __( 'under 1%', 'woocommerce' );
-		}
-		/* translators: %s: a whole number percentage. */
-		return sprintf( __( '%s%%', 'woocommerce' ), number_format_i18n( (int) round( $share * 100 ) ) );
+		/* translators: %s: a whole number, such as 18. */
+		return sprintf( __( 'Affects %s%% of your sales.', 'woocommerce' ), number_format_i18n( (int) round( $share * 100 ) ) );
 	}
 
 	/**
@@ -917,23 +889,48 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * Protocols and files the store serves to agents, as information, never pass or fail: how many were
-	 * found, then every item. Null with no items in the report.
+	 * found, then every item under where it lives. Items the scan couldn't read are under Not checked yet.
+	 * Null with no items in the report.
 	 *
 	 * @param array $items Items from the report.
-	 * @return array{title:string,badge:array{intent:string,text:string},text:string,items:array<int, array{name:string,found:bool}>}|null
+	 * @return array{title:string,badge:array{intent:string,text:string},text:string,groups:array<int, array{title:string,items:array<int, array{name:string,found:bool|null}>}>}|null
 	 */
 	private static function declared( array $items ): ?array {
 		$items = array_values( array_filter( $items, 'is_array' ) );
 		if ( array() === $items ) {
 			return null;
 		}
-		$found = array_filter( $items, static fn( array $item ): bool => true === ( $item['found'] ?? null ) );
-		$text  = sprintf(
-			/* translators: %s: how many items were found, such as "Found 4 of 33". */
-			__( 'Optional files that some AI assistants look for. You don’t need to fix anything. %s.', 'woocommerce' ),
-			/* translators: 1: number of items found, 2: number of items looked for. */
-			sprintf( __( 'Found %1$s of %2$s', 'woocommerce' ), number_format_i18n( count( $found ) ), number_format_i18n( count( $items ) ) )
+		$titles = array(
+			'root'    => __( 'Files in your root folder', 'woocommerce' ),
+			'address' => __( 'Files at standard addresses', 'woocommerce' ),
+			'code'    => __( 'In your page code', 'woocommerce' ),
+			'unknown' => __( 'Not checked yet', 'woocommerce' ),
 		);
+		$groups = array_fill_keys( array_keys( $titles ), array() );
+		foreach ( $items as $item ) {
+			$found              = $item['found'] ?? null;
+			$group              = null === $found ? 'unknown' : DeclaredToAgents::group( (string) ( $item['id'] ?? '' ) );
+			$groups[ $group ][] = array(
+				'name'  => (string) ( $item['name'] ?? '' ),
+				'found' => null === $found ? null : true === $found,
+			);
+		}
+		$found   = count( array_filter( $items, static fn( array $item ): bool => true === ( $item['found'] ?? null ) ) );
+		$checked = count( $items ) - count( $groups['unknown'] );
+		// The count covers the items the scan could read, so a store in coming soon mode isn't told it shares none.
+		$text = 0 === $checked
+			? __( 'These are other files and code that some AI assistants use to learn about your store. None are required, so there’s nothing to fix.', 'woocommerce' )
+			: sprintf(
+				/* translators: 1: number of items found, 2: number of items checked. */
+				_n(
+					'These are other files and code that some AI assistants use to learn about your store. Your store shares %1$s of %2$s. None are required, so there’s nothing to fix.',
+					'These are other files and code that some AI assistants use to learn about your store. Your store shares %1$s of these %2$s. None are required, so there’s nothing to fix.',
+					$checked,
+					'woocommerce'
+				),
+				number_format_i18n( $found ),
+				number_format_i18n( $checked )
+			);
 		// Served llms.txt caches guidance for a few minutes for anonymous requests, so a fresh
 		// policy/MCP/UCP change can briefly look missing until that cache expires.
 		foreach ( $items as $item ) {
@@ -943,15 +940,20 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			}
 		}
 		return array(
-			'title' => __( 'What does your store share with AI assistants?', 'woocommerce' ),
-			'badge' => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
-			'text'  => $text,
-			'items' => array_map(
-				static fn( array $item ): array => array(
-					'name'  => (string) ( $item['name'] ?? '' ),
-					'found' => true === ( $item['found'] ?? null ),
-				),
-				$items
+			'title'  => __( 'Extra details for AI assistants', 'woocommerce' ),
+			'badge'  => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
+			'text'   => $text,
+			'groups' => array_values(
+				array_filter(
+					array_map(
+						static fn( string $key ): array => array(
+							'title' => $titles[ $key ],
+							'items' => $groups[ $key ],
+						),
+						array_keys( $titles )
+					),
+					static fn( array $group ): bool => array() !== $group['items']
+				)
 			),
 		);
 	}
@@ -1098,10 +1100,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				$sections[] = self::no_products_section( $id, $group[0], $unreadable );
 				continue;
 			}
-			// When no scanned check could run, one row says why in their place; setup steps still show.
-			$scanned    = array_filter( $group[1], static fn( array $check ): bool => ! self::is_setup_step( $check ) );
-			$cant       = array() !== $report && self::none_ran( $scanned );
-			$checks     = $cant ? array_diff_key( $group[1], $scanned ) : $group[1];
+			// When no check could run, one row says why in their place.
+			$cant       = array() !== $report && self::none_ran( $group[1] );
+			$checks     = $cant ? array() : $group[1];
 			$folded     = array_filter( $checks, static fn( array $check ): bool => true === $check['ok'] );
 			$rows       = self::check_rows( array_values( array_diff_key( $checks, $folded ) ), $launched );
 			$sections[] = array(
@@ -1147,10 +1148,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		);
 		foreach ( $checks as $check ) {
 			// A report from before checks named their question has no group; the next scan fills it in.
-			foreach ( array_merge( array( $check['group'] ?? '' ), self::ALSO_IN[ $check['id'] ] ?? array() ) as $group ) {
-				if ( isset( $groups[ $group ] ) ) {
-					$groups[ $group ][1][] = $check;
-				}
+			$group = $check['group'] ?? '';
+			if ( isset( $groups[ $group ] ) ) {
+				$groups[ $group ][1][] = $check;
 			}
 		}
 		return $groups;

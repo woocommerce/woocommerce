@@ -3,7 +3,6 @@
  */
 import { Breadcrumbs, Page } from '@wordpress/admin-ui';
 import { __ } from '@wordpress/i18n';
-import { Spinner } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -32,7 +31,7 @@ export default function SalesReadiness() {
 						{
 							label:
 								view?.title ??
-								__( 'AI sales readiness', 'woocommerce' ),
+								__( 'AI shopping health', 'woocommerce' ),
 						},
 					] }
 				/>
@@ -42,7 +41,6 @@ export default function SalesReadiness() {
 		>
 			<div className="wc-sales-readiness__content">
 				{ error && <ErrorNotice message={ error } reload={ reload } /> }
-				{ ! view && ! error && <Spinner /> }
 				{ view && (
 					<>
 						<CheckedCard

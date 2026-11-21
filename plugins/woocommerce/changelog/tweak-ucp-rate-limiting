@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Apply Store API rate limiting to the opt-in UCP endpoints.

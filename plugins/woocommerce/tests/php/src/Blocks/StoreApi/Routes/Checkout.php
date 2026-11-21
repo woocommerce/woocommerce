@@ -3500,20 +3500,22 @@ class Checkout extends \WP_Test_REST_TestCase {
 	/**
 	 * Dispatches a pay-for-order request as the guest the order belongs to.
 	 *
-	 * Both addresses default to the one the order already carries and the payment method to one the guard
-	 * accepts, so a test states only the fields it changes.
+	 * Both addresses default to the one the order already carries and the payment method to bank transfer,
+	 * which the guard accepts, so a test states only what it changes.
 	 *
 	 * @param \WC_Order  $order                  Order being paid for.
 	 * @param array      $billing                Billing fields to override.
 	 * @param array|null $shipping               Shipping fields to override, or null to leave the shipping address out.
 	 * @param bool       $merge_existing_billing Whether to merge the stored billing address into the request.
+	 * @param string     $payment_method        Payment method to pay with, bank transfer by default.
 	 * @return \WP_REST_Response
 	 */
 	private function dispatch_pay_for_order_request(
 		\WC_Order $order,
 		array $billing = array(),
 		?array $shipping = array(),
-		bool $merge_existing_billing = true
+		bool $merge_existing_billing = true,
+		string $payment_method = WC_Gateway_BACS::ID
 	) {
 		$address = $order->get_address( 'billing' );
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
@@ -3526,7 +3528,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		);
 		$body = array(
 			'billing_address' => $merge_existing_billing ? array_merge( $address, $billing ) : $billing,
-			'payment_method'  => WC_Gateway_BACS::ID,
+			'payment_method'  => $payment_method,
 		);
 		if ( null !== $shipping ) {
 			$body['shipping_address'] = array_merge( $address, $shipping );
@@ -4278,6 +4280,187 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$stored_order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'GB', $stored_order->get_billing_country() );
 		$this->assertEquals( 'US', $stored_order->get_shipping_country() );
+	}
+
+	/**
+	 * Enables an offline gateway with the shipping restrictions from its settings screen.
+	 *
+	 * @param string $gateway_id         Gateway ID.
+	 * @param array  $enable_for_methods Shipping methods the gateway is enabled for, or empty for all.
+	 * @param bool   $enable_for_virtual Whether the gateway accepts orders that need no shipping.
+	 */
+	private function restrict_offline_gateway( string $gateway_id, array $enable_for_methods, bool $enable_for_virtual = true ) {
+		update_option(
+			"woocommerce_{$gateway_id}_settings",
+			array_merge(
+				(array) get_option( "woocommerce_{$gateway_id}_settings", array() ),
+				array(
+					'enabled'            => 'yes',
+					'enable_for_methods' => $enable_for_methods,
+					'enable_for_virtual' => $enable_for_virtual ? 'yes' : 'no',
+				)
+			)
+		);
+		WC()->payment_gateways()->init();
+	}
+
+	/**
+	 * @testdox Existing order payment should refuse an offline gateway the store does not enable for the order's shipping method.
+	 * @testWith ["cod"]
+	 *           ["bacs"]
+	 *           ["cheque"]
+	 *
+	 * @param string $gateway_id Gateway ID.
+	 */
+	public function test_checkout_order_refuses_gateway_not_enabled_for_order_shipping_method( string $gateway_id ) {
+		$this->restrict_offline_gateway( $gateway_id, array( 'local_pickup' ) );
+
+		// The order ships by flat rate, and the cart of the session paying it is unrelated to it.
+		$order = \WC_Helper_Order::create_order( 0 );
+		wc_empty_cart();
+
+		$response = $this->dispatch_pay_for_order_request( $order, array(), null, true, $gateway_id );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_checkout_payment_method_disabled', $response->get_data()['code'] );
+		$this->assertEquals( OrderStatus::PENDING, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Existing order payment should refuse a gateway the order's shipping method excludes when the pay endpoint is renamed.
+	 */
+	public function test_checkout_order_refuses_gateway_not_enabled_for_order_shipping_method_with_renamed_pay_endpoint() {
+		update_option( 'woocommerce_checkout_pay_endpoint', 'pay' );
+		WC()->query->init_query_vars();
+
+		try {
+			$this->restrict_offline_gateway( 'cod', array( 'local_pickup' ) );
+
+			$order = \WC_Helper_Order::create_order( 0 );
+			wc_empty_cart();
+
+			$response = $this->dispatch_pay_for_order_request( $order, array(), null, true, 'cod' );
+
+			$this->assertEquals( 400, $response->get_status() );
+			$this->assertEquals( 'woocommerce_rest_checkout_payment_method_disabled', $response->get_data()['code'] );
+		} finally {
+			delete_option( 'woocommerce_checkout_pay_endpoint' );
+			WC()->query->init_query_vars();
+		}
+	}
+
+	/**
+	 * @testdox Existing order payment should refuse a gateway that does not accept virtual orders for an order that needs no shipping.
+	 */
+	public function test_checkout_order_refuses_gateway_not_enabled_for_virtual_order() {
+		$this->restrict_offline_gateway( 'cod', array(), false );
+
+		$order = \WC_Helper_Order::create_order( 0, \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) ) );
+		foreach ( array_keys( $order->get_shipping_methods() ) as $item_id ) {
+			$order->remove_item( $item_id );
+		}
+		$order->calculate_totals();
+
+		// The cart of the session holds physical products, which must not make the order count as shipped.
+		$response = $this->dispatch_pay_for_order_request( $order, array(), null, true, 'cod' );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_checkout_payment_method_disabled', $response->get_data()['code'] );
+		$this->assertEquals( OrderStatus::PENDING, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Existing order payment should accept an offline gateway the store enables for the order's shipping method.
+	 */
+	public function test_checkout_order_accepts_gateway_enabled_for_order_shipping_method() {
+		$this->restrict_offline_gateway( 'cod', array( 'flat_rate_shipping' ) );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		wc_empty_cart();
+
+		$response = $this->dispatch_pay_for_order_request( $order, array(), null, true, 'cod' );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( OrderStatus::PROCESSING, $stored_order->get_status() );
+		$this->assertEquals( 'cod', $stored_order->get_payment_method() );
+	}
+
+	/**
+	 * @testdox Existing order payment should restore the order-pay endpoint after the request.
+	 */
+	public function test_checkout_order_restores_order_pay_endpoint() {
+		$order = \WC_Helper_Order::create_order( 0 );
+
+		$response = $this->dispatch_pay_for_order_request( $order, array(), null );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertFalse( is_wc_endpoint_url( 'order-pay' ) );
+		$this->assertSame( '', get_query_var( 'order-pay' ) );
+	}
+
+	/**
+	 * @testdox Existing order payment should check each order's own shipping method when batched, and restore the order-pay endpoint after the batch.
+	 */
+	public function test_checkout_order_checks_each_batched_order_shipping_method() {
+		$this->restrict_offline_gateway( 'cod', array( 'local_pickup' ) );
+
+		$flat_rate_order = \WC_Helper_Order::create_order( 0 );
+		$pickup_order    = \WC_Helper_Order::create_order( 0 );
+		foreach ( $pickup_order->get_shipping_methods() as $shipping_item ) {
+			$shipping_item->set_method_id( 'local_pickup' );
+			$shipping_item->save();
+		}
+		wc_empty_cart();
+
+		$nonce       = wp_create_nonce( 'wc_store_api' );
+		$subrequests = array();
+		foreach ( array( $flat_rate_order, $pickup_order ) as $order ) {
+			$subrequests[] = array(
+				'method'  => 'POST',
+				'path'    => '/wc/store/v1/checkout/' . $order->get_id(),
+				'headers' => array( 'Nonce' => $nonce ),
+				'body'    => array(
+					'key'             => $order->get_order_key(),
+					'billing_email'   => $order->get_billing_email(),
+					'billing_address' => $order->get_address( 'billing' ),
+					'payment_method'  => 'cod',
+				),
+			);
+		}
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
+		$request->set_header( 'Nonce', $nonce );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'requests' => $subrequests ) ) );
+
+		$responses = rest_get_server()->dispatch( $request )->get_data()['responses'];
+
+		$this->assertEquals( 400, $responses[0]['status'], 'Cash on delivery is refused for the flat rate order.' );
+		$this->assertEquals( 'woocommerce_rest_checkout_payment_method_disabled', $responses[0]['body']['code'] );
+		$this->assertEquals( OrderStatus::PENDING, wc_get_order( $flat_rate_order->get_id() )->get_status() );
+		$this->assertEquals( 200, $responses[1]['status'], 'Cash on delivery is accepted for the local pickup order: ' . wp_json_encode( $responses[1]['body'] ) );
+		$this->assertEquals( OrderStatus::PROCESSING, wc_get_order( $pickup_order->get_id() )->get_status() );
+		$this->assertFalse( is_wc_endpoint_url( 'order-pay' ) );
+		$this->assertSame( '', get_query_var( 'order-pay' ) );
+	}
+
+	/**
+	 * @testdox Existing order payment should refuse a gateway the shipping method excludes when a guest pays their own checkout draft.
+	 */
+	public function test_checkout_order_refuses_gateway_not_enabled_for_checkout_draft_shipping_method() {
+		$this->restrict_offline_gateway( 'cod', array( 'local_pickup' ) );
+
+		// What a refused checkout leaves behind: the guest's own draft, which they hold the key to.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_status( 'checkout-draft' );
+		$order->save();
+		wc_empty_cart();
+
+		$response = $this->dispatch_pay_for_order_request( $order, array(), null, true, 'cod' );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_checkout_payment_method_disabled', $response->get_data()['code'] );
+		$this->assertEquals( 'checkout-draft', wc_get_order( $order->get_id() )->get_status() );
 	}
 
 	/**
