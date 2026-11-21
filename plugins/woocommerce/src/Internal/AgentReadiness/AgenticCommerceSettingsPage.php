@@ -237,7 +237,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				'title'       => __( 'Allow AI assistants to shop your store', 'woocommerce' ),
 				'description' => __( 'Your products can be found by AI assistants and added to a shopper’s cart. Orders come through your checkout as usual.', 'woocommerce' ),
 				'learn_more'  => array(
-					'href' => 'https://ucp.dev/',
+					'href' => 'https://woocommerce.com/document/woocommerce-ai/agentic-commerce/',
 					'text' => __( 'Learn how it works', 'woocommerce' ),
 				),
 				// The snackbar after the switch saves, as in the design.

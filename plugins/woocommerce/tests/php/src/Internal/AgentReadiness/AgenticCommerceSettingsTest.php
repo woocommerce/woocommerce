@@ -2511,6 +2511,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$shopping = $this->shopping();
 
 		$this->assertSame( 'Learn how it works', $shopping['ucp']['learn_more']['text'] );
+		$this->assertSame( 'https://woocommerce.com/document/woocommerce-ai/agentic-commerce/', $shopping['ucp']['learn_more']['href'], 'The doc for setting up AI shopping' );
 		$this->assertSame( '/wc/v3/agent-readiness/ucp', $shopping['ucp']['path'], 'The switch saves on its own, as before' );
 		$this->assertSame( 'Test the connection in UCP Playground', $shopping['connection']['test']['text'] );
 		$this->assertSame( 'https://ucpplayground.com', $shopping['connection']['test']['href'] );

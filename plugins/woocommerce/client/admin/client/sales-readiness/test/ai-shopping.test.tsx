@@ -59,7 +59,10 @@ const view = ( fields: Partial< ShoppingView > = {} ): ShoppingView => ( {
 		blocked: true,
 		title: 'Allow AI assistants to shop your store',
 		description: 'Your products can be found by AI assistants.',
-		learn_more: { href: 'https://ucp.dev/', text: 'Learn how it works' },
+		learn_more: {
+			href: 'https://woocommerce.com/document/woocommerce-ai/agentic-commerce/',
+			text: 'Learn how it works',
+		},
 		turned_on: 'AI assistants can now shop your store.',
 		turned_off: 'AI assistants can no longer shop your store.',
 		path: '/wc/v3/agent-readiness/ucp',
@@ -530,7 +533,10 @@ describe( 'AiShopping', () => {
 		).toHaveAttribute( 'href', 'https://ucpplayground.com' );
 		expect(
 			screen.getByRole( 'link', { name: /Learn how it works/ } )
-		).toHaveAttribute( 'href', 'https://ucp.dev/' );
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woocommerce-ai/agentic-commerce/'
+		);
 	} );
 
 	it( 'goes to a policy field from a link, on load and from the Setup checklist on this page', () => {
