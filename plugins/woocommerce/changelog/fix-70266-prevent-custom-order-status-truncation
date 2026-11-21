@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Enforce 20-character database limit on order statuses across all creation and update paths, safely falling back to pending for new orders, preserving status on existing orders, and having update_status() return false when overlength statuses cannot be applied.
