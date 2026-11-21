@@ -592,6 +592,25 @@ class WC_Discounts {
 	}
 
 	/**
+	 * Ensure coupons are enabled for the store when validating a cart, or throw exception.
+	 *
+	 * Coupons applied to a cart before coupons were disabled are kept in the session, so they are rejected here.
+	 * A `woocommerce_coupons_enabled` callback that returns true keeps them valid, as on the apply paths. One that
+	 * returns false while the setting is on (e.g. to hide the coupon form on a page) doesn't remove applied coupons.
+	 *
+	 * @since  11.4.0
+	 * @throws Exception Error message.
+	 * @return bool
+	 */
+	protected function validate_coupons_enabled() {
+		if ( $this->object instanceof WC_Cart && 'yes' !== get_option( 'woocommerce_enable_coupons' ) && ! wc_coupons_enabled() ) {
+			throw new Exception( esc_html__( 'Coupons are disabled.', 'woocommerce' ), WC_Coupon::E_WC_COUPON_INVALID_FILTERED ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
+		return true;
+	}
+
+	/**
 	 * Ensure coupon exists or throw exception.
 	 *
 	 * A coupon is also considered to no longer exist if it has been placed in the trash, even if the trash has not yet
@@ -1245,6 +1264,7 @@ class WC_Discounts {
 	 */
 	public function is_coupon_valid( $coupon ) {
 		try {
+			$this->validate_coupons_enabled();
 			$this->validate_coupon_exists( $coupon );
 			$this->validate_coupon_usage_limit( $coupon );
 			$this->validate_coupon_user_usage_limit( $coupon );
