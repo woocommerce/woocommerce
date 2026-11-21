@@ -339,4 +339,56 @@ describe( 'ScheduledUpdatesPromotionNotice', () => {
 			expect( container.firstChild ).toBeNull();
 		} );
 	} );
+
+	test( 'keeps the notice in its React root when WordPress moves admin notices', () => {
+		const headerEnd = document.createElement( 'hr' );
+		headerEnd.className = 'wp-header-end';
+		document.body.appendChild( headerEnd );
+
+		const { container, rerender } = render(
+			<>
+				<ScheduledUpdatesPromotionNotice />
+				<p>Loading report</p>
+			</>
+		);
+		const notice = screen.getByRole( 'button', {
+			name: 'Dismiss this notice.',
+		} ).parentElement!;
+
+		try {
+			// Match common.js, which moves non-inline notices outside React.
+			document
+				.querySelectorAll( 'div.updated, div.error, div.notice' )
+				.forEach( ( element ) => {
+					if ( ! element.matches( '.inline, .below-h2' ) ) {
+						headerEnd.after( element );
+					}
+				} );
+
+			expect( container ).toContainElement( notice );
+
+			mockUseSettings.mockReturnValue( {
+				wcAdminSettings: {
+					woocommerce_analytics_scheduled_import: 'no',
+				},
+			} as unknown as ReturnType< typeof useSettings > );
+			rerender(
+				<>
+					<ScheduledUpdatesPromotionNotice />
+					<p>Report loaded</p>
+				</>
+			);
+
+			expect( screen.getByText( 'Report loaded' ) ).toBeInTheDocument();
+			expect(
+				screen.queryByRole( 'button', { name: 'Dismiss this notice.' } )
+			).not.toBeInTheDocument();
+		} finally {
+			// Restore a moved node so a failing assertion can still unmount it.
+			if ( notice.isConnected && ! container.contains( notice ) ) {
+				container.prepend( notice );
+			}
+			headerEnd.remove();
+		}
+	} );
 } );
