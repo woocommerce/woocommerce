@@ -1,0 +1,21 @@
+.components-base-control.has-error {
+	.components-text-control__input {
+		border-color: $alert-red;
+	}
+}
+
+.components-custom-select-control.has-error,
+.wcpay-component-grouped-select-control.has-error {
+	margin-bottom: $gap-smaller;
+
+	button {
+		border-color: $alert-red !important;
+	}
+}
+
+.components-form-field__error {
+	margin-top: -$gap-smallest;
+	margin-bottom: $gap-smaller;
+	font-size: 12px;
+	color: $alert-red;
+}

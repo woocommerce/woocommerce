@@ -1,0 +1,16 @@
+.woocommerce-embedded-layout__primary {
+	padding: 0 20px;
+
+	.components-card__header {
+		box-sizing: border-box;
+	}
+
+	.components-card__footer {
+		box-sizing: border-box;
+	}
+}
+@media (max-width: #{ ($break-medium) }) {
+	.woocommerce-embedded-layout__primary {
+		padding: 0;
+	}
+}

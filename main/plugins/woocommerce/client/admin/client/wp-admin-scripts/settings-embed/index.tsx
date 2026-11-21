@@ -1,0 +1,178 @@
+/**
+ * This file is used to enhance the settings page with additional features such as registering slot fills.
+ */
+
+/**
+ * External dependencies
+ */
+import { createRoot, lazy, Suspense } from '@wordpress/element';
+import { isRTL } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import './settings-ui.scss';
+import { readJsonDataset } from './read-json-dataset';
+import type { ConnectView } from '~/sales-readiness/components/agent-connect';
+import type { ReadinessView } from '~/sales-readiness/types';
+import { isFeatureEnabled } from '~/utils/features';
+import {
+	SettingsPaymentsBacsWrapper,
+	SettingsPaymentsChequeWrapper,
+	SettingsPaymentsCodWrapper,
+	SettingsPaymentsMainWrapper,
+	SettingsPaymentsOfflineWrapper,
+	SettingsPaymentsWooPaymentsWrapper,
+} from '~/settings-payments';
+
+import { possiblyRenderSettingsSlots } from '~/settings/settings-slots';
+import { registerTaxSettingsConflictErrorFill } from '~/settings/conflict-error-slotfill';
+import { registerPaymentsSettingsBannerFill } from '~/payments/payments-settings-banner-slotfill';
+import { registerSiteVisibilitySlotFill } from '~/launch-your-store';
+import { registerBlueprintSlotfill } from '~/blueprint';
+import { registerSettingsEmailColorPaletteFill } from '~/settings-email/settings-email-color-palette-slotfill';
+import { registerSettingsEmailImageUrlFill } from '~/settings-email/settings-email-image-url-slotfill';
+import { registerSettingsEmailPreviewFill } from '~/settings-email/settings-email-preview-slotfill';
+import { registerSettingsEmailFeedbackFill } from '~/settings-email/settings-email-feedback-slotfill';
+import { registerSettingsEmailListingFill } from '~/settings-email/settings-email-listing-slotfill';
+import { registerSettingsUIScreens } from '~/settings/settings-ui-registry';
+
+const renderPaymentsSettings = () => {
+	const pages = [
+		{
+			id: 'experimental_wc_settings_payments_main',
+			component: <SettingsPaymentsMainWrapper />,
+		},
+		{
+			id: 'experimental_wc_settings_payments_offline',
+			component: <SettingsPaymentsOfflineWrapper />,
+		},
+		{
+			id: 'experimental_wc_settings_payments_bacs',
+			component: <SettingsPaymentsBacsWrapper />,
+		},
+		{
+			id: 'experimental_wc_settings_payments_cheque',
+			component: <SettingsPaymentsChequeWrapper />,
+		},
+		{
+			id: 'experimental_wc_settings_payments_cod',
+			component: <SettingsPaymentsCodWrapper />,
+		},
+		{
+			id: 'experimental_wc_settings_payments_woocommerce_payments',
+			component: <SettingsPaymentsWooPaymentsWrapper />,
+		},
+	];
+
+	// Render each payment component.
+	pages.forEach( ( { id, component } ) => {
+		const root = document.getElementById( id );
+		if ( root ) {
+			const newDiv = document.createElement( 'div' );
+			newDiv.className = 'wc-settings-prevent-change-event';
+			createRoot( root.insertBefore( newDiv, null ) ).render( component );
+		}
+	} );
+};
+
+const SalesReadinessOverview = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "sales-readiness-overview" */ '~/sales-readiness/overview'
+		)
+);
+
+/**
+ * WooCommerce > Settings > AI tools opens on the Overview, which the PHP tab leaves a root for.
+ */
+const renderSalesReadinessOverview = () => {
+	const root = document.getElementById( 'wc-agent-readiness-overview' );
+	if ( root ) {
+		// Read each attribute on its own. One try would hide the connection card
+		// when the readiness view does not parse; that view can reload, the card cannot.
+		const initialView = readJsonDataset< ReadinessView >(
+			root.dataset.view
+		);
+		const connect = readJsonDataset< ConnectView >( root.dataset.connect );
+		createRoot( root ).render(
+			<Suspense fallback={ null }>
+				<SalesReadinessOverview
+					initialView={ initialView }
+					connect={ connect }
+				/>
+			</Suspense>
+		);
+	}
+};
+
+const AiShopping = lazy( () =>
+	Promise.all( [
+		import(
+			/* webpackChunkName: "ai-shopping" */ '~/sales-readiness/ai-shopping'
+		),
+		// Chunk stylesheets bypass the RTL swap WordPress applies to registered styles.
+		isRTL()
+			? import(
+					/* webpackChunkName: "ai-shopping-styles-rtl" */ '~/sales-readiness/ai-shopping-dataviews-rtl.scss'
+				)
+			: import(
+					/* webpackChunkName: "ai-shopping-styles" */ '~/sales-readiness/ai-shopping-dataviews.scss'
+				),
+	] ).then( ( [ module ] ) => module )
+);
+
+/**
+ * AI tools > AI shopping, which the PHP section leaves a root for with its data.
+ */
+const renderAiShopping = () => {
+	const root = document.getElementById( 'wc-ai-shopping' );
+	if ( ! root ) {
+		return;
+	}
+	let view = null;
+	try {
+		view = JSON.parse( root.dataset.view ?? 'null' );
+	} catch {
+		// Nothing to show without the page's data.
+	}
+	if ( view ) {
+		createRoot( root ).render(
+			<Suspense fallback={ null }>
+				<AiShopping view={ view } />
+			</Suspense>
+		);
+	}
+};
+
+const registerSlotFills = () => {
+	possiblyRenderSettingsSlots();
+	registerTaxSettingsConflictErrorFill();
+	registerPaymentsSettingsBannerFill();
+
+	const features = window.wcAdminFeatures;
+
+	registerSiteVisibilitySlotFill();
+
+	if ( isFeatureEnabled( 'blueprint' ) ) {
+		registerBlueprintSlotfill();
+	}
+
+	if ( isFeatureEnabled( 'block_email_editor' ) ) {
+		registerSettingsEmailListingFill();
+	}
+
+	if ( features?.[ 'settings-ui' ] === true ) {
+		registerSettingsUIScreens();
+	}
+
+	registerSettingsEmailColorPaletteFill();
+	registerSettingsEmailFeedbackFill();
+	registerSettingsEmailImageUrlFill();
+	registerSettingsEmailPreviewFill();
+};
+
+renderPaymentsSettings();
+renderSalesReadinessOverview();
+renderAiShopping();
+registerSlotFills();

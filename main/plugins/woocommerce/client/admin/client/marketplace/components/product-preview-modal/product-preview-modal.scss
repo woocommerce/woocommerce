@@ -1,0 +1,55 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace__product-preview-modal {
+
+	@media ( max-width: 599px ) {
+		border-radius: 0 !important;
+	}
+
+	.components-modal__header-heading {
+		// decreasing fonr weight as it's not the most important heading in the modal
+		font-weight: 500;
+	}
+
+	&__header {
+		display: flex;
+		gap: $grid-unit-20;
+		align-items: center;
+		margin: $grid-unit-40 0;
+	}
+
+	&__icon {
+		width: 64px;
+		height: 64px;
+		border-radius: 8px;
+	}
+
+	&__header-content h2 {
+		margin: 0;
+		line-height: 1;
+		font-weight: 500;
+		font-size: 1.2rem;
+	}
+
+	&__vendor {
+		display: flex;
+		gap: $grid-unit-05;
+		margin: $grid-unit-10 0 0;
+		font-size: 1.125em;
+
+		& a {
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 1;
+			text-decoration: none;
+			overflow: hidden;
+		}
+	}
+
+	&__loading {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 200px;
+	}
+}
