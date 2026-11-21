@@ -103,7 +103,7 @@ class CheckoutOrder extends AbstractCartRoute {
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		global $wp, $wp_query;
@@ -141,9 +141,9 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @throws RouteException On error.
 	 * @throws InvalidStockLevelsInCartException On error.
 	 *
-	 * @param \WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
 	 *
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	private function pay_for_order( \WP_REST_Request $request ) {
 		$order_id = absint( $request['id'] );
