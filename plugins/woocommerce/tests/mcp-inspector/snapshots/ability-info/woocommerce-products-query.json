@@ -1,0 +1,631 @@
+{
+	"name": "woocommerce/products-query",
+	"label": "Query products",
+	"description": "Find products by ID or common catalog filters.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"minimum": 1
+			},
+			"search": {
+				"type": "string"
+			},
+			"sku": {
+				"type": "string",
+				"description": "Limit results to products with SKUs that partially match this string. Use * to match products with any non-empty SKU."
+			},
+			"status": {
+				"type": "string",
+				"enum": [
+					"future",
+					"trash",
+					"draft",
+					"pending",
+					"private",
+					"publish"
+				]
+			},
+			"type": {
+				"type": "string",
+				"description": "Product type, from the product types that WooCommerce and extensions register.",
+				"enum": [
+					"simple",
+					"grouped",
+					"external",
+					"variable",
+					"variation"
+				]
+			},
+			"parent_id": {
+				"type": "integer",
+				"description": "Limit results to the variations of this variable product.",
+				"minimum": 1
+			},
+			"virtual": {
+				"type": "boolean",
+				"description": "Limit results to products that are not shipped (true) or that are shipped (false)."
+			},
+			"downloadable": {
+				"type": "boolean",
+				"description": "Limit results to products that have files to download (true) or that do not (false)."
+			},
+			"stock_status": {
+				"type": "string",
+				"enum": [
+					"instock",
+					"outofstock",
+					"onbackorder"
+				]
+			},
+			"category": {
+				"type": "array",
+				"description": "Only products in any of these product category IDs, including their child categories.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"tag": {
+				"type": "array",
+				"description": "Only products with any of these product tag IDs.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"brand": {
+				"type": "array",
+				"description": "Only products of any of these brand IDs, including their child brands.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"page": {
+				"type": "integer",
+				"default": 1,
+				"minimum": 1
+			},
+			"per_page": {
+				"type": "integer",
+				"default": 10,
+				"minimum": 1,
+				"maximum": 100
+			}
+		},
+		"additionalProperties": false,
+		"default": []
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"products": {
+				"type": "array",
+				"description": "Returned products for the current page.",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer"
+						},
+						"name": {
+							"type": "string"
+						},
+						"slug": {
+							"type": "string"
+						},
+						"permalink": {
+							"type": "string",
+							"description": "Product permalink. Omitted when no public permalink is available.",
+							"format": "uri"
+						},
+						"type": {
+							"type": "string",
+							"description": "Internal product type slug, such as simple, external, grouped, variable or variation."
+						},
+						"status": {
+							"type": "string",
+							"enum": [
+								"draft",
+								"pending",
+								"private",
+								"publish",
+								"future",
+								"auto-draft",
+								"trash"
+							]
+						},
+						"sku": {
+							"type": "string"
+						},
+						"currency": {
+							"type": "string",
+							"enum": [
+								"AED",
+								"AFN",
+								"ALL",
+								"AMD",
+								"ANG",
+								"AOA",
+								"ARS",
+								"AUD",
+								"AWG",
+								"AZN",
+								"BAM",
+								"BBD",
+								"BDT",
+								"BGN",
+								"BHD",
+								"BIF",
+								"BMD",
+								"BND",
+								"BOB",
+								"BRL",
+								"BSD",
+								"BTC",
+								"BTN",
+								"BWP",
+								"BYR",
+								"BYN",
+								"BZD",
+								"CAD",
+								"CDF",
+								"CHF",
+								"CHW",
+								"CLP",
+								"CNY",
+								"COP",
+								"CRC",
+								"CUC",
+								"CUP",
+								"CVE",
+								"CZK",
+								"DJF",
+								"DKK",
+								"DOP",
+								"DZD",
+								"EGP",
+								"ERN",
+								"ETB",
+								"EUR",
+								"FJD",
+								"FKP",
+								"GBP",
+								"GEL",
+								"GGP",
+								"GHS",
+								"GIP",
+								"GMD",
+								"GNF",
+								"GTQ",
+								"GYD",
+								"HKD",
+								"HNL",
+								"HRK",
+								"HTG",
+								"HUF",
+								"IDR",
+								"ILS",
+								"IMP",
+								"INR",
+								"IQD",
+								"IRR",
+								"IRT",
+								"ISK",
+								"JEP",
+								"JMD",
+								"JOD",
+								"JPY",
+								"KES",
+								"KGS",
+								"KHR",
+								"KMF",
+								"KPW",
+								"KRW",
+								"KWD",
+								"KYD",
+								"KZT",
+								"LAK",
+								"LBP",
+								"LKR",
+								"LRD",
+								"LSL",
+								"LYD",
+								"MAD",
+								"MDL",
+								"MGA",
+								"MKD",
+								"MMK",
+								"MNT",
+								"MOP",
+								"MRU",
+								"MUR",
+								"MVR",
+								"MWK",
+								"MXN",
+								"MYR",
+								"MZN",
+								"NAD",
+								"NGN",
+								"NIO",
+								"NOK",
+								"NPR",
+								"NZD",
+								"OMR",
+								"PAB",
+								"PEN",
+								"PGK",
+								"PHP",
+								"PKR",
+								"PLN",
+								"PRB",
+								"PYG",
+								"QAR",
+								"RON",
+								"RSD",
+								"RUB",
+								"RWF",
+								"SAR",
+								"SBD",
+								"SCR",
+								"SDG",
+								"SEK",
+								"SGD",
+								"SHP",
+								"SLL",
+								"SOS",
+								"SRD",
+								"SSP",
+								"STN",
+								"SYP",
+								"SZL",
+								"THB",
+								"TJS",
+								"TMT",
+								"TND",
+								"TOP",
+								"TRY",
+								"TTD",
+								"TWD",
+								"TZS",
+								"UAH",
+								"UGX",
+								"USD",
+								"UYU",
+								"UZS",
+								"VEF",
+								"VES",
+								"VND",
+								"VUV",
+								"WST",
+								"XAF",
+								"XCD",
+								"XOF",
+								"XPF",
+								"YER",
+								"ZAR",
+								"ZMW"
+							]
+						},
+						"currency_symbol": {
+							"type": "string"
+						},
+						"price": {
+							"type": "string",
+							"description": "Decimal price as a string, without a currency symbol."
+						},
+						"regular_price": {
+							"type": "string",
+							"description": "Decimal price as a string, without a currency symbol."
+						},
+						"sale_price": {
+							"type": "string",
+							"description": "Decimal price as a string, without a currency symbol."
+						},
+						"on_sale": {
+							"type": "boolean",
+							"description": "Whether the sale price applies now, taking the sale dates into account."
+						},
+						"date_on_sale_from": {
+							"type": "string",
+							"description": "Start of the sale in the store timezone. Omitted when the sale has no start date.",
+							"format": "date-time"
+						},
+						"date_on_sale_to": {
+							"type": "string",
+							"description": "End of the sale in the store timezone. Omitted when the sale has no end date.",
+							"format": "date-time"
+						},
+						"stock_status": {
+							"type": "string",
+							"enum": [
+								"instock",
+								"outofstock",
+								"onbackorder"
+							]
+						},
+						"stock_quantity": {
+							"type": "integer",
+							"description": "Current stock quantity. Omitted when no stock quantity is set."
+						},
+						"manage_stock": {
+							"type": "boolean"
+						},
+						"sold_individually": {
+							"type": "boolean"
+						},
+						"virtual": {
+							"type": "boolean"
+						},
+						"downloadable": {
+							"type": "boolean"
+						},
+						"external_url": {
+							"type": "string",
+							"description": "External product URL. Omitted when the product is not external or no URL is set.",
+							"format": "uri"
+						},
+						"button_text": {
+							"type": "string",
+							"description": "Button text. Omitted when the product is not external or no button text is set."
+						},
+						"grouped_products": {
+							"type": "array",
+							"description": "Product IDs included as children of a grouped product.",
+							"items": {
+								"type": "integer"
+							}
+						},
+						"parent_id": {
+							"type": "integer",
+							"description": "ID of the variable product of a variation, or 0."
+						},
+						"attributes": {
+							"type": "array",
+							"description": "Attributes with their options on a product, or the option each attribute picks on a variation. For a global attribute the options are term slugs.",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer",
+										"description": "ID of the global attribute, or 0 for an attribute of this product only."
+									},
+									"name": {
+										"type": "string"
+									},
+									"options": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									},
+									"option": {
+										"type": "string",
+										"description": "The option a variation picks. Omitted when the variation matches any option."
+									},
+									"visible": {
+										"type": "boolean"
+									},
+									"variation": {
+										"type": "boolean",
+										"description": "Whether the variations pick an option of this attribute."
+									}
+								},
+								"required": [
+									"name"
+								],
+								"additionalProperties": false
+							}
+						},
+						"categories": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"name": {
+										"type": "string"
+									},
+									"slug": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"tags": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"name": {
+										"type": "string"
+									},
+									"slug": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"brands": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"name": {
+										"type": "string"
+									},
+									"slug": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"catalog_visibility": {
+							"type": "string",
+							"enum": [
+								"visible",
+								"catalog",
+								"search",
+								"hidden"
+							]
+						},
+						"featured": {
+							"type": "boolean"
+						},
+						"description": {
+							"type": "string"
+						},
+						"short_description": {
+							"type": "string"
+						},
+						"images": {
+							"type": "array",
+							"description": "Featured image first, then the gallery.",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"src": {
+										"type": "string",
+										"format": "uri"
+									},
+									"name": {
+										"type": "string"
+									},
+									"alt": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"weight": {
+							"type": "string",
+							"description": "Decimal string in lbs, or empty when not set."
+						},
+						"dimensions": {
+							"type": "object",
+							"description": "Decimal strings in in, each empty when not set.",
+							"properties": {
+								"length": {
+									"type": "string"
+								},
+								"width": {
+									"type": "string"
+								},
+								"height": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						},
+						"shipping_required": {
+							"type": "boolean"
+						},
+						"shipping_class": {
+							"type": "string",
+							"description": "Shipping class slug, or empty when the product has none."
+						},
+						"shipping_class_id": {
+							"type": "integer",
+							"description": "Shipping class term ID, or 0 when the product has none."
+						},
+						"tax_status": {
+							"type": "string",
+							"enum": [
+								"taxable",
+								"shipping",
+								"none"
+							]
+						},
+						"tax_class": {
+							"type": "string",
+							"description": "Tax class slug, or empty for the standard rate."
+						},
+						"backorders": {
+							"type": "string",
+							"enum": [
+								"no",
+								"notify",
+								"yes"
+							]
+						},
+						"low_stock_amount": {
+							"type": "integer",
+							"description": "Low stock threshold of the product. Omitted when the store-wide threshold applies."
+						},
+						"variation_ids": {
+							"type": "array",
+							"description": "IDs of the variations of a variable product.",
+							"items": {
+								"type": "integer"
+							}
+						},
+						"date_created": {
+							"type": "string",
+							"format": "date-time",
+							"description": "Product creation date in the store timezone. Omitted when no creation date is available."
+						},
+						"date_created_gmt": {
+							"type": "string",
+							"format": "date-time",
+							"description": "Product creation date in UTC. Omitted when no creation date is available."
+						},
+						"date_modified": {
+							"type": "string",
+							"format": "date-time",
+							"description": "Product modification date in the store timezone. Omitted when no modification date is available."
+						},
+						"date_modified_gmt": {
+							"type": "string",
+							"format": "date-time",
+							"description": "Product modification date in UTC. Omitted when no modification date is available."
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"total_pages": {
+				"type": "integer",
+				"description": "Total number of result pages available for the current query."
+			},
+			"page": {
+				"type": "integer",
+				"description": "Current result page."
+			},
+			"per_page": {
+				"type": "integer",
+				"description": "Maximum number of items requested per page."
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

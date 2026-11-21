@@ -1,0 +1,54 @@
+{
+	"name": "woocommerce/product-delete",
+	"label": "Delete product",
+	"description": "Move a product to the trash, or delete it permanently.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"minimum": 1
+			},
+			"force": {
+				"type": "boolean",
+				"description": "Permanently delete the product. Defaults to false, which moves the product to trash.",
+				"default": false
+			}
+		},
+		"required": [
+			"id"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"description": "ID of the product."
+			},
+			"status": {
+				"type": "string",
+				"enum": [
+					"trash",
+					"deleted"
+				],
+				"description": "What happened to the product. \"trash\": the product was moved to the trash, and can be restored. \"deleted\": the product was permanently deleted, and cannot be restored."
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": true,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}
