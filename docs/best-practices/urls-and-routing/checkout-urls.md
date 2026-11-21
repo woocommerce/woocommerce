@@ -5,7 +5,7 @@ sidebar_label: Checkout URLs
 
 # Shareable Checkout URLs
 
-Custom checkout links automatically populate the cart with specific products and redirect customers straight to checkout with a unique session ID.
+Custom checkout links automatically populate the cart with specific products and redirect customers straight to checkout.
 
 The custom checkout link path is `/checkout-link/` and is not customizable.
 
@@ -80,4 +80,6 @@ In this link:
 
 ## Sessions
 
-Once the user is redirected to the checkout page, the cart is populated with the products and coupon code. The final URL includes a `session` parameter storing the ID of the session. Future changes to the checkout will be persisted in the session, enabling persistent and shareable carts.
+Once the user is redirected to the checkout page, the cart is populated with the products and coupon code. For guests, the final URL includes a `session` parameter so the cart is kept if they open the page in another browser, for example when leaving an app's built-in browser. The cart is copied without the shopper's address or contact details.
+
+To share a cart with other people, share the `/checkout-link/` URL. Each person who opens it gets their own cart with the same products and coupon.
