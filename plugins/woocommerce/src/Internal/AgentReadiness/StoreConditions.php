@@ -125,7 +125,7 @@ class StoreConditions {
 				'name'    => __( 'Site uses HTTPS', 'woocommerce' ),
 				'label'   => __( 'Site does not use HTTPS', 'woocommerce' ),
 				'why'     => __( 'Agents only send shoppers to a secure checkout.', 'woocommerce' ),
-				'fix'     => __( 'Move the site to HTTPS; your host can usually turn it on.', 'woocommerce' ),
+				'fix'     => __( 'Move the site to HTTPS; your hosting provider can usually turn it on.', 'woocommerce' ),
 				'fix_url' => wp_get_update_https_url(),
 			),
 			self::ucp_discovery( UcpDiscovery::serve_status() ),

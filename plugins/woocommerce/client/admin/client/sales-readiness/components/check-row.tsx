@@ -105,6 +105,39 @@ interface RowProps {
 	srState?: string;
 }
 
+/** Scripts that wrap between characters rather than at spaces: Chinese, Japanese and Korean. */
+const CJK = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\uf900-\ufaff]/;
+
+/**
+ * A title whose badge stays with its last word, so a long title wraps without leaving the badge on a
+ * line of its own.
+ */
+const TitleWithBadge = ( {
+	title,
+	badge,
+}: {
+	title: string;
+	badge: ViewBadge;
+} ) => {
+	// The last word stays with the badge. Text after the last space that has no spaces of its own, such
+	// as one word or Japanese, keeps only its last character there, so the rest can still wrap.
+	const afterSpace = title.lastIndexOf( ' ' ) + 1;
+	const lastChar = title.length - ( Array.from( title ).pop()?.length ?? 0 );
+	const split =
+		afterSpace && ! CJK.test( title.slice( afterSpace ) )
+			? afterSpace
+			: lastChar;
+	return (
+		<>
+			{ title.slice( 0, split ) }
+			<span className="wc-sales-readiness-row__title-end">
+				{ title.slice( split ) }
+				<Badge intent={ badge.intent }>{ badge.text }</Badge>
+			</span>
+		</>
+	);
+};
+
 /**
  * A row's frame: marker, title with its badge, whatever goes under the title, then the action.
  */
@@ -128,9 +161,10 @@ export const Row = ( {
 		<Stack direction="column" className="wc-sales-readiness-row__body">
 			<Text variant="body-md" className="wc-sales-readiness-row__title">
 				{ srState && <VisuallyHidden>{ srState } </VisuallyHidden> }
-				{ title }
-				{ badge && (
-					<Badge intent={ badge.intent }>{ badge.text }</Badge>
+				{ badge ? (
+					<TitleWithBadge title={ title } badge={ badge } />
+				) : (
+					title
 				) }
 			</Text>
 			{ children }

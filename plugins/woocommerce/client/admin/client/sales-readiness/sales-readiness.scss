@@ -84,6 +84,12 @@ body:has(.wc-sales-readiness) {
 		color: var(--wc-sr-muted);
 	}
 
+	// What a Fix first issue affects, in bold before its line.
+	&__impact {
+		color: var(--wpds-color-foreground-content-neutral);
+		font-weight: 600;
+	}
+
 	// No orphans: balance the last line of text.
 	:is(p, .components-text, [class*="__body-"]) {
 		text-wrap: pretty;
@@ -192,6 +198,38 @@ body:has(.wc-sales-readiness) {
 	}
 }
 
+// Extra details for AI assistants: a compact list per group, as in the design.
+.wc-sales-readiness-declared {
+	display: grid;
+	gap: 20px;
+	padding-block-start: 12px;
+
+	&__title {
+		display: block;
+		font-weight: 600;
+		margin-block-end: 6px;
+	}
+
+	&__list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	&__item {
+		display: flex;
+		gap: 8px;
+		align-items: flex-start;
+		// wp-admin gives every li a bottom margin.
+		margin: 0;
+		padding-block: 2px;
+
+		> svg {
+			flex: 0 0 20px;
+		}
+	}
+}
+
 // A list that ends the card (Fix first, a passed card) has no line under its last row. An open
 // fold keeps its line, above Hide.
 .wc-sales-readiness-card .wc-sales-readiness-list:last-child:not(.wc-sales-readiness-fold *) > .wc-sales-readiness-row:last-child {
@@ -276,13 +314,18 @@ body:has(.wc-sales-readiness) {
 	// The badge follows the title's last word, so a long title wraps without leaving it on a line of its own.
 	&__title {
 		display: block;
-		margin-block-end: -2px;
 		font-weight: 600;
 
-		> span {
-			display: inline-flex;
-			margin-inline-start: var(--wpds-dimension-gap-sm);
-			vertical-align: middle;
+		// The badge is taller than the 20px line, so it overlaps the line by 2px each side instead of adding a gap.
+		&-end {
+			white-space: nowrap;
+
+			> span {
+				display: inline-flex;
+				margin-block: -2px;
+				margin-inline-start: var(--wpds-dimension-gap-sm);
+				vertical-align: middle;
+			}
 		}
 	}
 
