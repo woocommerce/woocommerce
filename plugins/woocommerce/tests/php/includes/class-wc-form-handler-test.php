@@ -159,6 +159,31 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox cancel_order() shows the invalid order notice when the order does not exist.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 *
+	 * @param bool $user_has_cancel_cap Whether the user holds the cancel_order capability, as a role editor can grant.
+	 * @testWith [false]
+	 *           [true]
+	 */
+	public function test_cancel_order_shows_invalid_order_notice_for_missing_order( bool $user_has_cancel_cap ): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order = WC_Helper_Order::create_order( $user_id );
+		$this->prepare_cancel_order_request( $order );
+		$order->delete( true );
+
+		if ( $user_has_cancel_cap ) {
+			wp_get_current_user()->add_cap( 'cancel_order' );
+		}
+
+		WC_Form_Handler::cancel_order();
+
+		$this->assertSame( array( 'Invalid order.' ), array_column( wc_get_notices( 'error' ), 'notice' ), 'A missing order should get the invalid order notice.' );
+	}
+
+	/**
 	 * @testdox cancel_order() returns to direct callers outside wp_loaded and does not arm the deferred redirect.
 	 *
 	 * @covers WC_Form_Handler::cancel_order()
