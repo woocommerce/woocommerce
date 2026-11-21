@@ -32,6 +32,9 @@ const getCacheConfig = ( name, configPaths = [] ) =>
 		? { type: 'memory' }
 		: {
 				type: 'filesystem',
+				// webpack's default name includes the config's position in the
+				// exported list, which changes with WC_BLOCKS_BUILD_SHARD.
+				name: `${ name }-${ NODE_ENV }`,
 				cacheDirectory: path.resolve(
 					__dirname,
 					`node_modules/.cache/webpack-${ name }`
@@ -72,6 +75,7 @@ const sharedConfig = {
 
 const CartAndCheckoutFrontendConfig = {
 	...sharedConfig,
+	name: 'cart-and-checkout-frontend',
 	cache: getCacheConfig( 'cart-and-checkout-frontend', [] ),
 	...getCartAndCheckoutFrontendConfig( { alias: getAlias() } ),
 };
@@ -79,6 +83,7 @@ const CartAndCheckoutFrontendConfig = {
 // Core config for shared libraries.
 const CoreConfig = {
 	...sharedConfig,
+	name: 'core',
 	cache: getCacheConfig( 'core', [] ),
 	...getCoreConfig( { alias: getAlias() } ),
 };
@@ -86,6 +91,7 @@ const CoreConfig = {
 // Main Blocks config for registering Blocks and for the Editor.
 const MainConfig = {
 	...sharedConfig,
+	name: 'main',
 	cache: getCacheConfig( 'main', [] ),
 	...getMainConfig( { alias: getAlias() } ),
 };
@@ -93,6 +99,7 @@ const MainConfig = {
 // Unified Blocks config enabled at runtime by a WooCommerce feature flag.
 const UnifiedMainConfig = {
 	...sharedConfig,
+	name: 'unified-main',
 	cache: getCacheConfig( 'unified-main', [] ),
 	...getUnifiedMainConfig( { alias: getAlias() } ),
 };
@@ -100,6 +107,7 @@ const UnifiedMainConfig = {
 // Frontend config for scripts used in the store itself.
 const FrontendConfig = {
 	...sharedConfig,
+	name: 'frontend',
 	cache: getCacheConfig( 'frontend', [] ),
 	...getFrontConfig( { alias: getAlias() } ),
 };
@@ -109,6 +117,7 @@ const FrontendConfig = {
  */
 const ExtensionsConfig = {
 	...sharedConfig,
+	name: 'extensions',
 	cache: getCacheConfig( 'extensions', [] ),
 	...getExtensionsConfig( { alias: getAlias() } ),
 };
@@ -118,6 +127,7 @@ const ExtensionsConfig = {
  */
 const PaymentsConfig = {
 	...sharedConfig,
+	name: 'payments',
 	cache: getCacheConfig( 'payments', [] ),
 	...getPaymentsConfig( { alias: getAlias() } ),
 };
@@ -127,6 +137,7 @@ const PaymentsConfig = {
  */
 const StylingConfig = {
 	...sharedConfig,
+	name: 'styling',
 	cache: getCacheConfig( 'styling', [] ),
 	...getStylingConfig( { alias: getAlias() } ),
 };
@@ -134,6 +145,7 @@ const StylingConfig = {
 // Unified editor styles enabled at runtime by a WooCommerce feature flag.
 const UnifiedStylingConfig = {
 	...sharedConfig,
+	name: 'unified-styling',
 	cache: getCacheConfig( 'unified-styling', [] ),
 	...getUnifiedStylingConfig( { alias: getAlias() } ),
 };
@@ -141,6 +153,7 @@ const UnifiedStylingConfig = {
 // Scripts used exclusively in the Site Editor by the legacy asset path.
 const SiteEditorConfig = {
 	...sharedConfig,
+	name: 'site-editor',
 	cache: getCacheConfig( 'site-editor', [] ),
 	...getSiteEditorConfig( { alias: getAlias() } ),
 };
@@ -159,13 +172,14 @@ const InteractivityBlocksConfig = {
  */
 const DependencyDetectionConfig = {
 	...sharedConfig,
+	name: 'dependency-detection',
 	cache: getCacheConfig( 'dependency-detection', [
 		'bin/webpack-config-dependency-detection.js',
 	] ),
 	...dependencyDetectionConfig,
 };
 
-module.exports = [
+const configs = [
 	CartAndCheckoutFrontendConfig,
 	CoreConfig,
 	MainConfig,
@@ -179,3 +193,42 @@ module.exports = [
 	InteractivityBlocksConfig,
 	DependencyDetectionConfig,
 ];
+
+// Relative build cost of each config, used to split them evenly between the
+// processes started by bin/webpack-parallel.js. Configs not listed count as 1.
+const buildWeights = {
+	'unified-styling': 32,
+	main: 30,
+	'unified-main': 29,
+	styling: 27,
+	'cart-and-checkout-frontend': 16,
+	core: 14,
+	'interactivity-blocks-modules': 13,
+	frontend: 9,
+	extensions: 4,
+	payments: 2,
+};
+
+/**
+ * Returns the configs one process should build when the build is split into
+ * `count` processes. Each config goes to the process with the least work so far.
+ *
+ * @param {number} index Zero-based process index.
+ * @param {number} count Number of processes.
+ */
+const getShard = ( index, count ) => {
+	const loads = new Array( count ).fill( 0 );
+	const weight = ( config ) => buildWeights[ config.name ] ?? 1;
+	return [ ...configs ]
+		.sort( ( a, b ) => weight( b ) - weight( a ) )
+		.filter( ( config ) => {
+			const lightest = loads.indexOf( Math.min( ...loads ) );
+			loads[ lightest ] += weight( config );
+			return lightest === index;
+		} );
+};
+
+const shard = process.env.WC_BLOCKS_BUILD_SHARD?.match( /^(\d+)\/(\d+)$/ );
+module.exports = shard
+	? getShard( Number( shard[ 1 ] ), Number( shard[ 2 ] ) )
+	: configs;

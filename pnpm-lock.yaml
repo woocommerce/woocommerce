@@ -223,6 +223,9 @@ catalogs:
     '@jest/globals':
       specifier: 29.5.x
       version: 29.5.0
+    '@swc/core':
+      specifier: 1.15.24
+      version: 1.15.24
     '@types/jest':
       specifier: 29.5.x
       version: 29.5.14
@@ -250,9 +253,6 @@ catalogs:
     babel-loader:
       specifier: 9.2.x
       version: 9.2.1
-    babel-plugin-transform-react-remove-prop-types:
-      specifier: 0.4.24
-      version: 0.4.24
     copy-webpack-plugin:
       specifier: 14.0.x
       version: 14.0.0
@@ -304,6 +304,9 @@ catalogs:
     stylelint:
       specifier: ^16.9.0
       version: 16.26.1
+    swc-loader:
+      specifier: 0.2.7
+      version: 0.2.7
     ts-jest:
       specifier: 29.1.x
       version: 29.1.5
@@ -2010,9 +2013,15 @@ importers:
       '@automattic/color-studio':
         specifier: ^4.0.0
         version: 4.0.0
+      '@swc/core':
+        specifier: catalog:tooling
+        version: 1.15.24
       '@wordpress/base-styles':
         specifier: catalog:wp-bundled
         version: 6.9.1
+      '@wordpress/browserslist-config':
+        specifier: next
+        version: 6.55.1-next.v.202609171837.0
       '@wordpress/postcss-plugins-preset':
         specifier: catalog:tooling
         version: 5.56.0(postcss@8.5.26)
@@ -2046,6 +2055,9 @@ importers:
       sass-loader:
         specifier: catalog:tooling
         version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26))
+      swc-loader:
+        specifier: catalog:tooling
+        version: 0.2.7(@swc/core@1.15.24)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26))
       webpack-remove-empty-scripts:
         specifier: 1.0.x
         version: 1.0.4(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26))
@@ -3500,9 +3512,6 @@ importers:
       babel-loader:
         specifier: catalog:tooling
         version: 9.2.1(@babel/core@7.29.7)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
-      babel-plugin-transform-react-remove-prop-types:
-        specifier: catalog:tooling
-        version: 0.4.24
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
@@ -3981,9 +3990,6 @@ importers:
       babel-plugin-react-docgen:
         specifier: 4.2.1
         version: 4.2.1
-      babel-plugin-transform-react-remove-prop-types:
-        specifier: catalog:tooling
-        version: 0.4.24
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -10007,6 +10013,10 @@ packages:
     resolution: {integrity: sha512-2TLfCnjfVy6CBR6vwYlMRPrxHeGPrEF2OeKIUZd5hQhDeYP7s+u5iczEWw2F6acaIaJ3S8amO7lcoh3Q6APfWw==}
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
 
+  '@wordpress/browserslist-config@6.55.1-next.v.202609171837.0':
+    resolution: {integrity: sha512-GSXmW3M4/CmeiNWJpV5ryC/kcMWlC9haKpegIqlVogt/MpfXtaTArkZRLcccjUiWPHP6eAUpPn+MHig80W3njg==}
+    engines: {node: '>=18.12.0', npm: '>=8.19.2'}
+
   '@wordpress/browserslist-config@6.56.0':
     resolution: {integrity: sha512-/gdTZapH6cV2iu+glSvM6IjYjS6kLtRlmjlNENqn03Isc8V1cSyWZWZ4vlq2i41uwqGoDObu4DdlmTBWS+g4Cg==}
     engines: {node: '>=18.12.0'}
@@ -12156,9 +12166,6 @@ packages:
 
   babel-plugin-react-docgen@4.2.1:
     resolution: {integrity: sha512-UQ0NmGHj/HAqi5Bew8WvNfCk8wSsmdgNd8ZdMjBCICtyCJCq9LiqgqvjCYe570/Wg7AQArSq1VQ60Dd/CHN7mQ==}
-
-  babel-plugin-transform-react-remove-prop-types@0.4.24:
-    resolution: {integrity: sha512-eqj0hVcJUR57/Ug2zE1Yswsw4LhuqqHhD+8v120T1cl3kjg76QwtyBrdIk4WVwK+lAhBJVYCd/v+4nc4y+8JsA==}
 
   babel-preset-current-node-syntax@1.2.0:
     resolution: {integrity: sha512-E/VlAEzRrsLEb2+dv8yp3bo4scof3l9nR4lrld+Iy5NyVqgVYUJnDAmunkhPMisRI32Qc4iRiz425d8vM++2fg==}
@@ -19441,6 +19448,12 @@ packages:
     engines: {node: '>=14.0.0'}
     hasBin: true
 
+  swc-loader@0.2.7:
+    resolution: {integrity: sha512-nwYWw3Fh9ame3Rtm7StS9SBLpHRRnYcK7bnpF3UKZmesAK0gw2/ADvlURFAINmPvKtDLzp+GBiP9yLoEjg6S9w==}
+    peerDependencies:
+      '@swc/core': ^1.2.147
+      webpack: '>=2'
+
   symbol-tree@3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
 
@@ -26650,15 +26663,12 @@ snapshots:
       '@swc/core-win32-arm64-msvc': 1.15.24
       '@swc/core-win32-ia32-msvc': 1.15.24
       '@swc/core-win32-x64-msvc': 1.15.24
-    optional: true
 
-  '@swc/counter@0.1.3':
-    optional: true
+  '@swc/counter@0.1.3': {}
 
   '@swc/types@0.1.26':
     dependencies:
       '@swc/counter': 0.1.3
-    optional: true
 
   '@szmarczak/http-timer@4.0.6':
     dependencies:
@@ -28719,6 +28729,8 @@ snapshots:
       '@types/react-dom': 18.3.7(@types/react@18.3.28)
 
   '@wordpress/browserslist-config@6.43.1-next.v.202604091042.0': {}
+
+  '@wordpress/browserslist-config@6.55.1-next.v.202609171837.0': {}
 
   '@wordpress/browserslist-config@6.56.0': {}
 
@@ -35286,8 +35298,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  babel-plugin-transform-react-remove-prop-types@0.4.24: {}
-
   babel-preset-current-node-syntax@1.2.0(@babel/core@7.29.7):
     dependencies:
       '@babel/core': 7.29.7
@@ -40832,6 +40842,18 @@ snapshots:
       esbuild: 0.27.7
       postcss: 8.5.26
 
+  minimizer-webpack-plugin@5.13.1(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26)):
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.31
+      jest-worker: 27.5.1
+      schema-utils: 4.8.1(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26))
+      terser: 5.51.2
+      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26)
+    optionalDependencies:
+      '@swc/core': 1.15.24
+      esbuild: 0.28.2
+      postcss: 8.5.26
+
   minipass@7.1.3: {}
 
   mitt@3.0.1: {}
@@ -44105,6 +44127,12 @@ snapshots:
       picocolors: 1.1.1
       sax: 1.6.0
 
+  swc-loader@0.2.7(@swc/core@1.15.24)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26)):
+    dependencies:
+      '@swc/core': 1.15.24
+      '@swc/counter': 0.1.3
+      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26)
+
   symbol-tree@3.2.4: {}
 
   sync-child-process@1.0.2:
@@ -45310,6 +45338,43 @@ snapshots:
       webpack-sources: 3.6.0
     optionalDependencies:
       webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@5.2.7)(webpack@5.112.2)
+    transitivePeerDependencies:
+      - '@minify-html/node'
+      - '@napi-rs/image'
+      - '@swc/core'
+      - '@swc/css'
+      - '@swc/html'
+      - clean-css
+      - cssnano
+      - csso
+      - esbuild
+      - html-minifier-terser
+      - imagemin
+      - lightningcss
+      - postcss
+      - sharp
+      - svgo
+      - uglify-js
+
+  webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26):
+    dependencies:
+      '@types/estree': 1.0.8
+      '@types/json-schema': 7.0.15
+      '@webassemblyjs/ast': 1.14.1
+      '@webassemblyjs/wasm-edit': 1.14.1
+      '@webassemblyjs/wasm-parser': 1.14.1
+      browserslist: 4.29.5
+      chrome-trace-event: 1.0.4
+      enhanced-resolve: 5.26.0
+      es-module-lexer: 2.3.2
+      events: 3.3.0
+      graceful-fs: 4.2.11
+      mime-db: 1.54.0
+      minimizer-webpack-plugin: 5.13.1(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26))
+      schema-utils: 4.8.1(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26))
+      tapable: 2.3.3
+      watchpack: 2.6.3
+      webpack-sources: 3.6.0
     transitivePeerDependencies:
       - '@minify-html/node'
       - '@napi-rs/image'

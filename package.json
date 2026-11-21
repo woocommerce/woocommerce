@@ -25,7 +25,9 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"scripts": {
-		"build": "pnpm -r --workspace-concurrency=Infinity --stream '/^build:project:.*$/'",
+		"build": "pnpm --stream '/^build:monorepo:.*$/'",
+		"build:monorepo:woocommerce": "pnpm wc:build",
+		"build:monorepo:others": "pnpm -r --filter='!./plugins/woocommerce/**' --workspace-concurrency=Infinity --stream '/^build:project:.*$/'",
 		"test": "pnpm -r test",
 		"test:js:ci": "bash bin/test-js-ci.sh",
 		"test:php:ci": "bash bin/test-php-ci.sh",

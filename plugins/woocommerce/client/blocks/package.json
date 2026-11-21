@@ -46,7 +46,7 @@
 		"analyze-bundles": "WP_BUNDLE_ANALYZER=1 pnpm run build",
 		"build": "pnpm build:project",
 		"build:project": "pnpm --stream '/^build:project:.*$/'",
-		"build:project:bundle": "NODE_ENV=\"${NODE_ENV:-production}\" BABEL_ENV=\"${BABEL_ENV:-default}\" WP_EXPERIMENTAL_MODULES=\"${WP_EXPERIMENTAL_MODULES:-true}\" webpack && wp-scripts build-blocks-manifest --input=../../assets/client/blocks --output=../../assets/client/blocks/blocks-json.php",
+		"build:project:bundle": "NODE_ENV=\"${NODE_ENV:-production}\" BABEL_ENV=\"${BABEL_ENV:-default}\" WP_EXPERIMENTAL_MODULES=\"${WP_EXPERIMENTAL_MODULES:-true}\" node bin/webpack-parallel.js && wp-scripts build-blocks-manifest --input=../../assets/client/blocks --output=../../assets/client/blocks/blocks-json.php",
 		"build:check-assets": "npx ajv validate -s bin/block.json-validation-schema.json -d assets/js/**/block.json && rimraf ../../assets/client/blocks/* && ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack",
 		"prebuild:docs": "rimraf docs/third-party-developers/extensibility/hooks/actions.md docs/third-party-developers/extensibility/hooks/filters.md",
 		"build:docs": "composer install && mkdir -p bin/hook-docs/data && ./vendor/bin/wp-hooks-generator --input=../../src --output=bin/hook-docs/data && node ./bin/hook-docs && pnpm build:docs:block-references",
@@ -86,7 +86,7 @@
 		"wp-env": "wp-env",
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
-		"watch:build:project:bundle": "WP_EXPERIMENTAL_MODULES=\"${WP_EXPERIMENTAL_MODULES:-true}\" webpack --watch",
+		"watch:build:project:bundle": "WP_EXPERIMENTAL_MODULES=\"${WP_EXPERIMENTAL_MODULES:-true}\" node bin/webpack-parallel.js --watch",
 		"knip": "WP_EXPERIMENTAL_MODULES=true knip"
 	},
 	"devDependencies": {
@@ -162,7 +162,6 @@
 		"babel-jest": "catalog:tooling",
 		"babel-loader": "catalog:tooling",
 		"babel-plugin-react-docgen": "4.2.1",
-		"babel-plugin-transform-react-remove-prop-types": "catalog:tooling",
 		"chalk": "4.1.2",
 		"circular-dependency-plugin": "5.2.x",
 		"copy-webpack-plugin": "catalog:tooling",

@@ -70,8 +70,10 @@ module.exports = ( { config: storybookConfig } ) => {
 		( rule ) =>
 			! (
 				rule.use &&
-				typeof rule.use.loader === 'string' &&
-				rule.use.loader.indexOf( 'babel-loader' ) >= 0
+				// The blocks configs pass swc-loader as a function.
+				( typeof rule.use === 'function' ||
+					( typeof rule.use.loader === 'string' &&
+						rule.use.loader.indexOf( 'babel-loader' ) >= 0 ) )
 			)
 	);
 
