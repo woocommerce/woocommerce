@@ -143,6 +143,17 @@ final class DatabaseTransaction {
 	}
 
 	/**
+	 * Check whether WooCommerce already opened a transaction.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 * @return bool Whether an existing transaction owns the commit.
+	 */
+	public static function has_active_transaction(): bool {
+		return self::is_open() || self::$caller_open;
+	}
+
+	/**
 	 * Record a start, commit or rollback that wc_transaction_query() sent outside run().
 	 *
 	 * @param string $type Types: start, commit, rollback.

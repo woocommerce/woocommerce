@@ -4,11 +4,74 @@ namespace Automattic\WooCommerce\Caches;
 
 use Automattic\WooCommerce\Caching\ObjectCache;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 
 /**
  * A class to cache order objects.
  */
 class OrderCache extends ObjectCache {
+
+	/**
+	 * Sites deferring the order transient version, and whether a refresh was requested.
+	 *
+	 * @var array<int, bool>
+	 */
+	private static $deferred_transient_refresh = array();
+
+	/**
+	 * Refresh the shared version used by order transients.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 */
+	public static function refresh_transient_version(): void {
+		$site_id = get_current_blog_id();
+		if ( isset( self::$deferred_transient_refresh[ $site_id ] ) ) {
+			self::$deferred_transient_refresh[ $site_id ] = true;
+			return;
+		}
+		\WC_Cache_Helper::get_transient_version( 'orders', true );
+	}
+
+	/**
+	 * Defer the shared version update until an order save commits.
+	 *
+	 * Leave the timing alone if another caller owns the transaction.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 * @param callable $save Owns the transaction and throws if the save did not commit.
+	 */
+	public static function with_deferred_transient_refresh( callable $save ): void {
+		$site_id = get_current_blog_id();
+		if ( isset( self::$deferred_transient_refresh[ $site_id ] ) || DatabaseTransaction::has_active_transaction() ) {
+			$save();
+			return;
+		}
+
+		self::$deferred_transient_refresh[ $site_id ] = false;
+		try {
+			$save();
+		} finally {
+			$refresh = self::take_deferred_transient_refresh( $site_id );
+		}
+
+		if ( $refresh ) {
+			self::refresh_transient_version();
+		}
+	}
+
+	/**
+	 * Clear the site's deferral and read whether the save requested a refresh.
+	 *
+	 * @param int $site_id Site whose order was saved.
+	 * @return bool Whether to refresh the version after a successful save.
+	 */
+	private static function take_deferred_transient_refresh( int $site_id ): bool {
+		$refresh = self::$deferred_transient_refresh[ $site_id ];
+		unset( self::$deferred_transient_refresh[ $site_id ] );
+		return $refresh;
+	}
 
 	/**
 	 * Get the cache key and prefix to use for Orders.

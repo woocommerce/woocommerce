@@ -52,7 +52,6 @@ final class PaymentStock {
 	 * @since 11.4.0
 	 * @param WC_Order $order Order to pay for.
 	 * @throws ReserveStockException When stock cannot be secured.
-	 * @throws \Throwable When an order save or integration fails.
 	 */
 	public function reserve_stock_for_payment( WC_Order $order ): void {
 		$stock = $this->check_order_stock( $order );
@@ -70,8 +69,23 @@ final class PaymentStock {
 			return;
 		}
 
+		OrderCache::with_deferred_transient_refresh( fn() => $this->save_payment_reservation( $order, $quantities ) );
+	}
+
+	/**
+	 * Roll back the stock holds and order together if either write fails.
+	 *
+	 * @param WC_Order             $order Order to pay for.
+	 * @param array<int,int|float> $quantities Checked quantities keyed by stock-managing product ID.
+	 * @throws ReserveStockException When the database rolls back the reservation.
+	 * @throws \Throwable When an order save or integration fails.
+	 */
+	private function save_payment_reservation( WC_Order $order, array $quantities ): void {
 		try {
-			DatabaseTransaction::run( fn() => $this->reserve_and_save_order( $order, $quantities ) );
+			$result = DatabaseTransaction::run( fn() => $this->reserve_and_save_order( $order, $quantities ) );
+			if ( is_wp_error( $result ) ) {
+				throw ReserveStockException::stock_check_failed();
+			}
 		} catch ( \Throwable $e ) {
 			$this->clear_order_caches_after_rollback( $order );
 			throw $e;

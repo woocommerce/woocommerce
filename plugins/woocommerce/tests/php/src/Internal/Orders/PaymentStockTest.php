@@ -391,6 +391,31 @@ class PaymentStockTest extends WC_Unit_Test_Case {
 		$this->assertSame( OrderStatus::FAILED, wc_get_order( $order->get_id() )->get_status() );
 	}
 
+	/** @testdox A database rollback reported after the save stops payment and releases the new hold. */
+	public function test_lost_write_stops_payment(): void {
+		global $wpdb;
+		$product = WC_Helper_Product::create_stock_managed_product();
+		$order   = WC_Helper_Order::create_unpaid_order( $product );
+		add_action(
+			'woocommerce_after_order_object_save',
+			static function () use ( $wpdb ) {
+				$wpdb->query( "SIGNAL SQLSTATE '45000' SET MYSQL_ERRNO = 1020, MESSAGE_TEXT = 'Snapshot conflict'" );
+			}
+		);
+
+		$previous = $wpdb->suppress_errors();
+		try {
+			$this->sut->reserve_stock_for_payment( $order );
+			$this->fail( 'A rolled-back reservation must stop payment.' );
+		} catch ( ReserveStockException $e ) {
+			$this->assertSame( 'woocommerce_product_stock_unavailable', $e->getErrorCode() );
+		} finally {
+			$wpdb->suppress_errors( $previous );
+		}
+
+		$this->assertSame( 0, wc_get_held_stock_quantity( $product ) );
+	}
+
 	/** @testdox A stock amount filter cannot turn a required quantity into a negative reservation. */
 	public function test_invalid_normalized_quantity_is_rejected(): void {
 		$order = WC_Helper_Order::create_unpaid_order( WC_Helper_Product::create_stock_managed_product() );

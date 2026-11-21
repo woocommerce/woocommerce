@@ -8,6 +8,7 @@
  * @version 3.4.0
  */
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
@@ -544,7 +545,7 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	}
 
 	// Increments the transient version to invalidate cache.
-	WC_Cache_Helper::get_transient_version( 'orders', true );
+	OrderCache::refresh_transient_version();
 
 	// Do the same for regular cache.
 	WC_Cache_Helper::invalidate_cache_group( 'orders' );
