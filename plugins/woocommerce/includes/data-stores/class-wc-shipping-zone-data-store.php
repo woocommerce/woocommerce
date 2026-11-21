@@ -288,7 +288,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 *
 	 * @since  3.0.0
 	 * @param  int $instance_id Instance ID.
-	 * @return object
+	 * @return stdClass|null
 	 */
 	public function get_method( $instance_id ) {
 		global $wpdb;
@@ -299,7 +299,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * Find a matching zone ID for a given package.
 	 *
 	 * @since  3.0.0
-	 * @param  object $package Package information.
+	 * @param  array $package Package information.
 	 * @return int
 	 */
 	public function get_zone_id_from_package( $package ) {

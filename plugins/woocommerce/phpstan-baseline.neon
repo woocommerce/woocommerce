@@ -3079,18 +3079,6 @@ parameters:
 			path: includes/admin/class-wc-admin-upload-downloadable-product.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_count_webhooks_by_status\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-webhooks-table-list.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:search_webhooks\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-webhooks-table-list.php
-
-		-
 			message: '#^Method WC_Admin_Webhooks_Table_List\:\:display_tablenav\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -3125,12 +3113,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/admin/class-wc-admin-webhooks-table-list.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_count_webhooks_by_status\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-webhooks.php
 
 		-
 			message: '#^Default value of the parameter \#1 \$webhook \(string\) of method WC_Admin_Webhooks\:\:logs_output\(\) is incompatible with type WC_Webhook\.$#'
@@ -3706,12 +3688,6 @@ parameters:
 			message: '#^Binary operation "\." between ''deactivate\:'' and array\|string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
-			path: includes/admin/helper/class-wc-helper.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 2
 			path: includes/admin/helper/class-wc-helper.php
 
 		-
@@ -4615,12 +4591,6 @@ parameters:
 			path: includes/admin/list-tables/class-wc-admin-list-table-products.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:search_products\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/list-tables/class-wc-admin-list-table-products.php
-
-		-
 			message: '#^Call to an undefined method object\:\:get_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -5083,12 +5053,6 @@ parameters:
 			path: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_order_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php
-
-		-
 			message: '#^Call to an undefined method WC_Email\:\:trigger\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -5285,12 +5249,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/admin/meta-boxes/class-wc-meta-box-order-data.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_downloads\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-order-downloads.php
 
 		-
 			message: '#^Method WC_Meta_Box_Order_Downloads\:\:output\(\) has no return type specified\.$#'
@@ -6163,12 +6121,6 @@ parameters:
 			path: includes/admin/notes/class-wc-notes-refund-returns.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/notes/class-wc-notes-refund-returns.php
-
-		-
 			message: '#^Call to an undefined method object\:\:get_action\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -6215,12 +6167,6 @@ parameters:
 			identifier: notIdentical.alwaysTrue
 			count: 1
 			path: includes/admin/notes/class-wc-notes-refund-returns.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/notes/class-wc-notes-run-db-update.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Notes\\Note\:\:add_action\(\) invoked with 7 parameters, 2\-6 required\.$#'
@@ -7981,18 +7927,6 @@ parameters:
 			path: includes/admin/views/html-report-by-date.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_stock_reduced\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/wc-admin-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:set_stock_reduced\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/wc-admin-functions.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -8206,30 +8140,6 @@ parameters:
 			message: '#^Binary operation "\-" between float and string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:find_matching_product_variation\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:search_customers\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:search_products\(\)\.$#'
-			identifier: method.notFound
-			count: 2
 			path: includes/class-wc-ajax.php
 
 		-
@@ -10015,12 +9925,6 @@ parameters:
 			path: includes/class-wc-cart.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:find_matching_product_variation\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-cart.php
-
-		-
 			message: '#^Call to an undefined method WC_Product\:\:get_variation_attributes\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -10615,12 +10519,6 @@ parameters:
 			path: includes/class-wc-customer-download-log.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_download_logs_count_for_permission\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-customer-download.php
-
-		-
 			message: '#^Call to an undefined method object\:\:read\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -10777,13 +10675,7 @@ parameters:
 			path: includes/class-wc-data-store.php
 
 		-
-			message: '#^Property WC_Data_Store\:\:\$instance \(WC_Data_Store\) does not accept WC_Object_Data_Store_Interface\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: includes/class-wc-data-store.php
-
-		-
-			message: '#^Property WC_Data_Store\:\:\$instance \(WC_Data_Store\) does not accept object\.$#'
+			message: '#^Property WC_Data_Store\<T of object \= object\>\:\:\$instance \(WC_Object_Data_Store_Interface\) does not accept object\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: includes/class-wc-data-store.php
@@ -11061,12 +10953,6 @@ parameters:
 		-
 			message: '#^Action callback returns array but should not return anything\.$#'
 			identifier: return.void
-			count: 1
-			path: includes/class-wc-download-handler.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_downloads\(\)\.$#'
-			identifier: method.notFound
 			count: 1
 			path: includes/class-wc-download-handler.php
 
@@ -11947,24 +11833,6 @@ parameters:
 			path: includes/class-wc-meta-data.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_order_item_type\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-order-factory.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_order_type\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-order-factory.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_orders_type\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-order-factory.php
-
-		-
 			message: '#^Call to an undefined method object\:\:get_data_store\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -12161,12 +12029,6 @@ parameters:
 			identifier: empty.variable
 			count: 1
 			path: includes/class-wc-order-item-meta.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_downloads\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-order-item-product.php
 
 		-
 			message: '#^Cannot call method backorders_require_notification\(\) on WC_Product\|true\.$#'
@@ -12517,12 +12379,6 @@ parameters:
 			path: includes/class-wc-order-item.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:query\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-order-query.php
-
-		-
 			message: '#^Method WC_Order_Refund\:\:get_post_title\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -12829,42 +12685,6 @@ parameters:
 			path: includes/class-wc-payment-gateways.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_metadata\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-payment-tokens.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_token_by_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-payment-tokens.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_token_type_by_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-payment-tokens.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_tokens\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-payment-tokens.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_users_default_token\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-payment-tokens.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:set_default_status\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/class-wc-payment-tokens.php
-
-		-
 			message: '#^Call to an undefined method object\:\:delete\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -12892,36 +12712,6 @@ parameters:
 			message: '#^Access to an undefined property object\:\:\$slug\.$#'
 			identifier: property.notFound
 			count: 3
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_order_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_from_lookup_table\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_attribute_summary\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:untrash_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 1
 			path: includes/class-wc-post-data.php
 
 		-
@@ -13051,18 +12841,6 @@ parameters:
 			path: includes/class-wc-privacy-background-process.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_user_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-privacy-erasers.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_user_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-privacy-erasers.php
-
-		-
 			message: '#^Method WC_Privacy_Erasers\:\:remove_order_personal_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -13083,18 +12861,6 @@ parameters:
 		-
 			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Customer\.$#'
 			identifier: parameter.phpDocType
-			count: 1
-			path: includes/class-wc-privacy-exporters.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_download_logs_for_permission\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-privacy-exporters.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_downloads\(\)\.$#'
-			identifier: method.notFound
 			count: 1
 			path: includes/class-wc-privacy-exporters.php
 
@@ -13339,12 +13105,6 @@ parameters:
 			path: includes/class-wc-product-factory.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_product_type\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-product-factory.php
-
-		-
 			message: '#^Method WC_Product_Factory\:\:get_product\(\) should return bool\|WC_Product but returns object\.$#'
 			identifier: return.type
 			count: 1
@@ -13409,12 +13169,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-product-grouped.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:query\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-product-query.php
 
 		-
 			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
@@ -14577,30 +14331,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property object\:\:\$method_order\.$#'
 			identifier: property.notFound
-			count: 1
-			path: includes/class-wc-shipping-zones.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_method\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-shipping-zones.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_zone_id_by_instance_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-shipping-zones.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_zone_id_from_package\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-shipping-zones.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_zones\(\)\.$#'
-			identifier: method.notFound
 			count: 1
 			path: includes/class-wc-shipping-zones.php
 
@@ -16837,12 +16567,6 @@ parameters:
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:update_user_by_order_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Cannot access offset string on array\|bool\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -17551,24 +17275,6 @@ parameters:
 			path: includes/data-stores/class-wc-product-variation-data-store-cpt.php
 
 		-
-			message: '#^@param array \$package does not accept actual type of parameter\: object\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/data-stores/class-wc-shipping-zone-data-store.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$method_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/data-stores/class-wc-shipping-zone-data-store.php
-
-		-
-			message: '#^Cannot access offset ''destination'' on object\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 3
-			path: includes/data-stores/class-wc-shipping-zone-data-store.php
-
-		-
 			message: '#^Method WC_Shipping_Zone_Data_Store\:\:create\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -17678,12 +17384,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$data of function esc_sql expects array\|string, float\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/data-stores/class-wc-webhook-data-store.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, array\|object given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/data-stores/class-wc-webhook-data-store.php
@@ -20641,18 +20341,6 @@ parameters:
 			path: includes/legacy/abstract-wc-legacy-product.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:find_matching_product_variation\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/legacy/abstract-wc-legacy-product.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_related_products_query\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/legacy/abstract-wc-legacy-product.php
-
-		-
 			message: '#^Call to an undefined static method WC_Abstract_Legacy_Product\:\:sync\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 1
@@ -23508,7 +23196,6 @@ parameters:
 			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
 
-
 		-
 			message: '#^Method WC_REST_Product_Attributes_V1_Controller\:\:get_items_permissions_check\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
@@ -23586,7 +23273,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
-
 
 		-
 			message: '#^Cannot access property \$post_date_gmt on WP_Post\|null\.$#'
@@ -24763,12 +24449,6 @@ parameters:
 			identifier: empty.variable
 			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-webhook-deliveries-v1-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:search_webhooks\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-webhooks-v1-controller.php
 
 		-
 			message: '#^Call to function is_null\(\) with mixed will always evaluate to false\.$#'
@@ -29016,12 +28696,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_related_products\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
 			message: '#^Call to an undefined method WC_Product\:\:set_button_text\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -32190,18 +31864,6 @@ parameters:
 			path: includes/wc-core-functions.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_code_by_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-coupon-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_ids_by_code\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-coupon-functions.php
-
-		-
 			message: '#^Access to an undefined property WC_Session\:\:\$cart\.$#'
 			identifier: property.notFound
 			count: 2
@@ -33426,42 +33088,6 @@ parameters:
 			path: includes/wc-order-functions.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_downloads\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_order_id_by_order_key\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_unpaid_orders\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:search_orders\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:update_product_sales\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
 			identifier: method.notFound
 			count: 2
@@ -33720,54 +33346,6 @@ parameters:
 			path: includes/wc-order-functions.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:add_metadata\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-item-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:add_order_item\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-item-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_metadata\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-item-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_order_item\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-item-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_metadata\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-item-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_order_id_by_order_item_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-item-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:update_metadata\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-item-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:update_order_item\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-item-functions.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -33814,60 +33392,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/wc-page-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_ending_sales\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_featured_product_ids\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_on_sale_products\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_product_id_by_global_unique_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_product_id_by_sku\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_related_products\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_starting_sales\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:is_existing_global_unique_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:is_existing_sku\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-product-functions.php
 
 		-
 			message: '#^Call to function is_array\(\) with array\<mixed\> will always evaluate to true\.$#'
@@ -34140,18 +33664,6 @@ parameters:
 			path: includes/wc-stock-functions.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:read_stock_quantity\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-stock-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:update_product_stock\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-stock-functions.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
 			identifier: method.notFound
 			count: 2
@@ -34179,24 +33691,6 @@ parameters:
 			message: '#^Call to an undefined method object\:\:set_stock_reduced\(\)\.$#'
 			identifier: method.notFound
 			count: 2
-			path: includes/wc-stock-functions.php
-
-		-
-			message: '#^Cannot call method get_stock_quantity\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-stock-functions.php
-
-		-
-			message: '#^Cannot call method is_type\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/wc-stock-functions.php
-
-		-
-			message: '#^Cannot call method save\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: includes/wc-stock-functions.php
 
 		-
@@ -34938,12 +34432,6 @@ parameters:
 			path: includes/wc-user-functions.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_downloads_for_customer\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_order_key\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -35098,12 +34586,6 @@ parameters:
 			identifier: encapsedStringPart.nonString
 			count: 1
 			path: includes/wc-user-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_webhooks_ids\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-webhook-functions.php
 
 		-
 			message: '#^Function wc_deliver_webhook_async\(\) has no return type specified\.$#'
@@ -38573,7 +38055,6 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributeTerms.php
 
-
 		-
 			message: '#^Access to offset ''slug'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
 			identifier: class.notFound
@@ -38603,9 +38084,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/ProductAttributes.php
-
-
-
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:register_routes\(\) has no return type specified\.$#'
@@ -38637,8 +38115,6 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributes.php
 
-
-
 		-
 			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int given\.$#'
 			identifier: argument.type
@@ -38656,8 +38132,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/ProductAttributes.php
-
-
 
 		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Product_Categories_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 103 on line 5$#'
@@ -39350,12 +38824,6 @@ parameters:
 			path: src/Admin/API/Reports/Categories/DataStore.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Categories/Query.php
-
-		-
 			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -39572,12 +39040,6 @@ parameters:
 			path: src/Admin/API/Reports/Coupons/DataStore.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Query.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\Controller\:\:prepare_item_for_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -39618,12 +39080,6 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Stats/Query.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\Segmenter\:\:get_segments\(\) should return array but returns array\|null\.$#'
@@ -39954,12 +39410,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Customers/Stats/DataStore.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/Stats/Query.php
 
 		-
 			message: '#^Access to offset ''time_interval'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
@@ -40334,12 +39784,6 @@ parameters:
 			path: src/Admin/API/Reports/Downloads/Files/Controller.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Downloads/Query.php
-
-		-
 			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -40374,12 +39818,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Downloads/Stats/Query.php
 
 		-
 			message: '#^Access to offset ''email'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Export\\WP_REST_Request\.$#'
@@ -41606,12 +41044,6 @@ parameters:
 			path: src/Admin/API/Reports/Products/DataStore.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Products/Query.php
-
-		-
 			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -41672,12 +41104,6 @@ parameters:
 			path: src/Admin/API/Reports/Products/Stats/DataStore.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Products/Stats/Query.php
-
-		-
 			message: '#^Offset 1 might not exist on array\{\}\|array\{non\-falsy\-string, numeric\-string, numeric\-string\}\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
@@ -41694,12 +41120,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: src/Admin/API/Reports/Products/Stats/Segmenter.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Revenue/Query.php
 
 		-
 			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
@@ -42068,12 +41488,6 @@ parameters:
 			path: src/Admin/API/Reports/Stock/Stats/DataStore.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Stock/Stats/Query.php
-
-		-
 			message: '#^Access to property \$tax_rate_id on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\WC_Reports_Query\.$#'
 			identifier: class.notFound
 			count: 1
@@ -42152,12 +41566,6 @@ parameters:
 			path: src/Admin/API/Reports/Taxes/DataStore.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Query.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\Controller\:\:prepare_item_for_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -42192,12 +41600,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/Query.php
 
 		-
 			message: '#^Call to function is_array\(\) with array\<int, mixed\> will always evaluate to true\.$#'
@@ -42494,12 +41896,6 @@ parameters:
 			path: src/Admin/API/Reports/Variations/DataStore.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Variations/Query.php
-
-		-
 			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -42540,12 +41936,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/Query.php
 
 		-
 			message: '#^Offset 1 might not exist on array\{\}\|array\{non\-falsy\-string, numeric\-string, numeric\-string\}\.$#'
@@ -44034,12 +43424,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_zones\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Shipping.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Shipping\:\:delete_zone_count_transient\(\) has no return type specified\.$#'
@@ -51620,12 +51004,6 @@ parameters:
 			path: src/Caching/WPCacheEngine.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_query_for_stock\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Checkout\\Helpers\\ReserveStock\:\:release_stock_for_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -52790,12 +52168,6 @@ parameters:
 			path: src/Internal/Admin/FeaturePlugin.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_zones\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Homescreen.php
-
-		-
 			message: '#^Call to function method_exists\(\) with ''WC_Admin_Menus'' and ''can_view…'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -53504,12 +52876,6 @@ parameters:
 			path: src/Internal/Admin/Notes/MarketingJetpack.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
 			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\MarketingJetpack'' and ''get_note'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -53952,12 +53318,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Notes/UnsecuredReportFiles.php
 
 		-
 			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|null\.$#'
@@ -57878,12 +57238,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:update_user_by_order_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Call to an undefined method object\:\:get_current_class_name\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -60545,12 +59899,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/AbstractSchema.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:query_customers\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Customers/CollectionQuery.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Customers\\CollectionQuery\:\:get_query_args\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -61029,12 +60377,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/OrderNotes/Schema/OrderNoteSchema.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_order_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/ActionController.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\ActionController\:\:action_payment_complete\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
@@ -63071,12 +62413,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/ShippingZoneMethod/ShippingMethodSchema.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_zone_id_by_instance_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/ShippingZoneMethod/ShippingMethodSchema.php
-
-		-
 			message: '#^Call to an undefined method object\:\:get_title\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -63389,45 +62725,9 @@ parameters:
 			path: src/Internal/RestockRefundedItemsAdjuster.php
 
 		-
-			message: '#^Binary operation "/" between array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int and int\<1, max\> results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:query\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Cannot call method set_status\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Parameter \#1 \$args of method WP_List_Table\:\:set_pagination_args\(\) expects array\{total_items\?\: int, total_pages\?\: int, per_page\?\: int\}, array\{total_items\: array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int, per_page\: int\<1, max\>, total_pages\: \(float\|false\)\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Parameter \#1 \$notification of method Automattic\\WooCommerce\\Internal\\DataStores\\StockNotifications\\StockNotificationsDataStore\:\:delete\(\) expects Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification, Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Parameter \#1 \$notification of method Automattic\\WooCommerce\\Internal\\DataStores\\StockNotifications\\StockNotificationsDataStore\:\:update\(\) expects Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification, Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool given\.$#'
-			identifier: argument.type
-			count: 2
 			path: src/Internal/StockNotifications/Admin/ListTable.php
 
 		-
@@ -63461,48 +62761,6 @@ parameters:
 			path: src/Internal/StockNotifications/Admin/ListTable.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:\$data_store \(Automattic\\WooCommerce\\Internal\\DataStores\\StockNotifications\\StockNotificationsDataStore\) does not accept WC_Data_Store\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:\$total_active_items \(int\) does not accept array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:\$total_cancelled_items \(int\) does not accept array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:\$total_items \(int\) does not accept array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:\$total_pending_items \(int\) does not accept array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:\$total_sent_items \(int\) does not accept array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Property WP_List_Table\:\:\$items \(array\) does not accept array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
 			message: '#^Action callback returns bool\|void but should not return anything\.$#'
 			identifier: return.void
 			count: 1
@@ -63513,12 +62771,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/StockNotifications/Admin/MenusController.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:query\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Admin/NotificationCreatePage.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\NotificationCreatePage\:\:output\(\) has no return type specified\.$#'
@@ -64247,12 +63499,6 @@ parameters:
 			path: src/Internal/Utilities/ArrayUtil.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_order_type\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Internal/Utilities/COTMigrationUtil.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Utilities\\COTMigrationUtil\:\:get_post_or_order_id\(\) has parameter \$post_or_order_object with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -64485,12 +63731,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Utilities/Users.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:search_webhooks\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Utilities/WebhookUtil.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Packages\:\:deactivate_merged_packages\(\) has no return type specified\.$#'
@@ -66529,12 +65769,6 @@ parameters:
 		-
 			message: '#^@param int \$request_quantity does not accept actual type of parameter\: float\|int\.$#'
 			identifier: parameter.phpDocType
-			count: 1
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:find_matching_product_variation\(\)\.$#'
-			identifier: method.notFound
 			count: 1
 			path: src/StoreApi/Utilities/CartController.php
 

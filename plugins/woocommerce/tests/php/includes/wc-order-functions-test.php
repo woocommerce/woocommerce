@@ -1308,6 +1308,15 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_order_search() treats a search term that is not a string as an empty search instead of failing.
+	 */
+	public function test_wc_order_search_treats_array_term_as_empty_search(): void {
+		WC_Helper_Order::create_order();
+
+		$this->assertSame( wc_order_search( '' ), wc_order_search( array( 'foo' ) ), 'An array term should search like an empty term' );
+	}
+
+	/**
 	 * Get the product IDs of an order's download permissions.
 	 *
 	 * @param WC_Order $order The order.

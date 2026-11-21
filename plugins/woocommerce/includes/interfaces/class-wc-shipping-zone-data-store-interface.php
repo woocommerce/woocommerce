@@ -59,7 +59,7 @@ interface WC_Shipping_Zone_Data_Store_Interface {
 	/**
 	 * Find a matching zone ID for a given package.
 	 *
-	 * @param object $package Zone package object.
+	 * @param array $package Zone package.
 	 * @return int
 	 */
 	public function get_zone_id_from_package( $package );

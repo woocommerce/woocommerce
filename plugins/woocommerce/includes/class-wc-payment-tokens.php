@@ -144,8 +144,8 @@ class WC_Payment_Tokens {
 	 *
 	 * @since 2.6.0
 	 *
-	 * @param int    $token_id Token ID.
-	 * @param object $token_result Token result.
+	 * @param int           $token_id     Token ID.
+	 * @param stdClass|null $token_result Token result.
 	 * @return null|WC_Payment_Token Returns a valid payment token or null if no token can be found.
 	 */
 	public static function get( $token_id, $token_result = null ) {

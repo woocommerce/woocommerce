@@ -63,7 +63,7 @@ class ListTable extends \WP_List_Table {
 	/**
 	 * Data store.
 	 *
-	 * @var StockNotificationsDataStore
+	 * @var \WC_Data_Store<StockNotificationsDataStore>
 	 */
 	public $data_store;
 
@@ -425,7 +425,7 @@ class ListTable extends \WP_List_Table {
 			array(
 				'total_items' => $this->total_items, // Total items defined above.
 				'per_page'    => $per_page, // Per page constant defined at top of method.
-				'total_pages' => ceil( $this->total_items / $per_page ), // Calculate pages count.
+				'total_pages' => (int) ceil( $this->total_items / $per_page ), // Calculate pages count.
 			)
 		);
 	}
@@ -726,11 +726,14 @@ class ListTable extends \WP_List_Table {
 		try {
 
 			$notification = Factory::get_notification( $notification_id );
-			$this->data_store->delete( $notification );
+			if ( $notification instanceof Notification ) {
+				$this->data_store->delete( $notification );
 
-			$notice_message = __( 'Notification deleted.', 'woocommerce' );
-			NotificationsPage::add_notice( $notice_message, 'success' );
-
+				$notice_message = __( 'Notification deleted.', 'woocommerce' );
+				NotificationsPage::add_notice( $notice_message, 'success' );
+			} else {
+				NotificationsPage::add_notice( __( 'Notification not found.', 'woocommerce' ), 'error' );
+			}
 		} catch ( \Exception $e ) {
 
 			$notice_message = __( 'Notification not found.', 'woocommerce' );
@@ -765,6 +768,9 @@ class ListTable extends \WP_List_Table {
 			foreach ( $notifications as $id ) {
 
 				$notification = Factory::get_notification( $id );
+				if ( ! $notification instanceof Notification ) {
+					continue;
+				}
 				$notification->set_status( NotificationStatus::ACTIVE );
 				$this->data_store->update( $notification );
 
@@ -786,6 +792,9 @@ class ListTable extends \WP_List_Table {
 		} elseif ( 'cancel' === $this->current_action() ) {
 			foreach ( $notifications as $id ) {
 				$notification = Factory::get_notification( $id );
+				if ( ! $notification instanceof Notification ) {
+					continue;
+				}
 				$notification->set_status( NotificationStatus::CANCELLED );
 				$this->data_store->update( $notification );
 			}
@@ -807,6 +816,9 @@ class ListTable extends \WP_List_Table {
 		} elseif ( 'delete' === $this->current_action() ) {
 			foreach ( $notifications as $id ) {
 				$notification = Factory::get_notification( $id );
+				if ( ! $notification instanceof Notification ) {
+					continue;
+				}
 				$this->data_store->delete( $notification );
 			}
 

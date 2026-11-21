@@ -23,7 +23,7 @@ class Query extends \WC_Object_Query {
 	 */
 	public function get_data() {
 		$data_store = \WC_Data_Store::load( 'report-stock-stats' );
-		$results    = $data_store->get_data();
+		$results    = $data_store->get_data( array() );
 		return apply_filters( 'woocommerce_analytics_stock_stats_query', $results );
 	}
 }

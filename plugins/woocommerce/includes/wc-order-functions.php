@@ -973,7 +973,7 @@ add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
  */
 function wc_order_search( $term ) {
 	$data_store = WC_Data_Store::load( 'order' );
-	return $data_store->search_orders( str_replace( 'Order #', '', wc_clean( $term ) ) );
+	return $data_store->search_orders( str_replace( 'Order #', '', sanitize_text_field( $term ) ) );
 }
 
 /**
@@ -1176,7 +1176,7 @@ function wc_cancel_unpaid_orders() {
 	}
 
 	$data_store    = WC_Data_Store::load( 'order' );
-	$unpaid_orders = $data_store->get_unpaid_orders( strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
+	$unpaid_orders = $data_store->get_unpaid_orders( (int) strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- get_unpaid_orders() expects a site-local timestamp.
 
 	if ( $unpaid_orders ) {
 		foreach ( $unpaid_orders as $unpaid_order ) {

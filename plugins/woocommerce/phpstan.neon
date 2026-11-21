@@ -1,6 +1,7 @@
 includes:
 	- phpstan-baseline.neon
 	- vendor/szepeviktor/phpstan-wordpress/extension.neon
+	- tests/Tools/phpstan/extensions.neon
 
 parameters:
 	tmpDir: tmp

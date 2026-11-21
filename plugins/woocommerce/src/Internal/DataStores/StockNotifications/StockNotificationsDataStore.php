@@ -432,6 +432,8 @@ CREATE TABLE $meta_table_name (
 	 *
 	 * @param array $args The arguments.
 	 * @return array<int>|array<Notification>|int An array of notifications or the number of notifications.
+	 *
+	 * @phpstan-return ($args is array{return: 'count'} ? int : array<int>|array<Notification>)
 	 */
 	public function query( array $args ) {
 		global $wpdb;
