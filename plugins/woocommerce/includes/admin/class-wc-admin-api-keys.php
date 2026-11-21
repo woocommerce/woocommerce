@@ -20,6 +20,29 @@ class WC_Admin_API_Keys {
 		add_action( 'admin_init', array( $this, 'actions' ) );
 		add_action( 'woocommerce_settings_page_init', array( $this, 'screen_option' ) );
 		add_filter( 'woocommerce_save_settings_advanced_keys', array( $this, 'allow_save_settings' ) );
+		add_filter( 'woocommerce_json_search_found_customers', array( $this, 'restrict_api_key_user_search' ) );
+	}
+
+	/**
+	 * Hide users the current user can't actually assign a key to from the API Keys "User" field search.
+	 *
+	 * @internal Public only because it is used as a hook callback.
+	 *
+	 * @since 11.4.0
+	 * @param  array $found_customers Map of user ID to display text.
+	 * @return array
+	 */
+	public function restrict_api_key_user_search( $found_customers ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce already verified by the handler.
+		if ( ! doing_action( 'wp_ajax_woocommerce_json_search_customers' ) || ! isset( $_GET['context'] ) || 'admin_rest_api_keys' !== $_GET['context'] ) {
+			return $found_customers;
+		}
+
+		return array_filter(
+			$found_customers,
+			static fn( $user_id ) => current_user_can( 'edit_user', $user_id ),
+			ARRAY_FILTER_USE_KEY
+		);
 	}
 
 	/**
