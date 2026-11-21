@@ -3,7 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
-import { Button, ExternalLink } from '@wordpress/components';
+import { Button } from '@wordpress/components';
+import { Link } from '@wordpress/ui';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -38,10 +39,12 @@ const PacklinkItem = ( {
 		};
 
 		recordEvent( 'shipping_partner_click', trackingBase );
-		recordEvent( 'settings_shipping_recommendation_setup_click', {
-			plugin: PACKLINK_PLUGIN_SLUG,
-			action: isPluginInstalled ? 'activate' : 'install',
-		} );
+		if ( tracking?.context !== 'order' ) {
+			recordEvent( 'settings_shipping_recommendation_setup_click', {
+				plugin: PACKLINK_PLUGIN_SLUG,
+				action: isPluginInstalled ? 'activate' : 'install',
+			} );
+		}
 
 		const action = isPluginInstalled ? onActivateClick : onInstallClick;
 		const eventName = isPluginInstalled
@@ -89,9 +92,12 @@ const PacklinkItem = ( {
 						'woocommerce'
 					) }
 					<br />
-					<ExternalLink href="https://woocommerce.com/products/packlink-pro/">
+					<Link
+						openInNewTab
+						href="https://woocommerce.com/products/packlink-pro/"
+					>
 						{ __( 'Learn more', 'woocommerce' ) }
-					</ExternalLink>
+					</Link>
 				</span>
 			</div>
 			<div className="woocommerce-list__item-after">
