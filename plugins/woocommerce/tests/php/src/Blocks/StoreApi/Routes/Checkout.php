@@ -6677,4 +6677,75 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertArrayHasKey( 'payment_result', $data );
 		$this->assertSame( 'success', $data['payment_result']['payment_status'], 'Recovery must still report success on the result the response uses.' );
 	}
+
+	/**
+	 * @testdox A legacy gateway that adds an error notice and returns nothing shows that notice to the shopper.
+	 */
+	public function test_legacy_gateway_returning_nothing_shows_its_error_notice() {
+		$this->use_bacs_gateway_returning_nothing( 'The test gateway declined the card.' );
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status(), 'Unexpected response: ' . print_r( $data, true ) );
+		$this->assertSame( 'woocommerce_rest_checkout_process_payment_error', $data['code'] );
+		$this->assertSame( 'The test gateway declined the card.', $data['message'] );
+	}
+
+	/**
+	 * @testdox A legacy gateway that returns nothing without a notice ends the checkout as a failed payment.
+	 */
+	public function test_legacy_gateway_returning_nothing_without_a_notice_fails_the_payment() {
+		$this->use_bacs_gateway_returning_nothing( null );
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status(), 'Unexpected response: ' . print_r( $data, true ) );
+		$this->assertArrayHasKey( 'payment_result', $data );
+		$this->assertSame( 'failure', $data['payment_result']['payment_status'] );
+	}
+
+	/**
+	 * Replaces BACS with a gateway whose process_payment() returns nothing, as legacy gateways do when they bail out early.
+	 *
+	 * @param string|null $notice Error notice the gateway adds before returning, or null for none.
+	 */
+	private function use_bacs_gateway_returning_nothing( ?string $notice ): void {
+		$gateway = new class( $notice ) extends WC_Gateway_BACS {
+			/**
+			 * Error notice to add, or null for none.
+			 *
+			 * @var string|null
+			 */
+			private $notice;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param string|null $notice Error notice to add, or null for none.
+			 */
+			public function __construct( ?string $notice ) {
+				parent::__construct();
+				$this->notice = $notice;
+			}
+
+			/**
+			 * Adds the error notice, if any, and returns nothing.
+			 *
+			 * @param int $order_id Order ID.
+			 */
+			public function process_payment( $order_id ) {
+				if ( null !== $this->notice ) {
+					wc_add_notice( $this->notice, 'error' );
+				}
+			}
+		};
+
+		foreach ( WC()->payment_gateways()->payment_gateways as $key => $existing ) {
+			if ( WC_Gateway_BACS::ID === $existing->id ) {
+				WC()->payment_gateways()->payment_gateways[ $key ] = $gateway;
+			}
+		}
+	}
 }

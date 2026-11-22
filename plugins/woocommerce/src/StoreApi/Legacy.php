@@ -58,6 +58,11 @@ class Legacy {
 		// Restore $_POST data.
 		$_POST = $post_data;
 
+		// Legacy gateways add an error notice and return nothing when they bail out early, so treat that as a failed payment.
+		if ( ! is_array( $gateway_result ) ) {
+			$gateway_result = array( 'result' => 'failure' );
+		}
+
 		// If the payment failed with a message, throw an exception.
 		if ( isset( $gateway_result['result'] ) && 'failure' === $gateway_result['result'] ) {
 			if ( isset( $gateway_result['message'] ) ) {
