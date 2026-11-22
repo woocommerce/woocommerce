@@ -325,7 +325,7 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 							<Notice.Actions>
 								<Notice.ActionButton
 									variant="outline"
-									className="wc-ai-shopping__notice-action"
+									className="wc-ai-shopping__notice-action wc-sales-readiness-ui-button"
 									{ ...asLink( view.coming_soon.link.href ) }
 								>
 									{ view.coming_soon.link.text }
@@ -437,6 +437,7 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 				actions={
 					<Button
 						variant="solid"
+						className="wc-sales-readiness-ui-button"
 						type="submit"
 						form="mainform"
 						name="save"

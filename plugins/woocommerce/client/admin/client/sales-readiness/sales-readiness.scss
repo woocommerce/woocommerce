@@ -1,5 +1,11 @@
 // Sales readiness page and the AI tools Overview. Tokens from the design system; the build injects their fallbacks.
 
+// WordPress UI buttons are semibold in the design; the version bundled here sets medium (499).
+// The element in the selector outweighs the button's own class, whichever stylesheet loads last.
+:is(button, a).wc-sales-readiness-ui-button {
+	font-weight: 600;
+}
+
 // The prototype's buttons (WordPress UI minimal and outline): semibold, and a light background
 // on hover and focus that stays after a click until focus moves; the focus ring only for keyboard focus.
 @mixin sales-readiness-button($padding: var(--wpds-dimension-padding-md)) {
@@ -434,18 +440,9 @@ body:has(.wc-sales-readiness) {
 		}
 	}
 
-	// Check again: an outline button.
-	> .components-button {
-		@include sales-readiness-button;
-		border-color: var(--wpds-color-stroke-interactive-brand);
-
-		&:not(:disabled):is(:hover, :active, :focus) {
-			border-color: var(--wpds-color-stroke-interactive-brand-active);
-		}
-
-		&:disabled {
-			border-color: var(--wpds-color-stroke-interactive-brand-disabled);
-		}
+	> button {
+		flex-shrink: 0;
+		white-space: nowrap;
 	}
 }
 

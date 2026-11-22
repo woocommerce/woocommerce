@@ -66,9 +66,10 @@ describe( 'CheckedCard', () => {
 			'Checking your store'
 		);
 		expect( screen.queryByText( 'Not checked yet' ) ).toBeNull();
+		// Turned off but still focusable, so focus stays on it after the click.
 		expect(
 			screen.getByRole( 'button', { name: 'Check again' } )
-		).toBeDisabled();
+		).toHaveAttribute( 'aria-disabled', 'true' );
 	} );
 
 	it( 'shows the running state as soon as Check your store is clicked', () => {

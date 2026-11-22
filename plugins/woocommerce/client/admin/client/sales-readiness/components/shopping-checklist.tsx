@@ -33,6 +33,7 @@ const StepButton = ( {
 			<Button
 				variant="outline"
 				size="compact"
+				className="wc-sales-readiness-ui-button"
 				{ ...asLink( link.href ) }
 				{ ...sr.props }
 			>
@@ -136,7 +137,13 @@ export const ShoppingChecklist = ( {
 						</ul>
 					</Collapsible.Panel>
 					<Collapsible.Trigger
-						render={ <Button variant="minimal" size="compact" /> }
+						render={
+							<Button
+								variant="minimal"
+								size="compact"
+								className="wc-sales-readiness-ui-button"
+							/>
+						}
 					>
 						{ open ? checklist.hide_done : checklist.show_done }
 					</Collapsible.Trigger>

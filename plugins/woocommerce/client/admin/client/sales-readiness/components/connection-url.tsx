@@ -48,7 +48,11 @@ export const ConnectionUrl = ( {
 					readOnly
 					value={ connection.url }
 				/>
-				<Button variant="outline" onClick={ copy }>
+				<Button
+					variant="outline"
+					className="wc-sales-readiness-ui-button"
+					onClick={ copy }
+				>
 					{ copied ? connection.copied : connection.copy }
 				</Button>
 			</div>

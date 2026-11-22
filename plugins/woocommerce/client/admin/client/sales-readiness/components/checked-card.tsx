@@ -1,8 +1,10 @@
 /**
  * External dependencies
  */
-import { Card, Link, Text } from '@wordpress/ui';
-import { Button, Spinner } from '@wordpress/components';
+/* eslint-disable @wordpress/use-recommended-components -- The design asks for these @wordpress/ui components; this chunk bundles the package. */
+import { Button, Card, Link, Text } from '@wordpress/ui';
+/* eslint-enable @wordpress/use-recommended-components */
+import { Spinner } from '@wordpress/components';
 import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
@@ -88,8 +90,9 @@ export const CheckedCard = ( {
 						</div>
 					) }
 					<Button
-						variant="secondary"
+						variant="outline"
 						size="compact"
+						className="wc-sales-readiness-ui-button"
 						disabled={ view.run.pending || running }
 						onClick={ onRun }
 					>
