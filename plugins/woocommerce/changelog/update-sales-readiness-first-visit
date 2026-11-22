@@ -1,4 +1,3 @@
 Significance: patch
-Type: tweak
-
-Agent readiness: match the AI shopping pages to the design, link product names and single products to their pages, and keep status codes off the page.
+Type: dev
+Comment: Match AI shopping first visit, running check and switch snackbar to the design; behind a hidden flag.
