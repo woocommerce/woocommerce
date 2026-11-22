@@ -110,6 +110,8 @@ export interface ReadinessView {
 		/** Scheduled Actions, when the check can't start. */
 		link: ViewLink | null;
 	};
+	/** Where Need help? sends merchants: WordPress.com support on WordPress.com, else WooCommerce.com. */
+	support_url: string;
 	/** Null before the first check, and when there is nothing to fix. */
 	fix_first: FixFirst | null;
 	sections: Section[];

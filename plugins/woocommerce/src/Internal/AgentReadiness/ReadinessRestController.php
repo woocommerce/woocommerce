@@ -15,8 +15,9 @@ defined( 'ABSPATH' ) || exit;
  * (null before the first scan) and whether a scan is pending, so a settings
  * page can show the last result and poll while a scan runs. POST
  * wc/v3/agent-readiness/ucp turns UCP on or off for the AI tools settings
- * page, and GET wc/v3/agent-readiness/view gives the Sales readiness page and
- * the AI tools Overview what they show.
+ * page, GET wc/v3/agent-readiness/view gives the Sales readiness page and
+ * the AI tools Overview what they show, and GET wc/v3/agent-readiness/support-report
+ * gives the text file a merchant sends to support.
  *
  * Registered only while the agent_readiness feature is enabled.
  *
@@ -60,6 +61,13 @@ class ReadinessRestController extends RestApiControllerBase {
 	private ReadinessCheckPage $readiness_page;
 
 	/**
+	 * Text report for support.
+	 *
+	 * @var SupportReport
+	 */
+	private SupportReport $support_report;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
@@ -69,13 +77,15 @@ class ReadinessRestController extends RestApiControllerBase {
 	 * @param ScheduledScan      $scheduled_scan      Background scan.
 	 * @param UcpSwitch          $ucp_switch          UCP switch.
 	 * @param ReadinessCheckPage $readiness_page      Sales readiness.
+	 * @param SupportReport|null $support_report      Text report for support; resolved from the container when omitted.
 	 */
-	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness, ScheduledScan $scheduled_scan, UcpSwitch $ucp_switch, ReadinessCheckPage $readiness_page ): void {
+	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness, ScheduledScan $scheduled_scan, UcpSwitch $ucp_switch, ReadinessCheckPage $readiness_page, ?SupportReport $support_report = null ): void {
 		$this->features_controller = $features_controller;
 		$this->agent_readiness     = $agent_readiness;
 		$this->scheduled_scan      = $scheduled_scan;
 		$this->ucp_switch          = $ucp_switch;
 		$this->readiness_page      = $readiness_page;
+		$this->support_report      = $support_report ?? wc_get_container()->get( SupportReport::class );
 	}
 
 	/**
@@ -130,6 +140,18 @@ class ReadinessRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
+			'/agent-readiness/support-report',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'get_support_report' ),
+					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'manage_woocommerce' ),
+				),
+				'schema' => array( $this, 'get_support_report_schema' ),
+			)
+		);
+		register_rest_route(
+			$this->route_namespace,
 			'/agent-readiness/ucp',
 			array(
 				array(
@@ -178,6 +200,21 @@ class ReadinessRestController extends RestApiControllerBase {
 	}
 
 	/**
+	 * The text file a merchant sends to support, built from the stored report without running a check.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return array{filename:string,text:string}
+	 */
+	protected function get_support_report( WP_REST_Request $request ): array {
+		unset( $request );
+		return array(
+			'filename' => $this->support_report->filename(),
+			'text'     => $this->support_report->text(),
+		);
+	}
+
+	/**
 	 * Queue a scan, then answer like GET.
 	 *
 	 * @param WP_REST_Request $request Request.
@@ -220,6 +257,31 @@ class ReadinessRestController extends RestApiControllerBase {
 	}
 
 	/**
+	 * Schema of the support report.
+	 *
+	 * @internal
+	 */
+	public function get_support_report_schema(): array {
+		$schema               = $this->get_base_schema();
+		$schema['title']      = 'agent_readiness_support_report';
+		$schema['properties'] = array(
+			'filename' => array(
+				'description' => __( 'File name to save the report as.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => array( 'view' ),
+				'readonly'    => true,
+			),
+			'text'     => array(
+				'description' => __( 'The report as plain text.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => array( 'view' ),
+				'readonly'    => true,
+			),
+		);
+		return $schema;
+	}
+
+	/**
 	 * Schema of the view: the keys ReadinessCheckPage::view() builds.
 	 *
 	 * @internal
@@ -252,6 +314,12 @@ class ReadinessRestController extends RestApiControllerBase {
 			'run'          => array(
 				'description' => __( 'The check button: its label, whether a check is pending or stalled, and a status message.', 'woocommerce' ),
 				'type'        => 'object',
+				'context'     => array( 'view' ),
+			),
+			'support_url'  => array(
+				'description' => __( 'Where the page sends merchants to contact support.', 'woocommerce' ),
+				'type'        => 'string',
+				'format'      => 'uri',
 				'context'     => array( 'view' ),
 			),
 			'fix_first'    => array(

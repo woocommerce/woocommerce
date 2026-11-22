@@ -300,16 +300,29 @@ class StoreConditions {
 	}
 
 	/**
-	 * Whether any payment gateway is turned on. Whether it can take a given order
-	 * depends on the cart, so this reads the setting, not is_available().
+	 * Whether any payment gateway is turned on.
 	 */
 	private function payment_method_enabled(): bool {
+		return array() !== $this->enabled_payment_methods();
+	}
+
+	/**
+	 * The names of the payment gateways that are turned on, as the payment settings show them.
+	 * Whether one can take a given order depends on the cart, so this reads the setting, not is_available().
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return string[]
+	 */
+	public function enabled_payment_methods(): array {
+		$names = array();
 		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
 			if ( $gateway instanceof \WC_Payment_Gateway && 'yes' === $gateway->enabled ) {
-				return true;
+				$title   = wp_strip_all_tags( (string) $gateway->get_method_title() );
+				$names[] = '' !== $title ? $title : $gateway->id;
 			}
 		}
-		return false;
+		return $names;
 	}
 
 	/**
