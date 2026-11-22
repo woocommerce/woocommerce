@@ -28,6 +28,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	public const PATH = '/sales-readiness';
 
 	/**
+	 * Setup steps by importance: what blocks AI shopping (live, HTTPS, readable permalinks), what
+	 * stops orders or is asked for by AI shopping channels, then the optional steps.
+	 */
+	private const SETUP_ORDER = array( 'launched', 'https', 'ucp_discovery', 'payment_method', 'privacy_page', 'terms_page', 'refund_returns_page', 'search_visible', 'order_emails', 'guest_checkout', 'shipping_policy_page' );
+
+	/**
 	 * The admin_menu priority: between WooCommerce's Reports (20) and Settings (50).
 	 */
 	public const MENU_PRIORITY = 30;
@@ -222,18 +228,36 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Setup steps in the order the pages list them: HTTPS first, then as StoreConditions lists them,
-	 * which is also the order the report and the ability keep.
+	 * The setup steps already done, in the same order as the open ones.
+	 *
+	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
+	 * @return array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>
+	 */
+	public static function done_steps( array $checks ): array {
+		return self::setup_order( array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] && $check['ok'] ) );
+	}
+
+	/**
+	 * Setup steps by importance: the ones that block AI shopping, then the Required ones, then the
+	 * Optional ones (SETUP_ORDER). A step not in that list keeps its place after them.
 	 *
 	 * @template T of array{id:string}
 	 * @param array<int|string, T> $checks Store conditions.
 	 * @return array<int, T>
 	 */
 	private static function setup_order( array $checks ): array {
-		return array_merge(
-			array_values( array_filter( $checks, static fn( array $check ): bool => 'https' === $check['id'] ) ),
-			array_values( array_filter( $checks, static fn( array $check ): bool => 'https' !== $check['id'] ) )
-		);
+		$rank   = array_flip( self::SETUP_ORDER );
+		$ranked = array();
+		$rest   = array();
+		foreach ( $checks as $check ) {
+			if ( isset( $rank[ $check['id'] ] ) ) {
+				$ranked[ $rank[ $check['id'] ] ] = $check;
+			} else {
+				$rest[] = $check;
+			}
+		}
+		ksort( $ranked );
+		return array_merge( array_values( $ranked ), $rest );
 	}
 
 	/**

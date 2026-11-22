@@ -404,7 +404,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * @return array<string, mixed>
 	 */
 	private static function checklist( array $checks ): array {
-		$done     = array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] && $check['ok'] );
+		$done     = ReadinessCheckPage::done_steps( $checks );
 		$open     = ReadinessCheckPage::open_steps( $checks );
 		$required = count( array_filter( $open, array( StoreConditions::class, 'shows_required' ) ) );
 		if ( $required > 0 ) {

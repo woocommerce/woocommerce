@@ -348,7 +348,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'Required.', $json, 'Policy pages are recommended, so no field is marked required' );
 		$states = array_column( $checklist['steps'], 'state' );
 		$this->assertLessThan( array_search( 'open', $states, true ), max( array_keys( $states, 'required', true ) ), 'Required steps come first' );
-		$this->assertSame( 'https', $checklist['steps'][0]['id'], 'HTTPS is listed first, as in the design' );
+		$this->assertSame( array( 'launched', 'https' ), array_slice( array_column( $checklist['steps'], 'id' ), 0, 2 ), 'Making the store live comes first, then HTTPS' );
 		$this->assertMatchesRegularExpression( '/(Choose a|Publish your) privacy policy page/', $json, 'An open check says what to do' );
 		$this->assertSame( 'Connection URL', $shopping['connection']['title'] );
 		$this->assertSame( home_url( '/.well-known/ucp' ), $shopping['connection']['url'] );
@@ -358,6 +358,33 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'Security', $json, 'No Security card until a UCP flow signs anything (WOOAI-1620)' );
 		$this->assertStringNotContainsString( 'Universal Commerce Protocol (UCP) is off', $json, 'UCP is the switch, not a listed check' );
 		$this->assertNotContains( 'ucp_on', array_column( $checklist['steps'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Setup steps go by importance, open or done: what blocks AI shopping, then Required, then Optional.
+	 */
+	public function test_setup_steps_go_by_importance_open_or_done(): void {
+		// StoreConditions' own order, plus a step the order doesn't know.
+		$ids      = array( 'launched', 'search_visible', 'ucp_on', 'https', 'privacy_page', 'terms_page', 'refund_returns_page', 'shipping_policy_page', 'payment_method', 'guest_checkout', 'order_emails', 'other_step', 'ucp_discovery' );
+		$blocks   = array( 'launched', 'https', 'ucp_discovery' );
+		$checks   = static fn( bool $ok ): array => array_map(
+			static fn( string $id ): array => array(
+				'id'      => $id,
+				'ok'      => $ok,
+				'blocks'  => '',
+				'level'   => in_array( $id, $blocks, true ) ? StoreConditions::LEVEL_REQUIRED : StoreConditions::LEVEL_RECOMMENDED,
+				'name'    => $id,
+				'label'   => $id,
+				'why'     => '',
+				'fix'     => '',
+				'fix_url' => '',
+			),
+			$ids
+		);
+		$expected = array( 'launched', 'https', 'ucp_discovery', 'payment_method', 'privacy_page', 'terms_page', 'refund_returns_page', 'search_visible', 'order_emails', 'guest_checkout', 'shipping_policy_page', 'other_step' );
+
+		$this->assertSame( $expected, array_column( ReadinessCheckPage::done_steps( $checks( true ) ), 'id' ), 'Completed steps keep the same order as open ones' );
+		$this->assertSame( $expected, array_column( ReadinessCheckPage::open_steps( $checks( false ) ), 'id' ), 'Open steps: blocking, then Required, then Optional' );
 	}
 
 	/**
@@ -1676,7 +1703,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_enable_guest_checkout', 'no' );
 		$shopping = $this->shopping();
 		$this->assertStringStartsWith( 'Finish 3 required steps', $shopping['checklist']['summary'] );
-		$this->assertSame( array( 'search_visible', 'payment_method', 'order_emails', 'guest_checkout' ), array_column( $shopping['checklist']['steps'], 'id' ), 'They come before the optional guest checkout step' );
+		$this->assertSame( array( 'payment_method', 'search_visible', 'order_emails', 'guest_checkout' ), array_column( $shopping['checklist']['steps'], 'id' ), 'They come before the optional guest checkout step' );
 		$this->assertSame( array( 'required', 'required', 'required', 'open' ), array_column( $shopping['checklist']['steps'], 'state' ), 'All three stay Required (WOOAI-1681)' );
 		foreach ( array(
 			'search_visible' => array( 'Let search engines index your store', 'Change Reading settings' ),
