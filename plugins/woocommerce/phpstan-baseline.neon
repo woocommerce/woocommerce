@@ -1969,12 +1969,6 @@ parameters:
 			path: includes/admin/class-wc-admin-exporters.php
 
 		-
-			message: '#^Parameter \#1 \$product_category_to_export of method WC_Product_CSV_Exporter\:\:set_product_category_to_export\(\) expects string, list\<mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-exporters.php
-
-		-
 			message: '#^Property WC_Admin_Exporters\:\:\$exporters \(array\<string\>\) does not accept array\<array\<string, list\<\$this\(WC_Admin_Exporters\)\|string\>\|string\>\|string\>\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -10375,12 +10369,6 @@ parameters:
 			path: includes/class-wc-checkout.php
 
 		-
-			message: '#^Variable \$order might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/class-wc-checkout.php
-
-		-
 			message: '#^Call to static method add_command\(\) on an unknown class WP_CLI\.$#'
 			identifier: class.notFound
 			count: 1
@@ -10442,12 +10430,6 @@ parameters:
 
 		-
 			message: '#^Method WC_Comments\:\:add_comment_rating\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-comments.php
-
-		-
-			message: '#^Method WC_Comments\:\:clear_transients\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-comments.php
@@ -11869,12 +11851,6 @@ parameters:
 			path: includes/class-wc-install.php
 
 		-
-			message: '#^Parameter \#4 \$autoload of function add_option expects bool\|null, string given\.$#'
-			identifier: argument.type
-			count: 5
-			path: includes/class-wc-install.php
-
-		-
 			message: '#^Parameter \#5 \$post_parent of function wc_create_page expects int, int\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -12157,12 +12133,6 @@ parameters:
 			path: includes/class-wc-order-item-fee.php
 
 		-
-			message: '#^Parameter \#1 \$data of function maybe_unserialize expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-order-item-fee.php
-
-		-
 			message: '#^Parameter \#1 \$raw_tax_data of method WC_Order_Item_Fee\:\:set_taxes\(\) expects array, false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -12325,12 +12295,6 @@ parameters:
 			path: includes/class-wc-order-item-product.php
 
 		-
-			message: '#^Parameter \#1 \$data of function maybe_unserialize expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
 			message: '#^Parameter \#1 \$value of method WC_Order_Item_Product\:\:set_subtotal\(\) expects string, int\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -12404,12 +12368,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(string\)\: mixed\)\|null, ''wc_round_tax_total'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-order-item-shipping.php
-
-		-
-			message: '#^Parameter \#1 \$data of function maybe_unserialize expects string, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-order-item-shipping.php
@@ -18481,13 +18439,7 @@ parameters:
 			path: includes/emails/class-wc-email.php
 
 		-
-			message: '#^Access to property \$AltBody on an unknown class PHPMailer\.$#'
-			identifier: class.notFound
-			count: 4
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Action callback returns PHPMailer but should not return anything\.$#'
+			message: '#^Action callback returns PHPMailer\\PHPMailer\\PHPMailer but should not return anything\.$#'
 			identifier: return.void
 			count: 1
 			path: includes/emails/class-wc-email.php
@@ -18525,12 +18477,6 @@ parameters:
 		-
 			message: '#^Method WC_Email\:\:get_option_or_transient\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Method WC_Email\:\:handle_multipart\(\) has invalid return type PHPMailer\.$#'
-			identifier: class.notFound
 			count: 1
 			path: includes/emails/class-wc-email.php
 
@@ -18628,12 +18574,6 @@ parameters:
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(string\)\: bool\)\|null, ''is_email'' given\.$#'
 			identifier: argument.type
 			count: 3
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Parameter \$mailer of method WC_Email\:\:handle_multipart\(\) has invalid type PHPMailer\.$#'
-			identifier: class.notFound
-			count: 1
 			path: includes/emails/class-wc-email.php
 
 		-
@@ -18872,12 +18812,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$term_ids of method WC_CSV_Exporter\:\:format_term_ids\(\) expects array, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/export/class-wc-product-csv-exporter.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/export/class-wc-product-csv-exporter.php
@@ -23574,11 +23508,6 @@ parameters:
 			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
 
-		-
-			message: '#^Method WC_REST_Product_Attributes_V1_Controller\:\:get_items\(\) should return array but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
 
 		-
 			message: '#^Method WC_REST_Product_Attributes_V1_Controller\:\:get_items_permissions_check\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
@@ -23658,11 +23587,6 @@ parameters:
 			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
 
-		-
-			message: '#^Return type \(array\) of method WC_REST_Product_Attributes_V1_Controller\:\:get_items\(\) should be compatible with return type \(WP_Error\|WP_REST_Response\) of method WP_REST_Controller\:\:get_items\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
 
 		-
 			message: '#^Cannot access property \$post_date_gmt on WP_Post\|null\.$#'
@@ -26023,66 +25947,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
 
 		-
-			message: '#^Cannot call method get_downloadable\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
-			message: '#^Cannot call method get_parent_id\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_download_expiry\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_download_limit\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_downloadable\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_image_id\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_parent_id\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_sku\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_status\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_virtual\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
 			message: '#^Method WC_REST_Product_Variations_V2_Controller\:\:batch_items\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -26197,25 +26061,13 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
 
 		-
-			message: '#^Parameter \#1 \$product of method WC_REST_Products_V2_Controller\:\:save_downloadable_files\(\) expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
-			message: '#^Parameter \#1 \$product of method WC_REST_Products_V2_Controller\:\:save_product_shipping_data\(\) expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
-			message: '#^Parameter \#1 \$product of method WC_REST_Products_V2_Controller\:\:set_product_images\(\) expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
 			message: '#^Parameter \#1 \$quantity of method WC_Product\:\:set_stock_quantity\(\) expects float\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
+
+		-
+			message: '#^Parameter \#1 \$sku of method WC_Product\:\:set_sku\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
@@ -28936,67 +28788,7 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
 
 		-
-			message: '#^Cannot call method get_downloadable\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
 			message: '#^Cannot call method get_id\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Cannot call method set_download_expiry\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Cannot call method set_download_limit\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Cannot call method set_downloadable\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Cannot call method set_global_unique_id\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Cannot call method set_image_id\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Cannot call method set_parent_id\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Cannot call method set_sku\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Cannot call method set_status\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Cannot call method set_virtual\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
@@ -29098,6 +28890,12 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
 
 		-
+			message: '#^Parameter \#1 \$global_unique_id of method WC_Product\:\:set_global_unique_id\(\) expects string, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
+
+		-
 			message: '#^Parameter \#1 \$product of method WC_REST_Product_Variations_Controller\:\:delete_unmatched_product_variations\(\) expects WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -29116,18 +28914,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
 
 		-
-			message: '#^Parameter \#1 \$product of method WC_REST_Products_V2_Controller\:\:save_downloadable_files\(\) expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Parameter \#1 \$product of method WC_REST_Products_V2_Controller\:\:save_product_shipping_data\(\) expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
 			message: '#^Parameter \#1 \$quantity of method WC_Product\:\:set_stock_quantity\(\) expects float\|null, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -29135,6 +28921,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$request of method WC_REST_Product_Variations_Controller\:\:set_cogs_info_in_product_object\(\) expects Automattic\\WooCommerce\\Internal\\CostOfGoodsSold\\WP_Rest_Request, WP_REST_Request given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
+
+		-
+			message: '#^Parameter \#1 \$sku of method WC_Product\:\:set_sku\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
@@ -29159,12 +28951,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$variation of method WC_REST_Product_Variations_Controller\:\:get_image\(\) expects WC_Product_Variation, WC_Data given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Parameter \#1 \$variation of method WC_REST_Product_Variations_Controller\:\:set_variation_image\(\) expects WC_Product_Variation, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
@@ -30608,18 +30394,6 @@ parameters:
 			identifier: empty.variable
 			count: 1
 			path: includes/shortcodes/class-wc-shortcode-cart.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_order_key\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:needs_payment\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
 
 		-
 			message: '#^Call to an undefined method object\:\:get_stock_reduced\(\)\.$#'
@@ -38799,11 +38573,6 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributeTerms.php
 
-		-
-			message: '#^Access to offset ''search'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/ProductAttributes.php
 
 		-
 			message: '#^Access to offset ''slug'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
@@ -38835,23 +38604,8 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns array\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:register_routes\(\) has no return type specified\.$#'
@@ -38883,17 +38637,7 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Parameter \#1 \$request of method WC_REST_Product_Attributes_V1_Controller\:\:get_items\(\) expects WP_REST_Request, Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Parameter \#2 \$request of method WC_REST_Product_Attributes_V1_Controller\:\:prepare_item_for_response\(\) expects WP_REST_Request, Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
 		-
 			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int given\.$#'
@@ -38913,17 +38657,7 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Return type \(Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\) of method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) should be compatible with return type \(array\) of method WC_REST_Product_Attributes_V1_Controller\:\:get_items\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
 		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Product_Categories_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 103 on line 5$#'
@@ -47986,12 +47720,6 @@ parameters:
 			path: src/Blocks/BlockTypes/Checkout.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CheckoutActionsBlock\:\:initialize\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/CheckoutActionsBlock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CheckoutActionsBlock\:\:register_style_variations\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -48534,18 +48262,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartFooterBlock\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartFooterBlock\:\:get_cart_instance\(\) should return WC_Cart but returns null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
-
-		-
-			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''bdi'' given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
 
@@ -49846,12 +49562,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductQuery.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRating\:\:get_block_type_style\(\) should return null but returns array\<mixed, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductRating.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRating\:\:get_block_type_uses_context\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -49860,12 +49570,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRating\:\:register_block_type_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductRating.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductRating.php
 
@@ -50543,12 +50247,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypesController\:\:register_block_patterns\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypesController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypesController\:\:register_blocks\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTypesController.php
@@ -65071,12 +64769,6 @@ parameters:
 			path: src/StoreApi/Payments/PaymentResult.php
 
 		-
-			message: '#^Expected 2 @param tags, found 3\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/StoreApi/Routes/V1/AbstractCartRoute.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\AbstractCartRoute\:\:cart_updated\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -65551,12 +65243,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^Access to protected property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$status\.$#'
-			identifier: property.protected
-			count: 2
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 2
@@ -65785,12 +65471,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
 		-
-			message: '#^Access to protected property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$status\.$#'
-			identifier: property.protected
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_email\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -65841,12 +65521,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_route_post_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_route_post_response\(\) should return WP_REST_Response but returns WP_Error\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 

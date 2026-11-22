@@ -262,14 +262,10 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		};
 		add_filter( 'wp_redirect', $intercept_redirect );
 
-		try {
-			$this->expectException( RuntimeException::class );
-			$this->expectExceptionMessage( 'wp_redirect intercepted.' );
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( 'wp_redirect intercepted.' );
 
-			WC_Admin_Settings::save();
-		} finally {
-			remove_filter( 'wp_redirect', $intercept_redirect );
-		}
+		WC_Admin_Settings::save();
 	}
 
 	/**

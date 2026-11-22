@@ -6,7 +6,7 @@
  *
  * @see     Automattic\WooCommerce\Internal\Orders\OrderAttributionController
  * @package WooCommerce\Templates
- * @version 11.2.0
+ * @version 11.4.0
  */
 
 declare( strict_types=1 );
@@ -16,8 +16,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Variables used in this file.
  *
- * @var array $meta Array of meta data.
- * @var bool  $has_more_details Whether to show the more details toggle.
+ * @var array  $meta             Array of meta data.
+ * @var bool   $has_more_details Whether to show the more details toggle.
+ * @var string $origin_note      A sentence explaining the origin, or ''.
  */
 ?>
 
@@ -33,6 +34,10 @@ defined( 'ABSPATH' ) || exit;
 			<span class="order-attribution-origin">
 				<?php echo esc_html( $meta['origin'] ); ?>
 			</span>
+		<?php endif; ?>
+
+		<?php if ( ! empty( $origin_note ) ) : ?>
+			<p class="description order-attribution-origin-note"><?php echo esc_html( $origin_note ); ?></p>
 		<?php endif; ?>
 
 	</div>

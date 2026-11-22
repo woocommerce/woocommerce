@@ -16,8 +16,10 @@ use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
+use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
+use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -465,8 +467,14 @@ class WC_Checkout {
 			return $order_id;
 		}
 
+		$order = null;
+
 		try {
-			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
+			$order_id = absint( WC()->session->get( 'order_awaiting_payment' ) );
+			if ( $order_id && ! OrderController::lock_order( $order_id ) ) {
+				throw new Exception( esc_html( OrderController::get_order_lock_error_message() ) );
+			}
+
 			$cart_hash          = WC()->cart->get_cart_hash();
 			$cart_hashes        = $this->get_cart_section_hashes();
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
@@ -502,8 +510,8 @@ class WC_Checkout {
 
 				/**
 				 * Filters whether a resumed classic checkout order keeps the items that haven't changed, so their IDs
-				 * stay the same. Kept items don't run the woocommerce_checkout_create_order_*_item hooks again. Return false
-				 * to remove every item and add it again from the cart.
+				 * stay the same. Orders with item creation or removal callbacks always rebuild their items for compatibility.
+				 * Return false to rebuild items even when those hooks have no callbacks.
 				 *
 				 * @since 11.4.0
 				 *
@@ -512,7 +520,7 @@ class WC_Checkout {
 				 */
 				$keep_items = apply_filters( 'woocommerce_checkout_keep_order_items_on_resume', true, $order );
 
-				if ( true === $keep_items && $order instanceof WC_Order ) {
+				if ( true === $keep_items && $order instanceof WC_Order && ! $this->has_order_item_callbacks() ) {
 					// The rest of the items are added again from the cart later.
 					$this->kept_order_item_types = $this->remove_changed_order_items( $order, $cart_hashes );
 				} else {
@@ -579,6 +587,11 @@ class WC_Checkout {
 			// Save the order.
 			$order_id = $order->save();
 
+			// This acquires the lock for a new order, or confirms ownership of a resumed order.
+			if ( ! OrderController::lock_order( $order_id ) ) {
+				throw new Exception( esc_html( OrderController::get_order_lock_error_message() ) );
+			}
+
 			// Defense-in-depth: if the cart still has items but the persisted order has none,
 			// the save silently dropped every line item (e.g. a $wpdb->insert() returning false
 			// in save_items()). Re-read the order from the data store so we check DB state, not
@@ -615,7 +628,7 @@ class WC_Checkout {
 
 			return $order_id;
 		} catch ( Exception $e ) {
-			if ( $order && $order instanceof WC_Order ) {
+			if ( $order instanceof WC_Order ) {
 				wc_release_coupons_for_order( $order );
 				/**
 				 * Action hook fired when an order is discarded due to Exception.
@@ -662,6 +675,54 @@ class WC_Checkout {
 		if ( $this->should_add_order_items( OrderItemType::COUPON ) ) {
 			$this->create_order_coupon_lines( $order, WC()->cart );
 		}
+	}
+
+	/**
+	 * Whether callbacks require the original item creation and removal hooks on a checkout retry.
+	 *
+	 * @return bool
+	 */
+	private function has_order_item_callbacks(): bool {
+		global $wp_filter;
+
+		$hooks = array(
+			'woocommerce_checkout_create_order_line_item_object',
+			'woocommerce_checkout_create_order_line_item',
+			'woocommerce_checkout_create_order_fee_item',
+			'woocommerce_checkout_create_order_shipping_item',
+			'woocommerce_checkout_create_order_tax_item',
+			'woocommerce_checkout_create_order_coupon_item',
+			'woocommerce_remove_order_items',
+			'woocommerce_removed_order_items',
+		);
+		foreach ( $hooks as $hook ) {
+			if ( has_filter( $hook ) ) {
+				return true;
+			}
+		}
+
+		// Core always registers a forwarder; only its legacy listeners require a rebuild.
+		foreach ( $wp_filter['woocommerce_new_order_item']->callbacks ?? array() as $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				$function = $callback['function'];
+				$handler  = is_array( $function ) ? ( $function[0] ?? null ) : null;
+				if (
+					! $handler instanceof WC_Deprecated_Action_Hooks ||
+					WC_Deprecated_Action_Hooks::class !== get_class( $handler ) ||
+					'maybe_handle_deprecated_hook' !== ( $function[1] ?? null )
+				) {
+					return true;
+				}
+
+				foreach ( $handler->get_old_hooks( 'woocommerce_new_order_item' ) as $hook ) {
+					if ( has_action( $hook ) ) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1132,6 +1193,20 @@ class WC_Checkout {
 			}
 		}
 
+		// Totals are calculated from this data before validate_posted_data() runs, and shipping zones and tax rates
+		// match on state codes, so convert state names (e.g. "Hawaii") to their codes here.
+		$validation_utils = new ValidationUtils();
+
+		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
+			foreach ( $fieldset as $key => $field ) {
+				if ( empty( $data[ $key ] ) || ! is_string( $data[ $key ] ) || ! in_array( 'state', (array) ( $field['validate'] ?? array() ), true ) ) {
+					continue;
+				}
+
+				$data[ $key ] = $validation_utils->format_state( $data[ $key ], $this->get_fieldset_country( $fieldset_key, $data ) );
+			}
+		}
+
 		// BW compatibility.
 		$this->legacy_posted_data = $data;
 
@@ -1293,10 +1368,51 @@ class WC_Checkout {
 			$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ), array( 'id' => 'terms' ) );
 		}
 
+		// With nothing to ship the billing country is the taxable address, so a value that isn't a country the
+		// store sells to is refused here rather than skipped. A field filter can remove or re-type
+		// billing_country, which is the case validate_posted_data() doesn't reach.
+		$billing_country = $this->get_fieldset_country( 'billing', $data );
+
+		if ( ! $errors->get_error_messages( 'billing_country_validation' ) && ! $errors->get_error_messages( 'billing_country_required' ) ) {
+			if ( ! is_string( $billing_country ) || '' === $billing_country ) {
+				// An empty value is copied onto the customer by update_session(), which leaves the order with no
+				// taxable country, so it is refused even where the store made the field optional or hidden.
+				$country_field = $this->get_checkout_fields( 'billing' )['billing_country'] ?? null;
+				$can_be_edited = is_array( $country_field )
+					&& true !== ( $country_field['hidden'] ?? false )
+					&& 'hidden' !== ( $country_field['type'] ?? '' );
+
+				// Only ask for the country where the form still has a field to enter it in.
+				$message = $can_be_edited
+					? __( 'Please enter a billing country.', 'woocommerce' )
+					: __( 'This store cannot accept your order without a billing country.', 'woocommerce' );
+
+				$errors->add( 'billing_country_validation', $message, array( 'id' => 'billing_country' ) );
+			} elseif ( ! WC()->countries->country_exists( $billing_country ) ) {
+				$errors->add(
+					'billing_country_validation',
+					/* translators: ISO 3166-1 alpha-2 country code */
+					sprintf( __( "'%s' is not a valid country code.", 'woocommerce' ), $billing_country ),
+					array( 'id' => 'billing_country' )
+				);
+			} elseif ( ! array_key_exists( $billing_country, (array) WC()->countries->get_allowed_countries() ) ) {
+				$countries = WC()->countries->get_countries();
+				$errors->add(
+					'billing_country_not_allowed',
+					sprintf(
+						/* translators: %s: billing country name */
+						__( 'Sorry, we do not allow orders from the provided country (%s)', 'woocommerce' ),
+						$countries[ $billing_country ]
+					),
+					array( 'id' => 'billing_country' )
+				);
+			}
+		}
+
 		if ( WC()->cart->needs_shipping() ) {
 			$shipping_country = isset( $data['shipping_country'] ) ? $data['shipping_country'] : WC()->customer->get_shipping_country();
 
-			if ( empty( $shipping_country ) && ! $errors->get_error_data( 'billing_country_required' ) ) {
+			if ( empty( $shipping_country ) && ! $errors->get_error_data( 'billing_country_required' ) && ! $errors->get_error_data( 'billing_country_validation' ) ) {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
 			} elseif ( ! in_array( $shipping_country, array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
 				if ( WC()->countries->country_exists( $shipping_country ) ) {
@@ -1328,7 +1444,9 @@ class WC_Checkout {
 		if ( WC()->cart->needs_payment() ) {
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
-			if ( ! isset( $available_gateways[ $data['payment_method'] ] ) ) {
+			if ( empty( $data['payment_method'] ) && ! empty( $available_gateways ) ) {
+				$errors->add( 'payment', __( 'Please select a payment method.', 'woocommerce' ) );
+			} elseif ( ! isset( $available_gateways[ $data['payment_method'] ] ) ) {
 				$errors->add( 'payment', __( 'Invalid payment method.', 'woocommerce' ) );
 			} else {
 				$available_gateways[ $data['payment_method'] ]->validate_fields();
@@ -1442,10 +1560,15 @@ class WC_Checkout {
 	 * Process an order that does require payment.
 	 *
 	 * @since 3.0.0
+	 * @throws Exception When another request owns the order lock.
 	 * @param int    $order_id       Order ID.
 	 * @param string $payment_method Payment method.
 	 */
 	protected function process_order_payment( $order_id, $payment_method ) {
+		if ( ! OrderController::lock_order( absint( $order_id ), 0 ) ) {
+			throw new Exception( esc_html( OrderController::get_order_lock_error_message() ) );
+		}
+
 		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		if ( ! isset( $available_gateways[ $payment_method ] ) ) {
@@ -1495,10 +1618,14 @@ class WC_Checkout {
 	 * Process an order that doesn't require payment.
 	 *
 	 * @since 3.0.0
-	 * @throws Exception If the order is missing or a cancelled unpaid order would be marked paid.
+	 * @throws Exception If another request owns the order lock, the order is missing, or a cancelled unpaid order would be marked paid.
 	 * @param int $order_id Order ID.
 	 */
 	protected function process_order_without_payment( $order_id ) {
+		if ( ! OrderController::lock_order( absint( $order_id ), 0 ) ) {
+			throw new Exception( esc_html( OrderController::get_order_lock_error_message() ) );
+		}
+
 		$order = wc_get_order( $order_id );
 
 		if ( ! $order instanceof WC_Order ) {

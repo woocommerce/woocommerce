@@ -136,7 +136,8 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		$shipping = wp_parse_args( $request['shipping_address'] ?? array(), $this->get_customer_shipping_address( $customer ) );
 
 		// If the cart does not need shipping, shipping address is forced to match billing address unless defined.
-		if ( ! $cart->needs_shipping() && ! isset( $request['shipping_address'] ) ) {
+		// Stores that ship to the billing address only always use the billing address, like the classic checkout.
+		if ( wc_ship_to_billing_address_only() || ( ! $cart->needs_shipping() && ! isset( $request['shipping_address'] ) ) ) {
 			$shipping = $billing;
 		}
 

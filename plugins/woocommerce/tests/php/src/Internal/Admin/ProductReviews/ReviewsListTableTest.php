@@ -367,8 +367,6 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			),
 			$this->get_reviews_list_table()->get_columns()
 		);
-
-		remove_filter( 'woocommerce_product_reviews_table_columns', $filter_callback );
 	}
 
 	/**
@@ -516,7 +514,31 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			'4 stars'                 => array( '4', '<span aria-label="4 out of 5">&#9733;&#9733;&#9733;&#9733;&#9734;</span>' ),
 			'5 stars'                 => array( '5', '<span aria-label="5 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>' ),
 			'2.5 stars (rounds down)' => array( '2.5', '<span aria-label="2 out of 5">&#9733;&#9733;&#9734;&#9734;&#9734;</span>' ),
+			'negative rating'         => array( '-1', '<span aria-label="0 out of 5">&#9734;&#9734;&#9734;&#9734;&#9734;</span>' ),
 		);
+	}
+
+	/**
+	 * @testdox `column_rating` clamps a stored rating above 5 to 5 stars instead of failing.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_rating()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method does not exist.
+	 */
+	public function test_column_rating_clamps_rating_above_maximum(): void {
+		$list_table = $this->get_reviews_list_table();
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'column_rating' );
+		$method->setAccessible( true );
+
+		$review = $this->factory()->comment->create_and_get();
+		update_comment_meta( $review->comment_ID, 'rating', '6' );
+
+		ob_start();
+		$method->invokeArgs( $list_table, array( $review ) );
+		$output = trim( ob_get_clean() );
+
+		$this->assertSame( '<span aria-label="5 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>', $output );
 	}
 
 	/**
@@ -1661,8 +1683,6 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method->invokeArgs( $list_table, array( $review, 'custom_column' ) );
 
 		$this->assertSame( 'Custom content for "custom_column" for ID ' . $review->comment_ID, ob_get_clean() );
-
-		remove_action( 'woocommerce_product_reviews_table_column_custom_column', $callback );
 	}
 
 	/**
@@ -1688,8 +1708,6 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$output = $method->invokeArgs( $list_table, array( 'test', 'test content', $review ) );
 
 		$this->assertSame( 'Additional content to "test content" for test column belonging to review with ID: ' . (string) $review->comment_ID, $output );
-
-		remove_filter( 'woocommerce_product_reviews_table_column_test_content', $callback );
 	}
 
 	/**
@@ -2097,15 +2115,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'edit_comments_per_page', $legacy );
 
-		try {
-			$this->assertSame( 45, $method->invoke( $list_table ) );
+		$this->assertSame( 45, $method->invoke( $list_table ) );
 
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Mirrors WordPress's Screen Options filter.
-			$input_per_page = (int) apply_filters( Reviews::PER_PAGE_USER_OPTION_KEY, 20 );
-			$this->assertSame( 45, $input_per_page );
-		} finally {
-			remove_filter( 'edit_comments_per_page', $legacy );
-		}
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Mirrors WordPress's Screen Options filter.
+		$input_per_page = (int) apply_filters( Reviews::PER_PAGE_USER_OPTION_KEY, 20 );
+		$this->assertSame( 45, $input_per_page );
 	}
 
 	/**

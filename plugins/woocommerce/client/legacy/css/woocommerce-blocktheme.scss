@@ -222,7 +222,6 @@ a.added_to_cart {
 */
 .woocommerce-page {
 	// Ensure text input fields aren't too small.
-	select,
 	.input-text,
 	.select2-container {
 		font-size: var(--wp--preset--font-size--small);
@@ -231,6 +230,10 @@ a.added_to_cart {
 	label {
 		margin-bottom: 0.7em;
 	}
+}
+
+:where(.woocommerce-page select) {
+	font-size: var(--wp--preset--font-size--small);
 }
 
 .woocommerce {

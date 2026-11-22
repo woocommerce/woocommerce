@@ -370,6 +370,34 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Validate and normalize the request rating against the item schema.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return WP_Error|null Validation error, or null if the rating is absent or valid.
+	 */
+	private function validate_and_sanitize_rating( $request ) {
+		if ( ! isset( $request['rating'] ) ) {
+			return null;
+		}
+
+		$schema = $this->get_item_schema();
+		if ( empty( $schema['properties']['rating'] ) ) {
+			return null;
+		}
+
+		$rating_schema = $schema['properties']['rating'];
+		$valid         = rest_validate_value_from_schema( $request['rating'], $rating_schema, 'rating' );
+		if ( is_wp_error( $valid ) ) {
+			$valid->add_data( array( 'status' => 400 ) );
+			return $valid;
+		}
+
+		$request['rating'] = rest_sanitize_value_from_schema( $request['rating'], $rating_schema, 'rating' );
+
+		return null;
+	}
+
+	/**
 	 * Create a single review.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -384,6 +412,12 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		if ( 'product' !== get_post_type( $product_id ) ) {
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		// Batch requests call this method directly, so validate the rating against the schema here.
+		$rating_error = $this->validate_and_sanitize_rating( $request );
+		if ( $rating_error ) {
+			return $rating_error;
 		}
 
 		$prepared_review = $this->prepare_item_for_database( $request );
@@ -487,7 +521,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		 * review can change the aggregates.
 		 */
 		if ( ! empty( $request['rating'] ) && $review instanceof WP_Comment && '1' === $review->comment_approved ) {
-			WC_Comments::clear_transients( (int) $review->comment_post_ID );
+			WC_Comments::maybe_update_product_average_rating( (int) $review->comment_post_ID );
 		}
 
 		/**
@@ -554,6 +588,12 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		if ( isset( $request['type'] ) && 'review' !== get_comment_type( $id ) ) {
 			return new WP_Error( 'woocommerce_rest_review_invalid_type', __( 'Sorry, you are not allowed to change the comment type.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		// Batch requests call this method directly, so validate the rating against the schema here.
+		$rating_error = $this->validate_and_sanitize_rating( $request );
+		if ( $rating_error ) {
+			return $rating_error;
 		}
 
 		$prepared_args = $this->prepare_item_for_database( $request );
@@ -955,6 +995,8 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				'rating'           => array(
 					'description' => __( 'Review rating (0 to 5).', 'woocommerce' ),
 					'type'        => 'integer',
+					'minimum'     => 0,
+					'maximum'     => 5,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'verified'         => array(

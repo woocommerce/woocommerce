@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.7.0
+ * @version 11.4.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -24,12 +24,12 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2 class="wp-block-heading"> <?php echo esc_html__( 'Your item is on the way!', 'woocommerce' ); ?> </h2>
+<h2 class="wp-block-heading"> <?php echo '<!--[woocommerce/fulfillment-heading]-->&nbsp;'; // The non-breaking space is used to prevent the comment from being removed by the email editor. ?> </h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p><?php
-	echo esc_html__( 'Woo! Some items you purchased are being fulfilled. You can use the below information to track your shipment:', 'woocommerce' );
+	echo esc_html__( 'Woo! Here’s what’s being fulfilled from your order. You can use the information below to track your shipment:', 'woocommerce' );
 ?></p>
 <!-- /wp:paragraph -->
 

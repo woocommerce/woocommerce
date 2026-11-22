@@ -1184,19 +1184,13 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		try {
-			// Act.
-			$onboarding_url = $this->sut->get_onboarding_url( $fake_gateway );
+		// Act.
+		$onboarding_url = $this->sut->get_onboarding_url( $fake_gateway );
 
-			// Assert - Should do LIVE onboarding (no test_drive params).
-			$this->assertStringContainsString( 'https://example.com/wp-admin/woopayments/connect-url', $onboarding_url );
-			$this->assertStringNotContainsString( 'test_drive=true', $onboarding_url );
-			$this->assertStringNotContainsString( 'auto_start_test_drive_onboarding=true', $onboarding_url );
-		} finally {
-			// Clean up.
-			delete_option( 'woocommerce_coming_soon' );
-			delete_option( 'woocommerce_onboarding_profile' );
-		}
+		// Assert - Should do LIVE onboarding (no test_drive params).
+		$this->assertStringContainsString( 'https://example.com/wp-admin/woopayments/connect-url', $onboarding_url );
+		$this->assertStringNotContainsString( 'test_drive=true', $onboarding_url );
+		$this->assertStringNotContainsString( 'auto_start_test_drive_onboarding=true', $onboarding_url );
 	}
 
 	/**
@@ -1224,19 +1218,13 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		try {
-			// Act.
-			$onboarding_url = $this->sut->get_onboarding_url( $fake_gateway );
+		// Act.
+		$onboarding_url = $this->sut->get_onboarding_url( $fake_gateway );
 
-			// Assert - Should do LIVE onboarding (no test_drive params).
-			$this->assertStringContainsString( 'https://example.com/wp-admin/woopayments/connect-url', $onboarding_url );
-			$this->assertStringNotContainsString( 'test_drive=true', $onboarding_url );
-			$this->assertStringNotContainsString( 'auto_start_test_drive_onboarding=true', $onboarding_url );
-		} finally {
-			// Clean up.
-			delete_option( 'woocommerce_coming_soon' );
-			delete_option( 'woocommerce_onboarding_profile' );
-		}
+		// Assert - Should do LIVE onboarding (no test_drive params).
+		$this->assertStringContainsString( 'https://example.com/wp-admin/woopayments/connect-url', $onboarding_url );
+		$this->assertStringNotContainsString( 'test_drive=true', $onboarding_url );
+		$this->assertStringNotContainsString( 'auto_start_test_drive_onboarding=true', $onboarding_url );
 	}
 
 	/**
@@ -1263,19 +1251,13 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		try {
-			// Act.
-			$onboarding_url = $this->sut->get_onboarding_url( $fake_gateway );
+		// Act.
+		$onboarding_url = $this->sut->get_onboarding_url( $fake_gateway );
 
-			// Assert - Should do TEST-DRIVE onboarding (includes test_drive params).
-			$this->assertStringContainsString( 'https://example.com/wp-admin/woopayments/connect-url', $onboarding_url );
-			$this->assertStringContainsString( 'test_drive=true', $onboarding_url );
-			$this->assertStringContainsString( 'auto_start_test_drive_onboarding=true', $onboarding_url );
-		} finally {
-			// Clean up.
-			delete_option( 'woocommerce_coming_soon' );
-			delete_option( 'woocommerce_onboarding_profile' );
-		}
+		// Assert - Should do TEST-DRIVE onboarding (includes test_drive params).
+		$this->assertStringContainsString( 'https://example.com/wp-admin/woopayments/connect-url', $onboarding_url );
+		$this->assertStringContainsString( 'test_drive=true', $onboarding_url );
+		$this->assertStringContainsString( 'auto_start_test_drive_onboarding=true', $onboarding_url );
 	}
 
 	/**

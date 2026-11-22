@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * ProductSummary class.
  */
 class ProductSummary extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 
 	/**

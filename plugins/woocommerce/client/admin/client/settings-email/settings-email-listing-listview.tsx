@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, useMemo } from '@wordpress/element';
+import { useState, useMemo, useCallback } from '@wordpress/element';
 import { dispatch } from '@wordpress/data';
 import { pencil, external } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
@@ -82,6 +82,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		page: 1,
 		perPage: 20,
 		titleField: 'title',
+		descriptionField: 'description',
 		showTitle: true,
 		layout: {},
 	} );
@@ -122,17 +123,12 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				id: 'title',
 				label: __( 'Title', 'woocommerce' ),
 				enableHiding: false,
-				render: ( row: { item: EmailType } ) => {
-					return (
-						<div className="woocommerce-email-listing-title">
-							{ row.item.title }
-							<br />
-							<span className="woocommerce-email-listing-description">
-								{ row.item.description }
-							</span>
-						</div>
-					);
-				},
+			},
+			{
+				id: 'description',
+				label: __( 'Description', 'woocommerce' ),
+				enableHiding: false,
+				enableSorting: false,
 			},
 			{
 				id: 'recipients',
@@ -188,6 +184,47 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		];
 	}, [ emailTypes ] );
 
+	const editEmail = useCallback(
+		async ( email: EmailType ) => {
+			if ( email.post_id ) {
+				window.location.href = getAdminLink(
+					`post.php?post=${ encodeURIComponent(
+						email.post_id
+					) }&action=edit`
+				);
+				return;
+			}
+			// Classic emails have no block template to edit; their
+			// settings live on the per-email section page.
+			if ( ! email.block_editor_supported ) {
+				window.location.href = getAdminLink(
+					`admin.php?page=wc-settings&tab=email&section=${ encodeURIComponent(
+						email.email_key
+					) }`
+				);
+				return;
+			}
+			// Lazily create the post (a draft with the file
+			// template content) and open it in the editor.
+			const response = await recreateEmailPost( email.id );
+			if ( response?.post_id ) {
+				window.location.href = getAdminLink(
+					`post.php?post=${ encodeURIComponent(
+						response.post_id
+					) }&action=edit`
+				);
+				return;
+			}
+			void dispatch( 'core/notices' ).createErrorNotice(
+				__(
+					'Could not prepare the email for editing. Please try again.',
+					'woocommerce'
+				)
+			);
+		},
+		[ recreateEmailPost ]
+	);
+
 	const actions = useMemo(
 		() => [
 			{
@@ -195,44 +232,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				label: __( 'Edit', 'woocommerce' ),
 				icon: <Icon icon={ pencil } />,
 				supportsBulk: false,
-				callback: async ( items: EmailType[] ) => {
-					const email = items[ 0 ];
-					if ( email.post_id ) {
-						window.location.href = getAdminLink(
-							`post.php?post=${ encodeURIComponent(
-								email.post_id
-							) }&action=edit`
-						);
-						return;
-					}
-					// Classic emails have no block template to edit; their
-					// settings live on the per-email section page.
-					if ( ! email.block_editor_supported ) {
-						window.location.href = getAdminLink(
-							`admin.php?page=wc-settings&tab=email&section=${ encodeURIComponent(
-								email.email_key
-							) }`
-						);
-						return;
-					}
-					// Lazily create the post (a draft with the file
-					// template content) and open it in the editor.
-					const response = await recreateEmailPost( email.id );
-					if ( response?.post_id ) {
-						window.location.href = getAdminLink(
-							`post.php?post=${ encodeURIComponent(
-								response.post_id
-							) }&action=edit`
-						);
-						return;
-					}
-					void dispatch( 'core/notices' ).createErrorNotice(
-						__(
-							'Could not prepare the email for editing. Please try again.',
-							'woocommerce'
-						)
-					);
-				},
+				callback: ( items: EmailType[] ) => editEmail( items[ 0 ] ),
 			},
 			{
 				id: 'preview',
@@ -297,7 +297,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				},
 			},
 		],
-		[ updateEmailEnabledStatus, recreateEmailPost ]
+		[ updateEmailEnabledStatus, editEmail ]
 	);
 
 	const form = {
@@ -311,6 +311,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			form={ form }
 			actions={ actions }
 			onChangeView={ setView }
+			onClickItem={ editEmail }
 			fields={ fields }
 			data={ emails ?? [] }
 			paginationInfo={ {

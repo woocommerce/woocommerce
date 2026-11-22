@@ -123,8 +123,6 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			unset( $GLOBALS['hide_save_button'] );
 		}
 
-		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
-		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
 		wp_dequeue_style( 'wc-settings-ui' );
 		wp_deregister_style( 'wc-settings-ui' );
 		wp_dequeue_script( 'settings-ui-counting-handle' );
@@ -527,13 +525,9 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_get_settings_settings_ui_flag_test', $filter );
 
-		try {
-			$this->assertNull( $context->get_schema() );
-			$this->assertTrue( $context->has_schema_failed() );
-			$this->assertStringContainsString( 'Unable to build the Settings UI schema.', $context->get_schema_failure_reason() );
-		} finally {
-			remove_filter( 'woocommerce_get_settings_settings_ui_flag_test', $filter );
-		}
+		$this->assertNull( $context->get_schema() );
+		$this->assertTrue( $context->has_schema_failed() );
+		$this->assertStringContainsString( 'Unable to build the Settings UI schema.', $context->get_schema_failure_reason() );
 	}
 
 	/**
@@ -780,17 +774,13 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_get_settings_settings_ui_flag_test', $schema_filter );
 
-		try {
-			$dependencies = $this->invoke_private_method( new WCAdminAssets(), 'get_settings_ui_script_dependencies' );
+		$dependencies = $this->invoke_private_method( new WCAdminAssets(), 'get_settings_ui_script_dependencies' );
 
-			$this->assertContains( 'wc-settings-ui', $dependencies );
-			$this->assertSame( 0, $schema_filter_calls, 'Asset dependency resolution should not move public settings filters earlier in the request.' );
+		$this->assertContains( 'wc-settings-ui', $dependencies );
+		$this->assertSame( 0, $schema_filter_calls, 'Asset dependency resolution should not move public settings filters earlier in the request.' );
 
-			SettingsUIRequestContext::for_settings_page( $page, '' )->get_schema();
-			$this->assertSame( 1, $schema_filter_calls, 'The settings filter should still run when the schema is requested.' );
-		} finally {
-			remove_filter( 'woocommerce_get_settings_settings_ui_flag_test', $schema_filter );
-		}
+		SettingsUIRequestContext::for_settings_page( $page, '' )->get_schema();
+		$this->assertSame( 1, $schema_filter_calls, 'The settings filter should still run when the schema is requested.' );
 	}
 
 	/**

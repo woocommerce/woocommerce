@@ -382,6 +382,26 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Test that the page output gives the client no statistics cookie to read without the WP Consent API.
+	 */
+	public function test_page_output_omits_the_statistics_consent_cookie_without_the_consent_api(): void {
+		$this->assertStringContainsString( 'wcAnalytics.statisticsConsentCookie = "";', $this->render_analytics_data() );
+	}
+
+	/**
+	 * Test that the page output names the statistics cookie under a filtered prefix, so the client can read a deny before the consent API script loads.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_page_output_names_the_statistics_consent_cookie_under_the_consent_cookie_prefix(): void {
+		require_once __DIR__ . '/mocks/wp-consent-api-functions.php';
+		add_filter( 'wp_consent_cookie_prefix', fn() => 'custom' );
+
+		$this->assertStringContainsString( 'wcAnalytics.statisticsConsentCookie = "custom_statistics";', $this->render_analytics_data() );
+	}
+
+	/**
 	 * Test that the server-fired pixel path keeps its request-derived
 	 * properties. That path runs on uncached requests and is the only place
 	 * where pixel.wp.com can learn the visitor's real IP, user agent and
