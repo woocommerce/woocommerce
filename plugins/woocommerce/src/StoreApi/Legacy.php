@@ -65,6 +65,8 @@ class Legacy {
 			// A gateway that moved the order on before returning nothing did take payment. Hand it to the checkout's recovery, which reports success.
 			$order = wc_get_order( $order_id );
 			if ( $order instanceof \WC_Order && PaymentRecovery::order_moved_past_payment( $order ) ) {
+				// Notices are not shown from the API, so clear them as the normal path below does.
+				wc_clear_notices();
 				throw new RouteException( 'woocommerce_rest_invalid_payment_result', esc_html__( 'The payment method returned no result after taking payment.', 'woocommerce' ), 500 );
 			}
 

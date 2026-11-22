@@ -6710,7 +6710,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 * @testdox A legacy gateway that takes payment and then returns nothing still completes the checkout.
 	 */
 	public function test_legacy_gateway_returning_nothing_after_taking_payment_completes_the_checkout() {
-		$this->use_bacs_gateway_returning_nothing( null, true );
+		$this->use_bacs_gateway_returning_nothing( 'An error the paid shopper should not see later.', true );
 
 		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
 		$data     = $response->get_data();
@@ -6718,6 +6718,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertSame( 200, $response->get_status(), 'Unexpected response: ' . print_r( $data, true ) );
 		$this->assertArrayHasKey( 'payment_result', $data );
 		$this->assertSame( 'success', $data['payment_result']['payment_status'] );
+		$this->assertSame( 0, wc_notice_count( 'error' ), 'The gateway notice should not stay queued for a later page.' );
 	}
 
 	/**
