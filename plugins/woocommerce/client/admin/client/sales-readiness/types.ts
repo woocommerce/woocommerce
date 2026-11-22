@@ -119,6 +119,8 @@ export interface ReadinessView {
 	};
 	/** Where Need help? sends merchants: WordPress.com support on WordPress.com, else WooCommerce.com. */
 	support_url: string;
+	/** While the store is in coming soon mode and the results are from when it was live. */
+	coming_soon: { text: string; link: ViewLink } | null;
 	/** Null before the first check, and when there is nothing to fix. */
 	fix_first: FixFirst | null;
 	sections: Section[];

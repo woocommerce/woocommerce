@@ -33,6 +33,7 @@ const checkedView: ReadinessView = {
 		link: null,
 	},
 	support_url: 'https://woocommerce.com/my-account/create-a-ticket/',
+	coming_soon: null,
 	fix_first: {
 		title: 'Fix first',
 		ranking: 'Ranked by products.',
@@ -473,5 +474,34 @@ describe( 'Sales readiness page', () => {
 		expect(
 			screen.queryByText( 'Ranked by products.' )
 		).not.toBeInTheDocument();
+	} );
+
+	it( 'shows the coming soon notice above Fix first', async () => {
+		mockedApiFetch.mockResolvedValue( {
+			...checkedView,
+			coming_soon: {
+				text: 'Your store is in coming soon mode.',
+				link: {
+					href: 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=site-visibility',
+					text: 'Change store visibility',
+				},
+			},
+		} );
+		render( <SalesReadiness /> );
+
+		const notice = await screen.findByText(
+			'Your store is in coming soon mode.'
+		);
+		expect(
+			screen.getByRole( 'link', { name: 'Change store visibility' } )
+		).toHaveAttribute(
+			'href',
+			'https://example.com/wp-admin/admin.php?page=wc-settings&tab=site-visibility'
+		);
+		expect(
+			// eslint-disable-next-line no-bitwise
+			notice.compareDocumentPosition( screen.getByText( 'Fix first' ) ) &
+				window.Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
 	} );
 } );

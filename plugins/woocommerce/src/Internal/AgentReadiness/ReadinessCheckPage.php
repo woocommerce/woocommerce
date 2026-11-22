@@ -59,12 +59,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	private const REQUIRED_SCANNED = array( 'ucp_profile', 'ucp_checkout' );
 
 	/**
-	 * Scanned checks shown with a Warning instead of as Required when they fail: catalog search can fail
-	 * now and then with nothing changed on the store, usually because of something in front of it.
-	 */
-	private const WARNING_SCANNED = array( 'ucp_endpoints_live' );
-
-	/**
 	 * Scanned checks that keep products from being listed but aren't Required: a store whose pages all
 	 * need a login, such as a members-only store, chose that, and can still be ready for AI assistants that sign in.
 	 */
@@ -107,7 +101,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		'pass'  => 'stable',
 		'off'   => 'none',
 		'fix'   => 'low',
-		'warn'  => 'medium',
 	);
 
 	/**
@@ -293,6 +286,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			),
 			// The support line's link: WordPress.com support on WordPress.com, else the one in WooCommerce > Home > Help.
 			'support_url'  => UcpDiscovery::is_wordpress_com() ? 'https://wordpress.com/help/contact' : 'https://woocommerce.com/my-account/create-a-ticket/?utm_medium=product',
+			'coming_soon'  => self::coming_soon_notice( $checks, $report ),
 			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
 			// Setup steps live in the Setup checklist and, while one blocks sales, in Fix first; the cards hold what the scan read.
 			'sections'     => null === $report ? array() : $this->sections( array_values( array_filter( $visible, static fn( array $check ): bool => ! self::is_setup_step( $check ) ) ), $launched, $report ),
@@ -631,7 +625,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		return array(
 			'id'       => $id,
 			'title'    => $title,
-			'badge'    => self::badge_data( array( 'off', $unreadable ? __( 'Not checked', 'woocommerce' ) : __( 'No products', 'woocommerce' ) ) ),
+			'badge'    => self::badge_data( self::cant_check_badge() ),
 			'note'     => null,
 			'channels' => array(),
 			'rows'     => array(),
@@ -650,6 +644,34 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 					'href' => admin_url( 'post-new.php?post_type=product' ),
 					'text' => __( 'Add a product', 'woocommerce' ),
 				),
+			),
+		);
+	}
+
+	/**
+	 * The notice above Fix first while the store is in coming soon mode and the results shown are from
+	 * a check that ran while it was live. A check that runs in coming soon mode replaces them, so then
+	 * the cards say why the checks didn't run instead.
+	 *
+	 * @param array<int, array<string, mixed>> $checks Store conditions now.
+	 * @param array<string, mixed>|null        $report Stored report.
+	 * @return array{text:string,link:array{href:string,text:string}}|null
+	 */
+	private static function coming_soon_notice( array $checks, ?array $report ): ?array {
+		$launched = array_column( $checks, null, 'id' )['launched'] ?? null;
+		if ( null === $launched || false !== $launched['ok'] || null === $report ) {
+			return null;
+		}
+		$was_live = array_column( is_array( $report['store_checks'] ?? null ) ? $report['store_checks'] : array(), 'ok', 'id' )['launched'] ?? null;
+		if ( true !== $was_live ) {
+			return null;
+		}
+		return array(
+			'text' => __( 'Your store is in coming soon mode, so AI assistants can’t find your products yet. These results are from when your store was live.', 'woocommerce' ),
+			'link' => array(
+				'href' => (string) $launched['fix_url'],
+				// The same button as the AI shopping notice, from the content review.
+				'text' => __( 'Change store visibility', 'woocommerce' ),
 			),
 		);
 	}
@@ -1077,23 +1099,33 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The badge on a question: how many issues, or that everything passed. A check that
-	 * couldn't run isn't an issue.
+	 * The badge on a question: how many issues, that everything passed, or, when nothing failed but
+	 * a check couldn't run, Couldn't check (its row says why). Before the first check, Not checked yet.
 	 *
-	 * @param array<int, array{ok:bool|null}> $checks The question's checks.
+	 * @param array<int, array{ok:bool|null}> $checks  The question's checks.
+	 * @param bool                            $checked Whether a check has run.
 	 * @return array{0:string,1:string} Badge class and text.
 	 */
-	private static function group_badge( array $checks ): array {
+	private static function group_badge( array $checks, bool $checked = true ): array {
 		$issues = count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] ) );
 		if ( $issues > 0 ) {
 			/* translators: %d: number of issues. */
 			return array( 'check', sprintf( _n( '%d issue', '%d issues', $issues, 'woocommerce' ), $issues ) );
 		}
 		$passed = count( array_filter( $checks, static fn( array $check ): bool => true === $check['ok'] ) );
-		if ( 0 === $passed ) {
-			return array( 'off', __( 'Not checked yet', 'woocommerce' ) );
+		if ( $passed > 0 && count( $checks ) === $passed ) {
+			return array( 'info', __( 'All passed', 'woocommerce' ) );
 		}
-		return count( $checks ) === $passed ? array( 'info', __( 'All passed', 'woocommerce' ) ) : array( 'off', __( 'No issues', 'woocommerce' ) );
+		return $checked ? self::cant_check_badge() : array( 'off', __( 'Not checked yet', 'woocommerce' ) );
+	}
+
+	/**
+	 * The Couldn't check badge, on a question where nothing failed but a check couldn't run.
+	 *
+	 * @return array{0:string,1:string} Badge class and text.
+	 */
+	private static function cant_check_badge(): array {
+		return array( 'off', __( 'Couldn’t check', 'woocommerce' ) );
 	}
 
 	/**
@@ -1134,9 +1166,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 					'text' => (string) $check['seen_at'],
 				)
 				: null;
-			$warning  = ! $required && in_array( $check['id'], self::WARNING_SCANNED, true );
-			$badge    = $required ? self::required_badge() : ( $warning ? array( 'warn', __( 'Warning', 'woocommerce' ) ) : null );
-			$rows[]   = self::row( $check['id'], $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'], $failing['link'] ?? '', $failing['sr'] ?? '' ), $badge, $seen_at, $failing['tool'] ?? null );
+			$rows[]   = self::row( $check['id'], $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'], $failing['link'] ?? '', $failing['sr'] ?? '' ), $required ? self::required_badge() : null, $seen_at, $failing['tool'] ?? null );
 		}
 		return $rows;
 	}
@@ -1226,7 +1256,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$sections[] = array(
 				'id'       => $id,
 				'title'    => $group[0],
-				'badge'    => self::badge_data( $cant && array() === $rows ? array( 'off', __( 'Couldn’t check', 'woocommerce' ) ) : self::group_badge( $checks ) ),
+				'badge'    => self::badge_data( $cant && array() === $rows ? self::cant_check_badge() : self::group_badge( $checks, array() !== $report ) ),
 				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? self::ucp_off_note() : ( 'understand' === $id ? self::sample_note( $report ) : null ),
 				'channels' => array(),
 				'rows'     => $cant ? array_merge( $rows, array( self::cant_check_row( $launched ) ) ) : $rows,

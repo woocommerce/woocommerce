@@ -6,6 +6,12 @@
 	font-weight: 600;
 }
 
+// The coming soon notice's button is a link, so wp-admin's link blue would override the neutral button's label.
+.wc-ai-shopping__notice-action,
+.wc-ai-shopping__notice-action:is(:hover, :focus, :active) {
+	color: var(--wpds-color-foreground-interactive-neutral);
+}
+
 // The prototype's buttons (WordPress UI minimal and outline): semibold, and a light background
 // on hover and focus that stays after a click until focus moves; the focus ring only for keyboard focus.
 @mixin sales-readiness-button($padding: var(--wpds-dimension-padding-md)) {

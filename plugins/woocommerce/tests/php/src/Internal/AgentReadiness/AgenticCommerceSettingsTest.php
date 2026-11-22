@@ -652,6 +652,37 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox In coming soon mode, results from a check that ran while the store was live get a notice above Fix first; results from a check in coming soon mode don't.
+	 */
+	public function test_output_coming_soon_notice_over_live_results(): void {
+		$launched = static fn( bool $ok ): array => array(
+			'id'      => 'launched',
+			'group'   => 'access',
+			'ok'      => $ok,
+			'level'   => 'required',
+			'name'    => 'Store is launched',
+			'fix_url' => '',
+		);
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( true ) ) ), false );
+		$this->assertNull( $this->view()['coming_soon'], 'A live store needs no notice' );
+
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		$notice = $this->view()['coming_soon'];
+		$this->assertSame( 'Your store is in coming soon mode, so AI assistants can’t find your products yet. These results are from when your store was live.', $notice['text'] );
+		$this->assertSame( 'Change store visibility', $notice['link']['text'], 'The same button as the AI shopping notice' );
+		$this->assertStringContainsString( 'site-visibility', $notice['link']['href'] );
+
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( false ) ) ), false );
+		$this->assertNull( $this->view()['coming_soon'], 'Results from coming soon mode say why on the cards instead' );
+
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array() ), false );
+		$this->assertNull( $this->view()['coming_soon'], 'A report that doesn\'t say whether the store was live gets no notice' );
+
+		delete_option( AgentReadiness::REPORT_OPTION );
+		$this->assertNull( $this->view()['coming_soon'], 'No notice before the first check' );
+	}
+
+	/**
 	 * @testdox With UCP already on and a required check failing, the switch stays on and the checklist asks for the required steps.
 	 */
 	public function test_output_switch_on_with_failing_checks(): void {
@@ -868,7 +899,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'intent' => 'none',
-				'text'   => 'Not checked yet',
+				'text'   => 'Couldn’t check',
 			),
 			array_column( $view['sections'], 'badge', 'id' )['find'],
 			'Not counted as a result; the passing search engine step isn\'t in the card'
@@ -1224,7 +1255,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$sections = array_column( $this->view()['sections'], null, 'id' );
 		foreach ( array( 'products', 'understand' ) as $id ) {
-			$this->assertSame( 'No products', $sections[ $id ]['badge']['text'], $id . ' says why it has no checks' );
+			$this->assertSame( 'Couldn’t check', $sections[ $id ]['badge']['text'], $id . ' has no checks; its text says why' );
 			$this->assertSame( array(), array_merge( $sections[ $id ]['rows'], $sections[ $id ]['folded'] ) );
 			$this->assertSame( 'You don’t have any products yet', $sections[ $id ]['empty']['title'] );
 			$this->assertSame( 'Add a product', $sections[ $id ]['empty']['link']['text'] );
@@ -1260,7 +1291,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	private function assert_products_are_unreadable(): void {
 		$sections = array_column( $this->view()['sections'], null, 'id' );
 		foreach ( array( 'products', 'understand' ) as $id ) {
-			$this->assertSame( 'Not checked', $sections[ $id ]['badge']['text'], $id );
+			$this->assertSame( 'Couldn’t check', $sections[ $id ]['badge']['text'], $id );
 			$this->assertSame( 'None of your products can be checked yet', $sections[ $id ]['empty']['title'] );
 			$this->assertSame( 'View product visibility', $sections[ $id ]['empty']['link']['text'] );
 			$this->assertStringContainsString( 'section=' . AgenticCommerceSettings::SHOPPING_SECTION, $sections[ $id ]['empty']['link']['href'] );
@@ -1391,20 +1422,21 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A question's badge counts its issues; a check that couldn't run isn't an issue, nor a pass.
+	 * @testdox A question's badge counts its issues; when nothing failed but a check couldn't run, it says Couldn't check; before the first check, Not checked yet.
 	 */
 	public function test_group_badge(): void {
 		$badge = new \ReflectionMethod( ReadinessCheckPage::class, 'group_badge' );
 		$badge->setAccessible( true );
-		$text = static fn( array $checks ): string => $badge->invoke( null, $checks )[1];
+		$text = static fn( array $checks, bool $checked = true ): string => $badge->invoke( null, $checks, $checked )[1];
 		$row  = static fn( ?bool $ok ): array => array( 'ok' => $ok );
 
 		$this->assertSame( '2 issues', $text( array( $row( false ), $row( false ), $row( true ) ) ) );
 		$this->assertSame( '1 issue', $text( array( $row( false ), $row( null ) ) ) );
 		$this->assertSame( 'All passed', $text( array( $row( true ), $row( true ) ) ) );
-		$this->assertSame( 'No issues', $text( array( $row( true ), $row( null ) ) ), 'A check that could not run is not an issue, nor a pass' );
-		$this->assertSame( 'Not checked yet', $text( array() ) );
-		$this->assertSame( 'Not checked yet', $text( array( $row( null ), $row( null ) ) ), 'Nothing ran, so nothing is shown as passed' );
+		$this->assertSame( 'Couldn’t check', $text( array( $row( true ), $row( null ) ) ), 'A check that could not run is not an issue, nor a pass' );
+		$this->assertSame( 'Couldn’t check', $text( array( $row( null ), $row( null ) ) ), 'Nothing ran, so nothing is shown as passed' );
+		$this->assertSame( 'Couldn’t check', $text( array() ) );
+		$this->assertSame( 'Not checked yet', $text( array( $row( null ) ), false ), 'Before the first check' );
 
 		$map = new \ReflectionMethod( ReadinessCheckPage::class, 'badge_data' );
 		$map->setAccessible( true );
@@ -1560,7 +1592,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'intent' => 'none',
-				'text'   => 'Not checked yet',
+				'text'   => 'Couldn’t check',
 			),
 			$badges['access'],
 			'With AI shopping off and no scanned access check, the card has nothing checked; setup steps stay out'
@@ -1756,9 +1788,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With AI shopping on, a failing connection URL is Required and in Fix first, and failing catalog search is a Warning, with the status code kept off the page.
+	 * @testdox With AI shopping on, a failing connection URL is Required and in Fix first, and failing catalog search has no badge, like any failing check that isn't Required, with the status code kept off the page.
 	 */
-	public function test_failing_ucp_profile_is_required_and_endpoint_a_warning(): void {
+	public function test_failing_ucp_profile_is_required_and_endpoint_not(): void {
 		$this->make_every_step_pass();
 		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
 		$row = static fn( string $id ): array => array(
@@ -1786,17 +1818,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$view  = $this->view();
 		$items = array_column( $view['fix_first']['items'], 'tier', 'id' );
 		$this->assertSame( 'Required for AI shopping', $items['ucp_profile'] );
-		$this->assertArrayNotHasKey( 'ucp_endpoints_live', $items, 'Catalog search can fail now and then with nothing changed, so it warns instead' );
+		$this->assertArrayNotHasKey( 'ucp_endpoints_live', $items, 'Catalog search can fail now and then with nothing changed, so it is not Required' );
 		$this->assertArrayNotHasKey( 'ucp_profile_version', $items, 'A different version is likely another plugin, not a blocker' );
 		$rows = array_column( array_column( $view['sections'], null, 'id' )['access']['rows'], null, 'id' );
 		$this->assertSame( 'Required', $rows['ucp_profile']['badge']['text'] );
-		$this->assertSame(
-			array(
-				'intent' => 'medium',
-				'text'   => 'Warning',
-			),
-			$rows['ucp_endpoints_live']['badge']
-		);
+		$this->assertNull( $rows['ucp_endpoints_live']['badge'] );
 		$this->assertStringNotContainsString( '403', $rows['ucp_endpoints_live']['text'], 'The status code is for support, not the merchant' );
 	}
 

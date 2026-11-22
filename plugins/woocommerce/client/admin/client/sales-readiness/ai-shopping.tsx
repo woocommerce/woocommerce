@@ -18,7 +18,7 @@ import { Page } from '@wordpress/admin-ui';
 import { DataForm } from '@wordpress/dataviews';
 import type { Field, Form, FormField } from '@wordpress/dataviews';
 /* eslint-disable @wordpress/use-recommended-components -- The design asks for these @wordpress/ui components; this chunk bundles the package. */
-import { Button, Link, Notice, Stack, Text } from '@wordpress/ui';
+import { Button, Link, Stack, Text } from '@wordpress/ui';
 /* eslint-enable @wordpress/use-recommended-components */
 
 /**
@@ -28,9 +28,10 @@ import { safeHref } from './safe-href';
 import './sales-readiness.scss';
 import './ai-shopping.scss';
 import type { ShoppingView } from './types';
-import { asLink, ShoppingChecklist } from './components/shopping-checklist';
+import { ShoppingChecklist } from './components/shopping-checklist';
 import { ProductVisibility } from './components/product-visibility';
 import { ConnectionUrl } from './components/connection-url';
+import { ComingSoonNotice } from './components/coming-soon-notice';
 
 type Values = Record< string, string | boolean >;
 
@@ -318,20 +319,7 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 				isVisible: () => view.coming_soon !== null,
 				render: () =>
 					view.coming_soon && (
-						<Notice.Root intent="warning">
-							<Notice.Description>
-								{ view.coming_soon.text }
-							</Notice.Description>
-							<Notice.Actions>
-								<Notice.ActionButton
-									variant="outline"
-									className="wc-ai-shopping__notice-action wc-sales-readiness-ui-button"
-									{ ...asLink( view.coming_soon.link.href ) }
-								>
-									{ view.coming_soon.link.text }
-								</Notice.ActionButton>
-							</Notice.Actions>
-						</Notice.Root>
+						<ComingSoonNotice notice={ view.coming_soon } />
 					),
 			},
 			{
