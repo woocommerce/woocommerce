@@ -365,9 +365,13 @@ class UcpProductMapperTest extends \WC_Unit_Test_Case {
 		$own->set_global_unique_id( '4006381333931' );
 		$own->save();
 
-		$variants = array_column( ( new UcpProductMapper( 'USD' ) )->map_product( wc_get_product( $variable->get_id() ) )['variants'], null, 'id' );
+		// Keyed by variation: one with "Any" attributes yields several variants, all alike here.
+		$variants = array();
+		foreach ( ( new UcpProductMapper( 'USD' ) )->map_product( wc_get_product( $variable->get_id() ) )['variants'] as $variant ) {
+			$variants[ (int) $variant['id'] ] = $variant;
+		}
 
-		$this->assertSame( '4006381333931', $variants[ (string) $children[0] ]['barcodes'][0]['value'] );
-		$this->assertArrayNotHasKey( 'barcodes', $variants[ (string) $children[1] ] );
+		$this->assertSame( '4006381333931', $variants[ $children[0] ]['barcodes'][0]['value'] );
+		$this->assertArrayNotHasKey( 'barcodes', $variants[ $children[1] ] );
 	}
 }

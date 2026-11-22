@@ -237,8 +237,8 @@ class UcpCatalog extends ControllerTestCase {
 		$product = \WC_Helper_Product::create_variation_product();
 		$product->set_catalog_visibility( 'search' );
 		$product->save();
-		$children     = $product->get_children();
-		$variation_id = (string) end( $children );
+		// The helper's third variation fixes every attribute, so its id is a variant id as is.
+		$variation_id = (string) $product->get_children()[2];
 
 		$data = $this->post( '/catalog/lookup', array( 'ids' => array( $variation_id ) ) )->get_data();
 
@@ -398,8 +398,9 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
-	 * A variant id puts that variation first, takes its options as the selection,
-	 * and overrides a conflicting request selection.
+	 * A bare id of a variation with an "Any" attribute leads with that variation's first
+	 * variant, takes the options it fixes as the selection, and overrides a conflicting
+	 * request selection.
 	 */
 	public function test_product_detail_by_variation_id_leads_with_that_variation(): void {
 		$children = \WC_Helper_Product::create_variation_product()->get_children();
@@ -419,7 +420,6 @@ class UcpCatalog extends ControllerTestCase {
 			)
 		)->get_data();
 
-		$this->assertSame( $variation_id, $data['product']['variants'][0]['id'] );
 		$this->assertSame(
 			array(
 				array(
@@ -433,8 +433,43 @@ class UcpCatalog extends ControllerTestCase {
 			),
 			$data['product']['selected']
 		);
-		// The huge/blue variation with number 2 matches the same selection; nothing else does.
-		$this->assertCount( 2, $data['product']['variants'] );
+		// Number 2 goes to the huge/blue/2 variation, which comes first, as on the storefront.
+		$this->assertSame(
+			array( $variation_id . ':pa_number=0', $variation_id . ':pa_number=1', (string) $children[4] ),
+			wp_list_pluck( $data['product']['variants'], 'id' )
+		);
+	}
+
+	/**
+	 * @testdox A variant of an "Any" variation should be found by the id naming its value, and by no other value.
+	 */
+	public function test_any_variation_variant_id_resolves_exactly(): void {
+		$children   = \WC_Helper_Product::create_variation_product()->get_children();
+		$variant_id = end( $children ) . ':pa_number=1';
+
+		// Number 9 is no term; number 2 belongs to the earlier huge/blue/2 variation.
+		$misses = array( end( $children ) . ':pa_number=9', end( $children ) . ':pa_number=2' );
+		$lookup = $this->post( '/catalog/lookup', array( 'ids' => array_merge( array( $variant_id ), $misses ) ) )->get_data();
+
+		$this->assertSame( array( $variant_id ), wp_list_pluck( $lookup['products'][0]['variants'], 'id' ) );
+		$this->assertSame( 'exact', $lookup['products'][0]['variants'][0]['inputs'][0]['match'] );
+		$this->assertSame( array( 'not_found', 'not_found' ), wp_list_pluck( $lookup['messages'], 'code' ) );
+
+		$detail = $this->post( '/catalog/product', array( 'id' => $variant_id ) )->get_data();
+
+		$this->assertSame( $variant_id, $detail['product']['variants'][0]['id'] );
+		$this->assertSame( array( 'huge', 'blue', '1' ), wp_list_pluck( $detail['product']['selected'], 'label' ) );
+		$this->assertSame( $detail['product']['selected'], $detail['product']['variants'][0]['options'] );
+
+		// An unpriced variation claims nothing, as in the cart: number 2 now falls to the "Any" one.
+		$earlier = wc_get_product( $children[4] );
+		$earlier->set_regular_price( '' );
+		$earlier->save();
+		\WC_Product_Variable::sync( $earlier->get_parent_id() );
+
+		$lookup = $this->post( '/catalog/lookup', array( 'ids' => array( $misses[1] ) ) )->get_data();
+
+		$this->assertSame( array( $misses[1] ), wp_list_pluck( $lookup['products'][0]['variants'], 'id' ) );
 	}
 
 	/**

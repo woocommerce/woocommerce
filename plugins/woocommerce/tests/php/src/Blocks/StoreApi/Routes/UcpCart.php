@@ -710,6 +710,42 @@ class UcpCart extends UcpCartTestCase {
 	}
 
 	/**
+	 * @testdox A variant of an "Any" variation should go into a cart under the id naming its value, and come back under it.
+	 */
+	public function test_cart_holds_a_variant_of_an_any_variation(): void {
+		$children   = \WC_Helper_Product::create_variation_product()->get_children();
+		$bare_id    = (string) end( $children );
+		$line_items = array(
+			array(
+				'item'     => array( 'id' => $bare_id . ':pa_number=0' ),
+				'quantity' => 1,
+			),
+			array(
+				'item'     => array( 'id' => $bare_id . ':pa_number=1' ),
+				'quantity' => 2,
+			),
+		);
+
+		$created = $this->create_cart( $line_items );
+		$ids     = static function ( array $cart ): array {
+			return array_column( array_column( $cart['line_items'], 'item' ), 'id' );
+		};
+
+		$this->assertSame( array( $bare_id . ':pa_number=0', $bare_id . ':pa_number=1' ), $ids( $created ) );
+
+		// The same items sent back, without line ids, leave both lines as they are.
+		$resent = $this->request( 'PUT', '/carts/' . $created['id'], array( 'line_items' => $line_items ) )->get_data();
+
+		$this->assertSame( $ids( $created ), $ids( $resent ) );
+		$this->assertSame( array( 1, 2 ), wp_list_pluck( $resent['line_items'], 'quantity' ) );
+
+		// The bare id names no value for the open attribute, so it is not orderable.
+		$bare = $this->request( 'POST', '/carts', array( 'line_items' => array( array( 'item' => array( 'id' => $bare_id ) ) ) ) )->get_data();
+
+		$this->assertSame( 'error', $bare['ucp']['status'] );
+	}
+
+	/**
 	 * A variable parent is refused, in the envelope, telling the agent to name a variant.
 	 *
 	 * The parent reports a price so it passes `is_purchasable()`, and letting it through

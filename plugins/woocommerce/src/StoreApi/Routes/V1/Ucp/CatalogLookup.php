@@ -125,17 +125,6 @@ class CatalogLookup extends AbstractCatalogRoute {
 			$resolved = $this->resolve_product( $id );
 
 			if ( null === $resolved ) {
-				$messages[] = array(
-					'type'         => 'info',
-					'code'         => 'not_found',
-					'content'      => sprintf(
-						/* translators: %s: product identifier. */
-						__( 'Product "%s" not found.', 'woocommerce' ),
-						$id
-					),
-					'path'         => '$.ids',
-					'content_type' => 'plain',
-				);
 				continue;
 			}
 
@@ -149,8 +138,8 @@ class CatalogLookup extends AbstractCatalogRoute {
 			}
 
 			$groups[ $product_id ]['inputs'][] = array(
-				'id'           => $id,
-				'variation_id' => $resolved['variation_id'],
+				'id'         => $id,
+				'variant_id' => $resolved['variant_id'],
 			);
 		}
 
@@ -159,8 +148,33 @@ class CatalogLookup extends AbstractCatalogRoute {
 		$this->mapper()->begin_response();
 
 		$products = array();
+		$found    = array();
 		foreach ( $groups as $group ) {
-			$products[] = $this->mapper()->map_lookup_product( $group['product'], $group['inputs'] );
+			$product = $this->mapper()->map_lookup_product( $group['product'], $group['inputs'] );
+
+			foreach ( $product['variants'] as $variant ) {
+				$found += array_flip( array_column( $variant['inputs'], 'id' ) );
+			}
+
+			// `variants` cannot be empty: a product none of its identifiers reached is left out.
+			if ( ! empty( $product['variants'] ) ) {
+				$products[] = $product;
+			}
+		}
+
+		// Every identifier has an outcome: a variant carrying it, or a miss.
+		foreach ( array_diff( $ids, array_keys( $found ) ) as $id ) {
+			$messages[] = array(
+				'type'         => 'info',
+				'code'         => 'not_found',
+				'content'      => sprintf(
+					/* translators: %s: product identifier. */
+					__( 'Product "%s" not found.', 'woocommerce' ),
+					$id
+				),
+				'path'         => '$.ids',
+				'content_type' => 'plain',
+			);
 		}
 
 		$messages = array_merge(

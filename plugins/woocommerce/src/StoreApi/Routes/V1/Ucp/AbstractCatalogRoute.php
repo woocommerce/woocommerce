@@ -168,18 +168,18 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * of its own. Callers are told which variation was named so they can correlate
 	 * it back to the request.
 	 *
-	 * @param string $identifier Product ID or variation ID.
-	 * @return array|null `{ product, variation_id }`, where `variation_id` is 0 when the identifier
+	 * @param string $identifier Product ID or variant ID.
+	 * @return array|null `{ product, variant_id }`, where `variant_id` is '' when the identifier
 	 *                    named the product itself, or null when nothing catalog-visible matched.
 	 */
 	protected function resolve_product( string $identifier ) {
-		$product_id   = ctype_digit( $identifier ) ? (int) $identifier : 0;
-		$product      = $product_id > 0 ? wc_get_product( $product_id ) : null;
-		$variation_id = 0;
+		$resolved   = Utils::resolve_variant_id( $identifier );
+		$product    = $resolved['product'] ?? null;
+		$variant_id = '';
 
-		if ( $product instanceof \WC_Product_Variation ) {
-			$variation_id = (int) $product->get_id();
-			$product      = wc_get_product( $product->get_parent_id() );
+		if ( null !== $resolved && $product instanceof \WC_Product_Variation ) {
+			$variant_id = $resolved['id'];
+			$product    = wc_get_product( $product->get_parent_id() );
 		}
 
 		// Visibility as catalog search applies it: published, not "Hidden", and in
@@ -195,13 +195,13 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 		// A named variation the storefront would not offer — disabled, or out of
 		// stock while the store hides out-of-stock items — is a miss even when
 		// its parent is otherwise fine.
-		if ( $variation_id > 0 && ( ! $product instanceof \WC_Product_Variable || ! in_array( $variation_id, array_map( 'intval', $product->get_visible_children() ), true ) ) ) {
+		if ( '' !== $variant_id && ( ! $product instanceof \WC_Product_Variable || ! in_array( (int) $variant_id, array_map( 'intval', $product->get_visible_children() ), true ) ) ) {
 			return null;
 		}
 
 		return array(
-			'product'      => $product,
-			'variation_id' => $variation_id,
+			'product'    => $product,
+			'variant_id' => $variant_id,
 		);
 	}
 

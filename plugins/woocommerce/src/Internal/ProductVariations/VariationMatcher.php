@@ -71,6 +71,29 @@ class VariationMatcher {
 	}
 
 	/**
+	 * Get the attributes of a product's variations, in the order a selection is matched against them.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param WC_Product_Variable $parent_product Parent variable product.
+	 * @return array<int, array<string, string>|null> Attributes by variation ID, keyed by attribute meta key; null for a variation that is not available, which matches nothing.
+	 */
+	public function get_variation_attributes( WC_Product_Variable $parent_product ): array {
+		$child_ids = array_values( array_map( 'absint', $parent_product->get_children() ) );
+		_prime_post_caches( $child_ids );
+
+		$attributes = array();
+		foreach ( $child_ids as $child_id ) {
+			$variation               = wc_get_product( $child_id );
+			$attributes[ $child_id ] = $variation instanceof WC_Product_Variation && $this->is_available( $variation, $parent_product )
+				? wc_get_product_variation_attributes( $child_id )
+				: null;
+		}
+
+		return $attributes;
+	}
+
+	/**
 	 * Whether the variation's stored attributes match the selection.
 	 *
 	 * Empty attribute values are "any" and match every selection.
