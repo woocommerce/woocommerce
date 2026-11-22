@@ -1766,9 +1766,14 @@ class StoreOutputChecks {
 	private static function store_page_urls( StoreResponses $responses ): array {
 		$product = $responses->product();
 		$shop    = wc_get_page_permalink( 'shop', '' );
-		$shop_id = wc_get_page_id( 'shop' );
-		// Plain permalinks redirect the shop page itself to the product archive. A filtered shop permalink is left as visitors open it.
-		if ( 0 < $shop_id && (string) get_permalink( $shop_id ) === $shop && '' === (string) get_option( 'permalink_structure' ) ) {
+		$query   = wp_parse_url( $shop, PHP_URL_QUERY );
+		$args    = array();
+		if ( is_string( $query ) ) {
+			wp_parse_str( $query, $args );
+		}
+		// wc_template_redirect sends /?page_id=<shop> to the product archive. A front page, a filtered permalink, or a missing page has no page_id, so it stays.
+		$page_id = isset( $args['page_id'] ) && is_scalar( $args['page_id'] ) ? (int) $args['page_id'] : 0;
+		if ( 0 < $page_id && wc_get_page_id( 'shop' ) === $page_id && '' === (string) get_option( 'permalink_structure' ) ) {
 			$archive = get_post_type_archive_link( 'product' );
 			if ( is_string( $archive ) && '' !== $archive ) {
 				$shop = $archive;

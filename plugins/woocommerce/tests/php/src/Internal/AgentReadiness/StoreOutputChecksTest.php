@@ -178,6 +178,68 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox With plain permalinks and no product archive, the shop page itself is what gets checked.
+	 */
+	public function test_plain_permalinks_shop_without_archive(): void {
+		$this->set_permalink_structure( '' );
+		$shop = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Shop',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop );
+		$this->serve(
+			array(
+				'/'                   => array( 200, '<!doctype html><title>Home</title>' ),
+				"/?page_id=$shop"     => array( 302, '', array( 'location' => site_url( '/wp-login.php' ) ) ),
+				'/wp-login.php'       => array( 200, '<html>Log in</html>' ),
+				'/?post_type=product' => array( 200, '<!doctype html><title>Shop</title>' ),
+			)
+		);
+
+		$this->assertFalse( $this->results()['pages_public'] );
+	}
+
+	/**
+	 * @testdox With plain permalinks, the shop as the front page is not replaced by the product archive.
+	 */
+	public function test_plain_permalinks_front_page_shop(): void {
+		$this->set_permalink_structure( '' );
+		$product_type = get_post_type_object( 'product' );
+		$had_archive  = $product_type ? $product_type->has_archive : false;
+		if ( $product_type ) {
+			$product_type->has_archive = true;
+		}
+		try {
+			$shop = wp_insert_post(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_title'  => 'Shop',
+				)
+			);
+			update_option( 'woocommerce_shop_page_id', $shop );
+			update_option( 'show_on_front', 'page' );
+			update_option( 'page_on_front', $shop );
+			$this->serve(
+				array(
+					'/'                   => array( 200, '<!doctype html><title>Home</title>' ),
+					'/?post_type=product' => array( 302, '', array( 'location' => site_url( '/wp-login.php' ) ) ),
+					'/wp-login.php'       => array( 200, '<html>Log in</html>' ),
+				)
+			);
+
+			$this->assertTrue( $this->results()['pages_public'] );
+		} finally {
+			if ( $product_type ) {
+				$product_type->has_archive = $had_archive;
+			}
+		}
+	}
+
+	/**
 	 * @testdox With plain permalinks, a custom shop permalink is the page that is checked.
 	 */
 	public function test_plain_permalinks_custom_shop_permalink(): void {
