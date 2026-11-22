@@ -1,4 +1,3 @@
 Significance: patch
-Type: fix
-
-With plain permalinks, AI shopping health can check the sitemap and whether the shop page is public.
+Type: dev
+Comment: Agent readiness reads the sitemap and shop page with plain permalinks; behind a hidden flag.
