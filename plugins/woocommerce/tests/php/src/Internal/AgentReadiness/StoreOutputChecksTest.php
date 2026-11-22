@@ -182,24 +182,36 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	 */
 	public function test_plain_permalinks_shop_without_archive(): void {
 		$this->set_permalink_structure( '' );
-		$shop = wp_insert_post(
-			array(
-				'post_type'   => 'page',
-				'post_status' => 'publish',
-				'post_title'  => 'Shop',
-			)
-		);
-		update_option( 'woocommerce_shop_page_id', $shop );
-		$this->serve(
-			array(
-				'/'                   => array( 200, '<!doctype html><title>Home</title>' ),
-				"/?page_id=$shop"     => array( 302, '', array( 'location' => site_url( '/wp-login.php' ) ) ),
-				'/wp-login.php'       => array( 200, '<html>Log in</html>' ),
-				'/?post_type=product' => array( 200, '<!doctype html><title>Shop</title>' ),
-			)
-		);
+		$product_type = get_post_type_object( 'product' );
+		$had_archive  = $product_type ? $product_type->has_archive : false;
+		try {
+			$shop = wp_insert_post(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_title'  => 'Shop',
+				)
+			);
+			update_option( 'woocommerce_shop_page_id', $shop );
+			// A block theme registers a product archive. This case is the shop page with that archive off.
+			if ( $product_type ) {
+				$product_type->has_archive = false;
+			}
+			$this->serve(
+				array(
+					'/'                   => array( 200, '<!doctype html><title>Home</title>' ),
+					"/?page_id=$shop"     => array( 302, '', array( 'location' => site_url( '/wp-login.php' ) ) ),
+					'/wp-login.php'       => array( 200, '<html>Log in</html>' ),
+					'/?post_type=product' => array( 200, '<!doctype html><title>Shop</title>' ),
+				)
+			);
 
-		$this->assertFalse( $this->results()['pages_public'] );
+			$this->assertFalse( $this->results()['pages_public'] );
+		} finally {
+			if ( $product_type ) {
+				$product_type->has_archive = $had_archive;
+			}
+		}
 	}
 
 	/**
