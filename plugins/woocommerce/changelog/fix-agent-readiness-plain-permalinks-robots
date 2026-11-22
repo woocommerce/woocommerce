@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Agent readiness: with plain permalinks, read the WordPress sitemap at its query-string address, treat the home page served at /robots.txt as no rules, and check the product archive for the shop page.
+With plain permalinks, AI shopping health can check the sitemap and whether the shop page is public.
