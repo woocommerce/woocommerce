@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi;
 
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Utilities\NoticeHandler;
@@ -53,13 +54,20 @@ class Legacy {
 		NoticeHandler::convert_notices_to_exceptions( 'woocommerce_rest_payment_error' );
 
 		// Process Payment.
-		$gateway_result = $payment_method_object->process_payment( $context->order->get_id() );
+		$order_id       = $context->order->get_id();
+		$gateway_result = $payment_method_object->process_payment( $order_id );
 
 		// Restore $_POST data.
 		$_POST = $post_data;
 
 		// Legacy gateways add an error notice and return nothing when they bail out early, so treat that as a failed payment.
 		if ( ! is_array( $gateway_result ) ) {
+			// A gateway that moved the order on before returning nothing did take payment. Hand it to the checkout's recovery, which reports success.
+			$order = wc_get_order( $order_id );
+			if ( $order instanceof \WC_Order && PaymentRecovery::order_moved_past_payment( $order ) ) {
+				throw new RouteException( 'woocommerce_rest_invalid_payment_result', esc_html__( 'The payment method returned no result after taking payment.', 'woocommerce' ), 500 );
+			}
+
 			$gateway_result = array( 'result' => 'failure' );
 		}
 

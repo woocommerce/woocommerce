@@ -6707,12 +6707,27 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox A legacy gateway that takes payment and then returns nothing still completes the checkout.
+	 */
+	public function test_legacy_gateway_returning_nothing_after_taking_payment_completes_the_checkout() {
+		$this->use_bacs_gateway_returning_nothing( null, true );
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), 'Unexpected response: ' . print_r( $data, true ) );
+		$this->assertArrayHasKey( 'payment_result', $data );
+		$this->assertSame( 'success', $data['payment_result']['payment_status'] );
+	}
+
+	/**
 	 * Replaces BACS with a gateway whose process_payment() returns nothing, as legacy gateways do when they bail out early.
 	 *
-	 * @param string|null $notice Error notice the gateway adds before returning, or null for none.
+	 * @param string|null $notice           Error notice the gateway adds before returning, or null for none.
+	 * @param bool        $complete_payment Whether the gateway marks the order paid before returning.
 	 */
-	private function use_bacs_gateway_returning_nothing( ?string $notice ): void {
-		$gateway = new class( $notice ) extends WC_Gateway_BACS {
+	private function use_bacs_gateway_returning_nothing( ?string $notice, bool $complete_payment = false ): void {
+		$gateway = new class( $notice, $complete_payment ) extends WC_Gateway_BACS {
 			/**
 			 * Error notice to add, or null for none.
 			 *
@@ -6721,21 +6736,33 @@ class Checkout extends \WP_Test_REST_TestCase {
 			private $notice;
 
 			/**
+			 * Whether to mark the order paid before returning.
+			 *
+			 * @var bool
+			 */
+			private $complete_payment;
+
+			/**
 			 * Constructor.
 			 *
-			 * @param string|null $notice Error notice to add, or null for none.
+			 * @param string|null $notice           Error notice to add, or null for none.
+			 * @param bool        $complete_payment Whether to mark the order paid before returning.
 			 */
-			public function __construct( ?string $notice ) {
+			public function __construct( ?string $notice, bool $complete_payment ) {
 				parent::__construct();
-				$this->notice = $notice;
+				$this->notice           = $notice;
+				$this->complete_payment = $complete_payment;
 			}
 
 			/**
-			 * Adds the error notice, if any, and returns nothing.
+			 * Marks the order paid and adds the error notice when asked, then returns nothing.
 			 *
 			 * @param int $order_id Order ID.
 			 */
 			public function process_payment( $order_id ) {
+				if ( $this->complete_payment ) {
+					wc_get_order( $order_id )->payment_complete();
+				}
 				if ( null !== $this->notice ) {
 					wc_add_notice( $this->notice, 'error' );
 				}
