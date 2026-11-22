@@ -360,6 +360,21 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * A protocol version the store does not implement is refused.
+	 */
+	public function test_an_unsupported_version_is_refused(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/catalog/lookup' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_header( 'UCP-Agent', 'profile="https://agent.example/profile.json"; version="2099-01-01"' );
+		$request->set_body( wp_json_encode( array( 'ids' => array( (string) self::$product_ids[0] ) ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 422, $response->get_status() );
+		$this->assertSame( 'version_unsupported', $response->get_data()['messages'][0]['code'] );
+	}
+
+	/**
 	 * Product detail answers with `ucp.status`, and reports a miss as 200 + `not_found`.
 	 */
 	public function test_product_detail_reports_status_in_the_envelope(): void {

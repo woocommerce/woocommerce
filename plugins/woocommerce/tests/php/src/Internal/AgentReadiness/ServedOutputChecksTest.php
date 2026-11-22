@@ -557,9 +557,18 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$responses[ 'POST ' . $search ] = array( 403, '<html>Blocked</html>', array( 'content-type' => 'text/HTML; charset=UTF-8' ) );
 		$this->serve( $responses );
 		$this->assertSame( '403 text/html', array_column( $this->sut->all(), 'source', 'id' )['ucp_endpoints_live'], 'A failed check keeps what came back' );
+		$this->assertStringEndsWith( $search, array_column( $this->sut->all(), 'seen_at', 'id' )['ucp_endpoints_live'], 'A failed check keeps where it asked' );
+		$responses[ 'POST ' . $search ] = array( 503, '<html>Unavailable</html>', array( 'content-type' => 'text/html' ) );
+		$this->serve( $responses );
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertNull( $checks['ucp_endpoints_live']['ok'], 'A 5xx is couldn\'t check' );
+		$this->assertSame( '503 text/html', $checks['ucp_endpoints_live']['source'], 'Couldn\'t check keeps what came back too' );
+		$this->assertStringEndsWith( $search, $checks['ucp_endpoints_live']['seen_at'] );
+		$this->assertFalse( $checks['ucp_endpoints_live']['conflict'], 'The address is not a conflict, so the page doesn\'t link it' );
 		$responses[ 'POST ' . $search ] = null;
 		$this->serve( $responses );
 		$this->assertSame( '', array_column( $this->sut->all(), 'source', 'id' )['ucp_endpoints_live'], 'No answer leaves nothing to show' );
+		$this->assertSame( '', array_column( $this->sut->all(), 'seen_at', 'id' )['ucp_endpoints_live'] );
 
 		$responses[ $path ]             = array( 200, '{"namespace":"wc/ucp/v1","routes":{}}' );
 		$responses[ 'POST ' . $search ] = array( 404, '' );

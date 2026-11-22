@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessCheckPage;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use WC_Unit_Test_Case;
 
 /**
@@ -110,6 +111,15 @@ class ReadinessCheckPageTest extends WC_Unit_Test_Case {
 		$view = $this->sut->view();
 
 		$this->assertTrue( $view['run']['pending'], 'A queue during the report read must not hide the new scan' );
+	}
+
+	/**
+	 * @testdox Need help? links to WooCommerce.com support, as WooCommerce > Home > Help does, off WordPress.com.
+	 */
+	public function test_view_links_support(): void {
+		$this->assertFalse( UcpDiscovery::is_wordpress_com(), 'The test site is not on WordPress.com' );
+
+		$this->assertSame( 'https://woocommerce.com/my-account/create-a-ticket/?utm_medium=product', $this->sut->view()['support_url'] );
 	}
 
 	/**

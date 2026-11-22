@@ -30,6 +30,7 @@ describe( 'CheckedCard', () => {
 				view={ firstVisit }
 				running={ false }
 				onRun={ jest.fn() }
+				onDownloadError={ jest.fn() }
 			/>
 		);
 		expect( screen.getByText( 'Not checked yet' ) ).toBeInTheDocument();
@@ -55,6 +56,7 @@ describe( 'CheckedCard', () => {
 				view={ running }
 				running={ false }
 				onRun={ jest.fn() }
+				onDownloadError={ jest.fn() }
 			/>
 		);
 		expect(
@@ -75,6 +77,7 @@ describe( 'CheckedCard', () => {
 				view={ firstVisit }
 				running={ true }
 				onRun={ jest.fn() }
+				onDownloadError={ jest.fn() }
 			/>
 		);
 		expect( screen.getByRole( 'status' ) ).toHaveTextContent(

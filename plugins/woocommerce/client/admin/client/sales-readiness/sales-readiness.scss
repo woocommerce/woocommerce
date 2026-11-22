@@ -448,3 +448,13 @@ body:has(.wc-sales-readiness) {
 		}
 	}
 }
+
+// Download your results: a button styled like the contact support link.
+.wc-sales-readiness__link-button {
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	text-decoration-line: underline;
+	cursor: pointer;
+}

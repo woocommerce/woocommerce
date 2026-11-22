@@ -130,7 +130,8 @@ class CartCoupons extends AbstractCartRoute {
 
 		$cart->remove_coupons();
 
-		// Unlike remove_coupon(), remove_coupons() does not recalculate totals, and cart_updated() copies them to the draft order.
+		// remove_coupons() clears the codes without recalculating, so the cart response would still show the discount.
+		// Draft orders are left as they are; checkout copies the cart when the order is placed.
 		$cart->calculate_totals();
 
 		return new \WP_REST_Response( [], 200 );

@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { Card, Text } from '@wordpress/ui';
+import { Card, Link, Text } from '@wordpress/ui';
 import { Button, Spinner } from '@wordpress/components';
+import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -10,19 +11,27 @@ import { __ } from '@wordpress/i18n';
  */
 import type { ReadinessView } from '../types';
 import { RunStatus } from './run-status';
+import { SupportDownload } from './support-download';
 
 interface CheckedCardProps {
 	view: ReadinessView;
 	running: boolean;
 	onRun: () => void;
+	onDownloadError: ( message: string ) => void;
 }
 
 /**
  * When the store was last checked, with Check again. Before the first check it says Not checked
  * yet and offers Check your store. While a check runs it shows a spinner and Checking your store,
- * with Check again turned off.
+ * with Check again turned off. From the first check on, Need help? offers the results to
+ * download for support (built from the last check).
  */
-export const CheckedCard = ( { view, running, onRun }: CheckedCardProps ) => {
+export const CheckedCard = ( {
+	view,
+	running,
+	onRun,
+	onDownloadError,
+}: CheckedCardProps ) => {
 	const checking = ( view.run.pending && ! view.run.stalled ) || running;
 	return (
 		<Card.Root className="wc-sales-readiness-card">
@@ -48,6 +57,32 @@ export const CheckedCard = ( { view, running, onRun }: CheckedCardProps ) => {
 									className="wc-sales-readiness__muted"
 								>
 									{ view.checked_note }
+								</Text>
+							) }
+							{ ! view.intro && (
+								<Text
+									variant="body-sm"
+									className="wc-sales-readiness__muted"
+								>
+									{ createInterpolateElement(
+										__(
+											'Need help? <download>Download your results</download> and <support>contact support</support>.',
+											'woocommerce'
+										),
+										{
+											download: (
+												<SupportDownload
+													onError={ onDownloadError }
+												/>
+											),
+											support: (
+												<Link
+													href={ view.support_url }
+													openInNewTab
+												/>
+											),
+										}
+									) }
 								</Text>
 							) }
 						</div>

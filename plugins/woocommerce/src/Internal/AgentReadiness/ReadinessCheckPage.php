@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils as UcpUtils;
 
 defined( 'ABSPATH' ) || exit;
@@ -35,6 +36,15 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * Product checks that Sales readiness leaves out: product image alt text repeats the images_have_alt store check.
 	 */
 	private const HIDDEN_PRODUCT_CHECKS = array( 'image_alt_text' );
+
+	/**
+	 * Whether Sales readiness hides this product check (it still appears in the support download).
+	 *
+	 * @param string $id Check id.
+	 */
+	public static function hides_product_check( string $id ): bool {
+		return in_array( $id, self::HIDDEN_PRODUCT_CHECKS, true );
+	}
 
 	/**
 	 * How many issues Fix first lists after the required steps.
@@ -281,6 +291,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 					'text' => __( 'View Scheduled Actions', 'woocommerce' ),
 				) : null,
 			),
+			// The support line's link: WordPress.com support on WordPress.com, else the one in WooCommerce > Home > Help.
+			'support_url'  => UcpDiscovery::is_wordpress_com() ? 'https://wordpress.com/help/contact' : 'https://woocommerce.com/my-account/create-a-ticket/?utm_medium=product',
 			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
 			// Setup steps live in the Setup checklist and, while one blocks sales, in Fix first; the cards hold what the scan read.
 			'sections'     => null === $report ? array() : $this->sections( array_values( array_filter( $visible, static fn( array $check ): bool => ! self::is_setup_step( $check ) ) ), $launched, $report ),
@@ -503,6 +515,22 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 
 	/**
+	 * Ids of the store checks this page shows, so the support report can note the ones it leaves out.
+	 *
+	 * @param array<string, mixed>|null                                                                                                     $report Stored report.
+	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
+	 * @return string[]
+	 */
+	public function shown_check_ids( ?array $report, array $checks ): array {
+		$visible = $this->visible_store_checks( $report, $checks );
+		// With no products, sections() shows one "no products" row in place of the Product details checks.
+		if ( isset( $report['products'] ) && 0 === (int) $report['products'] ) {
+			$visible = array_filter( $visible, static fn( array $check ): bool => 'understand' !== ( $check['group'] ?? '' ) );
+		}
+		return array_column( $visible, 'id' );
+	}
+
+	/**
 	 * The store checks the page shows: the setup steps (UCP itself is the switch, so not a step),
 	 * then the scanned checks. With UCP off nothing is served, so the scanned UCP checks are left
 	 * out; a check whose prerequisite failed can't say anything, and checks waiting on a later
@@ -632,7 +660,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 *
 	 * @param array<int, array{ok:bool|null,pending?:bool}> $checks The question's checks.
 	 */
-	private static function none_ran( array $checks ): bool {
+	public static function none_ran( array $checks ): bool {
 		return array() !== $checks && array() === array_filter( $checks, static fn( array $check ): bool => null !== $check['ok'] || ! empty( $check['pending'] ) );
 	}
 
@@ -643,12 +671,36 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @return array<string, mixed>
 	 */
 	private static function cant_check_row( bool $launched ): array {
-		return self::row(
-			'cant_check',
-			'unknown',
-			$launched ? __( 'We couldn’t check your pages', 'woocommerce' ) : __( 'Your store is in coming soon mode', 'woocommerce' ),
-			$launched ? __( 'Your hosting setup blocked the check from opening them. Try again later, or contact your hosting provider.', 'woocommerce' ) : __( 'These checks run once your store is live.', 'woocommerce' )
-		);
+		$copy = self::cant_check_copy( $launched );
+		return self::row( 'cant_check', 'unknown', $copy[0], $copy[1] );
+	}
+
+	/**
+	 * Why none of the scanned checks ran, as a title and a line. The support report says the same.
+	 *
+	 * @param bool $launched Whether the store is launched.
+	 * @return array{0:string,1:string}
+	 */
+	public static function cant_check_copy( bool $launched ): array {
+		return $launched
+			? array( __( 'We couldn’t check your pages', 'woocommerce' ), __( 'Your hosting setup blocked the check from opening them. Try again later, or contact your hosting provider.', 'woocommerce' ) )
+			: array( __( 'Your store is in coming soon mode', 'woocommerce' ), __( 'These checks run once your store is live.', 'woocommerce' ) );
+	}
+
+	/**
+	 * The note shown while AI shopping is off. The support report uses it for the UCP step.
+	 */
+	public static function ucp_off_note(): string {
+		return __( 'Some checks only run when AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', 'woocommerce' );
+	}
+
+	/**
+	 * What the page says about a failing store check, so the support report uses the same words.
+	 *
+	 * @param array{id:string,name:string,label?:string,why:string,fix?:string,fix_url:string,conflict?:bool,source?:string} $check Store check.
+	 */
+	public static function failing_text( array $check ): string {
+		return self::failing_copy( $check )['text'];
 	}
 
 	/**
@@ -1175,7 +1227,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'id'       => $id,
 				'title'    => $group[0],
 				'badge'    => self::badge_data( $cant && array() === $rows ? array( 'off', __( 'Couldn’t check', 'woocommerce' ) ) : self::group_badge( $checks ) ),
-				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? __( 'Some checks only run when AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', 'woocommerce' ) : ( 'understand' === $id ? self::sample_note( $report ) : null ),
+				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? self::ucp_off_note() : ( 'understand' === $id ? self::sample_note( $report ) : null ),
 				'channels' => array(),
 				'rows'     => $cant ? array_merge( $rows, array( self::cant_check_row( $launched ) ) ) : $rows,
 				'folded'   => self::check_rows( array_values( $folded ), $launched ),
