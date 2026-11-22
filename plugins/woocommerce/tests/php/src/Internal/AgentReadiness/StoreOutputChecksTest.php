@@ -54,7 +54,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	/**
 	 * Answer requests by path from the home URL; a null response fails like a timeout, and any other path is a 404.
 	 *
-	 * @param array<string, array{0:int,1:string}|null> $responses Status and body by path.
+	 * @param array<string, array{0:int,1:string,2?:array<string,string>}|null> $responses Status, body and headers by path.
 	 */
 	private function serve( array $responses ): void {
 		add_filter(
@@ -67,7 +67,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 				}
 				$response = $responses[ $path ] ?? array( 404, '' );
 				return array(
-					'headers'  => array(),
+					'headers'  => new \WpOrg\Requests\Utility\CaseInsensitiveDictionary( $response[2] ?? array() ),
 					'body'     => $response[1],
 					'response' => array(
 						'code'    => $response[0],
@@ -122,8 +122,67 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	 */
 	public function test_plain_permalinks(): void {
 		$this->set_permalink_structure( '' );
-		$product = \WC_Helper_Product::create_simple_product();
-		$shop    = wp_insert_post(
+		// The shop page redirects to the product archive only when the product type has one.
+		$product_type = get_post_type_object( 'product' );
+		$had_archive  = $product_type ? $product_type->has_archive : false;
+		if ( $product_type ) {
+			$product_type->has_archive = true;
+		}
+		try {
+			$product = \WC_Helper_Product::create_simple_product();
+			$shop    = wp_insert_post(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_title'  => 'Shop',
+				)
+			);
+			update_option( 'woocommerce_shop_page_id', $shop );
+			$page = array( 200, '<!doctype html><title>Shop</title>' );
+			$this->serve(
+				array(
+					'/robots.txt'             => $page,
+					'/'                       => $page,
+					'/?post_type=product'     => $page,
+					self::path_of( $product ) => $page,
+					'/?sitemap=index'         => array( 200, '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=posts&amp;sitemap-subtype=product_cat&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ),
+					'/?sitemap=posts&sitemap-subtype=product_cat&paged=1' => array( 200, '<urlset><url><loc>' . home_url( '/?product=beanie' ) . '</loc><lastmod>2026-11-01</lastmod></url></urlset>' ),
+					"/?page_id=$shop"         => array( 302, '', array( 'location' => home_url( '/?post_type=product' ) ) ),
+				)
+			);
+
+			$results = $this->results();
+			$this->assertTrue( $results['sitemap_lists_products'] );
+			$this->assertTrue( $results['sitemap_lastmod'] );
+			$this->assertTrue( $results['pages_public'] );
+
+			$this->assertFalse( $this->names_products_in( '<urlset><url><loc>' . home_url( '/?product_cat=hats' ) . '</loc></url></urlset>' ) );
+			$this->assertTrue( $this->names_products_in( '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=posts&amp;sitemap-subtype=product&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ) );
+			$this->assertFalse( $this->names_products_in( '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=taxonomies&amp;sitemap-subtype=product_brand&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ) );
+			$this->assertTrue( $this->names_products_in( '<urlset><url><loc>' . home_url( '/?product=beanie&amp;lang=fr' ) . '</loc></url></urlset>' ) );
+		} finally {
+			if ( $product_type ) {
+				$product_type->has_archive = $had_archive;
+			}
+		}
+	}
+
+	/**
+	 * @testdox With plain permalinks, a page at /robots.txt counts as no robots file, so a missing sitemap fails.
+	 */
+	public function test_plain_permalinks_html_robots_is_no_file(): void {
+		$this->set_permalink_structure( '' );
+		$this->serve( array( '/robots.txt' => array( 200, '<!doctype html><title>Home</title>' ) ) );
+
+		$this->assertFalse( $this->results()['sitemap_lists_products'] );
+	}
+
+	/**
+	 * @testdox With plain permalinks, a custom shop permalink is the page that is checked.
+	 */
+	public function test_plain_permalinks_custom_shop_permalink(): void {
+		$this->set_permalink_structure( '' );
+		$shop = wp_insert_post(
 			array(
 				'post_type'   => 'page',
 				'post_status' => 'publish',
@@ -131,27 +190,22 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 			)
 		);
 		update_option( 'woocommerce_shop_page_id', $shop );
-		$page = array( 200, '<!doctype html><title>Shop</title>' );
+		add_filter(
+			'woocommerce_get_shop_page_permalink',
+			static function () {
+				return home_url( '/?custom-shop=1' );
+			}
+		);
 		$this->serve(
 			array(
-				'/robots.txt'             => $page,
-				'/'                       => $page,
-				'/?post_type=product'     => $page,
-				self::path_of( $product ) => $page,
-				'/?sitemap=index'         => array( 200, '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=posts&amp;sitemap-subtype=product_cat&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ),
-				'/?sitemap=posts&sitemap-subtype=product_cat&paged=1' => array( 200, '<urlset><url><loc>' . home_url( '/?product=beanie' ) . '</loc><lastmod>2026-11-01</lastmod></url></urlset>' ),
-				"/?page_id=$shop"         => array( 302, '' ),
+				'/'                   => array( 200, '<!doctype html><title>Home</title>' ),
+				'/?custom-shop=1'     => array( 302, '', array( 'location' => site_url( '/wp-login.php' ) ) ),
+				'/wp-login.php'       => array( 200, '<html>Log in</html>' ),
+				'/?post_type=product' => array( 200, '<!doctype html><title>Shop</title>' ),
 			)
 		);
 
-		$results = $this->results();
-		$this->assertTrue( $results['sitemap_lists_products'] );
-		$this->assertTrue( $results['sitemap_lastmod'] );
-		$this->assertTrue( $results['pages_public'] );
-
-		$this->assertFalse( $this->names_products_in( '<urlset><url><loc>' . home_url( '/?product_cat=hats' ) . '</loc></url></urlset>' ) );
-		$this->assertTrue( $this->names_products_in( '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=posts&amp;sitemap-subtype=product&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ) );
-		$this->assertFalse( $this->names_products_in( '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=taxonomies&amp;sitemap-subtype=product_brand&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ) );
+		$this->assertFalse( $this->results()['pages_public'] );
 	}
 
 	/**

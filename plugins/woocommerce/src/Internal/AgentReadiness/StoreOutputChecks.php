@@ -780,6 +780,16 @@ class StoreOutputChecks {
 		if ( false === stripos( $xml, '<sitemapindex' ) ) {
 			return array();
 		}
+		return self::loc_urls( $xml );
+	}
+
+	/**
+	 * The decoded URL in each loc element.
+	 *
+	 * @param string $xml Sitemap body.
+	 * @return array<int, string>
+	 */
+	private static function loc_urls( string $xml ): array {
 		$urls   = array();
 		$offset = 0;
 		$start  = stripos( $xml, '<loc>', $offset );
@@ -1655,8 +1665,8 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether a sitemap index names a product sitemap (product-sitemap.xml,
-	 * wp-sitemap-posts-product-1.xml), or a urlset lists a product page. A category
-	 * sitemap and a page that isn't a sitemap never count.
+	 * wp-sitemap-posts-product-1.xml, or ?sitemap-subtype=product), or a urlset lists a product page.
+	 * A category sitemap and a page that isn't a sitemap never count.
 	 *
 	 * @param string $xml Sitemap body.
 	 */
@@ -1667,13 +1677,35 @@ class StoreOutputChecks {
 		if ( 1 === preg_match( '#<loc>[^<]*(?:product-sitemap|wp-sitemap-posts-product-)[^<]*\.xml\s*</loc>#i', $xml ) ) {
 			return true;
 		}
-		// Plain permalinks: the WordPress product sitemap, or a product page (?product=slug).
-		if ( '' === (string) get_option( 'permalink_structure' ) && 1 === preg_match( '#<loc>[^<]*[?&](?:amp;)?(?:sitemap-subtype=product(?:&|\s*</loc>)|product=[^<&]+\s*</loc>)#i', $xml ) ) {
+		if ( '' === (string) get_option( 'permalink_structure' ) && self::plain_permalink_names_products( $xml ) ) {
 			return true;
 		}
 		// The fixed part of the product base, before a tag such as %product_cat%.
 		$base = trim( (string) strtok( (string) ( wc_get_permalink_structure()['product_base'] ?? '' ), '%' ), '/' );
 		return '' !== $base && 1 === preg_match( '#<loc>[^<]*/' . preg_quote( $base, '#' ) . '/[^<]+</loc>#i', $xml );
+	}
+
+	/**
+	 * Whether a plain-permalink sitemap names products. The product sitemap's subtype is
+	 * `product`, and a product page has a `product` query argument, in any position.
+	 *
+	 * @param string $xml Sitemap body.
+	 */
+	private static function plain_permalink_names_products( string $xml ): bool {
+		foreach ( self::loc_urls( $xml ) as $url ) {
+			$query = wp_parse_url( $url, PHP_URL_QUERY );
+			if ( ! is_string( $query ) || '' === $query ) {
+				continue;
+			}
+			$args = array();
+			wp_parse_str( $query, $args );
+			$subtype = $args['sitemap-subtype'] ?? '';
+			$product = $args['product'] ?? '';
+			if ( ( is_string( $subtype ) && 'product' === $subtype ) || ( is_string( $product ) && '' !== $product ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -1734,9 +1766,13 @@ class StoreOutputChecks {
 	private static function store_page_urls( StoreResponses $responses ): array {
 		$product = $responses->product();
 		$shop    = wc_get_page_permalink( 'shop', '' );
-		// With plain permalinks the shop page redirects to the product archive, a URL with a query string that fetches don't follow.
-		if ( '' !== $shop && '' === (string) get_option( 'permalink_structure' ) ) {
-			$shop = (string) get_post_type_archive_link( 'product' );
+		$shop_id = wc_get_page_id( 'shop' );
+		// Plain permalinks redirect the shop page itself to the product archive. A filtered shop permalink is left as visitors open it.
+		if ( 0 < $shop_id && (string) get_permalink( $shop_id ) === $shop && '' === (string) get_option( 'permalink_structure' ) ) {
+			$archive = get_post_type_archive_link( 'product' );
+			if ( is_string( $archive ) && '' !== $archive ) {
+				$shop = $archive;
+			}
 		}
 		return array_values( array_filter( array( home_url( '/' ), $shop, null === $product ? '' : (string) $product->get_permalink() ) ) );
 	}
