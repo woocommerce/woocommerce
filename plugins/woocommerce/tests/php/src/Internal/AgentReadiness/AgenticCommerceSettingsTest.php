@@ -1138,7 +1138,10 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'imported' => false,
 		);
 		update_option( AgentReadiness::REPORT_OPTION, $report );
-		$this->assertSame( 'Analytics hasn\'t imported all your past orders yet, so issues are ranked by how many products and AI apps they affect. Import them in Analytics > Settings.', $this->view()['fix_first']['ranking'], 'Missing orders don\'t read as no sales' );
+		$fix_first = $this->view()['fix_first'];
+		$this->assertSame( 'Analytics hasn\'t imported all your past orders yet, so issues are ranked by how many products and AI apps they affect.', $fix_first['ranking'], 'Missing orders don\'t read as no sales' );
+		$this->assertSame( 'Import your past orders in Analytics settings', $fix_first['link']['text'], 'The link goes where the import is' );
+		$this->assertStringEndsWith( 'admin.php?page=wc-admin&path=/analytics/settings', $fix_first['link']['href'] );
 
 		unset( $report['sales'] );
 		update_option( AgentReadiness::REPORT_OPTION, $report );

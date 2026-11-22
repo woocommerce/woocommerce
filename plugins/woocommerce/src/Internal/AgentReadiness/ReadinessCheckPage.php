@@ -783,13 +783,32 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		return array(
 			'title'   => __( 'Fix first', 'woocommerce' ),
 			'ranking' => self::ranking_text( $report, $items ),
-			// With Analytics off, where to turn it on: a report with a null `sales` key was read without it.
-			'link'    => array_key_exists( 'sales', $report ) && null === $report['sales'] ? array(
-				'href' => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ),
-				'text' => __( 'Turn on Analytics to see which fixes affect the most sales.', 'woocommerce' ),
-			) : null,
+			'link'    => self::ranking_link( $report ),
 			'items'   => $list,
 		);
+	}
+
+	/**
+	 * Where to go so Fix first can rank by sales: turn on Analytics (a report with a null `sales` key was read
+	 * without it), or import past orders in Analytics settings.
+	 *
+	 * @param array<string, mixed> $report Stored report.
+	 * @return array{href:string,text:string}|null
+	 */
+	private static function ranking_link( array $report ): ?array {
+		if ( array_key_exists( 'sales', $report ) && null === $report['sales'] ) {
+			return array(
+				'href' => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ),
+				'text' => __( 'Turn on Analytics to see which fixes affect the most sales.', 'woocommerce' ),
+			);
+		}
+		if ( is_array( $report['sales'] ?? null ) && false === ( $report['sales']['imported'] ?? true ) ) {
+			return array(
+				'href' => admin_url( 'admin.php?page=wc-admin&path=/analytics/settings' ),
+				'text' => __( 'Import your past orders in Analytics settings', 'woocommerce' ),
+			);
+		}
+		return null;
 	}
 
 	/**
@@ -809,7 +828,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			return __( 'Start with the fixes that affect the most products.', 'woocommerce' );
 		}
 		if ( false === ( $sales['imported'] ?? true ) ) {
-			return __( 'Analytics hasn\'t imported all your past orders yet, so issues are ranked by how many products and AI apps they affect. Import them in Analytics > Settings.', 'woocommerce' );
+			return __( 'Analytics hasn\'t imported all your past orders yet, so issues are ranked by how many products and AI apps they affect.', 'woocommerce' );
 		}
 		$orders = (int) ( $sales['orders'] ?? 0 );
 		$days   = (int) ( $sales['days'] ?? 0 );
