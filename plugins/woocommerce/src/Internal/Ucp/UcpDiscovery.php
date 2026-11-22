@@ -87,6 +87,13 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Whether the site is hosted on WordPress.com, the same test as Jetpack's Host::is_atomic_platform().
+	 */
+	public static function is_wordpress_com(): bool {
+		return defined( 'ATOMIC_SITE_ID' ) && ATOMIC_SITE_ID && defined( 'ATOMIC_CLIENT_ID' ) && ATOMIC_CLIENT_ID;
+	}
+
+	/**
 	 * What a merchant should do for a failing serve_status() value. Includes the file path.
 	 *
 	 * On WordPress.com the fix names its support instead of the hosting provider.
@@ -99,8 +106,8 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		$path = self::get_file_path();
 		$dir  = dirname( $path );
 
-		// The same test Jetpack uses for a WordPress.com site (Host::is_woa_site()): its support stands in for the hosting provider.
-		$wordpress_com = $wordpress_com ?? ( defined( 'ATOMIC_SITE_ID' ) && ATOMIC_SITE_ID && defined( 'ATOMIC_CLIENT_ID' ) && ATOMIC_CLIENT_ID );
+		// On WordPress.com its support stands in for the hosting provider.
+		$wordpress_com = $wordpress_com ?? self::is_wordpress_com();
 
 		switch ( $status ) {
 			case 'not_readable':

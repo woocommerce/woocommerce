@@ -548,6 +548,58 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_postcode_location_matcher matches a ZIP+4 code against rules written for its 5-digit ZIP code.
+	 *
+	 * @testWith ["96801-1234", "US", "96701...96898", true]
+	 *           ["968011234", "US", "96701...96898", true]
+	 *           ["96801-1234", "US", "96801", true]
+	 *           ["00901-1234", "PR", "00901...00999", true]
+	 *           ["00901-1234", "PR", "901...999", true]
+	 *           ["00901-1234", "PR", "9010000...9019999", true]
+	 *           ["96801-1234", "US", "96801*", true]
+	 *           ["96801-1234", "US", "967010000...968989999", true]
+	 *           ["96801-1234", "US", "96801-1234", true]
+	 *           ["96900-1234", "US", "96701...96898", false]
+	 *           ["96801-1234", "US", "96802", false]
+	 *           ["96801-1234", "US", "96801-5678", false]
+	 *           ["96801", "US", "967010000...968989999", false]
+	 *           ["00901-1234", "PR", "9020000...9029999", false]
+	 *           ["968011234", "DE", "96701...96898", false]
+	 *           ["968011234", "DE", "96801", false]
+	 *
+	 * @param string $postcode Postcode entered by the shopper.
+	 * @param string $country  Country of the address.
+	 * @param string $rule     Postcode rule as stored for a zone or tax rate.
+	 * @param bool   $expected Whether the rule should match.
+	 */
+	public function test_wc_postcode_location_matcher_matches_zip_plus_four( string $postcode, string $country, string $rule, bool $expected ): void {
+		$rules = array(
+			(object) array(
+				'id'   => 1,
+				'code' => $rule,
+			),
+		);
+
+		$matches = wc_postcode_location_matcher( $postcode, $rules, 'id', 'code', $country );
+
+		$this->assertSame( $expected, isset( $matches[1] ), sprintf( '%s (%s) against rule %s', $postcode, $country, $rule ) );
+	}
+
+	/**
+	 * @testdox wc_get_wildcard_postcodes adds the 5-digit ZIP code for a ZIP+4 code, and only for ZIP+4 countries.
+	 */
+	public function test_wc_get_wildcard_postcodes_adds_zip_code_for_zip_plus_four(): void {
+		$this->assertContains( '96801', wc_get_wildcard_postcodes( '968011234', 'US' ), 'A normalized ZIP+4 code should include its ZIP code.' );
+		$this->assertContains( '96801', wc_get_wildcard_postcodes( '96801-1234', 'US' ), 'A hyphenated ZIP+4 code should include its ZIP code.' );
+		$this->assertNotContains( '96801', wc_get_wildcard_postcodes( '968011234', 'DE' ), 'A 9-digit postcode outside ZIP+4 countries should not.' );
+		$this->assertSame(
+			array( '96801', '96801', '96801*', '9680*', '968*', '96*', '9*', '*' ),
+			wc_get_wildcard_postcodes( '96801', 'US' ),
+			'A 5-digit ZIP code should be unchanged.'
+		);
+	}
+
+	/**
 	 * @testdDox wc_get_rounding_precision returns the value of wc_get_price_decimals()+2, but with a minimum of WC_ROUNDING_PRECISION (6)
 	 *
 	 * @testWith [0, 6]

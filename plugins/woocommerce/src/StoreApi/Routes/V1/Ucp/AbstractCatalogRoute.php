@@ -63,7 +63,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	}
 
 	/**
-	 * Refuse a non-JSON payload before the handler reads anything.
+	 * Refuse an unsupported version or a non-JSON payload before the handler reads anything.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -72,7 +72,9 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		return Utils::refuse_non_json_payload( $request, $this->get_capability() ) ?? parent::get_response( $request );
+		return Utils::refuse_unsupported_version( $request, $this->get_capability() )
+			?? Utils::refuse_non_json_payload( $request, $this->get_capability() )
+			?? parent::get_response( $request );
 	}
 
 	/**

@@ -40,6 +40,11 @@ class Utils {
 	const CAPABILITY_CHECKOUT = 'dev.ucp.shopping.checkout';
 
 	/**
+	 * Extension of the cart and checkout capabilities that takes discount codes.
+	 */
+	const CAPABILITY_DISCOUNT = 'dev.ucp.shopping.discount';
+
+	/**
 	 * Whether the UCP routes are registered.
 	 *
 	 * @return bool
@@ -62,20 +67,27 @@ class Utils {
 	/**
 	 * Build the `ucp` envelope every UCP response carries.
 	 *
-	 * UCP requires `capabilities` to name only the capability relevant to the
-	 * operation being answered, so each response declares exactly one.
+	 * UCP requires `capabilities` to name only what is relevant to the operation being
+	 * answered: its own capability, and the extensions declared on it.
 	 *
 	 * @param string $capability One of the CAPABILITY_* constants.
 	 * @param string $status Response status, `success` or `error`.
 	 * @return array
 	 */
 	public static function response_metadata( string $capability, string $status ): array {
+		$declarations = self::capability_declarations();
+		$capabilities = array( $capability => array( $declarations[ $capability ] ?? array( 'version' => self::VERSION ) ) );
+
+		foreach ( $declarations as $name => $declaration ) {
+			if ( in_array( $capability, $declaration['extends'] ?? array(), true ) ) {
+				$capabilities[ $name ] = array( $declaration );
+			}
+		}
+
 		return array(
 			'version'      => self::VERSION,
 			'status'       => $status,
-			'capabilities' => array(
-				$capability => array( self::capability_declaration( $capability ) ),
-			),
+			'capabilities' => $capabilities,
 		);
 	}
 
@@ -112,17 +124,17 @@ class Utils {
 			unset( $declarations[ self::CAPABILITY_CHECKOUT ] );
 		}
 
-		return $declarations;
-	}
+		// A store with coupons turned off has no code to apply.
+		if ( wc_coupons_enabled() ) {
+			$declarations[ self::CAPABILITY_DISCOUNT ] = array(
+				'version' => self::VERSION,
+				'extends' => array_values( array_intersect( array( self::CAPABILITY_CART, self::CAPABILITY_CHECKOUT ), array_keys( $declarations ) ) ),
+				'spec'    => 'https://ucp.dev/' . self::VERSION . '/specification/discount',
+				'schema'  => 'https://ucp.dev/' . self::VERSION . '/schemas/shopping/discount.json',
+			);
+		}
 
-	/**
-	 * Spec and schema references for a capability.
-	 *
-	 * @param string $capability One of the CAPABILITY_* constants.
-	 * @return array
-	 */
-	private static function capability_declaration( string $capability ): array {
-		return self::capability_declarations()[ $capability ] ?? array( 'version' => self::VERSION );
+		return $declarations;
 	}
 
 	/**
@@ -182,6 +194,73 @@ class Utils {
 		}
 
 		return self::error_response( $capability, 'VALIDATION_ERROR', __( 'UCP requests must be sent as application/json.', 'woocommerce' ), 'recoverable', 415 );
+	}
+
+	/**
+	 * Refuse a request whose `UCP-Agent` header names a protocol version other than VERSION.
+	 *
+	 * No `supported_versions` are published, so only an exact match is served. A header without a version is not refused.
+	 * https://ucp.dev/2026-04-08/specification/overview/#request-time-validation
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @param string           $capability One of the CAPABILITY_* constants.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return \WP_REST_Response|null The 422 refusal, or null when the version is served.
+	 */
+	public static function refuse_unsupported_version( \WP_REST_Request $request, string $capability ): ?\WP_REST_Response {
+		$version = self::quoted_header_parameter( (string) $request->get_header( 'UCP-Agent' ), 'version' );
+
+		if ( '' === $version || self::VERSION === $version ) {
+			return null;
+		}
+
+		return self::error_response(
+			$capability,
+			'version_unsupported',
+			/* translators: 1: protocol version the agent asked for, 2: protocol version the store implements. */
+			sprintf( __( 'UCP version %1$s is not supported. This store implements version %2$s.', 'woocommerce' ), $version, self::VERSION ),
+			'unrecoverable',
+			422
+		);
+	}
+
+	/**
+	 * Unescaped value of one double-quoted parameter, matched by its exact name.
+	 *
+	 * A match counts only outside quotes, at the start of the header or after whitespace, a semicolon or a comma.
+	 * A repeated name resolves to its last occurrence, as RFC 8941 requires for a dictionary key.
+	 *
+	 * @param string $header Header value.
+	 * @param string $name   Parameter name.
+	 * @return string Empty when the parameter is absent.
+	 */
+	public static function quoted_header_parameter( string $header, string $name ): string {
+		// Each match is one whole quoted string, `\"` and `\\` escapes included, so text inside a value is never read as a parameter.
+		preg_match_all( '/"((?:[^"\\\\]++|\\\\.)*+)"/', $header, $strings, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
+
+		$prefix = $name . '=';
+		$value  = '';
+		foreach ( $strings as $string ) {
+			$start = $string[0][1] - strlen( $prefix );
+			if ( $start < 0 || substr( $header, $start, strlen( $prefix ) ) !== $prefix ) {
+				continue;
+			}
+
+			if ( 0 === $start || false !== strpos( " \t;,", $header[ $start - 1 ] ) ) {
+				// Keep scanning rather than return: the last matching occurrence wins.
+				$value = strtr(
+					$string[1][0],
+					array(
+						'\\"'  => '"',
+						'\\\\' => '\\',
+					)
+				);
+			}
+		}
+
+		return $value;
 	}
 
 	/**
