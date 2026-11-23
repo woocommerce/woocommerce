@@ -49,19 +49,26 @@ class Features {
 	/**
 	 * Check if auto-installation of the proxy speed module MU-plugin is enabled.
 	 *
+	 * @deprecated 0.19.0 The package no longer installs the MU-plugin. Use is_proxy_speed_module_host_provided().
+	 *
 	 * @return bool
 	 */
 	public static function is_proxy_speed_module_enabled() {
 		/**
-		 * Filter to control auto-installation of the proxy speed module mu-plugin.
-		 *
-		 * When this filter returns false, the mu-plugin file can't be added automatically.
+		 * Filter that controlled auto-installation of the proxy speed module MU-plugin.
 		 *
 		 * @since 0.15.0
+		 * @deprecated 0.19.0 The package no longer installs the MU-plugin, so this has no effect.
 		 *
 		 * @param bool $auto_install Whether to auto-install the mu-plugin. Default false.
 		 */
-		return apply_filters( 'woocommerce_analytics_auto_install_proxy_speed_module', false );
+		return (bool) apply_filters_deprecated(
+			'woocommerce_analytics_auto_install_proxy_speed_module',
+			array( false ),
+			'0.19.0',
+			'woocommerce_analytics_proxy_speed_module_host_provided',
+			'The package no longer installs the proxy speed module MU-plugin.'
+		);
 	}
 
 	/**

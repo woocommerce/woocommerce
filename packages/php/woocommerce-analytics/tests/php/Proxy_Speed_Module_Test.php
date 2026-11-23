@@ -12,32 +12,11 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use WorDBless\BaseTestCase;
 
 /**
- * Tests for Proxy_Speed_Module and the MU-plugin template that loads it.
+ * Tests for Proxy_Speed_Module.
  *
  * maybe_serve() exits after answering, so these tests drive its private respond() instead.
  */
 class Proxy_Speed_Module_Test extends BaseTestCase {
-
-	/**
-	 * Path of the MU-plugin template.
-	 *
-	 * @var string
-	 */
-	const TEMPLATE = __DIR__ . '/../../src/mu-plugin/woocommerce-analytics-proxy-speed-module-template.php';
-
-	/**
-	 * File error_log() writes to during a test.
-	 *
-	 * @var string
-	 */
-	private $error_log_file;
-
-	/**
-	 * Previous error_log ini value.
-	 *
-	 * @var string|false
-	 */
-	private $previous_error_log;
 
 	/**
 	 * Request globals as they were before the test.
@@ -47,26 +26,17 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	private $previous_server;
 
 	/**
-	 * Temporary files to delete after the test.
-	 *
-	 * @var string[]
-	 */
-	private $temp_files = array();
-
-	/**
-	 * Capture error_log() and start from an unauthorized module with no queued pixels.
+	 * Start from an unauthorized module with no queued pixels.
 	 */
 	public function set_up(): void {
 		parent::set_up();
-		$this->previous_server    = $_SERVER;
-		$this->error_log_file     = tempnam( sys_get_temp_dir(), 'wca-speed-module' );
-		$this->previous_error_log = ini_set( 'error_log', $this->error_log_file ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		$this->previous_server = $_SERVER;
 		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 		$this->set_pixel_batch_queue( array() );
 	}
 
 	/**
-	 * Restore the request globals and error log.
+	 * Restore the request globals.
 	 */
 	public function tear_down(): void {
 		unset( $_COOKIE['wp_consent_statistics'], $_COOKIE['custom_statistics'] );
@@ -77,10 +47,6 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 		delete_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION );
 		$GLOBALS['wp_rest_server'] = null;
 		$this->set_pixel_batch_queue( array() );
-		ini_set( 'error_log', (string) $this->previous_error_log ); // phpcs:ignore WordPress.PHP.IniSet.Risky
-		foreach ( array_merge( $this->temp_files, array( $this->error_log_file ) ) as $file ) {
-			wp_delete_file( $file );
-		}
 		parent::tear_down();
 	}
 
@@ -244,66 +210,15 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	}
 
 	/**
-	 * @dataProvider provide_template_requests
-	 *
-	 * @param string $method        Request method.
-	 * @param string $uri           Request URI.
-	 * @param bool   $loads_package Whether the template should try to load the package.
+	 * A renamed route must rename the module's path too, or the module silently never serves.
 	 */
-	#[DataProvider( 'provide_template_requests' )]
-	public function test_template_only_loads_the_package_for_proxy_requests( $method, $uri, $loads_package ): void {
-		$this->make_request( $method, $uri );
-
-		include self::TEMPLATE;
-
-		// The placeholder is never replaced here, so reaching the autoloader logs an error.
-		$log = (string) file_get_contents( $this->error_log_file );
-		if ( $loads_package ) {
-			$this->assertStringContainsString( 'Autoloader path placeholder was not replaced', $log );
-		} else {
-			$this->assertSame( '', $log );
-		}
-	}
-
-	/**
-	 * Requests the template sees.
-	 *
-	 * @return array
-	 */
-	public static function provide_template_requests(): array {
-		return array(
-			'proxy request'    => array( 'POST', '/wp-json/woocommerce-analytics/v1/track', true ),
-			'plain permalinks' => array( 'POST', '/?rest_route=/woocommerce-analytics/v1/track', false ),
-			'GET to the route' => array( 'GET', '/wp-json/woocommerce-analytics/v1/track', false ),
-			'other POST'       => array( 'POST', '/wp-json/wp/v2/posts', false ),
-		);
-	}
-
-	/**
-	 * Test that an installed template whose autoloader moved logs and falls through instead of fataling.
-	 */
-	public function test_template_falls_through_when_the_autoloader_is_gone(): void {
-		$this->make_request( 'POST', '/wp-json/woocommerce-analytics/v1/track' );
-		$installed          = tempnam( sys_get_temp_dir(), 'wca-installed-template' );
-		$this->temp_files[] = $installed;
-		file_put_contents( $installed, str_replace( '{{AUTOLOADER_PATH}}', '/nonexistent/vendor/autoload.php', (string) file_get_contents( self::TEMPLATE ) ) );
-
-		include $installed;
-
-		$this->assertStringContainsString( 'Autoloader file not found', (string) file_get_contents( $this->error_log_file ) );
-	}
-
-	/**
-	 * The template matches the route before it can load the constant, so a renamed route must update both.
-	 */
-	public function test_the_template_and_the_rest_route_match_the_module_path(): void {
+	public function test_the_rest_route_matches_the_module_path(): void {
 		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
 		Woocommerce_Analytics::sync_proxy_tracking_state();
 		$GLOBALS['wp_rest_server'] = null;
 		Woocommerce_Analytics::register_rest_routes();
 
 		$this->assertArrayHasKey( '/' . Proxy_Speed_Module::PROXY_REQUEST_PATH, rest_get_server()->get_routes() );
-		$this->assertStringContainsString( "'" . Proxy_Speed_Module::PROXY_REQUEST_PATH . "'", (string) file_get_contents( self::TEMPLATE ) );
 	}
 
 	/**

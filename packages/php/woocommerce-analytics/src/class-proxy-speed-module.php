@@ -12,7 +12,7 @@ use Automattic\Woocommerce_Analytics;
 /**
  * Answers proxy tracking requests at the MU-plugin stage, before regular plugins load.
  *
- * Called from the auto-installed MU-plugin, or from host platform code that registers the
+ * Called by host platform code that also returns true from the
  * `woocommerce_analytics_proxy_speed_module_host_provided` filter.
  *
  * @since 0.19.0
@@ -159,7 +159,7 @@ class Proxy_Speed_Module {
 	 * Whether the WP Consent API cookie stores a statistics deny.
 	 *
 	 * Unlike Consent_Manager, this reads the cookie whatever the consent type, which is not known yet.
-	 * Only a prefix filter added by an earlier MU-plugin applies this early.
+	 * Only a prefix filter registered before this runs applies, which is why hosts call it on `muplugins_loaded`.
 	 *
 	 * @return bool
 	 */
