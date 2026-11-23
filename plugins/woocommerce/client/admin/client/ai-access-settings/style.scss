@@ -10,8 +10,10 @@
 		margin: 0 0 16px;
 	}
 
+	// Matches the Site visibility description above.
 	.woocommerce-ai-access-settings__intro {
 		margin: 0 0 24px;
+		color: inherit;
 	}
 
 	.woocommerce-ai-access-settings__field {
@@ -28,6 +30,15 @@
 
 		.components-base-control__field p {
 			margin: 6px 0 0;
+		}
+
+		// Matches the field labels on classic settings pages, such as Store name on General.
+		.components-radio-control legend {
+			font-size: 14px;
+			font-weight: 600;
+			line-height: 1.3;
+			text-transform: none;
+			color: inherit;
 		}
 
 		.components-toggle-control + .woocommerce-ai-access-settings__notice {

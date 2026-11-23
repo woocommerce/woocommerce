@@ -113,7 +113,7 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 			{ notice && <AiAccessNotice intent="warning" message={ notice } /> }
 			<p className="woocommerce-ai-access-settings__intro">
 				{ __(
-					'Choose how AI companies can use your site’s content. These settings apply to your whole site, including blog posts and pages, not only your products.',
+					'These settings apply to your whole site.',
 					'woocommerce'
 				) }
 			</p>
