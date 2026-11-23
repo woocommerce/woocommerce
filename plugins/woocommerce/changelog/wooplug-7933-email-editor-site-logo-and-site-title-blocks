@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Saving an email in the block email editor no longer changes the site's title, logo or icon.
