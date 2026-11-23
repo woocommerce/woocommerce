@@ -108,8 +108,9 @@ before plugins register filters and cannot read them:
     has no caller, so a host that wants the endpoint gone has to call it from its
     own deactivation or uninstall routine once the cached pages have expired.
 -   `woocommerce_analytics_proxy_speed_module_authorized` records whether the speed
-    module may serve. It holds `should_install_proxy_speed_module()`, which is proxy
-    tracking **and** the module's own opt-in, so a revoked module is not
+    module may serve. It holds `should_authorize_proxy_speed_module()`, which is proxy
+    tracking **and** an opt-in to the module, either auto-install or host-provided
+    (see "Server-Side Optimizations"), so a revoked module is not
     reauthorized by the next request. An unauthorized module falls through to the
     REST route rather than answering itself, so the `403` always comes from one
     place.
@@ -299,7 +300,23 @@ When proxy tracking is enabled:
 
 **Server-Side Optimizations:**
 
-The package includes an optional MU plugin (`woocommerce-analytics-proxy-speed-module.php`) that significantly improves proxy performance by only loading WooCommerce, WooCommerce Analytics, and Jetpack for proxy requests. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route, which applies the consent check. The module runs before regular plugins, so it only reads the default `wp_consent` cookie prefix or one set by an earlier MU-plugin.
+`Proxy_Speed_Module` answers proxy requests at the MU-plugin stage and exits, which significantly reduces their cost. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route, which applies the consent check. The module runs before regular plugins, so it only reads the default `wp_consent` cookie prefix or one set by an earlier MU-plugin.
+
+It runs in one of two ways:
+
+-   **Auto-installed:** with `woocommerce_analytics_auto_install_proxy_speed_module` returning true, the package writes a thin MU-plugin (`woocommerce-analytics-proxy-speed-module.php`) that loads the package and calls the module.
+-   **Host-provided:** platform code that already loads a Jetpack autoloader at the MU-plugin stage returns true from `woocommerce_analytics_proxy_speed_module_host_provided` and calls the module itself, so nothing is written into the site:
+
+```php
+add_filter( 'woocommerce_analytics_proxy_speed_module_host_provided', '__return_true' );
+
+if ( class_exists( \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::class )
+	&& \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::maybe_serve() ) {
+	exit;
+}
+```
+
+Either way, the module serves only while proxy tracking is enabled, and otherwise leaves the request to the REST route.
 
 ### Debugging
 

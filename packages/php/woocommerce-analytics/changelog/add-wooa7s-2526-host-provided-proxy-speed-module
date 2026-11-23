@@ -1,0 +1,4 @@
+Significance: minor
+Type: added
+
+Let hosts run the proxy speed module from their own platform code, without writing an MU-plugin file into the site.

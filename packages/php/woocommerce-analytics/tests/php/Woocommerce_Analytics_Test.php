@@ -8,6 +8,7 @@
 namespace Automattic\Woocommerce_Analytics;
 
 use Automattic\Woocommerce_Analytics;
+use PHPUnit\Framework\Attributes\DataProvider;
 use WorDBless\BaseTestCase;
 
 /**
@@ -47,6 +48,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		// Remove any filters that might interfere.
 		remove_all_filters( 'woocommerce_analytics_auto_install_proxy_speed_module' );
+		remove_all_filters( 'woocommerce_analytics_proxy_speed_module_host_provided' );
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
 	}
 
@@ -65,6 +67,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		delete_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION );
 		delete_transient( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT );
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
+		remove_all_filters( 'woocommerce_analytics_proxy_speed_module_host_provided' );
 
 		parent::tear_down();
 	}
@@ -513,6 +516,43 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 			'no',
 			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
 			'Turning the feature off must be mirrored too, or the module never stops answering.'
+		);
+	}
+
+	/**
+	 * A host that runs the module from platform code needs it authorized without the file being written.
+	 *
+	 * @dataProvider provide_host_provided_states
+	 *
+	 * @param bool        $proxy_tracking Whether proxy tracking is enabled.
+	 * @param string|bool $expected       The expected authorization option.
+	 */
+	#[DataProvider( 'provide_host_provided_states' )]
+	public function test_a_host_provided_module_is_authorized_but_never_installed( $proxy_tracking, $expected ): void {
+		add_filter( 'woocommerce_analytics_proxy_speed_module_host_provided', '__return_true' );
+		if ( $proxy_tracking ) {
+			add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		}
+
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+		Woocommerce_Analytics::maybe_update_proxy_speed_module();
+
+		$this->assertSame( $expected, get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
+		$this->assertFalse(
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION ),
+			'Only the auto-install filter may write the MU-plugin file.'
+		);
+	}
+
+	/**
+	 * Proxy tracking states for a host-provided module.
+	 *
+	 * @return array
+	 */
+	public static function provide_host_provided_states(): array {
+		return array(
+			'proxy tracking on'  => array( true, 'yes' ),
+			'proxy tracking off' => array( false, false ),
 		);
 	}
 

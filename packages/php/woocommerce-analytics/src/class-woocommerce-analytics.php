@@ -269,7 +269,7 @@ class Woocommerce_Analytics {
 		}
 
 		// Track module eligibility so a removed module cannot be reauthorized.
-		$authorized = self::should_install_proxy_speed_module() ? 'yes' : 'no';
+		$authorized = self::should_authorize_proxy_speed_module() ? 'yes' : 'no';
 		$current    = get_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 
 		if ( $current === $authorized ) {
@@ -338,6 +338,19 @@ class Woocommerce_Analytics {
 	private static function should_install_proxy_speed_module() {
 		return \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled()
 			&& \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled();
+	}
+
+	/**
+	 * Whether the proxy speed module may serve, whether this package installs it or the host provides it.
+	 *
+	 * @since 0.19.0
+	 *
+	 * @return bool
+	 */
+	private static function should_authorize_proxy_speed_module() {
+		return \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled()
+			&& ( \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled()
+				|| \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_host_provided() );
 	}
 
 	/**

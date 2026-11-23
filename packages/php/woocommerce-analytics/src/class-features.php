@@ -63,4 +63,24 @@ class Features {
 		 */
 		return apply_filters( 'woocommerce_analytics_auto_install_proxy_speed_module', false );
 	}
+
+	/**
+	 * Check if the host runs Proxy_Speed_Module from its own platform code.
+	 *
+	 * @since 0.19.0
+	 *
+	 * @return bool
+	 */
+	public static function is_proxy_speed_module_host_provided() {
+		/**
+		 * Filter to authorize the proxy speed module without auto-installing the MU-plugin file.
+		 *
+		 * Return true from host platform code that calls Proxy_Speed_Module::maybe_serve() at MU-plugin stage.
+		 *
+		 * @since 0.19.0
+		 *
+		 * @param bool $host_provided Whether the host provides the speed module. Default false.
+		 */
+		return apply_filters( 'woocommerce_analytics_proxy_speed_module_host_provided', false );
+	}
 }
