@@ -1487,9 +1487,9 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Running counts of catalog search checks since `since`: checks run, how many failed on the first
-	 * try, failed after the retry, or got no answer (a 5xx or none, shown as couldn't check), and
-	 * what the store last answered when one didn't pass.
+	 * Running counts of catalog search checks since `since`. `first_try_failed` includes `failed`
+	 * and `no_answer` (a 5xx or none, shown as couldn't check). The retry recovered
+	 * `first_try_failed - failed - no_answer`. `last_seen` is what the store last answered when one didn't pass.
 	 *
 	 * @since 11.4.0
 	 *

@@ -633,6 +633,10 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $counts['no_answer'], 'A timeout is no answer, shown as couldn\'t check' );
 		$this->assertSame( '403 text/html', $counts['last_seen'], 'No answer leaves the last answer in place' );
 
+		$run( array( 503, '<html>Unavailable</html>', array( 'content-type' => 'text/html' ) ) );
+		$counts = StoreOutputChecks::search_counts();
+		$this->assertSame( array( 4, 3, 1, 2, '503 text/html' ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'], $counts['no_answer'], $counts['last_seen'] ), 'A 5xx is no answer and keeps what came back' );
+
 		$this->serve( $responses );
 		$answers = array( array( 403, '<html>Blocked</html>' ), array( 200, '{"ucp":{"status":"success"},"products":[]}' ) );
 		add_filter(
@@ -657,13 +661,13 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		);
 		$this->sut->all();
 		$counts = StoreOutputChecks::search_counts();
-		$this->assertSame( array( 4, 3, 1 ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'] ), 'A refusal the retry gets past counts as a first-try failure only' );
+		$this->assertSame( array( 5, 4, 1 ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'] ), 'A refusal the retry gets past counts as a first-try failure only' );
 
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		$this->serve( $responses );
 		$this->sut->all();
 		$this->assertNotContains( 'POST ' . $search, $this->requested );
-		$this->assertSame( array( 4, 3, 1 ), array( StoreOutputChecks::search_counts()['checks'], StoreOutputChecks::search_counts()['first_try_failed'], StoreOutputChecks::search_counts()['no_answer'] ), 'In coming soon mode nothing is asked, so nothing is counted' );
+		$this->assertSame( array( 5, 4, 2 ), array( StoreOutputChecks::search_counts()['checks'], StoreOutputChecks::search_counts()['first_try_failed'], StoreOutputChecks::search_counts()['no_answer'] ), 'In coming soon mode nothing is asked, so nothing is counted' );
 		update_option( 'woocommerce_coming_soon', 'no' );
 
 		$unreachable      = $responses;
@@ -671,12 +675,12 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->serve( $unreachable );
 		$this->sut->all();
 		$this->assertNotContains( 'POST ' . $search, $this->requested );
-		$this->assertSame( 4, StoreOutputChecks::search_counts()['checks'], 'A store that can\'t reach its home page sends nothing more, so nothing is counted' );
+		$this->assertSame( 5, StoreOutputChecks::search_counts()['checks'], 'A store that can\'t reach its home page sends nothing more, so nothing is counted' );
 
 		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
 		$this->serve( $responses );
 		$this->sut->all();
-		$this->assertSame( 4, StoreOutputChecks::search_counts()['checks'], 'With UCP off, catalog search isn\'t checked or counted' );
+		$this->assertSame( 5, StoreOutputChecks::search_counts()['checks'], 'With UCP off, catalog search isn\'t checked or counted' );
 	}
 
 	/**

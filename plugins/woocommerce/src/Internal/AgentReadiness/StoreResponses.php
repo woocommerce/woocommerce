@@ -196,6 +196,8 @@ class StoreResponses {
 	 * Whether this scan sends a request to a URL: only while the store is live, only to the store,
 	 * and not once the home page couldn't be reached.
 	 *
+	 * @since 11.4.0
+	 *
 	 * @param string $url URL or path.
 	 */
 	public function can_request( string $url ): bool {
