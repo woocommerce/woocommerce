@@ -21,6 +21,13 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 class TexturizeExclusions implements RegisterHooksInterface {
 
 	/**
+	 * Class on the address element that wraps a stock notification verification notice.
+	 *
+	 * Only a queued notice with this class turns on the skip, so an address in another plugin's notice does not.
+	 */
+	public const VERIFICATION_EMAIL_CLASS = 'woocommerce-verification-email';
+
+	/**
 	 * Register hooks and filters.
 	 */
 	public function register(): void {
@@ -58,7 +65,7 @@ class TexturizeExclusions implements RegisterHooksInterface {
 			return true;
 		}
 
-		return $this->queued_notices_contain_address_markup();
+		return $this->queued_notices_contain_verification_email();
 	}
 
 	/**
@@ -77,17 +84,20 @@ class TexturizeExclusions implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Whether a queued notice contains an address element.
+	 * Whether a queued notice is a verification email notice.
 	 *
-	 * Guest verification resends redirect to the product or shop page after wc_add_notice(), so those requests are not a fixed endpoint.
+	 * Guest resends redirect to the product or shop page, so they are not a fixed endpoint. wptexturize() only skips by tag name,
+	 * so on that page view every address element keeps its plain punctuation, not just the notice.
 	 *
 	 * @return bool
 	 */
-	private function queued_notices_contain_address_markup(): bool {
+	private function queued_notices_contain_verification_email(): bool {
+		$marker = '<address class="' . self::VERIFICATION_EMAIL_CLASS . '">';
+
 		foreach ( wc_get_notices() as $group ) {
 			foreach ( (array) $group as $notice ) {
 				$message = $notice['notice'] ?? $notice;
-				if ( is_string( $message ) && false !== strpos( $message, '<address' ) ) {
+				if ( is_string( $message ) && false !== strpos( $message, $marker ) ) {
 					return true;
 				}
 			}

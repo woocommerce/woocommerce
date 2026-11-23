@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Frontend;
 
+use Automattic\WooCommerce\Internal\Orders\TexturizeExclusions;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
@@ -151,7 +152,7 @@ class NotificationManagementService {
 		);
 
 		// Block themes texturize the whole page, but skip address elements.
-		wc_add_notice( wp_is_block_theme() ? '<address>' . $notice . '</address>' : $notice, 'success' );
+		wc_add_notice( wp_is_block_theme() ? '<address class="' . TexturizeExclusions::VERIFICATION_EMAIL_CLASS . '">' . $notice . '</address>' : $notice, 'success' );
 		wp_safe_redirect( $redirect_url );
 		exit;
 	}

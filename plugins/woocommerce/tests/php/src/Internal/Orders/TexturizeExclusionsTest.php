@@ -154,17 +154,33 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A queued notice that contains an address element skips texturizing that element, and other text still changes.
+	 * @testdox A queued verification email notice skips texturizing address elements, and other text still changes.
 	 */
-	public function test_skips_address_texturize_when_a_queued_notice_contains_address_markup(): void {
+	public function test_skips_address_texturize_when_a_verification_email_notice_is_queued(): void {
 		$this->go_to( get_permalink( self::factory()->post->create( array( 'post_type' => 'page' ) ) ) );
-		wc_add_notice( "<address>o'neil--shop@48x17.com</address>", 'success' );
+		wc_add_notice( '<address class="' . TexturizeExclusions::VERIFICATION_EMAIL_CLASS . '">o\'neil--shop@48x17.com</address>', 'success' );
 
 		$this->sut->skip_address_texturize_on_order_pages();
 		$text = $this->texturize_to_text( "<address>o'neil--shop@48x17.com</address><p>3x4 -- done</p>" );
 
 		$this->assertStringContainsString( "o'neil--shop@48x17.com", $text, 'Address content should not be texturized.' );
 		$this->assertStringContainsString( '3×4 — done', $text, 'Text outside the address should still be texturized.' );
+	}
+
+	/**
+	 * @testdox A queued notice with another address element, such as one from a plugin, still texturizes address content.
+	 */
+	public function test_texturizes_address_when_a_queued_notice_has_an_unmarked_address(): void {
+		$this->go_to( get_permalink( self::factory()->post->create( array( 'post_type' => 'page' ) ) ) );
+		wc_add_notice( '<address>1 Main St</address>', 'success' );
+
+		$this->sut->skip_address_texturize_on_order_pages();
+
+		$this->assertStringNotContainsString(
+			"o'neil--shop@48x17.com",
+			$this->texturize_to_text( "<address>o'neil--shop@48x17.com</address>" ),
+			'Address content should be texturized.'
+		);
 	}
 
 	/**
@@ -252,6 +268,7 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_account_verification_notice_survives_texturize_on_block_themes(): void {
 		$notice = $this->resend_as_customer();
+		$this->assertStringContainsString( '<address class="' . TexturizeExclusions::VERIFICATION_EMAIL_CLASS . '">', $notice, 'The account notice should wrap the sentence in a marked address element.' );
 
 		$this->sut->skip_address_texturize_on_order_pages();
 		$html = wc_kses_notice( $notice ) . '<p>3x4 -- done</p>';
@@ -266,7 +283,7 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 		$notice = $this->resend_as_guest();
 
 		$this->sut->skip_address_texturize_on_order_pages();
-		$this->assertStringContainsString( '<address>', $notice, 'The guest notice should wrap the sentence in an address element.' );
+		$this->assertStringContainsString( '<address class="' . TexturizeExclusions::VERIFICATION_EMAIL_CLASS . '">', $notice, 'The guest notice should wrap the sentence in a marked address element.' );
 		$this->assert_literal_email( wc_kses_notice( $notice ) . '<p>3x4 -- done</p>' );
 	}
 
@@ -392,7 +409,7 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 		switch_theme( 'storefront' );
 		$this->assertFalse( wp_is_block_theme(), 'The test requires a classic theme.' );
 		$this->go_to( get_permalink( self::factory()->post->create( array( 'post_type' => 'page' ) ) ) );
-		wc_add_notice( '<address>kept</address>', 'success' );
+		wc_add_notice( '<address class="' . TexturizeExclusions::VERIFICATION_EMAIL_CLASS . '">kept</address>', 'success' );
 
 		$this->sut->skip_address_texturize_on_order_pages();
 
