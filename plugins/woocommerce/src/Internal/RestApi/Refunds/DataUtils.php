@@ -379,7 +379,7 @@ class DataUtils {
 				// Cap and zero-check the GROSS line refund against the line's tax-inclusive
 				// total. When an explicit refund_tax breakdown is supplied, refund_total is
 				// the tax-exclusive (net) subtotal and the tax is added on top (core Woo
-				// semantics — see RefundSchema); without it, refund_total is already
+				// semantics); without it, refund_total is already
 				// tax-inclusive, so the gross equals refund_total. Capping the net alone
 				// would let a client push the overage into refund_tax and over-refund the
 				// line. Preview has no refund_tax field, so its (refund_total-only) cap stays
