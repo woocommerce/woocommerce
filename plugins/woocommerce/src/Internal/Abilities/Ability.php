@@ -130,4 +130,38 @@ class Ability extends \WP_Ability {
 		}
 		return null;
 	}
+
+	/**
+	 * Validate the output, and tell the caller that the ability ran when the output is invalid.
+	 *
+	 * WordPress calls this method only after the execute callback returned output,
+	 * so the callback may already have saved changes. The message says so, because some
+	 * callers, such as MCP clients, receive only the message. Read-only abilities keep the
+	 * original message, because they saved nothing.
+	 *
+	 * WordPress 7.2.1 returns its own error codes with this hint, so this override leaves them
+	 * unchanged. Remove this override when WooCommerce requires WordPress 7.2.1.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $output The output of the execute callback.
+	 * @return true|\WP_Error True when the output is valid, or a WP_Error.
+	 */
+	protected function validate_output( $output ) {
+		$result = parent::validate_output( $output );
+
+		if ( ! is_wp_error( $result ) || 'ability_invalid_output' !== $result->get_error_code() || true === ( $this->get_meta_item( 'annotations' )['readonly'] ?? null ) ) {
+			return $result;
+		}
+
+		$error = clone $result;
+
+		$error->errors['ability_invalid_output'][0] = sprintf(
+			/* translators: %s: error message. */
+			__( '%s The ability ran, so its changes may already be saved. Check the current state before you run it again.', 'woocommerce' ),
+			$error->get_error_message()
+		);
+
+		return $error;
+	}
 }
