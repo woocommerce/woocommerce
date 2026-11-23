@@ -311,7 +311,7 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 
 		// The UPDATE changes no row, so update_fields() reads whether the plan exists.
 		$change_nothing = static function ( string $query ) use ( $plans ): string {
-			return 0 === strpos( $query, "UPDATE {$plans} p " ) ? $query . ' AND 0 = 1' : $query;
+			return 0 === strpos( $query, "UPDATE `{$plans}` SET " ) ? $query . ' AND 0 = 1' : $query;
 		};
 		add_filter( 'query', $change_nothing );
 
@@ -333,7 +333,7 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 */
 	public function provide_failing_plan_update_queries(): array {
 		return array(
-			'update'                  => array( 'UPDATE {plans} p ', 'Failed to update plan' ),
+			'update'                  => array( 'UPDATE `{plans}` SET ', 'Failed to update plan' ),
 			'existence read after it' => array( 'SELECT p.id FROM {plans} p ', 'Failed to read plan' ),
 		);
 	}

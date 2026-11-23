@@ -29,11 +29,55 @@ const renderRow = ( data: CheckRowData ) =>
 	);
 
 describe( 'CheckRow', () => {
+	it( 'keeps the badge with the title’s last word, so it never wraps onto a line of its own', () => {
+		const { container } = renderRow(
+			row( {
+				title: 'Publish your refund and returns policy page',
+				badge: { intent: 'low', text: 'Required' },
+			} )
+		);
+
+		const end = container.querySelector(
+			'.wc-sales-readiness-row__title-end'
+		);
+		expect( end ).toHaveTextContent( 'pageRequired' );
+		expect(
+			container.querySelector( '.wc-sales-readiness-row__title' )
+		).toHaveTextContent(
+			'Publish your refund and returns policy pageRequired'
+		);
+	} );
+
+	it.each( [
+		'Payments',
+		'返品ポリシーのページを公開する',
+		'AI に商品情報を読み取れるようにする',
+	] )(
+		'keeps the last character with the badge when the last word has no spaces, so a long one can still wrap: %s',
+		( title ) => {
+			const { container } = renderRow(
+				row( {
+					title,
+					badge: { intent: 'low', text: 'Required' },
+				} )
+			);
+
+			expect(
+				container.querySelector( '.wc-sales-readiness-row__title-end' )
+			).toHaveTextContent(
+				new RegExp( '^' + Array.from( title ).pop() + 'Required$' )
+			);
+			expect(
+				container.querySelector( '.wc-sales-readiness-row__title' )
+			).toHaveTextContent( title + 'Required' );
+		}
+	);
+
 	it( 'links the name of a tool in the found line, and keeps the text around it', () => {
 		const { container } = renderRow(
 			row( {
 				id: 'ucp_profile',
-				text: 'Test it in UCP Playground, or ask your host.',
+				text: 'Test it in UCP Playground, or ask your hosting provider.',
 				text_link: {
 					href: 'https://ucpplayground.com/',
 					text: 'UCP Playground',
@@ -45,7 +89,7 @@ describe( 'CheckRow', () => {
 			screen.getByRole( 'link', { name: /UCP Playground/ } )
 		).toHaveAttribute( 'href', 'https://ucpplayground.com/' );
 		expect( container ).toHaveTextContent(
-			'Test it in UCP Playground, or ask your host.'
+			'Test it in UCP Playground, or ask your hosting provider.'
 		);
 	} );
 

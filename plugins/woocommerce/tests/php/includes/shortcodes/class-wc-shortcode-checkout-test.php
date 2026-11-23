@@ -188,6 +188,39 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The order-pay endpoint should reject refund IDs without a fatal error.
+	 */
+	public function test_order_pay_rejects_refund_id(): void {
+		global $wp;
+
+		$order  = WC_Helper_Order::create_order( 0 );
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+
+		wp_set_current_user( 0 );
+		$wp->query_vars['order-pay'] = $refund->get_id();
+
+		ob_start();
+		try {
+			WC_Shortcode_Checkout::output( array() );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$this->assertStringContainsString(
+			'Sorry, this order is invalid and cannot be paid for.',
+			$output,
+			'Refund IDs should show the invalid-order notice.'
+		);
+	}
+
+	/**
 	 * @testdox Pay page notices should render inside the shared notices wrapper.
 	 */
 	public function test_order_pay_prints_notices_inside_notices_wrapper(): void {

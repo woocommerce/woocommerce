@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
@@ -1060,11 +1061,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$list = $this->run_ability( $ability, $create_input() )[ $list_key ];
 
-		$ids = array_column( $list, 'id' );
+		// A customer's id is its Analytics customer ID; extensions get the WC_Customer of its user.
+		$id_key = 'customer' === $resource_name ? 'user_id' : 'id';
+		$ids    = array_column( $list, $id_key );
 		$this->assertCount( 2, $ids );
 		$this->assertSame( array( array( 'test-ext', $ids ), array( 'other_ext', $ids ) ), $calls );
 		foreach ( $list as $listed ) {
-			$this->assertSame( 'primed-' . $listed['id'], $listed['extensions']['test-ext']['primed'] );
+			$this->assertSame( 'primed-' . $listed[ $id_key ], $listed['extensions']['test-ext']['primed'] );
 		}
 	}
 
@@ -1090,7 +1093,12 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				'woocommerce/customers-query',
 				'customers',
 				static function (): array {
-					return array( 'include' => self::factory()->user->create_many( 2, array( 'role' => 'customer' ) ) );
+					$customer_ids = array();
+					foreach ( self::factory()->user->create_many( 2, array( 'role' => 'customer' ) ) as $user_id ) {
+						CustomersDataStore::update_registered_customer( $user_id );
+						$customer_ids[] = (int) CustomersDataStore::get_customer_id_by_user_id( $user_id );
+					}
+					return array( 'include' => $customer_ids );
 				},
 			),
 			'product_term'   => array(
@@ -4250,6 +4258,44 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
 
 		$this->assertSame( 0, $fired );
+	}
+
+	/**
+	 * @testdox Should refuse to trash a product or an order that is already in the trash, and run no sync.
+	 */
+	public function test_a_repeat_trash_is_refused_and_runs_no_sync(): void {
+		$synced = array();
+		foreach ( array( 'product', 'order' ) as $resource_name ) {
+			$this->register_sync(
+				$resource_name,
+				'test-ext',
+				static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$synced, $resource_name ) {
+					unset( $saved, $ability );
+					$synced[] = array( $resource_name, array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['trashed'] ) );
+					return null;
+				}
+			);
+		}
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = OrderHelper::create_order();
+
+		$this->run_ability( 'woocommerce/product-delete', array( 'id' => $product->get_id() ) );
+		$this->run_ability( 'woocommerce/order-delete', array( 'id' => $order->get_id() ) );
+		$product_again = $this->run_ability_response( 'woocommerce/product-delete', array( 'id' => $product->get_id() ) );
+		$order_again   = $this->run_ability_response( 'woocommerce/order-delete', array( 'id' => $order->get_id() ) );
+
+		$this->assertSame( 409, $product_again->get_status() );
+		$this->assertSame( 'woocommerce_ability_product_already_trashed', $product_again->get_data()['code'] );
+		$this->assertSame( 409, $order_again->get_status() );
+		$this->assertSame( 'woocommerce_ability_order_already_trashed', $order_again->get_data()['code'] );
+		$this->assertSame(
+			array(
+				array( 'product', array( $product->get_id() ) ),
+				array( 'order', array( $order->get_id() ) ),
+			),
+			$synced,
+			'Only the first trash of each object should run the syncs.'
+		);
 	}
 
 	/**

@@ -22,6 +22,7 @@ import { Button, Link, Notice, Stack, Text } from '@wordpress/ui';
 /**
  * Internal dependencies
  */
+import { safeHref } from './safe-href';
 import './sales-readiness.scss';
 import './ai-shopping.scss';
 import type { ShoppingView } from './types';
@@ -58,7 +59,9 @@ export const SettingsBreadcrumbs = ( {
 			<li>
 				<Text
 					variant="body-lg"
-					render={ <Link tone="neutral" href={ parent.href } /> }
+					render={
+						<Link tone="neutral" href={ safeHref( parent.href ) } />
+					}
 				>
 					{ parent.text }
 				</Text>
@@ -258,7 +261,10 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 				description: (
 					<>
 						{ ucp.description }{ ' ' }
-						<Link href={ ucp.learn_more.href } openInNewTab>
+						<Link
+							href={ safeHref( ucp.learn_more.href ) }
+							openInNewTab
+						>
 							{ ucp.learn_more.text }
 						</Link>
 					</>

@@ -70,6 +70,10 @@ class CatalogProduct extends AbstractCatalogRoute {
 					'description' => __( 'Option selections used to narrow the returned variants.', 'woocommerce' ),
 					'type'        => 'array',
 				),
+				'filters'  => array(
+					'description' => __( 'Filter criteria to narrow the returned variants.', 'woocommerce' ),
+					'type'        => 'object',
+				),
 			)
 		);
 	}
@@ -107,6 +111,12 @@ class CatalogProduct extends AbstractCatalogRoute {
 			);
 		}
 
+		$filters = (array) ( Utils::json_param( $request, 'filters' ) ?? array() );
+		$invalid = $this->validate_price_filter( $filters );
+		if ( null !== $invalid ) {
+			return $invalid;
+		}
+
 		$resolved = $this->resolve_product( $id );
 
 		if ( null === $resolved ) {
@@ -130,8 +140,28 @@ class CatalogProduct extends AbstractCatalogRoute {
 			);
 		}
 
-		$this->mapper()->begin_response();
+		$this->mapper()->begin_response( $this->price_bounds( $filters ) );
 		$product = $this->mapper()->map_detail_product( $resolved['product'], $this->normalize_selected( $selected ), (int) $resolved['variation_id'] );
+
+		// `variants` cannot be empty, so a product the filters leave nothing of is an error.
+		if ( empty( $product['variants'] ) ) {
+			return new \WP_REST_Response(
+				array(
+					'ucp'      => $this->ucp_metadata( 'error' ),
+					'messages' => array(
+						array(
+							'type'         => 'error',
+							'code'         => 'not_found',
+							'content'      => __( 'No variant of this product matches the filters.', 'woocommerce' ),
+							'severity'     => 'recoverable',
+							'path'         => '$.filters',
+							'content_type' => 'plain',
+						),
+					),
+				),
+				200
+			);
+		}
 
 		$response = array(
 			'ucp'     => $this->ucp_metadata( 'success' ),
