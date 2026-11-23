@@ -86,7 +86,7 @@ class OrderDeleteTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should move an order to the trash by default, and report it as trashed, also when it is already there.
+	 * @testdox Should move an order to the trash by default, refuse to trash it again, and still delete it with force.
 	 *
 	 * @dataProvider storage_modes
 	 * @param bool $hpos Whether to use the custom orders table.
@@ -95,15 +95,25 @@ class OrderDeleteTest extends WC_Unit_Test_Case {
 		$this->use_storage( $hpos );
 		$order = OrderHelper::create_order();
 
-		$first  = $this->execute( array( 'id' => $order->get_id() ) );
-		$second = $this->execute( array( 'id' => $order->get_id() ) );
+		$first   = $this->execute( array( 'id' => $order->get_id() ) );
+		$second  = wp_get_ability( 'woocommerce/order-delete' )->execute( array( 'id' => $order->get_id() ) );
+		$trashed = wc_get_order( $order->get_id() )->get_status();
+		$deleted = $this->execute(
+			array(
+				'id'    => $order->get_id(),
+				'force' => true,
+			)
+		);
 
 		$this->assertArrayHasKey( 'id', $first );
 		$this->assertSame( $order->get_id(), $first['id'] );
 		$this->assertArrayHasKey( 'status', $first );
 		$this->assertSame( 'trash', $first['status'] );
-		$this->assertSame( 'trash', $second['status'], 'Trashing a trashed order should succeed again.' );
-		$this->assertSame( OrderStatus::TRASH, wc_get_order( $order->get_id() )->get_status() );
+		$this->assertWPError( $second );
+		$this->assertSame( 'woocommerce_ability_order_already_trashed', $second->get_error_code() );
+		$this->assertSame( 409, $second->get_error_data()['status'] );
+		$this->assertSame( OrderStatus::TRASH, $trashed );
+		$this->assertSame( 'deleted', $deleted['status'] );
 	}
 
 	/**

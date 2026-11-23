@@ -102,6 +102,75 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Order statuses when the pay form is posted, and whether pay_action() should take each one on.
+	 *
+	 * @return array<string, array{0: string, 1: bool}>
+	 */
+	public function provider_pay_action_order_statuses(): array {
+		return array(
+			'pending order is processed'      => array( OrderStatus::PENDING, true ),
+			'checkout-draft order is refused' => array( OrderStatus::CHECKOUT_DRAFT, false ),
+		);
+	}
+
+	/**
+	 * @testdox pay_action() takes on a pending order but not a checkout-draft, which has not passed checkout validation.
+	 *
+	 * @dataProvider provider_pay_action_order_statuses
+	 * @covers WC_Form_Handler::pay_action()
+	 *
+	 * @param string $status           Order status when the form is posted.
+	 * @param bool   $expect_processed Whether pay_action() should start processing the order.
+	 */
+	public function test_pay_action_processes_payable_orders_but_not_checkout_drafts( string $status, bool $expect_processed ): void {
+		global $wp;
+
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( $status );
+		$order->save();
+
+		$this->assertTrue( $order->needs_payment(), 'Baseline: needs_payment() is true for both, so only the draft check can tell them apart.' );
+
+		// No payment method is posted, so a processed order stops at "Invalid payment method" instead of redirecting.
+		$_GET['key']                       = $order->get_order_key();
+		$_POST['woocommerce_pay']          = '1';
+		$_REQUEST['woocommerce-pay-nonce'] = wp_create_nonce( 'woocommerce-pay' );
+		$wp->query_vars['order-pay']       = $order->get_id();
+
+		$processed = false;
+		add_action(
+			'woocommerce_before_pay_action',
+			function () use ( &$processed ) {
+				$processed = true;
+			}
+		);
+
+		$customer_billing = array(
+			'billing_country'  => WC()->customer->get_billing_country(),
+			'billing_state'    => WC()->customer->get_billing_state(),
+			'billing_postcode' => WC()->customer->get_billing_postcode(),
+			'billing_city'     => WC()->customer->get_billing_city(),
+		);
+		$ob_level         = ob_get_level();
+
+		try {
+			WC_Form_Handler::pay_action();
+		} finally {
+			// pay_action() copies the order's billing location (country, state, postcode, city) onto the shared customer and leaves its output buffer open.
+			WC()->customer->set_props( $customer_billing );
+			WC()->customer->save();
+			while ( ob_get_level() > $ob_level ) {
+				ob_end_clean();
+			}
+			unset( $wp->query_vars['order-pay'], $_GET['key'], $_POST['woocommerce_pay'], $_REQUEST['woocommerce-pay-nonce'] );
+		}
+
+		$this->assertSame( $expect_processed, $processed, 'pay_action() must take on a pending order and leave a draft alone.' );
+	}
+
+	/**
 	 * @testdox cancel_order() redirects to a clean endpoint when no custom redirect is provided.
 	 *
 	 * @covers WC_Form_Handler::cancel_order()
@@ -1630,6 +1699,47 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox add_to_cart_action() validates the same product ID it adds for each item of a grouped product form.
+	 *
+	 * @covers WC_Form_Handler::add_to_cart_action()
+	 * @testWith ["%d"]
+	 *           ["-%d"]
+	 *           ["%dabc"]
+	 *
+	 * @param string $key_format Format of the quantity[] key naming the product.
+	 */
+	public function test_add_to_cart_action_rejects_protected_product_in_grouped_form( string $key_format ): void {
+		$grouped   = WC_Helper_Product::create_grouped_product();
+		$protected = WC_Helper_Product::create_simple_product();
+		wp_update_post(
+			array(
+				'ID'            => $protected->get_id(),
+				'post_password' => 'secret',
+			)
+		);
+		WC()->cart->empty_cart();
+
+		$validated_ids = array();
+		$validation    = function ( $passed, $product_id ) use ( &$validated_ids ) {
+			$validated_ids[] = $product_id;
+			return $passed;
+		};
+		add_filter( 'woocommerce_add_to_cart_validation', $validation, 10, 2 );
+
+		$_REQUEST = array(
+			'add-to-cart' => (string) $grouped->get_id(),
+			'quantity'    => array( sprintf( $key_format, $protected->get_id() ) => '1' ),
+		);
+		WC_Form_Handler::add_to_cart_action();
+
+		remove_filter( 'woocommerce_add_to_cart_validation', $validation, 10 );
+
+		$this->assertSame( array( $protected->get_id() ), $validated_ids, 'Validation should see the ID WC_Cart::add_to_cart() would add.' );
+		$this->assertCount( 0, WC()->cart->get_cart(), 'The protected product should not be added to the cart.' );
+		$this->assertSame( 1, wc_notice_count( 'error' ), 'The form should display the protected-product notice.' );
+	}
+
+	/**
 	 * Prepares request globals for the account details handler.
 	 *
 	 * @param array<string,string> $fields Account detail fields.
@@ -1879,7 +1989,9 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	public function test_pay_action_names_the_payment_problem( array $available, string $posted, string $expected ): void {
 		global $wp;
 
-		$order = WC_Helper_Order::create_order();
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+		$order = WC_Helper_Order::create_order( $customer_id );
 		add_filter(
 			'woocommerce_available_payment_gateways',
 			function () use ( $available ) {

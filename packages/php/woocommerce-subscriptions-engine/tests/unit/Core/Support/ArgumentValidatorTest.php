@@ -46,6 +46,9 @@ class ArgumentValidatorTest extends TestCase {
 			'null currency'         => array( 'validate_currency', array( null ), null ),
 			'string'                => array( 'validate_string', array( 'status', 'active' ), 'active' ),
 			'non-empty string'      => array( 'validate_non_empty_string', array( 'extension_slug', 'acme' ), 'acme' ),
+			'extension slug'        => array( 'validate_extension_slug', array( 'extension_slug', 'woocommerce-subscriptions-lite' ), 'woocommerce-subscriptions-lite' ),
+			'extension slug chars'  => array( 'validate_extension_slug', array( 'extension_slug', 'acme_2-x' ), 'acme_2-x' ),
+			'extension slug 64'     => array( 'validate_extension_slug', array( 'extension_slug', str_repeat( 'a', 64 ) ), str_repeat( 'a', 64 ) ),
 			'nullable string'       => array( 'validate_nullable_string', array( 'title', null ), null ),
 			'nullable id as digits' => array( 'validate_nullable_id', array( 'order_id', '42' ), 42 ),
 			'nullable id null'      => array( 'validate_nullable_id', array( 'order_id', null ), null ),
@@ -131,6 +134,7 @@ class ArgumentValidatorTest extends TestCase {
 		$type_array   = array( 'type' => 'array' );
 		$type_object  = array( 'type' => 'object' );
 		$min_one      = array( 'min' => 1 );
+		$slug_pattern = array( 'pattern' => '^[a-z0-9_-]{1,64}$' );
 
 		return array(
 			'currency'              => array( 'validate_currency', array( 'eur' ), ValidationErrorCode::INVALID_VALUE, 'currency', array() ),
@@ -140,6 +144,15 @@ class ArgumentValidatorTest extends TestCase {
 			'non-empty not string'  => array( 'validate_non_empty_string', array( 'extension_slug', 5 ), ValidationErrorCode::INVALID_TYPE, 'extension_slug', $type_string ),
 			'non-empty null'        => array( 'validate_non_empty_string', array( 'extension_slug', null ), ValidationErrorCode::REQUIRED, 'extension_slug', array() ),
 			'non-empty empty'       => array( 'validate_non_empty_string', array( 'extension_slug', '' ), ValidationErrorCode::REQUIRED, 'extension_slug', array() ),
+			'slug trailing space'   => array( 'validate_extension_slug', array( 'extension_slug', 'lite ' ), ValidationErrorCode::INVALID_PATTERN, 'extension_slug', $slug_pattern ),
+			'slug leading space'    => array( 'validate_extension_slug', array( 'extension_slug', ' lite' ), ValidationErrorCode::INVALID_PATTERN, 'extension_slug', $slug_pattern ),
+			'slug inner space'      => array( 'validate_extension_slug', array( 'extension_slug', 'li te' ), ValidationErrorCode::INVALID_PATTERN, 'extension_slug', $slug_pattern ),
+			'slug uppercase'        => array( 'validate_extension_slug', array( 'extension_slug', 'LITE' ), ValidationErrorCode::INVALID_PATTERN, 'extension_slug', $slug_pattern ),
+			'slug accent'           => array( 'validate_extension_slug', array( 'extension_slug', 'lité' ), ValidationErrorCode::INVALID_PATTERN, 'extension_slug', $slug_pattern ),
+			'slug newline'          => array( 'validate_extension_slug', array( 'extension_slug', "lite\n" ), ValidationErrorCode::INVALID_PATTERN, 'extension_slug', $slug_pattern ),
+			'slug 65 characters'    => array( 'validate_extension_slug', array( 'extension_slug', str_repeat( 'a', 65 ) ), ValidationErrorCode::INVALID_PATTERN, 'extension_slug', $slug_pattern ),
+			'slug empty'            => array( 'validate_extension_slug', array( 'extension_slug', '' ), ValidationErrorCode::REQUIRED, 'extension_slug', array() ),
+			'slug not string'       => array( 'validate_extension_slug', array( 'extension_slug', 5 ), ValidationErrorCode::INVALID_TYPE, 'extension_slug', $type_string ),
 			'positive int type'     => array( 'validate_positive_int', array( 'quantity', null ), ValidationErrorCode::INVALID_TYPE, 'quantity', $type_integer ),
 			'positive int zero'     => array( 'validate_positive_int', array( 'quantity', 0 ), ValidationErrorCode::OUT_OF_BOUNDS, 'quantity', $min_one ),
 			'nullable id type'      => array( 'validate_nullable_id', array( 'order_id', "5\n" ), ValidationErrorCode::INVALID_TYPE, 'order_id', $type_integer ),

@@ -156,11 +156,11 @@ class ReportAbility implements AbilityDefinition {
 									),
 									'seen_at'  => array(
 										'type'        => 'string',
-										'description' => __( 'On a likely conflict: the address where it was seen. On a broken llms.txt link: that link.', 'woocommerce' ),
+										'description' => __( 'On a likely conflict: the address where it was seen. On a broken llms.txt link: that link. On a UCP endpoint check that didn\'t pass: the catalog search address that answered.', 'woocommerce' ),
 									),
 									'source'   => array(
 										'type'        => 'string',
-										'description' => __( 'On a failed UCP version check: the version the store serves. On a failed UCP endpoint check: the status and content type catalog search answered with, such as 403 text/html. On the llms.txt check: woocommerce, file or other when served; disabled or not_reached when not. Otherwise empty.', 'woocommerce' ),
+										'description' => __( 'On a failed UCP version check: the version the store serves. On a UCP endpoint check that didn\'t pass: the status and content type catalog search answered with, such as 403 text/html. On the llms.txt check: woocommerce, file or other when served; disabled or not_reached when not. Otherwise empty.', 'woocommerce' ),
 									),
 									'product'  => array(
 										'type'        => 'integer',

@@ -202,11 +202,13 @@ class WC_Data_Store {
 	 * Delete an object from the data store.
 	 *
 	 * @since 3.0.0
+	 * @since 11.3.1 Returns what the data store returns.
 	 * @param WC_Data $data WooCommerce data instance.
 	 * @param array   $args Array of args to pass to the delete method.
+	 * @return mixed What the data store returns, if anything.
 	 */
 	public function delete( &$data, $args = array() ) {
-		$this->instance->delete( $data, $args );
+		return $this->instance->delete( $data, $args );
 	}
 
 	/**

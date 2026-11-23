@@ -2,7 +2,7 @@
  * External dependencies
  */
 /* eslint-disable @wordpress/use-recommended-components -- The design asks for these @wordpress/ui components; this chunk bundles the package. */
-import { Icon, Link, Popover, Text } from '@wordpress/ui';
+import { Icon, Link, Popover, Text, VisuallyHidden } from '@wordpress/ui';
 /* eslint-enable @wordpress/use-recommended-components */
 import { info } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { safeHref } from '../safe-href';
+import { trackReadiness } from '../tracks';
 import type { ShoppingView } from '../types';
 
 /**
@@ -48,12 +49,15 @@ export const ProductVisibility = ( {
 										<Icon icon={ info } size={ 16 } />
 									</Popover.Trigger>
 									<Popover.Popup className="wc-ai-shopping-stats__popup">
-										<Popover.Title>
+										{ /* Screen readers name the popup by its title; the design shows only the text. */ }
+										<VisuallyHidden
+											render={ <Popover.Title /> }
+										>
 											{ __(
 												'More information',
 												'woocommerce'
 											) }
-										</Popover.Title>
+										</VisuallyHidden>
 										<Popover.Description>
 											{ count.tip }
 										</Popover.Description>
@@ -68,7 +72,16 @@ export const ProductVisibility = ( {
 							{ count.count }
 						</Text>
 						<Text variant="body-sm">
-							<Link href={ safeHref( count.link.href ) }>
+							<Link
+								href={ safeHref( count.link.href ) }
+								onClick={ () =>
+									trackReadiness( 'link_clicked', {
+										surface: 'shopping',
+										area: 'product_visibility',
+										count_id: count.id,
+									} )
+								}
+							>
 								{ count.link.text }
 							</Link>
 						</Text>

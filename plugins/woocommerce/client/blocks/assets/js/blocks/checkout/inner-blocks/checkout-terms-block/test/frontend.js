@@ -124,4 +124,38 @@ describe( 'FrontendBlock', () => {
 			);
 		} );
 	} );
+
+	it.each( [ true, false ] )(
+		'Strips scripts but keeps formatting in the terms text (checkbox: %s)',
+		( checkbox ) => {
+			const { container } = render(
+				<SlotFillProvider>
+					<FrontendBlock
+						checkbox={ checkbox }
+						text={
+							'I agree to the <a href="https://example.com/terms" target="_blank">terms</a> and <strong>policy</strong><img src="x" onerror="alert(1)"><script>alert(2)</script>'
+						}
+						showSeparator={ false }
+					/>
+				</SlotFillProvider>
+			);
+
+			const label = container.querySelector(
+				'.wc-block-components-checkbox__label'
+			);
+
+			expect( label.querySelector( 'img' ) ).toBeNull();
+			expect( label.querySelector( 'script' ) ).toBeNull();
+			expect( label.querySelector( '[onerror]' ) ).toBeNull();
+			expect( label.querySelector( 'strong' ) ).toHaveTextContent(
+				'policy'
+			);
+			const link = label.querySelector( 'a' );
+			expect( link ).toHaveAttribute(
+				'href',
+				'https://example.com/terms'
+			);
+			expect( link ).toHaveAttribute( 'target', '_blank' );
+		}
+	);
 } );

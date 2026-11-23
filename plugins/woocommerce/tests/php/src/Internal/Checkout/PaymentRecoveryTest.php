@@ -157,6 +157,22 @@ class PaymentRecoveryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should still find the order sent to the gateway after a price change, so a resubmit doesn't place it twice.
+	 */
+	public function test_session_order_moved_past_payment_ignores_a_price_change(): void {
+		$order = $this->order_for_the_current_cart( OrderStatus::ON_HOLD );
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+
+		$cart_item = current( WC()->cart->get_cart() );
+		$cart_item['data']->set_price( 25 );
+		WC()->cart->calculate_totals();
+
+		$this->assertFalse( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The new price changes the cart hash.' );
+		$found = PaymentRecovery::get_session_order_moved_past_payment();
+		$this->assertSame( $order->get_id(), $found ? $found->get_id() : null, 'The same items are a repeat of the order, whatever they cost now.' );
+	}
+
+	/**
 	 * @testdox Should fall back to the order the caller names when nothing was remembered.
 	 */
 	public function test_session_order_moved_past_payment_falls_back_to_the_given_order(): void {

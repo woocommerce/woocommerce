@@ -124,11 +124,11 @@ class WC_Auth {
 
 		return add_query_arg(
 			array(
-				'app_name'     => wc_clean( $data['app_name'] ),
-				'user_id'      => wc_clean( $data['user_id'] ),
-				'return_url'   => rawurlencode( $this->get_formatted_url( $data['return_url'] ) ),
-				'callback_url' => rawurlencode( $this->get_formatted_url( $data['callback_url'] ) ),
-				'scope'        => wc_clean( $data['scope'] ),
+				'app_name'     => rawurlencode( sanitize_text_field( $data['app_name'] ) ),
+				'user_id'      => rawurlencode( sanitize_text_field( $data['user_id'] ) ),
+				'return_url'   => rawurlencode( $data['return_url'] ),
+				'callback_url' => rawurlencode( $data['callback_url'] ),
+				'scope'        => rawurlencode( sanitize_text_field( $data['scope'] ) ),
 			),
 			$url
 		);
@@ -368,7 +368,7 @@ class WC_Auth {
 						'return_url'   => add_query_arg(
 							array(
 								'success' => 0,
-								'user_id' => wc_clean( $data['user_id'] ),
+								'user_id' => rawurlencode( sanitize_text_field( $data['user_id'] ) ),
 							),
 							$this->get_formatted_url( $data['return_url'] )
 						),
@@ -397,7 +397,7 @@ class WC_Auth {
 						'return_url'   => add_query_arg(
 							array(
 								'success' => 0,
-								'user_id' => wc_clean( $data['user_id'] ),
+								'user_id' => rawurlencode( sanitize_text_field( $data['user_id'] ) ),
 							),
 							$this->get_formatted_url( $data['return_url'] )
 						),
@@ -425,7 +425,7 @@ class WC_Auth {
 							add_query_arg(
 								array(
 									'success' => 1,
-									'user_id' => wc_clean( $data['user_id'] ),
+									'user_id' => rawurlencode( sanitize_text_field( $data['user_id'] ) ),
 								),
 								$this->get_formatted_url( $data['return_url'] )
 							)

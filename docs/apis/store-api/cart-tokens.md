@@ -24,3 +24,9 @@ curl --header "Cart-Token: 12345" --request GET https://example-store.com/wp-jso
 ```
 
 The same method will allow you to checkout using a `Cart-Token` on the `/checkout` route.
+
+## Cross-origin requests
+
+Browser requests from another origin can use a cart token without cookies. Set the request's credentials mode to `omit` when the origin is not allowed by the store.
+
+To use browser credentials, such as login cookies, the storefront's origin must be allowed by WordPress using the `allowed_http_origins` or `allowed_http_origin` filter. Only allow origins that the store trusts with customer data.
