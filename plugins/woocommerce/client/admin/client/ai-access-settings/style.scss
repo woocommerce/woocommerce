@@ -1,0 +1,41 @@
+.woocommerce-ai-access-settings {
+	max-width: 650px;
+	margin-top: 40px;
+
+	p {
+		color: $gray-700;
+	}
+
+	.woocommerce-ai-access-settings__notice {
+		margin: 0 0 16px;
+	}
+
+	.woocommerce-ai-access-settings__intro {
+		margin: 0 0 24px;
+	}
+
+	.woocommerce-ai-access-settings__field {
+		margin-bottom: 24px;
+
+		.components-toggle-control .components-h-stack {
+			align-items: baseline;
+		}
+
+		// Matches the core disabled toggle, whose styles aren't loaded on classic settings pages.
+		.components-form-toggle.is-disabled {
+			opacity: 0.3;
+		}
+
+		.components-base-control__field p {
+			margin: 6px 0 0;
+		}
+
+		.components-toggle-control + .woocommerce-ai-access-settings__notice {
+			margin: 12px 0 0;
+		}
+	}
+
+	.woocommerce-ai-access-settings__footnote {
+		margin: 0;
+	}
+}

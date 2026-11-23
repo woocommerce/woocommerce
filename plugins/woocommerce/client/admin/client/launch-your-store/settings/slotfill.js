@@ -30,6 +30,7 @@ import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
 import './style.scss';
 import { SITE_VISIBILITY_DOC_LINK } from '../constants';
 import { ConfirmationModal } from './components/confirmation-modal';
+import { AiAccessSettings } from '../../ai-access-settings';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 const PLUGIN_ID = 'woocommerce-admin-site-visibility-settings-slotfill';
@@ -50,6 +51,7 @@ const SiteVisibility = () => {
 	const [ siteVisibilityBadge, setSiteVisibilityBadge ] = useState(
 		setting?.woocommerce_feature_site_visibility_badge_enabled || 'yes'
 	);
+	const [ aiAccessChanged, setAiAccessChanged ] = useState( false );
 	const formRef = useRef( null );
 	const saveButtonRef = useRef( null );
 
@@ -97,9 +99,11 @@ const SiteVisibility = () => {
 				initValues.storePagesOnly === currentValues.storePagesOnly &&
 				initValues.privateLink === currentValues.privateLink &&
 				initValues.siteVisibilityBadge ===
-					currentValues.siteVisibilityBadge;
+					currentValues.siteVisibilityBadge &&
+				! aiAccessChanged;
 		}
 	}, [
+		aiAccessChanged,
 		comingSoon,
 		storePagesOnly,
 		privateLink,
@@ -355,6 +359,7 @@ const SiteVisibility = () => {
 					/>
 				</div>
 			</div>
+			<AiAccessSettings onDirtyChange={ setAiAccessChanged } />
 			{ formRef.current && saveButtonRef.current ? (
 				<ConfirmationModal
 					saveButtonRef={ saveButtonRef }
