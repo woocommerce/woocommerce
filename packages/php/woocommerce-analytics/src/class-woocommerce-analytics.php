@@ -112,7 +112,7 @@ class Woocommerce_Analytics {
 	 * @return bool
 	 */
 	public static function should_track_store() {
-		// Register before early returns so the MU-plugin does not keep stale state.
+		// Register before early returns so the speed module does not keep stale state.
 		add_action( 'init', array( __CLASS__, 'sync_proxy_tracking_state' ), 20 );
 
 		// Ensure this is available, even with mu-plugins.
