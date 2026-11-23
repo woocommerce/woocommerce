@@ -14,10 +14,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Email Settings controller.
  *
- * The real controller was removed when the experimental `rest-api-v4` namespace was removed. This
- * empty stub stays so a pre-swap in-memory controller list, still naming this class while the files
- * are swapped during an update, can instantiate it instead of fataling on the deleted file. It
- * registers nothing.
+ * The real controller was removed with the experimental `rest-api-v4` namespace. This stub lets a
+ * pre-swap controller list still instantiate it instead of fataling on the deleted file.
  *
  * @deprecated 11.4.0
  */
