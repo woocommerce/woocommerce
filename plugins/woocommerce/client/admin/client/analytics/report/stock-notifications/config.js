@@ -42,6 +42,10 @@ export const charts = applyFilters( STOCK_NOTIFICATIONS_REPORT_CHARTS_FILTER, [
 		order: 'desc',
 		orderby: 'customers',
 		type: 'number',
+		labelTooltipText: __(
+			'Unique customers who signed up in the selected period.',
+			'woocommerce'
+		),
 	},
 ] );
 
