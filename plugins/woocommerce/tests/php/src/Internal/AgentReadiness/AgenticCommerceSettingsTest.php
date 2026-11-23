@@ -645,11 +645,19 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A check that couldn't run says why on its row; a card none of whose checks ran says why once, for coming soon mode or a host that blocks the store's own pages.
+	 * @testdox A check that couldn't run says why on its row; a card none of whose checks ran says why once, for coming soon mode, a check from before launch, or a host that blocks the store's own pages.
 	 */
 	public function test_output_couldnt_check_message_follows_coming_soon(): void {
 		StoreConditionsTest::make_store_ready( $this );
-		$sitemap = array(
+		$launched = static fn( bool $ok ): array => array(
+			'id'      => 'launched',
+			'group'   => 'access',
+			'ok'      => $ok,
+			'level'   => 'required',
+			'name'    => 'Store is launched',
+			'fix_url' => '',
+		);
+		$sitemap  = array(
 			'id'      => 'sitemap_lists_products',
 			'group'   => 'find',
 			'ok'      => null,
@@ -657,7 +665,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'name'    => 'Sitemap lists your products',
 			'fix_url' => '',
 		);
-		$robots  = array(
+		$robots   = array(
 			'id'      => 'robots_txt',
 			'group'   => 'find',
 			'ok'      => true,
@@ -665,10 +673,10 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'name'    => 'Robots file allows AI assistants',
 			'fix_url' => '',
 		);
-		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $sitemap, $robots ) ), false );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( true ), $sitemap, $robots ) ), false );
 		$this->assertSame( 'This check couldn’t run. It runs again each day, or you can run the check again now.', $this->row( 'Add a sitemap that lists your products' )['text'], 'Titled by what the check looks for, not as if it passed' );
 
-		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $sitemap, array( 'ok' => null ) + $robots ) ), false );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( true ), $sitemap, array( 'ok' => null ) + $robots ) ), false );
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
 		$this->assertSame( 'Couldn’t check', $card['badge']['text'], 'The store is live, so the check tried and couldn\'t' );
 		$this->assertSame( array( 'Your pages couldn’t be checked' ), array_column( $card['rows'], 'title' ), 'One row for the card, not one per check' );
@@ -680,6 +688,15 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Your store is in coming soon mode', $card['rows'][0]['title'] );
 		$this->assertSame( 'These checks run once your store is live.', $card['rows'][0]['text'] );
 		$this->assertSame( 'Not checked yet', $card['badge']['text'], 'In coming soon mode the checks wait for the store to go live' );
+		$this->assertTrue( $card['rows'][0]['waiting'], 'Screen readers hear Not checked yet' );
+
+		// Checked while coming soon, then launched: wait for the next check, don't blame hosting.
+		update_option( 'woocommerce_coming_soon', 'no' );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( false ), $sitemap, array( 'ok' => null ) + $robots ) ), false );
+		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
+		$this->assertSame( 'Your store wasn’t live at the last check', $card['rows'][0]['title'] );
+		$this->assertSame( 'These checks run at the next daily check, or you can run the check again now.', $card['rows'][0]['text'] );
+		$this->assertSame( 'Not checked yet', $card['badge']['text'], 'The checks wait for the next run after launch' );
 		$this->assertTrue( $card['rows'][0]['waiting'], 'Screen readers hear Not checked yet' );
 	}
 

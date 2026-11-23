@@ -338,7 +338,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
 			// Setup steps live in the Setup checklist and, while one blocks sales, in Fix first; the cards hold what the scan read.
 			'sections'     => null === $report ? array() : $this->sections( array_values( array_filter( $visible, static fn( array $check ): bool => ! self::is_setup_step( $check ) ) ), $launched, $report ),
-			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array(), $launched ),
+			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array(), $launched, self::checked_while_live( $report ) ),
 			'overview'     => array(
 				'shopping' => $this->shopping_card( $checks ),
 				// After the description, when the last check stopped at the product limit.
@@ -426,6 +426,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * A product's saved name as text, '' when there is none or it no longer exists. Read from the post,
 	 * which callers can prime, rather than loading the product. Shown as text, so nothing is stripped:
 	 * a name such as "Baker's <Dozen>" stays whole.
+	 *
+	 * @since 11.4.0
 	 *
 	 * @param int $product_id Product ID from the report.
 	 */
@@ -726,8 +728,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		if ( null === $launched || false !== $launched['ok'] || null === $report ) {
 			return null;
 		}
-		$was_live = array_column( is_array( $report['store_checks'] ?? null ) ? $report['store_checks'] : array(), 'ok', 'id' )['launched'] ?? null;
-		if ( true !== $was_live ) {
+		// Only when the stored results are from a live check; a coming soon check says why on the cards.
+		if ( true !== self::checked_while_live( $report ) ) {
 			return null;
 		}
 		return array(
@@ -738,6 +740,19 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'text' => __( 'Change site visibility', 'woocommerce' ),
 			),
 		);
+	}
+
+	/**
+	 * Whether the store was live when the stored report was built. Null when the report has no launched row.
+	 *
+	 * @param array<string, mixed>|null $report Stored report.
+	 */
+	public static function checked_while_live( ?array $report ): ?bool {
+		if ( null === $report ) {
+			return null;
+		}
+		$ok = array_column( is_array( $report['store_checks'] ?? null ) ? $report['store_checks'] : array(), 'ok', 'id' )['launched'] ?? null;
+		return null === $ok ? null : (bool) $ok;
 	}
 
 	/**
@@ -753,24 +768,41 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	/**
 	 * The row that stands in for a question's scanned checks when none of them could run, saying why.
 	 *
-	 * @param bool $launched Whether the store is launched.
+	 * @param bool      $launched Whether the store is launched now.
+	 * @param bool|null $was_live Whether the store was live when it was checked.
 	 * @return array<string, mixed>
 	 */
-	private static function cant_check_row( bool $launched ): array {
-		$copy = self::cant_check_copy( $launched );
-		return array( 'waiting' => ! $launched ) + self::row( 'cant_check', 'unknown', $copy[0], $copy[1] );
+	private static function cant_check_row( bool $launched, ?bool $was_live = null ): array {
+		$copy = self::cant_check_copy( $launched, $was_live );
+		return array( 'waiting' => self::checks_waiting( $launched, $was_live ) ) + self::row( 'cant_check', 'unknown', $copy[0], $copy[1] );
 	}
 
 	/**
 	 * Why none of the scanned checks ran, as a title and a line. The support report says the same.
 	 *
-	 * @param bool $launched Whether the store is launched.
+	 * @param bool      $launched Whether the store is launched now.
+	 * @param bool|null $was_live Whether the store was live when it was checked.
 	 * @return array{0:string,1:string}
 	 */
-	public static function cant_check_copy( bool $launched ): array {
-		return $launched
-			? array( __( 'Your pages couldn’t be checked', 'woocommerce' ), __( 'Your hosting setup blocked the check from opening them. Checks run again each day. If this keeps happening, contact your hosting provider.', 'woocommerce' ) )
-			: array( __( 'Your store is in coming soon mode', 'woocommerce' ), __( 'These checks run once your store is live.', 'woocommerce' ) );
+	public static function cant_check_copy( bool $launched, ?bool $was_live = null ): array {
+		if ( ! $launched ) {
+			return array( __( 'Your store is in coming soon mode', 'woocommerce' ), __( 'These checks run once your store is live.', 'woocommerce' ) );
+		}
+		// Checked in coming soon mode, then the store went live: nothing was blocked; the checks haven't run since.
+		if ( false === $was_live ) {
+			return array( __( 'Your store wasn’t live at the last check', 'woocommerce' ), __( 'These checks run at the next daily check, or you can run the check again now.', 'woocommerce' ) );
+		}
+		return array( __( 'Your pages couldn’t be checked', 'woocommerce' ), __( 'Your hosting setup blocked the check from opening them. Checks run again each day. If this keeps happening, contact your hosting provider.', 'woocommerce' ) );
+	}
+
+	/**
+	 * Whether unchecked rows wait for the merchant (coming soon, or a check from before the store went live).
+	 *
+	 * @param bool      $launched Whether the store is launched now.
+	 * @param bool|null $was_live Whether the store was live when it was checked.
+	 */
+	private static function checks_waiting( bool $launched, ?bool $was_live ): bool {
+		return ! $launched || false === $was_live;
 	}
 
 	/**
@@ -1101,24 +1133,26 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	/**
 	 * Protocols and files the store serves to agents, as information, never pass or fail: how many were
 	 * found, then every item under where it lives. Items the scan couldn't read are under Couldn't check,
-	 * or Not checked yet while the store is in coming soon mode. Null with no items in the report.
+	 * or Not checked yet while the checks wait for the merchant. Null with no items in the report.
 	 *
 	 * @param array     $items    Items from the report.
-	 * @param bool|null $launched Whether the store is launched.
+	 * @param bool|null $launched Whether the store is launched now.
+	 * @param bool|null $was_live Whether the store was live when it was checked.
 	 * @return array{title:string,badge:array{intent:string,text:string},text:string,waiting:bool,groups:array<int, array{title:string,items:array<int, array{name:string,found:bool|null}>}>}|null
 	 */
-	private static function declared( array $items, ?bool $launched = true ): ?array {
+	private static function declared( array $items, ?bool $launched = true, ?bool $was_live = true ): ?array {
 		$items = array_values( array_filter( $items, 'is_array' ) );
 		if ( array() === $items ) {
 			return null;
 		}
-		$titles = array(
+		$waiting = self::checks_waiting( (bool) $launched, $was_live );
+		$titles  = array(
 			'root'    => __( 'Files in your root folder', 'woocommerce' ),
 			'address' => __( 'Files at standard addresses', 'woocommerce' ),
 			'code'    => __( 'In your page code', 'woocommerce' ),
-			'unknown' => false === $launched ? __( 'Not checked yet', 'woocommerce' ) : __( 'Couldn’t check', 'woocommerce' ),
+			'unknown' => $waiting ? __( 'Not checked yet', 'woocommerce' ) : __( 'Couldn’t check', 'woocommerce' ),
 		);
-		$groups = array();
+		$groups  = array();
 		foreach ( $items as $item ) {
 			$found              = $item['found'] ?? null;
 			$group              = null === $found ? 'unknown' : DeclaredToAgents::group( (string) ( $item['id'] ?? '' ) );
@@ -1155,8 +1189,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'title'   => __( 'Extra details for AI assistants', 'woocommerce' ),
 			'badge'   => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
 			'text'    => $text,
-			// Unread items wait for the store to go live, rather than having failed to load.
-			'waiting' => false === $launched,
+			// Unread items wait for the merchant, rather than having failed to load.
+			'waiting' => $waiting,
 			// In the order of $titles, leaving out the groups with no items.
 			'groups'  => array_map(
 				static fn( string $key ): array => array(
@@ -1201,7 +1235,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * The Not checked yet badge, while a question's checks wait for the merchant: the store to go live,
-	 * AI shopping to be on, or products to check.
+	 * a check from before launch to run again, AI shopping to be on, or products to check.
 	 *
 	 * @return array{0:string,1:string} Badge class and text.
 	 */
@@ -1323,6 +1357,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		// products counts only what the scan can check. Hidden and unsupported products are counted apart, so they are not an empty store.
 		$no_products = isset( $report['products'] ) && 0 === (int) $report['products'];
 		$unreadable  = $no_products && ( (int) ( $report['hidden_from_catalog'] ?? 0 ) > 0 || (int) ( $report['unsupported_types'] ?? 0 ) > 0 );
+		$was_live    = self::checked_while_live( $report );
+		$waiting     = self::checks_waiting( $launched, $was_live );
 		foreach ( self::question_groups( $checks ) as $id => $group ) {
 			if ( 'buy' === $id ) {
 				$sections[] = $no_products ? self::no_products_section( 'products', self::products_question(), $unreadable ) : $this->product_section( $report );
@@ -1342,10 +1378,10 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$sections[] = array(
 				'id'       => $id,
 				'title'    => $group[0],
-				'badge'    => self::badge_data( $cant && array() === $rows ? ( $launched ? self::cant_check_badge() : self::waiting_badge() ) : self::group_badge( $checks, false === $launched ) ),
+				'badge'    => self::badge_data( $cant && array() === $rows ? ( $waiting ? self::waiting_badge() : self::cant_check_badge() ) : self::group_badge( $checks, $waiting ) ),
 				'note'     => $ucp_off && ! $ucp_only ? self::ucp_off_note() : ( 'understand' === $id ? self::sample_note( $report ) : null ),
 				'channels' => array(),
-				'rows'     => $cant ? array_merge( $rows, array( self::cant_check_row( $launched ) ) ) : $rows,
+				'rows'     => $cant ? array_merge( $rows, array( self::cant_check_row( $launched, $was_live ) ) ) : $rows,
 				'folded'   => self::check_rows( array_values( $folded ), $launched ),
 				'empty'    => $ucp_only ? array(
 					'title' => __( 'These checks run once AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', 'woocommerce' ),

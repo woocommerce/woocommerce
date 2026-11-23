@@ -213,7 +213,7 @@ class SupportReport {
 		}
 		$shown = $this->readiness_page->shown_check_ids( $report, $live );
 		if ( ReadinessCheckPage::none_ran( array_values( array_filter( $scanned, static fn( array $check ): bool => in_array( $check['id'], $shown, true ) ) ) ) ) {
-			$copy    = ReadinessCheckPage::cant_check_copy( (bool) ( array_column( $live, 'ok', 'id' )['launched'] ?? true ) );
+			$copy    = ReadinessCheckPage::cant_check_copy( (bool) ( array_column( $live, 'ok', 'id' )['launched'] ?? true ), ReadinessCheckPage::checked_while_live( $report ) );
 			$lines[] = $copy[0] . '. ' . $copy[1];
 			$lines[] = '';
 		}

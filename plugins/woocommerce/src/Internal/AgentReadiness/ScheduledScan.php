@@ -15,8 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * Each run schedules the next one a day later, so nothing is queued until a
  * merchant or the REST API asks for the first scan, and no request pays for a
  * scheduling check. The next run is scheduled before the scan, so a scan that
- * fails or times out does not end the chain; a run that finds the feature
- * disabled does.
+ * fails or times out does not end the chain. Cancelling the scheduled actions
+ * under Tools > Scheduled Actions stops the chain until the next manual check.
  *
  * A requested scan that has not started 10 minutes after it was due, while no
  * other scheduled action has finished either, is taken as stalled (Action

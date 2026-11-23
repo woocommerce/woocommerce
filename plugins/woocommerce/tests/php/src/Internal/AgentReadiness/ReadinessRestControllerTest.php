@@ -312,36 +312,47 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox When no store check could run, the support report says why once, as the page does.
 	 */
 	public function test_support_report_says_why_no_check_ran(): void {
+		$unchecked = array(
+			array(
+				'id'       => 'llms_txt_present',
+				'ok'       => null,
+				'blocks'   => 'discovery',
+				'name'     => 'llms.txt',
+				'why'      => '',
+				'conflict' => false,
+			),
+			array(
+				'id'       => 'product_shipping_schema',
+				'ok'       => null,
+				'pending'  => true,
+				'blocks'   => 'discovery',
+				'name'     => 'Shipping details',
+				'why'      => '',
+				'conflict' => false,
+			),
+			array(
+				'id'       => 'open_graph_tags',
+				'ok'       => null,
+				'blocks'   => 'discovery',
+				'name'     => 'Open Graph tags',
+				'why'      => '',
+				'conflict' => false,
+			),
+		);
 		update_option(
 			AgentReadiness::REPORT_OPTION,
 			array(
 				'generated_at' => '2026-11-18T10:42:00+00:00',
-				'store_checks' => array(
+				'store_checks' => array_merge(
 					array(
-						'id'       => 'llms_txt_present',
-						'ok'       => null,
-						'blocks'   => 'discovery',
-						'name'     => 'llms.txt',
-						'why'      => '',
-						'conflict' => false,
+						array(
+							'id'      => 'launched',
+							'ok'      => true,
+							'name'    => 'Store is launched',
+							'fix_url' => '',
+						),
 					),
-					array(
-						'id'       => 'product_shipping_schema',
-						'ok'       => null,
-						'pending'  => true,
-						'blocks'   => 'discovery',
-						'name'     => 'Shipping details',
-						'why'      => '',
-						'conflict' => false,
-					),
-					array(
-						'id'       => 'open_graph_tags',
-						'ok'       => null,
-						'blocks'   => 'discovery',
-						'name'     => 'Open Graph tags',
-						'why'      => '',
-						'conflict' => false,
-					),
+					$unchecked
 				),
 			),
 			false
@@ -351,6 +362,28 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertStringContainsString( "### Store checks ###\n\nYour pages couldn’t be checked. Your hosting setup blocked the check from opening them.", $text );
 		$this->assertSame( 1, substr_count( $text, 'Your pages couldn’t be checked' ) );
+
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => '2026-11-18T10:42:00+00:00',
+				'store_checks' => array_merge(
+					array(
+						array(
+							'id'      => 'launched',
+							'ok'      => false,
+							'name'    => 'Store is launched',
+							'fix_url' => '',
+						),
+					),
+					$unchecked
+				),
+			),
+			false
+		);
+		$text = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
+		$this->assertStringContainsString( "### Store checks ###\n\nYour store wasn’t live at the last check. These checks run at the next daily check, or you can run the check again now.", $text );
+		$this->assertStringNotContainsString( 'Your hosting setup blocked', $text );
 	}
 
 	/**
