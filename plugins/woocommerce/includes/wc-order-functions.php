@@ -1082,7 +1082,16 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 	if ( $is_invalid && $has_recorded ) {
 		$action = 'reduce';
-		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
+		if ( $data_store->has_callable( 'clear_recorded_coupon_usage_counts' ) ) {
+			// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
+			if ( ! $data_store->clear_recorded_coupon_usage_counts( $order ) ) {
+				// Another request already gave the uses back, or changed the order status since this order was loaded.
+				wc_release_coupons_for_order( $order );
+				return;
+			}
+		} else {
+			$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
+		}
 	} elseif ( ! $is_invalid && $coupon_codes && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
