@@ -107,6 +107,9 @@ class WC_Payment_Gateways {
 		$ordering  = (array) get_option( 'woocommerce_gateway_order' );
 		$order_end = 999;
 
+		// Start from an empty list so a re-init overwrites, rather than appends to, the previous gateways.
+		$this->payment_gateways = array();
+
 		// Load gateways in order.
 		foreach ( $load_gateways as $gateway ) {
 			if ( is_string( $gateway ) && class_exists( $gateway ) ) {
