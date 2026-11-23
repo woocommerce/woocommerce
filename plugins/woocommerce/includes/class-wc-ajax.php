@@ -901,7 +901,7 @@ class WC_AJAX {
 			$variation_ids = array_map( 'absint', (array) wp_unslash( $_POST['variation_ids'] ) );
 
 			if ( ! self::can_edit_variations( $variation_ids ) ) {
-				wp_die( -1 );
+				wp_die( '-1' );
 			}
 
 			foreach ( $variation_ids as $variation_id ) {
@@ -3299,12 +3299,12 @@ class WC_AJAX {
 
 		$product_id = absint( wp_unslash( $_POST['product_id'] ) );
 		if ( ! current_user_can( 'edit_product', $product_id ) ) {
-			wp_die( -1 );
+			wp_die( '-1' );
 		}
 
 		$variation_ids = isset( $_POST['variable_post_id'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['variable_post_id'] ) ) : array();
 		if ( ! self::can_edit_variations( $variation_ids, $product_id ) ) {
-			wp_die( -1 );
+			wp_die( '-1' );
 		}
 
 		WC_Admin_Meta_Boxes::$meta_box_errors = array();
