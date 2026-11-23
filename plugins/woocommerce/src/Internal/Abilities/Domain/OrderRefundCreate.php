@@ -240,15 +240,25 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		}
 
 		$order_id   = $order->get_id();
-		$candidate  = null;
 		$tagged     = null;
 		$saved      = false;
 		$paid       = false;
 		$lock_error = null;
 
+		/**
+		 * The refund that wc_create_refund() saved first. $watch_paid sets it, which PHPStan does not follow into $tag.
+		 *
+		 * @var \WC_Order_Refund|null $candidate
+		 */
+		$candidate = null;
+
 		// First, so the meta is on the refund before callbacks that move money see it, and a lost lock declines it before they run.
-		$tag = static function ( $refund ) use ( $order_id, $lock, $fingerprint, $resolved_fingerprint, $refund_payment, &$tagged, &$lock_error ): void {
+		// Only the refund that wc_create_refund() saved first, so a refund of the order that a callback makes during the call is left alone.
+		$tag = static function ( $refund ) use ( $order_id, $lock, $fingerprint, $resolved_fingerprint, $refund_payment, &$candidate, &$tagged, &$lock_error ): void {
 			if ( null !== $tagged || ! $refund instanceof \WC_Order_Refund || $refund->get_parent_id() !== $order_id ) {
+				return;
+			}
+			if ( null !== $candidate && $refund !== $candidate ) {
 				return;
 			}
 			$tagged = $refund;

@@ -1319,6 +1319,59 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should tag and delete only its own refund, not a gateway refund of the same order that a callback makes during the call, when an Error follows.
+	 */
+	public function test_crash_keeps_a_gateway_refund_that_a_callback_made_during_the_call(): void {
+		$order   = $this->create_order_without_lines();
+		$nested  = null;
+		$crashed = false;
+		$hooked  = false;
+		add_action(
+			'woocommerce_create_refund',
+			static function ( $refund ) use ( &$hooked ) {
+				$hooked = $hooked || '5' === (string) $refund->get_amount();
+			}
+		);
+		add_action(
+			'woocommerce_after_order_refund_object_save',
+			static function ( $refund ) use ( $order, &$nested, &$crashed, &$hooked ) {
+				if ( null === $nested && '5' === (string) $refund->get_amount() ) {
+					$nested = wc_create_refund(
+						array(
+							'amount'         => '2',
+							'order_id'       => $order->get_id(),
+							'refund_payment' => true,
+						)
+					);
+					return;
+				}
+				if ( ! $crashed && $hooked && '5' === (string) $refund->get_amount() ) {
+					$crashed = true;
+					throw new \Error( 'Extension save hook crashed.' );
+				}
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '5',
+			)
+		);
+
+		$this->assertInstanceOf( \WC_Order_Refund::class, $nested );
+		$this->assertTrue( $crashed );
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_lost', $result->get_error_code() );
+		$this->assertSame( array( '2' ), $this->gateway->refunded );
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds );
+		$this->assertSame( $nested->get_id(), $refunds[0]->get_id() );
+		$this->assertTrue( $refunds[0]->get_refunded_payment() );
+		$this->assertSame( '', (string) $refunds[0]->get_meta( '_woocommerce_ability_refund_fingerprint' ) );
+	}
+
+	/**
 	 * @testdox Should tell the client not to refund again when the call fails after woocommerce_create_refund ran and the refund is rolled back.
 	 */
 	public function test_reports_lost_refund_when_the_call_fails_after_the_create_hook(): void {
