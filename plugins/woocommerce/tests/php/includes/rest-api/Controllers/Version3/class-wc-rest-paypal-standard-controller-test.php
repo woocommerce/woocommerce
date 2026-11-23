@@ -2,6 +2,7 @@
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 
 /**
  * Tests for the POST /wc/v3/paypal-standard/update-shipping endpoint
@@ -12,6 +13,8 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 
 	private const PAYPAL_ORDER_ID = 'PAYPAL-ORDER-123';
+
+	private const SHIPPING_CALLBACK_TOKEN = 'shipping-callback-token';
 
 	private const TEST_ORDER_ITEM_META_KEY = 'test_custom_meta';
 
@@ -528,6 +531,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$order->set_status( OrderStatus::PENDING );
 		$order->update_meta_data( '_paypal_order_id', $paypal_order_id );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, self::SHIPPING_CALLBACK_TOKEN );
 		$order->calculate_totals( true );
 		$order->save();
 	}
@@ -601,6 +605,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/paypal-standard/update-shipping' );
 		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_query_params( array( 'token' => self::SHIPPING_CALLBACK_TOKEN ) );
 		$request->set_body( wp_json_encode( $body ) );
 
 		return $this->server->dispatch( $request );
