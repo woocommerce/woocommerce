@@ -9,9 +9,8 @@
 
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders;
+
 defined( 'ABSPATH' ) || exit;
 
-class_alias(
-	\Automattic\WooCommerce\Internal\RestApi\Orders\OrderLineMetaValidator::class,
-	'Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\OrderLineMetaValidator'
-);
+class_alias( \Automattic\WooCommerce\Internal\RestApi\Orders\OrderLineMetaValidator::class, __NAMESPACE__ . '\OrderLineMetaValidator' );

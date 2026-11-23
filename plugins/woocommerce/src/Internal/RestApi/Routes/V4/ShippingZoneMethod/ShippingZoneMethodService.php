@@ -9,9 +9,8 @@
 
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod;
+
 defined( 'ABSPATH' ) || exit;
 
-class_alias(
-	\Automattic\WooCommerce\Internal\Shipping\ShippingZoneMethodService::class,
-	'Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingZoneMethodService'
-);
+class_alias( \Automattic\WooCommerce\Internal\Shipping\ShippingZoneMethodService::class, __NAMESPACE__ . '\ShippingZoneMethodService' );
