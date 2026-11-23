@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Orders\PaymentStock;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
 
@@ -831,7 +832,13 @@ class WC_Form_Handler {
 			$order_id  = absint( $wp->query_vars['order-pay'] );
 			$order     = wc_get_order( $order_id );
 
-			if ( $order_id === $order->get_id() && hash_equals( $order->get_order_key(), $order_key ) && $order->needs_payment() ) {
+			if ( ! $order instanceof WC_Order || $order_id !== $order->get_id() ) {
+				return;
+			}
+			if ( ! hash_equals( $order->get_order_key(), $order_key ) ) {
+				return;
+			}
+			if ( $order->needs_payment() ) {
 
 				do_action( 'woocommerce_before_pay_action', $order );
 
@@ -872,6 +879,8 @@ class WC_Form_Handler {
 						$payment_method->validate_fields();
 
 						if ( 0 === wc_notice_count( 'error' ) ) {
+
+							wc_get_container()->get( PaymentStock::class )->reserve_stock_for_payment( $order );
 
 							$result = $payment_method->process_payment( $order_id );
 
