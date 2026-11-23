@@ -1171,6 +1171,116 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should name the newest refund that the call repeats, so one allow_duplicate_of is enough when the same refund was made in two forms.
+	 */
+	public function test_duplicate_error_names_the_newest_refund_the_call_repeats(): void {
+		$order    = $this->create_order();
+		$line_id  = $this->get_product_line_id( $order );
+		$quantity = array(
+			'id'         => $order->get_id(),
+			'line_items' => array(
+				array(
+					'line_item_id' => $line_id,
+					'quantity'     => 1,
+				),
+			),
+		);
+		$first    = $this->refund( $quantity );
+		$this->assertIsArray( $first, is_wp_error( $first ) ? $first->get_error_message() : '' );
+		$second = $this->refund(
+			array(
+				'id'                 => $order->get_id(),
+				'line_items'         => array(
+					array(
+						'line_item_id' => $line_id,
+						'refund_total' => 10,
+					),
+				),
+				'allow_duplicate_of' => $first['refund']['id'],
+			)
+		);
+		$this->assertIsArray( $second, is_wp_error( $second ) ? $second->get_error_message() : '' );
+
+		$repeat = $this->refund( $quantity );
+
+		$this->assertWPError( $repeat );
+		$this->assertSame( 'woocommerce_ability_order_refund_duplicate', $repeat->get_error_code() );
+		$this->assertStringContainsString( 'allow_duplicate_of set to ' . $second['refund']['id'] . '.', $repeat->get_error_message() );
+		$confirmed = $this->refund( $quantity + array( 'allow_duplicate_of' => $second['refund']['id'] ) );
+		$this->assertIsArray( $confirmed, is_wp_error( $confirmed ) ? $confirmed->get_error_message() : '' );
+		$this->assertCount( 3, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should refuse a refund to a user who can edit the order but may not create refunds, as the refunds REST endpoint does.
+	 */
+	public function test_refuses_refund_without_refund_create_permission(): void {
+		$order = $this->create_order_without_lines();
+		add_filter(
+			'woocommerce_rest_check_permissions',
+			static function ( $permission, $context, $object_id, $post_type ) {
+				unset( $object_id );
+				return 'shop_order_refund' === $post_type && 'create' === $context ? false : $permission;
+			},
+			10,
+			4
+		);
+
+		$result = $this->refund(
+			array(
+				'id'             => $order->get_id(),
+				'amount'         => '5',
+				'refund_payment' => true,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		$this->assertSame( array(), $this->gateway->refunded );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should name the refund that is still on the order, and not ask to record it manually, when an extension stops its deletion after a failure.
+	 *
+	 * @testWith ["woocommerce_order_partially_refunded", true]
+	 *           ["woocommerce_after_order_refund_object_save", false]
+	 *
+	 * @param string $hook           Hook that fails.
+	 * @param bool   $refund_payment Whether the call refunds the payment.
+	 */
+	public function test_names_the_kept_refund_when_its_deletion_is_stopped( string $hook, bool $refund_payment ): void {
+		$order = $this->create_order_without_lines();
+		add_filter( 'woocommerce_pre_delete_order_refund', '__return_false' );
+		add_action(
+			$hook,
+			static function () use ( $hook ) {
+				if ( 'woocommerce_order_partially_refunded' === $hook ) {
+					throw new \Exception( 'Loyalty points service is down.' );
+				}
+				throw new \Error( 'Loyalty points service is down.' );
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'             => $order->get_id(),
+				'amount'         => '10',
+				'refund_payment' => $refund_payment,
+			)
+		);
+
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds );
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_incomplete', $result->get_error_code() );
+		$this->assertSame( $refunds[0]->get_id(), $result->get_error_data()['refund_id'] );
+		$this->assertStringContainsString( 'Refund ' . $refunds[0]->get_id() . ' is still on the order', $result->get_error_message() );
+		$this->assertStringContainsString( 'Loyalty points service is down.', $result->get_error_message() );
+		$this->assertStringNotContainsString( 'manually', $result->get_error_message() );
+	}
+
+	/**
 	 * @testdox Should report a lock that fails with a database error as such, not as a refund in progress.
 	 */
 	public function test_reports_lock_database_error(): void {
@@ -1460,6 +1570,39 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 			$this->assertWPError( $result );
 			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code(), $ability_name );
 		}
+	}
+
+	/**
+	 * @testdox Should not name the order of a refund to a user who cannot act on that order, even if they can act on others.
+	 *
+	 * @testWith ["woocommerce/order-refund-create", {"amount": "1"}]
+	 *           ["woocommerce/order-refunds-query", {}]
+	 *
+	 * @param string $ability_name Ability that gets the refund ID.
+	 * @param array  $input        Rest of the ability input.
+	 */
+	public function test_refund_id_as_order_id_is_refused_without_access_to_its_order( string $ability_name, array $input ): void {
+		$order  = $this->create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 5,
+			)
+		);
+		add_filter(
+			'woocommerce_rest_check_permissions',
+			static function ( $permission, $context, $object_id ) use ( $order ) {
+				unset( $context );
+				return $order->get_id() === (int) $object_id ? false : $permission;
+			},
+			10,
+			3
+		);
+
+		$result = wp_get_ability( $ability_name )->execute( array( 'id' => $refund->get_id() ) + $input );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
 	}
 
 	/**

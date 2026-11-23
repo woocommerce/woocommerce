@@ -182,9 +182,9 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		$allowed_found = false;
 		$recent        = self::find_recent_refunds( $order );
 		$fingerprint   = self::fingerprint( $order, $input, $decimals );
-		$duplicate     = self::check_duplicate( $recent, self::FINGERPRINT_META_KEY, $fingerprint, $allowed_id, $allowed_found );
-		if ( null !== $duplicate ) {
-			return $duplicate;
+		$duplicate     = self::find_duplicate( $recent, self::FINGERPRINT_META_KEY, $fingerprint, $allowed_id, $allowed_found );
+		if ( null !== $duplicate && self::is_unsettled( $duplicate ) ) {
+			return self::duplicate_error( $duplicate );
 		}
 
 		$prepared = wc_get_container()->get( DataUtils::class )->prepare_refund_creation_or_error(
@@ -195,7 +195,7 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			'woocommerce-abilities'
 		);
 		if ( is_wp_error( $prepared ) ) {
-			return self::refund_error( $prepared );
+			return null !== $duplicate ? self::duplicate_error( $duplicate ) : self::refund_error( $prepared );
 		}
 
 		$amount               = NumberUtil::round( (float) $prepared['amount'], $decimals );
@@ -214,9 +214,9 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			),
 			$decimals
 		);
-		$duplicate            = self::check_duplicate( $recent, self::RESOLVED_FINGERPRINT_META_KEY, $resolved_fingerprint, $allowed_id, $allowed_found );
+		$duplicate            = self::blocking_refund( $duplicate, self::find_duplicate( $recent, self::RESOLVED_FINGERPRINT_META_KEY, $resolved_fingerprint, $allowed_id, $allowed_found ) );
 		if ( null !== $duplicate ) {
-			return $duplicate;
+			return self::duplicate_error( $duplicate );
 		}
 
 		if ( $allowed_id > 0 && ! $allowed_found && ! self::repeats_older_refund( $order, $allowed_id, $fingerprint, $resolved_fingerprint ) ) {
@@ -343,6 +343,11 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			return array( 'refund' => $formatted );
 		}
 
+		$made = $tagged ?? $candidate;
+		if ( null !== $made && $made->get_id() > 0 && wc_get_order( $made->get_id() ) instanceof \WC_Order_Refund ) {
+			return self::kept_refund_error( $made->get_id(), $result, $paid );
+		}
+
 		if ( $crashed && null === $tagged ) {
 			return new \WP_Error(
 				'woocommerce_ability_order_refund_failed',
@@ -353,6 +358,33 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		}
 
 		return self::create_error( $result, $order_id, $lock_error, $saved || $crashed, $paid, $refund_payment && ! $crashed );
+	}
+
+	/**
+	 * The error of a failed call whose refund is still on the order, because an extension stopped its deletion.
+	 *
+	 * @param int   $refund_id Refund ID.
+	 * @param mixed $result    Result of wc_create_refund().
+	 * @param bool  $paid      Whether the gateway refunded the payment.
+	 * @return \WP_Error
+	 */
+	private static function kept_refund_error( int $refund_id, $result, bool $paid ): \WP_Error {
+		/* translators: 1: refund ID, 2: error message. */
+		$message = __( 'Refund %1$d is still on the order, though a later step failed and WooCommerce could not delete it: %2$s Do not refund again. Check the order, and the payment with the merchant, instead.', 'woocommerce' );
+		if ( $paid ) {
+			/* translators: 1: refund ID, 2: error message. */
+			$message = __( 'Refund %1$d is still on the order and the payment gateway refunded the payment, though a later step failed and WooCommerce could not delete the refund: %2$s Do not refund again. Check the order instead.', 'woocommerce' );
+		}
+
+		return new \WP_Error(
+			'woocommerce_ability_order_refund_incomplete',
+			sprintf( $message, $refund_id, is_wp_error( $result ) ? $result->get_error_message() : __( 'The refund could not be created.', 'woocommerce' ) ),
+			array(
+				'status'           => 500,
+				'refund_id'        => $refund_id,
+				'refunded_payment' => $paid,
+			)
+		);
 	}
 
 	/**
@@ -443,24 +475,24 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * The duplicate error for the newest refund that blocks the call. The refund that allow_duplicate_of names
-	 * also lets through the older ones it repeats, so each repeat only needs the ID of the last one, but never a
-	 * newer refund, which a retry of the call would have made, or one kept without its payment refunded.
+	 * The newest refund that blocks the call. The refund that allow_duplicate_of names also lets through the older
+	 * ones it repeats, so each repeat only needs the ID of the last one, but never a newer refund, which a retry of
+	 * the call would have made, or one kept without its payment refunded.
 	 *
-	 * @param \WC_Order_Refund[] $recent        Refunds from find_recent_refunds().
+	 * @param \WC_Order_Refund[] $recent        Refunds from find_recent_refunds(), newest first.
 	 * @param string             $meta_key      Meta key of the fingerprint.
 	 * @param string             $fingerprint   Fingerprint of the call.
 	 * @param int                $allowed_id    Refund ID from allow_duplicate_of, or 0.
 	 * @param bool               $allowed_found Set to true when the refund that allow_duplicate_of names matched.
-	 * @return \WP_Error|null
+	 * @return \WC_Order_Refund|null
 	 */
-	private static function check_duplicate( array $recent, string $meta_key, string $fingerprint, int $allowed_id, bool &$allowed_found ): ?\WP_Error {
+	private static function find_duplicate( array $recent, string $meta_key, string $fingerprint, int $allowed_id, bool &$allowed_found ): ?\WC_Order_Refund {
 		foreach ( $recent as $refund ) {
 			if ( $refund->get_meta( $meta_key ) !== $fingerprint ) {
 				continue;
 			}
 			if ( $refund->get_id() > $allowed_id || self::is_unsettled( $refund ) ) {
-				return self::duplicate_error( $refund );
+				return $refund;
 			}
 
 			if ( $refund->get_id() === $allowed_id ) {
@@ -469,6 +501,25 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		}
 
 		return null;
+	}
+
+	/**
+	 * The one of two duplicates for the error to name: one without its payment refunded, since it stops every
+	 * retry, else the newer one, since allow_duplicate_of with its ID lets the older one through too.
+	 *
+	 * @param \WC_Order_Refund|null $first  Duplicate by the input fingerprint.
+	 * @param \WC_Order_Refund|null $second Duplicate by the resolved fingerprint.
+	 * @return \WC_Order_Refund|null
+	 */
+	private static function blocking_refund( ?\WC_Order_Refund $first, ?\WC_Order_Refund $second ): ?\WC_Order_Refund {
+		if ( null === $first || null === $second ) {
+			return $first ?? $second;
+		}
+		if ( self::is_unsettled( $second ) ) {
+			return $second;
+		}
+
+		return $second->get_id() > $first->get_id() ? $second : $first;
 	}
 
 	/**

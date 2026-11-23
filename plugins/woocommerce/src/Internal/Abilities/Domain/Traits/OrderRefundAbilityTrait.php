@@ -19,19 +19,21 @@ defined( 'ABSPATH' ) || exit;
 trait OrderRefundAbilityTrait {
 
 	/**
-	 * Check refund access to an order. A refund ID passes for users who could refund any order, so the lookup can
-	 * name the refunded order instead of failing as a permission error.
+	 * Check refund access to an order, with the refund create permission that the refunds REST endpoint checks. A
+	 * refund ID passes for users who could refund its order, so the lookup can name that order instead of failing
+	 * as a permission error.
 	 *
 	 * @param mixed $input Ability input.
 	 * @return bool
 	 */
 	public static function can_refund_order( $input = array() ): bool {
-		return self::is_refund_id_with_order_access( $input, 'batch' ) || self::can_edit_order( $input );
+		return wc_rest_check_post_permissions( 'shop_order_refund', 'create' )
+			&& ( self::is_refund_id_with_order_access( $input, 'edit' ) || self::can_edit_order( $input ) );
 	}
 
 	/**
-	 * Check read access to the refunds of an order. A refund ID passes for users who could read any order, so the
-	 * lookup can name the refunded order instead of failing as a permission error.
+	 * Check read access to the refunds of an order. A refund ID passes for users who could read its order, so the
+	 * lookup can name that order instead of failing as a permission error.
 	 *
 	 * @param mixed $input Ability input.
 	 * @return bool
@@ -41,18 +43,23 @@ trait OrderRefundAbilityTrait {
 	}
 
 	/**
-	 * Whether the input ID is a refund and the user has the given access to every order.
+	 * Whether the input ID is a refund and the user has the given access to the order it belongs to.
 	 *
 	 * @param mixed  $input   Ability input.
-	 * @param string $context `read` or `batch`, as for wc_rest_check_post_permissions().
+	 * @param string $context `read` or `edit`, as for wc_rest_check_post_permissions().
 	 * @return bool
 	 */
 	private static function is_refund_id_with_order_access( $input, string $context ): bool {
 		$id = self::get_id_from_input( $input );
+		if ( $id <= 0 || 'shop_order_refund' !== OrderUtil::get_order_type( $id ) ) {
+			return false;
+		}
 
-		return $id > 0
-			&& 'shop_order_refund' === OrderUtil::get_order_type( $id )
-			&& wc_rest_check_post_permissions( 'shop_order', $context );
+		$refund = wc_get_order( $id );
+
+		return $refund instanceof \WC_Order_Refund
+			&& $refund->get_parent_id() > 0
+			&& self::check_order_permission( $refund->get_parent_id(), $context );
 	}
 
 	/**
