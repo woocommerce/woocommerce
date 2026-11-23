@@ -109,8 +109,8 @@ class TaxRateUpdate extends AbstractDomainAbility implements AbilityDefinition {
 			return array( 'rate' => $current );
 		}
 
-		if ( ! empty( $columns ) ) {
-			\WC_Tax::_update_tax_rate( $rate_id, $columns );
+		if ( ! empty( $columns ) && ! self::update_rate_columns( $rate_id, $columns ) ) {
+			return new \WP_Error( 'woocommerce_ability_tax_rate_update_failed', __( 'The tax rate could not be saved, so it is unchanged.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 		$locations_error = self::write_rate_locations( $rate_id, $locations );
 		self::refresh_shipping_rates_cache();
@@ -124,6 +124,32 @@ class TaxRateUpdate extends AbstractDomainAbility implements AbilityDefinition {
 		}
 
 		return array( 'rate' => $rate );
+	}
+
+	/**
+	 * WC_Tax reports no result, and the updated hook it fires can run queries of its own,
+	 * so the error is read at the start of that hook, before any other callback.
+	 *
+	 * @param int   $rate_id Tax rate ID.
+	 * @param array $columns Rate columns to change.
+	 * @return bool Whether the update query succeeded.
+	 */
+	private static function update_rate_columns( int $rate_id, array $columns ): bool {
+		global $wpdb;
+
+		$error   = '';
+		$capture = static function () use ( $wpdb, &$error ) {
+			$error = $wpdb->last_error;
+		};
+
+		add_action( 'woocommerce_tax_rate_updated', $capture, PHP_INT_MIN );
+		try {
+			\WC_Tax::_update_tax_rate( $rate_id, $columns );
+		} finally {
+			remove_action( 'woocommerce_tax_rate_updated', $capture, PHP_INT_MIN );
+		}
+
+		return '' === $error;
 	}
 
 	/**
