@@ -2863,6 +2863,83 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should name the saved refund and say the gateway refunded it when a refund field callback throws after a gateway refund.
+	 */
+	public function test_a_gateway_refund_whose_field_callback_throws_names_the_saved_refund(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'order_refund',
+						'namespace'     => 'invalid-ext',
+						'field'         => 'bad',
+						'output_schema' => array( 'type' => 'string' ),
+						'get_callback'  => static function () {
+							throw new \RuntimeException( 'Secret failure' );
+						},
+					)
+				);
+			}
+		);
+		$gateway           = new class() extends \WC_Payment_Gateway {
+			/**
+			 * Set the ID and the refund support.
+			 */
+			public function __construct() {
+				$this->id       = 'field_test_gateway';
+				$this->enabled  = 'yes';
+				$this->supports = array( 'products', 'refunds' );
+			}
+
+			/**
+			 * Refund the payment.
+			 *
+			 * @param int        $order_id Order ID.
+			 * @param float|null $amount   Amount.
+			 * @param string     $reason   Reason.
+			 * @return bool
+			 */
+			public function process_refund( $order_id, $amount = null, $reason = '' ) {
+				unset( $order_id, $amount, $reason );
+				return true;
+			}
+		};
+		$gateways          = WC()->payment_gateways();
+		$original_gateways = $gateways->payment_gateways;
+		$gateways->payment_gateways['field_test_gateway'] = $gateway;
+		$order = \WC_Helper_Order::create_order();
+		$order->set_payment_method( 'field_test_gateway' );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		try {
+			$result = wp_get_ability( 'woocommerce/order-refund-create' )->execute(
+				array(
+					'id'             => $order->get_id(),
+					'amount'         => '5',
+					'refund_payment' => true,
+				)
+			);
+		} finally {
+			$gateways->payment_gateways = $original_gateways;
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_extension_failed', $result->get_error_code(), $result->get_error_message() );
+		$this->assertStringNotContainsString( 'Secret failure', $result->get_error_message() );
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds );
+		$this->assertTrue( $refunds[0]->get_refunded_payment() );
+		$this->assertStringContainsString( 'do not send it again', $result->get_error_message() );
+		$this->assertSame( 500, $result->get_error_data()['status'] );
+		$this->assertTrue( $result->get_error_data()['saved'] );
+		$this->assertSame( $refunds[0]->get_id(), $result->get_error_data()['id'] );
+		$this->assertTrue( $result->get_error_data()['refunded_payment'] );
+	}
+
+	/**
 	 * @testdox Should name the saved order in the error when order-update-status saves and an order field value then fails its schema.
 	 */
 	public function test_an_order_status_that_saves_before_a_field_fails_names_the_saved_order(): void {

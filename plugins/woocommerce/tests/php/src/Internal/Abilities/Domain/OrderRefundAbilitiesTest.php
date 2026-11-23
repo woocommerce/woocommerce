@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
@@ -454,6 +455,70 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 
 		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
 		$this->assertCount( 2, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should refuse allow_duplicate_of past the window for a refund of another order or a refund the call does not repeat.
+	 * @testWith [true, "10"]
+	 *           [false, "5"]
+	 *
+	 * @param bool   $other_order Whether the named refund belongs to another order.
+	 * @param string $amount      Amount of the call that names the refund.
+	 */
+	public function test_allow_duplicate_of_refuses_an_older_refund_it_does_not_repeat( bool $other_order, string $amount ): void {
+		$named_order = $this->create_order_without_lines();
+		$order       = $other_order ? $this->create_order_without_lines() : $named_order;
+		$named       = $this->refund(
+			array(
+				'id'     => $named_order->get_id(),
+				'amount' => '10',
+			)
+		);
+		$this->assertIsArray( $named, is_wp_error( $named ) ? $named->get_error_message() : '' );
+		$refund = wc_get_order( $named['refund']['id'] );
+		$refund->set_date_created( time() - 15 * MINUTE_IN_SECONDS );
+		$refund->save();
+		$count = count( wc_get_order( $order->get_id() )->get_refunds() );
+
+		$result = $this->refund(
+			array(
+				'id'                 => $order->get_id(),
+				'amount'             => $amount,
+				'allow_duplicate_of' => $named['refund']['id'],
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_duplicate_mismatch', $result->get_error_code() );
+		$this->assertCount( $count, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should name an engine error code that has no mapping as invalid_request, keeping its message, status and code in the data.
+	 */
+	public function test_names_unmapped_engine_error_as_invalid_request(): void {
+		$order  = $this->create_order_without_lines();
+		$engine = $this->createMock( DataUtils::class );
+		$engine->method( 'prepare_refund_creation_or_error' )->willReturn( new \WP_Error( 'new_engine_check', 'Engine refused.', array( 'status' => 422 ) ) );
+		wc_get_container()->replace( DataUtils::class, $engine );
+
+		try {
+			$result = $this->refund(
+				array(
+					'id'     => $order->get_id(),
+					'amount' => '10',
+				)
+			);
+		} finally {
+			wc_get_container()->reset_replacement( DataUtils::class );
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_invalid_request', $result->get_error_code() );
+		$this->assertSame( 'Engine refused.', $result->get_error_message() );
+		$this->assertSame( 422, $result->get_error_data()['status'] );
+		$this->assertSame( 'new_engine_check', $result->get_error_data()['engine_code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
 	}
 
 	/**
