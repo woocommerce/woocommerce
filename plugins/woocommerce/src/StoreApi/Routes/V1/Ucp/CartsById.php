@@ -59,6 +59,10 @@ class CartsById extends AbstractCartRoute {
 						'description' => __( 'The complete desired contents of the cart.', 'woocommerce' ),
 						'type'        => 'array',
 					),
+					'discounts'  => array(
+						'description' => __( 'Discount codes to apply, replacing any applied before.', 'woocommerce' ),
+						'type'        => 'object',
+					),
 				),
 			),
 			'schema' => array( $this->schema, 'get_public_item_schema' ),
@@ -88,6 +92,12 @@ class CartsById extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_update_response( \WP_REST_Request $request ) {
+		$codes = $this->parse_discount_codes( $request );
+
+		if ( $codes instanceof \WP_REST_Response ) {
+			return $codes;
+		}
+
 		$line_items = Utils::json_param( $request, 'line_items' );
 
 		// `line_items` is the whole desired state, so omitting it is not the same as
@@ -106,6 +116,6 @@ class CartsById extends AbstractCartRoute {
 			}
 		}
 
-		return $this->cart_response( $this->route_cart_id( $request ) );
+		return $this->cart_response( $this->route_cart_id( $request ), $this->apply_discount_codes( $codes ) );
 	}
 }

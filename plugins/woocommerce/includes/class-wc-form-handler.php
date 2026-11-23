@@ -1410,8 +1410,9 @@ class WC_Form_Handler {
 			$quantity_set = false;
 
 			foreach ( $items as $item => $quantity ) {
+				$item     = absint( $item );
 				$quantity = wc_stock_amount( $quantity );
-				if ( $quantity <= 0 ) {
+				if ( ! $item || $quantity <= 0 ) {
 					continue;
 				}
 				$quantity_set = true;
@@ -1474,7 +1475,7 @@ class WC_Form_Handler {
 		}
 
 		// Prevent parent variable product from being added to cart.
-		if ( empty( $variation_id ) && $product && $product->is_type( ProductType::VARIABLE ) ) {
+		if ( empty( $variation_id ) && $product && $product->is_type( ProductType::VARIABLE ) && $product->is_viewable() ) {
 			$current_url        = isset( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH ) : '';
 			$product_url        = wp_parse_url( get_permalink( $product_id ), PHP_URL_PATH );
 			$is_in_product_page = $current_url && $product_url && untrailingslashit( $current_url ) === untrailingslashit( $product_url );

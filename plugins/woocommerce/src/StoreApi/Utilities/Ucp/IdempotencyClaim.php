@@ -217,13 +217,36 @@ final class IdempotencyClaim {
 	 */
 	private static function replay( array $existing ): \WP_REST_Response {
 		$response = new \WP_REST_Response(
-			json_decode( (string) $existing['response_body'], true ),
+			self::restore_json_value( json_decode( (string) $existing['response_body'] ) ),
 			isset( $existing['response_status'] ) ? (int) $existing['response_status'] : 200
 		);
 
 		$response->header( 'Idempotency-Replayed', 'true' );
 
 		return $response;
+	}
+
+	/**
+	 * Turn decoded JSON objects back into arrays, except those that would then encode as a JSON list.
+	 *
+	 * An associative decode turns `{}` into `[]`, so an empty registry such as `payment_handlers`
+	 * would replay as a list. Such objects stay `stdClass`, and every other one becomes an array.
+	 *
+	 * @param mixed $value Value from `json_decode()` without associative mode.
+	 * @return mixed
+	 */
+	private static function restore_json_value( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( array( self::class, 'restore_json_value' ), $value );
+		}
+
+		if ( ! $value instanceof \stdClass ) {
+			return $value;
+		}
+
+		$properties = array_map( array( self::class, 'restore_json_value' ), get_object_vars( $value ) );
+
+		return wp_is_numeric_array( $properties ) ? (object) $properties : $properties;
 	}
 
 	/**
