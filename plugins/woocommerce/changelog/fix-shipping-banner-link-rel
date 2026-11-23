@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Restore `rel="noopener noreferrer"` on the shipping label banner's new-tab links.
+Stop the shipping label banner links from sending your store address to the pages they open.
