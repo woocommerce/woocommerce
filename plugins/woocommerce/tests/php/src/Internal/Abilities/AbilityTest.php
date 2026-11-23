@@ -553,7 +553,15 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	public function test_refuses_a_number_that_converts_below_the_minimum(): void {
 		$sut = $this->get_ability();
 
-		foreach ( array( $sut->execute( array( 'page' => 2.0 ** 64 ) ), $sut->prepare_input( array( 'page' => 2.0 ** 64 ) ) ) as $result ) {
+		// PHP 8.5 reports casting an out-of-range float to an integer as a deprecation.
+		set_error_handler( '__return_true', E_DEPRECATED ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
+		try {
+			$results = array( $sut->execute( array( 'page' => 2.0 ** 64 ) ), $sut->prepare_input( array( 'page' => 2.0 ** 64 ) ) );
+		} finally {
+			restore_error_handler();
+		}
+
+		foreach ( $results as $result ) {
 			$this->assertWPError( $result );
 			$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
 		}

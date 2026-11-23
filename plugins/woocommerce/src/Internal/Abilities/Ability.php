@@ -85,6 +85,10 @@ class Ability extends \WP_Ability {
 	 * @return mixed|\WP_Error The converted input, or a WP_Error when it cannot be converted.
 	 */
 	protected function sanitize_input( $input ) {
+		if ( self::core_prepares_input() ) {
+			return parent::sanitize_input( $input );
+		}
+
 		$schema = $this->get_input_schema();
 		if ( null === $input || empty( $schema ) ) {
 			return $input;
