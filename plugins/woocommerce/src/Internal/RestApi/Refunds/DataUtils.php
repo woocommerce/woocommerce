@@ -479,11 +479,13 @@ class DataUtils {
 						$already_refunded_tax = (float) ( $refund_data['tax_totals'][ $line_item_id ][ $tax_id ] ?? 0.0 );
 						$remaining_tax        = abs( $stored_tax ) - $already_refunded_tax;
 						if ( abs( $requested_tax ) > NumberUtil::round( $remaining_tax, $price_decimals ) ) {
-							// 400, not the 422 the over-refund caps above use: this keeps the
-							// code-to-status mapping one-to-one across this file —
-							// invalid_refund_amount is 400 at every site, sharing the code
-							// with the wrong-sign guard above, which is malformed input,
-							// while each 422 carries its own over-refund code.
+							// 400, not the 422 the over-refund caps above use: wc/v3 and the
+							// Abilities refund-creation tool already ship this status for
+							// invalid_refund_amount, so changing it would break an existing
+							// response. It also keeps the code-to-status mapping one-to-one
+							// across this file — the code is shared with the wrong-sign guard
+							// above, which is malformed input, while each 422 carries its own
+							// over-refund code.
 							return new WP_Error(
 								'invalid_refund_amount',
 								sprintf(
