@@ -423,9 +423,10 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * A product's saved name as text, '' when there is none or it no longer exists. Read from the post,
-	 * which callers can prime, rather than loading the product. Shown as text, so nothing is stripped:
-	 * a name such as "Baker's <Dozen>" stays whole.
+	 * A product's saved name as entity-decoded plain text, '' when there is none or it no longer exists.
+	 * Read from the post, which callers can prime, rather than loading the product. Not sanitized HTML:
+	 * a name such as "Baker's <Dozen>" stays whole. Callers must escape for their output context
+	 * (React text nodes need none; HTML or attributes need escaping).
 	 *
 	 * @since 11.4.0
 	 *
