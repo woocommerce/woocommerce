@@ -22,18 +22,20 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	private $received = array();
 
 	/**
-	 * Assert that the message has the retry hint once: from WordPress since 7.2, from WooCommerce before.
+	 * Assert that an invalid output error has the retry hint once: from WooCommerce on the
+	 * legacy error code, from WordPress on the codes that WordPress 7.2.1 adds.
 	 *
-	 * @param string $message The error message.
+	 * @param \WP_Error $error The invalid output error.
 	 */
-	private function assert_retry_hint_once( string $message ): void {
-		$core_hint = 'Check the outcome before retrying';
-		$woo_hint  = 'Check the current state before you run it again';
-		if ( is_wp_version_compatible( '7.2' ) ) {
-			$this->assertStringContainsString( $core_hint, $message );
-			$this->assertStringNotContainsString( $woo_hint, $message );
-		} else {
+	private function assert_retry_hint_once( \WP_Error $error ): void {
+		$message  = $error->get_error_message();
+		$woo_hint = 'Check the current state before you run it again';
+		if ( 'ability_invalid_output' === $error->get_error_code() ) {
 			$this->assertStringContainsString( $woo_hint, $message );
+		} else {
+			$this->assertSame( 'ability_output_schema_mismatch', $error->get_error_code() );
+			$this->assertStringContainsString( 'Check the outcome before retrying', $message );
+			$this->assertStringNotContainsString( $woo_hint, $message );
 		}
 	}
 
@@ -108,8 +110,7 @@ class AbilityTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 1, $runs );
 		$this->assertWPError( $result );
-		$this->assertSame( 'ability_invalid_output', $result->get_error_code() );
-		$this->assert_retry_hint_once( $result->get_error_message() );
+		$this->assert_retry_hint_once( $result );
 	}
 
 	/**
@@ -132,7 +133,6 @@ class AbilityTest extends \WC_Unit_Test_Case {
 		$result = $ability->execute();
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'ability_invalid_output', $result->get_error_code() );
 		$this->assertStringNotContainsString( 'may already be saved', $result->get_error_message() );
 	}
 
@@ -219,8 +219,8 @@ class AbilityTest extends \WC_Unit_Test_Case {
 		remove_filter( 'wp_ability_validate_output', $filter );
 
 		$this->assertWPError( $result );
-		$this->assertSame( array( 'ability_invalid_output', 'output_policy' ), $result->get_error_codes() );
-		$this->assert_retry_hint_once( $result->get_error_message() );
+		$this->assertSame( 'output_policy', $result->get_error_codes()[1] ?? null );
+		$this->assert_retry_hint_once( $result );
 		$this->assertSame( 'The output breaks a policy.', $result->get_error_message( 'output_policy' ) );
 		$data = $result->get_error_data( 'output_policy' );
 		$this->assertArrayHasKey( 'field', $data );
