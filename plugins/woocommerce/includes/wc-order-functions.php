@@ -98,6 +98,9 @@ function wc_get_order( $the_order = false ) {
 /**
  * Get all order statuses.
  *
+ * Custom order status slugs should not exceed 17 characters (excluding the 'wc-' prefix),
+ * as database columns store a maximum of 20 characters.
+ *
  * @since 2.2
  * @used-by WC_Order::set_status
  * @return array<string,string>
@@ -112,6 +115,16 @@ function wc_get_order_statuses() {
 		OrderInternalStatus::REFUNDED   => _x( 'Refunded', 'Order status', 'woocommerce' ),
 		OrderInternalStatus::FAILED     => _x( 'Failed', 'Order status', 'woocommerce' ),
 	);
+
+	/**
+	 * Filters the list of order statuses.
+	 *
+	 * Status keys exceeding 20 characters (including the 'wc-' prefix) cannot be stored in the
+	 * database and should be kept within 20 characters.
+	 *
+	 * @since 2.2.0
+	 * @param array<string, string> $order_statuses Order statuses map of slug => label.
+	 */
 	return apply_filters( 'wc_order_statuses', $order_statuses );
 }
 
