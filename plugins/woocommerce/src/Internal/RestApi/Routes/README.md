@@ -7,9 +7,10 @@ major version.
 
 Each major version of the REST API gets its own directory, e.g. `V5/`, `V6/`.
 
-`V4/` previously held the experimental REST API v4 implementation. It was removed; the directory now
-only contains no-op compatibility stubs kept to avoid mid-upgrade fatals (see
-`src/Internal/RestApi/README.md`).
+`V4/` previously held the experimental REST API v4 implementation. It was removed. The directory
+now only holds compatibility aliases, kept to avoid mid-upgrade fatals (see
+`src/Internal/RestApi/README.md`). They are deprecated since 11.5.0 and will be removed in a
+future version.
 
 ## Legacy API Versions
 

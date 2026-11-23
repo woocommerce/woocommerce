@@ -2,7 +2,7 @@
 /**
  * REST API V4 Settings OfflinePaymentMethods controller (compatibility stub).
  *
- * @deprecated 11.5.0 The v4 REST API was removed.
+ * @deprecated 11.5.0 The v4 REST API was removed. This alias will be removed in a future version.
  * @package Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods
  */
 

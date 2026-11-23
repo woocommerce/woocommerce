@@ -108,8 +108,9 @@ class WC_Autoloader {
 		} elseif ( 0 === strpos( $class, 'wc_notes_' ) ) {
 			$path = $this->include_path . 'admin/notes/';
 		} elseif ( 'wc_rest_settings_v4_controller' === $class ) {
-			// Compatibility stub for the removed experimental REST API v4; kept resolvable so a
-			// pre-swap controller list can still instantiate it instead of fataling during an upgrade.
+			// Compatibility stub for the removed experimental REST API v4. Kept resolvable so a
+			// pre-swap controller list can still instantiate it instead of fataling during an
+			// upgrade. Deprecated since 11.5.0 and will be removed in a future version.
 			$this->load_file( $this->include_path . 'rest-api/Controllers/Version4/' . $file );
 			return;
 		} elseif ( 0 === strpos( $class, 'wc_rest_' ) ) {

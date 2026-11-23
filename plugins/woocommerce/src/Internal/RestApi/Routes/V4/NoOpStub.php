@@ -3,7 +3,7 @@
  * No-op REST API V4 controller (compatibility stub).
  *
  * Kept for compatibility with the upgrade path to 11.5.0, aliased from each removed v4
- * controller's old class name. Registers nothing.
+ * controller's old class name. Registers nothing. Will be removed in a future version.
  *
  * @deprecated 11.5.0
  * @package Automattic\WooCommerce\Internal\RestApi\Routes\V4

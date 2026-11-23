@@ -21,7 +21,11 @@ export const registerProductEntity = () => {
 };
 
 /**
- * No-op. Its REST backing was the removed experimental wc/v4 settings endpoints; kept exported so
- * the deprecated `wc.wcEntities.registerSettingsEntity()` compatibility wrapper doesn't fatal.
+ * No-op. The v4 settings REST endpoints it depended on were removed.
+ *
+ * Kept exported so the deprecated `wc.wcEntities.registerSettingsEntity()` compatibility
+ * wrapper does not fatal.
+ *
+ * @deprecated Since WooCommerce 11.5.0. Will be removed in a future version.
  */
 export const registerSettingsEntity = () => {};

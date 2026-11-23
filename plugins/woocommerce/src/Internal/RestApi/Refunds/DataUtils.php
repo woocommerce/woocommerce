@@ -379,7 +379,7 @@ class DataUtils {
 				// Cap and zero-check the GROSS line refund against the line's tax-inclusive
 				// total. When an explicit refund_tax breakdown is supplied, refund_total is
 				// the tax-exclusive (net) subtotal and the tax is added on top (core Woo
-				// semantics); without it, refund_total is already
+				// semantics). Without it, refund_total is already
 				// tax-inclusive, so the gross equals refund_total. Capping the net alone
 				// would let a client push the overage into refund_tax and over-refund the
 				// line. Preview has no refund_tax field, so its (refund_total-only) cap stays
@@ -483,7 +483,7 @@ class DataUtils {
 							// Abilities refund-creation tool already ship this status for
 							// invalid_refund_amount, so changing it would break an existing
 							// response. It also keeps the code-to-status mapping one-to-one
-							// across this file — the code is shared with the wrong-sign guard
+							// across this file. The code is shared with the wrong-sign guard
 							// above, which is malformed input, while each 422 carries its own
 							// over-refund code.
 							return new WP_Error(
@@ -1293,7 +1293,7 @@ class DataUtils {
 	 * Normalizes the caller-supplied refund_total values, validates the line
 	 * items, builds the preview, and applies the two aggregate guards (a
 	 * non-positive total, and a total exceeding the order's remaining
-	 * refundable amount). Error codes are emitted unprefixed; the caller
+	 * refundable amount). Error codes are emitted unprefixed. The caller
 	 * applies its own surface convention (wc/v3 prefixes with
 	 * `woocommerce_rest_`).
 	 *
@@ -1390,7 +1390,7 @@ class DataUtils {
 	 * three aggregate guards (non-positive amount, an override below the line
 	 * items total, and an amount exceeding the order's remaining refundable
 	 * amount). Error codes are emitted unprefixed with their HTTP status in
-	 * the error data; the caller applies its own surface convention. Request
+	 * the error data. The caller applies its own surface convention. Request
 	 * mutation, hooks, metadata, and the wc_create_refund() call itself stay
 	 * with the caller.
 	 *
