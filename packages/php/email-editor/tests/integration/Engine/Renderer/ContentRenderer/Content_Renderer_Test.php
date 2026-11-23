@@ -79,19 +79,25 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			)
 		);
 		$this->assertIsInt( $email_post_id );
-		update_post_meta(
-			$email_post_id,
-			'woocommerce_email_theme',
-			array(
-				'styles' => array(
-					'elements' => array(
-						'caption' => array(
-							'color' => array( 'text' => '#f78da7' ),
+		$add_caption_color = static function ( $theme ) {
+			$theme->merge(
+				new \WP_Theme_JSON(
+					array(
+						'version' => 3,
+						'styles'  => array(
+							'elements' => array(
+								'caption' => array(
+									'color' => array( 'text' => '#f78da7' ),
+								),
+							),
 						),
 					),
-				),
-			)
-		);
+					'custom'
+				)
+			);
+			return $theme;
+		};
+		add_filter( 'woocommerce_email_editor_theme_json', $add_caption_color, 20 );
 		$email_post = get_post( $email_post_id );
 		$this->assertInstanceOf( \WP_Post::class, $email_post );
 
@@ -126,6 +132,7 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		} finally {
 			$registry->unregister( 'core/image' );
 			$registry->register( $original_block );
+			remove_filter( 'woocommerce_email_editor_theme_json', $add_caption_color, 20 );
 		}
 
 		$this->assertStringContainsString( 'Caption text', $content );
