@@ -437,12 +437,13 @@ class WC_Shortcode_Checkout {
 	 */
 	private static function guest_should_verify_email( WC_Order $order, string $context ): bool {
 		// If we cannot match the order with the current user, ask that they verify their email address.
-		$nonce_is_valid = wp_verify_nonce( filter_input( INPUT_POST, 'check_submission' ), 'wc_verify_email' );
+		$nonce          = is_string( $_POST['check_submission'] ?? null ) ? sanitize_text_field( wp_unslash( $_POST['check_submission'] ) ) : '';
+		$nonce_is_valid = wp_verify_nonce( $nonce, 'wc_verify_email' );
 		$supplied_email = null;
 		$order_id       = $order->get_id();
 
-		if ( $nonce_is_valid ) {
-			$supplied_email = sanitize_email( wp_unslash( filter_input( INPUT_POST, 'email' ) ) );
+		if ( $nonce_is_valid && is_string( $_POST['email'] ?? null ) ) {
+			$supplied_email = sanitize_email( wp_unslash( $_POST['email'] ) );
 		}
 
 		return Users::should_user_verify_order_email( $order_id, $supplied_email, $context );
