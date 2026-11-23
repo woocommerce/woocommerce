@@ -1155,8 +1155,8 @@ class WC_Analytics_Tracking {
 			return $salt_data['salt'];
 		}
 
-		// Generate new salt for today
-		$new_salt = wp_generate_password( 32, false );
+		// Not wp_generate_password(): the speed module can get here before pluggable.php loads.
+		$new_salt = bin2hex( random_bytes( 16 ) );
 
 		// Store salt with date (no expiration time needed)
 		$salt_data = array(
