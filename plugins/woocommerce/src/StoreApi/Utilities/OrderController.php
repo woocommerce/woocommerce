@@ -350,6 +350,7 @@ class OrderController {
 		$this->validate_email( $order );
 		$this->validate_selected_shipping_methods( $needs_shipping, $chosen_shipping_methods );
 		$this->validate_addresses( $order, $needs_shipping );
+		$this->validate_shipping_was_not_skipped_for_missing_address( $needs_shipping );
 
 		// Perform custom validations.
 		$this->perform_custom_order_validation( $order );
@@ -1104,6 +1105,11 @@ class OrderController {
 	 */
 	private function get_usage_per_aliases( $coupon, $aliases ) {
 		global $wpdb;
+		$data_store = $coupon->get_data_store();
+		if ( $data_store instanceof \WC_Data_Store && $data_store->has_callable( 'add_recorded_user_ids_to_aliases' ) ) {
+			// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the coupon data store instance.)
+			$aliases = $data_store->add_recorded_user_ids_to_aliases( $coupon, $aliases );
+		}
 		$aliases        = array_unique( array_filter( $aliases ) );
 		$aliases_string = "('" . implode( "','", array_map( 'esc_sql', $aliases ) ) . "')";
 		$usage_count    = $wpdb->get_var(
@@ -1114,7 +1120,6 @@ class OrderController {
 			)
 		);
 
-		$data_store = $coupon->get_data_store();
 		// Coupons can be held for an x amount of time before being applied to an order, so we need to check if it's already being held in (maybe via another flow).
 		$tentative_usage_count = $data_store->get_tentative_usages_for_user( $coupon->get_id(), $aliases );
 		return $tentative_usage_count + $usage_count;
@@ -1152,6 +1157,41 @@ class OrderController {
 			if ( ! is_string( $chosen_rate_for_package ) || ! ArrayUtils::string_contains_array( $chosen_rate_for_package, $valid_rate_ids_for_package ) ) {
 				throw $exception;
 			}
+		}
+	}
+
+	/**
+	 * Check shipping was not withheld because "Hide shipping costs until an address is entered"
+	 * judged the address incomplete.
+	 *
+	 * Without this, no packages are calculated, so validate_selected_shipping_methods() has nothing
+	 * to reject and the order is placed with no shipping line. Mirrors the classic checkout's
+	 * WC_Checkout::is_shipping_withheld_for_missing_address(), including its exemption for stores
+	 * that switch shipping calculation off through the filter.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @throws RouteException If shipping was withheld.
+	 * @param bool $needs_shipping Whether the order needs shipping.
+	 */
+	private function validate_shipping_was_not_skipped_for_missing_address( bool $needs_shipping ): void {
+		if ( ! $needs_shipping || 'yes' !== get_option( 'woocommerce_shipping_cost_requires_address' ) || wc()->cart->has_calculated_shipping() ) {
+			return;
+		}
+
+		/**
+		 * This filter is documented in includes/class-wc-cart.php.
+		 *
+		 * @since 2.7.0
+		 */
+		if ( (bool) apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true ) ) {
+			// No packages were calculated, so the checkout shows no shipping selector to pick from;
+			// say what the shopper can actually act on, as the classic checkout does.
+			throw new RouteException(
+				'woocommerce_rest_invalid_shipping_option',
+				esc_html__( 'Please enter an address to continue.', 'woocommerce' ),
+				400
+			);
 		}
 	}
 
@@ -1227,7 +1267,7 @@ class OrderController {
 							continue;
 						}
 
-						// Check stock based on all items in the cart and consider any held stock within pending orders.
+						// Check stock based on all items in the cart and consider any stock held by other orders.
 						$held_stock     = wc_get_held_stock_quantity( $product, $order->get_id() );
 						$required_stock = $quantities[ $product->get_stock_managed_by_id() ];
 

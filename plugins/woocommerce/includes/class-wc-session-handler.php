@@ -220,14 +220,21 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Clones a session to the current session. Exclude customer details for privacy reasons.
+	 * Clones the cart and applied coupons from a shared session into the current session.
+	 *
+	 * Other keys stay with the sharer: they can hold customer details, order IDs whose keys the sharer knows, or extension data.
 	 *
 	 * @param string $clone_from_customer_id The customer ID to clone from.
 	 */
 	private function clone_session_data( string $clone_from_customer_id ) {
-		$session_data                         = (array) $this->get_session( $clone_from_customer_id, array() );
+		$session_data                         = array_intersect_key(
+			(array) $this->get_session( $clone_from_customer_id, array() ),
+			array(
+				'cart'            => true,
+				'applied_coupons' => true,
+			)
+		);
 		$session_data['previous_customer_id'] = $clone_from_customer_id;
-		$session_data                         = array_diff_key( $session_data, array( 'customer' => true ) );
 		$this->_data                          = $session_data;
 		$this->_dirty                         = true;
 		$this->replace_session_on_save();

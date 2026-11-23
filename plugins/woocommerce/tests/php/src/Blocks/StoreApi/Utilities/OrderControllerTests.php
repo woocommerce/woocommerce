@@ -116,6 +116,105 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The guard exists because an address the cart judges incomplete leaves no packages for
+	 * validate_selected_shipping_methods() to inspect, so without it an order is placed with no
+	 * shipping line. It mirrors WC_Checkout::is_shipping_withheld_for_missing_address().
+	 *
+	 * @testdox validate_order_before_payment() refuses an order whose shipping was withheld.
+	 */
+	public function test_validate_order_before_payment_refuses_withheld_shipping(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone();
+		$this->add_product_to_cart_without_rating_shipping();
+
+		// The message, not just the type: validate_selected_shipping_methods() throws the same
+		// RouteException with the same error code, so only the wording tells the two apart.
+		$this->expectException( RouteException::class );
+		$this->expectExceptionMessage( 'Please enter an address to continue.' );
+		$this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() );
+	}
+
+	/**
+	 * The case that matters most in production: once the cart has rated an address, nothing may
+	 * refuse the order, or every checkout on a store with the option enabled would fail.
+	 *
+	 * @testdox validate_order_before_payment() allows an order whose cart has rated the address.
+	 */
+	public function test_validate_order_before_payment_allows_a_rated_cart(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone( '25.00' );
+
+		// A complete customer address, so the cart rates the package and picks the rate itself.
+		WC()->customer->set_shipping_city( 'San Francisco' );
+		WC()->customer->set_shipping_postcode( '94103' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$this->assertTrue(
+			WC()->cart->has_calculated_shipping(),
+			'The cart must have rated the address, or this test proves nothing.'
+		);
+
+		$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+	}
+
+	/**
+	 * With the option off, shipping is never withheld for the address, so a cart with no rate is
+	 * a store with no method configured, not a shopper slipping past one.
+	 *
+	 * @testdox validate_order_before_payment() allows an unrated cart when the option is off.
+	 */
+	public function test_validate_order_before_payment_allows_an_unrated_cart_when_the_option_is_off(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
+
+		// Deliberately no shipping method: with the option off that is the only way a cart that
+		// needs shipping reaches checkout with nothing rated.
+		$this->add_product_to_cart_without_rating_shipping();
+
+		$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+	}
+
+	/**
+	 * @testdox validate_order_before_payment() allows a cart that does not need shipping.
+	 */
+	public function test_validate_order_before_payment_allows_a_cart_that_does_not_need_shipping(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_virtual( true );
+		$product->save();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$this->assertFalse( WC()->cart->needs_shipping() );
+
+		$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+	}
+
+	/**
+	 * A store that switches shipping calculation off through the filter withholds rates for its
+	 * own reasons, so the order must go through, as it does on the classic checkout.
+	 *
+	 * @testdox validate_order_before_payment() allows an order when the filter stops calculation.
+	 */
+	public function test_validate_order_before_payment_allows_shipping_calculation_disabled_by_filter(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone();
+
+		$filter = function () {
+			return false;
+		};
+		add_filter( 'woocommerce_cart_ready_to_calc_shipping', $filter );
+
+		try {
+			$this->add_product_to_cart_without_rating_shipping();
+			$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+		} finally {
+			remove_filter( 'woocommerce_cart_ready_to_calc_shipping', $filter );
+		}
+	}
+
+	/**
 	 * test_validate_order_before_payment_invalid_coupon_usage_limit.
 	 */
 	public function test_validate_order_before_payment_invalid_coupon_usage_limit() {
@@ -695,6 +794,55 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Add a flat rate to the catch-all zone, optionally with a cost so it actually offers a rate.
+	 *
+	 * @param string $cost Flat rate cost. The default leaves the rate off, as an unconfigured method is.
+	 */
+	private function add_flat_rate_to_default_zone( string $cost = '' ): void {
+		$default_zone = \WC_Shipping_Zones::get_zone( 0 );
+		$default_zone->add_shipping_method( 'flat_rate' );
+		$default_zone->save();
+
+		if ( '' === $cost ) {
+			return;
+		}
+
+		$zone_methods                         = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
+		$flat_rate                            = reset( $zone_methods );
+		$flat_rate->instance_settings['cost'] = $cost;
+		update_option( $flat_rate->get_instance_option_key(), $flat_rate->instance_settings );
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping()->load_shipping_methods();
+	}
+
+	/**
+	 * Put the cart in the state the bug produced: a shippable product, a method left in the
+	 * session by an earlier request, and no package ever rated, so the shipping-method check has
+	 * nothing to reject.
+	 */
+	private function add_product_to_cart_without_rating_shipping(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->assertFalse( WC()->cart->has_calculated_shipping() );
+
+		// Any value will do: with no packages calculated, only its presence is checked.
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate:1' ) );
+	}
+
+	/**
+	 * An order carrying the complete address validate_addresses() asks for, so the shipping guard
+	 * is the only thing left that can refuse it.
+	 */
+	private function create_order_with_full_shipping_address(): \WC_Order {
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address( $order );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
 	 * @testdox Order locks are re-entrant within a request and released by their owner.
 	 */
 	public function test_order_lock_is_reentrant_and_released(): void {
@@ -848,5 +996,112 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		foreach ( $override_data as $key => $value ) {
 			$order->{"set_shipping_$key"}( $value );
 		}
+	}
+
+	/**
+	 * Build a saved order for a customer and billing email that carries a coupon, without recording its usage.
+	 *
+	 * @param int    $customer_id   Customer ID, 0 for a guest.
+	 * @param string $billing_email Billing email.
+	 * @param string $code          Coupon code.
+	 * @return \WC_Order
+	 */
+	private function create_order_with_coupon( int $customer_id, string $billing_email, string $code ): \WC_Order {
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_billing_email( $billing_email );
+		$this->set_shipping_address( $order );
+		$item = new \WC_Order_Item_Coupon();
+		$item->set_code( $code );
+		$order->add_item( $item );
+		$order->save();
+		return $order;
+	}
+
+	/**
+	 * Run payment validation and return the coupon error message, or null when the coupon was kept.
+	 *
+	 * @param \WC_Order $order Order to validate.
+	 * @return string|null
+	 */
+	private function get_coupon_error( \WC_Order $order ): ?string {
+		try {
+			$this->sut->validate_order_before_payment( $order );
+			return null;
+		} catch ( RouteException $e ) {
+			return $e->getMessage();
+		}
+	}
+
+	/**
+	 * @testdox A guest is refused a per-user coupon with the email of an account that used it, after that account changes its email.
+	 */
+	public function test_validate_coupon_usage_limit_after_account_email_change(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'vip-store@example.com' ) );
+		$coupon  = CouponHelper::create_coupon(
+			'vip-store',
+			'publish',
+			array(
+				'customer_email'       => array( 'vip-store@example.com' ),
+				'usage_limit_per_user' => 1,
+			)
+		);
+
+		$first_order = $this->create_order_with_coupon( $user_id, 'invoices@example.com', 'vip-store' );
+		$coupon->increase_usage_count( (string) $user_id, $first_order );
+
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'changed-store@example.com',
+			)
+		);
+
+		$error = $this->get_coupon_error( $this->create_order_with_coupon( 0, 'vip-store@example.com', 'vip-store' ) );
+
+		$this->assertStringContainsString( 'Usage limit for coupon', (string) $error );
+	}
+
+	/**
+	 * @testdox A second account is refused a per-user coupon billed to an email already used, after the first customer edits their saved billing email.
+	 */
+	public function test_validate_coupon_usage_limit_after_saved_billing_email_change(): void {
+		$first_id  = $this->factory->user->create( array( 'user_email' => 'first-store@example.com' ) );
+		$second_id = $this->factory->user->create( array( 'user_email' => 'second-store@example.com' ) );
+		$coupon    = CouponHelper::create_coupon( 'billing-store', 'publish', array( 'usage_limit_per_user' => 1 ) );
+
+		$first_order = $this->create_order_with_coupon( $first_id, 'shared-store@example.com', 'billing-store' );
+		$coupon->increase_usage_count( (string) $first_id, $first_order );
+		update_user_meta( $first_id, 'billing_email', 'moved-store@example.com' );
+
+		$second_error = $this->get_coupon_error( $this->create_order_with_coupon( $second_id, 'shared-store@example.com', 'billing-store' ) );
+		$guest_error  = $this->get_coupon_error( $this->create_order_with_coupon( 0, 'shared-store@example.com', 'billing-store' ) );
+
+		$this->assertStringContainsString( 'Usage limit for coupon', (string) $second_error );
+		$this->assertStringContainsString( 'Usage limit for coupon', (string) $guest_error );
+	}
+
+	/**
+	 * @testdox A per-user limit of two still accepts a second use by a guest with the email of an account that used it once.
+	 */
+	public function test_validate_coupon_usage_limit_allows_uses_up_to_limit(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'two-store@example.com' ) );
+		$coupon  = CouponHelper::create_coupon( 'two-store', 'publish', array( 'usage_limit_per_user' => 2 ) );
+		$coupon->increase_usage_count( (string) $user_id, $this->create_order_with_coupon( $user_id, 'two-store@example.com', 'two-store' ) );
+
+		$this->assertNull( $this->get_coupon_error( $this->create_order_with_coupon( 0, 'two-store@example.com', 'two-store' ) ) );
+	}
+
+	/**
+	 * @testdox A second account is refused a per-user coupon when it bills to the account email of a customer who used it.
+	 */
+	public function test_validate_coupon_usage_limit_second_account_billing_to_used_account_email(): void {
+		$first_id  = $this->factory->user->create( array( 'user_email' => 'owner-store@example.com' ) );
+		$second_id = $this->factory->user->create( array( 'user_email' => 'other-store@example.com' ) );
+		$coupon    = CouponHelper::create_coupon( 'owner-store', 'publish', array( 'usage_limit_per_user' => 1 ) );
+		$coupon->increase_usage_count( (string) $first_id, $this->create_order_with_coupon( $first_id, 'receipts-store@example.com', 'owner-store' ) );
+
+		$error = $this->get_coupon_error( $this->create_order_with_coupon( $second_id, 'owner-store@example.com', 'owner-store' ) );
+
+		$this->assertStringContainsString( 'Usage limit for coupon', (string) $error );
 	}
 }
