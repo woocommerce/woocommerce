@@ -1450,4 +1450,80 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( serialize( array( 'pa_color' => 'blue' ) ), $read( 'nested' ), 'Objects nested in arrays are removed' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 		$this->assertSame( $stored['recursive'], $read( 'recursive' ), 'A self-referencing row without objects is kept, and does not stop the migration' );
 	}
+
+	/**
+	 * @testdox wc_update_1131_invalidate_postcode_match_caches makes ZIP+4 postcodes match zones and tax rates cached before the fix.
+	 */
+	public function test_wc_update_1131_invalidate_postcode_match_caches(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$zone = new WC_Shipping_Zone();
+		$zone->set_zone_name( 'Honolulu' );
+		$zone->add_location( 'US', 'country' );
+		$zone->add_location( '96801', 'postcode' );
+		$zone->save();
+
+		$rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'Honolulu',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $rate_id, '96801' );
+
+		// What a lookup before the fix cached for a ZIP+4 postcode: the fallback zone and no tax rate.
+		wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'shipping_zones' ) . 'wc_shipping_zone_' . md5( 'US++968011234' ), 0, 'shipping_zones' );
+		wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'taxes' ) . 'wc_tax_rates_' . md5( 'US+++968011234+' ), array(), 'taxes' );
+
+		$package      = array(
+			'destination' => array(
+				'country'  => 'US',
+				'state'    => '',
+				'postcode' => '96801-1234',
+			),
+		);
+		$tax_location = array(
+			'country'  => 'US',
+			'postcode' => '96801-1234',
+		);
+
+		$this->assertSame( 0, WC_Shipping_Zones::get_zone_matching_package( $package )->get_id(), 'The stale zone match is served before the update.' );
+		$this->assertSame( array(), WC_Tax::find_rates( $tax_location ), 'The stale tax match is served before the update.' );
+
+		wc_update_1131_invalidate_postcode_match_caches();
+
+		$this->assertSame( $zone->get_id(), WC_Shipping_Zones::get_zone_matching_package( $package )->get_id() );
+		$this->assertArrayHasKey( $rate_id, WC_Tax::find_rates( $tax_location ) );
+	}
+
+	/**
+	 * @testdox wc_update_1131_invalidate_postcode_match_caches makes a cart calculate again the shipping rates it stored before the fix.
+	 */
+	public function test_wc_update_1131_invalidate_postcode_match_caches_recalculates_stored_package_rates(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$package = array(
+			'contents'    => array(),
+			'destination' => array(
+				'country'  => 'US',
+				'state'    => '',
+				'postcode' => '96801-1234',
+			),
+		);
+
+		// What a cart session stored before the fix: a rate from the zone the ZIP+4 postcode fell back to.
+		WC()->shipping()->calculate_shipping_for_package( $package );
+		$stored_rates          = WC()->session->get( 'shipping_for_package_0' );
+		$stored_rates['rates'] = array( 'flat_rate:99' => new WC_Shipping_Rate( 'flat_rate:99', 'Fallback rate', 10, array(), 'flat_rate' ) );
+		WC()->session->set( 'shipping_for_package_0', $stored_rates );
+
+		$this->assertArrayHasKey( 'flat_rate:99', WC()->shipping()->calculate_shipping_for_package( $package )['rates'], 'The stored rate is served before the update.' );
+
+		wc_update_1131_invalidate_postcode_match_caches();
+
+		$this->assertArrayNotHasKey( 'flat_rate:99', WC()->shipping()->calculate_shipping_for_package( $package )['rates'], 'The rates are calculated again after the update.' );
+	}
 }

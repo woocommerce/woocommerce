@@ -38,6 +38,7 @@
 	"usesContext": [ "query", "queryId", "postId" ],
 	"keywords": [ "WooCommerce" ],
 	"ancestor": [ "woocommerce/single-product" ],
+	"viewScript": "file:../product-rating-counter-frontend.js",
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

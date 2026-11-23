@@ -10,28 +10,38 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { safeHref } from '../safe-href';
 import type { ShoppingView } from '../types';
-import { Row } from './check-row';
+import { asLink } from './as-link';
+import { Row, useSrDescription } from './check-row';
 
 type Checklist = ShoppingView[ 'checklist' ];
 
 /**
- * Props that make a @wordpress/ui Button a link, or that disable it when the URL is rejected.
- * This version of the package has no ButtonLink.
+ * A step's button, with the policy it is for read as its description.
+ *
+ * @param props      Props.
+ * @param props.link The step's link.
  */
-export const asLink = ( href: string ) => {
-	const safe = safeHref( href );
-	if ( ! safe ) {
-		return { disabled: true };
-	}
-	return {
-		nativeButton: false as const,
-		role: 'link' as const,
-		// The Button renders the text into it.
-		// eslint-disable-next-line jsx-a11y/anchor-has-content
-		render: <a href={ safe } />,
-	};
+const StepButton = ( {
+	link,
+}: {
+	link: NonNullable< Checklist[ 'steps' ][ number ][ 'link' ] >;
+} ) => {
+	const sr = useSrDescription( link.sr );
+	return (
+		<>
+			<Button
+				variant="outline"
+				size="compact"
+				className="wc-sales-readiness-ui-button"
+				{ ...asLink( link.href ) }
+				{ ...sr.props }
+			>
+				{ link.text }
+			</Button>
+			{ sr.description }
+		</>
+	);
 };
 
 /**
@@ -67,16 +77,7 @@ export const ShoppingChecklist = ( {
 							badge={ step.badge }
 							srState={ issue }
 							action={
-								step.link && (
-									<Button
-										variant="outline"
-										size="compact"
-										{ ...asLink( step.link.href ) }
-										aria-label={ step.link.sr || undefined }
-									>
-										{ step.link.text }
-									</Button>
-								)
+								step.link && <StepButton link={ step.link } />
 							}
 						>
 							{ step.lines.map( ( line ) => (
@@ -118,7 +119,13 @@ export const ShoppingChecklist = ( {
 						</ul>
 					</Collapsible.Panel>
 					<Collapsible.Trigger
-						render={ <Button variant="minimal" size="compact" /> }
+						render={
+							<Button
+								variant="minimal"
+								size="compact"
+								className="wc-sales-readiness-ui-button"
+							/>
+						}
 					>
 						{ open ? checklist.hide_done : checklist.show_done }
 					</Collapsible.Trigger>

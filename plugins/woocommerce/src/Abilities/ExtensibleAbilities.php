@@ -353,7 +353,8 @@ class ExtensibleAbilities {
 	 *
 	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query`,
 	 *                               `orders-query` and `customers-query` apply the filters of `product`, `order`
-	 *                               and `customer`. A `meta_query` for `customer` matches user meta. The list ability
+	 *                               and `customer`. A `customer` filter returns only `include_ids`, which are
+	 *                               user IDs, so it matches registered customers only. The list ability
 	 *                               of another resource must call `get_query_args()` and `add_query_filters_schema()` itself.
 	 *     @type string   $namespace Slug of the extension that owns the filter, such as `subscriptions`.
 	 *     @type string   $filter    Filter name inside the namespace, such as `subscribable`.
@@ -362,7 +363,8 @@ class ExtensibleAbilities {
 	 *                               a `meta_query`, for products also a `tax_query`, `include_ids` or
 	 *                               `exclude_ids`. Core adds each one to the query with AND. Return a
 	 *                               WP_Error to refuse the value. A `tax_query` is accepted only for
-	 *                               `product`. Any other key, or a `tax_query` for another resource, fails the call.
+	 *                               `product`. Any other key, a `tax_query` for another resource, or a key other
+	 *                               than `include_ids` for `customer`, fails the call.
 	 *                               `include_ids` and `exclude_ids` are lists of object IDs. Use them for
 	 *                               data that is not meta, such as order items or a table of the extension:
 	 *                               query that data and return the IDs that match. Core keeps the IDs that
@@ -514,6 +516,7 @@ class ExtensibleAbilities {
 					! is_array( $clauses )
 					|| ! empty( array_diff_key( $clauses, array_flip( self::QUERY_ARG_KEYS ) ) )
 					|| ( 'product' !== $resource_name && isset( $clauses['tax_query'] ) )
+					|| ( 'customer' === $resource_name && ! empty( array_diff_key( $clauses, array( 'include_ids' => true ) ) ) )
 					|| in_array( false, array_map( 'is_array', $clauses ), true )
 				) {
 					return new \WP_Error(

@@ -26,6 +26,7 @@ Possible uses of the Store API include:
 ## Requirements and limitations
 
 * This is an unauthenticated API. It does not require API keys or authentication tokens for access.
+* WooCommerce REST API keys do not authenticate Store API requests. Since WooCommerce 11.3.1, a request that sends one is not run as the key's user. Use the customer's session cookie or a [Cart-Token](/docs/apis/store-api/cart-tokens) instead.
 * All API responses return JSON-formatted data.
 * Data returned from the API is reflective of the current user (customer). Customer sessions in WooCommerce are cookie-based.
 * Store API cannot be used to look up other customers and orders by ID; only data belonging to the current user.

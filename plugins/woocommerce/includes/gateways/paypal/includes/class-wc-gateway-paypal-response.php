@@ -54,6 +54,13 @@ abstract class WC_Gateway_Paypal_Response {
 			return false;
 		}
 
+		// A checkout-draft order has not been through checkout validation, so it must not be paid for from a PayPal
+		// IPN or PDT notification even though needs_payment() reports true for it.
+		if ( $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
+			WC_Gateway_Paypal::log( 'Order #' . $order->get_id() . ' is a checkout draft and cannot be paid for.', 'error' );
+			return false;
+		}
+
 		return $order;
 	}
 

@@ -37,8 +37,8 @@ function groupByTier( items: FixFirstData[ 'items' ] ): TierGroup[] {
 }
 
 /**
- * The Fix first items under a heading per tier: what each group of issues stops. A product item's
- * line starts with its share of sales.
+ * The Fix first items under a heading per tier: what each group of issues stops. An item's line
+ * starts with what it affects, in bold.
  */
 export const FixFirstList = ( {
 	items,
@@ -86,11 +86,17 @@ export const FixFirstList = ( {
 							}
 							srState={ item.tier + ':' }
 						>
-							{ item.why && (
+							{ ( item.impact || item.why ) && (
 								<Text
 									variant="body-sm"
 									className="wc-sales-readiness__muted"
 								>
+									{ item.impact && (
+										<strong className="wc-sales-readiness__impact">
+											{ item.impact }
+										</strong>
+									) }
+									{ item.impact && item.why && ' ' }
 									{ item.why }
 								</Text>
 							) }

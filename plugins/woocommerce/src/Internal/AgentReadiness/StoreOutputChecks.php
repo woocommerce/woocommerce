@@ -101,13 +101,20 @@ class StoreOutputChecks {
 			if ( 'ucp_profile_version' === $check['id'] && false === $ok ) {
 				$source = self::served_version( $responses );
 			}
-			if ( 'ucp_endpoints_live' === $check['id'] && false === $ok ) {
-				$source = self::search_seen( $responses );
-			}
 			if ( 'llms_txt_present' === $check['id'] ) {
 				$source = $this->llms_txt_source( $responses, $ok );
 			}
+			if ( 'open_graph_tags' === $check['id'] && false === $ok ) {
+				// Which page lacks the tags picks the found line: home, product or both. A failing product page is named.
+				$source = self::open_graph_missing( $responses );
+				$failed = 'home' === $source ? null : $responses->product();
+			}
 			$seen_at = $conflict ? self::seen_at( (string) ( $check['seen_at'] ?? '' ), $responses ) : '';
+			// A 5xx is couldn't check, not failed, and support still needs to see what the store answered and where.
+			if ( 'ucp_endpoints_live' === $check['id'] && true !== $ok && ! $pending ) {
+				$source  = self::search_seen( $responses );
+				$seen_at = '' !== $source ? self::catalog_search_url( $responses ) : '';
+			}
 			if ( 'llms_txt_links_resolve' === $check['id'] && false === $ok ) {
 				// Where the file comes from picks the fix, and the broken link is named.
 				$source  = $this->llms_txt_source( $responses, true );
@@ -135,6 +142,22 @@ class StoreOutputChecks {
 			$responses->focus( null );
 		}
 		return $results;
+	}
+
+	/**
+	 * Which page the Open Graph check failed on: 'home', 'product' or 'both'. The product page is the
+	 * one in focus, the sample's first that failed.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private static function open_graph_missing( StoreResponses $responses ): string {
+		$missing = static fn( ?array $page ): bool => null !== $page && ! ( self::has_open_graph( $page['body'], 'og:title' ) && self::has_open_graph( $page['body'], 'og:image' ) );
+		$home    = $missing( $responses->home_page() );
+		$product = $missing( $responses->product_page() );
+		if ( $home && $product ) {
+			return 'both';
+		}
+		return $home ? 'home' : 'product';
 	}
 
 	/**
@@ -349,7 +372,7 @@ class StoreOutputChecks {
 				'name'    => __( 'Pages let search and AI answers quote them', 'woocommerce' ),
 				'label'   => __( 'Pages ask search and AI answers not to quote them', 'woocommerce' ),
 				'why'     => __( 'A nosnippet or max-snippet robots rule keeps AI answers from quoting your pages, so your products get left out.', 'woocommerce' ),
-				'fix'     => __( 'Remove nosnippet and max-snippet from the robots settings in your SEO plugin, or ask your host about an X-Robots-Tag header.', 'woocommerce' ),
+				'fix'     => __( 'Remove nosnippet and max-snippet from the robots settings in your SEO plugin, or ask your hosting provider about an X-Robots-Tag header.', 'woocommerce' ),
 				'fix_url' => '',
 			),
 			array(
@@ -371,7 +394,7 @@ class StoreOutputChecks {
 				'name'    => __( 'Pages let search and AI crawlers index them', 'woocommerce' ),
 				'label'   => __( 'Pages ask search and AI crawlers not to index them', 'woocommerce' ),
 				'why'     => __( 'A noindex, noai or noimageai robots rule keeps your pages and products out of search and AI answers.', 'woocommerce' ),
-				'fix'     => __( 'Remove noindex, noai and noimageai from the robots settings in your SEO plugin, or ask your host about an X-Robots-Tag header.', 'woocommerce' ),
+				'fix'     => __( 'Remove noindex, noai and noimageai from the robots settings in your SEO plugin, or ask your hosting provider about an X-Robots-Tag header.', 'woocommerce' ),
 				'fix_url' => '',
 			),
 			array(
@@ -575,7 +598,7 @@ class StoreOutputChecks {
 			'name'     => __( 'Store serves its UCP profile', 'woocommerce' ),
 			'label'    => __( 'UCP profile isn\'t served', 'woocommerce' ),
 			'why'      => __( 'Agents read /.well-known/ucp to find your catalog. UCP is on, but visitors don\'t get the profile.', 'woocommerce' ),
-			'fix'      => __( 'Save Settings > Permalinks to refresh the rules. If it still fails, ask your host whether caching or a firewall blocks /.well-known/ucp.', 'woocommerce' ),
+			'fix'      => __( 'Save Settings > Permalinks to refresh the rules. If it still fails, ask your hosting provider whether caching or a firewall blocks /.well-known/ucp.', 'woocommerce' ),
 			'fix_url'  => admin_url( 'options-permalink.php' ),
 			'conflict' => true,
 			'seen_at'  => home_url( '/.well-known/ucp' ),
@@ -602,7 +625,7 @@ class StoreOutputChecks {
 			'name'    => __( 'UCP endpoint answers', 'woocommerce' ),
 			'label'   => __( 'UCP endpoint is blocked or doesn\'t answer', 'woocommerce' ),
 			'why'     => __( 'Agents search your catalog and build carts through this endpoint; when it\'s blocked they can\'t find your products.', 'woocommerce' ),
-			'fix'     => __( 'Ask your host or security plugin to allow requests to the WordPress REST API under /wp-json/wc/ucp/.', 'woocommerce' ),
+			'fix'     => __( 'Ask your hosting provider or security plugin to allow requests to the WordPress REST API under /wp-json/wc/ucp/.', 'woocommerce' ),
 			'fix_url' => '',
 		);
 		$checks[] = array(
@@ -655,7 +678,8 @@ class StoreOutputChecks {
 	 * The robots.txt crawlers get. '' when the store answered that there is none.
 	 * Null when it could not be read: the request failed, or the body is a page.
 	 *
-	 * Loaded from the host root, also when WordPress is in a subdirectory.
+	 * Loaded from the host root, also when WordPress is in a subdirectory. With plain permalinks
+	 * WordPress answers /robots.txt with a page, so crawlers get no rules: that reads as none.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
@@ -667,8 +691,11 @@ class StoreOutputChecks {
 		if ( in_array( $response['status'], array( 404, 410 ), true ) ) {
 			return '';
 		}
+		if ( ! str_starts_with( ltrim( $response['body'] ), '<' ) ) {
+			return $response['body'];
+		}
 		// A theme or a login wall that answers every URL with a page is not a robots.txt.
-		return str_starts_with( ltrim( $response['body'] ), '<' ) ? null : $response['body'];
+		return '' === (string) get_option( 'permalink_structure' ) ? '' : null;
 	}
 
 	/**
@@ -685,7 +712,8 @@ class StoreOutputChecks {
 		);
 		$defaults = array( '/sitemap_index.xml', '/sitemap.xml' );
 		if ( function_exists( 'wp_sitemaps_get_server' ) && wp_sitemaps_get_server()->sitemaps_enabled() ) {
-			$defaults[] = '/wp-sitemap.xml';
+			// /?sitemap=index with plain permalinks.
+			$defaults[] = (string) get_sitemap_url( 'index' );
 		}
 		return array_values( array_unique( array_merge( $listed, $defaults ) ) );
 	}
@@ -775,6 +803,16 @@ class StoreOutputChecks {
 		if ( false === stripos( $xml, '<sitemapindex' ) ) {
 			return array();
 		}
+		return self::loc_urls( $xml );
+	}
+
+	/**
+	 * The decoded URL in each loc element.
+	 *
+	 * @param string $xml Sitemap body.
+	 * @return array<int, string>
+	 */
+	private static function loc_urls( string $xml ): array {
 		$urls   = array();
 		$offset = 0;
 		$start  = stripos( $xml, '<loc>', $offset );
@@ -1650,8 +1688,8 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether a sitemap index names a product sitemap (product-sitemap.xml,
-	 * wp-sitemap-posts-product-1.xml), or a urlset lists a product page. A category
-	 * sitemap and a page that isn't a sitemap never count.
+	 * wp-sitemap-posts-product-1.xml, or ?sitemap-subtype=product), or a urlset lists a product page.
+	 * A category sitemap and a page that isn't a sitemap never count.
 	 *
 	 * @param string $xml Sitemap body.
 	 */
@@ -1662,9 +1700,35 @@ class StoreOutputChecks {
 		if ( 1 === preg_match( '#<loc>[^<]*(?:product-sitemap|wp-sitemap-posts-product-)[^<]*\.xml\s*</loc>#i', $xml ) ) {
 			return true;
 		}
+		if ( '' === (string) get_option( 'permalink_structure' ) && self::plain_permalink_names_products( $xml ) ) {
+			return true;
+		}
 		// The fixed part of the product base, before a tag such as %product_cat%.
 		$base = trim( (string) strtok( (string) ( wc_get_permalink_structure()['product_base'] ?? '' ), '%' ), '/' );
 		return '' !== $base && 1 === preg_match( '#<loc>[^<]*/' . preg_quote( $base, '#' ) . '/[^<]+</loc>#i', $xml );
+	}
+
+	/**
+	 * Whether a plain-permalink sitemap names products. The product sitemap's subtype is
+	 * `product`, and a product page has a `product` query argument, in any position.
+	 *
+	 * @param string $xml Sitemap body.
+	 */
+	private static function plain_permalink_names_products( string $xml ): bool {
+		foreach ( self::loc_urls( $xml ) as $url ) {
+			$query = wp_parse_url( $url, PHP_URL_QUERY );
+			if ( ! is_string( $query ) || '' === $query ) {
+				continue;
+			}
+			$args = array();
+			wp_parse_str( $query, $args );
+			$subtype = $args['sitemap-subtype'] ?? '';
+			$product = $args['product'] ?? '';
+			if ( ( is_string( $subtype ) && 'product' === $subtype ) || ( is_string( $product ) && '' !== $product ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -1724,7 +1788,21 @@ class StoreOutputChecks {
 	 */
 	private static function store_page_urls( StoreResponses $responses ): array {
 		$product = $responses->product();
-		return array_values( array_filter( array( home_url( '/' ), wc_get_page_permalink( 'shop', '' ), null === $product ? '' : (string) $product->get_permalink() ) ) );
+		$shop    = wc_get_page_permalink( 'shop', '' );
+		$query   = wp_parse_url( $shop, PHP_URL_QUERY );
+		$args    = array();
+		if ( is_string( $query ) ) {
+			wp_parse_str( $query, $args );
+		}
+		// wc_template_redirect sends /?page_id=<shop> to the product archive. A front page, a filtered permalink, or a missing page has no page_id, so it stays.
+		$page_id = isset( $args['page_id'] ) && is_scalar( $args['page_id'] ) ? (int) $args['page_id'] : 0;
+		if ( 0 < $page_id && wc_get_page_id( 'shop' ) === $page_id && '' === (string) get_option( 'permalink_structure' ) ) {
+			$archive = get_post_type_archive_link( 'product' );
+			if ( is_string( $archive ) && '' !== $archive ) {
+				$shop = $archive;
+			}
+		}
+		return array_values( array_filter( array( home_url( '/' ), $shop, null === $product ? '' : (string) $product->get_permalink() ) ) );
 	}
 
 	/**
@@ -1811,7 +1889,8 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether every image has an alt attribute. An empty alt marks a decorative image and counts;
-	 * images hidden from assistive technology don't need one.
+	 * images hidden from assistive technology don't need one, nor do templates whose alt a script
+	 * fills in, such as the Mini-Cart block's empty item images.
 	 *
 	 * @param string $html Page HTML.
 	 */
@@ -1829,7 +1908,8 @@ class StoreOutputChecks {
 			// A tracking pixel or an image hidden from assistive technology needs no alt.
 			$pixel  = '1' === (string) $tags->get_attribute( 'width' ) && '1' === (string) $tags->get_attribute( 'height' );
 			$hidden = 'true' === strtolower( (string) $tags->get_attribute( 'aria-hidden' ) ) || in_array( strtolower( (string) $tags->get_attribute( 'role' ) ), array( 'presentation', 'none' ), true );
-			if ( ! $pixel && ! $hidden ) {
+			$bound  = null !== $tags->get_attribute( 'data-wp-bind--alt' );
+			if ( ! $pixel && ! $hidden && ! $bound ) {
 				return false;
 			}
 		}

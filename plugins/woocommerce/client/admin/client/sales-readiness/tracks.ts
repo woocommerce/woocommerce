@@ -42,7 +42,7 @@ export function viewedProps( view: ReadinessView, surface: Surface ): Props {
 	}
 	return {
 		surface,
-		checked: ! view.intro,
+		checked: view.checked,
 		pending: view.run.pending,
 		fix_first_count: view.fix_first?.items.length ?? 0,
 		open_count: counts.open,
