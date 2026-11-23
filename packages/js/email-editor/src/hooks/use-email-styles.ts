@@ -30,8 +30,11 @@ interface EmailStylesData {
  * @return {boolean} True if the nested object is empty, false otherwise.
  */
 function isNestedEmpty( obj ) {
-	// An empty string is unset; other plain values (0, false, numbers) are set.
-	if ( typeof obj !== 'object' || obj === null ) {
+	// An empty string or null is unset; other plain values (0, false, numbers) are set.
+	if ( obj === null ) {
+		return true;
+	}
+	if ( typeof obj !== 'object' ) {
 		return obj === '';
 	}
 	const isNotEmpty = Object.keys( obj ).some( ( key ) => {

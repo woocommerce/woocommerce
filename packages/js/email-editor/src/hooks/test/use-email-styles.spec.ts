@@ -67,13 +67,14 @@ describe( 'email style helpers', () => {
 	} );
 
 	describe( 'cleanupUserStyles', () => {
-		it( 'removes empty arrays, undefined values and empty nested objects', () => {
+		it( 'removes empty arrays, empty strings, null and undefined values and empty nested objects', () => {
 			expect(
 				cleanupUserStyles( {
 					color: {
 						text: '#000',
 						gradient: undefined,
 						background: '',
+						link: null,
 					},
 					elements: { link: { color: {} } },
 					blocks: [],
