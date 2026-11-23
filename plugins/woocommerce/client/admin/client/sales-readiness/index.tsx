@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { Breadcrumbs, Page } from '@wordpress/admin-ui';
+import { Notice } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Spinner } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -22,6 +23,7 @@ import { DeclaredCard, SectionCard } from './components/section-card';
 export default function SalesReadiness() {
 	const { view, error, reload, running, runCheck } =
 		useReadinessView( 'page' );
+	const [ downloadError, setDownloadError ] = useState( '' );
 
 	return (
 		<Page
@@ -32,7 +34,7 @@ export default function SalesReadiness() {
 						{
 							label:
 								view?.title ??
-								__( 'AI sales readiness', 'woocommerce' ),
+								__( 'AI shopping health', 'woocommerce' ),
 						},
 					] }
 				/>
@@ -42,13 +44,21 @@ export default function SalesReadiness() {
 		>
 			<div className="wc-sales-readiness__content">
 				{ error && <ErrorNotice message={ error } reload={ reload } /> }
-				{ ! view && ! error && <Spinner /> }
+				{ downloadError && (
+					<Notice
+						status="error"
+						onRemove={ () => setDownloadError( '' ) }
+					>
+						{ downloadError }
+					</Notice>
+				) }
 				{ view && (
 					<>
 						<CheckedCard
 							view={ view }
 							running={ running }
 							onRun={ runCheck }
+							onDownloadError={ setDownloadError }
 						/>
 						{ view.fix_first && (
 							<FixFirstCard fixFirst={ view.fix_first } />

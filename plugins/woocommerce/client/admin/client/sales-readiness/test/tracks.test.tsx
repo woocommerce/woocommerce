@@ -32,6 +32,7 @@ const checkedView: ReadinessView = {
 		message: '',
 		link: null,
 	},
+	support_url: 'https://woocommerce.com/my-account/create-a-ticket/',
 	fix_first: {
 		title: 'Fix first',
 		ranking: 'Ranked by products.',
@@ -434,6 +435,29 @@ describe( 'Sales readiness tracking', () => {
 			)
 		);
 		expect( events() ).not.toContain( 'sales_readiness_viewed' );
+	} );
+} );
+
+describe( 'AI tools overview connection card', () => {
+	beforeEach( () => mockedApiFetch.mockReset() );
+
+	it( 'offers Connect while the readiness view is still loading', () => {
+		mockedApiFetch.mockReturnValue( new Promise( () => {} ) );
+		render(
+			<SalesReadinessOverview
+				connect={ {
+					connected: false,
+					notice: '',
+					url: 'https://example.com/wp-admin/admin-post.php',
+					action: 'woocommerce_ai_tools_connect',
+					nonce: 'abc',
+				} }
+			/>
+		);
+
+		expect(
+			screen.getByRole( 'button', { name: 'Connect to WordPress.com' } )
+		).toBeInTheDocument();
 	} );
 } );
 

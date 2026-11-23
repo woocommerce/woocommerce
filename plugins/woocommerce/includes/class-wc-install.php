@@ -375,6 +375,10 @@ class WC_Install {
 			'wc_update_1130_delete_stock_notification_sync_notice_option',
 			'wc_update_1130_backfill_order_stats_payment_method',
 		),
+		'11.3.1'   => array(
+			'wc_update_1131_redact_deferred_customer_passwords',
+			'wc_update_1131_invalidate_postcode_match_caches',
+		),
 		'11.4.0'   => array(
 			'wc_update_1140_re_enable_autoload_options',
 			'wc_update_1140_add_mpn_to_product_lookup_table',
