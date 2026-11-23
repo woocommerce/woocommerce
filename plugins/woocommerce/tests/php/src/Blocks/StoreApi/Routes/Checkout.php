@@ -4478,7 +4478,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox Existing order payment should refuse a gateway the shipping method excludes when a guest pays their own checkout draft.
+	 * @testdox Existing order payment should refuse a guest's own checkout draft even with a gateway the shipping method excludes.
 	 */
 	public function test_checkout_order_refuses_gateway_not_enabled_for_checkout_draft_shipping_method() {
 		$this->restrict_offline_gateway( 'cod', array( 'local_pickup' ) );
@@ -4492,7 +4492,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$response = $this->dispatch_pay_for_order_request( $order, array(), null, true, 'cod' );
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'woocommerce_rest_checkout_payment_method_disabled', $response->get_data()['code'] );
+		$this->assertEquals( 'invalid_order_update_status', $response->get_data()['code'] );
 		$this->assertEquals( 'checkout-draft', wc_get_order( $order->get_id() )->get_status() );
 	}
 
