@@ -59,7 +59,7 @@ describe( 'AiAccessSettings', () => {
 		const { container } = renderWith( { status: 'default' } );
 
 		const toggle = screen.getByRole( 'checkbox', {
-			name: /Let AI tools use your content in answers/,
+			name: /Allow AI assistants to use your content in answers/,
 		} );
 		const disallow = screen.getByRole( 'radio', {
 			name: /Don’t allow AI training/,
@@ -107,7 +107,7 @@ describe( 'AiAccessSettings', () => {
 				'/wp-admin/admin.php?page=wc-settings&tab=agentic-commerce&section=shopping',
 		} );
 		const toggle = screen.getByRole( 'checkbox', {
-			name: /Let AI tools use your content in answers/,
+			name: /Allow AI assistants to use your content in answers/,
 		} );
 		expect( container.querySelector( '.components-notice' ) ).toBeNull();
 
@@ -152,7 +152,7 @@ describe( 'AiAccessSettings', () => {
 			expect( notices[ 0 ] ).toHaveTextContent( noticeText );
 			expect(
 				screen.getByRole( 'checkbox', {
-					name: /Let AI tools use your content in answers/,
+					name: /Allow AI assistants to use your content in answers/,
 				} )
 			).toBeDisabled();
 			screen

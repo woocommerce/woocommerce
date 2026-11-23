@@ -112,7 +112,7 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 			) }
 			<p className="woocommerce-ai-access-settings__intro">
 				{ __(
-					'These settings apply to your whole site.',
+					'These settings apply to your whole site. They ask AI companies to respect your choices.',
 					'woocommerce'
 				) }
 			</p>
@@ -123,7 +123,7 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 					label={
 						<>
 							{ __(
-								'Let AI tools use your content in answers',
+								'Allow AI assistants to use your content in answers',
 								'woocommerce'
 							) }
 							<p>
@@ -147,7 +147,7 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 					>
 						{ createInterpolateElement(
 							__(
-								'AI shopping is on, so AI agents can still get your product details through it. Turn it off in <a>AI tools</a>.',
+								'AI shopping is on, so AI assistants can still get your product details. Turn it off in <a>AI tools</a>.',
 								'woocommerce'
 							),
 							{
@@ -180,7 +180,7 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 							label: __( 'Allow AI training', 'woocommerce' ),
 							value: 'yes',
 							description: __(
-								'AI companies may use your pages to train their models.',
+								'AI companies can use your pages to train their models.',
 								'woocommerce'
 							),
 						},
@@ -188,12 +188,6 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 					onChange={ ( value ) => setTraining( value as YesNo ) }
 				/>
 			</div>
-			<p className="woocommerce-ai-access-settings__footnote">
-				{ __(
-					'AI companies that respect site preferences follow these settings. They don’t block access to your site.',
-					'woocommerce'
-				) }
-			</p>
 		</div>
 	);
 };
