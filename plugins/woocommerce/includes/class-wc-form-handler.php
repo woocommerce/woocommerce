@@ -1216,12 +1216,12 @@ class WC_Form_Handler {
 			 *
 			 * @since 3.5.0
 			 *
-			 * @param array    $valid_statuses Array of valid order statuses for cancel.
-			 * @param WC_Order $order          Order object.
+			 * @param array                    $valid_statuses Array of valid order statuses for cancel.
+			 * @param WC_Order|WC_Order_Refund $order          Order or refund object.
 			 */
-			$valid_statuses   = apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order );
+			$valid_statuses   = $order ? apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order ) : array();
 			$user_can_cancel  = current_user_can( 'cancel_order', $order_id );
-			$order_can_cancel = $order instanceof WC_Order && $order->has_status( $valid_statuses );
+			$order_can_cancel = $order && $order->has_status( $valid_statuses ) && ! $order instanceof WC_Order_Refund;
 			$redirect         = isset( $_GET['redirect'] ) ? wp_unslash( $_GET['redirect'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			if ( WC()->session instanceof WC_Session_Handler && ! WC()->session->has_session() ) {
@@ -1238,7 +1238,7 @@ class WC_Form_Handler {
 
 				do_action( 'woocommerce_cancelled_order', $order->get_id() );
 
-			} elseif ( $order instanceof WC_Order && $user_can_cancel && ! $order_can_cancel ) {
+			} elseif ( $order && $user_can_cancel && ! $order_can_cancel ) {
 				wc_add_notice( __( 'Your order can no longer be cancelled. Please contact us if you need assistance.', 'woocommerce' ), 'error' );
 			} else {
 				wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );

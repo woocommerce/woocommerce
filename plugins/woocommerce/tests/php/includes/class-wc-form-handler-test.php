@@ -251,6 +251,86 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox cancel_order() does not pass a missing order to callbacks typed for WC_Order.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 */
+	public function test_cancel_order_skips_status_filter_for_missing_order(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order = WC_Helper_Order::create_order( $user_id );
+		$this->prepare_cancel_order_request( $order );
+		$order->delete( true );
+
+		$callback = static function ( array $statuses, WC_Order $order ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The type is what this test exercises.
+			return $statuses;
+		};
+		add_filter( 'woocommerce_valid_order_statuses_for_cancel', $callback, 10, 2 );
+
+		WC_Form_Handler::cancel_order();
+
+		remove_filter( 'woocommerce_valid_order_statuses_for_cancel', $callback, 10 );
+
+		$this->assertSame( array( 'Invalid order.' ), array_column( wc_get_notices( 'error' ), 'notice' ), 'A missing order should get the invalid order notice.' );
+	}
+
+	/**
+	 * @testdox cancel_order() keeps existing behavior for custom order classes that do not extend WC_Order.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 *
+	 * @param string $status          Status of the custom order.
+	 * @param string $notice_type     Expected notice type.
+	 * @param string $expected_notice Expected notice text.
+	 * @param string $expected_status Expected status after the request.
+	 * @testWith ["pending", "notice", "Your order was cancelled.", "cancelled"]
+	 *           ["completed", "error", "Your order can no longer be cancelled. Please contact us if you need assistance.", "completed"]
+	 */
+	public function test_cancel_order_supports_custom_order_classes( string $status, string $notice_type, string $expected_notice, string $expected_status ): void {
+		wp_set_current_user( 0 );
+		$this->prepare_cancel_order_request( WC_Helper_Order::create_order( 0 ) );
+		$_GET['order'] = 'custom-key';
+
+		$custom_order = new class() extends WC_Abstract_Order {
+			public static string $current_status = ''; // phpcs:ignore Squiz.Commenting.VariableComment.Missing
+
+			/**
+			 * Skip the default order data store, which requires WC_Order setters.
+			 *
+			 * @param int $order Order ID.
+			 */
+			public function __construct( $order = 0 ) {
+				$this->set_id( $order );
+				$this->set_object_read( true );
+			}
+
+			public function get_status( $context = 'view' ) { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UnusedFunctionParameter.Found
+				return self::$current_status;
+			}
+
+			public function get_order_key(): string { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				return 'custom-key';
+			}
+
+			public function update_status( string $new_status ): void { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				self::$current_status = $new_status;
+			}
+		};
+
+		$custom_class                  = get_class( $custom_order );
+		$custom_class::$current_status = $status;
+		$class_filter                  = static fn() => $custom_class;
+		add_filter( 'woocommerce_order_class', $class_filter );
+
+		WC_Form_Handler::cancel_order();
+
+		remove_filter( 'woocommerce_order_class', $class_filter );
+
+		$this->assertSame( array( $expected_notice ), array_column( wc_get_notices( $notice_type ), 'notice' ), 'The custom order should keep its existing notice.' );
+		$this->assertSame( $expected_status, $custom_class::$current_status, 'The custom order should keep its existing status change.' );
+	}
+
+	/**
 	 * @testdox cancel_order() returns to direct callers outside wp_loaded and does not arm the deferred redirect.
 	 *
 	 * @covers WC_Form_Handler::cancel_order()
@@ -500,6 +580,49 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$_SERVER['REQUEST_URI'] = add_query_arg( 'order_id', $refund->get_id(), $request_uri );
 
 		$this->dispatch_cancel_order_expecting_redirect( wp_make_link_relative( $order->get_cancel_endpoint() ) );
+	}
+
+	/**
+	 * @testdox cancel_order() never cancels a refund, even when a filter allows its status.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 *
+	 * @param bool $allow_refund_status Whether a filter adds the refund's status to the cancellable statuses.
+	 * @testWith [false]
+	 *           [true]
+	 */
+	public function test_cancel_order_keeps_cannot_cancel_notice_for_guest_refund( bool $allow_refund_status ): void {
+		wp_set_current_user( 0 );
+		$order  = WC_Helper_Order::create_order( 0 );
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 1,
+				'order_id' => $order->get_id(),
+				'reason'   => 'Test refund',
+			)
+		);
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The test requires a refund order.' );
+		$this->prepare_cancel_order_request( $order );
+		$_GET['order_id'] = (string) $refund->get_id();
+
+		$status_filter = static function ( array $statuses ) use ( $refund ): array {
+			$statuses[] = $refund->get_status();
+			return $statuses;
+		};
+		if ( $allow_refund_status ) {
+			add_filter( 'woocommerce_valid_order_statuses_for_cancel', $status_filter );
+		}
+
+		WC_Form_Handler::cancel_order();
+
+		remove_filter( 'woocommerce_valid_order_statuses_for_cancel', $status_filter );
+
+		$this->assertSame(
+			array( 'Your order can no longer be cancelled. Please contact us if you need assistance.' ),
+			array_column( wc_get_notices( 'error' ), 'notice' ),
+			'A refund should keep the existing cannot-cancel notice.'
+		);
 	}
 
 	/**
