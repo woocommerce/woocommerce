@@ -10747,12 +10747,6 @@ parameters:
 			path: includes/class-wc-customer.php
 
 		-
-			message: '#^Method WC_Data_Store\:\:delete\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-data-store.php
-
-		-
 			message: '#^Method WC_Data_Store\:\:read\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
