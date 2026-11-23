@@ -330,12 +330,12 @@ class ProductsListTest extends WC_Unit_Test_Case {
 	 * @testdox The Products list says when it shows only the products from an AI shopping health link, and links to all products.
 	 */
 	public function test_filter_notice(): void {
-		$notice = function (): string {
+		$notice                    = function (): string {
 			ob_start();
 			$this->sut->filter_notice();
 			return (string) ob_get_clean();
 		};
-		set_current_screen( 'edit-product' );
+		$GLOBALS['current_screen'] = \WP_Screen::get( 'edit-product' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		try {
 			$this->assertSame( '', $notice(), 'No notice on the usual list' );
 
@@ -349,7 +349,7 @@ class ProductsListTest extends WC_Unit_Test_Case {
 			$this->assertSame( '', $notice(), 'No notice with the feature off' );
 			update_option( 'woocommerce_feature_' . AgenticCommerceSettings::FEATURE_ID . '_enabled', 'yes' );
 
-			set_current_screen( 'edit-post' );
+			$GLOBALS['current_screen'] = \WP_Screen::get( 'edit-post' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			$this->assertSame( '', $notice(), 'Only on the Products list' );
 		} finally {
 			unset( $GLOBALS['current_screen'], $_GET[ ProductsList::FILTER_PARAM ] );
