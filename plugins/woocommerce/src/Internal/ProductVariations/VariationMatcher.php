@@ -76,21 +76,13 @@ class VariationMatcher {
 	 * @since 11.4.0
 	 *
 	 * @param WC_Product_Variable $parent_product Parent variable product.
-	 * @return array<int, array<string, string>|null> Attributes by variation ID, keyed by attribute meta key; null for a variation that is not available, which matches nothing.
+	 * @return array<int, array<string, string>> Attributes by variation ID, keyed by attribute meta key. A variation that is not available matches nothing; see is_available().
 	 */
 	public function get_variation_attributes( WC_Product_Variable $parent_product ): array {
 		$child_ids = array_values( array_map( 'absint', $parent_product->get_children() ) );
 		_prime_post_caches( $child_ids );
 
-		$attributes = array();
-		foreach ( $child_ids as $child_id ) {
-			$variation               = wc_get_product( $child_id );
-			$attributes[ $child_id ] = $variation instanceof WC_Product_Variation && $this->is_available( $variation, $parent_product )
-				? wc_get_product_variation_attributes( $child_id )
-				: null;
-		}
-
-		return $attributes;
+		return array_combine( $child_ids, array_map( 'wc_get_product_variation_attributes', $child_ids ) );
 	}
 
 	/**
@@ -120,11 +112,13 @@ class VariationMatcher {
 	/**
 	 * Whether the variation can be selected from the catalog.
 	 *
+	 * @since 11.4.0
+	 *
 	 * @param WC_Product_Variation $variation      Variation to check.
 	 * @param WC_Product_Variable  $parent_product Parent variable product.
 	 * @return bool
 	 */
-	private function is_available( WC_Product_Variation $variation, WC_Product_Variable $parent_product ): bool {
+	public function is_available( WC_Product_Variation $variation, WC_Product_Variable $parent_product ): bool {
 		if ( ! $variation->exists() ) {
 			return false;
 		}

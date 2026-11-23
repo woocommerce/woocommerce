@@ -519,16 +519,28 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 		}
 
 		// Only an "Any" variation can lose values to an earlier one, so only a product with one pays for the cart's rules.
+		$matcher = wc_get_container()->get( VariationMatcher::class );
 		$earlier = array_filter( $attributes, static fn( $own ) => in_array( '', $own, true ) )
-			? wc_get_container()->get( VariationMatcher::class )->get_variation_attributes( $product )
+			? $matcher->get_variation_attributes( $product )
 			: array();
 		$specs   = array();
 		$stream  = array();
 
+		// Availability loads the variation and runs the storefront's filters, so it is asked once, and only of a variation about to take a value.
+		$checked   = array();
+		$available = static function ( int $id ) use ( &$checked, $matcher, $product ): bool {
+			if ( ! isset( $checked[ $id ] ) ) {
+				$variation      = wc_get_product( $id );
+				$checked[ $id ] = $variation instanceof \WC_Product_Variation && $matcher->is_available( $variation, $product );
+			}
+
+			return $checked[ $id ];
+		};
+
 		foreach ( $required_variant_ids as $variant_id ) {
 			list( $variation_id, $values ) = Utils::parse_variant_id( (string) $variant_id );
 
-			foreach ( $this->variant_specs( $variation_id, $attributes[ $variation_id ] ?? null, $axes, $values + $selected, $earlier ) as $spec ) {
+			foreach ( $this->variant_specs( $variation_id, $attributes[ $variation_id ] ?? null, $axes, $values + $selected, $earlier, $available ) as $spec ) {
 				$specs[ $spec['id'] ] = $spec;
 				break;
 			}
@@ -549,7 +561,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 		$total = 0;
 
 		foreach ( array_unique( $stream ) as $variation_id ) {
-			foreach ( $this->variant_specs( $variation_id, $attributes[ $variation_id ] ?? null, $axes, $selected, $earlier ) as $spec ) {
+			foreach ( $this->variant_specs( $variation_id, $attributes[ $variation_id ] ?? null, $axes, $selected, $earlier, $available ) as $spec ) {
 				if ( isset( $specs[ $spec['id'] ] ) ) {
 					continue;
 				}
@@ -710,9 +722,10 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * @param array      $axes Variation attributes, from variation_data().
 	 * @param array      $narrow Values to hold attributes to, by attribute key.
 	 * @param array      $earlier The product's variations in matching order, from VariationMatcher::get_variation_attributes().
+	 * @param callable   $available Whether the variation with the given id is available; one that is not takes nothing.
 	 * @return \Generator Yields `{ id, variation_id, options }`.
 	 */
-	private function variant_specs( int $variation_id, ?array $own, array $axes, array $narrow, array $earlier ): \Generator {
+	private function variant_specs( int $variation_id, ?array $own, array $axes, array $narrow, array $earlier, callable $available ): \Generator {
 		if ( null === $own ) {
 			return;
 		}
@@ -731,10 +744,6 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 				break;
 			}
 
-			if ( null === $fixed ) {
-				continue;
-			}
-
 			$claim = array();
 			foreach ( array_diff( $fixed, array( '' ) ) as $key => $value ) {
 				if ( ! in_array( $value, $sets[ $key ] ?? array(), true ) ) {
@@ -744,6 +753,10 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 				if ( count( $sets[ $key ] ) > 1 ) {
 					$claim[ $key ] = $value;
 				}
+			}
+
+			if ( ! $available( $earlier_id ) ) {
+				continue;
 			}
 
 			if ( empty( $claim ) ) {
