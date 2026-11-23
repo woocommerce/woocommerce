@@ -159,6 +159,7 @@ class WC_Helper_Subscriptions_API {
 	 * Install links are only for users who can install plugins.
 	 *
 	 * @since 11.3.1
+	 * @return bool
 	 */
 	public static function get_install_permission() {
 		return self::get_permission() && current_user_can( 'install_plugins' );

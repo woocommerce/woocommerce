@@ -29,6 +29,18 @@ class WC_Helper_Admin_Test extends WC_Unit_Test_Case {
 			)
 		);
 		WC_Helper_Options::update( 'auth_user_data', array( 'email' => 'owner@example.org' ) );
+		add_filter(
+			'pre_http_request',
+			static fn() => array(
+				'response' => array(
+					'code'    => 200,
+					'message' => 'OK',
+				),
+				'headers'  => array(),
+				'body'     => '[]',
+				'cookies'  => array(),
+			)
+		);
 		wp_set_current_user( self::factory()->user->create( array( 'role' => $role ) ) );
 
 		$settings = WC_Helper_Admin::add_marketplace_settings( array() )['wccomHelper'];
