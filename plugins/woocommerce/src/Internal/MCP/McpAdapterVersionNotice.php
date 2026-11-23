@@ -85,7 +85,7 @@ class McpAdapterVersionNotice {
 		$message = esc_html( $message );
 
 		if ( current_user_can( 'update_plugins' ) ) {
-			$message .= sprintf( ' <a href="%1$s">%2$s</a>', esc_url( self_admin_url( 'plugins.php' ) ), esc_html__( 'Go to Plugins', 'woocommerce' ) );
+			$message .= sprintf( ' <a href="%1$s">%2$s</a>', esc_url( network_admin_url( 'plugins.php' ) ), esc_html__( 'Go to Plugins', 'woocommerce' ) );
 		}
 
 		$dismiss_url = wp_nonce_url(
