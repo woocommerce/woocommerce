@@ -6,6 +6,10 @@ You can try the email editor in [the WordPress Playground](https://playground.wo
 
 This JavaScript package is designed to work in conjunction with its PHP counterpart, which can be found in the same repository at `packages/php/email-editor`. Both packages are required for full functionality.
 
+## Requirements
+
+-   WordPress 7.0 or newer
+
 ## Initializing the editor
 
 > **Note:** The `initializeEditor` function is currently experimental and its API is subject to change in future releases. Please be aware that breaking changes may occur.
