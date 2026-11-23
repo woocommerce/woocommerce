@@ -27,13 +27,24 @@ class Proxy_Speed_Module {
 	const PROXY_REQUEST_PATH = 'woocommerce-analytics/v1/track';
 
 	/**
-	 * Answer the current request if it is a proxy request this module may serve.
+	 * Answer the current request and exit if it is a proxy request this module may serve.
 	 *
-	 * The caller must exit when this returns true, and let WordPress continue loading otherwise.
+	 * Returns without output otherwise, so WordPress continues loading and the REST route answers.
 	 *
-	 * @return bool Whether the request was answered.
+	 * @return void
 	 */
 	public static function maybe_serve() {
+		if ( self::respond() ) {
+			exit;
+		}
+	}
+
+	/**
+	 * Send the response to a proxy request this module may serve.
+	 *
+	 * @return bool Whether a response was sent.
+	 */
+	private static function respond() {
 		if ( ! self::is_proxy_request() ) {
 			return false;
 		}
@@ -80,12 +91,10 @@ class Proxy_Speed_Module {
 	/**
 	 * Record the events in a proxy request body, leaving their pixels queued.
 	 *
-	 * @internal
-	 *
 	 * @param string $body Raw request body.
 	 * @return array{status: int, data: array} The response to send.
 	 */
-	public static function handle_events( $body ) {
+	private static function handle_events( $body ) {
 		if ( '' === $body ) {
 			return self::error_response( 'Empty request body' );
 		}
@@ -95,61 +104,13 @@ class Proxy_Speed_Module {
 			return self::error_response( 'Invalid JSON' );
 		}
 
-		// Wrap a single event object or an unexpected scalar.
-		if ( ! is_array( $events ) || isset( $events['event_name'] ) ) {
-			$events = array( $events );
-		}
+		$data = WC_Analytics_Tracking::record_client_events( $events );
 
-		if ( count( $events ) > WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST ) {
-			$events = array_slice( $events, 0, WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST, true );
-		}
-
-		$results    = array();
-		$has_errors = false;
-
-		foreach ( $events as $index => $event ) {
-			if ( empty( $event ) || ! is_array( $event ) ) {
-				$results[ $index ] = array(
-					'success' => false,
-					'error'   => 'Invalid event format',
-				);
-				$has_errors        = true;
-				continue;
-			}
-
-			$event_name = $event['event_name'] ?? null;
-			$properties = $event['properties'] ?? array();
-
-			if ( ! $event_name || ! is_string( $event_name ) || ! is_array( $properties ) ) {
-				$results[ $index ] = array(
-					'success' => false,
-					'error'   => 'Missing event_name or invalid properties',
-				);
-				$has_errors        = true;
-				continue;
-			}
-
-			$result = WC_Analytics_Tracking::record_client_event( $event_name, $properties );
-
-			if ( is_wp_error( $result ) ) {
-				$results[ $index ] = array(
-					'success' => false,
-					'error'   => $result->get_error_message(),
-				);
-				$has_errors        = true;
-				continue;
-			}
-
-			$results[ $index ] = array( 'success' => true );
-		}
+		$data['is_proxy_speed_module'] = true;
 
 		return array(
-			'status' => $has_errors ? 207 : 200,
-			'data'   => array(
-				'success'               => ! $has_errors,
-				'results'               => $results,
-				'is_proxy_speed_module' => true,
-			),
+			'status' => $data['success'] ? 200 : 207,
+			'data'   => $data,
 		);
 	}
 
@@ -183,7 +144,7 @@ class Proxy_Speed_Module {
 		$raw_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$path    = is_string( $raw_uri ) ? wp_parse_url( $raw_uri, PHP_URL_PATH ) : null;
 
-		if ( ! is_string( $path ) || '' === $path || preg_match( '/[^A-Za-z0-9\-._~\/]/', $path ) ) {
+		if ( ! is_string( $path ) || preg_match( '/[^A-Za-z0-9\-._~\/]/', $path ) ) {
 			return false;
 		}
 

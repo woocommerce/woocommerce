@@ -76,11 +76,12 @@ class Features {
 		 * Filter to authorize the proxy speed module without auto-installing the MU-plugin file.
 		 *
 		 * Return true from host platform code that calls Proxy_Speed_Module::maybe_serve() at MU-plugin stage.
+		 * Register it on every request before `init` priority 20, or the stored authorization flips.
 		 *
 		 * @since 0.19.0
 		 *
 		 * @param bool $host_provided Whether the host provides the speed module. Default false.
 		 */
-		return apply_filters( 'woocommerce_analytics_proxy_speed_module_host_provided', false );
+		return true === apply_filters( 'woocommerce_analytics_proxy_speed_module_host_provided', false );
 	}
 }

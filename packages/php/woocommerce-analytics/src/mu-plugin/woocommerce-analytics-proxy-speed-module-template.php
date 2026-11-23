@@ -20,7 +20,8 @@ defined( 'ABSPATH' ) || exit;
 	// Cheap prefilter so other requests never load the package; Proxy_Speed_Module checks the path strictly.
 	$method = isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( (string) wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 	$uri    = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-	if ( 'POST' !== $method || false === strpos( $uri, 'woocommerce-analytics/v1/track' ) ) {
+	$path   = explode( '?', $uri, 2 )[0];
+	if ( 'POST' !== $method || false === strpos( $path, 'woocommerce-analytics/v1/track' ) ) {
 		return;
 	}
 
@@ -50,7 +51,5 @@ defined( 'ABSPATH' ) || exit;
 		return;
 	}
 
-	if ( \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::maybe_serve() ) {
-		exit;
-	}
+	\Automattic\Woocommerce_Analytics\Proxy_Speed_Module::maybe_serve();
 } )();

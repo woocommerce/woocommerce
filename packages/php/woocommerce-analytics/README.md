@@ -115,8 +115,9 @@ before plugins register filters and cannot read them:
     REST route rather than answering itself, so the `403` always comes from one
     place.
 
-**The filter must resolve to the same value for every request on a site, and must
-be registered before `init` priority 20.** A value that varies by cohort,
+**These filters, including `woocommerce_analytics_proxy_speed_module_host_provided`,
+must resolve to the same value for every request on a site, and must be registered
+before `init` priority 20.** A value that varies by cohort,
 percentage or geo makes cached pages disagree with what `/track` decides, and makes
 the speed module install and uninstall itself on alternate runs. A callback added
 after `init` priority 20 is never seen: the route is registered from the option,
@@ -305,14 +306,13 @@ When proxy tracking is enabled:
 It runs in one of two ways:
 
 -   **Auto-installed:** with `woocommerce_analytics_auto_install_proxy_speed_module` returning true, the package writes a thin MU-plugin (`woocommerce-analytics-proxy-speed-module.php`) that loads the package and calls the module.
--   **Host-provided:** platform code that already loads a Jetpack autoloader at the MU-plugin stage returns true from `woocommerce_analytics_proxy_speed_module_host_provided` and calls the module itself, so nothing is written into the site:
+-   **Host-provided:** platform code that already loads a Jetpack autoloader at the MU-plugin stage returns true from `woocommerce_analytics_proxy_speed_module_host_provided` on every request and calls the module itself, so nothing is written into the site. `maybe_serve()` exits after answering and returns otherwise:
 
 ```php
 add_filter( 'woocommerce_analytics_proxy_speed_module_host_provided', '__return_true' );
 
-if ( class_exists( \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::class )
-	&& \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::maybe_serve() ) {
-	exit;
+if ( class_exists( \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::class ) ) {
+	\Automattic\Woocommerce_Analytics\Proxy_Speed_Module::maybe_serve();
 }
 ```
 

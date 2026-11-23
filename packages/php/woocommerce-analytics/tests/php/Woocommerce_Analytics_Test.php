@@ -525,11 +525,12 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	 * @dataProvider provide_host_provided_states
 	 *
 	 * @param bool        $proxy_tracking Whether proxy tracking is enabled.
+	 * @param mixed       $host_provided  What the host-provided filter returns.
 	 * @param string|bool $expected       The expected authorization option.
 	 */
 	#[DataProvider( 'provide_host_provided_states' )]
-	public function test_a_host_provided_module_is_authorized_but_never_installed( $proxy_tracking, $expected ): void {
-		add_filter( 'woocommerce_analytics_proxy_speed_module_host_provided', '__return_true' );
+	public function test_a_host_provided_module_is_authorized_but_never_installed( $proxy_tracking, $host_provided, $expected ): void {
+		add_filter( 'woocommerce_analytics_proxy_speed_module_host_provided', fn() => $host_provided );
 		if ( $proxy_tracking ) {
 			add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
 		}
@@ -551,8 +552,9 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	 */
 	public static function provide_host_provided_states(): array {
 		return array(
-			'proxy tracking on'  => array( true, 'yes' ),
-			'proxy tracking off' => array( false, false ),
+			'proxy tracking on'         => array( true, true, 'yes' ),
+			'proxy tracking off'        => array( false, true, false ),
+			'filter returns a non-true' => array( true, 'no', false ),
 		);
 	}
 

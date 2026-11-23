@@ -45,7 +45,7 @@ class Woocommerce_Analytics {
 	 * Whether the MU-plugin speed module may serve requests.
 	 *
 	 * It reads this option because filters are unavailable before plugins load.
-	 * It tracks installation eligibility, so removal cannot reauthorize the module.
+	 * It tracks whether the package installs the module or the host provides it, so removal cannot reauthorize it.
 	 *
 	 * @since 0.18.0
 	 *
@@ -326,10 +326,9 @@ class Woocommerce_Analytics {
 	}
 
 	/**
-	 * Whether the proxy speed module belongs on this site.
+	 * Whether this package should write the MU-plugin file.
 	 *
-	 * It requires its own opt-in and proxy tracking, so it cannot serve when
-	 * tracking is disabled.
+	 * Requires the auto-install opt-in and proxy tracking.
 	 *
 	 * @since 0.18.0
 	 *
