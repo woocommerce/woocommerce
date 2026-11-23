@@ -578,7 +578,7 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_validates_input_that_needs_no_conversion_once(): void {
 		if ( ! method_exists( \WP_Ability::class, 'prepare_input' ) ) {
-			$this->markTestSkipped( 'WordPress prepares the input itself since 7.2.' );
+			$this->markTestSkipped( 'WP_Ability::prepare_input() exists since WordPress 7.2.' );
 		}
 
 		$calls    = 0;
