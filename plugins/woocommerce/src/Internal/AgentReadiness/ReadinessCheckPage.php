@@ -558,8 +558,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			/* translators: %s: time of day, such as 10:42 am. */
 			return sprintf( __( 'Last checked today at %s', 'woocommerce' ), wp_date( (string) get_option( 'time_format' ), $time ) );
 		}
-		/* translators: %s: date and time, such as November 3, 2026 10:42 am. */
-		return sprintf( __( 'Last checked %s', 'woocommerce' ), wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $time ) );
+		/* translators: 1: date, such as November 3, 2026. 2: time of day, such as 10:42 am. */
+		return sprintf( __( 'Last checked %1$s at %2$s', 'woocommerce' ), wp_date( (string) get_option( 'date_format' ), $time ), wp_date( (string) get_option( 'time_format' ), $time ) );
 	}
 
 
@@ -726,7 +726,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'link' => array(
 				'href' => (string) $launched['fix_url'],
 				// The same button as the AI shopping notice, from the content review.
-				'text' => __( 'Change store visibility', 'woocommerce' ),
+				'text' => __( 'Change site visibility', 'woocommerce' ),
 			),
 		);
 	}
@@ -760,7 +760,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 */
 	public static function cant_check_copy( bool $launched ): array {
 		return $launched
-			? array( __( 'We couldn’t check your pages', 'woocommerce' ), __( 'Your hosting setup blocked the check from opening them. Try again later, or contact your hosting provider.', 'woocommerce' ) )
+			? array( __( 'Your pages couldn’t be checked', 'woocommerce' ), __( 'Your hosting setup blocked the check from opening them. Try again later, or contact your hosting provider.', 'woocommerce' ) )
 			: array( __( 'Your store is in coming soon mode', 'woocommerce' ), __( 'These checks run once your store is live.', 'woocommerce' ) );
 	}
 
@@ -1161,14 +1161,13 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The badge on a question: how many issues, that everything passed, or, when nothing failed but
-	 * a check couldn't run, Couldn't check (its row says why). Before the first check, Not checked yet.
+	 * The badge on a question: how many issues, that everything passed, or Not checked yet, before the
+	 * first check or when nothing failed but a check couldn't run (its row says why).
 	 *
-	 * @param array<int, array{ok:bool|null}> $checks  The question's checks.
-	 * @param bool                            $checked Whether a check has run.
+	 * @param array<int, array{ok:bool|null}> $checks The question's checks.
 	 * @return array{0:string,1:string} Badge class and text.
 	 */
-	private static function group_badge( array $checks, bool $checked = true ): array {
+	private static function group_badge( array $checks ): array {
 		$issues = count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] ) );
 		if ( $issues > 0 ) {
 			/* translators: %d: number of issues. */
@@ -1178,16 +1177,16 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		if ( $passed > 0 && count( $checks ) === $passed ) {
 			return array( 'info', __( 'All passed', 'woocommerce' ) );
 		}
-		return $checked ? self::cant_check_badge() : array( 'off', __( 'Not checked yet', 'woocommerce' ) );
+		return self::cant_check_badge();
 	}
 
 	/**
-	 * The Couldn't check badge, on a question where nothing failed but a check couldn't run.
+	 * The Not checked yet badge, on a question where nothing failed but a check couldn't run, or before the first check.
 	 *
 	 * @return array{0:string,1:string} Badge class and text.
 	 */
 	private static function cant_check_badge(): array {
-		return array( 'off', __( 'Couldn’t check', 'woocommerce' ) );
+		return array( 'off', __( 'Not checked yet', 'woocommerce' ) );
 	}
 
 	/**
@@ -1209,7 +1208,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'why'   => $step[1],
 			) : ReadinessCopy::store_check( $check['id'] );
 			if ( null === $check['ok'] ) {
-				$rows[] = self::row( $check['id'], 'unknown', $copy['title'] ?? $check['name'], $launched ? __( 'This couldn\'t be checked. The next check tries again.', 'woocommerce' ) : __( 'Launch your store to run this check.', 'woocommerce' ) );
+				// The title says what the check looks for, not that it passed.
+				$title  = ReadinessCopy::store_check( $check['id'] )['action'] ?? $copy['title'] ?? $check['name'];
+				$rows[] = self::row( $check['id'], 'unknown', $title, $launched ? __( 'This couldn’t be checked. It’s checked again automatically each day, or select Check again.', 'woocommerce' ) : __( 'Launch your store to run this check.', 'woocommerce' ) );
 				continue;
 			}
 			if ( $check['ok'] ) {
@@ -1318,7 +1319,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$sections[] = array(
 				'id'       => $id,
 				'title'    => $group[0],
-				'badge'    => self::badge_data( $cant && array() === $rows ? self::cant_check_badge() : self::group_badge( $checks, array() !== $report ) ),
+				'badge'    => self::badge_data( $cant && array() === $rows ? self::cant_check_badge() : self::group_badge( $checks ) ),
 				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? self::ucp_off_note() : ( 'understand' === $id ? self::sample_note( $report ) : null ),
 				'channels' => array(),
 				'rows'     => $cant ? array_merge( $rows, array( self::cant_check_row( $launched ) ) ) : $rows,

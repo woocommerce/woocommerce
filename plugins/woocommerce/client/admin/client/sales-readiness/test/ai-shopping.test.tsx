@@ -267,7 +267,7 @@ describe( 'AiShopping', () => {
 					text: 'Your store is in coming soon mode, so AI assistants can’t find your products yet.',
 					link: {
 						href: '/wp-admin/admin.php?page=wc-settings&tab=site-visibility',
-						text: 'Change store visibility',
+						text: 'Change site visibility',
 					},
 				},
 			} )
@@ -277,7 +277,7 @@ describe( 'AiShopping', () => {
 			screen.getByText( /coming soon mode/, { selector: 'span' } )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'link', { name: 'Change store visibility' } )
+			screen.getByRole( 'link', { name: 'Change site visibility' } )
 		).toHaveAttribute(
 			'href',
 			'/wp-admin/admin.php?page=wc-settings&tab=site-visibility'
@@ -576,7 +576,7 @@ describe( 'AiShopping', () => {
 					text: 'Your store is in coming soon mode.',
 					link: {
 						href: '/wp-admin/admin.php?page=wc-settings&tab=site-visibility',
-						text: 'Change store visibility',
+						text: 'Change site visibility',
 					},
 				},
 			} )
@@ -587,7 +587,7 @@ describe( 'AiShopping', () => {
 		click( 'View Site Health' );
 		click( 'View products', 1 );
 		click( /Learn how it works/ );
-		click( 'Change store visibility' );
+		click( 'Change site visibility' );
 		click( /Test the connection in UCP Playground/ );
 		fireEvent.click( screen.getByRole( 'button', { name: 'Copy' } ) );
 
