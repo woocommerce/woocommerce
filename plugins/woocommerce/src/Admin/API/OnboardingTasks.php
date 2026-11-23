@@ -163,6 +163,12 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[a-z0-9_\-]+)/dismiss',
 			array(
+				'args'   => array(
+					'task_list_id' => array(
+						'description' => __( 'Optional parameter to query specific task list.', 'woocommerce' ),
+						'type'        => 'string',
+					),
+				),
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'dismiss_task' ),
@@ -176,6 +182,12 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[a-z0-9_\-]+)/undo_dismiss',
 			array(
+				'args'   => array(
+					'task_list_id' => array(
+						'description' => __( 'Optional parameter to query specific task list.', 'woocommerce' ),
+						'type'        => 'string',
+					),
+				),
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'undo_dismiss_task' ),
@@ -316,7 +328,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * Import sample products from given CSV path.
 	 *
 	 * @param  string $csv_file CSV file path.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|array
 	 */
 	public static function import_sample_products_from_csv( $csv_file ) {
 		include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
@@ -325,15 +337,29 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			// Override locale so we can return mappings from WooCommerce in English language stores.
 			add_filter( 'locale', '__return_false', 9999 );
 			$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
-			$args           = array(
-				'parse'   => true,
-				'mapping' => self::get_header_mappings( $csv_file ),
-			);
-			$args           = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
 
-			$importer = new $importer_class( $csv_file, $args );
-			$import   = $importer->import();
-			return $import;
+			try {
+				$args = array(
+					'parse'   => true,
+					'mapping' => self::get_header_mappings( $csv_file ),
+				);
+
+				/**
+				 * Filter the arguments used by the product CSV importer.
+				 *
+				 * @since 3.1.0
+				 *
+				 * @param array  $args           Importer arguments.
+				 * @param string $importer_class Importer class name.
+				 */
+				$args = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
+
+				$importer = new $importer_class( $csv_file, $args );
+				$import   = $importer->import();
+				return $import;
+			} catch ( \RuntimeException $e ) {
+				return new \WP_Error( 'woocommerce_rest_import_error', $e->getMessage() );
+			}
 		} else {
 			return new \WP_Error( 'woocommerce_rest_import_error', __( 'Sorry, the sample products data file was not found.', 'woocommerce' ) );
 		}
@@ -755,12 +781,24 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Dismiss a single task.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function dismiss_task( $request ) {
-		$id   = $request->get_param( 'id' );
-		$task = TaskLists::get_task( $id );
+		$id           = $request->get_param( 'id' );
+		$task_list_id = $request->get_param( 'task_list_id' );
+
+		if ( null !== $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_invalid_task_list',
+				__( 'Sorry, no task list with that ID was found.', 'woocommerce' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		$task = TaskLists::get_task( $id, $task_list_id );
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
@@ -789,12 +827,24 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Undo dismissal of a single task.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function undo_dismiss_task( $request ) {
-		$id   = $request->get_param( 'id' );
-		$task = TaskLists::get_task( $id );
+		$id           = $request->get_param( 'id' );
+		$task_list_id = $request->get_param( 'task_list_id' );
+
+		if ( null !== $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_invalid_task_list',
+				__( 'Sorry, no task list with that ID was found.', 'woocommerce' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		$task = TaskLists::get_task( $id, $task_list_id );
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(

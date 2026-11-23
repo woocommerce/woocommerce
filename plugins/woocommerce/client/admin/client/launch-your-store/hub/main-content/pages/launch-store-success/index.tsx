@@ -119,11 +119,11 @@ export const LaunchYourStoreSuccess = ( {
 							? __(
 									'Congratulations! Your store will launch soon',
 									'woocommerce'
-							  )
+								)
 							: __(
 									'Congratulations! Your store is now live',
 									'woocommerce'
-							  ) }
+								) }
 					</h1>
 					<h2 className="woocommerce-launch-store__congrats-subheading">
 						{ siteIsShowingCachedContent
@@ -146,11 +146,11 @@ export const LaunchYourStoreSuccess = ( {
 											</a>
 										),
 									}
-							  )
+								)
 							: __(
 									'You’ve successfully launched your store and are ready to start selling! We can’t wait to see your business grow.',
 									'woocommerce'
-							  ) }
+								) }
 					</h2>
 					<div className="woocommerce-launch-store__congrats-midsection-container">
 						<div className="woocommerce-launch-store__congrats-visit-store">

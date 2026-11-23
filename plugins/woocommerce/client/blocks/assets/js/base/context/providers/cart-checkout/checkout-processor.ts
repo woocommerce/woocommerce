@@ -255,7 +255,7 @@ const CheckoutProcessor = () => {
 						shouldSavePayment,
 						activePaymentMethod
 					),
-			  }
+				}
 			: {};
 
 		const billingAddressData = currentBillingAddress.current;

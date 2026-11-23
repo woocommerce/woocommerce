@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix order attribution data missing from classic checkout orders when tracking is enabled after the page loads.

@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-billing-address-block",
-	"version": "1.0.0",
 	"title": "Billing Address",
 	"description": "Collect your customer's billing address.",
 	"category": "woocommerce",

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Pin wp-prettier in scaffolded extensions so `prettier/prettier` stops reporting WordPress code style as errors.

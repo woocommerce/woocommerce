@@ -38,7 +38,7 @@ After you submit a PR that meets these requirements:
 
 1. A maintainer will triage your PR
 2. You may receive additional feedback or change requests
-3. Once approved, your PR will be merged into an upcoming release
+3. Once approved by a maintainer (see [review requirements](/docs/contribution/contributing/deciding-pr-high-impact#review-requirements)), your PR will be merged into an upcoming release
 
 If your PR needs changes, we'll add a `needs: author feedback` label. Please respond to feedback promptly to keep your contribution moving forward, as stale PRs with that label are automatically closed after a period of time.
 

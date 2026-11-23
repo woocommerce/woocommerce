@@ -378,7 +378,12 @@ class PageController {
 
 		$this->verify_create_permission();
 
-		$order_class_name = wc_get_order_type( $this->order_type )['class_name'];
+		/**
+		 * Registered order class.
+		 *
+		 * @var class-string<\WC_Order>|'' $order_class_name
+		 */
+		$order_class_name = wc_get_order_type( $this->order_type )['class_name'] ?? '';
 		if ( ! $order_class_name || ! class_exists( $order_class_name ) ) {
 			wp_die();
 		}
@@ -512,8 +517,7 @@ class PageController {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					// translators: %s is the name of a function.
-					esc_html__( '%s must be called after the current_screen action.', 'woocommerce' ),
+					esc_html( '%s must be called after the current_screen action.' ),
 					esc_html( __METHOD__ )
 				),
 				'7.9.0'
@@ -527,8 +531,7 @@ class PageController {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					// translators: %s is the name of an order type.
-					esc_html__( '%s is not a valid order type.', 'woocommerce' ),
+					esc_html( '%s is not a valid order type.' ),
 					esc_html( $type )
 				),
 				'7.9.0'

@@ -333,6 +333,26 @@ class ShopperLists extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Saved items do not expose a sale price before the scheduled sale starts.
+	 */
+	public function test_saved_item_sale_price_is_hidden_until_scheduled_sale_starts() {
+		wp_set_current_user( $this->customer_id );
+		$this->product->set_props(
+			array(
+				'sale_price'        => 5,
+				'date_on_sale_from' => strtotime( '+1 year' ),
+			)
+		);
+		$this->product->save();
+
+		$this->dispatch( 'POST', '/wc/store/v1/shopper-lists/saved-for-later/items', array( 'product_id' => $this->product->get_id() ) );
+		$items = $this->dispatch( 'GET', '/wc/store/v1/shopper-lists/saved-for-later/items' )->get_data();
+
+		$this->assertCount( 1, $items );
+		$this->assertSame( '', $items[0]['prices']->sale_price );
+	}
+
+	/**
 	 * Test that DELETE removes the item and returns 204 No Content.
 	 */
 	public function test_delete_item_removes_item() {

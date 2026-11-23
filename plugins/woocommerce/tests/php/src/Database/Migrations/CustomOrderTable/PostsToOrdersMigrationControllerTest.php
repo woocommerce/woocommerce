@@ -93,7 +93,6 @@ class PostsToOrdersMigrationControllerTest extends \WC_Unit_Test_Case {
 		$this->restore_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, $this->previous_isolation_option );
 		OrderHelper::toggle_cot_feature_and_usage( $this->previous_hpos_state );
 		self::disable_direct_product_attribute_lookup_updates();
-		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 
 		parent::tearDown();
 	}
@@ -829,7 +828,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	}
 
 	/**
-	 * @testDox When there are mutli meta values for a supposed unique meta key, the first one is picked.
+	 * @testDox When there are multi meta values for a supposed unique meta key, the first one is picked.
 	 */
 	public function test_first_value_is_picked_when_multi_value() {
 		global $wpdb;

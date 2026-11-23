@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E tests: normalize the IS_MULTISITE env var to '1'/unset so multisite skips behave consistently regardless of how the system status endpoint reports wp_multisite.

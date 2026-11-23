@@ -44,9 +44,20 @@ class Social_Links extends Abstract_Block_Renderer {
 
 		$inner_blocks = $parsed_block['innerBlocks'] ?? array();
 
-		$content = '';
+		$content                = '';
+		$is_first_rendered_link = true;
 		foreach ( $inner_blocks as $block ) {
-			$content .= $this->generate_social_link_content( $block, $attrs );
+			$social_link_content = $this->generate_social_link_content(
+				$block,
+				$attrs,
+				! $is_first_rendered_link,
+				$rendering_context->get_start_side()
+			);
+			if ( '' === $social_link_content ) {
+				continue;
+			}
+			$is_first_rendered_link = false;
+			$content               .= $social_link_content;
 		}
 
 		return str_replace(
@@ -59,11 +70,13 @@ class Social_Links extends Abstract_Block_Renderer {
 	/**
 	 * Generates the social link content.
 	 *
-	 * @param array $block The block data.
-	 * @param array $parent_block_attrs The parent block attributes.
+	 * @param array  $block The block data.
+	 * @param array  $parent_block_attrs The parent block attributes.
+	 * @param bool   $render_gap Whether to render a gap before the item.
+	 * @param string $gap_side The physical side used for the horizontal gap.
 	 * @return string The generated content.
 	 */
-	private function generate_social_link_content( $block, $parent_block_attrs ) {
+	private function generate_social_link_content( $block, $parent_block_attrs, bool $render_gap = false, string $gap_side = 'left' ) {
 		$service_name = $block['attrs']['service'] ?? '';
 		$service_url  = $block['attrs']['url'] ?? '';
 		$label        = $block['attrs']['label'] ?? '';
@@ -123,10 +136,11 @@ class Social_Links extends Abstract_Block_Renderer {
 
 		$main_table_styles = $this->compile_css(
 			array(
-				'background-color' => $icon_background_color_value,
-				'border-radius'    => '9999px',
-				'display'          => 'inline-table',
-				'float'            => 'none',
+				'background-color'    => $icon_background_color_value,
+				'border-radius'       => '9999px',
+				'display'             => 'inline-table',
+				'float'               => 'none',
+				'margin-' . $gap_side => $render_gap ? '16px' : '',
 			)
 		);
 
@@ -154,8 +168,9 @@ class Social_Links extends Abstract_Block_Renderer {
 		);
 
 		if ( $is_pill_shape ) {
-			$row_container_styles['padding-left']  = '17px';
-			$row_container_styles['padding-right'] = '17px';
+			$pill_shape_horizontal_padding         = rtrim( rtrim( number_format( $font_size_value * 2 / 3, 2, '.', '' ), '0' ), '.' ) . 'px';
+			$row_container_styles['padding-left']  = $pill_shape_horizontal_padding;
+			$row_container_styles['padding-right'] = $pill_shape_horizontal_padding;
 		}
 		$row_container_styles = $this->compile_css( $row_container_styles );
 
@@ -207,7 +222,11 @@ class Social_Links extends Abstract_Block_Renderer {
 
 		$main_table = Table_Wrapper_Helper::render_table_wrapper( $social_link_content, $main_table_attrs, array(), $main_row_attrs, false );
 
-		return Table_Wrapper_Helper::render_outlook_table_cell( $main_table );
+		$outlook_cell_attrs = array(
+			'style' => $render_gap ? 'padding-' . $gap_side . ':16px;' : '',
+		);
+
+		return Table_Wrapper_Helper::render_outlook_table_cell( $main_table, $outlook_cell_attrs );
 	}
 
 	/**

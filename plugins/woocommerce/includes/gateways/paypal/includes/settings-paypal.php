@@ -80,6 +80,7 @@ $settings = array(
 		'desc_tip'    => true,
 	),
 	'send_shipping'    => array(
+		'is_legacy'   => true,
 		'title'       => __( 'Shipping details', 'woocommerce' ),
 		'type'        => 'checkbox',
 		'label'       => __( 'Send shipping details to PayPal instead of billing.', 'woocommerce' ),
@@ -148,7 +149,7 @@ $legacy_settings = array(
 		'title'       => __( 'API credentials', 'woocommerce' ),
 		'type'        => 'title',
 		/* translators: %s: URL */
-		'description' => sprintf( __( 'Enter your PayPal API credentials to process refunds via PayPal. Learn how to access your <a href="%s">PayPal API Credentials</a>.', 'woocommerce' ), 'https://developer.paypal.com/webapps/developer/docs/classic/api/apiCredentials/#create-an-api-signature' ),
+		'description' => sprintf( __( 'Enter your PayPal API credentials to process refunds via PayPal. Learn how to access your <a href="%s">PayPal API Credentials</a>.', 'woocommerce' ), 'https://developer.paypal.com/api/nvp-soap/apiCredentials/' ),
 		'is_legacy'   => true,
 	),
 	'api_username'          => array(

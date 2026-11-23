@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
-# This script deliberately does not `set -e`. Some steps below are not
-# idempotent: attributes.sh exits non-zero once the attributes it creates
-# already exist, which is every re-seed of an existing environment, since
-# `wp site empty` leaves attribute taxonomies in place. Under `set -e` the
-# seed would die there, before any product is imported. Guard steps
-# individually until those steps are made re-runnable.
+# The Playwright global setup (tests/e2e/fixtures/blocks-setup.ts) exports the
+# database once this seed has run, and every test restores that snapshot before
+# it starts. So a step that fails silently here does not fail one spec, it hands
+# the whole suite a subtly wrong environment. Every step must therefore be
+# re-runnable, so that a re-seed of an existing environment is not mistaken for
+# a real failure.
+set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -19,12 +20,16 @@ bash "$script_dir/attributes.sh"
 bash "$script_dir/products.sh"
 
 # Run all scripts in parallel at maximum 10 at a time.
-find "$script_dir"/parallel/*.sh -maxdepth 1 -type f | xargs -P10 -n1 bash
+#
+# `xargs` reports any child failure as its own exit 123, so it names neither the
+# script that failed nor the code it failed with — and with ten of them writing
+# to the same log at once, the output alone does not identify it either. Wrap
+# each step so a failure announces itself before the seed dies.
+find "$script_dir"/parallel/*.sh -maxdepth 1 -type f | xargs -P10 -n1 bash -c \
+	'bash "$0" || { status=$?; echo "Seed step failed: $0 (exit $status)" >&2; exit "$status"; }'
 
 # Add deterministic ratings and sales data for product collection sorting.
-# Guarded because test-env-setup.sh snapshots the database once this returns, so
-# a half-seeded site would be restored before every test in the suite.
-bash "$script_dir/product-collection-sort-data.sh" || exit 1
+bash "$script_dir/product-collection-sort-data.sh"
 
 # Run rewrite script last to ensure all posts are created before running it.
 bash "$script_dir/rewrite.sh"

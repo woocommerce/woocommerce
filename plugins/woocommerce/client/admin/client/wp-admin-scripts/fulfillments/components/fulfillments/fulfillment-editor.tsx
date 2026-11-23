@@ -96,12 +96,15 @@ export default function FulfillmentEditor( {
 	}, [ isEditing, expanded ] );
 
 	const handleChevronClick = () => {
-		if ( isEditing ) return;
+		if ( isEditing ) {
+			return;
+		}
 		if (
 			itemsNotInAnyFulfillment.length === 0 &&
 			fulfillments.length === 1
-		)
+		) {
 			return;
+		}
 		if ( ! expanded ) {
 			onExpand();
 		} else {
@@ -140,9 +143,12 @@ export default function FulfillmentEditor( {
 						sprintf(
 							isEditing
 								? /* translators: %s: Fulfillment ID */
-								  __( 'Editing fulfillment #%s', 'woocommerce' )
+									__(
+										'Editing fulfillment #%s',
+										'woocommerce'
+									)
 								: /* translators: %s: Fulfillment ID */
-								  __( 'Fulfillment #%s', 'woocommerce' ),
+									__( 'Fulfillment #%s', 'woocommerce' ),
 							( index + 1 ).toString()
 						)
 					}

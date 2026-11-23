@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useStoreEvents } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
@@ -25,6 +26,14 @@ import './style.scss';
 
 const Cart = ( { children, attributes = {} } ) => {
 	const { hasDarkControls } = attributes;
+
+	const { dispatchCheckoutEvent } = useStoreEvents();
+
+	// Ignore changes to dispatchCheckoutEvent callback so this is ran on first mount only.
+	useEffect( () => {
+		dispatchCheckoutEvent( 'cart-render' );
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
 
 	return (
 		<CartBlockContext.Provider

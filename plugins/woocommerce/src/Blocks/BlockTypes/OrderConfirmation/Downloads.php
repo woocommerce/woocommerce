@@ -2,12 +2,14 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * Downloads class.
  */
 class Downloads extends AbstractOrderConfirmationBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -39,7 +41,7 @@ class Downloads extends AbstractOrderConfirmationBlock {
 			<table cellspacing="0" class="wc-block-order-confirmation-downloads__table ' . esc_attr( $classes_and_styles['classes'] ) . '" style="' . esc_attr( $classes_and_styles['styles'] ) . '">
 				<thead>
 					<tr>
-						' . $this->render_order_downloads_column_headers( $order ) . '
+						' . $this->render_order_downloads_column_headers() . '
 					</td>
 				</thead>
 				<tbody>

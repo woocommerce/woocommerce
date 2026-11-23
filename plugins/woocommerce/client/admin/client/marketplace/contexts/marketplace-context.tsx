@@ -7,6 +7,7 @@ import {
 	useCallback,
 	createContext,
 } from '@wordpress/element';
+import { useExperimentWithDefaultVariationName } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
@@ -18,6 +19,7 @@ import {
 	MARKETPLACE_HOST,
 	MARKETPLACE_IAM_SETTINGS_API_PATH,
 } from '../components/constants';
+import { PRODUCT_PREVIEW_EXPERIMENT_NAME } from '../utils/product-preview-experiment';
 
 // Create storage utils with 24h expiration
 const iamSettingsStorage = createStorageUtils< {
@@ -39,6 +41,7 @@ export const MarketplaceContext = createContext< MarketplaceContextType >( {
 	},
 	setSearchResultsCount: () => {},
 	iamSettings: {},
+	productPreviewVariation: null,
 } );
 
 export function MarketplaceContextProvider( props: {
@@ -47,6 +50,16 @@ export function MarketplaceContextProvider( props: {
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ selectedTab, setSelectedTab ] = useState( '' );
 	const [ iamSettings, setIamSettings ] = useState( {} );
+	// Loaded up front so product cards already know whether to open the preview modal when clicked.
+	// The control arm is ExPlat's default variation, and its clicks and links are tagged too, so it needs its name.
+	const [ , productPreviewAssignment ] =
+		useExperimentWithDefaultVariationName(
+			PRODUCT_PREVIEW_EXPERIMENT_NAME
+		);
+	// The hook keeps returning a cached assignment after tracking is turned off, so drop it here.
+	const productPreviewVariation = window.wcTracks?.isEnabled
+		? ( productPreviewAssignment?.variationName ?? null )
+		: null;
 	const [ installedPlugins, setInstalledPlugins ] = useState< string[] >(
 		[]
 	);
@@ -136,6 +149,7 @@ export function MarketplaceContextProvider( props: {
 		searchResultsCount,
 		setSearchResultsCount,
 		iamSettings,
+		productPreviewVariation,
 	};
 
 	return (

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { AddCartItemOutcome } from '@woocommerce/stores/woocommerce/cart';
+import type { AddCartItemOutcome } from '@woocommerce/stores/woocommerce';
 import type { RawShopperListItem } from '@woocommerce/stores/woocommerce/shopper-lists';
 
 type BlockActions = {
@@ -57,7 +57,7 @@ jest.mock(
 jest.mock( '@woocommerce/stores/woocommerce/shopper-lists', () => ( {} ), {
 	virtual: true,
 } );
-jest.mock( '@woocommerce/stores/woocommerce/cart', () => ( {} ), {
+jest.mock( '@woocommerce/stores/woocommerce', () => ( {} ), {
 	virtual: true,
 } );
 jest.mock( '@woocommerce/sanitize', () => ( { sanitizeHTML: jest.fn() } ), {
@@ -77,7 +77,6 @@ async function runAction( action: unknown ): Promise< void > {
 	const iterator = action as Iterator< unknown, unknown, unknown >;
 	let next = iterator.next();
 	while ( ! next.done ) {
-		// eslint-disable-next-line no-await-in-loop
 		const resolved = await next.value;
 		next = iterator.next( resolved );
 	}

@@ -66,7 +66,7 @@ class UserProfileFieldTest extends WC_Unit_Test_Case {
 	 */
 	public function test_save_clears_when_unchecked(): void {
 		$user_id = wc_create_new_customer( 'profile-uncheck@example.com', 'profileuncheck', 'pw' );
-		$this->service->mark_verified( $user_id );
+		$this->service->mark_verified( $user_id, 'profile-uncheck@example.com' );
 		$this->assertTrue( $this->service->is_verified( $user_id ) );
 
 		$_POST['wc_email_verified_nonce'] = wp_create_nonce( 'wc_email_verified_' . $user_id );

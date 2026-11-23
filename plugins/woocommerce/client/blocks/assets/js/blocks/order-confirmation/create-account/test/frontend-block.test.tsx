@@ -51,7 +51,7 @@ describe( 'CreateAccountFrontendBlock - Automatic password generation off', () =
 
 		await act( async () => {
 			expect(
-				await queryByText(
+				queryByText(
 					textContentMatcher( 'Set a password for test@test.com' )
 				)
 			).toBeInTheDocument();
@@ -112,7 +112,7 @@ describe( 'CreateAccountFrontendBlock - Automatic password generation on', () =>
 
 		await act( async () => {
 			expect(
-				await queryByText(
+				queryByText(
 					textContentMatcher( 'Set a password for test@test.com' )
 				)
 			).not.toBeInTheDocument();
@@ -147,7 +147,7 @@ describe( 'CreateAccountFrontendBlock - Automatic password generation on', () =>
 
 		await act( async () => {
 			expect(
-				await queryByText(
+				queryByText(
 					textContentMatcher(
 						'Check your email at test@test.com for the link to set up an account password.'
 					)
@@ -176,12 +176,12 @@ describe( 'CreateAccountFrontendBlock - Editor mode', () => {
 
 		await act( async () => {
 			expect(
-				await queryByText( textContentMatcher( 'Create account' ) )
+				queryByText( textContentMatcher( 'Create account' ) )
 			).toBeInTheDocument();
 		} );
 
 		expect(
-			await queryByText(
+			queryByText(
 				textContentMatcher( 'Set a password for customer@email.com' )
 			)
 		).toBeInTheDocument();
@@ -334,7 +334,7 @@ describe( 'CreateAccountFrontendBlock - Email handling', () => {
 
 		await act( async () => {
 			expect(
-				await queryByText(
+				queryByText(
 					textContentMatcher(
 						'Set a password for test+special@example.com'
 					)

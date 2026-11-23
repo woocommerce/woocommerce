@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\Reviews;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * ProductReviews class.
@@ -74,10 +73,10 @@ class ProductReviews extends AbstractBlock {
 		$reviews = ob_get_clean();
 
 		return sprintf(
-			'<div class="wp-block-woocommerce-product-reviews %1$s">
+			'<div %1$s>
 				%2$s
 			</div>',
-			StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) ),
+			get_block_wrapper_attributes( array( 'class' => 'wp-block-woocommerce-product-reviews' ) ),
 			$reviews
 		);
 	}

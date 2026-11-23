@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update uuid to 11 to fix a reported security issue.

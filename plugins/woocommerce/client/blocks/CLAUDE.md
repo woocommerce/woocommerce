@@ -17,19 +17,20 @@
 
 # Test
 pnpm --filter=@woocommerce/block-library test:js                      # Jest unit tests
-pnpm --filter=@woocommerce/block-library test:js -- path/to/test      # Specific test file
-pnpm --filter=@woocommerce/block-library test:watch                   # Jest watch mode
+pnpm --filter=@woocommerce/block-library test:js path/to/test         # Specific test file
+pnpm --filter=@woocommerce/block-library test:js --watch              # Jest watch mode
 pnpm --filter=@woocommerce/block-library test:update                  # Update snapshots
-pnpm --filter=@woocommerce/block-library test:e2e                     # Playwright E2E tests
+pnpm --filter=@woocommerce/plugin-woocommerce test:e2e:blocks         # Playwright E2E tests (needs env:start:blocks)
 
 # Lint (target specific files only)
-npx eslint --fix path/to/file.tsx                                      # Fix JS/TS file
+pnpm --filter=@woocommerce/block-library lint:js path/to/file.tsx --fix  # Fix JS/TS file (path relative to client/blocks; --fix after the path)
 pnpm --filter=@woocommerce/block-library lint:css                      # Stylelint for SCSS
 pnpm --filter=@woocommerce/block-library ts:check                     # TypeScript type checking
 
 # Environment
-pnpm --filter=@woocommerce/block-library env:start                    # Start wp-env + setup
-pnpm --filter=@woocommerce/block-library env:restart                  # Clean restart
+pnpm --filter=@woocommerce/plugin-woocommerce env:dev                 # Start wp-env at localhost:8888
+pnpm --filter=@woocommerce/plugin-woocommerce env:dev:restart         # Clean restart
+pnpm --filter=@woocommerce/plugin-woocommerce env:start:blocks        # Start + seed the E2E env
 
 # Analysis
 pnpm --filter=@woocommerce/block-library knip                         # Find unused code (dead code detector)
@@ -43,13 +44,13 @@ pnpm --filter=@woocommerce/block-library analyze-bundles              # Webpack 
 ```text
 client/blocks/
 ├── assets/js/
-│   ├── blocks/              # ~56 block implementations (cart, checkout, product-*, filter-*)
-│   ├── atomic/              # Atomic/primitive blocks (product elements)
+│   ├── blocks/              # Block implementations (cart, checkout, filters, products)
+│   │   └── product-elements-blocks/ # Reusable product element blocks
 │   ├── base/                # Shared components, context, hooks, stores
-│   │   └── stores/woocommerce/  # Interactivity API stores (LOCKED)
+│   │   └── stores/          # Interactivity API stores (LOCKED)
 │   ├── editor-components/   # 33+ shared editor UI components
 │   ├── extensions/          # Extension integrations
-│   └── utils/               # Utility functions
+│   └── utils/               # Shared utility functions
 ├── packages/
 │   ├── public-api/          # Supported package-root extension contracts
 │   │   ├── block-data/      # WordPress @data stores
@@ -141,7 +142,8 @@ For private stores:
 
 - Not intended for third-party extension
 - Removing/changing store state is NOT a breaking change
-- `assets/js/base/stores/woocommerce/` contains cart, product-data, products stores
+- `assets/js/base/stores/` holds each separate store as one file (`products.ts`, `shopper-lists.ts`, `store-notices.ts`)
+- The `woocommerce` store lives in `assets/js/base/stores/woocommerce/`: `index.ts` registers it, `types.ts` declares its store-wide types, and `cart/` holds the cart code split by concern, with the cart-only types in `cart/types.ts`
 - Cart store uses mutation batching for performance
 
 ### IntegrationRegistry (Extension API)
@@ -216,9 +218,10 @@ Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP en
 ### Playwright E2E Tests
 
 - Config: `../../tests/e2e/playwright.config.ts` (Blocks e2e now lives in the core e2e suite)
+- Projects: `blocks-parallel` (default) and `blocks-serial` (specs in `blocksSerialSpecs`, database reset after each test). Write new specs parallel-safe, or use a test lock; add them to `blocksSerialSpecs` only as a last resort. See `../../tests/e2e/README.md#parallel-locked-and-serial-specs`.
 - Test themes: `block-theme`, `classic-theme`, `block-theme-with-templates`
 - Setup script: `../../tests/e2e/bin/blocks/test-env-setup.sh`
-- Uses MSW for API mocking, Allure for reporting
+- Uses MSW for API mocking
 
 ### PHP Tests
 
@@ -228,7 +231,7 @@ Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP en
 
 ## Gotchas
 
-- **ESLint config** has custom WooCommerce rules and lodash import restrictions - use the local `.eslintrc.js`, not the monorepo root
+- **ESLint config** has custom WooCommerce rules and lodash import restrictions - use the local `eslint.config.mjs`, not the monorepo root
 - **`side-effects` in package.json** is extensive - many files cannot be tree-shaken (CSS, block registrations, filters)
 - **StoreApi lives outside Blocks** at `src/StoreApi/`, not `src/Blocks/StoreApi/`
 - **Two DI containers** exist: `src/Blocks/Registry/Container.php` (blocks-specific, legacy) and the main WooCommerce DI container in `src/`

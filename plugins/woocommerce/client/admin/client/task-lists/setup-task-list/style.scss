@@ -228,6 +228,7 @@
 	@for $i from 1 through 10 {
 		.woocommerce-task-list__item:not(.in_progress):not(.complete).index-#{$i} .woocommerce-task__icon::after {
 			content: "#{$i}";
+			/* stylelint-disable-next-line scss/at-extend-no-missing-placeholder */
 			@extend .numbered-circle;
 			color: var(--wp-admin-theme-color);
 			font-weight: bold;

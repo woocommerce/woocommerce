@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-contact-information-block",
-	"version": "1.0.0",
 	"title": "Contact Information",
 	"description": "Collect your customer's contact information.",
 	"category": "woocommerce",

@@ -9,7 +9,7 @@ Cart tokens can be used instead of cookies based sessions for headless interacti
 
 ## Obtaining a Cart Token
 
-Requests to `/cart` endpoints return a `Cart-Token` header alongside the response. This contains a token which can later be sent as a request header to the Store API Cart and Checkout endpoints to identify the cart.
+Successful requests to `/cart` endpoints return a `Cart-Token` header alongside the response. This contains a token which can later be sent as a request header to the Store API Cart and Checkout endpoints to identify the cart. Error responses caused by a cart session loading failure do not include `Cart-Token` or `Cart-Hash` headers.
 
 The quickest method of obtaining a Cart Token is to make a GET request `/wp-json/wc/store/v1/cart` and observe the response headers. You should see a `Cart-Token` header there.
 
@@ -24,3 +24,9 @@ curl --header "Cart-Token: 12345" --request GET https://example-store.com/wp-jso
 ```
 
 The same method will allow you to checkout using a `Cart-Token` on the `/checkout` route.
+
+## Cross-origin requests
+
+Browser requests from another origin can use a cart token without cookies. Set the request's credentials mode to `omit` when the origin is not allowed by the store.
+
+To use browser credentials, such as login cookies, the storefront's origin must be allowed by WordPress using the `allowed_http_origins` or `allowed_http_origin` filter. Only allow origins that the store trusts with customer data.

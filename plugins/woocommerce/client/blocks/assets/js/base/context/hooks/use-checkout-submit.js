@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { checkoutStore, paymentStore } from '@woocommerce/block-data';
+import {
+	cartStore,
+	checkoutStore,
+	paymentStore,
+} from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -25,7 +29,11 @@ export const useCheckoutSubmit = () => {
 	} = useSelect( ( select ) => {
 		const store = select( checkoutStore );
 		return {
-			isCalculating: store.isCalculating(),
+			// Shipping address changes are sent after a debounce, so the shipping rates are out of date before the
+			// request starts. Count that wait as calculating, so the checkout stays disabled from the change to the new rates.
+			isCalculating:
+				store.isCalculating() ||
+				select( cartStore ).isShippingRatesStale(),
 			isBeforeProcessing: store.isBeforeProcessing(),
 			isProcessing: store.isProcessing(),
 			isAfterProcessing: store.isAfterProcessing(),

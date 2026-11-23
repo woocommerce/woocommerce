@@ -336,4 +336,28 @@ final class ProductCountCacheServiceTest extends \WC_Unit_Test_Case {
 
 		$this->assertNull( $this->product_cache->get( 'product', array( ProductStatus::PUBLISH ) ) );
 	}
+
+	/**
+	 * @testdox Cache is flushed when a plugin is activated.
+	 */
+	public function test_activated_plugin_flushes_cache(): void {
+		$this->product_util->get_counts_for_type( 'product' );
+		$this->assertNotNull( $this->product_cache->get( 'product' ) );
+
+		do_action( 'activated_plugin', 'some-plugin/some-plugin.php', false );
+
+		$this->assertNull( $this->product_cache->get( 'product' ) );
+	}
+
+	/**
+	 * @testdox Cache is flushed when a plugin is deactivated.
+	 */
+	public function test_deactivated_plugin_flushes_cache(): void {
+		$this->product_util->get_counts_for_type( 'product' );
+		$this->assertNotNull( $this->product_cache->get( 'product' ) );
+
+		do_action( 'deactivated_plugin', 'some-plugin/some-plugin.php', false );
+
+		$this->assertNull( $this->product_cache->get( 'product' ) );
+	}
 }

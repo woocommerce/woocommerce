@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# This script mimics the CopyWebpackPlugin behavior from the WooCommerce Blocks webpack configuration
-# to make block.json files available for unit testing without requiring a full build.
-# Ensure that the logic of this script is kept in sync with the logic of the CopyWebpackPlugin in the WooCommerce Blocks webpack configuration:
+# Copies every block.json under the Blocks source tree into the built assets directory so the PHP
+# test suites can read block metadata without a full build. Mirrors the CopyWebpackPlugin rules in
 # https://github.com/woocommerce/woocommerce/blob/84d1da7be3cbd3d8f40b17ad58729f668fd82b6a/plugins/woocommerce/client/blocks/bin/webpack-configs.js#L229-L256
+# and must stay in sync with them. Unlike a plain copy, it first removes the previously generated
+# manifests so an edited or deleted source manifest cannot leave a stale copy behind.
 
 # Move to the project root
 while [ ! -d "plugins/woocommerce" ] || [ ! -f "pnpm-workspace.yaml" ]; do
@@ -14,43 +15,68 @@ while [ ! -d "plugins/woocommerce" ] || [ ! -f "pnpm-workspace.yaml" ]; do
     cd ..
 done
 
-# Set target directory
-TARGET_DIR="plugins/woocommerce/assets/client/blocks"
+node <<'NODE'
+const fs = require( 'node:fs' );
+const path = require( 'node:path' );
 
-# Create target directory if it doesn't exist
-mkdir -p "$TARGET_DIR"
+const sourceDirectory = path.resolve( 'plugins/woocommerce/client/blocks/assets/js' );
+const targetDirectory = path.resolve( 'plugins/woocommerce/assets/client/blocks' );
+// Keep in sync with genericBlocks in webpack-entries.js.
+const genericBlocks = new Set( [
+	'accordion-group',
+	'accordion-header',
+	'accordion-item',
+	'accordion-panel',
+] );
 
-# Define generic blocks as a space-separated string (keep in sync with webpack-entries.js)
-generic_blocks="accordion-group accordion-header accordion-item accordion-panel"
+const findManifests = ( directory ) =>
+	fs
+		.readdirSync( directory, { recursive: true } )
+		.filter( ( entry ) => path.basename( entry ) === 'block.json' )
+		.map( ( entry ) => path.join( directory, entry ) );
 
-# Find all block.json files
-find plugins/woocommerce/client/blocks/assets/js -name "block.json" | while read file; do
-    # Read the block name from the JSON file
-    block_name=$(cat "$file" | grep -o '"name": "[^"]*"' | cut -d'"' -f4 | cut -d'/' -f2)
+const sourceManifests = findManifests( sourceDirectory );
+if ( sourceManifests.length === 0 ) {
+	// Refuse to wipe the target when the source scan found nothing: that is a broken checkout, not an empty one.
+	throw new Error( `No block metadata manifests found in ${ sourceDirectory }` );
+}
 
-    # Function to check if a block is in the generic_blocks string
-    is_generic_block=false
-    for gb in $generic_blocks; do
-        if [ "$block_name" = "$gb" ]; then
-            is_generic_block=true
-            break
-        fi
-    done
+fs.mkdirSync( targetDirectory, { recursive: true } );
 
-    # Check if it's a parent block by looking for "parent" field, but treat as regular if generic
-    if grep -q '"parent":' "$file" && [ "$is_generic_block" = false ]; then
-        # It's an inner block
-        target_path="$TARGET_DIR/inner-blocks/$block_name/block.json"
-        mkdir -p "$TARGET_DIR/inner-blocks/$block_name"
-        if [ ! -f "$target_path" ]; then
-            cp "$file" "$target_path"
-        fi
-    else
-        # It's a regular block
-        target_path="$TARGET_DIR/$block_name/block.json"
-        mkdir -p "$TARGET_DIR/$block_name"
-        if [ ! -f "$target_path" ]; then
-            cp "$file" "$target_path"
-        fi
-    fi
-done
+for ( const targetManifest of findManifests( targetDirectory ) ) {
+	fs.unlinkSync( targetManifest );
+	// Prune the directories this copy created once they are empty, so a renamed or removed block leaves nothing behind.
+	let directory = path.dirname( targetManifest );
+	while ( directory !== targetDirectory && fs.readdirSync( directory ).length === 0 ) {
+		fs.rmdirSync( directory );
+		directory = path.dirname( directory );
+	}
+}
+
+// The full build writes a metadata collection that overrides the individual block.json files at
+// registration time; a stale one would mask the fresh copies until the next build, so drop it too.
+fs.rmSync( path.join( targetDirectory, 'blocks-json.php' ), { force: true } );
+
+for ( const sourceManifest of sourceManifests ) {
+	const metadata = JSON.parse( fs.readFileSync( sourceManifest, 'utf8' ) );
+	// Block names are `namespace/block-name`, the shape WordPress and bin/block.json-validation-schema.json
+	// both enforce. Reject anything else: a name like `woocommerce/..` would otherwise resolve to a path
+	// outside the target directory.
+	const blockName =
+		typeof metadata.name === 'string'
+			? /^[a-z][a-z0-9-]*\/([a-z][a-z0-9-]*)$/.exec( metadata.name )?.[ 1 ]
+			: undefined;
+	if ( ! blockName ) {
+		throw new Error( `Invalid block name in ${ sourceManifest }` );
+	}
+
+	const targetManifest = path.join(
+		targetDirectory,
+		metadata.parent && ! genericBlocks.has( blockName ) ? path.join( 'inner-blocks', blockName ) : blockName,
+		'block.json'
+	);
+
+	fs.mkdirSync( path.dirname( targetManifest ), { recursive: true } );
+	fs.copyFileSync( sourceManifest, targetManifest );
+}
+NODE

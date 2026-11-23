@@ -74,6 +74,28 @@ class CartShippingRateSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return package destination addresses as sanitized plain text.
+	 */
+	public function test_package_destination_uses_plain_text_values(): void {
+		$package = array(
+			'destination' => array(
+				'address_1' => '1 Rock & Roll <script>alert("x")</script>',
+				'address_2' => '',
+				'city'      => 'Beverly Hills',
+				'state'     => 'CA',
+				'postcode'  => '90210',
+				'country'   => 'US',
+			),
+		);
+
+		$method = ( new ReflectionClass( $this->sut ) )->getMethod( 'prepare_package_destination_response' );
+		$method->setAccessible( true );
+		$response = $method->invoke( $this->sut, $package );
+
+		$this->assertSame( '1 Rock & Roll', $response->address_1 );
+	}
+
+	/**
 	 * Invoke the protected get_rate_response method.
 	 *
 	 * @param WC_Shipping_Rate $rate Rate object.

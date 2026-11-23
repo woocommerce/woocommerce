@@ -111,7 +111,6 @@ class WC_Lazy_REST_Server extends WP_Test_Spy_REST_Server {
 			WC_Unit_Test_Case::with_rest_route_context(
 				$route,
 				static function () {
-					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 					do_action( 'rest_api_init' );
 				}
 			);
@@ -180,13 +179,32 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 	protected $server;
 
 	/**
+	 * Servers keyed by test class, so routes are registered once per class instead of once per test.
+	 *
+	 * @var array<string, WC_Lazy_REST_Server>
+	 */
+	private static $shared_servers = array();
+
+	/**
+	 * Set to false when tests register their own controllers, add filters read at route registration, or need route args built from their own data.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = true;
+
+	/**
 	 * Setup our test server.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		global $wp_rest_server;
-		$wp_rest_server = new WC_Lazy_REST_Server();
-		$this->server   = $wp_rest_server;
+		if ( ! static::$reuse_rest_server ) {
+			$wp_rest_server = new WC_Lazy_REST_Server();
+		} else {
+			self::$shared_servers[ static::class ] = self::$shared_servers[ static::class ] ?? new WC_Lazy_REST_Server();
+			$wp_rest_server                        = self::$shared_servers[ static::class ];
+		}
+		$this->server = $wp_rest_server;
 		$this->initialize_rest_api_defaults();
 
 		// Reset payment gateways.
@@ -217,6 +235,14 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 		global $wp_rest_server;
 		unset( $this->server );
 		$wp_rest_server = null;
+	}
+
+	/**
+	 * Drop the class's shared server.
+	 */
+	public static function tearDownAfterClass(): void {
+		unset( self::$shared_servers[ static::class ] );
+		parent::tearDownAfterClass();
 	}
 
 	/**

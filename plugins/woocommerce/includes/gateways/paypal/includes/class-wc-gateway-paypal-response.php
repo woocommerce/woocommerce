@@ -34,7 +34,7 @@ abstract class WC_Gateway_Paypal_Response {
 		$custom = json_decode( $raw_custom );
 		if ( $custom && is_object( $custom ) ) {
 			$order_id  = $custom->order_id;
-			$order_key = $custom->order_key;
+			$order_key = is_string( $custom->order_key ) ? $custom->order_key : '';
 		} else {
 			// Nothing was found.
 			WC_Gateway_Paypal::log( 'Order ID and key were not found in "custom".', 'error' );
@@ -51,6 +51,13 @@ abstract class WC_Gateway_Paypal_Response {
 
 		if ( ! $order || ! hash_equals( $order->get_order_key(), $order_key ) ) {
 			WC_Gateway_Paypal::log( 'Order Keys do not match.', 'error' );
+			return false;
+		}
+
+		// A checkout-draft order has not been through checkout validation, so it must not be paid for from a PayPal
+		// IPN or PDT notification even though needs_payment() reports true for it.
+		if ( $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
+			WC_Gateway_Paypal::log( 'Order #' . $order->get_id() . ' is a checkout draft and cannot be paid for.', 'error' );
 			return false;
 		}
 

@@ -31,6 +31,7 @@ jobs:
         name: 'Add changelog to PR'
         if: ${{ github.event.pull_request.user.login != 'github-actions[bot]' && github.event.pull_request.user.login != 'woocommercebot' && ( github.event_name != 'pull_request_target' || contains( github.event.pull_request.body, '[x] Automatically create a changelog' ) ) }}
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         permissions:
             contents: write
             issues: write
@@ -40,21 +41,14 @@ jobs:
               uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
             - name: Setup Node
-              uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+              uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
               with:
                   node-version-file: '.nvmrc'
 
             - name: Setup PNPM
               uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
-            - name: Skip changelog push for cross-repository pull requests
-              if: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository }}
-              run: |
-                  echo "Skipping changelog automation for cross-repository pull request."
-                  echo "The base repository token cannot push to the contributor fork."
-
             - name: Generate Changelog File
-              if: ${{ github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository }}
               env:
                   GITHUB_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
               run: pnpm utils changefile ${{ github.event.number || inputs.prNumber }} -o ${{ github.repository_owner }}

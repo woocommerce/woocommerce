@@ -36,7 +36,7 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 	 *
 	 * @var \WP_Post|null
 	 */
-	private ?\WP_Post $original_post;
+	private ?\WP_Post $original_post = null;
 
 	/**
 	 * Set up the test environment.
@@ -81,11 +81,6 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$post = $this->original_post;
-
-		// Remove any filters that might have been added.
-		remove_all_filters( 'woocommerce_is_checkout' );
-		remove_all_filters( 'woocommerce_is_cart' );
-		remove_all_filters( 'woocommerce_is_product' );
 
 		parent::tearDown();
 	}

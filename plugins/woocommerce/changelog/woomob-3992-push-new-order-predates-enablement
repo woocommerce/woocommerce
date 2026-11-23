@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop push notifications from announcing orders placed before they were turned on as new orders.

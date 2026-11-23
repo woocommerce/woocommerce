@@ -83,7 +83,7 @@ export function ImageGalleryToolbarDropdown( {
 										child,
 										{ onClose }
 									)
-						  ) }
+							) }
 					{ canRemove && (
 						<MenuGroup>
 							<MenuItem

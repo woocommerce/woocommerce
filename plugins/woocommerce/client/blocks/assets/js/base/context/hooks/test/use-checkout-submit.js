@@ -1,12 +1,16 @@
 /**
  * External dependencies
  */
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
+import {
+	CART_STORE_KEY,
+	config as cartStoreConfig,
+} from '@woocommerce/block-data/cart';
 import {
 	CHECKOUT_STORE_KEY,
 	config as checkoutStoreConfig,
@@ -38,6 +42,7 @@ describe( 'useCheckoutSubmit', () => {
 
 	beforeEach( () => {
 		registry = createRegistry( {
+			[ CART_STORE_KEY ]: cartStoreConfig,
 			[ CHECKOUT_STORE_KEY ]: checkoutStoreConfig,
 			[ PAYMENT_STORE_KEY ]: paymentDataStoreConfig,
 		} );
@@ -53,5 +58,29 @@ describe( 'useCheckoutSubmit', () => {
 		onSubmit();
 
 		expect( onSubmit ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'keeps the place order button disabled while a shipping address change waits to be sent', () => {
+		const { result } = renderHook( () => useCheckoutSubmit(), {
+			wrapper,
+		} );
+
+		expect( result.current.isCalculating ).toBe( false );
+
+		act( () => {
+			registry
+				.dispatch( CART_STORE_KEY )
+				.__internalSetShippingRatesUpdateQueued( true );
+		} );
+
+		expect( result.current.isCalculating ).toBe( true );
+
+		act( () => {
+			registry
+				.dispatch( CART_STORE_KEY )
+				.__internalSetShippingRatesUpdateQueued( false );
+		} );
+
+		expect( result.current.isCalculating ).toBe( false );
 	} );
 } );

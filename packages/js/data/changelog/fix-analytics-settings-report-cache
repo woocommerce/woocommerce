@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return refreshed report data and safely handle errors for unloaded settings groups.

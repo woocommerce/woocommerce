@@ -38,7 +38,7 @@ interface WC_Object_Data_Store_Interface {
 	 *
 	 * @param  WC_Data $data Data object.
 	 * @param  array   $args Array of args to pass to the delete method.
-	 * @return bool result
+	 * @return void
 	 */
 	public function delete( &$data, $args = array() );
 
@@ -53,9 +53,13 @@ interface WC_Object_Data_Store_Interface {
 	/**
 	 * Deletes meta based on meta ID.
 	 *
+	 * Implementations might return different types.
+	 * See: https://github.com/woocommerce/woocommerce/issues/30926
+	 *
 	 * @param  WC_Data $data Data object.
 	 * @param  object  $meta Meta object (containing at least ->id).
-	 * @return array
+	 *
+	 * @phpstan-ignore missingType.return (The return value is intentionally not part of this contract.)
 	 */
 	public function delete_meta( &$data, $meta );
 

@@ -16,12 +16,18 @@ export const debounce = < T extends ( ...args: any[] ) => any >(
 
 	const debounced = ( ( ...args: Parameters< T > ) => {
 		latestArgs = args;
-		if ( timeout ) clearTimeout( timeout );
+		if ( timeout ) {
+			clearTimeout( timeout );
+		}
 		timeout = setTimeout( () => {
 			timeout = null;
-			if ( ! immediate && latestArgs ) func( ...latestArgs );
+			if ( ! immediate && latestArgs ) {
+				func( ...latestArgs );
+			}
 		}, wait );
-		if ( immediate && ! timeout ) func( ...args );
+		if ( immediate && ! timeout ) {
+			func( ...args );
+		}
 	} ) as DebouncedFunction< T >;
 
 	debounced.flush = () => {

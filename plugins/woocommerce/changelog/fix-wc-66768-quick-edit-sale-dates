@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add explicit sale date fields to product Quick Edit and save schedules consistently with the full product editor.

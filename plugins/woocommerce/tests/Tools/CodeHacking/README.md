@@ -151,6 +151,16 @@ In a few rare cases the code hacker will cause problems with tests that do write
 
 One of these cases is the usage of the `copy` command to copy files. Since this function is used in a few tests, a convenience `file_copy` method is defined in `WC_Unit_Test_Case`; it just temporarily disables the hacker, does the copy, and reenables the hacker.
 
+## Disabling the code hacker for a whole run
+
+The code hacker owns PHP's `file` stream wrapper while it is enabled, so it cannot coexist with other tools that need that wrapper for themselves, such as mutation testing frameworks that swap mutated files in at include time. Set the `WC_TEST_DISABLE_CODE_HACKER` environment variable to any non-empty value to skip the code hacker for the whole run:
+
+```sh
+pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli env WC_TEST_DISABLE_CODE_HACKER=1 tests/php/bin/run-phpunit.sh -c phpunit.xml --filter SomeTest
+```
+
+The bootstrap prints a notice when it does this. Tests that mock functions or static methods, or that subclass `final` classes, fail without the code hacker, so narrow the run to test classes that do not rely on it.
+
 ## An important note
 
 The code hacker is intended to be a **last resort** mechanism to test stuff that it's **really** difficult or impossible to test otherwise - the mechanisms already in place to help testing (e.g. the PHPUnit's mocks or the Woo helpers) should still be used whenever possible. And of course, the code hacker should not be an excuse to write code that's difficult to test.

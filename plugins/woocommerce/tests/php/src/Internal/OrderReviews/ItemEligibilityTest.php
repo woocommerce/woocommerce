@@ -152,6 +152,47 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox decide() finds the order's review even when the billing email has since changed.
+	 */
+	public function test_decide_finds_review_whose_author_email_differs(): void {
+		$built = $this->make_order( 'new-contact@example.test' );
+		// Written while the order still carried a different billing address.
+		$comment_id = $this->insert_review(
+			$built['product_id'],
+			'old-contact@example.test',
+			'Before the address changed.',
+			4,
+			(int) $built['order']->get_id()
+		);
+
+		$decision = ItemEligibility::decide( $built['item'], $built['order'] );
+
+		$this->assertNotNull( $decision['comment'], 'The order is the scope, not the address.' );
+		$this->assertSame( $comment_id, (int) $decision['comment']->comment_ID );
+	}
+
+	/**
+	 * @testdox decide() finds a review the moderation checks are still holding.
+	 */
+	public function test_decide_finds_a_held_review(): void {
+		$built      = $this->make_order( 'jane@example.test' );
+		$comment_id = $this->insert_review(
+			$built['product_id'],
+			'jane@example.test',
+			'Waiting on moderation.',
+			4,
+			(int) $built['order']->get_id(),
+			0,
+			0
+		);
+
+		$decision = ItemEligibility::decide( $built['item'], $built['order'] );
+
+		$this->assertNotNull( $decision['comment'], 'A held review still occupies the slot.' );
+		$this->assertSame( $comment_id, (int) $decision['comment']->comment_ID );
+	}
+
+	/**
 	 * @testdox exclude_fully_refunded_items drops items whose full quantity has been refunded.
 	 */
 	public function test_exclude_fully_refunded_items_drops_full_refunds(): void {
@@ -364,6 +405,38 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 		$this->assertNull( $decision_b['comment'], 'Variation B row should stay unreviewed.' );
 		$this->assertSame( $built['variation_a_id'], $decision_a['variation_id'] );
 		$this->assertSame( $built['variation_b_id'], $decision_b['variation_id'] );
+	}
+
+	/**
+	 * @testdox unique_slot_items collapses the same product's line items to one row.
+	 */
+	public function test_unique_slot_items_collapses_same_product_line_items(): void {
+		$order = OrderHelper::create_order();
+		foreach ( $order->get_items() as $line ) {
+			$order->remove_item( $line->get_id() );
+		}
+		$product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $product, 1 );
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$this->assertCount( 2, $order->get_items(), 'Fixture should carry two line items.' );
+
+		$unique = ItemEligibility::unique_slot_items( $order->get_items() );
+
+		$this->assertCount( 1, $unique );
+		$this->assertSame( $product->get_id(), reset( $unique )->get_product_id() );
+	}
+
+	/**
+	 * @testdox unique_slot_items keeps distinct variations of the same product as separate rows.
+	 */
+	public function test_unique_slot_items_keeps_distinct_variations(): void {
+		$built = $this->make_variation_order( 'jane@example.test' );
+
+		$unique = ItemEligibility::unique_slot_items( $built['order']->get_items() );
+
+		$this->assertCount( 2, $unique );
 	}
 
 	/**

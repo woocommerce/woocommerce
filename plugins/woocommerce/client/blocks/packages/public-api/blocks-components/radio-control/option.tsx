@@ -30,7 +30,6 @@ const Option = ( {
 		onChange( event.target.value );
 
 	return (
-		// eslint-disable-next-line jsx-a11y/label-has-associated-control
 		<label
 			className={ clsx( 'wc-block-components-radio-control__option', {
 				'wc-block-components-radio-control__option-checked': checked,

@@ -286,8 +286,6 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			$this->assertTrue( $recommended_pms[3]['enabled'] );
 			$this->assertSame( PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY, $recommended_pms[3]['category'] );
 		} finally {
-			// Clean up.
-			Constants::clear_constants();
 			$container->reset_replacement( WooPaymentsRestController::class );
 		}
 	}
@@ -384,8 +382,6 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			$this->assertArrayHasKey( 'messages', $gateway_details['onboarding'] );
 			$this->assertArrayHasKey( 'not_supported', $gateway_details['onboarding']['messages'] );
 		} finally {
-			// Clean up.
-			Constants::clear_constants();
 			$container->reset_replacement( WooPaymentsRestController::class );
 			$container->reset_replacement( WooPaymentsService::class );
 		}
@@ -449,8 +445,6 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
 			$this->assertTrue( $gateway_details['onboarding']['state']['supported'] );
 		} finally {
-			// Clean up.
-			Constants::clear_constants();
 			$container->reset_replacement( WooPaymentsRestController::class );
 			$container->reset_replacement( WooPaymentsService::class );
 		}
@@ -590,19 +584,14 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		// Arrange the version constant.
 		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
-		try {
-			// Act.
-			$gateway_details = $this->sut->get_details( $fake_gateway, 0 );
+		// Act.
+		$gateway_details = $this->sut->get_details( $fake_gateway, 0 );
 
-			// Assert - when no country code is provided, supported state should be true by default.
-			$this->assertArrayHasKey( 'onboarding', $gateway_details );
-			$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
-			$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
-			$this->assertTrue( $gateway_details['onboarding']['state']['supported'] );
-		} finally {
-			// Clean up.
-			Constants::clear_constants();
-		}
+		// Assert - when no country code is provided, supported state should be true by default.
+		$this->assertArrayHasKey( 'onboarding', $gateway_details );
+		$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
+		$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
+		$this->assertTrue( $gateway_details['onboarding']['state']['supported'] );
 	}
 
 	/**
@@ -650,23 +639,18 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		// Arrange the version constant.
 		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
-		try {
-			// Act.
-			$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'XX' );
+		// Act.
+		$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'XX' );
 
-			// Assert - should include the unsupported state and message.
-			$this->assertArrayHasKey( 'onboarding', $gateway_details );
-			$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
-			$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
-			$this->assertFalse( $gateway_details['onboarding']['state']['supported'] );
+		// Assert - should include the unsupported state and message.
+		$this->assertArrayHasKey( 'onboarding', $gateway_details );
+		$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
+		$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
+		$this->assertFalse( $gateway_details['onboarding']['state']['supported'] );
 
-			$this->assertArrayHasKey( 'messages', $gateway_details['onboarding'] );
-			$this->assertArrayHasKey( 'not_supported', $gateway_details['onboarding']['messages'] );
-			$this->assertEquals( 'WooPayments is not available in your country.', $gateway_details['onboarding']['messages']['not_supported'] );
-		} finally {
-			// Clean up.
-			Constants::clear_constants();
-		}
+		$this->assertArrayHasKey( 'messages', $gateway_details['onboarding'] );
+		$this->assertArrayHasKey( 'not_supported', $gateway_details['onboarding']['messages'] );
+		$this->assertEquals( 'WooPayments is not available in your country.', $gateway_details['onboarding']['messages']['not_supported'] );
 	}
 
 	/**
@@ -1200,19 +1184,13 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		try {
-			// Act.
-			$onboarding_url = $this->sut->get_onboarding_url( $fake_gateway );
+		// Act.
+		$onboarding_url = $this->sut->get_onboarding_url( $fake_gateway );
 
-			// Assert - Should do LIVE onboarding (no test_drive params).
-			$this->assertStringContainsString( 'https://example.com/wp-admin/woopayments/connect-url', $onboarding_url );
-			$this->assertStringNotContainsString( 'test_drive=true', $onboarding_url );
-			$this->assertStringNotContainsString( 'auto_start_test_drive_onboarding=true', $onboarding_url );
-		} finally {
-			// Clean up.
-			delete_option( 'woocommerce_coming_soon' );
-			delete_option( 'woocommerce_onboarding_profile' );
-		}
+		// Assert - Should do LIVE onboarding (no test_drive params).
+		$this->assertStringContainsString( 'https://example.com/wp-admin/woopayments/connect-url', $onboarding_url );
+		$this->assertStringNotContainsString( 'test_drive=true', $onboarding_url );
+		$this->assertStringNotContainsString( 'auto_start_test_drive_onboarding=true', $onboarding_url );
 	}
 
 	/**
@@ -1240,19 +1218,13 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		try {
-			// Act.
-			$onboarding_url = $this->sut->get_onboarding_url( $fake_gateway );
+		// Act.
+		$onboarding_url = $this->sut->get_onboarding_url( $fake_gateway );
 
-			// Assert - Should do LIVE onboarding (no test_drive params).
-			$this->assertStringContainsString( 'https://example.com/wp-admin/woopayments/connect-url', $onboarding_url );
-			$this->assertStringNotContainsString( 'test_drive=true', $onboarding_url );
-			$this->assertStringNotContainsString( 'auto_start_test_drive_onboarding=true', $onboarding_url );
-		} finally {
-			// Clean up.
-			delete_option( 'woocommerce_coming_soon' );
-			delete_option( 'woocommerce_onboarding_profile' );
-		}
+		// Assert - Should do LIVE onboarding (no test_drive params).
+		$this->assertStringContainsString( 'https://example.com/wp-admin/woopayments/connect-url', $onboarding_url );
+		$this->assertStringNotContainsString( 'test_drive=true', $onboarding_url );
+		$this->assertStringNotContainsString( 'auto_start_test_drive_onboarding=true', $onboarding_url );
 	}
 
 	/**
@@ -1279,19 +1251,13 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		try {
-			// Act.
-			$onboarding_url = $this->sut->get_onboarding_url( $fake_gateway );
+		// Act.
+		$onboarding_url = $this->sut->get_onboarding_url( $fake_gateway );
 
-			// Assert - Should do TEST-DRIVE onboarding (includes test_drive params).
-			$this->assertStringContainsString( 'https://example.com/wp-admin/woopayments/connect-url', $onboarding_url );
-			$this->assertStringContainsString( 'test_drive=true', $onboarding_url );
-			$this->assertStringContainsString( 'auto_start_test_drive_onboarding=true', $onboarding_url );
-		} finally {
-			// Clean up.
-			delete_option( 'woocommerce_coming_soon' );
-			delete_option( 'woocommerce_onboarding_profile' );
-		}
+		// Assert - Should do TEST-DRIVE onboarding (includes test_drive params).
+		$this->assertStringContainsString( 'https://example.com/wp-admin/woopayments/connect-url', $onboarding_url );
+		$this->assertStringContainsString( 'test_drive=true', $onboarding_url );
+		$this->assertStringContainsString( 'auto_start_test_drive_onboarding=true', $onboarding_url );
 	}
 
 	/**

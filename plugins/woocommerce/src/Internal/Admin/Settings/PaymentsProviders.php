@@ -14,8 +14,8 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\GoCardless;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Helcim;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\HelioPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Klarna;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\KlarnaCheckout;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Komoju;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\KustomCheckout;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mastercard;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
@@ -144,7 +144,7 @@ class PaymentsProviders {
 		'monei'                       => Monei::class,
 		'monei_*'                     => Monei::class,
 		'gocardless'                  => GoCardless::class,
-		'kco'                         => KlarnaCheckout::class,
+		'kco'                         => KustomCheckout::class,
 		'visa_acceptance_solutions_*' => Visa::class,
 		'mastercard_merchant_cloud'   => Mastercard::class,
 		'eway'                        => Eway::class,
@@ -181,11 +181,10 @@ class PaymentsProviders {
 		ExtensionSuggestions::VIVA_WALLET       => Vivacom::class,
 		ExtensionSuggestions::TILOPAY           => Tilopay::class,
 		ExtensionSuggestions::HELCIM            => Helcim::class,
-		ExtensionSuggestions::HELIOPAY          => HelioPay::class,
 		ExtensionSuggestions::PAYTRAIL          => Paytrail::class,
 		ExtensionSuggestions::MONEI             => Monei::class,
 		ExtensionSuggestions::GOCARDLESS        => GoCardless::class,
-		ExtensionSuggestions::KLARNA_CHECKOUT   => KlarnaCheckout::class,
+		ExtensionSuggestions::KUSTOM_CHECKOUT   => KustomCheckout::class,
 		ExtensionSuggestions::VISA              => Visa::class,
 		ExtensionSuggestions::MASTERCARD        => Mastercard::class,
 		ExtensionSuggestions::EWAY              => Eway::class,
@@ -409,8 +408,7 @@ class PaymentsProviders {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					/* translators: %s: Gateway ID. */
-					esc_html__( 'The provider class for gateway ID "%s" must extend the PaymentGateway class.', 'woocommerce' ),
+					esc_html( 'The provider class for gateway ID "%s" must extend the PaymentGateway class.' ),
 					$gateway_id
 				),
 				'10.4.0'
@@ -457,8 +455,7 @@ class PaymentsProviders {
 				wc_doing_it_wrong(
 					__METHOD__,
 					sprintf(
-						/* translators: %s: Payment extension suggestion ID. */
-						esc_html__( 'The provider class for payment extension suggestion ID "%s" must extend the PaymentGateway class.', 'woocommerce' ),
+						esc_html( 'The provider class for payment extension suggestion ID "%s" must extend the PaymentGateway class.' ),
 						$pes_id
 					),
 					'10.4.0'
@@ -896,10 +893,8 @@ class PaymentsProviders {
 		}
 
 		$payments_nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_KEY, array() );
-		if ( empty( $payments_nox_profile ) ) {
+		if ( ! is_array( $payments_nox_profile ) ) {
 			$payments_nox_profile = array();
-		} else {
-			$payments_nox_profile = maybe_unserialize( $payments_nox_profile );
 		}
 
 		// Check if it is already marked as attached.
@@ -963,10 +958,8 @@ class PaymentsProviders {
 		}
 
 		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::PAYMENTS_NOX_PROFILE_KEY, true );
-		if ( empty( $user_payments_nox_profile ) ) {
+		if ( ! is_array( $user_payments_nox_profile ) ) {
 			$user_payments_nox_profile = array();
-		} else {
-			$user_payments_nox_profile = maybe_unserialize( $user_payments_nox_profile );
 		}
 
 		// Mark the suggestion as hidden.
@@ -1276,6 +1269,8 @@ class PaymentsProviders {
 		wp_cache_delete( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
 		// The Payments service owns and also clears this cache; deleting it here keeps direct callers of this service from reading stale provider lists.
 		wp_cache_delete( self::PROVIDER_LISTS_REQUEST_CACHE_KEY, self::PROVIDER_LISTS_REQUEST_CACHE_GROUP );
+		// Suggestion details are embedded in the gateway details, so clear their cache too.
+		$this->extension_suggestions->clear_cache();
 	}
 
 	/**
@@ -1387,11 +1382,11 @@ class PaymentsProviders {
 					ExtensionSuggestions::SQUARE,
 					ExtensionSuggestions::PAYONEER,
 					ExtensionSuggestions::AIRWALLEX,
+					ExtensionSuggestions::KOMOJU,
 					ExtensionSuggestions::COINBASE,         // We don't have suggestion details yet.
 					ExtensionSuggestions::AUTHORIZE_NET,    // We don't have suggestion details yet.
 					ExtensionSuggestions::BOLT,             // We don't have suggestion details yet.
 					ExtensionSuggestions::DEPAY,            // We don't have suggestion details yet.
-					ExtensionSuggestions::ELAVON,           // We don't have suggestion details yet.
 					ExtensionSuggestions::FORTISPAY,        // We don't have suggestion details yet.
 					ExtensionSuggestions::PAYPAL_ZETTLE,    // We don't have suggestion details yet.
 					ExtensionSuggestions::RAPYD,            // We don't have suggestion details yet.
@@ -1574,12 +1569,7 @@ class PaymentsProviders {
 	 */
 	private function is_payment_extension_suggestion_hidden( array $extension ): bool {
 		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::PAYMENTS_NOX_PROFILE_KEY, true );
-		if ( empty( $user_payments_nox_profile ) ) {
-			return false;
-		}
-		$user_payments_nox_profile = maybe_unserialize( $user_payments_nox_profile );
-
-		if ( empty( $user_payments_nox_profile['hidden_suggestions'] ) ) {
+		if ( ! is_array( $user_payments_nox_profile ) || empty( $user_payments_nox_profile['hidden_suggestions'] ) ) {
 			return false;
 		}
 

@@ -123,7 +123,7 @@ export const Tree = forwardRef( function ForwardedTree(
 								/* translators: %s: create value */
 								__( 'Create "%s"', 'woocommerce' ),
 								props.createValue
-						  )
+							)
 						: __( 'Create new', 'woocommerce' ) }
 				</Button>
 			) }

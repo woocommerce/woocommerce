@@ -59,7 +59,17 @@ final class OrderInternalStatus {
 	public const FAILED = 'wc-failed';
 
 	/**
-	 * Returns all internal order status values.
+	 * Returns every internal order status value defined by this enum, as a flat list of `wc-`
+	 * prefixed slugs.
+	 *
+	 * These are the seven core statuses, which is narrower than the set an order can hold. The enum
+	 * has no `wc-checkout-draft`, a status WooCommerce registers through the `wc_order_statuses`
+	 * filter and the Store API assigns to live orders during checkout. It cannot carry statuses an
+	 * extension registers either.
+	 *
+	 * For the registered statuses, use wc_get_order_statuses(), which returns a value => label map
+	 * on these same prefixed keys. OrderStatus lists a wider set of unprefixed slugs, including
+	 * WordPress post statuses such as trash and auto-draft.
 	 *
 	 * @since 10.9.0
 	 *

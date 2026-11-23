@@ -21,9 +21,12 @@ on:
 permissions: {}
 
 # One sentinel at a time; cron and manual dispatches must not race the variable.
+# A new run cancels the one in progress, so a stuck run cannot block later
+# ticks. The script writes the variable last, so a cancelled run leaves either
+# the old or the new value.
 concurrency:
   group: 'ci-queue-sentinel'
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   evaluate:
@@ -47,7 +50,7 @@ jobs:
               .github/workflows
           persist-credentials: false
 
-      - uses: 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020' # v7.0.0
+      - uses: 'actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1' # v7.1.0
         name: 'Setup Node'
         with:
           node-version-file: '.nvmrc'

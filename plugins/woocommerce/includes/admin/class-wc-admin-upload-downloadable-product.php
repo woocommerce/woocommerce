@@ -64,7 +64,7 @@ class WC_Admin_Upload_Downloadable_Product {
 	 */
 	public function update_filename( $full_filename, $ext, $dir ) {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		if ( ! isset( $_POST['type'] ) || ! 'downloadable_product' === $_POST['type'] ) {
+		if ( ! isset( $_POST['type'] ) || 'downloadable_product' !== $_POST['type'] ) {
 			return $full_filename;
 		}
 

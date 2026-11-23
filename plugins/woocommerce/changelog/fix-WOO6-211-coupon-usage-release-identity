@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Release coupon usage for the customer it was counted for, even when the order's billing email changed afterwards.

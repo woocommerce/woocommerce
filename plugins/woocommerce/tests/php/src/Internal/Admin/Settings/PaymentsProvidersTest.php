@@ -878,10 +878,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			$gateway_details['management']['_links']['settings']['href']
 		);
 		$this->assertTrue( $gateway_details['state']['test_mode'] ); // It should be in test mode because of the DB options. The custom provider logic handles this.
-
-		// Clean up.
-		delete_option( 'mollie-payments-for-woocommerce_test_mode_enabled' );
-		delete_option( 'mollie-payments-for-woocommerce_test_api_key' );
 	}
 
 	/**
@@ -1147,6 +1143,17 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox clear_cache cascades to the extension suggestions service.
+	 */
+	public function test_clear_cache_cascades_to_extension_suggestions(): void {
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'clear_cache' );
+
+		$this->sut->clear_cache();
+	}
+
+	/**
 	 * Test that get_payment_gateway_details does not override gateway details with those from the suggestion
 	 * when they exist.
 	 */
@@ -1295,6 +1302,70 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// And suggestion ID should be attached.
 		$this->assertArrayHasKey( '_suggestion_id', $gateway_details, 'Gateway details should have _suggestion_id' );
 		$this->assertSame( ExtensionSuggestions::PAYPAL_FULL_STACK, $gateway_details['_suggestion_id'], 'Suggestion ID should match' );
+	}
+
+	/**
+	 * Test that get_payment_gateway_details keeps each KOMOJU gateway's own title and description.
+	 *
+	 * KOMOJU registers a legacy gateway plus one gateway per payment method. Overriding them with the
+	 * suggestion details would make all the rows identical and hide the legacy gateway's deprecation notice.
+	 */
+	public function test_get_payment_gateway_details_does_not_override_komoju_gateway_titles() {
+		// Arrange.
+		$plugin_slug     = 'komoju-japanese-payments';
+		$legacy_gateway  = new FakePaymentGateway(
+			'komoju',
+			array(
+				'enabled'            => false,
+				'method_title'       => 'KOMOJU',
+				'method_description' => 'Deprecated — will be removed in a future version.',
+				'plugin_slug'        => $plugin_slug,
+				'plugin_file'        => 'komoju-japanese-payments/index.php',
+			),
+		);
+		$konbini_gateway = new FakePaymentGateway(
+			'komoju_konbini',
+			array(
+				'enabled'            => true,
+				'method_title'       => 'KOMOJU - Konbini',
+				'method_description' => 'Konbini payments powered by KOMOJU',
+				'plugin_slug'        => $plugin_slug,
+				'plugin_file'        => 'komoju-japanese-payments/index.php',
+			),
+		);
+
+		$suggestion = array(
+			'id'          => ExtensionSuggestions::KOMOJU,
+			'_priority'   => 1,
+			'_type'       => ExtensionSuggestions::TYPE_PSP,
+			'title'       => 'KOMOJU Payments',
+			'description' => 'Easily add popular Japanese payment methods.',
+			'plugin'      => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => $plugin_slug,
+			),
+			'icon'        => 'http://example.com/komoju-icon.png',
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_by_plugin_slug' )
+			->with( $plugin_slug )
+			->willReturn( $suggestion );
+
+		// Act.
+		$legacy_details  = $this->sut->get_payment_gateway_details( $legacy_gateway, 0, 'JP' );
+		$konbini_details = $this->sut->get_payment_gateway_details( $konbini_gateway, 1, 'JP' );
+
+		// Assert.
+		$this->assertSame( 'KOMOJU', $legacy_details['title'], 'The legacy gateway should keep its own title' );
+		$this->assertSame( 'Deprecated — will be removed in a future version.', $legacy_details['description'], 'The legacy gateway should keep its deprecation notice' );
+		$this->assertSame( 'KOMOJU - Konbini', $konbini_details['title'], 'The payment method gateway should keep its own title' );
+		$this->assertSame( 'Konbini payments powered by KOMOJU', $konbini_details['description'], 'The payment method gateway should keep its own description' );
+
+		// Other suggestion details still apply.
+		$this->assertSame( 'http://example.com/komoju-icon.png', $konbini_details['icon'], 'Icon should be filled from suggestion' );
+		$this->assertSame( ExtensionSuggestions::KOMOJU, $konbini_details['_suggestion_id'], 'Suggestion ID should match' );
 	}
 
 	/**
@@ -1523,7 +1594,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $pref_suggestion, 'Suggestion `id` entry is missing' );
 		$this->assertSame( 'suggestion1', $pref_suggestion['id'] );
 		$this->assertArrayHasKey( '_priority', $pref_suggestion, 'Suggestion `_priority` entry is missing' );
-		$this->assertIsInteger( $pref_suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
+		$this->assertIsInt( $pref_suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
 		$this->assertSame( 1, $pref_suggestion['_priority'] );
 		$this->assertArrayHasKey( '_type', $pref_suggestion, 'Suggestion `_type` entry is missing' );
 		$this->assertSame( ExtensionSuggestions::TYPE_PSP, $pref_suggestion['_type'] );
@@ -1554,7 +1625,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $other_suggestion, 'Suggestion `id` entry is missing' );
 		$this->assertSame( 'suggestion5', $other_suggestion['id'] );
 		$this->assertArrayHasKey( '_priority', $other_suggestion, 'Suggestion `_priority` entry is missing' );
-		$this->assertIsInteger( $other_suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
+		$this->assertIsInt( $other_suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
 		$this->assertSame( 5, $other_suggestion['_priority'] );
 		$this->assertArrayHasKey( '_type', $other_suggestion, 'Suggestion `_type` entry is missing' );
 		$this->assertSame( ExtensionSuggestions::TYPE_PSP, $other_suggestion['_type'] );
@@ -2339,9 +2410,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'timestamp', $nox_profile['suggestions'][ $suggestion_id ]['attached'] );
 		// The other profile entries should be kept.
 		$this->assertSame( 'value', $nox_profile['something_other'] );
-
-		// Clean up.
-		delete_option( Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**
@@ -2392,10 +2460,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_KEY );
 		$this->assertIsArray( $nox_profile['suggestions'][ $suggestion_id ]['attached'] );
 		$this->assertArrayHasKey( 'timestamp', $nox_profile['suggestions'][ $suggestion_id ]['attached'] );
-
-		// Clean up.
-		delete_option( 'woocommerce_paypal_branded' );
-		delete_option( Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**

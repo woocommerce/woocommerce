@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add Alipay, WeChat Pay, and Multibanco to the WooPayments payment method logos, and derive the "+N" count from the logo list.

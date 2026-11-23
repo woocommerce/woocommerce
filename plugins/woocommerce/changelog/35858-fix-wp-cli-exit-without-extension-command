@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-WP-CLI no longer exits the whole process when the optional wp-cli/extension-command package isn't installed.

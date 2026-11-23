@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagement
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Helper_Product;
 
 /**
@@ -15,23 +16,26 @@ use WC_Helper_Product;
  */
 class EligibilityServiceTests extends \WC_Unit_Test_Case {
 
+	use StockNotificationsFeatureTrait;
+
 	/**
 	 * @var EligibilityService
 	 */
 	private $sut;
 
 	/**
-	 * @before
+	 * Set up the test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		$stock_management_helper = new StockManagementHelper();
 		$this->sut               = new EligibilityService();
 		$this->sut->init( $stock_management_helper );
 	}
 
 	/**
-	 * @after
+	 * Tear down the test.
 	 */
 	public function tearDown(): void {
 		unset( $this->sut );
@@ -39,6 +43,7 @@ class EligibilityServiceTests extends \WC_Unit_Test_Case {
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 	}
 
@@ -96,7 +101,13 @@ class EligibilityServiceTests extends \WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		$this->assertEquals( array( $product->get_id() ), $this->sut->get_target_product_ids( $product ) );
 
-		$variable           = WC_Helper_Product::create_variation_product();
+		$variable = WC_Helper_Product::create_variation_product();
+		$this->assertFalse( $variable->get_manage_stock() );
+		$this->assertEquals( array( $variable->get_id() ), $this->sut->get_target_product_ids( $variable ), 'Variations of a parent that does not manage stock keep their own stock status.' );
+
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 10 );
+		$variable->save();
 		$managed_variations = array_filter(
 			array_map(
 				function ( $variation ) {
@@ -110,6 +121,7 @@ class EligibilityServiceTests extends \WC_Unit_Test_Case {
 			)
 		);
 
+		$this->assertNotEmpty( $managed_variations );
 		$this->assertEquals( array( $variable->get_id(), ...$managed_variations ), $this->sut->get_target_product_ids( $variable ) );
 
 		$variation = $variable->get_children()[0];

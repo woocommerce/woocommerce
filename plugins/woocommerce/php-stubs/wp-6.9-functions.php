@@ -4,6 +4,7 @@
  * installed `php-stubs/wordpress-stubs` package.
  *
  * @see https://developer.wordpress.org/reference/functions/wp_scrub_utf8/
+ * @see https://developer.wordpress.org/reference/functions/wp_is_valid_utf8/
  */
 
 /**
@@ -15,4 +16,15 @@
  * @return string
  */
 function wp_scrub_utf8( $text ) {
+}
+
+/**
+ * Checks whether a string is valid UTF-8.
+ *
+ * @since 6.9.0
+ *
+ * @param string $bytes String to check.
+ * @return bool
+ */
+function wp_is_valid_utf8( $bytes ) {
 }

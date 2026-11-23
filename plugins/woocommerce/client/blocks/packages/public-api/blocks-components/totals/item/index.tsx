@@ -67,10 +67,10 @@ const TotalsItem = ( {
 						<Skeleton
 							width="45px"
 							height="1em"
-							ariaMessage={ __(
-								'Loading price… ',
-								'woocommerce'
-							) }
+							ariaMessage={
+								// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+								__( 'Loading price… ', 'woocommerce' )
+							}
 						/>
 					</>
 				}

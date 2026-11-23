@@ -137,6 +137,13 @@ module.exports = [
 		rules: RELAXED_TEST_RULES,
 	},
 	{
+		files: [ '**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx' ],
+		rules: {
+			// Use recommended `@wordpress/ui` components.
+			'@wordpress/use-recommended-components': 'error',
+		},
+	},
+	{
 		files: [ '**/*.ts', '**/*.tsx' ],
 		ignores: TYPE_AWARE_IGNORES,
 		languageOptions: {

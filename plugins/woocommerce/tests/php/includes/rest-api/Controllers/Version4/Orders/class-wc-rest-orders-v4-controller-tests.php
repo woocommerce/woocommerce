@@ -4,6 +4,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\CollectionQuery;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Controller as OrdersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderItemSchema;
@@ -11,7 +12,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderCouponS
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderFeeSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderTaxSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderShippingSchema;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
+use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
 
 /**
  * Orders Controller tests for V4 REST API.
@@ -43,14 +44,6 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	private $order_schema;
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		$this->disable_rest_api_v4_feature();
-	}
-
-	/**
 	 * Enable the REST API v4 feature.
 	 */
 	public static function enable_rest_api_v4_feature() {
@@ -60,19 +53,6 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				$features[] = 'rest-api-v4';
 				return $features;
 			},
-		);
-	}
-
-	/**
-	 * Disable the REST API v4 feature.
-	 */
-	public static function disable_rest_api_v4_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features = array_diff( $features, array( 'rest-api-v4' ) );
-				return $features;
-			}
 		);
 	}
 
@@ -89,8 +69,8 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
-		$this->enable_rest_api_v4_feature();
 		parent::setUp();
+		$this->enable_rest_api_v4_feature();
 
 		// Create schema instances with dependency injection.
 		$order_item_schema     = new OrderItemSchema();
@@ -867,8 +847,6 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test edge case: created_via filtering when COT is enabled.
 	 */
 	public function test_created_via_filtering_with_cot_enabled(): void {
-		$original_cot_setting = get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
-
 		// Skip test if COT cannot be safely enabled/disabled.
 		try {
 			update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
@@ -895,10 +873,9 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $response_data );
 		$this->assertEquals( 'checkout', $response_data[0]['created_via'] );
 
-		// Clean up orders first, then restore setting.
+		// Clean up orders.
 		$order1->delete( true );
 		$order2->delete( true );
-		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $original_cot_setting );
 	}
 
 	/**
@@ -1049,6 +1026,98 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$order1->delete( true );
 		$order2->delete( true );
+	}
+
+	/**
+	 * @testdox GMT date filters should pass dates with an explicit offset to the query as the equivalent UTC time.
+	 */
+	public function test_get_query_args_converts_offset_dates_for_gmt_filters(): void {
+		update_option( 'timezone_string', 'Europe/Athens' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'dates_are_gmt', true );
+		$request->set_param( 'after', '2026-09-24T16:39:52+02:00' );
+		$request->set_param( 'before', '2026-09-24T14:39:52Z' );
+		$request->set_param( 'modified_after', '2026-09-24T14:39:52+00:00' );
+		$request->set_param( 'modified_before', '2026-09-24T17:39:52+03:00' );
+
+		$date_query = ( new CollectionQuery() )->get_query_args( $request )['date_query'];
+
+		$this->assertContains(
+			array(
+				'column' => 'post_date_gmt',
+				'after'  => '2026-09-24 14:39:52',
+			),
+			$date_query
+		);
+		$this->assertContains(
+			array(
+				'column' => 'post_date_gmt',
+				'before' => '2026-09-24 14:39:52',
+			),
+			$date_query
+		);
+		$this->assertContains(
+			array(
+				'column' => 'post_modified_gmt',
+				'after'  => '2026-09-24 14:39:52',
+			),
+			$date_query
+		);
+		$this->assertContains(
+			array(
+				'column' => 'post_modified_gmt',
+				'before' => '2026-09-24 14:39:52',
+			),
+			$date_query
+		);
+	}
+
+	/**
+	 * @testdox GMT date filters should pass dates without an offset, and offset dates that can't be parsed, to the query unchanged.
+	 *
+	 * @testWith ["2026-09-24T14:39:52"]
+	 *           ["2026-09-24T14:39:52.123"]
+	 *           ["not a dateZ"]
+	 *
+	 * @param string $value The date filter value.
+	 */
+	public function test_get_query_args_keeps_other_dates_for_gmt_filters( string $value ): void {
+		update_option( 'timezone_string', 'Europe/Athens' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'dates_are_gmt', true );
+		$request->set_param( 'after', $value );
+
+		$date_query = ( new CollectionQuery() )->get_query_args( $request )['date_query'];
+
+		$this->assertContains(
+			array(
+				'column' => 'post_date_gmt',
+				'after'  => $value,
+			),
+			$date_query
+		);
+	}
+
+	/**
+	 * @testdox Local date filters should pass dates with an explicit offset to the query unchanged.
+	 */
+	public function test_get_query_args_keeps_offset_dates_for_local_filters(): void {
+		update_option( 'timezone_string', 'Europe/Athens' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'modified_after', '2026-09-24T14:39:52Z' );
+
+		$date_query = ( new CollectionQuery() )->get_query_args( $request )['date_query'];
+
+		$this->assertContains(
+			array(
+				'column' => 'post_modified',
+				'after'  => '2026-09-24T14:39:52Z',
+			),
+			$date_query
+		);
 	}
 
 	/**
@@ -1869,5 +1938,111 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		foreach ( $orders as $order ) {
 			$order->delete( true );
 		}
+	}
+
+	/**
+	 * Test that a serialized value under a reserved line meta key is rejected for every line type.
+	 *
+	 * The create and update routes both build their args from the same OrderSchema property, so one
+	 * route covers the registration. Reading an item adds `_taxes` to its internal meta keys, so the
+	 * underscore-prefixed key diverts to the item's set_taxes() as well.
+	 *
+	 * @dataProvider provide_reserved_meta_key_line_types
+	 *
+	 * @param string   $line_type      Request key: `line_items`, `fee_lines` or `shipping_lines`.
+	 * @param callable $create_item    Builds the order item that $line_type maps to, taxes included.
+	 * @param array    $expected_taxes Taxes the item should still carry after the update is rejected.
+	 */
+	public function test_orders_update_rejects_serialized_taxes_line_meta_key( string $line_type, callable $create_item, array $expected_taxes ): void {
+		$order = new WC_Order();
+		$item  = $create_item();
+		$order->add_item( $item );
+		$order->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					$line_type => array(
+						array(
+							'id'        => $item->get_id(),
+							'meta_data' => array(
+								array(
+									'key'   => '_taxes',
+									'value' => 'O:8:"stdClass":0:{}',
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status(), 'The underscore-prefixed reserved key should be rejected.' );
+		$this->assertEquals(
+			'woocommerce_rest_invalid_order_item_meta_key',
+			$data['data']['details'][ $line_type ]['code'],
+			'The rejection should report the reserved meta key.'
+		);
+
+		$item_class = get_class( $item );
+		$reread     = new $item_class( $item->get_id() );
+		$this->assertEquals( $expected_taxes, $reread->get_taxes(), 'The line taxes should be unchanged.' );
+	}
+
+	/**
+	 * Every request key that maps to an order item type accepting meta data.
+	 *
+	 * @return array
+	 */
+	public function provide_reserved_meta_key_line_types(): array {
+		$line_item_taxes = array(
+			'total'    => array( 1 => '2.00' ),
+			'subtotal' => array( 1 => '2.00' ),
+		);
+		$fee_taxes       = array( 'total' => array( 1 => '1.00' ) );
+		$shipping_taxes  = array( 'total' => array( 1 => '2.00' ) );
+
+		return array(
+			'line items'     => array(
+				'line_items',
+				function () use ( $line_item_taxes ) {
+					$item = new WC_Order_Item_Product();
+					$item->set_product( WC_Helper_Product::create_simple_product() );
+					$item->set_quantity( 1 );
+					$item->set_total( '10.00' );
+					$item->set_taxes( $line_item_taxes );
+					return $item;
+				},
+				$line_item_taxes,
+			),
+			'fee lines'      => array(
+				'fee_lines',
+				function () use ( $fee_taxes ) {
+					$item = new WC_Order_Item_Fee();
+					$item->set_name( 'Test fee' );
+					$item->set_total( '5.00' );
+					$item->set_taxes( $fee_taxes );
+					return $item;
+				},
+				$fee_taxes,
+			),
+			'shipping lines' => array(
+				'shipping_lines',
+				function () use ( $shipping_taxes ) {
+					$item = new WC_Order_Item_Shipping();
+					$item->set_method_id( 'flat_rate' );
+					$item->set_method_title( 'Flat rate' );
+					$item->set_total( '10.00' );
+					$item->set_taxes( $shipping_taxes );
+					return $item;
+				},
+				$shipping_taxes,
+			),
+		);
 	}
 }

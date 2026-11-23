@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  * @extends WC_REST_Controller
- * @since x.x.x
+ * @since 7.4.0
  */
 class MarketingCampaigns extends WC_REST_Controller {
 

@@ -106,6 +106,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 * Generate the CSV file.
 	 *
 	 * @since 3.1.0
+	 * @return bool Whether the page's data was written to the file.
 	 */
 	public function generate_file() {
 		if ( 1 === $this->get_page() ) {
@@ -117,7 +118,8 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 			$this->get_file();
 		}
 		$this->prepare_data_to_export();
-		$this->write_csv_data( $this->get_csv_data() );
+
+		return $this->write_csv_data( $this->get_csv_data() );
 	}
 
 	/**
@@ -125,6 +127,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 *
 	 * @since 3.1.0
 	 * @param string $data Data.
+	 * @return bool Whether all of the data was written to the file.
 	 */
 	protected function write_csv_data( $data ) {
 
@@ -154,6 +157,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 		 */
 		$fopen_mode = apply_filters( 'woocommerce_csv_exporter_fopen_mode', 'a' );
 		$fp         = fopen( $this->get_file_path(), $fopen_mode );
+		$written    = false;
 
 		if ( $fp ) {
 			// WP_Filesystem has no streaming write API, so it would mean rewriting the whole export on every batch.
@@ -171,6 +175,8 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 					),
 					$log_context
 				);
+			} else {
+				$written = true;
 			}
 		} else {
 			// fopen() raises a warning when it fails, so the last PHP error usually explains why (permissions, an
@@ -197,6 +203,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 			@file_put_contents( $this->get_headers_row_file_path(), $header ); //phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_file_put_contents, Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 		}
 
+		return $written;
 	}
 
 	/**

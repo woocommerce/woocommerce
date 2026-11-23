@@ -155,10 +155,10 @@ class D3Chart extends Component {
 		this.createTooltip( g.node(), params.getColor, params.visibleKeys );
 
 		drawAxis( g, params, scales, formats, margin, isRTL() );
-		// eslint-disable-next-line no-unused-expressions
+
 		chartType === 'line' &&
 			drawLines( g, data, params, scales, formats, this.tooltip );
-		// eslint-disable-next-line no-unused-expressions
+
 		chartType === 'bar' &&
 			drawBars( g, data, params, scales, formats, this.tooltip );
 	}

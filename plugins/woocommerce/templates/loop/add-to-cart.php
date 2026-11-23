@@ -12,7 +12,7 @@
  *
  * @see         https://woocommerce.com/document/template-structure/
  * @package     WooCommerce\Templates
- * @version     9.2.0
+ * @version     11.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,18 +21,37 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $product;
 
+$args = $args ?? array();
+
+// Direct template callers may not supply the data prepared by woocommerce_template_loop_add_to_cart().
+$button_data = $button_data ?? array(
+	'url'      => $product->add_to_cart_url(),
+	'text'     => $product->add_to_cart_text(),
+	'quantity' => $args['quantity'] ?? 1,
+);
+unset( $args['button_data'] );
+
 $aria_describedby = isset( $args['aria-describedby_text'] ) ? sprintf( 'aria-describedby="woocommerce_loop_add_to_cart_link_describedby_%s"', esc_attr( $product->get_id() ) ) : '';
 
-echo apply_filters(
-	'woocommerce_loop_add_to_cart_link', // WPCS: XSS ok.
+/**
+ * Filters the loop add-to-cart link HTML.
+ *
+ * @param string     $link    The add-to-cart link HTML.
+ * @param WC_Product $product The product object.
+ * @param array      $args    Arguments used to build the link.
+ *
+ * @since 2.0.0
+ */
+echo apply_filters( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The public filter intentionally allows extensions to return link markup.
+	'woocommerce_loop_add_to_cart_link',
 	sprintf(
 		'<a href="%s" %s data-quantity="%s" class="%s" %s>%s</a>',
-		esc_url( $product->add_to_cart_url() ),
+		esc_url( $button_data['url'] ),
 		$aria_describedby,
-		esc_attr( isset( $args['quantity'] ) ? $args['quantity'] : 1 ),
+		esc_attr( $button_data['quantity'] ),
 		esc_attr( isset( $args['class'] ) ? $args['class'] : 'button' ),
 		isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
-		esc_html( $product->add_to_cart_text() )
+		esc_html( $button_data['text'] )
 	),
 	$product,
 	$args

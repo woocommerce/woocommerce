@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the product_import_complete Tracks event never firing by checking for the actual `_wpnonce` request parameter present on the importer's done step instead of a non-existent `nonce` parameter.

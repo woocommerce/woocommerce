@@ -38,7 +38,7 @@ function escapeCSVValue( value: string | number ) {
 			String.fromCharCode( 0x0d ), // carriage return
 		].includes( stringValue.charAt( 0 ) )
 	) {
-		stringValue = '"\'' + stringValue + '"';
+		stringValue = '"\'' + stringValue.replace( /"/g, '""' ) + '"';
 	} else if ( stringValue.match( /[,"\s]/ ) ) {
 		stringValue = '"' + stringValue.replace( /"/g, '""' ) + '"';
 	}
@@ -137,7 +137,6 @@ export function generateCSVFileName(
  * @param {string} content  Contents of the file to download
  */
 export function downloadCSVFile( fileName: string, content: BlobPart ) {
-	// eslint-disable-next-line no-undef
 	const blob = new Blob( [ content ], { type: 'text/csv;charset=utf-8' } );
 
 	saveAs( blob, fileName );

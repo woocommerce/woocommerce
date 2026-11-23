@@ -68,7 +68,7 @@ final class Experimental_Abtest {
 	private $platform = 'woocommerce';
 
 	/**
-	 * Whether trcking consent is given.
+	 * Whether tracking consent is given.
 	 *
 	 * @var bool
 	 */

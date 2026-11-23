@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypes\SavedForLater;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use ReflectionClass;
@@ -31,6 +32,20 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	private SavedForLater $sut;
 
 	/**
+	 * Features controller, used to toggle the `cart_save_for_later` feature.
+	 *
+	 * @var FeaturesController
+	 */
+	private FeaturesController $features_controller;
+
+	/**
+	 * The `cart_save_for_later` feature state before the test, restored on teardown.
+	 *
+	 * @var bool
+	 */
+	private bool $original_feature_enabled;
+
+	/**
 	 * Instantiate the block without invoking its constructor and inject a
 	 * registry mock so render() can call `->add()` without NPEing.
 	 */
@@ -46,84 +61,137 @@ class SavedForLaterTests extends WP_UnitTestCase {
 			$this->sut,
 			new AssetDataRegistryMock( Package::container()->get( Api::class ) )
 		);
+
+		// The block gates its rendering and auto-injection on the feature, so
+		// enable it by default; the feature-off tests toggle it off explicitly.
+		$this->features_controller      = wc_get_container()->get( FeaturesController::class );
+		$this->original_feature_enabled = $this->features_controller->feature_is_enabled( 'cart_save_for_later' );
+		$this->features_controller->change_feature_enable( 'cart_save_for_later', true );
 	}
 
 	/**
-	 * @return array<string, array{string, string, bool, bool}>
+	 * Restore the feature flag to its pre-test state.
 	 */
-	public function provider_register_hooked_block(): array {
-		$cart_only       = '<!-- wp:woocommerce/cart /-->';
-		$cart_with_block = '<!-- wp:woocommerce/cart /--><!-- wp:woocommerce/saved-for-later /-->';
-
-		return array(
-			// label                                => array( cart_page_content, anchor, context_is_cart_page, expected_hooked ).
-			'hooked after cart on cart page'        => array( $cart_only, 'woocommerce/cart', true, true ),
-			'not hooked after non-cart anchor'      => array( $cart_only, 'core/paragraph', true, false ),
-			'not hooked when context is other page' => array( $cart_only, 'woocommerce/cart', false, false ),
-			'not hooked when already present'       => array( $cart_with_block, 'woocommerce/cart', true, false ),
-		);
+	public function tearDown(): void {
+		$this->features_controller->change_feature_enable( 'cart_save_for_later', $this->original_feature_enabled );
+		parent::tearDown();
 	}
 
 	/**
-	 * `register_hooked_block` only adds the block when the anchor is `woocommerce/cart`,
-	 * the context is the cart page, and the cart page doesn't already contain the block.
+	 * @testdox block.json declares auto-injection after the Cart block via blockHooks.
 	 *
-	 * @dataProvider provider_register_hooked_block
+	 * Auto-injection after `woocommerce/cart` is declared in block.json via
+	 * `blockHooks`. Registering it on the block type (rather than through the
+	 * `hooked_block_types` filter alone) is what makes the editor treat it as a
+	 * first-class hooked block and materialize it, instead of recording it as
+	 * ignored on save. This guards that declaration.
+	 */
+	public function test_block_json_declares_block_hooks_after_cart(): void {
+		$block_json = WC_ABSPATH . 'assets/client/blocks/saved-for-later/block.json';
+		$this->assertFileExists( $block_json, 'Built saved-for-later block.json should exist.' );
+
+		$metadata = wp_json_file_decode( $block_json, array( 'associative' => true ) );
+		$this->assertIsArray( $metadata );
+		$this->assertArrayHasKey( 'blockHooks', $metadata );
+		$this->assertArrayHasKey( 'woocommerce/cart', $metadata['blockHooks'] );
+		$this->assertSame( 'after', $metadata['blockHooks']['woocommerce/cart'] );
+	}
+
+	/**
+	 * @testdox block.json declares supports.multiple false so only one instance can be inserted per document.
 	 *
-	 * @param string $cart_page_content    Initial content of the cart page.
-	 * @param string $anchor               Anchor block name passed to the filter.
-	 * @param bool   $context_is_cart_page Whether the filter context is the cart page or some other page.
-	 * @param bool   $expected_hooked      Whether the block should end up in the hooked list.
+	 * The block renders a shopper's single personal list, so a second instance
+	 * is never meaningful; `multiple: false` makes the editor refuse to insert
+	 * a duplicate, matching the Checkout and Mini Cart blocks.
 	 */
-	public function test_register_hooked_block( string $cart_page_content, string $anchor, bool $context_is_cart_page, bool $expected_hooked ): void {
-		$cart_page_id = self::factory()->post->create(
-			array(
-				'post_type'    => 'page',
-				'post_status'  => 'publish',
-				'post_content' => $cart_page_content,
-			)
-		);
-		update_option( 'woocommerce_cart_page_id', $cart_page_id );
+	public function test_block_json_declares_single_instance_support(): void {
+		$block_json = WC_ABSPATH . 'assets/client/blocks/saved-for-later/block.json';
+		$this->assertFileExists( $block_json, 'Built saved-for-later block.json should exist.' );
 
-		$context_id = $context_is_cart_page
-			? $cart_page_id
-			: self::factory()->post->create(
-				array(
-					'post_type'   => 'page',
-					'post_status' => 'publish',
-				)
-			);
-
-		$hooked = $this->sut->register_hooked_block( array(), 'after', $anchor, get_post( $context_id ) );
-
-		if ( $expected_hooked ) {
-			$this->assertContains( 'woocommerce/saved-for-later', $hooked );
-		} else {
-			$this->assertNotContains( 'woocommerce/saved-for-later', $hooked );
-		}
+		$metadata = wp_json_file_decode( $block_json, array( 'associative' => true ) );
+		$this->assertIsArray( $metadata );
+		$this->assertSame( false, $metadata['supports']['multiple'] ?? null, 'supports.multiple must be false so the editor refuses a second instance.' );
 	}
 
 	/**
-	 * When the cart page option is unset, `wc_get_page_id()` returns -1 — the filter
-	 * must treat that as "no cart page" rather than letting it match a real post ID.
+	 * @testdox disable_when_feature_off strips block_hooks and hides the inserter when the feature is off.
+	 *
+	 * The block type is registered unconditionally, but when the feature is off
+	 * `disable_when_feature_off` strips the `block_hooks` setting and hides the
+	 * block from the inserter, so it neither auto-injects nor can be added
+	 * manually while off.
 	 */
-	public function test_register_hooked_block_skips_when_cart_page_unset(): void {
-		delete_option( 'woocommerce_cart_page_id' );
+	public function test_disable_when_feature_off_strips_hooks_and_hides_inserter(): void {
+		$this->features_controller->change_feature_enable( 'cart_save_for_later', false );
 
-		$context_id = self::factory()->post->create(
-			array(
-				'post_type'    => 'page',
-				'post_status'  => 'publish',
-				'post_content' => '<!-- wp:woocommerce/cart /-->',
-			)
+		$settings = array(
+			'block_hooks' => array( 'woocommerce/cart' => 'after' ),
+			'supports'    => array( 'interactivity' => true ),
 		);
+		$metadata = array( 'name' => 'woocommerce/saved-for-later' );
 
-		$hooked = $this->sut->register_hooked_block( array(), 'after', 'woocommerce/cart', get_post( $context_id ) );
+		$result = $this->sut->disable_when_feature_off( $settings, $metadata );
 
-		$this->assertNotContains( 'woocommerce/saved-for-later', $hooked );
+		$this->assertArrayNotHasKey( 'block_hooks', $result );
+		$this->assertFalse( $result['supports']['inserter'] );
 	}
 
 	/**
+	 * @testdox disable_when_feature_off leaves settings untouched when the feature is enabled.
+	 *
+	 * When the feature is enabled the settings are left untouched, so the block
+	 * keeps its `block_hooks` setting and stays inserter-visible.
+	 */
+	public function test_disable_when_feature_off_keeps_settings_when_enabled(): void {
+		$this->features_controller->change_feature_enable( 'cart_save_for_later', true );
+
+		$settings = array(
+			'block_hooks' => array( 'woocommerce/cart' => 'after' ),
+			'supports'    => array( 'interactivity' => true ),
+		);
+		$metadata = array( 'name' => 'woocommerce/saved-for-later' );
+
+		$result = $this->sut->disable_when_feature_off( $settings, $metadata );
+
+		$this->assertArrayHasKey( 'block_hooks', $result );
+		$this->assertSame( 'after', $result['block_hooks']['woocommerce/cart'] );
+		$this->assertArrayNotHasKey( 'inserter', $result['supports'] );
+	}
+
+	/**
+	 * @testdox disable_when_feature_off passes other block types through untouched.
+	 *
+	 * `disable_when_feature_off` only touches the Saved for Later block; other
+	 * blocks' settings pass through untouched even when the feature is off.
+	 */
+	public function test_disable_when_feature_off_ignores_other_blocks(): void {
+		$this->features_controller->change_feature_enable( 'cart_save_for_later', false );
+
+		$settings = array( 'block_hooks' => array( 'woocommerce/cart' => 'after' ) );
+		$metadata = array( 'name' => 'core/paragraph' );
+
+		$this->assertSame( $settings, $this->sut->disable_when_feature_off( $settings, $metadata ) );
+	}
+
+	/**
+	 * @testdox render() outputs nothing when the feature is disabled.
+	 *
+	 * A block persisted while the feature was on renders empty instead of as
+	 * content once it is turned off.
+	 */
+	public function test_render_returns_empty_when_feature_disabled(): void {
+		$this->features_controller->change_feature_enable( 'cart_save_for_later', false );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+
+		$render = new ReflectionMethod( SavedForLater::class, 'render' );
+		$render->setAccessible( true );
+
+		$this->assertSame( '', (string) $render->invoke( $this->sut, array(), '', null ) );
+	}
+
+	/**
+	 * @testdox The auto-injected block is seeded with a default heading inner block.
+	 *
 	 * The auto-injected block ships with a seeded `core/heading` inner block so
 	 * fresh cart pages render the heading on the frontend out of the box. The
 	 * matching `null` push onto `innerContent` is what makes `WP_Block::render()`
@@ -162,6 +230,8 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox The seeded heading is appended alongside inner blocks added by extensions.
+	 *
 	 * Extensions are free to hook `hooked_block_woocommerce/saved-for-later`
 	 * to add their own inner blocks at a different priority. Our heading must
 	 * still be seeded alongside, not in place of, what they added.
@@ -201,7 +271,7 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * `render()` returns an empty string for logged-out shoppers.
+	 * @testdox render() returns an empty string for logged-out shoppers.
 	 */
 	public function test_render_returns_empty_for_logged_out_user(): void {
 		wp_set_current_user( 0 );
@@ -213,6 +283,8 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox render() seeds a hidden empty state for a shopper with no saved items.
+	 *
 	 * For a logged-in shopper whose list is empty (the new-shopper /
 	 * never-saved-an-item case), SSR must:
 	 *   - emit the empty-state `<li>` already `hidden`, so the message
@@ -276,6 +348,8 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox render() hides the header behind the visibility gate when the list is empty.
+	 *
 	 * The seeded heading (and any future sibling inner blocks rendered via
 	 * `$content`) must share the empty-state visibility gating: hidden on
 	 * first paint for new shoppers / empty refreshes, revealed once the
@@ -355,6 +429,8 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox cartPageHasSavedForLater is registered only on the cart page for logged-in shoppers.
+	 *
 	 * `cartPageHasSavedForLater` is the wcSettings flag the cart line item row reads
 	 * to decide whether to render the "Save for later" link. The block sets it
 	 * only when rendering the saved-for-later list, on the cart page, for a

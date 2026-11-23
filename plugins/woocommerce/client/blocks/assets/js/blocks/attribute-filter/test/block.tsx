@@ -5,7 +5,7 @@
 /**
  * External dependencies
  */
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import * as hooks from '@woocommerce/base-context/hooks';
 import userEvent from '@testing-library/user-event';
 
@@ -85,9 +85,12 @@ const stubCollectionData = () => ( {
 
 interface SetupParams {
 	initialUrl: string;
+	productAttributeTerms?: ReturnType< typeof stubProductsAttributesTerms >;
+	collectionData?: ReturnType< typeof stubCollectionData >;
+	queryState?: Record< string, unknown >;
 }
 
-const setup = ( params: SetupParams ) => {
+const renderBlock = ( params: SetupParams ) => {
 	const setupParams: SetupParams = {
 		initialUrl: params.initialUrl || 'http://woo.local/',
 	};
@@ -108,15 +111,24 @@ const setup = ( params: SetupParams ) => {
 		isPreview: false,
 	};
 	jest.spyOn( hooks, 'useCollection' ).mockReturnValue( {
-		results: stubProductsAttributesTerms(),
+		results: params.productAttributeTerms || stubProductsAttributesTerms(),
 		isLoading: false,
 	} );
 
 	jest.spyOn( hooks, 'useCollectionData' ).mockReturnValue( {
-		data: stubCollectionData(),
+		data: params.collectionData || stubCollectionData(),
 		isLoading: false,
 	} );
-	const utils = render( <AttributeFilterBlock attributes={ attributes } /> );
+	jest.spyOn( hooks, 'useQueryStateByContext' ).mockReturnValue( [
+		params.queryState || {},
+		jest.fn(),
+	] );
+
+	return render( <AttributeFilterBlock attributes={ attributes } /> );
+};
+
+const setup = ( params: SetupParams ) => {
+	const utils = renderBlock( params );
 	const applyButton = screen.getByRole( 'button', { name: /apply/i } );
 	const smallAttributeCheckbox = screen.getByRole( 'checkbox', {
 		name: /small/i,
@@ -157,6 +169,87 @@ const setupWithoutSelectedFilterAttributes = () => {
 };
 
 describe( 'Filter by Attribute block', () => {
+	test( 'passes active attribute and price filters to the count hook', () => {
+		const queryState = {
+			attributes: [
+				{
+					attribute: 'pa_size',
+					operator: 'in',
+					slug: [ 'small' ],
+				},
+			],
+			min_price: '1500',
+			max_price: '4000',
+		};
+
+		renderBlock( {
+			initialUrl:
+				'http://woo.local/?filter_size=small&query_type_size=or&min_price=15&max_price=40',
+			queryState,
+		} );
+
+		expect( hooks.useCollectionData ).toHaveBeenCalledWith( {
+			queryAttribute: {
+				taxonomy: 'pa_size',
+				queryType: 'or',
+			},
+			queryState,
+			isEditor: false,
+		} );
+	} );
+
+	test( 'maps each product count to its term by ID', () => {
+		renderBlock( {
+			initialUrl: 'http://woo.local/',
+			productAttributeTerms: [
+				stubProductsAttributesTerms()[ 2 ],
+				stubProductsAttributesTerms()[ 0 ],
+				stubProductsAttributesTerms()[ 1 ],
+			],
+			collectionData: {
+				...stubCollectionData(),
+				attribute_counts: [
+					{ term: 26, count: 13 },
+					{ term: 27, count: 2 },
+					{ term: 25, count: 7 },
+				],
+			},
+			queryState: {
+				attributes: [
+					{
+						attribute: 'pa_size',
+						operator: 'in',
+						slug: [ 'large', 'medium', 'small' ],
+					},
+				],
+			},
+		} );
+
+		[
+			{ name: 'Large', count: 7 },
+			{ name: 'Medium', count: 13 },
+			{ name: 'Small', count: 2 },
+		].forEach( ( { name, count } ) => {
+			const label = screen.getByText( name ).closest( 'label' );
+			const visualCount = label?.querySelector(
+				'.wc-filter-element-label-list-count [aria-hidden="true"]'
+			);
+			const screenReaderCount = label?.querySelector(
+				'.screen-reader-text'
+			);
+
+			expect( label ).not.toBeNull();
+			expect(
+				within( label as HTMLLabelElement ).getByRole( 'checkbox' )
+			).toBeInTheDocument();
+			expect( visualCount ).toHaveTextContent( count.toString() );
+			expect( screenReaderCount ).toHaveTextContent(
+				`${ count } products`
+			);
+			expect( screenReaderCount ).toHaveClass( 'screen-reader-text' );
+		} );
+	} );
+
 	describe( 'Given no filter attribute is selected when page loads', () => {
 		test( 'should disable Apply button when page loads', () => {
 			const { applyButton } = setupWithoutSelectedFilterAttributes();

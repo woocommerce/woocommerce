@@ -1,8 +1,9 @@
 @import "../../stylesheets/_variables.scss";
 
 .woocommerce-marketplace {
-	// Chip on product cards. Sits on its own row at the bottom of the card
-	// footer, below the price, to avoid crowding the title on narrow cards.
+	// Chip on product cards. Regular cards show it on its own row in the
+	// footer, above the price; compact cards show it between the title and
+	// the price.
 	&__quality-badge {
 		width: 100%;
 
@@ -10,8 +11,8 @@
 			align-items: center;
 			background: $studio-gray-0;
 			border: 0;
-			border-radius: $grid-unit-05;
-			color: $gray-900;
+			border-radius: $grid-unit-10;
+			color: $studio-gray-70;
 			cursor: pointer;
 			display: inline-flex;
 			font-family: inherit;
@@ -19,7 +20,7 @@
 			font-weight: 500;
 			gap: $grid-unit-05;
 			line-height: 20px;
-			padding: 0 $grid-unit-10 0 $grid-unit-05;
+			padding: 2px $grid-unit-10;
 			/* Punch through the "whole card clickable" trick so the popover opens: */
 			position: relative;
 		}

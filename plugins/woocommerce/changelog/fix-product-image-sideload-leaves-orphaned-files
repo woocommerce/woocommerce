@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove rejected image uploads and unused files from failed API updates while keeping saved product images.

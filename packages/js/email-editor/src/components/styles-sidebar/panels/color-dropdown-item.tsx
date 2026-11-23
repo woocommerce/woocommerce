@@ -10,14 +10,14 @@ import {
 	ColorIndicator,
 	Dropdown,
 	FlexItem,
-	__experimentalDropdownContentWrapper as DropdownContentWrapper, // eslint-disable-line
-	__experimentalHStack as HStack, // eslint-disable-line
-	__experimentalToolsPanelItem as ToolsPanelItem, // eslint-disable-line
+	__experimentalDropdownContentWrapper as DropdownContentWrapper,
+	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
-// eslint-disable-next-line
+import { Stack } from '@wordpress/ui';
+
 import {
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalColorGradientControl as ColorGradientControl, // eslint-disable-line
+	__experimentalColorGradientControl as ColorGradientControl,
 } from '@wordpress/block-editor';
 
 const popoverProps = {
@@ -76,7 +76,13 @@ export function ColorDropdownItem( {
 							ref={ dropdownButtonRef }
 							__next40pxDefaultSize
 						>
-							<HStack justify="flex-start">
+							{ /* Full width: the block editor styles size the label relative to this row. */ }
+							<Stack
+								direction="row"
+								align="center"
+								gap="sm"
+								style={ { width: '100%' } }
+							>
 								<ColorIndicator
 									className="block-editor-panel-color-gradient-settings__color-indicator"
 									colorValue={ inheritedValue }
@@ -87,7 +93,7 @@ export function ColorDropdownItem( {
 								>
 									{ label }
 								</FlexItem>
-							</HStack>
+							</Stack>
 						</Button>
 						{ hasValue() && (
 							<Button

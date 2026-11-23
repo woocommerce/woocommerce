@@ -39,7 +39,7 @@ if ( forms?.post || forms?.order ) {
 			forms?.post || forms?.order
 				? staticFormDataToObject(
 						( forms?.post || forms?.order ) as HTMLFormElement
-				  )
+					)
 				: {};
 		for ( const key of Object.keys( formData ) ) {
 			const value =

@@ -17,6 +17,48 @@
 		"interactivity": true,
 		"woocommerce": {
 			"innerBlockDisplayStyle": true
+		},
+		"typography": {
+			"fontSize": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalTextTransform": true
+		},
+		"__experimentalBorder": {
+			"radius": true,
+			"__experimentalSkipSerialization": true
+		},
+		"layout": {
+			"default": {
+				"type": "flex",
+				"flexWrap": "wrap",
+				"orientation": "horizontal"
+			},
+			"allowSwitching": false,
+			"allowInheriting": false,
+			"allowEditing": false,
+			"allowJustification": false,
+			"allowVerticalAlignment": false,
+			"allowOrientation": false,
+			"allowSizingOnChildren": false
+		},
+		"spacing": {
+			"padding": true,
+			"blockGap": true,
+			"__experimentalSkipSerialization": [ "padding" ],
+			"__experimentalDefaultControls": {
+				"blockGap": true
+			}
+		},
+		"__experimentalStyle": {
+			"spacing": {
+				"blockGap": "0.5em"
+			}
+		}
+	},
+	"selectors": {
+		"border": ".wp-block-woocommerce-product-filter-chips:not(.is-style-swatch) .wc-block-product-filter-chips__item",
+		"spacing": {
+			"padding": ".wp-block-woocommerce-product-filter-chips:not(.is-style-swatch) .wc-block-product-filter-chips__item"
 		}
 	},
 	"usesContext": [ "woocommerce/selectableItems", "woocommerce/attributeId" ],

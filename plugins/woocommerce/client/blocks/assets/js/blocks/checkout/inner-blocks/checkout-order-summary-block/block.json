@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-order-summary-block",
-	"version": "1.0.0",
 	"title": "Order Summary",
 	"description": "Show customers a summary of their order.",
 	"category": "woocommerce",

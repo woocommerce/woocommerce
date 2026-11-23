@@ -482,16 +482,6 @@ $payments-header-row-height: 38px;
 		}
 	}
 
-	.more-payment-options-link {
-		padding: 0;
-		text-decoration: none;
-
-		img {
-			height: $grid-unit-20;
-			margin-right: $grid-unit-05;
-		}
-	}
-
 	.more-payment-options {
 		padding: 25px 54px;
 	}
@@ -590,11 +580,6 @@ $payments-header-row-height: 38px;
 		border: 1px solid $gray-100;
 		box-shadow: none;
 		border-radius: 3px;
-
-		a {
-			outline: none;
-			text-decoration: underline;
-		}
 	}
 
 	.components-popover__content-container {
@@ -618,6 +603,11 @@ $payments-header-row-height: 38px;
 	.components-popover__content-container {
 		width: 236px;
 	}
+}
+
+// The incentive popover is only identifiable by its content.
+.woocommerce-status-badge-popover .components-popover__content-container:has(.woocommerce-incentive-popover__title) {
+	width: 236px;
 }
 
 .other-payment-gateways__content__title-popover {

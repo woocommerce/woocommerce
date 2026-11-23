@@ -219,6 +219,10 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
+		if ( ! is_string( $size ) || ! has_image_size( $size ) ) {
+			return $image;
+		}
+
 		$target_size      = wc_get_image_size( $size );
 		$image_width      = $image[1];
 		$image_height     = $image[2];
@@ -423,7 +427,8 @@ class WC_Regenerate_Images {
 			}
 		}
 
-		$metadata = wp_get_attachment_metadata( $attachment_id );
+		// Unfiltered: this is the base for a write, so it must be the stored value.
+		$metadata = wp_get_attachment_metadata( $attachment_id, true );
 
 		// Fix for images with no metadata.
 		if ( ! is_array( $metadata ) ) {
@@ -441,13 +446,32 @@ class WC_Regenerate_Images {
 
 		// If something went wrong lets just return the original image.
 		if ( is_wp_error( $new_metadata ) || empty( $new_metadata ) ) {
+			wp_update_attachment_metadata( $attachment_id, $metadata );
+
 			return $image;
+		}
+
+		// wp_generate_attachment_metadata() can also replace the main file with a scaled or rotated copy.
+		// Take these keys from its result so they describe the file that is now attached.
+		foreach ( array( 'file', 'width', 'height', 'filesize' ) as $key ) {
+			if ( isset( $new_metadata[ $key ] ) ) {
+				$metadata[ $key ] = $new_metadata[ $key ];
+			}
+		}
+
+		// Keep a stored original_image, because it names the upload. When WordPress scales the
+		// -scaled copy again, it reports that copy as the original.
+		if ( empty( $metadata['original_image'] ) && isset( $new_metadata['original_image'] ) ) {
+			$metadata['original_image'] = $new_metadata['original_image'];
 		}
 
 		if ( isset( $new_metadata['sizes'][ self::$regenerate_size ] ) ) {
 			$metadata['sizes'][ self::$regenerate_size ] = $new_metadata['sizes'][ self::$regenerate_size ];
-			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
+
+		// wp_generate_attachment_metadata() first saves a record with no sizes. Always save the stored
+		// record again, even when WordPress made no new size, for example because a site filter skipped it.
+		wp_update_attachment_metadata( $attachment_id, $metadata );
 
 		// Now we've done our regen, attempt to return the new size.
 		$new_image = self::unfiltered_image_downsize( $attachment_id, self::$regenerate_size );

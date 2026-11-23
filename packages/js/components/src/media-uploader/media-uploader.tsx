@@ -145,7 +145,7 @@ export const MediaUploader = ( {
 													? ( files as Attachment[] )
 													: (
 															files as Attachment[]
-													   )[ 0 ]
+														 )[ 0 ]
 											);
 										},
 										additionalData,

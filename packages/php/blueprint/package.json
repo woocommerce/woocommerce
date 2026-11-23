@@ -16,7 +16,7 @@
 	},
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
-		"@wordpress/env": "11.9.0"
+		"@wordpress/env": "catalog:tooling"
 	},
 	"config": {
 		"ci": {

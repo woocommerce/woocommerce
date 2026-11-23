@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+UCP: Stop running three term queries per variation when building catalog responses.

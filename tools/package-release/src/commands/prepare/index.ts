@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { CliUx, Command, Flags } from '@oclif/core';
+import { Args, Command, Flags, ux } from '@oclif/core';
 import { writeFileSync } from 'fs';
 import { execSync } from 'child_process';
 
@@ -36,14 +36,13 @@ export default class PackagePrepare extends Command {
 	/**
 	 * CLI arguments
 	 */
-	static args = [
-		{
-			name: 'packages',
+	static args = {
+		packages: Args.string( {
 			description:
 				'Package to release, or packages to release separated by commas.',
 			required: false,
-		},
-	];
+		} ),
+	};
 
 	/**
 	 * CLI flags.
@@ -65,6 +64,7 @@ export default class PackagePrepare extends Command {
 	 */
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( PackagePrepare );
+		const packages = args.packages ? args.packages.split( ',' ) : [];
 
 		if ( ! args.packages && ! flags.all ) {
 			this.error( 'No packages supplied.' );
@@ -74,8 +74,6 @@ export default class PackagePrepare extends Command {
 			await this.preparePackages( getAllPackages() );
 			return;
 		}
-
-		const packages = args.packages.split( ',' );
 
 		if ( flags[ 'initial-release' ] && packages.length > 1 ) {
 			this.error(
@@ -100,7 +98,7 @@ export default class PackagePrepare extends Command {
 		initialRelease?: boolean
 	) {
 		packages.forEach( async ( name ) => {
-			CliUx.ux.action.start( `Preparing ${ name }` );
+			ux.action.start( `Preparing ${ name }` );
 
 			try {
 				if ( hasValidChangelogs( name ) ) {
@@ -123,9 +121,9 @@ export default class PackagePrepare extends Command {
 
 					this.bumpPackageVersion( name, nextVersion );
 
-					CliUx.ux.action.stop();
+					ux.action.stop();
 				} else {
-					CliUx.ux.action.stop(
+					ux.action.stop(
 						`Skipping ${ name }. No changes available for a release.`
 					);
 				}

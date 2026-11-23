@@ -6,39 +6,48 @@
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi;
 
 use Automattic\WooCommerce\StoreApi\Authentication;
+use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\StoreApi\Utilities\RateLimits;
 use ReflectionClass;
 use ReflectionException;
 use Spy_REST_Server;
 use WP_REST_Server;
-use WP_Test_REST_TestCase;
 
 /**
  * ControllerTests
  */
-class RateLimitsTests extends WP_Test_REST_TestCase {
+class RateLimitsTests extends \WC_Unit_Test_Case {
 	/**
 	 * Setup Rest API server.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		/** @var WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
 		$wp_rest_server = new Spy_REST_Server();
 
-		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/cart';
-		$_SERVER['REMOTE_ADDR']                  = '76.45.67.179';
-
-		do_action( 'rest_api_init', $wp_rest_server );
+		$_SERVER['REMOTE_ADDR'] = '76.45.67.179';
 	}
 
 	/**
-	 * Discard the REST server installed for the test.
+	 * Run REST API init as a request to the given route would.
+	 *
+	 * @param string $route Requested REST route.
+	 */
+	private function init_rest_api( string $route ): void {
+		$GLOBALS['wp']->query_vars['rest_route'] = $route;
+
+		do_action( 'rest_api_init', rest_get_server() );
+	}
+
+	/**
+	 * Discard the REST server and route installed for the test.
 	 */
 	public function tearDown(): void {
 		global $wp_rest_server;
 		$wp_rest_server = null;
+		unset( $GLOBALS['wp']->query_vars['rest_route'] );
 
 		parent::tearDown();
 	}
@@ -50,6 +59,8 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 	 * @return void
 	 */
 	public function test_rate_limits_response_headers() {
+		$this->init_rest_api( '/wc/store/cart' );
+
 		add_filter(
 			'woocommerce_store_api_rate_limit_options',
 			function () {
@@ -89,7 +100,7 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 
 		$body = json_decode( $spy_rest_server->sent_body );
 		$this->assertEquals( JSON_ERROR_NONE, json_last_error() );
-		$this->assertEquals( 400, $body->data->status );
+		$this->assertEquals( 429, $body->data->status );
 
 		$this->assertEquals( $rate_limiting_options->limit, $spy_rest_server->sent_headers['RateLimit-Limit'] );
 		$this->assertIsInt( $spy_rest_server->sent_headers['RateLimit-Reset'] );
@@ -98,6 +109,75 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 		$this->assertArrayHasKey( 'RateLimit-Retry-After', $spy_rest_server->sent_headers );
 		$this->assertIsInt( $spy_rest_server->sent_headers['RateLimit-Retry-After'] );
 		$this->assertLessThanOrEqual( $rate_limiting_options->seconds, $spy_rest_server->sent_headers['RateLimit-Retry-After'] );
+	}
+
+	/**
+	 * @testdox UCP requests are rate limited, however the route is cased.
+	 *
+	 * @testWith ["/wc/ucp/v1/catalog/search"]
+	 *           ["/WC/UCP/v1/catalog/search"]
+	 *
+	 * @param string $route Requested REST route.
+	 */
+	public function test_ucp_requests_are_rate_limited( string $route ) {
+		add_filter(
+			'woocommerce_store_api_rate_limit_options',
+			function () {
+				return array(
+					'enabled' => true,
+					'limit'   => 1,
+				);
+			}
+		);
+
+		$this->init_rest_api( $route );
+
+		/** @var Spy_REST_Server $spy_rest_server */
+		$spy_rest_server = rest_get_server();
+		$spy_rest_server->serve_request( $route );
+		$this->assertArrayNotHasKey( 'RateLimit-Retry-After', $spy_rest_server->sent_headers, 'The first request is within the limit.' );
+
+		$spy_rest_server->serve_request( $route );
+
+		$body = json_decode( $spy_rest_server->sent_body );
+		$this->assertEquals( 429, $body->data->status );
+		$this->assertEquals( 0, $spy_rest_server->sent_headers['RateLimit-Remaining'] );
+	}
+
+	/**
+	 * @testdox UCP requests get rate limiting without the Store API authentication bypass and CORS handling.
+	 */
+	public function test_ucp_requests_skip_store_api_only_hooks() {
+		$this->init_rest_api( '/wc/ucp/v1/catalog/search' );
+
+		$authentication = StoreApi::container()->get( Authentication::class );
+
+		$this->assertSame( 10, has_filter( 'rest_authentication_errors', array( $authentication, 'rate_limit_ucp_request' ) ) );
+		$this->assertFalse( has_filter( 'rest_authentication_errors', array( $authentication, 'check_authentication' ) ) );
+		$this->assertFalse( has_filter( 'rest_pre_serve_request', array( $authentication, 'send_cors_headers' ) ) );
+		$this->assertSame( 10, has_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' ), 'The default CORS handling stays in place.' );
+	}
+
+	/**
+	 * @testdox The checkout rate limit covers the UCP route that places an order, and no other UCP route.
+	 *
+	 * @testWith ["/wc/ucp/v1/checkout-sessions/abc-123/complete", true]
+	 *           ["/wc/ucp/v1/checkout-sessions", false]
+	 *           ["/wc/ucp/v1/checkout-sessions/abc-123/cancel", false]
+	 *
+	 * @param string $route    Requested REST route.
+	 * @param bool   $expected Whether the checkout rate limit should apply.
+	 */
+	public function test_ucp_complete_opts_in_to_checkout_rate_limit( string $route, bool $expected ) {
+		update_option( 'woocommerce_feature_rate_limit_checkout_enabled', 'yes' );
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+
+		$this->init_rest_api( $route );
+		apply_filters( 'rest_authentication_errors', null );
+
+		$options = RateLimits::get_options();
+		$this->assertSame( $expected, $options->enabled );
+		$this->assertSame( $expected ? 3 : RateLimits::LIMIT, $options->limit );
 	}
 
 	/**
@@ -264,34 +344,28 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 	 * @throws ReflectionException On failing invoked private method through reflection class.
 	 */
 	public function test_is_only_post_request_method( string $method, ?string $override, bool $expected ) {
-		$original_server = $_SERVER;
+		$authentication          = new ReflectionClass( Authentication::class );
+		$is_only_post_request    = $authentication->getMethod( 'is_only_post_request' );
+		$authentication_instance = $authentication->newInstance();
+		$is_only_post_request->setAccessible( true );
 
-		try {
-			$authentication          = new ReflectionClass( Authentication::class );
-			$is_only_post_request    = $authentication->getMethod( 'is_only_post_request' );
-			$authentication_instance = $authentication->newInstance();
-			$is_only_post_request->setAccessible( true );
+		$_SERVER['REQUEST_METHOD'] = $method;
 
-			$_SERVER['REQUEST_METHOD'] = $method;
-
-			if ( null === $override ) {
-				unset( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] );
-			} else {
-				$_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] = $override;
-			}
-
-			$this->assertSame(
-				$expected,
-				$is_only_post_request->invoke( $authentication_instance ),
-				sprintf(
-					'is_only_post_request() should return %s for REQUEST_METHOD=%s with override=%s',
-					$expected ? 'true' : 'false',
-					$method,
-					$override ?? 'null'
-				)
-			);
-		} finally {
-			$_SERVER = $original_server;
+		if ( null === $override ) {
+			unset( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] );
+		} else {
+			$_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] = $override;
 		}
+
+		$this->assertSame(
+			$expected,
+			$is_only_post_request->invoke( $authentication_instance ),
+			sprintf(
+				'is_only_post_request() should return %s for REQUEST_METHOD=%s with override=%s',
+				$expected ? 'true' : 'false',
+				$method,
+				$override ?? 'null'
+			)
+		);
 	}
 }

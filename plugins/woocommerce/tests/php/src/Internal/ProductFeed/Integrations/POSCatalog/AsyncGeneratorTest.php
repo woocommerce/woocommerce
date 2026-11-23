@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\ProductFeed\Integrations\POSCatalog;
 
 use PHPUnit\Framework\MockObject\MockObject;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedValidatorInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\AsyncGenerator;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\POSIntegration;
@@ -63,21 +64,13 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-
-		delete_option( self::OPTION_KEY );
-		delete_option( self::OPTION_KEY . '_chunk_size' );
-		remove_all_filters( 'woocommerce_product_feed_chunk_size' );
-		remove_all_filters( 'woocommerce_product_feed_batch_size' );
-		// Always clear the timeout filter here so a failed assertion in a test that registers it cannot
-		// leak it into later tests in the same process (tearDown runs even when a test fails).
-		remove_all_filters( 'woocommerce_product_feed_in_progress_timeout' );
 		$this->test_container->reset_all_replacements();
 	}
 
 	/**
-	 * Test that feed generation action forwards arguments to mapper.
+	 * @testdox Should forward arguments to the mapper without persisting a download URL.
 	 */
-	public function test_feed_generation_action_forwards_args() {
+	public function test_feed_generation_action_forwards_args(): void {
 		// Make sure at least one product is present. We will not check it here.
 		WC_Helper_Product::create_simple_product();
 
@@ -119,6 +112,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		// Check the final status.
 		$updated_status = get_option( self::OPTION_KEY );
 		$this->assertEquals( AsyncGenerator::STATE_COMPLETED, $updated_status['state'] );
+		$this->assertArrayNotHasKey( 'url', $updated_status );
 	}
 
 	/**
@@ -215,7 +209,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertSame( AsyncGenerator::STATE_SCHEDULED, $status['state'] );
 
 		as_unschedule_all_actions( AsyncGenerator::FEED_GENERATION_ACTION, array(), 'woo-product-feed' );
-		delete_option( $option_key );
 	}
 
 	/**
@@ -286,7 +279,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$callback = fn() => 10;
 		add_filter( 'woocommerce_product_feed_in_progress_timeout', $callback );
 		$this->assertFalse( $method->invoke( $this->sut, $status ) );
-		remove_filter( 'woocommerce_product_feed_in_progress_timeout', $callback );
 	}
 
 	/**
@@ -331,7 +323,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$callback = fn() => 20 * MINUTE_IN_SECONDS;
 		add_filter( 'woocommerce_product_feed_batch_time_limit', $callback );
 		$this->assertTrue( $method->invoke( $this->sut, $status ) );
-		remove_filter( 'woocommerce_product_feed_batch_time_limit', $callback );
 	}
 
 	/**
@@ -359,11 +350,13 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Configures the mock integration with a real feed and lightweight mapper/validator so the
 	 * chunked generation path can be exercised end to end.
+	 *
+	 * @param array $query_args The product query args the integration should return.
 	 */
-	private function setup_real_feed_integration(): void {
+	private function setup_real_feed_integration( array $query_args = array() ): void {
 		$this->delete_all_products();
 
-		$this->mock_integration->method( 'get_product_feed_query_args' )->willReturn( array() );
+		$this->mock_integration->method( 'get_product_feed_query_args' )->willReturn( $query_args );
 		$this->mock_integration->method( 'create_feed' )->willReturnCallback(
 			fn() => new JsonFileFeed( 'pos-catalog-feed-test' )
 		);
@@ -468,6 +461,123 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for removing an already-exported product between chunks.
+	 *
+	 * @return array
+	 */
+	public function provider_removed_product(): array {
+		return array(
+			'trashed'     => array( fn( \WC_Product $product ) => $product->delete() ),
+			'unpublished' => array(
+				function ( \WC_Product $product ) {
+					$product->set_status( ProductStatus::DRAFT );
+					$product->save();
+				},
+			),
+			'POS-hidden'  => array( fn( \WC_Product $product ) => wp_set_object_terms( $product->get_id(), 'pos-hidden', 'pos_product_visibility' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should not skip a product when an already-exported $_dataName product is removed between chunks.
+	 *
+	 * @dataProvider provider_removed_product
+	 *
+	 * @param callable $remove Removes the given product from the catalog.
+	 */
+	public function test_feed_generation_does_not_skip_products_when_exported_product_is_removed( callable $remove ): void {
+		add_filter( 'woocommerce_product_feed_batch_size', fn() => 1 );
+		add_filter( 'woocommerce_product_feed_chunk_size', fn() => 1 );
+
+		$this->setup_real_feed_integration( ( new POSIntegration() )->get_product_feed_query_args() );
+
+		$products = array();
+		for ( $i = 0; $i < 3; $i++ ) {
+			$products[] = WC_Helper_Product::create_simple_product();
+		}
+		$product_ids = array_map( fn( $product ) => $product->get_id(), $products );
+
+		update_option( self::OPTION_KEY, array( 'state' => AsyncGenerator::STATE_SCHEDULED ) );
+
+		// The first chunk exports the first product, which is then removed before the next chunk.
+		$this->sut->feed_generation_action( self::OPTION_KEY );
+		$remove( $products[0] );
+		wp_cache_flush();
+
+		$iterations = 1;
+		do {
+			$this->sut->feed_generation_action( self::OPTION_KEY );
+			$status = get_option( self::OPTION_KEY );
+			++$iterations;
+		} while ( AsyncGenerator::STATE_IN_PROGRESS === $status['state'] && $iterations < 10 );
+
+		$this->assertSame( AsyncGenerator::STATE_COMPLETED, $status['state'] );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$entries = json_decode( (string) file_get_contents( $status['path'] ), true );
+		$this->assertSame( $product_ids, array_column( $entries, 'id' ) );
+
+		wp_delete_file( $status['path'] );
+	}
+
+	/**
+	 * @testdox Should restart a continuation saved by a version that tracked pages instead of product IDs.
+	 */
+	public function test_feed_generation_restarts_legacy_page_based_continuation(): void {
+		add_filter( 'woocommerce_product_feed_batch_size', fn() => 1 );
+		add_filter( 'woocommerce_product_feed_chunk_size', fn() => 1 );
+
+		$this->setup_real_feed_integration();
+
+		$product_ids = array();
+		for ( $i = 0; $i < 3; $i++ ) {
+			$product_ids[] = WC_Helper_Product::create_simple_product()->get_id();
+		}
+
+		// A partial feed written by the older version an hour ago, holding a stale entry. Feed file names
+		// are derived from the current second, so the earlier time keeps it distinct from the restarted feed.
+		$an_hour_ago = fn() => time() - HOUR_IN_SECONDS;
+		add_filter( 'woocommerce_product_feed_time', $an_hour_ago );
+		$legacy_feed = new JsonFileFeed( 'pos-catalog-feed-test' );
+		$legacy_file = $legacy_feed->open();
+		$legacy_feed->add_entry( array( 'id' => 999999 ) );
+		$legacy_feed->flush();
+		remove_filter( 'woocommerce_product_feed_time', $an_hour_ago );
+		$legacy_path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $legacy_file;
+
+		update_option(
+			self::OPTION_KEY,
+			array(
+				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
+				'file_name'       => $legacy_file,
+				'page'            => 2,
+				'processed'       => 1,
+				'entries_written' => 1,
+				'total'           => 3,
+				'updated_at'      => time(),
+			)
+		);
+
+		$iterations = 0;
+		do {
+			$this->sut->feed_generation_action( self::OPTION_KEY );
+			$status = get_option( self::OPTION_KEY );
+			++$iterations;
+		} while ( AsyncGenerator::STATE_IN_PROGRESS === $status['state'] && $iterations < 10 );
+
+		$this->assertSame( AsyncGenerator::STATE_COMPLETED, $status['state'] );
+		$this->assertArrayNotHasKey( 'page', $status );
+		$this->assertFileDoesNotExist( $legacy_path, 'The legacy partial feed should be discarded' );
+		$this->assertFalse( get_option( self::OPTION_KEY . '_chunk_size' ), 'A legacy restart should not reduce the chunk size' );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$entries = json_decode( (string) file_get_contents( $status['path'] ), true );
+		$this->assertSame( $product_ids, array_column( $entries, 'id' ) );
+
+		wp_delete_file( $status['path'] );
+	}
+
+	/**
 	 * Test that entries_written accumulates correctly across chunks rather than being double-counted.
 	 *
 	 * Each resumed chunk seeds the feed's entry count with the running total, so the feed already
@@ -563,12 +673,12 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		update_option(
 			$option_key,
 			array(
-				'state'      => AsyncGenerator::STATE_IN_PROGRESS,
-				'updated_at' => time() - HOUR_IN_SECONDS,
-				'file_name'  => $identifier,
-				'page'       => 3,
-				'processed'  => 50000,
-				'total'      => 120000,
+				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
+				'updated_at'      => time() - HOUR_IN_SECONDS,
+				'file_name'       => $identifier,
+				'last_product_id' => 3,
+				'processed'       => 50000,
+				'total'           => 120000,
 			)
 		);
 
@@ -584,8 +694,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 2500, (int) get_option( $option_key . '_chunk_size' ) );
 
 		as_unschedule_all_actions( AsyncGenerator::FEED_GENERATION_ACTION, array(), 'woo-product-feed' );
-		delete_option( $option_key );
-		delete_option( $option_key . '_chunk_size' );
 	}
 
 	/**
@@ -603,8 +711,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1000, $reduce->invoke( $this->sut, $option_key ) );
 		// Already at the smallest configured size: it stays there.
 		$this->assertSame( 1000, $reduce->invoke( $this->sut, $option_key ) );
-
-		delete_option( $option_key . '_chunk_size' );
 	}
 
 	/**
@@ -634,7 +740,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
 				'updated_at'      => time() - HOUR_IN_SECONDS,
 				'file_name'       => $identifier,
-				'page'            => 3,
+				'last_product_id' => 3,
 				'processed'       => 2500,
 				'total'           => 12000,
 				'entries_written' => 2500,
@@ -653,8 +759,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 2500, (int) get_option( $option_key . '_chunk_size' ) );
 
 		as_unschedule_all_actions( AsyncGenerator::FEED_GENERATION_ACTION, array(), 'woo-product-feed' );
-		delete_option( $option_key );
-		delete_option( $option_key . '_chunk_size' );
 	}
 
 	/**
@@ -681,7 +785,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 			array(
 				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
 				'file_name'       => 'pos-catalog-feed-missing.json',
-				'page'            => 5,
+				'last_product_id' => 5,
 				'processed'       => 999,
 				'entries_written' => 999,
 				'total'           => 999,
@@ -704,7 +808,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'file_name', $status );
 
 		as_unschedule_all_actions( AsyncGenerator::FEED_GENERATION_ACTION, array(), 'woo-product-feed' );
-		delete_option( $option_key );
 	}
 
 	/**
@@ -727,7 +830,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 			array(
 				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
 				'file_name'       => $identifier,
-				'page'            => 2,
+				'last_product_id' => 2,
 				'processed'       => 1,
 				'entries_written' => 1,
 				'total'           => 5,

@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/cart-order-summary-taxes-block",
-	"version": "1.0.0",
 	"title": "Taxes",
 	"description": "Shows the cart taxes row.",
 	"category": "woocommerce",

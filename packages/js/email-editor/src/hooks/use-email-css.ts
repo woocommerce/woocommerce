@@ -33,7 +33,7 @@ export function useEmailCss() {
 			return {
 				editorTheme: select( storeName ).getTheme(),
 				// @ts-expect-error There are no types for the experimental features settings.
-				// eslint-disable-next-line no-underscore-dangle
+
 				layout: editorSettings?.__experimentalFeatures?.layout,
 				deviceType: getDeviceType(),
 				initialEditorSettingsStyles: initialSettings?.styles,
@@ -82,6 +82,5 @@ export function useEmailCss() {
 		];
 	}, [ styles, initialEditorSettingsStyles, rootContainerStyles ] );
 
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 	return [ finalStyles || EMPTY_ARRAY ];
 }

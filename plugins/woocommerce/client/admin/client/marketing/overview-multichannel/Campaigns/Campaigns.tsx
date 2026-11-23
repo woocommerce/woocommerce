@@ -91,10 +91,13 @@ export const Campaigns = () => {
 						{ __( 'An unexpected error occurred.', 'woocommerce' ) }
 					</div>
 					<div className="woocommerce-marketing-campaigns-card-body__content-description">
-						{ __(
-							'Please try again later. Check the logs if the problem persists. ',
-							'woocommerce'
-						) }
+						{
+							// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+							__(
+								'Please try again later. Check the logs if the problem persists. ',
+								'woocommerce'
+							)
+						}
 					</div>
 				</CardBody>
 			);

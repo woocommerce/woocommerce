@@ -7,7 +7,7 @@ import {
 	getConfig,
 	getElement,
 } from '@wordpress/interactivity';
-import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import type { SelectedAttributes } from '@woocommerce/stores/woocommerce';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { ProductResponseItem, SelectableItem } from '@woocommerce/types';
@@ -307,8 +307,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 			toggle(
 				itemArg?:
-					| SelectableItem< { visual?: VisualAttributeTerm } >
-					| Event
+					SelectableItem< { visual?: VisualAttributeTerm } > | Event
 			) {
 				const context = getContext< ToggleContext >();
 				const item =

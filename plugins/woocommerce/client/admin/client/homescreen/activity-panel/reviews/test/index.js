@@ -79,7 +79,7 @@ describe( 'ReviewsPanel', () => {
 		expect( getByTextWithMarkup( 'Reviewer reviewed Cap' ) ).not.toBeNull();
 	} );
 
-	it( 'should render checkmark circle icon in the review title, if review is verfied owner', () => {
+	it( 'should render checkmark circle icon in the review title, if review is verified owner', () => {
 		render(
 			<ReviewsPanel
 				hasUnapprovedReviews={ true }

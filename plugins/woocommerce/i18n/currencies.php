@@ -40,6 +40,7 @@ return array(
 	'CAD' => __( 'Canadian dollar', 'woocommerce' ),
 	'CDF' => __( 'Congolese franc', 'woocommerce' ),
 	'CHF' => __( 'Swiss franc', 'woocommerce' ),
+	'CHW' => __( 'WIR franc', 'woocommerce' ),
 	'CLP' => __( 'Chilean peso', 'woocommerce' ),
 	'CNY' => __( 'Chinese yuan', 'woocommerce' ),
 	'COP' => __( 'Colombian peso', 'woocommerce' ),

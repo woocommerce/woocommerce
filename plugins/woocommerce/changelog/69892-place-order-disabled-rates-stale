@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the Place order button as disabled while shipping costs update after an address change, and update them sooner after picking a state.

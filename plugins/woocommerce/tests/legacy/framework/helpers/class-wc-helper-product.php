@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 
@@ -69,6 +70,101 @@ class WC_Helper_Product {
 		} else {
 			return $product;
 		}
+	}
+
+	/**
+	 * Create a product whose sale has ended while its stored price is still the sale price.
+	 *
+	 * @return WC_Product
+	 */
+	public static function create_missed_sale_end_product() {
+		$meta    = self::get_missed_sale_end_meta();
+		$product = self::create_simple_product();
+		$product->set_regular_price( $meta['_regular_price'] );
+		$product->set_sale_price( $meta['_sale_price'] );
+		$product->save();
+
+		foreach ( array( '_price', '_sale_price_dates_from', '_sale_price_dates_to' ) as $key ) {
+			update_post_meta( $product->get_id(), $key, $meta[ $key ] );
+		}
+
+		return $product;
+	}
+
+	/**
+	 * Get the price and sale date meta of a product whose sale has ended while its stored price is still the sale price.
+	 *
+	 * @return array<string, string|int> Meta values keyed by meta key.
+	 */
+	private static function get_missed_sale_end_meta(): array {
+		return array(
+			'_regular_price'         => '100',
+			'_sale_price'            => '50',
+			'_price'                 => '50',
+			'_sale_price_dates_from' => time() - 300,
+			'_sale_price_dates_to'   => time() - 100,
+		);
+	}
+
+	/**
+	 * Create simple products whose sale has ended, writing only the rows the scheduled sales query reads.
+	 *
+	 * Skips the product save cascade, so batch-boundary tests can create many of them cheaply.
+	 *
+	 * @param int $count Number of products to create.
+	 * @return int[] The product IDs, in ascending order.
+	 * @throws RuntimeException When the rows cannot be inserted.
+	 */
+	public static function create_missed_sale_end_product_ids( int $count ): array {
+		global $wpdb;
+
+		$ids  = self::insert_product_post_rows( $count );
+		$meta = self::get_missed_sale_end_meta();
+
+		$values = array();
+		foreach ( $ids as $id ) {
+			foreach ( $meta as $key => $value ) {
+				$values[] = $wpdb->prepare( '(%d, %s, %s)', $id, $key, $value );
+			}
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Each row is prepared above.
+		if ( count( $values ) !== $wpdb->query( "INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) VALUES " . implode( ', ', $values ) ) ) {
+			throw new RuntimeException( esc_html( 'Could not insert the sale meta rows: ' . $wpdb->last_error ) );
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * Insert bare product post rows in one query, for tests of code that only reads the posts table.
+	 *
+	 * The rows have no meta, terms or lookup data.
+	 *
+	 * @param int    $count     Number of rows to insert.
+	 * @param string $post_type Post type of the rows.
+	 * @return int[] The new post IDs, in ascending order.
+	 * @throws RuntimeException When the rows cannot be inserted.
+	 */
+	public static function insert_product_post_rows( int $count, string $post_type = 'product' ): array {
+		global $wpdb;
+
+		$name_prefix = 'product-post-row-' . wp_generate_password( 8, false ) . '-';
+		$values      = array();
+		for ( $i = 0; $i < $count; $i++ ) {
+			$values[] = $wpdb->prepare( "(%s, %s, 'Product post row', '', '', '', '', '', %s)", $post_type, ProductStatus::PUBLISH, $name_prefix . $i );
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Each row is prepared above.
+		$inserted = $wpdb->query( "INSERT INTO {$wpdb->posts} (post_type, post_status, post_title, post_content, post_excerpt, to_ping, pinged, post_content_filtered, post_name) VALUES " . implode( ', ', $values ) );
+		if ( $count !== $inserted ) {
+			throw new RuntimeException( esc_html( 'Could not insert the product post rows: ' . $wpdb->last_error ) );
+		}
+
+		return array_map(
+			'intval',
+			$wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_name LIKE %s ORDER BY ID", $wpdb->esc_like( $name_prefix ) . '%' ) )
+		);
 	}
 
 	/**
@@ -316,8 +412,6 @@ class WC_Helper_Product {
 	 * @return array
 	 */
 	public static function create_attribute( $raw_name = 'size', $terms = array( 'small' ) ) {
-		global $wpdb, $wc_product_attributes;
-
 		// Make sure caches are clean.
 		delete_transient( 'wc_attribute_taxonomies' );
 		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
@@ -335,7 +429,7 @@ class WC_Helper_Product {
 		if ( ! $attribute_id ) {
 			$taxonomy_name = wc_attribute_taxonomy_name( $attribute_name );
 
-			// Degister taxonomy which other tests may have created...
+			// Deregister taxonomy which other tests may have created...
 			unregister_taxonomy( $taxonomy_name );
 
 			$attribute_id = wc_create_attribute(
@@ -347,31 +441,6 @@ class WC_Helper_Product {
 					'has_archives' => 0,
 				)
 			);
-
-			// Register as taxonomy.
-			register_taxonomy(
-				$taxonomy_name,
-				apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
-				apply_filters(
-					'woocommerce_taxonomy_args_' . $taxonomy_name,
-					array(
-						'labels'       => array(
-							'name' => $raw_name,
-						),
-						'hierarchical' => false,
-						'show_ui'      => false,
-						'query_var'    => true,
-						'rewrite'      => false,
-					)
-				)
-			);
-
-			// Set product attributes global.
-			$wc_product_attributes = array();
-
-			foreach ( wc_get_attribute_taxonomies() as $taxonomy ) {
-				$wc_product_attributes[ wc_attribute_taxonomy_name( $taxonomy->attribute_name ) ] = $taxonomy;
-			}
 		}
 
 		$attribute = wc_get_attribute( $attribute_id );
@@ -443,5 +512,41 @@ class WC_Helper_Product {
 	 */
 	public static function save_post_test_update_meta_data_direct( $id ) {
 		update_post_meta( $id, '_test2', 'world' );
+	}
+
+	/**
+	 * Creates a variable product with global attributes and a single variation.
+	 *
+	 * Variation attribute values may be term slugs or empty strings ("Any" attributes).
+	 *
+	 * @param string $product_name         Product name.
+	 * @param array  $variation_attributes Variation attributes, e.g. array( 'pa_size' => 'huge', 'pa_number' => '' ).
+	 * @param array  $attribute_terms      Attribute terms keyed by raw attribute name (without 'pa_' prefix).
+	 *
+	 * @return array The variable product and its variation: array( WC_Product_Variable, WC_Product_Variation ).
+	 */
+	public static function create_variation_product_with_global_attributes( $product_name, $variation_attributes, $attribute_terms = array(
+		'size'   => array( 'small', 'huge' ),
+		'number' => array( '0', '1' ),
+	) ) {
+		$product = new WC_Product_Variable();
+		$product->set_name( $product_name );
+
+		$attributes = array();
+		foreach ( $attribute_terms as $attribute_name => $terms ) {
+			$attributes[] = self::create_product_attribute_object( $attribute_name, $terms );
+		}
+
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		$variation = self::create_product_variation_object(
+			$product->get_id(),
+			$product_name . ' variation',
+			10,
+			$variation_attributes
+		);
+
+		return array( $product, wc_get_product( $variation->get_id() ) );
 	}
 }

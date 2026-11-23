@@ -116,9 +116,9 @@ export const getSplitGateways = (
 							if ( gateway.installed && ! gateway.needsSetup ) {
 								wcPayBnpl.push( gateway );
 							}
-						} else if (
-							! ( gateway.installed && ! gateway.needsSetup )
-						) {
+						} else if ( ! (
+							gateway.installed && ! gateway.needsSetup
+						) ) {
 							// WCPay is always shown when it's not installed, or it's installed but needs setup.
 							wcPay.push( gateway );
 						}

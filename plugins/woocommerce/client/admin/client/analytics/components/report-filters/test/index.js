@@ -40,8 +40,8 @@ describe( 'ReportFilters', () => {
 				] }
 			/>
 		);
-		userEvent.click( getByText( 'All products' ) );
-		userEvent.click( getByText( 'Some products' ) );
+		await userEvent.click( getByText( 'All products' ) );
+		await userEvent.click( getByText( 'Some products' ) );
 		expect( recordEvent ).toHaveBeenCalledWith( 'analytics_filter', {
 			filter: 'some',
 			report: 'test-report',

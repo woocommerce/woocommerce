@@ -372,7 +372,6 @@ class OrdersVersionStringInvalidatorTest extends WC_Unit_Test_Case {
 		$this->assertNotNull( $order_refunds_version_before, 'Order refunds list version string should exist before deletion' );
 
 		$refund->delete( true );
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test code.
 		do_action( 'woocommerce_refund_deleted', $refund_id, $order_id );
 
 		$order_version_after         = $this->version_generator->get_version( "order_{$order_id}", false );

@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Add a per-contract lock and creation key to the unreleased subscriptions engine; no changelog entry needed.

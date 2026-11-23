@@ -90,7 +90,7 @@ trait StatsDataStoreTrait {
 	 *
 	 * @see get_data
 	 * @param array $query_args Query parameters.
-	 * @return stdClass|WP_Error Data object, or error.
+	 * @return \stdClass|\WP_Error Data object, or error.
 	 */
 	public function get_noncached_data( $query_args ) {
 		$params                  = $this->get_limit_params( $query_args );

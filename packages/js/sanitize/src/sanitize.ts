@@ -39,9 +39,7 @@ export const DEFAULT_ALLOWED_ATTR = [
  * These are the configuration values you can pass via `returnType`.
  */
 export type SanitizeReturnKind =
-	| 'string'
-	| 'HTMLBodyElement'
-	| 'DocumentFragment';
+	'string' | 'HTMLBodyElement' | 'DocumentFragment';
 
 /**
  * Mapping between `SanitizeReturnKind` and the actual returned value types.

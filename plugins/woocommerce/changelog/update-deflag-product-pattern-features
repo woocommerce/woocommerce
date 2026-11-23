@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Keep product editor and pattern toolkit behavior enabled without legacy feature flags.

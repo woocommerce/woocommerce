@@ -5,6 +5,7 @@
  * @package Automattic/WooCommerce/Tests
  */
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
 /**
@@ -41,6 +42,14 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
+	}
+
+	/**
+	 * Supply deterministic external responses for the real system status report.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->http_responder = array( $this, 'mock_status_http_responses' );
 	}
 
 	/**
@@ -91,7 +100,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_returns_root_properties() {
-		$this->skip_on_php_8_1();
 		$system_status_data = $this->fetch_or_get_system_status_data_for_user( self::$administrator_user );
 		$this->assertArrayHasKey( 'environment', $system_status_data );
 		$this->assertArrayHasKey( 'database', $system_status_data );
@@ -108,8 +116,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_environment() {
-		$this->skip_on_php_8_1();
-
 		$store_id = get_option( \WC_Install::STORE_ID_OPTION, null );
 		if ( empty( $store_id ) ) {
 			$store_id = 'a1b2c3d4-e5f6-a1b2-c3d4-a1b2c3d4e5f6';
@@ -119,7 +125,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$environment = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['environment'];
 
 		// Make sure all expected data is present.
-		$this->assertEquals( 35, count( $environment ) );
+		$this->assertEquals( 36, count( $environment ) );
 
 		// Test some responses to make sure they match up.
 		$this->assertEquals( get_option( 'home' ), $environment['home_url'] );
@@ -128,6 +134,15 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $store_id, $environment['store_id'] );
 		$this->assertEquals( WC()->version, $environment['version'] );
 		$this->assertEquals( wp_get_environment_type(), $environment['wp_environment_type'] );
+
+		// The test environment loads the Action Scheduler copy bundled with WooCommerce.
+		$action_scheduler = (array) $environment['action_scheduler'];
+		$this->assertSame( ActionSchedulerUtil::get_bundled_version(), $action_scheduler['loaded_version'] );
+		$this->assertSame( ActionSchedulerUtil::get_highest_registered_version(), $action_scheduler['registered_version'] );
+		$this->assertSame( 'woocommerce', $action_scheduler['source_type'] );
+		$this->assertSame( 'WooCommerce', $action_scheduler['source_name'] );
+		$this->assertSame( trailingslashit( wp_normalize_path( ActionScheduler::plugin_path( '' ) ) ), $action_scheduler['source_path'] );
+		$this->assertFalse( $action_scheduler['is_risky'] );
 	}
 
 	/**
@@ -136,8 +151,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_database() {
-		$this->skip_on_php_8_1();
-
 		global $wpdb;
 		$database = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['database'];
 
@@ -189,7 +202,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_theme() {
-		$this->skip_on_php_8_1();
 		$active_theme = wp_get_theme();
 		$theme        = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['theme'];
 
@@ -199,13 +211,11 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test to make sure settings response is correct.
+	 * @testdox The system status settings response contains the expected values.
 	 *
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_settings() {
-		$this->skip_on_php_8_1();
-
 		$term_response = array();
 		$terms         = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
 		foreach ( $terms as $term ) {
@@ -214,7 +224,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 
 		$settings = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['settings'];
 
-		$this->assertEquals( 17, count( $settings ) );
+		$this->assertEquals( 33, count( $settings ) );
 		$this->assertEquals( WC()->legacy_rest_api_is_available(), $settings['api_enabled'] );
 		$this->assertEquals( get_woocommerce_currency(), $settings['currency'] );
 		$this->assertEquals( $term_response, $settings['taxonomies'] );
@@ -226,8 +236,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_security() {
-		$this->skip_on_php_8_1();
-
 		$settings = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['security'];
 
 		$this->assertEquals( 2, count( $settings ) );
@@ -241,8 +249,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_pages() {
-		$this->skip_on_php_8_1();
-
 		$pages = $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['pages'];
 		$this->assertEquals( 5, count( $pages ) );
 	}
@@ -414,5 +420,59 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'description', $properties );
 		$this->assertArrayHasKey( 'success', $properties );
 		$this->assertArrayHasKey( 'message', $properties );
+	}
+
+	/**
+	 * Supply captured public responses while retaining real status report parsing.
+	 *
+	 * @param array  $request HTTP request arguments.
+	 * @param string $url HTTP request URL.
+	 * @return array|false Fixture response, or false for another request.
+	 */
+	protected function mock_status_http_responses( $request, $url ) {
+		$host   = wp_parse_url( $url, PHP_URL_HOST );
+		$path   = wp_parse_url( $url, PHP_URL_PATH );
+		$method = $request['method'] ?? 'GET';
+
+		if ( 'api.wordpress.org' === $host && '/themes/info/1.2/' === $path && 'GET' === $method ) {
+			return array(
+				'headers'  => array(
+					'cache-for'    => '',
+					'content-type' => 'application/json; charset=UTF-8',
+				),
+				'body'     => '{"name":"Default","slug":"default","version":"1.7.2","preview_url":"https://wp-themes.com/default/","author":{"user_nicename":"wordpressdotorg","profile":"https://profiles.wordpress.org/wordpressdotorg/","avatar":"https://secure.gravatar.com/avatar/178f40079143ff7464125e4fbc88e62024a16442920a6a3d6dfa3d7e626be20d?s=96&d=monsterid&r=g","display_name":"WordPress.org","author":false,"author_url":"http://binarybonsai.com/"},"screenshot_url":"//ts.w.org/wp-content/themes/default/screenshot.png?ver=1.7.2","rating":100,"num_ratings":3,"reviews_url":"https://wordpress.org/support/theme/default/reviews/","downloaded":592381,"last_updated":"2010-06-14","last_updated_time":"2010-06-14 22:06:29","creation_time":"2010-03-26 20:14:43","homepage":"https://wordpress.org/themes/default/","download_link":"https://downloads.wordpress.org/theme/default.1.7.2.zip","requires":false,"requires_php":false,"is_commercial":false,"external_support_url":false,"is_community":true,"external_repository_url":""}',
+				'response' => array(
+					'code' => 200,
+				),
+			);
+		}
+
+		if ( 'www.paypal.com' === $host && '/cgi-bin/webscr' === $path && 'POST' === $method ) {
+			return array(
+				'headers'  => array(
+					'cache-for'    => '',
+					'content-type' => 'text/html; charset=utf-8',
+				),
+				'body'     => 'INVALID',
+				'response' => array(
+					'code' => 200,
+				),
+			);
+		}
+
+		if ( 'woocommerce.com' === $host && '/wc-api/product-key-api' === $path && 'GET' === $method ) {
+			return array(
+				'headers'  => array(
+					'cache-for'    => '',
+					'content-type' => 'application/json; charset=UTF-8',
+				),
+				'body'     => '{"success":true,"data":{"success":true}}',
+				'response' => array(
+					'code' => 200,
+				),
+			);
+		}
+
+		return false;
 	}
 }

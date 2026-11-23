@@ -19,10 +19,9 @@ class RESTPermissions {
 	/**
 	 * Require a logged in user.
 	 *
-	 * The shared authentication floor for customer-facing routes: any logged-in user
-	 * passes; resource-level authorization (e.g. per-contract ownership) stays with the
-	 * route handlers. Core's cookie auth has already verified the REST nonce (`wp_rest`)
-	 * for a cookie-authenticated request by the time a permission callback runs.
+	 * The authentication floor under {@see self::require_admin_permission()}. Core's cookie
+	 * auth has already verified the REST nonce (`wp_rest`) for a cookie-authenticated
+	 * request by the time a permission callback runs.
 	 *
 	 * @return true|\WP_Error True when logged in, else a 401 error.
 	 */
@@ -30,7 +29,7 @@ class RESTPermissions {
 		if ( ! is_user_logged_in() ) {
 			return new \WP_Error(
 				'woocommerce_subscriptions_engine_not_authenticated',
-				__( 'You must be logged in to access this resource.', 'woocommerce-subscriptions-engine' ),
+				__( 'You must be logged in to access this resource.', 'woocommerce' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -53,7 +52,7 @@ class RESTPermissions {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return new \WP_Error(
 				'woocommerce_subscriptions_engine_insufficient_permissions',
-				__( 'Sorry, you are not allowed to access this resource.', 'woocommerce-subscriptions-engine' ),
+				__( 'Sorry, you are not allowed to access this resource.', 'woocommerce' ),
 				array( 'status' => 403 )
 			);
 		}

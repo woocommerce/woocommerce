@@ -14,10 +14,9 @@ export const parameters = {
 	},
 	layout: 'padded',
 	a11y: {
-		element: '#storybook-root',
+		context: '#storybook-root',
 		config: {},
 		options: {},
-		manual: true,
 	},
 	docs: {
 		toc: {
@@ -27,3 +26,9 @@ export const parameters = {
 		},
 	},
 };
+export const initialGlobals = {
+	a11y: {
+		manual: true,
+	},
+};
+export const tags = [ 'autodocs' ];

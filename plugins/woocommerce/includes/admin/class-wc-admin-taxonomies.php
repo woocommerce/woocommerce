@@ -122,6 +122,7 @@ class WC_Admin_Taxonomies {
 	 */
 	public function add_category_fields() {
 		?>
+		<?php if ( ! wp_is_block_theme() ) : ?>
 		<div class="form-field term-display-type-wrap">
 			<label for="display_type"><?php esc_html_e( 'Display type', 'woocommerce' ); ?></label>
 			<select id="display_type" name="display_type" class="postform">
@@ -131,6 +132,7 @@ class WC_Admin_Taxonomies {
 				<option value="both"><?php esc_html_e( 'Both', 'woocommerce' ); ?></option>
 			</select>
 		</div>
+		<?php endif; ?>
 		<div class="form-field term-thumbnail-wrap">
 			<label><?php esc_html_e( 'Thumbnail', 'woocommerce' ); ?></label>
 			<div id="product_cat_thumbnail" style="float: left; margin-right: 10px;"><img src="<?php echo esc_url( wc_placeholder_img_src() ); ?>" width="60px" height="60px" /></div>
@@ -229,6 +231,7 @@ class WC_Admin_Taxonomies {
 			$image = wc_placeholder_img_src();
 		}
 		?>
+		<?php if ( ! wp_is_block_theme() ) : ?>
 		<tr class="form-field term-display-type-wrap">
 			<th scope="row" valign="top"><label><?php esc_html_e( 'Display type', 'woocommerce' ); ?></label></th>
 			<td>
@@ -240,6 +243,7 @@ class WC_Admin_Taxonomies {
 				</select>
 			</td>
 		</tr>
+		<?php endif; ?>
 		<tr class="form-field term-thumbnail-wrap">
 			<th scope="row" valign="top"><label><?php esc_html_e( 'Thumbnail', 'woocommerce' ); ?></label></th>
 			<td>
@@ -314,11 +318,13 @@ class WC_Admin_Taxonomies {
 	 * @param string $taxonomy Taxonomy slug.
 	 */
 	public function save_category_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
-		if ( isset( $_POST['display_type'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
-			update_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) ); // WPCS: CSRF ok, sanitization ok, input var ok.
+		if ( isset( $_POST['display_type'] ) && 'product_cat' === $taxonomy ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Core term-edit flow verifies the nonce before firing this hook.
+			$display_type = is_string( $_POST['display_type'] ) ? sanitize_key( $_POST['display_type'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Core term-edit flow verifies the nonce before firing this hook.
+
+			update_term_meta( $term_id, 'display_type', $display_type );
 		}
-		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
-			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // WPCS: CSRF ok, input var ok.
+		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Core term-edit flow supplies authorization checks; IDs are cast.
+			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Core term-edit flow supplies authorization checks; IDs are cast.
 		}
 	}
 
@@ -414,10 +420,11 @@ class WC_Admin_Taxonomies {
 	 * Handle custom row actions.
 	 */
 	public function handle_product_cat_row_actions() {
-		if ( isset( $_GET['action'], $_GET['tag_ID'], $_GET['_wpnonce'] ) && 'make_default' === $_GET['action'] ) { // WPCS: CSRF ok, input var ok.
-			$make_default_id = absint( $_GET['tag_ID'] ); // WPCS: Input var ok.
+		if ( isset( $_GET['action'], $_GET['tag_ID'], $_GET['_wpnonce'] ) && 'make_default' === $_GET['action'] ) {
+			$make_default_id = absint( $_GET['tag_ID'] );
 
-			if ( wp_verify_nonce( $_GET['_wpnonce'], 'make_default_' . $make_default_id ) && current_user_can( 'edit_term', $make_default_id ) ) { // WPCS: Sanitization ok, input var ok, CSRF ok.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wp_verify_nonce() validates the raw nonce value.
+			if ( wp_verify_nonce( $_GET['_wpnonce'], 'make_default_' . $make_default_id ) && current_user_can( 'edit_term', $make_default_id ) ) {
 				update_option( 'default_product_cat', $make_default_id );
 			}
 		}
@@ -495,11 +502,10 @@ class WC_Admin_Taxonomies {
 					'use strict';
 					const product_cat = document.getElementById('tag-%d');
 					if (product_cat) {
-						const th = product_cat.querySelector('th');
-						const thumbSpan = product_cat.querySelector('td.thumb span');
-						if (th && thumbSpan) {
-							th.innerHTML = '';
-							th.appendChild(thumbSpan);
+						const checkColumn = product_cat.querySelector('.check-column');
+						const tooltip = product_cat.querySelector('.column-thumb > .woocommerce-help-tip');
+						if (checkColumn && tooltip) {
+							checkColumn.insertBefore(tooltip, checkColumn.firstChild);
 						}
 					}
 				})();",

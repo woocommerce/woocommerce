@@ -133,16 +133,22 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * @param WC_Order_Item $item Order item object.
 	 * @param array         $args Array of args to pass to the delete method.
 	 * @since 3.0.0
+	 * @since 11.3.1 Returns the number of item rows deleted.
+	 *
+	 * @return int|false Number of item rows this call deleted (0 when another call already deleted the row), or false on a database error.
 	 */
 	public function delete( &$item, $args = array() ) {
+		$deleted = 0;
 		if ( $item->get_id() ) {
 			global $wpdb;
 			do_action( 'woocommerce_before_delete_order_item', $item->get_id() );
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $item->get_id() ) );
+			$deleted = $wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $item->get_id() ) );
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_order_itemmeta', array( 'order_item_id' => $item->get_id() ) );
 			do_action( 'woocommerce_delete_order_item', $item->get_id() );
 			$this->clear_cache( $item );
 		}
+
+		return $deleted;
 	}
 
 	/**
@@ -162,7 +168,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$data = wp_cache_get( 'item-' . $item->get_id(), 'order-items' );
 
 		if ( false === $data ) {
-			$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
+			$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
 			wp_cache_set( 'item-' . $item->get_id(), $data, 'order-items' );
 		}
 

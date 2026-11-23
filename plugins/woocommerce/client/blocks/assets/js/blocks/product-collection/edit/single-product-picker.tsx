@@ -37,7 +37,7 @@ const SingleProductPicker = (
 		? __(
 				'Previously selected product is no longer available.',
 				'woocommerce'
-		  )
+			)
 		: createInterpolateElement(
 				sprintf(
 					/* translators: %s: collection title */
@@ -48,7 +48,7 @@ const SingleProductPicker = (
 					collection.title
 				),
 				{ strong: <strong /> }
-		  );
+			);
 
 	return (
 		<div { ...blockProps }>

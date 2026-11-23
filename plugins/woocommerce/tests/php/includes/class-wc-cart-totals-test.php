@@ -1,4 +1,7 @@
 <?php
+declare( strict_types = 1 );
+
+use Automattic\WooCommerce\Enums\TaxBasedOn;
 
 /**
  * Class WC_Cart_Totals_Tests. Tests for WC_Cart_Total class.
@@ -20,6 +23,12 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 
 		$this->shipping_was_enabled = WC()->shipping()->enabled;
 		WC()->shipping()->enabled   = false;
+
+		// The tax rates these tests insert have no country of their own, and
+		// WC_Tax::find_rates() finds nothing for a customer whose taxable address has no
+		// country, so give the customer one.
+		WC()->customer->set_billing_country( 'US' );
+		WC()->customer->set_shipping_country( 'US' );
 	}
 
 	/**
@@ -233,6 +242,284 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Coupon sorting should preserve priority and sequential application-order behavior.
+	 * @dataProvider data_provider_test_coupon_sorting_preserves_priority_contract
+	 *
+	 * @param string     $product_price      Product price.
+	 * @param string     $sequential_setting Sequential discount setting value.
+	 * @param array      $coupon_data         Coupon data keyed by fixture name.
+	 * @param array      $application_order   Coupon fixture names in application order.
+	 * @param array      $expected_discounts  Expected per-coupon discounts.
+	 * @param string     $expected_cart_total Expected cart total.
+	 * @param array|null $sort_priorities     Optional filtered priorities keyed by discount type.
+	 */
+	public function test_coupon_sorting_preserves_priority_contract(
+		string $product_price,
+		string $sequential_setting,
+		array $coupon_data,
+		array $application_order,
+		array $expected_discounts,
+		string $expected_cart_total,
+		?array $sort_priorities = null
+	): void {
+		$result = $this->calculate_cart_coupon_scenario( $product_price, $sequential_setting, $coupon_data, $application_order, $sort_priorities );
+
+		$this->assertSame( $expected_discounts, $result['discounts'], 'Each coupon should receive the discount implied by its effective calculation order.' );
+		$this->assertSame( $expected_cart_total, $result['cart_total'], 'The cart total should reflect the expected coupon calculation order.' );
+	}
+
+	/**
+	 * Data provider for coupon sorting priorities.
+	 *
+	 * @return array
+	 */
+	public function data_provider_test_coupon_sorting_preserves_priority_contract(): array {
+		return array(
+			'sequential 20% then 10%'          => array(
+				'100.00',
+				'yes',
+				array(
+					'high' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '20',
+					),
+					'low'  => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'high', 'low' ),
+				array(
+					'high' => '20.00',
+					'low'  => '8.00',
+				),
+				'72.00',
+			),
+			'sequential 10% then 20%'          => array(
+				'100.00',
+				'yes',
+				array(
+					'high' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '20',
+					),
+					'low'  => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'low', 'high' ),
+				array(
+					'high' => '18.00',
+					'low'  => '10.00',
+				),
+				'72.00',
+			),
+			// The 100.00 fixtures above hold the cart total steady in both orders, so these two prove
+			// the calculation order also moves the total once intermediate rounding is in play.
+			'sequential rounding 20% then 10%' => array(
+				'12.34',
+				'yes',
+				array(
+					'high' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '20',
+					),
+					'low'  => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'high', 'low' ),
+				array(
+					'high' => '2.47',
+					'low'  => '0.99',
+				),
+				'8.88',
+			),
+			'sequential rounding 10% then 20%' => array(
+				'12.34',
+				'yes',
+				array(
+					'high' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '20',
+					),
+					'low'  => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'low', 'high' ),
+				array(
+					'high' => '2.22',
+					'low'  => '1.23',
+				),
+				'8.89',
+			),
+			'non-sequential amount fallback'   => array(
+				'100.00',
+				'no',
+				array(
+					'large' => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '80',
+					),
+					'small' => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '30',
+					),
+				),
+				array( 'large', 'small' ),
+				array(
+					'large' => '70.00',
+					'small' => '30.00',
+				),
+				'0.00',
+			),
+			'standard coupon type priority'    => array(
+				'100.00',
+				'yes',
+				array(
+					'fixed'   => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '30',
+					),
+					'percent' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'fixed', 'percent' ),
+				array(
+					'fixed'   => '30.00',
+					'percent' => '10.00',
+				),
+				'60.00',
+			),
+			'usage-limit priority'             => array(
+				'100.00',
+				'yes',
+				array(
+					'broad'  => array(
+						'discount_type'          => 'percent',
+						'coupon_amount'          => '20',
+						'limit_usage_to_x_items' => 2,
+					),
+					'narrow' => array(
+						'discount_type'          => 'percent',
+						'coupon_amount'          => '10',
+						'limit_usage_to_x_items' => 1,
+					),
+				),
+				array( 'broad', 'narrow' ),
+				array(
+					'broad'  => '18.00',
+					'narrow' => '10.00',
+				),
+				'72.00',
+			),
+			'distinct filtered priorities'     => array(
+				'100.00',
+				'yes',
+				array(
+					'percent' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+					'fixed'   => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '30',
+					),
+				),
+				array( 'percent', 'fixed' ),
+				array(
+					'percent' => '7.00',
+					'fixed'   => '30.00',
+				),
+				'63.00',
+				array(
+					'fixed_cart' => 1,
+					'percent'    => 2,
+				),
+			),
+			'equal filtered priorities'        => array(
+				'100.00',
+				'yes',
+				array(
+					'fixed'   => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '30',
+					),
+					'percent' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'fixed', 'percent' ),
+				array(
+					'fixed'   => '30.00',
+					'percent' => '7.00',
+				),
+				'63.00',
+				array(
+					'fixed_cart' => 5,
+					'percent'    => 5,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Calculate normalized totals for a cart coupon scenario.
+	 *
+	 * @param string     $product_price      Product price.
+	 * @param string     $sequential_setting Sequential discount setting value.
+	 * @param array      $coupon_data         Coupon data keyed by fixture name.
+	 * @param array      $application_order   Coupon fixture names in application order.
+	 * @param array|null $sort_priorities     Optional filtered priorities keyed by discount type.
+	 * @return array
+	 */
+	private function calculate_cart_coupon_scenario( string $product_price, string $sequential_setting, array $coupon_data, array $application_order, ?array $sort_priorities ): array {
+		update_option( 'woocommerce_calc_discounts_sequentially', $sequential_setting );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $product_price ) );
+		$coupons = array();
+		foreach ( $coupon_data as $coupon_key => $data ) {
+			$coupons[ $coupon_key ] = WC_Helper_Coupon::create_coupon( 'test-' . $coupon_key, $data );
+		}
+
+		$sort_filter = null;
+		if ( null !== $sort_priorities ) {
+			$sort_filter = static function ( $sort, $coupon ) use ( $sort_priorities ) {
+				return $sort_priorities[ $coupon->get_discount_type() ] ?? $sort;
+			};
+			add_filter( 'woocommerce_coupon_sort', $sort_filter, 10, 2 );
+		}
+
+		WC()->cart->add_to_cart( $product->get_id() );
+		foreach ( $application_order as $coupon_key ) {
+			WC()->cart->apply_coupon( $coupons[ $coupon_key ]->get_code() );
+		}
+		WC()->cart->calculate_totals();
+
+		if ( null !== $sort_filter ) {
+			remove_filter( 'woocommerce_coupon_sort', $sort_filter, 10 );
+		}
+
+		$discounts = array();
+		foreach ( $coupons as $coupon_key => $coupon ) {
+			$discounts[ $coupon_key ] = wc_format_decimal( WC()->cart->get_coupon_discount_amount( $coupon->get_code() ), 2 );
+		}
+
+		return array(
+			'discounts'  => $discounts,
+			'cart_total' => wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ),
+		);
+	}
+
+	/**
 	 * A fixed_product $7 coupon on a $20 product yields a $7 discount and $13 total.
 	 */
 	public function test_fixed_product_coupon_discounts_cart_total() {
@@ -294,5 +581,105 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		$product->delete( true );
 		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox A fixed cart coupon larger than the cart stops at the line price when removing the base tax leaves half a cent.
+	 */
+	public function test_fixed_cart_coupon_stops_at_line_price_with_half_cent_price(): void {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+			)
+		);
+		add_filter( 'woocommerce_customer_taxable_address', fn() => array( 'FR', '', '75001', 'Paris' ) );
+		// The fee keeps the cart total above zero, where it is floored, so line totals show in it.
+		add_action( 'woocommerce_cart_calculate_fees', fn( $cart ) => $cart->add_fee( 'Handling', 10 ) );
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 9.99,
+				'price'         => 9.99,
+			)
+		);
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'fixed-cart-25',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '25',
+			)
+		);
+
+		WC()->cart->empty_cart();
+		$item_key = WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertNotEmpty( WC_Tax::get_base_tax_rates(), 'The base country should have a tax rate' );
+		$this->assertEmpty( WC_Tax::get_rates( '', WC()->customer ), 'The customer location should have no tax rate' );
+		$this->assertEquals( '8.33', wc_format_decimal( WC()->cart->get_discount_total(), 2 ), 'The discount should stop at the line price' );
+		$this->assertEqualsWithDelta( 0.0, WC()->cart->get_cart()[ $item_key ]['line_total'], 0.001, 'The line total should not go below zero' );
+		$this->assertEquals( '10.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ), 'Only the fee should remain to pay' );
+	}
+
+	/**
+	 * @testdox A $discount_type coupon of $amount discounts only the positive line and leaves the negative-priced line at its price.
+	 * @testWith ["fixed_cart", "1", "24.00"]
+	 *           ["fixed_cart", "100", "5.00"]
+	 *           ["percent", "10", "23.00"]
+	 *           ["fixed_product", "1", "24.00"]
+	 *
+	 * @param string $discount_type  Coupon discount type.
+	 * @param string $amount         Coupon amount.
+	 * @param string $expected_total Expected cart total.
+	 */
+	public function test_coupon_leaves_negative_priced_line_at_its_price( string $discount_type, string $amount, string $expected_total ): void {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		// The fee keeps the cart total above zero, where it is floored, so line totals show in it.
+		add_action( 'woocommerce_cart_calculate_fees', fn( $cart ) => $cart->add_fee( 'Handling', 10 ) );
+
+		$product          = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 20,
+				'price'         => 20,
+			)
+		);
+		$negative_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => -5,
+				'price'         => -5,
+			)
+		);
+		$coupon           = WC_Helper_Coupon::create_coupon(
+			'negative-line-coupon',
+			array(
+				'discount_type' => $discount_type,
+				'coupon_amount' => $amount,
+			)
+		);
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$negative_item_key = WC()->cart->add_to_cart( $negative_product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertEqualsWithDelta( -5.0, WC()->cart->get_cart()[ $negative_item_key ]['line_total'], 0.001, 'The negative-priced line should keep its price' );
+		$this->assertEquals( $expected_total, wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ), 'The coupon should discount only the positive line' );
 	}
 }

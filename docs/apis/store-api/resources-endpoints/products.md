@@ -10,7 +10,9 @@ Only published products are accessible via the Store API. Requesting a draft, pe
 
 ### Password-protected products
 
-Password-protected products are visible in the API, but their `description` and `short_description` fields are redacted (returned as empty strings) until the correct password has been submitted. The response includes an `is_password_protected` boolean field so clients can detect this state and prompt the user.
+Password-protected products, including variations whose parent product is password-protected, are visible in the API, but their `description` and `short_description` fields are redacted (returned as empty strings) until the correct password has been submitted.
+
+The `is_password_protected` field indicates whether the product or its parent has a configured password. It remains `true` after the current visitor has submitted the correct password and the descriptions become accessible.
 
 Password verification uses WordPress's native `wp-postpass_*` cookie, set when a user submits the password form on the frontend. The Store API does not accept passwords directly.
 
@@ -100,6 +102,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/products"
 		"variation": "",
 		"permalink": "https://local.wordpress.test/product/wordpress-pennant/",
 		"sku": "wp-pennant",
+		"global_unique_id": "",
 		"summary": "<p>This is an external product.</p>",
 		"short_description": "<p>This is an external product.</p>",
 		"description": "<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>",
@@ -169,6 +172,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/34"
 	"variation": "",
 	"permalink": "https://local.wordpress.test/product/wordpress-pennant/",
 	"sku": "wp-pennant",
+	"global_unique_id": "",
 	"summary": "<p>This is an external product.</p>",
 	"short_description": "<p>This is an external product.</p>",
 	"description": "<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>",
@@ -237,6 +241,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/wordpress-pennant"
 	"variation": "",
 	"permalink": "https://local.wordpress.test/product/wordpress-pennant/",
 	"sku": "wp-pennant",
+	"global_unique_id": "",
 	"summary": "<p>This is an external product.</p>",
 	"short_description": "<p>This is an external product.</p>",
 	"description": "<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>",

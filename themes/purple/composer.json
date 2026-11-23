@@ -1,0 +1,30 @@
+{
+	"name": "woocommerce/theme-purple",
+	"description": "Development and release configuration for Purple.",
+	"type": "wordpress-theme",
+	"license": "GPL-2.0-or-later",
+	"require-dev": {
+		"automattic/jetpack-changelogger": "3.3.0"
+	},
+	"scripts": {
+		"phpcs": "@php ../../tools/theme-cli/vendor/bin/phpcs",
+		"phpcbf": "@php ../../tools/theme-cli/vendor/bin/phpcbf"
+	},
+	"config": {
+		"platform": {
+			"php": "7.4"
+		},
+		"sort-packages": true
+	},
+	"extra": {
+		"changelogger": {
+			"versioning": "wordpress",
+			"types": {
+				"fix": "Fixes an existing bug",
+				"add": "Adds functionality",
+				"update": "Updates existing functionality",
+				"dev": "Development related task"
+			}
+		}
+	}
+}

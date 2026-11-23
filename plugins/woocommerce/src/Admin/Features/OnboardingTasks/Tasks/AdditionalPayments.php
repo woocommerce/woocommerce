@@ -100,6 +100,15 @@ class AdditionalPayments extends Payments {
 	}
 
 	/**
+	 * Check if a task is dismissable.
+	 *
+	 * @return bool
+	 */
+	public function is_dismissable() {
+		return true;
+	}
+
+	/**
 	 * Action URL.
 	 *
 	 * @return string

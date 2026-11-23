@@ -13,6 +13,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import './quality-badge.scss';
 import { Product } from '../product-list/types';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
+import { MarketplaceContextType } from '../../contexts/types';
 
 /**
  * Seal-with-checkmark icon, kept identical to the badge icon on WooCommerce.com.
@@ -148,6 +149,24 @@ export function QualityBadgePopover( props: {
 }
 
 /**
+ * The badge settings when a product card shows the badge, otherwise null.
+ * Product card tracking reads this too, so an event never reports a badge the
+ * merchant could not see.
+ */
+export function getVisibleQualityBadge(
+	product: Product | undefined,
+	iamSettings: MarketplaceContextType[ 'iamSettings' ] | undefined
+) {
+	const badge = iamSettings?.quality_badge;
+
+	if ( ! badge?.enabled || ! badge.label || ! product?.hasQualityBadge ) {
+		return null;
+	}
+
+	return { ...badge, label: badge.label };
+}
+
+/**
  * Quality badge chip shown on product cards. Whether it renders and with what
  * copy is fully driven by the WooCommerce.com API: the per-product flag comes
  * with the product data, the label/tooltip/docs URL from the IAM settings
@@ -158,13 +177,9 @@ export default function QualityBadge( props: { product: Product } ) {
 	const [ isOpen, setIsOpen ] = useState( false );
 	const [ anchor, setAnchor ] = useState< HTMLButtonElement | null >( null );
 
-	const badge = iamSettings?.quality_badge;
+	const badge = getVisibleQualityBadge( props.product, iamSettings );
 
-	if (
-		! badge?.enabled ||
-		! badge.label ||
-		! props.product.hasQualityBadge
-	) {
+	if ( ! badge ) {
 		return null;
 	}
 

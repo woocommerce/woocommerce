@@ -277,9 +277,6 @@ class ProductGallery extends AbstractBlock {
 					array(
 						'imageData'               => $default_media_ids,
 						'isDialogOpen'            => false,
-						'isDragging'              => false,
-						'touchStartX'             => 0,
-						'touchCurrentX'           => 0,
 						'productId'               => $product_id,
 						'selectedImageId'         => $initial_media_id,
 						'thumbnailsOverflow'      => [
@@ -317,7 +314,7 @@ class ProductGallery extends AbstractBlock {
 					);
 
 					// Support legacy Add to Cart with Options block.
-					$p->set_attribute( 'data-wp-init--watch-changes-on-add-to-cart-form', 'callbacks.watchForChangesOnAddToCartForm' );
+					$p->set_attribute( 'data-wp-init---watch-changes-on-add-to-cart-form', 'callbacks.watchForChangesOnAddToCartForm' );
 					// Support blockified Add to Cart + Options block.
 					$p->set_attribute( 'data-wp-watch', 'callbacks.listenToProductDataChanges' );
 				}

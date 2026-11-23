@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/order-confirmation-totals",
-	"version": "1.0.0",
 	"title": "Order Totals",
 	"description": "Display the items purchased and order totals.",
 	"category": "woocommerce",
@@ -62,6 +61,10 @@
 			"default": ""
 		}
 	},
+	"style": [
+		"wc-blocks-style",
+		"file:../order-confirmation-totals.css"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

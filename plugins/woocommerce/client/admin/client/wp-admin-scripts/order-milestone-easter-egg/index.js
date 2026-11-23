@@ -189,10 +189,14 @@
 
 	/* -- Load pinata -------------------------------------------------------- */
 	async function loadPinata( variantKey ) {
-		if ( ! VARIANTS[ variantKey ] ) return;
+		if ( ! VARIANTS[ variantKey ] ) {
+			return;
+		}
 
 		var svgText = SVG_DATA[ variantKey ];
-		if ( ! svgText ) return;
+		if ( ! svgText ) {
+			return;
+		}
 
 		active = VARIANTS[ variantKey ];
 		var v = active;
@@ -208,7 +212,9 @@
 		var firstEl =
 			svg &&
 			svg.querySelector( 'path,circle,ellipse,polygon,rect,polyline' );
-		if ( firstEl ) protectedEls.add( firstEl );
+		if ( firstEl ) {
+			protectedEls.add( firstEl );
+		}
 		svg.removeAttribute( 'width' );
 		svg.removeAttribute( 'height' );
 		svg.setAttribute( 'preserveAspectRatio', 'xMidYMid meet' );
@@ -262,11 +268,21 @@
 				} catch ( _ ) {
 					return;
 				}
-				if ( bb.width === 0 && bb.height === 0 ) return;
-				if ( bb.x < minX ) minX = bb.x;
-				if ( bb.y < minY ) minY = bb.y;
-				if ( bb.x + bb.width > maxX ) maxX = bb.x + bb.width;
-				if ( bb.y + bb.height > maxY ) maxY = bb.y + bb.height;
+				if ( bb.width === 0 && bb.height === 0 ) {
+					return;
+				}
+				if ( bb.x < minX ) {
+					minX = bb.x;
+				}
+				if ( bb.y < minY ) {
+					minY = bb.y;
+				}
+				if ( bb.x + bb.width > maxX ) {
+					maxX = bb.x + bb.width;
+				}
+				if ( bb.y + bb.height > maxY ) {
+					maxY = bb.y + bb.height;
+				}
 			} );
 		if ( isFinite( minY ) ) {
 			_contentBB = {
@@ -316,12 +332,16 @@
 				Math.round( parseFloat( c.getAttribute( 'cx' ) ) / 15 ) +
 				',' +
 				Math.round( parseFloat( c.getAttribute( 'cy' ) ) / 15 );
-			if ( ! posMap[ key ] ) posMap[ key ] = [];
+			if ( ! posMap[ key ] ) {
+				posMap[ key ] = [];
+			}
 			posMap[ key ].push( c );
 		} );
 		Object.keys( posMap ).forEach( function ( k ) {
 			var group = posMap[ k ];
-			if ( group.length < 2 ) return;
+			if ( group.length < 2 ) {
+				return;
+			}
 			var sumCx = 0,
 				sumCy = 0;
 			group.forEach( function ( c ) {
@@ -354,7 +374,9 @@
 			[].slice
 				.call( svg.querySelectorAll( 'circle' ) )
 				.forEach( function ( c ) {
-					if ( eyeElsSet.has( c ) ) return;
+					if ( eyeElsSet.has( c ) ) {
+						return;
+					}
 					var cx = parseFloat( c.getAttribute( 'cx' ) ),
 						cy = parseFloat( c.getAttribute( 'cy' ) );
 					var near = eyeGroups.some( function ( g ) {
@@ -365,7 +387,9 @@
 							) < 100
 						);
 					} );
-					if ( ! near ) return;
+					if ( ! near ) {
+						return;
+					}
 					protectedEls.add( c );
 					eyeEls.push( c );
 					eyeElsSet.add( c );
@@ -430,7 +454,9 @@
 		}
 
 		var existingBoom = svg.querySelector( '#egg-boom-text' );
-		if ( existingBoom ) existingBoom.remove();
+		if ( existingBoom ) {
+			existingBoom.remove();
+		}
 		var allClassEls = [];
 		v.classes.forEach( function ( sel ) {
 			allClassEls = allClassEls.concat(
@@ -492,15 +518,20 @@
 	/* -- Init --------------------------------------------------------------- */
 	/* -- Blink -------------------------------------------------------------- */
 	function startBlink() {
-		if ( ! eyeGroups.length ) return;
+		if ( ! eyeGroups.length ) {
+			return;
+		}
 		blinkScaleY = 1;
 		function animTo( from, to, dur, done ) {
 			var t0 = Date.now();
 			( function tick() {
 				var p = Math.min( 1, ( Date.now() - t0 ) / dur );
 				blinkScaleY = from + ( to - from ) * p;
-				if ( p < 1 ) requestAnimationFrame( tick );
-				else if ( done ) done();
+				if ( p < 1 ) {
+					requestAnimationFrame( tick );
+				} else if ( done ) {
+					done();
+				}
 			} )();
 		}
 		function doBlink() {
@@ -517,8 +548,9 @@
 	}
 
 	function updatePupil() {
-		if ( ! eyeGroups.length || ! overlayEl || ! overlayEl.parentNode )
+		if ( ! eyeGroups.length || ! overlayEl || ! overlayEl.parentNode ) {
 			return;
+		}
 		var lastOx = 0,
 			lastOy = 0;
 		eyeGroups.forEach( function ( group ) {
@@ -528,7 +560,9 @@
 			} catch ( _ ) {
 				return;
 			}
-			if ( ! ctm ) return;
+			if ( ! ctm ) {
+				return;
+			}
 			var scale = Math.sqrt( ctm.a * ctm.a + ctm.b * ctm.b );
 			var esx = ctm.a * group.pupilCx + ctm.c * group.pupilCy + ctm.e;
 			var esy = ctm.b * group.pupilCx + ctm.d * group.pupilCy + ctm.f;
@@ -569,7 +603,9 @@
 
 	/* -- Physics ------------------------------------------------------------ */
 	function update() {
-		if ( ! dropped ) return;
+		if ( ! dropped ) {
+			return;
+		}
 
 		var proxTorque = 0;
 		if ( mActive ) {
@@ -577,16 +613,21 @@
 				dx = mx - c.x,
 				d = Math.hypot( dx, my - c.y ),
 				R = c.r * 2.69;
-			if ( d < R && d > 1 )
+			if ( d < R && d > 1 ) {
 				proxTorque = -( dx / d ) * Math.pow( 1 - d / R, 2 ) * 0.0006;
+			}
 		}
 
 		mainOmega =
 			( mainOmega +
 				( -settings.gravity * Math.sin( mainAngle ) + proxTorque ) ) *
 			settings.damp;
-		if ( mainOmega > 0.06 ) mainOmega = 0.06;
-		if ( mainOmega < -0.06 ) mainOmega = -0.06;
+		if ( mainOmega > 0.06 ) {
+			mainOmega = 0.06;
+		}
+		if ( mainOmega < -0.06 ) {
+			mainOmega = -0.06;
+		}
 		mainAngle += mainOmega;
 		var _maxSwing =
 			active && active.maxSwing !== null ? active.maxSwing : 0.9;
@@ -602,7 +643,9 @@
 		var pcx = _contentBB.centerX,
 			pcy = _contentBB.centerY;
 		COLOR_LAYERS.forEach( function ( layer ) {
-			if ( ! layer.els.length ) return;
+			if ( ! layer.els.length ) {
+				return;
+			}
 			var target =
 				-mainOmega *
 				layer.velMult *
@@ -696,7 +739,9 @@
 	/* -- Confetti ----------------------------------------------------------- */
 	async function loadConfettiShapes() {
 		var text = SVG_DATA.confetti;
-		if ( ! text ) return;
+		if ( ! text ) {
+			return;
+		}
 		var tmp = document.createElement( 'div' );
 		tmp.style.cssText =
 			'position:absolute;left:-9999px;top:-9999px;visibility:hidden';
@@ -713,7 +758,9 @@
 				}
 				var d = p.getAttribute( 'd' ),
 					fill = p.getAttribute( 'fill' ) || '#7c5cf0';
-				if ( ! d || bb.width <= 0 || bb.height <= 0 ) return;
+				if ( ! d || bb.width <= 0 || bb.height <= 0 ) {
+					return;
+				}
 				var aspect =
 					Math.max( bb.width, bb.height ) /
 					Math.max( 0.0001, Math.min( bb.width, bb.height ) );
@@ -748,7 +795,9 @@
 		} else {
 			activeShapes = ALL_SHAPES.slice();
 		}
-		if ( ! activeShapes.length ) activeShapes = ALL_SHAPES.slice();
+		if ( ! activeShapes.length ) {
+			activeShapes = ALL_SHAPES.slice();
+		}
 	}
 
 	function rebuildColumns() {
@@ -765,7 +814,9 @@
 	}
 
 	function spawnBurst( x, y, count, opts ) {
-		if ( ! settings.cfOn || ! activeShapes.length ) return;
+		if ( ! settings.cfOn || ! activeShapes.length ) {
+			return;
+		}
 		count = count || settings.cfCount;
 		var upBias = ( opts && opts.upBias ) || 2.5;
 		for ( var i = 0; i < count; i++ ) {
@@ -813,7 +864,9 @@
 			}
 
 			if ( ! settings.cfPile ) {
-				if ( p.y - p.r > H + 50 ) live.splice( i, 1 );
+				if ( p.y - p.r > H + 50 ) {
+					live.splice( i, 1 );
+				}
 				continue;
 			}
 
@@ -824,8 +877,9 @@
 				ftop = H;
 			for ( var dc = -hc; dc <= hc; dc++ ) {
 				var nc = cc + dc;
-				if ( nc >= 0 && nc < columns.length && columns[ nc ] < ftop )
+				if ( nc >= 0 && nc < columns.length && columns[ nc ] < ftop ) {
 					ftop = columns[ nc ];
+				}
 			}
 
 			if ( p.y + r >= ftop ) {
@@ -833,7 +887,9 @@
 					fy = columns[ cc ],
 					rr = Math.max( 2, hc + 1 );
 				for ( var dc2 = -rr; dc2 <= rr; dc2++ ) {
-					if ( ! dc2 ) continue;
+					if ( ! dc2 ) {
+						continue;
+					}
 					var nc2 = cc + dc2;
 					if (
 						nc2 >= 0 &&
@@ -844,27 +900,36 @@
 						fy = columns[ nc2 ];
 					}
 				}
-				if ( fc !== cc )
+				if ( fc !== cc ) {
 					p.x =
 						( fc + 0.5 ) * COLUMN_W +
 						( Math.random() - 0.5 ) * COLUMN_W;
+				}
 				p.y = fy - r;
 				p.rotVel = 0;
 				var sp = hc + 2;
 				for ( var dc3 = -sp; dc3 <= sp; dc3++ ) {
 					var nc3 = fc + dc3;
-					if ( nc3 < 0 || nc3 >= columns.length ) continue;
+					if ( nc3 < 0 || nc3 >= columns.length ) {
+						continue;
+					}
 					var dx3 = dc3 * COLUMN_W;
-					if ( Math.abs( dx3 ) > r2 ) continue;
+					if ( Math.abs( dx3 ) > r2 ) {
+						continue;
+					}
 					var nt =
 						p.y +
 						r -
 						Math.sqrt( Math.max( 0, r2 * r2 - dx3 * dx3 ) );
-					if ( nt < columns[ nc3 ] ) columns[ nc3 ] = nt;
+					if ( nt < columns[ nc3 ] ) {
+						columns[ nc3 ] = nt;
+					}
 				}
 				settled.push( p );
 				live.splice( i, 1 );
-				if ( settled.length > SETTLED_CAP ) settled.splice( 0, 60 );
+				if ( settled.length > SETTLED_CAP ) {
+					settled.splice( 0, 60 );
+				}
 			} else if ( p.y - p.r > H + 50 ) {
 				live.splice( i, 1 );
 			}
@@ -913,7 +978,9 @@
 		var dpr = sizeCanvasHiDPI( bgCV );
 		bgCtx.setTransform( dpr, 0, 0, dpr, 0, 0 );
 		bgCtx.clearRect( 0, 0, window.innerWidth, window.innerHeight );
-		if ( ! dropped ) return;
+		if ( ! dropped ) {
+			return;
+		}
 		var c = pinataCentre();
 		var strOff =
 			active && active.stringOffsetX !== null ? active.stringOffsetX : 10;
@@ -940,16 +1007,21 @@
 		var allLayers = COLOR_LAYERS.filter( function ( l ) {
 			return l.els.length > 0;
 		} );
-		if ( HEAD_TOP_LAYER && HEAD_TOP_LAYER.els.length > 0 )
+		if ( HEAD_TOP_LAYER && HEAD_TOP_LAYER.els.length > 0 ) {
 			allLayers.push( HEAD_TOP_LAYER );
+		}
 
 		var eligible = [];
 		allLayers.forEach( function ( layer ) {
 			layer.els.forEach( function ( el ) {
-				if ( ! protectedEls.has( el ) ) eligible.push( { layer, el } );
+				if ( ! protectedEls.has( el ) ) {
+					eligible.push( { layer, el } );
+				}
 			} );
 		} );
-		if ( ! eligible.length ) return;
+		if ( ! eligible.length ) {
+			return;
+		}
 
 		var pick = eligible[ Math.floor( Math.random() * eligible.length ) ];
 		var layer = pick.layer;
@@ -974,9 +1046,13 @@
 		}
 
 		layer.els.splice( idx, 1 );
-		if ( el.parentNode ) el.parentNode.removeChild( el );
+		if ( el.parentNode ) {
+			el.parentNode.removeChild( el );
+		}
 
-		if ( ! d || ! bb || ! ctm || bb.width === 0 ) return;
+		if ( ! d || ! bb || ! ctm || bb.width === 0 ) {
+			return;
+		}
 
 		var svgCx = bb.x + bb.width / 2;
 		var svgCy = bb.y + bb.height / 2;
@@ -1007,13 +1083,17 @@
 			p.x += p.vx;
 			p.y += p.vy;
 			p.rot += p.rotVel;
-			if ( p.y > window.innerHeight + 300 ) fallingPieces.splice( i, 1 );
+			if ( p.y > window.innerHeight + 300 ) {
+				fallingPieces.splice( i, 1 );
+			}
 		}
 	}
 
 	/* -- Cursor ------------------------------------------------------------- */
 	function updateCursor() {
-		if ( ! mActive ) return;
+		if ( ! mActive ) {
+			return;
+		}
 		var rawVx = mx - lastMx;
 		mouseVx = mouseVx * 0.7 + rawVx * 0.3;
 		lastMx = mx;
@@ -1043,9 +1123,13 @@
 
 	/* -- Hits --------------------------------------------------------------- */
 	function tryHit( cx, cy ) {
-		if ( ! dropped ) return;
+		if ( ! dropped ) {
+			return;
+		}
 		var c = pinataCentre();
-		if ( Math.hypot( cx - c.x, cy - c.y ) > c.r * 1.68 ) return;
+		if ( Math.hypot( cx - c.x, cy - c.y ) > c.r * 1.68 ) {
+			return;
+		}
 		mainOmega +=
 			( c.x - cx ) * settings.hit +
 			( Math.random() - 0.5 ) * settings.hit * 5;
@@ -1058,8 +1142,9 @@
 		squishAngle = Math.atan2( c.y - cy, c.x - cx );
 		squishVel += 0.9;
 		var boomEl = document.getElementById( 'egg-boom-text' );
-		if ( boomEl && boomEl.style.opacity === '0' )
+		if ( boomEl && boomEl.style.opacity === '0' ) {
 			boomEl.style.opacity = '1';
+		}
 	}
 
 	/* -- Main loop ---------------------------------------------------------- */
@@ -1078,10 +1163,14 @@
 	async function init() {
 		stick.innerHTML = SVG_DATA.stick || '';
 		ALL_SHAPES = [];
-		if ( ! reducedMotion ) await loadConfettiShapes();
+		if ( ! reducedMotion ) {
+			await loadConfettiShapes();
+		}
 		filterShapes();
 		await loadPinata( settings.variant );
-		if ( ! reducedMotion ) startBlink();
+		if ( ! reducedMotion ) {
+			startBlink();
+		}
 		dropped = true;
 		if ( reducedMotion ) {
 			applyRotation();
@@ -1122,7 +1211,9 @@
 					'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'
 				)
 			);
-			if ( ! focusable.length ) return;
+			if ( ! focusable.length ) {
+				return;
+			}
 			var first = focusable[ 0 ],
 				last = focusable[ focusable.length - 1 ];
 			var activeElement = overlayEl.ownerDocument.activeElement;
@@ -1144,9 +1235,15 @@
 			tryHit( e.clientX, e.clientY );
 			return;
 		}
-		if ( t.closest( '#egg-close-btn' ) ) return;
-		if ( t.closest( '.egg-celebrate-btn' ) ) return;
-		if ( t.closest( '.egg-opt-out-btn' ) ) return;
+		if ( t.closest( '#egg-close-btn' ) ) {
+			return;
+		}
+		if ( t.closest( '.egg-celebrate-btn' ) ) {
+			return;
+		}
+		if ( t.closest( '.egg-opt-out-btn' ) ) {
+			return;
+		}
 		tryHit( e.clientX, e.clientY );
 	}
 
@@ -1177,10 +1274,16 @@
 		document.removeEventListener( 'click', onDocClick );
 		document.removeEventListener( 'keydown', onKeyDown );
 		window.removeEventListener( 'resize', onResize );
-		if ( svgDefsEl && svgDefsEl.parentNode ) svgDefsEl.remove();
-		if ( overlayEl && overlayEl.parentNode ) overlayEl.remove();
+		if ( svgDefsEl && svgDefsEl.parentNode ) {
+			svgDefsEl.remove();
+		}
+		if ( overlayEl && overlayEl.parentNode ) {
+			overlayEl.remove();
+		}
 		var st = document.getElementById( 'woo-egg-style' );
-		if ( st ) st.remove();
+		if ( st ) {
+			st.remove();
+		}
 		if ( _previousFocus && typeof _previousFocus.focus === 'function' ) {
 			_previousFocus.focus();
 		}
@@ -1327,7 +1430,9 @@
 		var firstFocusable = el.querySelector(
 			'.egg-celebrate-btn, #egg-close-btn'
 		);
-		if ( firstFocusable ) firstFocusable.focus();
+		if ( firstFocusable ) {
+			firstFocusable.focus();
+		}
 
 		bgCV = document.getElementById( 'egg-bg' );
 		bgCtx = bgCV.getContext( '2d' );
@@ -1396,8 +1501,11 @@
 					e2 * maxScale +
 					') translate(-391 -381)'
 			);
-			if ( t < 1 ) requestAnimationFrame( animReveal );
-			else overlayEl.style.clipPath = 'none';
+			if ( t < 1 ) {
+				requestAnimationFrame( animReveal );
+			} else {
+				overlayEl.style.clipPath = 'none';
+			}
 		} )();
 	}
 
@@ -1470,10 +1578,13 @@
 		if (
 			params.get( 'page' ) !== 'wc-orders' ||
 			params.get( 'action' ) !== 'edit'
-		)
+		) {
 			return;
+		}
 		var orderId = parseInt( params.get( 'id' ), 10 );
-		if ( ! orderId || shown[ orderId ] || ! milestones[ orderId ] ) return;
+		if ( ! orderId || shown[ orderId ] || ! milestones[ orderId ] ) {
+			return;
+		}
 		shown[ orderId ] = true;
 		showOverlay(
 			Object.assign( {}, milestones[ orderId ], { _orderId: orderId } )

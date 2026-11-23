@@ -1,6 +1,7 @@
 <?php
 
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
@@ -42,20 +43,12 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	protected static $fixture_user;
 
 	/**
-	 * Saves the `woocommerce_hide_out_of_stock_items` option value for restoration after tests that modify it.
-	 * @var mixed
-	 */
-	protected $original_hid_out_of_stock_value;
-
-	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->clear_rest_server();
 		unset( $this->server, $this->endpoint );
-		$this->disable_cogs_feature();
-		update_option( 'woocommerce_hide_out_of_stock_items', $this->original_hid_out_of_stock_value );
 	}
 
 	/**
@@ -138,6 +131,119 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create products whose sortable properties have independent orders.
+	 *
+	 * @return array{first: WC_Product_Simple, second: WC_Product_Simple, third: WC_Product_Simple, fourth: WC_Product_Simple, pending: WC_Product_Simple, variable: WC_Product_Variable} Products keyed by creation order.
+	 */
+	private function create_ordering_products(): array {
+		$definitions = array(
+			'first'   => array(
+				'name'           => 'Ordering Delta',
+				'slug'           => 'ordering-charlie',
+				'date_created'   => '2024-01-03 12:00:00',
+				'price'          => '40',
+				'total_sales'    => 3,
+				'average_rating' => 4.0,
+				'rating_counts'  => array( 4 => 3 ),
+			),
+			'second'  => array(
+				'name'           => 'Ordering Alpha',
+				'slug'           => 'ordering-bravo',
+				'date_created'   => '2024-01-01 12:00:00',
+				'price'          => '20',
+				'total_sales'    => 2,
+				'average_rating' => 2.0,
+				'rating_counts'  => array( 2 => 2 ),
+			),
+			'third'   => array(
+				'name'           => 'Ordering Charlie',
+				'slug'           => 'ordering-delta',
+				'date_created'   => '2024-01-06 12:00:00',
+				'price'          => '10',
+				'total_sales'    => 1,
+				'average_rating' => 3.0,
+				'rating_counts'  => array( 3 => 1 ),
+			),
+			'fourth'  => array(
+				'name'           => 'Ordering Bravo',
+				'slug'           => 'ordering-alpha',
+				'date_created'   => '2024-01-02 12:00:00',
+				'price'          => '30',
+				'total_sales'    => 4,
+				'average_rating' => 1.0,
+				'rating_counts'  => array( 1 => 4 ),
+			),
+			'pending' => array(
+				'name'           => 'Ordering Echo',
+				'date_created'   => '2024-01-04 12:00:00',
+				'price'          => '25',
+				'total_sales'    => 5,
+				'average_rating' => 0.0,
+				'rating_counts'  => array(),
+				'status'         => ProductStatus::PENDING,
+			),
+		);
+		$products    = array();
+
+		foreach ( $definitions as $key => $definition ) {
+			$props = array(
+				'name'          => $definition['name'],
+				'regular_price' => $definition['price'],
+				'price'         => $definition['price'],
+			);
+			if ( isset( $definition['slug'] ) ) {
+				$props['slug'] = $definition['slug'];
+			}
+			if ( isset( $definition['status'] ) ) {
+				$props['status'] = $definition['status'];
+			}
+			$product = WC_Helper_Product::create_simple_product( false, $props );
+			$product->set_date_created( $definition['date_created'] );
+			$product->set_total_sales( $definition['total_sales'] );
+			$product->set_average_rating( $definition['average_rating'] );
+			$product->set_rating_counts( $definition['rating_counts'] );
+			$product->set_review_count( array_sum( $definition['rating_counts'] ) );
+			$product->save();
+			$products[ $key ] = $product;
+		}
+
+		$variable = new WC_Product_Variable();
+		$variable->set_name( 'Ordering Foxtrot' );
+		$variable->set_slug( 'ordering-echo' );
+		$variable->set_date_created( '2024-01-05 12:00:00' );
+		$variable->set_total_sales( 6 );
+		$variable->set_average_rating( 5.0 );
+		$variable->set_rating_counts( array( 5 => 6 ) );
+		$variable->set_review_count( 6 );
+		$variable->save();
+		WC_Helper_Product::create_product_variation_object( $variable->get_id(), 'ORDERING LOW', 5, array() );
+		WC_Helper_Product::create_product_variation_object( $variable->get_id(), 'ORDERING HIGH', 50, array() );
+		WC_Product_Variable::sync( $variable->get_id() );
+		$products['variable'] = wc_get_product( $variable->get_id() );
+
+		return $products;
+	}
+
+	/**
+	 * Dispatch a product collection request and assert exact IDs.
+	 *
+	 * @param array<string,mixed> $query_params Query parameters for the collection request.
+	 * @param int[]               $expected_ids Product IDs in the expected response order.
+	 * @param string              $description  Assertion context.
+	 * @return WP_REST_Response
+	 */
+	private function assert_product_collection( array $query_params, array $expected_ids, string $description ): WP_REST_Response {
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), "$description should return HTTP 200." );
+		$this->assertSame( $expected_ids, array_map( 'absint', wp_list_pluck( $response->get_data(), 'id' ) ), "$description should return the exact expected product IDs." );
+
+		return $response;
+	}
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -149,14 +255,12 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		);
 		$this->user     = self::$fixture_user;
 		wp_set_current_user( $this->user );
-
-		$this->original_hid_out_of_stock_value = get_option( 'woocommerce_hide_out_of_stock_items' );
 	}
 
 	/**
 	 * Get all expected fields.
 	 *
-	 * @param bool $with_cogs_enabled Ture to get the fields expected when the Cost of Goods Sold feature is enabled.
+	 * @param bool $with_cogs_enabled True to get the fields expected when the Cost of Goods Sold feature is enabled.
 	 */
 	public function get_expected_response_fields( bool $with_cogs_enabled ) {
 		$fields = array(
@@ -175,6 +279,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 			'description',
 			'short_description',
 			'sku',
+			'mpn',
 			'global_unique_id',
 			'price',
 			'regular_price',
@@ -230,6 +335,9 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 			'menu_order',
 			'meta_data',
 			'post_password',
+			'customs_commodity_code',
+			'customs_country_of_origin',
+			'customs_description',
 		);
 
 		if ( $with_cogs_enabled ) {
@@ -246,7 +354,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testWith [true]
 	 *           [false]
 	 *
-	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
+	 * @param bool $with_cogs_enabled True test with the Cost of Goods Sold feature enabled.
 	 */
 	public function test_product_api_get_all_fields( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {
@@ -290,7 +398,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testWith [true]
 	 *           [false]
 	 *
-	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
+	 * @param bool $with_cogs_enabled True test with the Cost of Goods Sold feature enabled.
 	 */
 	public function test_products_get_each_field_one_by_one( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {
@@ -334,6 +442,100 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( $response_products[0]['sku'], 'pancake-2' );
 		$this->assertEquals( $response_products[1]['name'], 'Waffle 3' );
 		$this->assertEquals( $response_products[1]['sku'], 'waffle-3' );
+	}
+
+	/**
+	 * @testdox The on_sale parameter combines with include and exclude.
+	 */
+	public function test_products_filter_by_on_sale_with_include_and_exclude(): void {
+		$on_sale_product   = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$excluded_product  = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$regular_product   = WC_Helper_Product::create_simple_product();
+		$included_products = array( $on_sale_product->get_id(), $regular_product->get_id() );
+
+		delete_transient( 'wc_products_onsale' );
+
+		$cases = array(
+			'on_sale=true with include'  => array(
+				'params'   => array(
+					'on_sale' => true,
+					'include' => $included_products,
+				),
+				'expected' => array( $on_sale_product->get_id() ),
+			),
+			'on_sale=false with include' => array(
+				'params'   => array(
+					'on_sale' => false,
+					'include' => $included_products,
+				),
+				'expected' => array( $regular_product->get_id() ),
+			),
+			'on_sale=true with exclude'  => array(
+				'params'   => array(
+					'on_sale' => true,
+					'exclude' => array( $excluded_product->get_id() ),
+				),
+				'expected' => array( $on_sale_product->get_id() ),
+			),
+		);
+
+		foreach ( $cases as $name => $case ) {
+			$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+			$request->set_query_params( $case['params'] );
+
+			$response = $this->server->dispatch( $request );
+
+			$this->assertSame( 200, $response->get_status(), $name );
+			$this->assertSame( $case['expected'], wp_list_pluck( $response->get_data(), 'id' ), $name );
+		}
+	}
+
+	/**
+	 * @testdox The min_price and max_price parameters filter products by price without a deprecation notice.
+	 *
+	 * @testWith [{"min_price": "30"}, ["expensive"]]
+	 *           [{"max_price": "30"}, ["cheap"]]
+	 *           [{"min_price": "15", "max_price": "25"}, ["cheap"]]
+	 *           [{"min_price": "60"}, []]
+	 *           [{"min_price": "30", "max_price": ""}, ["expensive"]]
+	 *
+	 * @param array    $params   Price filter query params.
+	 * @param string[] $expected Keys of the products expected in the response.
+	 */
+	public function test_products_filter_by_min_and_max_price( array $params, array $expected ): void {
+		$products = array(
+			'cheap'     => WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) ),
+			'expensive' => WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 50 ) ),
+		);
+
+		$product_ids = array_map(
+			static function ( WC_Product $product ): int {
+				return $product->get_id();
+			},
+			$products
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array_merge(
+				$params,
+				array(
+					'include' => array_values( $product_ids ),
+					'orderby' => 'id',
+					'order'   => 'asc',
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$expected_ids = array_map(
+			static function ( string $key ) use ( $product_ids ): int {
+				return $product_ids[ $key ];
+			},
+			$expected
+		);
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected_ids, wp_list_pluck( $response->get_data(), 'id' ), 'Price filter returned the wrong products' );
 	}
 
 	/**
@@ -411,8 +613,6 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( $response_products[0]['sku'], 'pancake-2' );
 		$this->assertEquals( $response_products[1]['name'], 'Waffle 3' );
 		$this->assertEquals( $response_products[1]['sku'], 'waffle-3' );
-
-		remove_filter( 'wc_product_sku_enabled', '__return_false' );
 	}
 
 	/**
@@ -588,6 +788,286 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
 
 		$this->assertIsArray( $decoded_data_object[0]->meta_data );
+	}
+
+	/**
+	 * @testdox Product collection ordering returns exact core-field orders through the V3 route.
+	 */
+	public function test_collection_orderby_core_fields(): void {
+		$products = $this->create_ordering_products();
+		$first    = $products['first']->get_id();
+		$second   = $products['second']->get_id();
+		$third    = $products['third']->get_id();
+		$fourth   = $products['fourth']->get_id();
+		$pending  = $products['pending']->get_id();
+		$variable = $products['variable']->get_id();
+		$all      = array( $first, $second, $third, $fourth, $pending, $variable );
+
+		$base_query = array(
+			'include'  => $all,
+			'per_page' => count( $all ),
+		);
+		$ascending  = $base_query + array( 'order' => 'asc' );
+		$descending = $base_query + array( 'order' => 'desc' );
+
+		$this->assert_product_collection( $base_query, array( $third, $variable, $pending, $first, $fourth, $second ), 'Default date DESC ordering' );
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'date' ), array( $second, $fourth, $first, $pending, $variable, $third ), 'Date ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'date' ), array( $third, $variable, $pending, $first, $fourth, $second ), 'Date DESC ordering' );
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'id' ), array( $first, $second, $third, $fourth, $pending, $variable ), 'ID ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'id' ), array( $variable, $pending, $fourth, $third, $second, $first ), 'ID DESC ordering' );
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'title' ), array( $second, $fourth, $third, $first, $pending, $variable ), 'Title ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'title' ), array( $variable, $pending, $first, $third, $fourth, $second ), 'Title DESC ordering' );
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'slug' ), array( $pending, $fourth, $second, $first, $third, $variable ), 'Slug ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'slug' ), array( $variable, $third, $first, $second, $fourth, $pending ), 'Slug DESC ordering' );
+	}
+
+	/**
+	 * @testdox Product collection ordering returns exact lookup-field orders through the V3 route.
+	 */
+	public function test_collection_orderby_lookup_fields(): void {
+		$products = $this->create_ordering_products();
+		$first    = $products['first']->get_id();
+		$second   = $products['second']->get_id();
+		$third    = $products['third']->get_id();
+		$fourth   = $products['fourth']->get_id();
+		$pending  = $products['pending']->get_id();
+		$variable = $products['variable']->get_id();
+		$all      = array( $first, $second, $third, $fourth, $pending, $variable );
+
+		$base_query = array(
+			'include'  => $all,
+			'per_page' => count( $all ),
+		);
+		$ascending  = $base_query + array( 'order' => 'asc' );
+		$descending = $base_query + array( 'order' => 'desc' );
+
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'price' ), array( $variable, $third, $second, $pending, $fourth, $first ), 'Price ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'price' ), array( $variable, $first, $fourth, $pending, $second, $third ), 'Price DESC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'rating' ), array( $variable, $first, $third, $second, $fourth, $pending ), 'Rating DESC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'popularity' ), array( $variable, $pending, $fourth, $first, $second, $third ), 'Popularity DESC ordering' );
+	}
+
+	/**
+	 * @testdox Product collection include ordering preserves request order regardless of the order parameter.
+	 */
+	public function test_collection_orderby_include_order(): void {
+		$products     = $this->create_ordering_products();
+		$included_ids = array(
+			$products['pending']->get_id(),
+			$products['fourth']->get_id(),
+			$products['first']->get_id(),
+			$products['variable']->get_id(),
+			$products['third']->get_id(),
+			$products['second']->get_id(),
+		);
+
+		$base_query = array(
+			'include'  => $included_ids,
+			'per_page' => count( $included_ids ),
+			'orderby'  => 'include',
+		);
+
+		$this->assert_product_collection( $base_query + array( 'order' => 'asc' ), $included_ids, 'Include ASC ordering' );
+		$this->assert_product_collection( $base_query + array( 'order' => 'desc' ), $included_ids, 'Include DESC ordering' );
+	}
+
+	/**
+	 * @testdox Product collection pagination returns exact pages, totals, and offset precedence through the V3 route.
+	 */
+	public function test_collection_pagination_contract(): void {
+		$product_ids = array();
+		foreach ( range( 1, 11 ) as $index ) {
+			$product_ids[] = WC_Helper_Product::create_simple_product( true, array( 'name' => "Pagination {$index}" ) )->get_id();
+		}
+
+		$base_query = array(
+			'include' => $product_ids,
+			'orderby' => 'id',
+			'order'   => 'asc',
+		);
+		$paged      = function ( int $page, ?int $offset = null ) use ( $base_query ): array {
+			$query = array_merge(
+				$base_query,
+				array(
+					'per_page' => 4,
+					'page'     => $page,
+				)
+			);
+			if ( null !== $offset ) {
+				$query['offset'] = $offset;
+			}
+			return $query;
+		};
+
+		$response = $this->assert_product_collection( $base_query, array_slice( $product_ids, 0, 10 ), 'Default pagination' );
+		$this->assertSame( '11', (string) $response->get_headers()['X-WP-Total'], 'The default total header should count all eleven fixtures.' );
+		$this->assertSame( '2', (string) $response->get_headers()['X-WP-TotalPages'], 'The default total-pages header should reflect the ten-item default.' );
+
+		$this->assert_product_collection( $paged( 1 ), array_slice( $product_ids, 0, 4 ), 'Pagination page one' );
+		$this->assert_product_collection( $paged( 2 ), array_slice( $product_ids, 4, 4 ), 'Pagination page two' );
+		$this->assert_product_collection( $paged( 2, 5 ), array_slice( $product_ids, 5, 4 ), 'Pagination with an explicit offset' );
+		$this->assert_product_collection( $paged( 3 ), array_slice( $product_ids, 8 ), 'Pagination final page' );
+
+		$response = $this->assert_product_collection( $paged( 4 ), array(), 'Pagination beyond the result set' );
+		$this->assertSame( '11', (string) $response->get_headers()['X-WP-Total'], 'An empty later page should retain the total header.' );
+		$this->assertSame( '3', (string) $response->get_headers()['X-WP-TotalPages'], 'An empty later page should retain the total-pages header.' );
+	}
+
+	/**
+	 * @testdox Product collection identity filters return exact products through the V3 route.
+	 */
+	public function test_collection_identity_filters(): void {
+		$target = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'slug' => 'identity-target',
+				'sku'  => 'identity-target-sku',
+			)
+		);
+		$other  = WC_Helper_Product::create_simple_product( true, array( 'sku' => 'identity-other-sku' ) );
+		$parent = WC_Helper_Product::create_simple_product( true, array( 'sku' => 'identity-parent-sku' ) );
+		$child  = WC_Helper_Product::create_simple_product( true, array( 'sku' => 'identity-child-sku' ) );
+		$child->set_parent_id( $parent->get_id() );
+		$child->save();
+
+		$all        = array( $target->get_id(), $other->get_id(), $parent->get_id(), $child->get_id() );
+		$base_query = array(
+			'include'  => $all,
+			'per_page' => count( $all ),
+			'orderby'  => 'id',
+			'order'    => 'asc',
+		);
+
+		$included = array( $target->get_id(), $child->get_id() );
+		$this->assert_product_collection( array_merge( $base_query, array( 'include' => $included ) ), $included, 'Include filtering' );
+
+		// Exclude only applies without include, so constrain the cohort by SKU instead.
+		$excluded      = array( $other->get_id(), $parent->get_id() );
+		$exclude_query = array_merge(
+			$base_query,
+			array(
+				'exclude' => $excluded,
+				'sku'     => 'identity-target-sku,identity-other-sku,identity-parent-sku,identity-child-sku',
+			)
+		);
+		unset( $exclude_query['include'] );
+		$this->assert_product_collection( $exclude_query, array_values( array_diff( $all, $excluded ) ), 'Exclude filtering' );
+
+		$this->assert_product_collection( array_merge( $base_query, array( 'slug' => 'identity-target' ) ), array( $target->get_id() ), 'Slug filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'slug' => 'identity-missing' ) ), array(), 'Unmatched slug filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'sku' => 'identity-other-sku' ) ), array( $other->get_id() ), 'SKU filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'sku' => 'identity-missing-sku' ) ), array(), 'Unmatched SKU filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'parent' => array( $parent->get_id() ) ) ), array( $child->get_id() ), 'Parent filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'parent_exclude' => array( $parent->get_id() ) ) ), array_values( array_diff( $all, array( $child->get_id() ) ) ), 'Parent exclusion filtering' );
+	}
+
+	/**
+	 * @testdox Product collection state filters return exact sale, price, pending, and stock-state matches through the V3 route.
+	 */
+	public function test_collection_product_state_filters(): void {
+		$simple = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'State filter simple',
+				'regular_price' => '10',
+				'price'         => '10',
+			)
+		);
+
+		$external = new WC_Product_External();
+		$external->set_name( 'State filter external' );
+		$external->set_regular_price( '20' );
+		$external->set_sale_price( '15' );
+		$external->set_price( '15' );
+		$external->save();
+
+		$out_of_stock = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '60',
+				'price'         => '60',
+				'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
+			)
+		);
+		$backorder    = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '50',
+				'price'         => '50',
+				'stock_status'  => ProductStockStatus::ON_BACKORDER,
+			)
+		);
+		$pending      = WC_Helper_Product::create_simple_product( true, array( 'status' => ProductStatus::PENDING ) );
+
+		$variable = new WC_Product_Variable();
+		$variable->set_name( 'Variable price range' );
+		$variable->save();
+		WC_Helper_Product::create_product_variation_object( $variable->get_id(), 'STATE LOW', 30, array() );
+		WC_Helper_Product::create_product_variation_object( $variable->get_id(), 'STATE HIGH', 40, array() );
+		WC_Product_Variable::sync( $variable->get_id() );
+
+		$all        = array( $simple->get_id(), $external->get_id(), $out_of_stock->get_id(), $backorder->get_id(), $pending->get_id(), $variable->get_id() );
+		$base_query = array(
+			'include'  => $all,
+			'per_page' => count( $all ),
+			'orderby'  => 'id',
+			'order'    => 'asc',
+			'status'   => ProductStatus::PUBLISH,
+		);
+
+		// The on_sale filter merges its IDs into include rather than intersecting, so constrain by search instead.
+		$sale_query = array(
+			'search'  => 'State filter',
+			'orderby' => 'id',
+			'order'   => 'asc',
+			'status'  => ProductStatus::PUBLISH,
+		);
+		$this->assert_product_collection( array_merge( $sale_query, array( 'on_sale' => true ) ), array( $external->get_id() ), 'On-sale product filtering' );
+		$this->assert_product_collection( array_merge( $sale_query, array( 'on_sale' => false ) ), array( $simple->get_id() ), 'Non-sale product filtering' );
+
+		$this->assert_product_collection(
+			array_merge(
+				$base_query,
+				array(
+					'min_price' => '15',
+					'max_price' => '30',
+				)
+			),
+			array( $external->get_id(), $variable->get_id() ),
+			'Inclusive price filtering'
+		);
+
+		$this->assert_product_collection( array_merge( $base_query, array( 'status' => ProductStatus::PENDING ) ), array( $pending->get_id() ), 'Pending status filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'stock_status' => ProductStockStatus::OUT_OF_STOCK ) ), array( $out_of_stock->get_id() ), 'Out-of-stock filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'stock_status' => ProductStockStatus::ON_BACKORDER ) ), array( $backorder->get_id() ), 'On-backorder filtering' );
+	}
+
+	/**
+	 * @testdox Product collection category filtering includes descendant categories and tax class filtering matches exactly through the V3 route.
+	 */
+	public function test_collection_taxonomy_filters(): void {
+		$parent_category  = wp_insert_term( 'Taxonomy parent', 'product_cat' )['term_id'];
+		$child_category   = wp_insert_term( 'Taxonomy child', 'product_cat', array( 'parent' => $parent_category ) )['term_id'];
+		$sibling_category = wp_insert_term( 'Taxonomy sibling', 'product_cat' )['term_id'];
+		$tax_class_slug   = WC_Tax::create_tax_class( 'Taxonomy tax' )['slug'];
+
+		$in_child   = WC_Helper_Product::create_simple_product( true, array( 'category_ids' => array( $child_category ) ) );
+		$in_sibling = WC_Helper_Product::create_simple_product( true, array( 'category_ids' => array( $sibling_category ) ) );
+		$taxed      = WC_Helper_Product::create_simple_product( true, array( 'tax_class' => $tax_class_slug ) );
+		$untouched  = WC_Helper_Product::create_simple_product();
+
+		$all        = array( $in_child->get_id(), $in_sibling->get_id(), $taxed->get_id(), $untouched->get_id() );
+		$base_query = array(
+			'include'  => $all,
+			'per_page' => count( $all ),
+			'orderby'  => 'id',
+			'order'    => 'asc',
+		);
+
+		$this->assert_product_collection( array_merge( $base_query, array( 'category' => (string) $parent_category ) ), array( $in_child->get_id() ), 'Parent category descendant filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'category' => (string) $child_category ) ), array( $in_child->get_id() ), 'Child category filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'category' => (string) $sibling_category ) ), array( $in_sibling->get_id() ), 'Sibling category filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'tax_class' => $tax_class_slug ) ), array( $taxed->get_id() ), 'Tax class filtering' );
 	}
 
 	/**
@@ -2207,5 +2687,663 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $product->get_id() ) );
+	}
+
+	/**
+	 * @testdox Updating a product using a variation ID and a type param returns an error response instead of a fatal error.
+	 */
+	public function test_update_with_variation_id_and_type_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $variation_id );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status(), 'Variations should be handled by the variations endpoint.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Updating a product can still change its product type.
+	 */
+	public function test_update_can_change_product_type(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_body_params( array( 'type' => 'variable' ) );
+
+		$response        = $this->server->dispatch( $request );
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertSame( 200, $response->get_status(), 'Valid product type changes should continue to succeed.' );
+		$this->assertInstanceOf( WC_Product_Variable::class, $updated_product );
+	}
+
+	/**
+	 * @testdox Product preparation allows an extension-backed product whose ID collides with a variation post.
+	 */
+	public function test_prepare_object_allows_extension_product_when_id_collides_with_variation_post(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$product_id       = $variable_product->get_children()[0];
+
+		$custom_data_store           = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Number of products read through the extension data store.
+			 *
+			 * @var int
+			 */
+			public $read_count = 0;
+
+			/**
+			 * Mark the extension-backed product as read without loading the colliding WordPress post.
+			 *
+			 * @param WC_Product $product Product being read.
+			 */
+			public function read( &$product ) {
+				++$this->read_count;
+				$product->set_object_read( true );
+			}
+		};
+		$register_custom_data_store  = static function ( $data_stores ) use ( $custom_data_store ) {
+			$data_stores['product-simple'] = $custom_data_store;
+			return $data_stores;
+		};
+		$resolve_custom_product_type = static function ( $product_type, $queried_product_id ) use ( $product_id ) {
+			return $product_id === $queried_product_id ? ProductType::SIMPLE : $product_type;
+		};
+		add_filter( 'woocommerce_data_stores', $register_custom_data_store );
+		add_filter( 'woocommerce_product_type_query', $resolve_custom_product_type, 10, 2 );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product_id );
+		$request->set_url_params( array( 'id' => $product_id ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$result = $this->invoke_prepare( $request, false );
+
+		$this->assertInstanceOf( WC_Product_Simple::class, $result );
+		$this->assertSame( $product_id, $result->get_id() );
+		$this->assertSame( 'product_variation', get_post_type( $product_id ) );
+		$this->assertSame( 1, $custom_data_store->read_count, 'Product type detection should not construct the product twice.' );
+	}
+
+	/**
+	 * Invoke the protected prepare_object_for_database() on the endpoint under test.
+	 *
+	 * @param WP_REST_Request $request  Request object.
+	 * @param bool            $creating Whether the request creates a new product.
+	 * @return mixed
+	 */
+	private function invoke_prepare( WP_REST_Request $request, bool $creating ) {
+		$prepare_method = new ReflectionMethod( $this->endpoint, 'prepare_object_for_database' );
+		$prepare_method->setAccessible( true );
+
+		return $prepare_method->invoke( $this->endpoint, $request, $creating );
+	}
+
+	/**
+	 * @testdox Updating a product that no longer exists with a type param returns an error response instead of a fatal error.
+	 */
+	public function test_prepare_object_returns_error_when_product_deleted_with_type(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_url_params( array( 'id' => $product->get_id() ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		// Simulate a concurrent deletion between the update_item() guard and preparation.
+		wp_delete_post( $product->get_id(), true );
+
+		$result = $this->invoke_prepare( $request, false );
+
+		$this->assertWPError( $result );
+		$this->assertEquals( 'woocommerce_rest_invalid_product_id', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Construction failures on the create path are rethrown instead of misreported as an invalid product ID.
+	 */
+	public function test_prepare_object_rethrows_create_path_store_failure(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$break_store = function ( $stores ) {
+			$stores['product'] = 'WC_Nonexistent_Data_Store';
+			return $stores;
+		};
+		add_filter( 'woocommerce_data_stores', $break_store );
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Invalid data store.' );
+
+		$this->invoke_prepare( $request, true );
+	}
+
+	/**
+	 * @testdox Duplicating a product preserves the error code of a typed data exception thrown during preparation.
+	 */
+	public function test_duplicate_preserves_data_exception_error_code(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		// The route guard is served from the warm product instance cache, so the only
+		// read on this route happens inside the preparation construction.
+		$throw_data_exception = function ( $product_id ) use ( $product ) {
+			if ( $product->get_id() === $product_id ) {
+				throw new WC_Data_Exception( 'custom_duplicate_block', 'Simulated typed failure.', 409 );
+			}
+		};
+		add_action( 'woocommerce_product_read', $throw_data_exception );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/duplicate' );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 409, $response->get_status(), 'A typed exception should keep its own HTTP status on the duplicate route' );
+		$this->assertEquals( 'custom_duplicate_block', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox A non-scalar type value in a batch item is rejected instead of silently rewriting the product type.
+	 */
+	public function test_batch_update_with_array_type_is_rejected(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'update' => array(
+						array(
+							'id'   => $variable_product->get_id(),
+							'type' => array( 'simple' ),
+							'name' => 'Renamed via array-type batch',
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'error', $data['update'][0], 'A non-scalar type must be rejected, not coerced' );
+		$this->assertEquals( 'woocommerce_rest_invalid_product_type', $data['update'][0]['error']['code'] );
+		$this->assertInstanceOf( WC_Product_Variable::class, wc_get_product( $variable_product->get_id() ), 'The product type must not be rewritten' );
+	}
+
+	/**
+	 * @testdox Typed exceptions from extension-backed product stores are rethrown instead of becoming a 404.
+	 */
+	public function test_prepare_object_rethrows_typed_exception_for_extension_backed_product(): void {
+		$typed_store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Simulate an extension backend that is temporarily unavailable.
+			 *
+			 * @param WC_Product $product Product being read.
+			 * @throws WC_Data_Exception Always, with a typed error code and status.
+			 */
+			public function read( &$product ) {
+				throw new WC_Data_Exception( 'ext_backend_unavailable', 'Backend unavailable.', 503 );
+			}
+		};
+		$register    = static function ( $data_stores ) use ( $typed_store ) {
+			$data_stores['product-simple'] = $typed_store;
+			return $data_stores;
+		};
+		add_filter( 'woocommerce_data_stores', $register );
+
+		// Extension-backed product: the ID does not correspond to any WordPress post.
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/999999991' );
+		$request->set_url_params( array( 'id' => 999999991 ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$this->expectException( WC_Data_Exception::class );
+		$this->expectExceptionMessage( 'Backend unavailable.' );
+
+		$this->invoke_prepare( $request, false );
+	}
+
+	/**
+	 * @testdox Generic exceptions from extension-backed product stores are rethrown instead of becoming a 404.
+	 */
+	public function test_prepare_object_rethrows_generic_exception_for_extension_backed_product(): void {
+		$failing_store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Simulate a transient failure in an extension backend that stores products outside wp_posts.
+			 *
+			 * @param WC_Product $product Product being read.
+			 * @throws RuntimeException Always, simulating a temporary outage.
+			 */
+			public function read( &$product ) {
+				throw new RuntimeException( 'Remote backend timeout.' );
+			}
+		};
+		$register      = static function ( $data_stores ) use ( $failing_store ) {
+			$data_stores['product-simple'] = $failing_store;
+			return $data_stores;
+		};
+		add_filter( 'woocommerce_data_stores', $register );
+
+		// Extension-backed product: the ID has no corresponding WordPress post.
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/999999992' );
+		$request->set_url_params( array( 'id' => 999999992 ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( 'Remote backend timeout.' );
+
+		$this->invoke_prepare( $request, false );
+	}
+
+	/**
+	 * @testdox An extension store reusing the core invalid-product message is rethrown instead of becoming a 404.
+	 */
+	public function test_prepare_object_rethrows_extension_exception_reusing_core_message(): void {
+		$mimicking_store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Simulate an extension store that reuses the core failure message for its own failures.
+			 *
+			 * @param WC_Product $product Product being read.
+			 * @throws RuntimeException Always, with the core store's message text.
+			 */
+			public function read( &$product ) {
+				throw new RuntimeException( 'Invalid product.' );
+			}
+		};
+		$register        = static function ( $data_stores ) use ( $mimicking_store ) {
+			$data_stores['product-simple'] = $mimicking_store;
+			return $data_stores;
+		};
+		add_filter( 'woocommerce_data_stores', $register );
+
+		// Extension-backed product: the ID has no corresponding WordPress post.
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/999999993' );
+		$request->set_url_params( array( 'id' => 999999993 ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$this->expectException( RuntimeException::class );
+
+		$this->invoke_prepare( $request, false );
+	}
+
+	/**
+	 * @testdox The invalid-product error keeps one code but distinguishes variation targets in its message.
+	 */
+	public function test_invalid_product_id_error_distinguishes_variations_in_message(): void {
+		$error_method = new ReflectionMethod( $this->endpoint, 'get_invalid_product_id_error' );
+		$error_method->setAccessible( true );
+
+		$variation_error = $error_method->invoke( $this->endpoint, true );
+		$generic_error   = $error_method->invoke( $this->endpoint, false );
+
+		$this->assertEquals( 'woocommerce_rest_invalid_product_id', $variation_error->get_error_code() );
+		$this->assertEquals( 'woocommerce_rest_invalid_product_id', $generic_error->get_error_code() );
+		$this->assertStringContainsString( 'variations', $variation_error->get_error_message() );
+		$this->assertStringNotContainsString( 'variations', $generic_error->get_error_message() );
+	}
+
+	/**
+	 * @testdox A falsy type value in a batch item preserves the stored product type instead of causing a fatal error.
+	 */
+	public function test_batch_update_with_falsy_type_preserves_stored_type(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'update' => array(
+						array(
+							'id'   => $variable_product->get_id(),
+							'type' => '',
+							'name' => 'Renamed via falsy-type batch',
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayNotHasKey( 'error', $data['update'][0], 'A falsy type should not fail the item' );
+		$this->assertEquals( 'Renamed via falsy-type batch', $data['update'][0]['name'] );
+		$this->assertInstanceOf( WC_Product_Variable::class, wc_get_product( $variable_product->get_id() ), 'The stored product type must be preserved' );
+	}
+
+	/**
+	 * @testdox A stored type whose class is registered only through woocommerce_product_class keeps that class.
+	 */
+	public function test_falsy_type_preserves_filter_registered_product_class(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		add_filter(
+			'woocommerce_product_type_query',
+			static function ( $override, $product_id ) use ( $product ) {
+				return $product->get_id() === $product_id ? 'acme-widget' : $override;
+			},
+			10,
+			2
+		);
+		add_filter(
+			'woocommerce_product_class',
+			static function ( $classname, $product_type ) {
+				return 'acme-widget' === $product_type ? WC_Product_Grouped::class : $classname;
+			},
+			10,
+			2
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_url_params( array( 'id' => $product->get_id() ) );
+		$request->set_body_params( array( 'type' => '' ) );
+
+		$result = $this->invoke_prepare( $request, false );
+
+		$this->assertInstanceOf( WC_Product_Grouped::class, $result, 'The filter-registered class must win over the WC_Product_Simple fallback' );
+	}
+
+	/**
+	 * @testdox A non-string stored product type falls back to a simple product instead of causing a fatal error.
+	 */
+	public function test_non_string_stored_product_type_does_not_fatal(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		add_filter(
+			'woocommerce_product_type_query',
+			static function ( $override, $product_id ) use ( $product ) {
+				return $product->get_id() === $product_id ? array( ProductType::SIMPLE ) : $override;
+			},
+			10,
+			2
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_url_params( array( 'id' => $product->get_id() ) );
+		$request->set_body_params( array( 'type' => '' ) );
+
+		$result = $this->invoke_prepare( $request, false );
+
+		$this->assertInstanceOf( WC_Product_Simple::class, $result );
+		$this->assertSame( $product->get_id(), $result->get_id() );
+	}
+
+	/**
+	 * @testdox Product constructor exceptions are rethrown when the product still exists.
+	 */
+	public function test_prepare_object_rethrows_unexpected_constructor_exception(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_url_params( array( 'id' => $product->get_id() ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$throw_exception = function ( $product_id ) use ( $product ) {
+			if ( $product->get_id() === $product_id ) {
+				throw new Exception( 'Simulated unexpected read failure.' );
+			}
+		};
+		add_action( 'woocommerce_product_read', $throw_exception );
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Simulated unexpected read failure.' );
+
+		$this->invoke_prepare( $request, false );
+	}
+
+	/**
+	 * @testdox Duplicating a product using a variation ID and a type param returns an error response instead of a fatal error.
+	 */
+	public function test_duplicate_with_variation_id_and_type_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $variation_id . '/duplicate' );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status(), 'Variations should be handled by the variations endpoint.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Duplicating a product using a variation ID returns the variation endpoint error instead of an empty product.
+	 */
+	public function test_duplicate_with_variation_id_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $variation_id . '/duplicate' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status(), 'Duplicating a variation should return the variations endpoint error.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Batch updates continue processing valid products when a variation is rejected.
+	 */
+	public function test_batch_update_handles_variation_error_per_item(): void {
+		$product          = WC_Helper_Product::create_simple_product();
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'   => $variation_id,
+						'type' => 'simple',
+					),
+					array(
+						'id'   => $product->get_id(),
+						'name' => 'Updated in batch',
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $data['update'][0]['error']['code'] );
+		$this->assertSame( 'Updated in batch', $data['update'][1]['name'] );
+		$this->assertSame( 'Updated in batch', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Creating a product normalizes customs values.
+	 */
+	public function test_create_product_normalizes_customs_values(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params(
+			array(
+				'name'                      => 'Coffee',
+				'customs_commodity_code'    => '0901.21.0010',
+				'customs_country_of_origin' => ' br ',
+				'customs_description'       => ' Roasted  coffee ',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status(), 'Valid customs values should create the product.' );
+		$data = $response->get_data();
+		$this->assertSame( '0901210010', $data['customs_commodity_code'], 'The commodity code should be stored without punctuation.' );
+		$this->assertSame( 'BR', $data['customs_country_of_origin'], 'The country of origin should be trimmed and uppercased.' );
+		$this->assertSame( 'Roasted coffee', $data['customs_description'], 'The customs description should have its whitespace normalized.' );
+	}
+
+	/**
+	 * @testdox Product customs values honor the request context.
+	 */
+	public function test_product_customs_values_use_request_context(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_customs_commodity_code( '090121' );
+		$product->save();
+		$filter = static function () {
+			return '999999';
+		};
+		add_filter( 'woocommerce_product_get_customs_commodity_code', $filter );
+
+		$view = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) )->get_data();
+		$edit = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() );
+		$edit->set_param( 'context', 'edit' );
+		$edit = $this->server->dispatch( $edit )->get_data();
+
+		$this->assertSame( '999999', $view['customs_commodity_code'], 'The view context should return the filtered value.' );
+		$this->assertSame( '090121', $edit['customs_commodity_code'], 'The edit context should return the stored value.' );
+	}
+
+	/**
+	 * @testdox Omitted product customs fields are preserved while null clears them.
+	 */
+	public function test_update_product_preserves_and_clears_customs_values(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_customs_commodity_code( '090121' );
+		$product->set_customs_country_of_origin( 'BR' );
+		$product->set_customs_description( 'Coffee' );
+		$product->save();
+		$id = $product->get_id();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $id );
+		$request->set_body_params( array( 'menu_order' => 3 ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'An update without customs fields should succeed.' );
+		$this->assertSame( '090121', $response->get_data()['customs_commodity_code'], 'Omitted customs fields should be preserved.' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $id );
+		$request->set_body_params(
+			array(
+				'customs_commodity_code'    => null,
+				'customs_country_of_origin' => null,
+				'customs_description'       => null,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'Clearing customs fields should succeed.' );
+		foreach ( array( 'customs_commodity_code', 'customs_country_of_origin', 'customs_description' ) as $field ) {
+			$this->assertNull( $response->get_data()[ $field ], "The $field field should be cleared." );
+			$this->assertFalse( metadata_exists( 'post', $id, '_' . $field ), "The $field meta should be deleted." );
+		}
+	}
+
+	/**
+	 * @testdox Invalid product customs input rejects the request without saving other changes.
+	 * @testWith ["customs_commodity_code", "0901A10010"]
+	 * @param string $field Invalid field.
+	 * @param string $value Invalid value.
+	 */
+	public function test_update_product_rejects_invalid_customs_values( string $field, string $value ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_menu_order( 2 );
+		$product->save();
+		$id = $product->get_id();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $id );
+		$request->set_body_params(
+			array(
+				'menu_order'                => 7,
+				'customs_country_of_origin' => 'BR',
+				$field                      => $value,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'Invalid customs input should return a 400 response.' );
+		$this->assertSame( 'woocommerce_product_invalid_' . $field, $response->get_data()['code'], 'The error code should name the invalid field.' );
+		$this->assertSame( 2, wc_get_product( $id )->get_menu_order(), 'Other product changes should not be saved.' );
+		$this->assertFalse( metadata_exists( 'post', $id, '_customs_country_of_origin' ), 'Valid customs values in the same request should not be saved.' );
+	}
+
+	/**
+	 * @testdox Non-string JSON customs values are rejected.
+	 */
+	public function test_update_product_rejects_non_string_customs_value(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'customs_commodity_code' => 90121000 ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'A numeric commodity code should be rejected.' );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Schema validation should reject the non-string value.' );
+		$this->assertFalse( metadata_exists( 'post', $product->get_id(), '_customs_commodity_code' ), 'A rejected commodity code should not be stored.' );
+	}
+
+	/**
+	 * @testdox The featured image is returned only once when it is also part of the product gallery.
+	 */
+	public function test_get_product_does_not_duplicate_featured_image_in_gallery(): void {
+		$image_file  = WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png';
+		$featured_id = self::factory()->attachment->create_upload_object( $image_file );
+		$gallery_id  = self::factory()->attachment->create_upload_object( $image_file );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured_id );
+		$product->set_gallery_image_ids( array( $featured_id, $gallery_id ) );
+		$product->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame(
+			array( $featured_id, $gallery_id ),
+			wp_list_pluck( $response->get_data()['images'], 'id' ),
+			'The featured image should be listed first and only once.'
+		);
+	}
+
+	/**
+	 * @testdox Creating and updating a product keeps backslashes and quotes in its name and descriptions.
+	 */
+	public function test_create_and_update_product_keep_backslashes_in_post_fields(): void {
+		$fields         = array(
+			'name'              => 'Cable 1\\2" it\'s',
+			'description'       => 'Path C:\\temp',
+			'short_description' => 'Short C:\\temp',
+		);
+		$updated_fields = array(
+			'name'              => 'Cable 3\\4" it\'s',
+			'description'       => 'Path D:\\temp',
+			'short_description' => 'Short D:\\temp',
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params( $fields );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assert_post_fields_keep_backslashes( $response->get_data(), $fields );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $response->get_data()['id'] );
+		$request->set_body_params( $updated_fields );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assert_post_fields_keep_backslashes( $response->get_data(), $updated_fields );
+	}
+
+	/**
+	 * Assert a product response and its stored post keep the given name and descriptions.
+	 *
+	 * @param array $data   Product response data.
+	 * @param array $fields Expected name, description and short description.
+	 */
+	private function assert_post_fields_keep_backslashes( array $data, array $fields ): void {
+		$post = get_post( $data['id'] );
+		$this->assertSame( $fields['name'], $data['name'], 'The response name should keep its backslash and quotes.' );
+		$this->assertSame( $fields['name'], $post->post_title, 'The stored name should keep its backslash and quotes.' );
+		$this->assertSame( $fields['description'], $post->post_content, 'The stored description should keep its backslash.' );
+		$this->assertSame( $fields['short_description'], $post->post_excerpt, 'The stored short description should keep its backslash.' );
 	}
 }

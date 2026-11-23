@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use six columns for eleven or twelve Analytics metrics on wide screens, so the tiles fill the row more evenly.

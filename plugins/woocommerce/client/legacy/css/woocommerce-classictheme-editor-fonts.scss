@@ -13,7 +13,11 @@
  * For more information, see https://github.com/WordPress/gutenberg/blob/7129676335fe56802978a9511d860865f7e65aec/packages/block-editor/src/components/iframe/get-compatibility-styles.js#L3-L10
  */
 
-/* ! important: this rule must be preserved during build */
+/**
+ * ! important: this rule must be preserved during build.
+ * It only needs a minimal declaration so it is not removed. Avoid `content`:
+ * it is reported to hide images that carry the `wp-block` class in Safari.
+ */
 .wp-block {
-	content: ""; /* Minimal declaration to prevent removal */
+	--wc-editor-fonts-loaded: 1;
 }

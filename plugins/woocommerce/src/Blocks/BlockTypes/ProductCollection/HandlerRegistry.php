@@ -101,8 +101,8 @@ class HandlerRegistry {
 		$this->register_collection_handlers(
 			'woocommerce/product-collection/related',
 			function ( $collection_args ) {
-				// No products should be shown if no related product reference is set.
-				if ( empty( $collection_args['relatedProductReference'] ) ) {
+				// No products should be shown if no related product reference is set, or the current user can't view it.
+				if ( empty( $collection_args['relatedProductReference'] ) || empty( $this->get_viewable_products( array( $collection_args['relatedProductReference'] ) ) ) ) {
 					return array(
 						'post__in' => array( -1 ),
 					);
@@ -198,7 +198,7 @@ class HandlerRegistry {
 					);
 				}
 
-				$products = array_filter( array_map( 'wc_get_product', $product_reference ) );
+				$products = $this->get_viewable_products( $product_reference );
 
 				if ( empty( $products ) ) {
 					return array(
@@ -228,9 +228,18 @@ class HandlerRegistry {
 			},
 			function ( $collection_args, $query ) {
 				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
-				// Infer the product reference from the location if an explicit product is not set.
-				if ( empty( $product_references ) ) {
-					$location = $collection_args['productCollectionLocation'];
+
+				// A cart reference applies on any page, regardless of location.
+				$reference_type = $query['productReferenceType'] ?? null;
+
+				if ( Renderer::REFERENCE_TYPE_CART === $reference_type && empty( $product_references ) ) {
+					// User explicitly selected "From products in the cart".
+					// An explicit product selection, if present, always wins:
+					// a leftover cart reference type must not override it.
+					$product_references = Utils::get_cart_product_ids();
+				} elseif ( empty( $product_references ) ) {
+					// Fall back to location-based inference (backward compatibility).
+					$location = $collection_args['productCollectionLocation'] ?? array();
 					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
 						$product_references = array( $location['sourceData']['productId'] );
 					}
@@ -249,9 +258,19 @@ class HandlerRegistry {
 			},
 			function ( $collection_args, $query, $request ) {
 				$product_reference = $request->get_param( 'productReference' );
+				$reference_type    = $request->get_param( 'productReferenceType' );
+
+				// Handle explicit cart reference type in editor preview.
+				if ( Renderer::REFERENCE_TYPE_CART === $reference_type && empty( $product_reference ) ) {
+					// In editor, we can't access the actual cart, so return empty for preview.
+					// The block will show a placeholder or sample data.
+					$collection_args['upsellsProductReferences'] = array();
+					return $collection_args;
+				}
+
 				// In some cases the editor will send along block location context that we can infer the product reference from.
 				if ( empty( $product_reference ) ) {
-					$location = $collection_args['productCollectionLocation'];
+					$location = $collection_args['productCollectionLocation'] ?? array();
 					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
 						$product_reference = $location['sourceData']['productId'];
 					}
@@ -273,7 +292,7 @@ class HandlerRegistry {
 					);
 				}
 
-				$products = array_filter( array_map( 'wc_get_product', $product_reference ) );
+				$products = $this->get_viewable_products( $product_reference );
 
 				if ( empty( $products ) ) {
 					return array(
@@ -303,9 +322,19 @@ class HandlerRegistry {
 			},
 			function ( $collection_args, $query ) {
 				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
-				// Infer the product reference from the location if an explicit product is not set.
-				if ( empty( $product_references ) ) {
-					$location = $collection_args['productCollectionLocation'];
+
+				// A cart reference applies on any page, regardless of location.
+				$reference_type = $query['productReferenceType'] ?? null;
+
+				if ( Renderer::REFERENCE_TYPE_CART === $reference_type && empty( $product_references ) ) {
+					// User explicitly selected "From products in the cart".
+					// An explicit product selection, if present, always wins:
+					// a leftover cart reference type must not override it.
+					$product_references = Utils::get_cart_product_ids();
+				} elseif ( empty( $product_references ) ) {
+					// Fall back to location-based inference (backward compatibility).
+					$location = $collection_args['productCollectionLocation'] ?? array();
+
 					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
 						$product_references = array( $location['sourceData']['productId'] );
 					}
@@ -324,9 +353,18 @@ class HandlerRegistry {
 			},
 			function ( $collection_args, $query, $request ) {
 				$product_reference = $request->get_param( 'productReference' );
+				$reference_type    = $request->get_param( 'productReferenceType' );
+
+				if ( Renderer::REFERENCE_TYPE_CART === $reference_type && empty( $product_reference ) ) {
+					// In editor, we can't access the actual cart, so return empty for preview.
+					$collection_args['crossSellsProductReferences'] = array();
+					return $collection_args;
+				}
+
 				// In some cases the editor will send along block location context that we can infer the product reference from.
 				if ( empty( $product_reference ) ) {
-					$location = $collection_args['productCollectionLocation'];
+					$location = $collection_args['productCollectionLocation'] ?? array();
+
 					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
 						$product_reference = $location['sourceData']['productId'];
 					}
@@ -481,5 +519,20 @@ class HandlerRegistry {
 
 		// In frontend/email context, return empty array when no cart is found.
 		return array();
+	}
+
+	/**
+	 * Get the referenced products that the current user can view.
+	 *
+	 * @param array $product_references The product IDs.
+	 * @return \WC_Product[] The products that exist and that the current user can view.
+	 */
+	private function get_viewable_products( $product_references ) {
+		return array_filter(
+			array_map( 'wc_get_product', $product_references ),
+			function ( $product ) {
+				return $product instanceof \WC_Product && $product->is_viewable();
+			}
+		);
 	}
 }

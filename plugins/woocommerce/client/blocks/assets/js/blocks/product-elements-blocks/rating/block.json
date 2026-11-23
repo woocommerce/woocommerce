@@ -1,0 +1,56 @@
+{
+	"name": "woocommerce/product-rating",
+	"icon": "info",
+	"title": "Product Rating",
+	"description": "Display the average rating of a product.",
+	"category": "woocommerce-product-elements",
+	"attributes": {
+		"productId": {
+			"type": "number",
+			"default": 0
+		},
+		"textAlign": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"color": {
+			"text": true,
+			"background": false,
+			"link": false,
+			"__experimentalSkipSerialization": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true,
+			"__experimentalSkipSerialization": true
+		}
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-product-rating.wc-block-components-product-rating, .wp-block-woocommerce-product-rating .wc-block-components-product-rating"
+	},
+	"ancestor": [
+		"woocommerce/all-products",
+		"woocommerce/single-product",
+		"woocommerce/product-template",
+		"core/post-template"
+	],
+	"usesContext": [ "query", "queryId", "postId" ],
+	"style": [
+		"wc-blocks-style",
+		"wc-blocks-packages-style",
+		"file:../product-rating.css"
+	],
+	"keywords": [ "WooCommerce" ],
+	"viewScript": "file:../product-rating-frontend.js",
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

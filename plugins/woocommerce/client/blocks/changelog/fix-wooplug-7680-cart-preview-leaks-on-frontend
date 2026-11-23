@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Cart, Checkout and Mini-Cart blocks showing the editor preview cart on the storefront when another plugin loads the block editor scripts.

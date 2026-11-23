@@ -242,6 +242,78 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		}
 
 		/**
+		 * Get the stored value of a settings field.
+		 *
+		 * When save_fields() saves a field that sets 'field_name', it stores the value under that name, so read it from there.
+		 * Fields it skips, other names, and values not stored there are read through the field ID as before.
+		 *
+		 * @param array $field    Field definition with 'id', 'type', 'field_name' and 'default' set.
+		 * @param bool  $is_saved Whether save_fields() saves this field.
+		 * @return mixed
+		 */
+		private static function get_field_value( $field, $is_saved ) {
+			$field_name = $field['field_name'];
+
+			if (
+				$is_saved
+				&& $field_name !== $field['id']
+				&& is_string( $field_name )
+				&& is_string( $field['type'] )
+				// save_fields() hands types with a legacy update action to that action instead of saving them.
+				&& ! has_action( 'woocommerce_update_option_' . sanitize_title( $field['type'] ) )
+			) {
+				$location = self::resolve_field_name( $field_name );
+				if ( null !== $location ) {
+					list( $option_name, $setting_name ) = $location;
+
+					$stored = get_option( $option_name, null );
+					if ( null !== $setting_name ) {
+						$stored = is_array( $stored ) ? ( $stored[ $setting_name ] ?? null ) : null;
+					}
+
+					if ( null !== $stored && ! is_object( $stored ) ) {
+						// Read it again through self::get_option() so it is unslashed the same way as a read by ID.
+						return self::get_option( $field_name, $field['default'] );
+					}
+				}
+			}
+
+			return self::get_option( $field['id'], $field['default'] );
+		}
+
+		/**
+		 * Get the option and setting name that save_fields() stores a field name under.
+		 *
+		 * @param string $field_name Field name, like 'my_option' or 'my_options[enabled]'.
+		 * @return array{string, string|null}|null Option and setting name, or null when save_fields() can't store the field there.
+		 */
+		private static function resolve_field_name( string $field_name ): ?array {
+			if ( ! preg_match( '/^([^\[\]]+)(?:\[([^\[\]]+)\])?$/', $field_name, $matches ) ) {
+				return null;
+			}
+
+			$option_name  = $matches[1];
+			$setting_name = null;
+			if ( isset( $matches[2] ) ) {
+				// Resolve the name the way save_fields() does: parse_str() stores 'a.b[c]' under 'a_b'.
+				parse_str( $field_name, $parsed_name );
+				$option_name   = (string) key( $parsed_name );
+				$parsed_option = $parsed_name[ $option_name ] ?? null;
+				if ( ! is_array( $parsed_option ) ) {
+					return null;
+				}
+				$setting_name = (string) key( $parsed_option );
+			}
+
+			// save_fields() writes a setting name of '0' over the whole option, and update_option() rejects names that trim to '' or '0'.
+			if ( empty( trim( $option_name ) ) || '0' === $setting_name ) {
+				return null;
+			}
+
+			return array( $option_name, $setting_name );
+		}
+
+		/**
 		 * Output admin fields.
 		 *
 		 * Loops through the woocommerce options array and outputs each field.
@@ -253,6 +325,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				if ( ! isset( $value['type'] ) ) {
 					continue;
 				}
+				// Same skip rules as save_fields(), checked before a missing ID is filled in.
+				$is_saved = isset( $value['id'] ) && ! ( isset( $value['is_option'] ) && false === $value['is_option'] );
 				if ( ! isset( $value['id'] ) ) {
 					$value['id'] = '';
 				}
@@ -294,7 +368,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$value['suffix'] = '';
 				}
 				if ( ! isset( $value['value'] ) ) {
-					$value['value'] = self::get_option( $value['id'], $value['default'] );
+					$value['value'] = self::get_field_value( $value, $is_saved );
 				}
 
 				if ( ! is_null( $value['fixed_value'] ?? null ) ) {
@@ -386,7 +460,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized, filterable help-tip markup from get_field_description(). ?></label>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
 								<input
@@ -397,8 +471,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									value="<?php echo esc_attr( $option_value ); ?>"
 									class="<?php echo esc_attr( $value['class'] ); ?>"
 									placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
-									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
-									/><?php echo esc_html( $value['suffix'] ); ?> <?php echo $description; // WPCS: XSS ok. ?>
+									<?php echo implode( ' ', $custom_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $custom_attributes values are individually escaped before concatenation. ?>
+									/><?php echo esc_html( $value['suffix'] ); ?> <?php echo $description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $description is sanitized with wp_kses_post(). ?>
 							</td>
 						</tr>
 						<?php
@@ -411,7 +485,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized, filterable help-tip markup from get_field_description(). ?></label>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">&lrm;
 								<span class="colorpickpreview" style="background: <?php echo esc_attr( $option_value ); ?>">&nbsp;</span>
@@ -424,8 +498,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									value="<?php echo esc_attr( $option_value ); ?>"
 									class="<?php echo esc_attr( $value['class'] ); ?>colorpick"
 									placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
-									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
-									/>&lrm; <?php echo $description; // WPCS: XSS ok. ?>
+									<?php echo implode( ' ', $custom_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $custom_attributes values are individually escaped before concatenation. ?>
+									/>&lrm; <?php echo $description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $description is sanitized with wp_kses_post(). ?>
 									<div id="colorPickerDiv_<?php echo esc_attr( $value['id'] ); ?>" class="colorpickdiv" style="z-index: 100;background:#eee;border:1px solid #ccc;position:absolute;display:none;"></div>
 							</td>
 						</tr>
@@ -440,7 +514,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized, filterable help-tip markup from get_field_description(). ?></label>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
 								<?php
@@ -454,8 +528,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									style="<?php echo esc_attr( $value['css'] ); ?>"
 									class="<?php echo esc_attr( $value['class'] ); ?>"
 									placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
-									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
-									><?php echo esc_textarea( $option_value ); // WPCS: XSS ok. ?></textarea>
+									<?php echo implode( ' ', $custom_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $custom_attributes values are individually escaped before concatenation. ?>
+									><?php echo esc_textarea( $option_value ); ?></textarea>
 								<?php
 								if ( $show_desc_at_end ) {
 									echo wp_kses_post( $description );
@@ -474,7 +548,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized, filterable help-tip markup from get_field_description(). ?></label>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
 								<select
@@ -482,7 +556,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									id="<?php echo esc_attr( $value['id'] ); ?>"
 									style="<?php echo esc_attr( $value['css'] ); ?>"
 									class="<?php echo esc_attr( $value['class'] ); ?>"
-									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
+									<?php echo implode( ' ', $custom_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $custom_attributes values are individually escaped before concatenation. ?>
 									<?php echo 'multiselect' === $value['type'] ? 'multiple="multiple"' : ''; ?>
 									>
 									<?php
@@ -502,7 +576,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 										<?php
 									}
 									?>
-								</select> <?php echo $description; // WPCS: XSS ok. ?>
+								</select> <?php echo $description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $description is sanitized with wp_kses_post(). ?>
 							</td>
 						</tr>
 						<?php
@@ -550,7 +624,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 												?>
 												style="<?php echo esc_attr( $value['css'] ); ?>"
 												class="<?php echo esc_attr( $value['class'] ); ?>"
-												<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
+												<?php echo implode( ' ', $custom_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $custom_attributes values are individually escaped before concatenation. ?>
 												<?php checked( $key, $option_value ); ?>
 												/> <?php echo esc_html( $val ); ?></label>
 										</li>
@@ -636,9 +710,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									class="<?php echo esc_attr( isset( $value['class'] ) ? $value['class'] : '' ); ?>"
 									value="1"
 									<?php checked( $option_value, 'yes' ); ?>
-									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
-								/> <?php echo $description; // WPCS: XSS ok. ?>
-							</label> <?php echo $tooltip_html; // WPCS: XSS ok. ?>
+									<?php echo implode( ' ', $custom_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $custom_attributes values are individually escaped before concatenation. ?>
+								/> <?php echo $description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $description is sanitized with wp_kses_post(). ?>
+							</label> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- For checkboxes, get_field_description() wraps the tip in a description paragraph sanitized with wp_kses_post(). ?>
 						<?php
 
 						if ( ! isset( $value['checkboxgroup'] ) || 'end' === $value['checkboxgroup'] ) {
@@ -672,13 +746,13 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-							<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html . $disabled_message; // WPCS: XSS ok. ?></label>
+							<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html . $disabled_message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $tooltip_html is sanitized, filterable markup; $disabled_message is fixed escaped markup. ?></label>
 						</th>
 							<td class="forminp image_width_settings">
 
-								<input name="<?php echo esc_attr( $value['field_name'] ); ?>[width]" <?php echo $disabled_attr; // WPCS: XSS ok. ?> id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo esc_attr( $width ); ?>" /> &times; <input name="<?php echo esc_attr( $value['id'] ); ?>[height]" <?php echo $disabled_attr; // WPCS: XSS ok. ?> id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="<?php echo esc_attr( $height ); ?>" />px
+								<input name="<?php echo esc_attr( $value['field_name'] ); ?>[width]" <?php echo $disabled_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $disabled_attr is either empty or the fixed disabled attribute. ?> id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo esc_attr( $width ); ?>" /> &times; <input name="<?php echo esc_attr( $value['id'] ); ?>[height]" <?php echo $disabled_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $disabled_attr is either empty or the fixed disabled attribute. ?> id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="<?php echo esc_attr( $height ); ?>" />px
 
-								<label><input name="<?php echo esc_attr( $value['field_name'] ); ?>[crop]" <?php echo $disabled_attr; // WPCS: XSS ok. ?> id="<?php echo esc_attr( $value['id'] ); ?>-crop" type="checkbox" value="1" <?php checked( 1, $crop ); ?> /> <?php esc_html_e( 'Hard crop?', 'woocommerce' ); ?></label>
+								<label><input name="<?php echo esc_attr( $value['field_name'] ); ?>[crop]" <?php echo $disabled_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $disabled_attr is either empty or the fixed disabled attribute. ?> id="<?php echo esc_attr( $value['id'] ); ?>-crop" type="checkbox" value="1" <?php checked( 1, $crop ); ?> /> <?php esc_html_e( 'Hard crop?', 'woocommerce' ); ?></label>
 
 								</td>
 						</tr>
@@ -706,10 +780,13 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr class="single_select_page <?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-								<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+								<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized, filterable help-tip markup from get_field_description(). ?></label>
 							</th>
 							<td class="forminp">
-								<?php echo str_replace( ' id=', " data-placeholder='" . esc_attr__( 'Select a page&hellip;', 'woocommerce' ) . "' style='" . $value['css'] . "' class='" . $value['class'] . "' id=", wp_dropdown_pages( $args ) ); // WPCS: XSS ok. ?> <?php echo $description; // WPCS: XSS ok. ?>
+								<?php
+								// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_dropdown_pages() and get_field_description() return intentional, sanitized markup; injected attributes are escaped here.
+								echo str_replace( ' id=', " data-placeholder='" . esc_attr__( 'Select a page&hellip;', 'woocommerce' ) . "' style='" . esc_attr( $value['css'] ) . "' class='" . esc_attr( $value['class'] ) . "' id=", wp_dropdown_pages( $args ) ) . ' ' . $description;
+								?>
 							</td>
 						</tr>
 						<?php
@@ -717,10 +794,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					case 'single_select_page_with_search':
 						$option_value = $value['value'];
-						$page         = get_post( $option_value );
+						$page         = $option_value ? get_post( $option_value ) : null;
 
 						if ( ! is_null( $page ) ) {
-							$page                = get_post( $option_value );
 							$option_display_name = sprintf(
 								/* translators: 1: page name 2: page ID */
 								__( '%1$s (ID: %2$s)', 'woocommerce' ),
@@ -742,7 +818,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									<?php echo implode( ' ', $custom_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 									data-placeholder="<?php esc_attr_e( 'Search for a page&hellip;', 'woocommerce' ); ?>"
 									data-allow_clear="true"
-									data-exclude="<?php echo wc_esc_json( wp_json_encode( $value['args']['exclude'] ) ); ?>"
+									data-exclude="<?php echo wc_esc_json( wp_json_encode( $value['args']['exclude'] ?? array() ) ); ?>"
 									>
 									<option value=""></option>
 									<?php if ( ! is_null( $page ) ) { ?>
@@ -771,11 +847,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized, filterable help-tip markup from get_field_description(). ?></label>
 							</th>
 							<td class="forminp"><select name="<?php echo esc_attr( $value['field_name'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country / region&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>" class="wc-enhanced-select">
 								<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
-							</select> <?php echo $description; // WPCS: XSS ok. ?>
+							</select> <?php echo $description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $description is sanitized with wp_kses_post(). ?>
 							</td>
 						</tr>
 						<?php
@@ -795,7 +871,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized, filterable help-tip markup from get_field_description(). ?></label>
 							</th>
 							<td class="forminp">
 								<select
@@ -809,11 +885,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									<?php
 									if ( ! empty( $countries ) ) {
 										foreach ( $countries as $key => $val ) {
-											echo '<option value="' . esc_attr( $key ) . '"' . wc_selected( $key, $selections ) . '>' . esc_html( $val ) . '</option>'; // WPCS: XSS ok.
+											echo '<option value="' . esc_attr( $key ) . '"' . wc_selected( $key, $selections ) . '>' . esc_html( $val ) . '</option>';
 										}
 									}
 									?>
-								</select> <?php echo ( $description ) ? $description : ''; // WPCS: XSS ok. ?> <br /><a class="select_all button" href="#"><?php esc_html_e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php esc_html_e( 'Select none', 'woocommerce' ); ?></a>
+								</select> <?php echo ( $description ) ? $description : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $description is sanitized with wp_kses_post(). ?> <br /><a class="select_all button" href="#"><?php esc_html_e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php esc_html_e( 'Select none', 'woocommerce' ); ?></a>
 							</td>
 						</tr>
 						<?php
@@ -831,7 +907,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized, filterable help-tip markup from get_field_description(). ?></label>
 							</th>
 							<td class="forminp">
 							<input
@@ -844,7 +920,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
 									step="1"
 									min="1"
-									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
+									<?php echo implode( ' ', $custom_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $custom_attributes values are individually escaped before concatenation. ?>
 								/>&nbsp;
 								<select name="<?php echo esc_attr( $value['field_name'] ); ?>[unit]" style="width: auto;">
 									<?php
@@ -852,7 +928,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 										echo '<option value="' . esc_attr( $value ) . '"' . selected( $option_value['unit'], $value, false ) . '>' . esc_html( $label ) . '</option>';
 									}
 									?>
-								</select> <?php echo ( $description ) ? $description : ''; // WPCS: XSS ok. ?>
+								</select> <?php echo ( $description ) ? $description : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $description is sanitized with wp_kses_post(). ?>
 							</td>
 						</tr>
 						<?php
@@ -910,7 +986,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			}
 
 			if ( $tooltip_html && in_array( $value['type'], array( 'checkbox' ), true ) ) {
-				$tooltip_html = '<p class="description ' . $error_class . '">' . $tooltip_html . '</p>';
+				$tooltip_html = '<p class="description ' . $error_class . '">' . wp_kses_post( $tooltip_html ) . '</p>';
 			} elseif ( $tooltip_html ) {
 				$tooltip_html = wc_help_tip( $tooltip_html );
 			}
@@ -932,7 +1008,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 */
 		public static function save_fields( $options, $data = null ) {
 			if ( is_null( $data ) ) {
-				$data = $_POST; // WPCS: input var okay, CSRF ok.
+				$data = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Values are unslashed and sanitized by declared field type below; authorization belongs to the caller.
 			}
 			if ( empty( $data ) ) {
 				return false;

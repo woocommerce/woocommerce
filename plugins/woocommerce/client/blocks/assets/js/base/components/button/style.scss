@@ -1,16 +1,51 @@
+@mixin button-appearance {
+	&:focus {
+		box-shadow: 0 0 0 2px $studio-blue;
+		box-shadow: inset 0 0 0 1px $white, 0 0 0 2px $studio-blue;
+		outline: 3px solid transparent;
+	}
+
+	&.text {
+		color: $gray-900;
+
+		&:hover:not(:disabled):not([aria-disabled="true"]) {
+			opacity: 0.9;
+		}
+	}
+
+	&.outlined,
+	&.is-style-outline {
+		background: transparent;
+		color: currentColor;
+
+		&:not(:focus) {
+			box-shadow: inset 0 0 0 1px currentColor;
+		}
+
+		// Interaction states must not apply while disabled, or the button
+		// would fill in dark and read as more prominent than at rest.
+		&:not(:disabled):not([aria-disabled="true"]) {
+			&:hover,
+			&:focus,
+			&:active {
+				background-color: $gray-900;
+				color: $white;
+			}
+		}
+	}
+}
+
 .wc-block-components-button:not(.is-link) {
 	align-items: center;
 	display: inline-flex;
 	height: auto;
 	justify-content: center;
-	text-align: center;
 	position: relative;
 	transition: box-shadow 0.1s linear;
 
-	&:focus {
-		box-shadow: 0 0 0 2px $studio-blue;
-		box-shadow: inset 0 0 0 1px $white, 0 0 0 2px $studio-blue;
-		outline: 3px solid transparent;
+	&:not(:where(.wp-block-woocommerce-cart *, .wp-block-woocommerce-checkout *)) {
+		@include button-appearance;
+		text-align: center;
 	}
 
 	.wc-block-components-button__text {
@@ -25,47 +60,22 @@
 		}
 	}
 
-	&.text {
-		color: $gray-900;
-
-		&:hover {
-			opacity: 0.9;
-		}
+	// Some disabled buttons remain focusable and use aria-disabled.
+	&:disabled,
+	&[aria-disabled="true"] {
+		cursor: not-allowed;
+		opacity: 0.5;
 	}
+}
 
-	&:disabled {
-		.wc-block-components-button__text {
-			opacity: 0.5;
-		}
-	}
-
-	&.outlined,
-	&.is-style-outline {
-		background: transparent;
-		color: currentColor;
-
-		&:not(:focus) {
-			box-shadow: inset 0 0 0 1px currentColor;
-		}
-
-		&:disabled,
-		&:hover,
-		&:focus,
-		&:active {
-			background-color: $gray-900;
-			color: $white;
-		}
-
-		&:hover {
-			background-color: $gray-900;
-			color: $white;
-			opacity: 1;
-		}
+:where(.wp-block-woocommerce-cart, .wp-block-woocommerce-checkout) {
+	.wc-block-components-button:not(.is-link) .wc-block-components-button__text {
+		width: 100%;
 	}
 }
 
 body:not(.woocommerce-block-theme-has-button-styles)
-	.wc-block-components-button:not(.is-link) {
+	.wc-block-components-button:not(.is-link):not(:where(.wp-block-woocommerce-cart *, .wp-block-woocommerce-checkout *)) {
 	min-height: 3em;
 
 	&:focus {
@@ -77,7 +87,7 @@ body:not(.woocommerce-block-theme-has-button-styles)
 	&.text {
 		color: $gray-900;
 
-		&:hover {
+		&:hover:not(:disabled):not([aria-disabled="true"]) {
 			opacity: 0.9;
 		}
 	}

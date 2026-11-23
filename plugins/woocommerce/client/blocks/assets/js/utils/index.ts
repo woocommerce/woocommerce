@@ -14,6 +14,7 @@ export * from './is-widget-editor-page';
 export * from './trim-words';
 export * from './wordpress-stores';
 export * from './find-block';
+export * from './get-focusable-elements';
 export * from './get-unique-id';
 export * from './html-entities';
 export * from './get-inner-block-by-name';

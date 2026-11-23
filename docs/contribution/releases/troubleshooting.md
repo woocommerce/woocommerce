@@ -24,10 +24,6 @@ This page provides guidance for troubleshooting and recovering from issues that 
 
 ⚠️ _Do not re-run any workflows until you understand the cause of the failure._ Re-running without fixing the root issue can make things more complicated.
 
-### The changelog workflow fails with "Your local changes would be overwritten"
-
-Backport the updated `tools/monorepo-utils/dist/index.js` from `trunk` to the release branch and re-run the workflow. This happens on the rare occasions that file (a committed build artifact) is updated on `trunk`, making the two branches diverge during the workflow's checkout.
-
 ### CI is failing on a release-related PR
 
 During the release process, you may encounter CI test failures on release-related PRs. These failures sometimes occur because test fixes were merged to trunk but not backported to the release branch before it was cut.
@@ -87,6 +83,8 @@ For RC and stable releases, deploying to our staging environment and monitoring 
 3. **Publish all draft releases** for the affected version series. Even if the prior version wasn't made publicly available, it must be published along with the valid version. Each version will have its own changelog section.
 
 ### A critical bug surfaced after the release was marked stable on WordPress.org
+
+See [Rolling back a release](/docs/contribution/releases/rollback) for version checks and recovery steps.
 
 If a severe regression or bug is discovered (e.g., checkout failure or unrecoverable data loss):
 

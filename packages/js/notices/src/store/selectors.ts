@@ -40,7 +40,6 @@ const DEFAULT_NOTICES: [] = [];
  *                                             announced to screen readers. Defaults to
  *                                             `true`.
  * @property {WPNoticeAction[]} actions        User actions to present with notice.
- *
  */
 
 /**

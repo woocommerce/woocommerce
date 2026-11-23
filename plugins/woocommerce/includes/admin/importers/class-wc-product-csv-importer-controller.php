@@ -5,6 +5,7 @@
  * @package WooCommerce\Admin\Importers
  */
 
+use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ImportPlaceholders;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\URL;
@@ -25,6 +26,11 @@ if ( ! class_exists( 'WP_Importer' ) ) {
  * @version     3.1.0
  */
 class WC_Product_CSV_Importer_Controller {
+
+	/**
+	 * Prefix of the AJAX position that runs, and resumes, the cleanup phase.
+	 */
+	private const CLEANUP_POSITION_PREFIX = 'cleanup:';
 
 	/**
 	 * The path to the current file.
@@ -213,13 +219,14 @@ class WC_Product_CSV_Importer_Controller {
 			return '';
 		}
 
+		// add_query_arg() does not encode values, so characters like '+' in request-derived strings would be decoded as a space on the next request.
 		$params = array(
 			'step'               => $keys[ $step_index + 1 ],
-			'file'               => str_replace( DIRECTORY_SEPARATOR, '/', $this->file ),
-			'delimiter'          => $this->delimiter,
+			'file'               => rawurlencode( str_replace( DIRECTORY_SEPARATOR, '/', $this->file ) ),
+			'delimiter'          => rawurlencode( $this->delimiter ),
 			'update_existing'    => $this->update_existing,
 			'map_preferences'    => $this->map_preferences,
-			'character_encoding' => $this->character_encoding,
+			'character_encoding' => rawurlencode( $this->character_encoding ),
 			'_wpnonce'           => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
 		);
 
@@ -316,22 +323,57 @@ class WC_Product_CSV_Importer_Controller {
 	}
 
 	/**
+	 * Run one bounded pass of the post-import cleanup and tell the client where to resume.
+	 *
+	 * The cursor only ever skips placeholders forward, and the queries it feeds match nothing
+	 * but the importer's own temporary products, so it needs no server-side state of its own.
+	 *
+	 * @param int $cursor Highest placeholder ID earlier cleanup requests have examined.
+	 */
+	private static function dispatch_ajax_cleanup( int $cursor ): void {
+		$next_cursor = wc_get_container()->get( ImportPlaceholders::class )->cleanup_after_import( $cursor );
+
+		$response = array(
+			'position'            => null === $next_cursor ? 'done' : self::CLEANUP_POSITION_PREFIX . $next_cursor,
+			'percentage'          => 100,
+			'imported'            => 0,
+			'imported_variations' => 0,
+			'failed'              => 0,
+			'updated'             => 0,
+			'skipped'             => 0,
+		);
+
+		if ( null === $next_cursor ) {
+			$response['url'] = add_query_arg( array( '_wpnonce' => wp_create_nonce( 'woocommerce-csv-importer' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) );
+		}
+
+		wp_send_json_success( $response );
+	}
+
+	/**
 	 * Processes AJAX requests related to a product CSV import.
 	 *
 	 * @since 9.3.0
 	 */
 	public static function dispatch_ajax() {
-		global $wpdb;
-
 		check_ajax_referer( 'wc-product-import', 'security' );
 
 		try {
+			$position = wc_clean( wp_unslash( $_POST['position'] ?? '' ) );
+
+			// Cleanup runs in requests of its own so it cannot time out behind the last import batch.
+			if ( is_string( $position ) && preg_match( '/^' . preg_quote( self::CLEANUP_POSITION_PREFIX, '/' ) . '(\\d+)$/', $position, $matches ) ) {
+				self::dispatch_ajax_cleanup( (int) $matches[1] );
+
+				return;
+			}
+
 			$file = wc_clean( wp_unslash( $_POST['file'] ?? '' ) ); // PHPCS: input var ok.
 			self::validate_file_path( $file );
 
 			$params = array(
 				'delimiter'          => ! empty( $_POST['delimiter'] ) ? wc_clean( wp_unslash( $_POST['delimiter'] ) ) : ',', // PHPCS: input var ok.
-				'start_pos'          => isset( $_POST['position'] ) ? absint( $_POST['position'] ) : 0, // PHPCS: input var ok.
+				'start_pos'          => absint( $position ),
 				'mapping'            => isset( $_POST['mapping'] ) ? (array) wc_clean( wp_unslash( $_POST['mapping'] ) ) : array(), // PHPCS: input var ok.
 				'update_existing'    => isset( $_POST['update_existing'] ) ? (bool) $_POST['update_existing'] : false, // PHPCS: input var ok.
 				'character_encoding' => isset( $_POST['character_encoding'] ) ? wc_clean( wp_unslash( $_POST['character_encoding'] ) ) : '',
@@ -347,11 +389,15 @@ class WC_Product_CSV_Importer_Controller {
 				'parse'              => true,
 			);
 
-			// Log failures.
+			// Load the import log from earlier batches.
 			if ( 0 !== $params['start_pos'] ) {
 				$error_log = array_filter( (array) get_user_option( 'product_import_error_log' ) );
 			} else {
 				$error_log = array();
+			}
+
+			if ( 0 === $params['start_pos'] ) {
+				wc_get_container()->get( ImportPlaceholders::class )->release_stranded_cleanup_claims();
 			}
 
 			include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
@@ -359,74 +405,28 @@ class WC_Product_CSV_Importer_Controller {
 			$importer         = self::get_importer( $file, $params );
 			$results          = $importer->import();
 			$percent_complete = $importer->get_percent_complete();
-			$error_log        = array_merge( $error_log, $results['failed'], $results['skipped'] );
+			$error_log        = array_merge( $error_log, $results['failed'], $results['skipped'], $results['warnings'] ?? array() );
+
+			if ( 100 === $percent_complete ) {
+				wc_get_container()->get( ImportPlaceholders::class )->delete_original_id_markers();
+			}
 
 			update_user_option( get_current_user_id(), 'product_import_error_log', $error_log );
 
-			if ( 100 === $percent_complete ) {
-				// @codingStandardsIgnoreStart.
-				$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
-				$wpdb->delete( $wpdb->posts, array(
-					'post_type'   => 'product',
-					'post_status' => 'importing',
-				) );
-				$wpdb->delete( $wpdb->posts, array(
-					'post_type'   => 'product_variation',
-					'post_status' => 'importing',
-				) );
-				// @codingStandardsIgnoreEnd.
+			// The last row hands over to the cleanup phase rather than running it in this request.
+			$next_position = 100 === $percent_complete ? self::CLEANUP_POSITION_PREFIX . '0' : $importer->get_file_position();
 
-				// Clean up orphaned data.
-				$wpdb->query(
-					"
-					DELETE {$wpdb->posts}.* FROM {$wpdb->posts}
-					LEFT JOIN {$wpdb->posts} wp ON wp.ID = {$wpdb->posts}.post_parent
-					WHERE wp.ID IS NULL AND {$wpdb->posts}.post_type = 'product_variation'
-				"
-				);
-				$wpdb->query(
-					"
-					DELETE {$wpdb->postmeta}.* FROM {$wpdb->postmeta}
-					LEFT JOIN {$wpdb->posts} wp ON wp.ID = {$wpdb->postmeta}.post_id
-					WHERE wp.ID IS NULL
-				"
-				);
-				// @codingStandardsIgnoreStart.
-				$wpdb->query( "
-					DELETE tr.* FROM {$wpdb->term_relationships} tr
-					LEFT JOIN {$wpdb->posts} wp ON wp.ID = tr.object_id
-					LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-					WHERE wp.ID IS NULL
-					AND tt.taxonomy IN ( '" . implode( "','", array_map( 'esc_sql', get_object_taxonomies( 'product' ) ) ) . "' )
-				" );
-				// @codingStandardsIgnoreEnd.
-
-				// Send success.
-				wp_send_json_success(
-					array(
-						'position'            => 'done',
-						'percentage'          => 100,
-						'url'                 => add_query_arg( array( '_wpnonce' => wp_create_nonce( 'woocommerce-csv-importer' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
-						'imported'            => is_countable( $results['imported'] ) ? count( $results['imported'] ) : 0,
-						'imported_variations' => is_countable( $results['imported_variations'] ) ? count( $results['imported_variations'] ) : 0,
-						'failed'              => is_countable( $results['failed'] ) ? count( $results['failed'] ) : 0,
-						'updated'             => is_countable( $results['updated'] ) ? count( $results['updated'] ) : 0,
-						'skipped'             => is_countable( $results['skipped'] ) ? count( $results['skipped'] ) : 0,
-					)
-				);
-			} else {
-				wp_send_json_success(
-					array(
-						'position'            => $importer->get_file_position(),
-						'percentage'          => $percent_complete,
-						'imported'            => is_countable( $results['imported'] ) ? count( $results['imported'] ) : 0,
-						'imported_variations' => is_countable( $results['imported_variations'] ) ? count( $results['imported_variations'] ) : 0,
-						'failed'              => is_countable( $results['failed'] ) ? count( $results['failed'] ) : 0,
-						'updated'             => is_countable( $results['updated'] ) ? count( $results['updated'] ) : 0,
-						'skipped'             => is_countable( $results['skipped'] ) ? count( $results['skipped'] ) : 0,
-					)
-				);
-			}
+			wp_send_json_success(
+				array(
+					'position'            => $next_position,
+					'percentage'          => $percent_complete,
+					'imported'            => is_countable( $results['imported'] ) ? count( $results['imported'] ) : 0,
+					'imported_variations' => is_countable( $results['imported_variations'] ) ? count( $results['imported_variations'] ) : 0,
+					'failed'              => is_countable( $results['failed'] ) ? count( $results['failed'] ) : 0,
+					'updated'             => is_countable( $results['updated'] ) ? count( $results['updated'] ) : 0,
+					'skipped'             => is_countable( $results['skipped'] ) ? count( $results['skipped'] ) : 0,
+				)
+			);
 		} catch ( \Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}
@@ -471,10 +471,13 @@ class WC_Product_CSV_Importer_Controller {
 	public function handle_upload() {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce already verified in WC_Product_CSV_Importer_Controller::upload_form_handler()
 		$file_url = isset( $_POST['file_url'] ) ? wc_clean( wp_unslash( $_POST['file_url'] ) ) : '';
+		if ( ! is_string( $file_url ) ) {
+			$file_url = '';
+		}
 
 		try {
 			if ( ! empty( $file_url ) ) {
-				$path = ABSPATH . $file_url;
+				$path = FilesystemUtil::resolve_upload_file_path( $file_url );
 				self::validate_file_path( $path );
 			} else {
 				$csv_import_util = wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper::class );
@@ -612,6 +615,8 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'ID', 'woocommerce' )                      => 'id',
 			__( 'Type', 'woocommerce' )                    => 'type',
 			__( 'SKU', 'woocommerce' )                     => 'sku',
+			__( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ) => 'global_unique_id',
+			__( 'MPN', 'woocommerce' )                     => 'mpn',
 			__( 'Name', 'woocommerce' )                    => 'name',
 			__( 'Published', 'woocommerce' )               => 'published',
 			__( 'Is featured?', 'woocommerce' )            => 'featured',
@@ -652,6 +657,9 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'External URL', 'woocommerce' )            => 'product_url',
 			__( 'Button text', 'woocommerce' )             => 'button_text',
 			__( 'Position', 'woocommerce' )                => 'menu_order',
+			__( 'Commodity code (HS code)', 'woocommerce' ) => 'customs_commodity_code',
+			__( 'Country of origin', 'woocommerce' )       => 'customs_country_of_origin',
+			__( 'Customs description', 'woocommerce' )     => 'customs_description',
 		);
 
 		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
@@ -791,6 +799,7 @@ class WC_Product_CSV_Importer_Controller {
 			'type'               => __( 'Type', 'woocommerce' ),
 			'sku'                => __( 'SKU', 'woocommerce' ),
 			'global_unique_id'   => __( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ),
+			'mpn'                => __( 'MPN', 'woocommerce' ),
 			'name'               => __( 'Name', 'woocommerce' ),
 			'published'          => __( 'Published', 'woocommerce' ),
 			'featured'           => __( 'Is featured?', 'woocommerce' ),
@@ -867,6 +876,10 @@ class WC_Product_CSV_Importer_Controller {
 			'meta:' . $meta      => __( 'Import as meta data', 'woocommerce' ),
 			'menu_order'         => __( 'Position', 'woocommerce' ),
 		);
+
+		$options['customs_commodity_code']    = __( 'Commodity code (HS code)', 'woocommerce' );
+		$options['customs_country_of_origin'] = __( 'Country of origin', 'woocommerce' );
+		$options['customs_description']       = __( 'Customs description', 'woocommerce' );
 
 		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
 			$options['cogs_value'] = __( 'Cost of goods', 'woocommerce' );

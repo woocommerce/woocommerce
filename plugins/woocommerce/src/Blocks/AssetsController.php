@@ -60,9 +60,10 @@ final class AssetsController {
 			$this->api->get_block_asset_build_path( 'interactivity-blocks-frontend-assets', 'php' )
 		);
 
+		$base_path = plugins_url( '/', dirname( __DIR__ ) );
 		foreach ( $asset_data as $handle => $data ) {
 			$handle_without_js = str_replace( '.js', '', $handle );
-			wp_register_script_module( $handle_without_js, plugins_url( $this->api->get_block_asset_build_path( $handle_without_js ), dirname( __DIR__ ) ), $data['dependencies'], $data['version'] );
+			wp_register_script_module( $handle_without_js, $base_path . $this->api->get_block_asset_build_path( $handle_without_js ), $data['dependencies'], $data['version'] );
 		}
 	}
 
@@ -549,7 +550,7 @@ final class AssetsController {
 
 		foreach ( $wp_scripts->registered as $handle => $script ) {
 			// scripts that are loaded in the footer has extra->group = 1.
-			if ( array_intersect( $known_packages, $script->deps ) && ! isset( $script->extra['group'] ) ) {
+			if ( ! isset( $script->extra['group'] ) && ! empty( $script->deps ) && array_intersect( $known_packages, $script->deps ) ) {
 				// Append the script to footer.
 				$wp_scripts->add_data( $handle, 'group', 1 );
 				// Show a warning.
@@ -563,7 +564,6 @@ final class AssetsController {
 					$error_handle,
 					sprintf( 'console.warn( "%s" );', $error_message )
 				);
-
 			}
 		}
 	}

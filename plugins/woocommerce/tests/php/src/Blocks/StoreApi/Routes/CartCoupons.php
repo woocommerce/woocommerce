@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 
 /**
  * Cart Coupons Controller Tests.
@@ -49,6 +50,57 @@ class CartCoupons extends ControllerTestCase {
 					'discount_type' => 'fixed_cart',
 					'totals'        => array(
 						'total_discount'     => '0',
+						'total_discount_tax' => '0',
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Sequential percentage coupons should be projected in application order with exact discount totals.
+	 */
+	public function test_get_items_projects_sequential_percentage_coupons_in_application_order(): void {
+		update_option( 'woocommerce_calc_discounts_sequentially', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		wc_empty_cart();
+
+		$this->product->set_regular_price( '100.00' );
+		$this->product->set_price( '100.00' );
+		$this->product->set_tax_status( 'none' );
+		$this->product->save();
+		$this->coupon->set_discount_type( 'percent' );
+		$this->coupon->set_amount( '20' );
+		$this->coupon->save();
+
+		$low_coupon = ( new FixtureData() )->get_coupon(
+			array(
+				'code'          => 'sequential-low',
+				'discount_type' => 'percent',
+				'amount'        => '10',
+			)
+		);
+
+		wc()->cart->add_to_cart( $this->product->get_id() );
+		wc()->cart->apply_coupon( $this->coupon->get_code() );
+		wc()->cart->apply_coupon( $low_coupon->get_code() );
+		wc()->cart->calculate_totals();
+
+		$this->assertAPIResponse(
+			'/wc/store/v1/cart/coupons',
+			200,
+			array(
+				array(
+					'code'   => $this->coupon->get_code(),
+					'totals' => array(
+						'total_discount'     => '2000',
+						'total_discount_tax' => '0',
+					),
+				),
+				array(
+					'code'   => $low_coupon->get_code(),
+					'totals' => array(
+						'total_discount'     => '800',
 						'total_discount_tax' => '0',
 					),
 				),
@@ -152,6 +204,56 @@ class CartCoupons extends ControllerTestCase {
 			200,
 			array()
 		);
+	}
+
+	/**
+	 * @testdox Deleting all coupons should remove their discount from the cart totals and line totals.
+	 */
+	public function test_delete_items_recalculates_totals(): void {
+		$this->coupon->set_amount( 5 );
+		$this->coupon->save();
+		wc()->cart->calculate_totals();
+
+		$this->assertEquals( 5, wc()->cart->get_discount_total() );
+
+		$request = new \WP_REST_Request( 'DELETE', '/wc/store/v1/cart/coupons' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertEmpty( wc()->cart->get_applied_coupons() );
+		$this->assertEquals( 0, wc()->cart->get_discount_total() );
+		$this->assertEquals( 20, wc()->cart->get_total( 'edit' ) );
+
+		foreach ( wc()->cart->get_cart() as $cart_item ) {
+			$this->assertEquals( $cart_item['line_subtotal'], $cart_item['line_total'] );
+		}
+	}
+
+	/**
+	 * @testdox Deleting all coupons should leave the existing draft order unchanged.
+	 */
+	public function test_delete_items_leaves_draft_order_unchanged(): void {
+		$this->coupon->set_amount( 5 );
+		$this->coupon->save();
+		wc()->cart->calculate_totals();
+
+		$draft_order = ( new OrderController() )->create_order_from_cart();
+		wc()->session->set( 'store_api_draft_order', $draft_order->get_id() );
+
+		$this->assertEquals( 15, $draft_order->get_total() );
+
+		$request = new \WP_REST_Request( 'DELETE', '/wc/store/v1/cart/coupons' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertEmpty( wc()->cart->get_applied_coupons() );
+
+		$draft_order = wc_get_order( $draft_order->get_id() );
+		$this->assertSame( array( $this->coupon->get_code() ), $draft_order->get_coupon_codes() );
+		$this->assertEquals( 5, $draft_order->get_discount_total() );
+		$this->assertEquals( 15, $draft_order->get_total() );
 	}
 
 	/**

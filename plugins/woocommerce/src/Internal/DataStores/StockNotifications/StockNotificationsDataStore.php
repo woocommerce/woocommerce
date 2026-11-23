@@ -7,10 +7,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\DataStores\StockNotifications;
 
-use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -73,11 +73,6 @@ class StockNotificationsDataStore implements \WC_Object_Data_Store_Interface {
 	 * @return string
 	 */
 	public function get_database_schema(): string {
-
-		if ( ! Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
-			return '';
-		}
-
 		global $wpdb;
 
 		$collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
@@ -203,7 +198,22 @@ CREATE TABLE $meta_table_name (
 		$notification->save_meta_data();
 		$notification->apply_changes();
 
-		return $notification->get_id();
+		/**
+		 * Action: woocommerce_new_stock_notification
+		 *
+		 * Fires after a stock notification is created, from any code path.
+		 * With double opt-in the new notification is `pending` until the shopper verifies it, so
+		 * integrations that only want confirmed sign-ups can wait for
+		 * `woocommerce_stock_notification_status_changed` to `active` instead.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int          $notification_id The notification ID.
+		 * @param Notification $notification    The notification.
+		 */
+		do_action( 'woocommerce_new_stock_notification', $notification_id, $notification );
+
+		return $notification_id;
 	}
 
 	/**
@@ -268,10 +278,13 @@ CREATE TABLE $meta_table_name (
 			return new \WP_Error( 'invalid_stock_notification', 'Invalid notification ID.' );
 		}
 
-		$changes = $notification->get_changes();
-		$result  = 0;
+		$changes     = $notification->get_changes();
+		$result      = 0;
+		$status_from = $notification->get_data()['status'];
 
-		if ( array_intersect( array( 'product_id', 'user_id', 'user_email', 'status', 'date_modified', 'date_confirmed', 'date_last_attempt', 'date_notified', 'date_cancelled', 'cancellation_source' ), array_keys( $changes ) ) ) {
+		$has_prop_changes = (bool) array_intersect( array( 'product_id', 'user_id', 'user_email', 'status', 'date_modified', 'date_confirmed', 'date_last_attempt', 'date_notified', 'date_cancelled', 'cancellation_source' ), array_keys( $changes ) );
+
+		if ( $has_prop_changes || $notification->has_meta_changes() ) {
 
 			if ( ! array_key_exists( 'date_modified', $changes ) ) {
 				$notification->set_date_modified( time() );
@@ -300,16 +313,40 @@ CREATE TABLE $meta_table_name (
 			if ( false === $result ) {
 				return new \WP_Error( 'db_update_error', 'Could not update stock notification in the database.' );
 			}
-
-			if ( 0 === $result ) {
-				return new \WP_Error( 'db_update_error', 'Invalid notification ID.' );
-			}
 		}
 
 		$notification->save_meta_data();
+		$notification->apply_changes();
 
-		if ( $changes ) {
-			$notification->apply_changes();
+		$status_to = $notification->get_status( 'edit' );
+
+		/**
+		 * Action: woocommerce_update_stock_notification
+		 *
+		 * Fires after a stock notification is updated, from any code path, whether or not anything changed.
+		 * Also fires inside the back-in-stock send batch, so defer remote calls to Action Scheduler.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int          $notification_id The notification ID.
+		 * @param Notification $notification    The notification.
+		 */
+		do_action( 'woocommerce_update_stock_notification', $notification->get_id(), $notification );
+
+		if ( array_key_exists( 'status', $changes ) && $status_from !== $status_to ) {
+			/**
+			 * Action: woocommerce_stock_notification_status_changed
+			 *
+			 * Fires after a stock notification's status is persisted with a different value, from any code path.
+			 *
+			 * @since 11.3.0
+			 *
+			 * @param int          $notification_id The notification ID.
+			 * @param string       $status_from     The previous status.
+			 * @param string       $status_to       The new status.
+			 * @param Notification $notification    The notification.
+			 */
+			do_action( 'woocommerce_stock_notification_status_changed', $notification->get_id(), $status_from, $status_to, $notification );
 		}
 
 		return $result;
@@ -325,10 +362,23 @@ CREATE TABLE $meta_table_name (
 	public function delete( &$notification, $args = array() ) {
 		global $wpdb;
 
-		$deleted = $wpdb->delete( $this->get_table_name(), array( 'id' => $notification->get_id() ), array( '%d' ) );
+		$notification_id = $notification->get_id();
+		$deleted         = $wpdb->delete( $this->get_table_name(), array( 'id' => $notification_id ), array( '%d' ) );
 
 		if ( $deleted > 0 ) {
-			$this->data_store_meta->delete_by_notification_id( $notification->get_id() );
+			$this->data_store_meta->delete_by_notification_id( $notification_id );
+
+			/**
+			 * Action: woocommerce_delete_stock_notification
+			 *
+			 * Fires after a stock notification is deleted, from any code path.
+			 *
+			 * @since 11.3.0
+			 *
+			 * @param int          $notification_id The deleted notification ID.
+			 * @param Notification $notification    The notification, as it was before deletion.
+			 */
+			do_action( 'woocommerce_delete_stock_notification', $notification_id, $notification );
 		}
 	}
 
@@ -341,7 +391,6 @@ CREATE TABLE $meta_table_name (
 	 */
 	public function add_meta( &$notification, $meta ) {
 		$add_meta = $this->data_store_meta->add_meta( $notification, $meta );
-		$this->after_meta_change( $notification );
 		return $add_meta ? $add_meta : false;
 	}
 
@@ -364,9 +413,7 @@ CREATE TABLE $meta_table_name (
 	 * @return bool
 	 */
 	public function update_meta( &$notification, $meta ): bool {
-		$update_meta = $this->data_store_meta->update_meta( $notification, $meta );
-		$this->after_meta_change( $notification );
-		return $update_meta;
+		return $this->data_store_meta->update_meta( $notification, $meta );
 	}
 
 	/**
@@ -377,35 +424,7 @@ CREATE TABLE $meta_table_name (
 	 * @return bool
 	 */
 	public function delete_meta( &$notification, $meta ): bool {
-		$delete_meta = $this->data_store_meta->delete_meta( $notification, $meta );
-
-		$this->after_meta_change( $notification );
-		return $delete_meta;
-	}
-
-	/**
-	 * Perform after meta change operations.
-	 *
-	 * @param Notification $notification The notification object.
-	 * @return bool True if changes were applied, false otherwise.
-	 */
-	private function after_meta_change( &$notification ): bool {
-
-		$current_time      = time();
-		$current_date_time = new \WC_DateTime( "@$current_time", new \DateTimeZone( 'UTC' ) );
-
-		$should_save =
-			$notification->get_id() > 0
-			&& $notification->get_date_modified( 'edit' ) < $current_date_time
-			&& empty( $notification->get_changes() );
-
-		if ( $should_save ) {
-			$notification->set_date_modified( $current_time );
-			$saved = $notification->save();
-			return ! is_wp_error( $saved );
-		}
-
-		return false;
+		return $this->data_store_meta->delete_meta( $notification, $meta );
 	}
 
 	/**
@@ -424,6 +443,7 @@ CREATE TABLE $meta_table_name (
 				'product_id'         => array(),
 				'user_id'            => 0,
 				'user_email'         => '',
+				'customer'           => array(),
 				'last_attempt_limit' => 0,
 				'start_date'         => 0,
 				'end_date'           => 0,
@@ -446,9 +466,17 @@ CREATE TABLE $meta_table_name (
 		$where        = array();
 		$where_values = array();
 
-		if ( $args['status'] ) {
-			$where[]        = 'status = %s';
-			$where_values[] = esc_sql( $args['status'] );
+		$statuses = array_filter(
+			array_map( 'strval', (array) $args['status'] ),
+			static function ( string $status ): bool {
+				return '' !== $status;
+			}
+		);
+		if ( ! empty( $statuses ) ) {
+			$where[]      = 1 === count( $statuses )
+				? 'status = %s'
+				: 'status IN (' . implode( ',', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
+			$where_values = array_merge( $where_values, array_values( $statuses ) );
 		}
 
 		if ( ! empty( $args['product_id'] ) ) {
@@ -464,7 +492,33 @@ CREATE TABLE $meta_table_name (
 
 		if ( $args['user_email'] ) {
 			$where[]        = 'user_email = %s';
-			$where_values[] = esc_sql( $args['user_email'] );
+			$where_values[] = EmailNormalizer::normalize( (string) $args['user_email'] );
+		}
+
+		if ( ! empty( $args['customer'] ) ) {
+			$customer_ids    = array();
+			$customer_emails = array();
+			foreach ( (array) $args['customer'] as $customer ) {
+				if ( is_int( $customer ) || ( is_string( $customer ) && ctype_digit( $customer ) ) ) {
+					$customer_ids[] = (int) $customer;
+				} elseif ( is_string( $customer ) && '' !== EmailNormalizer::normalize( $customer ) ) {
+					$customer_emails[] = EmailNormalizer::normalize( $customer );
+				}
+			}
+
+			$customer_ids    = array_values( array_unique( array_filter( $customer_ids ) ) );
+			$customer_emails = array_values( array_unique( $customer_emails ) );
+			$customer_where  = array();
+			if ( ! empty( $customer_ids ) ) {
+				$customer_where[] = 'user_id IN (' . implode( ',', array_fill( 0, count( $customer_ids ), '%d' ) ) . ')';
+				$where_values     = array_merge( $where_values, $customer_ids );
+			}
+			if ( ! empty( $customer_emails ) ) {
+				$customer_where[] = 'user_email IN (' . implode( ',', array_fill( 0, count( $customer_emails ), '%s' ) ) . ')';
+				$where_values     = array_merge( $where_values, $customer_emails );
+			}
+
+			$where[] = empty( $customer_where ) ? '1=0' : '(' . implode( ' OR ', $customer_where ) . ')';
 		}
 
 		if ( $args['last_attempt_limit'] > 0 ) {
@@ -486,7 +540,8 @@ CREATE TABLE $meta_table_name (
 		$order_by         = '';
 		$order_by_clauses = array();
 
-		if ( $args['order_by'] && is_array( $args['order_by'] ) ) {
+		// A COUNT() has no rows to sort, and ORDER BY on it fails under ONLY_FULL_GROUP_BY.
+		if ( 'count' !== $args['return'] && $args['order_by'] && is_array( $args['order_by'] ) ) {
 			foreach ( $args['order_by'] as $what => $how ) {
 				$order_by_clauses[] = $table . '.' . esc_sql( strval( $what ) ) . ' ' . esc_sql( strval( $how ) );
 			}
@@ -564,6 +619,7 @@ CREATE TABLE $meta_table_name (
 	 */
 	public function notification_exists_by_email( int $product_id, string $email ): bool {
 
+		$email = EmailNormalizer::normalize( $email );
 		if ( ! is_email( $email ) ) {
 			return false;
 		}
@@ -602,6 +658,60 @@ CREATE TABLE $meta_table_name (
 	}
 
 	/**
+	 * Get the ID of the active or pending notification matching an identity, product and posted
+	 * attribute set.
+	 *
+	 * The posted attributes are matched as the serialized string they are stored as, so the
+	 * comparison is exact and case sensitive, but not sensitive to key order: both sides are
+	 * sorted by key. An empty set matches any sign-up for the identity.
+	 *
+	 * @param int    $product_id The product ID.
+	 * @param int    $user_id The user ID, or 0 to match on the email instead.
+	 * @param string $user_email The email address, used when no user ID is given.
+	 * @param array  $posted_attributes The posted attributes to match.
+	 * @return int The notification ID, or 0 when nothing matches.
+	 */
+	public function get_matching_notification_id( int $product_id, int $user_id, string $user_email, array $posted_attributes = array() ): int {
+
+		if ( empty( $product_id ) ) {
+			return 0;
+		}
+
+		if ( empty( $user_id ) ) {
+			$user_email = EmailNormalizer::normalize( $user_email );
+			if ( ! is_email( $user_email ) ) {
+				return 0;
+			}
+		}
+
+		global $wpdb;
+
+		$table          = $this->get_table_name();
+		$identity_where = empty( $user_id ) ? 'user_email = %s' : 'user_id = %d';
+		$identity_value = empty( $user_id ) ? $user_email : $user_id;
+
+		if ( empty( $posted_attributes ) ) {
+			$sql = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+				"SELECT id FROM $table WHERE product_id = %d AND $identity_where AND status IN (%s, %s) LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				array( $product_id, $identity_value, NotificationStatus::ACTIVE, NotificationStatus::PENDING )
+			);
+
+			return absint( $wpdb->get_var( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		}
+
+		// Sort by key so the serialized blob is the same whatever order the caller built the set in.
+		ksort( $posted_attributes );
+
+		$meta_table = $this->get_meta_table_name();
+		$sql        = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			"SELECT notifications.id FROM $table AS notifications INNER JOIN $meta_table AS meta ON meta.notification_id = notifications.id AND meta.meta_key = %s WHERE notifications.product_id = %d AND notifications.$identity_where AND notifications.status IN (%s, %s) AND BINARY meta.meta_value = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( 'posted_attributes', $product_id, $identity_value, NotificationStatus::ACTIVE, NotificationStatus::PENDING, maybe_serialize( $posted_attributes ) )
+		);
+
+		return absint( $wpdb->get_var( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
 	 * Get distinct notification creation dates.
 	 *
 	 * @return array
@@ -622,5 +732,28 @@ CREATE TABLE $meta_table_name (
 		);
 
 		return $results;
+	}
+
+	/**
+	 * Count the notifications of each status.
+	 *
+	 * @return array<string, int> Map of status to the number of notifications in it.
+	 */
+	public function count_by_status(): array {
+		global $wpdb;
+
+		$table = $this->get_table_name();
+
+		$results = $wpdb->get_results(
+			"SELECT status, COUNT(id) AS total FROM $table GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			ARRAY_A
+		);
+
+		$counts = array();
+		foreach ( (array) $results as $result ) {
+			$counts[ (string) $result['status'] ] = (int) $result['total'];
+		}
+
+		return $counts;
 	}
 }

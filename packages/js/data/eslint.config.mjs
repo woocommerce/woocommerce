@@ -11,7 +11,6 @@ export default [
 			'import/core-modules': [
 				...coreModules,
 				'@wordpress/api-fetch',
-				'redux',
 			],
 			'import/resolver': {
 				node: {},

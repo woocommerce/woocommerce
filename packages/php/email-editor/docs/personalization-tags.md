@@ -10,6 +10,7 @@
 -   [Format](#format)
 -   [Context](#context)
 -   [Rendering Context and Escaping](#rendering-context-and-escaping)
+-   [Value Interceptor](#value-interceptor)
 -   [Core Components](#core-components)
 -   [Creating Custom Tags](#creating-custom-tags)
 -   [Usage with Renderer](#usage-with-renderer)
@@ -80,7 +81,7 @@ When selected from a modal, the tag is placed into a text block displayed in a s
 
 ## Format
 
-Personalization Tags use HTML comment syntax with a specific format: `<!--[token-name attributes]-->`. The token name follows a namespaced pattern (e.g., `my-plugin/tag-name`) and can include attributes for configuration. This format ensures safe fallback behavior in browsers and provides reliable parsing capabilities.
+Personalization Tags use HTML comment syntax with a specific format: `<!--[token-name attributes]-->`. The token name follows a namespaced pattern (e.g., `my-plugin/tag-name`) and can include attributes for configuration. Attribute values may be quoted with double or single quotes and may contain `]`. HTML entities in values (such as `&#039;`, which `esc_attr()` adds) are decoded before the callback receives them. In HTML content, a tag with the default `VALUE_TYPE_HTML` receives the values escaped for HTML instead, so it can output an argument as it is. A tag that uses an argument as data, such as a key, a date format or a URL, should declare `VALUE_TYPE_TEXT`, or decode the value itself. This format ensures safe fallback behavior in browsers and provides reliable parsing capabilities.
 
 **Example usage in a paragraph block:**
 
@@ -128,6 +129,10 @@ The Personalizer passes the context of each replacement to the tag callback unde
 | `Personalizer::RENDERING_CONTEXT_TEXT` | Plain-text output (subject, preheader, plain-text body, `<title>`) | Raw plain text. No HTML markup, no entities, no escaping. |
 | `Personalizer::RENDERING_CONTEXT_HREF` | A link URL (`href`) | A raw, unescaped URL — do not pre-escape; URL escaping is applied when the attribute is written. |
 
+In the text rendering context the Personalizer also replaces tags in the `[text](url)` link targets of the Renderer's plain-text version (in the href rendering context), and removes a tag comment it cannot resolve, because the recipient would see it as text. A link whose whole target is a tag it cannot resolve loses the target and reads `[text]`.
+
+A tag callback that throws gives an empty value. The Personalizer logs the error through the package logger and carries on with the rest of the content.
+
 If the value is a URL *component* rather than a whole URL (e.g. an email address embedded in a query string), `rawurlencode()` it in the callback — the Personalizer cannot tell the difference.
 
 Inspecting the rendering context is optional — a callback that ignores it simply returns the same value for every destination. A tag that serves different content per destination can switch on the key:
@@ -167,6 +172,29 @@ $registry->register(
 Note: the `esc_html()` call does not double-encode existing entities, so a raw text value that itself contains an entity-shaped sequence (e.g. a literal `&amp;`) renders as the decoded character (`&`). Always return genuinely raw text.
 
 The default, `Personalization_Tag::VALUE_TYPE_HTML`, inserts the value untouched in every rendering context — including plain-text output; the callback owns escaping and any per-context differences (in the `text` rendering context it must return raw plain text without markup or entities).
+
+## Value Interceptor
+
+The Personalizer offers an advanced extension point that intercepts every resolved tag value just before it is written into the content:
+
+```php
+$previous = $personalizer->set_value_interceptor(
+    function ( string $value, string $source, string $rendering_context ): string {
+        // Record the value externally, substitute a placeholder, etc.
+        return $value;
+    }
+);
+```
+
+The interceptor receives:
+
+-   `$value` — the resolved value, after any context-driven escaping (e.g. `esc_html()` for `VALUE_TYPE_TEXT` tags in HTML content).
+-   `$source` — the raw source text being replaced: the trimmed tag token including arguments, the raw `data-link-href` attribute value, or the tag token found inside a plain `href`.
+-   `$rendering_context` — the `RENDERING_CONTEXT_*` constant of the replacement site.
+
+Its return value is written instead of the resolved value and must be a string — anything else throws a `TypeError`. In the `html` and `text` rendering contexts it is written verbatim. In the `href` rendering context it ends up in the `href` attribute, which WordPress escapes with `esc_url()`: characters not allowed in URLs (such as curly braces) are stripped and a missing scheme is prepended, so a `{{placeholder}}` return comes out as `http://placeholder`. An empty return in the `href` rendering context means no replacement — the link is left untouched, just like an empty resolved value.
+
+The interceptor persists until cleared by passing `null`, and the Personalizer instance obtained from the DI container is shared — WooCommerce core's transactional emails personalize through the same instance. Clear the interceptor (or restore the previous one returned by `set_value_interceptor()`) in a `finally` block, so an exception cannot leave it registered for unrelated emails.
 
 ## Core Components
 
@@ -257,6 +285,7 @@ Main engine for replacing tags with values in email content.
 -   `set_context(array $context)`: Set the personalization context
 -   `get_context()`: Get the current context
 -   `personalize_content(string $content, string $rendering_context = Personalizer::RENDERING_CONTEXT_HTML)`: Process and personalize content; pass `Personalizer::RENDERING_CONTEXT_TEXT` for plain-text content such as subjects or plain-text bodies
+-   `set_value_interceptor(?callable $interceptor)`: Register a callback intercepting each resolved value before it is written, or clear it with `null`; returns the previously registered interceptor (see [Value Interceptor](#value-interceptor))
 
 **Example Usage:**
 

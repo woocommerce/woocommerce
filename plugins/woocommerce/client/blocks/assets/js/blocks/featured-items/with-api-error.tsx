@@ -21,17 +21,16 @@ interface APIErrorRequiredProps {
 
 interface APIErrorProductProps extends APIErrorRequiredProps {
 	getCategory: never;
-	getProduct(): void;
+	getProduct: () => void;
 }
 
 interface APIErrorCategoryProps extends APIErrorRequiredProps {
-	getCategory(): void;
+	getCategory: () => void;
 	getProduct: never;
 }
 
 type APIErrorProps< T extends Block > =
-	| ( T & APIErrorProductProps )
-	| ( T & APIErrorCategoryProps );
+	( T & APIErrorProductProps ) | ( T & APIErrorCategoryProps );
 
 export const withApiError =
 	< T extends Block >( Component: ComponentType< T > ) =>

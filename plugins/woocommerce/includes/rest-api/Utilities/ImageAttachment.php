@@ -57,6 +57,10 @@ class ImageAttachment {
 		$this->id = wc_rest_set_uploaded_image_as_attachment( $upload, $this->object_id );
 
 		if ( ! wp_attachment_is_image( $this->id ) ) {
+			if ( $this->id > 0 ) {
+				wp_delete_attachment( $this->id, true );
+			}
+
 			/* translators: %s: image ID */
 			throw new \WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $this->id ), 400 );
 		}

@@ -41,7 +41,9 @@ const makeField = (
 	ref?: React.Ref< HTMLInputElement >
 ) => {
 	const { error, ...rest } = props;
-	if ( ! error ) return <Control { ...rest } ref={ ref } />;
+	if ( ! error ) {
+		return <Control { ...rest } ref={ ref } />;
+	}
 	return (
 		<>
 			<Control

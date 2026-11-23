@@ -80,7 +80,6 @@ jest.mock( '../panel', () => {
 describe( 'Activity Panel', () => {
 	beforeEach( () => {
 		useSelect.mockImplementation( () => ( {
-			hasUnreadNotifications: false,
 			requestingTaskListOptions: false,
 			setupTaskListComplete: false,
 			setupTaskListHidden: false,
@@ -92,25 +91,22 @@ describe( 'Activity Panel', () => {
 		} ) );
 	} );
 
-	it( 'should render inbox tab on embedded pages', () => {
-		render( <ActivityPanel isEmbedded query={ {} } /> );
+	it.each( [
+		[ 'embedded pages', true, {} ],
+		[ 'WooCommerce Admin pages', false, { path: '/customers' } ],
+		[ 'the home screen', false, { page: 'wc-admin' } ],
+	] )(
+		'should not render the activity tab on %s',
+		( _, isEmbedded, query ) => {
+			render(
+				<ActivityPanel isEmbedded={ isEmbedded } query={ query } />
+			);
 
-		expect( screen.getByRole( 'tab', { name: 'Activity' } ) ).toBeDefined();
-	} );
-
-	it( 'should render inbox tab if not on home screen', () => {
-		render(
-			<ActivityPanel query={ { page: 'wc-admin', path: '/customers' } } />
-		);
-
-		expect( screen.getByRole( 'tab', { name: 'Activity' } ) ).toBeDefined();
-	} );
-
-	it( 'should not render inbox tab on home screen', () => {
-		render( <ActivityPanel query={ { page: 'wc-admin' } } /> );
-
-		expect( screen.queryByRole( 'tab', { name: 'Inbox' } ) ).toBeNull();
-	} );
+			expect(
+				screen.queryByRole( 'tab', { name: 'Activity' } )
+			).not.toBeInTheDocument();
+		}
+	);
 
 	it( 'should render preview store tab on home screen', () => {
 		render( <ActivityPanel query={ { page: 'wc-admin' } } /> );

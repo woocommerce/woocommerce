@@ -2702,7 +2702,7 @@ var _items,
 	_initialZoomRunning,
 	_controllerDefaultOptions = {
 		index: 0,
-		errorMsg: '<div class="pswp__error-msg"><a href="%url%" target="_blank">The image</a> could not be loaded.</div>',
+		errorMsg: '<div class="pswp__error-msg">The image could not be loaded.</div>',
 		forceProgressiveLoading: false, // TODO
 		preload: [1,1],
 		getNumItemsFn: function() {
@@ -2872,7 +2872,7 @@ var _getItemAt,
 				item.container.innerHTML = '';
 			}
 
-			item.container.innerHTML = _options.errorMsg.replace('%url%',  item.src );
+			item.container.innerHTML = _options.errorMsg;
 			return true;
 			
 		}

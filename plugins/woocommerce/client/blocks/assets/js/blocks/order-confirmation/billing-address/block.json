@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/order-confirmation-billing-address",
-	"version": "1.0.0",
 	"title": "Billing Address",
 	"description": "Display the order confirmation billing address.",
 	"category": "woocommerce",
@@ -61,6 +60,10 @@
 			"default": "wide"
 		}
 	},
+	"style": [
+		"wc-blocks-style",
+		"file:../order-confirmation-billing-address.css"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

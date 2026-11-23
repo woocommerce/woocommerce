@@ -149,7 +149,7 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 							kind: 'postType',
 							name: 'woo_email',
 							id,
-					  } )
+						} )
 					: undefined;
 			const canUpdate = canUpdateRaw === false ? false : true;
 
@@ -183,7 +183,7 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 		} | null;
 	};
 
-	const meta = postId !== null ? record?.meta ?? null : null;
+	const meta = postId !== null ? ( record?.meta ?? null ) : null;
 	const status =
 		meta && typeof meta._wc_email_template_status === 'string'
 			? ( meta._wc_email_template_status as string )

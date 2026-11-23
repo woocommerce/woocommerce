@@ -163,16 +163,18 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding details for the Payments settings page.
 	 *
-	 * @param string      $location  The location for which we are onboarding.
-	 *                               This is an ISO 3166-1 alpha-2 country code.
-	 * @param string      $rest_path The REST API path to use for constructing REST API URLs.
-	 * @param string|null $source    Optional. The source for the onboarding flow.
+	 * @param string      $location                        The location for which we are onboarding.
+	 *                                                     This is an ISO 3166-1 alpha-2 country code.
+	 * @param string      $rest_path                       The REST API path to use for constructing REST API URLs.
+	 * @param string|null $source                          Optional. The source for the onboarding flow.
+	 * @param bool        $include_wpcom_authorization_url Optional. Whether to include the WPCOM connection authorization URL.
+	 *                                                     Only pass true for the current user's interactive admin session.
 	 *
 	 * @return array The onboarding details.
 	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
 	 * @throws Exception If there were errors when generating the onboarding details.
 	 */
-	public function get_onboarding_details( string $location, string $rest_path, ?string $source = null ): array {
+	public function get_onboarding_details( string $location, string $rest_path, ?string $source = null, bool $include_wpcom_authorization_url = false ): array {
 		// Since getting the onboarding details is not idempotent, we will check it as an action.
 		$this->check_if_onboarding_action_is_acceptable();
 
@@ -199,7 +201,7 @@ class WooPaymentsService {
 			'messages' => array(
 				'not_supported' => ! $onboarding_supported ? $this->provider->get_onboarding_not_supported_message( $gateway, $location ) : null,
 			),
-			'steps'    => $this->get_onboarding_steps( $location, trailingslashit( $rest_path ) . 'step', $source ),
+			'steps'    => $this->get_onboarding_steps( $location, trailingslashit( $rest_path ) . 'step', $source, $include_wpcom_authorization_url ),
 			'context'  => array(
 				'urls' => array(
 					'overview_page' => $this->get_overview_page_url(),
@@ -1654,21 +1656,80 @@ class WooPaymentsService {
 		// Register the site to WPCOM if it is not already registered.
 		// This sets up the site for connection. For new sites, this tends to take a while.
 		// It is a prerequisite to generating the WPCOM/Jetpack authorization URL.
+		// Not forced: the preload runs in the background, before the merchant asks to connect.
 		if ( ! $this->wpcom_connection_manager->is_connected() ) {
-			$result = $this->wpcom_connection_manager->try_registration();
-			if ( is_wp_error( $result ) ) {
-				throw new ApiException(
-					'woocommerce_woopayments_onboarding_action_error',
-					esc_html( $result->get_error_message() ),
-					(int) WP_Http::INTERNAL_SERVER_ERROR,
-					map_deep( (array) $result->get_error_data(), 'esc_html' )
-				);
-			}
+			$result = $this->register_site_with_wpcom( false );
 		}
 
 		return array(
 			'success' => $result,
 		);
+	}
+
+	/**
+	 * Get the URL to send the merchant to for authorizing the WPCOM/Jetpack connection.
+	 *
+	 * Registers the site to WPCOM first, if it is not already registered.
+	 *
+	 * @param string|null $source Optional. The upmost entry point from where the merchant entered the onboarding flow.
+	 *
+	 * @return array {
+	 *     @type string $url The WPCOM/Jetpack authorization URL.
+	 * }
+	 * @throws ApiException If the site could not be registered or the authorization URL could not be generated.
+	 */
+	public function onboarding_wpcom_connection_authorize( ?string $source = null ): array {
+		$this->check_if_onboarding_action_is_acceptable();
+
+		if ( ! $this->is_store_registered_with_wpcom() && ! $this->register_site_with_wpcom( true ) ) {
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_action_error',
+				esc_html__( 'Failed to register the store with WordPress.com.', 'woocommerce' ),
+				(int) WP_Http::INTERNAL_SERVER_ERROR
+			);
+		}
+
+		$source           = $this->validate_onboarding_source( $source );
+		$wpcom_connection = $this->get_wpcom_connection_authorization( $this->get_wpcom_connection_return_url( $source ) );
+		if ( empty( $wpcom_connection['success'] ) || empty( $wpcom_connection['url'] ) ) {
+			$errors = array_values( (array) ( $wpcom_connection['errors'] ?? array() ) );
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_action_error',
+				esc_html( (string) ( $errors[0] ?? __( 'Failed to generate the WordPress.com authorization URL.', 'woocommerce' ) ) ),
+				(int) WP_Http::INTERNAL_SERVER_ERROR
+			);
+		}
+
+		return array(
+			'url' => $wpcom_connection['url'],
+		);
+	}
+
+	/**
+	 * Register the site to WPCOM.
+	 *
+	 * @param bool $force Whether the merchant asked to connect. A forced attempt skips the Jetpack connection
+	 *                    package's offline mode check and the backoff after an earlier failed attempt.
+	 *
+	 * @return bool The registration result.
+	 * @throws ApiException If the registration failed.
+	 */
+	private function register_site_with_wpcom( bool $force ): bool {
+		// Jetpack connection package versions without the `$force` parameter ignore the extra argument.
+		$result = $this->wpcom_connection_manager->try_registration( true, $force );
+		if ( is_wp_error( $result ) ) {
+			$data                            = map_deep( (array) $result->get_error_data(), 'esc_html' );
+			$data['registration_error_code'] = (string) $result->get_error_code();
+
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_action_error',
+				esc_html( $result->get_error_message() ),
+				(int) WP_Http::INTERNAL_SERVER_ERROR,
+				$data // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Error details are escaped above; the registration code is a JSON lookup key.
+			);
+		}
+
+		return (bool) $result;
 	}
 
 	/**
@@ -2133,15 +2194,16 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding details for each step.
 	 *
-	 * @param string      $location  The location for which we are onboarding.
-	 *                               This is an ISO 3166-1 alpha-2 country code.
-	 * @param string      $rest_path The REST API path to use for constructing REST API URLs.
-	 * @param string|null $source    Optional. The source for the onboarding flow.
+	 * @param string      $location                        The location for which we are onboarding.
+	 *                                                     This is an ISO 3166-1 alpha-2 country code.
+	 * @param string      $rest_path                       The REST API path to use for constructing REST API URLs.
+	 * @param string|null $source                          Optional. The source for the onboarding flow.
+	 * @param bool        $include_wpcom_authorization_url Optional. Whether to include the WPCOM connection authorization URL.
 	 *
 	 * @return array[] The list of onboarding steps details.
 	 * @throws Exception If there was an error generating the onboarding steps details.
 	 */
-	private function get_onboarding_steps( string $location, string $rest_path, ?string $source = self::SESSION_ENTRY_DEFAULT ): array {
+	private function get_onboarding_steps( string $location, string $rest_path, ?string $source = self::SESSION_ENTRY_DEFAULT, bool $include_wpcom_authorization_url = false ): array {
 		$steps = array();
 
 		// Add the payment methods onboarding step details, but only if we have recommended payment methods.
@@ -2188,55 +2250,35 @@ class WooPaymentsService {
 
 		// If the WPCOM connection is already set up, we don't need to add anything more.
 		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $wpcom_step['status'] ) {
-			// Craft the return URL.
-			switch ( $source ) {
-				case self::SESSION_ENTRY_LYS:
-					// If the source is LYS, we return the user to the Launch Your Store flow.
-					$return_url = $this->proxy->call_function(
-						'admin_url',
-						'admin.php?page=wc-admin&path=/launch-your-store' . self::ONBOARDING_PATH_BASE . '&sidebar=hub&content=payments'
-					);
-					break;
-				default:
-					// By default, we return the user to the onboarding modal in the Settings > Payments page.
-					$return_url = $this->proxy->call_static(
-						Utils::class,
-						'wc_payments_settings_url',
-						self::ONBOARDING_PATH_BASE
-					);
-					break;
-			}
-
-			// Add standardized query arguments to the return URL.
-			$return_url = add_query_arg(
-				array(
-					// URL query flag so we can properly identify when the user returns
-					// either by accepting or rejecting the WPCOM connection.
-					self::WPCOM_CONNECTION_RETURN_PARAM => '1',
-					// Keep the source.
-					'source'                            => $source,
-					// Attach the `from` parameter to more easily identify where the return request is coming from.
-					'from'                              => self::FROM_WPCOM,
-				),
-				$return_url
-			);
-
-			// Try to generate the authorization URL.
-			$wpcom_connection = $this->get_wpcom_connection_authorization( $return_url );
-			if ( ! $wpcom_connection['success'] ) {
-				// In case of errors, make sure we work with a list of error messages.
-				$wpcom_step['errors'] = array_values( (array) ( $wpcom_connection['errors'] ?? array() ) );
-			}
 			$wpcom_step['actions'] = array(
 				'start' => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_WPCOM_CONNECTION . '/start' ),
 				),
-				'auth'  => array(
-					'type' => self::ACTION_TYPE_REDIRECT,
-					'href' => $wpcom_connection['url'],
-				),
 			);
+
+			if ( $this->is_store_registered_with_wpcom() ) {
+				// The authorization URL is only generated for callers that asked for it.
+				if ( $include_wpcom_authorization_url ) {
+					// The site is already registered, so generating the authorization URL will not register it.
+					$wpcom_connection = $this->get_wpcom_connection_authorization( $this->get_wpcom_connection_return_url( $source ) );
+					if ( ! $wpcom_connection['success'] ) {
+						// In case of errors, make sure we work with a list of error messages.
+						$wpcom_step['errors'] = array_values( (array) ( $wpcom_connection['errors'] ?? array() ) );
+					}
+					$wpcom_step['actions']['auth'] = array(
+						'type' => self::ACTION_TYPE_REDIRECT,
+						'href' => $wpcom_connection['url'],
+					);
+				}
+			} else {
+				// Registering the site is a slow WPCOM request, so it waits for the merchant's click
+				// instead of running every time something reads the onboarding details.
+				$wpcom_step['actions']['authorize'] = array(
+					'type' => self::ACTION_TYPE_REST,
+					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' ),
+				);
+			}
 		}
 
 		$steps[] = $wpcom_step;
@@ -2493,10 +2535,8 @@ class WooPaymentsService {
 	private function get_nox_profile(): array {
 		$nox_profile = $this->proxy->call_function( 'get_option', self::NOX_PROFILE_OPTION_KEY, array() );
 
-		if ( empty( $nox_profile ) ) {
-			$nox_profile = array();
-		} else {
-			$nox_profile = maybe_unserialize( $nox_profile );
+		if ( ! is_array( $nox_profile ) ) {
+			return array();
 		}
 
 		return $nox_profile;
@@ -2815,6 +2855,47 @@ class WooPaymentsService {
 	}
 
 	/**
+	 * Get the URL to return the merchant to after they authorize the WPCOM (Jetpack) connection.
+	 *
+	 * @param string|null $source The upmost entry point from where the merchant entered the onboarding flow.
+	 *
+	 * @return string The return URL.
+	 */
+	private function get_wpcom_connection_return_url( ?string $source ): string {
+		switch ( $source ) {
+			case self::SESSION_ENTRY_LYS:
+				// If the source is LYS, we return the user to the Launch Your Store flow.
+				$return_url = $this->proxy->call_function(
+					'admin_url',
+					'admin.php?page=wc-admin&path=/launch-your-store' . self::ONBOARDING_PATH_BASE . '&sidebar=hub&content=payments'
+				);
+				break;
+			default:
+				// By default, we return the user to the onboarding modal in the Settings > Payments page.
+				$return_url = $this->proxy->call_static(
+					Utils::class,
+					'wc_payments_settings_url',
+					self::ONBOARDING_PATH_BASE
+				);
+				break;
+		}
+
+		// Add standardized query arguments to the return URL.
+		return add_query_arg(
+			array(
+				// URL query flag so we can properly identify when the user returns
+				// either by accepting or rejecting the WPCOM connection.
+				self::WPCOM_CONNECTION_RETURN_PARAM => '1',
+				// Keep the source.
+				'source'                            => $source,
+				// Attach the `from` parameter to more easily identify where the return request is coming from.
+				'from'                              => self::FROM_WPCOM,
+			),
+			$return_url
+		);
+	}
+
+	/**
 	 * Get the store's WPCOM (Jetpack) connection state.
 	 *
 	 * @return array The WPCOM connection state.
@@ -2842,6 +2923,18 @@ class WooPaymentsService {
 	 */
 	private function has_working_wpcom_connection(): bool {
 		return $this->wpcom_connection_manager->is_connected() && $this->wpcom_connection_manager->has_connected_owner();
+	}
+
+	/**
+	 * Check if the store is registered with WPCOM (blog ID and tokens are set), with or without a connected owner.
+	 *
+	 * @return bool Whether the store is registered with WPCOM.
+	 */
+	private function is_store_registered_with_wpcom(): bool {
+		/** @var WPCOM_Connection_Manager $wpcom_connection_manager */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$wpcom_connection_manager = $this->wpcom_connection_manager;
+
+		return (bool) $wpcom_connection_manager->is_connected();
 	}
 
 	/**

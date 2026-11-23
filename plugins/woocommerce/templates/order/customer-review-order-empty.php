@@ -6,7 +6,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.8.0
+ * @version 11.3.0
  *
  * @var WC_Order $order          Order being reviewed.
  * @var int      $reviewed_count Number of items reviewed on this order.
@@ -18,11 +18,11 @@ if ( ! $order instanceof WC_Order ) {
 	return;
 }
 
-$meta_parts = \Automattic\WooCommerce\Internal\OrderReviews\Meta::parts_for_order( $order );
+$meta_line = \Automattic\WooCommerce\Internal\OrderReviews\Meta::line_for_order( $order );
 ?>
 <div class="woocommerce-review-order woocommerce-review-order--empty">
 	<p class="woocommerce-breadcrumb woocommerce-review-order__meta">
-		<?php echo esc_html( implode( ' · ', $meta_parts ) ); ?>
+		<?php echo esc_html( $meta_line ); ?>
 	</p>
 
 	<h1 class="woocommerce-review-order__empty-title">

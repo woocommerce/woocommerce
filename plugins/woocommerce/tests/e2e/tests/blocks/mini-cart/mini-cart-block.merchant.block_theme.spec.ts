@@ -50,10 +50,14 @@ test.describe( 'Merchant → Mini Cart', () => {
 				.getByRole( 'searchbox', { name: 'Search' } )
 				.fill( blockData.slug );
 
-			const miniCartButton = editor.page.getByRole( 'option', {
-				name: blockData.name,
-			} );
+			const miniCartButton = editor.page
+				.getByRole( 'listbox', { name: 'Blocks' } )
+				.getByRole( 'option', {
+					name: blockData.name,
+					exact: true,
+				} );
 
+			await expect( miniCartButton ).toHaveCount( 1 );
 			await expect( miniCartButton ).toBeVisible();
 			await expect( miniCartButton ).toBeDisabled();
 		} );

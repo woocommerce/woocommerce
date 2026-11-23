@@ -9,6 +9,7 @@ import {
 	select,
 } from '@wordpress/data';
 import { controls as dataControls } from '@wordpress/data-controls';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -62,10 +63,17 @@ window.addEventListener( 'load', () => {
 	const cachedCart = persistenceLayer.get();
 	// On login, if a customer had a cart session, the cached cart is equal to the default cart data, with no items.
 	// We need to check if the cached cart has items, otherwise we will wrongly skip the API request.
-	const hasItemsInCachedCart = cachedCart?.itemsCount > 0;
+	const hasItemsInCachedCart = ( cachedCart?.itemsCount ?? 0 ) > 0;
+	// A preloaded cart is fresh and costs no request, so let the resolver use it. The cached cart's hash does not
+	// cover the selected shipping rates, the customer address, or extension data, so it can be stale.
+	const isCartPreloaded = getSetting< string[] >(
+		'preloadedApiRequestPaths',
+		[]
+	).includes( '/wc/store/v1/cart' );
 
 	if (
 		( ! hasCartSession() || hasItemsInCachedCart ) &&
+		! isCartPreloaded &&
 		! isAddingToCart() &&
 		! isEditor() // Don't finish resolution in editor,but only for real carts
 	) {
@@ -77,7 +85,7 @@ window.addEventListener( 'load', () => {
 // Pushes changes whenever the store is updated.
 subscribe( pushChanges, store );
 
-// Emmits event to sync iAPI store.
+// Emits event to sync iAPI store.
 let previousCart: object | null = null;
 subscribe( () => {
 	const cartData = select( STORE_KEY ).getCartData();

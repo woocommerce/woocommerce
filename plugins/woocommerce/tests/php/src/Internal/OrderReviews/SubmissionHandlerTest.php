@@ -17,11 +17,26 @@ use WPAjaxDieContinueException;
 class SubmissionHandlerTest extends WC_Unit_Test_Case {
 
 	/**
+	 * The store's comment_registration setting as the test found it.
+	 *
+	 * @var mixed
+	 */
+	private $comment_registration;
+
+	/**
 	 * Feature flag gates the OrderReviews stack.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->comment_registration = get_option( 'comment_registration' );
 		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
+
+		// The container wires this in production via init(); the test dispatches the
+		// handler directly, so register the moderation-transition hooks here to exercise
+		// the tag lifecycle. WP_UnitTestCase restores hooks on tearDown.
+		$handler = new SubmissionHandler();
+		add_action( 'transition_comment_status', array( $handler, 'clear_auto_rejected_flag' ), 10, 3 );
+		add_action( 'transition_comment_status', array( $handler, 'record_moderator_hold' ), 10, 3 );
 	}
 
 	/**
@@ -32,14 +47,49 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		update_option( 'comment_moderation', '0' );
 		update_option( 'comment_max_links', 2 );
 		update_option( 'moderation_keys', '' );
-		remove_all_filters( 'woocommerce_review_order_submitted' );
-		remove_all_filters( 'woocommerce_review_order_eligible_statuses' );
-		remove_all_filters( 'woocommerce_review_order_eligible_items' );
-		remove_all_filters( 'wp_die_ajax_handler' );
-		remove_all_filters( 'wp_send_json_handler' );
-		remove_all_filters( 'wp_doing_ajax' );
+		update_option( 'disallowed_keys', '' );
+		update_option( 'comment_registration', $this->comment_registration );
 		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 		parent::tearDown();
+	}
+
+	/**
+	 * Dispatch and stop at the first `wp_send_json_*`, the way production does.
+	 * `dispatch()` lets `wp_die()` return, so the handler runs past a refusal
+	 * and the body ends up holding several JSON payloads that will not decode.
+	 *
+	 * The HTTP status is deliberately not returned: `wp_send_json()` only calls
+	 * `status_header()` when `! headers_sent()`, and the suite's bootstrap has
+	 * already written to stdout, so no status is ever set under PHPUnit. The
+	 * message identifies which guard refused instead.
+	 *
+	 * @return array{success:bool, message:string}
+	 */
+	private function dispatch_once(): array {
+
+		add_filter(
+			'wp_die_ajax_handler',
+			function () {
+				return function () {
+					throw new WPAjaxDieContinueException( 'stopped at the first response' );
+				};
+			}
+		);
+		add_filter( 'wp_doing_ajax', '__return_true' );
+
+		ob_start();
+		$handler = new SubmissionHandler();
+		try {
+			$handler->handle();
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		}
+		$decoded = json_decode( (string) ob_get_clean(), true );
+
+		return array(
+			'success' => is_array( $decoded ) && ! empty( $decoded['success'] ),
+			'message' => is_array( $decoded ) ? (string) ( $decoded['data']['message'] ?? '' ) : '',
+		);
 	}
 
 	/**
@@ -47,7 +97,10 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	 */
 	private function make_empty_order(): WC_Order {
 		$order = new WC_Order();
-		$order->set_customer_id( 1 );
+		// Guest order: the order key is the only credential, which is the case
+		// these tests exercise. Orders owned by a registered customer need that
+		// customer's session, covered separately.
+		$order->set_customer_id( 0 );
 		$order->set_billing_first_name( 'Jane' );
 		$order->set_billing_last_name( 'Doe' );
 		$order->set_billing_email( 'jane@example.test' );
@@ -87,7 +140,27 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Build a completed order with one product and the given billing email.
+	 *
+	 * @param string $email Billing email.
+	 * @return array{order:WC_Order, product_ids:int[], item_ids:int[]}
+	 */
+	private function make_order_with_email( string $email ): array {
+		$built = $this->make_order( 1 );
+		$built['order']->set_billing_email( $email );
+		$built['order']->save();
+
+		return $built;
+	}
+
+	/**
 	 * Invoke the handler and capture the JSON it would have sent.
+	 *
+	 * Note that `wp_die_ajax_handler` is filtered to a no-op here, so a
+	 * `wp_send_json_*` does not stop the handler the way it does in production:
+	 * the body can end up holding several payloads and failing to decode, and
+	 * `success` then keeps its `false` default. Assertions beyond "did not
+	 * succeed" belong on `dispatch_once()`.
 	 *
 	 * @return array{success:bool, data:mixed, status:int}
 	 */
@@ -156,9 +229,10 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 			'_wcnonce' => 'not-the-right-nonce',
 		);
 
-		$response = $this->dispatch();
+		$response = $this->dispatch_once();
 
 		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'Security check failed.', $response['message'] );
 	}
 
 	/**
@@ -175,9 +249,10 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
 		);
 
-		$response = $this->dispatch();
+		$response = $this->dispatch_once();
 
 		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'Order not found.', $response['message'] );
 	}
 
 	/**
@@ -891,6 +966,7 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_rejects_when_order_status_ineligible(): void {
 		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
 		$order = $built['order'];
 		$order->set_status( OrderStatus::PROCESSING );
 		$order->save();
@@ -908,9 +984,22 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 			),
 		);
 
-		$response = $this->dispatch();
+		$response = $this->dispatch_once();
 
 		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'Order not found.', $response['message'] );
+		$this->assertSame(
+			0,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			),
+			'A refusal must not store anything.'
+		);
 	}
 
 	/**
@@ -1080,6 +1169,505 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Insert strips markup outside the comment allow-list.
+	 */
+	public function test_insert_strips_disallowed_markup(): void {
+		$built      = $this->make_order( 1 );
+		$order      = $built['order'];
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => '<a href="https://example.test" data-wp-bind--href="state.url" style="position:fixed;inset:0">Nice</a><strong>Good</strong><script>alert(1)</script>',
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
+		$comment  = get_comment( $row['comment_id'] );
+
+		$this->assertStringContainsString( '<strong>Good</strong>', $comment->comment_content );
+		$this->assertStringContainsString( 'href="https://example.test"', $comment->comment_content );
+		$this->assertStringNotContainsString( 'data-wp-bind', $comment->comment_content );
+		$this->assertStringNotContainsString( 'style=', $comment->comment_content );
+		$this->assertStringNotContainsString( '<script', $comment->comment_content );
+		$this->assertSame( '', $comment->comment_author_url );
+	}
+
+	/**
+	 * @testdox Insert strips disallowed markup even when the site has removed the kses filters.
+	 */
+	public function test_insert_strips_disallowed_markup_with_kses_filters_removed(): void {
+		kses_remove_filters();
+
+		try {
+			$built      = $this->make_order( 1 );
+			$order      = $built['order'];
+			$product_id = $built['product_ids'][0];
+			$item_id    = $built['item_ids'][0];
+
+			$_POST = array(
+				'order_id' => $order->get_id(),
+				'key'      => $order->get_order_key(),
+				'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+				'reviews'  => array(
+					array(
+						'product_id'    => $product_id,
+						'order_item_id' => $item_id,
+						'rating'        => 5,
+						'text'          => '<a href="https://example.test" data-wp-bind--href="state.url" style="position:fixed;inset:0">Nice</a><strong>Good</strong><script>alert(1)</script>',
+					),
+				),
+			);
+
+			$response = $this->dispatch();
+			$row      = reset( $response['data']['results'] );
+			$comment  = get_comment( $row['comment_id'] );
+
+			$this->assertStringNotContainsString( 'data-wp-bind', $comment->comment_content );
+			$this->assertStringNotContainsString( 'style=', $comment->comment_content );
+			$this->assertStringNotContainsString( '<script', $comment->comment_content );
+		} finally {
+			kses_init_filters();
+		}
+	}
+
+	/**
+	 * @testdox Guest billing name with markup is stripped from the stored comment author.
+	 */
+	public function test_insert_strips_markup_from_guest_billing_name(): void {
+		$order = new WC_Order();
+		$order->set_billing_first_name( '<img src=x onerror=alert(1)>Jane' );
+		$order->set_billing_last_name( '' );
+		$order->set_billing_email( 'jane@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$items   = array_values( $order->get_items() );
+		$item_id = $items[0]->get_id();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product->get_id(),
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => 'Nice.',
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
+		$comment  = get_comment( $row['comment_id'] );
+
+		$this->assertStringNotContainsString( '<img', $comment->comment_author );
+		$this->assertStringNotContainsString( 'onerror', $comment->comment_author );
+		$this->assertStringContainsString( 'Jane', $comment->comment_author );
+	}
+
+	/**
+	 * @testdox A guest billing name consisting only of markup falls back to the anonymous author label.
+	 */
+	public function test_insert_falls_back_to_anonymous_when_name_is_only_markup(): void {
+		$order = new WC_Order();
+		$order->set_billing_first_name( '<img src=x onerror=alert(1)>' );
+		$order->set_billing_last_name( '' );
+		$order->set_billing_email( 'jane@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$items   = array_values( $order->get_items() );
+		$item_id = $items[0]->get_id();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product->get_id(),
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => 'Nice.',
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
+		$comment  = get_comment( $row['comment_id'] );
+
+		$this->assertSame( __( 'Anonymous', 'woocommerce' ), $comment->comment_author );
+	}
+
+	/**
+	 * @testdox Billing email with an ampersand round-trips verbatim and a resubmit reuses the same comment.
+	 */
+	public function test_insert_preserves_ampersand_in_billing_email_and_resubmit_reuses_comment(): void {
+		$order = new WC_Order();
+		$order->set_billing_first_name( 'Jane' );
+		$order->set_billing_last_name( 'Doe' );
+		$order->set_billing_email( 'a&b@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$items   = array_values( $order->get_items() );
+		$item_id = $items[0]->get_id();
+
+		$_POST      = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product->get_id(),
+					'order_item_id' => $item_id,
+					'rating'        => 4,
+					'text'          => 'First take.',
+				),
+			),
+		);
+		$first      = $this->dispatch();
+		$first_row  = reset( $first['data']['results'] );
+		$comment_id = (int) $first_row['comment_id'];
+
+		$comment = get_comment( $comment_id );
+		$this->assertSame( 'a&b@example.test', $comment->comment_author_email );
+
+		$_POST      = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product->get_id(),
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => 'Second take.',
+				),
+			),
+		);
+		$second     = $this->dispatch();
+		$second_row = reset( $second['data']['results'] );
+
+		$this->assertSame( $comment_id, (int) $second_row['comment_id'], 'Resubmit must reuse the same comment.' );
+	}
+
+	/**
+	 * @testdox A moderator's trash verdict still blocks resubmission after the shopper has edited the review.
+	 * @testWith ["a+b@example.test"]
+	 *           ["a&b@example.test"]
+	 *           ["o'neil&b@example.test"]
+	 *
+	 * @param string $email Billing email to run the flow with.
+	 */
+	public function test_trash_verdict_survives_an_edit( string $email ): void {
+		$built   = $this->make_order_with_email( $email );
+		$order   = $built['order'];
+		$product = $built['product_ids'][0];
+		$item    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $order, $product, $item, 4, 'First take.' );
+
+		// The edit is the step that used to re-encode the stored address.
+		$second = $this->submit_review( $order, $product, $item, 5, 'Second take.' );
+		$this->assertSame( (int) $first['comment_id'], (int) $second['comment_id'], 'The edit must reuse the row.' );
+
+		wp_trash_comment( (int) $first['comment_id'] );
+
+		$third = $this->submit_review( $order, $product, $item, 5, 'Third take.' );
+
+		$this->assertSame( 'error', $third['status'], 'A trashed review must block resubmission.' );
+		$this->assertSame( 'update_failed', $third['error'] );
+		$this->assertCount(
+			1,
+			get_comments(
+				array(
+					'post_id' => $product,
+					'type'    => 'review',
+					'status'  => 'any',
+				)
+			),
+			'The refusal must not leave a second review behind.'
+		);
+	}
+
+	/**
+	 * @testdox Editing a review leaves an ampersand in the stored author email unencoded.
+	 */
+	public function test_edit_does_not_encode_the_stored_author_email(): void {
+		$built   = $this->make_order_with_email( 'a&b@example.test' );
+		$order   = $built['order'];
+		$product = $built['product_ids'][0];
+		$item    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $order, $product, $item, 4, 'First take.' );
+		$this->submit_review( $order, $product, $item, 5, 'Second take.' );
+
+		$comment = get_comment( (int) $first['comment_id'] );
+
+		$this->assertSame( 'a&b@example.test', $comment->comment_author_email );
+	}
+
+	/**
+	 * @testdox A trashed review is found whatever the stored author email says.
+	 */
+	public function test_trash_verdict_is_found_whatever_the_stored_email(): void {
+		global $wpdb;
+
+		$stored = 'drifted-past-recognition@example.test';
+
+		$built   = $this->make_order_with_email( 'a&b@example.test' );
+		$order   = $built['order'];
+		$product = $built['product_ids'][0];
+		$item    = $built['item_ids'][0];
+
+		$first      = $this->submit_review( $order, $product, $item, 4, 'First take.' );
+		$comment_id = (int) $first['comment_id'];
+
+		// Stand in for a row another wp_update_comment() caller has drifted. Each write adds
+		// another step, so the lookups key on the order instead of chasing the address.
+		$wpdb->update(
+			$wpdb->comments,
+			array( 'comment_author_email' => $stored ),
+			array( 'comment_ID' => $comment_id )
+		);
+		clean_comment_cache( $comment_id );
+		$this->assertSame(
+			$stored,
+			get_comment( $comment_id )->comment_author_email,
+			'The simulated drifted row must actually be encoded, or this proves nothing.'
+		);
+
+		wp_trash_comment( $comment_id );
+
+		$second = $this->submit_review( $order, $product, $item, 5, 'Second take.' );
+
+		$this->assertSame( 'error', $second['status'], 'A drifted row must still be found.' );
+		$this->assertSame( 'update_failed', $second['error'] );
+		$this->assertCount(
+			1,
+			get_comments(
+				array(
+					'post_id' => $product,
+					'type'    => 'review',
+					'status'  => 'any',
+				)
+			),
+			'The refusal must not leave a second review behind.'
+		);
+	}
+
+	/**
+	 * @testdox A trashed review still blocks resubmission on an order with no billing email.
+	 */
+	public function test_trash_verdict_holds_for_an_order_without_a_billing_email(): void {
+		// Built without an address rather than by clearing one: WC_Order keeps the stored
+		// value when an existing billing email is set back to an empty string.
+		$order = new WC_Order();
+		$order->set_billing_first_name( 'Phone' );
+		$order->set_billing_last_name( 'Order' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$wc_product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $wc_product, 1 );
+		$order->save();
+
+		$items   = array_values( $order->get_items() );
+		$product = $wc_product->get_id();
+		$item    = $items[0]->get_id();
+
+		$this->assertSame(
+			'',
+			wc_get_order( $order->get_id() )->get_billing_email(),
+			'The order must really have no billing email, or this proves nothing.'
+		);
+
+		$first = $this->submit_review( $order, $product, $item, 4, 'First take.' );
+		wp_trash_comment( (int) $first['comment_id'] );
+
+		$second = $this->submit_review( $order, $product, $item, 5, 'Second take.' );
+
+		$this->assertSame( 'error', $second['status'], 'The guard must not depend on a billing email.' );
+		$this->assertSame( 'update_failed', $second['error'] );
+		$this->assertCount(
+			1,
+			get_comments(
+				array(
+					'post_id' => $product,
+					'type'    => 'review',
+					'status'  => 'any',
+				)
+			),
+			'The refusal must not leave a second review behind.'
+		);
+	}
+
+	/**
+	 * @testdox Editing a review leaves another comment's author email alone.
+	 */
+	public function test_edit_does_not_rewrite_another_comments_author_email(): void {
+		$built   = $this->make_order_with_email( 'a&b@example.test' );
+		$order   = $built['order'];
+		$product = $built['product_ids'][0];
+		$item    = $built['item_ids'][0];
+
+		$this->submit_review( $order, $product, $item, 4, 'First take.' );
+
+		$bystander_id = (int) self::factory()->comment->create(
+			array(
+				'comment_post_ID'      => $product,
+				'comment_author_email' => 'bystander@example.test',
+			)
+		);
+
+		// Stand in for a plugin that updates a different comment from inside this update.
+		$meddle = function ( $data, $comment ) use ( $bystander_id ) {
+			if ( (int) $comment['comment_ID'] !== $bystander_id ) {
+				wp_update_comment(
+					array(
+						'comment_ID'      => $bystander_id,
+						'comment_content' => 'Touched.',
+					)
+				);
+			}
+
+			return $data;
+		};
+		add_filter( 'wp_update_comment_data', $meddle, 10, 2 );
+		try {
+			$this->submit_review( $order, $product, $item, 5, 'Second take.' );
+		} finally {
+			remove_filter( 'wp_update_comment_data', $meddle, 10 );
+		}
+
+		$this->assertSame(
+			'Touched.',
+			get_comment( $bystander_id )->comment_content,
+			'The nested update must actually have run, or this proves nothing.'
+		);
+		$this->assertSame(
+			'bystander@example.test',
+			get_comment( $bystander_id )->comment_author_email,
+			'The override must apply to the review being edited, not to every comment update.'
+		);
+	}
+
+	/**
+	 * @testdox A logged-in admin who owns the order resubmitting disallowed markup gets it stripped on update too.
+	 */
+	public function test_resubmit_by_owning_admin_strips_disallowed_markup_on_update(): void {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$built      = $this->make_order( 1 );
+		$order      = $built['order'];
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+		$order->set_customer_id( $admin_id );
+		$order->save();
+
+		$_POST      = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 3,
+					'text'          => 'Plain text first.',
+				),
+			),
+		);
+		$first      = $this->dispatch();
+		$first_row  = reset( $first['data']['results'] );
+		$comment_id = (int) $first_row['comment_id'];
+
+		$_POST      = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => '<span data-wp-bind--href="state.url" style="position:fixed">Updated</span>',
+				),
+			),
+		);
+		$second     = $this->dispatch();
+		$second_row = reset( $second['data']['results'] );
+
+		$this->assertSame( $comment_id, (int) $second_row['comment_id'] );
+
+		$comment = get_comment( $comment_id );
+		$this->assertStringNotContainsString( 'data-wp-bind', $comment->comment_content );
+		$this->assertStringNotContainsString( 'style=', $comment->comment_content );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Quotes and backslashes in review text round-trip verbatim.
+	 */
+	public function test_insert_preserves_quotes_and_backslashes(): void {
+		$built      = $this->make_order( 1 );
+		$order      = $built['order'];
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		// $_POST is normally already magic-quoted by wp_magic_quotes() before the
+		// handler unslashes it; simulate that here so a literal backslash survives.
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => wp_slash( 'It\'s "great" \o/' ),
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
+		$comment  = get_comment( $row['comment_id'] );
+
+		$this->assertSame( 'It\'s "great" \o/', $comment->comment_content );
+	}
+
+	/**
 	 * @testdox A row for a fully-refunded line item is rejected via the eligible-items filter.
 	 */
 	public function test_rejects_row_for_fully_refunded_item(): void {
@@ -1138,5 +1726,738 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertSame( 0, $total );
+	}
+
+	/**
+	 * Submit review rows for an order and return the per-row results.
+	 *
+	 * @param WC_Order $order The order being reviewed.
+	 * @param array    $rows  Rows with product_id, order_item_id, rating and text.
+	 * @return array Result rows, in submission order.
+	 */
+	private function submit_rows( WC_Order $order, array $rows ): array {
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => $rows,
+		);
+
+		$response = $this->dispatch();
+		$results  = array_values( (array) ( $response['data']['results'] ?? array() ) );
+		$this->assertCount( count( $rows ), $results, 'Each submitted row should produce a result.' );
+
+		return $results;
+	}
+
+	/**
+	 * Submit a single-row review for the given order item.
+	 *
+	 * @param WC_Order $order      The order being reviewed.
+	 * @param int      $product_id Product ID of the row.
+	 * @param int      $item_id    Order item ID of the row.
+	 * @param int      $rating     Star rating.
+	 * @param string   $text       Review text.
+	 * @return array Result row for the submitted review.
+	 */
+	private function submit_review( WC_Order $order, int $product_id, int $item_id, int $rating, string $text ): array {
+		$results = $this->submit_rows(
+			$order,
+			array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => $rating,
+					'text'          => $text,
+				),
+			)
+		);
+
+		return $results[0];
+	}
+
+	/**
+	 * @testdox An approved review is included in the product's average rating, rating counts and review count.
+	 */
+	public function test_approved_review_updates_product_rating_aggregates(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+
+		$row = $this->submit_review( $built['order'], $product_id, $built['item_ids'][0], 5, 'Great.' );
+		$this->assertSame( 'ok', $row['status'] );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 5, (float) $product->get_average_rating() );
+		$this->assertSame( array( 5 => 1 ), $product->get_rating_counts() );
+		$this->assertSame( 1, $product->get_review_count() );
+	}
+
+	/**
+	 * @testdox Editing an approved review's rating updates the product aggregates to the new rating.
+	 * @testWith ["Great."]
+	 *           ["Changed my mind."]
+	 *
+	 * @param string $edited_text Text sent with the edit; the original text keeps the row's moderation state.
+	 */
+	public function test_editing_approved_review_updates_product_rating_aggregates( string $edited_text ): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Great.' );
+		$edit  = $this->submit_review( $built['order'], $product_id, $item_id, 2, $edited_text );
+		$this->assertSame( 'ok', $edit['status'] );
+		$this->assertSame( $first['comment_id'], $edit['comment_id'] );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 2, (float) $product->get_average_rating() );
+		$this->assertSame( array( 2 => 1 ), $product->get_rating_counts() );
+		$this->assertSame( 1, $product->get_review_count() );
+	}
+
+	/**
+	 * @testdox A review held for moderation is not counted until it is approved.
+	 */
+	public function test_held_review_is_counted_only_after_approval(): void {
+		update_option( 'comment_moderation', '1' );
+
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+
+		$row = $this->submit_review( $built['order'], $product_id, $built['item_ids'][0], 4, 'Pending.' );
+		$this->assertSame( 'pending_moderation', $row['status'] );
+		$this->assertSame( array(), wc_get_product( $product_id )->get_rating_counts() );
+
+		wp_set_comment_status( $row['comment_id'], 'approve' );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 4, (float) $product->get_average_rating() );
+		$this->assertSame( array( 4 => 1 ), $product->get_rating_counts() );
+	}
+
+	/**
+	 * @testdox A held review is counted once an edit removes the text that held it.
+	 */
+	public function test_held_review_approved_by_edit_updates_product_rating_aggregates(): void {
+		update_option( 'moderation_keys', 'hold-this' );
+
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$held = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Please hold-this review.' );
+		$this->assertSame( 'pending_moderation', $held['status'] );
+
+		$edit = $this->submit_review( $built['order'], $product_id, $item_id, 3, 'Clean text now.' );
+		$this->assertSame( 'ok', $edit['status'] );
+		$this->assertSame( $held['comment_id'], $edit['comment_id'] );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 3, (float) $product->get_average_rating() );
+		$this->assertSame( array( 3 => 1 ), $product->get_rating_counts() );
+		$this->assertSame( 1, $product->get_review_count() );
+	}
+
+	/**
+	 * @testdox An edit does not lift a hold a moderator set with Unapprove.
+	 */
+	public function test_edit_does_not_lift_a_moderators_unapprove(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Never arrived. Scam shop.' );
+		$this->assertSame( 'ok', $first['status'] );
+
+		// What the Unapprove row action under Products > Reviews does.
+		wp_set_comment_status( (int) $first['comment_id'], 'hold' );
+
+		$edit = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Never arrived. Scam shop!' );
+
+		$this->assertSame( $first['comment_id'], $edit['comment_id'], 'The edit must still reuse the row.' );
+		$this->assertSame( 'pending_moderation', $edit['status'] );
+		$this->assertSame(
+			'unapproved',
+			wp_get_comment_status( (int) $first['comment_id'] ),
+			'Approving a pending review is a staff action; an edit must not do it.'
+		);
+		$this->assertStringContainsString(
+			'Scam shop!',
+			get_comment( (int) $first['comment_id'] )->comment_content,
+			'The edit itself still applies; only the status is held back.'
+		);
+	}
+
+	/**
+	 * @testdox A disallowed-keys verdict still applies to a review a moderator put on hold.
+	 */
+	public function test_disallowed_edit_of_a_moderator_held_review_is_still_rejected(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Fine at first.' );
+		wp_set_comment_status( (int) $first['comment_id'], 'hold' );
+
+		update_option( 'disallowed_keys', 'casino-bonus' );
+		$this->submit_review( $built['order'], $product_id, $item_id, 5, 'Try my casino-bonus link.' );
+
+		$this->assertContains(
+			wp_get_comment_status( (int) $first['comment_id'] ),
+			array( 'trash', 'spam' ),
+			"A moderator's hold must not shield content the disallowed list rejects."
+		);
+	}
+
+	/**
+	 * @testdox A hold this handler applied is still lifted by a corrected edit.
+	 */
+	public function test_handlers_own_hold_stays_liftable(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$this->submit_review( $built['order'], $product_id, $item_id, 5, 'Clean to start.' );
+
+		update_option( 'moderation_keys', 'hold-this' );
+		$held = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Now with hold-this in it.' );
+		$this->assertSame( 'pending_moderation', $held['status'] );
+
+		update_option( 'moderation_keys', '' );
+		$clean = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Clean again.' );
+
+		$this->assertSame( 'ok', $clean['status'], "The handler's own hold must not read as a moderator's." );
+	}
+
+	/**
+	 * @testdox An Unapprove is recorded on the review; a hold the checks applied is not.
+	 */
+	public function test_only_a_moderators_hold_is_recorded(): void {
+		$built = $this->make_order( 2 );
+
+		$approved = $this->submit_review( $built['order'], $built['product_ids'][0], $built['item_ids'][0], 5, 'Clean enough.' );
+		wp_set_comment_status( (int) $approved['comment_id'], 'hold' );
+
+		update_option( 'moderation_keys', 'hold-this' );
+		$auto = $this->submit_review( $built['order'], $built['product_ids'][1], $built['item_ids'][1], 5, 'Please hold-this one.' );
+
+		$this->assertNotEmpty(
+			get_comment_meta( (int) $approved['comment_id'], '_wc_moderator_held', true ),
+			"A moderator's Unapprove must be recorded."
+		);
+		$this->assertEmpty(
+			get_comment_meta( (int) $auto['comment_id'], '_wc_moderator_held', true ),
+			'An automatic hold must stay unrecorded so an edit can lift it.'
+		);
+	}
+
+	/**
+	 * @testdox An ordinary comment a moderator unapproves is left alone.
+	 */
+	public function test_moderator_hold_is_not_recorded_on_other_comment_types(): void {
+		$comment_id = (int) self::factory()->comment->create(
+			array(
+				'comment_post_ID'  => self::factory()->post->create(),
+				'comment_approved' => 1,
+			)
+		);
+
+		wp_set_comment_status( $comment_id, 'hold' );
+
+		$this->assertEmpty(
+			get_comment_meta( $comment_id, '_wc_moderator_held', true ),
+			'The listener runs for every comment on the site; it must only touch reviews.'
+		);
+	}
+
+	/**
+	 * @testdox A review held before this tag existed can still be lifted by an edit.
+	 */
+	public function test_untagged_hold_is_still_liftable(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		// Stand in for a row held on a site that upgraded into this change.
+		$comment_id = (int) wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product_id,
+				'comment_author'       => 'Jane',
+				'comment_author_email' => $built['order']->get_billing_email(),
+				'comment_content'      => 'Held before the tag existed.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 0,
+			)
+		);
+		add_comment_meta( $comment_id, 'rating', 4, true );
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $built['order']->get_id(), true );
+		add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, 0, true );
+
+		$edit = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Corrected text.' );
+
+		$this->assertSame( $comment_id, (int) $edit['comment_id'], 'The edit must reuse the existing row.' );
+		$this->assertSame( 'ok', $edit['status'], 'An untagged hold predates the tag and stays liftable.' );
+
+		// Staff acting on it afterwards is what records the hold for the future.
+		wp_set_comment_status( $comment_id, 'hold' );
+
+		$this->assertNotEmpty(
+			get_comment_meta( $comment_id, '_wc_moderator_held', true ),
+			'The next staff action records the hold, so a later edit cannot lift it.'
+		);
+	}
+
+	/**
+	 * @testdox A rejected edit does not launder away a moderator's hold.
+	 */
+	public function test_auto_rejected_detour_does_not_lift_a_moderators_unapprove(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Fine at first.' );
+		wp_set_comment_status( (int) $first['comment_id'], 'hold' );
+
+		// A deliberately rejected edit moves the row out of hold and tags it auto-rejected.
+		update_option( 'disallowed_keys', 'casino-bonus' );
+		$this->submit_review( $built['order'], $product_id, $item_id, 5, 'Try my casino-bonus link.' );
+
+		// Clean text now reuses that rejected row, which must not come back approved.
+		update_option( 'disallowed_keys', '' );
+		$third = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Perfectly ordinary text.' );
+
+		$this->assertNotSame(
+			'approved',
+			wp_get_comment_status( (int) $first['comment_id'] ),
+			"A rejected edit must not clear the moderator's hold."
+		);
+		$this->assertSame( 'pending_moderation', $third['status'] );
+	}
+
+	/**
+	 * @testdox Once a moderator has acted on an automatically held review, a later edit cannot approve it.
+	 */
+	public function test_edit_does_not_lift_an_unapprove_that_followed_an_automatic_hold(): void {
+		update_option( 'moderation_keys', 'hold-this' );
+
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$held = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Please hold-this review.' );
+		$this->assertSame( 'pending_moderation', $held['status'] );
+
+		// The moderator approves it, then changes their mind. The second transition
+		// leaves a hold that is theirs, not one the checks applied.
+		wp_set_comment_status( (int) $held['comment_id'], 'approve' );
+		wp_set_comment_status( (int) $held['comment_id'], 'hold' );
+
+		$edit = $this->submit_review( $built['order'], $product_id, $item_id, 4, 'Clean text now.' );
+
+		$this->assertSame( 'pending_moderation', $edit['status'] );
+		$this->assertSame( 'unapproved', wp_get_comment_status( (int) $held['comment_id'] ) );
+	}
+
+	/**
+	 * @testdox Reviews for two variations in one submission are both included in the parent product's aggregates.
+	 */
+	public function test_variation_reviews_update_parent_aggregates(): void {
+		$variable      = WC_Helper_Product::create_variation_product();
+		$variation_ids = $variable->get_children();
+		$variation_a   = wc_get_product( $variation_ids[0] );
+		$variation_b   = wc_get_product( $variation_ids[1] );
+
+		$order = $this->make_empty_order();
+		$order->add_product( $variation_a, 1 );
+		$order->add_product( $variation_b, 1 );
+		$order->save();
+		$items = array_values( $order->get_items() );
+
+		$results = $this->submit_rows(
+			$order,
+			array(
+				array(
+					'product_id'    => $variation_a->get_id(),
+					'order_item_id' => $items[0]->get_id(),
+					'rating'        => 5,
+					'text'          => 'Loved variation A.',
+				),
+				array(
+					'product_id'    => $variation_b->get_id(),
+					'order_item_id' => $items[1]->get_id(),
+					'rating'        => 3,
+					'text'          => 'Variation B was just OK.',
+				),
+			)
+		);
+		$this->assertSame( array( 'ok', 'ok' ), array_column( $results, 'status' ) );
+
+		$parent = wc_get_product( $variable->get_id() );
+		$this->assertEquals( 4, (float) $parent->get_average_rating() );
+		$this->assertSame(
+			array(
+				3 => 1,
+				5 => 1,
+			),
+			$parent->get_rating_counts()
+		);
+		$this->assertSame( 2, $parent->get_review_count() );
+	}
+
+	/**
+	 * @testdox A review auto-rejected for a disallowed word is counted once a clean resubmission approves it.
+	 */
+	public function test_resubmission_after_auto_rejection_updates_product_rating_aggregates(): void {
+		update_option( 'disallowed_keys', 'casino-bonus' );
+
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$rejected = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Visit casino-bonus now.' );
+		$this->assertContains( wp_get_comment_status( $rejected['comment_id'] ), array( 'spam', 'trash' ) );
+		$this->assertSame( array(), wc_get_product( $product_id )->get_rating_counts() );
+
+		$resubmitted = $this->submit_review( $built['order'], $product_id, $item_id, 4, 'Clean text this time.' );
+		$this->assertSame( 'ok', $resubmitted['status'] );
+		$this->assertSame( $rejected['comment_id'], $resubmitted['comment_id'] );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 4, (float) $product->get_average_rating() );
+		$this->assertSame( array( 4 => 1 ), $product->get_rating_counts() );
+		$this->assertSame( 1, $product->get_review_count() );
+	}
+
+	/**
+	 * `make_order()` is a guest order, where requires_owner_login() is false by
+	 * construction, so only a registered-customer order shows the key is checked
+	 * before the login requirement.
+	 *
+	 * @testdox A bad key on a registered customer's order is not answered with a login prompt.
+	 */
+	public function test_key_check_outranks_the_login_requirement(): void {
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+		$order->set_customer_id( self::factory()->user->create() );
+		$order->save();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => 'wc_order_NOPE',
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		$response = $this->dispatch_once();
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame(
+			'Order not found.',
+			$response['message'],
+			'A login prompt here would confirm the order exists and who owns it.'
+		);
+	}
+
+	/**
+	 * Neither new predicate fires for a signed-in visitor, so this pre-existing
+	 * check is the only thing standing between a leaked key and somebody else's
+	 * order. The page side is covered by EndpointTest::test_404_when_logged_in_customer_mismatch.
+	 *
+	 * @testdox A signed-in visitor cannot submit against another customer's order.
+	 */
+	public function test_rejects_a_submission_from_a_signed_in_non_owner(): void {
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+		$order->set_customer_id( self::factory()->user->create() );
+		$order->save();
+
+		wp_set_current_user( self::factory()->user->create() );
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		$response = $this->dispatch_once();
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'This order belongs to a different account, so you cannot review it.', $response['message'] );
+		$this->assertSame(
+			0,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			),
+			'A refusal must not store anything.'
+		);
+	}
+
+	/**
+	 * The page refuses an ineligible status before it considers who is asking,
+	 * so the submit handler has to answer the same way round. Otherwise a 403
+	 * saying a sign-in would help confirms an order the page just 404'd.
+	 *
+	 * @testdox An ineligible status is reported the same way as on the page, whoever is asking.
+	 */
+	public function test_ineligible_status_outranks_the_login_requirement(): void {
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+		$order->set_customer_id( self::factory()->user->create() );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		$response = $this->dispatch_once();
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'Order not found.', $response['message'] );
+		$this->assertSame(
+			0,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			),
+			'A refusal must not store anything.'
+		);
+	}
+
+	/**
+	 * @testdox A signed-out visitor cannot submit against a registered customer's order.
+	 */
+	public function test_rejects_a_signed_out_submission_for_a_registered_customers_order(): void {
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+		$order->set_customer_id( self::factory()->user->create() );
+		$order->save();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		$response = $this->dispatch_once();
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'Please log in to your account to review this order.', $response['message'] );
+		$this->assertSame(
+			0,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			),
+			'A refusal must not store anything.'
+		);
+	}
+
+	/**
+	 * @testdox A store that requires registration to comment rejects a signed-out submission.
+	 */
+	public function test_rejects_a_signed_out_submission_when_the_store_requires_registration(): void {
+		update_option( 'comment_registration', 1 );
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		$response = $this->dispatch_once();
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'You must be logged in to post a review.', $response['message'] );
+		$this->assertSame(
+			0,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			),
+			'A refusal must not store anything.'
+		);
+	}
+
+	/**
+	 * @testdox A signed-in shopper can still submit when the store requires registration.
+	 */
+	public function test_accepts_a_signed_in_submission_when_the_store_requires_registration(): void {
+		update_option( 'comment_registration', 1 );
+		wp_set_current_user( self::factory()->user->create() );
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		$response = $this->dispatch_once();
+
+		// `handle()` answers success even when every row failed, so check a
+		// review was actually stored rather than just the envelope.
+		$this->assertTrue( $response['success'] );
+		$this->assertSame(
+			1,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Turning the known-shopper filter off does not unblock submission when an account is also required.
+	 */
+	public function test_known_shopper_filter_does_not_override_the_account_requirement(): void {
+		update_option( 'comment_registration', 1 );
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+		$order->set_customer_id( self::factory()->user->create() );
+		$order->save();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		add_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
+		$response = $this->dispatch_once();
+		remove_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'You must be logged in to post a review.', $response['message'] );
+	}
+
+	/**
+	 * @testdox The known-shopper filter unblocks the submit path as well as the page.
+	 */
+	public function test_verify_known_shoppers_filter_unblocks_the_submit_path(): void {
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+		$order->set_customer_id( self::factory()->user->create() );
+		$order->save();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		add_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
+		$response = $this->dispatch_once();
+		remove_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
+
+		$this->assertTrue( $response['success'] );
+		$this->assertSame(
+			1,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			)
+		);
 	}
 }

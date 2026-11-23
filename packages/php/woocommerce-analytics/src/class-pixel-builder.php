@@ -171,46 +171,54 @@ class Pixel_Builder {
 	/**
 	 * Sanitize property values for URL serialization.
 	 *
-	 * Converts array values to appropriate formats to prevent http_build_query()
-	 * from creating bracket notation (e.g., prop[0], prop[1]) which violates
-	 * the property name regex.
+	 * Flattens array and object values so http_build_query() does not create
+	 * bracket notation (e.g., prop[0], prop[1]) which violates the property name regex.
 	 *
 	 * @param array $properties Event properties.
 	 * @return array Sanitized properties.
 	 */
 	private static function sanitize_property_values( $properties ) {
-		foreach ( $properties as $key => $value ) {
-			if ( ! is_array( $value ) ) {
-				continue;
-			}
+		return array_map( array( __CLASS__, 'flatten_property_value' ), $properties );
+	}
 
-			if ( empty( $value ) ) {
-				// Empty array becomes empty string.
-				$properties[ $key ] = '';
-				continue;
-			}
+	/**
+	 * Reduce one property value to the scalar that goes into the pixel URL.
+	 *
+	 * Indexed arrays of scalars become a comma-joined string; other arrays and objects become JSON.
+	 * Not URL-encoded here: http_build_query() encodes the whole URL, so encoding twice stores `%2F` in Tracks.
+	 *
+	 * @internal Shared with WC_Analytics_Tracking's payload budget; the format may change.
+	 *
+	 * @since 0.18.1
+	 *
+	 * @param mixed $value Property value.
+	 * @return mixed The scalar it serializes to: '' for an empty array or a value JSON cannot encode; scalars and null as-is.
+	 */
+	public static function flatten_property_value( $value ) {
+		if ( ! is_array( $value ) && ! is_object( $value ) ) {
+			return $value;
+		}
 
-			// Check if array is indexed (not associative) and contains only scalar values.
-			$is_indexed_array = array_keys( $value ) === range( 0, count( $value ) - 1 );
-			$has_scalar_only  = ! array_filter(
+		if ( array() === $value ) {
+			return '';
+		}
+
+		$is_scalar_list = is_array( $value )
+			&& array_keys( $value ) === range( 0, count( $value ) - 1 )
+			&& ! array_filter(
 				$value,
-				function ( $item ) {
+				static function ( $item ) {
 					return is_array( $item ) || is_object( $item );
 				}
 			);
 
-			if ( $is_indexed_array && $has_scalar_only ) {
-				// Indexed arrays with scalar values: join as comma string.
-				$properties[ $key ] = implode( ',', array_map( 'strval', $value ) );
-				continue;
-			}
-
-			// Associative arrays or nested arrays become JSON strings.
-			$encoded            = wp_json_encode( $value, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES );
-			$properties[ $key ] = ( false === $encoded ) ? '' : $encoded;
+		if ( $is_scalar_list ) {
+			return implode( ',', $value );
 		}
 
-		return $properties;
+		$encoded = wp_json_encode( $value, JSON_UNESCAPED_SLASHES );
+
+		return false === $encoded ? '' : $encoded;
 	}
 
 	/**

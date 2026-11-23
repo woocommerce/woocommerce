@@ -53,7 +53,7 @@ describe( 'ValidatedTextInput', () => {
 			select( validationStore ).getValidationError( 'test-input' )
 		).not.toBe( undefined );
 
-		const textInputElement = await screen.getByLabelText( 'Test Input' );
+		const textInputElement = screen.getByLabelText( 'Test Input' );
 
 		await act( async () => {
 			await user.type( textInputElement, 'New value' );
@@ -85,7 +85,7 @@ describe( 'ValidatedTextInput', () => {
 		await expect(
 			select( validationStore ).getValidationError( 'textinput-1' )
 		).not.toBe( undefined );
-		const textInputElement = await screen.getByLabelText( 'Test Input' );
+		const textInputElement = screen.getByLabelText( 'Test Input' );
 
 		await act( async () => {
 			await userEvent.type( textInputElement, 'New value' );
@@ -114,7 +114,7 @@ describe( 'ValidatedTextInput', () => {
 				},
 			} )
 		);
-		const customErrorMessageElement = await screen.getByText(
+		const customErrorMessageElement = screen.getByText(
 			'Custom error message'
 		);
 		expect(
@@ -143,7 +143,7 @@ describe( 'ValidatedTextInput', () => {
 				},
 			} )
 		);
-		const errorMessageElement = await screen.getByText( 'Error message 3' );
+		const errorMessageElement = screen.getByText( 'Error message 3' );
 		await expect( errorMessageElement ).toBeInTheDocument();
 		expect( screen.getByRole( 'textbox' ) ).toHaveAccessibleErrorMessage(
 			'Error message 3'
@@ -203,7 +203,7 @@ describe( 'ValidatedTextInput', () => {
 		};
 		render( <TestComponent /> );
 
-		const textInputElement = await screen.getByLabelText( 'Test Input' );
+		const textInputElement = screen.getByLabelText( 'Test Input' );
 		await act( async () => {
 			await user.type( textInputElement, 'Invalid Value' );
 		} );
@@ -238,7 +238,7 @@ describe( 'ValidatedTextInput', () => {
 			);
 		};
 		render( <TestComponent /> );
-		const textInputElement = await screen.getByLabelText( 'Test Input' );
+		const textInputElement = screen.getByLabelText( 'Test Input' );
 
 		await act( async () => {
 			await user.type( textInputElement, 'invalid-email' );
@@ -266,7 +266,7 @@ describe( 'ValidatedTextInput', () => {
 			);
 		};
 		render( <TestComponent /> );
-		const textInputElement = await screen.getByLabelText( 'Pattern Input' );
+		const textInputElement = screen.getByLabelText( 'Pattern Input' );
 
 		await act( async () => {
 			await user.type( textInputElement, '123456' );
@@ -295,7 +295,7 @@ describe( 'ValidatedTextInput', () => {
 			);
 		};
 		render( <TestComponent /> );
-		const textInputElement = await screen.getByLabelText( 'Test Input' );
+		const textInputElement = screen.getByLabelText( 'Test Input' );
 
 		await act( async () => {
 			await user.type( textInputElement, 'test' );
@@ -374,8 +374,7 @@ describe( 'ValidatedTextInput', () => {
 				);
 			};
 			await render( <TestComponent /> );
-			const textInputElement =
-				await screen.getByLabelText( 'Test Input' );
+			const textInputElement = screen.getByLabelText( 'Test Input' );
 			await expect( textInputElement ).toHaveFocus();
 			await expect( setValidationErrors ).toHaveBeenCalledWith( {
 				'test-input': {
@@ -418,8 +417,7 @@ describe( 'ValidatedTextInput', () => {
 				);
 			};
 			const { rerender } = await render( <TestComponent /> );
-			const textInputElement =
-				await screen.getByLabelText( 'Test Input' );
+			const textInputElement = screen.getByLabelText( 'Test Input' );
 			await expect( textInputElement ).toHaveFocus();
 			await expect( setValidationErrors ).not.toHaveBeenCalled();
 
@@ -461,8 +459,7 @@ describe( 'ValidatedTextInput', () => {
 				);
 			};
 			await render( <TestComponent /> );
-			const textInputElement =
-				await screen.getByLabelText( 'Test Input' );
+			const textInputElement = screen.getByLabelText( 'Test Input' );
 			await expect( textInputElement ).toHaveFocus();
 			await expect( setValidationErrors ).not.toHaveBeenCalled();
 		} );

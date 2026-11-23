@@ -1,15 +1,16 @@
 <?php
 /**
  * Plugin Name: WooCommerce E2E Test Helper
- * Description: Always-on utilities for the WooCommerce E2E suite: cookie-driven filter overrides, synchronous Action Scheduler processing, and a REST API for feature flags, options, environment info and theme switching.
+ * Description: Always-on utilities for the WooCommerce E2E suite: cookie-driven filter overrides, synchronous Action Scheduler processing, a REST API for feature flags, options and theme switching, fixed overrides that remove production timing delays, and a mail override for Back in Stock Notifications batches.
  * Version: 1.0.0
  * Requires PHP: 7.4
  * Author: WooCommerce
  *
  * This bundles three previously separate helpers (filter-setter, process-waiting-actions and
- * test-helper-apis). They share the same lifecycle — mounted and auto-activated for every E2E run
- * via the .wp-env.e2e.json "plugins" array — so they live together here. Each concern is kept in its
- * own section below and none of them touch the others.
+ * test-helper-apis), plus the fixed overrides that remove production timing delays. They share the
+ * same lifecycle — mounted and auto-activated for every E2E run via the .wp-env.e2e.json "plugins"
+ * array — so they live together here. Each concern is kept in its own section below and none of them
+ * touch the others.
  *
  * It hopefully goes without saying, none of this should ever run in a production environment.
  *
@@ -119,8 +120,7 @@ add_action(
  * Test helper REST API
  * -----------------------------------------------------------------------------
  *
- * REST routes for toggling feature flags, setting/deleting options, reading environment info and
- * switching themes during a test.
+ * REST routes for toggling feature flags, setting/deleting options and switching themes during a test.
  */
 
 /**
@@ -163,16 +163,6 @@ function register_helper_api() {
 		array(
 			'methods'             => 'POST',
 			'callback'            => 'api_delete_option',
-			'permission_callback' => 'is_allowed',
-		)
-	);
-
-	register_rest_route(
-		'e2e-environment',
-		'/info',
-		array(
-			'methods'             => 'GET',
-			'callback'            => 'get_environment_info',
 			'permission_callback' => 'is_allowed',
 		)
 	);
@@ -231,18 +221,6 @@ function enable_experimental_features( $features ) {
 add_filter( 'woocommerce_admin_get_feature_config', 'enable_experimental_features' );
 
 /**
- * Disable WordPress comment flood protection during E2E runs.
- *
- * Parallel specs post comments and reviews as the shared customer account.
- * WordPress' 15-second flood throttle ("You are posting comments too quickly")
- * then rejects whichever request lands second, causing cross-spec flakes that
- * have nothing to do with the behaviour under test. Override core's
- * `wp_throttle_comment_flood` (priority 10) with a later filter that always
- * allows the comment.
- */
-add_filter( 'comment_flood_filter', '__return_false', 99 );
-
-/**
  * Update a WordPress option.
  *
  * @param WP_REST_Request $request The REST request, carrying `option_name` and `option_value`.
@@ -296,25 +274,6 @@ function is_allowed() {
 }
 
 /**
- * Get environment info
- * @return WP_REST_Response
- */
-function get_environment_info() {
-	$data['Core'] = get_bloginfo( 'version' );
-	$data['PHP']  = sprintf( '%s.%s', PHP_MAJOR_VERSION, PHP_MINOR_VERSION );
-
-	$all_plugins = get_plugins();
-
-	foreach ( $all_plugins as $plugin_file => $plugin_data ) {
-		if ( is_plugin_active( $plugin_file ) ) {
-			$data[ $plugin_data['Name'] ] = $plugin_data['Version'];
-		}
-	}
-
-	return new WP_REST_Response( $data, 200 );
-}
-
-/**
  * Activate a theme via the REST API.
  * @param WP_REST_Request $request Request object.
  * @return WP_REST_Response
@@ -333,3 +292,144 @@ function activate_theme( WP_REST_Request $request ) {
 		return new WP_REST_Response( array( 'message' => "Theme '$theme_name' does not exist." ), 400 );
 	}
 }
+
+/*
+ * -----------------------------------------------------------------------------
+ * Timing overrides
+ * -----------------------------------------------------------------------------
+ *
+ * Fixed filters that strip out delays and throttles which exist for production traffic but only
+ * make E2E runs slow or flaky. Unconditional by design: unlike the cookie-driven filter setter
+ * above, these must apply to requests a spec does not drive through the browser, such as REST calls
+ * made by the API client.
+ */
+
+/**
+ * Disable WordPress comment flood protection during E2E runs.
+ *
+ * Parallel specs post comments and reviews as the shared customer account.
+ * WordPress' 15-second flood throttle ("You are posting comments too quickly")
+ * then rejects whichever request lands second, causing cross-spec flakes that
+ * have nothing to do with the behaviour under test. Override core's
+ * `wp_throttle_comment_flood` (priority 10) with a later filter that always
+ * allows the comment.
+ */
+add_filter( 'comment_flood_filter', '__return_false', 99 );
+
+/**
+ * Dispatch Back in Stock Notifications batches immediately after a restock.
+ *
+ * Core waits a minute between a product coming back in stock and the first
+ * notifications batch. The BIS specs restock over REST and then drain the queue
+ * with `?process-waiting-actions`, so without this the batch is not due yet and
+ * the back-in-stock email never arrives.
+ */
+add_filter(
+	'woocommerce_customer_stock_notifications_first_batch_delay',
+	'__return_zero',
+	PHP_INT_MAX
+);
+
+/*
+ * -----------------------------------------------------------------------------
+ * Mail overrides
+ * -----------------------------------------------------------------------------
+ */
+
+/*
+ * Report Back in Stock Notifications emails as sent while a notifications batch runs.
+ *
+ * wp-env has no mail transport, so `wp_mail()` fails after WP Mail Logging logs the message,
+ * and a failed send cancels the sign-up. Hooked to the batch job so it applies whichever runner
+ * processes it. Not global, because other specs assert the failed-send path.
+ */
+
+/**
+ * Remove the `pre_wp_mail` short-circuit added for the batch.
+ */
+function woocommerce_e2e_remove_mail_short_circuit(): void {
+	remove_filter( 'pre_wp_mail', '__return_true' );
+}
+
+add_action(
+	'wc_send_stock_notifications_batch',
+	function () {
+		add_filter( 'pre_wp_mail', '__return_true' );
+	},
+	PHP_INT_MIN
+);
+add_action( 'wc_send_stock_notifications_batch', 'woocommerce_e2e_remove_mail_short_circuit', PHP_INT_MAX );
+// The PHP_INT_MAX remover does not run when the job throws, and the queue runner moves on to the next job.
+add_action( 'action_scheduler_failed_execution', 'woocommerce_e2e_remove_mail_short_circuit' );
+
+/*
+ * -----------------------------------------------------------------------------
+ * Shipping methods
+ * -----------------------------------------------------------------------------
+ *
+ * Registers a zone shipping method that supports instance settings but deliberately
+ * not 'instance-settings-modal', like UPS/USPS. Core ships no such method, so the
+ * shipping-zone save flow for non-modal methods has no coverage without one.
+ */
+add_action(
+	'woocommerce_shipping_init',
+	function () {
+		if ( class_exists( 'WC_E2E_Nonmodal_Shipping_Method' ) ) {
+			return;
+		}
+
+		/**
+		 * A minimal instance-based shipping method that omits 'instance-settings-modal'
+		 * so it configures on a full settings page instead of the zones modal.
+		 */
+		class WC_E2E_Nonmodal_Shipping_Method extends WC_Shipping_Method {
+			/**
+			 * @param int $instance_id Instance id.
+			 */
+			public function __construct( $instance_id = 0 ) {
+				$this->id                 = 'e2e_nonmodal';
+				$this->instance_id        = absint( $instance_id );
+				$this->method_title       = 'E2E Non-Modal Method';
+				$this->method_description = 'Instance settings without a modal, for save-flow testing.';
+				$this->supports           = array( 'shipping-zones', 'instance-settings' );
+				$this->init();
+			}
+
+			/**
+			 * Load settings and hook the save handler.
+			 */
+			public function init() {
+				$this->instance_form_fields = array(
+					'title' => array(
+						'title'   => 'Title',
+						'type'    => 'text',
+						'default' => 'E2E Non-Modal Method',
+					),
+				);
+				$this->title                = $this->get_option( 'title' );
+				add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
+			}
+
+			/**
+			 * @param array $package Shipping package.
+			 */
+			public function calculate_shipping( $package = array() ) {
+				$this->add_rate(
+					array(
+						'id'    => $this->id . $this->instance_id,
+						'label' => $this->title,
+						'cost'  => 0,
+					)
+				);
+			}
+		}
+	}
+);
+
+add_filter(
+	'woocommerce_shipping_methods',
+	function ( $methods ) {
+		$methods['e2e_nonmodal'] = 'WC_E2E_Nonmodal_Shipping_Method';
+		return $methods;
+	}
+);

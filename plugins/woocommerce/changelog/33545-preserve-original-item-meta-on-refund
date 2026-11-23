@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve original order item metadata when refund item metadata is added, updated, or deleted.

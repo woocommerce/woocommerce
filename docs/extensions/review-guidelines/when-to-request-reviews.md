@@ -19,7 +19,7 @@ Think about who is seeing the review request, and what they are doing at that ti
 
 Outreach after a milestone works really well. Some language we've used before is "Congratulations on your xxth sale! We're delighted that WooPayments facilitated this milestone. Would you consider sharing your experience and encouraging others by reviewing our extension?".
 
-Another way to optimally time a review request would be to setup a prompt that aligns with use patterns. For instance, if you know that most of your merchants use your extension daily, you would likely send a review request sooner than a extension that most merchants interact very sparingly with.
+Another way to optimally time a review request would be to set up a prompt that aligns with use patterns. For instance, if you know that most of your merchants use your extension daily, you would likely send a review request sooner than a extension that most merchants interact very sparingly with.
 
 SaaS/Connector extensions need to be particularly careful about requesting ratings correctly, as they are the most likely to be overlooked unless there is an issue, leading to skewed ratings not representative of the actual extension.
 

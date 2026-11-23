@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Screen readers now read product names with symbols like "&" correctly in the Checkout block order summary.

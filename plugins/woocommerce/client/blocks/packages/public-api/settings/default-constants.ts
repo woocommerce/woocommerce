@@ -14,8 +14,10 @@ import { getCurrencyPrefix, getCurrencySuffix } from './utils';
  */
 export const ADMIN_URL = allSettings.adminUrl;
 export const COUNTRIES = allSettings.countries;
+export const CURRENT_SITE_ID = allSettings.currentSiteId as number;
 export const CURRENT_USER_IS_ADMIN = allSettings.currentUserIsAdmin as boolean;
 export const HOME_URL = allSettings.homeUrl as string | undefined;
+export const IS_MULTISITE = allSettings.isMultisite as boolean;
 export const LOCALE = allSettings.locale;
 export const ORDER_STATUSES = allSettings.orderStatuses;
 export const PLACEHOLDER_IMG_SRC = allSettings.placeholderImgSrc as string;

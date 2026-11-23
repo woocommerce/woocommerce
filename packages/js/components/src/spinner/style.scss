@@ -16,6 +16,7 @@
 		stroke-dashoffset: 50;
 		transform: rotate(135deg);
 	}
+	/* stylelint-disable-next-line keyframe-block-no-duplicate-selectors */
 	100% {
 		transform: rotate(450deg);
 	}

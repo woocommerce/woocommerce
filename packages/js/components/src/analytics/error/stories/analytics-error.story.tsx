@@ -2,14 +2,14 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { Story } from '@storybook/react';
+import { StoryFn } from '@storybook/react-webpack5';
 
 /**
  * Internal dependencies
  */
 import AnalyticsError from '../';
 
-const Template: Story = ( args ) => <AnalyticsError { ...args } />;
+const Template: StoryFn = ( args ) => <AnalyticsError { ...args } />;
 
 export const Basic = Template.bind( {} );
 

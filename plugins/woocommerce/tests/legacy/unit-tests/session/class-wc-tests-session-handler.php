@@ -8,6 +8,7 @@
 declare( strict_types=1 );
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 
 /**
  * Tests for the WC_Session_Handler class.
@@ -186,6 +187,34 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An expired session for a logged-in customer should reset the loaded cart but keep their saved cart, so the cart can be rebuilt.
+	 */
+	public function test_destroy_session_cookie_expired_keeps_logged_in_customers_saved_cart(): void {
+		$customer_id = WC_Helper_Customer::create_customer()->get_id();
+		wp_set_current_user( $customer_id );
+		$cart_item_key = WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+
+		$handler = $this
+			->getMockBuilder( WC_Session_Handler::class )
+			->setMethods( array( 'get_session_cookie' ) )
+			->getMock();
+
+		$handler
+			->method( 'get_session_cookie' )
+			->willReturn( array( (string) $customer_id, time() - 10000, time() - 1000, '' ) );
+
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$handler->init_session_cookie();
+
+		remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$saved_cart = get_user_meta( $customer_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+		$this->assertArrayHasKey( $cart_item_key, $saved_cart['cart'] ?? array(), 'The saved cart should survive the session reset.' );
+		$this->assertTrue( WC()->cart->is_empty(), 'The loaded cart should be reset with the session.' );
+	}
+
+	/**
 	 * @testdox Test that session from cookie is destroyed if user is logged out.
 	 */
 	public function test_destroy_session_user_logged_out() {
@@ -316,6 +345,77 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		$this->assertCount( 4, $parts, 'Cookie value has 4 parts.' );
 		$cookie_expiration = (int) $parts[1];
 		$this->assertGreaterThanOrEqual( time() + 6 * DAY_IN_SECONDS, $cookie_expiration, 'Cookie expires in about a week.' );
+	}
+
+	/**
+	 * @testdox A session cloned from a ?session= token keeps only the sharer's cart and applied coupons.
+	 *
+	 * @testWith [0]
+	 *           [1]
+	 *
+	 * @param int $recipient_user_id User ID of the shopper who opens the link; 0 for a guest.
+	 */
+	public function test_clone_session_from_token_keeps_only_cart_and_coupons( int $recipient_user_id ) {
+		global $wpdb;
+
+		$sharer_session_id   = 't_' . wc_rand_hash( '', 30 );
+		$cart                = maybe_serialize( array( 'item_key' => array( 'product_id' => 123 ) ) );
+		$applied_coupons     = maybe_serialize( array( 'shared10' ) );
+		$sharer_session_data = array(
+			'cart'                    => $cart,
+			'applied_coupons'         => $applied_coupons,
+			'customer'                => maybe_serialize( array( 'email' => 'sharer@example.com' ) ),
+			'store_api_draft_order'   => 101,
+			'order_awaiting_payment'  => 102,
+			'store_api_customer_note' => 'Sharer note',
+			'chosen_payment_method'   => 'bacs',
+			'extension_session_data'  => maybe_serialize( array( 'secret' => 'sharer' ) ),
+		);
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_sessions',
+			array(
+				'session_key'    => $sharer_session_id,
+				'session_value'  => maybe_serialize( $sharer_session_data ),
+				'session_expiry' => time() + DAY_IN_SECONDS,
+			),
+			array( '%s', '%s', '%d' )
+		);
+
+		wp_set_current_user( $recipient_user_id );
+		$_GET['session'] = CartTokenUtils::get_cart_token( $sharer_session_id );
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		try {
+			$sut = new WC_Session_Handler();
+			$sut->init();
+		} finally {
+			unset( $_GET['session'] );
+			remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+			wp_set_current_user( 0 );
+		}
+
+		$this->assertNotSame( $sharer_session_id, $sut->get_customer_id(), 'The recipient gets a session of their own.' );
+
+		// Read the stored row directly: get_session_data() would return the copy save_data() just cached.
+		$stored_session_data = maybe_unserialize(
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT session_value FROM {$wpdb->prefix}woocommerce_sessions WHERE session_key = %s",
+					$sut->get_customer_id()
+				)
+			)
+		);
+
+		$this->assertEquals(
+			array(
+				'cart'                 => $cart,
+				'applied_coupons'      => $applied_coupons,
+				'previous_customer_id' => $sharer_session_id,
+			),
+			$stored_session_data,
+			'Only the cart, applied coupons and source session ID are stored for the recipient.'
+		);
 	}
 
 	/**
@@ -518,75 +618,56 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test that get_session_cookie accepts a cookie hashed with the current implementation.
-	 */
-	public function test_get_session_cookie_accepts_current_hash(): void {
-		$this->set_session_cookie( $this->build_session_cookie_value( 'cust_1', 'current' ) );
-
-		$cookie = $this->handler->get_session_cookie();
-
-		$this->assertNotFalse( $cookie, 'Cookie hashed with the current implementation should be accepted.' );
-		$this->assertSame( 'cust_1', $cookie[0] );
-	}
-
-	/**
-	 * @testdox Test that get_session_cookie still accepts a cookie hashed with the legacy wp_fast_hash implementation.
-	 */
-	public function test_get_session_cookie_accepts_legacy_fast_hash(): void {
-		if ( ! function_exists( 'wp_fast_hash' ) ) {
-			$this->markTestSkipped( 'wp_fast_hash() requires WordPress 6.8 or newer.' );
-		}
-
-		$this->set_session_cookie( $this->build_session_cookie_value( 'cust_1', 'legacy' ) );
-
-		$cookie = $this->handler->get_session_cookie();
-
-		$this->assertNotFalse( $cookie, 'Cookie hashed with wp_fast_hash() should still be accepted so existing guest sessions survive.' );
-		$this->assertSame( 'cust_1', $cookie[0] );
-	}
-
-	/**
-	 * @testdox Test that get_session_cookie rejects a cookie with a tampered hash.
-	 */
-	public function test_get_session_cookie_rejects_tampered_hash(): void {
-		$this->set_session_cookie( $this->build_session_cookie_value( 'cust_1', 'current' ) . 'tampered' );
-
-		$this->assertFalse( $this->handler->get_session_cookie() );
-	}
-
-	/**
-	 * @testdox Test that get_session_cookie rejects a cookie whose customer ID no longer matches the hash.
-	 */
-	public function test_get_session_cookie_rejects_tampered_customer_id(): void {
-		$cookie_value = $this->build_session_cookie_value( 'cust_1', 'current' );
-		$this->set_session_cookie( str_replace( 'cust_1', 'cust_2', $cookie_value ) );
-
-		$this->assertFalse( $this->handler->get_session_cookie() );
-	}
-
-	/**
-	 * Helper function to build a session cookie value for the handler under test.
+	 * Session tokens that can be passed in the `session` query arg.
 	 *
-	 * @param string $customer_id Customer ID to embed in the cookie.
-	 * @param string $hash_type   Either 'current' for the wp_hash() based tag, or 'legacy' for a wp_fast_hash() tag.
-	 * @return string
+	 * @return array<string, array<string>>
 	 */
-	protected function build_session_cookie_value( string $customer_id, string $hash_type ): string {
-		$session_expiration = time() + DAY_IN_SECONDS;
-		$session_expiring   = $session_expiration - HOUR_IN_SECONDS;
-		$message            = $customer_id . '|' . $session_expiration;
-		$cookie_hash        = 'legacy' === $hash_type ? wp_fast_hash( $message ) : hash_hmac( 'md5', $message, wp_hash( $message ) );
-
-		return implode( '|', array( $customer_id, $session_expiration, $session_expiring, $cookie_hash ) );
+	public function provide_session_query_tokens(): array {
+		return array(
+			'cart link token' => array( 'cart-link' ),
+			'cart token'      => array( 'store-api' ),
+		);
 	}
 
 	/**
-	 * Helper function to set the session cookie as if it were passed by the browser.
+	 * @testdox A $token_type in the session query arg copies the guest's cart without their customer details.
+	 * @dataProvider provide_session_query_tokens
 	 *
-	 * @param string $cookie_value Raw cookie value.
+	 * @param string $token_type Token issuer.
 	 */
-	protected function set_session_cookie( string $cookie_value ) {
-		$_COOKIE[ $this->get_session_cookie_name() ] = $cookie_value;
+	public function test_session_query_arg_copies_guest_cart_without_customer( string $token_type ) {
+		global $wpdb;
+
+		$guest_session_id = 't_' . wc_rand_hash( '', 30 );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_sessions',
+			array(
+				'session_key'    => $guest_session_id,
+				'session_value'  => maybe_serialize(
+					array(
+						'cart'     => 'shared cart',
+						'customer' => array( 'email' => 'guest@example.org' ),
+					)
+				),
+				'session_expiry' => time() + 50000,
+			),
+			array( '%s', '%s', '%d' )
+		);
+
+		wp_set_current_user( 0 );
+		$_GET['session'] = 'cart-link' === $token_type ? CartTokenUtils::get_cart_link_token( $guest_session_id ) : CartTokenUtils::get_cart_token( $guest_session_id );
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$handler = new WC_Session_Handler();
+		$handler->init();
+
+		remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+		unset( $_GET['session'] );
+
+		$this->assertNotSame( $guest_session_id, $handler->get_customer_id(), 'The visitor should get a new session.' );
+		$this->assertSame( 'shared cart', $handler->get( 'cart' ), 'The cart should be copied.' );
+		$this->assertNull( $handler->get( 'customer' ), 'Customer details should not be copied.' );
 	}
 
 	/**

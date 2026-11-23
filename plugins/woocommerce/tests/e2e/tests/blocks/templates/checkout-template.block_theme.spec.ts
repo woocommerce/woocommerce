@@ -27,6 +27,7 @@ test.describe( 'Test the checkout template', () => {
 		admin,
 		editor,
 		page,
+		wpCoreVersion,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postType: 'page',
@@ -44,8 +45,32 @@ test.describe( 'Test the checkout template', () => {
 		).toBeVisible();
 
 		await editor.openDocumentSettingsSidebar();
-		await page.getByLabel( 'Template options' ).click();
-		await page.getByRole( 'menuitem', { name: 'Edit template' } ).click();
+		// On 7.2 and above, the selectors for editing the template have changed: https://make.wordpress.org/core/2026/09/17/call-for-testing-dataform-editor-inspector/
+		// eslint-disable-next-line playwright/no-conditional-in-test
+		if ( wpCoreVersion >= 7.2 ) {
+			await page
+				.getByRole( 'button', {
+					name: 'Template: Page: Checkout',
+					exact: true,
+				} )
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Edit', exact: true } )
+				.click();
+		} else {
+			await page.getByLabel( 'Template options' ).click();
+			await page
+				.getByRole( 'menuitem', { name: 'Edit template' } )
+				.click();
+		}
+
+		await expect
+			.poll( () =>
+				page.evaluate( () =>
+					window.wp.data.select( 'core/editor' ).getCurrentPostId()
+				)
+			)
+			.toBe( templatePath );
 
 		await expect(
 			editor.canvas.getByRole( 'button', {

@@ -29,7 +29,7 @@ class WC_WCCOM_Site {
 		self::includes();
 
 		add_action( 'woocommerce_wccom_install_products', array( 'WC_WCCOM_Site_Installer', 'install' ) );
-		add_filter( 'determine_current_user', array( __CLASS__, 'authenticate_wccom' ), 14 );
+		add_filter( 'rest_authentication_errors', array( __CLASS__, 'authentication_fallback' ) );
 		add_action( 'woocommerce_rest_api_get_rest_namespaces', array( __CLASS__, 'register_rest_namespace' ) );
 	}
 
@@ -44,11 +44,14 @@ class WC_WCCOM_Site {
 	}
 
 	/**
-	 * Authenticate WooCommerce.com request.
+	 * Authenticate a WooCommerce.com request to the wccom-site REST API.
+	 *
+	 * Called from authentication_fallback() once WordPress has resolved the route. Returns the connected user,
+	 * or false with the reason added to the wccom_auth_error filter.
 	 *
 	 * @since 3.7.0
-	 * @param int|false $user_id User ID.
-	 * @return int|false
+	 * @param int|false $user_id Current user id if already set; always false from the only caller.
+	 * @return int|WP_User|false
 	 */
 	public static function authenticate_wccom( $user_id ) {
 		if ( ! empty( $user_id ) || ! self::is_request_to_wccom_site_rest_api() ) {
@@ -135,6 +138,30 @@ class WC_WCCOM_Site {
 	}
 
 	/**
+	 * Authenticate a WooCommerce.com request once WordPress has resolved its REST route.
+	 *
+	 * Only requests WordPress dispatches to the wccom-site namespace are authenticated, whatever the URL looked like.
+	 *
+	 * @since 11.3.0
+	 * @param WP_Error|null|bool $error Error from another authentication handler, null if none.
+	 * @return WP_Error|null|bool
+	 */
+	public static function authentication_fallback( $error ) {
+		if ( ! empty( $error ) || 0 !== get_current_user_id() ) {
+			return $error;
+		}
+
+		$user = self::authenticate_wccom( false );
+
+		if ( ! $user instanceof WP_User ) {
+			return $error;
+		}
+
+		wp_set_current_user( $user->ID );
+		return true;
+	}
+
+	/**
 	 * Get the authorization header.
 	 *
 	 * On certain systems and configurations, the Authorization header will be
@@ -152,7 +179,7 @@ class WC_WCCOM_Site {
 
 		if ( function_exists( 'getallheaders' ) ) {
 			$headers = getallheaders();
-			// Check for the authoization header case-insensitively.
+			// Check for the authorization header case-insensitively.
 			foreach ( $headers as $key => $value ) {
 				if ( 'authorization' === strtolower( $key ) ) {
 					return $value;
@@ -166,24 +193,26 @@ class WC_WCCOM_Site {
 	/**
 	 * Check if this is a request to WCCOM Site REST API.
 	 *
+	 * Only the route WordPress resolved counts, so this is false until WordPress is dispatching the request as REST.
+	 *
 	 * @since 3.7.0
 	 * @return bool
 	 */
 	protected static function is_request_to_wccom_site_rest_api() {
+		global $wp;
 
-		if ( isset( $_REQUEST['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$route       = wp_unslash( $_REQUEST['rest_route'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
-			$rest_prefix = '';
-		} else {
-			$route       = wp_unslash( add_query_arg( array() ) );
-			$rest_prefix = trailingslashit( rest_get_url_prefix() );
+		if ( ! wp_is_rest_endpoint() ) {
+			return false;
 		}
 
-		return false !== strpos( $route, $rest_prefix . 'wccom-site/' );
+		$route = $wp instanceof WP ? ( $wp->query_vars['rest_route'] ?? null ) : null;
+		return is_string( $route ) && str_starts_with( ltrim( $route, '/' ), 'wccom-site/' );
 	}
 
 	/**
 	 * Verify WooCommerce.com request from a given body and signature request.
+	 *
+	 * Only what follows the first "?" of the request URI is treated as its query string.
 	 *
 	 * @since 3.7.0
 	 * @param string $body                Request body.
@@ -193,9 +222,16 @@ class WC_WCCOM_Site {
 	 */
 	protected static function verify_wccom_request( $body, $signature, $access_token_secret ) {
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$uri_parts   = explode( '?', $_SERVER['REQUEST_URI'] ?? '', 2 );
+		$request_uri = urldecode( $uri_parts[0] );
+		if ( isset( $uri_parts[1] ) ) {
+			// With ALTERNATE_WP_CRON, WordPress redirects a GET to itself plus doing_wp_cron when cron is due, and WooCommerce.com follows it.
+			$request_uri .= urldecode( remove_query_arg( array( 'token', 'signature', 'doing_wp_cron' ), '?' . $uri_parts[1] ) );
+		}
+
 		$data = array(
 			'host'        => $_SERVER['HTTP_HOST'],
-			'request_uri' => urldecode( remove_query_arg( array( 'token', 'signature' ), $_SERVER['REQUEST_URI'] ) ),
+			'request_uri' => $request_uri,
 			'method'      => strtoupper( $_SERVER['REQUEST_METHOD'] ),
 		);
 		// phpcs:enable

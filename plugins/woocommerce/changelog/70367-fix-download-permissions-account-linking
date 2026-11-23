@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve download permissions when linking guest orders to customer accounts.

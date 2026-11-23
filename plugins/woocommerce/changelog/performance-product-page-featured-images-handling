@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Fixed N+1 query pattern when blocks rendering featured images on product page.

@@ -39,37 +39,19 @@ class FeaturesUtil {
 	 * @return bool True if the feature is enabled, false if not or if the feature doesn't exist.
 	 */
 	public static function feature_is_enabled( string $feature_id ): bool {
-		$features_controller = wc_get_container()->get( FeaturesController::class );
-		$feature             = $features_controller->get_feature_definition( $feature_id );
+		static $features_controller = null;
+		$features_controller        = $features_controller ?? wc_get_container()->get( FeaturesController::class );
 
-		// Log deprecation notice for deprecated features (only from the public API).
-		if ( ! empty( $feature['deprecated_since'] ) ) {
-			self::log_deprecated_feature_usage( $feature_id, $feature['deprecated_since'] );
+		static $checked_deprecations = array();
+		if ( ! isset( $checked_deprecations[ $feature_id ] ) ) {
+			$checked_deprecations[ $feature_id ] = true;
+			$definition                          = $features_controller->get_feature_definition( $feature_id );
+			if ( ! empty( $definition['deprecated_since'] ) ) {
+				wc_deprecated_function( "FeaturesUtil::feature_is_enabled('{$feature_id}')", $definition['deprecated_since'] );
+			}
 		}
 
 		return $features_controller->feature_is_enabled( $feature_id );
-	}
-
-	/**
-	 * Log usage of a deprecated feature.
-	 *
-	 * This method ensures logging only happens once per request to avoid spam.
-	 *
-	 * @param string $feature_id       The feature id being checked.
-	 * @param string $deprecated_since The version since which the feature is deprecated.
-	 */
-	private static function log_deprecated_feature_usage( string $feature_id, string $deprecated_since ): void {
-		static $logged = array();
-
-		if ( isset( $logged[ $feature_id ] ) ) {
-			return;
-		}
-		$logged[ $feature_id ] = true;
-
-		wc_deprecated_function(
-			"FeaturesUtil::feature_is_enabled('{$feature_id}')",
-			$deprecated_since
-		);
 	}
 
 	/**

@@ -20,6 +20,13 @@ use WP_REST_Request;
 class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Tests register their own controller's routes, which a reused server would keep serving from the first test.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * @var Controller
 	 */
 	private Controller $controller;
@@ -28,13 +35,6 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	 * @var ShippingMethodSchema
 	 */
 	private ShippingMethodSchema $schema;
-
-	/**
-	 * Created shipping zones for cleanup.
-	 *
-	 * @var array
-	 */
-	private array $created_zones = array();
 
 	/**
 	 * Created user ID for testing purposes.
@@ -73,19 +73,6 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Cleanup after test.
-	 */
-	public function tearDown(): void {
-		// Clean up created zones.
-		foreach ( $this->created_zones as $zone ) {
-			$zone->delete();
-		}
-		$this->created_zones = array();
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Cleanup after class.
 	 */
 	public static function tearDownAfterClass(): void {
@@ -108,8 +95,6 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 		$zone->set_zone_name( $name );
 		$zone->set_locations( $locations );
 		$zone->save();
-
-		$this->created_zones[] = $zone;
 
 		return $zone;
 	}
@@ -174,9 +159,6 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'rest_shipping_disabled', $result->get_error_code() );
 		$this->assertEquals( WP_Http::SERVICE_UNAVAILABLE, $result->get_error_data()['status'] );
-
-		// Re-enable shipping.
-		remove_filter( 'wc_shipping_enabled', '__return_false' );
 	}
 
 	/**

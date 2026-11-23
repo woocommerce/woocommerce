@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Tax settings REST validation rejecting valid values when plugins filter options into a structured format.

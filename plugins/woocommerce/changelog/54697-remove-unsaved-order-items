@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix order items not being removed when an extension removes them before the order is first saved.

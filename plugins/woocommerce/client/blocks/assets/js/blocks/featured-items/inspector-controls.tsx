@@ -43,11 +43,10 @@ type InspectorControlRequiredKeys =
 	| 'overlayColor'
 	| 'overlayGradient';
 
-interface InspectorControlsRequiredAttributes
-	extends LooselyMustHave<
-		FeaturedItemRequiredAttributes,
-		InspectorControlRequiredKeys
-	> {
+interface InspectorControlsRequiredAttributes extends LooselyMustHave<
+	FeaturedItemRequiredAttributes,
+	InspectorControlRequiredKeys
+> {
 	alt: string;
 	backgroundImageSrc: string;
 }
@@ -71,14 +70,16 @@ interface WithInspectorControlsRequiredProps< T > {
 	};
 }
 
-interface WithInspectorControlsCategoryProps< T >
-	extends WithInspectorControlsRequiredProps< T > {
+interface WithInspectorControlsCategoryProps<
+	T,
+> extends WithInspectorControlsRequiredProps< T > {
 	category: WP_REST_API_Category;
 	product: never;
 }
 
-interface WithInspectorControlsProductProps< T >
-	extends WithInspectorControlsRequiredProps< T > {
+interface WithInspectorControlsProductProps<
+	T,
+> extends WithInspectorControlsRequiredProps< T > {
 	category: never;
 	product: ProductResponseItem;
 }

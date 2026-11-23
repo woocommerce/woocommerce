@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 wp option set --format=json woocommerce_cod_settings '{
     "enabled":"yes",
     "title":"Cash on delivery",

@@ -38,19 +38,6 @@ class RequestTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down the test environment.
-	 *
-	 * @return void
-	 */
-	public function tearDown(): void {
-		remove_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
-		remove_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
-		remove_all_filters( 'pre_http_request' );
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Test create_paypal_order when API returns error.
 	 *
 	 * @return void
@@ -148,6 +135,73 @@ class RequestTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_paypal_settings', $previous_settings );
 
 		$this->assertNull( $result, 'create_paypal_order should return null when SET_PROVIDED_ADDRESS is set but the selected shipping country is unsupported' );
+	}
+
+	/**
+	 * @testdox New checkout attempts revoke or rotate callback credentials when shipping preferences change.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $virtual Whether the second attempt requires no shipping.
+	 */
+	public function test_create_paypal_order_resets_shipping_callback_credentials( bool $virtual ): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_address( $order->get_address( 'billing' ), 'shipping' );
+		$order->save();
+		$settings = array(
+			'address_override' => 'no',
+			'send_shipping'    => 'yes',
+		);
+		update_option( 'woocommerce_paypal_settings', $settings );
+		$contexts = array();
+		add_filter(
+			'pre_http_request',
+			function ( $value, $args, $url ) use ( &$contexts ) {
+				$body       = json_decode( $args['body'], true );
+				$contexts[] = $body['order']['payment_source']['paypal']['experience_context'];
+				$response   = $this->create_paypal_order_success( $value, $args, $url );
+				return is_array( $response ) ? $response : new \WP_Error( 'network_disabled' );
+			},
+			10,
+			3
+		);
+
+		$sut = new PayPalRequest( new \WC_Gateway_Paypal() );
+		$this->assertNotNull( $sut->create_paypal_order( $order ) );
+		$first_token = wc_get_order( $order->get_id() )->get_meta( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, true );
+		$this->assertIsString( $first_token );
+		$this->assertNotSame( '', $first_token );
+		$this->assertStringContainsString( 'token=' . $first_token, $contexts[0]['order_update_callback_config']['callback_url'] );
+
+		if ( $virtual ) {
+			foreach ( $order->get_items() as $item ) {
+				$product = $item->get_product();
+				$product->set_virtual( true );
+				$product->save();
+			}
+		} else {
+			$settings['address_override'] = 'yes';
+			update_option( 'woocommerce_paypal_settings', $settings );
+		}
+		$sut = new PayPalRequest( new \WC_Gateway_Paypal() );
+		$this->assertNotNull( $sut->create_paypal_order( $order ) );
+		$this->assertSame( $virtual ? PayPalConstants::SHIPPING_NO_SHIPPING : PayPalConstants::SHIPPING_SET_PROVIDED_ADDRESS, $contexts[1]['shipping_preference'] );
+		$this->assertArrayNotHasKey( 'order_update_callback_config', $contexts[1] );
+		$this->assertSame( '', wc_get_order( $order->get_id() )->get_meta( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, true ) );
+
+		foreach ( $order->get_items() as $item ) {
+			$product = $item->get_product();
+			$product->set_virtual( false );
+			$product->save();
+		}
+		$settings['address_override'] = 'no';
+		update_option( 'woocommerce_paypal_settings', $settings );
+		$sut = new PayPalRequest( new \WC_Gateway_Paypal() );
+		$this->assertNotNull( $sut->create_paypal_order( $order ) );
+		$next_token = wc_get_order( $order->get_id() )->get_meta( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, true );
+		$this->assertNotSame( '', $next_token );
+		$this->assertNotSame( $first_token, $next_token );
+		$this->assertStringContainsString( 'token=' . $next_token, $contexts[2]['order_update_callback_config']['callback_url'] );
 	}
 
 	/**
@@ -565,8 +619,6 @@ class RequestTest extends \WC_Unit_Test_Case {
 		// Second call: should not hit order details again because flag is set.
 		$request->capture_authorized_payment( $order );
 		$this->assertEquals( 1, $order_details_call_count, 'Expected no additional order details request after 404 (flag prevents retry)' );
-
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**

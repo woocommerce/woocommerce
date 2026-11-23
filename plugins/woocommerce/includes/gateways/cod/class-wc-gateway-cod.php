@@ -5,8 +5,8 @@
  * @package WooCommerce\Gateways
  */
 
-use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Gateways\ShippingMethodRestrictionsTrait;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils as SettingsUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,6 +25,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Gateway_COD extends WC_Payment_Gateway {
 
+	use ShippingMethodRestrictionsTrait;
+
 	/**
 	 * Unique ID for this gateway.
 	 *
@@ -40,20 +42,6 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	public $instructions;
 
 	/**
-	 * Enable for shipping methods.
-	 *
-	 * @var array
-	 */
-	public $enable_for_methods;
-
-	/**
-	 * Enable for virtual products.
-	 *
-	 * @var bool
-	 */
-	public $enable_for_virtual;
-
-	/**
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
@@ -65,11 +53,10 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		// Get settings.
-		$this->title              = $this->get_option( 'title' );
-		$this->description        = $this->get_option( 'description' );
-		$this->instructions       = $this->get_option( 'instructions' );
-		$this->enable_for_methods = $this->get_option( 'enable_for_methods', array() );
-		$this->enable_for_virtual = $this->get_option( 'enable_for_virtual', 'yes' ) === 'yes';
+		$this->title        = $this->get_option( 'title' );
+		$this->description  = $this->get_option( 'description' );
+		$this->instructions = $this->get_option( 'instructions' );
+		$this->init_shipping_method_restrictions();
 
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -95,211 +82,39 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * Initialise Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
-		$this->form_fields = array(
-			'enabled'            => array(
-				'title'       => __( 'Enable/Disable', 'woocommerce' ),
-				'label'       => __( 'Enable cash on delivery', 'woocommerce' ),
-				'type'        => 'checkbox',
-				'description' => '',
-				'default'     => 'no',
-			),
-			'title'              => array(
-				'title'       => __( 'Title', 'woocommerce' ),
-				'type'        => 'safe_text',
-				'description' => __( 'Payment method description that the customer will see on your checkout.', 'woocommerce' ),
-				'default'     => __( 'Cash on delivery', 'woocommerce' ),
-				'desc_tip'    => true,
-			),
-			'description'        => array(
-				'title'       => __( 'Description', 'woocommerce' ),
-				'type'        => 'textarea',
-				'description' => __( 'Payment method description that the customer will see on your website.', 'woocommerce' ),
-				'default'     => __( 'Pay with cash upon delivery.', 'woocommerce' ),
-				'desc_tip'    => true,
-			),
-			'instructions'       => array(
-				'title'       => __( 'Instructions', 'woocommerce' ),
-				'type'        => 'textarea',
-				'description' => __( 'Instructions that will be added to the thank you page.', 'woocommerce' ),
-				'default'     => __( 'Pay with cash upon delivery.', 'woocommerce' ),
-				'desc_tip'    => true,
-			),
-			'enable_for_methods' => array(
-				'title'             => __( 'Enable for shipping methods', 'woocommerce' ),
-				'type'              => 'multiselect',
-				'class'             => 'wc-enhanced-select',
-				'css'               => 'width: 400px;',
-				'default'           => '',
-				'description'       => __( 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
-				'options'           => $this->load_shipping_method_options(),
-				'desc_tip'          => true,
-				'custom_attributes' => array(
-					'data-placeholder' => __( 'Select shipping methods', 'woocommerce' ),
+		$this->form_fields = array_merge(
+			array(
+				'enabled'      => array(
+					'title'       => __( 'Enable/Disable', 'woocommerce' ),
+					'label'       => __( 'Enable cash on delivery', 'woocommerce' ),
+					'type'        => 'checkbox',
+					'description' => '',
+					'default'     => 'no',
+				),
+				'title'        => array(
+					'title'       => __( 'Title', 'woocommerce' ),
+					'type'        => 'safe_text',
+					'description' => __( 'Payment method description that the customer will see on your checkout.', 'woocommerce' ),
+					'default'     => __( 'Cash on delivery', 'woocommerce' ),
+					'desc_tip'    => true,
+				),
+				'description'  => array(
+					'title'       => __( 'Description', 'woocommerce' ),
+					'type'        => 'textarea',
+					'description' => __( 'Payment method description that the customer will see on your website.', 'woocommerce' ),
+					'default'     => __( 'Pay with cash upon delivery.', 'woocommerce' ),
+					'desc_tip'    => true,
+				),
+				'instructions' => array(
+					'title'       => __( 'Instructions', 'woocommerce' ),
+					'type'        => 'textarea',
+					'description' => __( 'Instructions that will be added to the thank you page.', 'woocommerce' ),
+					'default'     => __( 'Pay with cash upon delivery.', 'woocommerce' ),
+					'desc_tip'    => true,
 				),
 			),
-			'enable_for_virtual' => array(
-				'title'   => __( 'Accept for virtual orders', 'woocommerce' ),
-				'label'   => __( 'Accept COD if the order is virtual', 'woocommerce' ),
-				'type'    => 'checkbox',
-				'default' => 'yes',
-			),
+			$this->get_shipping_method_restrictions_form_fields()
 		);
-	}
-
-	/**
-	 * Check If The Gateway Is Available For Use.
-	 *
-	 * @since 10.7.0 Added early return when gateway is disabled.
-	 * @return bool
-	 */
-	public function is_available() {
-		if ( 'yes' !== $this->enabled ) {
-			return false;
-		}
-
-		$is_virtual       = true;
-		$shipping_methods = array();
-
-		// Get shipping methods from the cart or order.
-		if ( is_wc_endpoint_url( 'order-pay' ) ) {
-			$order            = wc_get_order( absint( get_query_var( 'order-pay' ) ) );
-			$shipping_methods = $order ? $order->get_shipping_methods() : array();
-			$is_virtual       = ! count( $shipping_methods );
-		} elseif ( WC()->cart && WC()->cart->needs_shipping() ) {
-			$shipping_methods = WC()->cart->get_shipping_methods();
-			$is_virtual       = false;
-		}
-
-		// If COD is not enabled for virtual orders and the order does not need shipping, return false.
-		if ( ! $this->enable_for_virtual && $is_virtual ) {
-			return false;
-		}
-
-		// Return early if:
-		// - There are no shipping methods resrictions in place.
-		// - The order is virtual so needs no shipping.
-		// - Shipping methods are not set yet.
-		if ( empty( $this->enable_for_methods ) || $is_virtual || ! $shipping_methods ) {
-			return parent::is_available();
-		}
-
-		// Get the selected shipping method ids. This works on both WC_Shipping_Rate and WC_Order_Item_Shipping class instances.
-		$canonical_rate_ids = array_unique(
-			array_values(
-				array_map(
-					function ( $shipping_method ) {
-						return $shipping_method && is_callable( array( $shipping_method, 'get_method_id' ) ) && is_callable( array( $shipping_method, 'get_instance_id' ) ) ? $shipping_method->get_method_id() . ':' . $shipping_method->get_instance_id() : null;
-					},
-					$shipping_methods
-				)
-			)
-		);
-
-		if ( ! count( $this->get_matching_rates( $canonical_rate_ids ) ) ) {
-			return false;
-		}
-
-		return parent::is_available();
-	}
-
-	/**
-	 * Checks to see whether or not the admin settings are being accessed by the current request.
-	 *
-	 * @return bool
-	 */
-	private function is_accessing_settings() {
-		if ( is_admin() ) {
-			if ( ! is_wc_admin_settings_page() ) {
-				return false;
-			}
-			// phpcs:disable WordPress.Security.NonceVerification
-			if ( ! isset( $_REQUEST['tab'] ) || 'checkout' !== $_REQUEST['tab'] ) {
-				return false;
-			}
-			if ( ! isset( $_REQUEST['section'] ) || self::ID !== $_REQUEST['section'] ) {
-				return false;
-			}
-			// phpcs:enable WordPress.Security.NonceVerification
-
-			return true;
-		}
-
-		if ( Constants::is_true( 'REST_REQUEST' ) ) {
-			global $wp;
-			if ( isset( $wp->query_vars['rest_route'] ) && false !== strpos( $wp->query_vars['rest_route'], '/payment_gateways' ) ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Loads all of the shipping method options for the enable_for_methods field.
-	 *
-	 * @return array
-	 */
-	private function load_shipping_method_options() {
-		// Since this is expensive, we only want to do it if we're actually on the settings page.
-		if ( ! $this->is_accessing_settings() ) {
-			return array();
-		}
-
-		$data_store = WC_Data_Store::load( 'shipping-zone' );
-		$raw_zones  = $data_store->get_zones();
-		$zones      = array();
-
-		foreach ( $raw_zones as $raw_zone ) {
-			$zones[] = new WC_Shipping_Zone( $raw_zone );
-		}
-
-		$zones[] = new WC_Shipping_Zone( 0 );
-
-		$options = array();
-		foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
-
-			$options[ $method->get_method_title() ] = array();
-
-			// Translators: %1$s shipping method name.
-			$options[ $method->get_method_title() ][ $method->id ] = sprintf( __( 'Any &quot;%1$s&quot; method', 'woocommerce' ), $method->get_method_title() );
-
-			foreach ( $zones as $zone ) {
-
-				$shipping_method_instances = $zone->get_shipping_methods();
-
-				foreach ( $shipping_method_instances as $shipping_method_instance_id => $shipping_method_instance ) {
-
-					if ( $shipping_method_instance->id !== $method->id ) {
-						continue;
-					}
-
-					$option_id = $shipping_method_instance->get_rate_id();
-
-					// Translators: %1$s shipping method title, %2$s shipping method id.
-					$option_instance_title = sprintf( __( '%1$s (#%2$s)', 'woocommerce' ), $shipping_method_instance->get_title(), $shipping_method_instance_id );
-
-					// Translators: %1$s zone name, %2$s shipping method instance name.
-					$option_title = sprintf( __( '%1$s &ndash; %2$s', 'woocommerce' ), $zone->get_id() ? $zone->get_zone_name() : __( 'Other locations', 'woocommerce' ), $option_instance_title );
-
-					$options[ $method->get_method_title() ][ $option_id ] = $option_title;
-				}
-			}
-		}
-
-		return $options;
-	}
-
-	/**
-	 * Indicates whether a rate exists in an array of canonically-formatted rate IDs that activates this gateway.
-	 *
-	 * @since  3.4.0
-	 *
-	 * @param array $rate_ids Rate ids to check.
-	 * @return array
-	 */
-	private function get_matching_rates( $rate_ids ) {
-		// First, match entries in 'method_id:instance_id' format. Then, match entries in 'method_id' format by stripping off the instance ID from the candidates.
-		return array_unique( array_merge( array_intersect( $this->enable_for_methods, $rate_ids ), array_intersect( $this->enable_for_methods, array_unique( array_map( 'wc_get_string_before_colon', $rate_ids ) ) ) ) );
 	}
 
 	/**

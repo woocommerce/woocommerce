@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\DataStores\PostDataSlashing;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -36,6 +37,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_visibility',
 		'_sku',
 		'_global_unique_id',
+		'_mpn',
+		'_customs_commodity_code',
+		'_customs_country_of_origin',
+		'_customs_description',
 		'_price',
 		'_regular_price',
 		'_sale_price',
@@ -104,6 +109,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @var array
 	 */
 	protected $updated_props = array();
+
+	/**
+	 * Lookup refreshes currently handed off to a product-type store, keyed by blog and product ID.
+	 *
+	 * @var array<string, bool>
+	 */
+	private static $refreshing_lookup_table = array();
 
 
 	/**
@@ -204,28 +216,35 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->set_date_created( time() );
 		}
 
-		$id = wp_insert_post(
-			apply_filters(
-				'woocommerce_new_product_data',
-				array(
-					'post_type'      => 'product',
-					'post_status'    => $product->get_status() ? $product->get_status() : ProductStatus::PUBLISH,
-					'post_author'    => get_current_user_id(),
-					'post_title'     => $product->get_name() ? $product->get_name() : __( 'Product', 'woocommerce' ),
-					'post_content'   => $product->get_description(),
-					'post_excerpt'   => $product->get_short_description(),
-					'post_parent'    => $product->get_parent_id(),
-					'comment_status' => $product->get_reviews_allowed() ? 'open' : 'closed',
-					'ping_status'    => 'closed',
-					'menu_order'     => $product->get_menu_order(),
-					'post_password'  => $product->get_post_password( 'edit' ),
-					'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
-					'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
-					'post_name'      => $product->get_slug( 'edit' ),
-				)
-			),
-			true
+		/**
+		 * Filters the post data used to create a product.
+		 *
+		 * Values are unslashed. They are slashed before being passed to wp_insert_post().
+		 *
+		 * @since 3.0.0
+		 * @param array $data Post data for wp_insert_post().
+		 */
+		$post_data = apply_filters(
+			'woocommerce_new_product_data',
+			array(
+				'post_type'      => 'product',
+				'post_status'    => $product->get_status() ? $product->get_status() : ProductStatus::PUBLISH,
+				'post_author'    => get_current_user_id(),
+				'post_title'     => $product->get_name() ? $product->get_name() : __( 'Product', 'woocommerce' ),
+				'post_content'   => $product->get_description(),
+				'post_excerpt'   => $product->get_short_description(),
+				'post_parent'    => $product->get_parent_id(),
+				'comment_status' => $product->get_reviews_allowed() ? 'open' : 'closed',
+				'ping_status'    => 'closed',
+				'menu_order'     => $product->get_menu_order(),
+				'post_password'  => $product->get_post_password( 'edit' ),
+				'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+				'post_name'      => $product->get_slug( 'edit' ),
+			)
 		);
+
+		$id = wp_insert_post( PostDataSlashing::slash( $post_data ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
@@ -362,7 +381,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $product->get_id() ) );
 				clean_post_cache( $product->get_id() );
 			} else {
-				wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
+				wp_update_post( PostDataSlashing::slash( array_merge( array( 'ID' => $product->get_id() ), $post_data ) ) );
 			}
 			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 
@@ -448,45 +467,58 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$id                = $product->get_id();
 		$post_meta_values  = get_post_meta( $id );
 		$meta_key_to_props = array(
-			'_sku'                   => 'sku',
-			'_global_unique_id'      => 'global_unique_id',
-			'_regular_price'         => 'regular_price',
-			'_sale_price'            => 'sale_price',
-			'_price'                 => 'price',
-			'_sale_price_dates_from' => 'date_on_sale_from',
-			'_sale_price_dates_to'   => 'date_on_sale_to',
-			'total_sales'            => 'total_sales',
-			'_tax_status'            => 'tax_status',
-			'_tax_class'             => 'tax_class',
-			'_manage_stock'          => 'manage_stock',
-			'_backorders'            => 'backorders',
-			'_low_stock_amount'      => 'low_stock_amount',
-			'_sold_individually'     => 'sold_individually',
-			'_weight'                => 'weight',
-			'_length'                => 'length',
-			'_width'                 => 'width',
-			'_height'                => 'height',
-			'_upsell_ids'            => 'upsell_ids',
-			'_crosssell_ids'         => 'cross_sell_ids',
-			'_purchase_note'         => 'purchase_note',
-			'_default_attributes'    => 'default_attributes',
-			'_virtual'               => 'virtual',
-			'_downloadable'          => 'downloadable',
-			'_download_limit'        => 'download_limit',
-			'_download_expiry'       => 'download_expiry',
-			'_thumbnail_id'          => 'image_id',
-			'_stock'                 => 'stock_quantity',
-			'_stock_status'          => 'stock_status',
-			'_wc_average_rating'     => 'average_rating',
-			'_wc_rating_count'       => 'rating_counts',
-			'_wc_review_count'       => 'review_count',
-			'_product_image_gallery' => 'gallery_image_ids',
+			'_sku'                       => 'sku',
+			'_global_unique_id'          => 'global_unique_id',
+			'_mpn'                       => 'mpn',
+			'_regular_price'             => 'regular_price',
+			'_sale_price'                => 'sale_price',
+			'_price'                     => 'price',
+			'_sale_price_dates_from'     => 'date_on_sale_from',
+			'_sale_price_dates_to'       => 'date_on_sale_to',
+			'total_sales'                => 'total_sales',
+			'_tax_status'                => 'tax_status',
+			'_tax_class'                 => 'tax_class',
+			'_manage_stock'              => 'manage_stock',
+			'_backorders'                => 'backorders',
+			'_low_stock_amount'          => 'low_stock_amount',
+			'_sold_individually'         => 'sold_individually',
+			'_weight'                    => 'weight',
+			'_length'                    => 'length',
+			'_width'                     => 'width',
+			'_height'                    => 'height',
+			'_upsell_ids'                => 'upsell_ids',
+			'_crosssell_ids'             => 'cross_sell_ids',
+			'_purchase_note'             => 'purchase_note',
+			'_default_attributes'        => 'default_attributes',
+			'_virtual'                   => 'virtual',
+			'_downloadable'              => 'downloadable',
+			'_download_limit'            => 'download_limit',
+			'_download_expiry'           => 'download_expiry',
+			'_thumbnail_id'              => 'image_id',
+			'_stock'                     => 'stock_quantity',
+			'_stock_status'              => 'stock_status',
+			'_wc_average_rating'         => 'average_rating',
+			'_wc_rating_count'           => 'rating_counts',
+			'_wc_review_count'           => 'review_count',
+			'_product_image_gallery'     => 'gallery_image_ids',
+			'_customs_commodity_code'    => 'customs_commodity_code',
+			'_customs_country_of_origin' => 'customs_country_of_origin',
+			'_customs_description'       => 'customs_description',
 		);
 
 		$set_props = array();
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			$meta_value         = $post_meta_values[ $meta_key ][0] ?? null;
+			$meta_value = $post_meta_values[ $meta_key ][0] ?? null;
+
+			if ( '_default_attributes' === $meta_key && is_serialized( $meta_value ) ) {
+				// Default attributes only hold strings, so don't let a stored value create objects.
+				$default_attributes = @unserialize( trim( $meta_value ), array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- Same as maybe_unserialize(), without objects.
+				// A whole-row object would otherwise be cast to an array of its class name and properties.
+				$set_props[ $prop ] = is_object( $default_attributes ) ? array() : $default_attributes;
+				continue;
+			}
+
 			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
 		}
 
@@ -734,38 +766,42 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected function update_post_meta( &$product, $force = false ) {
 		$meta_key_to_props = array(
-			'_sku'                   => 'sku',
-			'_global_unique_id'      => 'global_unique_id',
-			'_regular_price'         => 'regular_price',
-			'_sale_price'            => 'sale_price',
-			'_sale_price_dates_from' => 'date_on_sale_from',
-			'_sale_price_dates_to'   => 'date_on_sale_to',
-			'total_sales'            => 'total_sales',
-			'_tax_status'            => 'tax_status',
-			'_tax_class'             => 'tax_class',
-			'_manage_stock'          => 'manage_stock',
-			'_backorders'            => 'backorders',
-			'_low_stock_amount'      => 'low_stock_amount',
-			'_sold_individually'     => 'sold_individually',
-			'_weight'                => 'weight',
-			'_length'                => 'length',
-			'_width'                 => 'width',
-			'_height'                => 'height',
-			'_upsell_ids'            => 'upsell_ids',
-			'_crosssell_ids'         => 'cross_sell_ids',
-			'_purchase_note'         => 'purchase_note',
-			'_default_attributes'    => 'default_attributes',
-			'_virtual'               => 'virtual',
-			'_downloadable'          => 'downloadable',
-			'_product_image_gallery' => 'gallery_image_ids',
-			'_download_limit'        => 'download_limit',
-			'_download_expiry'       => 'download_expiry',
-			'_thumbnail_id'          => 'image_id',
-			'_stock'                 => 'stock_quantity',
-			'_stock_status'          => 'stock_status',
-			'_wc_average_rating'     => 'average_rating',
-			'_wc_rating_count'       => 'rating_counts',
-			'_wc_review_count'       => 'review_count',
+			'_sku'                       => 'sku',
+			'_global_unique_id'          => 'global_unique_id',
+			'_mpn'                       => 'mpn',
+			'_regular_price'             => 'regular_price',
+			'_sale_price'                => 'sale_price',
+			'_sale_price_dates_from'     => 'date_on_sale_from',
+			'_sale_price_dates_to'       => 'date_on_sale_to',
+			'total_sales'                => 'total_sales',
+			'_tax_status'                => 'tax_status',
+			'_tax_class'                 => 'tax_class',
+			'_manage_stock'              => 'manage_stock',
+			'_backorders'                => 'backorders',
+			'_low_stock_amount'          => 'low_stock_amount',
+			'_sold_individually'         => 'sold_individually',
+			'_weight'                    => 'weight',
+			'_length'                    => 'length',
+			'_width'                     => 'width',
+			'_height'                    => 'height',
+			'_upsell_ids'                => 'upsell_ids',
+			'_crosssell_ids'             => 'cross_sell_ids',
+			'_purchase_note'             => 'purchase_note',
+			'_default_attributes'        => 'default_attributes',
+			'_virtual'                   => 'virtual',
+			'_downloadable'              => 'downloadable',
+			'_product_image_gallery'     => 'gallery_image_ids',
+			'_download_limit'            => 'download_limit',
+			'_download_expiry'           => 'download_expiry',
+			'_thumbnail_id'              => 'image_id',
+			'_stock'                     => 'stock_quantity',
+			'_stock_status'              => 'stock_status',
+			'_wc_average_rating'         => 'average_rating',
+			'_wc_rating_count'           => 'rating_counts',
+			'_wc_review_count'           => 'review_count',
+			'_customs_commodity_code'    => 'customs_commodity_code',
+			'_customs_country_of_origin' => 'customs_country_of_origin',
+			'_customs_description'       => 'customs_description',
 		);
 
 		// Make sure to take extra data (like product url or text for external products) into account.
@@ -781,6 +817,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$value = $product->{"get_$prop"}( 'edit' );
 			$value = is_string( $value ) ? wp_slash( $value ) : $value;
 			switch ( $prop ) {
+				case 'customs_commodity_code':
+				case 'customs_country_of_origin':
+				case 'customs_description':
+					$value = $value ?? '';
+					break;
 				case 'virtual':
 				case 'downloadable':
 				case 'manage_stock':
@@ -789,6 +830,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					break;
 				case 'gallery_image_ids':
 					$value = implode( ',', $value );
+					break;
+				case 'image_id':
+					// An empty string makes update_or_delete_post_meta() remove the meta, as earlier versions did; integer zero would persist a "0" row.
+					$value = $value ? $value : '';
 					break;
 				case 'date_on_sale_from':
 				case 'date_on_sale_to':
@@ -957,7 +1002,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		$props_in_lookup_table = array( 'sku', 'global_unique_id', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' );
+		$props_in_lookup_table = array( 'sku', 'global_unique_id', 'mpn', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' );
 		if ( $this->cogs_feature_is_enabled() ) {
 			$props_in_lookup_table[] = 'cogs_value';
 		}
@@ -975,11 +1020,36 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Refresh the product meta lookup table row for a given product.
 	 *
+	 * When the product type's data store extends this one, the refresh runs there so its lookup data is used.
+	 *
 	 * @since 10.8.0
 	 * @param int $product_id Product ID.
 	 * @return void
 	 */
 	public function refresh_product_lookup_table( int $product_id ): void {
+		$product_id = absint( $product_id );
+		if ( ! $product_id ) {
+			return;
+		}
+		$refresh_key = get_current_blog_id() . ':' . $product_id;
+
+		// Custom stores can delegate back here through a different store instance.
+		if ( empty( self::$refreshing_lookup_table[ $refresh_key ] ) ) {
+			$product_type = WC_Product_Factory::get_product_type( $product_id );
+			$data_store   = WC_Data_Store::load( is_string( $product_type ) ? 'product-' . $product_type : 'product' );
+
+			// Only hand off to a more specific store, so a customized generic store keeps its own lookup data.
+			if ( is_subclass_of( $data_store->get_current_class_name(), get_class( $this ) ) ) {
+				self::$refreshing_lookup_table[ $refresh_key ] = true;
+				try {
+					$data_store->__call( 'refresh_product_lookup_table', array( $product_id ) );
+				} finally {
+					unset( self::$refreshing_lookup_table[ $refresh_key ] );
+				}
+				return;
+			}
+		}
+
 		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
 	}
 
@@ -1420,6 +1490,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				posts.post_type IN ( 'product', 'product_variation' )
 				AND posts.post_status != 'trash'
 				AND lookup.global_unique_id = %s
+				ORDER BY posts.ID ASC
 				LIMIT 1
 				",
 				$global_unique_id
@@ -1438,11 +1509,25 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Returns an array of IDs of products that have sales starting soon.
 	 *
+	 * Sales that have already ended are excluded, otherwise get_ending_sales() would undo
+	 * them on the same run and the product would qualify again on every run after that.
+	 * The exclusion must keep reading `_sale_price_dates_to` exactly the way
+	 * get_ending_sales() does, or a product ends up in neither queue. See the note there.
+	 *
+	 * Sale prices of '' and '0' are excluded because wc_apply_sale_state_for_product() skips
+	 * them, so the price never changes and the product would match on every run. '0.00' is
+	 * applied and settles, so it must stay matched: do not replace this with `> 0`.
+	 *
+	 * Keep the exclusion as NOT EXISTS: the LEFT JOIN ... IS NULL rewrite is faster on MariaDB
+	 * but materially slower on MySQL.
+	 *
 	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_starting_sales() {
 		global $wpdb;
+
+		$now = time();
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return $wpdb->get_col(
@@ -1455,14 +1540,34 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND postmeta_3.meta_key = '_sale_price'
 					AND postmeta.meta_value > 0
 					AND postmeta.meta_value < %s
-					AND postmeta_2.meta_value != postmeta_3.meta_value",
-				time()
+					AND postmeta_2.meta_value != postmeta_3.meta_value
+					AND postmeta_3.meta_value NOT IN ( '', '0' )
+					AND NOT EXISTS (
+						SELECT 1 FROM {$wpdb->postmeta} as ended
+						WHERE ended.post_id = postmeta.post_id
+							AND ended.meta_key = '_sale_price_dates_to'
+							AND ended.meta_value > 0
+							AND ended.meta_value < %s
+					)",
+				$now,
+				$now
 			)
 		);
 	}
 
 	/**
 	 * Returns an array of IDs of products that have sales which are due to end.
+	 *
+	 * Paired with get_starting_sales(), which excludes on this same `_sale_price_dates_to`
+	 * test, so keep the two identical: narrowing this alone strands a product in neither
+	 * queue, broadening it alone brings the daily churn back. `> 0` compares numerically,
+	 * which is what makes '' and '0000-00-00' read as "no end date"; `< %s` compares as
+	 * strings. Do not bind one as %d.
+	 *
+	 * The two do not share a timestamp: each reads the clock when it runs. What makes that
+	 * safe is the order, not the text. wc_scheduled_sales() runs starting first, so this
+	 * query's `now` is the later one, and anything already ended there is still ended here.
+	 * Reversing that order would strand exactly what the pairing is meant to prevent.
 	 *
 	 * @since 3.0.0
 	 * @return array
@@ -1802,7 +1907,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Sometimes I wonder if it shouldn't be part of update_lookup_table.
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
 
-		$this->update_lookup_table( $product_id_with_stock, 'wc_product_meta_lookup' );
+		$this->refresh_product_lookup_table( absint( $product_id_with_stock ) );
 	}
 
 	/**
@@ -1871,7 +1976,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Sometimes I wonder if it shouldn't be part of update_lookup_table.
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
 
-		$this->update_lookup_table( $product_id_with_stock, 'wc_product_meta_lookup' );
+		$this->refresh_product_lookup_table( absint( $product_id_with_stock ) );
 
 		/**
 		 * Fire an action for this direct update so it can be detected by other code.
@@ -1935,7 +2040,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		wp_cache_delete( $product_id, 'post_meta' );
 
-		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
+		$this->refresh_product_lookup_table( absint( $product_id ) );
 
 		/**
 		 * Fire an action for this direct update so it can be detected by other code.
@@ -2017,7 +2122,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param  string     $term Search term.
 	 * @param  string     $type Type of product.
 	 * @param  bool       $include_variations Include variations in search or not.
-	 * @param  bool       $all_statuses Should we search all statuses or limit to published.
+	 * @param  bool       $all_statuses True searches every status. False searches published products, plus private products when the current user can read them.
 	 * @param  null|int   $limit Limit returned results. @since 3.5.0.
 	 * @param  null|array $include Keep specific results. @since 3.6.0.
 	 * @param  null|array $exclude Discard specific results. @since 3.6.0.
@@ -2052,7 +2157,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 */
 		$post_statuses = apply_filters(
 			'woocommerce_search_products_post_statuses',
-			current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' )
+			current_user_can( 'read_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' )
 		);
 
 		// See if search term contains OR keywords.
@@ -2064,6 +2169,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$search_where   = '';
 		$search_queries = array();
+
+		// A variation without its own SKU or GTIN is searched by its parent's, so rank it by that too.
+		$identifier_columns = array();
+		foreach ( array( 'sku', 'global_unique_id' ) as $column ) {
+			$identifier_columns[] = $include_variations ? "COALESCE( NULLIF( wc_product_meta_lookup.{$column}, '' ), parent_wc_product_meta_lookup.{$column} )" : "wc_product_meta_lookup.{$column}";
+		}
+
+		$rank_tiers = array(
+			'identifier_exact'  => array(),
+			'identifier_prefix' => array(),
+			'title_prefix'      => array(),
+			'title_match'       => array(),
+		);
 
 		foreach ( $term_groups as $term_group ) {
 			// Parse search terms.
@@ -2079,10 +2197,35 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$search_terms = array( $term_group );
 			}
 
-			$term_group_query = array();
+			$term_group_query  = array();
+			$title_match_query = array();
+
+			// Rank on the raw term as well as the parsed one: parsing strips quotes, but also splits SKUs like "AB+12".
+			$rank_phrases = array_unique(
+				array_filter(
+					array( trim( $term_group ), implode( ' ', $search_terms ) ),
+					static function ( $phrase ) {
+						return '' !== $phrase;
+					}
+				)
+			);
+
+			foreach ( $rank_phrases as $rank_phrase ) {
+				$phrase_like  = $wpdb->esc_like( $rank_phrase );
+				$exact_value  = $wpdb->prepare( '%s', $phrase_like );
+				$prefix_value = $wpdb->prepare( '%s', $phrase_like . '%' );
+
+				foreach ( $identifier_columns as $column ) {
+					$rank_tiers['identifier_exact'][]  = "{$column} LIKE {$exact_value}";
+					$rank_tiers['identifier_prefix'][] = "{$column} LIKE {$prefix_value}";
+				}
+
+				$rank_tiers['title_prefix'][] = "posts.post_title LIKE {$prefix_value}";
+			}
 
 			foreach ( $search_terms as $search_term ) {
-				$like = '%' . $wpdb->esc_like( $search_term ) . '%';
+				$like                = '%' . $wpdb->esc_like( $search_term ) . '%';
+				$title_match_query[] = $wpdb->prepare( 'posts.post_title LIKE %s', $like );
 
 				// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- an array of placeholders is a valid arg.
 				$term_query = $wpdb->prepare(
@@ -2100,9 +2243,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 
 			if ( $term_group_query ) {
-				$search_queries[] = implode( ' AND ', $term_group_query );
+				$search_queries[]            = implode( ' AND ', $term_group_query );
+				$rank_tiers['title_match'][] = '( ' . implode( ' AND ', $title_match_query ) . ' )';
 			}
 		}
+
+		// Rank SKU, GTIN and title matches first so a limit doesn't drop them in favour of description-only matches.
+		// The rank is only used in ORDER BY: selecting it makes DISTINCT slower on MariaDB. Both joins are on primary
+		// keys, so each product has a single rank and DISTINCT can't merge rows with different ranks.
+		$rank_cases = '';
+
+		foreach ( array_values( $rank_tiers ) as $rank => $tier_queries ) {
+			if ( $tier_queries ) {
+				$rank_cases .= ' WHEN ( ' . implode( ' OR ', $tier_queries ) . " ) THEN {$rank}";
+			}
+		}
+
+		$rank_cases .= ' ELSE ' . count( $rank_tiers );
 
 		if ( ! empty( $search_queries ) ) {
 			$search_where = ' AND ((' . implode( ') OR (', $search_queries ) . ')) ';
@@ -2150,7 +2307,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$search_where
 			$status_where
 			$type_where
-			ORDER BY posts.post_parent ASC, posts.post_title ASC
+			ORDER BY CASE{$rank_cases} END ASC, posts.post_parent ASC, posts.post_title ASC
 			$limit_query
 			"
 			// phpcs:enable
@@ -2574,6 +2731,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 			if ( get_option( 'woocommerce_schema_version', 0 ) >= 920 ) {
 				$product_data['global_unique_id'] = get_post_meta( $id, '_global_unique_id', true );
+			}
+			if ( get_option( 'woocommerce_schema_version', 0 ) >= 1140 ) {
+				$raw_mpn = (string) get_post_meta( $id, '_mpn', true );
+				// Ensure we don't exceed lookup column size (varchar 100).
+				$product_data['mpn'] = mb_substr( $raw_mpn, 0, 100 );
 			}
 			return $product_data;
 		}

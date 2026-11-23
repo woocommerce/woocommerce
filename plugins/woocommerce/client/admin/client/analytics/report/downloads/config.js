@@ -12,11 +12,11 @@ import {
 	getProductLabels,
 } from '../../../lib/async-requests';
 
-const DOWLOADS_REPORT_CHARTS_FILTER =
+const DOWNLOADS_REPORT_CHARTS_FILTER =
 	'woocommerce_admin_downloads_report_charts';
-const DOWLOADS_REPORT_FILTERS_FILTER =
+const DOWNLOADS_REPORT_FILTERS_FILTER =
 	'woocommerce_admin_downloads_report_filters';
-const DOWLOADS_REPORT_ADVANCED_FILTERS_FILTER =
+const DOWNLOADS_REPORT_ADVANCED_FILTERS_FILTER =
 	'woocommerce_admin_downloads_report_advanced_filters';
 
 /**
@@ -29,7 +29,7 @@ const DOWLOADS_REPORT_ADVANCED_FILTERS_FILTER =
  * @filter woocommerce_admin_downloads_report_charts
  * @param {Array.<chart>} charts Report charts.
  */
-export const charts = applyFilters( DOWLOADS_REPORT_CHARTS_FILTER, [
+export const charts = applyFilters( DOWNLOADS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'download_count',
 		label: __( 'Downloads', 'woocommerce' ),
@@ -47,7 +47,7 @@ export const charts = applyFilters( DOWLOADS_REPORT_CHARTS_FILTER, [
  * @filter woocommerce_admin_downloads_report_filters
  * @param {Array.<filter>} filters Report filters.
  */
-export const filters = applyFilters( DOWLOADS_REPORT_FILTERS_FILTER, [
+export const filters = applyFilters( DOWNLOADS_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce' ),
 		staticParams: [ 'chartType', 'paged', 'per_page' ],
@@ -63,8 +63,6 @@ export const filters = applyFilters( DOWLOADS_REPORT_FILTERS_FILTER, [
 	},
 ] );
 
-/*eslint-disable max-len*/
-
 /**
  * Downloads Report Advanced Filters.
  *
@@ -74,7 +72,7 @@ export const filters = applyFilters( DOWLOADS_REPORT_FILTERS_FILTER, [
  * @param {Object} advancedFilters.filters An object specifying a report's Advanced Filters.
  */
 export const advancedFilters = applyFilters(
-	DOWLOADS_REPORT_ADVANCED_FILTERS_FILTER,
+	DOWNLOADS_REPORT_ADVANCED_FILTERS_FILTER,
 	{
 		title: _x(
 			'Downloads match <select/> filters',
@@ -115,49 +113,35 @@ export const advancedFilters = applyFilters(
 			},
 			customer: {
 				labels: {
-					add: __( 'Username', 'woocommerce' ),
-					placeholder: __(
-						'Search customer username',
-						'woocommerce'
-					),
-					remove: __(
-						'Remove customer username filter',
-						'woocommerce'
-					),
-					rule: __(
-						'Select a customer username filter match',
-						'woocommerce'
-					),
-					/* translators: A sentence describing a customer username filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
+					add: __( 'Customer', 'woocommerce' ),
+					placeholder: __( 'Search customer', 'woocommerce' ),
+					remove: __( 'Remove customer filter', 'woocommerce' ),
+					rule: __( 'Select a customer filter match', 'woocommerce' ),
+					/* translators: A sentence describing a customer filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
 					title: __(
-						'<title>Username</title> <rule/> <filter />',
+						'<title>Customer</title> <rule/> <filter />',
 						'woocommerce'
 					),
-					filter: __( 'Select customer username', 'woocommerce' ),
+					filter: __( 'Select customer', 'woocommerce' ),
 				},
 				rules: [
 					{
 						value: 'includes',
-						/* translators: Sentence fragment, logical, "Includes" refers to customer usernames including a given username(s). Screenshot for context: https://cloudup.com/ccxhyH2mEDg */
-						label: _x(
-							'Includes',
-							'customer usernames',
-							'woocommerce'
-						),
+						/* translators: Sentence fragment, logical, "Includes" refers to customers including a given customer(s). Screenshot for context: https://cloudup.com/ccxhyH2mEDg */
+						label: _x( 'Includes', 'customers', 'woocommerce' ),
 					},
 					{
 						value: 'excludes',
-						/* translators: Sentence fragment, logical, "Excludes" refers to customer usernames excluding a given username(s). Screenshot for context: https://cloudup.com/ccxhyH2mEDg */
-						label: _x(
-							'Excludes',
-							'customer usernames',
-							'woocommerce'
-						),
+						/* translators: Sentence fragment, logical, "Excludes" refers to customers excluding a given customer(s). Screenshot for context: https://cloudup.com/ccxhyH2mEDg */
+						label: _x( 'Excludes', 'customers', 'woocommerce' ),
 					},
 				],
 				input: {
 					component: 'Search',
-					type: 'usernames',
+					// The report matches customers to downloads through their
+					// user id, which guests don't have, so only registered
+					// customers can be offered.
+					type: 'registeredCustomers',
 					getLabels: getCustomerLabels,
 				},
 			},
@@ -246,4 +230,3 @@ export const advancedFilters = applyFilters(
 		},
 	}
 );
-/*eslint-enable max-len*/

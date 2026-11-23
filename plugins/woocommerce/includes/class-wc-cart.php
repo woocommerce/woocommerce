@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
+use Automattic\WooCommerce\Internal\ProductVariations\VariationMatcher;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
@@ -37,6 +39,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @var string shortcode|store-api
 	 */
 	public $cart_context = 'shortcode';
+
+	/**
+	 * How many show_shipping() calls are reading the shipping address fields, so a field filter that recalculates the totals cannot nest the reads without limit.
+	 *
+	 * @var int
+	 */
+	private $shipping_address_field_reads = 0;
 
 	/**
 	 * Contains an array of cart items.
@@ -658,7 +667,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_cart() {
 		if ( ! did_action( 'wp_loaded' ) ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Get cart should not be called before the wp_loaded action.', 'woocommerce' ), '2.3' );
+			wc_doing_it_wrong( __FUNCTION__, 'Get cart should not be called before the wp_loaded action.', '2.3' );
 		}
 		if ( ! did_action( 'woocommerce_load_cart_from_session' ) ) {
 			$this->session->get_cart_from_session();
@@ -879,9 +888,15 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool|WP_Error
 	 */
 	public function check_cart_item_stock() {
-		$error                    = new WP_Error();
-		$product_qty_in_cart      = $this->get_cart_item_quantities();
-		$current_session_order_id = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : absint( WC()->session->get( 'store_api_draft_order', 0 ) );
+		$error               = new WP_Error();
+		$product_qty_in_cart = $this->get_cart_item_quantities();
+		// Identify the shopper's own order so its stock hold is not counted against them.
+		// The classic checkout stores an order ID in `order_awaiting_payment`, but completing a
+		// payment or cancelling an unpaid order writes `false` there instead of unsetting it, so
+		// treat any falsy value as "no order" and fall back to the Store API draft order. Read the
+		// value with get(), because WC_Session::__isset() reports a stored `false` as set.
+		$order_awaiting_payment   = absint( WC()->session->get( 'order_awaiting_payment' ) );
+		$current_session_order_id = $order_awaiting_payment ? $order_awaiting_payment : absint( WC()->session->get( 'store_api_draft_order', 0 ) );
 
 		foreach ( $this->get_cart() as $values ) {
 			$product = $values['data'];
@@ -898,7 +913,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				continue;
 			}
 
-			// Check stock based on all items in the cart and consider any held stock within pending orders.
+			// Check stock based on all items in the cart and consider any stock held by other orders.
 			$held_stock     = wc_get_held_stock_quantity( $product, $current_session_order_id );
 			$required_stock = $product_qty_in_cart[ $product->get_stock_managed_by_id() ];
 
@@ -931,6 +946,35 @@ class WC_Cart extends WC_Legacy_Cart {
 		wc_deprecated_function( 'WC_Cart::get_item_data', '3.3', 'wc_get_formatted_cart_item_data' );
 
 		return wc_get_formatted_cart_item_data( $cart_item, $flat );
+	}
+
+	/**
+	 * Gets the display name for a cart item.
+	 *
+	 * For variations, selected "Any" attribute values that are missing from the
+	 * stored variation name are appended so the name matches fully defined
+	 * variations. The stored product and variation names are not modified.
+	 *
+	 * @since 11.2.0
+	 * @param array           $cart_item Cart item.
+	 * @param WC_Product|null $product   Optional product object to use as the name source,
+	 *                                   e.g. the result of the `woocommerce_cart_item_product` filter.
+	 *                                   Defaults to the cart item's product.
+	 * @return string The product name including any selected "Any" attribute values,
+	 *                or an empty string when no product can be resolved from the arguments.
+	 */
+	public function get_item_product_name( $cart_item, $product = null ) {
+		if ( ! $product instanceof WC_Product ) {
+			$product = is_array( $cart_item ) && isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product ? $cart_item['data'] : null;
+		}
+
+		if ( ! $product instanceof WC_Product ) {
+			return '';
+		}
+
+		$variation = isset( $cart_item['variation'] ) && is_array( $cart_item['variation'] ) ? $cart_item['variation'] : array();
+
+		return wc_get_container()->get( SelectedVariationName::class )->get_product_name( $product, $variation, true );
 	}
 
 	/**
@@ -1113,6 +1157,8 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( is_array( $variation ) && ! empty( $variation ) ) {
+			// Sort for consistent item identification regardless of attribute order.
+			ksort( $variation );
 			$variation_key = '';
 			foreach ( $variation as $key => $value ) {
 				$variation_key .= trim( $key ) . trim( $value );
@@ -1179,6 +1225,15 @@ class WC_Cart extends WC_Legacy_Cart {
 				return false;
 			}
 
+			if ( ! $product_data->is_viewable() && ! $product_data->is_purchasable() ) {
+				/**
+				 * This filter is documented further down in this method.
+				 *
+				 * @since 3.8.0
+				 */
+				throw new Exception( apply_filters( 'woocommerce_cart_product_cannot_be_purchased_message', __( 'Sorry, this product cannot be purchased.', 'woocommerce' ), $product_data ) );
+			}
+
 			// Variable product cannot be added to cart without a specified variation.
 			if ( ! $variation_id && $product_data->is_type( ProductType::VARIABLE ) ) {
 				/* translators: 1: product link, 2: product name */
@@ -1188,6 +1243,10 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( $product_data->is_type( ProductType::VARIATION ) ) {
 				$missing_attributes = array();
 				$parent_data        = wc_get_product( $product_data->get_parent_id() );
+
+				if ( ! $parent_data instanceof WC_Product ) {
+					throw new Exception( __( 'Sorry, this product cannot be added to the cart.', 'woocommerce' ) );
+				}
 
 				$variation_attributes = $product_data->get_variation_attributes();
 				// Filter out 'any' variations, which are empty, as they need to be explicitly specified while adding to cart.
@@ -1206,7 +1265,8 @@ class WC_Cart extends WC_Legacy_Cart {
 							// Don't use wc_clean as it destroys sanitized characters.
 							$value = sanitize_title( wp_unslash( $variation[ $attribute_key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 						} else {
-							$value = html_entity_decode( wc_clean( wp_unslash( $variation[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+							// Don't use wc_clean as it strips percent sequences (e.g. `%20`) that can legitimately appear in custom attribute values, making them fail validation against the stored options. Entities are decoded before tag stripping so encoded markup cannot survive as literal tags.
+							$value = wp_strip_all_tags( html_entity_decode( wp_unslash( $variation[ $attribute_key ] ), ENT_QUOTES, get_bloginfo( 'charset' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 						}
 
 						// Don't include if it's empty.
@@ -1264,12 +1324,20 @@ class WC_Cart extends WC_Legacy_Cart {
 					} elseif ( '' === $valid_value ) {
 						$missing_attributes[] = wc_attribute_label( $attribute['name'] );
 					}
-
-					$variation = $attributes;
 				}
+
+				// Keep only the checked attributes. This also drops posted values when the parent has no variation attributes.
+				$variation = $attributes;
 				if ( ! empty( $missing_attributes ) ) {
 					/* translators: %s: Attribute name. */
 					throw new Exception( sprintf( _n( '%s is a required field', '%s are required fields', count( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ) );
+				}
+
+				if (
+					$product_data instanceof WC_Product_Variation &&
+					wc_get_container()->get( VariationMatcher::class )->has_earlier_match( $product_data, $variation )
+				) {
+					throw new Exception( __( 'The selected options belong to a different variation of this product.', 'woocommerce' ) );
 				}
 			}
 
@@ -1282,7 +1350,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				)
 			) {
 				$product = wc_get_product( $product_id );
-				if ( ! ( $product instanceof WC_Product ) ) {
+				if ( ! ( $product instanceof WC_Product ) || ! $product->is_viewable() ) {
 					throw new Exception( __( 'The selected product is invalid.', 'woocommerce' ) );
 				}
 
@@ -1609,14 +1677,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function calculate_shipping() {
-		// Reset totals.
-		$this->set_shipping_total( 0 );
-		$this->set_shipping_tax( 0 );
-		$this->set_shipping_taxes( array() );
-		$this->shipping_methods        = array();
-		$this->has_calculated_shipping = false;
+		$this->clear_shipping_totals();
 
-		if ( ! $this->needs_shipping() || ! $this->show_shipping() ) {
+		$ready = $this->needs_shipping() && $this->show_shipping();
+
+		// A filter run by show_shipping() can calculate the totals again and leave that nested run's shipping behind.
+		$this->clear_shipping_totals();
+
+		if ( ! $ready ) {
 			return $this->shipping_methods;
 		}
 
@@ -1637,6 +1705,17 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->set_shipping_taxes( $merged_taxes );
 
 		return $this->shipping_methods;
+	}
+
+	/**
+	 * Reset the shipping totals, taxes and methods to none calculated.
+	 */
+	private function clear_shipping_totals(): void {
+		$this->set_shipping_total( 0 );
+		$this->set_shipping_tax( 0 );
+		$this->set_shipping_taxes( array() );
+		$this->shipping_methods        = array();
+		$this->has_calculated_shipping = false;
 	}
 
 	/**
@@ -1836,13 +1915,20 @@ class WC_Cart extends WC_Legacy_Cart {
 				return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 			}
 
-			if ( 'shortcode' === $this->cart_context ) {
+			// Calling calculate_totals() from an address field filter, such as woocommerce_default_address_fields, triggers show_shipping() again.
+			// Allow one nested field read for compatibility, then use the locale-based check below to prevent unbounded recursion.
+			if ( 'shortcode' === $this->cart_context && $this->shipping_address_field_reads < 2 ) {
 				$country = $this->get_customer()->get_shipping_country();
 				if ( ! $country ) {
 					return false;
 				}
-				$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
-				$checkout_fields = WC()->checkout()->get_checkout_fields();
+				++$this->shipping_address_field_reads;
+				try {
+					$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
+					$checkout_fields = WC()->checkout()->get_checkout_fields();
+				} finally {
+					--$this->shipping_address_field_reads;
+				}
 
 				/**
 				 * Filter to not require shipping state for shipping calculation, even if it is required at checkout.
@@ -1853,9 +1939,12 @@ class WC_Cart extends WC_Legacy_Cart {
 				 * @param bool $show_state Whether to use the state field. Default true.
 				 */
 				$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
-				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
+				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && true !== ( $country_fields['shipping_state']['hidden'] ?? false );
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
-				$checkout_state_field_exists = isset( $checkout_fields['shipping']['shipping_state'] );
+				// When shipping is forced to the billing address the shipping fields are never shown, so only a field the shopper
+				// can actually fill in (the billing one) should keep shipping hidden.
+				$address_fieldset            = wc_ship_to_billing_address_only() ? 'billing' : 'shipping';
+				$checkout_state_field_exists = isset( $checkout_fields[ $address_fieldset ][ $address_fieldset . '_state' ] );
 				if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() && $checkout_state_field_exists ) {
 					return false;
 				}
@@ -1868,9 +1957,9 @@ class WC_Cart extends WC_Legacy_Cart {
 				 * @param bool $show_postcode Whether to use the postcode field. Default true.
 				 */
 				$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
-				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
+				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && true !== ( $country_fields['shipping_postcode']['hidden'] ?? false );
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
-				$checkout_postcode_field_exists = isset( $checkout_fields['shipping']['shipping_postcode'] );
+				$checkout_postcode_field_exists = isset( $checkout_fields[ $address_fieldset ][ $address_fieldset . '_postcode' ] );
 				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && $checkout_postcode_field_exists ) {
 					return false;
 				}
@@ -1969,8 +2058,29 @@ class WC_Cart extends WC_Legacy_Cart {
 					// For guest, usage per user has not been enforced yet. Enforce it now.
 					$coupon_data_store = $coupon->get_data_store();
 					$billing_email     = strtolower( sanitize_email( $billing_email ) );
-					if ( $coupon_data_store && $coupon_data_store->get_usage_by_email( $coupon, $billing_email ) >= $coupon_usage_limit ) {
-						if ( $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( $billing_email ) ) ) {
+					// A use by the account that owns this email is recorded under its user ID, not the email.
+					$email_owner = $billing_email ? get_user_by( 'email', $billing_email ) : false;
+					$aliases     = array_filter( array( $billing_email, $email_owner ? $email_owner->ID : 0 ) );
+					$uses_alias  = $coupon_data_store instanceof WC_Data_Store && $coupon_data_store->has_callable( 'get_usage_by_aliases' );
+					$usage_count = 0;
+					if ( $coupon_data_store ) {
+						$usage_count = (int) $coupon_data_store->get_usage_by_email( $coupon, $billing_email );
+						if ( $email_owner ) {
+							// @phpstan-ignore-next-line method.notFound (Part of WC_Coupon_Data_Store_Interface, called via __call() on the coupon data store instance.)
+							$usage_count += (int) $coupon_data_store->get_usage_by_user_id( $coupon, $email_owner->ID );
+						}
+					}
+					// The larger count keeps a custom store's get_usage_by_email() override in effect.
+					if ( $uses_alias ) {
+						// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the coupon data store instance.)
+						$usage_count = max( $usage_count, (int) $coupon_data_store->get_usage_by_aliases( $coupon, $aliases ) );
+					}
+					if ( $coupon_data_store && $usage_count >= $coupon_usage_limit ) {
+						if ( $uses_alias ) {
+							// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the coupon data store instance.)
+							$aliases = $coupon_data_store->add_recorded_user_ids_to_aliases( $coupon, $aliases );
+						}
+						if ( $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), $aliases ) ) {
 							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST );
 						} else {
 							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
@@ -1993,7 +2103,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function is_coupon_emails_allowed( $check_emails, $restrictions ) {
 		wc_doing_it_wrong(
 			'WC_Cart::is_coupon_emails_allowed',
-			__( 'This method has been deprecated and will be removed soon. Use Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed instead.', 'woocommerce' ),
+			'This method has been deprecated and will be removed soon. Use Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed instead.',
 			'9.0.0'
 		);
 

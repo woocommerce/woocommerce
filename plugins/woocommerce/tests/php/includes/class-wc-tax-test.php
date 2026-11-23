@@ -14,34 +14,6 @@ declare( strict_types=1 );
 class WC_Tax_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * Track whether we created the reduced-rate tax class.
-	 *
-	 * @var bool
-	 */
-	private $created_reduced_rate_class = false;
-
-	/**
-	 * Track whether we created the zero-rate tax class.
-	 *
-	 * @var bool
-	 */
-	private $created_zero_rate_class = false;
-
-	/**
-	 * Track created products for cleanup.
-	 *
-	 * @var array
-	 */
-	private $created_products = array();
-
-	/**
-	 * Store the original value of woocommerce_calc_taxes.
-	 *
-	 * @var string|null
-	 */
-	private $original_calc_taxes = null;
-
-	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
@@ -50,8 +22,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		// Clear any existing tax rates and settings.
 		$this->clean_up_tax_rates();
 
-		// Store and set woocommerce_calc_taxes option.
-		$this->original_calc_taxes = get_option( 'woocommerce_calc_taxes', null );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
 		// Ensure required tax classes exist for testing.
@@ -59,44 +29,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		// Clear cart.
 		WC()->cart->empty_cart();
-	}
-
-	/**
-	 * Clean up after test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		remove_all_filters( 'woocommerce_shipping_tax_class' );
-		remove_all_filters( 'woocommerce_shipping_prices_include_tax' );
-
-		// Clean up created products.
-		foreach ( $this->created_products as $product_id ) {
-			wp_delete_post( $product_id, true );
-		}
-		$this->created_products = array();
-
-		// Clean up tax rates.
-		$this->clean_up_tax_rates();
-
-		// Reset tax settings.
-		delete_option( 'woocommerce_shipping_tax_class' );
-		delete_option( 'woocommerce_tax_classes' );
-
-		// Restore woocommerce_calc_taxes option to its original value.
-		if ( null !== $this->original_calc_taxes ) {
-			update_option( 'woocommerce_calc_taxes', $this->original_calc_taxes );
-		} else {
-			delete_option( 'woocommerce_calc_taxes' );
-		}
-
-		// Only clean up tax classes we created during testing.
-		if ( $this->created_reduced_rate_class ) {
-			WC_Tax::delete_tax_class_by( 'slug', 'reduced-rate' );
-		}
-		if ( $this->created_zero_rate_class ) {
-			WC_Tax::delete_tax_class_by( 'slug', 'zero-rate' );
-		}
 	}
 
 	/**
@@ -119,18 +51,12 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		// Check and create reduced-rate tax class if needed.
 		if ( ! in_array( 'reduced-rate', $existing_tax_class_slugs, true ) ) {
-			$reduced_class = WC_Tax::create_tax_class( 'Reduced rate', 'reduced-rate' );
-			if ( is_array( $reduced_class ) ) {
-				$this->created_reduced_rate_class = true;
-			}
+			WC_Tax::create_tax_class( 'Reduced rate', 'reduced-rate' );
 		}
 
 		// Check and create zero-rate tax class if needed.
 		if ( ! in_array( 'zero-rate', $existing_tax_class_slugs, true ) ) {
-			$zero_class = WC_Tax::create_tax_class( 'Zero rate', 'zero-rate' );
-			if ( is_array( $zero_class ) ) {
-				$this->created_zero_rate_class = true;
-			}
+			WC_Tax::create_tax_class( 'Zero rate', 'zero-rate' );
 		}
 	}
 
@@ -147,8 +73,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		$product->set_regular_price( 10.00 );
 		$product->set_tax_class( $tax_class );
 		$product->save();
-
-		$this->created_products[] = $product->get_id();
 
 		return $product;
 	}
@@ -324,8 +248,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		$product->set_tax_status( 'none' );
 		$product->save();
 
-		$this->created_products[] = $product->get_id();
-
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		$shipping_rates = WC_Tax::get_shipping_tax_rates();
@@ -427,8 +349,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		$product->set_regular_price( 10.00 );
 		$product->set_tax_status( 'none' );
 		$product->save();
-
-		$this->created_products[] = $product->get_id();
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
@@ -815,8 +735,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		$expected_net = 10.00 / 1.20;
 		$net          = 10.00 - array_sum( $taxes_inclusive );
 		$this->assertEqualsWithDelta( $expected_net, $net, 0.01, 'Net cost should equal gross divided by (1 + rate)' );
-
-		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 	}
 
 	/**
@@ -854,7 +772,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 		$taxes_inclusive = WC_Tax::calc_shipping_tax( 10.00, $tax_rates );
 		$this->assertEquals( 0.00, array_sum( $taxes_inclusive ), 'Zero tax: inclusive should be 0' );
-		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 	}
 
 	/**
@@ -867,7 +784,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 		$taxes = WC_Tax::calc_shipping_tax( 10.00, array() );
 		$this->assertEmpty( $taxes, 'No tax rates with filter should return empty array' );
-		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 	}
 
 	/**
@@ -918,8 +834,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		$expected_tax = 15.00 - ( 15.00 / 1.10 );
 		$this->assertEqualsWithDelta( $expected_tax, array_sum( $taxes_with_filter ), 0.01, 'Filter return value should be used for inclusive calculation' );
-
-		remove_all_filters( 'woocommerce_shipping_prices_include_tax' );
 	}
 
 	/**
@@ -1005,7 +919,56 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		$this->assertEqualsWithDelta( 2.00, $total_tax, 0.02, 'Tax taken from 12.00 should be about 2.00' );
 		$this->assertEqualsWithDelta( 10.00, $net_cost, 0.02, 'Net cost should be 10.00' );
+	}
 
-		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+	/**
+	 * @testdox find_rates applies a rate limited to a 5-digit ZIP code, or a range of them, to a ZIP+4 postcode.
+	 *
+	 * @testWith ["10001"]
+	 *           ["10000...10099"]
+	 *
+	 * @param string $rule Postcode rule of the tax rate.
+	 */
+	public function test_find_rates_matches_zip_plus_four_postcode( string $rule ): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'ZIP code tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, $rule );
+
+		foreach ( array( '10001', '10001-1234' ) as $postcode ) {
+			$rates = WC_Tax::find_rates(
+				array(
+					'country'   => 'US',
+					'state'     => 'NY',
+					'postcode'  => $postcode,
+					'city'      => '',
+					'tax_class' => '',
+				)
+			);
+
+			$this->assertArrayHasKey( $tax_rate_id, $rates, "{$postcode} should get the rate limited to {$rule}." );
+		}
+
+		$rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'US',
+				'state'     => 'NY',
+				'postcode'  => '10101-1234',
+				'city'      => '',
+				'tax_class' => '',
+			)
+		);
+
+		$this->assertArrayNotHasKey( $tax_rate_id, $rates, "A ZIP+4 code outside {$rule} should not get the rate." );
 	}
 }

@@ -30,6 +30,32 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not use the global post as the selection when a searchable page setting is empty.
+	 */
+	public function test_empty_page_search_does_not_select_global_post(): void {
+		$GLOBALS['post'] = self::factory()->post->create_and_get( array( 'post_title' => 'Unrelated global post' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Exercise the global-post fallback; parent teardown restores it.
+
+		$fields = array(
+			array(
+				'id'    => 'empty_page',
+				'type'  => 'single_select_page_with_search',
+				'value' => 0,
+			),
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $fields );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$this->assertStringNotContainsString( 'Unrelated global post', $output );
+		$this->assertSame( 1, substr_count( $output, '<option ' ) );
+	}
+
+	/**
 	 * @testdox Should preserve percent-encoded sequences in password fields.
 	 */
 	public function test_save_fields_preserves_percent_encoded_chars_in_password_fields(): void {
@@ -236,14 +262,10 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		};
 		add_filter( 'wp_redirect', $intercept_redirect );
 
-		try {
-			$this->expectException( RuntimeException::class );
-			$this->expectExceptionMessage( 'wp_redirect intercepted.' );
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( 'wp_redirect intercepted.' );
 
-			WC_Admin_Settings::save();
-		} finally {
-			remove_filter( 'wp_redirect', $intercept_redirect );
-		}
+		WC_Admin_Settings::save();
 	}
 
 	/**
@@ -338,6 +360,93 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $xpath->query( $radio . '/fieldset[@aria-labelledby="test_radio_setting-title"]' )->length );
 		$this->assertSame( 0, $xpath->query( $radio . '/fieldset/legend' )->length );
 		$this->assertSame( 2, $xpath->query( $radio . '//input[@type="radio"]' )->length );
+	}
+
+	/**
+	 * @testdox Should preserve supported checkbox description tooltip markup and remove unsupported markup.
+	 */
+	public function test_output_fields_normalizes_checkbox_description_tooltip_html(): void {
+		$options = array(
+			array(
+				'id'       => 'test_checkbox_tooltip',
+				'title'    => 'Checkbox title',
+				'type'     => 'checkbox',
+				'value'    => 'no',
+				'desc_tip' => true,
+				'desc'     => 'Use <strong>supported</strong> <em onclick="unsupported">formatting</em><script>unsupported</script><iframe src="https://example.com">unsupported</iframe>.',
+			),
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $options );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<table>' . $output . '</table>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The checkbox setting output should be valid enough for DOM parsing.' );
+
+		$xpath       = new DOMXPath( $document );
+		$description = '//td[contains(concat(" ", normalize-space(@class), " "), " forminp-checkbox ")]/fieldset/p[contains(concat(" ", normalize-space(@class), " "), " description ")]';
+
+		$this->assertSame( 1, $xpath->query( $description . '//strong[normalize-space(.)="supported"]' )->length );
+		$this->assertSame( 1, $xpath->query( $description . '//em[normalize-space(.)="formatting"]' )->length );
+		$this->assertSame( 0, $xpath->query( $description . '//*[@onclick]' )->length );
+		$this->assertSame( 0, $xpath->query( $description . '//script | ' . $description . '//iframe' )->length );
+	}
+
+	/**
+	 * @testdox Should keep single-page-select attributes inside their rendered contexts.
+	 */
+	public function test_output_fields_escapes_single_select_page_attributes(): void {
+		$css   = "width: 12px;' onfocus='alert(1)";
+		$class = "safe-class' data-pwned='1";
+		$this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		$options = array(
+			array(
+				'id'    => 'test_page_setting',
+				'title' => 'Page setting',
+				'type'  => 'single_select_page',
+				'value' => 0,
+				'css'   => $css,
+				'class' => $class,
+			),
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $options );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<table>' . $output . '</table>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The setting output should remain valid enough for DOM parsing.' );
+
+		$select = ( new DOMXPath( $document ) )->query( '//select[@id="test_page_setting"]' )->item( 0 );
+		$this->assertInstanceOf( DOMElement::class, $select );
+		$this->assertSame( $css, $select->getAttribute( 'style' ) );
+		$this->assertSame( $class, $select->getAttribute( 'class' ) );
+		$this->assertFalse( $select->hasAttribute( 'onfocus' ) );
+		$this->assertFalse( $select->hasAttribute( 'data-pwned' ) );
 	}
 
 	/**
@@ -464,6 +573,341 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $xpath->query( $radio_title . '/span[normalize-space(.)="Boolean ID radio"]' )->length );
 		$this->assertSame( 1, $xpath->query( $radio_title . '/span[normalize-space(.)="Array ID radio"]' )->length );
 		$this->assertSame( 1, $xpath->query( $radio_title . '/span[normalize-space(.)="Object ID radio"]' )->length );
+	}
+
+	/**
+	 * @testdox Should render the value save_fields() stored under a field name, or the ID value when it overwrote the whole option.
+	 *
+	 * @dataProvider saved_field_name_data
+	 *
+	 * @param string $field_name      Field name of the saved field.
+	 * @param array  $posted          Posted form data, as PHP parses it from the request.
+	 * @param string $option_name     Option save_fields() should write.
+	 * @param mixed  $expected_stored Value that option should hold after the save.
+	 * @param string $expected        Value the rendered input should carry.
+	 */
+	public function test_output_fields_renders_value_saved_through_field_name( string $field_name, array $posted, string $option_name, $expected_stored, string $expected ): void {
+		update_option( 'test_field_id', 'id value' );
+		$options = array(
+			array(
+				'id'         => 'test_field_id',
+				'field_name' => $field_name,
+				'type'       => 'text',
+				'default'    => 'default value',
+			),
+		);
+
+		WC_Admin_Settings::save_fields( $options, $posted );
+
+		$this->assertSame( $expected_stored, get_option( $option_name ) );
+		$this->assertStringContainsString( 'value="' . $expected . '"', $this->render_fields( $options ) );
+	}
+
+	/**
+	 * Data provider for test_output_fields_renders_value_saved_through_field_name().
+	 *
+	 * @return array<string, array{string, array<string, mixed>, string, mixed, string}>
+	 */
+	public static function saved_field_name_data(): array {
+		return array(
+			'nested name'           => array( 'test_parent[key]', array( 'test_parent' => array( 'key' => 'saved value' ) ), 'test_parent', array( 'key' => 'saved value' ), 'saved value' ),
+			// PHP turns dots and spaces in a posted name into underscores, and save_fields() does the same through parse_str().
+			'rewritten option name' => array( 'test.dotted options[one]', array( 'test_dotted_options' => array( 'one' => 'saved value' ) ), 'test_dotted_options', array( 'one' => 'saved value' ), 'saved value' ),
+			// save_fields() writes a setting named 0 over the whole option, so the form reads the ID instead.
+			'setting named 0'       => array( 'test_parent[0]', array( 'test_parent' => array( 0 => 'saved value' ) ), 'test_parent', 'saved value', 'id value' ),
+		);
+	}
+
+	/**
+	 * @testdox Should read through the field name only when a value is stored there, and through the ID otherwise.
+	 *
+	 * @dataProvider field_name_read_data
+	 *
+	 * @param array  $stored_options Options to store, keyed by option name.
+	 * @param mixed  $field_name     Field name of the rendered field.
+	 * @param string $expected       Value the rendered input should carry.
+	 */
+	public function test_output_fields_reads_through_field_name_or_id( array $stored_options, $field_name, string $expected ): void {
+		foreach ( $stored_options as $option_name => $option_value ) {
+			update_option( $option_name, $option_value );
+		}
+
+		$output = $this->render_fields(
+			array(
+				array(
+					'id'         => 'test_field_id',
+					'field_name' => $field_name,
+					'type'       => 'text',
+					'default'    => 'default value',
+				),
+			)
+		);
+
+		$this->assertStringContainsString( 'value="' . $expected . '"', $output );
+	}
+
+	/**
+	 * Data provider for test_output_fields_reads_through_field_name_or_id().
+	 *
+	 * @return array<string, array{array<string, mixed>, mixed, string}>
+	 */
+	public static function field_name_read_data(): array {
+		$id_value = array( 'test_field_id' => 'id value' );
+
+		return array(
+			'plain name'                => array( array( 'test_plain' => 'plain value' ) + $id_value, 'test_plain', 'plain value' ),
+			'empty value under name'    => array( array( 'test_plain' => '' ) + $id_value, 'test_plain', '' ),
+			'zero under nested name'    => array( array( 'test_parent' => array( 'key' => '0' ) ) + $id_value, 'test_parent[key]', '0' ),
+			'setting named 0'           => array( array( 'test_parent' => array( 0 => 'other value' ) ) + $id_value, 'test_parent[0]', 'id value' ),
+			'option named 0'            => array( $id_value, '0', 'id value' ),
+			'option named 0 with space' => array( $id_value, ' 0', 'id value' ),
+			'encoded nested key'        => array( array( 'test_parent' => array( 'A' => 'decoded value' ) ) + $id_value, 'test_parent[%41]', 'decoded value' ),
+			'nothing stored under name' => array( $id_value, 'test_parent[key]', 'id value' ),
+			'two levels'                => array( array( 'test_parent' => array( 'deep' => array( 'leaf' => 'deep value' ) ) ) + $id_value, 'test_parent[deep][leaf]', 'id value' ),
+			'string option'             => array( array( 'test_string' => 'abc' ) + $id_value, 'test_string[1]', 'id value' ),
+			'object value under key'    => array( array( 'test_object' => array( 'key' => new stdClass() ) ) + $id_value, 'test_object[key]', 'id value' ),
+			'name split by &'           => array( array( 'test_split' => array( 'key' => 'other value' ) ) + $id_value, 'test_split&other[key]', 'id value' ),
+		);
+	}
+
+	/**
+	 * @testdox Should pass the ID value to a custom field type that save_fields() hands to a legacy update action instead of saving.
+	 */
+	public function test_output_fields_reads_through_id_for_types_with_legacy_update_action(): void {
+		$this->setExpectedDeprecated( 'The woocommerce_update_option_X action' );
+		update_option( 'test_field_id', 'id value' );
+		update_option( 'test_parent', array( 'key' => 'nested value' ) );
+		add_action( 'woocommerce_update_option_test_legacy_type', function () {} );
+		$received = null;
+		add_action(
+			'woocommerce_admin_field_test_legacy_type',
+			function ( $field ) use ( &$received ) {
+				$received = $field['value'];
+			}
+		);
+		$options = array(
+			array(
+				'id'         => 'test_field_id',
+				'field_name' => 'test_parent[key]',
+				'type'       => 'test_legacy_type',
+				'default'    => 'default value',
+			),
+		);
+
+		WC_Admin_Settings::save_fields( $options, array( 'test_parent' => array( 'key' => 'posted value' ) ) );
+		$this->render_fields( $options );
+
+		$this->assertSame( array( 'key' => 'nested value' ), get_option( 'test_parent' ) );
+		$this->assertSame( 'id value', $received );
+	}
+
+	/**
+	 * @testdox Should render an explicit empty value without reading the stored values.
+	 */
+	public function test_output_fields_renders_explicit_value_over_stored_values(): void {
+		update_option( 'test_field_id', 'id value' );
+		update_option( 'test_parent', array( 'key' => 'nested value' ) );
+
+		$output = $this->render_fields(
+			array(
+				array(
+					'id'         => 'test_field_id',
+					'field_name' => 'test_parent[key]',
+					'type'       => 'text',
+					'default'    => 'default value',
+					'value'      => '',
+				),
+			)
+		);
+
+		$this->assertStringContainsString( 'value=""', $output );
+	}
+
+	/**
+	 * @testdox Should render the value saved through a nested field name for a field with an empty ID.
+	 */
+	public function test_output_fields_renders_value_saved_for_empty_id(): void {
+		$options = array(
+			array(
+				'id'         => '',
+				'field_name' => 'test_parent[key]',
+				'type'       => 'text',
+				'default'    => 'default value',
+			),
+		);
+
+		WC_Admin_Settings::save_fields( $options, array( 'test_parent' => array( 'key' => 'saved value' ) ) );
+
+		$this->assertSame( array( 'key' => 'saved value' ), get_option( 'test_parent' ) );
+		$this->assertStringContainsString( 'value="saved value"', $this->render_fields( $options ) );
+	}
+
+	/**
+	 * @testdox Should read a field with is_option set to false through its ID, since save_fields() doesn't save it under its field name.
+	 */
+	public function test_output_fields_reads_non_option_field_through_id(): void {
+		update_option( 'test_field_id', 'id value' );
+		update_option( 'test_parent', array( 'key' => 'nested value' ) );
+		$options = array(
+			array(
+				'id'         => 'test_field_id',
+				'field_name' => 'test_parent[key]',
+				'type'       => 'text',
+				'default'    => 'default value',
+				'is_option'  => false,
+			),
+		);
+
+		WC_Admin_Settings::save_fields( $options, array( 'test_parent' => array( 'key' => 'posted value' ) ) );
+
+		$this->assertSame( array( 'key' => 'nested value' ), get_option( 'test_parent' ) );
+		$this->assertStringContainsString( 'value="id value"', $this->render_fields( $options ) );
+	}
+
+	/**
+	 * @testdox Should pass the default to a custom field without an ID, since save_fields() doesn't save it under its field name.
+	 */
+	public function test_output_fields_passes_default_to_id_less_custom_field(): void {
+		update_option( 'test_parent', array( 'rules' => array( 'stored rule' ) ) );
+
+		$received = null;
+		add_action(
+			'woocommerce_admin_field_test_custom',
+			function ( $field ) use ( &$received ) {
+				$received = $field['value'];
+			}
+		);
+		$options = array(
+			array(
+				'type'       => 'test_custom',
+				'field_name' => 'test_parent[rules]',
+				'default'    => 'default value',
+			),
+		);
+
+		WC_Admin_Settings::save_fields( $options, array( 'test_parent' => array( 'rules' => 'posted rule' ) ) );
+		$this->render_fields( $options );
+
+		$this->assertSame( array( 'rules' => array( 'stored rule' ) ), get_option( 'test_parent' ) );
+		$this->assertSame( 'default value', $received );
+	}
+
+	/**
+	 * Render settings fields and return the output.
+	 *
+	 * @param array $options Field definitions.
+	 * @return string
+	 */
+	private function render_fields( array $options ): string {
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $options );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		return $output;
+	}
+
+	/**
+	 * @testdox Should render each stored General setting back into its own form field.
+	 */
+	public function test_output_fields_renders_stored_general_setting_values(): void {
+		$store_address = '123 "Evergreen" & Terrace';
+
+		update_option( 'woocommerce_store_address', $store_address );
+		update_option( 'woocommerce_price_num_decimals', '3' );
+		update_option( 'woocommerce_price_thousand_sep', '.' );
+		update_option( 'woocommerce_currency_pos', 'right_space' );
+
+		$output = $this->render_settings_section( new WC_Settings_General(), '' );
+
+		$this->assertSame( $store_address, $this->get_rendered_input_attribute( $output, 'woocommerce_store_address', 'value' ) );
+		$this->assertStringContainsString( '123 &quot;Evergreen&quot; &amp; Terrace', $output, 'The stored value should reach the markup escaped for an attribute.' );
+		$this->assertSame( '3', $this->get_rendered_input_attribute( $output, 'woocommerce_price_num_decimals', 'value' ) );
+		$this->assertSame( '.', $this->get_rendered_input_attribute( $output, 'woocommerce_price_thousand_sep', 'value' ) );
+		$this->assertSame( 'right_space', $this->get_selected_option( $output, 'woocommerce_currency_pos' ), 'The stored option should be the selected one.' );
+	}
+
+	/**
+	 * @testdox Should tick only the checkbox settings that are stored as enabled.
+	 */
+	public function test_output_fields_renders_stored_checkbox_state(): void {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
+
+		$output = $this->render_settings_section( new WC_Settings_Advanced(), 'woocommerce_com' );
+
+		$this->assertSame( 'checked', $this->get_rendered_input_attribute( $output, 'woocommerce_allow_tracking', 'checked' ), 'The enabled setting should render a ticked checkbox.' );
+		$this->assertNull( $this->get_rendered_input_attribute( $output, 'woocommerce_show_marketplace_suggestions', 'checked' ), 'The disabled setting should render an unticked checkbox.' );
+	}
+
+	/**
+	 * Render the fields of a settings section.
+	 *
+	 * @param WC_Settings_Page $settings_page Settings page holding the section.
+	 * @param string           $section_id    Section to render, an empty string for the default section.
+	 * @return string
+	 */
+	private function render_settings_section( WC_Settings_Page $settings_page, string $section_id ): string {
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $settings_page->get_settings_for_section( $section_id ) );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		return $output;
+	}
+
+	/**
+	 * Get an attribute of a rendered input, or null when the attribute is absent.
+	 *
+	 * @param string $html      Rendered settings markup.
+	 * @param string $input_id  ID of the input to read.
+	 * @param string $attribute Attribute to read.
+	 * @return string|bool|null
+	 */
+	private function get_rendered_input_attribute( string $html, string $input_id, string $attribute ) {
+		$tags = new WP_HTML_Tag_Processor( $html );
+
+		while ( $tags->next_tag( array( 'tag_name' => 'INPUT' ) ) ) {
+			if ( $input_id === $tags->get_attribute( 'id' ) ) {
+				return $tags->get_attribute( $attribute );
+			}
+		}
+
+		$this->fail( "The settings form should render an input with the ID {$input_id}." );
+	}
+
+	/**
+	 * Get the value of the selected option of a rendered select, or null when no option is selected.
+	 *
+	 * @param string $html      Rendered settings markup.
+	 * @param string $select_id ID of the select to read.
+	 * @return string|null
+	 */
+	private function get_selected_option( string $html, string $select_id ): ?string {
+		$tags = new WP_HTML_Tag_Processor( $html );
+
+		while ( $tags->next_tag( array( 'tag_name' => 'SELECT' ) ) ) {
+			if ( $select_id !== $tags->get_attribute( 'id' ) ) {
+				continue;
+			}
+
+			$selected = null;
+			while ( null === $selected && $tags->next_tag() && 'OPTION' === $tags->get_tag() ) {
+				if ( null !== $tags->get_attribute( 'selected' ) ) {
+					$selected = $tags->get_attribute( 'value' );
+				}
+			}
+
+			return $selected;
+		}
+
+		$this->fail( "The settings form should render a select with the ID {$select_id}." );
 	}
 
 	/**

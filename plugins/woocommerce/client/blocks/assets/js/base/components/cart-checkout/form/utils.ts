@@ -24,6 +24,62 @@ export interface FieldProps {
 	className: string;
 }
 
+const SECTIONED_ADDRESS_TYPES = [ 'billing', 'shipping' ];
+
+/**
+ * Build the `autocomplete` attribute value for a checkout field.
+ *
+ * Only `shipping` and `billing` are valid in the address type slot, `on`/`off`
+ * cannot be combined with any other token, and a value that already carries
+ * tokens would overflow the limit. Browsers drop a value they cannot parse and
+ * guess instead, so anything else is passed through as it came.
+ *
+ * @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill
+ *
+ * @param autocomplete     Autofill field name from the field config.
+ * @param fieldAddressType Address type of the form the field belongs to.
+ * @return The attribute value, or undefined when the field has no hint.
+ */
+export const getAutoCompleteValue = (
+	autocomplete: string | undefined,
+	fieldAddressType: string
+): string | undefined => {
+	// Registered field config reaches us from PHP unvalidated, so neither
+	// argument is guaranteed to be the string its type claims.
+	if ( typeof autocomplete !== 'string' ) {
+		return undefined;
+	}
+
+	const value = autocomplete.trim();
+
+	if ( ! value ) {
+		return undefined;
+	}
+
+	const lowerCaseValue = value.toLowerCase();
+
+	if ( lowerCaseValue === 'on' || lowerCaseValue === 'off' ) {
+		return value;
+	}
+
+	// A field that already supplies its own tokens would overflow the token
+	// limit once prefixed, and the browser drops the whole value.
+	if ( value.includes( ' ' ) ) {
+		return value;
+	}
+
+	const addressType =
+		typeof fieldAddressType === 'string'
+			? fieldAddressType.trim().toLowerCase()
+			: '';
+
+	if ( ! SECTIONED_ADDRESS_TYPES.includes( addressType ) ) {
+		return value;
+	}
+
+	return `section-${ addressType } ${ addressType } ${ value }`;
+};
+
 export const createFieldProps = (
 	field: KeyedParsedFormFields[ number ],
 	formId: string,
@@ -34,12 +90,7 @@ export const createFieldProps = (
 	name: `${ fieldAddressType }_${ field?.key }`,
 	label: ( field?.required ? field?.label : field?.optionalLabel ) || '',
 	autoCapitalize: field?.autocapitalize,
-	// Prefix autocomplete value with section and address type per HTML spec.
-	// Format: section-<name> [shipping|billing] <autofill-field>
-	// e.g., 'address-level1' becomes 'section-billing billing address-level1'
-	autoComplete: field?.autocomplete
-		? `section-${ fieldAddressType } ${ fieldAddressType } ${ field.autocomplete }`
-		: undefined,
+	autoComplete: getAutoCompleteValue( field?.autocomplete, fieldAddressType ),
 	errorMessage: field?.errorMessage || '',
 	required: field?.required,
 	placeholder: field?.placeholder,

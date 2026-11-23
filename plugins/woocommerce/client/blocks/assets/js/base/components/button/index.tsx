@@ -4,15 +4,16 @@
 import { Button as AriakitButton } from '@ariakit/react';
 import { forwardRef } from '@wordpress/element';
 import clsx from 'clsx';
-import type { ForwardedRef } from 'react';
+import type { ForwardedRef, ReactNode } from 'react';
 import type { ButtonProps as AriakitButtonProps } from '@ariakit/react';
 
 /**
  * Internal dependencies
  */
+import withGlobalStyles from './with-global-styles';
 import './style.scss';
 
-type WCButtonProps = AriakitButtonProps & { children?: React.ReactNode };
+type WCButtonProps = AriakitButtonProps & { children?: ReactNode };
 
 export interface ButtonProps extends WCButtonProps {
 	/**
@@ -57,12 +58,13 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 		const buttonClassName = clsx(
 			'wc-block-components-button',
 			'wp-element-button',
+			'wp-block-button__link',
 			className,
 			variant
 		);
 
 		if ( 'href' in props ) {
-			return (
+			return withGlobalStyles(
 				<AriakitButton
 					render={
 						<a
@@ -88,7 +90,7 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 			</div>
 		);
 
-		return (
+		return withGlobalStyles(
 			<AriakitButton
 				ref={ ref }
 				className={ buttonClassName }

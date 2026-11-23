@@ -114,7 +114,7 @@ export default function ConnectButton( props: ConnectProps ) {
 									connect();
 								},
 							},
-					  ];
+						];
 
 				addNotice(
 					props.subscription.product_key,

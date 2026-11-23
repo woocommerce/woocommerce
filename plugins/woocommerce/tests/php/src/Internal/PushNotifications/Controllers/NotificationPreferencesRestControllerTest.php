@@ -577,7 +577,6 @@ class NotificationPreferencesRestControllerTest extends WC_Unit_Test_Case {
 		$preferences_controller->register();
 		$push_token_controller->register();
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Triggering an existing filter from RestApiControllerBase, not defining one.
 		$namespaces = apply_filters( 'woocommerce_rest_api_get_rest_namespaces', array( 'wc/v3' => array() ) );
 
 		$this->assertArrayHasKey( 'wc/v3', $namespaces );

@@ -9,17 +9,28 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\Entity;
 
-use DomainException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInvalidInput;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInternalInvariant;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle
  */
 class CycleTest extends TestCase {
+
+	use AssertsInternalInvariant;
+	use AssertsInvalidInput;
+
+	protected function tearDown(): void {
+		StatusRegistry::reset();
+		parent::tearDown();
+	}
 
 	/**
 	 * Build a pending billing cycle with sensible defaults, overridable per test.
@@ -51,7 +62,7 @@ class CycleTest extends TestCase {
 		$this->assertSame( 1, $cycle->get_sequence_no() );
 		$this->assertSame( 1, $cycle->get_count() );
 		$this->assertSame( Cycle::KIND_BILLING, $cycle->get_kind() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::pending() ) );
+		$this->assertSame( CycleStatus::PENDING, $cycle->get_status()->get_value() );
 		$this->assertNull( $cycle->get_reason() );
 		$this->assertSame( '2026-02-01 00:00:00', $cycle->get_starts_at_gmt() );
 		$this->assertSame( '2026-03-01 00:00:00', $cycle->get_ends_at_gmt() );
@@ -74,22 +85,27 @@ class CycleTest extends TestCase {
 
 	public function test_create_can_build_a_billed_cycle_directly(): void {
 		// The checkout signup cycle is created directly billed (the origin order is paid).
-		$cycle = $this->make_pending( array( 'status' => CycleStatus::billed() ) );
+		$cycle = $this->make_pending( array( 'status' => new CycleStatus( CycleStatus::BILLED ) ) );
 
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertSame( CycleStatus::BILLED, $cycle->get_status()->get_value() );
 	}
 
 	public function test_create_requires_a_contract_id(): void {
-		$this->expectException( DomainException::class );
-
-		Cycle::create(
-			array(
-				'sequence_no'    => 1,
-				'starts_at_gmt'  => '2026-02-01 00:00:00',
-				'ends_at_gmt'    => '2026-03-01 00:00:00',
-				'expected_total' => '20.00',
-				'currency'       => 'USD',
-			)
+		$this->assert_invalid_input(
+			function (): void {
+				Cycle::create(
+					array(
+						'sequence_no'    => 1,
+						'starts_at_gmt'  => '2026-02-01 00:00:00',
+						'ends_at_gmt'    => '2026-03-01 00:00:00',
+						'expected_total' => '20.00',
+						'currency'       => 'USD',
+					)
+				);
+			},
+			ValidationErrorCode::OUT_OF_BOUNDS,
+			'contract_id',
+			array( 'min' => 1 )
 		);
 	}
 
@@ -108,21 +124,67 @@ class CycleTest extends TestCase {
 	}
 
 	public function test_create_rejects_an_empty_kind(): void {
-		$this->expectException( DomainException::class );
-
-		$this->make_pending( array( 'kind' => '' ) );
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'kind' => '' ) );
+			},
+			ValidationErrorCode::REQUIRED,
+			'kind'
+		);
 	}
 
 	public function test_create_rejects_a_non_positive_sequence_no(): void {
-		$this->expectException( DomainException::class );
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'sequence_no' => 0 ) );
+			},
+			ValidationErrorCode::OUT_OF_BOUNDS,
+			'sequence_no',
+			array( 'min' => 1 )
+		);
+	}
 
-		$this->make_pending( array( 'sequence_no' => 0 ) );
+	public function test_create_requires_a_start(): void {
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'starts_at_gmt' => null ) );
+			},
+			ValidationErrorCode::REQUIRED,
+			'starts_at_gmt'
+		);
+	}
+
+	public function test_create_requires_an_end(): void {
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'ends_at_gmt' => null ) );
+			},
+			ValidationErrorCode::REQUIRED,
+			'ends_at_gmt'
+		);
+	}
+
+	public function test_create_requires_a_currency(): void {
+		$e = $this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'currency' => null ) );
+			},
+			ValidationErrorCode::REQUIRED,
+			'currency'
+		);
+
+		$this->assertStringContainsString( 'currency is required', $e->getMessage() );
 	}
 
 	public function test_create_rejects_a_non_positive_count(): void {
-		$this->expectException( DomainException::class );
-
-		$this->make_pending( array( 'count' => 0 ) );
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'count' => 0 ) );
+			},
+			ValidationErrorCode::OUT_OF_BOUNDS,
+			'count',
+			array( 'min' => 1 )
+		);
 	}
 
 	public function test_create_allows_a_null_count_for_a_non_counting_cycle(): void {
@@ -134,9 +196,14 @@ class CycleTest extends TestCase {
 	}
 
 	public function test_create_rejects_an_invalid_status(): void {
-		$this->expectException( DomainException::class );
-
-		$this->make_pending( array( 'status' => 'nonsense' ) );
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'status' => 'nonsense' ) );
+			},
+			ValidationErrorCode::NOT_REGISTERED,
+			'status',
+			array( 'value' => 'nonsense' )
+		);
 	}
 
 	public function test_create_carries_order_id_and_owner(): void {
@@ -151,42 +218,55 @@ class CycleTest extends TestCase {
 		$this->assertSame( 'acme-subs', $cycle->get_extension_slug() );
 	}
 
-	public function test_holds_snapshot_vos_when_provided(): void {
-		$plan  = PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) );
-		$items = ItemsSnapshot::from_items( array( array( 'product_id' => 42 ) ) );
-
+	public function test_create_ignores_snapshot_value_objects(): void {
 		$cycle = $this->make_pending(
 			array(
-				'plan_snapshot'  => $plan,
-				'items_snapshot' => $items,
+				'plan_snapshot'  => PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) ),
+				'items_snapshot' => ItemsSnapshot::from_items( array( array( 'product_id' => 42 ) ) ),
 			)
 		);
 
-		$this->assertSame( $plan, $cycle->get_plan_snapshot() );
-		$this->assertSame( $items, $cycle->get_items_snapshot() );
+		$this->assertNull( $cycle->get_plan_snapshot(), 'Snapshot value objects are attached only on read.' );
+		$this->assertNull( $cycle->get_items_snapshot() );
 	}
 
-	public function test_status_changes_go_through_cycle_status(): void {
-		$cycle = $this->make_pending();
+	public function test_create_accepts_an_extension_registered_status_string(): void {
+		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
 
-		$cycle->set_status( CycleStatus::billed() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$cycle = $this->make_pending( array( 'status' => 'disputed' ) );
+
+		$this->assertSame( 'disputed', $cycle->get_status()->get_value() );
 	}
 
-	public function test_status_change_rejects_an_illegal_transition(): void {
-		$cycle = $this->make_pending( array( 'status' => CycleStatus::billed() ) );
+	public function test_from_storage_hydrates_an_unregistered_stored_status(): void {
+		$cycle = Cycle::from_storage(
+			array(
+				'id'             => 5,
+				'contract_id'    => 7,
+				'sequence_no'    => 1,
+				'count'          => 1,
+				'kind'           => Cycle::KIND_BILLING,
+				'status'         => 'legacy-x',
+				'starts_at_gmt'  => '2026-03-01 00:00:00',
+				'ends_at_gmt'    => '2026-04-01 00:00:00',
+				'expected_total' => '20.00',
+				'currency'       => 'USD',
+			)
+		);
 
-		// billed is terminal, so it cannot move to failed.
-		$this->expectException( DomainException::class );
-		$cycle->set_status( CycleStatus::failed() );
+		$this->assertSame( 'legacy-x', $cycle->get_status()->get_value() );
+		$this->assertSame( 'legacy-x', $cycle->to_storage()['status'] );
 	}
 
-	public function test_setting_the_same_status_is_a_no_op(): void {
-		$cycle = $this->make_pending();
-
-		$cycle->set_status( CycleStatus::pending() );
-
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::pending() ) );
+	public function test_create_rejects_an_unregistered_status_instance(): void {
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'status' => new CycleStatus( 'nope' ) ) );
+			},
+			ValidationErrorCode::NOT_REGISTERED,
+			'status',
+			array( 'value' => 'nope' )
+		);
 	}
 
 	public function test_period_boundaries_are_frozen_at_construction(): void {
@@ -199,32 +279,6 @@ class CycleTest extends TestCase {
 		$this->assertFalse( $reflection->hasMethod( 'set_ends_at_gmt' ) );
 	}
 
-	public function test_plan_snapshot_id_is_stamped_write_once(): void {
-		$cycle = $this->make_pending();
-
-		$cycle->set_plan_snapshot_id( 11 );
-		$cycle->set_items_snapshot_id( 22 );
-
-		$this->assertSame( 11, $cycle->get_plan_snapshot_id() );
-		$this->assertSame( 22, $cycle->get_items_snapshot_id() );
-	}
-
-	public function test_plan_snapshot_id_cannot_be_re_pointed(): void {
-		$cycle = $this->make_pending();
-		$cycle->set_plan_snapshot_id( 11 );
-
-		$this->expectException( DomainException::class );
-		$cycle->set_plan_snapshot_id( 99 );
-	}
-
-	public function test_items_snapshot_id_cannot_be_re_pointed(): void {
-		$cycle = $this->make_pending();
-		$cycle->set_items_snapshot_id( 22 );
-
-		$this->expectException( DomainException::class );
-		$cycle->set_items_snapshot_id( 99 );
-	}
-
 	public function test_plan_snapshot_vo_is_attached_write_once(): void {
 		$cycle = $this->make_pending();
 
@@ -235,52 +289,25 @@ class CycleTest extends TestCase {
 	}
 
 	public function test_plan_snapshot_vo_cannot_be_replaced(): void {
-		$cycle = $this->make_pending( array( 'plan_snapshot' => PlanSnapshot::from_array( array( 'selling_plan_id' => 9 ) ) ) );
+		$cycle = $this->make_pending();
+		$cycle->set_plan_snapshot( PlanSnapshot::from_array( array( 'selling_plan_id' => 9 ) ) );
 
-		$this->expectException( DomainException::class );
-		$cycle->set_plan_snapshot( PlanSnapshot::from_array( array( 'selling_plan_id' => 10 ) ) );
+		$this->assert_internal_invariant(
+			static function () use ( $cycle ): void {
+				$cycle->set_plan_snapshot( PlanSnapshot::from_array( array( 'selling_plan_id' => 10 ) ) );
+			}
+		);
 	}
 
 	public function test_items_snapshot_vo_cannot_be_replaced(): void {
-		$cycle = $this->make_pending( array( 'items_snapshot' => ItemsSnapshot::from_items( array() ) ) );
-
-		$this->expectException( DomainException::class );
-		$cycle->set_items_snapshot( ItemsSnapshot::from_items( array( array( 'product_id' => 1 ) ) ) );
-	}
-
-	public function test_reason_can_be_annotated_on_a_pending_cycle(): void {
 		$cycle = $this->make_pending();
+		$cycle->set_items_snapshot( ItemsSnapshot::from_items( array() ) );
 
-		$cycle->set_reason( 'flagged for review' );
-
-		$this->assertSame( 'flagged for review', $cycle->get_reason() );
-	}
-
-	public function test_reason_can_be_annotated_when_cancelling_a_pending_cycle(): void {
-		$cycle = $this->make_pending();
-
-		$cycle->set_status( CycleStatus::cancelled() );
-		$cycle->set_reason( 'customer requested cancellation' );
-
-		$this->assertSame( 'customer requested cancellation', $cycle->get_reason() );
-	}
-
-	public function test_reason_can_be_annotated_on_a_billed_cycle(): void {
-		// `reason` is one of the few mutable fields: any cycle may carry one.
-		$cycle = $this->make_pending( array( 'status' => CycleStatus::billed() ) );
-
-		$cycle->set_reason( 'settled after retry' );
-
-		$this->assertSame( 'settled after retry', $cycle->get_reason() );
-	}
-
-	public function test_reason_can_be_annotated_on_a_failed_cycle(): void {
-		$cycle = $this->make_pending();
-		$cycle->set_status( CycleStatus::failed() );
-
-		$cycle->set_reason( 'gateway declined the charge' );
-
-		$this->assertSame( 'gateway declined the charge', $cycle->get_reason() );
+		$this->assert_internal_invariant(
+			static function () use ( $cycle ): void {
+				$cycle->set_items_snapshot( ItemsSnapshot::from_items( array( array( 'product_id' => 1 ) ) ) );
+			}
+		);
 	}
 
 	public function test_from_storage_hydrates_a_persisted_cycle(): void {
@@ -308,63 +335,34 @@ class CycleTest extends TestCase {
 		$this->assertSame( 7, $cycle->get_contract_id() );
 		$this->assertSame( 2, $cycle->get_sequence_no() );
 		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertSame( CycleStatus::BILLED, $cycle->get_status()->get_value() );
 		$this->assertSame( 11, $cycle->get_plan_snapshot_id() );
 		$this->assertSame( 22, $cycle->get_items_snapshot_id() );
 		$this->assertSame( 123, $cycle->get_order_id() );
 		$this->assertSame( 'acme-subs', $cycle->get_extension_slug() );
 	}
 
-	public function test_from_storage_cycle_plan_snapshot_ref_is_write_once(): void {
-		// A cycle hydrated from storage already carries non-null snapshot refs through
-		// the constructor; the write-once guard must still reject re-pointing them.
+	public function test_from_storage_keeps_stored_values_that_create_would_refuse(): void {
 		$cycle = Cycle::from_storage(
 			array(
-				'id'                => 5,
-				'contract_id'       => 7,
-				'sequence_no'       => 2,
-				'count'             => 2,
-				'kind'              => Cycle::KIND_BILLING,
-				'status'            => 'billed',
-				'reason'            => null,
-				'starts_at_gmt'     => '2026-03-01 00:00:00',
-				'ends_at_gmt'       => '2026-04-01 00:00:00',
-				'expected_total'    => '20.00',
-				'currency'          => 'USD',
-				'plan_snapshot_id'  => 11,
-				'items_snapshot_id' => 22,
-				'order_id'          => 123,
-				'extension_slug'    => 'acme-subs',
+				'id'             => 5,
+				'contract_id'    => 0,
+				'sequence_no'    => 0,
+				'count'          => 0,
+				'kind'           => '',
+				'status'         => 'legacy-x',
+				'starts_at_gmt'  => '2026-03-01 00:00:00',
+				'ends_at_gmt'    => '2026-04-01 00:00:00',
+				'expected_total' => '20.00',
+				'currency'       => 'USD',
 			)
 		);
 
-		$this->expectException( DomainException::class );
-		$cycle->set_plan_snapshot_id( 99 );
-	}
-
-	public function test_from_storage_cycle_items_snapshot_ref_is_write_once(): void {
-		$cycle = Cycle::from_storage(
-			array(
-				'id'                => 5,
-				'contract_id'       => 7,
-				'sequence_no'       => 2,
-				'count'             => 2,
-				'kind'              => Cycle::KIND_BILLING,
-				'status'            => 'billed',
-				'reason'            => null,
-				'starts_at_gmt'     => '2026-03-01 00:00:00',
-				'ends_at_gmt'       => '2026-04-01 00:00:00',
-				'expected_total'    => '20.00',
-				'currency'          => 'USD',
-				'plan_snapshot_id'  => 11,
-				'items_snapshot_id' => 22,
-				'order_id'          => 123,
-				'extension_slug'    => 'acme-subs',
-			)
-		);
-
-		$this->expectException( DomainException::class );
-		$cycle->set_items_snapshot_id( 99 );
+		$row = $cycle->to_storage();
+		$this->assertSame( 0, $row['contract_id'] );
+		$this->assertSame( 0, $row['sequence_no'] );
+		$this->assertSame( 0, $row['count'] );
+		$this->assertSame( '', $row['kind'] );
 	}
 
 	public function test_from_storage_hydrates_a_non_counting_cycle(): void {
@@ -389,12 +387,12 @@ class CycleTest extends TestCase {
 	public function test_to_storage_excludes_id_and_serializes_the_row(): void {
 		$cycle = $this->make_pending(
 			array(
-				'order_id'         => 123,
-				'extension_slug'   => 'acme-subs',
-				'plan_snapshot_id' => 11,
+				'order_id'          => 123,
+				'extension_slug'    => 'acme-subs',
+				'plan_snapshot_id'  => 11,
+				'items_snapshot_id' => 22,
 			)
 		);
-		$cycle->set_items_snapshot_id( 22 );
 
 		$row = $cycle->to_storage();
 
@@ -420,19 +418,108 @@ class CycleTest extends TestCase {
 		$this->assertSame( 'pending', $row['status'] );
 	}
 
-	public function test_sequence_no_can_be_reassigned_after_construction(): void {
-		$cycle = $this->make_pending( array( 'sequence_no' => 1 ) );
-
-		$cycle->set_sequence_no( 4 );
-
-		$this->assertSame( 4, $cycle->get_sequence_no() );
+	/**
+	 * Build a cycle without `sequence_no` or `count`.
+	 */
+	private function make_unpositioned(): Cycle {
+		return Cycle::create(
+			array(
+				'contract_id'   => 7,
+				'starts_at_gmt' => '2026-02-01 00:00:00',
+				'ends_at_gmt'   => '2026-03-01 00:00:00',
+				'currency'      => 'USD',
+			)
+		);
 	}
 
-	public function test_set_sequence_no_rejects_a_non_positive_value(): void {
-		$cycle = $this->make_pending();
+	public function test_create_reports_every_invalid_attribute(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				Cycle::create(
+					array(
+						'contract_id' => 0,
+						'status'      => 'Not A Slug',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'contract_id', array( 'min' => 1 ) ),
+				array( ValidationErrorCode::REQUIRED, 'starts_at_gmt', array() ),
+				array( ValidationErrorCode::REQUIRED, 'ends_at_gmt', array() ),
+				array( ValidationErrorCode::REQUIRED, 'currency', array() ),
+				array( ValidationErrorCode::INVALID_VALUE, 'status', array() ),
+			)
+		);
+	}
 
-		$this->expectException( DomainException::class );
-		$cycle->set_sequence_no( 0 );
+	public function test_create_reports_an_unregistered_status_with_the_other_errors(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				Cycle::create(
+					array(
+						'contract_id'   => 7,
+						'starts_at_gmt' => '2026-02-01 00:00:00',
+						'ends_at_gmt'   => '2026-03-01 00:00:00',
+						'currency'      => 'USD',
+						'count'         => 0,
+						'status'        => 'never-registered',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'count', array( 'min' => 1 ) ),
+				array( ValidationErrorCode::NOT_REGISTERED, 'status', array( 'value' => 'never-registered' ) ),
+			)
+		);
+	}
+
+	public function test_create_without_a_sequence_no_leaves_it_to_the_append(): void {
+		$this->assertTrue( $this->make_unpositioned()->awaits_sequence_no() );
+		$this->assertFalse( $this->make_pending()->awaits_sequence_no() );
+	}
+
+	public function test_a_null_sequence_no_is_unassigned_like_an_absent_one(): void {
+		$this->assertTrue( $this->make_pending( array( 'sequence_no' => null ) )->awaits_sequence_no() );
+	}
+
+	public function test_create_without_a_count_is_non_counting(): void {
+		$this->assertNull( $this->make_unpositioned()->get_count() );
+	}
+
+	public function test_an_unassigned_sequence_no_cannot_be_read(): void {
+		$this->assert_internal_invariant(
+			function (): void {
+				$this->make_unpositioned()->get_sequence_no();
+			}
+		);
+	}
+
+	public function test_the_sequence_no_can_be_assigned_once(): void {
+		$cycle = $this->make_unpositioned();
+
+		$cycle->assign_sequence_no( 4 );
+
+		$this->assertSame( 4, $cycle->get_sequence_no() );
+		$this->assertFalse( $cycle->awaits_sequence_no() );
+	}
+
+	public function test_assign_sequence_no_rejects_a_non_positive_value(): void {
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_unpositioned()->assign_sequence_no( 0 );
+			},
+			ValidationErrorCode::OUT_OF_BOUNDS,
+			'sequence_no',
+			array( 'min' => 1 )
+		);
+	}
+
+	public function test_an_assigned_sequence_no_cannot_be_reassigned(): void {
+		$this->assert_internal_invariant(
+			function (): void {
+				$this->make_pending()->assign_sequence_no( 2 );
+			}
+		);
 	}
 
 	public function test_id_can_be_stamped_after_persistence(): void {

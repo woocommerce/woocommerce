@@ -22,6 +22,7 @@ const templateSlugToTemplateMap: {
 	'archive-product': Locations.PRODUCT_CATALOG,
 	'taxonomy-product_cat': Locations.PRODUCT_ARCHIVE,
 	'taxonomy-product_tag': Locations.PRODUCT_ARCHIVE,
+	'taxonomy-product_brand': Locations.PRODUCT_ARCHIVE,
 	'taxonomy-product_attribute': Locations.PRODUCT_ARCHIVE,
 	'product-search-results': Locations.PRODUCT_ARCHIVE,
 	'order-confirmation': Locations.ORDER_CONFIRMATION,
@@ -55,7 +56,8 @@ export const useTracksLocation = ( templateSlug: string | undefined ) => {
 
 	if (
 		templateSlug.includes( 'taxonomy-product_cat' ) ||
-		templateSlug.includes( 'taxonomy-product_tag' )
+		templateSlug.includes( 'taxonomy-product_tag' ) ||
+		templateSlug.includes( 'taxonomy-product_brand' )
 	) {
 		return Locations.PRODUCT_ARCHIVE;
 	}

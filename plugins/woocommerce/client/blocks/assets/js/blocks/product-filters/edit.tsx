@@ -7,12 +7,20 @@ import {
 	useBlockProps,
 } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
-import { PanelBody, ToggleControl } from '@wordpress/components';
+import type { HTMLAttributes } from 'react';
+import {
+	PanelBody,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControl as ToggleGroupControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Icon, close } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
 import { filterThreeLines } from '@woocommerce/icons';
 import { getSetting } from '@woocommerce/settings';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 import clsx from 'clsx';
 
 /**
@@ -21,7 +29,11 @@ import clsx from 'clsx';
 import './editor.scss';
 import { type BlockAttributes } from './types';
 import { getColorsFromBlockSupports } from './utils/get-colors-from-block-supports';
+import { getOverlayMode, isOverlayMode } from './utils/overlay-mode';
 import { presetToCssVariable } from './utils/preset-to-css-variable';
+import { getDefaultAttributeId } from './inner-blocks/attribute-filter/utils';
+
+const DEFAULT_ATTRIBUTE_ID = getDefaultAttributeId();
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
@@ -38,15 +50,22 @@ const TEMPLATE: InnerBlockTemplate[] = [
 	[ 'woocommerce/product-filter-active' ],
 	[ 'woocommerce/product-filter-price' ],
 	[ 'woocommerce/product-filter-rating' ],
-	[ 'woocommerce/product-filter-attribute' ],
+	[
+		'woocommerce/product-filter-attribute',
+		// Persist the ID: a block attribute equal to its default isn't saved.
+		DEFAULT_ATTRIBUTE_ID > 0 ? { attributeId: DEFAULT_ATTRIBUTE_ID } : {},
+	],
 	[ 'woocommerce/product-filter-taxonomy' ],
 	[ 'woocommerce/product-filter-status' ],
 ];
 
 export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const { attributes, setAttributes } = props;
-	const { isPreview } = attributes;
-	const showFilterDrawer = attributes.showFilterDrawer !== false;
+	const isPreviewMode = usePreviewMode();
+	const overlayMode = getOverlayMode( attributes );
+	const hasOverlay = overlayMode !== 'off';
+	const overlayPosition =
+		attributes.overlayPosition === 'right' ? 'right' : 'left';
 	const [ isOpen, setIsOpen ] = useState( false );
 
 	const globalColors = getSetting< { background?: string; text?: string } >(
@@ -65,7 +84,9 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filters', {
 			'is-overlay-opened': isOpen,
-			'is-filter-drawer-disabled': ! showFilterDrawer,
+			'is-filter-drawer-disabled': ! hasOverlay,
+			'is-mobile-overlay': overlayMode === 'mobile',
+			'is-overlay-right': hasOverlay && overlayPosition === 'right',
 		} ),
 		style: {
 			'--wc-product-filters-background-color':
@@ -76,17 +97,17 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 				? presetToCssVariable( blockGap )
 				: undefined,
 		},
-	} );
+	} ) as HTMLAttributes< HTMLDivElement >;
 
 	let filtersContent: JSX.Element;
 
-	if ( isPreview ) {
+	if ( isPreviewMode ) {
 		filtersContent = (
 			<div className="wc-block-product-filters__overlay-content">
 				<InnerBlocks templateLock={ false } template={ TEMPLATE } />
 			</div>
 		);
-	} else if ( showFilterDrawer ) {
+	} else if ( hasOverlay ) {
 		filtersContent = (
 			<>
 				<button
@@ -99,18 +120,12 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 
 				<div className="wc-block-product-filters__overlay">
 					<div className="wc-block-product-filters__overlay-wrapper">
-						<div
-							className="wc-block-product-filters__overlay-dialog"
-							role="dialog"
-						>
+						<section className="wc-block-product-filters__overlay-dialog">
 							<header className="wc-block-product-filters__overlay-header">
 								<button
 									className="wc-block-product-filters__close-overlay"
 									onClick={ () => setIsOpen( ! isOpen ) }
 								>
-									<span>
-										{ __( 'Close', 'woocommerce' ) }
-									</span>
 									<Icon icon={ close } />
 								</button>
 							</header>
@@ -130,7 +145,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 									</span>
 								</button>
 							</footer>
-						</div>
+						</section>
 					</div>
 				</div>
 			</>
@@ -147,27 +162,60 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 		<>
 			<InspectorControls>
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
-					<ToggleControl
-						label={ __(
-							'Collapse filters on small screens',
+					<ToggleGroupControl
+						__nextHasNoMarginBottom
+						__next40pxDefaultSize
+						isBlock
+						label={ __( 'Overlay', 'woocommerce' ) }
+						help={ __(
+							'When on, filters are hidden behind a button instead of showing on the page.',
 							'woocommerce'
 						) }
-						help={
-							showFilterDrawer
-								? __(
-										'Shoppers tap a button to open filters.',
-										'woocommerce'
-								  )
-								: __(
-										'Filters are shown directly on the page.',
-										'woocommerce'
-								  )
-						}
-						checked={ showFilterDrawer }
-						onChange={ ( value ) =>
-							setAttributes( { showFilterDrawer: value } )
-						}
-					/>
+						value={ overlayMode }
+						onChange={ ( value ) => {
+							if ( isOverlayMode( value ) ) {
+								setAttributes( { overlayMode: value } );
+							}
+						} }
+					>
+						<ToggleGroupControlOption
+							value="off"
+							label={ __( 'Off', 'woocommerce' ) }
+						/>
+						<ToggleGroupControlOption
+							value="mobile"
+							label={ __( 'Mobile', 'woocommerce' ) }
+						/>
+						<ToggleGroupControlOption
+							value="always"
+							label={ __( 'Always', 'woocommerce' ) }
+						/>
+					</ToggleGroupControl>
+					{ overlayMode !== 'off' && (
+						<ToggleGroupControl
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
+							isBlock
+							label={ __( 'Overlay position', 'woocommerce' ) }
+							value={ overlayPosition }
+							onChange={ ( value ) => {
+								if ( value === 'left' || value === 'right' ) {
+									setAttributes( {
+										overlayPosition: value,
+									} );
+								}
+							} }
+						>
+							<ToggleGroupControlOption
+								value="left"
+								label={ __( 'Left', 'woocommerce' ) }
+							/>
+							<ToggleGroupControlOption
+								value="right"
+								label={ __( 'Right', 'woocommerce' ) }
+							/>
+						</ToggleGroupControl>
+					) }
 				</PanelBody>
 			</InspectorControls>
 			<div { ...blockProps }>{ filtersContent }</div>

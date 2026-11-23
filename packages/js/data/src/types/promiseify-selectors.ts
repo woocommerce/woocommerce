@@ -5,7 +5,9 @@
  */
 
 export type PromiseifySelectors< Selectors > = {
-	[ SelectorFunction in keyof Selectors ]: Selectors[ SelectorFunction ] extends (
+	[
+		SelectorFunction in keyof Selectors
+	]: Selectors[ SelectorFunction ] extends (
 		...args: infer SelectorArgs
 	) => infer SelectorReturnType
 		? ( ...args: SelectorArgs ) => Promise< SelectorReturnType >

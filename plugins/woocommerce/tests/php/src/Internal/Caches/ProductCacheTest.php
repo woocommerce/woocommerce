@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Caches;
 
 use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Data;
 use WC_Helper_Product;
@@ -128,6 +129,95 @@ class ProductCacheTest extends \WC_Unit_Test_Case {
 
 		// Verify retrieved product has DUPLICATE mode.
 		$this->assertEquals( WC_Data::CLONE_MODE_DUPLICATE, $retrieved_product->get_clone_mode() );
+	}
+
+	/**
+	 * @testdox Should keep an unsaved attribute or download change on one cached copy away from other copies.
+	 */
+	public function test_unsaved_attribute_change_does_not_reach_other_copies(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_attributes( array( $this->create_attribute() ) );
+		$product->set_downloads( array( $this->create_download() ) );
+		$product->save();
+
+		$this->assert_cached_copies_are_isolated( $product );
+	}
+
+	/**
+	 * @testdox Should keep an unsaved change on one cached copy away from other copies when the attributes and downloads are pending changes.
+	 */
+	public function test_unsaved_change_does_not_reach_other_copies_when_props_are_pending(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_attributes( array( $this->create_attribute() ) );
+		$product->set_downloads( array( $this->create_download() ) );
+
+		$this->assertArrayHasKey( 'attributes', $product->get_changes() );
+		$this->assertArrayHasKey( 'downloads', $product->get_changes() );
+		$this->assert_cached_copies_are_isolated( $product );
+	}
+
+	/**
+	 * @testdox Should keep a change to a saved or pending date on a product clone away from the original.
+	 */
+	public function test_date_change_does_not_reach_cloned_product(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_date_on_sale_from( '2026-01-15 10:00:00' );
+		$this->assertArrayHasKey( 'date_on_sale_from', $product->get_changes() );
+		$created = $product->get_date_created()->getTimestamp();
+		$on_sale = $product->get_date_on_sale_from()->getTimestamp();
+
+		$copy = clone $product;
+		$copy->get_date_created()->modify( '+1 day' );
+		$copy->get_date_on_sale_from()->modify( '+1 day' );
+
+		$this->assertSame( $created, $product->get_date_created()->getTimestamp() );
+		$this->assertSame( $on_sale, $product->get_date_on_sale_from()->getTimestamp() );
+		$this->assertGreaterThan( $created, $copy->get_date_created()->getTimestamp() );
+		$this->assertGreaterThan( $on_sale, $copy->get_date_on_sale_from()->getTimestamp() );
+	}
+
+	/**
+	 * Cache the product, change the attribute and download objects on one copy, and check that another copy and the original keep their values.
+	 *
+	 * @param \WC_Product $product The product to cache.
+	 */
+	private function assert_cached_copies_are_isolated( \WC_Product $product ): void {
+		$this->sut->set( $product );
+
+		$first = $this->sut->get( $product->get_id() );
+		$first->get_attributes()['color']->set_options( array( 'green' ) );
+		current( $first->get_downloads() )->set_name( 'Changed' );
+		$second = $this->sut->get( $product->get_id() );
+
+		$this->assertSame( array( 'red', 'blue' ), $second->get_attributes()['color']->get_options() );
+		$this->assertSame( array( 'red', 'blue' ), $product->get_attributes()['color']->get_options() );
+		$this->assertSame( 'Manual', current( $second->get_downloads() )->get_name() );
+		$this->assertSame( 'Manual', current( $product->get_downloads() )->get_name() );
+	}
+
+	/**
+	 * Create a color attribute with two options.
+	 *
+	 * @return \WC_Product_Attribute
+	 */
+	private function create_attribute(): \WC_Product_Attribute {
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'color' );
+		$attribute->set_options( array( 'red', 'blue' ) );
+		return $attribute;
+	}
+
+	/**
+	 * Create a download named Manual in an approved directory.
+	 *
+	 * @return \WC_Product_Download
+	 */
+	private function create_download(): \WC_Product_Download {
+		wc_get_container()->get( Download_Directories::class )->add_approved_directory( 'https://example.com/' );
+		$download = new \WC_Product_Download();
+		$download->set_name( 'Manual' );
+		$download->set_file( 'https://example.com/manual.pdf' );
+		return $download;
 	}
 
 	/**

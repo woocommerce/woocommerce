@@ -55,6 +55,10 @@ class WC_Analytics_Tracking_Test extends BaseTestCase {
 		$queue = $reflection->getProperty( 'pixel_batch_queue' );
 		$queue->setAccessible( true );
 		$queue->setValue( null, array() );
+
+		$reserved = $reflection->getProperty( 'reserved_property_names' );
+		$reserved->setAccessible( true );
+		$reserved->setValue( null, null );
 	}
 
 	/**

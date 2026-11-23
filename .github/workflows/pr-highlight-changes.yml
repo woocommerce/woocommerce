@@ -16,6 +16,7 @@ jobs:
   analyze:
     name: 'Analyze Branch Changes'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       results: ${{ steps.results.outputs.results }}
     steps:

@@ -88,6 +88,36 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A product and each variation return their own GTIN; a variation without one doesn't get its parent's.
+	 */
+	public function test_get_item_returns_gtin() {
+		$product = $this->products[1];
+		$product->set_global_unique_id( '4006381333931' );
+		$product->save();
+		$variable = \WC_Helper_Product::create_variation_product();
+		$children = $variable->get_children();
+		$variable->set_global_unique_id( '9780306406157' );
+		$variable->save();
+		$variation = wc_get_product( $children[0] );
+		$variation->set_global_unique_id( '012345678905' );
+		$variation->save();
+		$get = static fn( int $id ): array => rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $id ) )->get_data();
+
+		$this->assertSame( '4006381333931', $get( $product->get_id() )['global_unique_id'] );
+		$this->assertSame( '9780306406157', $get( $variable->get_id() )['global_unique_id'] );
+		$this->assertSame( '012345678905', $get( $variation->get_id() )['global_unique_id'] );
+		$this->assertSame( '', $get( $children[1] )['global_unique_id'] );
+
+		$product->set_global_unique_id( '123--456' );
+		$product->save();
+		$this->assertSame( '123--456', $get( $product->get_id() )['global_unique_id'], 'Consecutive hyphens stay as entered' );
+
+		$product->set_global_unique_id( '' );
+		$product->save();
+		$variable->delete( true );
+	}
+
+	/**
 	 * Test getting item.
 	 */
 	public function test_get_item() {
@@ -105,6 +135,7 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( $this->products[0]->get_slug(), $data['slug'] );
 		$this->assertEquals( $this->products[0]->get_permalink(), $data['permalink'] );
 		$this->assertEquals( $this->products[0]->get_sku(), $data['sku'] );
+		$this->assertSame( '', $data['global_unique_id'], 'No GTIN set: an empty string' );
 		$this->assertEquals( $this->products[0]->get_price(), $data['prices']->price / ( 10 ** $data['prices']->currency_minor_unit ) );
 		$this->assertEquals( $this->products[0]->get_average_rating(), $data['average_rating'] );
 		$this->assertEquals( $this->products[0]->get_review_count(), $data['review_count'] );
@@ -112,7 +143,7 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( $this->products[0]->is_purchasable(), $data['is_purchasable'] );
 		$this->assertEquals( $this->products[0]->is_in_stock(), $data['is_in_stock'] );
 		$this->assertEquals( $this->products[0]->add_to_cart_text(), $data['add_to_cart']->text );
-		$this->assertEquals( $this->products[0]->add_to_cart_description(), $data['add_to_cart']->description );
+		$this->assertEqualHTML( $this->products[0]->add_to_cart_description(), $data['add_to_cart']->description );
 		$this->assertEquals( $this->products[0]->single_add_to_cart_text(), $data['add_to_cart']->single_text );
 		$this->assertEquals( $this->products[0]->is_on_sale(), $data['on_sale'] );
 		$this->assertEquals( $this->products[0]->get_weight(), $data['weight'] );
@@ -130,6 +161,34 @@ class Products extends ControllerTestCase {
 		$this->assertNotEmpty( wp_parse_url( $data['images'][0]->thumbnail, PHP_URL_HOST ) );
 
 		wp_delete_attachment( $image_id, true );
+	}
+
+	/**
+	 * @testdox Sale price is only returned while the sale is active.
+	 */
+	public function test_sale_price_is_hidden_until_scheduled_sale_starts(): void {
+		$fixtures  = new FixtureData();
+		$scheduled = $fixtures->get_simple_product(
+			array(
+				'regular_price'     => 100,
+				'sale_price'        => 63.45,
+				'date_on_sale_from' => strtotime( '+1 year' ),
+				'date_on_sale_to'   => strtotime( '+1 year +3 days' ),
+			)
+		);
+		$active    = $fixtures->get_simple_product(
+			array(
+				'regular_price' => 100,
+				'sale_price'    => 70,
+			)
+		);
+
+		$scheduled_prices = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $scheduled->get_id() ) )->get_data()['prices'];
+		$active_prices    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $active->get_id() ) )->get_data()['prices'];
+
+		$this->assertSame( '10000', $scheduled_prices->price );
+		$this->assertSame( '10000', $scheduled_prices->sale_price, 'A sale that has not started must not expose its sale price.' );
+		$this->assertSame( '7000', $active_prices->sale_price, 'An active sale returns its sale price.' );
 	}
 
 	/**
@@ -181,6 +240,7 @@ class Products extends ControllerTestCase {
 		$this->assertArrayHasKey( 'description', $data[0] );
 		$this->assertArrayHasKey( 'on_sale', $data[0] );
 		$this->assertArrayHasKey( 'sku', $data[0] );
+		$this->assertArrayHasKey( 'global_unique_id', $data[0] );
 		$this->assertArrayHasKey( 'prices', $data[0] );
 		$this->assertArrayHasKey( 'average_rating', $data[0] );
 		$this->assertArrayHasKey( 'review_count', $data[0] );
@@ -212,6 +272,56 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( 1, count( $data ) );
 		$this->assertArrayHasKey( 'sku', $data[0] );
 		$this->assertEquals( 'search-for-this-value', $data[0]['sku'] );
+	}
+
+	/**
+	 * @testdox Should return a bad request response for invalid price filter values.
+	 * @testWith ["min_price", "true"]
+	 *           ["max_price", "10.99invalid"]
+	 *           ["min_price", "-1"]
+	 *
+	 * @param string $param Price filter parameter.
+	 * @param string $value Price filter value.
+	 */
+	public function test_rejects_invalid_price_filter_values( string $param, string $value ): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( $param, $value );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status(), 'Invalid price filters should return HTTP 400.' );
+		$this->assertSame( 'rest_invalid_param', $data['code'], 'The response should identify an invalid request parameter.' );
+	}
+
+	/**
+	 * @testdox Should allow decimal price filter values produced by product filter blocks.
+	 * @testWith ["min_price", "110.00000000000001"]
+	 *           ["max_price", "10.99"]
+	 *
+	 * @param string $param Price filter parameter.
+	 * @param string $value Price filter value.
+	 */
+	public function test_allows_decimal_price_filter_values( string $param, string $value ): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( $param, $value );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Decimal price filters should be accepted.' );
+	}
+
+	/**
+	 * @testdox Should allow empty price filter values used by product filter blocks.
+	 */
+	public function test_allows_empty_price_filter_values(): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'min_price', '' );
+		$request->set_param( 'max_price', '' );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Empty price filters should be ignored.' );
 	}
 
 	/**
@@ -344,6 +454,31 @@ class Products extends ControllerTestCase {
 
 		$this->assertIsArray( $data['images'] );
 		$this->assertCount( 0, $data['images'] );
+	}
+
+	/**
+	 * @testdox The featured image is returned only once when it is also part of the product gallery.
+	 */
+	public function test_featured_image_in_gallery_is_not_duplicated(): void {
+		$fixtures    = new FixtureData();
+		$featured_id = $fixtures->create_image_attachment();
+		$gallery_id  = $fixtures->create_image_attachment();
+		$product     = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Test Product 1',
+				'regular_price'     => 10,
+				'image_id'          => $featured_id,
+				'gallery_image_ids' => array( $featured_id, $gallery_id ),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+
+		$this->assertSame(
+			array( $featured_id, $gallery_id ),
+			wp_list_pluck( $response->get_data()['images'], 'id' ),
+			'The featured image should be listed first and only once.'
+		);
 	}
 
 	/**
@@ -857,6 +992,50 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Variations should inherit the parent product's password-protected flag regardless of access.
+	 */
+	public function test_variation_inherits_parent_password_protected_flag(): void {
+		$password     = 'secret';
+		$product      = \WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+		$variation    = wc_get_product( $variation_id );
+		$variation->set_description( 'Protected variation description' );
+		$variation->save();
+		$product->set_post_password( $password );
+		$product->save();
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_query_params(
+			array(
+				'include' => array( $variation_id ),
+				'parent'  => array( $product->get_id() ),
+				'type'    => 'variation',
+			)
+		);
+
+		$protected_response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $protected_response->get_status() );
+		$protected_data = $protected_response->get_data()[0];
+		$this->assertTrue( $protected_data['is_password_protected'] );
+		$this->assertSame( '', $protected_data['description'] );
+
+		require_once ABSPATH . WPINC . '/class-phpass.php';
+		$hasher                                 = new \PasswordHash( 8, true );
+		$_COOKIE[ 'wp-postpass_' . COOKIEHASH ] = $hasher->HashPassword( $password );
+
+		try {
+			$accessible_response = rest_get_server()->dispatch( $request );
+		} finally {
+			unset( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
+		}
+
+		$this->assertSame( 200, $accessible_response->get_status() );
+		$accessible_data = $accessible_response->get_data()[0];
+		$this->assertTrue( $accessible_data['is_password_protected'] );
+		$this->assertStringContainsString( 'Protected variation description', $accessible_data['description'] );
+	}
+
+	/**
 	 * @testdox Related query parameter returns empty when no related products exist.
 	 */
 	public function test_related_query_parameter_returns_empty_when_no_related() {
@@ -896,5 +1075,45 @@ class Products extends ControllerTestCase {
 
 		$this->assertEquals( 404, $response->get_status() );
 		$this->assertFalse( get_transient( 'wc_related_' . $nonexistent_id ), 'No transient should be created for a non-existent product.' );
+	}
+
+	/**
+	 * @testdox Getting a product loaded before its global attribute is deleted returns 200 and the attribute without terms.
+	 */
+	public function test_get_item_for_product_loaded_before_its_global_attribute_is_deleted(): void {
+		update_option( 'woocommerce_feature_product_instance_caching_enabled', 'yes' );
+		$attribute = \WC_Helper_Product::create_product_attribute_object( 'Stale Finish', array( 'Matte' ) );
+		$product   = new \WC_Product_Simple();
+		$product->set_name( 'Stale attribute product' );
+		$product->set_status( ProductStatus::PUBLISH );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+		wc_get_product( $product->get_id() );
+
+		wc_delete_attribute( $attribute->get_id() );
+
+		$warnings = array();
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capturing the warning is the assertion; PHPUnit would otherwise convert it to an exception.
+		set_error_handler(
+			static function ( int $errno, string $errstr ) use ( &$warnings ): bool {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- Reads the level only, to skip warnings silenced with @.
+				if ( error_reporting() & $errno ) {
+					$warnings[] = $errstr;
+				}
+				return true;
+			}
+		);
+		try {
+			$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array(), $warnings, 'Serializing the product should not raise warnings.' );
+		$attributes = $response->get_data()['attributes'];
+		$this->assertCount( 1, $attributes, 'The cached product still carries the deleted attribute for the rest of the request.' );
+		$this->assertSame( $attribute->get_name(), $attributes[0]->taxonomy );
+		$this->assertSame( array(), $attributes[0]->terms );
 	}
 }

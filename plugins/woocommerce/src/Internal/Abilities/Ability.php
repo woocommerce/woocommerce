@@ -1,0 +1,183 @@
+<?php
+/**
+ * Ability class file.
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Internal\Abilities;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * The base class of the WooCommerce abilities.
+ *
+ * WordPress 7.2 prepares the ability input with WP_Ability::prepare_input() before
+ * the callbacks run. This class backports that method, so the callbacks get converted
+ * input on WordPress 7.0 and 7.1 too. Direct permission checks must pass the result
+ * of prepare_input() to check_permissions(), and must return early when that result
+ * is a WP_Error, because check_permissions() hands it to the permission callback.
+ * Pass raw input to execute(), which prepares it before checking permissions.
+ *
+ * @since 11.4.0
+ */
+class Ability extends \WP_Ability {
+
+	/**
+	 * Apply the schema default. Before WordPress 7.2, also convert valid input to
+	 * the schema types, as WordPress 7.2 does in execute().
+	 *
+	 * Invalid input stays unchanged, so validate_input() refuses it as before.
+	 *
+	 * Remove when WooCommerce requires WordPress 7.2, together with prepare_input(),
+	 * sanitize_input(), core_prepares_input() and get_input_error().
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $input Optional. The raw input provided for the ability. Default `null`.
+	 * @return mixed The input, converted before WordPress 7.2, or a WP_Error.
+	 */
+	final public function normalize_input( $input = null ) {
+		$input = parent::normalize_input( $input );
+		if ( self::core_prepares_input() || null === $input || is_wp_error( $input ) || is_wp_error( $this->validate_input( $input ) ) ) {
+			return $input;
+		}
+
+		return $this->sanitize_input( $input );
+	}
+
+	/**
+	 * Normalize, validate and convert the input, the same way WordPress 7.2 does.
+	 *
+	 * WordPress 7.2 and later handle this in WP_Ability::prepare_input().
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $input Optional. The raw input provided for the ability. Default `null`.
+	 * @return mixed|\WP_Error The prepared input, or a WP_Error when any step fails.
+	 */
+	public function prepare_input( $input = null ) {
+		if ( self::core_prepares_input() ) {
+			return parent::prepare_input( $input );
+		}
+
+		$input = $this->normalize_input( $input );
+		if ( is_wp_error( $input ) ) {
+			return $input;
+		}
+
+		// This class's normalize_input() override already sanitizes the input.
+		$is_valid = $this->validate_input( $input );
+		return is_wp_error( $is_valid ) ? $is_valid : $input;
+	}
+
+	/**
+	 * Convert validated input to the schema types, the same way WordPress 7.2 does.
+	 *
+	 * Converting can make validated input invalid, such as items that are unique
+	 * as strings but not as integers, or a number too large for an integer that
+	 * becomes 0 and breaks a minimum. The converted input is validated again and
+	 * refused when it fails.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $input Validated ability input.
+	 * @return mixed|\WP_Error The converted input, or a WP_Error when it cannot be converted.
+	 */
+	protected function sanitize_input( $input ) {
+		if ( self::core_prepares_input() ) {
+			return parent::sanitize_input( $input );
+		}
+
+		$schema = $this->get_input_schema();
+		if ( null === $input || empty( $schema ) ) {
+			return $input;
+		}
+
+		$sanitized = rest_sanitize_value_from_schema( $input, $schema, 'input' );
+
+		$error = self::get_input_error( $sanitized );
+		if ( null !== $error ) {
+			return new \WP_Error(
+				'ability_invalid_input',
+				sprintf(
+					/* translators: %1$s: ability name, %2$s: error message. */
+					__( 'Ability "%1$s" has invalid input. Reason: %2$s', 'woocommerce' ),
+					$this->name,
+					$error->get_error_message()
+				)
+			);
+		}
+
+		if ( $sanitized === $input ) {
+			return $sanitized;
+		}
+
+		$is_valid = $this->validate_input( $sanitized );
+		return is_wp_error( $is_valid ) ? $is_valid : $sanitized;
+	}
+
+	/**
+	 * Check whether WordPress prepares the ability input itself, as WordPress 7.2 and later do.
+	 *
+	 * @return bool
+	 */
+	private static function core_prepares_input(): bool {
+		return method_exists( \WP_Ability::class, 'prepare_input' );
+	}
+
+	/**
+	 * Get the first WP_Error in a converted value.
+	 *
+	 * @param mixed $value Converted value.
+	 * @return \WP_Error|null
+	 */
+	private static function get_input_error( $value ): ?\WP_Error {
+		if ( is_wp_error( $value ) ) {
+			return $value;
+		}
+		if ( is_array( $value ) ) {
+			foreach ( $value as $item ) {
+				$error = self::get_input_error( $item );
+				if ( null !== $error ) {
+					return $error;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Validate the output, and tell the caller that the ability ran when the output is invalid.
+	 *
+	 * WordPress calls this method only after the execute callback returned output,
+	 * so the callback may already have saved changes. The message says so, because some
+	 * callers, such as MCP clients, receive only the message. Read-only abilities keep the
+	 * original message, because they saved nothing.
+	 *
+	 * WordPress 7.2.1 returns its own error codes with this hint, so this override leaves them
+	 * unchanged. Remove this override when WooCommerce requires WordPress 7.2.1.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $output The output of the execute callback.
+	 * @return true|\WP_Error True when the output is valid, or a WP_Error.
+	 */
+	protected function validate_output( $output ) {
+		$result = parent::validate_output( $output );
+
+		if ( ! is_wp_error( $result ) || 'ability_invalid_output' !== $result->get_error_code() || true === ( $this->get_meta_item( 'annotations' )['readonly'] ?? null ) ) {
+			return $result;
+		}
+
+		$error = clone $result;
+
+		$error->errors['ability_invalid_output'][0] = sprintf(
+			/* translators: %s: error message. */
+			__( '%s The ability ran, so its changes may already be saved. Check the current state before you run it again.', 'woocommerce' ),
+			$error->get_error_message()
+		);
+
+		return $error;
+	}
+}

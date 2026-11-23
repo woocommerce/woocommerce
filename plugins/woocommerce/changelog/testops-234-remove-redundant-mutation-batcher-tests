@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Remove 6 redundant mutation batcher E2E tests already covered by Jest unit tests.

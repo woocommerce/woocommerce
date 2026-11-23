@@ -148,7 +148,8 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 			return false;
 		}
 
-		$old_metadata = wp_get_attachment_metadata( $this->attachment_id );
+		// Unfiltered, so the keys carried over below come from the stored value.
+		$old_metadata = wp_get_attachment_metadata( $this->attachment_id, true );
 
 		// We only want to regen WC images.
 		add_filter( 'intermediate_image_sizes', array( $this, 'adjust_intermediate_image_sizes' ) );
@@ -165,6 +166,10 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 
 		// If something went wrong lets just remove the item from the queue.
 		if ( is_wp_error( $new_metadata ) || empty( $new_metadata ) ) {
+			if ( is_array( $old_metadata ) ) {
+				wp_update_attachment_metadata( $this->attachment_id, $old_metadata );
+			}
+
 			return false;
 		}
 
@@ -174,6 +179,11 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 					$new_metadata['sizes'][ $old_size ] = $old_metadata['sizes'][ $old_size ];
 				}
 			}
+		}
+
+		// Restore the top level keys regeneration does not own.
+		if ( is_array( $old_metadata ) ) {
+			$new_metadata += $old_metadata;
 		}
 
 		// Update the meta data with the new size values.

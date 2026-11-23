@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore spacing above the Checkout block country field when it is not the first address field.

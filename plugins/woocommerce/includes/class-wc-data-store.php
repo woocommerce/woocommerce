@@ -181,6 +181,7 @@ class WC_Data_Store {
 	 *
 	 * @since 3.0.0
 	 * @param WC_Data $data WooCommerce data instance.
+	 * @return void
 	 */
 	public function create( &$data ) {
 		$this->instance->create( $data );
@@ -191,6 +192,7 @@ class WC_Data_Store {
 	 *
 	 * @since 3.0.0
 	 * @param WC_Data $data WooCommerce data instance.
+	 * @return void
 	 */
 	public function update( &$data ) {
 		$this->instance->update( $data );
@@ -200,11 +202,13 @@ class WC_Data_Store {
 	 * Delete an object from the data store.
 	 *
 	 * @since 3.0.0
+	 * @since 11.3.1 Returns what the data store returns.
 	 * @param WC_Data $data WooCommerce data instance.
 	 * @param array   $args Array of args to pass to the delete method.
+	 * @return mixed What the data store returns, if anything.
 	 */
 	public function delete( &$data, $args = array() ) {
-		$this->instance->delete( $data, $args );
+		return $this->instance->delete( $data, $args );
 	}
 
 	/**

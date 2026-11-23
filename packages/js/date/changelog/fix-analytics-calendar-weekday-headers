@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fill moment's minimal weekday names in from the translated short ones so calendar week headers are not English on translated sites.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Pass placeholder image attributes to the placeholder image filter.
