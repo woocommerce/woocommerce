@@ -14161,18 +14161,6 @@ parameters:
 			path: includes/class-wc-session-handler.php
 
 		-
-			message: '#^Parameter \#1 \$cart_token of static method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartTokenUtils\:\:get_cart_token_payload\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
-			message: '#^Parameter \#1 \$cart_token of static method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartTokenUtils\:\:validate_cart_token\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
 			message: '#^Parameter \#1 \$customer_id of method WC_Session_Handler\:\:get_session\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1

@@ -133,13 +133,9 @@ class WC_Session_Handler extends WC_Session {
 	private function init_session_from_request() {
 		$session_token = is_string( $_GET['session'] ?? '' ) ? wc_clean( wp_unslash( $_GET['session'] ?? '' ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		if ( empty( $session_token ) || ! CartTokenUtils::validate_cart_token( $session_token ) ) {
-			return false;
-		}
+		$token_customer_id = is_string( $session_token ) && '' !== $session_token ? CartTokenUtils::get_cart_link_customer_id( $session_token ) : '';
 
-		$payload = CartTokenUtils::get_cart_token_payload( $session_token );
-
-		if ( ! $this->is_customer_guest( $payload['user_id'] ) || ! $this->session_exists( $payload['user_id'] ) ) {
+		if ( ! $token_customer_id || ! $this->is_customer_guest( $token_customer_id ) || ! $this->session_exists( $token_customer_id ) ) {
 			return false;
 		}
 
@@ -148,14 +144,14 @@ class WC_Session_Handler extends WC_Session {
 
 		if ( $cookie ) {
 			// User owns this token. Return and use cookie session.
-			if ( $cookie[0] === $payload['user_id'] ) {
+			if ( $cookie[0] === $token_customer_id ) {
 				return false;
 			}
 
 			$cookie_session_data = (array) $this->get_session( $cookie[0], array() );
 
 			// Cookie session was originally created via this token. Return and use cookie session to prevent creating a new clone.
-			if ( isset( $cookie_session_data['previous_customer_id'] ) && $cookie_session_data['previous_customer_id'] === $payload['user_id'] ) {
+			if ( isset( $cookie_session_data['previous_customer_id'] ) && $cookie_session_data['previous_customer_id'] === $token_customer_id ) {
 				return false;
 			}
 		}
@@ -163,7 +159,7 @@ class WC_Session_Handler extends WC_Session {
 		// Generate new customer ID for the new session before cloning the data.
 		$this->_customer_id = $this->generate_customer_id();
 		$this->set_customer_session_cookie( true );
-		$this->clone_session_data( $payload['user_id'] );
+		$this->clone_session_data( $token_customer_id );
 
 		return true;
 	}
