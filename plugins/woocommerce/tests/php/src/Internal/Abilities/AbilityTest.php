@@ -190,6 +190,42 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the retry hint when the output validation filter runs the same ability again.
+	 */
+	public function test_nested_run_in_the_output_filter_keeps_the_retry_hint(): void {
+		if ( version_compare( get_bloginfo( 'version' ), '7.1-alpha', '<' ) ) {
+			$this->markTestSkipped( 'The wp_ability_validate_output filter exists since WordPress 7.1.' );
+		}
+
+		$ability = new Ability(
+			'test/nested-run',
+			array(
+				'label'               => 'Nested run',
+				'description'         => 'Returns output that does not match its schema.',
+				'category'            => 'woocommerce',
+				'input_schema'        => array( 'type' => 'integer' ),
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => fn() => 'not an object',
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		$nested = function ( $is_valid ) use ( $ability, &$nested ) {
+			remove_filter( 'wp_ability_validate_output', $nested );
+			$ability->execute( 'not an integer' );
+			return $is_valid;
+		};
+		add_filter( 'wp_ability_validate_output', $nested );
+
+		$result = $ability->execute( 1 );
+
+		remove_filter( 'wp_ability_validate_output', $nested );
+
+		$this->assertWPError( $result );
+		$this->assert_retry_hint_once( $result );
+	}
+
+	/**
 	 * @testdox Should keep every error from the output validation filter when it adds the retry hint.
 	 */
 	public function test_invalid_output_keeps_every_error(): void {
