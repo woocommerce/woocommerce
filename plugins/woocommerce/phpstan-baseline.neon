@@ -10369,12 +10369,6 @@ parameters:
 			path: includes/class-wc-checkout.php
 
 		-
-			message: '#^Variable \$order might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/class-wc-checkout.php
-
-		-
 			message: '#^Call to static method add_command\(\) on an unknown class WP_CLI\.$#'
 			identifier: class.notFound
 			count: 1
@@ -10751,12 +10745,6 @@ parameters:
 			identifier: isset.property
 			count: 1
 			path: includes/class-wc-customer.php
-
-		-
-			message: '#^Method WC_Data_Store\:\:delete\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-data-store.php
 
 		-
 			message: '#^Method WC_Data_Store\:\:read\(\) has no return type specified\.$#'
@@ -11401,73 +11389,19 @@ parameters:
 			path: includes/class-wc-form-handler.php
 
 		-
-			message: '#^Cannot call method get_billing_city\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method get_billing_country\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method get_billing_postcode\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method get_billing_state\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method get_checkout_order_received_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
 			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/class-wc-form-handler.php
 
 		-
 			message: '#^Cannot call method get_order_key\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: includes/class-wc-form-handler.php
 
 		-
 			message: '#^Cannot call method has_status\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method needs_payment\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method payment_complete\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method save\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method set_payment_method\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/class-wc-form-handler.php
@@ -12139,12 +12073,6 @@ parameters:
 			path: includes/class-wc-order-item-fee.php
 
 		-
-			message: '#^Parameter \#1 \$data of function maybe_unserialize expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-order-item-fee.php
-
-		-
 			message: '#^Parameter \#1 \$raw_tax_data of method WC_Order_Item_Fee\:\:set_taxes\(\) expects array, false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -12307,12 +12235,6 @@ parameters:
 			path: includes/class-wc-order-item-product.php
 
 		-
-			message: '#^Parameter \#1 \$data of function maybe_unserialize expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
 			message: '#^Parameter \#1 \$value of method WC_Order_Item_Product\:\:set_subtotal\(\) expects string, int\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -12386,12 +12308,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(string\)\: mixed\)\|null, ''wc_round_tax_total'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-order-item-shipping.php
-
-		-
-			message: '#^Parameter \#1 \$data of function maybe_unserialize expects string, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-order-item-shipping.php
@@ -14235,18 +14151,6 @@ parameters:
 		-
 			message: '#^Method WC_Session_Handler\:\:update_session_timestamp\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
-			message: '#^Parameter \#1 \$cart_token of static method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartTokenUtils\:\:get_cart_token_payload\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
-			message: '#^Parameter \#1 \$cart_token of static method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartTokenUtils\:\:validate_cart_token\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: includes/class-wc-session-handler.php
 
@@ -64793,12 +64697,6 @@ parameters:
 			path: src/StoreApi/Payments/PaymentResult.php
 
 		-
-			message: '#^Expected 2 @param tags, found 3\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/StoreApi/Routes/V1/AbstractCartRoute.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\AbstractCartRoute\:\:cart_updated\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -65273,12 +65171,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^Access to protected property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$status\.$#'
-			identifier: property.protected
-			count: 2
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 2
@@ -65507,12 +65399,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
 		-
-			message: '#^Access to protected property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$status\.$#'
-			identifier: property.protected
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_email\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -65563,12 +65449,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_route_post_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_route_post_response\(\) should return WP_REST_Response but returns WP_Error\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 

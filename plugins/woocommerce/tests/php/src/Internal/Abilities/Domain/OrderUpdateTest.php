@@ -66,6 +66,26 @@ class OrderUpdateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should change other address fields while the saved state no longer matches the saved country.
+	 */
+	public function test_outdated_saved_state_does_not_block_other_fields(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_billing_country( 'US' );
+		$order->set_billing_state( 'XX' );
+		$order->save();
+
+		$result = $this->execute(
+			array(
+				'id'      => $order->get_id(),
+				'billing' => array( 'phone' => '555-0199' ),
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( '555-0199', wc_get_order( $order->get_id() )->get_billing_phone() );
+	}
+
+	/**
 	 * @testdox Should refuse every bad address field in one error, check the state against the saved country, and save nothing.
 	 */
 	public function test_refuses_every_bad_address_field_and_saves_nothing(): void {

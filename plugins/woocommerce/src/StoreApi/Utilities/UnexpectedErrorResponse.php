@@ -53,8 +53,8 @@ final class UnexpectedErrorResponse {
 						'file' => $error->getFile(),
 						'line' => $error->getLine(),
 					),
-					// Same shape the fatal-error shutdown handler logs, so log handlers and readers see one trace format.
-					'backtrace'      => array_slice( explode( "\n", $error->getTraceAsString() ), 0, self::MAX_BACKTRACE_FRAMES ),
+					// Same frame format the fatal-error shutdown handler logs, so log handlers and readers see one trace format.
+					'backtrace'      => self::get_backtrace( $error ),
 					// These failures reached remote logging as fatals before the dispatchers caught them.
 					'remote-logging' => true,
 				)
@@ -73,6 +73,28 @@ final class UnexpectedErrorResponse {
 		}
 
 		return new WP_Error( 'woocommerce_rest_unknown_server_error', $message, $data );
+	}
+
+	/**
+	 * Format the original call sites without exposing argument values.
+	 *
+	 * @param \Throwable $error Caught failure.
+	 * @return string[]
+	 */
+	private static function get_backtrace( \Throwable $error ): array {
+		$backtrace = array();
+		foreach ( array_slice( $error->getTrace(), 0, self::MAX_BACKTRACE_FRAMES ) as $index => $frame ) {
+			$backtrace[] = sprintf(
+				'#%d %s: %s%s%s()',
+				$index,
+				isset( $frame['file'], $frame['line'] ) ? $frame['file'] . '(' . $frame['line'] . ')' : '[internal function]',
+				// Anonymous class names continue past a NUL byte with the declaring path; PHP's own traces stop there.
+				explode( "\0", $frame['class'] ?? '' )[0],
+				$frame['type'] ?? '',
+				explode( "\0", $frame['function'] )[0]
+			);
+		}
+		return $backtrace;
 	}
 
 	/**

@@ -19,7 +19,7 @@ class CartMapper {
 	 *
 	 * @param array                $cart Store API cart response, as nested arrays.
 	 * @param string               $cart_id Cart identifier (a Store API cart token).
-	 * @param array<string, mixed> $context Optional `messages` to merge in.
+	 * @param array<string, mixed> $context Optional `messages` to merge in, and the `discount_codes` the request submitted.
 	 * @return array
 	 */
 	public function build_cart( array $cart, string $cart_id, array $context = array() ): array {
@@ -30,6 +30,11 @@ class CartMapper {
 			'totals'       => $this->totals( (array) $cart['totals'] ),
 			'continue_url' => $this->continue_url( $cart_id ),
 		);
+
+		$discounts = $this->discounts( (array) ( $cart['coupons'] ?? array() ), $context['discount_codes'] ?? null );
+		if ( null !== $discounts ) {
+			$payload['discounts'] = $discounts;
+		}
 
 		$expires_at = $this->expires_at( $cart_id );
 		if ( '' !== $expires_at ) {
@@ -106,8 +111,8 @@ class CartMapper {
 	 * `subtotal`, `tax` and `total` are always present; a zero `tax` is valid (schema
 	 * `minimum` 0) and tells the agent no tax applied. `discount`/`fulfillment`/`fee` are
 	 * dropped when zero — the schema forbids a zero `discount` (`exclusiveMaximum` 0), and a
-	 * zero shipping or fee is nothing to show. Discounts stay order-level: no agent can apply
-	 * a code without the discounts extension, so there is nothing to attribute.
+	 * zero shipping or fee is nothing to show. Discounts stay order-level: `discounts.applied`
+	 * carries no allocations, and the discount extension totals those under `discount`.
 	 *
 	 * @param array $cart_totals Store API cart totals, already in minor units.
 	 * @return array
@@ -159,6 +164,36 @@ class CartMapper {
 	}
 
 	/**
+	 * Build the discount extension's `discounts` object.
+	 *
+	 * `codes` echoes what the request submitted, rejected codes included, or else the coupons applied.
+	 * WooCommerce coupons have no buyer-facing name, so the code is the title.
+	 *
+	 * @param array      $coupons Store API cart coupons.
+	 * @param array|null $submitted Normalized codes the request submitted, or null when it sent none.
+	 * @return array|null Null when no code was submitted or applied.
+	 */
+	private function discounts( array $coupons, ?array $submitted ): ?array {
+		if ( null === $submitted && empty( $coupons ) ) {
+			return null;
+		}
+
+		$applied = array();
+		foreach ( $coupons as $coupon ) {
+			$applied[] = array(
+				'code'   => (string) $coupon['code'],
+				'title'  => (string) $coupon['code'],
+				'amount' => (int) $coupon['totals']['total_discount'],
+			);
+		}
+
+		return array(
+			'codes'   => $submitted ?? array_column( $applied, 'code' ),
+			'applied' => $applied,
+		);
+	}
+
+	/**
 	 * Surface the cart's own validation errors, such as stock that ran out since the
 	 * item was added, as recoverable messages.
 	 *
@@ -169,12 +204,16 @@ class CartMapper {
 		$messages = array();
 
 		foreach ( $errors as $error ) {
+			$code = (string) ( $error['code'] ?? '' );
+			// A coupon the cart no longer accepts, which the cart has removed.
+			$is_coupon = 'woocommerce_rest_cart_coupon_error' === $code;
+
 			$messages[] = array(
 				'type'         => 'warning',
-				'code'         => Utils::cart_error_code( (string) ( $error['code'] ?? '' ) ),
+				'code'         => $is_coupon ? 'discount_code_invalid' : Utils::cart_error_code( $code ),
 				'content'      => (string) ( $error['message'] ?? '' ),
 				'severity'     => 'recoverable',
-				'path'         => '$.line_items',
+				'path'         => $is_coupon ? '$.discounts.codes' : '$.line_items',
 				'content_type' => 'plain',
 			);
 		}
@@ -191,7 +230,7 @@ class CartMapper {
 	 * @param string $cart_id Cart identifier.
 	 * @return string
 	 */
-	private function continue_url( string $cart_id ): string {
+	public function continue_url( string $cart_id ): string {
 		$continue_url = add_query_arg( 'session', $cart_id, wc_get_cart_url() );
 
 		/**

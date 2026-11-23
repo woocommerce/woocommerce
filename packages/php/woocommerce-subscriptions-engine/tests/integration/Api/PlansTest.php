@@ -547,15 +547,17 @@ class PlansTest extends EngineIntegrationTestCase {
 			)
 		);
 		$this->assertNull( Plans::update( $id, array( 'extension_slug' => 'other-extension' ) ), 'A fieldless update is scoped too.' );
-		$this->assertNull(
-			Plans::update(
-				$id,
-				array(
-					'extension_slug' => strtoupper( self::OWNER ),
-					'name'           => 'Hijacked',
-				)
-			),
-			'The owner matches exactly: a case variant is another extension.'
+		$this->assert_validation_errors(
+			function () use ( $id ): void {
+				Plans::update(
+					$id,
+					array(
+						'extension_slug' => strtoupper( self::OWNER ),
+						'name'           => 'Hijacked',
+					)
+				);
+			},
+			array( array( ValidationErrorCode::INVALID_PATTERN, 'extension_slug' ) )
 		);
 
 		$this->assertSame( 0, $validated, 'The validate action never sees a plan of another extension.' );
@@ -1170,6 +1172,37 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'opaque' => true ), $plan->get_pricing_policy() );
 		$this->assertNull( Plans::get( 999999 ) );
 		$this->assertNull( Plans::get( 0 ) );
+	}
+
+	/**
+	 * @testdox update and get throw on a failed plan read instead of reporting the plan missing.
+	 */
+	public function test_update_and_get_throw_on_a_failed_plan_read(): void {
+		$id = $this->create();
+
+		$this->fail_next_query( '/^\s*SELECT p\.\* FROM \S*selling_plans p /' );
+		try {
+			Plans::update(
+				$id,
+				array(
+					'extension_slug' => self::OWNER,
+					'name'           => 'Renamed',
+				)
+			);
+			$this->fail( 'Expected update() to throw.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( "Failed to read plan {$id}", $e->getMessage() );
+		}
+
+		$this->fail_next_query( '/^\s*SELECT \* FROM \S*selling_plans WHERE id/' );
+		try {
+			Plans::get( $id );
+			$this->fail( 'Expected get() to throw.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( "Failed to read plan {$id}", $e->getMessage() );
+		}
+
+		$this->assertSame( 'Monthly', $this->stored( $id )->get_name() );
 	}
 
 	/**

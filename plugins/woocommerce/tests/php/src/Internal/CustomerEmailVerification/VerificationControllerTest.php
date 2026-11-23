@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Internal\CustomerEmailVerification\VerificationContro
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the VerificationController class (login-gated magic-link flow).
+ * Tests for the VerificationController class: confirmation links that need the account password.
  */
 class VerificationControllerTest extends WC_Unit_Test_Case {
 
@@ -39,9 +39,25 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox send_verification_email() emits a link carrying the key, and confirming it as the link owner verifies and links orders.
+	 * Tear down test fixtures.
 	 */
-	public function test_send_then_confirm_as_owner_links_orders(): void {
+	public function tearDown(): void {
+		try {
+			// Request globals and the shared controller's state are process state the base class does not reset.
+			unset( $_GET['wc_verify_email_user'], $_GET['wc_verify_email_key'] );
+			$_POST    = array();
+			$property = new \ReflectionProperty( VerificationController::class, 'confirm_form_user' );
+			$property->setAccessible( true );
+			$property->setValue( $this->ctrl, null );
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
+	 * @testdox send_verification_email() emits a link; the owner confirms it with their password, which verifies and links orders.
+	 */
+	public function test_send_then_confirm_with_password_links_orders(): void {
 		$email   = 'roundtrip@example.com';
 		$user_id = wc_create_new_customer( $email, 'roundtripuser', 'pw' );
 		$order   = $this->create_guest_order( $email );
@@ -51,12 +67,11 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 		$key = $this->key_from_url( $verify_url );
 
 		wp_set_current_user( $user_id );
-		$redirect = $this->open_verify_link( $user_id, $key );
-		wp_set_current_user( 0 );
+		$redirect = $this->submit_verify_form( $user_id, $key, 'pw' );
 
-		$this->assertTrue( $this->service->is_verified( $user_id ), 'Opening the link as the owner should verify the address' );
+		$this->assertTrue( $this->service->is_verified( $user_id ), 'The correct password should verify the address' );
 		$this->assertSame( $user_id, wc_get_order( $order->get_id() )->get_customer_id(), 'Guest order should link to the verified customer' );
-		$this->assertStringContainsString( 'wc_verify_notice=confirmed', $redirect, 'Should redirect to the Orders endpoint carrying the confirmed result notice' );
+		$this->assertStringContainsString( 'wc_verify_notice=confirmed', $redirect );
 	}
 
 	/**
@@ -81,7 +96,7 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 			$this->assertTrue( $this->ctrl->should_show_prompt(), 'The customer can request confirmation after setting their password.' );
 
 			$key      = $this->key_from_url( $this->capture_sent_url( $user_id ) );
-			$redirect = $this->open_verify_link( $user_id, $key );
+			$redirect = $this->submit_verify_form( $user_id, $key, 'newpassword123' );
 
 			$this->assertTrue( $this->service->is_verified( $user_id ), 'The email-bound confirmation should verify the address.' );
 			$this->assertSame( $user_id, wc_get_order( $order->get_id() )->get_customer_id(), 'Confirmation should link matching guest orders.' );
@@ -93,107 +108,202 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox LOCKDOWN: the same valid link verifies ONLY when opened as the target — logged out (prefetch) and cross-account never consume the key.
+	 * @testdox Opening a link never verifies: logged out, as another account, or as the owner.
 	 *
-	 * This is the core security property: verification is gated on being authenticated as the link's
-	 * target user, so neither a prefetch (always logged out) nor any other account can spend the key.
+	 * A planted login session (login CSRF) or a mail scanner can only open the link, so it can never confirm it.
 	 */
-	public function test_verify_link_requires_authentication_as_target(): void {
+	public function test_opening_link_never_verifies(): void {
 		$owner_id = wc_create_new_customer( 'lockdown-owner@example.com', 'lockdownowner', 'pw' );
 		$other_id = wc_create_new_customer( 'lockdown-other@example.com', 'lockdownother', 'pw' );
 		$key      = $this->service->create_verification_key( $owner_id );
 
-		// Logged out (the prefetch case): inert — no verification, key untouched.
 		wp_set_current_user( 0 );
-		$this->open_verify_link( $owner_id, $key );
-		wc_clear_notices();
-		$this->assertFalse( $this->service->is_verified( $owner_id ), 'A logged-out open must not verify' );
-		$this->assertTrue( $this->service->has_pending_key( $owner_id ), 'A logged-out open must not consume the key' );
+		$this->assertSame( '', $this->open_verify_link( $owner_id, $key ), 'A logged-out open should show the form, not a redirect' );
 
-		// Logged in as a different account: refused, key still intact.
 		wp_set_current_user( $other_id );
-		$this->open_verify_link( $owner_id, $key );
-		$this->assertFalse( $this->service->is_verified( $owner_id ), 'A cross-account open must not verify the owner' );
-		$this->assertTrue( $this->service->has_pending_key( $owner_id ), 'A cross-account open must not consume the key' );
+		$this->assertStringContainsString( 'wc_verify_notice=mismatch', $this->open_verify_link( $owner_id, $key ) );
 
-		// Logged in as the target: the key (untouched by the prior attempts) now verifies and is spent.
 		wp_set_current_user( $owner_id );
-		$this->open_verify_link( $owner_id, $key );
-		wp_set_current_user( 0 );
-		$this->assertTrue( $this->service->is_verified( $owner_id ), 'Opening as the target should verify' );
-		$this->assertFalse( $this->service->has_pending_key( $owner_id ), 'Verifying consumes the key' );
+		$this->assertSame( '', $this->open_verify_link( $owner_id, $key ), 'The owner should see the form, not a redirect' );
+
+		$this->assertFalse( $this->service->is_verified( $owner_id ), 'Opening the link must never verify' );
+		$this->assertTrue( $this->service->has_pending_key( $owner_id ), 'Opening the link must never consume the key' );
 	}
 
 	/**
-	 * @testdox LOGIN GATE: opening the verify-link while logged out renders the My Account login with a notice, and never verifies or consumes the key.
-	 *
-	 * The verify params stay in the page URL, so signing in on that login form returns the visitor here
-	 * to complete verification.
+	 * @testdox The password form replaces the My Account page, and only shows the email address to the logged in customer.
 	 */
-	public function test_logged_out_open_renders_login_with_notice(): void {
-		$user_id = wc_create_new_customer( 'openlink@example.com', 'openlinkuser', 'pw' );
+	public function test_form_replaces_my_account_page(): void {
+		$user_id = wc_create_new_customer( 'render@example.com', 'renderuser', 'pw' );
 		$key     = $this->service->create_verification_key( $user_id );
 
+		wp_set_current_user( $user_id );
+		$logged_in = $this->render_my_account( $user_id, $key );
+
+		$this->assertStringContainsString( 'render@example.com', $logged_in );
+		$this->assertStringContainsString( 'name="wc_confirm_password"', $logged_in );
+		$this->assertStringNotContainsString( 'woocommerce-MyAccount-navigation', $logged_in, 'The account navigation should be hidden.' );
+
 		wp_set_current_user( 0 );
-		$redirect       = $this->open_verify_link( $user_id, $key );
-		$notice_notices = wc_get_notices( 'notice' );
+		$logged_out = $this->render_my_account( $user_id, $key );
+
+		$this->assertStringContainsString( 'name="wc_confirm_password"', $logged_out );
+		$this->assertStringNotContainsString( 'render@example.com', $logged_out, 'A logged out page should not show the email address.' );
+		$this->assertStringNotContainsString( 'renderuser', $logged_out, 'A logged out page should not show the username.' );
+		$this->assertStringNotContainsString( 'woocommerce-form-register', $logged_out, 'The registration form should not show.' );
+		$this->assertStringNotContainsString( 'woocommerce-form-login', $logged_out, 'The standard login form should not show.' );
+	}
+
+	/**
+	 * @testdox A logged out visitor with a wrong key sees neither the form nor the account's email address.
+	 */
+	public function test_logged_out_wrong_key_does_not_reveal_email(): void {
+		$user_id = wc_create_new_customer( 'hidden@example.com', 'hiddenuser', 'pw' );
+		$this->service->create_verification_key( $user_id );
+
+		wp_set_current_user( 0 );
+		$html = $this->render_my_account( $user_id, 'totally-wrong-key' );
+
+		$this->assertStringNotContainsString( 'hidden@example.com', $html );
+		$this->assertStringNotContainsString( 'wc_confirm_password', $html );
+		$this->assertStringContainsString( 'invalid or has expired', $html );
+	}
+
+	/**
+	 * @testdox A logged out customer confirms with their password, is logged in, and lands on the dashboard.
+	 */
+	public function test_logged_out_customer_confirms_and_logs_in(): void {
+		$email   = 'login-confirm@example.com';
+		$user_id = wc_create_new_customer( $email, 'loginconfirm', 'pw' );
+		$order   = $this->create_guest_order( $email );
+		$key     = $this->service->create_verification_key( $user_id );
+		add_filter( 'send_auth_cookies', '__return_false' );
+		$verified_at_login = null;
+		add_action(
+			'wp_login',
+			function () use ( $user_id, &$verified_at_login ) {
+				$verified_at_login = $this->service->is_verified( $user_id );
+			}
+		);
+
+		wp_set_current_user( 0 );
+		$redirect = $this->submit_verify_form( $user_id, $key, 'pw' );
+
+		$this->assertStringContainsString( 'wc_verify_notice=confirmed', $redirect );
+		$this->assertStringNotContainsString( 'orders', $redirect, 'The customer should land on the dashboard.' );
+		$this->assertTrue( $this->service->is_verified( $user_id ) );
+		$this->assertTrue( $verified_at_login, 'The customer should log in after verifying, because verifying ends other sessions.' );
+		$this->assertSame( $user_id, wc_get_order( $order->get_id() )->get_customer_id() );
+	}
+
+	/**
+	 * @testdox A logged out customer cannot confirm with a wrong password, or with a password and the wrong key.
+	 */
+	public function test_logged_out_customer_needs_password_and_key(): void {
+		$user_id = wc_create_new_customer( 'wrong-details@example.com', 'wrongdetails', 'pw' );
+		$key     = $this->service->create_verification_key( $user_id );
+		add_filter( 'send_auth_cookies', '__return_false' );
+
+		wp_set_current_user( 0 );
+		$this->assertSame( '', $this->submit_verify_form( $user_id, $key, 'not-the-password' ) );
+		$this->assertStringContainsString( 'incorrect', wp_json_encode( wc_get_notices( 'error' ) ) );
 		wc_clear_notices();
 
-		$this->assertSame( '', $redirect, 'A logged-out open must render the login in place, not redirect or verify' );
-		$this->assertFalse( $this->service->is_verified( $user_id ), 'Opening the link logged out must not verify anyone' );
-		$this->assertTrue( $this->service->has_pending_key( $user_id ), 'Opening the link logged out must not consume the key' );
-		$this->assertNotEmpty( $notice_notices, 'A logged-out open should explain that login is required' );
+		$this->assertSame( '', $this->submit_verify_form( $user_id, 'totally-wrong-key', 'pw' ) );
+		$this->assertStringContainsString( 'invalid or has expired', wp_json_encode( wc_get_notices( 'error' ) ) );
+		$this->assertFalse( $this->service->is_verified( $user_id ) );
 	}
 
 	/**
-	 * @testdox LOGIN GATE: opening the link while logged in as a different account verifies no one and shows the mismatch notice.
+	 * @testdox The password must belong to the link's account, even when its login matches another account's email address.
 	 */
-	public function test_cross_account_open_does_not_verify(): void {
-		$owner_id = wc_create_new_customer( 'owner@example.com', 'owneruser', 'pw' );
-		$other_id = wc_create_new_customer( 'other@example.com', 'otheruser', 'pw' );
-		$key      = $this->service->create_verification_key( $owner_id );
+	public function test_password_must_belong_to_the_links_account(): void {
+		$other_id = wc_create_new_customer( 'lookalike@example.com', 'lookalikeother', 'other-pw' );
+		$user_id  = wc_create_new_customer( 'target@example.com', 'lookalike@example.com', 'pw' );
+		$key      = $this->service->create_verification_key( $user_id );
+		add_filter( 'send_auth_cookies', '__return_false' );
 
-		wp_set_current_user( $other_id );
-		$redirect = $this->open_verify_link( $owner_id, $key );
 		wp_set_current_user( 0 );
+		$this->assertSame( '', $this->submit_verify_form( $user_id, $key, 'other-pw' ) );
 
-		$this->assertFalse( $this->service->is_verified( $owner_id ), 'The link owner must not be verified by another account' );
-		$this->assertFalse( $this->service->is_verified( $other_id ), 'The logged-in different account must not be verified' );
-		$this->assertTrue( $this->service->has_pending_key( $owner_id ), 'A cross-account open must not consume the key' );
-		$this->assertStringContainsString( 'wc_verify_notice=mismatch', $redirect, 'A cross-account open should surface the mismatch result notice' );
+		$this->assertFalse( $this->service->is_verified( $user_id ) );
+		$this->assertFalse( $this->service->is_verified( $other_id ) );
 	}
 
 	/**
-	 * @testdox Opening the link as the owner with a wrong/expired key errors and does not verify.
+	 * @testdox Three wrong passwords are allowed, then the next attempt is rate limited.
 	 */
-	public function test_invalid_key_errors_and_does_not_verify(): void {
+	public function test_wrong_passwords_are_rate_limited_after_three_attempts(): void {
+		$user_id = wc_create_new_customer( 'wrongpw@example.com', 'wrongpwuser', 'pw' );
+		$key     = $this->service->create_verification_key( $user_id );
+
+		wp_set_current_user( $user_id );
+		foreach ( array( 1, 2, 3 ) as $attempt ) {
+			$this->assertSame( '', $this->submit_verify_form( $user_id, $key, 'not-the-password' ), 'A wrong password should show the form again' );
+			$this->assertStringContainsString( 'incorrect', wp_json_encode( wc_get_notices( 'error' ) ), "Attempt $attempt should be checked" );
+			wc_clear_notices();
+		}
+
+		$this->submit_verify_form( $user_id, $key, 'pw' );
+
+		$this->assertStringContainsString( 'wait a few seconds', wp_json_encode( wc_get_notices( 'error' ) ), 'The fourth attempt should be rate limited' );
+		$this->assertFalse( $this->service->is_verified( $user_id ) );
+	}
+
+	/**
+	 * @testdox Two wrong passwords do not stop the right one straight after.
+	 */
+	public function test_right_password_works_after_two_wrong_attempts(): void {
+		$user_id = wc_create_new_customer( 'twowrong@example.com', 'twowronguser', 'pw' );
+		$key     = $this->service->create_verification_key( $user_id );
+
+		wp_set_current_user( $user_id );
+		$this->submit_verify_form( $user_id, $key, 'not-the-password' );
+		$this->submit_verify_form( $user_id, $key, 'still-not-the-password' );
+
+		$this->assertStringContainsString( 'wc_verify_notice=confirmed', $this->submit_verify_form( $user_id, $key, 'pw' ) );
+		$this->assertTrue( $this->service->is_verified( $user_id ) );
+	}
+
+	/**
+	 * @testdox The password form needs a valid nonce.
+	 */
+	public function test_password_form_needs_nonce(): void {
+		$user_id = wc_create_new_customer( 'nonce@example.com', 'nonceuser', 'pw' );
+		$key     = $this->service->create_verification_key( $user_id );
+
+		wp_set_current_user( $user_id );
+		$this->submit_verify_form( $user_id, $key, 'pw', 'bad-nonce' );
+
+		$this->assertFalse( $this->service->is_verified( $user_id ) );
+	}
+
+	/**
+	 * @testdox Opening a link with a wrong or expired key as the owner shows the expired notice instead of the form.
+	 */
+	public function test_invalid_key_shows_expired_notice(): void {
 		$user_id = wc_create_new_customer( 'wrongkey@example.com', 'wrongkeyuser', 'pw' );
 		$this->service->create_verification_key( $user_id );
 
 		wp_set_current_user( $user_id );
-		$redirect = $this->open_verify_link( $user_id, 'totally-wrong-key' );
-		wp_set_current_user( 0 );
 
-		$this->assertFalse( $this->service->is_verified( $user_id ), 'A wrong key must not verify the address' );
-		$this->assertStringContainsString( 'wc_verify_notice=expired', $redirect, 'A wrong key should surface the expired result notice' );
+		$this->assertStringContainsString( 'wc_verify_notice=expired', $this->open_verify_link( $user_id, 'totally-wrong-key' ) );
+		$this->assertFalse( $this->service->is_verified( $user_id ) );
 	}
 
 	/**
-	 * @testdox Re-opening the link after the address is already verified lands on Orders without repeating the success notice.
+	 * @testdox Opening the link again once verified lands on the dashboard without the form or a success notice.
 	 */
-	public function test_reopening_link_after_verified_shows_no_success_notice(): void {
+	public function test_reopening_link_after_verified_lands_on_dashboard(): void {
 		$user_id = wc_create_new_customer( 'reopen@example.com', 'reopenuser', 'pw' );
 		$key     = $this->service->create_verification_key( $user_id );
 
 		wp_set_current_user( $user_id );
-		$first  = $this->open_verify_link( $user_id, $key );
+		$this->submit_verify_form( $user_id, $key, 'pw' );
 		$second = $this->open_verify_link( $user_id, $key );
-		wp_set_current_user( 0 );
 
-		$this->assertTrue( $this->service->is_verified( $user_id ), 'The first open should verify the address' );
-		$this->assertStringContainsString( 'wc_verify_notice=confirmed', $first, 'The first open should report success' );
-		$this->assertStringContainsString( 'orders', $second, 'A re-open once verified should still land on Orders' );
-		$this->assertStringNotContainsString( 'wc_verify_notice=', $second, 'A re-open once verified must not repeat the success notice' );
+		$this->assertTrue( $this->service->is_verified( $user_id ) );
+		$this->assertSame( wc_get_page_permalink( 'myaccount' ), $second );
 	}
 
 	/**
@@ -245,18 +355,52 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Open a verify-link (GET) through the controller, returning the captured redirect target.
+	 * Submit the password form for a verify link; returns the redirect target, or '' when the form shows again.
 	 *
-	 * handle_verify_link() ends in wp_safe_redirect()/exit on every path except the logged-out one (which
-	 * renders the login in place); a filter throws the redirect target so the exit is never reached. The
-	 * returned value is the redirect location, or '' when the handler rendered without redirecting.
+	 * @param int    $user_id  Target user ID.
+	 * @param string $key      Plaintext key.
+	 * @param string $password Password to submit.
+	 * @param string $nonce    Nonce to submit; a valid one when empty.
+	 * @return string
+	 */
+	private function submit_verify_form( int $user_id, string $key, string $password, string $nonce = '' ): string {
+		$_POST = array(
+			'wc_confirm_email'                => '1',
+			'wc_confirm_password'             => $password,
+			'woocommerce-confirm-email-nonce' => '' !== $nonce ? $nonce : wp_create_nonce( 'woocommerce-confirm-email' ),
+		);
+
+		try {
+			return $this->open_verify_link( $user_id, $key );
+		} finally {
+			$_POST = array();
+		}
+	}
+
+	/**
+	 * Open a verify link, then render the My Account page.
 	 *
-	 * @param int    $user_id User ID in the link.
-	 * @param string $key     Key in the link.
-	 * @return string The redirect location the handler attempted, or '' if it rendered in place.
+	 * @param int    $user_id Target user ID.
+	 * @param string $key     Plaintext key.
+	 * @return string The rendered page.
+	 */
+	private function render_my_account( int $user_id, string $key ): string {
+		$this->open_verify_link( $user_id, $key );
+
+		ob_start();
+		\WC_Shortcode_My_Account::output( array() );
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Simulate opening a verify link; returns the redirect target, or '' when no redirect happened.
+	 *
+	 * @param int    $user_id Target user ID.
+	 * @param string $key     Plaintext key.
+	 * @return string
 	 */
 	private function open_verify_link( int $user_id, string $key ): string {
-		$_SERVER['REQUEST_METHOD']    = 'GET';
 		$_GET['wc_verify_email_user'] = (string) $user_id;
 		$_GET['wc_verify_email_key']  = $key;
 
