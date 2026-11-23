@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 /**
  * Internal dependencies
  */
+import { safeHref } from '../safe-href';
 import type { CheckRow as CheckRowData, ViewBadge, ViewLink } from '../types';
 import { trackReadiness, type Surface } from '../tracks';
 
@@ -23,12 +24,13 @@ export const RowLink = ( {
 }: {
 	link: ViewLink;
 	onClick?: () => void;
-} ) =>
-	link.href ? (
+} ) => {
+	const href = safeHref( link.href );
+	return href ? (
 		<Button
 			variant="secondary"
 			size="compact"
-			href={ link.href }
+			href={ href }
 			onClick={ onClick }
 		>
 			{ link.text }
@@ -38,6 +40,7 @@ export const RowLink = ( {
 			{ link.text }
 		</Text>
 	);
+};
 
 // The swatch icon, a dashed circle, from the WordPress icons package from version 18 on.
 // This package pins an older version that doesn't have it.
@@ -102,6 +105,39 @@ interface RowProps {
 	srState?: string;
 }
 
+/** Scripts that wrap between characters rather than at spaces: Chinese, Japanese and Korean. */
+const CJK = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\uf900-\ufaff]/;
+
+/**
+ * A title whose badge stays with its last word, so a long title wraps without leaving the badge on a
+ * line of its own.
+ */
+const TitleWithBadge = ( {
+	title,
+	badge,
+}: {
+	title: string;
+	badge: ViewBadge;
+} ) => {
+	// The last word stays with the badge. Text after the last space that has no spaces of its own, such
+	// as one word or Japanese, keeps only its last character there, so the rest can still wrap.
+	const afterSpace = title.lastIndexOf( ' ' ) + 1;
+	const lastChar = title.length - ( Array.from( title ).pop()?.length ?? 0 );
+	const split =
+		afterSpace && ! CJK.test( title.slice( afterSpace ) )
+			? afterSpace
+			: lastChar;
+	return (
+		<>
+			{ title.slice( 0, split ) }
+			<span className="wc-sales-readiness-row__title-end">
+				{ title.slice( split ) }
+				<Badge intent={ badge.intent }>{ badge.text }</Badge>
+			</span>
+		</>
+	);
+};
+
 /**
  * A row's frame: marker, title with its badge, whatever goes under the title, then the action.
  */
@@ -125,9 +161,10 @@ export const Row = ( {
 		<Stack direction="column" className="wc-sales-readiness-row__body">
 			<Text variant="body-md" className="wc-sales-readiness-row__title">
 				{ srState && <VisuallyHidden>{ srState } </VisuallyHidden> }
-				{ title }
-				{ badge && (
-					<Badge intent={ badge.intent }>{ badge.text }</Badge>
+				{ badge ? (
+					<TitleWithBadge title={ title } badge={ badge } />
+				) : (
+					title
 				) }
 			</Text>
 			{ children }
@@ -155,7 +192,7 @@ const TextWithLink = ( {
 	return (
 		<>
 			{ text.slice( 0, at ) }
-			<Link href={ link.href } openInNewTab>
+			<Link href={ safeHref( link.href ) } openInNewTab>
 				{ link.text }
 			</Link>
 			{ text.slice( at + link.text.length ) }
@@ -225,7 +262,9 @@ export const CheckRow = ( {
 							row.seen_at.text
 						),
 						{
-							link: <Link href={ row.seen_at.href } />,
+							link: (
+								<Link href={ safeHref( row.seen_at.href ) } />
+							),
 						}
 					) }
 				</Text>

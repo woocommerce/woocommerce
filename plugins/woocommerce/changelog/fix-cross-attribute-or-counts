@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Respect selections in other OR attribute filters when calculating filter counts with the attribute lookup table.

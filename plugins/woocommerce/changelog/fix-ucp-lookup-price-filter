@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+UCP: Apply the price filter to the variants returned by catalog lookup and product requests.

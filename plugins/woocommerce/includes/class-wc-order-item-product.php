@@ -10,6 +10,8 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -175,48 +177,53 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * but scalar values (floats/strings) are accepted for legacy compatibility.
 	 */
 	public function set_taxes( $raw_tax_data ) {
-		$raw_tax_data = maybe_unserialize( $raw_tax_data );
+		$raw_tax_data = MetaDataUtil::maybe_unserialize_no_classes( $raw_tax_data );
 		$tax_data     = array(
 			'total'    => array(),
 			'subtotal' => array(),
 		);
-		if ( ! empty( $raw_tax_data['total'] ) && ! empty( $raw_tax_data['subtotal'] ) ) {
+		if ( is_array( $raw_tax_data ) && ! empty( $raw_tax_data['total'] ) && ! empty( $raw_tax_data['subtotal'] ) ) {
 			$subtotal = $raw_tax_data['subtotal'];
 			$total    = $raw_tax_data['total'];
 
-			// Handle legacy data where total/subtotal might be floats/strings instead of arrays.
-			// Convert scalar values to array format to preserve the tax amount.
-			$has_legacy_data = ! is_array( $subtotal ) || ! is_array( $total );
+			if (
+				( is_scalar( $total ) || ArrayUtil::is_flat_scalar_array( $total ) )
+				&& ( is_scalar( $subtotal ) || ArrayUtil::is_flat_scalar_array( $subtotal ) )
+			) {
+				// Handle legacy data where total/subtotal might be floats/strings instead of arrays.
+				// Convert scalar values to array format to preserve the tax amount.
+				$has_legacy_data = ! is_array( $subtotal ) || ! is_array( $total );
 
-			if ( $has_legacy_data ) {
-				$order = $this->get_order();
-				if ( ! is_array( $subtotal ) ) {
-					$subtotal = $this->convert_legacy_tax_value_to_array( $subtotal, $order );
+				if ( $has_legacy_data ) {
+					$order = $this->get_order();
+					if ( ! is_array( $subtotal ) ) {
+						$subtotal = $this->convert_legacy_tax_value_to_array( $subtotal, $order );
+					}
+					if ( ! is_array( $total ) ) {
+						$total = $this->convert_legacy_tax_value_to_array( $total, $order );
+					}
+					// Log legacy data format for debugging purposes.
+					wc_get_logger()->warning(
+						sprintf(
+							/* translators: %d: order item ID */
+							__( 'Order item #%d contains legacy tax data format. Tax rate ID information is unavailable.', 'woocommerce' ),
+							$this->get_id()
+						),
+						array(
+							'source'        => 'woocommerce-order-item-product',
+							'order_item_id' => $this->get_id(),
+							'order_id'      => $order ? $order->get_id() : 0,
+						)
+					);
 				}
-				if ( ! is_array( $total ) ) {
-					$total = $this->convert_legacy_tax_value_to_array( $total, $order );
+
+				$tax_data['subtotal'] = array_map( 'wc_format_decimal', $subtotal );
+				$tax_data['total']    = array_map( 'wc_format_decimal', $total );
+
+				// Subtotal cannot be less than total!
+				if ( NumberUtil::array_sum( $tax_data['subtotal'] ) < NumberUtil::array_sum( $tax_data['total'] ) ) {
+					$tax_data['subtotal'] = $tax_data['total'];
 				}
-				// Log legacy data format for debugging purposes.
-				wc_get_logger()->warning(
-					sprintf(
-						/* translators: %d: order item ID */
-						__( 'Order item #%d contains legacy tax data format. Tax rate ID information is unavailable.', 'woocommerce' ),
-						$this->get_id()
-					),
-					array(
-						'source'        => 'woocommerce-order-item-product',
-						'order_item_id' => $this->get_id(),
-						'order_id'      => $order ? $order->get_id() : 0,
-					)
-				);
-			}
-
-			$tax_data['subtotal'] = array_map( 'wc_format_decimal', $subtotal );
-			$tax_data['total']    = array_map( 'wc_format_decimal', $total );
-
-			// Subtotal cannot be less than total!
-			if ( NumberUtil::array_sum( $tax_data['subtotal'] ) < NumberUtil::array_sum( $tax_data['total'] ) ) {
-				$tax_data['subtotal'] = $tax_data['total'];
 			}
 		}
 		$this->set_prop( 'taxes', $tax_data );
