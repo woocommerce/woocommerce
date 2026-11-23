@@ -427,9 +427,10 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 *
 	 * @param int $product_id Product ID from the report.
 	 */
-	private static function product_name( int $product_id ): string {
+	public static function product_name( int $product_id ): string {
 		$product = $product_id > 0 ? wc_get_product( $product_id ) : null;
-		return $product instanceof \WC_Product ? wp_strip_all_tags( html_entity_decode( $product->get_name(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) : '';
+		// Shown as text, so nothing is stripped: a name such as "Baker's <Dozen>" stays whole.
+		return $product instanceof \WC_Product ? html_entity_decode( $product->get_name(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) : '';
 	}
 
 	/**
@@ -1056,7 +1057,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 */
 	private static function failing_product_names( string $check_id ): array {
 		return array_map(
-			static fn( int $id ): string => html_entity_decode( wp_strip_all_tags( get_the_title( $id ) ), ENT_QUOTES, 'UTF-8' ),
+			static fn( int $id ): string => self::product_name( $id ),
 			self::failing_product_ids( $check_id, ReadinessCopy::NAMED_MAX + 1 )
 		);
 	}

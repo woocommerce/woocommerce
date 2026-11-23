@@ -304,7 +304,7 @@ class SupportReport {
 				$line .= ' ' . sprintf( 1 === $count ? '%s product' : '%s products', $count );
 				if ( array() !== $ids ) {
 					_prime_post_caches( $ids, false, false );
-					$named = array_map( static fn( int $id ): string => sprintf( '%d (%s)', $id, wp_strip_all_tags( get_the_title( $id ) ) ), $ids );
+					$named = array_map( static fn( int $id ): string => sprintf( '%d (%s)', $id, ReadinessCheckPage::product_name( $id ) ), $ids );
 					$line .= '. Products: ' . implode( ', ', $named );
 				}
 			}

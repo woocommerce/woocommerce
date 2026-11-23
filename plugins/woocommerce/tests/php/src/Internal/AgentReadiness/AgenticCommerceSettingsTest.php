@@ -1516,6 +1516,26 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A named product keeps its whole saved name, angle brackets and ampersand included, and ignores markup that title filters add.
+	 */
+	public function test_output_product_fix_keeps_the_whole_name(): void {
+		kses_remove_filters(); // An administrator can save a name with angle brackets.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( "Baker's <Dozen> & Co" );
+		$product->save();
+		kses_init_filters();
+		$wrap = static fn( $title ) => '<span class="badge">' . $title . '</span>';
+		add_filter( 'the_title', $wrap );
+		try {
+			wc_get_container()->get( AgentReadiness::class )->refresh_report();
+			$brand = $this->row( "Add a brand to Baker's <Dozen> & Co" );
+			$this->assertSame( 'View product', $brand['link']['text'], 'The row names the product exactly as saved' );
+		} finally {
+			remove_filter( 'the_title', $wrap );
+		}
+	}
+
+	/**
 	 * @testdox Sales readiness shows what each channel can list and each failing check, naming the channel that can't list it, with a filtered list link, without the alt text check.
 	 */
 	public function test_output_product_checks_and_store_check_detail(): void {
