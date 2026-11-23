@@ -3,6 +3,7 @@
  */
 import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
+import { decodeEntities } from '@wordpress/html-entities';
 import { map } from 'lodash';
 import { Link } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
@@ -47,8 +48,8 @@ class StockNotificationsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Unsubscribed', 'woocommerce' ),
-				key: 'unsubscribed',
+				label: __( 'Customers', 'woocommerce' ),
+				key: 'customers',
 				isSortable: true,
 				isNumeric: true,
 			},
@@ -64,9 +65,10 @@ class StockNotificationsReportTable extends Component {
 			const {
 				signups,
 				notifications_sent: notificationsSent,
-				unsubscribed,
+				customers,
 			} = row;
-			const { name, edit_url: editUrl } = row.extended_info || {};
+			const { edit_url: editUrl } = row.extended_info || {};
+			const name = decodeEntities( row.extended_info?.name || '' );
 
 			return [
 				{
@@ -88,8 +90,8 @@ class StockNotificationsReportTable extends Component {
 					value: notificationsSent,
 				},
 				{
-					display: formatNumber( unsubscribed ),
-					value: unsubscribed,
+					display: formatNumber( customers ),
+					value: customers,
 				},
 			];
 		} );
@@ -100,7 +102,7 @@ class StockNotificationsReportTable extends Component {
 			products_count: productsCount = 0,
 			signups = 0,
 			notifications_sent: notificationsSent = 0,
-			unsubscribed = 0,
+			customers = 0,
 		} = totals;
 		const currency = this.context.getCurrencyConfig();
 		return [
@@ -127,8 +129,8 @@ class StockNotificationsReportTable extends Component {
 				value: formatValue( currency, 'number', notificationsSent ),
 			},
 			{
-				label: __( 'Unsubscribed', 'woocommerce' ),
-				value: formatValue( currency, 'number', unsubscribed ),
+				label: _n( 'Customer', 'Customers', customers, 'woocommerce' ),
+				value: formatValue( currency, 'number', customers ),
 			},
 		];
 	}
@@ -146,7 +148,7 @@ class StockNotificationsReportTable extends Component {
 					'products_count',
 					'signups',
 					'notifications_sent',
-					'unsubscribed',
+					'customers',
 				] }
 				isRequesting={ isRequesting }
 				itemIdField="product_id"

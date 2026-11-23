@@ -17,10 +17,11 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 /**
  * Stock notifications stats report: totals plus per-interval subtotals.
  *
- * - signups, notifications_sent, unsubscribed: same definitions as the per-product report, each
+ * - signups, notifications_sent, customers: same definitions as the per-product report, each
  *   bucketed on its own date column. date_notified_gmt is overwritten on re-send, so a re-send
- *   moves the count to the new date rather than adding to it.
- * - products_count: products with any of those metrics in the period, i.e. the per-product report's rows.
+ *   moves the count to the new date rather than adding to it. Customers are distinct within each
+ *   interval and within the totals, so interval values don't add up to the total.
+ * - products_count: products with sign-ups or notifications sent in the period, i.e. the per-product report's rows.
  */
 class DataStore extends StockNotificationsDataStore implements DataStoreInterface {
 	use StatsDataStoreTrait;
@@ -39,7 +40,7 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 		'date_end_gmt'       => 'strval',
 		'signups'            => 'intval',
 		'notifications_sent' => 'intval',
-		'unsubscribed'       => 'intval',
+		'customers'          => 'intval',
 		'products_count'     => 'intval',
 	);
 
@@ -81,7 +82,8 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 	 */
 	protected function assign_report_columns() {
 		$this->report_columns = array(
-			'signups' => 'COUNT(*) AS signups',
+			'signups'   => 'COUNT(*) AS signups',
+			'customers' => 'COUNT( DISTINCT ' . self::get_db_table_name() . '.user_email ) AS customers',
 		);
 	}
 
@@ -155,7 +157,14 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 
 		$this->initialize_queries();
 
-		$selections   = $this->selected_columns( $query_args );
+		// ORDER BY needs the sort column selected, even when `fields` leaves it out.
+		$sql_args       = $query_args;
+		$hidden_orderby = is_array( $query_args['fields'] ?? null ) && isset( $this->report_columns[ $query_args['orderby'] ] ) && ! in_array( $query_args['orderby'], $query_args['fields'], true );
+		if ( $hidden_orderby ) {
+			$sql_args['fields'][] = $query_args['orderby'];
+		}
+
+		$selections   = $this->selected_columns( $sql_args );
 		$limit_params = $this->get_limit_sql_params( $query_args );
 		$this->update_sql_query_params( $query_args );
 
@@ -218,20 +227,20 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 		 * @var \stdClass $data
 		 */
 
-		$conditions = $this->get_metric_conditions( $query_args );
-		$columns    = array(
-			'notifications_sent' => 'date_notified_gmt',
-			'unsubscribed'       => 'date_cancelled_gmt',
-		);
-		foreach ( $columns as $metric => $column ) {
-			if ( ! $this->is_field_requested( $query_args, $metric ) ) {
-				continue;
-			}
-			$by_interval = $this->get_count_by_interval( $query_args, $column, $conditions[ $metric ] );
+		if ( $hidden_orderby ) {
+			unset( $data->totals->{$query_args['orderby']} );
 			foreach ( $data->intervals as $idx => $interval ) {
-				$data->intervals[ $idx ][ $metric ] = $by_interval[ $interval['time_interval'] ] ?? 0;
+				unset( $data->intervals[ $idx ][ $query_args['orderby'] ] );
 			}
-			$data->totals->{$metric} = array_sum( $by_interval );
+		}
+
+		$conditions = $this->get_metric_conditions( $query_args );
+		if ( $this->is_field_requested( $query_args, 'notifications_sent' ) ) {
+			$by_interval = $this->get_count_by_interval( $query_args, 'date_notified_gmt', $conditions['notifications_sent'] );
+			foreach ( $data->intervals as $idx => $interval ) {
+				$data->intervals[ $idx ]['notifications_sent'] = $by_interval[ $interval['time_interval'] ] ?? 0;
+			}
+			$data->totals->notifications_sent = array_sum( $by_interval );
 		}
 
 		if ( $this->is_field_requested( $query_args, 'products_count' ) ) {

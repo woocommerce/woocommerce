@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\StockNotifications;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\StockNotifications\Controller;
-use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
@@ -144,25 +143,39 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should count sends and customer unsubscribes on their own dates, listing products with no sign-ups in the period.
+	 * @testdox Should count sends on their own date, listing products with no sign-ups in the period.
 	 */
-	public function test_notified_and_unsubscribed_use_their_own_dates(): void {
+	public function test_notified_uses_its_own_date(): void {
 		$before = '2026-02-01 10:00:00';
 		$during = '2026-03-03 10:00:00';
 		$this->insert_row( 1, NotificationStatus::SENT, $before, 'a@example.com', $during );
-		$this->insert_row( 1, NotificationStatus::CANCELLED, $before, 'b@example.com', null, $during, NotificationCancellationSource::USER );
-		$this->insert_row( 1, NotificationStatus::CANCELLED, $before, 'c@example.com', null, $during, NotificationCancellationSource::ADMIN );
 		$this->insert_row( 2, NotificationStatus::SENT, $during, 'd@example.com', $before );
-		$this->insert_row( 3, NotificationStatus::CANCELLED, $before, 'e@example.com', null, $before, NotificationCancellationSource::USER );
+		$this->insert_row( 3, NotificationStatus::CANCELLED, $before, 'e@example.com' );
 
 		$rows = $this->get_rows( self::PERIOD );
 
 		$this->assertEqualsCanonicalizing( array( 1, 2 ), array_keys( $rows ), 'A product with no activity in the period is not listed.' );
 		$this->assertSame( 0, $rows[1]['signups'], 'Rows created before the period are not sign-ups.' );
+		$this->assertSame( 0, $rows[1]['customers'], 'A send alone does not make a customer in the period.' );
 		$this->assertSame( 1, $rows[1]['notifications_sent'], 'A send in the period counts, whenever the sign-up was made.' );
-		$this->assertSame( 1, $rows[1]['unsubscribed'], 'Only cancellations by the customer count as unsubscribes.' );
 		$this->assertSame( 1, $rows[2]['signups'] );
 		$this->assertSame( 0, $rows[2]['notifications_sent'], 'A send before the period does not count.' );
+	}
+
+	/**
+	 * @testdox Should count customers as distinct emails among the period's sign-ups.
+	 */
+	public function test_customers_count_distinct_emails_that_signed_up(): void {
+		$this->insert_row( 1, NotificationStatus::ACTIVE, '2026-03-02 10:00:00', 'a@example.com' );
+		$this->insert_row( 1, NotificationStatus::CANCELLED, '2026-03-03 10:00:00', 'a@example.com' );
+		$this->insert_row( 1, NotificationStatus::ACTIVE, '2026-03-02 10:00:00', 'b@example.com' );
+		$this->insert_row( 1, NotificationStatus::PENDING, '2026-03-02 10:00:00', 'c@example.com' );
+		$this->insert_row( 1, NotificationStatus::SENT, '2026-02-01 10:00:00', 'd@example.com', '2026-03-03 10:00:00' );
+
+		$rows = $this->get_rows( self::PERIOD );
+
+		$this->assertSame( 3, $rows[1]['signups'] );
+		$this->assertSame( 2, $rows[1]['customers'], 'Repeat, pending and earlier sign-ups do not add customers.' );
 	}
 
 	/**
@@ -186,7 +199,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testWith ["product_id", [3, 2, 1]]
 	 *           ["signups", [2, 3, 1]]
 	 *           ["notifications_sent", [1, 3, 2]]
-	 *           ["unsubscribed", [3, 2, 1]]
+	 *           ["customers", [3, 1, 2]]
 	 *
 	 * @param string $orderby  Orderby value.
 	 * @param array  $expected Product IDs in the expected order.
@@ -194,7 +207,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_accepts_orderby( string $orderby, array $expected ): void {
 		$before = '2026-02-01 10:00:00';
 		$during = '2026-03-03 10:00:00';
-		// Sign-ups: 1, 3 and 2. Notifications sent: 1, 0 and 1. Unsubscribed: 0, 1 and 2.
+		// Sign-ups: 1, 3 and 2. Customers: 1, 1 (one email signing up three times) and 2. Notifications sent: 1, 0 and 1.
 		$signups_by_product = array(
 			1 => 1,
 			2 => 3,
@@ -202,14 +215,12 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		);
 		foreach ( $signups_by_product as $product_id => $signups ) {
 			for ( $i = 0; $i < $signups; $i++ ) {
-				$this->insert_row( $product_id, NotificationStatus::ACTIVE, $during, "{$product_id}-{$i}@example.com" );
+				$email = 2 === $product_id ? 'repeat@example.com' : "{$product_id}-{$i}@example.com";
+				$this->insert_row( $product_id, NotificationStatus::ACTIVE, $during, $email );
 			}
 		}
 		foreach ( array( 1, 3 ) as $product_id ) {
 			$this->insert_row( $product_id, NotificationStatus::SENT, $before, "sent-{$product_id}@example.com", $during );
-		}
-		foreach ( array( 2, 3, 3 ) as $i => $product_id ) {
-			$this->insert_row( $product_id, NotificationStatus::CANCELLED, $before, "gone-{$i}@example.com", null, $during, NotificationCancellationSource::USER );
 		}
 
 		$response = $this->request( self::ENDPOINT, array_merge( self::PERIOD, array( 'orderby' => $orderby ) ) );
@@ -339,7 +350,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should export the product name, sign-ups, notifications sent and unsubscribed columns.
+	 * @testdox Should export the product name, sign-ups, notifications sent and customers columns.
 	 */
 	public function test_export_columns_and_rows(): void {
 		$controller = new Controller();
@@ -347,12 +358,12 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 			'product_id'         => 7,
 			'signups'            => 3,
 			'notifications_sent' => 2,
-			'unsubscribed'       => 1,
+			'customers'          => 1,
 			'extended_info'      => array( 'name' => 'Hoodie' ),
 		);
 
 		$this->assertSame(
-			array( 'product_name', 'signups', 'notifications_sent', 'unsubscribed' ),
+			array( 'product_name', 'signups', 'notifications_sent', 'customers' ),
 			array_keys( $controller->get_export_columns() )
 		);
 		$this->assertSame(
@@ -360,7 +371,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 				'product_name'       => 'Hoodie',
 				'signups'            => 3,
 				'notifications_sent' => 2,
-				'unsubscribed'       => 1,
+				'customers'          => 1,
 			),
 			$controller->prepare_item_for_export( $item )
 		);

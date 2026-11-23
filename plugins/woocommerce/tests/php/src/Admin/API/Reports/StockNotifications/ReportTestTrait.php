@@ -42,23 +42,19 @@ trait ReportTestTrait {
 	 * @param string      $date_created        GMT creation date.
 	 * @param string      $email               Customer email.
 	 * @param string|null $date_notified       GMT notified date.
-	 * @param string|null $date_cancelled      GMT cancelled date.
-	 * @param string|null $cancellation_source Cancellation source.
 	 */
-	private function insert_row( int $product_id, string $status, string $date_created, string $email = 'customer@example.com', ?string $date_notified = null, ?string $date_cancelled = null, ?string $cancellation_source = null ): void {
+	private function insert_row( int $product_id, string $status, string $date_created, string $email = 'customer@example.com', ?string $date_notified = null ): void {
 		global $wpdb;
 
 		$wpdb->insert(
 			$wpdb->prefix . 'wc_stock_notifications',
 			array(
-				'product_id'          => $product_id,
-				'user_id'             => 0,
-				'user_email'          => $email,
-				'status'              => $status,
-				'date_created_gmt'    => $date_created,
-				'date_notified_gmt'   => $date_notified,
-				'date_cancelled_gmt'  => $date_cancelled,
-				'cancellation_source' => $cancellation_source,
+				'product_id'        => $product_id,
+				'user_id'           => 0,
+				'user_email'        => $email,
+				'status'            => $status,
+				'date_created_gmt'  => $date_created,
+				'date_notified_gmt' => $date_notified,
 			)
 		);
 	}

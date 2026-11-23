@@ -100,9 +100,8 @@ CREATE TABLE $table_name (
 	KEY product_status_attempt (product_id, status, date_last_attempt_gmt, id),
 	KEY user_lookup (user_id, product_id, status),
 	KEY email_lookup (user_email, product_id, status),
-	KEY date_created (date_created_gmt, status, product_id),
-	KEY date_notified (date_notified_gmt),
-	KEY date_cancelled (date_cancelled_gmt)
+	KEY date_created (date_created_gmt, status, product_id, user_email),
+	KEY date_notified (date_notified_gmt)
 ) $collate;
 CREATE TABLE $meta_table_name (
 	id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -322,7 +321,7 @@ CREATE TABLE $meta_table_name (
 			}
 
 			// Only the props the Analytics report reads; bookkeeping saves such as send attempts keep the cache.
-			if ( array_intersect( array( 'product_id', 'status', 'date_created', 'date_notified', 'date_cancelled', 'cancellation_source' ), array_keys( $changes ) ) ) {
+			if ( array_intersect( array( 'product_id', 'user_email', 'status', 'date_created', 'date_notified' ), array_keys( $changes ) ) ) {
 				ReportsCache::invalidate();
 			}
 		}

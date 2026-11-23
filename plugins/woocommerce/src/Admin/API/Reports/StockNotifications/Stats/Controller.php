@@ -108,16 +108,16 @@ class Controller extends GenericStatsController {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'unsubscribed'       => array(
-				'title'       => __( 'Unsubscribed', 'woocommerce' ),
-				'description' => __( 'Sign-ups the customer cancelled in the period.', 'woocommerce' ),
+			'customers'          => array(
+				'title'       => __( 'Customers', 'woocommerce' ),
+				'description' => __( 'Distinct customers, by email, who signed up in the period.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'products_count'     => array(
 				'title'       => __( 'Products', 'woocommerce' ),
-				'description' => __( 'Products with sign-ups, notifications sent or unsubscribes in the period.', 'woocommerce' ),
+				'description' => __( 'Products with sign-ups or notifications sent in the period.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,

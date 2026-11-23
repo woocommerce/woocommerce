@@ -14,7 +14,6 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 
 /**
@@ -25,7 +24,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
  *   double opt-in and get purged by DataRetentionController, so counting them would shrink history.
  *   Cancelled rows still count on their creation date.
  * - notifications_sent: rows notified in the period, like the stats report.
- * - unsubscribed: rows the customer cancelled in the period.
+ * - customers: distinct emails among the period's sign-ups.
  *
  * The product is the one the customer signed up for, so a variation is its own row.
  *
@@ -82,7 +81,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		'product_id'         => 'intval',
 		'signups'            => 'intval',
 		'notifications_sent' => 'intval',
-		'unsubscribed'       => 'intval',
+		'customers'          => 'intval',
 	);
 
 	/**
@@ -125,12 +124,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				"{$table_name}.date_notified_gmt BETWEEN %s AND %s",
 				$after,
 				$before
-			),
-			'unsubscribed'       => $wpdb->prepare(
-				"{$table_name}.date_cancelled_gmt BETWEEN %s AND %s AND {$table_name}.cancellation_source = %s",
-				$after,
-				$before,
-				NotificationCancellationSource::USER
 			),
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -295,6 +288,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		foreach ( $conditions as $metric => $condition ) {
 			$this->report_columns[ $metric ] = "SUM( {$condition} ) AS {$metric}";
 		}
+		$this->report_columns['customers'] = "COUNT( DISTINCT CASE WHEN {$conditions['signups']} THEN {$table_name}.user_email END ) AS customers";
 		$this->subquery->add_sql_clause( 'where', 'AND ( (' . implode( ') OR (', $conditions ) . ') )' );
 
 		$included_products = $this->get_filtered_ids( $query_args, 'product_includes' );

@@ -130,8 +130,8 @@ class Controller extends GenericController implements ExportableInterface {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'unsubscribed'       => array(
-					'description' => __( 'Sign-ups the customer cancelled in the period.', 'woocommerce' ),
+				'customers'          => array(
+					'description' => __( 'Distinct customers, by email, who signed up in the period.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -175,7 +175,7 @@ class Controller extends GenericController implements ExportableInterface {
 				'product_id',
 				'signups',
 				'notifications_sent',
-				'unsubscribed',
+				'customers',
 			)
 		);
 		$params['products']           = array(
@@ -208,7 +208,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'product_name'       => __( 'Product', 'woocommerce' ),
 			'signups'            => __( 'Sign-ups', 'woocommerce' ),
 			'notifications_sent' => __( 'Notifications sent', 'woocommerce' ),
-			'unsubscribed'       => __( 'Unsubscribed', 'woocommerce' ),
+			'customers'          => __( 'Customers', 'woocommerce' ),
 		);
 
 		/**
@@ -232,7 +232,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'product_name'       => $item['extended_info']['name'] ?? '',
 			'signups'            => $item['signups'],
 			'notifications_sent' => $item['notifications_sent'],
-			'unsubscribed'       => $item['unsubscribed'],
+			'customers'          => $item['customers'],
 		);
 
 		/**
