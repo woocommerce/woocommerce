@@ -357,8 +357,8 @@ class VerificationController {
 
 		$should_show = $email_enabled && wc_string_to_bool( get_option( 'woocommerce_enable_guest_checkout' ) );
 
-		// A temporary-password account already has a set-password link (which also verifies on use),
-		// surfaced by the temporary-password notice, so skip a second prompt alongside it.
+		// Ask temporary-password accounts to set their password first. Once they do, the
+		// temporary-password notice clears and this separate email-confirmation prompt can appear.
 		$should_show = $should_show && ! get_user_option( 'default_password_nag', $user_id );
 
 		/**
