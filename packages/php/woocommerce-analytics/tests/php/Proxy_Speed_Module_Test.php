@@ -33,14 +33,15 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	private $previous_wp_actions;
 
 	/**
-	 * Start from an unauthorized module with no queued pixels.
+	 * Start from an enabled module, with proxy tracking off and no queued pixels.
 	 */
 	public function set_up(): void {
 		parent::set_up();
 		$this->previous_server     = $_SERVER;
 		$this->previous_wp_actions = $GLOBALS['wp_actions'];
-		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
+		delete_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
 		$this->set_pixel_batch_queue( array() );
+		$this->set_enabled( true );
 	}
 
 	/**
@@ -53,12 +54,10 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 		remove_action( 'muplugins_loaded', array( Proxy_Speed_Module::class, 'maybe_serve' ) );
 		remove_all_filters( 'doing_it_wrong_trigger_error' );
 		remove_all_actions( 'doing_it_wrong_run' );
-		$enabled = ( new \ReflectionClass( Proxy_Speed_Module::class ) )->getProperty( 'enabled' );
-		$enabled->setAccessible( true );
-		$enabled->setValue( null, false );
+		$this->set_enabled( false );
 		remove_all_filters( 'wp_consent_cookie_prefix' );
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
-		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
+		delete_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
 		delete_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION );
 		$GLOBALS['wp_rest_server'] = null;
 		$this->set_pixel_batch_queue( array() );
@@ -70,14 +69,14 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	 *
 	 * @param string      $method     Request method.
 	 * @param string      $uri        Request URI.
-	 * @param string|null $authorized Stored authorization, or null when absent.
+	 * @param string|null $proxy_tracking Stored proxy tracking state, or null when absent.
 	 * @param string|null $choice     Stored statistics choice, or null when none is stored.
 	 */
 	#[DataProvider( 'provide_requests_left_to_the_rest_route' )]
-	public function test_leaves_the_request_to_the_rest_route( $method, $uri, $authorized, $choice ): void {
+	public function test_leaves_the_request_to_the_rest_route( $method, $uri, $proxy_tracking, $choice ): void {
 		$this->make_request( $method, $uri );
-		if ( null !== $authorized ) {
-			update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, $authorized );
+		if ( null !== $proxy_tracking ) {
+			update_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, $proxy_tracking );
 		}
 		if ( null !== $choice ) {
 			$_COOKIE['wp_consent_statistics'] = $choice;
@@ -98,8 +97,8 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 		$route = '/wp-json/woocommerce-analytics/v1/track';
 		return array(
 			'not a POST'                => array( 'GET', $route, 'yes', null ),
-			'never authorized'          => array( 'POST', $route, null, null ),
-			'authorization revoked'     => array( 'POST', $route, 'no', null ),
+			'proxy tracking never on'   => array( 'POST', $route, null, null ),
+			'proxy tracking turned off' => array( 'POST', $route, 'no', null ),
 			'shopper denied statistics' => array( 'POST', $route, 'yes', 'deny' ),
 			'another route'             => array( 'POST', '/wp-json/wp/v2/posts', 'yes', null ),
 			'a longer route'            => array( 'POST', $route . 'er', 'yes', null ),
@@ -109,11 +108,24 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	}
 
 	/**
+	 * A direct maybe_serve() call without enable() must not bypass the REST route's checks.
+	 */
+	public function test_leaves_the_request_to_the_rest_route_without_enable(): void {
+		$this->set_enabled( false );
+		$this->make_request( 'POST', '/wp-json/woocommerce-analytics/v1/track' );
+		update_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, 'yes' );
+
+		list( $served ) = $this->respond();
+
+		$this->assertFalse( $served );
+	}
+
+	/**
 	 * Test that the stored deny is read under a consent cookie prefix filtered by an earlier MU-plugin.
 	 */
 	public function test_leaves_a_deny_under_a_filtered_cookie_prefix_to_the_rest_route(): void {
 		$this->make_request( 'POST', '/wp-json/woocommerce-analytics/v1/track' );
-		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, 'yes' );
+		update_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, 'yes' );
 		add_filter( 'wp_consent_cookie_prefix', fn() => 'custom' );
 		$_COOKIE['custom_statistics'] = 'deny';
 
@@ -131,9 +143,9 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	 * @param string|null $choice The stored statistics choice, or null when none is stored.
 	 */
 	#[DataProvider( 'provide_requests_the_module_answers' )]
-	public function test_answers_an_authorized_proxy_request( $uri, $choice ): void {
+	public function test_answers_a_proxy_request_while_proxy_tracking_is_on( $uri, $choice ): void {
 		$this->make_request( 'POST', $uri );
-		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, 'yes' );
+		update_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, 'yes' );
 		if ( null !== $choice ) {
 			$_COOKIE['wp_consent_statistics'] = $choice;
 		}
@@ -169,7 +181,7 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	 */
 	public function test_sends_the_queued_pixels_after_answering(): void {
 		$this->make_request( 'POST', '/wp-json/woocommerce-analytics/v1/track' );
-		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, 'yes' );
+		update_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, 'yes' );
 		// A closed loopback port, so the non-blocking send fails fast without leaving the machine.
 		$this->set_pixel_batch_queue( array( 'http://127.0.0.1:9/t.gif' ) );
 
@@ -241,11 +253,12 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	 * Test that an MU-plugin's call waits for every MU-plugin, so their consent cookie prefix applies.
 	 */
 	public function test_enable_from_an_mu_plugin_serves_on_muplugins_loaded(): void {
+		$this->set_enabled( false );
 		$this->set_load_stage( 'mu-plugins' );
 
 		Proxy_Speed_Module::enable();
 
-		$this->assertTrue( Proxy_Speed_Module::is_enabled() );
+		$this->assertTrue( $this->is_enabled() );
 		$this->assertSame( 10, has_action( 'muplugins_loaded', array( Proxy_Speed_Module::class, 'maybe_serve' ) ) );
 	}
 
@@ -253,19 +266,21 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	 * Test that a plugin file's call serves at once, since `muplugins_loaded` has already fired.
 	 */
 	public function test_enable_from_a_plugin_file_serves_at_once(): void {
+		$this->set_enabled( false );
 		$this->set_load_stage( 'plugins' );
 		$this->make_request( 'GET', '/' );
 
 		Proxy_Speed_Module::enable();
 
-		$this->assertTrue( Proxy_Speed_Module::is_enabled() );
+		$this->assertTrue( $this->is_enabled() );
 		$this->assertFalse( has_action( 'muplugins_loaded', array( Proxy_Speed_Module::class, 'maybe_serve' ) ) );
 	}
 
 	/**
-	 * A late call cannot save anything, and enabling it would flip the stored authorization between requests.
+	 * A call once plugins have loaded is too late to save anything, so it is refused.
 	 */
 	public function test_enable_after_plugins_loaded_is_refused(): void {
+		$this->set_enabled( false );
 		$this->set_load_stage( 'loaded' );
 		$wrong = 0;
 		add_action(
@@ -278,7 +293,7 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 
 		Proxy_Speed_Module::enable();
 
-		$this->assertFalse( Proxy_Speed_Module::is_enabled() );
+		$this->assertFalse( $this->is_enabled() );
 		$this->assertSame( 1, $wrong );
 	}
 
@@ -333,5 +348,27 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 		$property = ( new \ReflectionClass( WC_Analytics_Tracking::class ) )->getProperty( 'pixel_batch_queue' );
 		$property->setAccessible( true );
 		$property->setValue( null, $queue );
+	}
+
+	/**
+	 * Set what enable() records.
+	 *
+	 * @param bool $enabled Whether the module is enabled.
+	 */
+	private function set_enabled( bool $enabled ): void {
+		$property = ( new \ReflectionClass( Proxy_Speed_Module::class ) )->getProperty( 'enabled' );
+		$property->setAccessible( true );
+		$property->setValue( null, $enabled );
+	}
+
+	/**
+	 * Read what enable() recorded.
+	 *
+	 * @return bool
+	 */
+	private function is_enabled(): bool {
+		$property = ( new \ReflectionClass( Proxy_Speed_Module::class ) )->getProperty( 'enabled' );
+		$property->setAccessible( true );
+		return $property->getValue();
 	}
 }

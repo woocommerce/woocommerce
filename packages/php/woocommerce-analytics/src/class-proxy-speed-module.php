@@ -24,7 +24,7 @@ class Proxy_Speed_Module {
 	const PROXY_REQUEST_PATH = 'woocommerce-analytics/v1/track';
 
 	/**
-	 * Whether code on this site called enable() for this request.
+	 * Whether code on this site called enable() in this request.
 	 *
 	 * @var bool
 	 */
@@ -33,13 +33,12 @@ class Proxy_Speed_Module {
 	/**
 	 * Serve proxy tracking requests early on this site.
 	 *
-	 * Call it on every request, from an MU-plugin or a plugin's main file, so the stored authorization stays steady.
-	 * From an MU-plugin it serves on `muplugins_loaded`; from a plugin file it serves at once.
+	 * From an MU-plugin it serves on `muplugins_loaded`; from a plugin's main file it serves at once.
 	 *
 	 * @return void
 	 */
 	public static function enable() {
-		// Too late to save anything, and the authorization is written at `init` from this flag.
+		// Too late to save anything.
 		if ( did_action( 'plugins_loaded' ) ) {
 			_doing_it_wrong( __METHOD__, 'Call it before plugins_loaded, from an MU-plugin or a plugin main file.', '0.19.0' );
 			return;
@@ -53,15 +52,6 @@ class Proxy_Speed_Module {
 		}
 
 		add_action( 'muplugins_loaded', array( __CLASS__, 'maybe_serve' ) );
-	}
-
-	/**
-	 * Whether code on this site called enable() for this request.
-	 *
-	 * @return bool
-	 */
-	public static function is_enabled() {
-		return self::$enabled;
 	}
 
 	/**
@@ -83,7 +73,7 @@ class Proxy_Speed_Module {
 	 * @return bool Whether a response was sent.
 	 */
 	private static function respond() {
-		if ( ! self::is_proxy_request() ) {
+		if ( ! self::$enabled || ! self::is_proxy_request() ) {
 			return false;
 		}
 
@@ -92,9 +82,8 @@ class Proxy_Speed_Module {
 			return false;
 		}
 
-		// Unauthorized means "do not accelerate", not "do not serve": only the REST route can tell a
-		// disabled feature from a revoked module, so fall through and let it answer.
-		if ( ! self::is_authorized() ) {
+		// Off means "do not accelerate", not "do not serve": the REST route answers, with the 403 a cached page needs.
+		if ( ! self::is_proxy_tracking_enabled() ) {
 			return false;
 		}
 
@@ -102,7 +91,7 @@ class Proxy_Speed_Module {
 			// Match the superglobals the REST route sees.
 			wp_magic_quotes();
 
-			// Authorized means proxy tracking was on at the last init, before the plugin that turns it on has loaded.
+			// The plugin that turns proxy tracking on has not loaded yet, but it was on at the last init.
 			add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
 
 			$response = self::handle_events( (string) file_get_contents( 'php://input' ) );
@@ -216,14 +205,13 @@ class Proxy_Speed_Module {
 	}
 
 	/**
-	 * Whether this site authorized the module to serve.
+	 * Whether proxy tracking was on at the last `init`.
 	 *
-	 * Features cannot answer this early, because no plugin has registered its filters yet. Only an
-	 * explicit yes serves, so a network-wide module cannot answer for a site that never authorized it.
+	 * Features cannot answer this early, because no plugin has registered its filters yet. Only an explicit yes serves.
 	 *
 	 * @return bool
 	 */
-	private static function is_authorized() {
-		return 'yes' === get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
+	private static function is_proxy_tracking_enabled() {
+		return 'yes' === get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
 	}
 }

@@ -99,26 +99,23 @@ request-derived values and the session cookie.
 Invalid event names and oversized pixel URLs return an error. Events beyond the
 batch limit are ignored.
 
-Two options carry this state, because the optional MU-plugin speed module loads
-before plugins register filters and cannot read them:
+Two options carry this state, because the speed module runs before plugins
+register filters and cannot read them:
 
 -   `woocommerce_analytics_proxy_tracking_ever_enabled` is sticky and decides
     whether the route is registered at all. Nothing in the package clears it:
     `Woocommerce_Analytics::reset_proxy_tracking_state()` is the only way, and it
     has no caller, so a host that wants the endpoint gone has to call it from its
     own deactivation or uninstall routine once the cached pages have expired.
--   `woocommerce_analytics_proxy_speed_module_authorized` records whether the speed
-    module may serve. It holds `should_authorize_proxy_speed_module()`, which is proxy
-    tracking **and** a call to `Proxy_Speed_Module::enable()` (see "Server-Side
-    Optimizations"), so a revoked module is not reauthorized by the next request. An unauthorized module falls through to the
-    REST route rather than answering itself, so the `403` always comes from one
-    place.
+-   `woocommerce_analytics_proxy_tracking_enabled` mirrors proxy tracking at each
+    `init` for the speed module (see "Server-Side Optimizations"). Only an explicit
+    `yes` lets it serve; otherwise it falls through to the REST route rather than
+    answering itself, so the `403` always comes from one place.
 
 **These filters must resolve to the same value for every request on a site, and must
-be registered before `init` priority 20; the same goes for calling
-`Proxy_Speed_Module::enable()`.** A value that varies by cohort,
+be registered before `init` priority 20.** A value that varies by cohort,
 percentage or geo makes cached pages disagree with what `/track` decides, and flips
-the speed module's authorization on alternate runs. A callback added
+the option the speed module reads on alternate runs. A callback added
 after `init` priority 20 is never seen: the route is registered from the option,
 not from the filter, and the option is written there.
 
@@ -300,7 +297,7 @@ When proxy tracking is enabled:
 
 **Server-Side Optimizations:**
 
-`Proxy_Speed_Module` answers proxy requests before regular plugins finish loading and exits, which significantly reduces their cost. The package never installs it: code on the site turns it on, such as WordPress.com's platform plugin or a VIP `client-mu-plugins` file, by calling `enable()` on every request once a Jetpack autoloader that can find this package has loaded:
+`Proxy_Speed_Module` answers proxy requests before regular plugins finish loading and exits, which significantly reduces their cost. The package never installs it: code on the site turns it on, such as WordPress.com's platform plugin or a VIP `client-mu-plugins` file, by calling `enable()` once a Jetpack autoloader that can find this package has loaded:
 
 ```php
 if ( class_exists( \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::class ) ) {
@@ -310,9 +307,9 @@ if ( class_exists( \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::class )
 
 Called from an MU-plugin, it serves on `muplugins_loaded`, when a `wp_consent_cookie_prefix` filter from any MU-plugin is already registered. Called from a plugin's main file, it serves at once, so it also sees that filter from the plugins that load before it, but not from those after. A call after `plugins_loaded` is refused with a `_doing_it_wrong()` notice.
 
-The module serves only while proxy tracking is enabled, and otherwise leaves the request to the REST route. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route too, which applies the consent check.
+The module serves only while proxy tracking was on at the last `init`, and otherwise leaves the request to the REST route. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route too, which applies the consent check.
 
-Earlier versions could write a `woocommerce-analytics-proxy-speed-module.php` MU-plugin into the site. The package now removes that file, and `woocommerce_analytics_auto_install_proxy_speed_module` is deprecated with no effect. Where the package cannot delete it, such as on a read-only filesystem, remove it before calling `enable()`, since it would answer first with its own older code.
+Earlier versions could write a `woocommerce-analytics-proxy-speed-module.php` MU-plugin into the site. The package now removes that file, and no longer writes the option it reads, so a copy it cannot delete leaves every request to the REST route. `woocommerce_analytics_auto_install_proxy_speed_module` is deprecated with no effect.
 
 ### Debugging
 

@@ -19,7 +19,7 @@ class WooCommerce_Test_Double {}
 /**
  * Tests for the Woocommerce_Analytics class.
  *
- * Focuses on the proxy tracking state and the speed module's authorization.
+ * Focuses on the proxy tracking state the speed module reads, and the leftover MU-plugin cleanup.
  */
 class Woocommerce_Analytics_Test extends BaseTestCase {
 
@@ -36,7 +36,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		delete_transient( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT );
 
 		// Remove any filters that might interfere.
-		$this->set_speed_module_enabled( false );
+		delete_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
 	}
 
@@ -50,7 +50,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		delete_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION );
 		delete_transient( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT );
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
-		$this->set_speed_module_enabled( false );
+		delete_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
 
 		parent::tear_down();
 	}
@@ -135,7 +135,6 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	 */
 	#[DataProvider( 'provide_leftover_module_files' )]
 	public function test_maybe_update_proxy_speed_module_removes_a_leftover_module( $deletable ): void {
-		$this->set_speed_module_enabled( true );
 		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION, '0.18.1' );
 		// Not wp_mkdir_p(): it refuses the `..` in the test bootstrap's WPMU_PLUGIN_DIR.
 		$created_dir = ! is_dir( WPMU_PLUGIN_DIR ) && mkdir( WPMU_PLUGIN_DIR, 0755, true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
@@ -205,36 +204,17 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 	/**
 	 * The sync runs on `init` for every request on every site carrying this package,
-	 * and the module already treats an absent option as unauthorized. Writing `no`
+	 * and the module already treats an absent option as off. Writing `no`
 	 * anyway puts an autoloaded row on the overwhelming majority of installs that
 	 * will never turn proxy tracking on.
 	 */
-	public function test_a_site_that_never_authorized_the_module_gets_no_row(): void {
+	public function test_a_site_that_never_enabled_proxy_tracking_gets_no_row(): void {
 		Woocommerce_Analytics::sync_proxy_tracking_state();
 		Woocommerce_Analytics::sync_proxy_tracking_state();
 
 		$this->assertFalse(
-			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
-			'An absent option already means unauthorized; the row buys nothing.'
-		);
-	}
-
-	/**
-	 * Revoking still has to leave a value behind, since the module reads the option
-	 * and an absent one is only safe while no module was ever authorized.
-	 */
-	public function test_revoking_an_authorized_module_writes_no(): void {
-		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
-		$this->set_speed_module_enabled( true );
-		Woocommerce_Analytics::sync_proxy_tracking_state();
-
-		$this->set_speed_module_enabled( false );
-		Woocommerce_Analytics::sync_proxy_tracking_state();
-
-		$this->assertSame(
-			'no',
-			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
-			'A module already on disk must be told to stop, not merely left unmentioned.'
+			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			'An absent option already means off; the row buys nothing.'
 		);
 	}
 
@@ -282,8 +262,8 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	 */
 	public function test_removing_the_module_drops_its_authorization(): void {
 		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
-		$this->set_speed_module_enabled( true );
 		Woocommerce_Analytics::sync_proxy_tracking_state();
+		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, 'yes' );
 
 		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
 
@@ -311,8 +291,8 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	 */
 	public function test_removal_revokes_even_when_the_filesystem_is_unavailable(): void {
 		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
-		$this->set_speed_module_enabled( true );
 		Woocommerce_Analytics::sync_proxy_tracking_state();
+		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, 'yes' );
 		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION, Woocommerce_Analytics::PACKAGE_VERSION );
 
 		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
@@ -346,18 +326,17 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	 * carries the endpoint for good with no supported way back.
 	 */
 	public function test_reset_proxy_tracking_state_clears_both_options(): void {
-		// Both flags, or the sync leaves the authorization option absent and the
-		// second assertion below is true without anything having been cleared.
+		// Proxy tracking on, or the sync leaves the option absent and the second
+		// assertion below is true without anything having been cleared.
 		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
-		$this->set_speed_module_enabled( true );
 		Woocommerce_Analytics::sync_proxy_tracking_state();
 
-		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
+		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
 
 		Woocommerce_Analytics::reset_proxy_tracking_state();
 
 		$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION ) );
-		$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
+		$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
 	}
 
 	/**
@@ -383,11 +362,10 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	 */
 	public function test_sync_proxy_tracking_state_records_the_resolved_value(): void {
 		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
-		$this->set_speed_module_enabled( true );
 
 		Woocommerce_Analytics::sync_proxy_tracking_state();
 
-		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
+		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
 
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
 
@@ -395,45 +373,8 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		$this->assertSame(
 			'no',
-			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
+			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
 			'Turning the feature off must be mirrored too, or the module never stops answering.'
-		);
-	}
-
-	/**
-	 * Code that calls Proxy_Speed_Module::enable() needs the module authorized without the file being written.
-	 *
-	 * @dataProvider provide_proxy_tracking_states
-	 *
-	 * @param bool        $proxy_tracking Whether proxy tracking is enabled.
-	 * @param string|bool $expected       The expected authorization option.
-	 */
-	#[DataProvider( 'provide_proxy_tracking_states' )]
-	public function test_an_enabled_module_is_authorized_but_never_installed( $proxy_tracking, $expected ): void {
-		$this->set_speed_module_enabled( true );
-		if ( $proxy_tracking ) {
-			add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
-		}
-
-		Woocommerce_Analytics::sync_proxy_tracking_state();
-		Woocommerce_Analytics::maybe_update_proxy_speed_module();
-
-		$this->assertSame( $expected, get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
-		$this->assertFalse(
-			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION ),
-			'The package never writes the MU-plugin file.'
-		);
-	}
-
-	/**
-	 * Proxy tracking states for an enabled module.
-	 *
-	 * @return array
-	 */
-	public static function provide_proxy_tracking_states(): array {
-		return array(
-			'proxy tracking on'  => array( true, 'yes' ),
-			'proxy tracking off' => array( false, false ),
 		);
 	}
 
@@ -449,11 +390,11 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 			++$writes;
 			return $value;
 		};
-		add_filter( 'pre_update_option_' . Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, $spy );
+		add_filter( 'pre_update_option_' . Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, $spy );
 
 		Woocommerce_Analytics::sync_proxy_tracking_state();
 
-		remove_filter( 'pre_update_option_' . Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, $spy );
+		remove_filter( 'pre_update_option_' . Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, $spy );
 
 		$this->assertSame( 0, $writes );
 	}
@@ -498,14 +439,4 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		);
 	}
 
-	/**
-	 * Set what Proxy_Speed_Module::enable() records, which tests cannot call once plugins have loaded.
-	 *
-	 * @param bool $enabled Whether the module is enabled.
-	 */
-	private function set_speed_module_enabled( bool $enabled ): void {
-		$property = ( new \ReflectionClass( Proxy_Speed_Module::class ) )->getProperty( 'enabled' );
-		$property->setAccessible( true );
-		$property->setValue( null, $enabled );
-	}
 }

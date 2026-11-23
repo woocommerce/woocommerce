@@ -40,16 +40,22 @@ class Woocommerce_Analytics {
 	const PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT = 'woocommerce_analytics_proxy_speed_module_version_check';
 
 	/**
-	 * Whether the speed module may serve requests.
-	 *
-	 * It reads this option because filters are unavailable before plugins load.
-	 * It mirrors proxy tracking and Proxy_Speed_Module::enable() on every init.
+	 * Authorization read by the MU-plugin earlier package versions installed. No longer written, so that file cannot serve.
 	 *
 	 * @since 0.18.0
 	 *
 	 * @var string
 	 */
 	const PROXY_SPEED_MODULE_AUTHORIZED_OPTION = 'woocommerce_analytics_proxy_speed_module_authorized';
+
+	/**
+	 * Whether proxy tracking was on at the last `init`, for the speed module, which runs before plugins register the filter.
+	 *
+	 * @since 0.19.0
+	 *
+	 * @var string
+	 */
+	const PROXY_TRACKING_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_enabled';
 
 	/**
 	 * Whether proxy tracking has ever been enabled on this site.
@@ -254,39 +260,38 @@ class Woocommerce_Analytics {
 	}
 
 	/**
-	 * Sync proxy tracking state for the REST route and MU-plugin speed module.
+	 * Sync proxy tracking state for the REST route and the speed module.
 	 *
 	 * @since 0.18.0
 	 *
 	 * @return void
 	 */
 	public static function sync_proxy_tracking_state() {
-		if ( \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled()
-			&& 'yes' !== get_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION ) ) {
+		$enabled = \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled();
+
+		if ( $enabled && 'yes' !== get_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION ) ) {
 			update_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION, 'yes' );
 		}
 
-		// Track module eligibility so a removed module cannot be reauthorized.
-		$authorized = self::should_authorize_proxy_speed_module() ? 'yes' : 'no';
-		$current    = get_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
+		$value   = $enabled ? 'yes' : 'no';
+		$current = get_option( self::PROXY_TRACKING_ENABLED_OPTION );
 
-		if ( $current === $authorized ) {
+		if ( $current === $value ) {
 			return;
 		}
 
-		// An absent option already means unauthorized, so most sites installing this
-		// package never need a row saying so.
-		if ( false === $current && 'no' === $authorized ) {
+		// An absent option already means off, so most sites installing this package never need a row saying so.
+		if ( false === $current && 'no' === $value ) {
 			return;
 		}
 
-		update_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, $authorized );
+		update_option( self::PROXY_TRACKING_ENABLED_OPTION, $value );
 	}
 
 	/**
 	 * Forget that proxy tracking was enabled, so the REST route is unregistered.
 	 *
-	 * This is separate from removing the speed module because cached pages may remain.
+	 * Separate from removing a leftover MU-plugin, because cached pages may still post to the route.
 	 *
 	 * @since 0.18.0
 	 *
@@ -294,13 +299,12 @@ class Woocommerce_Analytics {
 	 */
 	public static function reset_proxy_tracking_state() {
 		delete_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION );
+		delete_option( self::PROXY_TRACKING_ENABLED_OPTION );
 		delete_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 	}
 
 	/**
 	 * Remove a speed module MU-plugin that an earlier package version installed.
-	 *
-	 * A leftover copy runs its own stale code, and would serve again once a host authorizes the module.
 	 */
 	public static function maybe_update_proxy_speed_module() {
 		if ( get_transient( self::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT ) ) {
@@ -319,18 +323,6 @@ class Woocommerce_Analytics {
 	}
 
 	/**
-	 * Whether the speed module may serve: proxy tracking is on and code on this site enabled the module.
-	 *
-	 * @since 0.19.0
-	 *
-	 * @return bool
-	 */
-	private static function should_authorize_proxy_speed_module() {
-		return \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled()
-			&& \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::is_enabled();
-	}
-
-	/**
 	 * Formerly installed the speed module MU-plugin; the package no longer writes it.
 	 *
 	 * @deprecated 0.19.0 Call Proxy_Speed_Module::enable() instead.
@@ -340,7 +332,7 @@ class Woocommerce_Analytics {
 	}
 
 	/**
-	 * Remove a speed module MU-plugin left by an earlier package version, and revoke the module.
+	 * Remove a speed module MU-plugin left by an earlier package version, and the authorization it reads.
 	 *
 	 * Clear its authorization because an undeletable MU-plugin can still load.
 	 */
