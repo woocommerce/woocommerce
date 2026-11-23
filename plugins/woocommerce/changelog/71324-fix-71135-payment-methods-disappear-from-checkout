@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix payment methods missing from checkout when several are given the same order number through the REST API or WP-CLI.
+Fix payment methods disappearing from checkout when several of them share the same position in the payment order.
