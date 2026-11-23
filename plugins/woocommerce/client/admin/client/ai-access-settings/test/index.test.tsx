@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -68,7 +68,9 @@ describe( 'AiAccessSettings', () => {
 		expect( toggle ).toBeEnabled();
 		expect( disallow ).toBeChecked();
 		expect( disallow ).toBeEnabled();
-		expect( container.querySelector( '.components-notice' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-ai-access-settings__notice' )
+		).toBeNull();
 		expect(
 			hiddenInput( container, ANSWERS_OPTION )?.getAttribute( 'value' )
 		).toBe( 'yes' );
@@ -98,7 +100,7 @@ describe( 'AiAccessSettings', () => {
 		expect( onDirtyChange ).toHaveBeenLastCalledWith( false );
 	} );
 
-	it( 'shows the AI shopping notice only while answers are off and AI shopping is on', () => {
+	it( 'shows the AI shopping notice only while answers are off and AI shopping is on', async () => {
 		const { container } = renderWith( {
 			status: 'default',
 			[ ANSWERS_OPTION ]: 'yes',
@@ -109,11 +111,18 @@ describe( 'AiAccessSettings', () => {
 		const toggle = screen.getByRole( 'checkbox', {
 			name: /Let AI tools use your content in answers/,
 		} );
-		expect( container.querySelector( '.components-notice' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-ai-access-settings__notice' )
+		).toBeNull();
 
 		fireEvent.click( toggle );
-		const notice = container.querySelector( '.components-notice' );
-		expect( notice ).toHaveTextContent( /AI shopping is on/ );
+		await waitFor( () =>
+			expect(
+				container.querySelector(
+					'.woocommerce-ai-access-settings__notice'
+				)
+			).toHaveTextContent( /AI shopping is on/ )
+		);
 		expect(
 			screen.getByRole( 'link', { name: 'AI tools' } )
 		).toHaveAttribute(
@@ -122,7 +131,9 @@ describe( 'AiAccessSettings', () => {
 		);
 
 		fireEvent.click( toggle );
-		expect( container.querySelector( '.components-notice' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-ai-access-settings__notice' )
+		).toBeNull();
 	} );
 
 	it( 'does not show the AI shopping notice while AI shopping is off', () => {
@@ -132,7 +143,9 @@ describe( 'AiAccessSettings', () => {
 			aiShoppingEnabled: false,
 		} );
 
-		expect( container.querySelector( '.components-notice' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-ai-access-settings__notice' )
+		).toBeNull();
 	} );
 
 	it.each( [
@@ -140,14 +153,23 @@ describe( 'AiAccessSettings', () => {
 		[ 'other_plugin', /Another plugin already sets AI preferences/ ],
 	] as const )(
 		'shows a warning and disables the controls for %s',
-		( status, noticeText ) => {
+		async ( status, noticeText ) => {
 			const { container } = renderWith( {
 				status,
 				[ ANSWERS_OPTION ]: 'no',
 				aiShoppingEnabled: true,
 			} );
 
-			const notices = container.querySelectorAll( '.components-notice' );
+			await waitFor( () =>
+				expect(
+					container.querySelector(
+						'.woocommerce-ai-access-settings__notice'
+					)
+				).toBeInTheDocument()
+			);
+			const notices = container.querySelectorAll(
+				'.woocommerce-ai-access-settings__notice'
+			);
 			expect( notices ).toHaveLength( 1 );
 			expect( notices[ 0 ] ).toHaveTextContent( noticeText );
 			expect(
