@@ -258,41 +258,6 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 		isAdmin: props.isAdmin,
 	} );
 
-	let buttonContent: JSX.Element;
-	if ( isLoading ) {
-		buttonContent = (
-			<LoadingAddToCartButton
-				className={ styleProps.className }
-				style={ buttonStyle }
-			/>
-		);
-	} else if ( product && product?.id ) {
-		buttonContent = (
-			<AddToCartButton
-				product={ product }
-				style={ buttonStyle }
-				className={ styleProps.className }
-				isAdmin={ props.isAdmin }
-				isDescendantOfAddToCartWithOptions={
-					props[ 'woocommerce/isDescendantOfAddToCartWithOptions' ]
-				}
-				productEntity={ props.product }
-				collection={ collection }
-				noticeContext={ props.noticeContext }
-			/>
-		);
-	} else {
-		buttonContent = (
-			<AddToCartButtonPlaceholder
-				style={ buttonStyle }
-				className={ styleProps.className }
-				isLoading={ isLoading ?? false }
-				blockClientId={ blockClientId }
-				collection={ collection }
-			/>
-		);
-	}
-
 	return (
 		<div
 			className={ clsx(
@@ -307,7 +272,39 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 			) }
 			style={ props.isAdmin ? undefined : blockMarginStyle }
 		>
-			{ buttonContent }
+			{ isLoading ? (
+				<LoadingAddToCartButton
+					className={ styleProps.className }
+					style={ buttonStyle }
+				/>
+			) : (
+				<>
+					{ product && product?.id ? (
+						<AddToCartButton
+							product={ product }
+							style={ buttonStyle }
+							className={ styleProps.className }
+							isAdmin={ props.isAdmin }
+							isDescendantOfAddToCartWithOptions={
+								props[
+									'woocommerce/isDescendantOfAddToCartWithOptions'
+								]
+							}
+							productEntity={ props.product }
+							collection={ collection }
+							noticeContext={ props.noticeContext }
+						/>
+					) : (
+						<AddToCartButtonPlaceholder
+							style={ buttonStyle }
+							className={ styleProps.className }
+							isLoading={ isLoading ?? false }
+							blockClientId={ blockClientId }
+							collection={ collection }
+						/>
+					) }
+				</>
+			) }
 		</div>
 	);
 };
