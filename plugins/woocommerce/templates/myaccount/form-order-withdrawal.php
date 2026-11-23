@@ -80,7 +80,7 @@ $email_note_tag = $is_block_theme ? 'address' : 'p';
 					<dt><?php echo esc_html( $review_row['label'] ?? '' ); ?></dt>
 					<dd>
 						<?php
-						if ( $is_block_theme && \Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor::FIELD_EMAIL === ( $review_row['key'] ?? '' ) ) {
+						if ( $is_block_theme && 'email' === ( $review_row['key'] ?? '' ) ) {
 							printf( '<address>%s</address>', esc_html( $review_row['value'] ?? '' ) );
 						} else {
 							echo nl2br( esc_html( $review_row['value'] ?? '' ) );
