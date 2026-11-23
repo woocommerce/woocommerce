@@ -2491,6 +2491,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$coupon_info = $coupon_item->get_meta( 'coupon_info', true );
 		if ( $coupon_info ) {
 			$coupon_object->set_short_info( $coupon_info );
+			$coupon_object->set_maximum_discount_from_order_item( $coupon_item );
 			return $coupon_object;
 		}
 
@@ -2575,6 +2576,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					if ( ! $coupon_item->meta_exists( 'coupon_info' ) && ! $coupon_item->meta_exists( 'coupon_data' ) ) {
 						$coupon = new WC_Coupon( wc_get_coupon_id_by_code( $coupon_code ) );
 						$coupon_item->add_meta_data( 'coupon_info', $coupon->get_short_info() );
+						$coupon->add_maximum_discount_to_order_item( $coupon_item );
 					}
 				}
 
