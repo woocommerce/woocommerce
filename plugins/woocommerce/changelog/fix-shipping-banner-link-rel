@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore `rel="noopener noreferrer"` on the shipping label banner's new-tab links.
