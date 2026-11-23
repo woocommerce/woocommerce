@@ -4814,4 +4814,30 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertInstanceOf( \Exception::class, $error, 'The update should throw when a value does not fit its column.' );
 		$this->assertStringContainsString( 'phone', $error->getMessage(), 'The error should name the column that is too long.' );
 	}
+
+	/**
+	 * @testdox update_order_from_object() keeps a sync-on-read marker set by a caller for the same order.
+	 */
+	public function test_update_order_from_object_keeps_outer_sync_on_read_marker() {
+		$this->enable_cot_sync();
+		$order = OrderHelper::create_order();
+
+		$set_marker = function ( $order_id ) {
+			self::$sync_on_read_order_ids[ $order_id ] = true;
+		};
+		$has_marker = function ( $order_id ) {
+			return isset( self::$sync_on_read_order_ids[ $order_id ] );
+		};
+
+		$set_marker->call( $this->sut, $order->get_id() );
+		try {
+			$this->sut->update_order_from_object( $order );
+			$marker_kept = $has_marker->call( $this->sut, $order->get_id() );
+		} finally {
+			$this->reset_order_data_store_state( $this->sut );
+			$this->disable_cot_sync();
+		}
+
+		$this->assertTrue( $marker_kept, 'The marker set before the call should still be there.' );
+	}
 }
