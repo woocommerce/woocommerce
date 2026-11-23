@@ -423,14 +423,18 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The name of the product a page check failed on, '' when there is none or it no longer exists.
+	 * A product's saved name as text, '' when there is none or it no longer exists. Read from the post,
+	 * which callers can prime, rather than loading the product. Shown as text, so nothing is stripped:
+	 * a name such as "Baker's <Dozen>" stays whole.
 	 *
 	 * @param int $product_id Product ID from the report.
 	 */
 	public static function product_name( int $product_id ): string {
-		$product = $product_id > 0 ? wc_get_product( $product_id ) : null;
-		// Shown as text, so nothing is stripped: a name such as "Baker's <Dozen>" stays whole.
-		return $product instanceof \WC_Product ? html_entity_decode( $product->get_name(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) : '';
+		$post = $product_id > 0 ? get_post( $product_id ) : null;
+		if ( ! $post instanceof \WP_Post || ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+			return '';
+		}
+		return html_entity_decode( $post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 	}
 
 	/**
