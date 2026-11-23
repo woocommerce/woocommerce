@@ -40,7 +40,7 @@ try {
 }
 ```
 
-This either holds stock, or rejects the order if the stock cannot be reserved for whatever reason. Stock is released when the defined time passes, when the order's stock is reduced (`wc_reduce_stock_levels()`), or when the order is paid, cancelled, or fails. A hold on an order in a paid status such as processing, on-hold, or completed keeps counting until it is released, so the same units are never available twice while payment completes.
+This either holds stock, or rejects the order if the stock cannot be reserved for whatever reason. Stock is released when the defined time passes, when the order's stock is reduced (`wc_reduce_stock_levels()`), or when the order is paid, cancelled, or fails. A hold on an order in a paid status such as processing, on-hold, or completed keeps counting until it is released.
 
 Some things worth noting:
 
