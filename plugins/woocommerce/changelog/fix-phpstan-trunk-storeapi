@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Fix PHPStan failures on trunk in Store API checkout code; no behavior change.
+

@@ -246,7 +246,7 @@ describe( 'AiShopping', () => {
 		renderPage(
 			view( {
 				coming_soon: {
-					text: 'Your store is in coming soon mode, so AI assistants can’t shop it yet.',
+					text: 'Your store is in coming soon mode, so AI assistants can’t find your products yet.',
 					link: {
 						href: '/wp-admin/admin.php?page=wc-settings&tab=site-visibility',
 						text: 'Change store visibility',
@@ -310,7 +310,7 @@ describe( 'AiShopping', () => {
 			view( {
 				visibility: {
 					...view().visibility,
-					empty: 'Product counts show after the first AI sales readiness check.',
+					empty: 'Product counts show after the first AI shopping health check.',
 					counts: [],
 				},
 			} )
@@ -318,7 +318,7 @@ describe( 'AiShopping', () => {
 
 		expect(
 			screen.getByText(
-				'Product counts show after the first AI sales readiness check.'
+				'Product counts show after the first AI shopping health check.'
 			)
 		).toBeInTheDocument();
 		expect( screen.queryByText( 'View products' ) ).toBeNull();
@@ -336,6 +336,26 @@ describe( 'AiShopping', () => {
 				name: 'More information about hidden products',
 			} )
 		).toBeInTheDocument();
+	} );
+
+	it( 'opens a count’s popover with its text and no heading', async () => {
+		renderPage( view() );
+
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'More information about hidden products',
+			} )
+		);
+
+		expect(
+			await screen.findByText(
+				'Products set to Hidden in Catalog visibility.'
+			)
+		).toBeInTheDocument();
+		// The title stays for screen readers only.
+		expect( screen.getByText( 'More information' ) ).toHaveAttribute(
+			'data-visually-hidden'
+		);
 	} );
 
 	it( 'submits the policy pages as the settings fields, and warns before leaving once one changes', () => {
