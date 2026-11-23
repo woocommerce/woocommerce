@@ -116,23 +116,21 @@ Place the call at the end of the method that populates the registry, before any 
 // records them in the notoptions negative-cache indefinitely, since those rows are never
 // created in wp_options. Sites with a persistent cache already retrieve transients from the
 // object cache in O(1) — no priming is needed or beneficial.
-if ( ! wp_using_ext_object_cache() && ! wp_installing() ) {
+if ( ! wp_using_ext_object_cache() ) {
     wp_prime_option_caches( $transient_option_names );
 }
 ```
 
-`wp_using_ext_object_cache() || wp_installing()` is the same condition WordPress itself uses inside `get_transient()` and `set_transient()` to switch between the options table and the object cache. Sites without a persistent cache keep the existing batching behaviour. Sites with one already retrieve transients from the object cache directly — skipping the prime loses nothing.
-
-**Mixed key list:** If the array passed to `wp_prime_option_caches()` mixes regular option names with transient names, split the call: prime the regular option names unconditionally; prime the transient names only under the guard. Wrapping the entire call in the guard would silently drop the regular option priming on persistent-cache sites.
+**Mixed key list:** If the array passed to `wp_prime_option_caches()` mixes regular option names with transient names, split the call: prime the regular option names unconditionally; prime the transient names only under `! wp_using_ext_object_cache()`. Wrapping the entire call in the guard would silently drop the regular option priming on persistent-cache sites.
 
 ```php
 wp_prime_option_caches( $regular_option_names );
-if ( ! wp_using_ext_object_cache() && ! wp_installing() ) {
+if ( ! wp_using_ext_object_cache() ) {
     wp_prime_option_caches( $transient_option_names );
 }
 ```
 
-**Audit rule:** Any call to `wp_prime_option_caches()` whose key list contains names beginning with `_transient_`, `_transient_timeout_`, `_site_transient_`, or `_site_transient_timeout_` must be guarded with `! wp_using_ext_object_cache() && ! wp_installing()`. On multisite, site transients (`_site_transient_*`) are stored as network options: prime them with `wp_prime_network_option_caches()` under the same guard, not with `wp_prime_option_caches()`.
+**Audit rule:** Any call to `wp_prime_option_caches()` whose key list contains names beginning with `_transient_`, `_transient_timeout_`, `_site_transient_`, or `_site_transient_timeout_` must be guarded with `! wp_using_ext_object_cache()`. On multisite, site transients (`_site_transient_*`) are stored as network options: prime them with `wp_prime_network_option_caches()` under the same guard, not with `wp_prime_option_caches()`.
 
 ---
 

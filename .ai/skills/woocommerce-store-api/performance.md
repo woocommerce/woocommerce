@@ -4,12 +4,12 @@ This file is a thin wrapper over the `woocommerce-performance` skill, framed for
 
 ## When this matters
 
-Any schema that serialises a **collection** of post-based objects (products, orders, attachments) is a candidate for cache priming. Store API list responses are the most common case:
+Any schema that serialises a **collection** of products or attachments is a candidate for post cache priming (for orders, see [pattern 1 in the performance skill](../woocommerce-performance/cache-priming.md#1-missing-cache-priming-before-iterating-post-based-objects)). Store API list responses are the most common case:
 
 - `GET /cart` returns N cart line items, each loaded via `wc_get_product()`.
-- Any future route returning a collection of products, orders, or attachment-backed resources — each item loaded individually inside the per-item loop.
+- Any future route returning a collection of products or attachment-backed resources — each item loaded individually inside the per-item loop.
 
-Without priming, each per-item lookup hits the database individually — classic N+1. Orders are the exception: under HPOS they are not posts, so batch them with `WC_Order_Factory::get_orders()` instead of `_prime_post_caches()`. It is not a drop-in replacement for a `wc_get_order()` loop; see pattern 1 in `cache-priming.md`.
+Without priming, each per-item lookup hits the database individually — classic N+1.
 
 ## Where to apply priming in a Store API route
 
