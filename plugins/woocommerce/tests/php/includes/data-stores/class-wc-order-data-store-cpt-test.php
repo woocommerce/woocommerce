@@ -2,6 +2,7 @@
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
@@ -2123,5 +2124,38 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( WC_Order_Data_Store_CPT::class . '::query', $messages, 'Unsupported arguments should raise a notice.' );
 		$this->assertStringStartsWith( $expected_message, $messages[ WC_Order_Data_Store_CPT::class . '::query' ], 'The notice should use the English wording for the argument count.' );
+	}
+
+	/**
+	 * @testdox Should ask the HPOS synchronizer to copy the order after the $setter operational flag setter runs.
+	 * @testWith ["set_download_permissions_granted"]
+	 *           ["set_recorded_sales"]
+	 *           ["set_recorded_coupon_usage_counts"]
+	 *           ["set_email_sent"]
+	 *           ["set_stock_reduced"]
+	 *
+	 * @param string $setter Data store setter method name.
+	 */
+	public function test_operational_flag_setters_sync_order_to_hpos( string $setter ): void {
+		$order = WC_Helper_Order::create_order();
+
+		$synchronizer = $this->getMockBuilder( DataSynchronizer::class )
+			->disableOriginalConstructor()
+			->setMethods( array( 'handle_updated_order' ) )
+			->getMock();
+		$synchronizer->expects( $this->once() )
+			->method( 'handle_updated_order' )
+			->with( $order->get_id() );
+
+		$container = wc_get_container();
+		$container->replace( DataSynchronizer::class, $synchronizer );
+		$container->reset_all_resolved();
+
+		try {
+			( new WC_Order_Data_Store_CPT() )->$setter( $order, true );
+		} finally {
+			$container->reset_replacement( DataSynchronizer::class );
+			$container->reset_all_resolved();
+		}
 	}
 }

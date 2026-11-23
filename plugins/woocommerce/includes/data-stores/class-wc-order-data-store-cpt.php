@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -672,6 +673,20 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_download_permissions_granted', wc_bool_to_string( $set ) );
+		$this->sync_operational_data_change( $order_id );
+	}
+
+	/**
+	 * Copy an order to the HPOS tables after an operational flag was changed outside of a regular save.
+	 *
+	 * These flags are written with plain post meta updates, typically from status change hooks that run after
+	 * the order was saved (and synced), so without this the HPOS copy would stay behind while sync is enabled.
+	 * The synchronizer does nothing unless posts are authoritative and sync is enabled.
+	 *
+	 * @param int|bool $order_id Order ID, as returned by WC_Order_Factory::get_order_id().
+	 */
+	private function sync_operational_data_change( $order_id ): void {
+		wc_get_container()->get( DataSynchronizer::class )->handle_updated_order( (int) $order_id );
 	}
 
 	/**
@@ -697,6 +712,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_recorded_sales', wc_bool_to_string( $set ) );
+		$this->sync_operational_data_change( $order_id );
 	}
 
 	/**
@@ -722,6 +738,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
+		$this->sync_operational_data_change( $order_id );
 	}
 
 	/**
@@ -761,6 +778,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$value    = wc_bool_to_string( $set );
 		$value    = 'yes' === $value ? 'true' : 'false'; // For backward compat, we store this as true|false string.
 		update_post_meta( $order_id, '_new_order_email_sent', $value );
+		$this->sync_operational_data_change( $order_id );
 	}
 
 	/**
@@ -886,6 +904,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_order_stock_reduced', wc_bool_to_string( $set ) );
+		$this->sync_operational_data_change( $order_id );
 	}
 
 	/**
