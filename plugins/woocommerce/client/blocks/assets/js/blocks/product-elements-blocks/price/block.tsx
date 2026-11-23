@@ -2,7 +2,6 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { ProductEntityResponse } from '@woocommerce/entities';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
@@ -13,8 +12,7 @@ import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { CurrencyCode } from '@woocommerce/type-defs/currency';
 import type { HTMLAttributes } from 'react';
-import type { Currency, ProductResponseItem } from '@woocommerce/types';
-import { SITE_CURRENCY } from '@woocommerce/settings';
+import type { Currency } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -24,9 +22,7 @@ import type { BlockAttributes } from './types';
 type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & {
 		isAdmin: boolean;
-		isExperimentalWcRestApiV4Enabled: boolean;
 		isDescendentOfSingleProductTemplate: boolean;
-		product: ProductResponseItem | ProductEntityResponse | undefined;
 	};
 
 interface PriceProps {
@@ -72,23 +68,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		textAlign,
 		isDescendentOfSingleProductTemplate,
 		isAdmin,
-		product: productData,
-		isExperimentalWcRestApiV4Enabled,
 	} = props;
 
 	const { parentName, parentClassName } = useInnerBlockLayoutContext();
-	const { product } = useProductDataContext(
-		/**
-		 * This block can depend on the core-data package only when the experimental WC Rest API feature flag is enabled because
-		 * it depends on experimental fields: https://github.com/woocommerce/woocommerce/pull/60101
-		 */
-		isExperimentalWcRestApiV4Enabled
-			? {
-					isAdmin,
-					product: productData,
-				}
-			: undefined
-	);
+	const { product } = useProductDataContext();
 
 	const isDescendentOfAllProductsBlock =
 		parentName === 'woocommerce/all-products';
@@ -147,49 +130,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		return productPriceComponent;
 	}
 
-	let prices: PriceProps = product?.prices ?? {};
+	const prices: PriceProps = product?.prices ?? {};
 	const currency = showPricePreview
 		? getCurrencyFromPriceResponse()
 		: getCurrencyFromPriceResponse( prices );
-
-	if ( isExperimentalWcRestApiV4Enabled ) {
-		prices = {
-			price: convertAdminPriceToStoreApiFormat(
-				product?.price,
-				currency
-			),
-			...( product?.sale_price
-				? {
-						sale_price: convertAdminPriceToStoreApiFormat(
-							product?.sale_price,
-							currency
-						),
-					}
-				: {} ),
-			...( product?.regular_price
-				? {
-						regular_price: convertAdminPriceToStoreApiFormat(
-							product?.regular_price,
-							currency
-						),
-					}
-				: {} ),
-			currency_minor_unit: SITE_CURRENCY.minorUnit,
-			price_range:
-				product?.max_price && product?.min_price
-					? {
-							min_amount: convertAdminPriceToStoreApiFormat(
-								product.min_price,
-								currency
-							),
-							max_amount: convertAdminPriceToStoreApiFormat(
-								product.max_price,
-								currency
-							),
-						}
-					: null,
-		};
-	}
 
 	const pricePreview = '5000';
 	const isOnSale = prices.price !== prices.regular_price;

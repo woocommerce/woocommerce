@@ -119,7 +119,6 @@ declare global {
 			'minified-js': boolean;
 			'settings-ui': boolean;
 			'store-alerts': boolean;
-			'rest-api-v4': boolean;
 			'order-detail-redesign': boolean;
 		};
 		wp: {
