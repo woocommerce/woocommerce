@@ -10,10 +10,7 @@ namespace Automattic\Woocommerce_Analytics;
 use Automattic\Woocommerce_Analytics;
 
 /**
- * Answers proxy tracking requests at the MU-plugin stage, before regular plugins load.
- *
- * Called by host platform code that also returns true from the
- * `woocommerce_analytics_proxy_speed_module_host_provided` filter.
+ * Answers proxy tracking requests before regular plugins finish loading, so they skip the full WordPress boot.
  *
  * @since 0.19.0
  */
@@ -25,6 +22,47 @@ class Proxy_Speed_Module {
 	 * @var string
 	 */
 	const PROXY_REQUEST_PATH = 'woocommerce-analytics/v1/track';
+
+	/**
+	 * Whether code on this site called enable() for this request.
+	 *
+	 * @var bool
+	 */
+	private static $enabled = false;
+
+	/**
+	 * Serve proxy tracking requests early on this site.
+	 *
+	 * Call it on every request, from an MU-plugin or a plugin's main file, so the stored authorization stays steady.
+	 * From an MU-plugin it serves on `muplugins_loaded`; from a plugin file it serves at once.
+	 *
+	 * @return void
+	 */
+	public static function enable() {
+		// Too late to save anything, and the authorization is written at `init` from this flag.
+		if ( did_action( 'plugins_loaded' ) ) {
+			_doing_it_wrong( __METHOD__, 'Call it before plugins_loaded, from an MU-plugin or a plugin main file.', '0.19.0' );
+			return;
+		}
+
+		self::$enabled = true;
+
+		if ( did_action( 'muplugins_loaded' ) ) {
+			self::maybe_serve();
+			return;
+		}
+
+		add_action( 'muplugins_loaded', array( __CLASS__, 'maybe_serve' ) );
+	}
+
+	/**
+	 * Whether code on this site called enable() for this request.
+	 *
+	 * @return bool
+	 */
+	public static function is_enabled() {
+		return self::$enabled;
+	}
 
 	/**
 	 * Answer the current request and exit if it is a proxy request this module may serve.
@@ -159,7 +197,7 @@ class Proxy_Speed_Module {
 	 * Whether the WP Consent API cookie stores a statistics deny.
 	 *
 	 * Unlike Consent_Manager, this reads the cookie whatever the consent type, which is not known yet.
-	 * Only a prefix filter registered before this runs applies, which is why hosts call it on `muplugins_loaded`.
+	 * Only a prefix filter registered before this runs applies, which is why enable() waits for `muplugins_loaded`.
 	 *
 	 * @return bool
 	 */

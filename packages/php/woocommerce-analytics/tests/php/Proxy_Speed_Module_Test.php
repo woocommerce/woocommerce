@@ -26,11 +26,19 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	private $previous_server;
 
 	/**
+	 * Fired actions as they were before the test.
+	 *
+	 * @var array
+	 */
+	private $previous_wp_actions;
+
+	/**
 	 * Start from an unauthorized module with no queued pixels.
 	 */
 	public function set_up(): void {
 		parent::set_up();
-		$this->previous_server = $_SERVER;
+		$this->previous_server     = $_SERVER;
+		$this->previous_wp_actions = $GLOBALS['wp_actions'];
 		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 		$this->set_pixel_batch_queue( array() );
 	}
@@ -40,7 +48,14 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	 */
 	public function tear_down(): void {
 		unset( $_COOKIE['wp_consent_statistics'], $_COOKIE['custom_statistics'] );
-		$_SERVER = $this->previous_server;
+		$_SERVER               = $this->previous_server;
+		$GLOBALS['wp_actions'] = $this->previous_wp_actions;
+		remove_action( 'muplugins_loaded', array( Proxy_Speed_Module::class, 'maybe_serve' ) );
+		remove_all_filters( 'doing_it_wrong_trigger_error' );
+		remove_all_actions( 'doing_it_wrong_run' );
+		$enabled = ( new \ReflectionClass( Proxy_Speed_Module::class ) )->getProperty( 'enabled' );
+		$enabled->setAccessible( true );
+		$enabled->setValue( null, false );
 		remove_all_filters( 'wp_consent_cookie_prefix' );
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
 		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
@@ -219,6 +234,66 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 		Woocommerce_Analytics::register_rest_routes();
 
 		$this->assertArrayHasKey( '/' . Proxy_Speed_Module::PROXY_REQUEST_PATH, rest_get_server()->get_routes() );
+	}
+
+	/**
+	 * Test that an MU-plugin's call waits for every MU-plugin, so their consent cookie prefix applies.
+	 */
+	public function test_enable_from_an_mu_plugin_serves_on_muplugins_loaded(): void {
+		$this->set_load_stage( 'mu-plugins' );
+
+		Proxy_Speed_Module::enable();
+
+		$this->assertTrue( Proxy_Speed_Module::is_enabled() );
+		$this->assertSame( 10, has_action( 'muplugins_loaded', array( Proxy_Speed_Module::class, 'maybe_serve' ) ) );
+	}
+
+	/**
+	 * Test that a plugin file's call serves at once, since `muplugins_loaded` has already fired.
+	 */
+	public function test_enable_from_a_plugin_file_serves_at_once(): void {
+		$this->set_load_stage( 'plugins' );
+		$this->make_request( 'GET', '/' );
+
+		Proxy_Speed_Module::enable();
+
+		$this->assertTrue( Proxy_Speed_Module::is_enabled() );
+		$this->assertFalse( has_action( 'muplugins_loaded', array( Proxy_Speed_Module::class, 'maybe_serve' ) ) );
+	}
+
+	/**
+	 * A late call cannot save anything, and enabling it would flip the stored authorization between requests.
+	 */
+	public function test_enable_after_plugins_loaded_is_refused(): void {
+		$this->set_load_stage( 'loaded' );
+		$wrong = 0;
+		add_action(
+			'doing_it_wrong_run',
+			function () use ( &$wrong ) {
+				++$wrong;
+			}
+		);
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+
+		Proxy_Speed_Module::enable();
+
+		$this->assertFalse( Proxy_Speed_Module::is_enabled() );
+		$this->assertSame( 1, $wrong );
+	}
+
+	/**
+	 * Make the load-stage actions look fired up to the given stage.
+	 *
+	 * @param string $stage `mu-plugins` (loading MU-plugins), `plugins` (loading plugins) or `loaded`.
+	 */
+	private function set_load_stage( $stage ): void {
+		unset( $GLOBALS['wp_actions']['muplugins_loaded'], $GLOBALS['wp_actions']['plugins_loaded'] );
+		if ( 'mu-plugins' !== $stage ) {
+			$GLOBALS['wp_actions']['muplugins_loaded'] = 1;
+		}
+		if ( 'loaded' === $stage ) {
+			$GLOBALS['wp_actions']['plugins_loaded'] = 1;
+		}
 	}
 
 	/**

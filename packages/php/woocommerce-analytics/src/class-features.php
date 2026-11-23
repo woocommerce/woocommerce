@@ -49,7 +49,7 @@ class Features {
 	/**
 	 * Check if auto-installation of the proxy speed module MU-plugin is enabled.
 	 *
-	 * @deprecated 0.19.0 The package no longer installs the MU-plugin. Use is_proxy_speed_module_host_provided().
+	 * @deprecated 0.19.0 The package no longer installs the MU-plugin. Call Proxy_Speed_Module::enable() instead.
 	 *
 	 * @return bool
 	 */
@@ -66,29 +66,8 @@ class Features {
 			'woocommerce_analytics_auto_install_proxy_speed_module',
 			array( false ),
 			'0.19.0',
-			'woocommerce_analytics_proxy_speed_module_host_provided',
-			'The package no longer installs the proxy speed module MU-plugin.'
+			'',
+			'The package no longer installs the proxy speed module MU-plugin. Call Proxy_Speed_Module::enable() instead.'
 		);
-	}
-
-	/**
-	 * Check if the host runs Proxy_Speed_Module from its own platform code.
-	 *
-	 * @since 0.19.0
-	 *
-	 * @return bool
-	 */
-	public static function is_proxy_speed_module_host_provided() {
-		/**
-		 * Filter to authorize the proxy speed module without auto-installing the MU-plugin file.
-		 *
-		 * Return true from host platform code that calls Proxy_Speed_Module::maybe_serve() at MU-plugin stage.
-		 * Register it on every request before `init` priority 20, or the stored authorization flips.
-		 *
-		 * @since 0.19.0
-		 *
-		 * @param bool $host_provided Whether the host provides the speed module. Default false.
-		 */
-		return true === apply_filters( 'woocommerce_analytics_proxy_speed_module_host_provided', false );
 	}
 }

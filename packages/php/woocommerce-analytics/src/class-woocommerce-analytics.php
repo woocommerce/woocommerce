@@ -43,7 +43,7 @@ class Woocommerce_Analytics {
 	 * Whether the speed module may serve requests.
 	 *
 	 * It reads this option because filters are unavailable before plugins load.
-	 * It mirrors proxy tracking and the host-provided filter on every init.
+	 * It mirrors proxy tracking and Proxy_Speed_Module::enable() on every init.
 	 *
 	 * @since 0.18.0
 	 *
@@ -316,7 +316,7 @@ class Woocommerce_Analytics {
 	}
 
 	/**
-	 * Whether the host-provided speed module may serve.
+	 * Whether the speed module may serve: proxy tracking is on and code on this site enabled the module.
 	 *
 	 * @since 0.19.0
 	 *
@@ -324,13 +324,13 @@ class Woocommerce_Analytics {
 	 */
 	private static function should_authorize_proxy_speed_module() {
 		return \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled()
-			&& \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_host_provided();
+			&& \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::is_enabled();
 	}
 
 	/**
 	 * Formerly installed the speed module MU-plugin; the package no longer writes it.
 	 *
-	 * @deprecated 0.19.0 Hosts return true from `woocommerce_analytics_proxy_speed_module_host_provided` and call Proxy_Speed_Module::maybe_serve().
+	 * @deprecated 0.19.0 Call Proxy_Speed_Module::enable() instead.
 	 */
 	public static function maybe_add_proxy_speed_module() {
 		// Kept as a no-op for callers such as the Jetpack activation hook.
