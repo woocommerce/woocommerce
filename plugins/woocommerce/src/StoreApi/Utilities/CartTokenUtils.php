@@ -124,7 +124,7 @@ class CartTokenUtils {
 
 		$customer_id = (string) ( JsonWebToken::get_parts( $cart_token )->payload->user_id ?? '' );
 
-		if ( '' === $customer_id || 't_' === substr( $customer_id, 0, 2 ) ) {
+		if ( 't_' === substr( $customer_id, 0, 2 ) ) {
 			return true;
 		}
 

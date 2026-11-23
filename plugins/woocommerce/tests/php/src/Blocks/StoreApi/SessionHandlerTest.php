@@ -155,6 +155,18 @@ class SessionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A cart token without a session key starts a new guest session instead of loading a shared one.
+	 */
+	public function test_token_without_a_session_key_starts_a_guest_session(): void {
+		$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_token( '' );
+
+		$handler = new SessionHandler();
+		$handler->init();
+
+		$this->assertStringStartsWith( 't_', (string) $handler->get_customer_id(), 'An empty session key should not be loaded' );
+	}
+
+	/**
 	 * @testdox A registered customer cart token does not load their session for a logged-out or different user.
 	 * @testWith [false]
 	 *           [true]
