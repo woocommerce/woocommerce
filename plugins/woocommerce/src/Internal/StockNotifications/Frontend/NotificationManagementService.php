@@ -152,7 +152,11 @@ class NotificationManagementService {
 		);
 
 		// Block themes texturize the whole page, but skip address elements.
-		wc_add_notice( wp_is_block_theme() ? '<address class="' . TexturizeExclusions::VERIFICATION_EMAIL_CLASS . '">' . $notice . '</address>' : $notice, 'success' );
+		if ( wp_is_block_theme() ) {
+			$notice = '<address class="' . TexturizeExclusions::VERIFICATION_EMAIL_CLASS . '">' . $notice . '</address>';
+		}
+
+		wc_add_notice( $notice, 'success' );
 		wp_safe_redirect( $redirect_url );
 		exit;
 	}
