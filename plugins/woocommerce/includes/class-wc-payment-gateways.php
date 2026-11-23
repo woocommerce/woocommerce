@@ -126,10 +126,17 @@ class WC_Payment_Gateways {
 			}
 
 			if ( isset( $ordering[ $gateway->id ] ) && is_numeric( $ordering[ $gateway->id ] ) ) {
-				// Add in position.
-				$this->payment_gateways[ $ordering[ $gateway->id ] ] = $gateway;
+				// Add in position, moving to the next free one if another gateway has the same number.
+				$position = (int) $ordering[ $gateway->id ];
+				while ( isset( $this->payment_gateways[ $position ] ) ) {
+					++$position;
+				}
+				$this->payment_gateways[ $position ] = $gateway;
 			} else {
-				// Add to end of the array.
+				// Add to end of the array, skipping any position already taken.
+				while ( isset( $this->payment_gateways[ $order_end ] ) ) {
+					++$order_end;
+				}
 				$this->payment_gateways[ $order_end ] = $gateway;
 				++$order_end;
 			}

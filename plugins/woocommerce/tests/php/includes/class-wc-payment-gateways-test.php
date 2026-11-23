@@ -531,6 +531,62 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep every gateway listed when several share the same saved order number.
+	 */
+	public function test_init_keeps_all_gateways_when_saved_order_numbers_collide(): void {
+		update_option(
+			'woocommerce_gateway_order',
+			array(
+				WC_Gateway_BACS::ID   => 0,
+				WC_Gateway_Cheque::ID => 0,
+				WC_Gateway_COD::ID    => 0,
+			)
+		);
+
+		$sut = new WC_Payment_Gateways();
+
+		$gateway_ids = array_map(
+			static function ( $gateway ) {
+				return $gateway->id;
+			},
+			array_values( $sut->payment_gateways )
+		);
+
+		$this->assertContains( WC_Gateway_BACS::ID, $gateway_ids, 'Direct bank transfer should not be overwritten.' );
+		$this->assertContains( WC_Gateway_Cheque::ID, $gateway_ids, 'Check payments should not be overwritten.' );
+		$this->assertContains( WC_Gateway_COD::ID, $gateway_ids, 'Cash on delivery should not be overwritten.' );
+	}
+
+	/**
+	 * @testdox Should keep a gateway without a saved order when an earlier gateway was saved at the end slot.
+	 */
+	public function test_init_keeps_unordered_gateway_when_end_slot_is_taken(): void {
+		// BACS loads first and takes slot 999, so the unordered gateways loaded after it must not overwrite it.
+		update_option(
+			'woocommerce_gateway_order',
+			array(
+				WC_Gateway_BACS::ID => 999,
+			)
+		);
+
+		$sut = new WC_Payment_Gateways();
+
+		$gateway_ids = array_map(
+			static function ( $gateway ) {
+				return $gateway->id;
+			},
+			array_values( $sut->payment_gateways )
+		);
+
+		$this->assertSame(
+			array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ),
+			array_slice( $gateway_ids, 0, 3 ),
+			'All gateways should be kept, in load order.'
+		);
+		$this->assertSame( count( array_unique( $gateway_ids ) ), count( $gateway_ids ), 'No gateway should be listed twice.' );
+	}
+
+	/**
 	 * Enable all payment gateways.
 	 */
 	private function enable_all_gateways() {
