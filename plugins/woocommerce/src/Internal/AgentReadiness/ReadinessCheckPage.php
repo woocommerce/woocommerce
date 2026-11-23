@@ -338,7 +338,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
 			// Setup steps live in the Setup checklist and, while one blocks sales, in Fix first; the cards hold what the scan read.
 			'sections'     => null === $report ? array() : $this->sections( array_values( array_filter( $visible, static fn( array $check ): bool => ! self::is_setup_step( $check ) ) ), $launched, $report ),
-			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ),
+			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array(), $launched ),
 			'overview'     => array(
 				'shopping' => $this->shopping_card( $checks ),
 				// After the description, when the last check stopped at the product limit.
@@ -689,7 +689,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		return array(
 			'id'       => $id,
 			'title'    => $title,
-			'badge'    => self::badge_data( self::cant_check_badge() ),
+			'badge'    => self::badge_data( self::waiting_badge() ),
 			'note'     => null,
 			'channels' => array(),
 			'rows'     => array(),
@@ -758,7 +758,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 */
 	private static function cant_check_row( bool $launched ): array {
 		$copy = self::cant_check_copy( $launched );
-		return self::row( 'cant_check', 'unknown', $copy[0], $copy[1] );
+		return array( 'waiting' => ! $launched ) + self::row( 'cant_check', 'unknown', $copy[0], $copy[1] );
 	}
 
 	/**
@@ -1100,13 +1100,14 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * Protocols and files the store serves to agents, as information, never pass or fail: how many were
-	 * found, then every item under where it lives. Items the scan couldn't read are under Not checked yet.
-	 * Null with no items in the report.
+	 * found, then every item under where it lives. Items the scan couldn't read are under Couldn't check,
+	 * or Not checked yet while the store is in coming soon mode. Null with no items in the report.
 	 *
-	 * @param array $items Items from the report.
-	 * @return array{title:string,badge:array{intent:string,text:string},text:string,groups:array<int, array{title:string,items:array<int, array{name:string,found:bool|null}>}>}|null
+	 * @param array     $items    Items from the report.
+	 * @param bool|null $launched Whether the store is launched.
+	 * @return array{title:string,badge:array{intent:string,text:string},text:string,waiting:bool,groups:array<int, array{title:string,items:array<int, array{name:string,found:bool|null}>}>}|null
 	 */
-	private static function declared( array $items ): ?array {
+	private static function declared( array $items, ?bool $launched = true ): ?array {
 		$items = array_values( array_filter( $items, 'is_array' ) );
 		if ( array() === $items ) {
 			return null;
@@ -1115,7 +1116,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'root'    => __( 'Files in your root folder', 'woocommerce' ),
 			'address' => __( 'Files at standard addresses', 'woocommerce' ),
 			'code'    => __( 'In your page code', 'woocommerce' ),
-			'unknown' => __( 'Not checked yet', 'woocommerce' ),
+			'unknown' => false === $launched ? __( 'Not checked yet', 'woocommerce' ) : __( 'Couldn’t check', 'woocommerce' ),
 		);
 		$groups = array();
 		foreach ( $items as $item ) {
@@ -1151,11 +1152,13 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			}
 		}
 		return array(
-			'title'  => __( 'Extra details for AI assistants', 'woocommerce' ),
-			'badge'  => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
-			'text'   => $text,
+			'title'   => __( 'Extra details for AI assistants', 'woocommerce' ),
+			'badge'   => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
+			'text'    => $text,
+			// Unread items wait for the store to go live, rather than having failed to load.
+			'waiting' => false === $launched,
 			// In the order of $titles, leaving out the groups with no items.
-			'groups' => array_map(
+			'groups'  => array_map(
 				static fn( string $key ): array => array(
 					'title' => $titles[ $key ],
 					'items' => $groups[ $key ],
@@ -1166,13 +1169,15 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The badge on a question: how many issues, that everything passed, or Not checked yet, before the
-	 * first check or when nothing failed but a check couldn't run (its row says why).
+	 * The badge on a question: how many issues, that everything passed, or, when nothing failed but a check
+	 * couldn't run (its row says why), Couldn't check. Not checked yet while the checks wait for the merchant:
+	 * in coming soon mode, or with nothing to check, such as Store access while AI shopping is off.
 	 *
-	 * @param array<int, array{ok:bool|null}> $checks The question's checks.
+	 * @param array<int, array{ok:bool|null}> $checks  The question's checks.
+	 * @param bool                            $waiting Whether the checks wait for the merchant, as in coming soon mode.
 	 * @return array{0:string,1:string} Badge class and text.
 	 */
-	private static function group_badge( array $checks ): array {
+	private static function group_badge( array $checks, bool $waiting = false ): array {
 		$issues = count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] ) );
 		if ( $issues > 0 ) {
 			/* translators: %d: number of issues. */
@@ -1182,15 +1187,25 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		if ( $passed > 0 && count( $checks ) === $passed ) {
 			return array( 'info', __( 'All passed', 'woocommerce' ) );
 		}
-		return self::cant_check_badge();
+		return $waiting || array() === $checks ? self::waiting_badge() : self::cant_check_badge();
 	}
 
 	/**
-	 * The Not checked yet badge, on a question where nothing failed but a check couldn't run, or before the first check.
+	 * The Couldn't check badge, on a question where nothing failed but a check tried to run and couldn't.
 	 *
 	 * @return array{0:string,1:string} Badge class and text.
 	 */
 	private static function cant_check_badge(): array {
+		return array( 'off', __( 'Couldn’t check', 'woocommerce' ) );
+	}
+
+	/**
+	 * The Not checked yet badge, while a question's checks wait for the merchant: the store to go live,
+	 * AI shopping to be on, or products to check.
+	 *
+	 * @return array{0:string,1:string} Badge class and text.
+	 */
+	private static function waiting_badge(): array {
 		return array( 'off', __( 'Not checked yet', 'woocommerce' ) );
 	}
 
@@ -1215,7 +1230,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			if ( null === $check['ok'] ) {
 				// The title says what the check looks for, not that it passed.
 				$title  = ReadinessCopy::store_check( $check['id'] )['action'] ?? $copy['title'] ?? $check['name'];
-				$rows[] = self::row( $check['id'], 'unknown', $title, $launched ? __( 'This check couldn’t run. It runs again each day, or you can run the check again now.', 'woocommerce' ) : __( 'Launch your store to run this check.', 'woocommerce' ) );
+				$rows[] = array( 'waiting' => false === $launched ) + self::row( $check['id'], 'unknown', $title, $launched ? __( 'This check couldn’t run. It runs again each day, or you can run the check again now.', 'woocommerce' ) : __( 'Launch your store to run this check.', 'woocommerce' ) );
 				continue;
 			}
 			if ( $check['ok'] ) {
@@ -1327,7 +1342,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$sections[] = array(
 				'id'       => $id,
 				'title'    => $group[0],
-				'badge'    => self::badge_data( $cant && array() === $rows ? self::cant_check_badge() : self::group_badge( $checks ) ),
+				'badge'    => self::badge_data( $cant && array() === $rows ? ( $launched ? self::cant_check_badge() : self::waiting_badge() ) : self::group_badge( $checks, false === $launched ) ),
 				'note'     => $ucp_off && ! $ucp_only ? self::ucp_off_note() : ( 'understand' === $id ? self::sample_note( $report ) : null ),
 				'channels' => array(),
 				'rows'     => $cant ? array_merge( $rows, array( self::cant_check_row( $launched ) ) ) : $rows,

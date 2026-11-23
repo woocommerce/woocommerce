@@ -681,14 +681,17 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $sitemap, array( 'ok' => null ) + $robots ) ), false );
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
-		$this->assertSame( 'Not checked yet', $card['badge']['text'] );
+		$this->assertSame( 'Couldn’t check', $card['badge']['text'], 'The store is live, so the check tried and couldn\'t' );
 		$this->assertSame( array( 'Your pages couldn’t be checked' ), array_column( $card['rows'], 'title' ), 'One row for the card, not one per check' );
+		$this->assertFalse( $card['rows'][0]['waiting'], 'Screen readers hear Couldn\'t check' );
 		$this->assertSame( 'Your hosting setup blocked the check from opening them. Checks run again each day. If this keeps happening, contact your hosting provider.', $card['rows'][0]['text'] );
 
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
 		$this->assertSame( 'Your store is in coming soon mode', $card['rows'][0]['title'] );
 		$this->assertSame( 'These checks run once your store is live.', $card['rows'][0]['text'] );
+		$this->assertSame( 'Not checked yet', $card['badge']['text'], 'In coming soon mode the checks wait for the store to go live' );
+		$this->assertTrue( $card['rows'][0]['waiting'], 'Screen readers hear Not checked yet' );
 	}
 
 	/**
@@ -917,14 +920,15 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 				'Files in your root folder'   => array( 'ai.txt usage file', 'AGENTS.md' ),
 				'Files at standard addresses' => array( 'API catalog' ),
 				'In your page code'           => array( 'sameAs links', 'Markdown pages' ),
-				'Not checked yet'             => array( 'TDMRep' ),
+				'Couldn’t check'              => array( 'TDMRep' ),
 			),
 			array_column( array_map( static fn( array $group ): array => array( $group['title'], array_column( $group['items'], 'name' ) ), $view['declared']['groups'] ), 1, 0 ),
-			'Every item, found or not, under where it lives; an item the scan couldn\'t read is under Not checked yet'
+			'Every item, found or not, under where it lives; an item the scan couldn\'t read on a live store is under Couldn\'t check'
 		);
 		$groups = array_column( $view['declared']['groups'], 'items', 'title' );
 		$this->assertSame( array( true, false ), array_column( $groups['Files in your root folder'], 'found' ) );
-		$this->assertNull( $groups['Not checked yet'][0]['found'], 'Not checked is neither found nor missing' );
+		$this->assertNull( $groups['Couldn’t check'][0]['found'], 'Not read is neither found nor missing' );
+		$this->assertFalse( $view['declared']['waiting'], 'The store is live, so an unread item couldn\'t be checked' );
 
 		$report             = get_option( 'woocommerce_agent_readiness_report' );
 		$report['declared'] = array(
@@ -1466,20 +1470,21 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A question's badge counts its issues; when nothing failed but a check couldn't run, it says Not checked yet.
+	 * @testdox A question's badge counts its issues; when nothing failed but a check couldn't run, it says Couldn't check, or Not checked yet while the checks wait for the merchant.
 	 */
 	public function test_group_badge(): void {
 		$badge = new \ReflectionMethod( ReadinessCheckPage::class, 'group_badge' );
 		$badge->setAccessible( true );
-		$text = static fn( array $checks ): string => $badge->invoke( null, $checks )[1];
+		$text = static fn( array $checks, bool $waiting = false ): string => $badge->invoke( null, $checks, $waiting )[1];
 		$row  = static fn( ?bool $ok ): array => array( 'ok' => $ok );
 
 		$this->assertSame( '2 issues', $text( array( $row( false ), $row( false ), $row( true ) ) ) );
 		$this->assertSame( '1 issue', $text( array( $row( false ), $row( null ) ) ) );
 		$this->assertSame( 'All passed', $text( array( $row( true ), $row( true ) ) ) );
-		$this->assertSame( 'Not checked yet', $text( array( $row( true ), $row( null ) ) ), 'A check that could not run is not an issue, nor a pass' );
-		$this->assertSame( 'Not checked yet', $text( array( $row( null ), $row( null ) ) ), 'Nothing ran, so nothing is shown as passed' );
-		$this->assertSame( 'Not checked yet', $text( array() ) );
+		$this->assertSame( 'Couldn’t check', $text( array( $row( true ), $row( null ) ) ), 'A check that could not run is not an issue, nor a pass' );
+		$this->assertSame( 'Couldn’t check', $text( array( $row( null ), $row( null ) ) ), 'Nothing ran, so nothing is shown as passed' );
+		$this->assertSame( 'Not checked yet', $text( array( $row( true ), $row( null ) ), true ), 'In coming soon mode the checks wait for the store to go live' );
+		$this->assertSame( 'Not checked yet', $text( array() ), 'Nothing to check, as Store access while AI shopping is off' );
 
 		$map = new \ReflectionMethod( ReadinessCheckPage::class, 'badge_data' );
 		$map->setAccessible( true );
