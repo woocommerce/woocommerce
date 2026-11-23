@@ -901,6 +901,7 @@ class WC_AJAX {
 			$variation_ids = array_map( 'absint', (array) wp_unslash( $_POST['variation_ids'] ) );
 
 			if ( ! self::can_edit_variations( $variation_ids ) ) {
+				// @phpstan-ignore argument.type (WordPress accepts integer -1 for AJAX responses, as used by other WooCommerce handlers.)
 				wp_die( -1 );
 			}
 
@@ -3299,11 +3300,13 @@ class WC_AJAX {
 
 		$product_id = absint( wp_unslash( $_POST['product_id'] ) );
 		if ( ! current_user_can( 'edit_product', $product_id ) ) {
+			// @phpstan-ignore argument.type (WordPress accepts integer -1 for AJAX responses, as used by other WooCommerce handlers.)
 			wp_die( -1 );
 		}
 
 		$variation_ids = isset( $_POST['variable_post_id'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['variable_post_id'] ) ) : array();
 		if ( ! self::can_edit_variations( $variation_ids, $product_id ) ) {
+			// @phpstan-ignore argument.type (WordPress accepts integer -1 for AJAX responses, as used by other WooCommerce handlers.)
 			wp_die( -1 );
 		}
 
