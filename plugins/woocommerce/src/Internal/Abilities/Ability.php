@@ -58,7 +58,7 @@ class Ability extends \WP_Ability {
 	 */
 	public function prepare_input( $input = null ) {
 		if ( self::core_prepares_input() ) {
-			return ( new \ReflectionMethod( \WP_Ability::class, 'prepare_input' ) )->invoke( $this, $input );
+			return parent::prepare_input( $input );
 		}
 
 		$input = $this->normalize_input( $input );
