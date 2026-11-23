@@ -490,6 +490,7 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_ability_order_refund_duplicate_mismatch', $result->get_error_code() );
+		$this->assertStringStartsWith( 'Refund ' . $named['refund']['id'] . ' is not a refund of this order with the same amount and lines,', $result->get_error_message() );
 		$this->assertCount( $count, wc_get_order( $order->get_id() )->get_refunds() );
 	}
 

@@ -224,7 +224,7 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 				'woocommerce_ability_order_refund_duplicate_mismatch',
 				sprintf(
 					/* translators: %d: refund ID. */
-					__( 'Refund %d is not a recent refund of this order with the same amount and lines, so no refund was created. Send allow_duplicate_of only with the refund ID that a duplicate error returned, and the same input as that call.', 'woocommerce' ),
+					__( 'Refund %d is not a refund of this order with the same amount and lines, so no refund was created. Send allow_duplicate_of only with the refund ID that a duplicate error returned, and the same input as that call.', 'woocommerce' ),
 					$allowed_id
 				),
 				array( 'status' => 400 )
