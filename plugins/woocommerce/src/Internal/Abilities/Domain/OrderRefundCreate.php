@@ -265,7 +265,7 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		};
 		// wc_create_refund() sets the paid flag only after the gateway refunded, so a save that carries it means the money moved.
 		$watch_paid = static function ( $refund ) use ( $order_id, &$candidate, &$tagged, &$paid ): void {
-			if ( null === $candidate && $refund instanceof \WC_Order_Refund && $refund->get_parent_id() === $order_id ) {
+			if ( null === $candidate && $refund instanceof \WC_Order_Refund && 0 === $refund->get_id() && $refund->get_parent_id() === $order_id ) {
 				$candidate = $refund;
 			}
 			$paid = $paid || ( null !== $tagged && $refund === $tagged && $refund->get_refunded_payment() );
@@ -337,7 +337,7 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			return new \WP_Error(
 				'woocommerce_ability_order_refund_failed',
 				/* translators: %s: error message. */
-				sprintf( __( 'The refund failed before the payment gateway or any refund callback ran, so no refund was created and no money was returned: %s', 'woocommerce' ), $result->get_error_message() ),
+				sprintf( __( 'The refund failed before it was sent to the payment gateway, so no refund was created and no money was returned: %s The same error will likely stop a retry, so ask the merchant to check it before you refund again.', 'woocommerce' ), $result->get_error_message() ),
 				array( 'status' => 500 )
 			);
 		}

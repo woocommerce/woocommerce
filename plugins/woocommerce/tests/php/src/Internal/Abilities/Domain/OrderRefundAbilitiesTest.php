@@ -1258,11 +1258,64 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_ability_order_refund_failed', $result->get_error_code() );
-		$this->assertStringContainsString( 'no money was returned', $result->get_error_message() );
+		$this->assertStringContainsString( 'before it was sent to the payment gateway, so no refund was created and no money was returned', $result->get_error_message() );
+		$this->assertStringContainsString( 'ask the merchant to check it before you refund again', $result->get_error_message() );
 		$this->assertStringContainsString( 'Extension save hook crashed.', $result->get_error_message() );
 		$this->assertFalse( $hook_ran );
 		$this->assertSame( array(), $this->gateway->refunded );
 		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should delete only the new refund, not an older one that a callback saved during the call, when an Error is thrown before woocommerce_create_refund.
+	 */
+	public function test_crash_before_the_create_hook_keeps_an_older_refund_saved_during_the_call(): void {
+		$order = $this->create_order_without_lines();
+		$older = $this->refund(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '5',
+			)
+		);
+		$this->assertIsArray( $older, is_wp_error( $older ) ? $older->get_error_message() : '' );
+		$older_id = $older['refund']['id'];
+		$resaved  = false;
+		add_filter(
+			'woocommerce_order_get_items',
+			static function ( $items, $refund ) use ( $order, $older_id, &$resaved ) {
+				if ( ! $resaved && $refund instanceof \WC_Order_Refund && 0 === $refund->get_id() && $refund->get_parent_id() === $order->get_id() ) {
+					$resaved = true;
+					$saved   = wc_get_order( $older_id );
+					$saved->set_reason( 'Touched by an extension.' );
+					$saved->save();
+				}
+				return $items;
+			},
+			10,
+			2
+		);
+		add_action(
+			'woocommerce_after_order_refund_object_save',
+			static function ( $refund ) use ( $older_id ) {
+				if ( $refund->get_id() !== $older_id ) {
+					throw new \Error( 'Extension save hook crashed.' );
+				}
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '10',
+			)
+		);
+
+		$this->assertTrue( $resaved );
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_failed', $result->get_error_code() );
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds );
+		$this->assertSame( $older_id, $refunds[0]->get_id() );
 	}
 
 	/**
