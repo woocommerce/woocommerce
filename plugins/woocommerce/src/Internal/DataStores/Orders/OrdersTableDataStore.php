@@ -1043,6 +1043,27 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	}
 
 	/**
+	 * Reads the "coupon usage counted" flag straight from the database, skipping the order cache.
+	 *
+	 * @since 11.3.1
+	 *
+	 * @internal For use by WC_Abstract_Order::remove_coupon() only.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return bool
+	 */
+	public function get_stored_recorded_coupon_usage_counts( $order ): bool {
+		global $wpdb;
+
+		$operational_data_table = self::get_operational_data_table_name();
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+		$value = $wpdb->get_var( $wpdb->prepare( "SELECT coupon_usages_are_counted FROM {$operational_data_table} WHERE order_id = %d", $order->get_id() ) );
+
+		return (bool) $value;
+	}
+
+	/**
 	 * Whether email have been sent for this order.
 	 *
 	 * @param \WC_Order|int $order Order object.

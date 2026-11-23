@@ -4837,6 +4837,27 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox get_stored_recorded_coupon_usage_counts() reads the flag from the database, not from the order cache.
+	 */
+	public function test_get_stored_recorded_coupon_usage_counts(): void {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( true );
+		$order = $this->create_cancelled_order_with_counted_coupon_usage();
+		$this->assertFalse( $this->sut->get_stored_recorded_coupon_usage_counts( OrderHelper::create_order() ), 'An order without the flag should read as not counted' );
+		$this->assertTrue( $this->sut->get_stored_recorded_coupon_usage_counts( $order ), 'A set flag should read as counted' );
+
+		$wpdb->update(
+			OrdersTableDataStore::get_operational_data_table_name(),
+			array( 'coupon_usages_are_counted' => 0 ),
+			array( 'order_id' => $order->get_id() )
+		);
+
+		$this->assertTrue( $order->get_recorded_coupon_usage_counts(), 'The loaded order should still see the old value' );
+		$this->assertFalse( $this->sut->get_stored_recorded_coupon_usage_counts( $order ), 'The stored read should see the cleared flag' );
+	}
+
+	/**
 	 * Create a cancelled order marked as having its coupon usage counted.
 	 *
 	 * @return WC_Order

@@ -214,6 +214,129 @@ class WC_Update_Coupon_Usage_Counts_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cancelling an order does not give back a coupon use that a coupon removal gave back after the order was loaded.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is the authoritative order storage.
+	 */
+	public function test_cancel_skips_coupon_removed_by_another_request( bool $hpos_enabled ): void {
+		$this->toggle_cot_authoritative( $hpos_enabled );
+		$order = $this->create_pending_order_with_counted_coupon( 'removed-meanwhile' );
+		WC_Helper_Coupon::create_coupon( 'kept-meanwhile' );
+		$order->apply_coupon( 'kept-meanwhile' );
+
+		$this->run_once_between_flag_read_and_write(
+			function () use ( $order ) {
+				wc_get_order( $order->get_id() )->remove_coupon( 'removed-meanwhile' );
+			}
+		);
+		$order->update_status( OrderStatus::CANCELLED );
+
+		$this->assertSame( 1, ( new WC_Coupon( 'removed-meanwhile' ) )->get_usage_count(), 'The removed coupon should be given back only by the removal' );
+		$this->assertSame( 0, ( new WC_Coupon( 'kept-meanwhile' ) )->get_usage_count(), 'The coupon still on the order should be given back by the cancellation' );
+	}
+
+	/**
+	 * @testdox Removing one of two coupons does not give its use back, or mark the order as counted again, when the order was cancelled while the coupon line was being deleted.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is the authoritative order storage.
+	 */
+	public function test_remove_coupon_skips_use_given_back_by_cancel_meanwhile( bool $hpos_enabled ): void {
+		$this->toggle_cot_authoritative( $hpos_enabled );
+		$order   = $this->create_pending_order_with_counted_coupon( 'cancelled-meanwhile' );
+		$item_id = array_key_first( $order->get_items( 'coupon' ) );
+		WC_Helper_Coupon::create_coupon( 'kept-on-cancel' );
+		$order->apply_coupon( 'kept-on-cancel' );
+
+		$has_run = false;
+		add_action(
+			'woocommerce_before_delete_order_item',
+			function ( $deleted_item_id ) use ( $order, $item_id, &$has_run ) {
+				if ( ! $has_run && (int) $deleted_item_id === (int) $item_id ) {
+					$has_run = true;
+					wc_get_order( $order->get_id() )->update_status( OrderStatus::CANCELLED );
+				}
+			}
+		);
+		$this->assertTrue( $order->remove_coupon( 'cancelled-meanwhile' ), 'The coupon should be removed' );
+
+		$this->assertTrue( $has_run, 'The cancellation should run while the coupon line is deleted' );
+		$this->assertSame( OrderStatus::CANCELLED, wc_get_order( $order->get_id() )->get_status(), 'The order should stay cancelled after the removal saves it' );
+		$this->assertFalse( $order->get_data_store()->get_stored_recorded_coupon_usage_counts( $order ), 'The cancelled order should stay marked as not counted' );
+		$this->assertSame( 1, ( new WC_Coupon( 'cancelled-meanwhile' ) )->get_usage_count(), 'The use should be given back only by the cancellation' );
+		$this->assertCount( 1, ( new WC_Coupon( 'cancelled-meanwhile' ) )->get_used_by(), 'Only one customer use record should be removed' );
+		$this->assertSame( 0, ( new WC_Coupon( 'kept-on-cancel' ) )->get_usage_count(), 'The cancellation should give back the coupon still on the order' );
+	}
+
+	/**
+	 * @testdox A cancellation that lands right after a coupon removal deletes the line does not give the use back twice.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is the authoritative order storage.
+	 */
+	public function test_cancel_right_after_coupon_line_delete_does_not_give_use_back_twice( bool $hpos_enabled ): void {
+		$this->toggle_cot_authoritative( $hpos_enabled );
+		$order   = $this->create_pending_order_with_counted_coupon( 'cancelled-after-delete' );
+		$item_id = array_key_first( $order->get_items( 'coupon' ) );
+
+		$has_run = false;
+		add_action(
+			'woocommerce_delete_order_item',
+			function ( $deleted_item_id ) use ( $order, $item_id, &$has_run ) {
+				if ( ! $has_run && (int) $deleted_item_id === (int) $item_id ) {
+					$has_run = true;
+					wc_get_order( $order->get_id() )->update_status( OrderStatus::CANCELLED );
+				}
+			}
+		);
+		$this->assertTrue( $order->remove_coupon( 'cancelled-after-delete' ), 'The coupon should be removed' );
+
+		$this->assertTrue( $has_run, 'The cancellation should run right after the coupon line is deleted' );
+		$this->assertSame( 2, ( new WC_Coupon( 'cancelled-after-delete' ) )->get_usage_count(), 'At this exact moment both requests skip the use, so it stays counted rather than given back twice' );
+		$this->assertCount( 2, ( new WC_Coupon( 'cancelled-after-delete' ) )->get_used_by(), 'No customer use record should be removed' );
+	}
+
+	/**
+	 * @testdox A removal that finds the coupon line already deleted does not stop the removal that deleted it from giving the use back.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is the authoritative order storage.
+	 */
+	public function test_losing_removal_keeps_flag_for_winning_removal( bool $hpos_enabled ): void {
+		$this->toggle_cot_authoritative( $hpos_enabled );
+		$order       = $this->create_pending_order_with_counted_coupon( 'lost-removal' );
+		$winner      = wc_get_order( $order->get_id() );
+		$loser       = wc_get_order( $order->get_id() );
+		$item_id     = array_key_first( $winner->get_items( 'coupon' ) );
+		$loser_items = $loser->get_items( 'coupon' );
+		$this->assertArrayHasKey( $item_id, $loser_items, 'The losing copy should load the coupon line before it is deleted' );
+
+		$has_run = false;
+		add_action(
+			'woocommerce_delete_order_item',
+			function ( $deleted_item_id ) use ( $loser, $item_id, &$has_run ) {
+				if ( ! $has_run && (int) $deleted_item_id === (int) $item_id ) {
+					$has_run = true;
+					$loser->remove_coupon( 'lost-removal' );
+				}
+			}
+		);
+		$this->assertTrue( $winner->remove_coupon( 'lost-removal' ), 'The coupon should be removed' );
+
+		$this->assertTrue( $has_run, 'The losing removal should run right after the line is deleted' );
+		$this->assertSame( 1, ( new WC_Coupon( 'lost-removal' ) )->get_usage_count(), 'The use should be given back once' );
+	}
+
+	/**
 	 * Create a pending order whose coupon use is counted, after another order already used the same coupon.
 	 *
 	 * @param string $code Coupon code.
