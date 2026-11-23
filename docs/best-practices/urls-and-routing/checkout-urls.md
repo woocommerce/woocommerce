@@ -29,6 +29,12 @@ The product identifier can be:
 
 Variation and cart item data use `key=value` pairs. Separate multiple pairs in the same field with semicolons. Variation data selects a variation, while cart item data passes additional values consumed by extensions or custom product types. The accepted cart item data depends on the extension handling the product.
 
+Cart item data in a checkout link comes from the shopper, not a trusted extension. Treat it as untrusted input, the same as any other external data.
+
+:::note
+For products sold individually, cart item data is dropped by default: since the shopper is in charge of this input, letting it vary would let a checkout link add more than one unit. An extension can restore it for a specific product with the `woocommerce_checkout_link_sold_individually_cart_item_data` filter, and restored data then behaves like any other item data. To keep both the data and the limit, add a check to the `woocommerce_add_cart_item_data` filter (it runs on every add to cart) that rejects the add if the cart already has a line for that product.
+:::
+
 For example:
 
 ```plaintext

@@ -219,6 +219,8 @@ export const getPages = ( reports = [] ) => {
 	if ( isFeatureEnabled( 'agent_readiness' ) ) {
 		pages.push( {
 			container: SalesReadiness,
+			// No spinner while the page's code loads; the page shows none while its view loads either.
+			fallback: () => null,
 			layout: {
 				header: false,
 			},

@@ -156,7 +156,7 @@ final class Contracts {
 	 * @param string $extension_slug The expected owner (the contract's owning extension).
 	 * @param string $operation      Operation label (1-64 of `[a-z0-9_-]`), shown to callers that conflict.
 	 * @return ContractLock|null The held lock; null when another operation holds it or no contract of that extension has the id.
-	 * @throws ValidationException If `$extension_slug` is empty.
+	 * @throws ValidationException If `$extension_slug` is not a valid extension slug (1-64 of `[a-z0-9_-]`).
 	 * @throws InvalidArgumentException If the label is invalid: refused after the slug, alone.
 	 */
 	public static function lock( int $contract_id, string $extension_slug, string $operation ): ?ContractLock {
@@ -192,8 +192,11 @@ final class Contracts {
 		$validator      = new ArgumentValidator();
 		$operation      = $validator->get_string( 'operation', $filtered_options['operation'] ?? self::CREATE_OPERATION );
 		$extension_slug = $validator->get_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
-		$creation_key   = $validator->get_nullable_string( 'creation_key', $filtered_args['creation_key'] ?? null );
-		$fields         = self::get_contract_fields( $validator, $filtered_args );
+		if ( null !== $extension_slug && '' !== $extension_slug ) {
+			$validator->get_extension_slug( 'extension_slug', $extension_slug );
+		}
+		$creation_key = $validator->get_nullable_string( 'creation_key', $filtered_args['creation_key'] ?? null );
+		$fields       = self::get_contract_fields( $validator, $filtered_args );
 		try {
 			$validator->throw_errors();
 			$contract = Contract::create(
@@ -245,7 +248,7 @@ final class Contracts {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
 
 		$validator      = new ArgumentValidator();
-		$extension_slug = (string) $validator->get_non_empty_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		$extension_slug = (string) $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] ?? null );
 		$changes        = self::get_contract_fields( $validator, $filtered_args );
 		try {
 			$validator->throw_errors();
@@ -357,7 +360,7 @@ final class Contracts {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
 
 		$validator      = new ArgumentValidator();
-		$extension_slug = (string) $validator->get_non_empty_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		$extension_slug = (string) $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] ?? null );
 		$cycle_args     = array(
 			'contract_id'    => $contract_id,
 			'kind'           => $filtered_args['kind'] ?? null,
@@ -422,7 +425,7 @@ final class Contracts {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::TRANSITION_KEYS );
 
 		$validator      = new ArgumentValidator();
-		$extension_slug = (string) $validator->get_non_empty_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		$extension_slug = (string) $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] ?? null );
 		$from_status    = $validator->get_non_empty_string( 'from_status', $filtered_args['from_status'] ?? null );
 		$to_status      = $validator->get_non_empty_string( 'to_status', $filtered_args['to_status'] ?? null );
 		$changes        = array();
@@ -466,7 +469,7 @@ final class Contracts {
 	 * @param bool              $unique         When true, add nothing if the key already exists.
 	 * @param ContractLock|null $lock           The caller's lock on this contract, or null for an internal one.
 	 * @return int|null The meta row id; null when `$unique` and the key exists.
-	 * @throws ValidationException If `$extension_slug` or `$key` is empty, with both reported.
+	 * @throws ValidationException If `$extension_slug` is not a valid extension slug or `$key` is empty, with both reported.
 	 * @throws InvalidArgumentException If no contract of that extension has the id, or the lock is for another contract or extension.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
 	 * @throws \RuntimeException If the key is longer than the meta_key column (255 characters).
@@ -490,7 +493,7 @@ final class Contracts {
 	 *                                          value ('' and false included) matches literally.
 	 * @param ContractLock|null $lock           The caller's lock on this contract, or null for an internal one.
 	 * @return bool True when a value was added or changed; false when nothing changed.
-	 * @throws ValidationException If `$extension_slug` or `$key` is empty, with both reported.
+	 * @throws ValidationException If `$extension_slug` is not a valid extension slug or `$key` is empty, with both reported.
 	 * @throws InvalidArgumentException If no contract of that extension has the id, or the lock is for another contract or extension.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
 	 * @throws \RuntimeException If the key is longer than the meta_key column (255 characters).
@@ -513,7 +516,7 @@ final class Contracts {
 	 *                                          Any other value ('' and false included) matches literally.
 	 * @param ContractLock|null $lock           The caller's lock on this contract, or null for an internal one.
 	 * @return bool True when at least one value was deleted; false also when no contract of that extension has the id.
-	 * @throws ValidationException If `$extension_slug` or `$key` is empty, with both reported.
+	 * @throws ValidationException If `$extension_slug` is not a valid extension slug or `$key` is empty, with both reported.
 	 * @throws InvalidArgumentException If the lock is for another contract or extension.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
 	 */
@@ -639,7 +642,7 @@ final class Contracts {
 	 *                                           Absent: every extension.
 	 * }
 	 * @return array<int, ContractView> The customer's contracts, newest first.
-	 * @throws ValidationException If `extension_slug` is empty, not a string, or `any`.
+	 * @throws ValidationException If `extension_slug` is empty, not a string, not a valid extension slug, or `any`.
 	 */
 	public static function list_for_customer( int $customer_id, int $limit = 20, int $offset = 0, array $args = array() ): array {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::LIST_FOR_CUSTOMER_KEYS );
@@ -651,7 +654,7 @@ final class Contracts {
 		);
 		if ( array_key_exists( 'extension_slug', $filtered_args ) ) {
 			$validator      = new ArgumentValidator();
-			$extension_slug = $validator->get_non_empty_string( 'extension_slug', $filtered_args['extension_slug'] );
+			$extension_slug = $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] );
 			if ( 'any' === $extension_slug ) {
 				$validator->add(
 					new InvalidInputException(
@@ -720,11 +723,11 @@ final class Contracts {
 	 *
 	 * @param string      $extension_slug The expected owner.
 	 * @param string|null $key            Meta key, or null for a write that takes none.
-	 * @throws ValidationException If the owner or the key is empty.
+	 * @throws ValidationException If the owner is not a valid extension slug or the key is empty.
 	 */
 	private static function assert_scope( string $extension_slug, ?string $key = null ): void {
 		$validator = new ArgumentValidator();
-		$validator->get_non_empty_string( 'extension_slug', $extension_slug );
+		$validator->get_extension_slug( 'extension_slug', $extension_slug );
 		if ( null !== $key ) {
 			$validator->get_non_empty_string( 'key', $key );
 		}

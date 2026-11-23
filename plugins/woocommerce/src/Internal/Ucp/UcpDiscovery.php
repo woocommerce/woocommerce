@@ -87,6 +87,13 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Whether the site is hosted on WordPress.com, the same test as Jetpack's Host::is_atomic_platform().
+	 */
+	public static function is_wordpress_com(): bool {
+		return defined( 'ATOMIC_SITE_ID' ) && ATOMIC_SITE_ID && defined( 'ATOMIC_CLIENT_ID' ) && ATOMIC_CLIENT_ID;
+	}
+
+	/**
 	 * What a merchant should do for a failing serve_status() value. Includes the file path.
 	 *
 	 * On WordPress.com the fix names its support instead of the hosting provider.
@@ -99,8 +106,8 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		$path = self::get_file_path();
 		$dir  = dirname( $path );
 
-		// The same test Jetpack uses for a WordPress.com site (Host::is_woa_site()): its support stands in for the hosting provider.
-		$wordpress_com = $wordpress_com ?? ( defined( 'ATOMIC_SITE_ID' ) && ATOMIC_SITE_ID && defined( 'ATOMIC_CLIENT_ID' ) && ATOMIC_CLIENT_ID );
+		// On WordPress.com its support stands in for the hosting provider.
+		$wordpress_com = $wordpress_com ?? self::is_wordpress_com();
 
 		switch ( $status ) {
 			case 'not_readable':
@@ -368,8 +375,8 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	public function get_profile(): array {
 		return array(
 			'ucp'   => array(
-				'version'      => Utils::VERSION,
-				'services'     => array(
+				'version'          => Utils::VERSION,
+				'services'         => array(
 					'dev.ucp.shopping' => array(
 						array(
 							'version'   => Utils::VERSION,
@@ -380,12 +387,14 @@ final class UcpDiscovery implements RegisterHooksInterface {
 						),
 					),
 				),
-				'capabilities' => array_map(
+				'capabilities'     => array_map(
 					static function ( array $declaration ): array {
 						return array( $declaration );
 					},
 					Utils::capability_declarations()
 				),
+				// UCP requires the registry even when empty. Encodes as `{}`, since the store offers no payment handlers yet.
+				'payment_handlers' => new \stdClass(),
 			),
 			'links' => array(
 				array(
