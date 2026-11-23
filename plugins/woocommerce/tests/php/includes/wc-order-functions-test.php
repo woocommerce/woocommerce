@@ -1308,12 +1308,13 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox wc_order_search() treats a search term that is not a string as an empty search instead of failing.
+	 * @testdox wc_order_search() returns no orders for a term that is empty after sanitizing, including a term that is not a string.
 	 */
-	public function test_wc_order_search_treats_array_term_as_empty_search(): void {
+	public function test_wc_order_search_returns_no_orders_for_empty_term(): void {
 		WC_Helper_Order::create_order();
 
-		$this->assertSame( wc_order_search( '' ), wc_order_search( array( 'foo' ) ), 'An array term should search like an empty term' );
+		$this->assertSame( array(), wc_order_search( '<br>' ), 'A term with only a tag should match no orders' );
+		$this->assertSame( array(), wc_order_search( array( 'foo' ) ), 'An array term should match no orders' );
 	}
 
 	/**

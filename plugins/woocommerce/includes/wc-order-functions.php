@@ -969,11 +969,17 @@ add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
  *
  * @since  2.6.0
  * @param  string $term Term to search.
- * @return array List of orders ID.
+ * @return array List of orders ID, empty when the term has no text left after sanitizing.
  */
 function wc_order_search( $term ) {
+	$term = str_replace( 'Order #', '', sanitize_text_field( $term ) );
+
+	if ( '' === $term ) {
+		return array();
+	}
+
 	$data_store = WC_Data_Store::load( 'order' );
-	return $data_store->search_orders( str_replace( 'Order #', '', sanitize_text_field( $term ) ) );
+	return $data_store->search_orders( $term );
 }
 
 /**
