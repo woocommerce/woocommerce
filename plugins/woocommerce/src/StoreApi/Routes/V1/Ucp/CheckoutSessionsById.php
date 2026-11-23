@@ -67,6 +67,10 @@ class CheckoutSessionsById extends AbstractCheckoutRoute {
 						'description' => __( 'Shipping postal address.', 'woocommerce' ),
 						'type'        => 'object',
 					),
+					'discounts'        => array(
+						'description' => __( 'Discount codes to apply, replacing any applied before.', 'woocommerce' ),
+						'type'        => 'object',
+					),
 				),
 			),
 			'schema' => array( $this->schema, 'get_public_item_schema' ),
@@ -108,13 +112,20 @@ class CheckoutSessionsById extends AbstractCheckoutRoute {
 			return $state;
 		}
 
-		$error = $this->update_line_items( $request ) ?? $this->update_customer( $request );
+		$codes = $this->parse_discount_codes( $request );
+
+		if ( $codes instanceof \WP_REST_Response ) {
+			return $codes;
+		}
+
+		$error   = $this->update_line_items( $request ) ?? $this->update_customer( $request );
+		$context = null === $error ? $this->apply_discount_codes( $codes ) : array();
 
 		if ( ( $state['fingerprint'] ?? '' ) !== $this->hand_off_fingerprint() ) {
 			$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session changed after payment was handed off.', 'woocommerce' ) );
 		}
 
 		// Read again, so an order paid while this request ran is reported as it now stands.
-		return $error ?? $this->checkout_response( $this->route_cart_id( $request ), $this->checkout_state() ?? $state );
+		return $error ?? $this->checkout_response( $this->route_cart_id( $request ), $this->checkout_state() ?? $state, 200, null, $context );
 	}
 }

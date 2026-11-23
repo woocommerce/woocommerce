@@ -101,8 +101,8 @@ class HandlerRegistry {
 		$this->register_collection_handlers(
 			'woocommerce/product-collection/related',
 			function ( $collection_args ) {
-				// No products should be shown if no related product reference is set.
-				if ( empty( $collection_args['relatedProductReference'] ) ) {
+				// No products should be shown if no related product reference is set, or the current user can't view it.
+				if ( empty( $collection_args['relatedProductReference'] ) || empty( $this->get_viewable_products( array( $collection_args['relatedProductReference'] ) ) ) ) {
 					return array(
 						'post__in' => array( -1 ),
 					);
@@ -198,7 +198,7 @@ class HandlerRegistry {
 					);
 				}
 
-				$products = array_filter( array_map( 'wc_get_product', $product_reference ) );
+				$products = $this->get_viewable_products( $product_reference );
 
 				if ( empty( $products ) ) {
 					return array(
@@ -292,7 +292,7 @@ class HandlerRegistry {
 					);
 				}
 
-				$products = array_filter( array_map( 'wc_get_product', $product_reference ) );
+				$products = $this->get_viewable_products( $product_reference );
 
 				if ( empty( $products ) ) {
 					return array(
@@ -519,5 +519,20 @@ class HandlerRegistry {
 
 		// In frontend/email context, return empty array when no cart is found.
 		return array();
+	}
+
+	/**
+	 * Get the referenced products that the current user can view.
+	 *
+	 * @param array $product_references The product IDs.
+	 * @return \WC_Product[] The products that exist and that the current user can view.
+	 */
+	private function get_viewable_products( $product_references ) {
+		return array_filter(
+			array_map( 'wc_get_product', $product_references ),
+			function ( $product ) {
+				return $product instanceof \WC_Product && $product->is_viewable();
+			}
+		);
 	}
 }

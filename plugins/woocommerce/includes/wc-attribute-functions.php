@@ -71,6 +71,11 @@ function wc_get_attribute_taxonomies() {
 		set_transient( 'wc_attribute_taxonomies', $raw_attribute_taxonomies );
 	}
 
+	// Stored labels are plain text for every reader, as the admin form stores them.
+	foreach ( (array) $raw_attribute_taxonomies as $raw_attribute_taxonomy ) {
+		$raw_attribute_taxonomy->attribute_label = sanitize_text_field( (string) $raw_attribute_taxonomy->attribute_label );
+	}
+
 	/**
 	 * Filter attribute taxonomies.
 	 *
@@ -527,7 +532,7 @@ function wc_get_attribute( $id ) {
  *     Array of attribute parameters.
  *
  *     @type int    $id           Unique identifier, used to update an attribute.
- *     @type string $name         Attribute name. Always required.
+ *     @type string $name         Attribute name. Always required. Stored as plain text (sanitize_text_field()).
  *     @type string $slug         Attribute alphanumeric identifier.
  *     @type string $type         Type of attribute.
  *                                Core by default accepts: 'select' and
@@ -548,13 +553,15 @@ function wc_create_attribute( $args ) {
 	$format = array( '%s', '%s', '%s', '%s', '%d' );
 
 	// Name is required.
+	$raw_name     = isset( $args['name'] ) && is_scalar( $args['name'] ) ? (string) $args['name'] : '';
+	$args['name'] = sanitize_text_field( $raw_name );
 	if ( empty( $args['name'] ) ) {
 		return new WP_Error( 'missing_attribute_name', __( 'Please, provide an attribute name.', 'woocommerce' ), array( 'status' => 400 ) );
 	}
 
-	// Set the attribute slug.
+	// Set the attribute slug. Derive it from the name as given so the default slug does not change with the label cleanup.
 	if ( empty( $args['slug'] ) ) {
-		$slug = wc_sanitize_taxonomy_name( $args['name'] );
+		$slug = wc_sanitize_taxonomy_name( $raw_name );
 	} else {
 		$slug = (string) preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( $args['slug'] ) );
 	}

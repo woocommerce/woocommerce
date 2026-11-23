@@ -18,6 +18,11 @@ import type { ShoppingView } from '../types';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 jest.mock( '@wordpress/a11y', () => ( { speak: jest.fn() } ) );
+const mockCreateSuccessNotice = jest.fn();
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
+	dispatch: () => ( { createSuccessNotice: mockCreateSuccessNotice } ),
+} ) );
 
 const mockedFetch = apiFetch as unknown as jest.Mock;
 
@@ -54,8 +59,12 @@ const view = ( fields: Partial< ShoppingView > = {} ): ShoppingView => ( {
 		blocked: true,
 		title: 'Allow AI assistants to shop your store',
 		description: 'Your products can be found by AI assistants.',
-		learn_more: { href: 'https://ucp.dev/', text: 'Learn how it works' },
-		message: '',
+		learn_more: {
+			href: 'https://woocommerce.com/document/woocommerce-ai/agentic-commerce/',
+			text: 'Learn how it works',
+		},
+		turned_on: 'AI assistants can now shop your store.',
+		turned_off: 'AI assistants can no longer shop your store.',
 		path: '/wc/v3/agent-readiness/ucp',
 		error_on:
 			'AI shopping wasn’t turned on. Reload the page and try again.',
@@ -161,6 +170,8 @@ describe( 'AiShopping', () => {
 
 	beforeEach( () => {
 		mockedFetch.mockReset();
+		mockCreateSuccessNotice.mockReset();
+		window.sessionStorage.clear();
 		Object.defineProperty( window, 'location', {
 			configurable: true,
 			value: {
@@ -234,11 +245,15 @@ describe( 'AiShopping', () => {
 			} )
 		);
 
-		expect(
-			screen.getByRole( 'link', {
-				name: 'Edit your refund and returns policy page',
-			} )
-		).toHaveAttribute( 'href', '/post.php?post=5&action=edit' );
+		const link = screen.getByRole( 'link', {
+			name: 'Edit page',
+			description: 'Edit your refund and returns policy page',
+		} );
+		expect( link ).toHaveAccessibleName( 'Edit page' );
+		expect( link ).toHaveAttribute(
+			'href',
+			'/post.php?post=5&action=edit'
+		);
 		expect( screen.queryByText( 'Required' ) ).toBeNull();
 	} );
 
@@ -246,7 +261,7 @@ describe( 'AiShopping', () => {
 		renderPage(
 			view( {
 				coming_soon: {
-					text: 'Your store is in coming soon mode, so AI assistants can’t shop it yet.',
+					text: 'Your store is in coming soon mode, so AI assistants can’t find your products yet.',
 					link: {
 						href: '/wp-admin/admin.php?page=wc-settings&tab=site-visibility',
 						text: 'Change store visibility',
@@ -273,8 +288,6 @@ describe( 'AiShopping', () => {
 					...view().ucp,
 					enabled: true,
 					blocked: false,
-					message:
-						'AI shopping is on. AI assistants can now find and shop your store.',
 				},
 				checklist: {
 					...view().checklist,
@@ -287,11 +300,7 @@ describe( 'AiShopping', () => {
 
 		expect( toggle() ).toBeChecked();
 		expect( toggle() ).not.toBeDisabled();
-		expect(
-			screen.getByText(
-				'AI shopping is on. AI assistants can now find and shop your store.'
-			)
-		).toBeInTheDocument();
+		expect( screen.queryByText( /can now shop/ ) ).toBeNull();
 		expect( screen.queryByText( /step left/ ) ).toBeNull();
 
 		fireEvent.click(
@@ -310,7 +319,7 @@ describe( 'AiShopping', () => {
 			view( {
 				visibility: {
 					...view().visibility,
-					empty: 'Product counts show after the first AI sales readiness check.',
+					empty: 'Product counts show after the first AI shopping health check.',
 					counts: [],
 				},
 			} )
@@ -318,7 +327,7 @@ describe( 'AiShopping', () => {
 
 		expect(
 			screen.getByText(
-				'Product counts show after the first AI sales readiness check.'
+				'Product counts show after the first AI shopping health check.'
 			)
 		).toBeInTheDocument();
 		expect( screen.queryByText( 'View products' ) ).toBeNull();
@@ -336,6 +345,26 @@ describe( 'AiShopping', () => {
 				name: 'More information about hidden products',
 			} )
 		).toBeInTheDocument();
+	} );
+
+	it( 'opens a count’s popover with its text and no heading', async () => {
+		renderPage( view() );
+
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'More information about hidden products',
+			} )
+		);
+
+		expect(
+			await screen.findByText(
+				'Products set to Hidden in Catalog visibility.'
+			)
+		).toBeInTheDocument();
+		// The title stays for screen readers only.
+		expect( screen.getByText( 'More information' ) ).toHaveAttribute(
+			'data-visually-hidden'
+		);
 	} );
 
 	it( 'submits the policy pages as the settings fields, and warns before leaving once one changes', () => {
@@ -414,6 +443,27 @@ describe( 'AiShopping', () => {
 		expect( window.location.assign ).toHaveBeenCalledWith(
 			'https://example.com/wp-admin/admin.php?page=wc-settings'
 		);
+		expect(
+			window.sessionStorage.getItem( 'wc-ai-shopping-snackbar' )
+		).toBe( 'AI assistants can now shop your store.' );
+		expect( mockCreateSuccessNotice ).not.toHaveBeenCalled();
+	} );
+
+	it( 'shows the switch’s snackbar on the page that loads after it saves, once', () => {
+		window.sessionStorage.setItem(
+			'wc-ai-shopping-snackbar',
+			'AI assistants can no longer shop your store.'
+		);
+		renderPage( view() );
+
+		expect( mockCreateSuccessNotice ).toHaveBeenCalledTimes( 1 );
+		expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
+			'AI assistants can no longer shop your store.',
+			{ type: 'snackbar' }
+		);
+		expect(
+			window.sessionStorage.getItem( 'wc-ai-shopping-snackbar' )
+		).toBeNull();
 	} );
 
 	it( 'does not reload over unsaved fields, and says to save them', async () => {
@@ -434,6 +484,10 @@ describe( 'AiShopping', () => {
 
 		expect( window.location.assign ).not.toHaveBeenCalled();
 		expect( toggle() ).not.toBeChecked();
+		expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
+			'AI assistants can no longer shop your store.',
+			{ type: 'snackbar' }
+		);
 		expect(
 			screen.getByText( 'Save your changes to see the updated status.' )
 		).toBeInTheDocument();
@@ -505,7 +559,10 @@ describe( 'AiShopping', () => {
 		).toHaveAttribute( 'href', 'https://ucpplayground.com' );
 		expect(
 			screen.getByRole( 'link', { name: /Learn how it works/ } )
-		).toHaveAttribute( 'href', 'https://ucp.dev/' );
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woocommerce-ai/agentic-commerce/'
+		);
 	} );
 
 	it( 'goes to a policy field from a link, on load and from the Setup checklist on this page', () => {

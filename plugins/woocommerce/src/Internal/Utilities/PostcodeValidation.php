@@ -74,4 +74,25 @@ final class PostcodeValidation {
 
 		return false === $matched ? null : 1 === $matched;
 	}
+
+	/**
+	 * Get the 5-digit ZIP code of a ZIP+4 postcode.
+	 *
+	 * Covers the countries wc_format_postcode() formats as ZIP+4.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $postcode Postcode, with or without the hyphen.
+	 * @param string $country  Country code.
+	 * @return string The 5-digit ZIP code, or an empty string if the postcode is not a ZIP+4 code.
+	 */
+	public static function get_zip_code_from_zip_plus_four( string $postcode, string $country ): string {
+		$postcode = wc_normalize_postcode( $postcode );
+
+		if ( ! in_array( $country, array( 'US', 'PR', 'MN' ), true ) || ! preg_match( '/^\d{9}$/', $postcode ) ) {
+			return '';
+		}
+
+		return substr( $postcode, 0, 5 );
+	}
 }

@@ -336,4 +336,148 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( sanitize_email( $email ), $result['email'] );
 	}
+
+	/**
+	 * @testdox Should reject a state of "0" when the country has a list of states.
+	 *
+	 * @testWith ["0"]
+	 *           [0]
+	 *           [" 0 "]
+	 *
+	 * @param mixed $state State value as posted.
+	 */
+	public function test_rejects_state_zero( $state ): void {
+		$address = $this->make_address(
+			array(
+				'country'  => 'CA',
+				'state'    => $state,
+				'postcode' => 'M5H 2N2',
+			)
+		);
+
+		$result = $this->sut->validate_callback( $address, new \WP_REST_Request(), 'billing_address' );
+
+		$this->assertWPError( $result, 'A state of "0" is not in the Canadian list and must be refused.' );
+		$this->assertContains( 'invalid_state', $result->get_error_codes() );
+	}
+
+	/**
+	 * @testdox Should reject a country of "0".
+	 */
+	public function test_rejects_country_zero(): void {
+		$address = $this->make_address(
+			array(
+				'country' => '0',
+				'state'   => '',
+			)
+		);
+
+		$result = $this->sut->validate_callback( $address, new \WP_REST_Request(), 'billing_address' );
+
+		$this->assertWPError( $result );
+		$this->assertContains( 'invalid_country', $result->get_error_codes() );
+	}
+
+	/**
+	 * @testdox Should accept a partial address with a blank state and postcode.
+	 */
+	public function test_accepts_blank_state_and_postcode_in_partial_address(): void {
+		$result = $this->sut->validate_callback(
+			array(
+				'state'    => '',
+				'postcode' => '',
+			),
+			new \WP_REST_Request(),
+			'billing_address'
+		);
+
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * @testdox Should format the state for a country code sent in lower case.
+	 *
+	 * @testWith ["Illinois"]
+	 *           ["ıl"]
+	 *
+	 * @param string $state State value as posted.
+	 */
+	public function test_formats_state_for_lowercase_country( string $state ): void {
+		$address = $this->make_address(
+			array(
+				'country'  => 'us',
+				'state'    => $state,
+				'postcode' => '60601',
+			)
+		);
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( 'US', $result['country'] );
+		$this->assertSame( 'IL', $result['state'], 'The state must be formatted for the upper-cased country, which tax and shipping zone lookups match.' );
+	}
+
+	/**
+	 * @testdox Should sanitize and validate a partial address without a country.
+	 */
+	public function test_partial_address_without_country(): void {
+		$address = array( 'state' => 'Ontario' );
+
+		$sanitized = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+		$result    = $this->sut->validate_callback( $address, new \WP_REST_Request(), 'billing_address' );
+
+		$this->assertSame( 'Ontario', $sanitized['state'], 'Without a country there is no state list to format against.' );
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * @testdox Should validate and format states the same way across the kinds of countries WooCommerce supports.
+	 *
+	 * @dataProvider provide_states_across_country_types
+	 *
+	 * @param string      $country        Country code.
+	 * @param string      $state          State as posted.
+	 * @param string      $postcode       Postcode valid for the country.
+	 * @param string|true $expected       True, or the error code validation must return.
+	 * @param string|null $expected_state State after sanitization, or null when validation fails.
+	 */
+	public function test_state_validation_across_country_types( string $country, string $state, string $postcode, $expected, ?string $expected_state ): void {
+		$address = $this->make_address(
+			array(
+				'country'  => $country,
+				'state'    => $state,
+				'postcode' => $postcode,
+			)
+		);
+
+		$result = $this->sut->validate_callback( $address, new \WP_REST_Request(), 'billing_address' );
+
+		if ( true === $expected ) {
+			$this->assertTrue( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+			$this->assertSame( $expected_state, $this->sut->sanitize_callback( $address, null, 'billing_address' )['state'] );
+		} else {
+			$this->assertWPError( $result );
+			$this->assertContains( $expected, $result->get_error_codes() );
+		}
+	}
+
+	/**
+	 * Countries with a required state list, an optional one, a hidden state field, and a free-text state.
+	 *
+	 * @return array
+	 */
+	public function provide_states_across_country_types(): array {
+		return array(
+			'optional list, blank'        => array( 'DE', '', '10115', true, '' ),
+			'optional list, code'         => array( 'DE', 'DE-BE', '10115', true, 'DE-BE' ),
+			'optional list, zero'         => array( 'DE', '0', '10115', 'invalid_state', null ),
+			'free text'                   => array( 'GB', 'Cambridgeshire', 'CB24 1AB', true, 'Cambridgeshire' ),
+			'free text, zero'             => array( 'GB', '0', 'CB24 1AB', true, '0' ),
+			'hidden field, empty list'    => array( 'FR', 'Île-de-France', '75001', true, 'Île-de-France' ),
+			'lower-case code'             => array( 'MA', 'maagd', '80000', true, 'MAAGD' ),
+			'digit code that is not zero' => array( 'PH', '00', '1000', true, '00' ),
+			'required list, name to code' => array( 'JP', 'Hokkaido', '060-0001', true, 'JP01' ),
+			'required list, zero'         => array( 'JP', '0', '060-0001', 'invalid_state', null ),
+		);
+	}
 }

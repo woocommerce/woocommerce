@@ -15,6 +15,13 @@ export interface ViewLink {
 	/** Empty when the text is shown without a link. */
 	href: string;
 	text: string;
+	/** What screen readers also hear, as the button's description, when the text repeats (Edit page). */
+	sr?: string;
+}
+
+/** A name to link inside a line, and where it starts when it could also appear earlier. */
+export interface TextLink extends ViewLink {
+	at?: number;
 }
 
 export type RowState = 'open' | 'required' | 'unknown' | 'pass';
@@ -34,7 +41,7 @@ export interface CheckRow {
 	link: ViewLink | null;
 	seen_at: ViewLink | null;
 	/** A name in the text to link, such as a tool to test with. */
-	text_link?: ViewLink | null;
+	text_link?: TextLink | null;
 }
 
 export interface FixFirstItem {
@@ -44,6 +51,8 @@ export interface FixFirstItem {
 	/** Shown beside the tier heading: Required for the Required tier. */
 	badge: ViewBadge | null;
 	title: string;
+	/** Shown in bold before `why`: "Affects 38% of your sales.", or "Affects your whole store.". */
+	impact?: string | null;
 	why: string;
 	link: ViewLink | null;
 }
@@ -79,7 +88,12 @@ export interface Declared {
 	title: string;
 	badge: ViewBadge;
 	text: string;
-	items: { name: string; found: boolean }[];
+	/** Items under where they live: root folder, standard addresses, page code, extra details, not checked yet. */
+	groups: {
+		title: string;
+		/** `found` is null for an item the scan couldn't read. */
+		items: { name: string; found: boolean | null }[];
+	}[];
 }
 
 export interface ShoppingCard {
@@ -94,7 +108,8 @@ export interface ReadinessView {
 	description: string;
 	last_checked: string;
 	checked_note: string | null;
-	intro: string | null;
+	/** False before the first check. */
+	checked: boolean;
 	run: {
 		label: string;
 		pending: boolean;
@@ -103,6 +118,10 @@ export interface ReadinessView {
 		/** Scheduled Actions, when the check can't start. */
 		link: ViewLink | null;
 	};
+	/** Where Need help? sends merchants: WordPress.com support on WordPress.com, else WooCommerce.com. */
+	support_url: string;
+	/** While the store is in coming soon mode and the results are from when it was live. */
+	coming_soon: { text: string; link: ViewLink } | null;
 	/** Null before the first check, and when there is nothing to fix. */
 	fix_first: FixFirst | null;
 	sections: Section[];
@@ -165,8 +184,9 @@ export interface ShoppingView {
 		title: string;
 		description: string;
 		learn_more: ViewLink;
-		/** What the switch says under it: that AI shopping is on, or ''. */
-		message: string;
+		/** The snackbar after the switch saves, turned on and turned off. */
+		turned_on: string;
+		turned_off: string;
 		path: string;
 		/** Said when turning AI shopping on didn't save, unless required steps are the reason. */
 		error_on: string;

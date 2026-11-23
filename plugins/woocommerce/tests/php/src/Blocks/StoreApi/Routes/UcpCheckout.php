@@ -109,7 +109,7 @@ class UcpCheckout extends ControllerTestCase {
 	 * @param string $method HTTP method.
 	 * @param string $path Route path under /wc/ucp/v1.
 	 * @param array  $body Request body.
-	 * @param array  $headers Extra request headers.
+	 * @param array  $headers Extra request headers; an `Idempotency-Key` replaces the fresh one.
 	 * @return \WP_REST_Response
 	 */
 	private function request( string $method, string $path, array $body = array(), array $headers = array() ) {
@@ -117,7 +117,9 @@ class UcpCheckout extends ControllerTestCase {
 		$request->set_headers( $headers );
 		$request->set_header( 'content-type', 'application/json' );
 		// A write needs a key of its own; the key itself is the UcpIdempotency suite's concern.
-		$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
+		if ( null === $request->get_header( 'Idempotency-Key' ) ) {
+			$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
+		}
 		$request->set_body( wp_json_encode( $body ) );
 
 		return rest_get_server()->dispatch( $request );
@@ -144,6 +146,13 @@ class UcpCheckout extends ControllerTestCase {
 			unset( $_SERVER['HTTP_CART_TOKEN'] );
 		} else {
 			$_SERVER['HTTP_CART_TOKEN'] = $cart_token;
+		}
+
+		if ( WC()->cart instanceof \WC_Cart ) {
+			// A real request ends with its cart; left hooked, this one would go on saving itself into later sessions.
+			$cart_session = new \ReflectionProperty( \WC_Cart::class, 'session' );
+			$cart_session->setAccessible( true );
+			remove_action( 'woocommerce_after_calculate_totals', array( $cart_session->getValue( WC()->cart ), 'set_session' ), 1000 );
 		}
 
 		WC()->session  = null;
@@ -216,7 +225,7 @@ class UcpCheckout extends ControllerTestCase {
 	public function test_create_from_line_items(): void {
 		$data = $this->create_ready_checkout();
 
-		$this->assertSame( array( 'dev.ucp.shopping.checkout' ), array_keys( $data['ucp']['capabilities'] ) );
+		$this->assertSame( array( 'dev.ucp.shopping.checkout', 'dev.ucp.shopping.discount' ), array_keys( $data['ucp']['capabilities'] ) );
 		$this->assertInstanceOf( \stdClass::class, $data['ucp']['payment_handlers'], 'A checkout envelope must carry the payment_handlers registry.' );
 		$this->assertSame( 'ready_for_complete', $data['status'] );
 		$this->assertSame( 'buyer@example.com', $data['buyer']['email'] );
@@ -225,6 +234,64 @@ class UcpCheckout extends ControllerTestCase {
 
 		$missing = $this->request( 'POST', '/checkout-sessions', array() );
 		$this->assertSame( 400, $missing->get_status(), 'line_items is required without a cart_id.' );
+	}
+
+	/**
+	 * @testdox A replayed create answers the same body, with payment_handlers still an empty object.
+	 */
+	public function test_replay_keeps_the_empty_payment_handlers_object(): void {
+		$key   = wp_generate_uuid4();
+		$body  = array( 'line_items' => array( $this->line_item( 0, 1 ) ) );
+		$first = $this->request( 'POST', '/checkout-sessions', $body, array( 'Idempotency-Key' => $key ) );
+		$this->assertSame( 201, $first->get_status() );
+		$this->simulate_new_request();
+		$replay = $this->request( 'POST', '/checkout-sessions', $body, array( 'Idempotency-Key' => $key ) );
+
+		$this->assertSame( 'true', $replay->get_headers()['Idempotency-Replayed'] ?? '' );
+		$this->assertInstanceOf( \stdClass::class, $replay->get_data()['ucp']['payment_handlers'] );
+		$this->assertSame( wp_json_encode( $first->get_data() ), wp_json_encode( $replay->get_data() ) );
+	}
+
+	/**
+	 * Version cases for the `UCP-Agent` header.
+	 *
+	 * @return array<string, array{string, int}>
+	 */
+	public function provider_agent_versions(): array {
+		$profile = 'profile="https://agent.example/profile.json"';
+
+		return array(
+			'supported'                   => array( $profile . '; version="' . Utils::VERSION . '"', 201 ),
+			'newer'                       => array( $profile . '; version="2099-01-01"', 422 ),
+			'older'                       => array( $profile . '; version="2026-01-23"', 422 ),
+			'bare comma'                  => array( $profile . ',version="2099-01-01"', 422 ),
+			'duplicate, unsupported last' => array( $profile . ', version="' . Utils::VERSION . '", version="2099-01-01"', 422 ),
+			'duplicate, supported last'   => array( $profile . ', version="2099-01-01", version="' . Utils::VERSION . '"', 201 ),
+			'escaped quote, newer'        => array( $profile . ', note="a\\"b", version="2099-01-01"', 422 ),
+			'escaped quote, supported'    => array( $profile . ', note="a\\"b", version="' . Utils::VERSION . '"', 201 ),
+		);
+	}
+
+	/**
+	 * Only the protocol version the store implements is served.
+	 *
+	 * @dataProvider provider_agent_versions
+	 *
+	 * @param string $header UCP-Agent header.
+	 * @param int    $status Expected HTTP status.
+	 */
+	public function test_agent_version_is_negotiated( string $header, int $status ): void {
+		$response = $this->request(
+			'POST',
+			'/checkout-sessions',
+			array( 'line_items' => array( $this->line_item( 0, 1 ) ) ),
+			array( 'UCP-Agent' => $header )
+		);
+
+		$this->assertSame( $status, $response->get_status() );
+		if ( 422 === $status ) {
+			$this->assertSame( 'version_unsupported', $response->get_data()['messages'][0]['code'] );
+		}
 	}
 
 	/**
@@ -615,6 +682,7 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 'requires_escalation', $data['status'] );
 		$this->assertContains( 'ESCALATION_REQUIRED', array_column( $data['messages'], 'code' ) );
+		$this->assertContains( 'Payment must be completed by the buyer at continue_url.', array_column( $data['messages'], 'content' ) );
 
 		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
 		$this->assertInstanceOf( \WC_Order::class, $order );
@@ -636,9 +704,9 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Complete refuses a checkout with nothing to pay, which the payment page would not take, and makes no order.
+	 * @testdox Complete hands a checkout with nothing to pay to the store with its cart, makes no order, and a later request reads the hand-off back.
 	 */
-	public function test_complete_refuses_a_free_checkout(): void {
+	public function test_complete_hands_a_free_checkout_to_the_store(): void {
 		$product = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -655,8 +723,15 @@ class UcpCheckout extends ControllerTestCase {
 
 		$data = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
 
-		$this->assertSame( 'payment_not_required', $data['messages'][0]['code'] );
+		$this->assertSame( 'requires_escalation', $data['status'] );
+		$this->assertSame( add_query_arg( 'session', $created['id'], wc_get_cart_url() ), $data['continue_url'] );
+		$this->assertStringNotContainsString( 'Payment must be completed', implode( ' ', array_column( $data['messages'], 'content' ) ) );
 		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ) );
+
+		$this->simulate_new_request( $created['id'] );
+		$read_back = $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data();
+		$this->assertSame( 'requires_escalation', $read_back['status'] );
+		$this->assertSame( $data['continue_url'], $read_back['continue_url'] );
 	}
 
 	/**
@@ -1009,6 +1084,229 @@ class UcpCheckout extends ControllerTestCase {
 			$this->assertSame( 409, $this->request( 'POST', '/checkout-sessions/' . $created['id'] . $action )->get_status(), $action );
 		}
 		$this->assertSame( 409, $this->request( 'POST', '/checkout-sessions', array( 'cart_id' => $created['id'] ) )->get_status() );
+	}
+
+	/**
+	 * @testdox Complete holds the checkout's coupons, and refuses one whose last use another checkout took meanwhile.
+	 */
+	public function test_complete_holds_coupons(): void {
+		$coupon  = \WC_Helper_Coupon::create_coupon(
+			'once',
+			array(
+				'coupon_amount' => '1',
+				'usage_limit'   => '1',
+			)
+		);
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+
+		$updated = $this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'once' ) ) ) )->get_data();
+		$this->assertSame( array( 'once' ), array_column( $updated['discounts']['applied'], 'code' ) );
+
+		// A rival checkout holds the last use after this one passed validation.
+		$hold_rival = static function () use ( $coupon, &$hold_rival ) {
+			remove_action( 'woocommerce_checkout_validate_order_before_payment', $hold_rival );
+			$coupon->get_data_store()->check_and_hold_coupon( $coupon );
+		};
+		add_action( 'woocommerce_checkout_validate_order_before_payment', $hold_rival );
+		$response = $this->request( 'POST', $path . '/complete' );
+
+		$this->assertSame( 'error', $response->get_data()['ucp']['status'] );
+		$this->assertSame( 'discount_code_invalid', $response->get_data()['messages'][0]['code'] );
+		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertTrue( $order->has_status( OrderStatus::CHECKOUT_DRAFT ), 'A coupon that cannot be held must not leave a payable order.' );
+	}
+
+	/**
+	 * @testdox A handed-off checkout keeps the usage-limited coupon its own order spent, which stays spent for every other checkout.
+	 */
+	public function test_handed_off_checkout_keeps_its_own_coupon(): void {
+		$coupon  = \WC_Helper_Coupon::create_coupon(
+			'once',
+			array(
+				'coupon_amount' => '1',
+				'usage_limit'   => '1',
+			)
+		);
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'once' ) ) ) );
+		$first    = $this->request( 'POST', $path . '/complete' )->get_data();
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+
+		$this->assertSame( 1, ( new \WC_Coupon( 'once' ) )->get_usage_count(), 'The pending order spends the coupon.' );
+
+		$this->simulate_new_request();
+		$read = $this->request( 'GET', $path )->get_data();
+		$this->assertSame( array( 'once' ), array_column( $read['discounts']['applied'] ?? array(), 'code' ) );
+		$this->assertSame( $first['totals'], $read['totals'] );
+		$this->assertSame( $first['continue_url'], $read['continue_url'] );
+
+		$this->simulate_new_request();
+		$second = $this->request( 'POST', $path . '/complete' )->get_data();
+		$this->assertContains( 'ALREADY_HANDED_OFF', array_column( $second['messages'], 'code' ) );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ) );
+
+		$this->simulate_new_request();
+		$rival = $this->create_ready_checkout();
+		$rival = $this->request( 'PUT', '/checkout-sessions/' . $rival['id'], array( 'discounts' => array( 'codes' => array( 'once' ) ) ) )->get_data();
+		$this->assertSame( array(), $rival['discounts']['applied'] ?? array(), 'Another checkout cannot spend the coupon again.' );
+		$this->assertSame( 1, ( new \WC_Coupon( $coupon->get_id() ) )->get_usage_count() );
+
+		$this->simulate_new_request();
+		$changed = $this->request( 'PUT', $path, array( 'line_items' => array( $this->line_item( 0, 2 ) ) ) )->get_data();
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::CANCELLED ) );
+		$this->assertSame( 0, ( new \WC_Coupon( $coupon->get_id() ) )->get_usage_count(), 'The cancelled order gives its use back.' );
+		$this->assertSame( array( 'once' ), array_column( $changed['discounts']['applied'] ?? array(), 'code' ) );
+
+		$this->request( 'POST', $path . '/complete' );
+		$this->assertNotSame( $order_id, (int) WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertSame( 1, ( new \WC_Coupon( $coupon->get_id() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A coupon applied before the store turned coupons off is removed and reported, and is not carried into the order.
+	 */
+	public function test_coupon_is_removed_once_coupons_are_disabled(): void {
+		\WC_Helper_Coupon::create_coupon( 'save1', array( 'coupon_amount' => '1' ) );
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$applied = $this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'save1' ) ) ) )->get_data();
+		$this->assertSame( array( 'save1' ), array_column( $applied['discounts']['applied'], 'code' ) );
+
+		update_option( 'woocommerce_enable_coupons', 'no' );
+		$this->simulate_new_request();
+		$refused = $this->request( 'POST', $path . '/complete' )->get_data();
+
+		$this->assertSame( 'incomplete', $refused['status'], 'The total changed, so the buyer is not handed off on this request.' );
+		$this->assertContains( 'discount_code_invalid', array_column( $refused['messages'], 'code' ) );
+		$this->assertSame( array(), $refused['discounts']['applied'] ?? array() );
+		$this->assertSame( $created['totals'], $refused['totals'] );
+
+		$this->simulate_new_request();
+		$completed = $this->request( 'POST', $path . '/complete' )->get_data();
+		$order     = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+
+		$this->assertSame( 'requires_escalation', $completed['status'] );
+		$this->assertSame( array(), $order->get_coupon_codes() );
+	}
+
+	/**
+	 * @testdox Complete gives the coupon holds back when holding stock fails for a reason other than stock.
+	 */
+	public function test_complete_releases_coupon_holds_when_the_stock_hold_throws(): void {
+		$coupon  = \WC_Helper_Coupon::create_coupon(
+			'once',
+			array(
+				'coupon_amount' => '1',
+				'usage_limit'   => '1',
+			)
+		);
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'once' ) ) ) );
+
+		$throw = static function () {
+			throw new \RuntimeException( 'Broken filter.' );
+		};
+		add_filter( 'woocommerce_order_hold_stock_minutes', $throw );
+		$response = $this->request( 'POST', $path . '/complete' );
+		remove_filter( 'woocommerce_order_hold_stock_minutes', $throw );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 0, (int) $coupon->get_data_store()->get_tentative_usage_count( $coupon->get_id() ) );
+	}
+
+	/**
+	 * @testdox Complete gives the coupon holds back when recording attribution throws.
+	 */
+	public function test_complete_releases_coupon_holds_when_attribution_throws(): void {
+		$coupon  = \WC_Helper_Coupon::create_coupon(
+			'once',
+			array(
+				'coupon_amount' => '1',
+				'usage_limit'   => '1',
+			)
+		);
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'once' ) ) ) );
+
+		$throw = static function () {
+			throw new \RuntimeException( 'Broken listener.' );
+		};
+		add_action( 'woocommerce_order_save_attribution_data', $throw, 1 );
+		$response = $this->request( 'POST', $path . '/complete' );
+		remove_action( 'woocommerce_order_save_attribution_data', $throw, 1 );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 0, (int) $coupon->get_data_store()->get_tentative_usage_count( $coupon->get_id() ) );
+	}
+
+	/**
+	 * @testdox Complete cancels the order a hook refused after it was saved, so a retry keeps the usage-limited coupon.
+	 */
+	public function test_complete_cancels_the_order_when_the_processed_hook_throws(): void {
+		$coupon  = \WC_Helper_Coupon::create_coupon(
+			'once',
+			array(
+				'coupon_amount' => '1',
+				'usage_limit'   => '1',
+			)
+		);
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'once' ) ) ) );
+
+		$order_id = 0;
+		$throw    = static function ( $order ) use ( &$order_id ) {
+			$order_id = $order->get_id();
+			throw new \RuntimeException( 'Refused.' );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $throw );
+		$response = $this->request( 'POST', $path . '/complete' );
+		remove_action( 'woocommerce_store_api_checkout_order_processed', $throw );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::CANCELLED ) );
+		$this->assertSame( 0, ( new \WC_Coupon( $coupon->get_id() ) )->get_usage_count() );
+
+		$this->simulate_new_request();
+		$retry = $this->request( 'POST', $path . '/complete' )->get_data();
+		$this->assertSame( array( 'once' ), array_column( $retry['discounts']['applied'] ?? array(), 'code' ) );
+		$this->assertNotEmpty( $retry['continue_url'] );
+		$this->assertNotSame( $order_id, (int) WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertSame( 1, ( new \WC_Coupon( $coupon->get_id() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A coupon removed because coupons were turned off is reported even when the cart has a stock error too.
+	 */
+	public function test_removed_coupon_is_reported_beside_a_stock_error(): void {
+		\WC_Helper_Coupon::create_coupon( 'save1', array( 'coupon_amount' => '1' ) );
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 2,
+			)
+		);
+		$created = $this->create_ready_checkout(
+			array(
+				'item'     => array( 'id' => (string) $product->get_id() ),
+				'quantity' => 2,
+			)
+		);
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'save1' ) ) ) );
+
+		wc_update_product_stock( $product, 1 );
+		update_option( 'woocommerce_enable_coupons', 'no' );
+		$this->simulate_new_request();
+		$codes = array_column( $this->request( 'GET', $path )->get_data()['messages'], 'code' );
+
+		$this->assertContains( 'out_of_stock', $codes );
+		$this->assertContains( 'discount_code_invalid', $codes );
 	}
 
 	/**

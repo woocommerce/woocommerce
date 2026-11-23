@@ -64,6 +64,21 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		global $wpdb;
+
+		try {
+			$this->unlock_orders();
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( OrderController::ORDER_LOCK_OPTION_PREFIX ) . '%' ) );
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
 	 * test_validate_existing_order_before_payment_valid_data.
 	 */
 	public function test_validate_existing_order_before_payment_valid_data() {
@@ -98,6 +113,105 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 
 		$this->assertNull( $this->sut->validate_selected_shipping_methods( true, array( $valid_method->id . ':' . $valid_method->instance_id ) ) );
 		$this->assertNull( $this->sut->validate_selected_shipping_methods( false, array( 'free-shipping' ) ) );
+	}
+
+	/**
+	 * The guard exists because an address the cart judges incomplete leaves no packages for
+	 * validate_selected_shipping_methods() to inspect, so without it an order is placed with no
+	 * shipping line. It mirrors WC_Checkout::is_shipping_withheld_for_missing_address().
+	 *
+	 * @testdox validate_order_before_payment() refuses an order whose shipping was withheld.
+	 */
+	public function test_validate_order_before_payment_refuses_withheld_shipping(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone();
+		$this->add_product_to_cart_without_rating_shipping();
+
+		// The message, not just the type: validate_selected_shipping_methods() throws the same
+		// RouteException with the same error code, so only the wording tells the two apart.
+		$this->expectException( RouteException::class );
+		$this->expectExceptionMessage( 'Please enter an address to continue.' );
+		$this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() );
+	}
+
+	/**
+	 * The case that matters most in production: once the cart has rated an address, nothing may
+	 * refuse the order, or every checkout on a store with the option enabled would fail.
+	 *
+	 * @testdox validate_order_before_payment() allows an order whose cart has rated the address.
+	 */
+	public function test_validate_order_before_payment_allows_a_rated_cart(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone( '25.00' );
+
+		// A complete customer address, so the cart rates the package and picks the rate itself.
+		WC()->customer->set_shipping_city( 'San Francisco' );
+		WC()->customer->set_shipping_postcode( '94103' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$this->assertTrue(
+			WC()->cart->has_calculated_shipping(),
+			'The cart must have rated the address, or this test proves nothing.'
+		);
+
+		$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+	}
+
+	/**
+	 * With the option off, shipping is never withheld for the address, so a cart with no rate is
+	 * a store with no method configured, not a shopper slipping past one.
+	 *
+	 * @testdox validate_order_before_payment() allows an unrated cart when the option is off.
+	 */
+	public function test_validate_order_before_payment_allows_an_unrated_cart_when_the_option_is_off(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
+
+		// Deliberately no shipping method: with the option off that is the only way a cart that
+		// needs shipping reaches checkout with nothing rated.
+		$this->add_product_to_cart_without_rating_shipping();
+
+		$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+	}
+
+	/**
+	 * @testdox validate_order_before_payment() allows a cart that does not need shipping.
+	 */
+	public function test_validate_order_before_payment_allows_a_cart_that_does_not_need_shipping(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_virtual( true );
+		$product->save();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$this->assertFalse( WC()->cart->needs_shipping() );
+
+		$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+	}
+
+	/**
+	 * A store that switches shipping calculation off through the filter withholds rates for its
+	 * own reasons, so the order must go through, as it does on the classic checkout.
+	 *
+	 * @testdox validate_order_before_payment() allows an order when the filter stops calculation.
+	 */
+	public function test_validate_order_before_payment_allows_shipping_calculation_disabled_by_filter(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone();
+
+		$filter = function () {
+			return false;
+		};
+		add_filter( 'woocommerce_cart_ready_to_calc_shipping', $filter );
+
+		try {
+			$this->add_product_to_cart_without_rating_shipping();
+			$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+		} finally {
+			remove_filter( 'woocommerce_cart_ready_to_calc_shipping', $filter );
+		}
 	}
 
 	/**
@@ -568,6 +682,68 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() rebuilds line items from a changed cart even when an extension set the order's cart hash to match it.
+	 */
+	public function test_update_order_from_cart_rebuilds_line_items_when_an_extension_set_the_cart_hash(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		CouponHelper::create_coupon(
+			'ten-percent',
+			'publish',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$order = $this->sut->create_order_from_cart();
+		$order->save();
+		$this->assertSame( 10.0, (float) $order->get_total(), 'The order should start at the undiscounted product price.' );
+
+		WC()->cart->apply_coupon( 'ten-percent' );
+		WC()->cart->calculate_totals();
+		// Subscriptions sets the cart hash of the renewal order it resumes on every cart load, before checkout syncs the order.
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
+
+		$this->sut->update_order_from_cart( $order );
+
+		$line_items = $order->get_items();
+		$this->assertSame( 9.0, (float) reset( $line_items )->get_total(), 'The line item should be rebuilt with the coupon discount.' );
+		$this->assertSame( 9.0, (float) $order->get_total(), 'The order total should include the coupon discount.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps unchanged line items, but still updates the cart hash when only the cart total changes.
+	 */
+	public function test_update_order_from_cart_keeps_line_items_and_updates_cart_hash_when_only_the_total_changes(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$order = $this->sut->create_order_from_cart();
+		$order->save();
+		$line_item_ids = array_keys( $order->get_items() );
+
+		$add_fee = static function ( \WC_Cart $cart ) {
+			$cart->add_fee( 'Handling', 5 );
+		};
+		add_action( 'woocommerce_cart_calculate_fees', $add_fee );
+
+		try {
+			$this->sut->update_order_from_cart( $order );
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_cart_calculate_fees', $add_fee );
+		}
+
+		$this->assertSame( $line_item_ids, array_keys( $order->get_items() ), 'Line items should be kept when the cart contents did not change.' );
+		$this->assertSame( 15.0, (float) $order->get_total(), 'The order total should include the new fee.' );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash should follow the cart total so checkout can resume the order.' );
+	}
+
+	/**
 	 * @testdox update_order_from_cart() keeps the shopper's session choice on the order even when the default payment method filter returns nothing.
 	 */
 	public function test_update_order_from_cart_keeps_the_session_payment_choice_with_a_callback(): void {
@@ -680,6 +856,190 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Add a flat rate to the catch-all zone, optionally with a cost so it actually offers a rate.
+	 *
+	 * @param string $cost Flat rate cost. The default leaves the rate off, as an unconfigured method is.
+	 */
+	private function add_flat_rate_to_default_zone( string $cost = '' ): void {
+		$default_zone = \WC_Shipping_Zones::get_zone( 0 );
+		$default_zone->add_shipping_method( 'flat_rate' );
+		$default_zone->save();
+
+		if ( '' === $cost ) {
+			return;
+		}
+
+		$zone_methods                         = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
+		$flat_rate                            = reset( $zone_methods );
+		$flat_rate->instance_settings['cost'] = $cost;
+		update_option( $flat_rate->get_instance_option_key(), $flat_rate->instance_settings );
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping()->load_shipping_methods();
+	}
+
+	/**
+	 * Put the cart in the state the bug produced: a shippable product, a method left in the
+	 * session by an earlier request, and no package ever rated, so the shipping-method check has
+	 * nothing to reject.
+	 */
+	private function add_product_to_cart_without_rating_shipping(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->assertFalse( WC()->cart->has_calculated_shipping() );
+
+		// Any value will do: with no packages calculated, only its presence is checked.
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate:1' ) );
+	}
+
+	/**
+	 * An order carrying the complete address validate_addresses() asks for, so the shipping guard
+	 * is the only thing left that can refuse it.
+	 */
+	private function create_order_with_full_shipping_address(): \WC_Order {
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address( $order );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * @testdox Order locks are re-entrant within a request and released by their owner.
+	 */
+	public function test_order_lock_is_reentrant_and_released(): void {
+		global $wpdb;
+
+		$order_id    = 123;
+		$option_name = OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id;
+
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ), 'The first acquisition should lock the order.' );
+		$shutdown_callback = $this->get_order_lock_shutdown_callback();
+		$this->assertInstanceOf( \Closure::class, $shutdown_callback );
+		$this->assertSame( PHP_INT_MAX, has_action( 'shutdown', $shutdown_callback ), 'The lock should be released after session data is persisted.' );
+		$first_expiry = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) );
+
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ), 'The same request should retain ownership.' );
+		$renewed_expiry = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) );
+		$this->assertGreaterThan( (float) $first_expiry, (float) $renewed_expiry, 'Re-entering the lock should renew its lease.' );
+
+		$this->unlock_orders();
+
+		$this->assertNull(
+			$wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ),
+			'Releasing the lock should remove its options-table row.'
+		);
+		$this->assertFalse( has_action( 'shutdown', $shutdown_callback ), 'Manual cleanup should remove the shutdown callback.' );
+	}
+
+	/**
+	 * @testdox A live order lock owned by another request blocks acquisition.
+	 */
+	public function test_order_lock_rejects_another_owner(): void {
+		global $wpdb;
+
+		$order_id = 456;
+		$inserted = $wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id,
+				'option_value' => number_format( microtime( true ) + 60, 6, '.', '' ),
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
+		);
+
+		$this->assertSame( 1, $inserted, 'The competing request lock should be inserted.' );
+		$this->assertFalse( OrderController::lock_order( $order_id, 0 ), 'The active lock should prevent acquisition.' );
+	}
+
+	/**
+	 * @testdox An expired order lock can be taken over and released by the new owner.
+	 */
+	public function test_order_lock_takes_over_expired_lock(): void {
+		global $wpdb;
+
+		$order_id    = 789;
+		$option_name = OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id;
+		$inserted    = $wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => $option_name,
+				'option_value' => number_format( microtime( true ) - 1, 6, '.', '' ),
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
+		);
+
+		$this->assertSame( 1, $inserted, 'The stale lock should be inserted.' );
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ), 'The expired lock should be available for takeover.' );
+		$this->assertGreaterThan(
+			microtime( true ),
+			(float) $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ),
+			'The takeover should store a new future expiry.'
+		);
+
+		$this->unlock_orders();
+
+		$this->assertNull( $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ) );
+	}
+
+	/**
+	 * @testdox Releasing a stale lock does not delete a replacement owner's lock.
+	 */
+	public function test_unlock_does_not_delete_replacement_lock(): void {
+		global $wpdb;
+
+		$order_id          = 987;
+		$option_name       = OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id;
+		$replacement_value = number_format( microtime( true ) + 120, 6, '.', '' );
+
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ) );
+		$this->assertSame(
+			1,
+			$wpdb->update(
+				$wpdb->options,
+				array( 'option_value' => $replacement_value ),
+				array( 'option_name' => $option_name ),
+				array( '%s' ),
+				array( '%s' )
+			),
+			'The replacement request should take ownership of the row.'
+		);
+		$this->assertFalse( OrderController::lock_order( $order_id, 0 ), 'The stale owner should not renew a replacement owner\'s lock.' );
+
+		$this->unlock_orders();
+
+		$this->assertSame(
+			$replacement_value,
+			$wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ),
+			'Releasing the stale owner should preserve the replacement lock.'
+		);
+	}
+
+	/**
+	 * Get the registered order-lock shutdown callback.
+	 *
+	 * @return \Closure|null
+	 */
+	private function get_order_lock_shutdown_callback(): ?\Closure {
+		$property = new \ReflectionProperty( OrderController::class, 'unlock_orders_on_shutdown' );
+		$property->setAccessible( true );
+
+		return $property->getValue();
+	}
+
+	/**
+	 * Release order locks registered by the current test.
+	 */
+	private function unlock_orders(): void {
+		$callback = $this->get_order_lock_shutdown_callback();
+		if ( $callback ) {
+			$callback();
+		}
+	}
+
+	/**
 	 * Helper method to set shipping address on an order.
 	 *
 	 * @param \WC_Order $order Order object.
@@ -698,5 +1058,112 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		foreach ( $override_data as $key => $value ) {
 			$order->{"set_shipping_$key"}( $value );
 		}
+	}
+
+	/**
+	 * Build a saved order for a customer and billing email that carries a coupon, without recording its usage.
+	 *
+	 * @param int    $customer_id   Customer ID, 0 for a guest.
+	 * @param string $billing_email Billing email.
+	 * @param string $code          Coupon code.
+	 * @return \WC_Order
+	 */
+	private function create_order_with_coupon( int $customer_id, string $billing_email, string $code ): \WC_Order {
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_billing_email( $billing_email );
+		$this->set_shipping_address( $order );
+		$item = new \WC_Order_Item_Coupon();
+		$item->set_code( $code );
+		$order->add_item( $item );
+		$order->save();
+		return $order;
+	}
+
+	/**
+	 * Run payment validation and return the coupon error message, or null when the coupon was kept.
+	 *
+	 * @param \WC_Order $order Order to validate.
+	 * @return string|null
+	 */
+	private function get_coupon_error( \WC_Order $order ): ?string {
+		try {
+			$this->sut->validate_order_before_payment( $order );
+			return null;
+		} catch ( RouteException $e ) {
+			return $e->getMessage();
+		}
+	}
+
+	/**
+	 * @testdox A guest is refused a per-user coupon with the email of an account that used it, after that account changes its email.
+	 */
+	public function test_validate_coupon_usage_limit_after_account_email_change(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'vip-store@example.com' ) );
+		$coupon  = CouponHelper::create_coupon(
+			'vip-store',
+			'publish',
+			array(
+				'customer_email'       => array( 'vip-store@example.com' ),
+				'usage_limit_per_user' => 1,
+			)
+		);
+
+		$first_order = $this->create_order_with_coupon( $user_id, 'invoices@example.com', 'vip-store' );
+		$coupon->increase_usage_count( (string) $user_id, $first_order );
+
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'changed-store@example.com',
+			)
+		);
+
+		$error = $this->get_coupon_error( $this->create_order_with_coupon( 0, 'vip-store@example.com', 'vip-store' ) );
+
+		$this->assertStringContainsString( 'Usage limit for coupon', (string) $error );
+	}
+
+	/**
+	 * @testdox A second account is refused a per-user coupon billed to an email already used, after the first customer edits their saved billing email.
+	 */
+	public function test_validate_coupon_usage_limit_after_saved_billing_email_change(): void {
+		$first_id  = $this->factory->user->create( array( 'user_email' => 'first-store@example.com' ) );
+		$second_id = $this->factory->user->create( array( 'user_email' => 'second-store@example.com' ) );
+		$coupon    = CouponHelper::create_coupon( 'billing-store', 'publish', array( 'usage_limit_per_user' => 1 ) );
+
+		$first_order = $this->create_order_with_coupon( $first_id, 'shared-store@example.com', 'billing-store' );
+		$coupon->increase_usage_count( (string) $first_id, $first_order );
+		update_user_meta( $first_id, 'billing_email', 'moved-store@example.com' );
+
+		$second_error = $this->get_coupon_error( $this->create_order_with_coupon( $second_id, 'shared-store@example.com', 'billing-store' ) );
+		$guest_error  = $this->get_coupon_error( $this->create_order_with_coupon( 0, 'shared-store@example.com', 'billing-store' ) );
+
+		$this->assertStringContainsString( 'Usage limit for coupon', (string) $second_error );
+		$this->assertStringContainsString( 'Usage limit for coupon', (string) $guest_error );
+	}
+
+	/**
+	 * @testdox A per-user limit of two still accepts a second use by a guest with the email of an account that used it once.
+	 */
+	public function test_validate_coupon_usage_limit_allows_uses_up_to_limit(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'two-store@example.com' ) );
+		$coupon  = CouponHelper::create_coupon( 'two-store', 'publish', array( 'usage_limit_per_user' => 2 ) );
+		$coupon->increase_usage_count( (string) $user_id, $this->create_order_with_coupon( $user_id, 'two-store@example.com', 'two-store' ) );
+
+		$this->assertNull( $this->get_coupon_error( $this->create_order_with_coupon( 0, 'two-store@example.com', 'two-store' ) ) );
+	}
+
+	/**
+	 * @testdox A second account is refused a per-user coupon when it bills to the account email of a customer who used it.
+	 */
+	public function test_validate_coupon_usage_limit_second_account_billing_to_used_account_email(): void {
+		$first_id  = $this->factory->user->create( array( 'user_email' => 'owner-store@example.com' ) );
+		$second_id = $this->factory->user->create( array( 'user_email' => 'other-store@example.com' ) );
+		$coupon    = CouponHelper::create_coupon( 'owner-store', 'publish', array( 'usage_limit_per_user' => 1 ) );
+		$coupon->increase_usage_count( (string) $first_id, $this->create_order_with_coupon( $first_id, 'receipts-store@example.com', 'owner-store' ) );
+
+		$error = $this->get_coupon_error( $this->create_order_with_coupon( $second_id, 'owner-store@example.com', 'owner-store' ) );
+
+		$this->assertStringContainsString( 'Usage limit for coupon', (string) $error );
 	}
 }
