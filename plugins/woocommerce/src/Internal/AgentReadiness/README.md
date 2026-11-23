@@ -225,15 +225,17 @@ Tracks event: `agentic_commerce_ucp_toggled` (`enabled`), sent only when the sto
 
 ### Tracking
 
-The React views send Tracks events through `@woocommerce/tracks` (`client/admin/client/sales-readiness/tracks.ts`), so they get the `wcadmin_` prefix and are sent only when the store allows usage tracking. `surface` is `page` (Sales readiness) or `overview` (AI tools). Check ids are the report's ids (`refund_policy`, `image`, `llms_txt`), never translated titles; `ReadinessCheckPage::view()` adds an `id` to every row and Fix first item for this. wc-admin's own `wcadmin_page_view` already counts visits to the page.
+The React views send Tracks events through `@woocommerce/tracks` (`client/admin/client/sales-readiness/tracks.ts`), so they get the `wcadmin_` prefix and are sent only when the store allows usage tracking. `surface` is `page` (AI shopping health), `overview` (AI tools) or `shopping` (AI shopping). Check ids are the report's ids (`refund_policy`, `image`, `llms_txt`), never translated titles; `ReadinessCheckPage::view()` adds an `id` to every row and Fix first item for this. wc-admin's own `wcadmin_page_view` already counts visits to the page.
 
 | Event | When | Properties |
 | --- | --- | --- |
 | `wcadmin_sales_readiness_viewed` | The view first loads, once per visit | `surface`, `checked`, `pending`, `fix_first_count`, `open_count`, `required_count`, `unknown_count`, `pass_count` (a check shown in two cards counts once) |
 | `wcadmin_sales_readiness_run_check_clicked` | Run checks or Check again | `surface`, `first_check` |
-| `wcadmin_sales_readiness_link_clicked` | A fix link, View all checks, or Manage | `surface`, `area` (`fix_first`, `section`, `view_all`, `shopping`); for fixes `check_id`, plus `position` in Fix first or `section` and `state` in a section card |
+| `wcadmin_sales_readiness_link_clicked` | A fix link or another link or button on these pages | `surface`, `area`: `fix_first`, `section`, `view_all`, `shopping` (Manage), `agent_connect` (Connect to WordPress.com), `setup` (a Setup checklist step), `coming_soon` (Change store visibility), `connection_url_copy`, `connection_url_test`, `product_visibility` (with `count_id`), `learn_more` (next to the AI shopping switch) or `support_download`. Fixes and setup steps add `check_id`, plus `position` in Fix first, `section` and `state` in a section card, or `state` in the Setup checklist |
+| `wcadmin_sales_readiness_agent_connect_viewed` | The Connect to WordPress.com card shows on the Overview, once per visit | `surface`, `connected`, `result` (`connected` or `error` when the merchant comes back from a connection attempt, otherwise `none`) |
 | `wcadmin_sales_readiness_fold_toggle` | Show N passed checks or Hide passed checks | `surface`, `section` (a section id, or `declared`), `open` |
 | `wcadmin_sales_readiness_error` | The view can't load, or a check can't start | `surface`, `action` (`load` or `run`) |
+| `wcadmin_agentic_commerce_ucp_toggled` | The AI shopping switch saves (sent from PHP, `UcpSwitch`) | `enabled` (`yes` or `no`) |
 
 ## Usage tracking
 

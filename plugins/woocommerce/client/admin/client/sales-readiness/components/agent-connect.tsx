@@ -3,7 +3,7 @@
  */
 import { Card, Text } from '@wordpress/ui';
 import { Button, Notice } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -57,6 +57,16 @@ function postConnect( connect: ConnectView ) {
 
 export const AgentConnect = ( { connect }: { connect: ConnectView } ) => {
 	const [ notice, setNotice ] = useState( connect.notice );
+	// Once per visit: whether the store is connected, and how a connection attempt ended when the
+	// merchant comes back from WordPress.com.
+	useEffect( () => {
+		trackReadiness( 'agent_connect_viewed', {
+			surface: 'overview',
+			connected: connect.connected,
+			result: connect.notice || 'none',
+		} );
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- Recorded once, for the state the page loaded with.
+	}, [] );
 	const dismissNotice = () => {
 		setNotice( '' );
 		const next = new URL( window.location.href );
