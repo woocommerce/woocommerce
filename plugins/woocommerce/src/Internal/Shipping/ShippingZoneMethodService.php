@@ -114,6 +114,7 @@ class ShippingZoneMethodService {
 		$updates         = array();
 		$formats         = array();
 		$enabled_changed = false;
+		$is_enabled      = false;
 
 		if ( ! is_null( $data['settings'] ) ) {
 			$result = $this->update_shipping_method_settings( $method, $data['settings'] );
@@ -123,9 +124,10 @@ class ShippingZoneMethodService {
 		}
 
 		if ( ! is_null( $data['enabled'] ) ) {
-			$updates['is_enabled'] = wc_string_to_bool( $data['enabled'] ) ? 1 : 0;
+			$is_enabled            = wc_string_to_bool( $data['enabled'] );
+			$updates['is_enabled'] = $is_enabled ? 1 : 0;
 			$formats[]             = '%d';
-			$method->enabled       = wc_string_to_bool( $data['enabled'] ) ? 'yes' : 'no';
+			$method->enabled       = $is_enabled ? 'yes' : 'no';
 			$enabled_changed       = true;
 		}
 
@@ -169,7 +171,7 @@ class ShippingZoneMethodService {
 				$instance_id,
 				$method->id,
 				$zone_id,
-				(bool) $updates['is_enabled']
+				$is_enabled
 			);
 		}
 

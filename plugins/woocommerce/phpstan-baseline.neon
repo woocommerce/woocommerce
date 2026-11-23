@@ -60525,12 +60525,6 @@ parameters:
 			path: src/Internal/RestockRefundedItemsAdjuster.php
 
 		-
-			message: '#^Offset ''is_enabled'' might not exist on non\-empty\-array\{is_enabled\?\: 0\|1, method_order\?\: int\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Internal/Shipping/ShippingZoneMethodService.php
-
-		-
 			message: '#^Binary operation "/" between array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int and int\<1, max\> results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
