@@ -548,6 +548,8 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Remove when WooCommerce requires WordPress 7.2, together with the backport in Ability.
+	 *
 	 * @testdox Should refuse a number that converts to a value the schema does not allow, and not run the callbacks.
 	 */
 	public function test_refuses_a_number_that_converts_below_the_minimum(): void {
