@@ -285,6 +285,41 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Quantities 1 and 2.5 must still come to the coupon amount.
+	 *
+	 * A $30 coupon on two $100 products at those quantities used to show a $30.00
+	 * discount while the cart total was $320.01.
+	 */
+	public function test_fixed_cart_coupon_quantities_one_and_two_point_five_match_cart_total() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		WC()->cart->empty_cart();
+
+		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$product_b = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$coupon    = WC_Helper_Coupon::create_coupon(
+			'qty-1-25-fixed-cart',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '30',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product_a->get_id(), 1 );
+		WC()->cart->add_to_cart( $product_b->get_id(), 2.5 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( '30.00', wc_format_decimal( WC()->cart->get_discount_total(), 2 ) );
+		$this->assertEquals( '320.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+
+		WC()->cart->empty_cart();
+		$product_a->delete( true );
+		$product_b->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
 	 * Whole-number quantities still receive the leftover cent, so a $10 coupon on three items is $10.
 	 */
 	public function test_fixed_cart_coupon_remainder_reaches_exact_amount() {
