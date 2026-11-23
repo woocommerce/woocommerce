@@ -146,6 +146,31 @@ jobs:
                  confidence, set needs_docs=true with the highest confidence level found.
                - If ALL changes are developer-only or low confidence, set needs_docs=false.
 
+      # Label first so the docs signal survives a Linear outage. A failed Linear step
+      # fails the job, and a rerun sees the label and retries only the issue.
+      - name: 'Apply Label'
+        if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          STRUCTURED_OUTPUT: ${{ steps.analyze.outputs.structured_output }}
+        with:
+          script: |
+            const verdict = JSON.parse( process.env.STRUCTURED_OUTPUT );
+            console.log( `Reason: ${ verdict.reason } (confidence: ${ verdict.confidence })` );
+
+            const { data: pr } = await github.rest.pulls.get( {
+              ...context.repo,
+              pull_number: context.issue.number,
+            } );
+
+            if ( ! pr.labels.some( ( label ) => label.name === 'needs: documentation' ) ) {
+              await github.rest.issues.addLabels( {
+                ...context.repo,
+                issue_number: context.issue.number,
+                labels: [ 'needs: documentation' ],
+              } );
+            }
+
       - name: 'Setup Linear'
         if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
         # Install outside the workspace: the checkout put the monorepo root package.json there,
@@ -181,28 +206,4 @@ jobs:
               console.log( `${ reused ? 'Reusing' : 'Created' } Linear issue: ${ issue.identifier } (${ issue.url })` );
             } catch ( error ) {
               core.setFailed( error.message );
-            }
-
-      # Only mark the PR after Linear confirms an issue exists.
-      - name: 'Apply Label'
-        if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        env:
-          STRUCTURED_OUTPUT: ${{ steps.analyze.outputs.structured_output }}
-        with:
-          script: |
-            const verdict = JSON.parse( process.env.STRUCTURED_OUTPUT );
-            console.log( `Reason: ${ verdict.reason } (confidence: ${ verdict.confidence })` );
-
-            const { data: pr } = await github.rest.pulls.get( {
-              ...context.repo,
-              pull_number: context.issue.number,
-            } );
-
-            if ( ! pr.labels.some( ( label ) => label.name === 'needs: documentation' ) ) {
-              await github.rest.issues.addLabels( {
-                ...context.repo,
-                issue_number: context.issue.number,
-                labels: [ 'needs: documentation' ],
-              } );
             }

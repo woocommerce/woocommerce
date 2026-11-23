@@ -304,11 +304,11 @@ const workflow = readFileSync(
 	'utf8'
 );
 
-test( 'serializes reruns and labels only after issue creation succeeds', () => {
+test( 'serializes reruns and labels before the Linear issue step', () => {
 	assert.match( workflow, /cancel-in-progress: false/ );
 	assert.ok(
-		workflow.indexOf( "name: 'Create Linear Issue'" ) <
-			workflow.indexOf( "name: 'Apply Label'" )
+		workflow.indexOf( "name: 'Apply Label'" ) <
+			workflow.indexOf( "name: 'Create Linear Issue'" )
 	);
 	assert.match(
 		workflow,
@@ -321,7 +321,7 @@ test( 'the GitHub Actions entry point fails the step on a Linear error', async (
 	const entryPoint = workflow
 		.split( "      - name: 'Create Linear Issue'" )[ 1 ]
 		.split( '          script: |\n' )[ 1 ]
-		.split( '\n\n      # Only mark' )[ 0 ]
+		.split( '\n\n' )[ 0 ]
 		.split( '\n' )
 		.map( ( line ) => line.slice( 12 ) )
 		.join( '\n' );
