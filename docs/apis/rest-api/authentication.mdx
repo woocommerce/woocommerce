@@ -18,17 +18,15 @@ REST API keys do not authenticate requests to the [Store API](/docs/apis/store-a
 
 ### Authentication timing for extensions
 
-Starting in WooCommerce 11.2.2, WooCommerce API keys are authenticated only during a WordPress REST request. If a request relies on an API key and no other authentication method has identified a user, code running on `init` or `wp_loaded` must not assume that the current user is the key owner. WooCommerce normally resolves the key user during `rest_authentication_errors` at priority 8. Use a REST endpoint's permission callback for checks that depend on the authenticated user.
+Starting in WooCommerce 11.2.2, WooCommerce API keys are authenticated only during a WordPress REST request. If a request relies on an API key and no other authentication method has identified a user, code running on `init` or `wp_loaded` must not assume that the current user is the key owner. The key user is resolved once WordPress starts serving the REST request, and no later than `rest_authentication_errors` at priority 8. Use a REST endpoint's permission callback for checks that depend on the authenticated user.
 
-The `woocommerce_rest_is_request_to_rest_api` filter is evaluated only after WordPress identifies the request as a REST endpoint. Other authentication methods can identify a user earlier. For requests using a logged-in WordPress cookie, include a valid `wp_rest` nonce. If a request sends both a logged-in cookie and an API key without the nonce, WordPress treats the request as unauthenticated and a protected endpoint returns a 401 response. An invalid cookie nonce returns a 403 response. See [WordPress REST API authentication](https://developer.wordpress.org/rest-api/using-the-rest-api/authentication/#cookie-authentication).
+The `woocommerce_rest_is_request_to_rest_api` filter is evaluated only after WordPress identifies the request as a REST endpoint, so it can no longer enable API keys outside REST requests. After a key is accepted, later `rest_authentication_errors` callbacks receive `true`. Other authentication methods can identify a user earlier. For requests using a logged-in WordPress cookie, include a valid `wp_rest` nonce. If a request sends both a logged-in cookie and an API key without the nonce, WordPress treats the request as unauthenticated and a protected endpoint returns a 401 response. An invalid cookie nonce returns a 403 response. See [WordPress REST API authentication](https://developer.wordpress.org/rest-api/using-the-rest-api/authentication/#cookie-authentication).
 
 ### Generating API keys in the WordPress admin interface
 
 To create or manage keys for a specific WordPress user, go to **WooCommerce > Settings > Advanced > REST API keys**.
 
-*Note: Keys/Apps was found at WooCommerce > Settings > API > Key/Apps prior to WooCommerce 3.4.*
-
-Select **Add key**. On the next screen, add a description and select the WordPress user you want to generate the key for. Use of the REST API with the generated keys will conform to that user's WordPress roles and capabilities.
+Select **Add key**, or **Create an API key** if the store has no keys yet. On the next screen, add a description and select the WordPress user you want to generate the key for. Use of the REST API with the generated keys will conform to that user's WordPress roles and capabilities.
 
 Choose the level of access for this REST API key, which can be _Read_ access, _Write_ access or _Read/Write_ access. Then select **Generate API key** to generate the keys for the selected user.
 
@@ -175,6 +173,7 @@ The authorization screen identifies the app, its requested permissions, and the 
 
 - While redirecting the user using `return_url`, you are also sent `success` and `user_id` parameters as query strings.
 - `success` sends `0` if the user denied, or `1` if authenticated successfully.
+- Your `callback_url` must respond with an HTTP `200` status. If the request fails or returns any other status, WooCommerce deletes the new key and shows the user an error instead of redirecting to `return_url`.
 - Use `user_id` to identify the user when redirected back to the (`return_url`) and also remember to save the API Keys when your `callback_url` is posted to after auth.
 - The auth endpoint will send the API Keys in JSON format to the `callback_url`, so it's important to remember that some languages such as PHP will not display it inside the `$_POST` global variable, in PHP you can access it using `$HTTP_RAW_POST_DATA` (for old PHP versions) or `file_get_contents('php://input');`.
 - The URL generated must have all query string values encoded.
@@ -264,7 +263,7 @@ woocommerce = WooCommerce::API.new(
   </TabItem>
 </Tabs>
 
-If the server does not pass the `Authorization` header to WordPress, fix the web server configuration rather than putting the consumer key and secret in the request URL. URLs can be recorded in logs and exposed to other systems. See the [WordPress REST API authentication troubleshooting guide](https://developer.wordpress.org/rest-api/frequently-asked-questions/#why-is-authentication-not-working) for examples of server configuration.
+If the server does not pass the `Authorization` header to WordPress, WooCommerce still accepts `consumer_key` and `consumer_secret` as query string parameters over HTTPS. This isn't recommended because URLs end up in logs, so fix the server configuration instead. See the [WordPress REST API authentication troubleshooting guide](https://developer.wordpress.org/rest-api/frequently-asked-questions/#why-is-authentication-not-working) for examples.
 
 ## Authentication over HTTP
 

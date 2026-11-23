@@ -335,7 +335,7 @@ POST /cart/items/
 | Attribute   | Type    | Required | Description                                                                                          |
 | :---------- | :------ | :------: | :--------------------------------------------------------------------------------------------------- |
 | `id`        | integer |   Yes    | The cart item product or variation ID.                                                               |
-| `quantity`  | number  |   No     | Quantity to add. Defaults to the product’s minimum quantity.                                         |
+| `quantity`  | number  |   No     | Quantity to add. Defaults to the product's minimum quantity.                                         |
 | `variation` | array   |   No     | Chosen attributes for a variation, as objects with `attribute` and `value` keys.                      |
 
 ```sh
@@ -365,9 +365,9 @@ PUT /cart/items/:key
 curl --header "Cart-Token: $CART_TOKEN" --request PUT "https://example-store.com/wp-json/wc/store/v1/cart/items/e369853df766fa44e1ed0ff613f563bd?quantity=10"
 ```
 
-Starting with WooCommerce 11.2.2, a nonnumeric `quantity` returns a `400` error and leaves the cart unchanged. WooCommerce normalizes numeric values with `wc_stock_amount()` and validates them against the product’s quantity limits. By default, stock amounts are converted to integers; extensions can change this behavior.
+Starting in WooCommerce 11.2.2, a nonnumeric `quantity` returns a `400` error and leaves the cart unchanged. WooCommerce normalizes numeric values with `wc_stock_amount()` and validates them against the product's quantity limits. By default, stock amounts are converted to integers; extensions can change this behavior.
 
-If an update returns `401` or `403`, check that the Cart Token or nonce is valid for the current cart session. For a `409` response, check that the item key belongs to that cart. For a `400` response, check that the quantity is numeric and meets the product’s quantity limits.
+If an update returns `401` or `403`, check that the Cart Token or nonce is valid for the current cart session. For a `409` response, check that the item key belongs to that cart. For a `400` response, check that the quantity is numeric and meets the product's quantity limits.
 
 For an example response, see [Single Cart Item](#single-cart-item).
 
