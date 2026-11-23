@@ -308,7 +308,7 @@ if ( class_exists( \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::class )
 }
 ```
 
-Called from an MU-plugin, it serves on `muplugins_loaded`, when a `wp_consent_cookie_prefix` filter from any MU-plugin is already registered. Called from a plugin's main file, it serves at once, after the plugins that load before it. A call after `plugins_loaded` is refused with a `_doing_it_wrong()` notice.
+Called from an MU-plugin, it serves on `muplugins_loaded`, when a `wp_consent_cookie_prefix` filter from any MU-plugin is already registered. Called from a plugin's main file, it serves at once, so it also sees that filter from the plugins that load before it, but not from those after. A call after `plugins_loaded` is refused with a `_doing_it_wrong()` notice.
 
 The module serves only while proxy tracking is enabled, and otherwise leaves the request to the REST route. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route too, which applies the consent check.
 
