@@ -327,6 +327,36 @@ class ProductsListTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The Products list says when it shows only the products from an AI shopping health link, and links to all products.
+	 */
+	public function test_filter_notice(): void {
+		$notice = function (): string {
+			ob_start();
+			$this->sut->filter_notice();
+			return (string) ob_get_clean();
+		};
+		set_current_screen( 'edit-product' );
+		try {
+			$this->assertSame( '', $notice(), 'No notice on the usual list' );
+
+			$_GET[ ProductsList::FILTER_PARAM ] = 'missing_images';
+			$html                               = $notice();
+			$this->assertStringContainsString( 'Showing products from AI shopping health.', $html );
+			$this->assertStringContainsString( 'Show all products</a>', $html );
+			$this->assertStringContainsString( 'href="' . esc_url( admin_url( 'edit.php?post_type=product' ) ) . '"', $html, 'The link drops the filter' );
+
+			update_option( 'woocommerce_feature_' . AgenticCommerceSettings::FEATURE_ID . '_enabled', 'no' );
+			$this->assertSame( '', $notice(), 'No notice with the feature off' );
+			update_option( 'woocommerce_feature_' . AgenticCommerceSettings::FEATURE_ID . '_enabled', 'yes' );
+
+			set_current_screen( 'edit-post' );
+			$this->assertSame( '', $notice(), 'Only on the Products list' );
+		} finally {
+			unset( $GLOBALS['current_screen'], $_GET[ ProductsList::FILTER_PARAM ] );
+		}
+	}
+
+	/**
 	 * @testdox The filter limits the main Products list query, and only there.
 	 */
 	public function test_filter_query(): void {
