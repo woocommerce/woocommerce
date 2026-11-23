@@ -40,4 +40,20 @@ trait ReadinessAbility {
 			),
 		);
 	}
+
+	/**
+	 * A value that may be null: the non-null schema, or null. Prefer this over a list of types
+	 * so each branch has one type name (MCP and the Core ability schema checks).
+	 *
+	 * @param array<string, mixed> $schema Schema of the non-null value (must include type).
+	 * @return array{anyOf: list<array<string, mixed>>}
+	 */
+	protected static function nullable( array $schema ): array {
+		return array(
+			'anyOf' => array(
+				$schema,
+				array( 'type' => 'null' ),
+			),
+		);
+	}
 }

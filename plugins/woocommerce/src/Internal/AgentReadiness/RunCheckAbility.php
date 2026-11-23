@@ -135,9 +135,11 @@ class RunCheckAbility implements AbilityDefinition {
 					'type'        => 'boolean',
 					'description' => __( 'Whole store: whether the queued check has not started because scheduled actions are not running on the store. It runs once they do; until then the report does not change.', 'woocommerce' ),
 				),
-				'report_generated_at' => array(
-					'type'        => array( 'string', 'null' ),
-					'description' => __( 'Whole store: when the report agents can read now was made; it changes when the queued check finishes.', 'woocommerce' ),
+				'report_generated_at' => self::nullable(
+					array(
+						'type'        => 'string',
+						'description' => __( 'Whole store: when the report agents can read now was made; it changes when the queued check finishes.', 'woocommerce' ),
+					)
 				),
 				'product'             => array(
 					'type'       => 'object',
