@@ -1,8 +1,13 @@
 /**
  * External dependencies
  */
-import { RadioControl, ToggleControl } from '@wordpress/components';
-import { lazy, Suspense, useEffect, useState } from '@wordpress/element';
+import { Notice, RadioControl, ToggleControl } from '@wordpress/components';
+import {
+	createElement,
+	createInterpolateElement,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -10,7 +15,6 @@ import { __ } from '@wordpress/i18n';
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 import { isFeatureEnabled } from '~/utils/features';
-import type { AiAccessNoticeProps } from './notice';
 import './style.scss';
 
 export const ANSWERS_OPTION = 'woocommerce_ai_answers_allowed';
@@ -34,19 +38,6 @@ type Props = {
 	 */
 	onDirtyChange?: ( isDirty: boolean ) => void;
 };
-
-// Notices load on demand, so the settings page only downloads @wordpress/ui when one is shown. The
-// section's own fields render with the page: the classic settings script treats fields added later as edits.
-const LazyNotice = lazy(
-	() =>
-		import( /* webpackChunkName: "ai-access-settings-notice" */ './notice' )
-);
-
-const AiAccessNotice = ( props: AiAccessNoticeProps ) => (
-	<Suspense fallback={ null }>
-		<LazyNotice { ...props } />
-	</Suspense>
-);
 
 const getNotice = ( status: AiAccessStatus ): string | null => {
 	switch ( status ) {
@@ -110,7 +101,15 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 				</>
 			) }
 			<h2>{ __( 'AI access', 'woocommerce' ) }</h2>
-			{ notice && <AiAccessNotice intent="warning" message={ notice } /> }
+			{ notice && (
+				<Notice
+					status="warning"
+					isDismissible={ false }
+					className="woocommerce-ai-access-settings__notice"
+				>
+					{ notice }
+				</Notice>
+			) }
 			<p className="woocommerce-ai-access-settings__intro">
 				{ __(
 					'These settings apply to your whole site.',
@@ -141,14 +140,23 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 					}
 				/>
 				{ showAiShoppingNotice && (
-					<AiAccessNotice
-						intent="info"
-						message={ __(
-							'AI shopping is on, so AI agents can still get your product details through it. Turn it off in <a>AI tools</a>.',
-							'woocommerce'
+					<Notice
+						status="info"
+						isDismissible={ false }
+						className="woocommerce-ai-access-settings__notice"
+					>
+						{ createInterpolateElement(
+							__(
+								'AI shopping is on, so AI agents can still get your product details through it. Turn it off in <a>AI tools</a>.',
+								'woocommerce'
+							),
+							{
+								a: createElement( 'a', {
+									href: data.aiShoppingUrl,
+								} ),
+							}
 						) }
-						href={ data.aiShoppingUrl }
-					/>
+					</Notice>
 				) }
 			</div>
 			<div className="woocommerce-ai-access-settings__field">
