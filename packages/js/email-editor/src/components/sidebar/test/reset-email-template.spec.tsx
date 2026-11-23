@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
+import { parse } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -74,6 +74,14 @@ describe( 'reset email template action', () => {
 	} );
 
 	describe( 'confirming the reset', () => {
+		// The click starts an async save, so wait for it inside act().
+		const clickReset = async () => {
+			const button = screen.getByRole( 'button', { name: 'Reset' } );
+			await act( async () => {
+				button.click();
+			} );
+		};
+
 		const dispatch = {
 			createSuccessNotice: jest.fn(),
 			createErrorNotice: jest.fn(),
@@ -86,6 +94,7 @@ describe( 'reset email template action', () => {
 
 		beforeEach( () => {
 			jest.clearAllMocks();
+			apiFetchMock.mockReset();
 			( useDispatch as jest.Mock ).mockReturnValue( dispatch );
 			const { RenderModal } = action;
 			render(
@@ -103,14 +112,19 @@ describe( 'reset email template action', () => {
 			} );
 			apiFetchMock.mockResolvedValueOnce( {} );
 
-			await userEvent.click(
-				screen.getByRole( 'button', { name: 'Reset' } )
-			);
+			await clickReset();
 
 			await waitFor( () => expect( closeModal ).toHaveBeenCalled() );
 			expect( apiFetchMock ).toHaveBeenNthCalledWith( 1, {
 				path: '/wp/v2/templates/woocommerce//order-email?context=edit&source=plugin',
 			} );
+			expect( parse ).toHaveBeenCalledWith( '<!-- default -->' );
+			expect( dispatch.saveEditedEntityRecord ).toHaveBeenCalledWith(
+				'postType',
+				'wp_template',
+				template.id,
+				{}
+			);
 			expect( dispatch.editEntityRecord ).toHaveBeenCalledWith(
 				'postType',
 				'wp_template',
@@ -138,9 +152,7 @@ describe( 'reset email template action', () => {
 		it( 'shows the error and keeps the template when the reset fails', async () => {
 			apiFetchMock.mockRejectedValueOnce( new Error( 'Server error.' ) );
 
-			await userEvent.click(
-				screen.getByRole( 'button', { name: 'Reset' } )
-			);
+			await clickReset();
 
 			await waitFor( () => expect( closeModal ).toHaveBeenCalled() );
 			expect( dispatch.createErrorNotice ).toHaveBeenCalledWith(

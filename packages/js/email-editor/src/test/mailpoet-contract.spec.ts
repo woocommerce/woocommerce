@@ -88,7 +88,8 @@ function sourceFiles( dir: string ): string[] {
 }
 
 /**
- * Most arguments passed to each hook fired with a string literal name.
+ * Fewest arguments passed to each hook fired with a string literal name, so a
+ * call site that drops an argument MailPoet reads fails the check.
  */
 function firedHooks(): Map< string, number > {
 	const hooks = new Map< string, number >();
@@ -105,7 +106,7 @@ function firedHooks(): Map< string, number > {
 			) {
 				const name = node.arguments[ 0 ].text;
 				const args = node.arguments.length - 1;
-				hooks.set( name, Math.max( hooks.get( name ) ?? 0, args ) );
+				hooks.set( name, Math.min( hooks.get( name ) ?? args, args ) );
 			}
 			ts.forEachChild( node, visit );
 		};
@@ -115,6 +116,12 @@ function firedHooks(): Map< string, number > {
 }
 
 describe( 'MailPoet contract', () => {
+	let fired: Map< string, number >;
+
+	beforeAll( () => {
+		fired = firedHooks();
+	} );
+
 	it( 'keeps the store name MailPoet selects and dispatches to', () => {
 		expect( storeName ).toBe( 'email-editor/editor' );
 	} );
@@ -154,8 +161,6 @@ describe( 'MailPoet contract', () => {
 		[ 'woocommerce_email_editor_preferred_template_title', 2 ],
 		[ 'woocommerce_email_editor_recent_emails_query', 2 ],
 	] )( 'fires %s with at least %d argument(s)', ( hook, args ) => {
-		const fired = firedHooks();
-
 		expect( fired.has( hook ) ).toBe( true );
 		expect( fired.get( hook ) ).toBeGreaterThanOrEqual( args );
 	} );
@@ -164,7 +169,7 @@ describe( 'MailPoet contract', () => {
 		// Guards the helpers above: an empty map would make every hook check fail
 		// for the wrong reason, so this test names that cause directly.
 		expect(
-			[ ...firedHooks().keys() ].filter( ( name ) =>
+			[ ...fired.keys() ].filter( ( name ) =>
 				name.startsWith( 'woocommerce_email_editor_' )
 			).length
 		).toBeGreaterThan( 9 );

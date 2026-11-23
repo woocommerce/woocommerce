@@ -55,14 +55,23 @@ describe( 'email editor config tools', () => {
 				.mockReturnValueOnce( {
 					name: 'core/quote',
 					title: 'Original',
+					category: 'text',
 				} )
-				.mockReturnValueOnce( { name: 'core/quote', title: 'First' } );
+				.mockReturnValueOnce( {
+					name: 'core/quote',
+					title: 'First',
+					category: 'text',
+				} );
 
 			expect(
 				updateBlockSettings( 'core/quote', () => ( {
 					title: 'First',
 				} ) )
 			).toBe( true );
+			expect( registerBlockType ).toHaveBeenCalledWith( 'core/quote', {
+				title: 'First',
+				category: 'text',
+			} );
 			updateBlockSettings( 'core/quote', () => ( { title: 'Second' } ) );
 			( registerBlockType as jest.Mock ).mockClear();
 
@@ -72,6 +81,7 @@ describe( 'email editor config tools', () => {
 			expect( unregisterBlockType ).toHaveBeenCalledWith( 'core/quote' );
 			expect( registerBlockType ).toHaveBeenCalledWith( 'core/quote', {
 				title: 'Original',
+				category: 'text',
 			} );
 			expect( restoreAllModifiedBlockSettings() ).toEqual( [] );
 		} );
