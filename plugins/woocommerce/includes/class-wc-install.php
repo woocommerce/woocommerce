@@ -1128,13 +1128,16 @@ class WC_Install {
 	 * @return array
 	 */
 	public static function cron_schedules( $schedules ) {
+		// Translating before `init` would load the text domain too early (WP 6.7+ notice), so fall back to English labels.
+		$translate = did_action( 'init' ) > 0;
+
 		$schedules['monthly']     = array(
 			'interval' => MONTH_IN_SECONDS,
-			'display'  => __( 'Monthly', 'woocommerce' ),
+			'display'  => $translate ? __( 'Monthly', 'woocommerce' ) : 'Monthly',
 		);
 		$schedules['fifteendays'] = array(
 			'interval' => 15 * DAY_IN_SECONDS,
-			'display'  => __( 'Every 15 Days', 'woocommerce' ),
+			'display'  => $translate ? __( 'Every 15 Days', 'woocommerce' ) : 'Every 15 Days',
 		);
 		return $schedules;
 	}
