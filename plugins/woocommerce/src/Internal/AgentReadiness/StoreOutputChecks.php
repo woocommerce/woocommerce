@@ -1519,7 +1519,7 @@ class StoreOutputChecks {
 
 	/**
 	 * The status and content type of the last answer from catalog search, such as `403 text/html`,
-	 * so a failed check says what was in the way. Empty when the store didn't answer.
+	 * so a failed check says what was in the way. Only a known media type is kept. Empty when the store didn't answer.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
@@ -1528,8 +1528,12 @@ class StoreOutputChecks {
 		if ( null === $response ) {
 			return '';
 		}
-		$type = strtolower( trim( explode( ';', $response['headers']['content-type'] ?? '' )[0] ) );
-		return trim( $response['status'] . ' ' . sanitize_text_field( $type ) );
+		$type = strtolower( trim( explode( ';', (string) ( $response['headers']['content-type'] ?? '' ) )[0] ) );
+		$type = sanitize_text_field( $type );
+		if ( ! in_array( $type, array( 'text/html', 'text/plain', 'application/json', 'application/problem+json' ), true ) ) {
+			$type = '';
+		}
+		return trim( $response['status'] . ' ' . $type );
 	}
 
 	/**

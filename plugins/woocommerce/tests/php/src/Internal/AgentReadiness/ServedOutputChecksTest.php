@@ -681,6 +681,43 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->serve( $responses );
 		$this->sut->all();
 		$this->assertSame( 5, StoreOutputChecks::search_counts()['checks'], 'With UCP off, catalog search isn\'t checked or counted' );
+
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+		$this->serve( $responses );
+		$answers = array( array( 403, '<html>Blocked</html>', array( 'content-type' => 'text/html' ) ), null );
+		add_filter(
+			'pre_http_request',
+			function ( $pre, $args, $url ) use ( $search, &$answers ) {
+				if ( 'POST' !== $args['method'] || substr( $url, strlen( untrailingslashit( home_url() ) ) ) !== $search || array() === $answers ) {
+					return $pre;
+				}
+				$answer = array_shift( $answers );
+				if ( null === $answer ) {
+					return new \WP_Error( 'http_request_failed', 'Timed out' );
+				}
+				return array(
+					'headers'  => new \WpOrg\Requests\Utility\CaseInsensitiveDictionary( $answer[2] ?? array() ),
+					'body'     => $answer[1],
+					'response' => array(
+						'code'    => $answer[0],
+						'message' => '',
+					),
+					'cookies'  => array(),
+				);
+			},
+			20,
+			3
+		);
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$counts = StoreOutputChecks::search_counts();
+		$this->assertNull( $checks['ucp_endpoints_live']['ok'], 'A retry that times out is couldn\'t check' );
+		$this->assertSame( '403 text/html', $checks['ucp_endpoints_live']['source'], 'A retry that times out keeps the first answer' );
+		$this->assertSame( array( 6, 5, 1, 3, '403 text/html' ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'], $counts['no_answer'], $counts['last_seen'] ) );
+
+		$run( array( 403, '<html>Blocked</html>', array( 'content-type' => 'https://store.example/cart' ) ) );
+		$counts = StoreOutputChecks::search_counts();
+		$this->assertSame( '403', $counts['last_seen'], 'An unknown content type is left out' );
+		$this->assertSame( array( 7, 6, 2 ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'] ) );
 	}
 
 	/**
