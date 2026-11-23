@@ -458,6 +458,22 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox An "Any" variation should leave out every combination an earlier variation takes, whole values and single combinations alike.
+	 */
+	public function test_any_variation_leaves_out_combinations_earlier_variations_take(): void {
+		$product = \WC_Helper_Product::create_variation_product();
+		$any     = \WC_Helper_Product::create_product_variation_object( $product->get_id(), 'ucp-any-everything', 10, array() );
+
+		// Small and large go whole, as does blue under huge; huge red 0 and huge red 2 go one by one.
+		$lookup = $this->post( '/catalog/lookup', array( 'ids' => array( (string) $any->get_id() ) ) )->get_data();
+
+		$this->assertSame(
+			array( $any->get_id() . ':pa_size=huge&pa_colour=red&pa_number=1' ),
+			wp_list_pluck( $lookup['products'][0]['variants'], 'id' )
+		);
+	}
+
+	/**
 	 * The opaque cursor walks forward through the result set.
 	 */
 	public function test_search_cursor_advances_to_the_next_page(): void {

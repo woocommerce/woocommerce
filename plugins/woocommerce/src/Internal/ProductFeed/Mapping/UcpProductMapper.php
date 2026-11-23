@@ -736,8 +736,6 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			$sets[ $key ] = isset( $narrow[ $key ] ) ? array_intersect( $values, array( $narrow[ $key ] ) ) : $values;
 		}
 
-		// Whole values go before anything is combined; only a claim on several
-		// attributes at once is left to check per combination.
 		$claims = array();
 		foreach ( in_array( '', $own, true ) ? $earlier : array() as $earlier_id => $fixed ) {
 			if ( $earlier_id === $variation_id ) {
@@ -759,24 +757,10 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 				continue;
 			}
 
-			if ( empty( $claim ) ) {
-				return;
-			}
-
-			if ( count( $claim ) > 1 ) {
-				$claims[] = $claim;
-			} else {
-				$sets[ key( $claim ) ] = array_diff( $sets[ key( $claim ) ], $claim );
-			}
+			$claims[] = $claim;
 		}
 
-		foreach ( $this->combinations( $sets ) as $values ) {
-			foreach ( $claims as $claim ) {
-				if ( ! array_diff_assoc( $claim, $values ) ) {
-					continue 2;
-				}
-			}
-
+		foreach ( $this->combinations( $sets, $claims ) as $values ) {
 			yield array(
 				'id'           => Utils::variant_id( $variation_id, $values ),
 				'variation_id' => $variation_id,
@@ -786,12 +770,32 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	}
 
 	/**
-	 * Walk the cartesian product of value sets, last set fastest.
+	 * Walk the cartesian product of value sets, last set fastest, less the combinations claimed.
+	 *
+	 * Claimed branches are cut rather than walked: a claim with one key left takes its value
+	 * out of that set, and one with none left takes the whole branch. Claims that cover a
+	 * branch only between them, several keys deep, are still walked into before they cut.
 	 *
 	 * @param array $sets Values by key.
+	 * @param array $claims Combinations to leave out, each a value by key for some of the keys.
 	 * @return \Generator Yields one value by key.
 	 */
-	private function combinations( array $sets ): \Generator {
+	private function combinations( array $sets, array $claims = array() ): \Generator {
+		foreach ( $claims as $index => $claim ) {
+			if ( empty( $claim ) ) {
+				return;
+			}
+
+			if ( 1 === count( $claim ) ) {
+				$sets[ key( $claim ) ] = array_diff( $sets[ key( $claim ) ], $claim );
+				unset( $claims[ $index ] );
+			}
+		}
+
+		if ( in_array( array(), $sets, true ) ) {
+			return;
+		}
+
 		if ( empty( $sets ) ) {
 			yield array();
 			return;
@@ -802,7 +806,16 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 		unset( $sets[ $key ] );
 
 		foreach ( $values as $value ) {
-			foreach ( $this->combinations( $sets ) as $rest ) {
+			// A claim naming another value for this key is out of the branch; the rest carry on without the key.
+			$open = array();
+			foreach ( $claims as $claim ) {
+				if ( ( $claim[ $key ] ?? $value ) === $value ) {
+					unset( $claim[ $key ] );
+					$open[] = $claim;
+				}
+			}
+
+			foreach ( $this->combinations( $sets, $open ) as $rest ) {
 				yield array( $key => $value ) + $rest;
 			}
 		}
