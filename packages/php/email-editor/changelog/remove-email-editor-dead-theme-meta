@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Remove unused per-email theme meta reads and deprecate leftover email theme helpers.
+
