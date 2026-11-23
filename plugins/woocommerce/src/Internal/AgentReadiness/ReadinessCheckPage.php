@@ -1210,7 +1210,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			if ( null === $check['ok'] ) {
 				// The title says what the check looks for, not that it passed.
 				$title  = ReadinessCopy::store_check( $check['id'] )['action'] ?? $copy['title'] ?? $check['name'];
-				$rows[] = self::row( $check['id'], 'unknown', $title, $launched ? __( 'This check couldn’t run. It runs again each day, or you can check again now.', 'woocommerce' ) : __( 'Launch your store to run this check.', 'woocommerce' ) );
+				$rows[] = self::row( $check['id'], 'unknown', $title, $launched ? __( 'This check couldn’t run. It runs again each day, or you can run the check again now.', 'woocommerce' ) : __( 'Launch your store to run this check.', 'woocommerce' ) );
 				continue;
 			}
 			if ( $check['ok'] ) {
