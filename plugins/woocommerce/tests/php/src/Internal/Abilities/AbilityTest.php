@@ -60,6 +60,10 @@ class AbilityTest extends \WC_Unit_Test_Case {
 						'text'  => array( 'type' => 'string' ),
 						'flag'  => array( 'type' => 'boolean' ),
 						'count' => array( 'type' => 'integer' ),
+						'page'  => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+						),
 						'ids'   => array(
 							'type'        => 'array',
 							'uniqueItems' => true,
@@ -539,6 +543,20 @@ class AbilityTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+		$this->assertArrayNotHasKey( 'permission', $this->received );
+		$this->assertArrayNotHasKey( 'execute', $this->received );
+	}
+
+	/**
+	 * @testdox Should refuse a number that converts to a value the schema does not allow, and not run the callbacks.
+	 */
+	public function test_refuses_a_number_that_converts_below_the_minimum(): void {
+		$sut = $this->get_ability();
+
+		foreach ( array( $sut->execute( array( 'page' => 2.0 ** 64 ) ), $sut->prepare_input( array( 'page' => 2.0 ** 64 ) ) ) as $result ) {
+			$this->assertWPError( $result );
+			$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+		}
 		$this->assertArrayNotHasKey( 'permission', $this->received );
 		$this->assertArrayNotHasKey( 'execute', $this->received );
 	}

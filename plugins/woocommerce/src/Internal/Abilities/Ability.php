@@ -48,31 +48,35 @@ class Ability extends \WP_Ability {
 	/**
 	 * Normalize, validate and convert the input, the same way WordPress 7.2 does.
 	 *
+	 * WordPress 7.2 and later handle this in WP_Ability::prepare_input().
+	 *
 	 * @since 11.4.0
 	 *
 	 * @param mixed $input Optional. The raw input provided for the ability. Default `null`.
 	 * @return mixed|\WP_Error The prepared input, or a WP_Error when any step fails.
 	 */
 	public function prepare_input( $input = null ) {
+		if ( self::core_prepares_input() ) {
+			return ( new \ReflectionMethod( \WP_Ability::class, 'prepare_input' ) )->invoke( $this, $input );
+		}
+
 		$input = $this->normalize_input( $input );
 		if ( is_wp_error( $input ) ) {
 			return $input;
 		}
 
+		// This class's normalize_input() override already sanitizes the input.
 		$is_valid = $this->validate_input( $input );
-		if ( is_wp_error( $is_valid ) ) {
-			return $is_valid;
-		}
-
-		// On older Core, this class's normalize_input() override already sanitizes before execute() validates.
-		return self::core_prepares_input() ? $this->sanitize_input( $input ) : $input;
+		return is_wp_error( $is_valid ) ? $is_valid : $input;
 	}
 
 	/**
 	 * Convert validated input to the schema types, the same way WordPress 7.2 does.
 	 *
-	 * Converting can fail on input that validated, such as items that are unique
-	 * as strings but not as integers. The input is then refused.
+	 * Converting can make validated input invalid, such as items that are unique
+	 * as strings but not as integers, or a number too large for an integer that
+	 * becomes 0 and breaks a minimum. The converted input is validated again and
+	 * refused when it fails.
 	 *
 	 * @since 11.4.0
 	 *
@@ -100,7 +104,8 @@ class Ability extends \WP_Ability {
 			);
 		}
 
-		return $sanitized;
+		$is_valid = $this->validate_input( $sanitized );
+		return is_wp_error( $is_valid ) ? $is_valid : $sanitized;
 	}
 
 	/**
