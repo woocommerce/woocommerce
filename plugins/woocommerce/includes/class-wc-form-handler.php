@@ -831,7 +831,8 @@ class WC_Form_Handler {
 			$order_id  = absint( $wp->query_vars['order-pay'] );
 			$order     = wc_get_order( $order_id );
 
-			if ( $order_id === $order->get_id() && hash_equals( $order->get_order_key(), $order_key ) && $order->needs_payment() ) {
+			// needs_payment() is true for a checkout-draft, but a draft has not passed checkout validation yet.
+			if ( $order instanceof WC_Order && $order_id === $order->get_id() && hash_equals( $order->get_order_key(), $order_key ) && $order->needs_payment() && ! $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
 
 				do_action( 'woocommerce_before_pay_action', $order );
 
@@ -1653,6 +1654,11 @@ class WC_Form_Handler {
 		$nonce_value = isset( $_POST['woocommerce-register-nonce'] ) ? wp_unslash( $_POST['woocommerce-register-nonce'] ) : $nonce_value; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		if ( isset( $_POST['register'], $_POST['email'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-register' ) ) {
+			if ( 'yes' !== get_option( 'woocommerce_enable_myaccount_registration' ) ) {
+				wc_add_notice( __( 'Registration is disabled.', 'woocommerce' ), 'error' );
+				return;
+			}
+
 			$username = 'no' === get_option( 'woocommerce_registration_generate_username' ) && isset( $_POST['username'] ) ? wp_unslash( $_POST['username'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$password = 'no' === get_option( 'woocommerce_registration_generate_password' ) && isset( $_POST['password'] ) ? $_POST['password'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$email    = wp_unslash( $_POST['email'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

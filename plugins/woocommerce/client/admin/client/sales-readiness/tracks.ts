@@ -8,8 +8,8 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import type { ReadinessView } from './types';
 
-/** Where the event happened: the Sales readiness page or the AI tools Overview. */
-export type Surface = 'page' | 'overview';
+/** Where the event happened: AI shopping health, the AI tools Overview, or AI shopping. */
+export type Surface = 'page' | 'overview' | 'shopping';
 
 type Props = Record< string, string | number | boolean >;
 
@@ -42,7 +42,7 @@ export function viewedProps( view: ReadinessView, surface: Surface ): Props {
 	}
 	return {
 		surface,
-		checked: ! view.intro,
+		checked: view.checked,
 		pending: view.run.pending,
 		fix_first_count: view.fix_first?.items.length ?? 0,
 		open_count: counts.open,

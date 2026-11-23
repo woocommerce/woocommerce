@@ -12,9 +12,11 @@ import {
 	SupportDownload,
 } from '../components/support-download';
 import { CheckedCard } from '../components/checked-card';
+import { trackReadiness } from '../tracks';
 import type { ReadinessView } from '../types';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+jest.mock( '../tracks', () => ( { trackReadiness: jest.fn() } ) );
 const mockFetch = apiFetch as unknown as jest.Mock;
 
 describe( 'SupportDownload', () => {
@@ -56,6 +58,10 @@ describe( 'SupportDownload', () => {
 		expect( blob.type ).toBe( 'text/plain;charset=utf-8' );
 		expect( blob.size ).toBe( 'Site: https://example.org\n'.length );
 		expect( onError ).toHaveBeenLastCalledWith( '' );
+		expect( trackReadiness ).toHaveBeenCalledWith( 'link_clicked', {
+			surface: 'page',
+			area: 'support_download',
+		} );
 	} );
 
 	it( 'reports an error when the report can’t be loaded, and saves nothing', async () => {
@@ -82,11 +88,11 @@ describe( 'SupportDownload', () => {
 } );
 
 describe( 'CheckedCard', () => {
-	const checked = ( intro: string | null ) =>
+	const checked = ( hasRun: boolean ) =>
 		( {
 			last_checked: 'Last checked today',
 			checked_note: null,
-			intro,
+			checked: hasRun,
 			support_url: 'https://woocommerce.com/my-account/create-a-ticket/',
 			run: {
 				label: 'Check again',
@@ -97,10 +103,10 @@ describe( 'CheckedCard', () => {
 			},
 		} ) as unknown as ReadinessView;
 
-	const renderCard = ( intro: string | null ) =>
+	const renderCard = ( hasRun: boolean ) =>
 		render(
 			<CheckedCard
-				view={ checked( intro ) }
+				view={ checked( hasRun ) }
 				running={ false }
 				onRun={ jest.fn() }
 				onDownloadError={ jest.fn() }
@@ -108,7 +114,7 @@ describe( 'CheckedCard', () => {
 		);
 
 	it( 'offers Need help? with the results to download and a link to support', () => {
-		renderCard( null );
+		renderCard( true );
 
 		expect(
 			screen.getByText( /^Need help\?/ ).closest( 'span' )
@@ -127,7 +133,7 @@ describe( 'CheckedCard', () => {
 	} );
 
 	it( 'shows no Need help? line before the first check, as in the design', () => {
-		renderCard( 'Run a check to see what AI assistants get.' );
+		renderCard( false );
 
 		expect(
 			screen.queryByRole( 'button', { name: 'Download your results' } )

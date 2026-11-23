@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\TaxBasedOn;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
@@ -519,6 +520,55 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 90, $order->get_total() );
 		$this->assertEquals( 18, $order->get_total_tax() );
 		$this->assertEquals( 2, $order->get_discount_tax() );
+	}
+
+	/**
+	 * @testdox A fixed cart coupon applied to an order records no more than the line price when removing the base tax leaves half a cent.
+	 */
+	public function test_apply_fixed_cart_coupon_records_line_price_with_half_cent_price(): void {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => 'US',
+				'tax_rate_state'   => '',
+				'tax_rate'         => '20.0000',
+				'tax_rate_name'    => 'VAT',
+				'tax_rate_order'   => '1',
+				'tax_rate_class'   => '',
+			)
+		);
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 9.99,
+				'price'         => 9.99,
+			)
+		);
+		WC_Helper_Coupon::create_coupon(
+			'fixed-cart-25',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '25',
+			)
+		);
+
+		$order = wc_create_order();
+		$order->set_billing_country( 'FR' );
+		$order->set_shipping_country( 'FR' );
+		$order->add_product( $product, 1 );
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_total( 10 );
+		$order->add_item( $shipping );
+		$order->calculate_totals();
+
+		$this->assertTrue( $order->apply_coupon( 'fixed-cart-25' ), 'The coupon should apply to the order' );
+		$coupon_items = array_values( $order->get_items( 'coupon' ) );
+		$this->assertEquals( 8.33, $coupon_items[0]->get_discount(), 'The coupon should record no more than the line price' );
+		$this->assertEquals( 10, $order->get_total(), 'Only shipping should remain to pay' );
 	}
 
 	/**
@@ -3098,5 +3148,80 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $result );
 		$this->assertTrue( $order->update_status( OrderStatus::PROCESSING ), 'update_status() should return true once the save succeeds.' );
+	}
+
+	/**
+	 * Try to hold the per-user coupon allowance for a new, unsaved order, as the checkout does.
+	 *
+	 * @param string $code          Coupon code in the cart.
+	 * @param string $billing_email Billing email of the checkout.
+	 * @return string|null The error message, or null when the hold was taken.
+	 */
+	private function try_hold_coupon( string $code, string $billing_email ): ?string {
+		WC()->cart->set_applied_coupons( array( $code ) );
+		$order = new WC_Order();
+		$order->set_billing_email( $billing_email );
+		try {
+			$order->hold_applied_coupons( $billing_email );
+			return null;
+		} catch ( Exception $e ) {
+			return $e->getMessage();
+		}
+	}
+
+	/**
+	 * @testdox A guest cannot hold a per-user coupon that the account owning the billing email already used.
+	 */
+	public function test_hold_applied_coupons_counts_use_of_account_that_owns_guest_email(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'owner@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'hold_owner_use', array( 'usage_limit_per_user' => '1' ) );
+		add_post_meta( ( new WC_Coupon( 'hold_owner_use' ) )->get_id(), '_used_by', (string) $user_id );
+		wp_set_current_user( 0 );
+
+		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_owner_use', 'owner@example.com' ), 'A use stored under the owner ID, with no email record, is found by email' );
+		$this->assertNull( $this->try_hold_coupon( 'hold_owner_use', 'someone-else@example.com' ), 'An unrelated guest keeps their allowance' );
+	}
+
+	/**
+	 * @testdox A logged in customer cannot take a second hold while their first hold is still active.
+	 */
+	public function test_hold_applied_coupons_counts_own_active_hold(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'parallel@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'hold_parallel', array( 'usage_limit_per_user' => '1' ) );
+		wp_set_current_user( $user_id );
+
+		$this->assertNull( $this->try_hold_coupon( 'hold_parallel', 'parallel@example.com' ), 'The first checkout takes the hold' );
+		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_parallel', 'parallel@example.com' ), 'The second checkout sees the first hold' );
+	}
+
+	/**
+	 * @testdox A per-user limit of two still lets the same customer take two holds.
+	 */
+	public function test_hold_applied_coupons_allows_uses_up_to_limit(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'twice@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'hold_limit_two', array( 'usage_limit_per_user' => '2' ) );
+		wp_set_current_user( $user_id );
+
+		$this->assertNull( $this->try_hold_coupon( 'hold_limit_two', 'twice@example.com' ), 'First hold' );
+		$this->assertNull( $this->try_hold_coupon( 'hold_limit_two', 'twice@example.com' ), 'Second hold, still within the limit' );
+		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_limit_two', 'twice@example.com' ), 'Third hold is over the limit' );
+	}
+
+	/**
+	 * @testdox A guest cannot hold a per-user coupon with an email whose owner used it, after the owner changes their account email.
+	 */
+	public function test_hold_applied_coupons_counts_use_after_account_email_change(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'before@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'hold_email_change', array( 'usage_limit_per_user' => '1' ) );
+		( new WC_Coupon( 'hold_email_change' ) )->increase_usage_count( (string) $user_id );
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'after@example.com',
+			)
+		);
+		wp_set_current_user( 0 );
+
+		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_email_change', 'before@example.com' ), 'The use is found through the email recorded with it' );
 	}
 }

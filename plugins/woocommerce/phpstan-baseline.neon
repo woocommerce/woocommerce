@@ -11395,73 +11395,19 @@ parameters:
 			path: includes/class-wc-form-handler.php
 
 		-
-			message: '#^Cannot call method get_billing_city\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method get_billing_country\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method get_billing_postcode\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method get_billing_state\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method get_checkout_order_received_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
 			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/class-wc-form-handler.php
 
 		-
 			message: '#^Cannot call method get_order_key\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: includes/class-wc-form-handler.php
 
 		-
 			message: '#^Cannot call method has_status\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method needs_payment\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method payment_complete\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method save\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot call method set_payment_method\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/class-wc-form-handler.php
@@ -14211,18 +14157,6 @@ parameters:
 		-
 			message: '#^Method WC_Session_Handler\:\:update_session_timestamp\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
-			message: '#^Parameter \#1 \$cart_token of static method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartTokenUtils\:\:get_cart_token_payload\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
-			message: '#^Parameter \#1 \$cart_token of static method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartTokenUtils\:\:validate_cart_token\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: includes/class-wc-session-handler.php
 
