@@ -633,7 +633,7 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		} else {
 			$message = sprintf(
 				/* translators: 1: refund ID, 2: time since the refund, such as "2 mins". */
-				__( 'Refund %1$d refunded the same amount and lines of this order %2$s ago, so no new refund was created. If you mean to make the same refund again, send the same input with allow_duplicate_of set to %1$d.', 'woocommerce' ),
+				__( 'Refund %1$d already refunded the same amount and lines of this order %2$s ago, so no new refund was created. If you sent this call again after an error or a timeout, the first call went through: tell the merchant about refund %1$d and do not refund again. Only if the merchant then asks for a second, identical refund, send the same input with allow_duplicate_of set to %1$d.', 'woocommerce' ),
 				$refund->get_id(),
 				human_time_diff( $created )
 			);
@@ -828,7 +828,7 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 				),
 				'allow_duplicate_of' => array(
 					'type'        => 'integer',
-					'description' => __( 'ID of the refund that a duplicate error returned. Send it, with the same amount and lines, only when you mean to make that refund again.', 'woocommerce' ),
+					'description' => __( 'ID of the refund that a duplicate error returned. Send it, with the same input, only when the merchant asked for a second refund after being told about that one. Never send it to retry a failed or timed-out call.', 'woocommerce' ),
 					'minimum'     => 1,
 				),
 			),
