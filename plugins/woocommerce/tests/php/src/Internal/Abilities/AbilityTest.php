@@ -551,6 +551,10 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	 * @testdox Should refuse a number that converts to a value the schema does not allow, and not run the callbacks.
 	 */
 	public function test_refuses_a_number_that_converts_below_the_minimum(): void {
+		if ( method_exists( \WP_Ability::class, 'prepare_input' ) ) {
+			$this->markTestSkipped( 'WordPress prepares the input itself since 7.2.' );
+		}
+
 		$sut = $this->get_ability();
 
 		// PHP 8.5 reports casting an out-of-range float to an integer as a deprecation.
