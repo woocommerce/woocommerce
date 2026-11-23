@@ -113,6 +113,26 @@ describe( 'CheckRow', () => {
 		);
 	} );
 
+	it( 'links the name at a UTF-16 offset when an emoji comes first', () => {
+		const { container } = renderRow(
+			row( {
+				id: 'product_jsonld_present',
+				text: '😀 On the the page, the name.',
+				text_link: {
+					href: 'https://example.com/product/the/',
+					text: 'the',
+					at: 10,
+				},
+			} )
+		);
+
+		const link = screen.getByRole( 'link', { name: /the/ } );
+		expect( link.previousSibling?.textContent ).toBe( '😀 On the ' );
+		expect( container ).toHaveTextContent(
+			'😀 On the the page, the name.'
+		);
+	} );
+
 	it( 'falls back to the first match when the position does not hold the name', () => {
 		renderRow(
 			row( {

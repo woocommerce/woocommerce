@@ -385,6 +385,19 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $expected, array_column( ReadinessCheckPage::done_steps( $checks( true ) ), 'id' ), 'Completed steps keep the same order as open ones' );
 		$this->assertSame( $expected, array_column( ReadinessCheckPage::open_steps( $checks( false ) ), 'id' ), 'Open steps: blocking, then Required, then Optional' );
+
+		// shipping_policy_page follows guest checkout in the setup list. Shown as Required, it comes first in both lists.
+		$shown          = static fn( bool $ok ): array => array_map(
+			static function ( array $check ) use ( $ok ): array {
+				$check['ok']    = $ok;
+				$check['level'] = 'shipping_policy_page' === $check['id'] ? StoreConditions::LEVEL_REQUIRED : $check['level'];
+				return $check;
+			},
+			$checks( false )
+		);
+		$required_ahead = array( 'launched', 'https', 'ucp_discovery', 'payment_method', 'privacy_page', 'terms_page', 'refund_returns_page', 'search_visible', 'order_emails', 'shipping_policy_page', 'guest_checkout', 'other_step' );
+		$this->assertSame( $required_ahead, array_column( ReadinessCheckPage::done_steps( $shown( true ) ), 'id' ), 'A completed Required step stays ahead of Optional ones' );
+		$this->assertSame( $required_ahead, array_column( ReadinessCheckPage::open_steps( $shown( false ) ), 'id' ), 'An open Required step stays ahead of Optional ones' );
 	}
 
 	/**

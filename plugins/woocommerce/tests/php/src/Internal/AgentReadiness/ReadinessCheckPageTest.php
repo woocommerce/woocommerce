@@ -221,6 +221,15 @@ class ReadinessCheckPageTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Na stronie „the” brakuje nazwy, ceny i stanu.', $translated['text'] );
 		$this->assertSame( 12, $translated['tool']['at'], 'In a translation the name can sit elsewhere, and the position counts characters, not bytes' );
 
+		$emoji = static function ( $translation, $text ) {
+			return 0 === strpos( (string) $text, 'On the %s page, the name, price, and stock' ) ? '😀 On the %s page, the name.' : $translation;
+		};
+		add_filter( 'gettext', $emoji, 10, 2 );
+		$emoji_line = $failing_copy->invoke( null, $check );
+		remove_filter( 'gettext', $emoji, 10 );
+		$this->assertSame( '😀 On the the page, the name.', $emoji_line['text'] );
+		$this->assertSame( 10, $emoji_line['tool']['at'], 'An emoji before the name counts as two UTF-16 code units, the index the page slices with' );
+
 		$product->delete( true );
 		$unnamed = $failing_copy->invoke( null, $check );
 		$this->assertStringStartsWith( 'On a product page, the name, price, and stock aren’t in the page code', $unnamed['text'] );

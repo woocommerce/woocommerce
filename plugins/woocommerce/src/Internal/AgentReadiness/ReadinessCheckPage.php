@@ -222,9 +222,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @return array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>
 	 */
 	public static function open_steps( array $checks ): array {
-		$open     = self::setup_order( array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] && ! $check['ok'] ) );
-		$required = array( StoreConditions::class, 'shows_required' );
-		return array_merge( array_values( array_filter( $open, $required ) ), array_values( array_filter( $open, static fn( array $check ): bool => ! $required( $check ) ) ) );
+		return self::required_first( self::setup_order( array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] && ! $check['ok'] ) ) );
 	}
 
 	/**
@@ -234,7 +232,20 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @return array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>
 	 */
 	public static function done_steps( array $checks ): array {
-		return self::setup_order( array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] && $check['ok'] ) );
+		return self::required_first( self::setup_order( array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] && $check['ok'] ) ) );
+	}
+
+	/**
+	 * Required steps first, keeping setup order inside each group. A step the rules file marks
+	 * Required moves ahead of the Optional ones, open or done.
+	 *
+	 * @template T of array{id:string,level:string}
+	 * @param array<int|string, T> $checks Store conditions, already in setup order.
+	 * @return array<int, T>
+	 */
+	private static function required_first( array $checks ): array {
+		$required = array( StoreConditions::class, 'shows_required' );
+		return array_merge( array_values( array_filter( $checks, $required ) ), array_values( array_filter( $checks, static fn( array $check ): bool => ! $required( $check ) ) ) );
 	}
 
 	/**
@@ -410,8 +421,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * The link on the product name in "On the Blue hoodie page, …", to that page. `at` is where the name
-	 * starts in the line, in characters, so a name that also appears earlier ("the") is still the one linked.
-	 * Null when the line names no product.
+	 * starts in the line, in UTF-16 code units, the index the page uses to slice the text. A name that
+	 * also appears earlier ("the") is still the one linked. Null when the line names no product.
 	 *
 	 * @param array  $check      Store check.
 	 * @param int    $product_id Product ID from the report.
@@ -434,8 +445,19 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		return array(
 			'href' => $href,
 			'text' => $product,
-			'at'   => mb_strlen( substr( $found, 0, $at ), 'UTF-8' ),
+			'at'   => self::utf16_units( substr( $found, 0, $at ) ),
 		);
+	}
+
+	/**
+	 * How many UTF-16 code units $text has. The page slices with JavaScript, which counts in those
+	 * units, so an emoji before the product name is two, not one.
+	 *
+	 * @param string $text Text before the product name.
+	 */
+	private static function utf16_units( string $text ): int {
+		$utf16 = mb_convert_encoding( $text, 'UTF-16LE', 'UTF-8' );
+		return is_string( $utf16 ) ? intdiv( strlen( $utf16 ), 2 ) : 0;
 	}
 
 	/**
