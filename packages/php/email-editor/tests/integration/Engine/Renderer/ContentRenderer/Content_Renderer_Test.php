@@ -653,18 +653,13 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$author_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		$this->assertIsInt( $author_id );
 		wp_set_current_user( $author_id );
-		$style_block   = '<!-- wp:html --><style>.elementor-hidden { display: none; }</style><!-- /wp:html -->';
-		$email_post_id = $this->factory->post->create(
-			array(
-				'post_content' => $style_block . $style_block . $style_block
-					. '<!-- wp:paragraph --><p>First</p><!-- /wp:paragraph -->'
-					. $style_block
-					. '<!-- wp:paragraph --><p>Second</p><!-- /wp:paragraph -->',
-			)
+		$style_block       = '<!-- wp:html --><style>.elementor-hidden { display: none; }</style><!-- /wp:html -->';
+		$email_post        = $this->create_email_post(
+			$style_block . $style_block . $style_block
+			. '<!-- wp:paragraph --><p>First</p><!-- /wp:paragraph -->'
+			. $style_block
+			. '<!-- wp:paragraph --><p>Second</p><!-- /wp:paragraph -->'
 		);
-		$this->assertIsInt( $email_post_id );
-		$email_post = get_post( $email_post_id );
-		$this->assertInstanceOf( \WP_Post::class, $email_post );
 		$template          = new \WP_Block_Template();
 		$template->id      = 'template-id';
 		$template->content = '<!-- wp:post-content /-->';
@@ -678,9 +673,14 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		}
 		// The wrappers are post-content's, then the two paragraphs'.
 		$this->assertSame( array( '', '', 'margin-top:16px;' ), $wrapper_styles, $html );
-		// Only the two paragraphs get the root padding wrapper.
-		$this->assertSame( 2, substr_count( $html, '<div class="email-root-padding"' ) );
-		$this->assertSame( 4, substr_count( $html, '.elementor-hidden { display: none; }</style>' ) );
+
+		$padding_wrappers = 0;
+		$processor        = new \WP_HTML_Tag_Processor( $html );
+		while ( $processor->next_tag( array( 'class_name' => 'email-root-padding' ) ) ) {
+			++$padding_wrappers;
+		}
+		$this->assertSame( 2, $padding_wrappers, 'Only the two paragraphs should get the root padding wrapper. ' . $html );
+		$this->assertSame( 4, substr_count( $html, '.elementor-hidden { display: none; }</style>' ), 'Every <style> should still reach the CSS inliner. ' . $html );
 	}
 
 	/**
