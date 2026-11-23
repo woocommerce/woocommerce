@@ -11,7 +11,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils as UcpUtils;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Sales readiness, while the agent_readiness feature is enabled: when the store was last checked, Fix first,
+ * Sales readiness: when the store was last checked, Fix first,
  * then a card per merchant question with the checks from the last scan. It is a WooCommerce Admin page
  * under the WooCommerce menu, before Settings; the React page reads everything it shows from
  * wc/v3/agent-readiness/view, which this class builds. The same builder gives the AI tools tab its
@@ -170,12 +170,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Add the page while the feature is enabled.
+	 * Add the page in the admin.
 	 *
 	 * @internal
 	 */
 	public function handle_init(): void {
-		if ( ! is_admin() || ! $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ) {
+		if ( ! is_admin() ) {
 			return;
 		}
 		// After Reports (20) and before Settings (50), as WooCommerce adds them.

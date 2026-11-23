@@ -51,7 +51,6 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			// On multisite only a super admin can choose the privacy policy page, as a single site's administrator can.
 			grant_super_admin( get_current_user_id() );
 		}
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		delete_option( 'woocommerce_feature_ucp_enabled' );
 		$this->sut = wc_get_container()->get( AgenticCommerceSettings::class );
 	}
@@ -71,15 +70,10 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The tab is added only while the agent_readiness feature is enabled.
+	 * @testdox The AI tools tab is added in the admin.
 	 */
-	public function test_tab_only_with_feature_enabled(): void {
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
+	public function test_tab_added(): void {
 		remove_all_filters( 'woocommerce_get_settings_pages' );
-		$this->sut->handle_init();
-		$this->assertFalse( has_filter( 'woocommerce_get_settings_pages' ), 'No tab with the feature off' );
-
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
 		$this->sut->handle_init();
 		$pages = apply_filters( 'woocommerce_get_settings_pages', array() );
@@ -107,16 +101,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Sales readiness is added only while the agent_readiness feature is enabled, as a WooCommerce Admin page under WooCommerce, before Settings.
+	 * @testdox Sales readiness is added as a WooCommerce Admin page under WooCommerce, before Settings.
 	 */
-	public function test_readiness_page_only_with_feature_enabled(): void {
+	public function test_readiness_page_added(): void {
 		$page = wc_get_container()->get( ReadinessCheckPage::class );
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
 		remove_all_actions( 'admin_menu' );
-		$page->handle_init();
-		$this->assertFalse( has_action( 'admin_menu', array( $page, 'handle_admin_menu' ) ), 'No page with the feature off' );
-
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		$page->handle_init();
 		$this->assertSame( ReadinessCheckPage::MENU_PRIORITY, has_action( 'admin_menu', array( $page, 'handle_admin_menu' ) ), 'After Reports (20), before Settings (50)' );
 
@@ -2419,7 +2408,6 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 * A fresh settings page.
 	 */
 	private function page(): AgenticCommerceSettingsPage {
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		delete_option( 'woocommerce_feature_ucp_enabled' );
 		$this->sut->handle_init();
 		$pages = $this->sut->handle_woocommerce_get_settings_pages( array() );

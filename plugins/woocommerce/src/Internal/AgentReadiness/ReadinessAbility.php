@@ -3,27 +3,14 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
- * What the agent readiness abilities share: the feature gate, the permission, and the channel schema.
+ * What the agent readiness abilities share: the permission and the channel schema.
  *
  * @since 11.4.0
  */
 trait ReadinessAbility {
-
-	/**
-	 * Ability name while the feature is on, or an empty string so AbilitiesLoader skips it.
-	 *
-	 * @param string $name Ability name.
-	 * @return string
-	 */
-	protected static function name_when_enabled( string $name ): string {
-		$features = wc_get_container()->get( FeaturesController::class );
-		return $features->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ? $name : '';
-	}
 
 	/**
 	 * Whether the current user may use the ability.

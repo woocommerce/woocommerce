@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 
@@ -55,12 +54,6 @@ class ScheduledScan implements RegisterHooksInterface {
 	 */
 	public const RUNNING_FOR = 10 * MINUTE_IN_SECONDS;
 
-	/**
-	 * Features controller.
-	 *
-	 * @var FeaturesController
-	 */
-	private FeaturesController $features_controller;
 
 	/**
 	 * Readiness service.
@@ -81,14 +74,12 @@ class ScheduledScan implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param FeaturesController $features_controller Features controller.
-	 * @param AgentReadiness     $agent_readiness     Readiness service.
-	 * @param RemoteRules        $remote_rules        Rules from the published rules file.
+	 * @param AgentReadiness $agent_readiness     Readiness service.
+	 * @param RemoteRules    $remote_rules        Rules from the published rules file.
 	 */
-	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness, RemoteRules $remote_rules ): void {
-		$this->features_controller = $features_controller;
-		$this->agent_readiness     = $agent_readiness;
-		$this->remote_rules        = $remote_rules;
+	final public function init( AgentReadiness $agent_readiness, RemoteRules $remote_rules ): void {
+		$this->agent_readiness = $agent_readiness;
+		$this->remote_rules    = $remote_rules;
 	}
 
 	/**
@@ -175,9 +166,6 @@ class ScheduledScan implements RegisterHooksInterface {
 	 * @internal
 	 */
 	public function run(): void {
-		if ( ! $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ) {
-			return;
-		}
 		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
 		as_schedule_single_action( time() + DAY_IN_SECONDS, self::DAILY_HOOK, array(), self::GROUP );
 
@@ -195,11 +183,6 @@ class ScheduledScan implements RegisterHooksInterface {
 	 */
 	public function run_batch( $chain = '' ): void {
 		$chain = is_string( $chain ) ? $chain : '';
-		if ( ! $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ) {
-			$this->agent_readiness->cancel_refresh();
-			as_unschedule_all_actions( self::NEXT_HOOK );
-			return;
-		}
 		// Runs only if this action ends early, as on a timeout, and goes on from the last finished batch.
 		as_schedule_single_action( time() + self::RETRY_AFTER, self::NEXT_HOOK, array( $chain ), self::GROUP );
 		$more = $this->agent_readiness->continue_refresh( $chain );

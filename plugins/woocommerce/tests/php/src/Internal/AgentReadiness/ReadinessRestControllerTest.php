@@ -17,19 +17,17 @@ use WP_REST_Request;
 class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * Tests fire rest_api_init with the feature both on and off.
+	 * Each test gets a fresh REST server.
 	 *
 	 * @var bool
 	 */
 	protected static $reuse_rest_server = false;
 
 	/**
-	 * Enable the feature after parent::setUp(), so the filter stays out of the hook
-	 * snapshot WordPress takes in the first test. Routes register on first dispatch.
+	 * Keep the report tests offline, with no stored report or queued scan. Routes register on first dispatch.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		add_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
 		// Report tests stay offline: store output checks would load the test site's pages.
 		StoreOutputChecksTest::block_requests();
 		delete_option( AgentReadiness::REPORT_OPTION );
@@ -44,13 +42,6 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
 		parent::tearDown();
-	}
-
-	/**
-	 * The feature option's value while these tests run.
-	 */
-	public static function enabled(): string {
-		return 'yes';
 	}
 
 	/**
@@ -143,20 +134,6 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/view' ) )->get_status() );
 		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_status() );
 		$this->assertFalse( as_has_scheduled_action( ScheduledScan::RUN_NOW_HOOK ) );
-	}
-
-	/**
-	 * @testdox With the feature disabled the routes are not registered.
-	 */
-	public function test_routes_absent_when_feature_disabled(): void {
-		remove_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
-		global $wp_rest_server;
-		$wp_rest_server = new \WP_REST_Server();
-		do_action( 'rest_api_init', $wp_rest_server );
-
-		$this->assertSame( 404, $wp_rest_server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness' ) )->get_status() );
-		$this->assertSame( 404, $wp_rest_server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_status() );
 	}
 
 	/**

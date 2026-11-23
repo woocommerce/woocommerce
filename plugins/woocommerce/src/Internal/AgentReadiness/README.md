@@ -1,6 +1,6 @@
 # Agent readiness
 
-Checks published simple and variable products against the product data specs of AI shopping channels and reports what keeps them from being listed or found. Behind the experimental `agent_readiness` feature flag (disabled by default, not shown on the Features screen).
+Checks published simple and variable products against the product data specs of AI shopping channels and reports what keeps them from being listed or found.
 
 ## What the checks read
 
@@ -198,7 +198,7 @@ The scan walks published simple and variable products not set to Hidden in batch
 
 ## Abilities
 
-While the feature is enabled, `AbilitiesLoader` registers these abilities in the WordPress Abilities API with the `Ability` class, which converts their input to the schema types. Each definition class in this directory owns its arguments. They show in REST and to MCP clients, for users with `manage_woocommerce`:
+`AbilitiesLoader` registers these abilities in the WordPress Abilities API with the `Ability` class, which converts their input to the schema types. Each definition class in this directory owns its arguments. They show in REST and to MCP clients, for users with `manage_woocommerce`:
 
 - `woocommerce/get-agent-readiness` and `GET wc/v3/agent-readiness` both return `{ report, scan_pending, scan_stalled }` from `AgentReadiness::get_served_report()`: settings changed since the scan show their current state, and store output checks come from the stored report.
 - `woocommerce/run-agent-readiness-check` with `product_id` checks that product now (`check_product()`) and returns its failing checks with label and fix, and its status per channel. Without one it queues the background scan, like `POST wc/v3/agent-readiness/scan`, and returns `scan_pending`, `scan_stalled` and `report_generated_at`, so the agent knows when to read the report again, or that it won't change until scheduled actions run.
@@ -239,9 +239,9 @@ The React views send Tracks events through `@woocommerce/tracks` (`client/admin/
 
 ## Usage tracking
 
-With the flag on, the weekly WC Tracker snapshot (sent only by stores that allow usage tracking) has an `agent_readiness` block, from `Telemetry`:
+The weekly WC Tracker snapshot (sent only by stores that allow usage tracking) has an `agent_readiness` block, from `Telemetry`:
 
-- `feature_enabled`: `yes` or `no`. With the flag off, the other fields stay empty.
+- `feature_enabled`: always `yes`. Kept from when the feature had a flag, so readers of the snapshot keep working.
 - `last_scan`: the day the stored report was built (`Y-m-d`), or empty before the first scan.
 - `truncated`: `yes` when the last scan stopped at the product limit, otherwise `no` (including before the first scan). On a truncated scan, product check statuses cover only the products that were checked.
 - `store_checks`: each store check id with `pass`, `problem` or `unknown` (couldn't check, or still waiting for a result). Setup steps are read when the snapshot is built, so they are there before the first scan too; output checks come from the stored report.
@@ -262,8 +262,4 @@ Core's UCP catalog mapper (`src/Internal/ProductFeed/Mapping/UcpProductMapper.ph
 
 ## Trying it
 
-```sh
-wp option update woocommerce_feature_agent_readiness_enabled yes
-```
-
-Then open WooCommerce > Sales readiness and select "Check your store". AI shopping is under WooCommerce > Settings > AI tools.
+Open WooCommerce > Sales readiness and select "Check your store". AI shopping is under WooCommerce > Settings > AI tools.

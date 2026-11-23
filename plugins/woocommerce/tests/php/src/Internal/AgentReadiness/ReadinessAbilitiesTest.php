@@ -48,7 +48,6 @@ class ReadinessAbilitiesTest extends WC_Unit_Test_Case {
 			do_action( 'wp_abilities_api_categories_init' );
 			remove_action( 'wp_abilities_api_categories_init', $category );
 		}
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$this->register();
 	}
@@ -93,9 +92,9 @@ class ReadinessAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox AbilitiesLoader registers the abilities with the Ability class, only while the feature is enabled.
+	 * @testdox AbilitiesLoader registers the abilities with the Ability class.
 	 */
-	public function test_registered_only_with_feature(): void {
+	public function test_registered_with_ability_class(): void {
 		$this->assertTrue( wp_has_ability( ReportAbility::NAME ) );
 		$this->assertInstanceOf( Ability::class, wp_get_ability( ReportAbility::NAME ) );
 		$this->assertInstanceOf( Ability::class, wp_get_ability( RunCheckAbility::NAME ) );
@@ -103,11 +102,6 @@ class ReadinessAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $meta['mcp']['public'] );
 		$this->assertTrue( $meta['annotations']['readonly'] );
 		$this->assertFalse( wp_get_ability( RunCheckAbility::NAME )->get_meta()['annotations']['idempotent'] );
-
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
-		$this->register();
-		$this->assertFalse( wp_has_ability( ReportAbility::NAME ) );
-		$this->assertFalse( wp_has_ability( RunCheckAbility::NAME ) );
 	}
 
 	/**

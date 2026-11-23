@@ -9,7 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Ability that reads the readiness report, for AbilitiesLoader.
- * No name while the feature is disabled, so the loader skips it.
  *
  * @since 11.4.0
  */
@@ -20,12 +19,12 @@ class ReportAbility implements AbilityDefinition {
 	public const NAME = 'woocommerce/get-agent-readiness';
 
 	/**
-	 * Ability name, or an empty string while the feature is disabled.
+	 * Ability name.
 	 *
 	 * @return string
 	 */
 	public static function get_name(): string {
-		return self::name_when_enabled( self::NAME );
+		return self::NAME;
 	}
 
 	/**

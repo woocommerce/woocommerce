@@ -9,7 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Ability that checks a product again or queues a store check, for AbilitiesLoader.
- * No name while the feature is disabled, so the loader skips it.
  *
  * @since 11.4.0
  */
@@ -20,12 +19,12 @@ class RunCheckAbility implements AbilityDefinition {
 	public const NAME = 'woocommerce/run-agent-readiness-check';
 
 	/**
-	 * Ability name, or an empty string while the feature is disabled.
+	 * Ability name.
 	 *
 	 * @return string
 	 */
 	public static function get_name(): string {
-		return self::name_when_enabled( self::NAME );
+		return self::NAME;
 	}
 
 	/**
