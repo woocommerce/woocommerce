@@ -5,7 +5,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
-import { parse } from '@wordpress/blocks';
+import { parse, serialize } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -129,11 +129,15 @@ describe( 'reset email template action', () => {
 				'postType',
 				'wp_template',
 				template.id,
-				expect.objectContaining( {
+				{
+					blocks: [ { name: 'core/paragraph' } ],
 					content: '<!-- default -->',
 					source: 'plugin',
-				} )
+				}
 			);
+			expect( serialize ).toHaveBeenCalledWith( [
+				{ name: 'core/paragraph' },
+			] );
 			expect( apiFetchMock ).toHaveBeenNthCalledWith( 2, {
 				path: '/wp/v2/templates/woocommerce//order-email',
 				method: 'DELETE',
