@@ -105,6 +105,10 @@ class Ability extends \WP_Ability {
 			);
 		}
 
+		if ( $sanitized === $input ) {
+			return $sanitized;
+		}
+
 		$is_valid = $this->validate_input( $sanitized );
 		return is_wp_error( $is_valid ) ? $is_valid : $sanitized;
 	}

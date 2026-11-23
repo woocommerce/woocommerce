@@ -560,4 +560,26 @@ class AbilityTest extends \WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'permission', $this->received );
 		$this->assertArrayNotHasKey( 'execute', $this->received );
 	}
+
+	/**
+	 * @testdox Should validate input that needs no conversion once.
+	 */
+	public function test_validates_input_that_needs_no_conversion_once(): void {
+		if ( ! method_exists( \WP_Ability::class, 'prepare_input' ) ) {
+			$this->markTestSkipped( 'WordPress prepares the input itself since 7.2.' );
+		}
+
+		$calls    = 0;
+		$callback = function ( $is_valid ) use ( &$calls ) {
+			++$calls;
+			return $is_valid;
+		};
+		add_filter( 'wp_ability_validate_input', $callback );
+
+		$result = $this->get_ability()->prepare_input( array( 'count' => 5 ) );
+
+		remove_filter( 'wp_ability_validate_input', $callback );
+		$this->assertSame( array( 'count' => 5 ), $result );
+		$this->assertSame( 1, $calls );
+	}
 }
