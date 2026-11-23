@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent some block elements rendering on top of menu dropdowns
