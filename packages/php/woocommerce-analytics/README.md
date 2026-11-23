@@ -297,7 +297,7 @@ When proxy tracking is enabled:
 
 **Server-Side Optimizations:**
 
-`Proxy_Speed_Module` answers proxy requests before regular plugins finish loading and exits, which significantly reduces their cost. The package never installs it: code on the site turns it on, such as WordPress.com's platform plugin or a VIP `client-mu-plugins` file, by calling `enable()` once a Jetpack autoloader that can find this package has loaded:
+`Proxy_Speed_Module` answers proxy requests before regular plugins finish loading and exits, which significantly reduces their cost. Code on the site turns it on, such as WordPress.com's platform plugin or a VIP `client-mu-plugins` file, by calling `enable()` once a Jetpack autoloader that can find this package has loaded:
 
 ```php
 if ( class_exists( \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::class ) ) {
@@ -309,7 +309,7 @@ Called from an MU-plugin, it serves on `muplugins_loaded`, when a `wp_consent_co
 
 The module serves only while proxy tracking was on at the last `init`, and otherwise leaves the request to the REST route. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route too, which applies the consent check.
 
-Earlier versions could write a `woocommerce-analytics-proxy-speed-module.php` MU-plugin into the site. The package now removes that file, and no longer writes the option it reads, so a copy it cannot delete leaves every request to the REST route. `woocommerce_analytics_auto_install_proxy_speed_module` is deprecated with no effect.
+`woocommerce_analytics_auto_install_proxy_speed_module` is deprecated and has no effect.
 
 ### Debugging
 
