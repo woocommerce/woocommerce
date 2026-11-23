@@ -58,10 +58,6 @@ abstract class UcpCartTestCase extends ControllerTestCase {
 			WC()->session->set( AbstractCartRoute::CANCELLED_SESSION_KEY, null );
 		}
 
-		if ( WC()->cart instanceof \WC_Cart ) {
-			\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, true );
-		}
-
 		// Undo the route's swap so the next test gets the cart, session and customer the
 		// harness built, not the token-bound one left behind here.
 		WC()->session  = $this->wc_globals_backup['session'];
@@ -77,6 +73,11 @@ abstract class UcpCartTestCase extends ControllerTestCase {
 			} else {
 				$GLOBALS['wp_actions'][ $action ] = $this->wc_globals_backup[ $key ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restores the per-process markers the harness cleared.
 			}
+		}
+
+		// The route turns off session writes on a cart it discards, which is the one restored above.
+		if ( WC()->cart instanceof \WC_Cart ) {
+			\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, true );
 		}
 
 		parent::tearDown();
