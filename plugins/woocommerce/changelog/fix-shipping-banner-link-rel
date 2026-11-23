@@ -1,4 +1,4 @@
 Significance: patch
-Type: fix
+Type: dev
+Comment: Restore rel on shipping label banner links lost in unreleased #70802; no merchant-facing change.
 
-Stop the shipping label banner links from sending your store address to the pages they open.
