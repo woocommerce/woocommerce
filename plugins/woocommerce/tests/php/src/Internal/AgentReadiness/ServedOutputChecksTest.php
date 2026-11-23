@@ -181,6 +181,49 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failing Open Graph check records which page lacks the tags: the home page, the product page, which it names, or both.
+	 */
+	public function test_open_graph_names_the_page_without_tags(): void {
+		$store = $this->good_store();
+		$cases = array(
+			'home'    => array( self::page( '', '', false ), $store[ $this->product_path() ][1] ),
+			'product' => array( $store['/'][1], self::page( '', '', false ) ),
+			'both'    => array( self::page( '', '', false ), self::page( '', '', false ) ),
+		);
+		foreach ( $cases as $source => $pages ) {
+			$store['/']                     = array( 200, $pages[0] );
+			$store[ $this->product_path() ] = array( 200, $pages[1] );
+			$this->serve( $store );
+			$check = array_column( $this->sut->all(), null, 'id' )['open_graph_tags'];
+			$this->assertFalse( $check['ok'], $source );
+			$this->assertSame( $source, $check['source'], $source );
+			$this->assertSame( 'home' === $source ? 0 : $this->product->get_id(), $check['product'], 'The product is named when its page lacks the tags: ' . $source );
+		}
+	}
+
+	/**
+	 * @testdox A check that reads the home and product pages names the product only when its page failed; a failing home page isn't put on the product.
+	 */
+	public function test_page_check_names_the_product_only_when_its_page_failed(): void {
+		$store    = $this->good_store();
+		$viewport = '<meta name="viewport" content="width=device-width">';
+		$product  = '<h1>Blue &amp; Gold Mug</h1>';
+		$cases    = array(
+			'home'    => array( self::page(), self::page( $viewport, $product ), 0 ),
+			'product' => array( self::page( $viewport ), self::page( '', $product ), $this->product->get_id() ),
+			'both'    => array( self::page(), self::page( '', $product ), 0 ),
+		);
+		foreach ( $cases as $failed => $pages ) {
+			$store['/']                     = array( 200, $pages[0] );
+			$store[ $this->product_path() ] = array( 200, $pages[1] );
+			$this->serve( $store );
+			$check = array_column( $this->sut->all(), null, 'id' )['viewport_meta'];
+			$this->assertFalse( $check['ok'], $failed );
+			$this->assertSame( $pages[2], $check['product'], 'Named only when the product page alone failed: ' . $failed );
+		}
+	}
+
+	/**
 	 * @testdox llms.txt without a heading fails the format check; a broken store link fails, an unreachable or blocked one is couldn't check, and a blocked llms.txt is too.
 	 */
 	public function test_llms_txt(): void {
@@ -327,7 +370,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 
 		$not_reached = self::llms_present( self::with_llms_status( 'unknown', '## Agentic capabilities' ) );
 		$this->assertSame( 'not_reached', $not_reached['source'] );
-		$this->assertStringContainsString( 'Ask your host', $not_reached['fix'] );
+		$this->assertStringContainsString( 'Ask your hosting provider', $not_reached['fix'] );
 		$this->assertNotSame( $default['fix'], $not_reached['fix'] );
 		$this->assertSame( '', self::llms_present( self::with_llms_status( 'no_rewrite', '## Agentic capabilities' ) )['source'], 'A status it doesn\'t know claims no cause' );
 
@@ -514,9 +557,18 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$responses[ 'POST ' . $search ] = array( 403, '<html>Blocked</html>', array( 'content-type' => 'text/HTML; charset=UTF-8' ) );
 		$this->serve( $responses );
 		$this->assertSame( '403 text/html', array_column( $this->sut->all(), 'source', 'id' )['ucp_endpoints_live'], 'A failed check keeps what came back' );
+		$this->assertStringEndsWith( $search, array_column( $this->sut->all(), 'seen_at', 'id' )['ucp_endpoints_live'], 'A failed check keeps where it asked' );
+		$responses[ 'POST ' . $search ] = array( 503, '<html>Unavailable</html>', array( 'content-type' => 'text/html' ) );
+		$this->serve( $responses );
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertNull( $checks['ucp_endpoints_live']['ok'], 'A 5xx is couldn\'t check' );
+		$this->assertSame( '503 text/html', $checks['ucp_endpoints_live']['source'], 'Couldn\'t check keeps what came back too' );
+		$this->assertStringEndsWith( $search, $checks['ucp_endpoints_live']['seen_at'] );
+		$this->assertFalse( $checks['ucp_endpoints_live']['conflict'], 'The address is not a conflict, so the page doesn\'t link it' );
 		$responses[ 'POST ' . $search ] = null;
 		$this->serve( $responses );
 		$this->assertSame( '', array_column( $this->sut->all(), 'source', 'id' )['ucp_endpoints_live'], 'No answer leaves nothing to show' );
+		$this->assertSame( '', array_column( $this->sut->all(), 'seen_at', 'id' )['ucp_endpoints_live'] );
 
 		$responses[ $path ]             = array( 200, '{"namespace":"wc/ucp/v1","routes":{}}' );
 		$responses[ 'POST ' . $search ] = array( 404, '' );

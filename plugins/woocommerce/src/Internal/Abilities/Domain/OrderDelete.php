@@ -108,7 +108,7 @@ class OrderDelete extends ActionableAbility {
 				),
 				'annotations'  => array(
 					'readonly'    => false,
-					'idempotent'  => true,
+					'idempotent'  => false,
 					'destructive' => true,
 				),
 			),
@@ -168,6 +168,15 @@ class OrderDelete extends ActionableAbility {
 				'woocommerce_ability_order_trash_not_supported',
 				__( 'Trash is disabled on this site. Pass force: true to permanently delete.', 'woocommerce' ),
 				array( 'status' => 501 )
+			);
+		}
+
+		if ( ! $this->force && OrderStatus::TRASH === $order->get_status( 'edit' ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_already_trashed',
+				/* translators: %d: order ID. */
+				sprintf( __( 'Order %d is already in the trash. Pass force: true to delete it permanently.', 'woocommerce' ), $order->get_id() ),
+				array( 'status' => 409 )
 			);
 		}
 

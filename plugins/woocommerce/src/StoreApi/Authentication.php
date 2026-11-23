@@ -14,6 +14,13 @@ class Authentication {
 	 * Hook into WP lifecycle events. This is hooked by the StoreAPI class on `rest_api_init`.
 	 */
 	public function init() {
+		// UCP routes get rate limiting only: the other filters below assume a browser client with a nonce.
+		if ( 0 === stripos( $GLOBALS['wp']->query_vars['rest_route'] ?? '', '/wc/ucp/' ) ) {
+			add_filter( 'rest_authentication_errors', array( $this, 'rate_limit_ucp_request' ) );
+			add_filter( 'rest_authentication_errors', array( $this, 'opt_in_checkout_endpoint' ), 9, 1 );
+			return;
+		}
+
 		if ( ! $this->is_request_to_store_api() ) {
 			return;
 		}
@@ -80,7 +87,7 @@ class Authentication {
 	 * Allowed origins can be changed using the WordPress `allowed_http_origins` or `allowed_http_origin` filters if
 	 * access needs to be granted to other domains.
 	 *
-	 * Users of valid Cart Tokens are also allowed access from any origin.
+	 * Users of valid Cart Tokens are also allowed access from any origin, without browser credentials unless the origin is allowed.
 	 *
 	 * @param bool              $served Whether the request has already been served.
 	 * @param \WP_REST_Response $result The response object.
@@ -94,15 +101,18 @@ class Authentication {
 		if ( 'null' !== $origin ) {
 			$origin = esc_url_raw( $origin );
 		}
+		$allowed_origin = is_allowed_http_origin( $origin );
 
 		// Send standard CORS headers.
 		$server->send_header( 'Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE' );
-		$server->send_header( 'Access-Control-Allow-Credentials', 'true' );
+		if ( $allowed_origin ) {
+			$server->send_header( 'Access-Control-Allow-Credentials', 'true' );
+		}
 		$server->send_header( 'Vary', 'Origin', false );
 
 		// Allow preflight requests, certain http origins, and any origin if a cart token is present. Preflight requests
 		// are allowed because we'll be unable to validate cart token headers at that point.
-		if ( $this->is_preflight() || CartTokenUtils::validate_cart_token( $this->get_cart_token( $request ) ) || is_allowed_http_origin( $origin ) ) {
+		if ( $this->is_preflight() || CartTokenUtils::validate_cart_token( $this->get_cart_token( $request ) ) || $allowed_origin ) {
 			$server->send_header( 'Access-Control-Allow-Origin', $origin );
 		}
 
@@ -168,6 +178,17 @@ class Authentication {
 	}
 
 	/**
+	 * Applies Store API rate limiting to a UCP request, passing any other authentication result through unchanged.
+	 *
+	 * @since 11.4.0
+	 * @param \WP_Error|mixed $result Error from another authentication handler, null if we should handle it, or another value if not.
+	 * @return \WP_Error|mixed
+	 */
+	public function rate_limit_ucp_request( $result ) {
+		return current_user_can( 'edit_posts' ) ? $result : $this->apply_rate_limiting( $result );
+	}
+
+	/**
 	 * When the login cookies are set, they are not available until the next page reload. For the Store API, specifically
 	 * for returning updated nonces, we need this to be available immediately.
 	 *
@@ -187,10 +208,15 @@ class Authentication {
 	 * @return \WP_Error|null|bool
 	 */
 	public function opt_in_checkout_endpoint( $result ) {
+		$route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
+
+		// Of the UCP checkout routes only complete places an order, so only it is matched.
+		$is_checkout = ( $this->is_request_to_store_api() && preg_match( '#/wc/store(?:/v\d+)?/checkout#', $route ) )
+			|| preg_match( '#^/wc/ucp/v\d+/checkout-sessions/[^/]+/complete/?$#i', $route );
+
 		if (
 			FeaturesUtil::feature_is_enabled( 'rate_limit_checkout' )
-			&& $this->is_request_to_store_api()
-			&& preg_match( '#/wc/store(?:/v\d+)?/checkout#', $GLOBALS['wp']->query_vars['rest_route'] )
+			&& $is_checkout
 			&& $this->is_only_post_request()
 		) {
 			add_filter(

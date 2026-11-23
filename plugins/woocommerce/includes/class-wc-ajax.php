@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Products\ProductsOrderingMoveService;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -471,6 +472,17 @@ class WC_AJAX {
 					'shipping_address_2' => isset( $_POST['s_address_2'] ) ? wc_clean( wp_unslash( $_POST['s_address_2'] ) ) : null,
 				)
 			);
+		}
+
+		// Shipping zones and tax rates match on state codes, so convert posted state names (e.g. "Hawaii") to their codes.
+		$validation_utils = new ValidationUtils();
+
+		if ( isset( $_POST['state'] ) ) {
+			WC()->customer->set_billing_state( $validation_utils->format_state( WC()->customer->get_billing_state( 'edit' ), WC()->customer->get_billing_country( 'edit' ) ) );
+		}
+
+		if ( isset( $_POST[ wc_ship_to_billing_address_only() ? 'state' : 's_state' ] ) ) {
+			WC()->customer->set_shipping_state( $validation_utils->format_state( WC()->customer->get_shipping_state( 'edit' ), WC()->customer->get_shipping_country( 'edit' ) ) );
 		}
 
 		if ( isset( $_POST['has_full_address'] ) && wc_string_to_bool( wc_clean( wp_unslash( $_POST['has_full_address'] ) ) ) ) {
@@ -2409,14 +2421,13 @@ class WC_AJAX {
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		foreach ( $ids as $id ) {
-			$customer = new WC_Customer( $id );
-			/* translators: 1: user display name 2: user ID 3: user email */
+			$customer               = new WC_Customer( $id );
 			$found_customers[ $id ] = sprintf(
-				/* translators: $1: customer name, $2 customer id, $3: customer email */
+				/* translators: 1: customer name, 2: customer ID, 3: customer email */
 				esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
-				$customer->get_first_name() . ' ' . $customer->get_last_name(),
+				esc_html( $customer->get_first_name() . ' ' . $customer->get_last_name() ),
 				$customer->get_id(),
-				$customer->get_email()
+				esc_html( $customer->get_email() )
 			);
 		}
 

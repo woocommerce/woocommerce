@@ -1225,28 +1225,43 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The owner matches exactly: a slug differing only in case reads as another extension.
+	 * @testdox A case variant of the owner slug is refused at the boundary and changes nothing.
 	 */
-	public function test_the_owner_match_is_case_sensitive(): void {
+	public function test_a_case_variant_owner_slug_is_refused(): void {
 		$id    = $this->contract_with_currency();
 		$upper = strtoupper( self::EXTENSION_SLUG );
-
-		$this->assertNull( Contracts::lock( $id, $upper, 'hold' ) );
-		$this->assertNull(
-			Contracts::update(
-				$id,
-				array(
-					'extension_slug' => $upper,
-					'billing_total'  => '9',
-				)
-			)
-		);
-		$this->assertNull( Contracts::update( $id, array( 'extension_slug' => $upper ) ), 'The fieldless path agrees.' );
 		Contracts::add_meta( $id, self::EXTENSION_SLUG, 'k', 'v' );
-		$this->assertFalse( Contracts::delete_meta( $id, $upper, 'k' ) );
+		$before = Contracts::get( $id );
+		$this->assertNotNull( $before );
+
+		$calls = array(
+			'lock'        => static function () use ( $id, $upper ): void {
+				Contracts::lock( $id, $upper, 'hold' );
+			},
+			'update'      => static function () use ( $id, $upper ): void {
+				Contracts::update(
+					$id,
+					array(
+						'extension_slug' => $upper,
+						'billing_total'  => '9',
+					)
+				);
+			},
+			'add_meta'    => static function () use ( $id, $upper ): void {
+				Contracts::add_meta( $id, $upper, 'k', 'theirs' );
+			},
+			'delete_meta' => static function () use ( $id, $upper ): void {
+				Contracts::delete_meta( $id, $upper, 'k' );
+			},
+		);
+		foreach ( $calls as $call ) {
+			$this->assert_validation_errors( $call, array( array( ValidationErrorCode::INVALID_PATTERN, 'extension_slug' ) ) );
+		}
+
+		$after = Contracts::get( $id );
+		$this->assertNotNull( $after );
+		$this->assertSame( $before->get_billing_total(), $after->get_billing_total() );
 		$this->assertSame( 'v', Contracts::get_meta( $id, 'k', true ), 'The case variant deletes nothing.' );
-		$this->expectException( InvalidArgumentException::class );
-		Contracts::add_meta( $id, $upper, 'k', 'v' );
 	}
 
 	/**
