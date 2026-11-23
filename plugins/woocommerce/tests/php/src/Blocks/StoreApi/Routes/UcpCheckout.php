@@ -478,6 +478,27 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A paid checkout keeps the variant id naming the value chosen for an "Any" variation.
+	 */
+	public function test_completed_checkout_keeps_the_variant_id_of_an_any_variation(): void {
+		$children   = \WC_Helper_Product::create_variation_product()->get_children();
+		$variant_id = end( $children ) . ':pa_number=1';
+		$created    = $this->create_ready_checkout(
+			array(
+				'item'     => array( 'id' => $variant_id ),
+				'quantity' => 1,
+			)
+		);
+		$path       = '/checkout-sessions/' . $created['id'];
+		$this->request( 'POST', $path . '/complete' );
+
+		wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) )->payment_complete();
+		$this->simulate_new_request( $created['id'] );
+
+		$this->assertSame( $variant_id, $this->request( 'GET', $path )->get_data()['line_items'][0]['item']['id'] );
+	}
+
+	/**
 	 * @testdox A checkout paid once stays completed when its order is later refunded or cancelled, so it cannot be completed again.
 	 * @testWith ["processing", "cancelled"]
 	 *           ["on-hold", "refunded"]

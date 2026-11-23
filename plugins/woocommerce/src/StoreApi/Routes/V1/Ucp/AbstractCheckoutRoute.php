@@ -288,6 +288,15 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 			$line['key']             = (string) $item->get_id();
 			$line['prices']['price'] = (int) round( $subtotal / max( 1, (int) $item->get_quantity() ) );
 
+			// The id the catalog hands out, built from the "Any" values the order line keeps as meta.
+			if ( $item->get_variation_id() ) {
+				$chosen = array();
+				foreach ( $item->get_meta_data() as $meta ) {
+					$chosen[ 'attribute_' . $meta->key ] = $meta->value;
+				}
+				$line['catalog_id'] = Utils::variant_id( $item->get_variation_id(), $chosen );
+			}
+
 			// An order line's name already holds the attributes the mapper appends from `variation`.
 			if ( ! empty( $line['variation'] ) && $product instanceof \WC_Product ) {
 				$line['name'] = $product->get_title();
