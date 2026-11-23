@@ -42,13 +42,19 @@ function wc_protected_product_add_to_cart( $passed, $product_id ) {
 add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_cart', 10, 2 );
 
 /**
- * Clears the cart session when called.
+ * Empties the cart once the shopper is done with it, for example after an order is placed.
+ *
+ * Also deletes a logged-in customer's saved (persistent) cart, so its items aren't loaded back on the next request.
+ * To reset the cart but keep the saved cart, call `WC()->cart->empty_cart( false )` instead, as `WC_Session_Handler::forget_session()` does.
+ * Creates the cart if it isn't loaded yet, which needs `WC()->session` to be set.
+ *
+ * @since 11.4.0 Deletes the saved cart too. Before 11.4.0 it was kept, and its items came back on the next request.
  */
 function wc_empty_cart() {
 	if ( ! isset( WC()->cart ) || '' === WC()->cart ) {
 		WC()->cart = new WC_Cart();
 	}
-	WC()->cart->empty_cart( false );
+	WC()->cart->empty_cart();
 }
 
 /**
@@ -230,7 +236,7 @@ function wc_clear_cart_after_payment() {
 
 	// If the order is different from the cart, don't clear the cart. This can happen if the user has multiple tabs open and completes a different order than the one in the cart.
 	if ( $should_clear_cart_after_payment && $order instanceof WC_Order && ! WC()->cart->is_empty() ) {
-		$should_clear_cart_after_payment = $order->has_cart_hash( WC()->cart->get_cart_hash() );
+		$should_clear_cart_after_payment = PaymentRecovery::cart_belongs_to_order( $order );
 	}
 
 	/**

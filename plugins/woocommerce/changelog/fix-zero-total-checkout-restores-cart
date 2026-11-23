@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop purchased items coming back into the cart after checkout, such as after a free order with a 100% coupon.

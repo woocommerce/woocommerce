@@ -380,6 +380,8 @@ abstract class ActionableAbility extends Ability {
 			} elseif ( $id > 0 && $object instanceof \WC_Abstract_Order ) {
 				wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->remove( $id );
 				clean_post_cache( $id );
+			} elseif ( $id > 0 && $object instanceof \WC_Customer ) {
+				clean_user_cache( $id );
 			}
 		}
 	}

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+// eslint-disable-next-line @wordpress/use-recommended-components -- Keep the existing task card layout.
 import { Card, CardBody } from '@wordpress/components';
 import {
 	optionsStore,
@@ -45,21 +46,30 @@ export const Setup = ( { markConfigured, paymentGateway } ) => {
 		PAYMENT_GATEWAYS_STORE_NAME
 	);
 
-	const { isOptionUpdating, isPaymentGatewayResolving, needsPluginInstall } =
-		useSelect( ( select ) => {
-			const { isOptionsUpdating } = select( optionsStore );
-			const { isResolving } = select( PAYMENT_GATEWAYS_STORE_NAME );
-			const activePlugins = select( pluginsStore ).getActivePlugins();
-			const pluginsToInstall = plugins.filter(
-				( m ) => ! activePlugins.includes( m )
-			);
+	const {
+		isOptionUpdating,
+		isPaymentGatewayResolving,
+		needsPluginInstall,
+		isPluginInstalling,
+	} = useSelect( ( select ) => {
+		const { isOptionsUpdating } = select( optionsStore );
+		const { isResolving } = select( PAYMENT_GATEWAYS_STORE_NAME );
+		const activePlugins = select( pluginsStore ).getActivePlugins();
+		const pluginsToInstall = plugins.filter(
+			( m ) => ! activePlugins.includes( m )
+		);
 
-			return {
-				isOptionUpdating: isOptionsUpdating(),
-				isPaymentGatewayResolving: isResolving( 'getPaymentGateways' ),
-				needsPluginInstall: !! pluginsToInstall.length,
-			};
-		} );
+		return {
+			isOptionUpdating: isOptionsUpdating(),
+			isPaymentGatewayResolving: isResolving( 'getPaymentGateways' ),
+			needsPluginInstall: !! pluginsToInstall.length,
+			isPluginInstalling:
+				select( pluginsStore ).isPluginsRequesting(
+					'installPlugins'
+				) ||
+				select( pluginsStore ).isPluginsRequesting( 'activatePlugins' ),
+		};
+	} );
 
 	useEffect( () => {
 		if ( needsPluginInstall ) {
@@ -105,7 +115,6 @@ export const Setup = ( { markConfigured, paymentGateway } ) => {
 							onError={ ( errors, response ) =>
 								createNoticesFromResponse( response )
 							}
-							autoInstall
 							pluginSlugs={ plugins }
 						/>
 					),
@@ -134,10 +143,10 @@ export const Setup = ( { markConfigured, paymentGateway } ) => {
 	);
 
 	const stepperPending =
-		needsPluginInstall ||
+		isPluginInstalling ||
 		isOptionUpdating ||
 		isPaymentGatewayResolving ||
-		! isPluginLoaded;
+		( ! needsPluginInstall && ! isPluginLoaded );
 
 	const defaultStepper = (
 		<Stepper

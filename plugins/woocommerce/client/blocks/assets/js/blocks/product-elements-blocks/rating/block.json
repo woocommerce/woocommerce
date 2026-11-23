@@ -49,6 +49,7 @@
 		"file:../product-rating.css"
 	],
 	"keywords": [ "WooCommerce" ],
+	"viewScript": "file:../product-rating-frontend.js",
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

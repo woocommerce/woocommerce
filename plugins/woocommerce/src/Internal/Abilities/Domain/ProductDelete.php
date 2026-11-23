@@ -105,7 +105,7 @@ class ProductDelete extends ActionableAbility {
 				),
 				'annotations'  => array(
 					'readonly'    => false,
-					'idempotent'  => true,
+					'idempotent'  => false,
 					'destructive' => true,
 				),
 			),
@@ -165,6 +165,15 @@ class ProductDelete extends ActionableAbility {
 				'woocommerce_trash_not_supported',
 				__( 'Trash is disabled on this site. Pass force: true to permanently delete.', 'woocommerce' ),
 				array( 'status' => 501 )
+			);
+		}
+
+		if ( ! $this->force && ProductStatus::TRASH === $product->get_status( 'edit' ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_product_already_trashed',
+				/* translators: %d: product ID. */
+				sprintf( __( 'Product %d is already in the trash. Pass force: true to delete it permanently.', 'woocommerce' ), $product->get_id() ),
+				array( 'status' => 409 )
 			);
 		}
 

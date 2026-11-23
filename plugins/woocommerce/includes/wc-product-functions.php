@@ -1401,14 +1401,22 @@ function wc_get_product_tax_class_options() {
  * @return array
  */
 function wc_get_product_stock_status_options() {
-	return apply_filters(
-		'woocommerce_product_stock_status_options',
-		array(
-			ProductStockStatus::IN_STOCK     => __( 'In stock', 'woocommerce' ),
-			ProductStockStatus::OUT_OF_STOCK => __( 'Out of stock', 'woocommerce' ),
-			ProductStockStatus::ON_BACKORDER => __( 'On backorder', 'woocommerce' ),
-		)
+	$defaults = array(
+		ProductStockStatus::IN_STOCK     => __( 'In stock', 'woocommerce' ),
+		ProductStockStatus::OUT_OF_STOCK => __( 'Out of stock', 'woocommerce' ),
+		ProductStockStatus::ON_BACKORDER => __( 'On backorder', 'woocommerce' ),
 	);
+
+	/**
+	 * Filters the available product stock statuses.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param array $defaults Stock status labels keyed by status.
+	 */
+	$options = apply_filters( 'woocommerce_product_stock_status_options', $defaults );
+
+	return is_array( $options ) ? $options : $defaults;
 }
 
 /**

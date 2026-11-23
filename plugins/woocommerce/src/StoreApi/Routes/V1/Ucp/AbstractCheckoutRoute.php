@@ -180,7 +180,7 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	}
 
 	/**
-	 * Fingerprint what a handed-off order is built from: cart contents and total, addresses and shipping choice.
+	 * Fingerprint what a handed-off order is built from: cart contents and total, coupons, addresses and shipping choice.
 	 *
 	 * @return string
 	 */
@@ -190,6 +190,7 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 			(string) wp_json_encode(
 				array(
 					$this->cart_controller->get_cart_instance()->get_cart_hash(),
+					$this->cart_controller->get_cart_instance()->get_applied_coupons(),
 					WC()->customer->get_billing(),
 					WC()->customer->get_shipping(),
 					WC()->session->get( 'chosen_shipping_methods' ),
@@ -233,9 +234,10 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	 * @param array<string, mixed> $state Checkout state.
 	 * @param int                  $http_status HTTP status.
 	 * @param array|null           $cart Store API cart response already built for this request, or null to build it.
+	 * @param array<string, mixed> $context Optional `messages` and `discount_codes`, as {@see CheckoutMapper::build_checkout()} takes them.
 	 * @return \WP_REST_Response
 	 */
-	protected function checkout_response( string $checkout_id, array $state, int $http_status = 200, ?array $cart = null ): \WP_REST_Response {
+	protected function checkout_response( string $checkout_id, array $state, int $http_status = 200, ?array $cart = null, array $context = array() ): \WP_REST_Response {
 		$order_id = (int) ( $state['order']['id'] ?? 0 );
 
 		if ( ! $order_id && $this->awaits_confirmation( $state ) ) {
@@ -256,7 +258,7 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 		return new \WP_REST_Response(
 			array_merge(
 				array( 'ucp' => $this->ucp_metadata( 'success' ) ),
-				( new CheckoutMapper() )->build_checkout( $cart ?? $this->cart_item_response(), $checkout_id, $state )
+				( new CheckoutMapper() )->build_checkout( $cart ?? $this->cart_item_response(), $checkout_id, $state, $context )
 			),
 			$http_status
 		);
