@@ -560,10 +560,10 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		}
 		if ( wp_date( 'Y-m-d', $time ) === wp_date( 'Y-m-d' ) ) {
 			/* translators: %s: time of day, such as 10:42 am. */
-			return sprintf( __( 'Last checked today at %s', 'woocommerce' ), wp_date( (string) get_option( 'time_format' ), $time ) );
+			return sprintf( __( 'Last checked today at %s. Checks run each day.', 'woocommerce' ), wp_date( (string) get_option( 'time_format' ), $time ) );
 		}
 		/* translators: 1: date, such as November 3, 2026. 2: time of day, such as 10:42 am. */
-		return sprintf( __( 'Last checked %1$s at %2$s', 'woocommerce' ), wp_date( (string) get_option( 'date_format' ), $time ), wp_date( (string) get_option( 'time_format' ), $time ) );
+		return sprintf( __( 'Last checked %1$s at %2$s. Checks run each day.', 'woocommerce' ), wp_date( (string) get_option( 'date_format' ), $time ), wp_date( (string) get_option( 'time_format' ), $time ) );
 	}
 
 
@@ -764,7 +764,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 */
 	public static function cant_check_copy( bool $launched ): array {
 		return $launched
-			? array( __( 'Your pages couldn’t be checked', 'woocommerce' ), __( 'Your hosting setup blocked the check from opening them. Try again later, or contact your hosting provider.', 'woocommerce' ) )
+			? array( __( 'Your pages couldn’t be checked', 'woocommerce' ), __( 'Your hosting setup blocked the check from opening them. Checks run again each day. If this keeps happening, contact your hosting provider.', 'woocommerce' ) )
 			: array( __( 'Your store is in coming soon mode', 'woocommerce' ), __( 'These checks run once your store is live.', 'woocommerce' ) );
 	}
 
@@ -938,7 +938,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		if ( is_array( $report['sales'] ?? null ) && false === ( $report['sales']['imported'] ?? true ) ) {
 			return array(
 				'href' => admin_url( 'admin.php?page=wc-admin&path=/analytics/settings' ),
-				'text' => __( 'Import your past orders in Analytics settings', 'woocommerce' ),
+				'text' => __( 'Import past orders', 'woocommerce' ),
 			);
 		}
 		return null;
@@ -961,7 +961,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			return __( 'Start with the fixes that affect the most products.', 'woocommerce' );
 		}
 		if ( false === ( $sales['imported'] ?? true ) ) {
-			return __( 'Analytics hasn\'t imported all your past orders yet, so issues are ranked by how many products and AI apps they affect.', 'woocommerce' );
+			return __( 'Start with the fixes that affect the most products. Sales rankings start once Analytics has imported your past orders.', 'woocommerce' );
 		}
 		$orders = (int) ( $sales['orders'] ?? 0 );
 		$days   = (int) ( $sales['days'] ?? 0 );
@@ -1210,7 +1210,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			if ( null === $check['ok'] ) {
 				// The title says what the check looks for, not that it passed.
 				$title  = ReadinessCopy::store_check( $check['id'] )['action'] ?? $copy['title'] ?? $check['name'];
-				$rows[] = self::row( $check['id'], 'unknown', $title, $launched ? __( 'This couldn’t be checked. It’s checked again automatically each day, or select Check again.', 'woocommerce' ) : __( 'Launch your store to run this check.', 'woocommerce' ) );
+				$rows[] = self::row( $check['id'], 'unknown', $title, $launched ? __( 'This check couldn’t run. It runs again each day, or you can check again now.', 'woocommerce' ) : __( 'Launch your store to run this check.', 'woocommerce' ) );
 				continue;
 			}
 			if ( $check['ok'] ) {

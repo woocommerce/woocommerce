@@ -677,13 +677,13 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'fix_url' => '',
 		);
 		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $sitemap, $robots ) ), false );
-		$this->assertSame( 'This couldn’t be checked. It’s checked again automatically each day, or select Check again.', $this->row( 'Add a sitemap that lists your products' )['text'], 'Titled by what the check looks for, not as if it passed' );
+		$this->assertSame( 'This check couldn’t run. It runs again each day, or you can check again now.', $this->row( 'Add a sitemap that lists your products' )['text'], 'Titled by what the check looks for, not as if it passed' );
 
 		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $sitemap, array( 'ok' => null ) + $robots ) ), false );
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
 		$this->assertSame( 'Not checked yet', $card['badge']['text'] );
 		$this->assertSame( array( 'Your pages couldn’t be checked' ), array_column( $card['rows'], 'title' ), 'One row for the card, not one per check' );
-		$this->assertSame( 'Your hosting setup blocked the check from opening them. Try again later, or contact your hosting provider.', $card['rows'][0]['text'] );
+		$this->assertSame( 'Your hosting setup blocked the check from opening them. Checks run again each day. If this keeps happening, contact your hosting provider.', $card['rows'][0]['text'] );
 
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
@@ -1210,8 +1210,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 		update_option( AgentReadiness::REPORT_OPTION, $report );
 		$fix_first = $this->view()['fix_first'];
-		$this->assertSame( 'Analytics hasn\'t imported all your past orders yet, so issues are ranked by how many products and AI apps they affect.', $fix_first['ranking'], 'Missing orders don\'t read as no sales' );
-		$this->assertSame( 'Import your past orders in Analytics settings', $fix_first['link']['text'], 'The link goes where the import is' );
+		$this->assertSame( 'Start with the fixes that affect the most products. Sales rankings start once Analytics has imported your past orders.', $fix_first['ranking'], 'Missing orders don\'t read as no sales' );
+		$this->assertSame( 'Import past orders', $fix_first['link']['text'], 'The link goes where the import is' );
 		$this->assertStringEndsWith( 'admin.php?page=wc-admin&path=/analytics/settings', $fix_first['link']['href'] );
 
 		unset( $report['sales'] );
@@ -1547,7 +1547,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( 'date_format', 'F j, Y' );
 		update_option( 'time_format', 'g:i a' );
 		update_option( 'timezone_string', 'UTC' );
-		$this->assertSame( 'Last checked November 18, 2026 at 9:14 am', $last->invoke( null, array( 'generated_at' => '2026-11-18T09:14:00+00:00' ) ), 'An earlier day reads as a date, then at and the time' );
+		$this->assertSame( 'Last checked November 18, 2026 at 9:14 am. Checks run each day.', $last->invoke( null, array( 'generated_at' => '2026-11-18T09:14:00+00:00' ) ), 'An earlier day reads as a date, then at and the time' );
 		$this->assertNotNull( $view['fix_first'], 'When it last ran, Fix first, then a card per question' );
 		$brand = $this->row( 'Add a brand to ' . $product->get_name() );
 		$this->assertSame( 'ChatGPT only lists products that have a brand. In Google and Copilot, a brand makes products easier to find.', $brand['text'], 'One failing product is named in the title; the text says why a brand matters' );
