@@ -124,7 +124,7 @@ final class PaymentRecovery {
 		$order_id = absint( WC()->session->get( self::ORDER_SENT_TO_GATEWAY ) );
 		$order    = wc_get_order( $order_id ? $order_id : $fallback_order_id );
 
-		if ( ! $order instanceof WC_Order || ! $order->has_cart_hash( WC()->cart->get_cart_hash() ) ) {
+		if ( ! $order instanceof WC_Order || ! self::cart_belongs_to_order( $order ) ) {
 			return null;
 		}
 
