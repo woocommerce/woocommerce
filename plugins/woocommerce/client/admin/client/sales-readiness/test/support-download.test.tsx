@@ -12,9 +12,11 @@ import {
 	SupportDownload,
 } from '../components/support-download';
 import { CheckedCard } from '../components/checked-card';
+import { trackReadiness } from '../tracks';
 import type { ReadinessView } from '../types';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+jest.mock( '../tracks', () => ( { trackReadiness: jest.fn() } ) );
 const mockFetch = apiFetch as unknown as jest.Mock;
 
 describe( 'SupportDownload', () => {
@@ -56,6 +58,10 @@ describe( 'SupportDownload', () => {
 		expect( blob.type ).toBe( 'text/plain;charset=utf-8' );
 		expect( blob.size ).toBe( 'Site: https://example.org\n'.length );
 		expect( onError ).toHaveBeenLastCalledWith( '' );
+		expect( trackReadiness ).toHaveBeenCalledWith( 'link_clicked', {
+			surface: 'page',
+			area: 'support_download',
+		} );
 	} );
 
 	it( 'reports an error when the report can’t be loaded, and saves nothing', async () => {

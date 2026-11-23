@@ -10,6 +10,7 @@ import { Button, InputControl, Link } from '@wordpress/ui';
  * Internal dependencies
  */
 import { safeHref } from '../safe-href';
+import { trackReadiness } from '../tracks';
 import type { ShoppingView } from '../types';
 
 /**
@@ -25,6 +26,10 @@ export const ConnectionUrl = ( {
 	useEffect( () => () => clearTimeout( timer.current ), [] );
 
 	const copy = async () => {
+		trackReadiness( 'link_clicked', {
+			surface: 'shopping',
+			area: 'connection_url_copy',
+		} );
 		if ( ! navigator.clipboard ) {
 			return;
 		}
@@ -56,7 +61,16 @@ export const ConnectionUrl = ( {
 					{ copied ? connection.copied : connection.copy }
 				</Button>
 			</div>
-			<Link href={ safeHref( connection.test.href ) } openInNewTab>
+			<Link
+				href={ safeHref( connection.test.href ) }
+				openInNewTab
+				onClick={ () =>
+					trackReadiness( 'link_clicked', {
+						surface: 'shopping',
+						area: 'connection_url_test',
+					} )
+				}
+			>
 				{ connection.test.text }
 			</Link>
 		</div>

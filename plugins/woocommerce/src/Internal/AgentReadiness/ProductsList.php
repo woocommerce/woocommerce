@@ -87,6 +87,7 @@ class ProductsList {
 		add_action( 'woocommerce_before_delete_product_variation', array( $this, 'handle_before_variation_delete' ) );
 		add_action( 'woocommerce_delete_product_variation', array( $this, 'handle_variation_removed' ) );
 		add_action( 'pre_get_posts', array( $this, 'apply_filter' ) );
+		add_action( 'admin_notices', array( $this, 'filter_notice' ) );
 	}
 
 	/**
@@ -322,6 +323,26 @@ class ProductsList {
 			$meta_query[] = $existing;
 		}
 		$query->set( 'meta_query', $meta_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+	}
+
+	/**
+	 * Say above the Products list when it shows only the products from an AI shopping health link,
+	 * with a way back to all products. Nothing else on the screen shows that filter.
+	 *
+	 * @internal
+	 */
+	public function filter_notice(): void {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads whether the list filter is set.
+		if ( ! $screen || 'edit-product' !== $screen->id || ! $this->enabled() || empty( $_GET[ self::FILTER_PARAM ] ) ) {
+			return;
+		}
+		printf(
+			'<div class="notice notice-info"><p>%s <a href="%s">%s</a></p></div>',
+			esc_html__( 'Showing products from AI shopping health.', 'woocommerce' ),
+			esc_url( admin_url( 'edit.php?post_type=product' ) ),
+			esc_html__( 'Show all products', 'woocommerce' )
+		);
 	}
 
 	/**

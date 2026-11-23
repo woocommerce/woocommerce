@@ -105,7 +105,7 @@ trait ReadinessMarkup {
 		}
 		$labels = array(
 			'https'          => __( 'View Site Health', 'woocommerce' ),
-			'launched'       => __( 'Change store visibility', 'woocommerce' ),
+			'launched'       => __( 'Change site visibility', 'woocommerce' ),
 			'guest_checkout' => __( 'View account settings', 'woocommerce' ),
 			'payment_method' => __( 'View payment settings', 'woocommerce' ),
 			'order_emails'   => __( 'View email settings', 'woocommerce' ),
