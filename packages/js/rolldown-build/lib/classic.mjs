@@ -187,6 +187,30 @@ async function rewriteSource( ctx, code, id, config, state ) {
 	return { code, map: null };
 }
 
+// Rolldown's `__toESM` gives a CommonJS module flagged `__esModule` a
+// `default` (the whole module) when it has none of its own. Webpack leaves
+// `default` undefined, so follow the flag alone, as @wordpress/build does.
+const TO_ESM_OWN_DEFAULT_CHECK = ' || !__hasOwnProp.call(mod, "default")';
+export const esModuleInteropPlugin = {
+	name: 'wc-es-module-interop',
+	renderChunk( code ) {
+		if ( ! code.includes( 'var __toESM = ' ) ) {
+			return null;
+		}
+		if ( ! code.includes( TO_ESM_OWN_DEFAULT_CHECK ) ) {
+			throw new Error( 'Unexpected Rolldown `__toESM` helper.' );
+		}
+		// A same-length replacement keeps the source map valid.
+		return {
+			code: code.replace(
+				TO_ESM_OWN_DEFAULT_CHECK,
+				' '.repeat( TO_ESM_OWN_DEFAULT_CHECK.length )
+			),
+			map: null,
+		};
+	},
+};
+
 export function classicPlugin( config, state ) {
 	const entryByName = new Map( config.entries.map( ( e ) => [ e.name, e ] ) );
 	return {
@@ -1053,6 +1077,7 @@ export function rolldownOptions( config, state ) {
 		plugins: [
 			...( config.plugins || [] ),
 			production && ! config.cssOnly && propTypesPlugin(),
+			esModuleInteropPlugin,
 			classicPlugin( config, state ),
 		].filter( Boolean ),
 		resolve: {
