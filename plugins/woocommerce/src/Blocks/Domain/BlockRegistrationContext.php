@@ -190,7 +190,6 @@ class BlockRegistrationContext {
 			'wc/v1/',
 			'wc/v2/',
 			'wc/v3/',
-			'wc/v4/',
 			'wc/private/',
 			'wc-admin/',
 			'wc-analytics/',

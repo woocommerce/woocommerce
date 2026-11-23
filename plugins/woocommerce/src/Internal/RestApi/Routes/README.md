@@ -1,14 +1,15 @@
 # REST API Route Controllers
 
-This directory contains route controllers and schemas for WooCommerce REST API endpoints, organized by major version.
+This directory holds route controllers and schemas for WooCommerce REST API endpoints, organized by
+major version.
 
 ## Version Structure
 
-Each major version of the REST API has its own directory:
+Each major version of the REST API gets its own directory, e.g. `V5/`, `V6/`.
 
-- `V4/` - REST API v4 controllers and schemas
-- `V5/` - REST API v5 controllers and schemas (future)
-- `V6/` - REST API v6 controllers and schemas (future)
+`V4/` previously held the experimental REST API v4 implementation. It was removed; the directory now
+only contains no-op compatibility stubs kept to avoid mid-upgrade fatals (see
+`src/Internal/RestApi/README.md`).
 
 ## Legacy API Versions
 
@@ -20,16 +21,14 @@ plugins/woocommerce/includes/rest-api/
 
 These legacy controllers are maintained for backwards compatibility and should not be modified for new features.
 
-## V4 Controllers and Schemas
-
-Route controllers and schemas for the WooCommerce REST API V4 endpoints are placed in the `V4/` directory.
+## Adding a New Version
 
 ### Directory Structure
 
 Each route should have its own directory containing both controller and schema files:
 
 ```markdown
-V4/
+V5/
 ├── AbstractController.php
 ├── AbstractSchema.php
 ├── Orders/
@@ -51,8 +50,8 @@ The main controller class should be named `Controller.php` with the correct name
 
 For example:
 
-- `V4/Orders/Controller.php` with namespace `Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders`
-- `V4/OrderNotes/Controller.php` with namespace `Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes`
+- `V5/Orders/Controller.php` with namespace `Automattic\WooCommerce\Internal\RestApi\Routes\V5\Orders`
+- `V5/OrderNotes/Controller.php` with namespace `Automattic\WooCommerce\Internal\RestApi\Routes\V5\OrderNotes`
 
 #### Schemas
 
@@ -60,16 +59,16 @@ The schema class should be named `{SingularResourceType}Schema.php` with the cor
 
 For example:
 
-- `V4/Orders/OrderSchema.php` with namespace `Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders`
-- `V4/OrderNotes/OrderNoteSchema.php` with namespace `Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes`
+- `V5/Orders/OrderSchema.php` with namespace `Automattic\WooCommerce\Internal\RestApi\Routes\V5\Orders`
+- `V5/OrderNotes/OrderNoteSchema.php` with namespace `Automattic\WooCommerce\Internal\RestApi\Routes\V5\OrderNotes`
 
 ### Controller Structure
 
-Controllers should extend `V4/AbstractController.php`, which extends `WP_REST_Controller`.
+Controllers should extend an `AbstractController.php` in their version directory, which extends `WP_REST_Controller`.
 
 ### Schema Structure
 
-Schemas should extend `V4/AbstractSchema.php` and implement the following:
+Schemas should extend an `AbstractSchema.php` in their version directory and implement the following:
 
 1. **IDENTIFIER constant** - Unique identifier for the schema (e.g., `'order'`, `'order_note'`)
 2. **get_item_properties() method** - Return array of schema properties

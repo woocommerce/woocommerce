@@ -1,12 +1,8 @@
 <?php
 /**
- * REST API Settings V4 controller.
- *
- * This controller extends the V3 Options settings controller to make all V3 Options settings endpoints
- * available under the V4 namespace.
+ * REST API Settings V4 controller (compatibility stub).
  *
  * @package WooCommerce\RestApi
- * @since   8.6.0
  */
 
 declare(strict_types=1);
@@ -18,15 +14,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * REST API Settings V4 controller class.
  *
- * @package WooCommerce\RestApi
- * @extends WC_REST_Setting_Options_Controller
+ * The real controller was removed when the experimental `rest-api-v4` namespace was removed. This
+ * empty stub stays so a pre-swap in-memory controller list, still naming this class while the files
+ * are swapped during an update, can instantiate it instead of fataling on the deleted file. It
+ * registers nothing.
+ *
+ * @deprecated 11.4.0
  */
-class WC_REST_Settings_V4_Controller extends WC_REST_Setting_Options_Controller {
+class WC_REST_Settings_V4_Controller {
 
 	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
+	 * Register routes. Intentionally a no-op.
 	 */
-	protected $namespace = 'wc/v4';
+	public function register_routes(): void {}
 }

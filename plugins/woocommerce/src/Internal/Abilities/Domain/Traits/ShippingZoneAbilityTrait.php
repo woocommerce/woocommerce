@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingZoneMethodService;
+use Automattic\WooCommerce\Internal\Shipping\ShippingZoneMethodService;
 
 defined( 'ABSPATH' ) || exit;
 
