@@ -1855,7 +1855,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 						$user_ids_and_emails = $this->get_billing_and_current_user_ids_and_aliases( $billing_email );
 					}
 
-					$held_key_for_user = $this->hold_coupon_for_users( $coupon, $user_ids_and_emails, $user_alias );
+					$coupon_data_store = $coupon->get_data_store();
+					$coupon_aliases    = $user_ids_and_emails;
+					if ( $coupon_data_store instanceof WC_Data_Store && $coupon_data_store->has_callable( 'add_recorded_user_ids_to_aliases' ) ) {
+						// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the coupon data store instance.)
+						$coupon_aliases = $coupon_data_store->add_recorded_user_ids_to_aliases( $coupon, $user_ids_and_emails );
+					}
+					$held_key_for_user = $this->hold_coupon_for_users( $coupon, $coupon_aliases, $user_alias );
 
 					if ( $held_key_for_user ) {
 						$held_keys_for_user[ $coupon->get_id() ] = $held_key_for_user;
@@ -1922,19 +1928,32 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Helper method to get all aliases and IDs for current user and provided billing email.
 	 *
+	 * A logged in customer's uses and holds are recorded under their user ID, so the list includes the current
+	 * user's ID and the ID of the account that owns each email.
+	 *
 	 * @param string $billing_email Billing email to look up for.
 	 *
 	 * @return array     Array of all aliases and IDs.
 	 * @throws Exception When validation fails.
 	 */
 	private function get_billing_and_current_user_ids_and_aliases( $billing_email ): array {
-		$emails = array( $billing_email );
+		$emails   = array( $billing_email );
+		$user_ids = array();
 		if ( get_current_user_id() ) {
-			$emails[] = wp_get_current_user()->user_email;
+			$emails[]   = wp_get_current_user()->user_email;
+			$user_ids[] = get_current_user_id();
 		}
 		$emails   = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
-		$user_ids = wc_get_container()->get( CustomersSearchService::class )->find_user_ids_by_billing_email_for_coupons_usage_lookup( $emails );
-		return array_merge( $user_ids, $emails );
+		$user_ids = array_merge( $user_ids, wc_get_container()->get( CustomersSearchService::class )->find_user_ids_by_billing_email_for_coupons_usage_lookup( $emails ) );
+
+		foreach ( array_filter( $emails ) as $email ) {
+			$user = get_user_by( 'email', $email );
+			if ( $user ) {
+				$user_ids[] = $user->ID;
+			}
+		}
+
+		return array_merge( array_unique( array_map( 'intval', $user_ids ) ), $emails );
 	}
 
 	/**
@@ -2115,7 +2134,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$identities = array();
 		foreach ( $coupons as $coupon ) {
-			$coupon->increase_usage_count( $used_by );
+			$coupon->increase_usage_count( $used_by, $this instanceof WC_Order ? $this : null );
 			if ( $coupon->get_id() ) {
 				$identities[ $coupon->get_id() ] = $used_by;
 			}

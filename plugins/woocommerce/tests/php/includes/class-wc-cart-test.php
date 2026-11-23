@@ -3157,4 +3157,104 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( $cart_item_key, 'Add to cart should reject a variation when an earlier variation matches.' );
 		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
 	}
+
+	/**
+	 * Run the classic checkout's per-user check for a guest and return the error notices it added.
+	 *
+	 * @param string $code          Coupon code.
+	 * @param string $billing_email Posted billing email.
+	 * @return string[]
+	 */
+	private function get_guest_coupon_check_errors( string $code, string $billing_email ): array {
+		wp_set_current_user( 0 );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+		WC()->cart->set_applied_coupons( array( $code ) );
+		wc_clear_notices();
+
+		WC()->cart->check_customer_coupons( array( 'billing_email' => $billing_email ) );
+
+		return wp_list_pluck( wc_get_notices( 'error' ), 'notice' );
+	}
+
+	/**
+	 * @testdox The classic checkout refuses a guest a per-user coupon that the account owning the billing email already used.
+	 */
+	public function test_check_customer_coupons_counts_use_of_account_that_owns_guest_email(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'cart-owner@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'cart_owner_use', array( 'usage_limit_per_user' => '1' ) );
+		add_post_meta( ( new WC_Coupon( 'cart_owner_use' ) )->get_id(), '_used_by', (string) $user_id );
+
+		$errors = $this->get_guest_coupon_check_errors( 'cart_owner_use', 'cart-owner@example.com' );
+
+		$this->assertStringContainsString( 'Usage limit for coupon', implode( ' ', $errors ), 'A use stored under the owner ID, with no email record, is found by email' );
+		$this->assertSame( array(), $this->get_guest_coupon_check_errors( 'cart_owner_use', 'cart-other@example.com' ), 'An unrelated guest keeps their allowance' );
+	}
+
+	/**
+	 * @testdox The classic checkout keeps the usage count of a custom coupon data store that overrides get_usage_by_email().
+	 */
+	public function test_check_customer_coupons_keeps_custom_store_email_usage_count(): void {
+		WC_Helper_Coupon::create_coupon( 'cart_custom_store', array( 'usage_limit_per_user' => '1' ) );
+		$store  = new class() extends WC_Coupon_Data_Store_CPT {
+			/**
+			 * Report one use for every email.
+			 *
+			 * @param WC_Coupon $coupon Coupon object.
+			 * @param string    $email  Email address.
+			 * @return int
+			 */
+			public function get_usage_by_email( &$coupon, $email ) {
+				return 1;
+			}
+		};
+		$filter = fn() => $store;
+		add_filter( 'woocommerce_coupon_data_store', $filter );
+
+		$errors = $this->get_guest_coupon_check_errors( 'cart_custom_store', 'cart-custom@example.com' );
+		remove_filter( 'woocommerce_coupon_data_store', $filter );
+
+		$this->assertStringContainsString( 'Usage limit for coupon', implode( ' ', $errors ), 'The custom count is used' );
+	}
+
+	/**
+	 * @testdox The classic checkout counts a guest's earlier use once when the coupon allows two uses per user.
+	 */
+	public function test_check_customer_coupons_counts_guest_use_once(): void {
+		WC_Helper_Coupon::create_coupon( 'cart_two_uses', array( 'usage_limit_per_user' => '2' ) );
+		add_post_meta( ( new WC_Coupon( 'cart_two_uses' ) )->get_id(), '_used_by', 'cart-two@example.com' );
+
+		$this->assertSame( array(), $this->get_guest_coupon_check_errors( 'cart_two_uses', 'cart-two@example.com' ), 'One of two uses is left' );
+	}
+
+	/**
+	 * @testdox The classic checkout tells a guest to try again later when the account owning the billing email holds the coupon.
+	 */
+	public function test_check_customer_coupons_shows_try_again_message_for_owner_hold(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'cart-held@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'cart_owner_hold', array( 'usage_limit_per_user' => '1' ) );
+		$coupon = new WC_Coupon( 'cart_owner_hold' );
+		WC_Data_Store::load( 'coupon' )->check_and_hold_coupon_for_user( $coupon, array( $user_id ), $user_id );
+
+		$errors = $this->get_guest_coupon_check_errors( 'cart_owner_hold', 'cart-held@example.com' );
+
+		$this->assertStringContainsString( 'Please try again after some time', implode( ' ', $errors ) );
+	}
+
+	/**
+	 * @testdox The classic checkout refuses a guest a per-user coupon with an email whose owner used it, after the owner changes their account email.
+	 */
+	public function test_check_customer_coupons_counts_use_after_account_email_change(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'cart-before@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'cart_email_change', array( 'usage_limit_per_user' => '1' ) );
+		( new WC_Coupon( 'cart_email_change' ) )->increase_usage_count( (string) $user_id );
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'cart-after@example.com',
+			)
+		);
+
+		$this->assertStringContainsString( 'Usage limit for coupon', implode( ' ', $this->get_guest_coupon_check_errors( 'cart_email_change', 'cart-before@example.com' ) ), 'The use is found through the email recorded with it' );
+	}
 }

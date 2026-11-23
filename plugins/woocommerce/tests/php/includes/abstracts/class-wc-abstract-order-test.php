@@ -3099,4 +3099,79 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertFalse( $result );
 		$this->assertTrue( $order->update_status( OrderStatus::PROCESSING ), 'update_status() should return true once the save succeeds.' );
 	}
+
+	/**
+	 * Try to hold the per-user coupon allowance for a new, unsaved order, as the checkout does.
+	 *
+	 * @param string $code          Coupon code in the cart.
+	 * @param string $billing_email Billing email of the checkout.
+	 * @return string|null The error message, or null when the hold was taken.
+	 */
+	private function try_hold_coupon( string $code, string $billing_email ): ?string {
+		WC()->cart->set_applied_coupons( array( $code ) );
+		$order = new WC_Order();
+		$order->set_billing_email( $billing_email );
+		try {
+			$order->hold_applied_coupons( $billing_email );
+			return null;
+		} catch ( Exception $e ) {
+			return $e->getMessage();
+		}
+	}
+
+	/**
+	 * @testdox A guest cannot hold a per-user coupon that the account owning the billing email already used.
+	 */
+	public function test_hold_applied_coupons_counts_use_of_account_that_owns_guest_email(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'owner@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'hold_owner_use', array( 'usage_limit_per_user' => '1' ) );
+		add_post_meta( ( new WC_Coupon( 'hold_owner_use' ) )->get_id(), '_used_by', (string) $user_id );
+		wp_set_current_user( 0 );
+
+		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_owner_use', 'owner@example.com' ), 'A use stored under the owner ID, with no email record, is found by email' );
+		$this->assertNull( $this->try_hold_coupon( 'hold_owner_use', 'someone-else@example.com' ), 'An unrelated guest keeps their allowance' );
+	}
+
+	/**
+	 * @testdox A logged in customer cannot take a second hold while their first hold is still active.
+	 */
+	public function test_hold_applied_coupons_counts_own_active_hold(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'parallel@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'hold_parallel', array( 'usage_limit_per_user' => '1' ) );
+		wp_set_current_user( $user_id );
+
+		$this->assertNull( $this->try_hold_coupon( 'hold_parallel', 'parallel@example.com' ), 'The first checkout takes the hold' );
+		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_parallel', 'parallel@example.com' ), 'The second checkout sees the first hold' );
+	}
+
+	/**
+	 * @testdox A per-user limit of two still lets the same customer take two holds.
+	 */
+	public function test_hold_applied_coupons_allows_uses_up_to_limit(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'twice@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'hold_limit_two', array( 'usage_limit_per_user' => '2' ) );
+		wp_set_current_user( $user_id );
+
+		$this->assertNull( $this->try_hold_coupon( 'hold_limit_two', 'twice@example.com' ), 'First hold' );
+		$this->assertNull( $this->try_hold_coupon( 'hold_limit_two', 'twice@example.com' ), 'Second hold, still within the limit' );
+		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_limit_two', 'twice@example.com' ), 'Third hold is over the limit' );
+	}
+
+	/**
+	 * @testdox A guest cannot hold a per-user coupon with an email whose owner used it, after the owner changes their account email.
+	 */
+	public function test_hold_applied_coupons_counts_use_after_account_email_change(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'before@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'hold_email_change', array( 'usage_limit_per_user' => '1' ) );
+		( new WC_Coupon( 'hold_email_change' ) )->increase_usage_count( (string) $user_id );
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'after@example.com',
+			)
+		);
+		wp_set_current_user( 0 );
+
+		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_email_change', 'before@example.com' ), 'The use is found through the email recorded with it' );
+	}
 }
