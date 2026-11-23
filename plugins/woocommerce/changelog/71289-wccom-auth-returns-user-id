@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return a user ID from WooCommerce.com request authentication so later determine_current_user callbacks receive an integer.

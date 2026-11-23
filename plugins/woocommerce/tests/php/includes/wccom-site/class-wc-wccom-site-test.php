@@ -146,17 +146,16 @@ class WC_WCCOM_Site_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should authenticate a signed pretty-permalink request as the connected user before the route is resolved.
+	 * @testdox Should authenticate a signed pretty-permalink request as the connected user's ID before the route is resolved.
 	 */
 	public function test_authenticate_wccom_accepts_signed_pretty_permalink_request(): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		$this->simulate_request( '/wp-json/wccom-site/v3/status', false );
 		$this->sign_request_for_connected_site( $user_id, '/wp-json/wccom-site/v3/status' );
 
-		$user = self::with_rest_route_context( null, fn() => WC_WCCOM_Site::authenticate_wccom( false ) );
+		$authenticated_user_id = self::with_rest_route_context( null, fn() => WC_WCCOM_Site::authenticate_wccom( false ) );
 
-		$this->assertInstanceOf( WP_User::class, $user );
-		$this->assertSame( $user_id, $user->ID );
+		$this->assertSame( $user_id, $authenticated_user_id );
 	}
 
 	/**
@@ -253,8 +252,8 @@ class WC_WCCOM_Site_Test extends WC_Unit_Test_Case {
 		$this->simulate_request( $received_uri, true );
 		$this->sign_request_for_connected_site( $user_id, $signed_uri );
 
-		$user = self::with_rest_route_context( $route, fn() => WC_WCCOM_Site::authenticate_wccom( false ) );
+		$authenticated_user_id = self::with_rest_route_context( $route, fn() => WC_WCCOM_Site::authenticate_wccom( false ) );
 
-		$this->assertSame( $expected, $user instanceof WP_User && $user_id === $user->ID );
+		$this->assertSame( $expected, $user_id === $authenticated_user_id );
 	}
 }
