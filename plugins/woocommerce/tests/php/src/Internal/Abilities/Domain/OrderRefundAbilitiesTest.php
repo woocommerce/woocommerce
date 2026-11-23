@@ -435,10 +435,71 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept allow_duplicate_of for the refund that a duplicate error named after the window has passed.
+	 */
+	public function test_allow_duplicate_of_accepts_the_named_refund_after_the_window(): void {
+		$order = $this->create_order_without_lines();
+		$input = array(
+			'id'     => $order->get_id(),
+			'amount' => '10',
+		);
+		$first = $this->refund( $input );
+		$this->assertIsArray( $first, is_wp_error( $first ) ? $first->get_error_message() : '' );
+		$this->assertWPError( $this->refund( $input ) );
+		$refund = wc_get_order( $first['refund']['id'] );
+		$refund->set_date_created( time() - 15 * MINUTE_IN_SECONDS );
+		$refund->save();
+
+		$result = $this->refund( array_merge( $input, array( 'allow_duplicate_of' => $first['refund']['id'] ) ) );
+
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertCount( 2, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should name the missing fields when the call sends neither amount nor line_items, before it locks the order.
+	 */
+	public function test_refuses_refund_without_amount_or_lines(): void {
+		global $wpdb;
+		$order = $this->create_order_without_lines();
+
+		$result = $this->refund( array( 'id' => $order->get_id() ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_missing_amount', $result->get_error_code() );
+		$this->assertSame( 400, $result->get_error_data()['status'] );
+		$this->assertStringContainsString( 'Send amount, line_items, or both.', $result->get_error_message() );
+		$this->assertNull( $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'woocommerce_ability_order_refund_lock_' . $order->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox Should keep the field name refund_total in the error code of a line refund above the line.
+	 */
+	public function test_names_refund_total_in_line_error_code(): void {
+		$order = $this->create_order();
+
+		$result = $this->refund(
+			array(
+				'id'         => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $this->get_product_line_id( $order ),
+						'refund_total' => 9999,
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_refund_total_exceeds_line', $result->get_error_code() );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
 	 * @testdox Should refuse allow_duplicate_of when the input does not repeat that refund, and not copy the refund from its ID.
 	 * @testWith [{"amount":"5"}, 0, "woocommerce_ability_order_refund_duplicate_mismatch"]
 	 *           [{"amount":"10"}, 99999999, "woocommerce_ability_order_refund_duplicate_mismatch"]
-	 *           [{}, 0, "woocommerce_ability_order_refund_invalid_amount"]
+	 *           [{}, 0, "woocommerce_ability_order_refund_missing_amount"]
 	 *
 	 * @param array  $input      Input sent with allow_duplicate_of.
 	 * @param int    $allowed_id Refund ID to send, or 0 for the ID of the refund made first.
@@ -1069,6 +1130,72 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_ability_order_refund_lock_failed', $result->get_error_code() );
 		$this->assertSame( 500, $result->get_error_data()['status'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should report a database error while the refund checks its lock as such, not as a lock taken over, and refund nothing.
+	 */
+	public function test_reports_lock_check_database_error(): void {
+		global $wpdb;
+		$order  = $this->create_order_without_lines();
+		$break  = static function ( string $query ) use ( $wpdb ): string {
+			return 0 === strpos( $query, "SELECT option_value FROM {$wpdb->options}" ) && false !== strpos( $query, 'woocommerce_ability_order_refund_lock_' )
+				? "SELECT option_value FROM {$wpdb->prefix}no_such_table"
+				: $query;
+		};
+		$errors = $wpdb->suppress_errors( true );
+		add_filter( 'query', $break );
+
+		$result = $this->refund(
+			array(
+				'id'             => $order->get_id(),
+				'amount'         => '10',
+				'refund_payment' => true,
+			)
+		);
+
+		remove_filter( 'query', $break );
+		$wpdb->suppress_errors( $errors );
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_lock_failed', $result->get_error_code() );
+		$this->assertSame( array(), $this->gateway->refunded );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should delete the refund and say nothing was refunded when an Error is thrown while the refund is saved before woocommerce_create_refund.
+	 */
+	public function test_reports_failed_refund_when_a_save_before_the_create_hook_crashes(): void {
+		$order    = $this->create_order_without_lines();
+		$hook_ran = false;
+		add_action(
+			'woocommerce_after_order_refund_object_save',
+			static function () {
+				throw new \Error( 'Extension save hook crashed.' );
+			}
+		);
+		add_action(
+			'woocommerce_create_refund',
+			static function () use ( &$hook_ran ) {
+				$hook_ran = true;
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'             => $order->get_id(),
+				'amount'         => '10',
+				'refund_payment' => true,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_failed', $result->get_error_code() );
+		$this->assertStringContainsString( 'no money was returned', $result->get_error_message() );
+		$this->assertStringContainsString( 'Extension save hook crashed.', $result->get_error_message() );
+		$this->assertFalse( $hook_ran );
+		$this->assertSame( array(), $this->gateway->refunded );
 		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
 	}
 

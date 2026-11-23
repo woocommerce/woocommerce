@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderRefundAbilityTrait;
 use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
@@ -53,6 +54,29 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 	 * Seconds after which a lock is stale, longer than a gateway call takes, so a crashed request cannot block the order.
 	 */
 	private const LOCK_TTL = 5 * MINUTE_IN_SECONDS;
+
+	/**
+	 * Ability error code suffixes for the codes of the refund engine, so a new or renamed engine code does not change them.
+	 */
+	private const ENGINE_ERROR_CODES = array(
+		'invalid_refund_request'           => 'invalid_request',
+		'order_not_refundable'             => 'order_not_refundable',
+		'invalid_refund_amount'            => 'invalid_amount',
+		'refund_exceeds_remaining'         => 'exceeds_remaining',
+		'missing_line_item_id'             => 'missing_line_item_id',
+		'duplicate_line_item'              => 'duplicate_line_item',
+		'line_item_not_found'              => 'line_item_not_found',
+		'unsupported_item_type'            => 'unsupported_item_type',
+		'invalid_line_item'                => 'invalid_line_item',
+		'line_item_already_refunded'       => 'line_item_already_refunded',
+		'invalid_quantity'                 => 'invalid_quantity',
+		'quantity_exceeds_refundable'      => 'quantity_exceeds_refundable',
+		'missing_quantity_or_refund_total' => 'missing_quantity_or_refund_total',
+		'invalid_refund_total'             => 'invalid_refund_total',
+		'refund_total_exceeds_line'        => 'refund_total_exceeds_line',
+		'refund_total_exceeds_remaining'   => 'refund_total_exceeds_remaining',
+		'duplicate_tax_id'                 => 'duplicate_tax_id',
+	);
 
 	/**
 	 * Get the ability name.
@@ -109,14 +133,18 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 	 * @since 11.4.0
 	 */
 	public static function execute( array $input ) {
+		if ( ! isset( $input['amount'] ) && ! isset( $input['line_items'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_refund_missing_amount',
+				__( 'No amount or lines to refund were sent, so no refund was created. Send amount, line_items, or both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		$order_id = $input['id'];
 		$lock     = self::lock_order( $order_id );
 		if ( false === $lock ) {
-			return new \WP_Error(
-				'woocommerce_ability_order_refund_lock_failed',
-				__( 'The order could not be locked for the refund because of a database error, so no refund was created. It is safe to try again.', 'woocommerce' ),
-				array( 'status' => 500 )
-			);
+			return self::lock_failed_error();
 		}
 		if ( null === $lock ) {
 			return new \WP_Error(
@@ -152,8 +180,9 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 
 		$allowed_id    = $input['allow_duplicate_of'] ?? 0;
 		$allowed_found = false;
+		$recent        = self::find_recent_refunds( $order );
 		$fingerprint   = self::fingerprint( $order, $input, $decimals );
-		$duplicate     = self::check_duplicate( $order, self::FINGERPRINT_META_KEY, $fingerprint, $allowed_id, $allowed_found );
+		$duplicate     = self::check_duplicate( $recent, self::FINGERPRINT_META_KEY, $fingerprint, $allowed_id, $allowed_found );
 		if ( null !== $duplicate ) {
 			return $duplicate;
 		}
@@ -185,12 +214,12 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			),
 			$decimals
 		);
-		$duplicate            = self::check_duplicate( $order, self::RESOLVED_FINGERPRINT_META_KEY, $resolved_fingerprint, $allowed_id, $allowed_found );
+		$duplicate            = self::check_duplicate( $recent, self::RESOLVED_FINGERPRINT_META_KEY, $resolved_fingerprint, $allowed_id, $allowed_found );
 		if ( null !== $duplicate ) {
 			return $duplicate;
 		}
 
-		if ( $allowed_id > 0 && ! $allowed_found ) {
+		if ( $allowed_id > 0 && ! $allowed_found && ! self::repeats_older_refund( $order, $allowed_id, $fingerprint, $resolved_fingerprint ) ) {
 			return new \WP_Error(
 				'woocommerce_ability_order_refund_duplicate_mismatch',
 				sprintf(
@@ -210,21 +239,23 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			);
 		}
 
-		$order_id  = $order->get_id();
-		$tagged    = null;
-		$saved     = false;
-		$paid      = false;
-		$lock_lost = false;
+		$order_id   = $order->get_id();
+		$candidate  = null;
+		$tagged     = null;
+		$saved      = false;
+		$paid       = false;
+		$lock_error = null;
 
 		// First, so the meta is on the refund before callbacks that move money see it, and a lost lock declines it before they run.
-		$tag = static function ( $refund ) use ( $order_id, $lock, $fingerprint, $resolved_fingerprint, $refund_payment, &$tagged, &$lock_lost ): void {
+		$tag = static function ( $refund ) use ( $order_id, $lock, $fingerprint, $resolved_fingerprint, $refund_payment, &$tagged, &$lock_error ): void {
 			if ( null !== $tagged || ! $refund instanceof \WC_Order_Refund || $refund->get_parent_id() !== $order_id ) {
 				return;
 			}
 			$tagged = $refund;
-			if ( ! self::holds_lock( $order_id, $lock ) ) {
-				$lock_lost = true;
-				throw new \Exception( 'The refund lock of the order was taken over.' );
+			$holds  = self::holds_lock( $order_id, $lock );
+			if ( true !== $holds ) {
+				$lock_error = null === $holds ? self::lock_failed_error() : self::lock_lost_error();
+				throw new \Exception( 'The refund lock of the order could not be confirmed.' );
 			}
 			$refund->update_meta_data( self::FINGERPRINT_META_KEY, $fingerprint );
 			$refund->update_meta_data( self::RESOLVED_FINGERPRINT_META_KEY, $resolved_fingerprint );
@@ -233,7 +264,10 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			}
 		};
 		// wc_create_refund() sets the paid flag only after the gateway refunded, so a save that carries it means the money moved.
-		$watch_paid = static function ( $refund ) use ( &$tagged, &$paid ): void {
+		$watch_paid = static function ( $refund ) use ( $order_id, &$candidate, &$tagged, &$paid ): void {
+			if ( null === $candidate && $refund instanceof \WC_Order_Refund && $refund->get_parent_id() === $order_id ) {
+				$candidate = $refund;
+			}
 			$paid = $paid || ( null !== $tagged && $refund === $tagged && $refund->get_refunded_payment() );
 		};
 		$watch_save = static function ( $refund ) use ( &$tagged, &$saved ): void {
@@ -256,11 +290,12 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 				)
 			);
 		} catch ( \Error $e ) {
-			// wc_create_refund() catches only exceptions, so delete the half-made refund as it would. A callback that crashed may have moved money.
+			// wc_create_refund() catches only exceptions, so delete the half-made refund as it would. It saves the refund before woocommerce_create_refund, so the refund can exist untagged.
 			$crashed = true;
 			$result  = new \WP_Error( 'error', $e->getMessage() );
-			if ( null !== $tagged && $tagged->get_id() > 0 ) {
-				$tagged->delete( true );
+			$made    = $tagged ?? $candidate;
+			if ( null !== $made && $made->get_id() > 0 ) {
+				$made->delete( true );
 			}
 		} finally {
 			remove_action( 'woocommerce_create_refund', $tag, PHP_INT_MIN );
@@ -291,34 +326,42 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			}
 
 			$formatted = self::format_refund_for_response( $result );
+			if ( is_wp_error( $formatted ) ) {
+				return ExtensibleAbilities::saved_write_error( $formatted, 'order_refund', $result->get_id(), array( 'refunded_payment' => $paid ) );
+			}
 
-			return is_wp_error( $formatted ) ? $formatted : array( 'refund' => $formatted );
+			return array( 'refund' => $formatted );
 		}
 
-		return self::create_error( $result, $order_id, $lock_lost, $saved || $crashed, $paid, $refund_payment && ! $crashed );
+		if ( $crashed && null === $tagged ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_refund_failed',
+				/* translators: %s: error message. */
+				sprintf( __( 'The refund failed before the payment gateway or any refund callback ran, so no refund was created and no money was returned: %s', 'woocommerce' ), $result->get_error_message() ),
+				array( 'status' => 500 )
+			);
+		}
+
+		return self::create_error( $result, $order_id, $lock_error, $saved || $crashed, $paid, $refund_payment && ! $crashed );
 	}
 
 	/**
 	 * The error of a wc_create_refund() call that failed. It deletes the refund on any failure, also after the
 	 * gateway or a refund callback moved the money, so the error says when a retry could refund twice.
 	 *
-	 * @param mixed $result         Result of wc_create_refund().
-	 * @param int   $order_id       Order ID.
-	 * @param bool  $lock_lost      Whether the call declined the refund because another call took its lock over.
-	 * @param bool  $saved          Whether the refund was saved after woocommerce_create_refund, or a callback crashed.
-	 * @param bool  $paid           Whether the gateway refunded the payment.
-	 * @param bool  $refund_payment Whether the call asked the gateway to refund the payment.
+	 * @param mixed          $result        Result of wc_create_refund().
+	 * @param int            $order_id       Order ID.
+	 * @param \WP_Error|null $lock_error     Error of the lock check that declined the refund, if it did.
+	 * @param bool           $saved          Whether the refund was saved after woocommerce_create_refund, or a callback crashed.
+	 * @param bool           $paid           Whether the gateway refunded the payment.
+	 * @param bool           $refund_payment Whether the call asked the gateway to refund the payment.
 	 * @return \WP_Error
 	 */
-	private static function create_error( $result, int $order_id, bool $lock_lost, bool $saved, bool $paid, bool $refund_payment ): \WP_Error {
+	private static function create_error( $result, int $order_id, ?\WP_Error $lock_error, bool $saved, bool $paid, bool $refund_payment ): \WP_Error {
 		$reason = is_wp_error( $result ) ? $result->get_error_message() : __( 'The refund could not be created.', 'woocommerce' );
 
-		if ( $lock_lost ) {
-			return new \WP_Error(
-				'woocommerce_ability_order_refund_lock_lost',
-				__( 'This refund took too long, and another refund of the order may have started, so no refund was created. List the refunds of the order with woocommerce/order-refunds-query before you refund it again.', 'woocommerce' ),
-				array( 'status' => 409 )
-			);
+		if ( null !== $lock_error ) {
+			return $lock_error;
 		}
 
 		if ( ! $saved ) {
@@ -394,15 +437,18 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 	 * also lets through the older ones it repeats, so each repeat only needs the ID of the last one, but never a
 	 * newer refund, which a retry of the call would have made, or one kept without its payment refunded.
 	 *
-	 * @param \WC_Order $order         Order.
-	 * @param string    $meta_key      Meta key of the fingerprint.
-	 * @param string    $fingerprint   Fingerprint of the call.
-	 * @param int       $allowed_id    Refund ID from allow_duplicate_of, or 0.
-	 * @param bool      $allowed_found Set to true when the refund that allow_duplicate_of names matched.
+	 * @param \WC_Order_Refund[] $recent        Refunds from find_recent_refunds().
+	 * @param string             $meta_key      Meta key of the fingerprint.
+	 * @param string             $fingerprint   Fingerprint of the call.
+	 * @param int                $allowed_id    Refund ID from allow_duplicate_of, or 0.
+	 * @param bool               $allowed_found Set to true when the refund that allow_duplicate_of names matched.
 	 * @return \WP_Error|null
 	 */
-	private static function check_duplicate( \WC_Order $order, string $meta_key, string $fingerprint, int $allowed_id, bool &$allowed_found ): ?\WP_Error {
-		foreach ( self::find_recent_refunds( $order, $meta_key, $fingerprint ) as $refund ) {
+	private static function check_duplicate( array $recent, string $meta_key, string $fingerprint, int $allowed_id, bool &$allowed_found ): ?\WP_Error {
+		foreach ( $recent as $refund ) {
+			if ( $refund->get_meta( $meta_key ) !== $fingerprint ) {
+				continue;
+			}
 			if ( $refund->get_id() > $allowed_id || self::is_unsettled( $refund ) ) {
 				return self::duplicate_error( $refund );
 			}
@@ -416,15 +462,32 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * Refunds of the order with the same fingerprint, newest first, created within the duplicate window or, at any
-	 * age, kept without their payment refunded, since a retry would then record the refund twice.
+	 * Whether allow_duplicate_of names a settled refund of the order, older than the duplicate window, that the
+	 * call repeats. A refund past the window no longer blocks the call, so naming it only confirms the repeat.
 	 *
-	 * @param \WC_Order $order       Order.
-	 * @param string    $meta_key    Meta key of the fingerprint.
-	 * @param string    $fingerprint Fingerprint of the call.
+	 * @param \WC_Order $order                Order.
+	 * @param int       $allowed_id           Refund ID from allow_duplicate_of.
+	 * @param string    $fingerprint          Fingerprint of the call.
+	 * @param string    $resolved_fingerprint Fingerprint of the amount and lines the call resolved to.
+	 * @return bool
+	 */
+	private static function repeats_older_refund( \WC_Order $order, int $allowed_id, string $fingerprint, string $resolved_fingerprint ): bool {
+		$refund = wc_get_order( $allowed_id );
+
+		return $refund instanceof \WC_Order_Refund
+			&& $refund->get_parent_id() === $order->get_id()
+			&& ! self::is_unsettled( $refund )
+			&& ( $refund->get_meta( self::FINGERPRINT_META_KEY ) === $fingerprint || $refund->get_meta( self::RESOLVED_FINGERPRINT_META_KEY ) === $resolved_fingerprint );
+	}
+
+	/**
+	 * Refunds of the order, newest first, created within the duplicate window or, at any age, kept without their
+	 * payment refunded, since a retry would then record the refund twice.
+	 *
+	 * @param \WC_Order $order Order.
 	 * @return \WC_Order_Refund[]
 	 */
-	private static function find_recent_refunds( \WC_Order $order, string $meta_key, string $fingerprint ): array {
+	private static function find_recent_refunds( \WC_Order $order ): array {
 		$refund_ids = wc_get_orders(
 			array(
 				'type'    => 'shop_order_refund',
@@ -439,7 +502,7 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		$found = array();
 		foreach ( is_array( $refund_ids ) ? $refund_ids : array() as $refund_id ) {
 			$refund = wc_get_order( $refund_id );
-			if ( ! $refund instanceof \WC_Order_Refund || $refund->get_meta( $meta_key ) !== $fingerprint ) {
+			if ( ! $refund instanceof \WC_Order_Refund ) {
 				continue;
 			}
 			$created = $refund->get_date_created();
@@ -532,14 +595,45 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 	 *
 	 * @param int    $order_id Order ID.
 	 * @param string $lock     Value that lock_order() returned.
-	 * @return bool
+	 * @return bool|null Null on a database error.
 	 */
-	private static function holds_lock( int $order_id, string $lock ): bool {
+	private static function holds_lock( int $order_id, string $lock ): ?bool {
 		global $wpdb;
 
-		return $wpdb->get_var(
+		$value = $wpdb->get_var(
 			$wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", self::LOCK_OPTION_PREFIX . $order_id )
-		) === $lock;
+		);
+		if ( null === $value && '' !== $wpdb->last_error ) {
+			return null;
+		}
+
+		return $value === $lock;
+	}
+
+	/**
+	 * The error when the order lock cannot be taken or checked. The refund is declined before the gateway runs.
+	 *
+	 * @return \WP_Error
+	 */
+	private static function lock_failed_error(): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_ability_order_refund_lock_failed',
+			__( 'The order could not be locked for the refund because of a database error, so no refund was created. It is safe to try again.', 'woocommerce' ),
+			array( 'status' => 500 )
+		);
+	}
+
+	/**
+	 * The error when another call took over the order lock as stale while this call was refunding.
+	 *
+	 * @return \WP_Error
+	 */
+	private static function lock_lost_error(): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_ability_order_refund_lock_lost',
+			__( 'This refund took too long, and another refund of the order may have started, so no refund was created. List the refunds of the order with woocommerce/order-refunds-query before you refund it again.', 'woocommerce' ),
+			array( 'status' => 409 )
+		);
 	}
 
 	/**
@@ -569,20 +663,24 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * Name an error of the refund engine as an ability error, such as `refund_exceeds_remaining` as
-	 * `woocommerce_ability_order_refund_exceeds_remaining`. The message and data stay.
+	 * Name an error of the refund engine as an ability error. The message and data stay. A code missing from
+	 * ENGINE_ERROR_CODES becomes `invalid_request`, with the engine code in the data, so the ability codes stay fixed.
 	 *
-	 * @param \WP_Error $error Error with an unprefixed code.
+	 * @param \WP_Error $error Error of DataUtils::prepare_refund_creation_or_error().
 	 * @return \WP_Error
 	 */
 	private static function refund_error( \WP_Error $error ): \WP_Error {
-		$reason = implode( '_', array_diff( explode( '_', (string) $error->get_error_code() ), array( 'refund' ) ) );
-		$data   = $error->get_error_data();
+		$code = (string) $error->get_error_code();
+		$data = $error->get_error_data();
+		$data = is_array( $data ) ? $data : array( 'status' => 400 );
+		if ( ! isset( self::ENGINE_ERROR_CODES[ $code ] ) ) {
+			$data['engine_code'] = $code;
+		}
 
 		return new \WP_Error(
-			'woocommerce_ability_order_refund_' . $reason,
+			'woocommerce_ability_order_refund_' . ( self::ENGINE_ERROR_CODES[ $code ] ?? 'invalid_request' ),
 			$error->get_error_message(),
-			is_array( $data ) ? $data : array( 'status' => 400 )
+			$data
 		);
 	}
 

@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
@@ -2833,6 +2834,32 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$note = wc_get_order_note( $result->get_error_data()['note_id'] );
 		$this->assertSame( $order->get_id(), (int) get_comment( $note->id )->comment_post_ID );
 		$this->assertSame( 'Packed.', $note->content );
+	}
+
+	/**
+	 * @testdox Should name the saved refund in the error when order-refund-create refunds and a refund field value then fails its schema.
+	 */
+	public function test_a_refund_that_saves_before_a_field_fails_names_the_saved_refund(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$this->register_invalid_field( 'order_refund', array( 'type' => 'integer' ), 'many' );
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$result = wp_get_ability( 'woocommerce/order-refund-create' )->execute(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '5',
+			)
+		);
+
+		$this->assert_field_output_invalid( $result, 'order_refund' );
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds );
+		$this->assertStringContainsString( 'do not send it again', $result->get_error_message() );
+		$this->assertTrue( $result->get_error_data()['saved'] );
+		$this->assertSame( $refunds[0]->get_id(), $result->get_error_data()['id'] );
+		$this->assertFalse( $result->get_error_data()['refunded_payment'] );
 	}
 
 	/**
