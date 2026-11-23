@@ -244,8 +244,9 @@ With the flag on, the weekly WC Tracker snapshot (sent only by stores that allow
 - `truncated`: `yes` when the last scan stopped at the product limit, otherwise `no` (including before the first scan). On a truncated scan, product check statuses cover only the products that were checked.
 - `store_checks`: each store check id with `pass`, `problem` or `unknown` (couldn't check, or still waiting for a result). Setup steps are read when the snapshot is built, so they are there before the first scan too; output checks come from the stored report.
 - `product_checks`: each product check id with `problem` when any product fails it, otherwise `pass`.
+- `ucp_search`: running counts of the catalog search check (`ucp_endpoints_live`) since `since` (`Y-m-d`, the first counted check): `checks` run, `first_try_failed`, `failed` after the retry, `no_answer` (a 5xx or no answer, shown as couldn't check), and `last_seen`, the status and content type of the last answer that didn't pass (`403 text/html`). Only checks that sent the request count, so not in coming soon mode. Totals only grow; compare two snapshots for a week's numbers.
 
-Check ids and statuses only: no URLs, product names, ids or counts.
+Check ids, statuses and the catalog search counts only: no URLs, product names or product ids.
 
 ## Updating rules
 

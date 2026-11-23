@@ -606,6 +606,80 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Each catalog search check adds to the running counts: first-try failures, failures after the retry, no answer, and what a failing one answered.
+	 */
+	public function test_catalog_search_counts(): void {
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+		delete_option( StoreOutputChecks::SEARCH_COUNTS_OPTION );
+		$search    = substr( rest_url( 'wc/ucp/v1' ), strlen( untrailingslashit( home_url() ) ) ) . '/catalog/search';
+		$responses = $this->good_store();
+		$run       = function ( ?array $answer ) use ( $responses, $search ): void {
+			$responses[ 'POST ' . $search ] = $answer;
+			$this->serve( $responses );
+			$this->sut->all();
+		};
+
+		$run( array( 200, '{"ucp":{"status":"success"},"products":[]}' ) );
+		$counts = StoreOutputChecks::search_counts();
+		$this->assertSame( gmdate( 'Y-m-d' ), $counts['since'] );
+		$this->assertSame( array( 1, 0, 0, 0, '' ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'], $counts['no_answer'], $counts['last_seen'] ), 'A pass counts only as a check' );
+
+		$run( array( 403, '<html>Blocked</html>', array( 'content-type' => 'text/html; charset=UTF-8' ) ) );
+		$run( null );
+		$counts = StoreOutputChecks::search_counts();
+		$this->assertSame( 3, $counts['checks'] );
+		$this->assertSame( 2, $counts['first_try_failed'] );
+		$this->assertSame( 1, $counts['failed'], 'A refusal fails after the retry' );
+		$this->assertSame( 1, $counts['no_answer'], 'A timeout is no answer, shown as couldn\'t check' );
+		$this->assertSame( '403 text/html', $counts['last_seen'], 'No answer leaves the last answer in place' );
+
+		$this->serve( $responses );
+		$answers = array( array( 403, '<html>Blocked</html>' ), array( 200, '{"ucp":{"status":"success"},"products":[]}' ) );
+		add_filter(
+			'pre_http_request',
+			function ( $pre, $args, $url ) use ( $search, &$answers ) {
+				if ( 'POST' !== $args['method'] || substr( $url, strlen( untrailingslashit( home_url() ) ) ) !== $search || array() === $answers ) {
+					return $pre;
+				}
+				$answer = array_shift( $answers );
+				return array(
+					'headers'  => new \WpOrg\Requests\Utility\CaseInsensitiveDictionary( array() ),
+					'body'     => $answer[1],
+					'response' => array(
+						'code'    => $answer[0],
+						'message' => '',
+					),
+					'cookies'  => array(),
+				);
+			},
+			20,
+			3
+		);
+		$this->sut->all();
+		$counts = StoreOutputChecks::search_counts();
+		$this->assertSame( array( 4, 3, 1 ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'] ), 'A refusal the retry gets past counts as a first-try failure only' );
+
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		$this->serve( $responses );
+		$this->sut->all();
+		$this->assertNotContains( 'POST ' . $search, $this->requested );
+		$this->assertSame( array( 4, 3, 1 ), array( StoreOutputChecks::search_counts()['checks'], StoreOutputChecks::search_counts()['first_try_failed'], StoreOutputChecks::search_counts()['no_answer'] ), 'In coming soon mode nothing is asked, so nothing is counted' );
+		update_option( 'woocommerce_coming_soon', 'no' );
+
+		$unreachable      = $responses;
+		$unreachable['/'] = null;
+		$this->serve( $unreachable );
+		$this->sut->all();
+		$this->assertNotContains( 'POST ' . $search, $this->requested );
+		$this->assertSame( 4, StoreOutputChecks::search_counts()['checks'], 'A store that can\'t reach its home page sends nothing more, so nothing is counted' );
+
+		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+		$this->serve( $responses );
+		$this->sut->all();
+		$this->assertSame( 4, StoreOutputChecks::search_counts()['checks'], 'With UCP off, catalog search isn\'t checked or counted' );
+	}
+
+	/**
 	 * @testdox Only the UCP checkout check waits as pending, until this WooCommerce serves UCP checkout; the product structured data checks run.
 	 */
 	public function test_pending_checks(): void {

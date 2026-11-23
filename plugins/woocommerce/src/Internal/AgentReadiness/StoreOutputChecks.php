@@ -29,6 +29,11 @@ defined( 'ABSPATH' ) || exit;
 class StoreOutputChecks {
 
 	/**
+	 * Option holding the running counts of catalog search checks, read by the tracker snapshot.
+	 */
+	public const SEARCH_COUNTS_OPTION = 'woocommerce_agent_readiness_ucp_search_counts';
+
+	/**
 	 * Coming soon mode helper.
 	 *
 	 * @var ComingSoonHelper
@@ -1445,10 +1450,62 @@ class StoreOutputChecks {
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private static function ucp_endpoint_answers( StoreResponses $responses ): ?bool {
-		$url    = self::catalog_search_url( $responses );
-		$answer = self::endpoint_answer( $responses->post_json( $url, array() ) );
+		$url   = self::catalog_search_url( $responses );
+		$first = self::endpoint_answer( $responses->post_json( $url, array() ) );
 		// Asked once more before it fails, so one slow or briefly refused request doesn't mark AI shopping as broken.
-		return true === $answer ? true : self::endpoint_answer( $responses->post_json_again( $url, array() ) );
+		$answer = true === $first ? true : self::endpoint_answer( $responses->post_json_again( $url, array() ) );
+		if ( $responses->can_request( $url ) ) {
+			self::count_search_answer( $first, $answer, true === $answer ? '' : self::search_seen( $responses ) );
+		}
+		return $answer;
+	}
+
+	/**
+	 * Add one catalog search check to the running counts the tracker snapshot sends, so we can see
+	 * how often stores fail it, and whether the retry helps.
+	 *
+	 * @param bool|null $first  The first answer: true when it was the JSON, null when the store didn't answer.
+	 * @param bool|null $answer The result after the retry.
+	 * @param string    $seen   What the store last answered, such as `403 text/html`, when the check didn't pass.
+	 */
+	private static function count_search_answer( ?bool $first, ?bool $answer, string $seen ): void {
+		$counts          = self::search_counts();
+		$counts['since'] = '' === $counts['since'] ? gmdate( 'Y-m-d' ) : $counts['since'];
+		++$counts['checks'];
+		if ( true !== $first ) {
+			++$counts['first_try_failed'];
+		}
+		if ( false === $answer ) {
+			++$counts['failed'];
+		} elseif ( null === $answer ) {
+			++$counts['no_answer'];
+		}
+		if ( '' !== $seen ) {
+			$counts['last_seen'] = $seen;
+		}
+		update_option( self::SEARCH_COUNTS_OPTION, $counts, false );
+	}
+
+	/**
+	 * Running counts of catalog search checks since `since`: checks run, how many failed on the first
+	 * try, failed after the retry, or got no answer (a 5xx or none, shown as couldn't check), and
+	 * what the store last answered when one didn't pass.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return array{since:string,checks:int,first_try_failed:int,failed:int,no_answer:int,last_seen:string}
+	 */
+	public static function search_counts(): array {
+		$stored = get_option( self::SEARCH_COUNTS_OPTION, array() );
+		$stored = is_array( $stored ) ? $stored : array();
+		return array(
+			'since'            => is_string( $stored['since'] ?? null ) ? $stored['since'] : '',
+			'checks'           => (int) ( $stored['checks'] ?? 0 ),
+			'first_try_failed' => (int) ( $stored['first_try_failed'] ?? 0 ),
+			'failed'           => (int) ( $stored['failed'] ?? 0 ),
+			'no_answer'        => (int) ( $stored['no_answer'] ?? 0 ),
+			'last_seen'        => is_string( $stored['last_seen'] ?? null ) ? $stored['last_seen'] : '',
+		);
 	}
 
 	/**

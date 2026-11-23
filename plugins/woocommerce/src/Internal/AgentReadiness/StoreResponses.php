@@ -193,6 +193,16 @@ class StoreResponses {
 	}
 
 	/**
+	 * Whether this scan sends a request to a URL: only while the store is live, only to the store,
+	 * and not once the home page couldn't be reached.
+	 *
+	 * @param string $url URL or path.
+	 */
+	public function can_request( string $url ): bool {
+		return $this->site_live && $this->reachable && $this->is_store_url( self::absolute( $url ) );
+	}
+
+	/**
 	 * The response to a POST of a JSON object, sent again instead of read from this scan's earlier answer.
 	 *
 	 * @param string               $url  URL or path.
