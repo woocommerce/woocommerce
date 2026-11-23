@@ -1,5 +1,5 @@
 Significance: patch
 Type: dev
-Comment: Remove the experimental REST API v4 (flag-gated, off by default); no production change.
+Comment: Remove the unused experimental REST API v4; no production change.
 
 
