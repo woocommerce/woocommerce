@@ -32,6 +32,7 @@
 		},
 		"__experimentalSelector": ".wc-block-components-product-average-rating"
 	},
+	"viewScript": "file:../product-average-rating-frontend.js",
 	"textdomain": "woocommerce",
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
