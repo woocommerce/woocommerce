@@ -52,7 +52,6 @@ export default class D3Base extends Component {
 	delayedScroll() {
 		const { tooltip } = this.props;
 		return throttle( () => {
-			// eslint-disable-next-line no-unused-expressions
 			tooltip && tooltip.hide();
 		}, 300 );
 	}

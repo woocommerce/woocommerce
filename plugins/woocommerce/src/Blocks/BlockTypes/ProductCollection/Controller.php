@@ -15,6 +15,11 @@ class Controller extends AbstractBlock {
 	use EnableBlockJsonAssetsTrait;
 
 	/**
+	 * Option that holds how many products each shop and category page shows on block themes.
+	 */
+	private const PRODUCTS_PER_PAGE_OPTION = 'woocommerce_catalog_products_per_page';
+
+	/**
 	 * Block name.
 	 *
 	 * @var string
@@ -70,6 +75,11 @@ class Controller extends AbstractBlock {
 			2
 		);
 
+		// On block themes, Products per page in the editor replaces "Rows per page", which the Customizer hides while this filter is in use.
+		if ( wp_is_block_theme() ) {
+			add_filter( 'loop_shop_per_page', array( $this, 'handle_loop_shop_per_page' ), 20, 1 );
+		}
+
 		// Register the backend settings so they can be used in the editor.
 		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
 
@@ -87,6 +97,26 @@ class Controller extends AbstractBlock {
 	}
 
 	/**
+	 * Use the saved products per page on shop and category pages.
+	 *
+	 * In wp-admin it keeps the store default, so the editor shows that number until a value is saved.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 *
+	 * @param int $per_page Products per page from the store settings or another filter.
+	 * @return int
+	 */
+	public function handle_loop_shop_per_page( $per_page ) {
+		$value = get_option( self::PRODUCTS_PER_PAGE_OPTION );
+		if ( is_admin() || ! is_numeric( $value ) || (int) $value < 1 || (int) $value > 100 ) {
+			return $per_page;
+		}
+
+		return (int) $value;
+	}
+
+	/**
 	 * Add interactivity to the Product Title block within Product Collection.
 	 * This enables the triggering of a custom event when the product title is clicked.
 	 *
@@ -96,12 +126,22 @@ class Controller extends AbstractBlock {
 	 * @return string   Modified block content with added interactivity.
 	 */
 	public function add_product_title_click_event_directives( $block_content, $block, $instance ) {
-		$namespace              = $instance->attributes['__woocommerceNamespace'] ?? '';
-		$is_product_title_block = 'woocommerce/product-collection/product-title' === $namespace;
-		$is_link                = $instance->attributes['isLink'] ?? false;
+		$namespace                         = $instance->attributes['__woocommerceNamespace'] ?? '';
+		$is_product_collection_inner_block = $instance->context['isProductCollectionInnerBlock'] ?? false;
+		$is_product_title_block            = in_array(
+			$namespace,
+			array(
+				'woocommerce/product-title',
+				'woocommerce/product-query/product-title',
+				'woocommerce/product-collection/product-title',
+			),
+			true
+		);
 
-		// Only proceed if the block is a Product Title (Post Title variation) block.
-		if ( $is_product_title_block && $is_link ) {
+		$is_link = $instance->attributes['isLink'] ?? false;
+
+		// Only proceed if the block is a Product Title (Post Title variation) block and is part of a Product Collection inner block.
+		if ( $is_product_title_block && $is_link && $is_product_collection_inner_block ) {
 			$p = new \WP_HTML_Tag_Processor( $block_content );
 			$p->next_tag( array( 'class_name' => 'wp-block-post-title' ) );
 			$is_anchor = $p->next_tag( array( 'tag_name' => 'a' ) );
@@ -220,8 +260,7 @@ class Controller extends AbstractBlock {
 	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 
-		// The `loop_shop_per_page` filter can be found in WC_Query::product_query().
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Query::product_query().
 		$this->asset_data_registry->add( 'loopShopPerPage', apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ) );
 	}
 
@@ -245,6 +284,25 @@ class Controller extends AbstractBlock {
 					),
 				),
 				'default'      => 'menu_order',
+			)
+		);
+
+		register_setting(
+			'options',
+			self::PRODUCTS_PER_PAGE_OPTION,
+			array(
+				'type'              => 'integer',
+				'description'       => __( 'How many products to show on each shop and category page.', 'woocommerce' ),
+				'label'             => __( 'Products per page', 'woocommerce' ),
+				'sanitize_callback' => 'absint',
+				'show_in_rest'      => array(
+					'name'   => self::PRODUCTS_PER_PAGE_OPTION,
+					'schema' => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+						'maximum' => 100,
+					),
+				),
 			)
 		);
 	}
@@ -383,10 +441,9 @@ class Controller extends AbstractBlock {
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
 		$block_context_query['queryId']   = $block->context['queryId'] ?? null;
 
-		$inherit    = $block->context['query']['inherit'] ?? false;
-		$filterable = $block->context['query']['filterable'] ?? false;
-
-		$is_exclude_applied_filters = ! ( $inherit || $filterable );
+		if ( ! ( $block_context_query['inherit'] ?? false ) ) {
+			$block_context_query['filterParams'] = wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class )->get_filter_params( $block_context_query['queryId'] );
+		}
 
 		$collection_args = array(
 			'name'                      => $block->context['collection'] ?? '',
@@ -397,8 +454,7 @@ class Controller extends AbstractBlock {
 		return $this->query_builder->get_final_frontend_query(
 			$collection_args,
 			$block_context_query,
-			$page,
-			$is_exclude_applied_filters
+			$page
 		);
 	}
 

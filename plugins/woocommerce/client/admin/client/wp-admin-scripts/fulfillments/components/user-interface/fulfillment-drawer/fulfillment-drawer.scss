@@ -91,7 +91,10 @@
 		flex-direction: column;
 		height: fit-content;
 		overflow-y: auto;
-		overscroll-behavior: none;
+		// On desktop the body never overflows, so let the wheel chain to the scrolling panel;
+		// the drawer's overscroll-behavior-y keeps the page itself from moving. The mobile rule
+		// below restores `none`, where the body is the actual scroller.
+		overscroll-behavior: auto;
 	}
 }
 
@@ -117,6 +120,8 @@
 		}
 		&__body {
 			height: calc(100% - var(--wp-admin--admin-bar--height, 0px) - 27px);
+			// The body is the scroller at this width; keep its overscroll contained as before.
+			overscroll-behavior: none;
 		}
 	}
 

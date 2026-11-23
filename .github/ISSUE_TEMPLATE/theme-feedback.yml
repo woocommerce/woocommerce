@@ -1,0 +1,78 @@
+name: 🎨 Theme feedback or bug report
+description: Report a bug, layout issue, or feedback about a theme maintained in this repository.
+title: "[Theme]: "
+labels: ["Themes"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Thanks for testing our themes
+
+        Use this form to share bugs, layout problems, extension conflicts, block behavior, or design ideas for the [themes maintained in this repository](https://github.com/woocommerce/woocommerce/tree/trunk/themes).
+
+        If you're unsure whether it's a bug or feedback, share it anyway. Check the [existing theme issues](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue+label%3AThemes) first to see whether it's already being discussed.
+
+  - type: input
+    id: theme
+    attributes:
+      label: Theme name and version
+      description: Include the parent theme if you use a child theme. You can find the version under Appearance > Themes in WordPress.
+      placeholder: Purple, followed by the installed version number
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What did you experience?
+      description: Describe the issue, observation, or feedback. For bugs, explain what you expected and what happened instead.
+      placeholder: The Cart block layout looks broken on mobile.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: feedback_type
+    attributes:
+      label: What kind of feedback is this?
+      options:
+        - label: Bug or broken layout
+        - label: Conflict with a WooCommerce extension or another plugin
+        - label: Confusing or missing block behavior
+        - label: General design or usability feedback
+        - label: Developer feedback about templates, code, or structure
+        - label: Feature suggestion or improvement idea
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: For bugs, share the steps needed to reproduce the issue, including the affected page, template, or block.
+      placeholder: |
+        1. Open the Cart page on a mobile device.
+        2. Add a product to the cart.
+        3. See the layout issue.
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Your testing environment
+      description: Include versions and any theme customizations that could help us reproduce the issue.
+      placeholder: |
+        - WordPress version:
+        - WooCommerce version:
+        - Browser and operating system:
+        - Device or screen size:
+        - Active plugins and versions:
+        - Theme customizations:
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or recordings
+      description: Drag and drop screenshots or recordings that show what you're seeing.
+
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: Anything else you'd like to share?
+      description: Add suggested improvements, workarounds, or other context here.

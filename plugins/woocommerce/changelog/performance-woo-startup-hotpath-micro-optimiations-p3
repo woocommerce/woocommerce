@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Micro-optimizations package to compress Woo core initialization execution time (final batch).

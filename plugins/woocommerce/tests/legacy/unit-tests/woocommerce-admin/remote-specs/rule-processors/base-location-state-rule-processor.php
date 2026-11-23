@@ -8,7 +8,6 @@
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\BaseLocationStateRuleProcessor;
-use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
 /**
  * class WC_Admin_Tests_RemoteSpecs_RuleProcessors_BaseLocationStateRuleProcessor
@@ -28,16 +27,6 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_BaseLocationStateRuleProcessor e
 				"value": "CA"
 			}'
 		);
-	}
-
-	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		update_option( 'woocommerce_store_address', '' );
-		update_option( 'woocommerce_default_country', 'US:CA' );
-		update_option( OnboardingProfile::DATA_OPTION, array() );
 	}
 
 	/**

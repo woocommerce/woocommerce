@@ -26,14 +26,16 @@ interface WithImageEditorRequiredProps< T > {
 	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
 }
 
-interface WithImageEditorCategoryProps< T >
-	extends WithImageEditorRequiredProps< T > {
+interface WithImageEditorCategoryProps<
+	T,
+> extends WithImageEditorRequiredProps< T > {
 	category: WP_REST_API_Category;
 	product: never;
 }
 
-interface WithImageEditorProductProps< T >
-	extends WithImageEditorRequiredProps< T > {
+interface WithImageEditorProductProps<
+	T,
+> extends WithImageEditorRequiredProps< T > {
 	category: never;
 	product: ProductResponseItem;
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix WooCommerce abilities reading values that AI agents send as text, such as "false" or "5", as the wrong type.

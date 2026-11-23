@@ -125,7 +125,7 @@ describe( 'Experimental List', () => {
 			).not.toBeInTheDocument();
 		} );
 
-		it( 'supports onClick on the list item, and handles keyboard events', () => {
+		it( 'supports onClick on the list item, and handles keyboard events', async () => {
 			const dummyOnClick = jest.fn();
 
 			const { container, queryByRole } = render(
@@ -139,10 +139,10 @@ describe( 'Experimental List', () => {
 			);
 
 			if ( listItem ) {
-				userEvent.click( listItem );
+				await userEvent.click( listItem );
 
 				// it doesn't actually matter what key you hit here while handleKeyDown is mocked.
-				userEvent.type( listItem, '{enter}' );
+				await userEvent.type( listItem, '{enter}' );
 			}
 
 			// TODO check that the button role was added.
@@ -180,7 +180,7 @@ describe( 'Experimental List', () => {
 			expect( container ).toHaveTextContent( 'Show more items' );
 		} );
 
-		it( 'should render list items when footer is clicked and trigger onExpand', () => {
+		it( 'should render list items when footer is clicked and trigger onExpand', async () => {
 			const onExpand = jest.fn();
 			const onCollapse = jest.fn();
 			const { container } = render(
@@ -198,7 +198,7 @@ describe( 'Experimental List', () => {
 			const listItem = container.querySelector( '.list-item-collapse' );
 
 			if ( listItem ) {
-				userEvent.click( listItem );
+				await userEvent.click( listItem );
 			}
 			expect( container ).toHaveTextContent( 'Test' );
 			expect( container ).toHaveTextContent( 'Test 2' );
@@ -208,7 +208,7 @@ describe( 'Experimental List', () => {
 			expect( onCollapse ).not.toHaveBeenCalled();
 		} );
 
-		it( 'should render minimum children if minChildrenToShow is set and show the rest on expand', () => {
+		it( 'should render minimum children if minChildrenToShow is set and show the rest on expand', async () => {
 			const onExpand = jest.fn();
 			const onCollapse = jest.fn();
 			const { container } = render(
@@ -233,7 +233,7 @@ describe( 'Experimental List', () => {
 			const listItem = container.querySelector( '.list-item-collapse' );
 
 			if ( listItem ) {
-				userEvent.click( listItem );
+				await userEvent.click( listItem );
 			}
 			expect( container ).toHaveTextContent( 'Test' );
 			expect( container ).toHaveTextContent( 'Test 2' );
@@ -263,7 +263,7 @@ describe( 'Experimental List', () => {
 			let listItem = container.querySelector( '.list-item-collapse' );
 
 			if ( listItem ) {
-				userEvent.click( listItem );
+				await userEvent.click( listItem );
 			}
 			expect( container ).toHaveTextContent( 'Test' );
 			expect( container ).toHaveTextContent( 'Test 2' );
@@ -273,7 +273,7 @@ describe( 'Experimental List', () => {
 			listItem = container.querySelector( '.list-item-collapse' );
 
 			if ( listItem ) {
-				userEvent.click( listItem );
+				await userEvent.click( listItem );
 			}
 			expect( container ).toHaveTextContent( 'Show more items' );
 			expect( container ).not.toHaveTextContent( 'Show less' );

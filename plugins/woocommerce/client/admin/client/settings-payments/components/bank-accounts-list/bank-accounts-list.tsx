@@ -113,7 +113,9 @@ export const BankAccountsList = ( {
 	 * Confirms and deletes the selected bank account.
 	 */
 	const confirmDelete = () => {
-		if ( ! accountToDelete ) return;
+		if ( ! accountToDelete ) {
+			return;
+		}
 		const newAccounts = accountsWithIds.filter(
 			( acc ) => acc.id !== accountToDelete.id
 		);

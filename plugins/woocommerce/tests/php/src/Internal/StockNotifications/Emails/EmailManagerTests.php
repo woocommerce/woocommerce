@@ -5,13 +5,17 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Emails;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Helper_Product;
 
 /**
  * Tests for EmailManager wrapper methods.
  */
 class EmailManagerTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The System Under Test.
@@ -28,10 +32,25 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	private $sent_to = array();
 
 	/**
+	 * Captured `wp_mail()` message bodies.
+	 *
+	 * @var string[]
+	 */
+	private $sent_messages = array();
+
+	/**
+	 * What the short-circuited `wp_mail()` reports back.
+	 *
+	 * @var bool
+	 */
+	private $wp_mail_result = true;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 
 		// Short-circuit `wp_mail()` so the tests never attempt a real SMTP handoff.
 		// Returning a non-null value from `pre_wp_mail` signals WP core to skip the actual send.
@@ -40,7 +59,11 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$this->sut = new EmailManager();
 		$this->sut->init();
 
-		// Boot the mailer so email classes are registered.
+		// `WC_Emails` is a singleton that keeps whichever email list it built on its first
+		// construction for the rest of the process. Reset it so this test's registration
+		// via `woocommerce_email_classes` is actually picked up rather than an earlier
+		// test's (feature-disabled) build of the list.
+		$this->reset_email_singleton();
 		WC()->mailer();
 	}
 
@@ -48,9 +71,24 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'pre_wp_mail', array( $this, 'capture_pre_wp_mail' ), 10 );
-		$this->sent_to = array();
+		$this->sent_to        = array();
+		$this->sent_messages  = array();
+		$this->wp_mail_result = true;
+		$this->restore_stock_notifications_feature_option();
+		// Discard this test's `WC_Emails` build so later tests rebuild their own from
+		// whatever filters are active for them, rather than inheriting this test's list.
+		$this->reset_email_singleton();
 		parent::tearDown();
+		WC()->query->init_query_vars();
+	}
+
+	/**
+	 * Reset the `WC_Emails` singleton so the next `WC()->mailer()` call rebuilds it.
+	 */
+	private function reset_email_singleton(): void {
+		$instance_property = ( new \ReflectionClass( \WC_Emails::class ) )->getProperty( 'instance' );
+		$instance_property->setAccessible( true );
+		$instance_property->setValue( null, null );
 	}
 
 	/**
@@ -62,11 +100,43 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 */
 	public function capture_pre_wp_mail( $short_circuit, $atts ): bool {
 		unset( $short_circuit );
-		$recipients = is_array( $atts['to'] ?? null ) ? $atts['to'] : array( $atts['to'] ?? '' );
+		$recipients            = is_array( $atts['to'] ?? null ) ? $atts['to'] : array( $atts['to'] ?? '' );
+		$this->sent_messages[] = (string) ( $atts['message'] ?? '' );
 		foreach ( $recipients as $recipient ) {
 			$this->sent_to[ $recipient ] = true;
 		}
-		return true;
+		return $this->wp_mail_result;
+	}
+
+	/**
+	 * @testdox Should report whether the back-in-stock email was actually sent when send_stock_notification_email is called.
+	 *
+	 * @dataProvider stock_notification_send_outcome_provider
+	 *
+	 * @param bool $email_enabled  Whether the back-in-stock email is enabled.
+	 * @param bool $wp_mail_result What `wp_mail()` reports back.
+	 * @param bool $expected       The expected return value.
+	 */
+	public function test_send_stock_notification_email_returns_whether_sent( bool $email_enabled, bool $wp_mail_result, bool $expected ): void {
+		add_filter( 'woocommerce_email_enabled_customer_stock_notification', fn() => $email_enabled );
+		$this->wp_mail_result = $wp_mail_result;
+		$notification         = $this->build_notification();
+
+		$this->assertSame( $expected, $this->sut->send_stock_notification_email( $notification ) );
+		$this->assertSame( $email_enabled, isset( $this->sent_to[ $notification->get_user_email() ] ), 'Mail should only be attempted when the email is enabled.' );
+	}
+
+	/**
+	 * Data provider for test_send_stock_notification_email_returns_whether_sent.
+	 *
+	 * @return array[]
+	 */
+	public function stock_notification_send_outcome_provider(): array {
+		return array(
+			'email sent'     => array( true, true, true ),
+			'email disabled' => array( false, true, false ),
+			'wp_mail failed' => array( true, false, false ),
+		);
 	}
 
 	/**
@@ -78,6 +148,130 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'WC_Email_Customer_Stock_Notification', $emails );
 		$this->assertArrayHasKey( 'WC_Email_Customer_Stock_Notification_Verify', $emails );
 		$this->assertArrayHasKey( 'WC_Email_Customer_Stock_Notification_Verified', $emails );
+	}
+
+	/**
+	 * @testdox Should send the Core email when the pre-send filter returns null, and otherwise report what the filter decided.
+	 *
+	 * @dataProvider pre_send_filter_provider
+	 *
+	 * @param mixed $handled        What the `woocommerce_customer_stock_notification_pre_send` filter returns.
+	 * @param bool  $wp_mail_result What `wp_mail()` reports back when Core sends.
+	 * @param bool  $expected       The expected return value of deliver_stock_notification.
+	 */
+	public function test_deliver_stock_notification_honours_pre_send_filter( $handled, bool $wp_mail_result, bool $expected ): void {
+		$this->wp_mail_result = $wp_mail_result;
+		$notification         = $this->build_notification();
+		$received             = array();
+		add_filter(
+			'woocommerce_customer_stock_notification_pre_send',
+			function ( $pre, $filtered_notification, $product ) use ( $handled, &$received ) {
+				$received = array( $pre, $filtered_notification->get_id(), $product->get_id() );
+				return $handled;
+			},
+			10,
+			3
+		);
+
+		$this->assertSame( $expected, $this->sut->deliver_stock_notification( $notification ) );
+		$this->assertSame( array( null, $notification->get_id(), $notification->get_product_id() ), $received );
+		$this->assertSame( null === $handled, isset( $this->sent_to[ $notification->get_user_email() ] ), 'The Core email should only go out when the filter returns null.' );
+	}
+
+	/**
+	 * Data provider for test_deliver_stock_notification_honours_pre_send_filter.
+	 *
+	 * @return array[]
+	 */
+	public function pre_send_filter_provider(): array {
+		return array(
+			'null: Core sends'          => array( null, true, true ),
+			'null: Core email not sent' => array( null, false, false ),
+			'true: handled'             => array( true, true, true ),
+			'false: failed'             => array( false, true, false ),
+			'WP_Error: failed'          => array( new \WP_Error( 'delivery_failed', 'Provider unreachable.' ), true, false ),
+			'string: failed'            => array( 'sent', true, false ),
+		);
+	}
+
+	/**
+	 * @testdox Should log a warning naming the notification whenever the pre-send filter does not report success.
+	 *
+	 * @dataProvider pre_send_filter_failure_provider
+	 *
+	 * @param mixed  $handled  What the `woocommerce_customer_stock_notification_pre_send` filter returns.
+	 * @param string $expected Text the logged warning must contain.
+	 */
+	public function test_deliver_stock_notification_logs_a_warning_when_the_pre_send_filter_fails( $handled, string $expected ): void {
+		$notification = $this->build_notification();
+
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->expects( $this->once() )
+			->method( 'warning' )
+			->with(
+				$this->logicalAnd( $this->stringContains( (string) $notification->get_id() ), $this->stringContains( $expected ) ),
+				$this->callback( fn( $context ) => 'wc-customer-stock-notifications' === $context['source'] && $notification->get_id() === $context['notification_id'] )
+			);
+		$use_logger = function () use ( $logger ) {
+			return $logger;
+		};
+		add_filter( 'woocommerce_logging_class', $use_logger );
+		$take_over = function () use ( $handled ) {
+			return $handled;
+		};
+		add_filter( 'woocommerce_customer_stock_notification_pre_send', $take_over );
+
+		$result = $this->sut->deliver_stock_notification( $notification );
+
+		remove_filter( 'woocommerce_customer_stock_notification_pre_send', $take_over );
+		remove_filter( 'woocommerce_logging_class', $use_logger );
+
+		$this->assertFalse( $result );
+		$this->assertEmpty( $this->sent_to );
+	}
+
+	/**
+	 * Data provider for test_deliver_stock_notification_logs_a_warning_when_the_pre_send_filter_fails.
+	 *
+	 * @return array[]
+	 */
+	public function pre_send_filter_failure_provider(): array {
+		return array(
+			'false'    => array( false, 'returned false' ),
+			'WP_Error' => array( new \WP_Error( 'delivery_failed', 'Provider unreachable.' ), 'Provider unreachable.' ),
+			'string'   => array( 'sent', 'returned string' ),
+			'integer'  => array( 1, 'returned integer' ),
+		);
+	}
+
+	/**
+	 * @testdox Should log a warning instead of failing silently when the email class is missing from the mailer.
+	 */
+	public function test_send_verify_email_logs_a_warning_when_the_email_is_not_registered() {
+		$notification = $this->build_notification();
+
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->expects( $this->once() )
+			->method( 'warning' )
+			->with( $this->stringContains( 'WC_Email_Customer_Stock_Notification_Verify' ) );
+		$use_logger = function () use ( $logger ) {
+			return $logger;
+		};
+		add_filter( 'woocommerce_logging_class', $use_logger );
+
+		$drop_bis_emails = function ( $emails ) {
+			unset( $emails['WC_Email_Customer_Stock_Notification_Verify'] );
+			return $emails;
+		};
+		add_filter( 'woocommerce_email_classes', $drop_bis_emails, 20 );
+		$this->reset_email_singleton();
+
+		$this->sut->send_verify_email( $notification );
+
+		remove_filter( 'woocommerce_email_classes', $drop_bis_emails, 20 );
+		remove_filter( 'woocommerce_logging_class', $use_logger );
+
+		$this->assertEmpty( $this->sent_to );
 	}
 
 	/**
@@ -108,6 +302,125 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( $notification->get_user_email(), $verified->get_recipient() );
 		// Behavior assertion: the trigger path actually dispatched mail to the expected recipient.
 		$this->assertArrayHasKey( $notification->get_user_email(), $this->sent_to );
+	}
+
+	/**
+	 * @testdox Should not save the notification while sending the stock email, leaving the unsubscribe key to the caller's save.
+	 */
+	public function test_send_stock_notification_email_leaves_saving_the_unsubscribe_key_to_the_caller() {
+		$notification = $this->build_notification();
+		$updates      = 0;
+		$count        = function () use ( &$updates ) {
+			++$updates;
+		};
+		add_action( 'woocommerce_update_stock_notification', $count );
+
+		$this->sut->send_stock_notification_email( $notification );
+
+		remove_action( 'woocommerce_update_stock_notification', $count );
+		$this->assertSame( 0, $updates );
+		$this->assertCount( 1, $this->sent_messages );
+		$this->assertSame( 1, preg_match( '/email_link_action_key=([A-Za-z0-9]+)/', $this->sent_messages[0], $matches ) );
+
+		$notification->save();
+		$notification = new Notification( $notification->get_id() );
+		$this->assertTrue( $notification->check_unsubscribe_key( $matches[1] ) );
+	}
+
+	/**
+	 * @testdox Should build the $email_method action link on home_url() when WordPress core lives in a subdirectory.
+	 * @dataProvider provider_email_send_methods
+	 *
+	 * @param string $email_method EmailManager method that sends the email.
+	 */
+	public function test_email_action_link_uses_home_url_when_core_is_in_subdirectory( string $email_method ) {
+		add_filter( 'option_home', fn() => 'https://shop.example' );
+		add_filter( 'option_siteurl', fn() => 'https://shop.example/wp' );
+		$notification = $this->build_notification();
+
+		$this->sut->$email_method( $notification );
+
+		$this->assertCount( 1, $this->sent_messages );
+		$this->assertStringContainsString( 'https://shop.example/?email_link_action=', $this->sent_messages[0] );
+		$this->assertStringNotContainsString( 'https://shop.example/wp', $this->sent_messages[0] );
+	}
+
+	/**
+	 * EmailManager methods that send a BIS email with an action link.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_email_send_methods(): array {
+		return array(
+			'stock notification' => array( 'send_stock_notification_email' ),
+			'verify'             => array( 'send_verify_email' ),
+			'verified'           => array( 'send_verified_email' ),
+		);
+	}
+
+	/**
+	 * @testdox Should link registered recipients to account management and preserve guest unsubscribe links.
+	 * @testWith [false, false, "stock-notifications"]
+	 *           [true, false, "stock-notifications"]
+	 *           [false, false, "restock-alerts"]
+	 *           [true, false, "restock-alerts"]
+	 *           [false, true, "stock-notifications"]
+	 *           [true, true, "stock-notifications"]
+	 *           [false, false, ""]
+	 *           [true, false, ""]
+	 *           [false, true, ""]
+	 *           [true, true, ""]
+	 *           [false, false, "stock-notifications", true]
+	 *           [true, false, "stock-notifications", true]
+	 *           [false, false, "restock-alerts", true]
+	 *           [true, false, "restock-alerts", true]
+	 *           [false, true, "stock-notifications", true]
+	 *           [true, true, "stock-notifications", true]
+	 *           [false, false, "", true]
+	 *           [true, false, "", true]
+	 *           [false, true, "", true]
+	 *           [true, true, "", true]
+	 *
+	 * @param bool   $verified Whether to render the confirmation email.
+	 * @param bool   $guest Whether the signup belongs to a guest.
+	 * @param string $endpoint The configured account endpoint.
+	 * @param bool   $plain_text Whether to render the plain-text email instead of HTML.
+	 */
+	public function test_email_footer_links( bool $verified, bool $guest, string $endpoint, bool $plain_text = false ): void {
+		update_option( MyAccountEndpoint::ENDPOINT_OPTION, $endpoint );
+		new MyAccountEndpoint();
+		WC()->query->init_query_vars();
+		$notification = $this->build_notification();
+		if ( ! $guest ) {
+			$notification->set_user_id( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+			$notification->save();
+		}
+
+		$emails = WC()->mailer()->get_emails();
+		$sut    = $emails[ $verified ? 'WC_Email_Customer_Stock_Notification_Verified' : 'WC_Email_Customer_Stock_Notification' ];
+		$sut->prepare_email( $notification );
+		$notification->save();
+		$content = $plain_text ? $sut->get_content_plain() : $sut->get_content_html();
+		$pattern = $plain_text ? '/^.*: (https?:\/\/\S+)$/m' : '/href="([^"]+)" id="notification__unsubscribe_link"/';
+		$this->assertSame( 1, preg_match( $pattern, $content, $matches ), 'The footer must contain its management link.' );
+		$link = html_entity_decode( $matches[1], ENT_QUOTES );
+		parse_str( (string) wp_parse_url( $link, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( 'back-in-stock-notifications', $query['utm_source'] );
+		$this->assertSame( 'email', $query['utm_medium'] );
+		if ( $guest || '' === $endpoint ) {
+			$this->assertSame( 'unsubscribe', $query['email_link_action'] );
+			$this->assertTrue( ( new Notification( $notification->get_id() ) )->check_unsubscribe_key( $query['email_link_action_key'] ), 'The unsubscribe link must contain the persisted unsubscribe key.' );
+			$this->assertSame( (string) $notification->get_id(), $query['notification_id'] );
+			$this->assertStringContainsString( 'To stop receiving these messages,', $content );
+			$this->assertStringNotContainsString( 'To manage your notifications,', $content );
+		} else {
+			$this->assertSame( wc_get_account_endpoint_url( $endpoint ), remove_query_arg( array( 'utm_source', 'utm_medium' ), $link ) );
+			$this->assertArrayNotHasKey( 'email_link_action', $query );
+			$this->assertArrayNotHasKey( 'email_link_action_key', $query );
+			$this->assertStringContainsString( 'To manage your notifications,', $content );
+			$this->assertStringNotContainsString( 'To stop receiving these messages,', $content );
+		}
 	}
 
 	/**

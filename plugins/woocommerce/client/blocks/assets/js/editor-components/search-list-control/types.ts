@@ -38,8 +38,7 @@ interface SearchListProps< T extends object = object > {
 }
 
 export interface ListItemsProps
-	extends Require< SearchListProps, 'renderItem' >,
-		ItemProps {
+	extends Require< SearchListProps, 'renderItem' >, ItemProps {
 	instanceId: string | number;
 }
 
@@ -55,8 +54,7 @@ export type SearchListItem< T extends object = object > = {
 };
 
 export interface SearchListItemsContainerProps< T extends object = object >
-	extends SearchListControlProps,
-		ItemProps {
+	extends SearchListControlProps, ItemProps {
 	instanceId: string | number;
 	filteredList: SearchListItem< T >[];
 	messages: SearchListMessages;
@@ -78,7 +76,8 @@ export interface SearchListMessages {
 }
 
 export interface RenderItemArgs< T extends object = object >
-	extends ItemProps,
+	extends
+		ItemProps,
 		Partial<
 			Omit<
 				InputHTMLAttributes< HTMLInputElement >,
@@ -109,8 +108,6 @@ export interface RenderItemArgs< T extends object = object >
 	 * If not provided, a default name will be generated using the controlId.
 	 */
 	name?: string;
-	// Aria label for the input. If not provided, a default label will be generated using the item name.
-	ariaLabel?: string;
 }
 
 export interface SearchListControlProps< T extends object = object > {
@@ -141,8 +138,7 @@ export interface SearchListControlProps< T extends object = object > {
 	onSearch?: ( ( search: string ) => void ) | undefined;
 	// Callback to render each item in the selection list, allows any custom object-type rendering.
 	renderItem?:
-		| ( ( args: RenderItemArgs< T > ) => JSX.Element | null )
-		| undefined;
+		( ( args: RenderItemArgs< T > ) => JSX.Element | null ) | undefined;
 	// The list of currently selected items.
 	selected: SearchListItem< T >[];
 	// Whether to show a text field or a token field as search

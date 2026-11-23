@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Add a per-attempt id to WooCommerce.com connect usage tracking; no merchant-facing change.
+

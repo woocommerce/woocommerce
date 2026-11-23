@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Caches;
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use WC_Product;
 use WP_Post;
@@ -57,13 +58,15 @@ class ProductCountCacheService {
 
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'schedule_background_actions' ) );
 		add_action( self::BACKGROUND_EVENT_HOOK, array( $this, 'prime_cache_if_cold' ) );
+		add_action( 'activated_plugin', array( $this, 'flush_cache' ) );
+		add_action( 'deactivated_plugin', array( $this, 'flush_cache' ) );
 		if ( defined( 'WC_PLUGIN_BASENAME' ) ) {
 			add_action( 'deactivate_' . WC_PLUGIN_BASENAME, array( $this, 'unschedule_background_actions' ) );
 		}
 
 		// transition_post_status owns all mid-lifecycle status changes; woocommerce_new_product corrects for creation-time
 		// ephemeral transitions before the final status is committed; before_delete_post closes the lifecycle.
-		add_action( 'transition_post_status', array( $this, 'update_on_product_status_changed' ), 10, 3 );
+		add_action( 'transition_post_status', array( $this, 'update_on_product_status_changed_skip_autosave' ), 10, 3 );
 		add_action( 'before_delete_post', array( $this, 'update_on_product_deleted' ), 10, 2 );
 	}
 
@@ -82,6 +85,18 @@ class ProductCountCacheService {
 	}
 
 	/**
+	 * Flushes the product count cache.
+	 *
+	 * @internal
+	 * @since 11.2.0
+	 *
+	 * @return void
+	 */
+	public function flush_cache(): void {
+		$this->product_count_cache->flush( 'product' );
+	}
+
+	/**
 	 * Register background caching for each product type.
 	 *
 	 * @return void
@@ -89,7 +104,7 @@ class ProductCountCacheService {
 	public function schedule_background_actions(): void {
 		$frequency = HOUR_IN_SECONDS * 12;
 		$timestamp = time() + $frequency;
-		as_schedule_recurring_action( $timestamp, $frequency, self::BACKGROUND_EVENT_HOOK, array( 'product' ), 'count', true );
+		ActionSchedulerUtil::schedule_recurring( $timestamp, $frequency, self::BACKGROUND_EVENT_HOOK, array( 'product' ), 'count', true );
 	}
 
 	/**
@@ -114,6 +129,21 @@ class ProductCountCacheService {
 		// This was implemented to address a potential concurrency issue, but upon review, it was determined to be a false positive.
 		// - Specifically, cache warming by a concurrent request between transition_post_status and woocommerce_new_product was considered.
 		// - However, this scenario is a false positive because it occurs within the same PHP process, where hooks are executed sequentially.
+	}
+
+	/**
+	 * Update the cache whenever a product status changes.
+	 *
+	 * @param string       $new_status The new post status.
+	 * @param string       $old_status The previous post status.
+	 * @param null|WP_Post $post       The post object (may be null during autosaves/revisions).
+	 *
+	 * @return void
+	 */
+	public function update_on_product_status_changed_skip_autosave( string $new_status, string $old_status, $post ): void {
+		if ( $post instanceof WP_Post ) {
+			$this->update_on_product_status_changed( $new_status, $old_status, $post );
+		}
 	}
 
 	/**

@@ -6,7 +6,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.9.0
+ * @version 11.3.0
  *
  * @var WC_Order_Item_Product $item            Order line item being rendered.
  * @var WC_Product            $product         Product attached to the line item.
@@ -38,6 +38,8 @@ $variation_summary = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibili
 $rating_label_id = 'woocommerce-review-rating-label-' . $item_id;
 $review_label_id = 'woocommerce-review-text-label-' . $item_id;
 $review_input_id = 'woocommerce-review-text-' . $item_id;
+$rating_error_id = 'woocommerce-review-rating-error-' . $item_id;
+$row_status_id   = 'woocommerce-review-status-' . $item_id;
 
 $rating_control = \Automattic\WooCommerce\Internal\OrderReviews\StarRating::render(
 	array(
@@ -68,6 +70,9 @@ $rating_control = \Automattic\WooCommerce\Internal\OrderReviews\StarRating::rend
 		<?php endif; ?>
 	</p>
 
+	<?php // Not a live region: the script focuses the rating and the radios point here with `aria-describedby`. ?>
+	<p id="<?php echo esc_attr( $rating_error_id ); ?>" class="woocommerce-review-order__item-rating-error"></p>
+
 	<div class="woocommerce-review-order__item-row">
 		<div class="woocommerce-review-order__item-image">
 			<?php echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_image() returns escaped HTML. ?>
@@ -77,14 +82,9 @@ $rating_control = \Automattic\WooCommerce\Internal\OrderReviews\StarRating::rend
 			<input type="hidden" name="reviews[<?php echo esc_attr( (string) $row_index ); ?>][product_id]" value="<?php echo esc_attr( (string) $product_id ); ?>" />
 			<input type="hidden" name="reviews[<?php echo esc_attr( (string) $row_index ); ?>][order_item_id]" value="<?php echo esc_attr( (string) $item_id ); ?>" />
 
+			<?php // No required marker: a rating is only needed once the row has text, which `aria-invalid` conveys. ?>
 			<p id="<?php echo esc_attr( $rating_label_id ); ?>" class="woocommerce-review-order__item-rating-label">
-				<?php
-				printf(
-					'%1$s <span class="required" aria-hidden="true">*</span><span class="screen-reader-text"> %2$s</span>',
-					esc_html__( 'Your rating', 'woocommerce' ),
-					esc_html__( 'Required', 'woocommerce' )
-				);
-				?>
+				<?php esc_html_e( 'Your rating', 'woocommerce' ); ?>
 			</p>
 			<?php echo $rating_control; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- StarRating::render() returns escaped HTML. ?>
 		</div>
@@ -119,4 +119,6 @@ $rating_control = \Automattic\WooCommerce\Internal\OrderReviews\StarRating::rend
 	 */
 	do_action( 'woocommerce_review_order_form_fields', $item, $product, $order, $row_index );
 	?>
+
+	<p id="<?php echo esc_attr( $row_status_id ); ?>" class="woocommerce-review-order__item-status" role="status"></p>
 </li>

@@ -8,6 +8,8 @@ test.describe( 'Single Product template', () => {
 		admin,
 		editor,
 		page,
+		requestUtils,
+		cleanup,
 		wpCoreVersion,
 	} ) => {
 		const testData = {
@@ -19,8 +21,26 @@ test.describe( 'Single Product template', () => {
 		};
 		const userText = 'Hello World in the Belt template';
 
+		cleanup( async () => {
+			const templates = (
+				await requestUtils.getTemplates( 'wp_template' )
+			).filter(
+				( { slug, wp_id: wpId } ) =>
+					slug === testData.templatePath && wpId
+			);
+			for ( const { id } of templates ) {
+				await requestUtils.rest( {
+					method: 'DELETE',
+					path: `/wp/v2/templates/${ id }`,
+					params: { force: true },
+				} );
+			}
+		} );
+
 		// Create the specific product template.
-		await admin.visitSiteEditor( { path: `/${ testData.templateType }` } );
+		await admin.visitSiteEditor( {
+			path: `/${ testData.templateType }`,
+		} );
 
 		await page
 			.getByRole( 'button', {
@@ -60,7 +80,9 @@ test.describe( 'Single Product template', () => {
 		await admin.visitSiteEditor( {
 			postType: testData.templateType,
 		} );
-		await editor.revertTemplate( { templateName: testData.templateName } );
+		await editor.revertTemplate( {
+			templateName: testData.templateName,
+		} );
 		await page.goto( testData.permalink );
 
 		// Verify the edits are no longer visible.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the "Permanently delete" and "Reset" actions in the block email editor on WordPress 7.2.

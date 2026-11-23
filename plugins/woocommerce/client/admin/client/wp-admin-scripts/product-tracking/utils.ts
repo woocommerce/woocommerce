@@ -16,7 +16,9 @@ export function attachEventListenerToParentForChildren(
 ) {
 	const parent = document.querySelector( parentQuery );
 
-	if ( ! parent ) return;
+	if ( ! parent ) {
+		return;
+	}
 
 	const eventListener = ( event: Event ) => {
 		children.forEach( ( { eventName, childQuery, callback } ) => {

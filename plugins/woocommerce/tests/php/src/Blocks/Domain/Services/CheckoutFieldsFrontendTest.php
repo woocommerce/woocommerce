@@ -213,8 +213,6 @@ class CheckoutFieldsFrontendTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'error', $mocked_messages[0]['type'] );
 		$value = $this->controller->get_field_from_object( 'mynamespace/required_field', new WC_Customer( 1 ) );
 		$this->assertEquals( '', $value );
-
-		remove_action( 'woocommerce_blocks_validate_location_contact_fields', $e_thrower );
 	}
 
 	/**
@@ -380,7 +378,6 @@ class CheckoutFieldsFrontendTest extends \WC_Unit_Test_Case {
 		);
 
 		$order = \WC_Helper_Order::create_order();
-		$order->set_created_via( 'store-api' );
 		$this->controller->persist_field_for_order( 'mynamespace/billing_confirmation_field', 'secret value', $order, 'billing', false );
 		$order->save();
 
@@ -404,7 +401,6 @@ class CheckoutFieldsFrontendTest extends \WC_Unit_Test_Case {
 		);
 
 		$order = \WC_Helper_Order::create_order();
-		$order->set_created_via( 'store-api' );
 		$this->controller->persist_field_for_order( 'mynamespace/billing_confirmation_field', 'visible value', $order, 'billing', false );
 		$order->save();
 

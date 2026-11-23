@@ -170,9 +170,12 @@
 				).length > 0;
 
 				if ( ! isFormField && ! inEnhancedSelect ) {
-					if ( $( '#btn-ok' ).length ) {
-						this.addButton( e );
-					}	else if ( $( '#btn-next' ).length ) {
+					var $okButton = this.$( '#btn-ok' );
+					if ( $okButton.length ) {
+						if ( ! $okButton.prop( 'disabled' ) ) {
+							this.addButton( e );
+						}
+					}	else if ( this.$( '#btn-next' ).length && ! this.$( '#btn-next' ).prop( 'disabled' ) ) {
 						this.nextButton( e );
 					}
 				}

@@ -140,6 +140,18 @@ export function updatingAddressFieldsForShippingRates( isResolving: boolean ) {
 		isResolving,
 	};
 }
+
+/**
+ * Tracks when shipping address fields that affect the shipping rates have changed locally but have not been sent to
+ * the server yet. Internal: use the isShippingRatesStale selector to read it.
+ */
+export function __internalSetShippingRatesUpdateQueued( isQueued: boolean ) {
+	return {
+		type: types.SET_SHIPPING_RATES_UPDATE_QUEUED,
+		isQueued,
+	};
+}
+
 /**
  * Returns an action object used to track whether the shipping rate is being
  * selected or not.

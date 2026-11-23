@@ -333,7 +333,7 @@ export const getSharedReviewListControls = (
 								? {
 										...state,
 										value: String( defaultOffset ),
-								  }
+									}
 								: state
 						}
 						label={ __( 'Offset', 'woocommerce' ) }

@@ -134,7 +134,9 @@ const ConnectAccountPage = () => {
 		}
 	};
 
-	if ( ! incentive ) return null;
+	if ( ! incentive ) {
+		return null;
+	}
 
 	return (
 		<div className="woopayments-welcome-page">

@@ -147,11 +147,11 @@ export default withSelect( ( select, props ) => {
 
 	const hasImportFinished = Boolean(
 		inProgress &&
-			! cacheNeedsClearing &&
-			isImporting === false &&
-			( customersTotal > 0 || ordersTotal > 0 ) &&
-			customersProgress === customersTotal &&
-			ordersProgress === ordersTotal
+		! cacheNeedsClearing &&
+		isImporting === false &&
+		( customersTotal > 0 || ordersTotal > 0 ) &&
+		customersProgress === customersTotal &&
+		ordersProgress === ordersTotal
 	);
 
 	let response = {

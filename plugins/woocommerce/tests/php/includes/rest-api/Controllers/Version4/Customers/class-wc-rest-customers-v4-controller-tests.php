@@ -18,13 +18,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
-	 * Created customers for cleanup.
-	 *
-	 * @var array
-	 */
-	private $created_customers = array();
-
-	/**
 	 * Endpoint instance.
 	 *
 	 * @var CustomersController
@@ -59,15 +52,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		$this->cleanup_test_customers();
-		$this->disable_rest_api_v4_feature();
-	}
-
-	/**
 	 * Enable the REST API v4 feature.
 	 */
 	public static function enable_rest_api_v4_feature() {
@@ -81,24 +65,11 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Disable the REST API v4 feature.
-	 */
-	public static function disable_rest_api_v4_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features = array_diff( $features, array( 'rest-api-v4' ) );
-				return $features;
-			}
-		);
-	}
-
-	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
-		$this->enable_rest_api_v4_feature();
 		parent::setUp();
+		$this->enable_rest_api_v4_feature();
 
 		// Create schema instances with dependency injection.
 		$this->customer_schema = new CustomerSchema();
@@ -111,18 +82,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->endpoint->init( $this->customer_schema, $collection_query, $update_utils );
 
 		wp_set_current_user( self::$administrator_id );
-	}
-
-	/**
-	 * Clean up customers created during tests.
-	 */
-	private function cleanup_test_customers(): void {
-		foreach ( $this->created_customers as $customer_id ) {
-			if ( $customer_id && get_userdata( $customer_id ) ) {
-				wp_delete_user( $customer_id );
-			}
-		}
-		$this->created_customers = array();
 	}
 
 	/**
@@ -168,11 +127,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 201, $response->get_status() );
 		$data = $response->get_data();
 
-		$customer = new WC_Customer( $data['id'] );
-
-		$this->created_customers[] = $customer->get_id();
-
-		return $customer;
+		return new WC_Customer( $data['id'] );
 	}
 
 	/**
@@ -834,9 +789,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Should return default per_page (10), not 0.
 		$this->assertEquals( 10, count( $response_data ), 'number=-5 should fall back to default (10)' );
-
-		// Clean up filter.
-		remove_all_filters( 'woocommerce_customer_query_args' );
 	}
 
 	/**
@@ -1129,8 +1081,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response_data = $response->get_data();
 		$this->assertNotEmpty( $response_data['username'] );
 		$this->assertEquals( 'nousernameorpassword@example.com', $response_data['email'] );
-
-		$this->created_customers[] = $response_data['id'];
 	}
 
 	/**

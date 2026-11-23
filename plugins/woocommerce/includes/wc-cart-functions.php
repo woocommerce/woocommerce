@@ -12,7 +12,9 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -24,6 +26,13 @@ defined( 'ABSPATH' ) || exit;
  * @return bool
  */
 function wc_protected_product_add_to_cart( $passed, $product_id ) {
+	if ( 'product_variation' === get_post_type( $product_id ) ) {
+		$parent_id = wp_get_post_parent_id( $product_id );
+		if ( $parent_id ) {
+			$product_id = $parent_id;
+		}
+	}
+
 	if ( post_password_required( $product_id ) ) {
 		$passed = false;
 		wc_add_notice( __( 'This product is protected and cannot be purchased.', 'woocommerce' ), 'error' );
@@ -33,13 +42,19 @@ function wc_protected_product_add_to_cart( $passed, $product_id ) {
 add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_cart', 10, 2 );
 
 /**
- * Clears the cart session when called.
+ * Empties the cart once the shopper is done with it, for example after an order is placed.
+ *
+ * Also deletes a logged-in customer's saved (persistent) cart, so its items aren't loaded back on the next request.
+ * To reset the cart but keep the saved cart, call `WC()->cart->empty_cart( false )` instead, as `WC_Session_Handler::forget_session()` does.
+ * Creates the cart if it isn't loaded yet, which needs `WC()->session` to be set.
+ *
+ * @since 11.4.0 Deletes the saved cart too. Before 11.4.0 it was kept, and its items came back on the next request.
  */
 function wc_empty_cart() {
 	if ( ! isset( WC()->cart ) || '' === WC()->cart ) {
 		WC()->cart = new WC_Cart();
 	}
-	WC()->cart->empty_cart( false );
+	WC()->cart->empty_cart();
 }
 
 /**
@@ -55,10 +70,10 @@ function wc_get_raw_referer() {
 		return wp_get_raw_referer();
 	}
 
-	if ( ! empty( $_REQUEST['_wp_http_referer'] ) ) { // WPCS: input var ok, CSRF ok.
-		return wp_unslash( $_REQUEST['_wp_http_referer'] ); // WPCS: input var ok, CSRF ok, sanitization ok.
-	} elseif ( ! empty( $_SERVER['HTTP_REFERER'] ) ) { // WPCS: input var ok, CSRF ok.
-		return wp_unslash( $_SERVER['HTTP_REFERER'] ); // WPCS: input var ok, CSRF ok, sanitization ok.
+	if ( ! empty( $_REQUEST['_wp_http_referer'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only fallback that only reports where the request came from; no state changes here.
+		return wp_unslash( $_REQUEST['_wp_http_referer'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- This function is documented to return the referer unvalidated; every caller passes the result through wp_validate_redirect().
+	} elseif ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
+		return wp_unslash( $_SERVER['HTTP_REFERER'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- This function is documented to return the referer unvalidated; every caller passes the result through wp_validate_redirect().
 	}
 
 	return false;
@@ -183,7 +198,7 @@ function wc_clear_cart_after_payment() {
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
 		$order_id  = absint( $wp->query_vars['order-received'] );
-		$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Raw referer is sanitized and validated by its consumers.
+		$order_key = isset( $_GET['key'] ) && is_string( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Order key is cleaned and compared with hash_equals() against the order's key below.
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
@@ -196,8 +211,16 @@ function wc_clear_cart_after_payment() {
 	}
 
 	// If the order is awaiting payment, and we haven't already decided to clear the cart, check the order status.
-	if ( is_object( WC()->session ) && WC()->session->order_awaiting_payment > 0 && ! $should_clear_cart_after_payment ) {
-		$order = wc_get_order( WC()->session->order_awaiting_payment );
+	$session_order_id = 0;
+	if ( is_object( WC()->session ) ) {
+		// The order sent to the gateway comes first: payment_complete() clears order_awaiting_payment
+		// before the status change, so after a request dies there it is the only pointer left.
+		$session_order_id = absint( WC()->session->get( PaymentRecovery::ORDER_SENT_TO_GATEWAY ) );
+		$session_order_id = $session_order_id ? $session_order_id : absint( WC()->session->order_awaiting_payment );
+	}
+
+	if ( $session_order_id > 0 && ! $should_clear_cart_after_payment ) {
+		$order = wc_get_order( $session_order_id );
 
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
 			// If the order status is neither pending, failed, nor cancelled, the order must have gone through.
@@ -213,7 +236,7 @@ function wc_clear_cart_after_payment() {
 
 	// If the order is different from the cart, don't clear the cart. This can happen if the user has multiple tabs open and completes a different order than the one in the cart.
 	if ( $should_clear_cart_after_payment && $order instanceof WC_Order && ! WC()->cart->is_empty() ) {
-		$should_clear_cart_after_payment = $order->has_cart_hash( WC()->cart->get_cart_hash() );
+		$should_clear_cart_after_payment = PaymentRecovery::cart_belongs_to_order( $order );
 	}
 
 	/**
@@ -316,7 +339,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
 	}
 
 	$amount               = WC()->cart->get_coupon_discount_amount( $coupon->get_code(), WC()->cart->display_cart_ex_tax );
-	$discount_amount_html = '-' . wc_price( $amount );
+	$discount_amount_html = wc_price( -$amount );
 
 	if ( $coupon->get_free_shipping() && empty( $amount ) ) {
 		$discount_amount_html = __( 'Free shipping coupon', 'woocommerce' );
@@ -419,6 +442,8 @@ function wc_cart_round_discount( $value, $precision ) {
 /**
  * Gets chosen shipping method IDs from chosen_shipping_methods session, without instance IDs.
  *
+ * Only choices whose rate was listed for the cart are returned, see ShippingUtil::filter_chosen_shipping_methods().
+ *
  * @since  2.6.2
  * @return string[]
  */
@@ -427,7 +452,7 @@ function wc_get_chosen_shipping_method_ids() {
 		return array();
 	}
 
-	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	$chosen_methods = ShippingUtil::filter_chosen_shipping_methods( WC()->session->get( 'chosen_shipping_methods', array() ) );
 	$method_ids     = array();
 
 	foreach ( $chosen_methods as $chosen_method ) {

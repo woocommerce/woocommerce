@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+REST API date filters with dates_are_gmt now return the right results for UTC or offset dates on stores outside UTC.

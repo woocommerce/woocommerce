@@ -47,9 +47,21 @@ class WooCommerceAnalyticsProxySpeed {
 			return;
 		}
 
+		// The WP Consent API has not loaded yet, so let the REST route apply the stored deny.
+		if ( $this->is_statistics_consent_denied() ) {
+			return;
+		}
+
 		// If autoloader failed, let WordPress continue loading
 		// and fallback to the regular REST API.
 		if ( ! $this->load_autoloader() ) {
+			return;
+		}
+
+		// Unauthorized means "do not accelerate", not "do not serve". Only the REST
+		// route can tell a disabled feature from a module whose authorization was
+		// revoked while the feature stays on, so fall through and let it answer.
+		if ( ! $this->is_authorized() ) {
 			return;
 		}
 
@@ -60,6 +72,9 @@ class WooCommerceAnalyticsProxySpeed {
 
 	/**
 	 * Check if current request is a proxy request.
+	 *
+	 * Self-contained on purpose: init() calls this before load_autoloader(), so no
+	 * package class exists yet to delegate to.
 	 *
 	 * @return bool
 	 */
@@ -82,6 +97,24 @@ class WooCommerceAnalyticsProxySpeed {
 		}
 
 		return substr( $normalized_path, -strlen( $proxy_suffix ) ) === $proxy_suffix;
+	}
+
+	/**
+	 * Check if the shopper denied statistics consent, as recorded in the WP Consent API consent cookie.
+	 *
+	 * Unlike Consent_Manager, this reads the cookie whatever the consent type, which is not known yet. Only a prefix filter added by an earlier MU-plugin applies this early.
+	 *
+	 * @return bool
+	 */
+	private function is_statistics_consent_denied() {
+		$prefix = apply_filters( 'wp_consent_cookie_prefix', 'wp_consent' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reads a WP Consent API filter.
+		if ( ! is_string( $prefix ) ) {
+			return false;
+		}
+
+		$cookie_name = $prefix . '_statistics';
+
+		return isset( $_COOKIE[ $cookie_name ] ) && 'deny' === $_COOKIE[ $cookie_name ];
 	}
 
 	/**
@@ -118,7 +151,41 @@ class WooCommerceAnalyticsProxySpeed {
 			return false;
 		}
 
+		// The autoloader resolves the highest version across active plugins, which can
+		// be older than the one that wrote this file. Fall back rather than fatal.
+		if ( ! method_exists( '\Automattic\Woocommerce_Analytics\WC_Analytics_Tracking', 'record_client_event' ) ) {
+			error_log( 'WooCommerce Analytics Proxy Speed Module: the loaded WC_Analytics_Tracking predates record_client_event().' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			return false;
+		}
+
+		// Avoid a 500 when an older package lacks the bound constant.
+		if ( ! defined( '\Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST' ) ) {
+			error_log( 'WooCommerce Analytics Proxy Speed Module: the loaded WC_Analytics_Tracking predates the client input bounds.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			return false;
+		}
+
+		// Same skew, other class: process_proxy_request() reads this to decide whether
+		// to serve, and an older package lacking it throws where nothing can fall back.
+		if ( ! defined( '\Automattic\Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION' ) ) {
+			error_log( 'WooCommerce Analytics Proxy Speed Module: the loaded Woocommerce_Analytics predates the speed module authorization option.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			return false;
+		}
+
 		return true;
+	}
+
+	/**
+	 * Whether this module may serve the request.
+	 *
+	 * Features::is_proxy_tracking_enabled() cannot be used here: no plugin has
+	 * registered that filter this early, so it reads false everywhere. Only an
+	 * explicit yes serves, so a network-wide module file cannot answer for a site
+	 * that never authorized it.
+	 *
+	 * @return bool
+	 */
+	private function is_authorized() {
+		return 'yes' === get_option( \Automattic\Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 	}
 
 	/**
@@ -189,6 +256,12 @@ class WooCommerceAnalyticsProxySpeed {
 			$events = array( $events );
 		}
 
+		// Use the same batch limit as the REST controller.
+		$max_events = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST;
+		if ( count( $events ) > $max_events ) {
+			$events = array_slice( $events, 0, $max_events, true );
+		}
+
 		$results    = array();
 		$has_errors = false;
 
@@ -205,7 +278,7 @@ class WooCommerceAnalyticsProxySpeed {
 			$event_name = $event['event_name'] ?? null;
 			$properties = $event['properties'] ?? array();
 
-			if ( ! $event_name || ! is_array( $properties ) ) {
+			if ( ! $event_name || ! is_string( $event_name ) || ! is_array( $properties ) ) {
 				$results[ $index ] = array(
 					'success' => false,
 					'error'   => 'Missing event_name or invalid properties',
@@ -214,7 +287,7 @@ class WooCommerceAnalyticsProxySpeed {
 				continue;
 			}
 
-			$result = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::record_event( $event_name, $properties );
+			$result = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::record_client_event( $event_name, $properties );
 
 			if ( is_wp_error( $result ) ) {
 				$results[ $index ] = array(

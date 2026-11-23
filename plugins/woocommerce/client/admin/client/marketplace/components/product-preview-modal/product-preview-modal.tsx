@@ -10,6 +10,7 @@ import { Spinner } from '@woocommerce/components';
  * Internal dependencies
  */
 import { fetchProductPreview } from '../../utils/functions';
+import { addVariationToPreviewLinks } from '../../utils/product-preview-experiment';
 import sanitizeHtmlExtended from '~/lib/sanitize-html/sanitize-html-extended.js';
 import sanitizeHtmlConfig from './product-preview-sanitize-html-config';
 import './product-preview-modal.scss';
@@ -20,6 +21,7 @@ interface ProductPreviewModalProps {
 	productIcon: string;
 	productId: number;
 	triggerRef: React.RefObject< HTMLAnchorElement | null >;
+	variation?: string | null;
 	onOpen?: () => void;
 	onClose?: ( closeType?: string ) => void;
 }
@@ -30,6 +32,7 @@ export default function ProductPreviewModal( {
 	productIcon,
 	productId,
 	triggerRef,
+	variation,
 	onOpen,
 	onClose,
 }: ProductPreviewModalProps ) {
@@ -99,8 +102,11 @@ export default function ProductPreviewModal( {
 					throw new Error( 'Invalid preview data structure' );
 				}
 
+				const previewHtml = variation
+					? addVariationToPreviewLinks( previewData.html, variation )
+					: previewData.html;
 				const sanitizedHtmlObj = sanitizeHtmlExtended(
-					previewData.html,
+					previewHtml,
 					sanitizeHtmlConfig
 				) as { __html?: string };
 				const sanitizedHtml = sanitizedHtmlObj?.__html ?? '';
@@ -123,7 +129,7 @@ export default function ProductPreviewModal( {
 		if ( onOpen ) {
 			onOpen();
 		}
-	}, [ onOpen, productId ] );
+	}, [ onOpen, productId, variation ] );
 
 	const productHeader = (
 		<div className="woocommerce-marketplace__product-preview-modal__header">

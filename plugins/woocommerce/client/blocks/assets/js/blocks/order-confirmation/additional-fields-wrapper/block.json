@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/order-confirmation-additional-fields-wrapper",
-	"version": "1.0.0",
 	"title": "Additional Fields",
 	"description": "Display additional checkout fields from the 'contact' and 'order' locations.",
 	"category": "woocommerce",
@@ -28,6 +27,10 @@
 			}
 		}
 	},
+	"style": [
+		"wc-blocks-style",
+		"file:../order-confirmation-additional-fields-wrapper.css"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

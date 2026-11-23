@@ -4,7 +4,6 @@
 import { miniCartAlt } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 import { registerBlockType } from '@wordpress/blocks';
-import { addFilter } from '@wordpress/hooks';
 /**
  * Internal dependencies
  */
@@ -44,28 +43,3 @@ registerBlockType( metadata, {
 		return null;
 	},
 } );
-
-// Remove the Mini Cart template part from the block inserter.
-addFilter(
-	'blocks.registerBlockType',
-	'woocommerce/area_mini-cart',
-	function ( blockSettings, blockName ) {
-		if ( blockName === 'core/template-part' ) {
-			return {
-				...blockSettings,
-				variations: blockSettings.variations.map(
-					( variation: { name: string } ) => {
-						if ( variation.name === 'area_mini-cart' ) {
-							return {
-								...variation,
-								scope: [],
-							};
-						}
-						return variation;
-					}
-				),
-			};
-		}
-		return blockSettings;
-	}
-);

@@ -39,14 +39,6 @@ export const CONSUMER_KEY = { name: '', key: '', secret: '' };
 const reporter = [
 	[ 'list' ],
 	[
-		'allure-playwright',
-		{
-			resultsDir: `${ TESTS_ROOT_PATH }/test-results/allure-results`,
-			detail: true,
-			suiteTitle: true,
-		},
-	],
-	[
 		'json',
 		{
 			outputFile: `${ TESTS_ROOT_PATH }/test-results/test-results-${ Date.now() }.json`,
@@ -62,10 +54,6 @@ const reporter = [
 			appName: 'woocommerce-core',
 			repositoryName: process.env.GITHUB_REPOSITORY || '',
 		},
-	],
-	[
-		`${ TESTS_ROOT_PATH }/reporters/environment-reporter.ts`,
-		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/allure-results` },
 	],
 ];
 
@@ -119,47 +107,22 @@ const blocksSetupProject = {
  * Spec folders that must run serially in `core-serial` (they mutate global
  * state or share fixtures). Every other folder under `tests/` runs in
  * `core-parallel` by default, except the other-project folders in `nonCoreSpecs`.
+ *
+ * Specs that only race each other on the same options run in `core-parallel`
+ * with a shared `locks` entry (see `fixtures/fixtures.ts`) instead. A lock
+ * does not help when a spec changes a setting that unlocked specs read.
  */
 const serialRunSpecs = [
-	// Toggles the global `woocommerce_analytics_scheduled_import` option to
-	// exercise the Settings-page scheduled/immediate switch. Kept serial because,
-	// as a standalone file, running it in `core-parallel` would race
-	// `analytics.spec.ts` — which also toggles that option — across workers.
-	// (The other analytics specs are parallel: `analytics` owns its own
-	// import-mode toggles plus the Overview manual-trigger tests in one file, so
-	// those serialise within a single worker; `analytics-overview` only mutates
-	// the admin's own `dashboard_sections` meta. No other parallel spec depends on
-	// the order-import mode, and this serial job never runs concurrently with the
-	// parallel one.)
-	'**/tests/analytics/analytics-settings.spec.ts',
-	// Every spec sets the global `woocommerce_customer_stock_notifications_*`
-	// options in beforeAll (allow_signups / double_opt_in / require_account) and
-	// deletes them in afterAll. Run in parallel the files demand conflicting global
-	// config and race on those options: concurrent identical writes make
-	// `update_option` return false (`e2e-options/update` 400 "Update option FAILED"),
-	// and one file's afterAll strips the signup form mid-test for the others.
-	'**/tests/back-in-stock-notifications/**/*.spec.ts',
 	// Flips the global `woocommerce_default_customer_address` (geolocation) and
 	// `woocommerce_enable_ajax_add_to_cart` settings, which change add-to-cart
 	// behavior for every other worker. (`cart.spec.ts` runs in core-parallel — it
 	// scopes its tax rate to a dedicated tax class instead of toggling global tax.)
 	'**/tests/cart/add-to-cart.spec.ts',
-	// Activates a custom-gateway test plugin globally, which would surface its extra
-	// payment button on every other worker's checkout.
+	// Activates a test plugin with WP-CLI, which races other workers on the
+	// `active_plugins` option.
 	'**/tests/checkout/checkout-shortcode-custom-place-order-button.spec.ts',
-	// Every spec toggles a global email feature flag via `setOption`:
-	// `editor-tracking-selectors`/`settings-email-listing` flip
-	// `woocommerce_feature_block_email_editor_enabled`, while `account-emails`/
-	// `order-emails`/`settings-email` flip `woocommerce_feature_email_improvements_enabled`.
-	// Run in parallel they race on those options — one file's afterAll disables the
-	// editor (or flips improvements) mid-test for the others. Proven not parallel-safe:
-	// an email-only `core-parallel` run failed across all three clusters.
-	'**/tests/email/**/*.spec.ts',
-	// Each spec toggles the global `woocommerce_feature_block_email_editor_enabled`
-	// flag in beforeAll/afterAll; running the files concurrently races on that option
-	// (`e2e-options/update` returns 400 "Update option FAILED") and the first file's
-	// afterAll disables the editor mid-test for the others. Proven not parallel-safe.
-	'**/tests/email-editor/**/*.spec.ts',
+	// Changes site visibility and the active plugins while checking llms.txt.
+	'**/tests/llms-txt/*.spec.ts',
 	// Mutate the global onboarding profile/options, site-visibility options and
 	// the active theme.
 	'**/tests/onboarding/**/*.spec.ts',
@@ -179,8 +142,8 @@ const serialRunSpecs = [
 	// Mutate global WooCommerce settings (store address/currency/country, tax)
 	// that other workers' cart/checkout/storefront specs depend on.
 	'**/tests/settings/settings-general.spec.ts',
-	// Mutates the global woocommerce_permalinks option (product base and the
-	// derived use_verbose_page_rules flag) and restores it in teardown.
+	// Mutates the global woocommerce_permalinks option (the product base) and
+	// restores it in teardown.
 	'**/tests/settings/product-permalinks.spec.ts',
 	'**/tests/settings/settings-tax.spec.ts',
 	// Toggles the global `settings-ui` feature flag and resets all e2e feature flags
@@ -189,9 +152,6 @@ const serialRunSpecs = [
 	// Toggles the global `woocommerce_cart_redirect_after_add` setting, which
 	// changes add-to-cart behavior for every other worker — not parallel-safe.
 	'**/tests/shop/cart-redirection.spec.ts',
-	// Trashes and restores the global Shop page in a fixture; while trashed, every
-	// other worker's shop/cart/account navigation 404s.
-	'**/tests/shop/shop-title-after-deletion.spec.ts',
 ];
 
 /**
@@ -205,7 +165,120 @@ const nonCoreSpecs = [
 	'**/tests/blocks/**',
 ];
 
-export default defineConfig( {
+/**
+ * Blocks specs that must run serially in `blocks-serial`, which resets the
+ * database after each test. Every other blocks spec runs in `blocks-parallel`
+ * by default, without that reset, against a site that other workers use at the
+ * same time.
+ *
+ * A parallel spec must clean up what it creates and must not change state that
+ * other specs read, unless it shares a `locks` entry (see `fixtures/fixtures.ts`)
+ * with every spec that reads that state.
+ *
+ * Never run `blocks-serial` and `blocks-parallel` in the same invocation: the
+ * serial resets wipe the data of the parallel workers.
+ */
+const blocksSerialSpecs = [
+	// Switch the active theme. It is a site-wide setting, and every spec
+	// renders with the active theme, so a test lock cannot isolate the switch.
+
+	// Activates `theme-with-woo-templates` and saves its Single Product
+	// template and Add to Cart + Options template part.
+	'**/tests/blocks/add-to-cart-with-options/add-to-cart-with-options.block_theme_with_templates.spec.ts',
+	// Activates three child themes of the block theme to check their notices,
+	// and makes the Cart Shortcode page the cart page.
+	'**/tests/blocks/cart/cart-checkout-block-notices-child-themes.shopper.block_theme.spec.ts',
+	// Activates Storefront and three of its child themes to check notices in a
+	// classic theme, and makes the Cart Shortcode page the cart page.
+	'**/tests/blocks/cart/cart-checkout-block-notices.shopper.classic_theme.spec.ts',
+	// Activates Storefront to check the Mini-Cart drawer with the classic AJAX
+	// add-to-cart button.
+	'**/tests/blocks/mini-cart/mini-cart.classic_theme.spec.ts',
+	// Activates Storefront to check the Product Button block in a classic
+	// theme.
+	'**/tests/blocks/product-button/product-button.classic_theme.spec.ts',
+	// Activates Storefront to check which block styles a classic theme loads.
+	'**/tests/blocks/style.classic_theme.spec.ts',
+	// Activates `theme-with-woo-templates` and saves its template for one
+	// product.
+	'**/tests/blocks/templates/single-product-template.block_theme_with_templates.spec.ts',
+	// Saves each site-wide WooCommerce template and template part. The
+	// template part priority tests also activate `theme-with-woo-templates`.
+	'**/tests/blocks/templates/template-customization.block_theme.spec.ts',
+	// Activates `theme-with-woo-templates` and saves each of its WooCommerce
+	// templates.
+	'**/tests/blocks/templates/template-customization.block_theme_with_templates.spec.ts',
+	// Activates a Storefront child theme that has block template parts, and
+	// saves its Mini-Cart template part.
+	'**/tests/blocks/templates/template-part-customization.classic_theme_with_template_parts.spec.ts',
+	// Activates two Storefront child themes with block template part support,
+	// and saves the Mini-Cart template part.
+	'**/tests/blocks/templates/template-part-customization.classic_theme_with_template_parts_support.spec.ts',
+	// Activates `theme-with-woo-templates`, and saves the site-wide Single
+	// Product, Product Catalog and Products by Category templates.
+	'**/tests/blocks/templates/template-priority.block_theme.spec.ts',
+	// Activates Storefront, because only a classic theme has the widget
+	// editor.
+	'**/tests/blocks/widget-area/widget-area.classic_theme.spec.ts',
+
+	// Save site-wide templates, template parts or pages (single product, product
+	// archive, header, cart, checkout), or the
+	// `wc_blocks_use_blockified_product_grid_block_as_template` option. Every
+	// spec that visits those pages reads them.
+	'**/tests/blocks/add-to-cart-with-options/add-to-cart-with-options.block_theme.spec.ts',
+	'**/tests/blocks/attributes-filter/attribute-filter.block_theme.spec.ts',
+	'**/tests/blocks/cart-store/cart-line-identity.block_theme.spec.ts',
+	'**/tests/blocks/checkout/checkout-block.merchant.block_theme.spec.ts',
+	'**/tests/blocks/classic-template/classic-template-blockified-option.block_theme.spec.ts',
+	'**/tests/blocks/mini-cart/mini-cart-block.shopper.block_theme.spec.ts',
+	'**/tests/blocks/mini-cart/mini-cart-header-colors.block_theme.spec.ts',
+	'**/tests/blocks/page-content-wrapper/page-content-wrapper-page-edit.block_theme.spec.ts',
+	'**/tests/blocks/price-filter/price-filter.block_theme.spec.ts',
+	'**/tests/blocks/product-collection/product-collection-site-templates.block_theme.spec.ts',
+	'**/tests/blocks/product-filters/active-filter-frontend.block_theme.spec.ts',
+	'**/tests/blocks/product-filters/attribute-filter-frontend.block_theme.spec.ts',
+	'**/tests/blocks/product-filters/product-filters-frontend.block_theme.spec.ts',
+	'**/tests/blocks/products/products.block_theme.spec.ts',
+	'**/tests/blocks/rating-filter/rating-filter.block_theme.spec.ts',
+	'**/tests/blocks/stock-filter/stock-filter.block_theme.spec.ts',
+	'**/tests/blocks/templates/legacy-templates.block_theme.spec.ts',
+
+	// Turn off AJAX add to cart, which every Product Button reads.
+	'**/tests/blocks/product-button/product-button-ajax-disabled.block_theme.spec.ts',
+
+	// Change global settings that cart, checkout and storefront specs read.
+
+	// Adds, edits and deletes shipping zones and methods, and changes the
+	// default customer location, local pickup and "Hide shipping costs until an
+	// address is entered".
+	'**/tests/blocks/cart/cart-checkout-block-shipping.block_theme.spec.ts',
+	// Turns tax calculation off and on and adds a standard tax rate, which
+	// changes the prices every cart and checkout spec shows.
+	'**/tests/blocks/cart/cart-checkout-block-taxes.shopper.block_theme.spec.ts',
+	// Switches the site language, which every spec reads.
+	'**/tests/blocks/cart/cart-checkout-block-translations.shopper.block_theme.spec.ts',
+	// Changes local pickup, shipping methods, "Hide shipping costs until an
+	// address is entered" and the countries the store ships to, and saves the
+	// Checkout page template. Most tests also place orders, some for Beanie,
+	// which changes the Best Sellers ranking.
+	'**/tests/blocks/checkout/checkout-block.shopper.block_theme.spec.ts',
+	// Logs out the admin user that all workers share. Also changes local pickup,
+	// account creation settings and the `experimental-blocks` feature flag,
+	// activates a test plugin, places orders for Beanie and opens the newest
+	// order in the orders list.
+	'**/tests/blocks/checkout/order-confirmation.block_theme.spec.ts',
+	// Changes the shop page slug, so the `shop/` URL that other specs visit
+	// stops working.
+	'**/tests/blocks/templates/shop-page.block_theme.spec.ts',
+
+	// Creates a visible $10 product with limited stock, which the Product
+	// Collection block needs to show it. While it exists, it changes product
+	// counts that catalog specs check, such as the single product under $10 in
+	// `inspector-controls`.
+	'**/tests/blocks/product-collection/product-collection-errors.block_theme.spec.ts',
+];
+
+export default defineConfig< { resetDatabaseAfterEachTest: boolean } >( {
 	timeout: 120 * 1000,
 	expect: { timeout: CI ? 20 * 1000 : 10 * 1000 },
 	outputDir: TESTS_RESULTS_PATH,
@@ -261,13 +334,25 @@ export default defineConfig( {
 			workers: 1,
 		},
 		{
-			name: 'blocks-chromium',
+			name: 'blocks-serial',
 			testDir: `${ TESTS_ROOT_PATH }/tests/blocks`,
+			testMatch: blocksSerialSpecs,
 			dependencies: [ 'blocks setup' ],
 			workers: 1,
 			use: {
 				...devices[ 'Desktop Chrome' ],
 				storageState: BLOCKS_ADMIN_STATE,
+			},
+		},
+		{
+			name: 'blocks-parallel',
+			testDir: `${ TESTS_ROOT_PATH }/tests/blocks`,
+			testIgnore: blocksSerialSpecs,
+			dependencies: [ 'blocks setup' ],
+			use: {
+				...devices[ 'Desktop Chrome' ],
+				storageState: BLOCKS_ADMIN_STATE,
+				resetDatabaseAfterEachTest: false,
 			},
 		},
 	],

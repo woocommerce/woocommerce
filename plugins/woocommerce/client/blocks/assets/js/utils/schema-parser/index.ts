@@ -23,9 +23,11 @@ ajv.addFormat(
 
 addFormats( ajv, {
 	mode: 'fast',
-	formats: [ 'date', 'time', 'uri' ],
+	formats: [ 'time', 'uri' ],
 	keywords: true,
 } );
+// Date rules must reject impossible calendar dates as the server does.
+addFormats( ajv, { mode: 'full', formats: [ 'date' ], keywords: false } );
 addErrors( ajv );
 
 // Add type declaration for window.schemaParser

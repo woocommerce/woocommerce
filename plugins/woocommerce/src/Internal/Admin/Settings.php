@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
 use Automattic\WooCommerce\Internal\Utilities\PriceSeparators;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -48,6 +49,8 @@ class Settings {
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'add_component_settings' ) );
 		add_filter( 'woocommerce_settings_groups', array( $this, 'add_settings_group' ) );
 		add_filter( 'woocommerce_settings-wc_admin', array( $this, 'add_settings' ) );
+		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_excluded_report_order_statuses', array( $this, 'maybe_forget_default_order_statuses' ), 10, 2 );
+		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_actionable_order_statuses', array( $this, 'maybe_forget_default_order_statuses' ), 10, 2 );
 	}
 
 	/**
@@ -78,6 +81,186 @@ class Settings {
 		$formatted_statuses    = array_keys( $formatted_status_keys );
 
 		return array_combine( $formatted_statuses, $formatted_statuses );
+	}
+
+	/**
+	 * Get the payment gateways for the Orders report payment method filter and column: the installed
+	 * ones by title, then any other gateway the stored orders were paid with, by id.
+	 *
+	 * @return array Payment gateway titles, keyed by gateway id.
+	 */
+	private function get_payment_gateway_titles() {
+		$titles = array();
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			$titles[ $gateway->id ] = $gateway->get_method_title();
+		}
+
+		// A gateway that is no longer installed still has orders, so it stays in the filter under its id.
+		$stored  = OrdersDataStore::get_all_payment_methods();
+		$titles += array_combine( $stored, $stored );
+
+		return $titles;
+	}
+
+	/**
+	 * Validate a filtered list of default order statuses for display in the Settings UI.
+	 *
+	 * Drops slugs that are not registered or synced (they cannot be shown as checkboxes).
+	 * An explicitly empty list stays empty so the UI agrees with the runtime accessors; a
+	 * non-empty list with nothing displayable left falls back to the built-in default, and
+	 * a non-array falls back too. This cross-check is a display-only concern: runtime
+	 * consumers of the same options accept any string slug via
+	 * get_valid_order_statuses_or_default().
+	 *
+	 * @param mixed $statuses     Value returned by a default-order-statuses filter.
+	 * @param array $all_statuses Known order statuses, keyed by status slug.
+	 * @param array $fallback     Built-in default to use if nothing displayable remains.
+	 * @return array
+	 */
+	private function sanitize_default_order_statuses( $statuses, $all_statuses, $fallback ) {
+		$valid_statuses = self::get_valid_order_statuses_or_default( $statuses, $fallback );
+		if ( empty( $valid_statuses ) ) {
+			return $valid_statuses;
+		}
+		$sanitized = array_values( array_intersect( $valid_statuses, array_keys( $all_statuses ) ) );
+		return empty( $sanitized ) ? $fallback : $sanitized;
+	}
+
+	/**
+	 * The default order statuses excluded from Analytics report totals, used until a merchant
+	 * saves a different selection. Single source of truth for the Settings UI and every runtime
+	 * consumer, so the filtered value applies everywhere without saving the option.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return array
+	 */
+	public static function get_default_excluded_order_statuses(): array {
+		$builtin_default = array( OrderStatus::PENDING, OrderStatus::CANCELLED, OrderStatus::FAILED );
+
+		/**
+		 * Filters the default set of order statuses excluded from Analytics report totals.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param array $default_statuses Default excluded order statuses.
+		 */
+		$filtered = apply_filters( 'woocommerce_analytics_settings_default_excluded_order_statuses', $builtin_default );
+
+		return self::get_valid_order_statuses_or_default( $filtered, $builtin_default );
+	}
+
+	/**
+	 * The default order statuses considered actionable in Analytics, used until a merchant
+	 * saves a different selection. Single source of truth for the Settings UI and every runtime
+	 * consumer, so the filtered value applies everywhere without saving the option.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return array
+	 */
+	public static function get_default_actionable_order_statuses(): array {
+		$builtin_default = array( OrderStatus::PROCESSING, OrderStatus::ON_HOLD );
+
+		/**
+		 * Filters the default set of order statuses considered actionable in Analytics.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param array $default_statuses Default actionable order statuses.
+		 */
+		$filtered = apply_filters( 'woocommerce_analytics_settings_default_actionable_order_statuses', $builtin_default );
+
+		return self::get_valid_order_statuses_or_default( $filtered, $builtin_default );
+	}
+
+	/**
+	 * Validate a value that should be an array of order status slugs (an option value or a
+	 * default-order-statuses filter's return value), falling back to the passed default if
+	 * it is not an array.
+	 *
+	 * An explicitly saved empty array passes through: the merchant intentionally cleared
+	 * the selection, and replacing it with the defaults would make reports disagree with
+	 * the Settings page. Non-string elements are dropped, and string slugs are trimmed,
+	 * so a broken filter return value cannot raise warnings or leave a blank slug that
+	 * the Settings UI drops but runtime consumers keep.
+	 *
+	 * This is a cheap type check only. Slugs are not cross-checked against registered or
+	 * synced order statuses, because runtime call sites intentionally accept slugs outside
+	 * that set and must not pay for OrdersDataStore::get_all_statuses()'s DB-backed lookup
+	 * on every request. Only add_settings() needs the fuller display cross-check, via
+	 * sanitize_default_order_statuses().
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed $value    Value to validate.
+	 * @param array $fallback Default to use if $value is not an array.
+	 * @return array
+	 */
+	public static function get_valid_order_statuses_or_default( $value, array $fallback ): array {
+		if ( ! is_array( $value ) ) {
+			return $fallback;
+		}
+
+		// An intentionally empty array means "no statuses" and must survive as-is, whether
+		// it came from a saved option or a filter.
+		if ( empty( $value ) ) {
+			return array();
+		}
+
+		$statuses = array_map( 'trim', array_filter( $value, 'is_string' ) );
+		$statuses = array_values(
+			array_filter(
+				$statuses,
+				static function ( $status ) {
+					return '' !== $status;
+				}
+			)
+		);
+
+		// A non-empty array whose elements are all unusable is treated as invalid, so a
+		// broken callback does not silently empty the selection.
+		return empty( $statuses ) ? $fallback : $statuses;
+	}
+
+	/**
+	 * Delete an Analytics order status option instead of saving it when the list matches the
+	 * default the Settings page shows.
+	 *
+	 * "Reset defaults", or saving the page without touching a list, sends that default back.
+	 * Storing it would freeze the current value and stop the default order status filters
+	 * from applying, so the option is deleted and the default keeps being resolved at runtime.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed $value  Sanitized value about to be saved.
+	 * @param array $option Setting definition, including its resolved default.
+	 * @return mixed The value to save, or null to skip saving it.
+	 */
+	public function maybe_forget_default_order_statuses( $value, $option ) {
+		$default = $option['default'] ?? null;
+		if ( ! is_array( $value ) || ! is_array( $default ) ) {
+			return $value;
+		}
+
+		// Compare as sets, so the same statuses in another order still count as the default.
+		if ( array_diff( $value, $default ) || array_diff( $default, $value ) ) {
+			return $value;
+		}
+
+		// The page shows the built-in default when a filter returns only statuses it cannot display. Deleting the option
+		// then would switch reports to the filter's list, so store what was shown. Extra undisplayable statuses still delete it.
+		$runtime_default = 'woocommerce_excluded_report_order_statuses' === $option['id']
+			? self::get_default_excluded_order_statuses()
+			: self::get_default_actionable_order_statuses();
+		if ( array_diff( $default, $runtime_default ) ) {
+			return $value;
+		}
+
+		delete_option( $option['id'] );
+		return null;
 	}
 
 	/**
@@ -217,6 +400,8 @@ class Settings {
 			// E.g. an extension that added statuses is now inactive or removed.
 			$settings['unregisteredOrderStatuses'] = $this->get_unregistered_order_statuses();
 			$settings['usesNewFullRefundData']     = OrderUtil::uses_new_full_refund_data();
+			$settings['couponTypes']               = wc_get_coupon_types();
+			$settings['paymentGateways']           = $this->get_payment_gateway_titles();
 		}
 
 		// The separator used for attributes found in Variation titles.
@@ -322,12 +507,17 @@ class Settings {
 		$registered_statuses   = self::get_order_statuses( wc_get_order_statuses() );
 		$all_statuses          = array_merge( $unregistered_statuses, $registered_statuses );
 
+		// Only the Settings UI needs the display cross-check; runtime consumers use the
+		// accessor values as-is.
+		$default_excluded_statuses   = $this->sanitize_default_order_statuses( self::get_default_excluded_order_statuses(), $all_statuses, array( OrderStatus::PENDING, OrderStatus::CANCELLED, OrderStatus::FAILED ) );
+		$default_actionable_statuses = $this->sanitize_default_order_statuses( self::get_default_actionable_order_statuses(), $all_statuses, array( OrderStatus::PROCESSING, OrderStatus::ON_HOLD ) );
+
 		$settings[] = array(
 			'id'          => 'woocommerce_excluded_report_order_statuses',
 			'option_key'  => 'woocommerce_excluded_report_order_statuses',
 			'label'       => __( 'Excluded report order statuses', 'woocommerce' ),
 			'description' => __( 'Statuses that should not be included when calculating report totals.', 'woocommerce' ),
-			'default'     => array( 'pending', 'cancelled', 'failed' ),
+			'default'     => $default_excluded_statuses,
 			'type'        => 'multiselect',
 			'options'     => $all_statuses,
 		);
@@ -336,7 +526,7 @@ class Settings {
 			'option_key'  => 'woocommerce_actionable_order_statuses',
 			'label'       => __( 'Actionable order statuses', 'woocommerce' ),
 			'description' => __( 'Statuses that require extra action on behalf of the store admin.', 'woocommerce' ),
-			'default'     => array( 'processing', 'on-hold' ),
+			'default'     => $default_actionable_statuses,
 			'type'        => 'multiselect',
 			'options'     => $all_statuses,
 		);
@@ -394,6 +584,10 @@ class Settings {
 	/**
 	 * Gets custom settings used for WC Admin.
 	 *
+	 * Exposes the current values as `wcAdminSettings` and the resolved defaults as
+	 * `wcAdminSettingsDefaults`, so the client can reset to the same (possibly filtered)
+	 * defaults the REST endpoint reports instead of a hardcoded copy.
+	 *
 	 * @param array $settings Array of settings to merge into.
 	 * @return array
 	 */
@@ -401,10 +595,15 @@ class Settings {
 		$wc_rest_settings_options_controller = new \WC_REST_Setting_Options_Controller();
 		$wc_admin_group_settings             = $wc_rest_settings_options_controller->get_group_settings( 'wc_admin' );
 		$settings['wcAdminSettings']         = array();
+		$settings['wcAdminSettingsDefaults'] = array();
 
 		foreach ( $wc_admin_group_settings as $setting ) {
-			if ( ! empty( $setting['id'] ) ) {
-				$settings['wcAdminSettings'][ $setting['id'] ] = $setting['value'];
+			if ( empty( $setting['id'] ) ) {
+				continue;
+			}
+			$settings['wcAdminSettings'][ $setting['id'] ] = $setting['value'];
+			if ( array_key_exists( 'default', $setting ) ) {
+				$settings['wcAdminSettingsDefaults'][ $setting['id'] ] = $setting['default'];
 			}
 		}
 		return $settings;

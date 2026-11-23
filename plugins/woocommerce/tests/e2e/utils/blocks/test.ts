@@ -2,6 +2,7 @@
 /**
  * External dependencies
  */
+import { randomUUID } from 'crypto';
 import { test as base, expect, ConsoleMessage } from '@playwright/test';
 import {
 	STORAGE_STATE_PATH,
@@ -16,6 +17,7 @@ import {
 	PerformanceUtils,
 	RequestUtils,
 	ShippingUtils,
+	WPTemplate,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -106,6 +108,20 @@ function observeConsoleLogging( message: ConsoleMessage ) {
 	console[ logFunction ]( text );
 }
 
+export type ProductTemplate = { template: WPTemplate; productUrl: string };
+
+type WCProduct = {
+	id: number;
+	name: string;
+	type: string;
+	regular_price: string;
+	sale_price: string;
+	attributes: unknown[];
+	default_attributes: unknown[];
+	images: { id: number }[];
+	image?: { id: number } | null;
+};
+
 const test = base.extend<
 	{
 		admin: Admin;
@@ -117,19 +133,66 @@ const test = base.extend<
 		shippingUtils: ShippingUtils;
 		localPickupUtils: LocalPickupUtils;
 		miniCartUtils: MiniCartUtils;
+		resetDatabaseAfterEachTest: boolean;
+		cleanup: ( callback: () => Promise< unknown > ) => void;
+		createProductTemplate: (
+			sourceProductSlug: string,
+			options?: { content?: string }
+		) => Promise< ProductTemplate >;
+		createHiddenProduct: (
+			data: Record< string, unknown >
+		) => Promise< { id: number } >;
 	},
 	{
 		requestUtils: RequestUtils;
 		wpCoreVersion: number;
 	}
 >( {
-	admin: async ( { page, pageUtils, editor, wpCoreVersion }, use ) => {
-		await use( new Admin( { page, pageUtils, editor, wpCoreVersion } ) );
+	// Deletes each post that `createNewPost` opens, drafts included, because
+	// `blocks-parallel` never resets the database. In `blocks-serial`, the
+	// delete runs before the database reset only when `page` is set up before
+	// `cleanup`; otherwise it fails with a 404 and only logs a warning.
+	admin: async (
+		{ page, pageUtils, editor, wpCoreVersion, requestUtils, cleanup },
+		use
+	) => {
+		const admin = new Admin( { page, pageUtils, editor, wpCoreVersion } );
+		const createNewPost = admin.createNewPost.bind( admin );
+		admin.createNewPost = async ( ...args ) => {
+			await createNewPost( ...args );
+			// `createNewPost` waits for `wp.data`, not for the editor to mount.
+			const { id, type } = await (
+				await page.waitForFunction( () => {
+					const editorStore = window.wp.data.select( 'core/editor' );
+					const postId = editorStore?.getCurrentPostId();
+					return (
+						postId && {
+							id: postId,
+							type: editorStore.getCurrentPostType(),
+						}
+					);
+				} )
+			).jsonValue();
+			cleanup( async () => {
+				const { rest_base: restBase } = await requestUtils.rest< {
+					rest_base: string;
+				} >( { path: `/wp/v2/types/${ type }` } );
+				await requestUtils.rest( {
+					method: 'DELETE',
+					path: `/wp/v2/${ restBase }/${ id }`,
+					params: { force: true },
+				} );
+			} );
+		};
+		await use( admin );
 	},
 	editor: async ( { page, wpCoreVersion }, use ) => {
 		await use( new Editor( { page, wpCoreVersion } ) );
 	},
-	page: async ( { page }, use ) => {
+	// Workers share one site, so a project that runs specs in parallel must turn
+	// this off: one worker's reset would wipe the data of the others.
+	resetDatabaseAfterEachTest: [ true, { option: true } ],
+	page: async ( { page, resetDatabaseAfterEachTest }, use ) => {
 		page.on( 'console', observeConsoleLogging );
 
 		await use( page );
@@ -148,24 +211,26 @@ const test = base.extend<
 		// Dispose the current APIRequestContext to free up resources.
 		await page.request.dispose();
 
-		// Navigate away before resetting the DB so the page stops issuing
-		// Store API requests against a half-dropped database. Otherwise late
-		// in-flight fetches are served the WordPress install page (HTTP 200,
-		// text/html) and surface as "The response is not a valid JSON
-		// response." console noise.
-		try {
-			await page.goto( 'about:blank' );
-		} catch ( error ) {
-			// Ignore errors if page is already closed/navigated away.
-			// eslint-disable-next-line no-console
-			console.log(
-				'Failed to navigate away before DB reset:',
-				error.message
-			);
-		}
+		if ( resetDatabaseAfterEachTest ) {
+			// Navigate away before resetting the DB so the page stops issuing
+			// Store API requests against a half-dropped database. Otherwise late
+			// in-flight fetches are served the WordPress install page (HTTP 200,
+			// text/html) and surface as "The response is not a valid JSON
+			// response." console noise.
+			try {
+				await page.goto( 'about:blank' );
+			} catch ( error ) {
+				// Ignore errors if page is already closed/navigated away.
+				// eslint-disable-next-line no-console
+				console.log(
+					'Failed to navigate away before DB reset:',
+					error.message
+				);
+			}
 
-		// Reset the database to the initial state via snapshot import.
-		await restoreBlocksDatabase( DB_EXPORT_FILE );
+			// Reset the database to the initial state via snapshot import.
+			await restoreBlocksDatabase( DB_EXPORT_FILE );
+		}
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
@@ -184,6 +249,177 @@ const test = base.extend<
 	},
 	miniCartUtils: async ( { page, frontendUtils }, use ) => {
 		await use( new MiniCartUtils( page, frontendUtils ) );
+	},
+	// Registers a callback that runs after the test, even after a timeout,
+	// when code after the timed-out step in the test body does not run.
+	// The page may already be closed then, so use `requestUtils` or `wpCLI`.
+	cleanup: async ( {}, use ) => {
+		const callbacks: ( () => Promise< unknown > )[] = [];
+
+		await use( ( callback ) => {
+			callbacks.push( callback );
+		} );
+
+		const results = await Promise.allSettled(
+			callbacks.map( ( callback ) => Promise.resolve().then( callback ) )
+		);
+		for ( const result of results ) {
+			if ( result.status === 'rejected' ) {
+				// eslint-disable-next-line no-console
+				console.warn( 'Test cleanup failed:', result.reason );
+			}
+		}
+	},
+	// Copies a sample product and creates a `single-product-<slug>` template
+	// for the copy, so a spec can save a Single Product template without
+	// changing the pages other workers visit. The copy is hidden from the
+	// catalog. Both are deleted after the test.
+	createProductTemplate: async ( { requestUtils }, use ) => {
+		const productIds: number[] = [];
+		const templateIds: string[] = [];
+
+		await use( async ( sourceProductSlug, options = {} ) => {
+			const [ source ] = await requestUtils.rest< WCProduct[] >( {
+				path: 'wc/v3/products',
+				params: { slug: sourceProductSlug },
+			} );
+			if ( ! source ) {
+				throw new Error(
+					`No product with slug ${ sourceProductSlug }`
+				);
+			}
+			const suffix = randomUUID().slice( 0, 8 );
+			// Copied field by field rather than with the duplicate endpoint, and
+			// with a random slug: concurrent duplicates generate the same
+			// "unique" SKU or slug and fail. The name leaves out the source name,
+			// so specs that pick "Cap" or "Hoodie" by name never match a copy.
+			const product = await requestUtils.rest<
+				WCProduct & { slug: string; permalink: string }
+			>( {
+				method: 'POST',
+				path: 'wc/v3/products',
+				data: {
+					name: `E2E copy ${ suffix }`,
+					slug: `${ sourceProductSlug }-${ suffix }`,
+					type: source.type,
+					regular_price: source.regular_price,
+					sale_price: source.sale_price,
+					attributes: source.attributes,
+					default_attributes: source.default_attributes,
+					images: source.images.map( ( { id } ) => ( { id } ) ),
+					catalog_visibility: 'hidden',
+				},
+			} );
+			productIds.push( product.id );
+
+			if ( source.type === 'variable' ) {
+				const variations = await requestUtils.rest< WCProduct[] >( {
+					path: `wc/v3/products/${ source.id }/variations`,
+					params: { per_page: 100 },
+				} );
+				await requestUtils.rest( {
+					method: 'POST',
+					path: `wc/v3/products/${ product.id }/variations/batch`,
+					data: {
+						create: variations.map( ( variation ) => ( {
+							regular_price: variation.regular_price,
+							sale_price: variation.sale_price,
+							attributes: variation.attributes,
+							image: variation.image && {
+								id: variation.image.id,
+							},
+						} ) ),
+					},
+				} );
+			}
+
+			const template = ( await requestUtils.createTemplate(
+				'wp_template',
+				{
+					slug: `single-product-${ product.slug }`,
+					title: `Single Product ${ product.slug }`,
+					content: options.content ?? 'placeholder',
+				}
+			) ) as WPTemplate;
+			templateIds.push( template.id );
+
+			return { template, productUrl: product.permalink };
+		} );
+
+		await Promise.allSettled(
+			templateIds.map( ( templateId ) =>
+				requestUtils.revertTemplate( 'wp_template', templateId )
+			)
+		);
+		await Promise.allSettled(
+			productIds.map( ( productId ) =>
+				requestUtils.rest( {
+					method: 'DELETE',
+					path: `wc/v3/products/${ productId }`,
+					params: { force: true },
+				} )
+			)
+		);
+	},
+	// Creates a product for a test that places orders. Hidden from the catalog
+	// and dated in the past, it stays out of Best Sellers, New Arrivals and
+	// catalog counts. After the test, it deletes the orders for the product,
+	// including checkout drafts, then the product.
+	createHiddenProduct: async ( { requestUtils }, use ) => {
+		const productIds: number[] = [];
+
+		await use( async ( data ) => {
+			const product = await requestUtils.rest< { id: number } >( {
+				method: 'POST',
+				path: 'wc/v3/products',
+				data: {
+					catalog_visibility: 'hidden',
+					date_created: '2020-01-01T00:00:00',
+					...data,
+				},
+			} );
+			productIds.push( product.id );
+			return product;
+		} );
+
+		const results = await Promise.allSettled(
+			productIds.map( async ( productId ) => {
+				try {
+					// `any` leaves out checkout drafts.
+					const orders = await requestUtils.rest< { id: number }[] >(
+						{
+							path: 'wc/v3/orders',
+							params: {
+								product: productId,
+								status: 'pending,processing,on-hold,completed,cancelled,refunded,failed,checkout-draft',
+								per_page: 100,
+							},
+						}
+					);
+					await Promise.all(
+						orders.map( ( { id } ) =>
+							requestUtils.rest( {
+								method: 'DELETE',
+								path: `wc/v3/orders/${ id }`,
+								params: { force: true },
+							} )
+						)
+					);
+				} finally {
+					await requestUtils.rest( {
+						method: 'DELETE',
+						path: `wc/v3/products/${ productId }`,
+						params: { force: true },
+					} );
+				}
+			} )
+		);
+		for ( const result of results ) {
+			if ( result.status === 'rejected' ) {
+				// eslint-disable-next-line no-console
+				console.warn( 'Test cleanup failed:', result.reason );
+			}
+		}
 	},
 	requestUtils: [
 		async ( {}, use, workerInfo ) => {

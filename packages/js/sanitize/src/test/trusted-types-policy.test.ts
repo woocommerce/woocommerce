@@ -24,9 +24,8 @@ describe( 'getTrustedTypesPolicy', () => {
 		};
 		mockCreatePolicy.mockReturnValue( mockPolicy );
 
-		const { getTrustedTypesPolicy } = await import(
-			'../trusted-types-policy'
-		);
+		const { getTrustedTypesPolicy } =
+			await import( '../trusted-types-policy' );
 		const policy = getTrustedTypesPolicy();
 
 		expect( policy ).toBe( mockPolicy );
@@ -45,9 +44,8 @@ describe( 'getTrustedTypesPolicy', () => {
 		};
 		mockCreatePolicy.mockReturnValue( mockPolicy );
 
-		const { getTrustedTypesPolicy } = await import(
-			'../trusted-types-policy'
-		);
+		const { getTrustedTypesPolicy } =
+			await import( '../trusted-types-policy' );
 		const policy1 = getTrustedTypesPolicy();
 		const policy2 = getTrustedTypesPolicy();
 
@@ -58,9 +56,8 @@ describe( 'getTrustedTypesPolicy', () => {
 	test( 'should handle case when window.trustedTypes is not available', async () => {
 		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
 
-		const { getTrustedTypesPolicy } = await import(
-			'../trusted-types-policy'
-		);
+		const { getTrustedTypesPolicy } =
+			await import( '../trusted-types-policy' );
 		const policy = getTrustedTypesPolicy();
 
 		expect( policy ).toBeNull();
@@ -71,9 +68,8 @@ describe( 'getTrustedTypesPolicy', () => {
 			throw new Error( 'Creation failed' );
 		} );
 
-		const { getTrustedTypesPolicy } = await import(
-			'../trusted-types-policy'
-		);
+		const { getTrustedTypesPolicy } =
+			await import( '../trusted-types-policy' );
 		const policy = getTrustedTypesPolicy();
 
 		expect( policy ).toBeNull();
@@ -102,9 +98,8 @@ describe( 'getTrustedTypesPolicy', () => {
 			sanitizeHTML: mockSanitizeHTML,
 		} ) );
 
-		const { getTrustedTypesPolicy } = await import(
-			'../trusted-types-policy'
-		);
+		const { getTrustedTypesPolicy } =
+			await import( '../trusted-types-policy' );
 		const policy = getTrustedTypesPolicy();
 
 		// Now call createHTML on the policy

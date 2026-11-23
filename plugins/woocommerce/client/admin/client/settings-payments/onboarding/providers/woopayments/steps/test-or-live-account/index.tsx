@@ -33,8 +33,9 @@ const TestOrLiveAccountStep = () => {
 	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
 		useState( false );
 
-	const testAccountStepActions = getStepByKey( TESTING_ACCOUNT_STEP_ID )
-		?.actions;
+	const testAccountStepActions = getStepByKey(
+		TESTING_ACCOUNT_STEP_ID
+	)?.actions;
 	const canCreateTestAccount = testAccountStepActions?.finish?.href;
 
 	return (

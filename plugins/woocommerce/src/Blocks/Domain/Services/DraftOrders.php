@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Exception;
 use WC_Order;
 
@@ -77,8 +78,7 @@ class DraftOrders {
 	 * Maybe create cron events.
 	 */
 	protected function maybe_create_cronjobs() {
-		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		if ( false === call_user_func( $has_scheduled_action, self::DRAFT_CLEANUP_EVENT_HOOK ) ) {
+		if ( ! ActionSchedulerUtil::has_scheduled_action( self::DRAFT_CLEANUP_EVENT_HOOK ) ) {
 			$midnight_tonight = strtotime( 'midnight tonight' );
 			if ( false !== $midnight_tonight ) {
 				as_schedule_recurring_action( $midnight_tonight, DAY_IN_SECONDS, self::DRAFT_CLEANUP_EVENT_HOOK );
@@ -207,8 +207,8 @@ class DraftOrders {
 					++$count;
 				}
 			}
-			if ( $batch_size === $count && function_exists( 'as_enqueue_async_action' ) ) {
-				as_enqueue_async_action( self::DRAFT_CLEANUP_EVENT_HOOK );
+			if ( $batch_size === $count ) {
+				ActionSchedulerUtil::enqueue_async( self::DRAFT_CLEANUP_EVENT_HOOK );
 			}
 		} catch ( Exception $error ) {
 			wc_caught_exception( $error, __METHOD__ );

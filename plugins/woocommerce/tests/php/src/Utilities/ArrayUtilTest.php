@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Utilities;
 
@@ -193,8 +194,8 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 			),
 		);
 
-		$actual = ArrayUtil::select( $items, 'foo' );
-		$this->assertEquals( array( 1, 3 ), $actual, ArrayUtil::SELECT_BY_ARRAY_KEY );
+		$actual = ArrayUtil::select( $items, 'foo', ArrayUtil::SELECT_BY_ARRAY_KEY );
+		$this->assertSame( array( 1, 3 ), $actual );
 	}
 
 	/**
@@ -450,5 +451,65 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 
 		$actual = ArrayUtil::group_by_column( $data, 'type', true );
 		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox `unique_truthy_values` removes falsy values and duplicates, and reindexes the result.
+	 */
+	public function test_unique_truthy_values_filters_dedupes_and_reindexes() {
+		$input = array(
+			5  => 403,
+			7  => 0,
+			9  => 404,
+			11 => 403,
+			13 => null,
+			15 => '',
+			17 => false,
+			19 => 405,
+		);
+
+		$actual = ArrayUtil::unique_truthy_values( $input );
+
+		$this->assertEquals( array( 403, 404, 405 ), $actual );
+	}
+
+	/**
+	 * @testdox `unique_truthy_values` returns an empty array when all values are falsy or the input is empty.
+	 *
+	 * @testWith [[]]
+	 *           [[0, null, "", false]]
+	 *
+	 * @param array $input The input array to test.
+	 */
+	public function test_unique_truthy_values_returns_empty_array_when_nothing_survives( $input ) {
+		$this->assertEquals( array(), ArrayUtil::unique_truthy_values( $input ) );
+	}
+
+	/**
+	 * @testdox `is_flat_scalar_array` is true only for an array whose direct values are all scalars.
+	 *
+	 * @testWith [[], true]
+	 *           [[1, "2.00", true], true]
+	 *           [[null], false]
+	 *           [[[1, 2]], false]
+	 *
+	 * @param array $input    The input value to test.
+	 * @param bool  $expected The expected result.
+	 */
+	public function test_is_flat_scalar_array_checks_direct_values_only( $input, bool $expected ) {
+		$this->assertSame( $expected, ArrayUtil::is_flat_scalar_array( $input ) );
+	}
+
+	/**
+	 * @testdox `is_flat_scalar_array` is false for a non-array value.
+	 *
+	 * @testWith [null]
+	 *           ["a string"]
+	 *           [42]
+	 *
+	 * @param mixed $input The input value to test.
+	 */
+	public function test_is_flat_scalar_array_is_false_for_non_arrays( $input ) {
+		$this->assertFalse( ArrayUtil::is_flat_scalar_array( $input ) );
 	}
 }

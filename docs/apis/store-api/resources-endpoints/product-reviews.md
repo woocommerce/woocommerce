@@ -58,3 +58,11 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/collection-data?cal
 	}
 ]
 ```
+
+### Password-protected products
+
+Reviews of password-protected products are excluded until the visitor has submitted the correct password. They are omitted from both the collection and the pagination totals.
+
+Password verification uses WordPress's native `wp-postpass_*` cookie, set when a user submits the password form on the frontend. The Store API does not accept passwords directly.
+
+A request that targets a locked product via `product_id` returns an empty collection with status `200`.

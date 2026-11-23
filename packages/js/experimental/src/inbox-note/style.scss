@@ -62,6 +62,7 @@
 		}
 
 		a {
+			/* stylelint-disable-next-line scss/at-extend-no-missing-placeholder */
 			@extend .woocommerce-inbox-message__title;
 			color: $gray-900 !important;
 			text-decoration: none !important;

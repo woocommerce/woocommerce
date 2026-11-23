@@ -43,7 +43,7 @@ export const generateContributors = async (
 		)
 	);
 
-	await checkoutRef( repoPath, previousVersion.toString() );
+	await checkoutRef( repoPath, previousVersion );
 
 	const previousComposer = JSON.parse(
 		await readFile(
@@ -84,8 +84,6 @@ export const generateContributors = async (
 
 	return {
 		'WooCommerce Core': coreContributors,
-		ActionScheduler: dependencyContributors.ActionScheduler || [],
-		'WooCommerce Blocks':
-			dependencyContributors[ 'WooCommerce Blocks' ] || [],
+		...dependencyContributors,
 	};
 };

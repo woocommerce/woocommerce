@@ -9,7 +9,7 @@ import {
 	type AsyncAction,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/shopper-lists';
-import '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce';
 import type {
 	RawShopperListItem,
 	Store as ShopperListsStore,
@@ -17,7 +17,7 @@ import type {
 import type {
 	AddCartItemOutcome,
 	Store as WooCommerce,
-} from '@woocommerce/stores/woocommerce/cart';
+} from '@woocommerce/stores/woocommerce';
 /**
  * Internal dependencies
  */
@@ -280,7 +280,7 @@ store< BlockStore >(
 
 			// Single shared innerHTML-swap callback for any slot whose
 			// content is one of the schema's preformatted HTML fields.
-			// Mirrors the atomic product-elements `updateValue` callback:
+			// Mirrors the product elements `updateValue` callback:
 			// the watched element carries `data-wp-context='{"htmlField":"price_html"}'`
 			// (or `"image_html"`), and this callback reads that field
 			// off the row's `listItem` and pastes its sanitized HTML into

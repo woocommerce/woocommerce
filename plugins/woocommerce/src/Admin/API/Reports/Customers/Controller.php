@@ -718,6 +718,7 @@ class Controller extends GenericController implements ExportableInterface {
 					'city',
 					'state',
 					'postcode',
+					'username',
 				),
 			),
 		);

@@ -459,7 +459,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_default_customer_address',
 						label: 'Default customer location',
-						description: '',
+						description: expect.any( String ),
 						type: 'select',
 						default: 'base',
 						tip: 'This option determines a customers default location. The MaxMind GeoLite Database will be periodically downloaded to your wp-content directory if using geolocation.',
@@ -1051,7 +1051,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_tax_based_on',
 						label: 'Calculate tax based on',
-						description: '',
+						description: expect.any( String ),
 						type: 'select',
 						default: 'shipping',
 						options: {
@@ -2966,39 +2966,11 @@ test.describe( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'cc',
-						label: 'Cc(s)',
-						description: expect.stringContaining(
-							'Enter Cc recipients (comma-separated) for this email.'
-						),
-						type: 'text',
-						default: '',
-						tip: expect.stringContaining(
-							'Enter Cc recipients (comma-separated) for this email.'
-						),
-						value: expect.any( String ),
-					} ),
-				] )
+			expect( responseJSON ).not.toContainEqual(
+				expect.objectContaining( { id: 'cc' } )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'bcc',
-						label: 'Bcc(s)',
-						description: expect.stringContaining(
-							'Enter Bcc recipients (comma-separated) for this email.'
-						),
-						type: 'text',
-						default: '',
-						tip: expect.stringContaining(
-							'Enter Bcc recipients (comma-separated) for this email.'
-						),
-						value: expect.any( String ),
-					} ),
-				] )
+			expect( responseJSON ).not.toContainEqual(
+				expect.objectContaining( { id: 'bcc' } )
 			);
 		} );
 	} );
@@ -3088,39 +3060,11 @@ test.describe( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'cc',
-						label: 'Cc(s)',
-						description: expect.stringContaining(
-							'Enter Cc recipients (comma-separated) for this email.'
-						),
-						type: 'text',
-						default: '',
-						tip: expect.stringContaining(
-							'Enter Cc recipients (comma-separated) for this email.'
-						),
-						value: expect.any( String ),
-					} ),
-				] )
+			expect( responseJSON ).not.toContainEqual(
+				expect.objectContaining( { id: 'cc' } )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'bcc',
-						label: 'Bcc(s)',
-						description: expect.stringContaining(
-							'Enter Bcc recipients (comma-separated) for this email.'
-						),
-						type: 'text',
-						default: '',
-						tip: expect.stringContaining(
-							'Enter Bcc recipients (comma-separated) for this email.'
-						),
-						value: expect.any( String ),
-					} ),
-				] )
+			expect( responseJSON ).not.toContainEqual(
+				expect.objectContaining( { id: 'bcc' } )
 			);
 		} );
 	} );

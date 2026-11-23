@@ -24,6 +24,7 @@ import {
 	type DispatchFunction,
 } from '@wordpress/data/build-types/types';
 import { __ } from '@wordpress/i18n';
+import { doAction } from '@wordpress/hooks';
 import { cartStore } from '@woocommerce/block-data';
 
 /**
@@ -49,6 +50,32 @@ interface CartThunkArgs {
 	dispatch: ActionCreatorsOf< ConfigOf< typeof cartStore > >;
 	registry?: { dispatch: DispatchFunction };
 }
+
+/**
+ * Fires an action once a cart from the server is in the store, so extensions can react to the updated cart.
+ *
+ * @param storeCart         The cart now in the store.
+ * @param previousStoreCart The cart in the store before this update.
+ */
+const triggerCartUpdatedEvent = (
+	storeCart: Cart,
+	previousStoreCart: Cart
+) => {
+	// The editor shows a preview cart, not one from the server.
+	if ( isEditor() ) {
+		return;
+	}
+	try {
+		doAction( 'experimental__woocommerce_blocks-cart-updated', {
+			storeCart,
+			previousStoreCart,
+		} );
+	} catch ( error ) {
+		// A failing callback must not break the cart, so only log it for troubleshooting.
+		// eslint-disable-next-line no-console
+		console.error( error );
+	}
+};
 
 /**
  * A thunk used in updating the store with the cart items retrieved from a request. This also notifies the shopper
@@ -95,6 +122,8 @@ export const receiveCart =
 
 		updateCartErrorNotices( newCart.errors, oldCartErrors );
 		dispatch.setErrorData( null );
+
+		triggerCartUpdatedEvent( newCart, oldCart );
 	};
 
 /**
@@ -179,11 +208,11 @@ export const applyExtensionCartUpdate =
 				? {
 						shipping_address: raw.shipping_address === true,
 						billing_address: raw.billing_address === true,
-				  }
+					}
 				: {
 						shipping_address: raw === true,
 						billing_address: raw === true,
-				  };
+					};
 
 			const isDirty = getIsCustomerDataDirty();
 
@@ -325,6 +354,8 @@ export const syncCartWithIAPIStore =
 
 			updateCartErrorNotices( newCart.errors, oldCartErrors );
 			dispatch.setErrorData( null );
+
+			triggerCartUpdatedEvent( newCart, oldCart );
 		} catch ( error ) {
 			// Clear pending states on error as well
 			if ( productsPendingAdd && productsPendingAdd.length > 0 ) {
@@ -593,11 +624,7 @@ const quantityAbortControllers = new Map< string, AbortController >();
  * @param {number} quantity    Specified (new) quantity.
  */
 export const changeCartItemQuantity =
-	(
-		cartItemKey: string,
-		quantity: number
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- unclear how to represent multiple different yields as type
-	) =>
+	( cartItemKey: string, quantity: number ) =>
 	async ( { dispatch, select }: CartThunkArgs ) => {
 		const cartItem = select.getCartItem( cartItemKey );
 		if ( cartItem?.quantity === quantity ) {
@@ -694,7 +721,7 @@ export const selectShippingRate =
 			return;
 		}
 
-		const previousRates = select.getShippingRates();
+		const previousRates: CartShippingRate[] = select.getShippingRates();
 
 		try {
 			dispatch.shippingRatesBeingSelected( true );
@@ -749,10 +776,25 @@ export const selectShippingRate =
 			dispatch.shippingRatesBeingSelected( false );
 			return response;
 		} catch ( error ) {
-			// Roll back the optimistic update so the UI reflects the server's
-			// actual selection rather than a rate the server never committed.
+			// Roll back only this request's packages; other selections in the batch may have succeeded.
 			dispatch.setCartData( {
-				shippingRates: previousRates,
+				shippingRates: select
+					.getShippingRates()
+					.map( ( pkg: CartShippingRate ) => {
+						if (
+							packageId !== null &&
+							pkg.package_id !== packageId
+						) {
+							return pkg;
+						}
+						return (
+							previousRates.find(
+								( previousPackage ) =>
+									previousPackage.package_id ===
+									pkg.package_id
+							) ?? pkg
+						);
+					} ),
 			} );
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			dispatch.shippingRatesBeingSelected( false );

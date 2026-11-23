@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\MenusController;
-use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 use Automattic\Jetpack\Constants;
 
 /**
@@ -27,7 +26,6 @@ class AdminManager {
 
 		$container = wc_get_container();
 		$container->get( MenusController::class );
-		$container->get( SettingsController::class );
 	}
 
 	/**

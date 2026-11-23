@@ -314,7 +314,7 @@ class ShopperListItemSchema extends AbstractSchema {
 	private function get_prices( \WC_Product $product ): array {
 		$decimals      = wc_get_price_decimals();
 		$regular_price = $product->get_regular_price();
-		$sale_price    = $product->get_sale_price();
+		$sale_price    = $product->is_on_sale() ? $product->get_sale_price() : '';
 		$current_price = $product->get_price();
 
 		return $this->prepare_currency_response(

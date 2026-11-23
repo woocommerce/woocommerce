@@ -118,6 +118,10 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 					'title'         => __( 'Calculations', 'woocommerce' ),
 					'desc'          => __( 'Enable the shipping calculator on the cart page', 'woocommerce' ),
 					'id'            => 'woocommerce_enable_shipping_calc',
+					'abilities'     => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'       => 'yes',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',
@@ -127,6 +131,10 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				array(
 					'desc'          => __( 'Hide shipping costs until an address is entered', 'woocommerce' ),
 					'id'            => 'woocommerce_shipping_cost_requires_address',
+					'abilities'     => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'       => 'no',
 					'type'          => 'checkbox',
 					'checkboxgroup' => '',
@@ -135,6 +143,10 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				array(
 					'desc'          => __( 'Hide shipping rates when free shipping is available', 'woocommerce' ),
 					'id'            => 'woocommerce_shipping_hide_rates_when_free',
+					'abilities'     => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'       => 'no',
 					'type'          => 'checkbox',
 					'autoload'      => false,
@@ -145,6 +157,10 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 					'title'           => __( 'Shipping destination', 'woocommerce' ),
 					'desc'            => __( 'This controls which shipping address is used by default.', 'woocommerce' ),
 					'id'              => 'woocommerce_ship_to_destination',
+					'abilities'       => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'         => 'billing',
 					'type'            => 'radio',
 					'options'         => array(
@@ -158,12 +174,16 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				),
 
 				array(
-					'title'    => __( 'Debug mode', 'woocommerce' ),
-					'desc'     => __( 'Enable debug mode', 'woocommerce' ),
-					'desc_tip' => __( 'Enable shipping debug mode to show matching shipping zones and to bypass shipping rate cache.', 'woocommerce' ),
-					'id'       => 'woocommerce_shipping_debug_mode',
-					'default'  => 'no',
-					'type'     => 'checkbox',
+					'title'     => __( 'Debug mode', 'woocommerce' ),
+					'desc'      => __( 'Enable debug mode', 'woocommerce' ),
+					'desc_tip'  => __( 'Enable shipping debug mode to show matching shipping zones and to bypass shipping rate cache.', 'woocommerce' ),
+					'id'        => 'woocommerce_shipping_debug_mode',
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
+					'default'   => 'no',
+					'type'      => 'checkbox',
 				),
 
 				array(

@@ -25,10 +25,7 @@ import {
 } from '../../types';
 import { setQueryAttribute, getDefaultSettings } from '../../utils';
 import ColumnsControl from './columns-control';
-import {
-	InheritQueryControl,
-	FilterableControl,
-} from './use-page-context-control';
+import { InheritQueryControl } from './use-page-context-control';
 import useCarouselLayoutAdjustments from './use-carousel-layout-adjustments';
 import useEmailPaginationAdjustments from './use-email-pagination-adjustments';
 import useEmailColumnAdjustments from './use-email-column-adjustments';
@@ -51,6 +48,7 @@ import LinkedProductControl from './linked-product-control';
 import WidthOptionsControl from './width-options-control';
 import RelatedByControl from './related-by-control';
 import ProductsPerPageControl from './products-per-page-control';
+import DefaultQueryProductsPerPageControl from './default-query-products-per-page-control';
 import OffsetControl from './offset-control';
 import MaxPagesToShowControl from './max-pages-to-show-control';
 
@@ -93,8 +91,6 @@ const ProductCollectionInspectorControls = (
 	const showCustomQueryControls = inherit === false;
 	const showInheritQueryControl =
 		isArchiveTemplate && shouldShowFilter( CoreFilterNames.INHERIT );
-	const showFilterableControl =
-		! isArchiveTemplate && shouldShowFilter( CoreFilterNames.FILTERABLE );
 	const showCustomOrderControl =
 		showCustomQueryControls && shouldShowFilter( CoreFilterNames.ORDER );
 	const showDefaultOrderControl = ! showCustomQueryControls;
@@ -107,6 +103,9 @@ const ProductCollectionInspectorControls = (
 		shouldShowFilter( CoreFilterNames.MAX_PAGES_TO_SHOW );
 	const showProductsPerPageControl =
 		showCustomQueryControls &&
+		shouldShowFilter( CoreFilterNames.PRODUCTS_PER_PAGE );
+	const showDefaultProductsPerPageControl =
+		showDefaultOrderControl &&
 		shouldShowFilter( CoreFilterNames.PRODUCTS_PER_PAGE );
 	const showOnSaleControl = shouldShowFilter( CoreFilterNames.ON_SALE );
 	const showStockStatusControl = shouldShowFilter(
@@ -204,14 +203,16 @@ const ProductCollectionInspectorControls = (
 				{ showInheritQueryControl && (
 					<InheritQueryControl { ...queryControlProps } />
 				) }
-				{ showFilterableControl && (
-					<FilterableControl { ...queryControlProps } />
-				) }
 				{ showCustomOrderControl && (
 					<CustomQueryOrderByControl { ...queryControlProps } />
 				) }
 				{ showDefaultOrderControl && (
 					<DefaultQueryOrderByControl
+						trackInteraction={ trackInteraction }
+					/>
+				) }
+				{ showDefaultProductsPerPageControl && (
+					<DefaultQueryProductsPerPageControl
 						trackInteraction={ trackInteraction }
 					/>
 				) }

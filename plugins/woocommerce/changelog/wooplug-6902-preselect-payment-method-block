@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a filter that lets stores choose which payment method the Checkout block preselects, or none.

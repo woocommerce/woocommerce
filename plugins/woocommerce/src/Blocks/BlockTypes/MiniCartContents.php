@@ -35,7 +35,7 @@ class MiniCartContents extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_style() {
-		return [ 'wc-blocks-style', 'wc-blocks-packages-style' ];
+		return array_merge( parent::get_block_type_style() ?? [], [ 'wc-blocks-packages-style' ] );
 	}
 
 	/**
@@ -64,7 +64,7 @@ class MiniCartContents extends AbstractBlock {
 		?>
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<div class="wc-block-components-drawer__close-wrapper">
-				<button data-wp-on--click="woocommerce/mini-cart::actions.closeDrawer" class="wc-block-components-button wp-element-button wc-block-components-drawer__close contained" aria-label="Close" type="button">
+				<button data-wp-on--click="woocommerce/mini-cart::actions.closeDrawer" class="wc-block-components-button wp-element-button wc-block-components-drawer__close contained" aria-label="<?php esc_attr_e( 'Close', 'woocommerce' ); ?>" type="button">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
 						<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
 					</svg>

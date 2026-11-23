@@ -11,8 +11,23 @@ use WC_Order;
 class Meta {
 
 	/**
+	 * The meta line shown above the heading, parts joined by the separator.
+	 *
+	 * @param WC_Order $order Order being reviewed.
+	 * @return string
+	 */
+	public static function line_for_order( WC_Order $order ): string {
+		// Spaces inside the string: a locale that needs a full-width
+		// separator has to be able to drop them.
+		$separator = _x( ' · ', 'Review Order meta-line separator', 'woocommerce' );
+
+		return implode( $separator, self::parts_for_order( $order ) );
+	}
+
+	/**
 	 * Build the meta-line parts shown above the heading on both the form and
-	 * empty-state views (customer name, billing email, order #/date).
+	 * empty-state views: the order number and date, preceded by the customer's name
+	 * and billing email only when the viewer is signed in as that customer.
 	 *
 	 * @param WC_Order $order Order being reviewed.
 	 * @return array<int, string> Non-empty parts ready to be joined with a separator.
@@ -39,14 +54,28 @@ class Meta {
 			);
 		}
 
-		return array_values(
-			array_filter(
-				array(
-					$customer_name,
-					$customer_email,
-					$order_summary,
-				)
-			)
-		);
+		$parts = self::viewer_is_signed_in_owner( $order )
+			? array( $customer_name, $customer_email, $order_summary )
+			: array( $order_summary );
+
+		return array_values( array_filter( $parts ) );
+	}
+
+	/**
+	 * Whether the viewer is signed in as the customer who owns the order.
+	 *
+	 * The billing email is the second proof the Store API order route and the
+	 * order-received page ask for on top of the key, so the page must not print it to
+	 * everyone holding one.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param WC_Order $order Order being reviewed.
+	 * @return bool
+	 */
+	private static function viewer_is_signed_in_owner( WC_Order $order ): bool {
+		$customer_id = $order->get_customer_id();
+
+		return $customer_id > 0 && is_user_logged_in() && get_current_user_id() === $customer_id;
 	}
 }

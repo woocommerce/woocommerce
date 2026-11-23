@@ -44,15 +44,9 @@ class CustomerAccount extends AbstractBlock {
 	 */
 	protected function initialize() {
 		parent::initialize();
-		/**
-		 * The hooked_block_{$hooked_block_type} filter was added in WordPress 6.5.
-		 * We are the only code adding the filter 'hooked_block_woocommerce/customer-account'.
-		 * Using has_filter() for a compatibility check won't work because add_filter() is used in the same file.
-		 */
-		if ( version_compare( get_bloginfo( 'version' ), '6.5', '>=' ) ) {
-			add_filter( 'hooked_block_woocommerce/customer-account', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
-			add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
-		}
+
+		add_filter( 'hooked_block_woocommerce/customer-account', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
+		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
 	}
 
 	/**
@@ -71,11 +65,9 @@ class CustomerAccount extends AbstractBlock {
 		$parsed_hooked_block['attrs']['iconStyle']    = 'line';
 		$parsed_hooked_block['attrs']['iconClass']    = 'wc-block-customer-account__account-icon';
 
-		$customer_account_block_font_size = wp_get_global_styles( array( 'blocks', 'woocommerce/customer-account', 'typography', 'fontSize' ) );
-
+		$customer_account_block_font_size = StyleAttributesUtils::get_global_styles( array( 'blocks', 'woocommerce/customer-account', 'typography', 'fontSize' ) );
 		if ( ! is_string( $customer_account_block_font_size ) ) {
-			$navigation_block_font_size = wp_get_global_styles( array( 'blocks', 'core/navigation', 'typography', 'fontSize' ) );
-
+			$navigation_block_font_size = StyleAttributesUtils::get_global_styles( array( 'blocks', 'core/navigation', 'typography', 'fontSize' ) );
 			if ( is_string( $navigation_block_font_size ) ) {
 				$parsed_hooked_block['attrs']['style']['typography']['fontSize'] = $navigation_block_font_size;
 			}
@@ -153,7 +145,7 @@ class CustomerAccount extends AbstractBlock {
 		<div
 			class="wp-block-woocommerce-customer-account <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 			style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
-		>	
+		>
 			<a
 				class="wc-block-customer-account__link"
 				href="<?php echo esc_url( $account_link ); ?>"
@@ -347,25 +339,28 @@ class CustomerAccount extends AbstractBlock {
 	}
 
 	/**
-	 * Render the user avatar and icon.
+	 * Render the user avatar or icon.
 	 *
 	 * @param array $attributes Block attributes.
 	 *
-	 * @return string Avatar and icon markup.
+	 * @return string Avatar or icon markup.
 	 */
 	private function render_visual( $attributes ) {
 		if ( self::TEXT_ONLY === $attributes['displayStyle'] ) {
 			return '';
 		}
 
-		$icon    = $this->render_icon( $attributes );
 		$user_id = get_current_user_id();
 		if ( $user_id ) {
-			// We use `blank` as the default so if the user has no avatar, the icon underneath is visible.
+			$avatar_default = get_option( 'avatar_default', 'mystery' );
+			if ( 'blank' === $avatar_default ) {
+				$avatar_default = 'mystery';
+			}
+
 			$avatar = get_avatar(
 				$user_id,
 				48,
-				'blank',
+				$avatar_default,
 				'',
 				array(
 					'class' => 'wc-block-customer-account__avatar',
@@ -373,10 +368,16 @@ class CustomerAccount extends AbstractBlock {
 			);
 
 			if ( $avatar ) {
-				return '<div class="wc-block-customer-account__visual">' . $icon . wp_kses_post( $avatar ) . '</div>';
+				return '<div class="wc-block-customer-account__visual">' . wp_kses_post( $avatar ) . '</div>';
 			}
 		}
-		return '<div class="wc-block-customer-account__visual">' . $icon . '</div>';
+
+		$icon = $this->render_icon( $attributes );
+		if ( '' !== $icon ) {
+			return '<div class="wc-block-customer-account__visual">' . $icon . '</div>';
+		}
+
+		return '';
 	}
 
 	/**

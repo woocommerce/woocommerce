@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an option to skip the Cancelled order email for orders cancelled automatically when the hold stock time runs out.

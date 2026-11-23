@@ -275,7 +275,7 @@ export class Shipping extends Component {
 				( slug ) => typeof slug === 'string' && slug.trim().length > 0
 			);
 
-		const onShippingPluginInstalltionSkip = () => {
+		const onShippingPluginInstallationSkip = () => {
 			recordEvent( 'tasklist_shipping_label_printing', {
 				install: false,
 				plugins_to_activate: pluginsToActivate,
@@ -383,12 +383,12 @@ export class Shipping extends Component {
 									/>
 								),
 							},
-					  } )
+						} )
 					: __(
 							'With WooCommerce Shipping you can save time ' +
 								'by printing your USPS and DHL Express shipping labels at home',
 							'woocommerce'
-					  ),
+						),
 				content: (
 					<>
 						{ ! isJetpackConnected &&
@@ -483,7 +483,7 @@ export class Shipping extends Component {
 					this.state.step !== 'rates'
 						? () => {
 								this.setState( { step: 'rates' } );
-						  }
+							}
 						: undefined,
 				content: (
 					<ShippingRates
@@ -512,11 +512,11 @@ export class Shipping extends Component {
 						? getSinglePluginDescription(
 								pluginsToPromote[ 0 ].name,
 								pluginsToPromote[ 0 ].learn_more_link
-						  )
+							)
 						: __(
 								'Save time and money by printing your shipping labels right from your computer with one of these shipping solutions.',
 								'woocommerce'
-						  ),
+							),
 
 				content: (
 					<>
@@ -671,7 +671,7 @@ export class Shipping extends Component {
 												pluginsToPromote[ 0 ]?.slug,
 										} );
 									} }
-									onSkip={ onShippingPluginInstalltionSkip }
+									onSkip={ onShippingPluginInstallationSkip }
 									pluginSlugs={ pluginsToActivate }
 									installText={ __(
 										'Install and enable',
@@ -682,7 +682,7 @@ export class Shipping extends Component {
 						) : (
 							<Button
 								isTertiary
-								onClick={ onShippingPluginInstalltionSkip }
+								onClick={ onShippingPluginInstallationSkip }
 								className={ clsx(
 									'woocommerce-task-shipping-recommendations_skip-button',
 									pluginsToPromote.length === 2 ? 'dual' : ''
@@ -704,7 +704,7 @@ export class Shipping extends Component {
 					this.state.step !== 'store_location'
 						? () => {
 								this.setState( { step: 'store_location' } );
-						  }
+							}
 						: undefined,
 				buttonText: __( 'Save store location', 'woocommerce' ),
 			},

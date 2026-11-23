@@ -110,7 +110,10 @@ test.describe(
 				page.getByRole( 'cell', { name: 'Discount:', exact: true } )
 			).toBeVisible();
 			await expect(
-				page.getByRole( 'cell', { name: `- $${ couponAmount }.00` } )
+				page.getByRole( 'cell', {
+					name: `-$${ couponAmount }.00`,
+					exact: true,
+				} )
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', {
@@ -135,7 +138,8 @@ test.describe(
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', {
-					name: `- $${ couponAmount }.00`,
+					name: `-$${ couponAmount }.00`,
+					exact: true,
 				} )
 			).toBeVisible();
 			await expect(

@@ -20,7 +20,7 @@ abstract class CustomMetaDataStore {
 	abstract protected function get_table_name();
 
 	/**
-	 * Returns the name of the field/column used for identifiying metadata entries.
+	 * Returns the name of the field/column used for identifying metadata entries.
 	 *
 	 * @return string
 	 */

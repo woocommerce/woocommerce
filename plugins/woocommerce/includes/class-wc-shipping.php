@@ -77,7 +77,7 @@ class WC_Shipping {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, 'Cloning is forbidden.', '2.1' );
 	}
 
 	/**
@@ -86,7 +86,7 @@ class WC_Shipping {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, 'Unserializing instances of this class is forbidden.', '2.1' );
 	}
 
 	/**
@@ -417,6 +417,11 @@ class WC_Shipping {
 	 * @return string
 	 */
 	private function get_package_hash( array $package_to_hash ): string {
+		// The rate taxes depend on the tax address, so a new tax address must not reuse saved rates.
+		if ( wc_tax_enabled() && WC()->customer instanceof WC_Customer ) {
+			$package_to_hash['tax_location'] = WC()->customer->get_taxable_address();
+		}
+
 		/**
 		 * Filters package fields that should not affect the shipping-rate cache hash.
 		 *

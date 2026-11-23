@@ -1,9 +1,18 @@
+// Borders are drawn with inset box-shadows so they add no height, matching the rate options they stand in for.
 .wc-block-components-skeleton.wc-block-components-skeleton--checkout-shipping {
-	border: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+	box-shadow: inset 0 0 0 1px $universal-border-light;
 	border-radius: $universal-border-radius;
+	gap: 0;
+}
+
+.wc-block-components-skeleton__shipping-option {
 	padding: $gap;
 	display: grid;
 	grid-template-columns: 20px 1fr 50px;
 	gap: $gap;
 	align-items: center;
+
+	& + & {
+		box-shadow: inset 0 1px 0 0 $universal-border-light;
+	}
 }

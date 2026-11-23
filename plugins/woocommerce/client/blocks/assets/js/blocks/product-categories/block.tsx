@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { InspectorControls } from '@wordpress/block-editor';
 import ServerSideRender from '@wordpress/server-side-render';
+// eslint-disable-next-line import/named -- listView is exported through @wordpress/icons' library re-export.
 import { Icon, listView } from '@wordpress/icons';
 import { isSiteEditorPage, isWidgetEditorPage } from '@woocommerce/utils';
 import { useSelect } from '@wordpress/data';
@@ -111,11 +112,11 @@ const ProductCategoriesBlock = ( {
 									? __(
 											'Category images are visible.',
 											'woocommerce'
-									  )
+										)
 									: __(
 											'Category images are hidden.',
 											'woocommerce'
-									  )
+										)
 							}
 							checked={ hasImage }
 							onChange={ () =>
@@ -162,21 +163,18 @@ const ProductCategoriesBlock = ( {
 		);
 	};
 
-	const blockProps = useBlockProps( {
-		className: 'wc-block-product-categories',
-	} );
-
 	return (
-		<div { ...blockProps }>
+		<>
 			{ getInspectorControls() }
 			<Disabled>
 				<ServerSideRender
 					block={ name }
-					attributes={ attributes }
+					attributes={ { ...attributes, isPreview: true } }
+					skipBlockSupportAttributes
 					EmptyResponsePlaceholder={ EmptyPlaceholder }
 				/>
 			</Disabled>
-		</div>
+		</>
 	);
 };
 

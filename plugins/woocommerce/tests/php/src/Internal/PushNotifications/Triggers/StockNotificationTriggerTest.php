@@ -7,7 +7,9 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Triggers;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\StockNotificationTrigger;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -15,6 +17,9 @@ use WC_Unit_Test_Case;
  * Tests for the StockNotificationTrigger class.
  */
 class StockNotificationTriggerTest extends WC_Unit_Test_Case {
+
+	use PushNotificationsTestTrait;
+
 	/**
 	 * An instance of StockNotificationTrigger.
 	 *
@@ -38,7 +43,7 @@ class StockNotificationTriggerTest extends WC_Unit_Test_Case {
 		$dispatcher  = $this->createMock( InternalNotificationDispatcher::class );
 		$this->store = new PendingNotificationStore();
 
-		$this->store->init( $dispatcher );
+		$this->store->init( $dispatcher, $this->create_data_store_with_tokens( true ), $this->createMock( NotificationStepLogger::class ) );
 		$this->store->register();
 
 		wc_get_container()->replace( PendingNotificationStore::class, $this->store );
@@ -52,11 +57,6 @@ class StockNotificationTriggerTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_action( 'woocommerce_low_stock', array( $this->trigger, 'on_low_stock' ) );
-		remove_action( 'woocommerce_no_stock', array( $this->trigger, 'on_no_stock' ) );
-		remove_action( 'woocommerce_product_on_backorder', array( $this->trigger, 'on_backorder' ) );
-		remove_action( 'shutdown', array( $this->store, 'dispatch_all' ) );
-
 		$this->reset_container_replacements();
 		wc_get_container()->reset_all_resolved();
 

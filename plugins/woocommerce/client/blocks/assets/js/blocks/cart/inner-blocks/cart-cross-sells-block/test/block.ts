@@ -8,11 +8,11 @@ import { registerCoreBlocks } from '@wordpress/block-library';
  */
 import { createCrossSellsProductCollection } from '../index';
 import crossSells from '../../../../product-collection/collections/cross-sells';
-import '../../../../../atomic/blocks/product-elements/sale-badge/index';
-import '../../../../../atomic/blocks/product-elements/image/index';
-import '../../../../../atomic/blocks/product-elements/price/index';
-import '../../../../../atomic/blocks/product-elements/button/index';
-import '../../../../../atomic/blocks/product-elements/title/index';
+import '../../../../product-elements-blocks/sale-badge/index';
+import '../../../../product-elements-blocks/image/index';
+import '../../../../product-elements-blocks/price/index';
+import '../../../../product-elements-blocks/button/index';
+import '../../../../product-elements-blocks/title/index';
 import '../../../../product-template/index';
 import '../../../../product-collection/index';
 
@@ -42,9 +42,7 @@ describe( 'createCrossSellsProductCollection transform function', () => {
 			...crossSells.attributes.query,
 			perPage: 3,
 		} );
-		expect( transformedBlock.attributes.hideControls ).toEqual(
-			crossSells.attributes.hideControls
-		);
+		expect( transformedBlock.attributes.hideControls ).toEqual( [] );
 	} );
 
 	it( 'creates inner blocks from cross-sells template', () => {

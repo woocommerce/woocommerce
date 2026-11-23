@@ -197,6 +197,17 @@ describe( 'isPostcode', () => {
 		[ true, '2000', 'AU' ],
 		[ false, '2000#', 'AU' ],
 
+		// Argentina uses the fallback too. The legacy four digit codes are
+		// still in everyday use next to the lettered format; postcode-validator
+		// 3.10 started rejecting them.
+		[ true, '1213', 'AR' ],
+		[ true, '7540', 'AR' ],
+		[ true, 'C1213', 'AR' ],
+		[ true, 'C1213ABC', 'AR' ],
+		[ true, 'B7540', 'AR' ],
+		[ false, '142', 'AR' ],
+		[ false, 'I1213', 'AR' ],
+
 		// Unknown country codes — assumed valid since no regex applies.
 		[ true, '12345', 'XX' ],
 		[ true, 'anything', 'ZZ' ],

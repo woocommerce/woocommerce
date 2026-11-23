@@ -6,50 +6,26 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Utils\WC_Product_Custom;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsQuantitySelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductSelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductItemMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductItemSelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
  * Tests for the AddToCartWithOptions block type
  */
-class AddToCartWithOptions extends \WP_UnitTestCase {
-
-	/**
-	 * Tracks whether blocks have been registered.
-	 *
-	 * @var bool
-	 */
-	protected static $are_blocks_registered = false;
+class AddToCartWithOptions extends \WC_Unit_Test_Case {
+	use BlockTypeRegistryTrait;
 
 	/**
 	 * Initiate the mock object.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
-		if ( ! self::$are_blocks_registered ) {
-			// We need to register the blocks after set up. They are no registered
-			// on `init` because `init` is called with a classic theme.
-			new AddToCartWithOptionsMock();
-			new AddToCartWithOptionsQuantitySelectorMock();
-			new AddToCartWithOptionsGroupedProductSelectorMock();
-			new AddToCartWithOptionsGroupedProductItemMock();
-			new AddToCartWithOptionsGroupedProductItemSelectorMock();
-			new AddToCartWithOptionsVariationSelectorMock();
-			new AddToCartWithOptionsVariationSelectorAttributeMock();
-			new AddToCartWithOptionsVariationSelectorAttributeNameMock();
-
-			self::$are_blocks_registered = true;
-		}
+		// The blocks are not registered on `init`, because `init` runs with a classic theme.
+		$this->replace_block_types( AddToCartWithOptionsMocks::get_mock_classes() );
 	}
 
 	/**
@@ -134,8 +110,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		// Third-party product types use their own template.
 		$this->assertStringContainsString( 'Custom Product Type Add to Cart Form', $markup, 'The Custom Product Type Add to Cart + Options contains the custom product type add to cart form.' );
-
-		remove_action( 'woocommerce_custom_add_to_cart', array( $this, 'print_custom_product_type_add_to_cart_markup' ) );
 	}
 
 	/**
@@ -192,9 +166,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'Hook into add to cart action', $markup, 'The Add to Cart + Options correctly renders the contents from the wrapper hook if the product is out of stock.' );
 		$this->assertStringNotContainsString( 'Hook into add to cart button action', $markup, 'The Add to Cart + Options doesn\'t render the contents from the inner hooks if the product is out of stock.' );
-
-		remove_action( 'woocommerce_simple_add_to_cart', array( $this, 'hook_into_add_to_cart_action' ) );
-		remove_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action' ) );
 	}
 
 	/**
@@ -292,10 +263,125 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$this->assertStringNotContainsString( 'action="https://example.com"', $markup, 'The form doesn\'t have an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter when an extension hooks into the form but not adding a form element.' );
 		$this->assertStringContainsString( 'data-wp-on--submit', $markup, 'The form has an on submit event when an extension hooks into the form but not adding a form element.' );
+	}
 
-		remove_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action_text' ) );
+	/**
+	 * @testdox Legacy add-to-cart forms expose the request fields required by each product type.
+	 *
+	 * @dataProvider provider_legacy_form_fields
+	 *
+	 * @param string $product_type Product type under test.
+	 */
+	public function test_legacy_form_fields_for_product_types( string $product_type ): void {
+		global $product;
 
-		remove_filter( 'woocommerce_add_to_cart_form_action', array( $this, 'hook_into_woocommerce_add_to_cart_form_action_filter' ) );
+		$previous_product  = $product;
+		$products          = array();
+		$original_redirect = get_option( 'woocommerce_cart_redirect_after_add' );
+
+		try {
+			if ( 'simple' === $product_type ) {
+				$product = new \WC_Product_Simple();
+				$product->set_name( 'Legacy Simple' );
+				$product->set_regular_price( '10' );
+				$product->save();
+				$products[]      = $product;
+				$expected_fields = array( 'name="add-to-cart"', 'name="quantity"' );
+			} elseif ( 'variable' === $product_type ) {
+				$product = new \WC_Product_Variable();
+				$product->set_name( 'Legacy Variable' );
+				$product->set_attributes(
+					array( \WC_Helper_Product::create_product_attribute_object( 'color', array( 'blue' ) ) )
+				);
+				$product->save();
+
+				$variation = new \WC_Product_Variation();
+				$variation->set_parent_id( $product->get_id() );
+				$variation->set_attributes( array( 'pa_color' => 'blue' ) );
+				$variation->set_regular_price( '10' );
+				$variation->save();
+				\WC_Product_Variable::sync( $product->get_id() );
+
+				$products[]      = $variation;
+				$products[]      = $product;
+				$expected_fields = array( 'name="add-to-cart"', 'name="product_id"', 'name="variation_id"', 'name="attribute_pa_color"', 'name="quantity"' );
+			} else {
+				$child = new \WC_Product_Simple();
+				$child->set_name( 'Legacy Grouped Child' );
+				$child->set_regular_price( '10' );
+				$child->save();
+
+				$product = new \WC_Product_Grouped();
+				$product->set_name( 'Legacy Grouped' );
+				$product->set_children( array( $child->get_id() ) );
+				$product->save();
+
+				$products[]      = $product;
+				$products[]      = $child;
+				$expected_fields = array( 'name="add-to-cart"', 'name="quantity[' . $child->get_id() . ']"' );
+			}
+
+			update_option( 'woocommerce_cart_redirect_after_add', 'yes' );
+			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+			$this->assertStringContainsString( '<form ', $markup, 'A legacy HTML form should be rendered.' );
+			$this->assertStringContainsString( 'method="post"', $markup, 'The legacy form should submit with POST.' );
+			$this->assertStringContainsString( 'enctype="multipart/form-data"', $markup, 'The legacy form should retain multipart compatibility.' );
+			$this->assertStringNotContainsString( 'data-wp-on--submit="actions.addToCart"', $markup, 'The Interactivity API submit binding should be absent in legacy mode.' );
+			$this->assertStringContainsString( 'name="add-to-cart" value="' . $product->get_id() . '"', $markup, 'The parent product ID should be submitted.' );
+
+			foreach ( $expected_fields as $expected_field ) {
+				$this->assertStringContainsString( $expected_field, $markup, "The {$product_type} form should contain {$expected_field}." );
+			}
+		} finally {
+			update_option( 'woocommerce_cart_redirect_after_add', $original_redirect );
+			$product = $previous_product;
+			foreach ( $products as $created_product ) {
+				$created_product->delete( true );
+			}
+		}
+	}
+
+	/**
+	 * Data provider for legacy form field coverage.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function provider_legacy_form_fields(): array {
+		return array(
+			'simple product'   => array( 'simple' ),
+			'variable product' => array( 'variable' ),
+			'grouped product'  => array( 'grouped' ),
+		);
+	}
+
+	/**
+	 * @testdox Disabling archive AJAX add-to-cart leaves the block's Interactivity API submit binding enabled.
+	 */
+	public function test_ajax_archive_setting_does_not_disable_interactive_form(): void {
+		global $product;
+
+		$previous_product  = $product;
+		$original_ajax     = get_option( 'woocommerce_enable_ajax_add_to_cart' );
+		$original_redirect = get_option( 'woocommerce_cart_redirect_after_add' );
+		$product           = new \WC_Product_Simple();
+		$product->set_regular_price( '10' );
+		$product->save();
+
+		try {
+			update_option( 'woocommerce_enable_ajax_add_to_cart', 'no' );
+			update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+
+			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+			$this->assertStringContainsString( 'data-wp-on--submit="actions.addToCart"', $markup, 'The block should keep its Interactivity API submit binding.' );
+			$this->assertStringNotContainsString( 'method="post"', $markup, 'The archive AJAX option should not force the block into legacy mode.' );
+		} finally {
+			update_option( 'woocommerce_enable_ajax_add_to_cart', $original_ajax );
+			update_option( 'woocommerce_cart_redirect_after_add', $original_redirect );
+			$product->delete( true );
+			$product = $previous_product;
+		}
 	}
 
 	/**
@@ -511,18 +597,14 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		add_filter( 'woocommerce_quantity_input_args', $filter, 10, 2 );
 
-		try {
-			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
-			// Quantity selector block should not render at all.
-			$this->assertStringContainsString( 'wc-block-add-to-cart-with-options__quantity-selector--hidden', $markup, 'The Quantity Selector block is hidden when min equals max.' );
+		// Quantity selector block should not render at all.
+		$this->assertStringContainsString( 'wc-block-add-to-cart-with-options__quantity-selector--hidden', $markup, 'The Quantity Selector block is hidden when min equals max.' );
 
-			// Plus and minus stepper buttons should not be present.
-			$this->assertStringNotContainsString( 'wc-block-components-quantity-selector__button--plus', $markup, 'The plus stepper is not rendered when min equals max.' );
-			$this->assertStringNotContainsString( 'wc-block-components-quantity-selector__button--minus', $markup, 'The minus stepper is not rendered when min equals max.' );
-		} finally {
-			remove_filter( 'woocommerce_quantity_input_args', $filter, 10 );
-		}
+		// Plus and minus stepper buttons should not be present.
+		$this->assertStringNotContainsString( 'wc-block-components-quantity-selector__button--plus', $markup, 'The plus stepper is not rendered when min equals max.' );
+		$this->assertStringNotContainsString( 'wc-block-components-quantity-selector__button--minus', $markup, 'The minus stepper is not rendered when min equals max.' );
 	}
 
 	/**
@@ -635,7 +717,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$markup = do_blocks( $block );
 			$this->assertStringNotContainsString( $marker, $markup, 'The Add to Wishlist Button is not injected when the wishlist feature is disabled.' );
 		} finally {
-			$registry->unregister( 'woocommerce/add-to-wishlist-button' );
 			$features->change_feature_enable( 'product_wishlist', $original );
 		}
 	}

@@ -47,7 +47,9 @@
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
+		"lint:fix:lang:style": "stylelint 'src/**/*.scss' --fix",
 		"lint:lang:js": "eslint src",
+		"lint:lang:style": "stylelint 'src/**/*.scss'",
 		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build:publish:project",
 		"test:js": "jest --config ./jest.config.json --passWithNoTests",
@@ -80,7 +82,7 @@
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
 		"@testing-library/react": "^16.x.x",
-		"@types/jest": "29.5.x",
+		"@types/jest": "catalog:tooling",
 		"@types/react": "18.3.x",
 		"@types/string-similarity": "4.0.0",
 		"@woocommerce/eslint-config": "workspace:*",
@@ -88,19 +90,20 @@
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/browserslist-config": "next",
-		"css-loader": "6.11.x",
-		"eslint": "^10.0.0",
-		"jest": "29.5.x",
-		"jest-cli": "29.5.x",
-		"jest-environment-jsdom": "29.5.x",
+		"css-loader": "catalog:tooling",
+		"eslint": "catalog:tooling",
+		"stylelint": "catalog:tooling",
+		"jest": "catalog:tooling",
+		"jest-cli": "catalog:tooling",
+		"jest-environment-jsdom": "catalog:tooling",
 		"postcss": "catalog:tooling",
-		"postcss-loader": "4.3.x",
-		"rimraf": "5.0.5",
-		"sass-loader": "10.5.x",
-		"ts-jest": "29.1.x",
-		"typescript": "5.7.x",
+		"postcss-loader": "catalog:tooling",
+		"rimraf": "catalog:tooling",
+		"sass-loader": "catalog:tooling",
+		"ts-jest": "catalog:tooling",
+		"typescript": "catalog:tooling",
 		"webpack": "catalog:tooling",
-		"webpack-cli": "5.1.x"
+		"webpack-cli": "catalog:tooling"
 	},
 	"publishConfig": {
 		"access": "public",
@@ -115,7 +118,7 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/**/*.{js,jsx,ts,tsx}"
+				"changes": "src/**/*.{js,jsx,ts,tsx,scss}"
 			},
 			"tests": [
 				{

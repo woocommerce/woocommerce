@@ -330,7 +330,7 @@ class WC_Report_Downloads extends WP_List_Table {
 		$query_from  = apply_filters( 'woocommerce_report_downloads_query_from', $query_from );
 		$query_order = $wpdb->prepare( 'ORDER BY timestamp DESC LIMIT %d, %d;', ( $current_page - 1 ) * $per_page, $per_page );
 
-		$this->items     = $wpdb->get_results( "SELECT * {$query_from} {$query_order}" ); // WPCS: cache ok, db call ok, unprepared SQL ok.
-		$this->max_items = $wpdb->get_var( "SELECT COUNT( DISTINCT download_log_id ) {$query_from};" ); // WPCS: cache ok, db call ok, unprepared SQL ok.
+		$this->items     = $wpdb->get_results( "SELECT * {$query_from} {$query_order}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Core builds both fragments with $wpdb->prepare(); the woocommerce_report_downloads_query_from filter lets extensions supply their own SQL.
+		$this->max_items = $wpdb->get_var( "SELECT COUNT( DISTINCT download_log_id ) {$query_from};" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Core builds the fragment with $wpdb->prepare(); the woocommerce_report_downloads_query_from filter lets extensions supply their own SQL.
 	}
 }

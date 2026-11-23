@@ -155,7 +155,7 @@ jobs:
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: Setup Node
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
             node-version-file: .nvmrc
             cache: pnpm
@@ -189,7 +189,8 @@ jobs:
           if [[ -z "${{ github.event.inputs.append_changelog }}" || "${{ github.event.inputs.append_changelog }}" == "auto" ]]; then
             # If a prerelease, append if there's already content in the changelog.
             if [[ "$VERSION" == *"-"* || "$VERSION" =~ \.0$ ]]; then
-              if sed -n '/== Changelog ==/,$p' release-branch/plugins/woocommerce/readme.txt | grep -Fq '**WooCommerce**'; then
+              # No pipe: under pipefail, grep -q exiting early can SIGPIPE the writer and fail this check.
+              if awk '/== Changelog ==/{f=1} f && index($0, "**WooCommerce**"){found=1; exit} END{exit !found}' release-branch/plugins/woocommerce/readme.txt; then
                 APPEND_CHANGELOG="--append-changelog"
               fi
             fi

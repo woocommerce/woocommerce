@@ -1,0 +1,624 @@
+<?php
+/**
+ * UCP Catalog Route Tests.
+ */
+
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
+
+/**
+ * Tests for the /wc/ucp/v1/catalog/* endpoints.
+ */
+class UcpCatalog extends ControllerTestCase {
+	/**
+	 * Published product IDs shared by the class, oldest first.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
+	/**
+	 * SKU of the newest fixture product.
+	 *
+	 * @var string
+	 */
+	private const SKU = 'ucp-catalog-sku';
+
+	/**
+	 * Create immutable fixtures before route registration starts.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		$products = self::create_class_fixture_products(
+			array(
+				array(
+					'name'          => 'UCP Older Product',
+					'regular_price' => '5.00',
+					'price'         => '5.00',
+				),
+				array(
+					'name'          => 'UCP Nebula Mug',
+					'regular_price' => '19.99',
+					'sale_price'    => '14.50',
+					'price'         => '14.50',
+					'sku'           => self::SKU,
+				),
+			)
+		);
+
+		self::$product_ids = array_map(
+			static function ( $product ) {
+				return $product->get_id();
+			},
+			$products
+		);
+	}
+
+	/**
+	 * Delete class fixtures.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_class_fixture_products( self::$product_ids );
+	}
+
+	/**
+	 * Option behind the `ucp` feature.
+	 */
+	private const FEATURE_OPTION = 'woocommerce_feature_ucp_enabled';
+
+	/**
+	 * Enable the UCP routes before the REST server is built.
+	 */
+	protected function setUp(): void {
+		parent::setUp();
+		update_option( self::FEATURE_OPTION, 'yes' );
+		$this->initialize_store_api_server();
+	}
+
+	/**
+	 * Dispatch a POST request with a JSON body.
+	 *
+	 * @param string $path Route path under /wc/ucp/v1.
+	 * @param array  $body Request body.
+	 * @return \WP_REST_Response
+	 */
+	private function post( string $path, array $body = array() ) {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1' . $path );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( $body ) );
+
+		return rest_get_server()->dispatch( $request );
+	}
+
+	/**
+	 * The routes must not exist unless a site opts in.
+	 */
+	public function test_routes_are_not_registered_by_default(): void {
+		delete_option( self::FEATURE_OPTION );
+		$this->initialize_store_api_server();
+
+		foreach ( array( '/catalog/search', '/catalog/lookup', '/catalog/product' ) as $path ) {
+			$this->assertSame( 404, $this->post( $path )->get_status(), $path . ' should not be registered' );
+		}
+	}
+
+	/**
+	 * Search returns published products in the UCP shape, with amounts in minor units.
+	 */
+	public function test_search_returns_published_products_in_minor_units(): void {
+		$response = $this->post( '/catalog/search', array( 'query' => 'Nebula Mug' ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( '2026-04-08', $data['ucp']['version'] );
+		$this->assertSame( 'success', $data['ucp']['status'] );
+		// The envelope names only the capability relevant to the operation answered.
+		$this->assertSame( array( 'dev.ucp.shopping.catalog.search' ), array_keys( $data['ucp']['capabilities'] ) );
+		$this->assertArrayHasKey( 'has_next_page', $data['pagination'] );
+
+		$product = $this->find_product( $data['products'], end( self::$product_ids ) );
+
+		$this->assertSame( 'UCP Nebula Mug', $product['title'] );
+		$this->assertSame( 1450, $product['price_range']['min']['amount'] );
+		$this->assertSame( get_woocommerce_currency(), $product['price_range']['min']['currency'] );
+		// The regular price survives as the strike-through comparison.
+		$this->assertSame( 1999, $product['list_price_range']['min']['amount'] );
+
+		$this->assertCount( 1, $product['variants'] );
+		$this->assertSame( self::SKU, $product['variants'][0]['sku'] );
+		$this->assertSame( 1450, $product['variants'][0]['price']['amount'] );
+		$this->assertTrue( $product['variants'][0]['availability']['available'] );
+	}
+
+	/**
+	 * Price bounds are taken in minor units and applied against the stored price.
+	 */
+	public function test_search_price_filter_takes_minor_units(): void {
+		list( $older, $newest ) = self::$product_ids;
+
+		// Both fixtures carry the "UCP" prefix, so the query scopes the assertions to them.
+		$above = $this->post(
+			'/catalog/search',
+			array(
+				'query'   => 'UCP',
+				'filters' => array( 'price' => array( 'min' => 1000 ) ),
+			)
+		)->get_data();
+		$this->assertSame( array( (string) $newest ), wp_list_pluck( $above['products'], 'id' ) );
+
+		$below = $this->post(
+			'/catalog/search',
+			array(
+				'query'   => 'UCP',
+				'filters' => array( 'price' => array( 'max' => 1000 ) ),
+			)
+		)->get_data();
+		$this->assertSame( array( (string) $older ), wp_list_pluck( $below['products'], 'id' ) );
+	}
+
+	/**
+	 * Lookup resolves product IDs only; a SKU is reported as a miss like any other unknown id.
+	 */
+	public function test_lookup_resolves_ids_and_reports_misses(): void {
+		$newest   = end( self::$product_ids );
+		$response = $this->post( '/catalog/lookup', array( 'ids' => array( (string) $newest, self::SKU ) ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+
+		$this->assertCount( 1, $data['products'] );
+		$this->assertSame( (string) $newest, $data['products'][0]['id'] );
+		$this->assertSame( array( (string) $newest ), wp_list_pluck( $data['products'][0]['variants'][0]['inputs'], 'id' ) );
+
+		$this->assertSame( 'not_found', $data['messages'][0]['code'] );
+		$this->assertSame( '$.ids', $data['messages'][0]['path'] );
+	}
+
+	/**
+	 * Lookup follows the storefront's hide-out-of-stock setting.
+	 */
+	public function test_lookup_hides_out_of_stock_products_when_the_store_does(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'stock_status' => 'outofstock' ) );
+		$body    = array( 'ids' => array( (string) $product->get_id() ) );
+
+		$data = $this->post( '/catalog/lookup', $body )->get_data();
+		$this->assertFalse( $data['products'][0]['variants'][0]['availability']['available'] );
+
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$data = $this->post( '/catalog/lookup', $body )->get_data();
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+
+		$this->assertSame( array(), $data['products'] );
+		$this->assertSame( 'not_found', $data['messages'][0]['code'] );
+	}
+
+	/**
+	 * Lookup and product details open what catalog search can return: every product but a
+	 * hidden one, including "Search results only", which is_visible() refuses outside a
+	 * storefront search.
+	 *
+	 * @testWith ["visible", true, true, true]
+	 *           ["search", true, false, true]
+	 *           ["catalog", false, true, true]
+	 *           ["hidden", false, false, false]
+	 *
+	 * @param string $visibility    Catalog visibility.
+	 * @param bool   $found_by_name Whether a search by name returns it.
+	 * @param bool   $browsable     Whether a category search with no query returns it.
+	 * @param bool   $opens         Whether lookup and product details return it.
+	 */
+	public function test_lookup_and_details_open_what_search_can_return( string $visibility, bool $found_by_name, bool $browsable, bool $opens ): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'UCP Zebra ' . $visibility ) );
+		$product->set_catalog_visibility( $visibility );
+		$product->save();
+		$id   = (string) $product->get_id();
+		$term = wp_insert_term( 'UCP Zebras ' . $visibility, 'product_cat' );
+		wp_set_object_terms( $product->get_id(), (int) $term['term_id'], 'product_cat' );
+
+		$found = wp_list_pluck( $this->post( '/catalog/search', array( 'query' => 'UCP Zebra ' . $visibility ) )->get_data()['products'], 'id' );
+		$this->assertSame( $found_by_name, in_array( $id, $found, true ), 'Search by name' );
+
+		$browsed = wp_list_pluck( $this->post( '/catalog/search', array( 'filters' => array( 'categories' => array( (string) $term['term_id'] ) ) ) )->get_data()['products'], 'id' );
+		$this->assertSame( $browsable, in_array( $id, $browsed, true ), 'Search by category with no query' );
+
+		$lookup = $this->post( '/catalog/lookup', array( 'ids' => array( $id ) ) )->get_data();
+		$this->assertSame( $opens ? array( $id ) : array(), wp_list_pluck( $lookup['products'], 'id' ), 'Lookup' );
+
+		$detail = $this->post( '/catalog/product', array( 'id' => $id ) )->get_data();
+		$this->assertSame( $opens ? $id : null, $detail['product']['id'] ?? null, 'Product details' );
+	}
+
+	/**
+	 * A variation ID opens in lookup and product details when its parent is "Search results only".
+	 */
+	public function test_lookup_and_details_open_a_variation_of_a_search_only_product(): void {
+		$product = \WC_Helper_Product::create_variation_product();
+		$product->set_catalog_visibility( 'search' );
+		$product->save();
+		$children     = $product->get_children();
+		$variation_id = (string) end( $children );
+
+		$data = $this->post( '/catalog/lookup', array( 'ids' => array( $variation_id ) ) )->get_data();
+
+		$this->assertSame( array( (string) $product->get_id() ), wp_list_pluck( $data['products'], 'id' ) );
+		$this->assertContains( $variation_id, wp_list_pluck( $data['products'][0]['variants'], 'id' ) );
+
+		$detail = $this->post( '/catalog/product', array( 'id' => $variation_id ) )->get_data();
+		$this->assertSame( $variation_id, $detail['product']['variants'][0]['id'] ?? null, 'Product details' );
+	}
+
+	/**
+	 * A "Search results only" product still follows the hide-out-of-stock setting.
+	 */
+	public function test_lookup_hides_out_of_stock_search_only_products_when_the_store_does(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'stock_status' => 'outofstock' ) );
+		$product->set_catalog_visibility( 'search' );
+		$product->save();
+
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$data = $this->post( '/catalog/lookup', array( 'ids' => array( (string) $product->get_id() ) ) )->get_data();
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+
+		$this->assertSame( array(), $data['products'] );
+	}
+
+	/**
+	 * Lookup still opens a "Search results only" product when an extension removes `visible`
+	 * from the catalog visibility options (the temporary override path must not throw).
+	 */
+	public function test_lookup_opens_search_only_when_visible_option_is_removed(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_catalog_visibility( 'search' );
+		$product->save();
+		$id = (string) $product->get_id();
+
+		$filter = static function ( array $options ): array {
+			unset( $options['visible'] );
+			return $options;
+		};
+		add_filter( 'woocommerce_product_visibility_options', $filter );
+		try {
+			$data = $this->post( '/catalog/lookup', array( 'ids' => array( $id ) ) )->get_data();
+		} finally {
+			remove_filter( 'woocommerce_product_visibility_options', $filter );
+		}
+
+		$this->assertSame( array( $id ), wp_list_pluck( $data['products'], 'id' ) );
+	}
+
+	/**
+	 * A category list resolving to no existing term matches nothing rather than everything.
+	 */
+	public function test_search_unknown_category_returns_no_products(): void {
+		$newest = end( self::$product_ids );
+		$term   = wp_insert_term( 'UCP Mugs', 'product_cat', array( 'slug' => 'ucp-mugs' ) );
+		wp_set_object_terms( $newest, (int) $term['term_id'], 'product_cat' );
+
+		$data = $this->post( '/catalog/search', array( 'filters' => array( 'categories' => array( 'ucp-mugs' ) ) ) )->get_data();
+		$this->assertSame( array( (string) $newest ), wp_list_pluck( $data['products'], 'id' ) );
+
+		$data = $this->post( '/catalog/search', array( 'filters' => array( 'categories' => array( 'does-not-exist' ) ) ) )->get_data();
+		$this->assertSame( array(), $data['products'] );
+		$this->assertFalse( $data['pagination']['has_next_page'] );
+	}
+
+	/**
+	 * Search needs a query or a supported filter; an unrecognized filter alone does not count.
+	 */
+	public function test_search_without_recognized_input_returns_ucp_validation_error(): void {
+		$response = $this->post( '/catalog/search', array( 'filters' => array( 'brand' => 'acme' ) ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'VALIDATION_ERROR', $data['messages'][0]['code'] );
+	}
+
+	/**
+	 * Price filters every catalog route refuses.
+	 *
+	 * @return array
+	 */
+	public function provider_malformed_price_filters(): array {
+		return array(
+			'not an object'             => array( '1000' ),
+			'fractional bound'          => array( array( 'min' => 1000.9 ) ),
+			'beyond the integer range'  => array( array( 'min' => '1e400' ) ),
+			'reversed after truncation' => array(
+				array(
+					'min' => 1000.9,
+					'max' => 1000.1,
+				),
+			),
+		);
+	}
+
+	/**
+	 * A malformed `filters.price` is refused rather than ignored or truncated.
+	 *
+	 * @dataProvider provider_malformed_price_filters
+	 *
+	 * @param mixed $price The `filters.price` value.
+	 */
+	public function test_malformed_price_filter_returns_ucp_validation_error( $price ): void {
+		$id      = (string) self::$product_ids[0];
+		$filters = array( 'filters' => array( 'price' => $price ) );
+
+		foreach ( array(
+			'/catalog/product' => array( 'id' => $id ),
+			'/catalog/lookup'  => array( 'ids' => array( $id ) ),
+			'/catalog/search'  => array( 'query' => 'product' ),
+		) as $route => $body ) {
+			$response = $this->post( $route, $filters + $body );
+
+			$this->assertSame( 400, $response->get_status(), $route );
+			$this->assertSame( 'VALIDATION_ERROR', $response->get_data()['messages'][0]['code'], $route );
+		}
+	}
+
+	/**
+	 * Zero and integer-valued bounds are accepted.
+	 */
+	public function test_integral_price_bounds_are_accepted(): void {
+		$body = array(
+			'ids'     => array( (string) self::$product_ids[0] ),
+			'filters' => array(
+				'price' => array(
+					'min' => 0,
+					'max' => '1500.0',
+				),
+			),
+		);
+
+		$this->assertSame( 200, $this->post( '/catalog/lookup', $body )->get_status() );
+	}
+
+	/**
+	 * A missing `ids` list is a UCP validation error, not a WordPress one.
+	 */
+	public function test_lookup_without_ids_returns_ucp_validation_error(): void {
+		$response = $this->post( '/catalog/lookup' );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'VALIDATION_ERROR', $data['messages'][0]['code'] );
+	}
+
+	/**
+	 * Input outside the JSON document does not act.
+	 */
+	public function test_lookup_ids_in_the_query_string_are_ignored(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/catalog/lookup' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_query_params( array( 'ids' => array( (string) self::$product_ids[0] ) ) );
+		$request->set_body( '{}' );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'VALIDATION_ERROR', $response->get_data()['messages'][0]['code'] );
+	}
+
+	/**
+	 * A payload under any other content type is refused rather than read.
+	 */
+	public function test_a_non_json_payload_is_refused(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/catalog/lookup' );
+		$request->set_header( 'content-type', 'application/x-www-form-urlencoded' );
+		$request->set_body_params( array( 'ids' => array( (string) self::$product_ids[0] ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 415, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'VALIDATION_ERROR', $data['messages'][0]['code'] );
+	}
+
+	/**
+	 * A protocol version the store does not implement is refused.
+	 */
+	public function test_an_unsupported_version_is_refused(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/catalog/lookup' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_header( 'UCP-Agent', 'profile="https://agent.example/profile.json"; version="2099-01-01"' );
+		$request->set_body( wp_json_encode( array( 'ids' => array( (string) self::$product_ids[0] ) ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 422, $response->get_status() );
+		$this->assertSame( 'version_unsupported', $response->get_data()['messages'][0]['code'] );
+	}
+
+	/**
+	 * Product detail answers with `ucp.status`, and reports a miss as 200 + `not_found`.
+	 */
+	public function test_product_detail_reports_status_in_the_envelope(): void {
+		$newest   = end( self::$product_ids );
+		$response = $this->post( '/catalog/product', array( 'id' => (string) $newest ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'success', $data['ucp']['status'] );
+		$this->assertSame( array( 'dev.ucp.shopping.catalog.lookup' ), array_keys( $data['ucp']['capabilities'] ) );
+		$this->assertSame( (string) $newest, $data['product']['id'] );
+		$this->assertSame( 1450, $data['product']['variants'][0]['price']['amount'] );
+
+		$missing = $this->post( '/catalog/product', array( 'id' => '99999999' ) );
+		$data    = $missing->get_data();
+
+		$this->assertSame( 200, $missing->get_status(), 'A missing product is reported in the envelope, not as a 404' );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'not_found', $data['messages'][0]['code'] );
+		$this->assertSame( 'unrecoverable', $data['messages'][0]['severity'] );
+	}
+
+	/**
+	 * Price filters for the helper's variations, priced 10, 15, 16, 17, 18 and 19.
+	 *
+	 * @return array
+	 */
+	public function provider_variant_price_filters(): array {
+		return array(
+			'max is inclusive'                 => array( array( 'max' => 1500 ), array( 1000, 1500 ) ),
+			'min skips the default first pick' => array(
+				array(
+					'min' => 1600,
+					'max' => 1700,
+				),
+				array( 1600, 1700 ),
+			),
+			'nothing in range'                 => array( array( 'max' => 999 ), array() ),
+		);
+	}
+
+	/**
+	 * @testdox Lookup and product detail should return only the variants inside the price filter.
+	 *
+	 * @dataProvider provider_variant_price_filters
+	 *
+	 * @param array $price Price filter bounds in minor units.
+	 * @param array $expected Variant amounts expected back, or none when the product is excluded.
+	 */
+	public function test_lookup_and_detail_apply_the_price_filter( array $price, array $expected ): void {
+		$id   = (string) \WC_Helper_Product::create_variation_product()->get_id();
+		$body = array( 'filters' => array( 'price' => $price ) );
+
+		$detail = $this->post( '/catalog/product', $body + array( 'id' => $id ) )->get_data();
+		$lookup = $this->post( '/catalog/lookup', $body + array( 'ids' => array( $id ) ) )->get_data();
+
+		if ( empty( $expected ) ) {
+			$this->assertSame( 'error', $detail['ucp']['status'] );
+			$this->assertSame( array(), $lookup['products'] );
+			return;
+		}
+
+		$amounts = static function ( array $product ): array {
+			return array_map(
+				static function ( array $variant ): int {
+					return $variant['price']['amount'];
+				},
+				$product['variants']
+			);
+		};
+
+		$this->assertSame( $expected, $amounts( $detail['product'] ) );
+		$this->assertSame( $expected, $amounts( $lookup['products'][0] ) );
+		$this->assertSame( $detail['product']['variants'][0]['options'], $detail['product']['selected'] );
+	}
+
+	/**
+	 * @testdox A selection matching only variants outside the price filter should be relaxed until one inside it matches.
+	 */
+	public function test_product_detail_relaxes_a_selection_the_price_filter_excludes(): void {
+		$id   = (string) \WC_Helper_Product::create_variation_product()->get_id();
+		$data = $this->post(
+			'/catalog/product',
+			array(
+				'id'       => $id,
+				'selected' => array(
+					array(
+						'name'  => 'size',
+						'label' => 'small',
+					),
+				),
+				'filters'  => array( 'price' => array( 'min' => 1500 ) ),
+			)
+		)->get_data();
+
+		$this->assertSame( 'success', $data['ucp']['status'] );
+		$this->assertSame( array(), $data['product']['selected'] );
+		$this->assertSame( 1500, $data['product']['variants'][0]['price']['amount'] );
+	}
+
+	/**
+	 * A variant id puts that variation first, takes its options as the selection,
+	 * and overrides a conflicting request selection.
+	 */
+	public function test_product_detail_by_variation_id_leads_with_that_variation(): void {
+		$children = \WC_Helper_Product::create_variation_product()->get_children();
+		// The helper's last variation: size huge, colour blue, number left as "Any".
+		$variation_id = (string) end( $children );
+
+		$data = $this->post(
+			'/catalog/product',
+			array(
+				'id'       => $variation_id,
+				'selected' => array(
+					array(
+						'name'  => 'colour',
+						'label' => 'red',
+					),
+				),
+			)
+		)->get_data();
+
+		$this->assertSame( $variation_id, $data['product']['variants'][0]['id'] );
+		$this->assertSame(
+			array(
+				array(
+					'name'  => 'size',
+					'label' => 'huge',
+				),
+				array(
+					'name'  => 'colour',
+					'label' => 'blue',
+				),
+			),
+			$data['product']['selected']
+		);
+		// The huge/blue variation with number 2 matches the same selection; nothing else does.
+		$this->assertCount( 2, $data['product']['variants'] );
+	}
+
+	/**
+	 * The opaque cursor walks forward through the result set.
+	 */
+	public function test_search_cursor_advances_to_the_next_page(): void {
+		$first = $this->post(
+			'/catalog/search',
+			array(
+				'query'      => 'UCP',
+				'pagination' => array( 'limit' => 1 ),
+			)
+		)->get_data();
+
+		$this->assertCount( 1, $first['products'] );
+		$this->assertTrue( $first['pagination']['has_next_page'] );
+		$this->assertNotEmpty( $first['pagination']['cursor'] );
+
+		$second = $this->post(
+			'/catalog/search',
+			array(
+				'query'      => 'UCP',
+				'pagination' => array(
+					'limit'  => 1,
+					'cursor' => $first['pagination']['cursor'],
+				),
+			)
+		)->get_data();
+
+		$this->assertCount( 1, $second['products'] );
+		$this->assertNotSame( $first['products'][0]['id'], $second['products'][0]['id'] );
+	}
+
+	/**
+	 * Find a mapped product by id.
+	 *
+	 * @param array $products Mapped products.
+	 * @param int   $product_id Product id to find.
+	 * @return array
+	 */
+	private function find_product( array $products, int $product_id ): array {
+		foreach ( $products as $product ) {
+			if ( (string) $product_id === $product['id'] ) {
+				return $product;
+			}
+		}
+
+		$this->fail( 'Product ' . $product_id . ' was not returned by the search' );
+	}
+}

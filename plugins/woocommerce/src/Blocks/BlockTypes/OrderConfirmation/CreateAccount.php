@@ -66,8 +66,8 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 					<!-- wp:heading {"level":3} -->
                     <h3 class="wp-block-heading">' . esc_html( $site_title_heading ) . '</h3>
 					<!-- /wp:heading -->
-					<!-- wp:list {"className":"is-style-checkmark-list"} -->
-					<ul class="wp-block-list is-style-checkmark-list"><!-- wp:list-item -->
+					<!-- wp:list -->
+					<ul class="wp-block-list"><!-- wp:list-item -->
                     <li>' . esc_html__( 'Faster future purchases', 'woocommerce' ) . '</li>
                     <!-- /wp:list-item -->
                     <!-- wp:list-item -->
@@ -104,12 +104,21 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	}
 
 	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return string[]
+	 */
+	protected function get_block_type_style() {
+		return array_merge( (array) parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
+	}
+
+	/**
 	 * Returns if delayed account creation is enabled.
 	 *
 	 * @return bool
 	 */
 	protected function is_feature_enabled() {
-		return get_option( 'woocommerce_enable_delayed_account_creation', 'yes' ) === 'yes';
+		return get_option( 'woocommerce_enable_delayed_account_creation', 'no' ) === 'yes';
 	}
 
 	/**

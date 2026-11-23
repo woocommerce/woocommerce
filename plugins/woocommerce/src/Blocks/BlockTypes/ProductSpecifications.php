@@ -8,6 +8,8 @@ use Automattic\WooCommerce\Enums\ProductType;
  * ProductSpecifications class.
  */
 class ProductSpecifications extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -84,8 +86,9 @@ class ProductSpecifications extends AbstractBlock {
 					foreach ( $attribute_values as $attribute_value ) {
 						$value_name = esc_html( $attribute_value->name );
 
-						if ( $attribute_taxonomy->attribute_public ) {
-							$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $value_name . '</a>';
+						if ( $attribute_taxonomy && $attribute_taxonomy->attribute_public ) {
+							$term_link = get_term_link( $attribute_value->term_id, $attribute->get_name() );
+							$values[]  = is_wp_error( $term_link ) ? $value_name : '<a href="' . esc_url( $term_link ) . '" rel="tag">' . $value_name . '</a>';
 						} else {
 							$values[] = $value_name;
 						}
@@ -133,7 +136,7 @@ class ProductSpecifications extends AbstractBlock {
 								<td class="wp-block-product-specifications-item__value" data-wp-interactive="woocommerce/products" data-wp-text="state.productInContext.<?php echo esc_attr( $product_attribute['api_field'] ); ?>">
 									<?php echo wp_kses_post( $product_attribute['value'] ); ?>
 								</td>
-							<?php else : ?>	
+							<?php else : ?>
 								<td class="wp-block-product-specifications-item__value">
 									<?php echo wp_kses_post( $product_attribute['value'] ); ?>
 								</td>

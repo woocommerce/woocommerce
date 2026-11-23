@@ -52,7 +52,7 @@ export const DefaultProgressTitle = ( {
 						/* translators: %s = site title */
 						__( 'Welcome to %s', 'woocommerce' ),
 						siteTitle as string
-				  )
+					)
 				: __( 'Welcome to your store', 'woocommerce' );
 		}
 		if ( completedCount <= 3 ) {

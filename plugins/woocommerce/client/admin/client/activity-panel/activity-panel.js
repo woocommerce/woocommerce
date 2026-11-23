@@ -37,14 +37,16 @@ import { useLaunchYourStore } from '~/launch-your-store';
 import { useTaskListsState } from '~/hooks/use-tasklists-state';
 import HeaderAccount from '../marketplace/components/header-account/header-account';
 
-const HelpPanel = lazy( () =>
-	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
+const HelpPanel = lazy(
+	() =>
+		import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
 );
 
-const SetupTasksPanel = lazy( () =>
-	import(
-		/* webpackChunkName: "activity-panels-setup" */ './panels/setup-tasks/setup-tasks-panel.tsx'
-	)
+const SetupTasksPanel = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "activity-panels-setup" */ './panels/setup-tasks/setup-tasks-panel.tsx'
+		)
 );
 
 export const ActivityPanel = ( { isEmbedded, query } ) => {
@@ -277,7 +279,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			// and resetting its DropdownMenu's internal isOpen state.
 			component: HeaderAccount,
 			options: { page: 'wc-admin' },
-			visible: isHomescreen,
+			visible: isHomescreen && currentUserCan( 'manage_woocommerce' ),
 		};
 
 		const previewSite = {

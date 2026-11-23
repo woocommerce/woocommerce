@@ -222,11 +222,11 @@ const ProductTemplateEdit = (
 			},
 			queryContext = [ { page: 1 } ],
 			templateSlug,
-			displayLayout: { type: layoutType, columns, shrinkColumns } = {
-				type: 'flex',
-				columns: 3,
-				shrinkColumns: false,
-			},
+			displayLayout: {
+				type: layoutType = 'flex',
+				columns = 3,
+				shrinkColumns = false,
+			} = {},
 			queryContextIncludes = [],
 			__privateProductCollectionPreviewState,
 		},
@@ -329,16 +329,20 @@ const ProductTemplateEdit = (
 						}
 					}
 				}
-				query.per_page = loopShopPerPage;
-
 				const settings = getEditedEntityRecord(
 					'root',
 					'site',
 					undefined
-				) as unknown as Record< string, string >;
+				) as unknown as Record< string, string | number >;
+
+				query.per_page = isNumber(
+					settings.woocommerce_catalog_products_per_page
+				)
+					? settings.woocommerce_catalog_products_per_page
+					: loopShopPerPage;
 
 				const orderProperties = getOrderPropertiesForDefaultQuery(
-					settings.woocommerce_default_catalog_orderby
+					settings.woocommerce_default_catalog_orderby as string
 				);
 				query.orderby = orderProperties.orderby;
 				query.order = orderProperties.order;

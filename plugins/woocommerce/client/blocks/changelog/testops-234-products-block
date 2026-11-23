@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move the Products block inspector policy to Jest and its per-item Interactivity context to PHPUnit, cutting the block's browser spec from seven titles to three while keeping the editor, hydrated cart, and Product Catalog journeys.
+

@@ -7,6 +7,22 @@ jQuery( function ( $ ) {
 
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
 
+	// A paste can carry characters that render as nothing. The server strips them
+	// before validating, so flagging the field here would blame the customer for
+	// something invisible. Mirrors the strip in wc_remove_non_displayable_chars(),
+	// not the server's phone check — that one is stricter, so a number can pass
+	// here and still be refused on submit. No "u" flag, and surrogate pairs for the
+	// ranges above U+FFFF, so the pattern builds on any browser.
+	var invisible_chars = new RegExp(
+		'[\\u00AD\\u034F\\u061C\\u115F\\u1160\\u17B4\\u17B5\\u180B-\\u180F' +
+			'\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u206F\\u3164' +
+			'\\uFE00-\\uFE0F\\uFEFF\\uFFA0\\uFFF0-\\uFFFB]' +
+			'|\\uD82F[\\uDCA0-\\uDCA3]' +
+			'|\\uD834[\\uDD73-\\uDD7A]' +
+			'|[\\uDB40-\\uDB43][\\uDC00-\\uDFFF]',
+		'g'
+	);
+
 	/**
 	 * Create the API object passed to custom place order button render callbacks.
 	 * This is checkout-specific and includes form validation.
@@ -126,6 +142,7 @@ jQuery( function ( $ ) {
 		updateTimer: false,
 		dirtyInput: false,
 		selectedPaymentMethod: false,
+		keepPaymentMethodRadioVisible: false,
 		xhr: false,
 		$order_review: $( '#order_review' ),
 		$checkout_form: $( 'form.checkout' ),
@@ -231,8 +248,25 @@ jQuery( function ( $ ) {
 				'input[name="payment_method"]'
 			);
 
-			// If there is one method, we can hide the radio input
-			if ( 1 === $payment_methods.length ) {
+			// The server leaves the list without a selection on purpose when a
+			// woocommerce_default_payment_method callback returns nothing.
+			var serverSelectedNone =
+				'no' ===
+				$payment_methods
+					.closest( 'ul.wc_payment_methods' )
+					.attr( 'data-preselected' );
+
+			// The shopper has to select a method themselves, so its radio must be on screen. It then stays
+			// there for as long as the page is open, also after later updates report the method as selected.
+			if ( serverSelectedNone ) {
+				wc_checkout_form.keepPaymentMethodRadioVisible = true;
+			}
+
+			// If there is one method, we can hide the radio input, unless the shopper needs it.
+			if (
+				1 === $payment_methods.length &&
+				! wc_checkout_form.keepPaymentMethodRadioVisible
+			) {
 				$payment_methods.eq( 0 ).hide();
 			}
 
@@ -244,8 +278,11 @@ jQuery( function ( $ ) {
 				);
 			}
 
-			// If there are none selected, select the first.
-			if ( 0 === $payment_methods.filter( ':checked' ).length ) {
+			// If there are none selected, select the first, unless the server selected none.
+			if (
+				0 === $payment_methods.filter( ':checked' ).length &&
+				! serverSelectedNone
+			) {
 				$payment_methods.eq( 0 ).prop( 'checked', true );
 			}
 
@@ -565,7 +602,7 @@ jQuery( function ( $ ) {
 						pattern = new RegExp(
 							// eslint-disable-next-line max-len
 							/^([a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+(\.[a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)*|"((([ \t]*\r\n)?[ \t]+)?([\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*(([ \t]*\r\n)?[ \t]+)?")@(([a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.)+([a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[0-9a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.?$/i
-						); // eslint-disable-line max-len
+						);  
 
 						if ( ! pattern.test( $this.val() ) ) {
 							$this.attr( 'aria-invalid', 'true' );
@@ -573,7 +610,7 @@ jQuery( function ( $ ) {
 								.removeClass( 'woocommerce-validated' )
 								.addClass(
 									'woocommerce-invalid woocommerce-invalid-email'
-								); // eslint-disable-line max-len
+								);  
 							validated = false;
 						}
 					}
@@ -582,7 +619,13 @@ jQuery( function ( $ ) {
 				if ( validate_phone ) {
 					pattern = new RegExp( /[\s\#0-9_\-\+\/\(\)\.]/g );
 
-					if ( 0 < $this.val().replace( pattern, '' ).length ) {
+					if (
+						0 <
+						$this
+							.val()
+							.replace( invisible_chars, '' )
+							.replace( pattern, '' ).length
+					) {
 						$this.attr( 'aria-invalid', 'true' );
 						$parent
 							.removeClass( 'woocommerce-validated' )
@@ -602,7 +645,7 @@ jQuery( function ( $ ) {
 						.removeClass(
 							'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email woocommerce-invalid-phone'
 						)
-						.addClass( 'woocommerce-validated' ); // eslint-disable-line max-len
+						.addClass( 'woocommerce-validated' );  
 				}
 			}
 		},
@@ -718,6 +761,7 @@ jQuery( function ( $ ) {
 					.toString()
 					.replace( '%%endpoint%%', 'update_order_review' ),
 				data: data,
+				wc_form_encoding: true,
 				success: function ( data ) {
 					// Reload the page if requested
 					if ( data && true === data.reload ) {
@@ -803,26 +847,55 @@ jQuery( function ( $ ) {
 						} );
 					}
 
-					// Check for error
-					if ( data && 'failure' === data.result ) {
-						var $form = $( 'form.checkout' );
+					var $form = $( 'form.checkout' );
 
-						// Remove notices from all sources
+					// `result` only reports whether the response carries a notice, so a success
+					// or info notice reads as `failure` there. Prefer the explicit error flag
+					// when it is the boolean this endpoint documents and, if it reports an
+					// error, the response carries the notice to show for it. Otherwise fall
+					// back to `result`, such as for a third-party callback that answers before
+					// Core does.
+					var trustsErrorFlag =
+						!! data &&
+						'boolean' === typeof data.has_errors &&
+						( ! data.has_errors || !! data.messages );
+					var hasErrors = trustsErrorFlag
+						? data.has_errors
+						: !! data && 'failure' === data.result;
+
+					// Whether this response has a notice to render. `result` is the legacy
+					// signal for that and third-party callbacks still set it, so keep honoring
+					// it alongside the error flag.
+					var rendersNotices =
+						!! data &&
+						!! data.messages &&
+						( hasErrors || 'failure' === data.result );
+
+					if ( hasErrors ) {
+						// Remove notices from all sources before rendering an error.
 						$(
 							'.woocommerce-error, .woocommerce-message, .is-error, .is-success'
 						).remove();
+					} else if ( rendersNotices ) {
+						// A non-error notice supersedes a failed place order, but leaves every
+						// other notice on the page alone.
+						$( '.woocommerce-NoticeGroup-checkout' ).remove();
+					}
 
-						// Add new errors returned by this event
-						if ( data.messages ) {
-							$form.prepend(
-								'<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
-									data.messages +
-									'</div>'
-							); // eslint-disable-line max-len
-						} else {
-							$form.prepend( data );
-						}
+					// Add notices returned by this event.
+					if ( rendersNotices ) {
+						$form.prepend(
+							'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
+								data.messages +
+								'</div>'
+						);  
+					} else if ( data && 'failure' === data.result ) {
+						// A response that reports a notice without carrying one: render it as-is.
+						$form.prepend( data );
+					}
 
+					// Check for error.
+					if ( hasErrors ) {
 						// Lose focus for all fields
 						$form
 							.find( '.input-text, select, input:checkbox' )
@@ -838,14 +911,19 @@ jQuery( function ( $ ) {
 					// If there is no errors and the checkout update was triggered by changing the shipping method, focus its radio input.
 					if (
 						data &&
-						'success' === data.result &&
+						! hasErrors &&
 						args.current_target &&
 						args.current_target.id.indexOf( 'shipping_method' ) !==
 							-1
 					) {
-						document
-							.getElementById( args.current_target.id )
-							.focus();
+						// The refreshed fragment may no longer offer the method that was selected.
+						var shippingInput = document.getElementById(
+							args.current_target.id
+						);
+
+						if ( shippingInput ) {
+							shippingInput.focus();
+						}
 					}
 
 					// Fire updated_checkout event.
@@ -962,6 +1040,7 @@ jQuery( function ( $ ) {
 					type: 'POST',
 					url: wc_checkout_params.checkout_url,
 					data: $form.serialize(),
+					wc_form_encoding: true,
 					dataType: 'json',
 					success: function ( result ) {
 						// Detach the unload handler that prevents a reload / redirect
@@ -1030,7 +1109,7 @@ jQuery( function ( $ ) {
 									'<div class="woocommerce-error">' +
 										wc_checkout_params.i18n_checkout_error +
 										'</div>'
-								); // eslint-disable-line max-len
+								);  
 							}
 						}
 					},
@@ -1071,10 +1150,10 @@ jQuery( function ( $ ) {
 				'.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message, .is-error, .is-success'
 			).remove();
 			wc_checkout_form.$checkout_form.prepend(
-				'<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' +
+				'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' +
 					error_message +
 					'</div>'
-			); // eslint-disable-line max-len
+			);  
 			wc_checkout_form.$checkout_form
 				.removeClass( 'processing' )
 				.unblock();
@@ -1268,6 +1347,7 @@ jQuery( function ( $ ) {
 					.toString()
 					.replace( '%%endpoint%%', 'apply_coupon' ),
 				data: data,
+				wc_form_encoding: true,
 				success: function ( response ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success, .checkout-inline-error-message'
@@ -1342,6 +1422,7 @@ jQuery( function ( $ ) {
 					.toString()
 					.replace( '%%endpoint%%', 'remove_coupon' ),
 				data: data,
+				wc_form_encoding: true,
 				success: function ( code ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success'

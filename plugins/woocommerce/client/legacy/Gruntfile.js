@@ -22,13 +22,14 @@ module.exports = function ( grunt ) {
 			options: {
 				configFile: '.stylelintrc',
 			},
-			all: [ '<%= dirs.css %>/*.scss', '!<%= dirs.css %>/select2.scss' ],
+			// select2.scss is excluded through `ignoreFiles` in .stylelintrc,
+			// so a direct stylelint run skips it too.
+			all: [ '<%= dirs.css %>/*.scss' ],
 		},
 
 		// Minify .js files.
 		uglify: {
 			options: {
-				ie8: true,
 				parse: {
 					strict: false,
 				},
@@ -289,6 +290,7 @@ module.exports = function ( grunt ) {
 					] )
 				);
 
+			runQueued( [ 'assets' ] );
 			grunt.log.writeln( 'Watching css/ and js/ for changes...' );
 		}
 	);

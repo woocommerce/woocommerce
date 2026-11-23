@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { useCollectionData } from '@woocommerce/base-context/hooks';
 import { BlockAttributes } from '@wordpress/blocks';
 import '@testing-library/jest-dom';
 import { act, fireEvent, screen, within } from '@testing-library/react';
@@ -57,13 +58,28 @@ jest.mock( '@woocommerce/block-data/schema/selectors', () => ( {
 	} ) ),
 } ) );
 
+// Mock usePreviewMode to true so preview data is loaded in test environment
+jest.mock( '@woocommerce/base-hooks', () => ( {
+	...jest.requireActual( '@woocommerce/base-hooks' ),
+	usePreviewMode: jest.fn( () => true ),
+} ) );
+
+jest.mock( '@woocommerce/base-context/hooks', () => {
+	const originalModule = jest.requireActual(
+		'@woocommerce/base-context/hooks'
+	);
+	return {
+		...originalModule,
+		useCollectionData: jest.fn( originalModule.useCollectionData ),
+	};
+} );
+
 async function setup( attributes: BlockAttributes ) {
 	const testBlock = [
 		{
 			name: 'woocommerce/product-filter-taxonomy',
 			attributes: {
 				...attributes,
-				isPreview: true,
 			},
 		},
 	];
@@ -109,15 +125,28 @@ describe( 'Taxonomy Filter block', () => {
 		} );
 
 		test( 'should display taxonomy filter when taxonomy is selected', async () => {
+			jest.mocked( useCollectionData ).mockClear();
 			await setup( { taxonomy: 'product_cat' } );
 			await selectBlock( /Block: Category Filter/i );
 
-			const block = within(
-				screen.getByLabelText( /Block: Category Filter/i )
+			const blockElement = screen.getByLabelText(
+				/Block: Category Filter/i
 			);
+			const block = within( blockElement );
 
 			// Should display the taxonomy label as heading
 			expect( block.getByText( /Category/i ) ).toBeInTheDocument();
+			expect( block.getByText( 'Sample Item 1' ) ).toBeInTheDocument();
+			expect(
+				blockElement.querySelector(
+					'.wc-block-product-filter-checkbox-list'
+				)
+			).not.toHaveClass( 'is-loading' );
+			expect( useCollectionData ).toHaveBeenCalledWith(
+				expect.objectContaining( {
+					queryTaxonomy: undefined,
+				} )
+			);
 		} );
 	} );
 

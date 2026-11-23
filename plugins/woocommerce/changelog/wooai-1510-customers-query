@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a customer query ability that gives AI agents order counts and total spend without names, emails or addresses.

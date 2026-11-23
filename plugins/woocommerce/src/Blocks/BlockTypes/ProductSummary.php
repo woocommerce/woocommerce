@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * ProductSummary class.
  */
 class ProductSummary extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 
 	/**
@@ -196,7 +197,7 @@ class ProductSummary extends AbstractBlock {
 		$post_id = $block->context['postId'] ?? '';
 		$product = wc_get_product( $post_id );
 
-		if ( ! $product || post_password_required( $product->get_id() ) ) {
+		if ( ! $product ) {
 			return '';
 		}
 

@@ -185,6 +185,15 @@ const reducer: Reducer< CartState > = ( state = defaultCartState, action ) => {
 				},
 			};
 			break;
+		case types.SET_SHIPPING_RATES_UPDATE_QUEUED:
+			state = {
+				...state,
+				metaData: {
+					...state.metaData,
+					isShippingRatesUpdateQueued: !! action.isQueued,
+				},
+			};
+			break;
 		case types.UPDATING_SELECTED_SHIPPING_RATE:
 			state = {
 				...state,

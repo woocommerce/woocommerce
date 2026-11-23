@@ -127,18 +127,22 @@ class Api {
 	 * @param PaymentMethodRegistry $payment_method_registry Payment method registry instance.
 	 */
 	public function register_payment_method_integrations( PaymentMethodRegistry $payment_method_registry ) {
-		$payment_method_registry->register(
-			Package::container()->get( Cheque::class )
+		// Preload option caches to minimize future queries for options that do not yet exist or are not set to autoload.
+		wp_prime_option_caches(
+			array(
+				'woocommerce_bacs_settings',
+				'woocommerce_bacs_accounts',
+				'woocommerce_cheque_settings',
+				'woocommerce_cod_settings',
+				'woocommerce_paypal_settings',
+			)
 		);
-		$payment_method_registry->register(
-			Package::container()->get( PayPal::class )
-		);
-		$payment_method_registry->register(
-			Package::container()->get( BankTransfer::class )
-		);
-		$payment_method_registry->register(
-			Package::container()->get( CashOnDelivery::class )
-		);
+
+		$container = Package::container();
+		$payment_method_registry->register( $container->get( Cheque::class ) );
+		$payment_method_registry->register( $container->get( PayPal::class ) );
+		$payment_method_registry->register( $container->get( BankTransfer::class ) );
+		$payment_method_registry->register( $container->get( CashOnDelivery::class ) );
 	}
 
 	/**
@@ -157,14 +161,7 @@ class Api {
 		$payment_method_scripts = $this->payment_method_registry->get_all_active_payment_method_script_dependencies();
 
 		foreach ( $payment_method_scripts as $payment_method_script ) {
-			if (
-				! array_key_exists( $payment_method_script, $wp_scripts->registered ) ||
-				! property_exists( $wp_scripts->registered[ $payment_method_script ], 'deps' )
-			) {
-				continue;
-			}
-			$deps = $wp_scripts->registered[ $payment_method_script ]->deps;
-			foreach ( $deps as $dep ) {
+			foreach ( ( $wp_scripts->registered[ $payment_method_script ]->deps ?? array() ) as $dep ) { // @phpstan-ignore nullCoalesce.property (false-positive)
 				if ( ! wp_script_is( $dep, 'registered' ) ) {
 					$error_handle  = $dep . '-dependency-error';
 					$error_message = sprintf(

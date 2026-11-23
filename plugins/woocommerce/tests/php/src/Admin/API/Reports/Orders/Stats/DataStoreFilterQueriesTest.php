@@ -11,6 +11,7 @@ use WC_Helper_Customer;
 use WC_Helper_Order;
 use WC_Helper_Queue;
 use WC_Helper_Reports;
+use WC_Helper_Shipping;
 use WC_Order_Item_Product;
 use WC_Product_Simple;
 
@@ -133,12 +134,19 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 		$order_time = (int) $order_datetime->format( 'U' );
 
 		$iterations = 1;
+		// The Orders Stats report queries date_paid by default, so each order pins it
+		// alongside date_created. Left unset, reaching a paid status stamps date_paid with
+		// the wall clock, and a run that crosses the hour puts orders outside the window
+		// the assertions query.
 		foreach ( $primary_products as $product ) {
 			foreach ( array( null, $small_coupon, $large_coupon ) as $coupon ) {
 				foreach ( array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ) as $order_status ) {
-					$single_product_order = WC_Helper_Order::create_order( $customer->get_id(), $product );
 					// Offset each order by 1 second.
-					$single_product_order->set_date_created( $order_time + $iterations++ );
+					$single_order_time = $order_time + $iterations++;
+
+					$single_product_order = WC_Helper_Order::create_order( $customer->get_id(), $product );
+					$single_product_order->set_date_created( $single_order_time );
+					$single_product_order->set_date_paid( $single_order_time );
 					$single_product_order->set_status( $order_status );
 
 					if ( $coupon ) {
@@ -161,7 +169,9 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 					$item->save();
 					$two_product_order->add_item( $item );
 					// Offset each order by 1 second.
-					$two_product_order->set_date_created( $order_time + $iterations++ );
+					$two_order_time = $order_time + $iterations++;
+					$two_product_order->set_date_created( $two_order_time );
+					$two_product_order->set_date_paid( $two_order_time );
 					$two_product_order->set_status( $order_status );
 
 					if ( $coupon ) {
@@ -207,6 +217,7 @@ class DataStoreFilterQueriesTest extends OrdersStatsTestCase {
 		self::$primary_product_ids = array();
 
 		WC_Helper_Reports::reset_stats_dbs();
+		WC_Helper_Shipping::delete_simple_flat_rate();
 	}
 
 	/**

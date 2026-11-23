@@ -3,6 +3,7 @@
 -   I have followed the [WooCommerce Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) and the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/).
 -   I have checked to ensure there aren't other open [Pull Requests](https://github.com/woocommerce/woocommerce/pulls) for the same update/change.
 -   I have reviewed my code for [security best practices](https://developer.wordpress.org/apis/security/).
+-   I have assessed the impact of this change and followed the applicable [review requirements](https://github.com/woocommerce/woocommerce/blob/trunk/docs/contribution/contributing/deciding-pr-high-impact.md#review-requirements).
 -   Following the above guidelines will result in quick merges and clear and detailed feedback when appropriate.
 
 <!-- You can erase any parts of this template not applicable to your Pull Request. -->

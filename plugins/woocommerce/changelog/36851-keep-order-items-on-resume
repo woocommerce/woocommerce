@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep order items intact when a shopper retries a failed or unpaid classic checkout payment, so integrations still find them.

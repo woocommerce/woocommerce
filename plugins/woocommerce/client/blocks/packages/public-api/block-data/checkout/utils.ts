@@ -65,7 +65,7 @@ export const handleErrorResponse = ( {
 					isString( response.messageContext )
 						? {
 								context: response.messageContext,
-						  }
+							}
 						: undefined;
 				errorResponse = response;
 				createErrorNotice( response.message, errorOptions );
@@ -151,9 +151,7 @@ export const runCheckoutSuccessObservers = ( {
 } ) => {
 	let successResponse = null as null | ObserverSuccessResponse;
 	let errorResponse = null as
-		| null
-		| ObserverErrorResponse
-		| ObserverFailResponse;
+		null | ObserverErrorResponse | ObserverFailResponse;
 
 	observerResponses.forEach( ( response ) => {
 		if ( isSuccessResponse( response ) ) {
@@ -175,7 +173,7 @@ export const runCheckoutSuccessObservers = ( {
 				isString( errorResponse.messageContext )
 					? {
 							context: errorResponse.messageContext,
-					  }
+						}
 					: undefined;
 			createErrorNotice( errorResponse.message, errorOptions );
 		}

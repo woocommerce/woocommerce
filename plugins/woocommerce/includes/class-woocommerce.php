@@ -21,8 +21,10 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\LegacyAssets\LegacySelect2UsageTracker;
-use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
-use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
+use Automattic\WooCommerce\Internal\MCP\McpAdapterVersionNotice;
+use Automattic\WooCommerce\Internal\MCP\McpEndpointRemoval;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesTracking;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -30,23 +32,33 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Internal\Email\EmailLogger;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
+use Automattic\WooCommerce\Internal\Admin\MenuIcons;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
+use Automattic\WooCommerce\Internal\Admin\Screens\AdminScreens;
+use Automattic\WooCommerce\Internal\Admin\Screens\Settings\ChequeSettings;
+use Automattic\WooCommerce\Internal\Admin\Screens\Settings\SettingsScreen;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
 use Automattic\WooCommerce\Caches\ProductCountCacheService;
+use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
 use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyStore;
+use Automattic\WooCommerce\Internal\StructuredData\OpenGraph;
+use Automattic\WooCommerce\Internal\SearchEngineVisibility;
 
 /**
  * Main WooCommerce Class.
@@ -60,7 +72,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '11.2.0-dev';
+	public $version = '11.5.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -69,7 +81,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $db_version = '920';
+	public $db_version = '1140';
 
 	/**
 	 * The single instance of the class.
@@ -192,7 +204,7 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function __clone() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, 'Cloning is forbidden.', '2.1' );
 	}
 
 	/**
@@ -203,7 +215,7 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function __wakeup() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, 'Unserializing instances of this class is forbidden.', '2.1' );
 	}
 
 	/**
@@ -367,8 +379,9 @@ final class WooCommerce {
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'get_tracking_history' ), 10, 2 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'handle_tracking_setting_change' ), 10, 2 );
+		add_action( IdempotencyStore::CLEANUP_HOOK, array( IdempotencyStore::class, 'cleanup' ) );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'register_recurring_actions' ) );
-		add_action( 'action_scheduler_init', array( $this, 'add_recurring_action_wrappers' ) );
+		ActionSchedulerUtil::when_ready( array( $this, 'add_recurring_action_wrappers' ) );
 
 		add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
@@ -401,19 +414,29 @@ final class WooCommerce {
 		$container->get( EmailImprovements::class );
 		$container->get( DeferredEmailQueue::class );
 		$container->get( AddressProviderController::class );
-		$container->get( AbilitiesRegistry::class );
-		$container->get( MCPAdapterProvider::class );
+		$container->get( AbilitiesLoader::class );
+		$container->get( McpEndpointRemoval::class );
+		$container->get( McpAdapterVersionNotice::class );
+		$container->get( CouponCodeLookupInvalidator::class );
 		$container->get( ProductVersionStringInvalidator::class );
 		$container->get( OrdersVersionStringInvalidator::class );
 		$container->get( TaxRateVersionStringInvalidator::class );
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
+		$container->get( AdminScreens::class );
+		$container->get( ChequeSettings::class );
+		$container->get( SettingsScreen::class );
+		$container->get( AbilitiesTracking::class );
+		$container->get( OpenGraph::class );
+		$container->get( SearchEngineVisibility::class );
+		$container->get( MenuIcons::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
 		 */
 		$container->get( Automattic\WooCommerce\Internal\Utilities\PluginInstaller::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Tax\BaseLocationTaxEstimate::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController::class )->register();
@@ -423,6 +446,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
 		$container->get( LegacySelect2UsageTracker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ProductCustoms\Telemetry::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
 		$container->get( EmailLogger::class )->register();
 		$container->get( VisualAttributeTermAdmin::class )->register();
@@ -430,11 +454,25 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\ProductSales::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\TexturizeExclusions::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Ucp\UcpDiscovery::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\LlmsTxt\LlmsTxt::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRestController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ReadinessCheckPage::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ProductsList::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\Telemetry::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ProductDownloads\DownloadableFileAttachments::class )->register();
+		$container->get( ProductUtil::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
@@ -447,9 +485,6 @@ final class WooCommerce {
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
-
-		// Code+GraphQL API.
-		Automattic\WooCommerce\Api\Infrastructure\Main::register();
 
 		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
 		\WC_Admin_Reports::register_orders_hook_handlers();
@@ -507,14 +542,22 @@ final class WooCommerce {
 			);
 
 			if ( false !== strpos( $message, 'Stack trace:' ) ) {
-				$segments  = explode( 'Stack trace:', $message );
-				$message   = str_replace( PHP_EOL, ' ', trim( $segments[0] ) );
-				$backtrace = array_map(
-					'trim',
-					explode( PHP_EOL, $segments[1] )
-				);
+				$segments = explode( 'Stack trace:', $message, 2 );
+				$message  = str_replace( PHP_EOL, ' ', trim( $segments[0] ) );
 
-				$context['backtrace'] = $backtrace;
+				$context['backtrace'] = array();
+				foreach ( explode( "\n", trim( $segments[1] ) ) as $line ) {
+					// Cap each line so one huge line cannot hit the PCRE backtrack limit.
+					$line = substr( $line, 0, 4096 );
+					// Keep only frame headers, including eval, anonymous class and PHP 8.4 closure frames, and drop their arguments.
+					// PHP escapes newlines inside trace arguments, so an argument cannot start a frame line of its own.
+					if ( preg_match( '/^#\d+ (?:(?:\[internal function\]|.*?\(\d+\)): (?:\{closure[^{}\'\r\n]*+\}|[^(\r\n])++\(|\{main\})/', $line, $frame ) ) {
+						$context['backtrace'][] = '(' === substr( $frame[0], -1 ) ? $frame[0] . ')' : $frame[0];
+					} elseif ( preg_match( '/^Next ([\w\\\\]+): /', $line, $next ) ) {
+						// Keep the chained exception class, not its message.
+						$context['backtrace'][] = 'Next ' . $next[1];
+					}
+				}
 			} else {
 				$context['backtrace'] = true;
 			}
@@ -658,7 +701,14 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Returns true if the request is a store REST API request.
+	 * Returns true if the request is a store REST API or UCP API request.
+	 *
+	 * The UCP namespace counts as one: like the Store API it returns data rather than rendered
+	 * pages, so callers can skip the same work — block and template registration, site tracking.
+	 *
+	 * This is a rendering decision only. StoreApi\Authentication keeps its own, narrower check
+	 * and gives UCP only its rate limiting: its other filters assume a browser client with a nonce,
+	 * which a UCP agent never sends, so UCP routes must not inherit them.
 	 *
 	 * @return bool
 	 */
@@ -667,13 +717,21 @@ final class WooCommerce {
 			return false;
 		}
 
-		// Pretty permalinks: the Store API namespace is part of the path, e.g. /wp-json/wc/store/v1/cart. Match the
+		$namespaces = array( 'wc/store/', 'wc/ucp/' );
+
+		// Pretty permalinks: the namespace is part of the path, e.g. /wp-json/wc/store/v1/cart. Match the
 		// path only (a leading slash anchors the prefix) so a REST-like query argument such as
-		// /some-page/?arg=/wp-json/wc/store/ is not mistaken for a Store API request.
+		// /some-page/?arg=/wp-json/wc/store/ is not mistaken for a Store API request. Decode the path because WordPress
+		// also matches rewrite rules against the decoded path, so /wp%2Djson/wc/store/v1/cart reaches the Store API.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$path = wp_parse_url( '/' . ltrim( (string) wp_unslash( $_SERVER['REQUEST_URI'] ), '/' ), PHP_URL_PATH );
-		if ( is_string( $path ) && false !== strpos( $path, '/' . trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) ) {
-			return true;
+		if ( is_string( $path ) ) {
+			$path = rawurldecode( $path );
+			foreach ( $namespaces as $namespace ) {
+				if ( false !== stripos( $path, '/' . trailingslashit( rest_get_url_prefix() ) . $namespace ) ) {
+					return true;
+				}
+			}
 		}
 
 		// Plain permalinks: the route is passed as a query parameter, e.g. ?rest_route=/wc/store/v1/cart.
@@ -681,8 +739,10 @@ final class WooCommerce {
 		if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the route only, no state change.
 			$rest_route = '/' . ltrim( rawurldecode( sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) ), '/' );
-			if ( 0 === strpos( $rest_route, '/wc/store/' ) ) {
-				return true;
+			foreach ( $namespaces as $namespace ) {
+				if ( 0 === stripos( $rest_route, '/' . $namespace ) ) {
+					return true;
+				}
 			}
 		}
 
@@ -1141,7 +1201,10 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function plugin_path() {
-		return untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) );
+		static $plugin_path = null;
+		$plugin_path        = $plugin_path ?? untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) );
+
+		return $plugin_path;
 	}
 
 	/**
@@ -1598,7 +1661,7 @@ final class WooCommerce {
 	 *
 	 * @param string $old_value The old value for the woocommerce_allow_tracking option.
 	 * @param string $value The current value for the woocommerce_allow_tracking option.
-	 * @since x.x.x
+	 * @since 9.5.2
 	 *
 	 * @return void
 	 */
@@ -1744,7 +1807,7 @@ final class WooCommerce {
 			$scheduled_sales_time = strtotime( '00:00 tomorrow' );
 		}
 
-		as_schedule_recurring_action( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
+		ActionSchedulerUtil::schedule_recurring( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
 
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
@@ -1756,7 +1819,7 @@ final class WooCommerce {
 			 */
 			$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $held_duration ) );
 
-			as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
+			ActionSchedulerUtil::schedule_single( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
 
 		}
 
@@ -1773,23 +1836,25 @@ final class WooCommerce {
 		// so it doesn't occur in the same request. WooCommerce Admin also schedules
 		// a daily cron that gets lost due to a race condition. WC_Privacy's background
 		// processing instance updates the cron schedule from within a cron job.
-		as_schedule_recurring_action( time() + 10, DAY_IN_SECONDS, 'woocommerce_cleanup_personal_data', array(), 'woocommerce', true );
+		ActionSchedulerUtil::schedule_recurring( time() + 10, DAY_IN_SECONDS, 'woocommerce_cleanup_personal_data', array(), 'woocommerce', true );
 
-		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_logs', array(), 'woocommerce', true );
+		ActionSchedulerUtil::schedule_recurring( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_logs', array(), 'woocommerce', true );
 
-		as_schedule_recurring_action( $tomorrow_6am, 12 * HOUR_IN_SECONDS, 'woocommerce_cleanup_sessions', array(), 'woocommerce', true );
+		ActionSchedulerUtil::schedule_recurring( $tomorrow_6am, 12 * HOUR_IN_SECONDS, 'woocommerce_cleanup_sessions', array(), 'woocommerce', true );
 
-		as_schedule_recurring_action( $tomorrow_6am, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', true );
+		ActionSchedulerUtil::schedule_recurring( $tomorrow_6am, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', true );
 
 		// Schedule the action to send tracking events if tracking is enabled.
 		$this->schedule_tracking_action();
 
-		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
+		ActionSchedulerUtil::schedule_recurring( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
 
-		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
+		ActionSchedulerUtil::schedule_recurring( $tomorrow_3am, DAY_IN_SECONDS, IdempotencyStore::CLEANUP_HOOK, array(), 'woocommerce', true );
+
+		ActionSchedulerUtil::schedule_recurring( $tomorrow_3am, DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
 
 		// Note: this is potentially redundant when the core package exists.
-		as_schedule_single_action( time() + 10, 'generate_category_lookup_table_wrapper', array(), 'woocommerce', true );
+		ActionSchedulerUtil::schedule_single( time() + 10, 'generate_category_lookup_table_wrapper', array(), 'woocommerce', true );
 	}
 
 	/**
@@ -1832,8 +1897,8 @@ final class WooCommerce {
 		$tracker_recurrence = apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' );
 		$tracker_recurrence = is_string( $tracker_recurrence ) ? $tracker_recurrence : 'daily';
 		$core_internals     = wp_get_schedules();
-		$interval           = $core_internals[ $tracker_recurrence ]['interval'] ?? DAY_IN_SECONDS;
-		as_schedule_recurring_action( time() + 10, $interval, 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce', true );
+		$interval           = (int) ( $core_internals[ $tracker_recurrence ]['interval'] ?? DAY_IN_SECONDS );
+		ActionSchedulerUtil::schedule_recurring( time() + 10, $interval, 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce', true );
 	}
 
 	/**

@@ -172,7 +172,7 @@ export const useCombinedIncompatibilityNotice = (
 		! isSubsetOf( dismissedItemSlugs, allIncompatibleItemSlugs )
 			? dismissedItemSlugs.filter( ( slug ) =>
 					allIncompatibleItemSlugs.includes( slug )
-			  )
+				)
 			: null;
 
 	// Deliberately no dependency array: a pruned set is always strictly smaller

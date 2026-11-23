@@ -33,12 +33,12 @@
 		.woocommerce-filters-filter__button {
 			background-color: $studio-white;
 
-			&.components-button:not(:disabled):not([aria-disabled='true']):focus {
+			&.components-button:not(:disabled):not([aria-disabled="true"]):focus {
 				background-color: $studio-white;
 			}
 
 			&::before {
-				content: '';
+				content: "";
 				width: 8px;
 				height: 8px;
 				background-color: $studio-woocommerce-purple;
@@ -68,7 +68,7 @@
 			color: $gray-700;
 		}
 
-		&.components-button:not(:disabled):not([aria-disabled='true']):focus {
+		&.components-button:not(:disabled):not([aria-disabled="true"]):focus {
 			background-color: $gray-100;
 		}
 

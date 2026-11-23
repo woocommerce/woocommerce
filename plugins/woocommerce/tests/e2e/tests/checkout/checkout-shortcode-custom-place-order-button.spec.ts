@@ -17,6 +17,7 @@ import {
 } from '../../utils/pages';
 import { wpCLI } from '../../utils/cli';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
+import { enableTestPlugin } from '../../utils/blocks/test-plugins';
 
 const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
@@ -37,12 +38,13 @@ const test = baseTest.extend( {
 		const codWasEnabled = await setGatewayEnabled( restApi, 'cod', true );
 
 		await page.context().clearCookies();
+		await enableTestPlugin(
+			page.context(),
+			'custom-place-order-button-test'
+		);
 		await use( page );
 
-		// Cleanup: deactivate the test plugin so its custom gateway stops being
-		// registered on every checkout/order-pay page for the rest of the run.
-		// The gateway hardcodes `enabled = 'yes'` in its constructor, so deleting
-		// the option alone would NOT disable it — only deactivation does.
+		// Cleanup: undo the plugin activation and the option.
 		await wpCLI(
 			'wp plugin deactivate woocommerce-blocks-test-plugins/custom-place-order-button-test.php'
 		);
@@ -70,39 +72,17 @@ const test = baseTest.extend( {
 } );
 
 test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
-	// The shared site setup attaches a free shipping method to zone 0, so every
-	// cart needs shipping. On the shortcode checkout that renders the collapsed
-	// "Ship to a different address?" block with hidden, empty required shipping
-	// fields. A custom place-order button's client-side validate() counts those
-	// hidden invalid fields and silently skips submission, so the order is never
-	// placed. Remove the baseline shipping for this spec so the cart does not
-	// need shipping, then restore it afterwards.
-	// TODO: Remove this workaround once the validation fix is merged.
-	// Bug fixed in https://github.com/woocommerce/woocommerce/pull/65933.
-	test.beforeAll( async ( { restApi } ) => {
-		const { data: methods } = await restApi.get<
-			{ instance_id: number }[]
-		>( `${ WC_API_PATH }/shipping/zones/0/methods` );
-
-		for ( const method of methods ) {
-			await restApi.delete(
-				`${ WC_API_PATH }/shipping/zones/0/methods/${ method.instance_id }`,
-				{ force: true }
-			);
-		}
-	} );
-
-	test.afterAll( async ( { restApi } ) => {
-		// Restore the baseline free shipping method on zone 0 (mirrors site setup).
-		await restApi.post( `${ WC_API_PATH }/shipping/zones/0/methods`, {
-			method_id: 'free_shipping',
-		} );
-	} );
-
 	test(
 		'clicking custom button triggers validation when form is invalid',
 		{ tag: [ tags.PAYMENTS ] },
 		async ( { page, product } ) => {
+			const checkoutRequests: string[] = [];
+			page.on( 'request', ( request ) => {
+				if ( request.url().includes( 'wc-ajax=checkout' ) ) {
+					checkoutRequests.push( request.url() );
+				}
+			} );
+
 			await addAProductToCart( page, product.id, 1 );
 			await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
 
@@ -124,6 +104,10 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 
 			// Ensuring we're still on checkout (order not submitted).
 			await expect( page ).not.toHaveURL( /order-received/ );
+
+			// The server also marks empty fields invalid, so check that client-side
+			// validation stopped the checkout request from being sent.
+			expect( checkoutRequests ).toHaveLength( 0 );
 		}
 	);
 
@@ -158,7 +142,7 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 				.fill( customer.billing.email );
 
 			// Selecting Cash on Delivery first.
-			await page.getByText( 'Cash on delivery' ).click();
+			await page.getByText( 'Cash on delivery', { exact: true } ).click();
 
 			// Ensuring the default button is visible and the custom button is not.
 			await expect( page.locator( '#place_order' ) ).toBeVisible();
@@ -184,7 +168,7 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 			await expect( page.locator( '#place_order' ) ).toBeHidden();
 
 			// Switching back to Cash on Delivery.
-			await page.getByText( 'Cash on delivery' ).click();
+			await page.getByText( 'Cash on delivery', { exact: true } ).click();
 
 			await page.waitForFunction( () => {
 				const form = document.querySelector( 'form.checkout' );
@@ -208,6 +192,12 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 		async ( { page, product } ) => {
 			await addAProductToCart( page, product.id, 1 );
 			await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
+
+			// The cart needs shipping, so the collapsed shipping fields render hidden
+			// and empty. The custom button must still submit with them on the page.
+			const shippingFirstName = page.locator( '#shipping_first_name' );
+			await expect( shippingFirstName ).toBeAttached();
+			await expect( shippingFirstName ).toBeHidden();
 
 			const customer = getFakeCustomer();
 			await page
@@ -239,7 +229,6 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 			await expect(
 				page.getByTestId( 'custom-place-order-button' )
 			).toBeVisible();
-
 			await page.getByTestId( 'custom-place-order-button' ).click();
 
 			// Ensuring the order was placed successfully.

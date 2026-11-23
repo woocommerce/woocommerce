@@ -12,7 +12,7 @@ This skill provides guidance for the WooCommerce development workflow, including
 Follow these guidelines for WooCommerce development workflow:
 
 1. **Running tests**: See [running-tests.md](running-tests.md) for PHP and JavaScript test commands, test environment setup, and troubleshooting
-2. **Code quality**: See [code-quality.md](code-quality.md) for linting and code style fixes
+2. **Code quality**: See [code-quality.md](code-quality.md) for linting, code style fixes, and the lockfile procedure for dependency changes
 3. **PHP linting patterns**: See [php-linting-patterns.md](php-linting-patterns.md) for common PHP linting issues and fixes
 4. **JS/TS i18n patterns**: See [js-i18n-patterns.md](js-i18n-patterns.md) for translatable string patterns and placeholder usage
 5. **Markdown linting**: See [markdown-linting.md](markdown-linting.md) for markdown file linting and formatting
@@ -23,8 +23,8 @@ The standard development workflow:
 
 1. Make code changes
 2. Run relevant tests: `pnpm run test:php:env -- --filter YourTestClass`
-3. Run linting/type checking: `pnpm run lint:changes:branch:php`
-4. Fix any issues: `pnpm run lint:php:fix`
+3. Run linting: `pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch` (PHP and JS, the command CI's Lint job runs; `git add` new files first, since untracked files are skipped; for a PR that does not target trunk, append its fetched base, such as `origin/release/X.Y`)
+4. Fix any issues: PHP with `pnpm --filter=@woocommerce/plugin-woocommerce lint:php:fix`; there is no branch fixer for JS, so fix JS by hand (see [code-quality.md](code-quality.md))
 5. Commit changes only after tests pass
 
 ## Key Principles

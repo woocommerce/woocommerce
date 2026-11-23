@@ -80,7 +80,7 @@ class SelectedVariationName {
 				continue;
 			}
 
-			if ( wc_is_attribute_in_product_name( $display_value, $product_name ) ) {
+			if ( wc_is_attribute_in_product_name( $display_value, $product_name, $product ) ) {
 				$has_attributes_in_name = true;
 				continue;
 			}

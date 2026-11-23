@@ -3,15 +3,14 @@
  */
 import {
 	useBlockProps,
+	RichText,
 	__experimentalUseColorProps as useColorProps,
 } from '@wordpress/block-editor';
-import EditableButton from '@woocommerce/editor-components/editable-button';
 
 /**
  * Internal dependencies
  */
 import { defaultStartShoppingButtonLabel } from './constants';
-import { getVariant } from '../utils';
 
 export const Edit = ( {
 	attributes,
@@ -28,12 +27,24 @@ export const Edit = ( {
 	const colorProps = useColorProps( attributes );
 	const { startShoppingButtonLabel } = attributes;
 
+	// Same markup and classes as a core Button block, so the theme's button styles apply in the editor too.
+	const linkClassName = [
+		'wp-block-button__link',
+		'wp-element-button',
+		'wc-block-mini-cart__shopping-button',
+		colorProps.className,
+	]
+		.filter( Boolean )
+		.join( ' ' );
+
 	return (
 		<div { ...blockProps }>
-			<EditableButton
-				className={ `wc-block-mini-cart__shopping-button ${
-					colorProps.className || ''
-				}` }
+			<RichText
+				tagName="a"
+				className={ linkClassName }
+				style={ colorProps.style }
+				multiline={ false }
+				allowedFormats={ [] }
 				value={ startShoppingButtonLabel }
 				placeholder={ defaultStartShoppingButtonLabel }
 				onChange={ ( content ) => {
@@ -41,8 +52,6 @@ export const Edit = ( {
 						startShoppingButtonLabel: content,
 					} );
 				} }
-				variant={ getVariant( blockProps.className, 'contained' ) }
-				style={ colorProps.style }
 			/>
 		</div>
 	);

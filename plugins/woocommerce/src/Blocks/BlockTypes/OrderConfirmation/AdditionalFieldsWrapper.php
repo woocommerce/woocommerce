@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 
@@ -9,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
  * AdditionalFieldsWrapper class.
  */
 class AdditionalFieldsWrapper extends AbstractOrderConfirmationBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -50,7 +52,9 @@ class AdditionalFieldsWrapper extends AbstractOrderConfirmationBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'additionalFields', Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'order' ) );
+		$order_fields = Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'order' );
+		$this->asset_data_registry->add( 'additionalFields', $order_fields );
+		$this->asset_data_registry->add( 'additionalOrderFields', $order_fields );
 		$this->asset_data_registry->add( 'additionalContactFields', Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'contact' ) );
 	}
 }

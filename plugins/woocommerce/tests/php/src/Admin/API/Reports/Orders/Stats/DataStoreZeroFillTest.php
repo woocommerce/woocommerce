@@ -10,6 +10,7 @@ use WC_Helper_Customer;
 use WC_Helper_Order;
 use WC_Helper_Queue;
 use WC_Helper_Reports;
+use WC_Helper_Shipping;
 use WC_Product_Simple;
 
 /**
@@ -127,6 +128,7 @@ class DataStoreZeroFillTest extends OrdersStatsTestCase {
 		}
 
 		WC_Helper_Reports::reset_stats_dbs();
+		WC_Helper_Shipping::delete_simple_flat_rate();
 	}
 
 	/**

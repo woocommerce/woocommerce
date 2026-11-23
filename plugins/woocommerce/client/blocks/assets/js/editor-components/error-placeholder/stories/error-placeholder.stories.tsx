@@ -26,7 +26,7 @@ const Template: StoryFn< ErrorPlaceholderProps > = ( args ) => {
 					() => setArgs( { isLoading: false } ),
 					INTERACTION_TIMEOUT
 				);
-		  }
+			}
 		: undefined;
 
 	return (

@@ -8,12 +8,54 @@ declare( strict_types = 1 );
  */
 class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	/**
+	 * @testdox Cart links preselect taxonomy variations with non-Latin term slugs.
+	 * @testWith ["color", "Κόκκινο"]
+	 *           ["χρώμα", "Κόκκινο"]
+	 *           ["color", "Red"]
+	 * @param string $attribute_name Attribute name.
+	 * @param string $term_name Term name.
+	 */
+	public function test_variation_dropdown_preselects_attribute_from_permalink( string $attribute_name, string $term_name ): void {
+		$attribute = WC_Helper_Product::create_product_attribute_object( $attribute_name, array( $term_name ) );
+		$product   = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+		$term = $attribute->get_terms()[0];
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( sanitize_title( $attribute->get_name() ) => $term->slug ) );
+		$variation->save();
+
+		$previous_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve request state for the test.
+		parse_str( wp_parse_url( $variation->get_permalink(), PHP_URL_QUERY ), $query );
+		$_REQUEST = wp_slash( $query ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simulate following the variation permalink.
+		ob_start();
+		try {
+			wc_dropdown_variation_attribute_options(
+				array(
+					'product'   => $product,
+					'attribute' => $attribute->get_name(),
+					'options'   => array( $term->slug ),
+				)
+			);
+			$html = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+			$_REQUEST = $previous_request;
+		}
+
+		$this->assertMatchesRegularExpression( '/value="' . preg_quote( $term->slug, '/' ) . '"\s+selected=/', $html, 'The linked variation must be selected in the dropdown.' );
+	}
+
+	/**
 	 * Render the loop add-to-cart template for a product.
 	 *
 	 * @param WC_Product $test_product Product to render.
+	 * @param array      $args Arguments for the loop button.
 	 * @return string Rendered template markup.
 	 */
-	private function render_loop_add_to_cart( WC_Product $test_product ): string {
+	private function render_loop_add_to_cart( WC_Product $test_product, array $args = array() ): string {
 		global $product;
 
 		$previous_product = $product;
@@ -22,7 +64,7 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 
 		ob_start();
 		try {
-			woocommerce_template_loop_add_to_cart();
+			woocommerce_template_loop_add_to_cart( $args );
 
 			return (string) ob_get_clean();
 		} finally {
@@ -77,11 +119,188 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * `enabled` values the checkout payment tests switched on the shared gateway instances, keyed by gateway ID.
+	 *
+	 * @var array<string, string>
+	 */
+	private $original_gateway_enabled = array();
+
+	/**
 	 * Clean up cache between tests.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		wp_cache_flush();
+	}
+
+	/**
+	 * Restore the shared gateway instances, which the base class doesn't reset.
+	 */
+	public function tearDown(): void {
+		try {
+			parent::tearDown();
+		} finally {
+			foreach ( $this->original_gateway_enabled as $gateway_id => $enabled ) {
+				WC()->payment_gateways()->payment_gateways()[ $gateway_id ]->enabled = $enabled;
+			}
+			$this->original_gateway_enabled = array();
+
+			foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+				$gateway->chosen = false;
+			}
+		}
+	}
+
+	/**
+	 * Render the classic checkout payment section for a cart that needs payment, with BACS and COD enabled.
+	 *
+	 * @return string Rendered markup.
+	 */
+	private function render_checkout_payment(): string {
+		$this->prepare_checkout_payment();
+
+		ob_start();
+		woocommerce_checkout_payment();
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render the checkout/payment.php template directly, as code that loads it without woocommerce_checkout_payment() would.
+	 *
+	 * @param array $extra_args Template arguments on top of the checkout, the gateways and the button text.
+	 * @return string Rendered markup.
+	 */
+	private function render_payment_template( array $extra_args ): string {
+		$this->prepare_checkout_payment();
+
+		ob_start();
+		wc_get_template(
+			'checkout/payment.php',
+			array(
+				'checkout'           => WC()->checkout(),
+				'available_gateways' => WC()->payment_gateways()->get_available_payment_gateways(),
+				'order_button_text'  => 'Place order',
+			) + $extra_args
+		);
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Enable BACS and COD, make the cart need payment and start from no payment choice in the session.
+	 */
+	private function prepare_checkout_payment(): void {
+		foreach ( array( WC_Gateway_BACS::ID, WC_Gateway_COD::ID ) as $gateway_id ) {
+			$gateway = WC()->payment_gateways()->payment_gateways()[ $gateway_id ];
+			if ( ! isset( $this->original_gateway_enabled[ $gateway_id ] ) ) {
+				$this->original_gateway_enabled[ $gateway_id ] = $gateway->enabled;
+			}
+			$gateway->enabled = 'yes';
+		}
+		add_filter( 'woocommerce_cart_needs_payment', '__return_true' );
+		// The mock session is one object for the whole run and the base class never clears this key.
+		WC()->session->set( 'chosen_payment_method', null );
+	}
+
+	/**
+	 * Get the IDs of the payment method radios that are checked in rendered markup.
+	 *
+	 * @param string $output Rendered payment section.
+	 * @return string[]
+	 */
+	private function get_checked_gateways( string $output ): array {
+		preg_match_all( '/id="payment_method_([^"]+)"[^>]*\/>/', $output, $radios, PREG_SET_ORDER );
+		$checked = array();
+		foreach ( $radios as $radio ) {
+			if ( false !== strpos( $radio[0], 'checked=' ) ) {
+				$checked[] = $radio[1];
+			}
+		}
+
+		return $checked;
+	}
+
+	/**
+	 * @testdox The classic checkout should start with the first available gateway selected without a default payment method callback, as before.
+	 */
+	public function test_checkout_payment_selects_the_first_gateway_without_a_callback(): void {
+		$output = $this->render_checkout_payment();
+
+		$this->assertSame( array( WC_Gateway_BACS::ID ), $this->get_checked_gateways( $output ) );
+		$this->assertStringContainsString( 'data-preselected="yes"', $output, 'The list should tell checkout.js a method is selected.' );
+	}
+
+	/**
+	 * @testdox The classic checkout should start with nothing selected when the default payment method callback returns nothing.
+	 */
+	public function test_checkout_payment_selects_nothing_when_the_callback_returns_nothing(): void {
+		add_filter( 'woocommerce_default_payment_method', '__return_empty_string' );
+
+		$output = $this->render_checkout_payment();
+
+		$this->assertSame( array(), $this->get_checked_gateways( $output ) );
+		$this->assertStringContainsString( 'data-preselected="no"', $output, 'The list should tell checkout.js not to select the first method.' );
+		$this->assertStringContainsString( 'id="payment_method_' . WC_Gateway_COD::ID . '"', $output, 'The gateways should still be offered.' );
+	}
+
+	/**
+	 * @testdox The checkout payment template should print the preselection it is handed, without working it out from the gateways.
+	 */
+	public function test_payment_template_prints_the_preselection_it_is_handed(): void {
+		$with_none_selected = $this->render_payment_template( array( 'has_chosen_gateway' => true ) );
+		WC()->payment_gateways()->payment_gateways()[ WC_Gateway_BACS::ID ]->set_current();
+		$with_one_selected = $this->render_payment_template( array( 'has_chosen_gateway' => false ) );
+
+		$this->assertStringContainsString( 'data-preselected="yes"', $with_none_selected );
+		$this->assertStringContainsString( 'data-preselected="no"', $with_one_selected );
+	}
+
+	/**
+	 * @testdox The checkout payment template should say a method is preselected when its loader doesn't pass the value, so checkout.js keeps selecting the first one.
+	 */
+	public function test_payment_template_defaults_to_preselected_without_the_value(): void {
+		$output = $this->render_payment_template( array() );
+
+		$this->assertSame( array(), $this->get_checked_gateways( $output ), 'No gateway is marked as current in this test.' );
+		$this->assertStringContainsString( 'data-preselected="yes"', $output );
+	}
+
+	/**
+	 * @testdox Product archive titles fall back to Shop when the configured Shop page is missing.
+	 */
+	public function test_product_archive_title_falls_back_to_shop_when_shop_page_is_missing(): void {
+		global $wp_query, $wp_the_query;
+
+		// Nothing is restored by hand. The transaction rollback covers the option
+		// and the page, and `WP_UnitTestCase_Base::tear_down()` replaces both
+		// query globals with a fresh `WP_Query` before the next test runs.
+		$shop_page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Retired catalog',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+		wp_delete_post( $shop_page_id, true );
+
+		$query                       = new WP_Query( array( 'post_type' => 'product' ) );
+		$query->is_post_type_archive = true;
+		$query->is_archive           = true;
+		$query->is_tax               = false;
+		$query->is_home              = false;
+		$wp_query                    = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_the_query                = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->assertTrue( is_shop(), 'The query must represent the product archive.' );
+		$this->assertSame( '', get_the_title( $shop_page_id ), 'The configured Shop page must be missing.' );
+		$this->assertSame( 10, has_filter( 'post_type_archive_title', 'wc_update_product_archive_title' ) );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress core owns this hook; the test exercises WooCommerce's registered callback.
+		$title = apply_filters( 'post_type_archive_title', 'Products', 'product' );
+
+		$this->assertSame( __( 'Shop', 'woocommerce' ), $title );
 	}
 
 	/**
@@ -122,8 +341,6 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertFalse( wp_cache_get( $cache_key, 'product_cat' ) );
 		// Result should be empty too (query with empty taxonomy returns nothing).
 		$this->assertEmpty( $result );
-
-		remove_filter( 'woocommerce_product_subcategories_args', $filter );
 	}
 
 	/**
@@ -143,8 +360,6 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 
 		// Cache should remain empty because taxonomy was removed.
 		$this->assertFalse( wp_cache_get( $cache_key, 'product_cat' ) );
-
-		remove_filter( 'woocommerce_product_subcategories_args', $filter );
 	}
 
 	/**
@@ -216,6 +431,205 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Loop buttons use and announce the minimum quantity without changing sold-individually products.
+	 * @testWith [1, false, 1]
+	 *           [10, false, 10]
+	 *           [0, false, 1]
+	 *           [10, true, 1]
+	 *
+	 * @param int  $minimum Minimum purchase quantity.
+	 * @param bool $sold_individually Whether the product is sold individually.
+	 * @param int  $expected_quantity Expected quantity added by the button.
+	 */
+	public function test_loop_button_uses_minimum_purchase_quantity( int $minimum, bool $sold_individually, int $expected_quantity ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sold_individually( $sold_individually );
+		$filter = static function () use ( $minimum ) {
+			return $minimum;
+		};
+
+		add_filter( 'woocommerce_quantity_input_min', $filter );
+		try {
+			$markup = $this->render_loop_add_to_cart( $product );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $filter );
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue( $processor->next_tag( 'a' ), 'The loop button should be rendered.' );
+		$this->assertSame( (string) $expected_quantity, $processor->get_attribute( 'data-quantity' ), 'AJAX should add the minimum quantity.' );
+		parse_str( wp_parse_url( $processor->get_attribute( 'href' ), PHP_URL_QUERY ), $query );
+		$this->assertSame( (string) $product->get_id(), $query['add-to-cart'], 'The link should add the correct product.' );
+		$this->assertSame( (string) $expected_quantity, $query['quantity'] ?? '1', 'Non-AJAX requests should add the same quantity as AJAX.' );
+
+		$expected_text = $expected_quantity > 1 ? 'Add ' . $expected_quantity . ' to cart' : 'Add to cart';
+		$this->assertStringContainsString( '>' . $expected_text . '</a>', $markup, 'The button should disclose how many items will be added.' );
+		$this->assertStringContainsString( $expected_text, $processor->get_attribute( 'aria-label' ), 'The accessible name should include the visible button text.' );
+	}
+
+	/**
+	 * @testdox Classic buttons preserve URL-filter quantities unless arguments or argument filters explicitly override them.
+	 */
+	public function test_loop_button_retains_filtered_url_quantity(): void {
+		$product     = WC_Helper_Product::create_simple_product();
+		$minimum     = static fn() => 10;
+		$url_filter  = static fn( $url ) => add_query_arg( 'quantity', 30, $url );
+		$args_filter = static function ( $args ) {
+			$args['quantity'] = 10;
+			return $args;
+		};
+		add_filter( 'woocommerce_quantity_input_min', $minimum );
+		add_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+		try {
+			$markup = $this->render_loop_add_to_cart( $product );
+			$this->assertStringContainsString( 'data-quantity="30"', $markup );
+			$this->assertStringContainsString( '>Add 30 to cart</a>', $markup );
+			$this->assertStringContainsString( 'aria-label="Add 30 to cart:', $markup );
+			$this->assertStringContainsString( 'quantity=30', $markup );
+
+			$markup = $this->render_loop_add_to_cart( $product, array( 'quantity' => 10 ) );
+			$this->assertStringContainsString( 'data-quantity="10"', $markup );
+			$this->assertStringContainsString( '>Add 10 to cart</a>', $markup );
+			$this->assertStringContainsString( 'aria-label="Add 10 to cart:', $markup );
+			$this->assertStringContainsString( 'quantity=10', $markup );
+
+			add_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
+			$markup = $this->render_loop_add_to_cart( $product );
+			$this->assertStringContainsString( 'data-quantity="10"', $markup );
+			$this->assertStringContainsString( '>Add 10 to cart</a>', $markup );
+			$this->assertStringContainsString( 'aria-label="Add 10 to cart:', $markup );
+			$this->assertStringContainsString( 'quantity=10', $markup );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum );
+			remove_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
+		}
+	}
+
+	/**
+	 * @testdox Direct template rendering retains legacy defaults without requiring prepared button data.
+	 */
+	public function test_loop_template_resolves_quantity_when_rendered_directly(): void {
+		global $product;
+
+		$previous_product = $product;
+		$product          = WC_Helper_Product::create_simple_product();
+		$product_id       = $product->get_id();
+		$url_filter       = static fn( $url ) => add_query_arg( 'quantity', 12, $url );
+		add_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+		try {
+			$markup          = wc_get_template_html( 'loop/add-to-cart.php' );
+			$explicit_markup = wc_get_template_html( 'loop/add-to-cart.php', array( 'quantity' => 1 ) );
+		} finally {
+			remove_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+			$product = $previous_product;
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue( $processor->next_tag( 'a' ), 'The template should render a link without quantity arguments.' );
+		$this->assertSame( '1', $processor->get_attribute( 'data-quantity' ), 'Direct callers should retain the legacy default quantity.' );
+		parse_str( wp_parse_url( $processor->get_attribute( 'href' ), PHP_URL_QUERY ), $query );
+		$this->assertSame( (string) $product_id, $query['add-to-cart'] );
+		$this->assertSame( '12', $query['quantity'], 'The filtered URL quantity should be retained.' );
+		$this->assertStringContainsString( '>Add to cart</a>', $markup );
+		$processor = new WP_HTML_Tag_Processor( $explicit_markup );
+		$this->assertTrue( $processor->next_tag( 'a' ) );
+		$this->assertSame( '1', $processor->get_attribute( 'data-quantity' ), 'Direct callers should retain their explicit quantity.' );
+		parse_str( wp_parse_url( $processor->get_attribute( 'href' ), PHP_URL_QUERY ), $query );
+		$this->assertSame( '12', $query['quantity'], 'Direct callers should retain the filtered product URL.' );
+		$this->assertStringContainsString( '>Add to cart</a>', $explicit_markup );
+	}
+
+	/**
+	 * @testdox Loop rendering passes prepared button data alongside the existing template arguments.
+	 */
+	public function test_loop_button_passes_prepared_data_without_replacing_template_args(): void {
+		$product         = WC_Helper_Product::create_simple_product();
+		$template_args   = null;
+		$link_args       = null;
+		$template_filter = static function ( $template, $template_name, $args ) use ( &$template_args ) {
+			if ( 'loop/add-to-cart.php' === $template_name ) {
+				$template_args = $args;
+			}
+			return $template;
+		};
+		$link_filter     = static function ( $html, $product, $args ) use ( &$link_args ) {
+			$link_args = $args;
+			return $html;
+		};
+
+		add_filter( 'wc_get_template', $template_filter, 10, 3 );
+		add_filter( 'woocommerce_loop_add_to_cart_link', $link_filter, 10, 3 );
+		try {
+			$this->render_loop_add_to_cart(
+				$product,
+				array(
+					'quantity'   => '3',
+					'class'      => 'custom-button',
+					'custom_arg' => 'extension-value',
+					'attributes' => array( 'aria-label' => 'Custom accessible label' ),
+				)
+			);
+		} finally {
+			remove_filter( 'wc_get_template', $template_filter );
+			remove_filter( 'woocommerce_loop_add_to_cart_link', $link_filter );
+		}
+
+		$this->assertSame( '3', $template_args['quantity'], 'Existing overrides must retain the original quantity value and type.' );
+		$this->assertSame( 'custom-button', $template_args['class'] );
+		$this->assertSame( 'extension-value', $template_args['custom_arg'] );
+		$this->assertSame( 'Custom accessible label', $template_args['attributes']['aria-label'] );
+		$this->assertSame( 3, $template_args['button_data']['quantity'] );
+		$this->assertSame( 'Add 3 to cart', $template_args['button_data']['text'] );
+		$this->assertArrayNotHasKey( 'button_data', $link_args, 'Prepared template data must not change the link filter arguments.' );
+		unset( $template_args['button_data'] );
+		$this->assertSame( $template_args, $link_args, 'The template must retain all existing loop arguments.' );
+	}
+
+	/**
+	 * @testdox Add-to-cart URLs do not inherit another product's minimum quantity from the current request.
+	 */
+	public function test_loop_button_does_not_inherit_request_quantity(): void {
+		$product      = WC_Helper_Product::create_simple_product();
+		$previous_uri = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Preserve the original request URI for restoration.
+
+		$_SERVER['REQUEST_URI'] = '/shop/?quantity=10';
+		try {
+			$url = $product->add_to_cart_url();
+		} finally {
+			if ( null === $previous_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $previous_uri;
+			}
+		}
+
+		parse_str( wp_parse_url( $url, PHP_URL_QUERY ), $query );
+		$this->assertArrayNotHasKey( 'quantity', $query, 'An ordinary product should not inherit a previous bulk quantity.' );
+	}
+
+	/**
+	 * @testdox Minimum quantities do not change links or labels for unavailable products.
+	 */
+	public function test_loop_button_minimum_does_not_change_unavailable_products(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( '' );
+		$filter = static function () {
+			return 10;
+		};
+
+		add_filter( 'woocommerce_quantity_input_min', $filter );
+		try {
+			$markup = $this->render_loop_add_to_cart( $product );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $filter );
+		}
+
+		$this->assertStringContainsString( 'href="' . esc_url( $product->get_permalink() ) . '"', $markup, 'Unavailable products should link to their product page.' );
+		$this->assertStringContainsString( '>Read more</a>', $markup, 'Unavailable products should retain their label.' );
+	}
+
+	/**
 	 * @testdox Loop buttons retain nofollow on external product links.
 	 */
 	public function test_loop_button_external_product_link_retains_nofollow(): void {
@@ -277,5 +691,125 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertSame( 'https://example.test/shop/%_%', $pagination_args['base'] );
 		$this->assertSame( 'page/%#%/', $pagination_args['format'] );
 		$this->assertStringContainsString( 'href="https://example.test/shop/"', $markup );
+	}
+
+	/**
+	 * @testdox wc_display_product_attributes() renders term names when the taxonomy is registered but missing from the global attribute list.
+	 */
+	public function test_display_product_attributes_without_global_attribute_entry(): void {
+		global $wc_product_attributes;
+
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'Stale Finish', array( 'Matte' ) );
+		$product   = new WC_Product_Simple();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$taxonomy        = $attribute->get_name();
+		$taxonomy_object = $wc_product_attributes[ $taxonomy ];
+		unset( $wc_product_attributes[ $taxonomy ] );
+		$warnings     = array();
+		$buffer_level = ob_get_level();
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capturing the warning is the assertion; PHPUnit would otherwise convert it to an exception.
+		set_error_handler(
+			static function ( int $errno, string $errstr ) use ( &$warnings ): bool {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- Reads the level only, to skip warnings silenced with @.
+				if ( error_reporting() & $errno ) {
+					$warnings[] = $errstr;
+				}
+				return true;
+			}
+		);
+		ob_start();
+		try {
+			wc_display_product_attributes( $product );
+			$markup = (string) ob_get_clean();
+		} finally {
+			restore_error_handler();
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			$wc_product_attributes[ $taxonomy ] = $taxonomy_object;
+		}
+
+		$this->assertSame( array(), $warnings, 'Rendering the attributes should not raise warnings.' );
+		$this->assertStringContainsString( 'Matte', $markup );
+	}
+
+	/**
+	 * @testdox wc_dropdown_variation_attribute_options keeps a percent-escaped custom option value raw and decodes its label.
+	 */
+	public function test_variation_dropdown_decodes_custom_option_label_but_keeps_value_raw(): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Finish' );
+		$attribute->set_options( array( 'Black%20White', 'Gloss' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		ob_start();
+		wc_dropdown_variation_attribute_options(
+			array(
+				'options'   => array( 'Black%20White', 'Gloss' ),
+				'attribute' => 'Finish',
+				'product'   => $product,
+				'selected'  => 'Black%20White',
+				'name'      => 'attribute_finish',
+			)
+		);
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'value="Black%20White"', $html, 'The option value must stay raw so the posted value still matches.' );
+		$this->assertStringContainsString( '>Black White<', $html, 'The option label must be decoded to match the cart and order.' );
+		$this->assertStringNotContainsString( '>Black%20White<', $html, 'The percent-escaped label must not be displayed.' );
+	}
+
+	/**
+	 * @testdox Displaying product attributes renders plain text when a term link cannot be resolved.
+	 */
+	public function test_display_product_attributes_does_not_crash_for_deleted_term(): void {
+		global $wc_product_attributes;
+
+		$previous_attributes = $wc_product_attributes;
+		$attribute           = WC_Helper_Product::create_product_attribute_object( 'Archive Finish', array( 'Matte & Gloss' ) );
+		$taxonomy            = $attribute->get_name();
+
+		try {
+			$wc_product_attributes[ $taxonomy ]->attribute_public = true;
+
+			$product = new WC_Product_Simple();
+			$product->set_attributes( array( $attribute ) );
+
+			$term = get_term( $attribute->get_options()[0], $taxonomy );
+			wp_delete_term( $term->term_id, $taxonomy );
+
+			add_filter( 'woocommerce_get_product_terms', static fn() => array( $term ) );
+			ob_start();
+			wc_display_product_attributes( $product );
+			$markup = (string) ob_get_clean();
+		} finally {
+			unregister_taxonomy( $taxonomy );
+			$wc_product_attributes = $previous_attributes;
+		}
+
+		$this->assertStringContainsString( 'Matte &amp; Gloss', $markup, 'The term name should be rendered as escaped text.' );
+		$this->assertStringNotContainsString( '<a ', $markup, 'The deleted term should not be linked.' );
+	}
+
+	/**
+	 * @testdox The empty cart message should be wrapped in the shared notices wrapper.
+	 */
+	public function test_empty_cart_message_uses_notices_wrapper(): void {
+		ob_start();
+		wc_empty_cart_message();
+		$markup = (string) ob_get_clean();
+
+		$this->assertStringContainsString(
+			'<div class="woocommerce-notices-wrapper wc-empty-cart-message">',
+			$markup,
+			'The empty cart message should keep its own class and gain the notices wrapper class.'
+		);
+		$this->assertStringContainsString( 'Your cart is currently empty.', $markup );
 	}
 }

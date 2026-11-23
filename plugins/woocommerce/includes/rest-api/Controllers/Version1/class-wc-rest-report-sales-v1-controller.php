@@ -112,8 +112,12 @@ class WC_REST_Report_Sales_V1_Controller extends WC_REST_Controller {
 
 		$customers = $users_query->get_results();
 
+		// end_date is midnight at the start of the last day, so the range ends one day later.
+		$range_end = strtotime( '+1 DAY', $this->report->end_date );
+
 		foreach ( $customers as $key => $customer ) {
-			if ( strtotime( $customer->user_registered ) < $this->report->start_date || strtotime( $customer->user_registered ) > $this->report->end_date ) {
+			$registered = strtotime( $customer->user_registered );
+			if ( $registered < $this->report->start_date || $registered >= $range_end ) {
 				unset( $customers[ $key ] );
 			}
 		}

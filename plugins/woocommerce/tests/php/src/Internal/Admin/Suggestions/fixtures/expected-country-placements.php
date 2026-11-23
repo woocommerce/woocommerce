@@ -6,7 +6,7 @@
  * suite proves the code matches this file — it cannot prove this file matches
  * the sheet. Only a harness run against a fresh export can do that.
  *
- * Last verified against the sheet: 2026-08-05, using the regional CSV exports of
+ * Last verified against the sheet: 2026-10-26, using the regional CSV exports of
  * that date and a clone-local audit harness.
  *
  * Sections mirror the sheet's rows. `primary_offline` describes the offline
@@ -52,6 +52,7 @@ return array(
 			'square',
 			'visa_as',
 			'airwallex',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -76,8 +77,9 @@ return array(
 			'visa_as',
 			'airwallex',
 			'viva_wallet',
-			'kustom_checkout',
 			'gocardless',
+			'kustom_checkout',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -138,6 +140,7 @@ return array(
 			'airwallex',
 			'viva_wallet',
 			'gocardless',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -212,6 +215,7 @@ return array(
 			'gocardless',
 			'kustom_checkout',
 			'nexi_checkout',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -293,6 +297,7 @@ return array(
 			'gocardless',
 			'kustom_checkout',
 			'nexi_checkout',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -309,6 +314,7 @@ return array(
 			'mollie',
 			'visa_as',
 			'viva_wallet',
+			'gocardless',
 		),
 		'other_bnpl'  => array(
 			'klarna',
@@ -358,6 +364,8 @@ return array(
 			'visa_as',
 			'airwallex',
 			'viva_wallet',
+			'gocardless',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -378,6 +386,7 @@ return array(
 			'visa_as',
 			'airwallex',
 			'viva_wallet',
+			'gocardless',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -396,6 +405,7 @@ return array(
 			'stripe',
 			'mollie',
 			'visa_as',
+			'gocardless',
 		),
 	),
 	'LI' => array(
@@ -414,6 +424,7 @@ return array(
 			'mollie',
 			'visa_as',
 			'airwallex',
+			'gocardless',
 		),
 	),
 	'LU' => array(
@@ -424,6 +435,7 @@ return array(
 			'mollie',
 			'visa_as',
 			'viva_wallet',
+			'gocardless',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -437,6 +449,7 @@ return array(
 			'mollie',
 			'visa_as',
 			'viva_wallet',
+			'gocardless',
 		),
 	),
 	'MD' => array(
@@ -458,7 +471,10 @@ return array(
 			'mollie',
 			'visa_as',
 			'viva_wallet',
+			'airwallex',
 			'kustom_checkout',
+			'gocardless',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -477,8 +493,10 @@ return array(
 			'stripe',
 			'mollie',
 			'visa_as',
+			'viva_wallet',
 			'kustom_checkout',
 			'nexi_checkout',
+			'elavon',
 		),
 		'other_bnpl'  => array(
 			'klarna',
@@ -493,6 +511,7 @@ return array(
 			'visa_as',
 			'airwallex',
 			'viva_wallet',
+			'elavon',
 		),
 		'other_bnpl'  => array(
 			'klarna',
@@ -507,6 +526,7 @@ return array(
 			'visa_as',
 			'airwallex',
 			'viva_wallet',
+			'gocardless',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -546,6 +566,7 @@ return array(
 			'stripe',
 			'mollie',
 			'visa_as',
+			'gocardless',
 		),
 		'other_bnpl'  => array(
 			'klarna',
@@ -558,6 +579,7 @@ return array(
 			'stripe',
 			'mollie',
 			'visa_as',
+			'gocardless',
 		),
 	),
 	'ES' => array(
@@ -572,6 +594,8 @@ return array(
 			'monei',
 			'airwallex',
 			'viva_wallet',
+			'gocardless',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -593,6 +617,8 @@ return array(
 			'viva_wallet',
 			'kustom_checkout',
 			'nexi_checkout',
+			'gocardless',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -620,449 +646,307 @@ return array(
 		'primary_psp' => 'visa_as',
 	),
 	'AG' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'AI' => array(
-		'primary_psp'  => 'tilopay',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'AR' => array(
-		'primary_psp'  => 'mercado_pago',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'mercado_pago',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'AW' => array(
-		'primary_psp'  => 'tilopay',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'BS' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'BB' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'BZ' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'BM' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'BO' => array(
-		'primary_psp'  => 'visa_as',
-		'other_crypto' => array(
-			'heliopay',
-		),
+		'primary_psp' => 'visa_as',
 	),
 	'BQ' => array(
-		'primary_psp'  => 'tilopay',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'BR' => array(
-		'primary_psp'  => 'stripe',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'stripe',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'mercado_pago',
 			'visa_as',
 		),
-		'other_crypto' => array(
-			'heliopay',
-		),
 	),
 	'VG' => array(
-		'primary_psp'  => 'tilopay',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'KY' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'CL' => array(
-		'primary_psp'  => 'mercado_pago',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'mercado_pago',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'CO' => array(
-		'primary_psp'  => 'mercado_pago',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'mercado_pago',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'CR' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'CU' => array(
 		'primary_psp' => 'visa_as',
 	),
 	'CW' => array(
-		'primary_psp'  => 'tilopay',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'DM' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'DO' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'EC' => array(
-		'primary_psp'  => 'visa_as',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_crypto' => array(
-			'heliopay',
-		),
+		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'SV' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'FK' => array(
-		'primary_psp'  => 'visa_as',
-		'other_crypto' => array(
-			'heliopay',
-		),
+		'primary_psp' => 'visa_as',
 	),
 	'GF' => array(
-		'primary_psp'  => 'visa_as',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_crypto' => array(
-			'heliopay',
-		),
+		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'GD' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'GP' => array(
-		'primary_psp'  => 'visa_as',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_crypto' => array(
-			'heliopay',
-		),
+		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'GT' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'GY' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'HT' => array(
 		'primary_psp' => 'visa_as',
 	),
 	'HN' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'JM' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'MQ' => array(
-		'primary_psp'  => 'visa_as',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_crypto' => array(
-			'heliopay',
-		),
+		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'MX' => array(
-		'primary_psp'  => 'stripe',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'stripe',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'mercado_pago',
 			'visa_as',
 		),
-		'other_bnpl'   => array(
+		'other_bnpl'  => array(
 			'klarna',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'MS' => array(
 		'primary_psp' => 'visa_as',
 	),
 	'NI' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'PA' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'PY' => array(
-		'primary_psp'  => 'visa_as',
-		'other_crypto' => array(
-			'heliopay',
-		),
+		'primary_psp' => 'visa_as',
 	),
 	'PE' => array(
-		'primary_psp'  => 'mercado_pago',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'mercado_pago',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'PR' => array(
-		'primary_psp'  => 'visa_as',
-		'other_crypto' => array(
-			'heliopay',
-		),
+		'primary_psp' => 'visa_as',
 	),
 	'BL' => array(
-		'primary_psp'  => 'visa_as',
-		'other_crypto' => array(
-			'heliopay',
-		),
+		'primary_psp' => 'visa_as',
 	),
 	'KN' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'LC' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'MF' => array(
 		'primary_psp' => 'visa_as',
 	),
 	'VC' => array(
-		'primary_psp'  => 'tilopay',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'SX' => array(
-		'primary_psp'  => 'tilopay',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'GS' => array(
 		'primary_psp' => 'visa_as',
 	),
 	'SR' => array(
-		'primary_psp'  => 'tilopay',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'TT' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'TC' => array(
-		'primary_psp'  => 'tilopay',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'UY' => array(
-		'primary_psp'  => 'mercado_pago',
-		'primary_apm'  => 'paypal_full_stack',
-		'other_psp'    => array(
+		'primary_psp' => 'mercado_pago',
+		'primary_apm' => 'paypal_full_stack',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'VI' => array(
-		'primary_psp'  => 'tilopay',
-		'other_psp'    => array(
+		'primary_psp' => 'tilopay',
+		'other_psp'   => array(
 			'visa_as',
-		),
-		'other_crypto' => array(
-			'heliopay',
 		),
 	),
 	'VE' => array(
-		'primary_apm'  => 'paypal_full_stack',
-		'other_crypto' => array(
-			'heliopay',
-		),
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'AQ' => array(
 		'primary_psp' => 'visa_as',
@@ -1225,6 +1109,7 @@ return array(
 			'eway',
 			'visa_as',
 			'airwallex',
+			'gocardless',
 		),
 		'other_bnpl'  => array(
 			'afterpay',
@@ -1275,6 +1160,7 @@ return array(
 	),
 	'LK' => array(
 		'primary_psp' => 'payoneer',
+		'primary_apm' => 'paypal_full_stack',
 		'other_psp'   => array(
 			'visa_as',
 		),
@@ -1282,9 +1168,6 @@ return array(
 	'KR' => array(
 		'primary_psp' => 'visa_as',
 		'primary_apm' => 'paypal_full_stack',
-		'other_psp'   => array(
-			'airwallex',
-		),
 	),
 	'TW' => array(
 		'primary_psp' => 'visa_as',
@@ -1312,6 +1195,7 @@ return array(
 	),
 	'VU' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'VN' => array(
 		'primary_psp' => 'payoneer',
@@ -1374,6 +1258,7 @@ return array(
 	),
 	'CD' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'DJ' => array(
 		'primary_psp' => 'visa_as',
@@ -1445,6 +1330,7 @@ return array(
 	),
 	'YT' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'MA' => array(
 		'primary_psp' => 'payoneer',
@@ -1556,6 +1442,7 @@ return array(
 	),
 	'IL' => array(
 		'primary_psp' => 'airwallex',
+		'primary_apm' => 'paypal_full_stack',
 		'other_psp'   => array(
 			'visa_as',
 		),

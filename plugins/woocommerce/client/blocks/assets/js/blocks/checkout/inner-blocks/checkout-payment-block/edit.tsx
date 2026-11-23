@@ -103,7 +103,7 @@ export const Edit = ( {
 										? {
 												warning:
 													incompatiblePaymentMethodMessage,
-										  }
+											}
 										: {} ) }
 								/>
 							);

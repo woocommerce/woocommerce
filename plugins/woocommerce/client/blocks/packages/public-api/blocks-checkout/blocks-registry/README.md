@@ -48,10 +48,9 @@ See the [`innerBlockAreas`](https://github.com/woocommerce/woocommerce-blocks/bl
 
 ## Registering a Block
 
-To register a checkout block, first, register your Block Type with WordPress using <https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/>. We recommend using the `blocks.json` method to avoid
-repetition.
+Register a checkout block on both the server and the client. Client-side registration alone may make the block work in the editor, but WooCommerce cannot inspect its metadata when rendering the frontend. This can prevent saved attributes and translations from reaching the frontend component.
 
-When registering your block, you should also define the `parent` property to include a list of areas where your block will be available. For example:
+Define the block in `block.json` to keep the server and client registrations consistent. Include the `parent` property with the areas where the block will be available. For example:
 
 ```json
 {
@@ -63,6 +62,19 @@ When registering your block, you should also define the `parent` property to inc
 	// ...snip
 }
 ```
+
+Register the metadata on the server during `init`:
+
+```php
+add_action(
+	'init',
+	function () {
+		register_block_type_from_metadata( __DIR__ . '/build/namespace-block-name' );
+	}
+);
+```
+
+Register the same metadata on the client with [`registerBlockType`](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/#registration-on-the-client). The [`@woocommerce/extend-cart-checkout-block`](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/extend-cart-checkout-block) template demonstrates both registrations.
 
 ### Registering a Forced Block
 
@@ -97,9 +109,16 @@ For your block to dynamically render on the frontend and have access to its own 
 -   To render the block on the frontend, you need a `data-block-name` attribute on the HTML with your block name `namespace/block-name`.
 -   To access your attributes on frontend, you need to save them as `data-*` attributes on the HTML.
 
-Blocks whose namespace is `woocommerce` or `woocommerce-checkout` will have this applied to them automatically, but you can also add this behaviour to your own namespace or individual blocks.
+WooCommerce applies these attributes automatically to blocks that:
 
-To add this behavior to your namespace, you can use the `__experimental_woocommerce_blocks_add_data_attributes_to_namespace` filter:
+- use the `woocommerce` or `woocommerce-checkout` namespace; or
+- are registered on the server with a WooCommerce block in their `parent` metadata.
+
+Server registration with accurate `parent` metadata is the recommended approach for extension blocks. No filter is needed in that case.
+
+The following experimental filters are compatibility options for blocks that cannot be registered on the server. They should not replace normal server-side block registration.
+
+To opt in an entire namespace, use the `__experimental_woocommerce_blocks_add_data_attributes_to_namespace` filter:
 
 ```php
 add_filter(
@@ -113,7 +132,7 @@ add_filter(
 );
 ```
 
-To add just a single block, you can use `__experimental_woocommerce_blocks_add_data_attributes_to_block` filter:
+To opt in a single block, use the `__experimental_woocommerce_blocks_add_data_attributes_to_block` filter:
 
 ```php
 add_filter(

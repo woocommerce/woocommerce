@@ -261,12 +261,8 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_draft_response( \WC_Cart $cart, \WC_Customer $customer ) {
-		// Use the shopper's session-stored selection so a PATCH-time choice survives the next render — but only if the gateway is still enabled, since the slug can outlive the gateway (admin disables it, payment plugin deactivated).
-		$session_payment_method = (string) WC()->session->get( 'chosen_payment_method' );
-		$enabled_gateways       = PaymentUtils::get_enabled_payment_gateways();
-		$payment_method         = ( '' !== $session_payment_method && isset( $enabled_gateways[ $session_payment_method ] ) )
-			? $session_payment_method
-			: (string) PaymentUtils::get_default_payment_method();
+		// The shopper's session-stored selection survives the next render while its gateway is still available for the cart; see PaymentUtils.
+		$payment_method = PaymentUtils::get_checkout_payment_method();
 
 		return [
 			'order_id'           => 0,
@@ -370,20 +366,10 @@ class CheckoutSchema extends AbstractSchema {
 				'required'    => $this->additional_fields_controller->is_conditional_field( $field ) ? false : true === $field['required'],
 			];
 
-			if ( 'select' === $field['type'] ) {
-				$field_schema['enum'] = array_map(
-					function ( $option ) {
-						return $option['value'];
-					},
-					$field['options']
-				);
-				if ( true !== $field['required'] || $this->additional_fields_controller->is_conditional_field( $field ) ) {
-					$field_schema['enum'][] = '';
-				}
-			}
+			$field_schema = $this->additional_fields_controller->prepare_field_value_schema( $field_schema, $field );
 
-			if ( 'checkbox' === $field['type'] ) {
-				$field_schema['type'] = 'boolean';
+			if ( 'select' === $field['type'] && ( true !== $field['required'] || $this->additional_fields_controller->is_conditional_field( $field ) ) ) {
+				$field_schema['enum'][] = '';
 			}
 
 			if ( 'checkbox' === $field['type'] && true === $field['required'] ) {

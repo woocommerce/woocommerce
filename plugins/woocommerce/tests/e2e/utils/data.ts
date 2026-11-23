@@ -49,11 +49,16 @@ export function getFakeCustomer() {
 	return getFakeUser( 'customer' );
 }
 
+// The name ends in random characters because `faker.commerce.productName()` is
+// not unique: parallel workers can generate the same name, and specs that
+// search the store by product name would then find the wrong product.
 export function getFakeProduct( options: any = {} ) {
 	const dec = options.dec ?? 2;
 
 	return {
-		name: `${ faker.commerce.productName() }`,
+		name: `${ faker.commerce.productName() } ${ faker.string.alphanumeric(
+			8
+		) }`,
 		description: faker.commerce.productDescription(),
 		regular_price: options.regular_price
 			? options.regular_price

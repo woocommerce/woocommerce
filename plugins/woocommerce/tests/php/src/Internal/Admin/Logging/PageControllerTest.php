@@ -147,6 +147,11 @@ class PageControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertStringNotContainsString( 'has-context', $formatted );
 		$this->assertStringNotContainsString( '<details>', $formatted );
-		$this->assertStringContainsString( 'CONTEXT: {&quot;unclosed&quot;:', $formatted );
+		// WordPress 7.2's HTML API-based KSES parser can serialize text-node quotes literally instead of as &quot;.
+		// Decode entities so the assertion checks that the malformed context is preserved with either parser.
+		$this->assertStringContainsString(
+			'CONTEXT: {"unclosed":',
+			html_entity_decode( $formatted, ENT_QUOTES | ENT_HTML401 )
+		);
 	}
 }

@@ -134,6 +134,20 @@ export async function accessTheEmailEditor(
 	} );
 }
 
+/**
+ * Open an existing email post in the email editor, skipping the slow Email settings page.
+ * Note: Ensure the block email editor feature flag is already enabled.
+ *
+ * @param {import('@playwright/test').Page } page   The Playwright page.
+ * @param {string}                           postId The woo_email post ID.
+ */
+export async function openEmailPostInEditor( page: Page, postId: string ) {
+	await page.goto( `/wp-admin/post.php?post=${ postId }&action=edit` );
+	await expect( page.locator( '#woocommerce-email-editor' ) ).toBeVisible( {
+		timeout: 20000,
+	} );
+}
+
 export async function ensureEmailEditorSettingsPanelIsOpened( page: Page ) {
 	const status = await page.evaluate( async () => {
 		const elem = document.querySelector(

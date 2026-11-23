@@ -59,6 +59,7 @@ class OrderTagsProvider extends AbstractTagProvider {
 				),
 				null,
 				array( Integration::EMAIL_POST_TYPE ),
+				Personalization_Tag::VALUE_TYPE_TEXT,
 			)
 		);
 
@@ -306,6 +307,23 @@ class OrderTagsProvider extends AbstractTagProvider {
 
 		$registry->register(
 			new Personalization_Tag(
+				__( 'Order Review URL', 'woocommerce' ),
+				'woocommerce/order-review-url',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return wc_get_review_order_url( $context['order'] );
+				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
 				__( 'Order Custom Field', 'woocommerce' ),
 				'woocommerce/order-custom-field',
 				__( 'Order', 'woocommerce' ),
@@ -321,6 +339,28 @@ class OrderTagsProvider extends AbstractTagProvider {
 				),
 				null,
 				array( Integration::EMAIL_POST_TYPE ),
+				Personalization_Tag::VALUE_TYPE_TEXT,
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Fulfillment Heading', 'woocommerce' ),
+				'woocommerce/fulfillment-heading',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					$wc_email = $context['wc_email'] ?? null;
+					// The fulfillment emails are the only consumers of this tag.
+					if ( ! $wc_email instanceof \WC_Email || ! str_starts_with( $wc_email->id, 'customer_fulfillment_' ) ) {
+						return '';
+					}
+					// get_heading() returns filtered output, so it is cast rather than trusted.
+					return (string) $wc_email->get_heading();
+				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
+				Personalization_Tag::VALUE_TYPE_TEXT,
 			)
 		);
 	}

@@ -20,7 +20,7 @@ const completer: AutoCompleter = {
 					per_page: 10,
 					orderby: 'popularity',
 					type: 'variable',
-			  }
+				}
 			: {};
 		return apiFetch( {
 			path: addQueryArgs( '/wc-analytics/products', query ),

@@ -47,8 +47,7 @@ function useSaveShortcutTakeover( onSave: () => void, isDisabled: boolean ) {
 			description: select(
 				keyboardShortcutsStore
 			).getShortcutDescription( 'core/editor/save' ) as
-				| string
-				| undefined,
+				string | undefined,
 		} ),
 		[]
 	);

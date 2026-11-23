@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Remove unused render_order_downloads_column_headers parameter
-
-

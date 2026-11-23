@@ -11,8 +11,7 @@ import './style.scss';
 
 type DisabledTagNameType = 'span' | 'h3';
 
-export interface ProductNameProps
-	extends AnchorHTMLAttributes< HTMLAnchorElement > {
+export interface ProductNameProps extends AnchorHTMLAttributes< HTMLAnchorElement > {
 	/**
 	 * If `true` renders a `span` element instead of a link
 	 */
@@ -63,7 +62,7 @@ export const ProductName = ( {
 			<DisabledTagName
 				className={ classes }
 				{ ...disabledProps }
-				// eslint-disable-next-line react/no-danger
+
 				dangerouslySetInnerHTML={ {
 					__html: name,
 				} }
@@ -76,7 +75,7 @@ export const ProductName = ( {
 			href={ permalink }
 			target={ target }
 			{ ...props }
-			// eslint-disable-next-line react/no-danger
+
 			dangerouslySetInnerHTML={ {
 				__html: name,
 			} }

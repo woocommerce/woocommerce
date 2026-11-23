@@ -6,15 +6,21 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
-import { useId, useState } from '@wordpress/element';
+import {
+	createPortal,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import clsx from 'clsx';
 import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 /**
  * Internal dependencies
  */
 import { OrderMetaSlotFill, CheckoutOrderSummaryFill } from './slotfills';
-import { useContainerWidthContext } from '../../../../base/context';
 import { FormStepHeading } from '../../form-step';
+import { useOrderSummaryToggle } from './use-order-summary-toggle';
 
 const FrontendBlock = ( {
 	children,
@@ -24,42 +30,132 @@ const FrontendBlock = ( {
 	className?: string;
 } ): JSX.Element | null => {
 	const { cartTotals } = useStoreCart();
-	const { isMedium, isSmall, isMobile } = useContainerWidthContext();
-	const [ isOpen, setIsOpen ] = useState( false );
+	const {
+		isOpen,
+		hasContainerWidth,
+		isLarge,
+		closeSummary,
+		ariaControlsId,
+		toggleProps,
+	} = useOrderSummaryToggle();
+	const [ titleElement, setTitleElement ] = useState< HTMLDivElement | null >(
+		null
+	);
+	// The stable content container moves between these hosts without remounting its portal children.
+	const [ inlineHost, setInlineHost ] = useState< HTMLDivElement | null >(
+		null
+	);
+	const [ checkoutActionsHost, setCheckoutActionsHost ] =
+		useState< HTMLDivElement | null >( null );
+	// This wrapper is observed to detect proximity and preserve scroll position when the container moves.
+	const [ checkoutActionsAnchor, setCheckoutActionsAnchor ] =
+		useState< HTMLDivElement | null >( null );
+	const [ isContentReady, setIsContentReady ] = useState( false );
+	const checkoutActionsTopBeforeMove = useRef< number | null >( null );
+	const [ contentContainer ] = useState( () => {
+		const container = document.createElement( 'div' );
+		container.className =
+			'wc-block-components-checkout-order-summary__content-container';
+		return container;
+	} );
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const totalPrice = parseInt( cartTotals.total_price, 10 );
-	const ariaControlsId = useId();
+	const showInline = ! hasContainerWidth || isLarge || isOpen;
 
-	const orderSummaryProps =
-		isMedium || isSmall || isMobile
-			? {
-					role: 'button',
-					onClick: () => setIsOpen( ! isOpen ),
-					'aria-expanded': isOpen,
-					'aria-controls': ariaControlsId,
-					tabIndex: 0,
-					onKeyDown: ( event: React.KeyboardEvent ) => {
-						if ( event.key === 'Enter' || event.key === ' ' ) {
-							setIsOpen( ! isOpen );
-						}
-					},
-			  }
-			: {};
+	useEffect( () => {
+		if (
+			! hasContainerWidth ||
+			isLarge ||
+			! isOpen ||
+			! titleElement ||
+			! checkoutActionsAnchor ||
+			typeof window.IntersectionObserver !== 'function'
+		) {
+			return;
+		}
 
-	// Render the summary once here in the block and once in the fill. The fill can be slotted once elsewhere. The fill is only
-	// rendered on small and mobile screens.
+		let isTitleVisible = true;
+		let areCheckoutActionsNear = false;
+		const observer = new window.IntersectionObserver(
+			( entries ) => {
+				entries.forEach( ( entry ) => {
+					if ( entry.target === titleElement ) {
+						isTitleVisible = entry.isIntersecting;
+					} else if ( entry.target === checkoutActionsAnchor ) {
+						areCheckoutActionsNear = entry.isIntersecting;
+					}
+				} );
+
+				if ( ! isTitleVisible && areCheckoutActionsNear ) {
+					checkoutActionsTopBeforeMove.current =
+						checkoutActionsAnchor.getBoundingClientRect().top;
+					closeSummary();
+				}
+			},
+			{ rootMargin: '0px 0px 25% 0px' }
+		);
+
+		observer.observe( titleElement );
+		observer.observe( checkoutActionsAnchor );
+
+		return () => observer.disconnect();
+	}, [
+		checkoutActionsAnchor,
+		closeSummary,
+		hasContainerWidth,
+		isLarge,
+		isOpen,
+		titleElement,
+	] );
+
+	// Attach the empty container before mounting portal children. Later moves
+	// preserve the same mounted extension component instances.
+	useLayoutEffect( () => {
+		const destination = showInline ? inlineHost : checkoutActionsHost;
+
+		if ( destination ) {
+			if ( contentContainer.parentElement !== destination ) {
+				destination.appendChild( contentContainer );
+			}
+			setIsContentReady( true );
+
+			if (
+				! showInline &&
+				checkoutActionsAnchor &&
+				checkoutActionsTopBeforeMove.current !== null
+			) {
+				const offset =
+					checkoutActionsAnchor.getBoundingClientRect().top -
+					checkoutActionsTopBeforeMove.current;
+				checkoutActionsTopBeforeMove.current = null;
+				window.scrollBy( 0, offset );
+			}
+		}
+	}, [
+		checkoutActionsAnchor,
+		checkoutActionsHost,
+		contentContainer,
+		inlineHost,
+		showInline,
+	] );
+
+	useLayoutEffect( () => {
+		return () => contentContainer.remove();
+	}, [ contentContainer ] );
+
 	return (
 		<>
 			<div className={ className }>
 				<div
+					ref={ setTitleElement }
 					className={ clsx(
 						'wc-block-components-checkout-order-summary__title',
 						{
 							'is-open': isOpen,
 						}
 					) }
-					{ ...orderSummaryProps }
+					{ ...toggleProps }
 				>
 					<p
 						className="wc-block-components-checkout-order-summary__title-text"
@@ -78,6 +174,7 @@ const FrontendBlock = ( {
 					</span>
 				</div>
 				<div
+					ref={ setInlineHost }
 					className={ clsx(
 						'wc-block-components-checkout-order-summary__content',
 						{
@@ -85,40 +182,43 @@ const FrontendBlock = ( {
 						}
 					) }
 					id={ ariaControlsId }
-				>
-					{ children }
-					<div className="wc-block-components-totals-wrapper">
-						<TotalsFooterItem
-							currency={ totalsCurrency }
-							values={ cartTotals }
-						/>
-					</div>
-					<OrderMetaSlotFill />
-				</div>
+				/>
 			</div>
-			{ /* Render a second instance of the order summary in a different location for smaller screens
-			This prevents the fill from appearing on desktop before width data is available */ }
-			{ ( isMedium || isSmall || isMobile ) && (
-				<CheckoutOrderSummaryFill>
+			<CheckoutOrderSummaryFill>
+				<div
+					ref={ setCheckoutActionsAnchor }
+					aria-hidden={ showInline }
+					className={ clsx(
+						className,
+						'checkout-order-summary-block-fill-wrapper',
+						{
+							'is-content-inline': showInline,
+						}
+					) }
+				>
+					<FormStepHeading>
+						<>{ __( 'Order summary', 'woocommerce' ) }</>
+					</FormStepHeading>
 					<div
-						className={ `${ className } checkout-order-summary-block-fill-wrapper` }
-					>
-						<FormStepHeading>
-							<>{ __( 'Order summary', 'woocommerce' ) }</>
-						</FormStepHeading>
-						<div className="checkout-order-summary-block-fill">
-							{ children }
-							<div className="wc-block-components-totals-wrapper">
-								<TotalsFooterItem
-									currency={ totalsCurrency }
-									values={ cartTotals }
-								/>
-							</div>
-							<OrderMetaSlotFill />
+						ref={ setCheckoutActionsHost }
+						className="checkout-order-summary-block-fill"
+					/>
+				</div>
+			</CheckoutOrderSummaryFill>
+			{ isContentReady &&
+				createPortal(
+					<>
+						{ children }
+						<div className="wc-block-components-totals-wrapper">
+							<TotalsFooterItem
+								currency={ totalsCurrency }
+								values={ cartTotals }
+							/>
 						</div>
-					</div>
-				</CheckoutOrderSummaryFill>
-			) }
+						<OrderMetaSlotFill />
+					</>,
+					contentContainer
+				) }
 		</>
 	);
 };

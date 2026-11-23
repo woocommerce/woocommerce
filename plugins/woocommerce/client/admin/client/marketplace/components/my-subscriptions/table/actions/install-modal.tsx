@@ -123,11 +123,11 @@ export default function InstallModal() {
 				? __(
 						'Keep the momentum going and start setting up your extension.',
 						'woocommerce'
-				  )
+					)
 				: __(
 						'Would you like to install this extension?',
 						'woocommerce'
-				  );
+					);
 			return (
 				<>
 					<p className="woocommerce-marketplace__header-account-modal-text">

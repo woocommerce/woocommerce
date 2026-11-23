@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Serve the UCP discovery profile at /.well-known/ucp when the store uses plain permalinks.

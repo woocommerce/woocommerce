@@ -349,6 +349,54 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should stop rebuilding a snapshot that cannot be built after the same number of attempts a failed delivery gets.
+	 *
+	 * A Throwable escaping get_tracking_data() never reaches record_send_result(), so nothing
+	 * downstream records the outcome. Throwing from a woocommerce_tracker_data callback
+	 * reproduces that exact path: a real fatal is uncatchable, but both leave send_tracking_data()
+	 * before any result is recorded.
+	 */
+	public function test_unbuildable_snapshot_is_abandoned_after_max_attempts(): void {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		$last_send = strtotime( '-2 weeks' );
+		update_option( 'woocommerce_tracker_last_send', $last_send );
+
+		$builds   = 0;
+		$requests = 0;
+		add_filter(
+			'woocommerce_tracker_data',
+			function () use ( &$builds ) {
+				++$builds;
+				throw new RuntimeException( 'Snapshot build failed' );
+			}
+		);
+		add_filter(
+			'pre_http_request',
+			function () use ( &$requests ) {
+				++$requests;
+				return array( 'response' => array( 'code' => 200 ) );
+			}
+		);
+		$logger = $this->expect_tracker_warning();
+
+		// Four consecutive scheduled runs, on a store where building the snapshot always fails.
+		for ( $run = 0; $run < 4; $run++ ) {
+			try {
+				WC_Tracker::send_tracking_data();
+			} catch ( RuntimeException $e ) {
+				continue;
+			}
+		}
+
+		$this->assertSame( 0, $requests, 'A snapshot that cannot be built is never posted.' );
+		$this->assertSame( 3, $builds, 'The build should be attempted the same number of times a failed delivery is retried, then abandoned.' );
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'Abandoning the snapshot should record the send time so the next attempt waits for the weekly interval.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Giving up should clear the failure counter.' );
+		$this->assertCount( 1, $logger->warnings, 'Abandoning the snapshot should be logged once, on the run that gives up.' );
+		$this->assertSame( 3, $logger->warnings[0]['failures'], 'The warning should report the attempts made, not the run that found the limit exceeded.' );
+	}
+
+	/**
 	 * Fake the tracker HTTP response.
 	 *
 	 * @param int|string $status       HTTP status code, or "wp_error" for a transport failure.
@@ -732,7 +780,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$tracking_data = WC_Tracker::get_tracking_data();
 		$this->assertArrayHasKey( 'store_id', $tracking_data );
 		$this->assertEquals( '12345', $tracking_data['store_id'] );
-		delete_option( \WC_Install::STORE_ID_OPTION );
 	}
 
 	/**
@@ -744,7 +791,27 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$tracking_data = WC_Tracker::get_tracking_data();
 		$this->assertArrayHasKey( 'admin_install_timestamp', $tracking_data['settings'] );
 		$this->assertEquals( $tracking_data['settings']['admin_install_timestamp'], $time );
-		delete_option( 'woocommerce_admin_install_timestamp' );
+	}
+
+	/**
+	 * @testdox Tracker data includes the number of customers with stored Application Passwords.
+	 */
+	public function test_customer_application_password_user_count(): void {
+		$get_user_counts = new ReflectionMethod( WC_Tracker::class, 'get_user_counts' );
+		$get_user_counts->setAccessible( true );
+		$initial_count = $get_user_counts->invoke( null )['customer_application_password_users'];
+
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$admin_id    = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$empty_id    = self::factory()->user->create( array( 'role' => 'customer' ) );
+
+		$this->assertIsArray( WP_Application_Passwords::create_new_application_password( $customer_id, array( 'name' => 'Customer credential' ) ) );
+		$this->assertIsArray( WP_Application_Passwords::create_new_application_password( $admin_id, array( 'name' => 'Administrator credential' ) ) );
+		update_user_meta( $empty_id, WP_Application_Passwords::USERMETA_KEY_APPLICATION_PASSWORDS, array() );
+
+		$updated_count = $get_user_counts->invoke( null )['customer_application_password_users'];
+
+		$this->assertSame( $initial_count + 1, $updated_count, 'Only current customers with a stored credential should be counted' );
 	}
 
 	/**
@@ -758,8 +825,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 * @testDox Test woocommerce_allow_tracking related data is included in tracking snapshot.
 	 */
 	public function test_tracking_data_woocommerce_allow_tracking() {
-		$current_woocommerce_allow_tracking = get_option( 'woocommerce_allow_tracking', 'no' );
-
 		// Clear everything.
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		delete_option( 'woocommerce_allow_tracking_last_modified' );
@@ -800,11 +865,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $tracking_data['woocommerce_allow_tracking'], 'yes' );
 		$this->assertGreaterThanOrEqual( $before, (int) $tracking_data['woocommerce_allow_tracking_last_modified'] );
 		$this->assertEquals( $first_optin, (int) $tracking_data['woocommerce_allow_tracking_first_optin'] );
-
-		// Restore everything as it was.
-		update_option( 'woocommerce_allow_tracking', $current_woocommerce_allow_tracking );
-		delete_option( 'woocommerce_allow_tracking_last_modified' );
-		delete_option( 'woocommerce_allow_tracking_first_optin' );
 	}
 
 	/**
@@ -888,6 +948,28 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_address_providers' );
 		// Re-init address providers to ensure class is clean for other tests.
 		wc_get_container()->get( \Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController::class )->init();
+	}
+
+	/**
+	 * @testdox Should report the PHP memory limit, using 32 GB when PHP has no limit.
+	 *
+	 * @testWith ["-1", "32 GB"]
+	 *           ["2G", "2 GB"]
+	 *           ["268435456", "256 MB"]
+	 *
+	 * @param string $php_memory_limit The PHP memory_limit ini value.
+	 * @param string $expected         The expected reported memory limit.
+	 */
+	public function test_get_tracking_data_reports_php_memory_limit( string $php_memory_limit, string $expected ): void {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'ini_get' => fn() => $php_memory_limit,
+			)
+		);
+
+		$tracking_data = WC_Tracker::get_tracking_data();
+
+		$this->assertSame( $expected, $tracking_data['wp']['memory_limit'] );
 	}
 
 	/**

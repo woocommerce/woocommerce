@@ -1,0 +1,32 @@
+{
+	"name": "woocommerce/cart",
+	"title": "Cart",
+	"description": "Shopping cart.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"align": [ "wide" ],
+		"html": false,
+		"multiple": false
+	},
+	"example": {
+		"viewportWidth": 800
+	},
+	"attributes": {
+		"hasDarkControls": {
+			"type": "boolean"
+		},
+		"checkoutPageId": {
+			"type": "number"
+		},
+		"showRateAfterTaxName": {
+			"type": "boolean"
+		},
+		"align": {
+			"type": "string"
+		}
+	},
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

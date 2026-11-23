@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\TaxBasedOn;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
@@ -26,6 +27,361 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	private $registered_order_statuses = array();
 
 	/**
+	 * @testdox Order coupon amounts and totals respect the filtered VAT exemption when applied and recalculated.
+	 * @testWith ["yes", "yes", null, true]
+	 *           ["no", "yes", null, true]
+	 *           ["yes", "no", true, true]
+	 *           ["no", "no", true, true]
+	 *           ["yes", "yes", false, false]
+	 *           ["no", "yes", false, false]
+	 *           ["yes", "no", null, false]
+	 *           ["no", "no", null, false]
+	 *
+	 * @param string    $prices_include_tax Whether store prices include tax.
+	 * @param string    $exemption_meta     Stored order VAT exemption.
+	 * @param bool|null $filtered_exemption Optional filter override.
+	 * @param bool      $is_exempt          Expected effective exemption.
+	 */
+	public function test_coupon_amounts_respect_order_vat_exemption( string $prices_include_tax, string $exemption_meta, ?bool $filtered_exemption, bool $is_exempt ): void {
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'base' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->update_meta_data( 'is_vat_exempt', $exemption_meta );
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
+
+		if ( null !== $filtered_exemption ) {
+			add_filter(
+				'woocommerce_order_is_vat_exempt',
+				static function ( $exempt, $filtered_order ) use ( $order, $filtered_exemption ) {
+					return $filtered_order->get_id() === $order->get_id() ? $filtered_exemption : $exempt;
+				},
+				10,
+				2
+			);
+		}
+
+		$order->calculate_totals();
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'vat-exemption-coupon' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 20 );
+		$coupon->save();
+
+		$this->assertTrue( $order->apply_coupon( $coupon ), 'The percentage coupon should apply successfully.' );
+
+		foreach ( array( 'applied', 'recalculated' ) as $operation ) {
+			if ( 'recalculated' === $operation ) {
+				$order = wc_get_order( $order->get_id() );
+				$order->recalculate_coupons();
+			}
+
+			$coupon_items = $order->get_items( 'coupon' );
+			$coupon_item  = reset( $coupon_items );
+			$this->assertEquals( 20, $coupon_item->get_discount(), "The $operation coupon should discount the net subtotal by 20%." );
+			$this->assertEquals( $is_exempt ? 0 : 4, $coupon_item->get_discount_tax(), "The $operation coupon tax should respect the effective exemption." );
+			$this->assertEquals( 20, $order->get_discount_total(), "The $operation order should retain the complete discount." );
+			$this->assertEquals( $is_exempt ? 0 : 4, $order->get_discount_tax(), "The $operation order discount tax should match the coupon." );
+			$this->assertEquals( $is_exempt ? 80 : 96, $order->get_total(), "The $operation order should have the correct discounted total." );
+		}
+	}
+
+	/**
+	 * @testdox Recalculating coupons reuses an unsaved coupon item instead of adding a duplicate.
+	 */
+	public function test_recalculate_coupons_reuses_unsaved_coupon_item(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
+		$order->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'unsaved-coupon-item' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-coupon-item' );
+		$order->add_item( $coupon_item );
+
+		$order->recalculate_coupons();
+
+		$coupon_items = $order->get_items( 'coupon' );
+		$this->assertCount( 1, $coupon_items, 'The unsaved coupon item should not be duplicated.' );
+		$this->assertEquals( 10, reset( $coupon_items )->get_discount(), 'The coupon discount should be set on the existing item.' );
+	}
+
+	/**
+	 * @testdox A reused unsaved coupon item keeps its coupon definition after the coupon is deleted.
+	 */
+	public function test_recalculate_coupons_stores_coupon_info_on_reused_unsaved_item(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
+		$order->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'unsaved-coupon-info' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-coupon-info' );
+		$order->add_item( $coupon_item );
+		$order->recalculate_coupons();
+		$order->save();
+
+		$coupon->delete( true );
+		$line_item = current( $order->get_items() );
+		$line_item->set_subtotal( 200 );
+		$line_item->set_total( 200 );
+		$line_item->save();
+
+		$order = wc_get_order( $order->get_id() );
+		$order->recalculate_coupons();
+
+		$this->assertCount( 1, $order->get_items( 'coupon' ), 'The coupon item should not be duplicated.' );
+		$this->assertEquals( 20, $order->get_discount_total(), 'The deleted percentage coupon should still apply 10% from its stored definition.' );
+	}
+
+	/**
+	 * @testdox Recalculating coupons keeps the coupon definition already stored on an unsaved coupon item.
+	 */
+	public function test_recalculate_coupons_keeps_existing_coupon_info_on_unsaved_item(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
+		$order->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'unsaved-existing-info' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+		$original_info = $coupon->get_short_info();
+
+		$coupon->set_amount( 25 );
+		$coupon->save();
+
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-existing-info' );
+		$coupon_item->add_meta_data( 'coupon_info', $original_info );
+		$order->add_item( $coupon_item );
+		$order->recalculate_coupons();
+
+		$coupon_item = current( $order->get_items( 'coupon' ) );
+		$this->assertCount( 1, $coupon_item->get_meta( 'coupon_info', false ), 'Only one coupon_info entry should be stored.' );
+		$this->assertSame( $original_info, $coupon_item->get_meta( 'coupon_info' ), 'The stored coupon definition should not be replaced.' );
+	}
+
+	/**
+	 * @testdox Recalculating coupons discounts each unsaved line item without failing.
+	 */
+	public function test_recalculate_coupons_with_unsaved_line_items(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$coupon  = new WC_Coupon();
+		$coupon->set_code( 'unsaved-line-items' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$order = new WC_Order();
+		foreach ( array( 100, 50 ) as $total ) {
+			$line_item = new WC_Order_Item_Product();
+			$line_item->set_product( $product );
+			$line_item->set_quantity( 1 );
+			$line_item->set_subtotal( $total );
+			$line_item->set_total( $total );
+			$order->add_item( $line_item );
+		}
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-line-items' );
+		$order->add_item( $coupon_item );
+
+		$order->recalculate_coupons();
+
+		$line_totals = array_map(
+			fn( $item ) => (float) $item->get_total(),
+			array_values( $order->get_items() )
+		);
+		$this->assertEqualsCanonicalizing( array( 90.0, 45.0 ), $line_totals, 'Each unsaved line item should get its own discount.' );
+		$this->assertCount( 1, $order->get_items( 'coupon' ), 'The coupon item should not be duplicated.' );
+		$this->assertEquals( 15, $order->get_discount_total() );
+	}
+
+	/**
+	 * @testdox Order and refund defaults capture the store tax mode without pending changes.
+	 * @dataProvider provide_order_tax_defaults
+	 *
+	 * @param string $order_class Order class.
+	 * @param string $tax_mode Store tax mode.
+	 * @param bool   $expected Expected order tax mode.
+	 * @phpstan-param class-string<WC_Abstract_Order> $order_class
+	 */
+	public function test_constructor_initializes_prices_include_tax( string $order_class, string $tax_mode, bool $expected ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', $tax_mode );
+		$sut = new $order_class();
+
+		$this->assertSame( $expected, $sut->get_prices_include_tax( 'edit' ) );
+		$this->assertArrayNotHasKey( 'prices_include_tax', $sut->get_changes(), 'Initialization must not be a pending edit.' );
+
+		update_option( 'woocommerce_prices_include_tax', 'yes' === $tax_mode ? 'no' : 'yes' );
+		$this->assertSame( $expected, $sut->get_prices_include_tax( 'edit' ), 'The default must be captured at construction, not at read time.' );
+	}
+
+	/**
+	 * Provides order classes and store tax modes.
+	 *
+	 * @return array<string, array{class-string<WC_Abstract_Order>, string, bool}>
+	 */
+	public static function provide_order_tax_defaults(): array {
+		return array(
+			'inclusive order'  => array( WC_Order::class, 'yes', true ),
+			'exclusive order'  => array( WC_Order::class, 'no', false ),
+			'inclusive refund' => array( WC_Order_Refund::class, 'yes', true ),
+			'exclusive refund' => array( WC_Order_Refund::class, 'no', false ),
+		);
+	}
+
+	/**
+	 * @testdox CRUD persists the initial tax mode or explicit override independently of later store settings.
+	 * @dataProvider provide_order_tax_persistence
+	 *
+	 * @param string    $tax_mode Store tax mode at construction.
+	 * @param bool|null $override Explicit tax mode, or null to leave the default untouched.
+	 * @param bool      $expected Expected persisted tax mode.
+	 */
+	public function test_prices_include_tax_persists_initial_value( string $tax_mode, ?bool $override, bool $expected ): void {
+		$sut = null;
+
+		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
+			update_option( 'woocommerce_prices_include_tax', $tax_mode );
+			$sut = new WC_Order();
+			if ( null !== $override ) {
+				$sut->set_prices_include_tax( $override );
+			}
+			update_option( 'woocommerce_prices_include_tax', $expected ? 'no' : 'yes' );
+			$sut->save();
+
+			$reloaded_order = new WC_Order( $sut->get_id() );
+			$this->assertSame( $expected, $reloaded_order->get_prices_include_tax( 'edit' ), 'Saving and loading must preserve the order value, not use the current store setting.' );
+			$this->assertArrayNotHasKey( 'prices_include_tax', $reloaded_order->get_changes(), 'Loading a persisted value must not mark it as changed.' );
+		} finally {
+			if ( $sut ) {
+				$sut->delete( true );
+			}
+		}
+	}
+
+	/**
+	 * Provides tax defaults and explicit overrides.
+	 *
+	 * @return array<string, array{string, bool|null, bool}>
+	 */
+	public static function provide_order_tax_persistence(): array {
+		return array(
+			'inclusive default' => array( 'yes', null, true ),
+			'exclusive default' => array( 'no', null, false ),
+			'explicit false'    => array( 'yes', false, false ),
+			'explicit true'     => array( 'no', true, true ),
+		);
+	}
+
+	/**
+	 * @testdox Refund creation preserves the parent order tax mode despite a different store default.
+	 * @dataProvider provide_order_tax_persistence
+	 *
+	 * @param string    $tax_mode Store tax mode at parent construction.
+	 * @param bool|null $override Explicit parent tax mode, or null for the default.
+	 * @param bool      $expected Expected refund tax mode.
+	 */
+	public function test_refund_inherits_parent_prices_include_tax( string $tax_mode, ?bool $override, bool $expected ): void {
+		$order = null;
+		$sut   = null;
+
+		// This persistence test must not leave email logs for subsequent logging tests.
+		add_filter( 'woocommerce_email_log_enabled', '__return_false' );
+
+		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
+			update_option( 'woocommerce_prices_include_tax', $tax_mode );
+			$order = new WC_Order();
+			if ( null !== $override ) {
+				$order->set_prices_include_tax( $override );
+			}
+			$order->set_total( '10' );
+			$order->save();
+			update_option( 'woocommerce_prices_include_tax', $expected ? 'no' : 'yes' );
+
+			$sut = wc_create_refund(
+				array(
+					'order_id' => $order->get_id(),
+					'amount'   => 1,
+				)
+			);
+			$this->assertInstanceOf( WC_Order_Refund::class, $sut );
+			$reloaded_refund = new WC_Order_Refund( $sut->get_id() );
+			$this->assertSame( $expected, $reloaded_refund->get_prices_include_tax( 'edit' ) );
+			$this->assertArrayNotHasKey( 'prices_include_tax', $reloaded_refund->get_changes() );
+		} finally {
+			if ( $sut instanceof WC_Order_Refund ) {
+				$sut->delete( true );
+			}
+			if ( $order ) {
+				$order->delete( true );
+			}
+		}
+	}
+
+	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
@@ -36,7 +392,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->registered_order_statuses = array();
 
 		parent::tearDown();
-		$this->disable_cogs_feature();
 	}
 
 	/**
@@ -165,6 +520,55 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 90, $order->get_total() );
 		$this->assertEquals( 18, $order->get_total_tax() );
 		$this->assertEquals( 2, $order->get_discount_tax() );
+	}
+
+	/**
+	 * @testdox A fixed cart coupon applied to an order records no more than the line price when removing the base tax leaves half a cent.
+	 */
+	public function test_apply_fixed_cart_coupon_records_line_price_with_half_cent_price(): void {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => 'US',
+				'tax_rate_state'   => '',
+				'tax_rate'         => '20.0000',
+				'tax_rate_name'    => 'VAT',
+				'tax_rate_order'   => '1',
+				'tax_rate_class'   => '',
+			)
+		);
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 9.99,
+				'price'         => 9.99,
+			)
+		);
+		WC_Helper_Coupon::create_coupon(
+			'fixed-cart-25',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '25',
+			)
+		);
+
+		$order = wc_create_order();
+		$order->set_billing_country( 'FR' );
+		$order->set_shipping_country( 'FR' );
+		$order->add_product( $product, 1 );
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_total( 10 );
+		$order->add_item( $shipping );
+		$order->calculate_totals();
+
+		$this->assertTrue( $order->apply_coupon( 'fixed-cart-25' ), 'The coupon should apply to the order' );
+		$coupon_items = array_values( $order->get_items( 'coupon' ) );
+		$this->assertEquals( 8.33, $coupon_items[0]->get_discount(), 'The coupon should record no more than the line price' );
+		$this->assertEquals( 10, $order->get_total(), 'Only shipping should remain to pay' );
 	}
 
 	/**
@@ -321,6 +725,175 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for refund coupon tests.
+	 *
+	 * @return array
+	 */
+	public function provide_refund_parent_customer_ids(): array {
+		return array(
+			'guest parent order'      => array( 0 ),
+			'registered parent order' => array( 1 ),
+		);
+	}
+
+	/**
+	 * Create a refund for one line item of a new order.
+	 *
+	 * @param int $customer_id Customer ID of the parent order.
+	 * @return WC_Order_Refund
+	 */
+	private function create_line_item_refund( int $customer_id ): WC_Order_Refund {
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$item  = current( $order->get_items() );
+
+		return wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $item->get_total(),
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => $item->get_quantity(),
+						'refund_total' => $item->get_total(),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Applying a coupon to a refund returns an error and records no coupon usage.
+	 * @dataProvider provide_refund_parent_customer_ids
+	 *
+	 * @param int $customer_id Customer ID of the parent order.
+	 */
+	public function test_apply_coupon_on_refund_returns_error( int $customer_id ) {
+		$coupon_code = 'coupon_test_refund_' . $customer_id;
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$refund = $this->create_line_item_refund( $customer_id );
+
+		$result = $refund->apply_coupon( $coupon_code );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'invalid_coupon', $result->get_error_code() );
+		$this->assertCount( 0, $refund->get_items( 'coupon' ) );
+		$this->assertSame( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A refund uses the tax location of its parent order.
+	 */
+	public function test_refund_get_taxable_location_returns_parent_tax_location() {
+		$refund       = $this->create_line_item_refund( 1 );
+		$parent_order = wc_get_order( $refund->get_parent_id() );
+
+		$this->assertSame( 'US', $parent_order->get_taxable_location()['country'] );
+		$this->assertSame( $parent_order->get_taxable_location(), $refund->get_taxable_location() );
+	}
+
+	/**
+	 * @testdox A refund without a parent order uses the store base address as its tax location.
+	 */
+	public function test_refund_get_taxable_location_without_parent_returns_base_address() {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_store_city', 'San Francisco' );
+		update_option( 'woocommerce_store_postcode', '94110' );
+
+		$refund = new WC_Order_Refund();
+
+		$this->assertSame(
+			array(
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '94110',
+				'city'     => 'San Francisco',
+			),
+			$refund->get_taxable_location()
+		);
+	}
+
+	/**
+	 * @testdox A coupon can be applied to a custom order type that has no customer ID or billing email.
+	 */
+	public function test_apply_coupon_on_custom_order_type_without_customer() {
+		$coupon_code = 'coupon_test_custom_order_type';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$order = $this->create_custom_order();
+
+		$this->assertFalse( is_callable( array( $order, 'get_customer_id' ) ) );
+		$this->assertFalse( is_callable( array( $order, 'get_billing_email' ) ) );
+
+		$result = $order->apply_coupon( $coupon_code );
+
+		$this->assertTrue( $result );
+		$this->assertCount( 1, $order->get_items( 'coupon' ) );
+	}
+
+	/**
+	 * Create and save a CustomerlessTestOrder with one line item.
+	 *
+	 * @param string|null $billing_email When set, the order type also has get_billing_email() returning this.
+	 * @return CustomerlessTestOrder
+	 */
+	private function create_custom_order( ?string $billing_email = null ): CustomerlessTestOrder {
+		// A custom order type registers its own data store, as WC_Order's store expects WC_Order methods.
+		$data_store = new class() extends Abstract_WC_Order_Data_Store_CPT {
+		};
+		add_filter(
+			'woocommerce_data_stores',
+			function ( $stores ) use ( $data_store ) {
+				$stores['test-custom-order'] = $data_store;
+				return $stores;
+			}
+		);
+
+		if ( null === $billing_email ) {
+			$order = new CustomerlessTestOrder();
+		} else {
+			$order = new class() extends CustomerlessTestOrder {
+				/**
+				 * Billing email returned by get_billing_email().
+				 *
+				 * @var string
+				 */
+				public $test_billing_email = '';
+
+				/**
+				 * Get the billing email.
+				 *
+				 * @return string
+				 */
+				public function get_billing_email() {
+					return $this->test_billing_email;
+				}
+			};
+
+			$order->test_billing_email = $billing_email;
+		}
+		$order->add_product( WC_Helper_Product::create_simple_product(), 1 );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * @testdox The per-email coupon usage limit applies to a custom order type that has a billing email but no customer ID.
+	 */
+	public function test_apply_coupon_enforces_email_usage_limit_on_custom_order_type_without_customer_id() {
+		$coupon_code = 'coupon_test_custom_order_type_email_limit';
+		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code, array( 'usage_limit_per_user' => '1' ) );
+		$coupon->increase_usage_count( 'guest@example.com' );
+		$order = $this->create_custom_order( 'guest@example.com' );
+
+		$this->assertFalse( is_callable( array( $order, 'get_customer_id' ) ) );
+
+		$result = $order->apply_coupon( $coupon_code );
+
+		$this->assertWPError( $result );
+		$this->assertSame( $coupon->get_coupon_error( 106 ), $result->get_error_message() );
+		$this->assertCount( 0, $order->get_items( 'coupon' ) );
+	}
+
+	/**
 	 * Test remove_coupon fires woocommerce_order_removed_coupon hook with WC_Coupon object.
 	 */
 	public function test_remove_coupon_fires_order_removed_coupon_hook() {
@@ -348,18 +921,344 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			2
 		);
 
-		try {
-			$result = $order->remove_coupon( $coupon_code );
+		$result = $order->remove_coupon( $coupon_code );
 
-			$this->assertTrue( $result );
-			$this->assertTrue( $hook_fired, 'woocommerce_order_removed_coupon hook did not fire.' );
-			$this->assertInstanceOf( WC_Coupon::class, $hook_coupon, 'First parameter should be a WC_Coupon instance.' );
-			$this->assertEquals( $coupon->get_code(), $hook_coupon->get_code(), 'Hook coupon code should match.' );
-			$this->assertSame( $order, $hook_order, 'Second parameter should be the same WC_Order instance.' );
-			$this->assertCount( 0, $order->get_items( 'coupon' ) );
-		} finally {
-			remove_all_actions( 'woocommerce_order_removed_coupon' );
+		$this->assertTrue( $result );
+		$this->assertTrue( $hook_fired, 'woocommerce_order_removed_coupon hook did not fire.' );
+		$this->assertInstanceOf( WC_Coupon::class, $hook_coupon, 'First parameter should be a WC_Coupon instance.' );
+		$this->assertEquals( $coupon->get_code(), $hook_coupon->get_code(), 'Hook coupon code should match.' );
+		$this->assertSame( $order, $hook_order, 'Second parameter should be the same WC_Order instance.' );
+		$this->assertCount( 0, $order->get_items( 'coupon' ) );
+	}
+
+	/**
+	 * @testdox Removing a coupon from an order that never recorded usage leaves the coupon usage count alone.
+	 */
+	public function test_remove_coupon_keeps_usage_count_when_order_did_not_record_it() {
+		$coupon_code = 'remove_unrecorded_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$counted_order = WC_Helper_Order::create_order();
+		$counted_order->set_status( OrderStatus::PENDING );
+		$counted_order->save();
+		$counted_order->apply_coupon( $coupon_code );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$item = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon_code );
+		$order->add_item( $item );
+		$order->save();
+		$this->assertFalse( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		$this->assertTrue( $order->remove_coupon( $coupon_code ) );
+
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Removing the last coupon from a recorded order releases its usage, clears the flag, and lets a later coupon be counted.
+	 */
+	public function test_remove_coupon_from_recorded_order_releases_usage_and_clears_flag() {
+		$coupon_code = 'remove_recorded_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->apply_coupon( $coupon_code );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		$this->assertTrue( $order->remove_coupon( $coupon_code ) );
+
+		$reloaded = wc_get_order( $order->get_id() );
+		$this->assertCount( 0, $reloaded->get_items( 'coupon' ) );
+		$this->assertFalse( $reloaded->get_data_store()->get_recorded_coupon_usage_counts( $reloaded ) );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+
+		$item = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon_code );
+		$reloaded->add_item( $item );
+		$reloaded->save();
+		$reloaded->set_status( OrderStatus::ON_HOLD );
+		$reloaded->save();
+
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Removing a coupon right after applying it on the same order instance clears the stored flag.
+	 */
+	public function test_remove_coupon_after_apply_on_same_instance_clears_stored_flag() {
+		$coupon_code = 'remove_same_instance_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->apply_coupon( $coupon_code );
+		$this->assertTrue( $order->remove_coupon( $coupon_code ) );
+
+		$reloaded = wc_get_order( $order->get_id() );
+		$this->assertFalse( $reloaded->get_data_store()->get_recorded_coupon_usage_counts( $reloaded ) );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+
+		$item = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon_code );
+		$reloaded->add_item( $item );
+		$reloaded->save();
+		$reloaded->set_status( OrderStatus::ON_HOLD );
+		$reloaded->save();
+
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Removing a coupon from a recorded guest order removes the billing email that was recorded as a user.
+	 */
+	public function test_remove_coupon_from_recorded_guest_order_removes_billing_email() {
+		$coupon_code = 'remove_guest_test';
+		$email       = 'guest-remove-coupon@example.com';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $email );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->apply_coupon( $coupon_code );
+
+		$this->assertContains( $email, ( new WC_Coupon( $coupon_code ) )->get_used_by() );
+
+		$order->remove_coupon( $coupon_code );
+
+		$this->assertNotContains( $email, ( new WC_Coupon( $coupon_code ) )->get_used_by() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Removing a coupon after the billing email changed releases the row this order added, not another order's row.
+	 */
+	public function test_remove_coupon_releases_identity_recorded_before_billing_email_changed() {
+		$coupon_code = 'remove_changed_email_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$order_a = WC_Helper_Order::create_order( 0 );
+		$order_a->set_billing_email( 'reserve@example.com' );
+		$order_a->set_status( OrderStatus::PENDING );
+		$order_a->save();
+		$order_a->apply_coupon( $coupon_code );
+
+		$order_b = WC_Helper_Order::create_order( 0 );
+		$order_b->set_billing_email( 'buyer@example.com' );
+		$order_b->set_status( OrderStatus::PENDING );
+		$order_b->save();
+		$order_b->apply_coupon( $coupon_code );
+
+		$order_a = wc_get_order( $order_a->get_id() );
+		$order_a->set_billing_email( 'buyer@example.com' );
+		$order_a->save();
+
+		$this->assertTrue( $order_a->remove_coupon( $coupon_code ) );
+
+		$coupon = new WC_Coupon( $coupon_code );
+		$this->assertSame( array( 'buyer@example.com' ), array_values( $coupon->get_used_by() ) );
+		$this->assertEquals( 1, $coupon->get_usage_count() );
+		$this->assertSame( '', (string) wc_get_order( $order_a->get_id() )->get_meta( '_coupon_usage_identities' ) );
+	}
+
+	/**
+	 * @testdox Removing a coupon after the order moved to another customer releases the original customer row, not the new customer's row.
+	 */
+	public function test_remove_coupon_after_order_moved_to_another_customer_releases_original_customer() {
+		$coupon_code = 'remove_moved_customer_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$customer_a = WC_Helper_Customer::create_customer( 'movedcustomera', 'hunter2', 'movedcustomera@example.com' );
+		$customer_b = WC_Helper_Customer::create_customer( 'movedcustomerb', 'hunter2', 'movedcustomerb@example.com' );
+
+		$order_a = WC_Helper_Order::create_order( $customer_a->get_id() );
+		$order_a->set_status( OrderStatus::PENDING );
+		$order_a->save();
+		$order_a->apply_coupon( $coupon_code );
+
+		$order_b = WC_Helper_Order::create_order( $customer_b->get_id() );
+		$order_b->set_status( OrderStatus::PENDING );
+		$order_b->save();
+		$order_b->apply_coupon( $coupon_code );
+
+		$order_a = wc_get_order( $order_a->get_id() );
+		$order_a->set_customer_id( $customer_b->get_id() );
+		$order_a->save();
+
+		$this->assertTrue( $order_a->remove_coupon( $coupon_code ) );
+
+		$coupon = new WC_Coupon( $coupon_code );
+		$this->assertSame( array( (string) $customer_b->get_id() ), array_values( $coupon->get_used_by() ) );
+		$this->assertEquals( 1, $coupon->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Two copies of one order that both remove the same coupon give its use back only once.
+	 */
+	public function test_remove_coupon_from_two_copies_of_order_gives_use_back_once(): void {
+		$order       = $this->create_pending_order_with_counted_coupons( array( 'two-copies', 'two-copies-kept' ) );
+		$first_copy  = wc_get_order( $order->get_id() );
+		$second_copy = wc_get_order( $order->get_id() );
+		$this->assertCount( 2, $first_copy->get_items( 'coupon' ), 'The first copy should load both coupon lines' );
+		$this->assertCount( 2, $second_copy->get_items( 'coupon' ), 'The second copy should load both coupon lines before the first one removes a coupon' );
+		$decreases_before = did_action( 'woocommerce_decrease_coupon_usage_count' );
+		$removals_before  = did_action( 'woocommerce_order_removed_coupon' );
+		$deletes_before   = did_action( 'woocommerce_delete_order_item' );
+
+		$this->assertTrue( $first_copy->remove_coupon( 'two-copies' ), 'The first copy should remove the coupon' );
+		$this->assertSame( 1, did_action( 'woocommerce_delete_order_item' ) - $deletes_before, 'The coupon line should be deleted once, not again on save' );
+		$this->assertTrue( $second_copy->remove_coupon( 'two-copies' ), 'The second copy should also report the coupon as removed' );
+
+		$this->assertSame( 1, did_action( 'woocommerce_decrease_coupon_usage_count' ) - $decreases_before, 'The use should be given back once' );
+		$this->assertSame( 2, did_action( 'woocommerce_order_removed_coupon' ) - $removals_before, 'Both copies should fire the removed coupon hook' );
+		$this->assertSame( 5, ( new WC_Coupon( 'two-copies' ) )->get_usage_count(), 'The removed coupon should be back at its count before this order' );
+		$this->assertSame( 6, ( new WC_Coupon( 'two-copies-kept' ) )->get_usage_count(), 'The kept coupon should stay counted' );
+		$stored = wc_get_order( $order->get_id() );
+		$this->assertSame( array( 'two-copies-kept' ), $stored->get_coupon_codes(), 'Only the kept coupon should stay on the order' );
+		$this->assertTrue( $stored->get_data_store()->get_recorded_coupon_usage_counts( $stored ), 'The order should stay counted for the kept coupon' );
+	}
+
+	/**
+	 * @testdox Two copies of one order that both stage the removal of the same coupon and save give its use back only once.
+	 */
+	public function test_stage_coupon_removal_on_two_copies_of_order_gives_use_back_once(): void {
+		$order       = $this->create_pending_order_with_counted_coupons( array( 'two-staged-copies' ) );
+		$first_copy  = wc_get_order( $order->get_id() );
+		$second_copy = wc_get_order( $order->get_id() );
+		$this->assertCount( 1, $second_copy->get_items( 'coupon' ), 'The second copy should load the coupon line before the first one removes it' );
+
+		$this->assertTrue( $first_copy->stage_coupon_removal( 'two-staged-copies' ), 'The first copy should stage the removal' );
+		$this->assertTrue( $second_copy->stage_coupon_removal( 'two-staged-copies' ), 'The second copy should also stage the removal' );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items( 'coupon' ), 'Staging should leave the stored coupon line until the save' );
+		$this->assertSame( 6, ( new WC_Coupon( 'two-staged-copies' ) )->get_usage_count(), 'Staging should not give the use back yet' );
+		$first_copy->save();
+		$second_copy->save();
+
+		$this->assertSame( 5, ( new WC_Coupon( 'two-staged-copies' ) )->get_usage_count(), 'The use should be given back once' );
+		$stored = wc_get_order( $order->get_id() );
+		$this->assertSame( array(), $stored->get_coupon_codes(), 'The coupon should be gone from the order' );
+		$this->assertFalse( $stored->get_data_store()->get_recorded_coupon_usage_counts( $stored ), 'The order should no longer be counted' );
+	}
+
+	/**
+	 * @testdox Removing two coupons one after the other gives each use back and clears the counted flag after the last one.
+	 */
+	public function test_remove_coupons_one_after_another_gives_each_use_back(): void {
+		$order = $this->create_pending_order_with_counted_coupons( array( 'sequence-first', 'sequence-second' ) );
+
+		$this->assertTrue( $order->remove_coupon( 'sequence-first' ) );
+		$this->assertSame( 5, ( new WC_Coupon( 'sequence-first' ) )->get_usage_count(), 'The first coupon should be given back' );
+		$this->assertSame( 6, ( new WC_Coupon( 'sequence-second' ) )->get_usage_count(), 'The second coupon should stay counted' );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order->get_id() ), 'The order should stay counted while a coupon remains' );
+
+		$this->assertTrue( $order->remove_coupon( 'sequence-second' ) );
+		$this->assertSame( 5, ( new WC_Coupon( 'sequence-second' ) )->get_usage_count(), 'The second coupon should be given back' );
+		$this->assertFalse( $order->get_data_store()->get_recorded_coupon_usage_counts( $order->get_id() ), 'The order should no longer be counted' );
+	}
+
+	/**
+	 * @testdox Removing a coupon gives the use back once when the coupon line's data store does not report deleted rows, and keeps it when the first delete fails.
+	 *
+	 * @testWith [null, false, 5]
+	 *           [false, false, 6]
+	 *           [null, true, 5]
+	 *
+	 * @param bool|null $first_result     What the coupon line data store's first delete() call returns.
+	 * @param bool      $cancel_meanwhile Whether a cancellation gives the use back while the line is being deleted.
+	 * @param int       $expected_count   Coupon usage count expected after the removal.
+	 */
+	public function test_remove_coupon_with_item_data_store_that_does_not_report_rows( ?bool $first_result, bool $cancel_meanwhile, int $expected_count ): void {
+		$order = $this->create_pending_order_with_counted_coupons( array( 'custom-item-store' ) );
+		$store = new class() extends WC_Order_Item_Coupon_Data_Store {
+			/**
+			 * What the first delete() call returns: null deletes the row and reports nothing, false fails like a database error.
+			 *
+			 * @var bool|null
+			 */
+			public $first_result;
+
+			/**
+			 * Number of delete() calls.
+			 *
+			 * @var int
+			 */
+			private $calls = 0;
+
+			/**
+			 * Delete the item and report nothing, failing the first call when set up to.
+			 *
+			 * @param WC_Order_Item $item Order item.
+			 * @param array         $args Delete arguments.
+			 * @return bool|null
+			 */
+			public function delete( &$item, $args = array() ) {
+				++$this->calls;
+				if ( 1 === $this->calls && false === $this->first_result ) {
+					return false;
+				}
+				parent::delete( $item, $args );
+				return null;
+			}
+		};
+
+		$store->first_result = $first_result;
+		add_filter(
+			'woocommerce_data_stores',
+			function ( $stores ) use ( $store ) {
+				$stores['order-item-coupon'] = $store;
+				return $stores;
+			}
+		);
+
+		$removing_copy = wc_get_order( $order->get_id() );
+		if ( $cancel_meanwhile ) {
+			$has_run = false;
+			add_action(
+				'woocommerce_before_delete_order_item',
+				function () use ( $order, &$has_run ) {
+					if ( ! $has_run ) {
+						$has_run = true;
+						wc_get_order( $order->get_id() )->update_status( OrderStatus::CANCELLED );
+					}
+				}
+			);
 		}
+
+		$this->assertTrue( $removing_copy->remove_coupon( 'custom-item-store' ), 'The coupon should be removed' );
+
+		$this->assertSame( array(), $order->get_data_store()->get_item_ids( $order, 'coupon' ), 'The coupon line should be deleted, by the save when the first delete failed' );
+		$this->assertSame( $expected_count, ( new WC_Coupon( 'custom-item-store' ) )->get_usage_count(), 'The use should be given back once when the store reports nothing, and kept when the first delete failed' );
+	}
+
+	/**
+	 * Create a pending order that counted a use of each coupon. Each coupon starts at 5 uses, so 6 with this order.
+	 *
+	 * The count starts above 1 because WC_Coupon::decrease_usage_count() skips a coupon whose loaded count is 0,
+	 * which would hide a second release.
+	 *
+	 * @param string[] $codes Coupon codes to create and apply.
+	 * @return WC_Order
+	 */
+	private function create_pending_order_with_counted_coupons( array $codes ): WC_Order {
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		foreach ( $codes as $code ) {
+			WC_Helper_Coupon::create_coupon( $code, array( 'usage_count' => 5 ) );
+			$order->apply_coupon( $code );
+			$this->assertSame( 6, ( new WC_Coupon( $code ) )->get_usage_count(), 'The order should count its coupon use' );
+		}
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order->get_id() ), 'The order should be marked as counted' );
+
+		return $order;
 	}
 
 	/**
@@ -714,7 +1613,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testDox Test that order items are not mixed when order_id is zero.
 	 */
-	public function test_order_items_shouldnot_mix_with_zero_id() {
+	public function test_order_items_should_not_mix_with_zero_id() {
 		$order1 = new WC_Order();
 		$order2 = new WC_Order();
 
@@ -871,7 +1770,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Add a product order item with a given Cost of Goods Sold to an exising order.
+	 * Add a product order item with a given Cost of Goods Sold to an existing order.
 	 *
 	 * @param WC_Order $order The target order.
 	 * @param float    $cogs_value The COGS value of the product.
@@ -1247,7 +2146,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 */
 	public static function provide_failed_order_item_delete_queries(): array {
 		return array(
-			'item metadata delete' => array( 'DELETE itemmeta FROM' ),
+			'item ID lookup'       => array( 'SELECT order_item_id FROM {prefix}woocommerce_order_items WHERE order_id' ),
+			'item metadata delete' => array( 'DELETE FROM {prefix}woocommerce_order_itemmeta' ),
 			'item row delete'      => array( 'DELETE FROM {prefix}woocommerce_order_items' ),
 		);
 	}
@@ -1332,6 +2232,264 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			'all item types' => array( null ),
 			'line items'     => array( 'line_item' ),
 		);
+	}
+
+	/**
+	 * Create an unsaved order item of the given type.
+	 *
+	 * @param string $type Order item type.
+	 * @param string $name Item name (the code for coupons).
+	 * @return WC_Order_Item
+	 */
+	private function create_unsaved_order_item( string $type, string $name = 'Unsaved item' ): WC_Order_Item {
+		$classes = array(
+			'line_item' => WC_Order_Item_Product::class,
+			'fee'       => WC_Order_Item_Fee::class,
+			'shipping'  => WC_Order_Item_Shipping::class,
+			'coupon'    => WC_Order_Item_Coupon::class,
+			'tax'       => WC_Order_Item_Tax::class,
+		);
+
+		$item = new $classes[ $type ]();
+		$item->set_name( $name );
+		return $item;
+	}
+
+	/**
+	 * Provides order item types.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function provide_order_item_types(): array {
+		return array(
+			'line item' => array( 'line_item' ),
+			'fee'       => array( 'fee' ),
+			'shipping'  => array( 'shipping' ),
+			'coupon'    => array( 'coupon' ),
+			'tax'       => array( 'tax' ),
+		);
+	}
+
+	/**
+	 * @testdox remove_item() should remove an unsaved item by its temporary key, so it is not saved with the order.
+	 * @dataProvider provide_order_item_types
+	 *
+	 * @param string $type Order item type.
+	 */
+	public function test_remove_item_removes_unsaved_item( string $type ): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( $type ) );
+		$item_key = array_key_first( $order->get_items( $type ) );
+
+		$order->remove_item( $item_key );
+
+		$this->assertEmpty( $order->get_items( $type ), 'The unsaved item should be removed from the order straight away.' );
+
+		$order->save();
+
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_items( $type ), 'The removed item should not be saved.' );
+	}
+
+	/**
+	 * @testdox remove_item() should remove only the requested entry when the same unsaved item is added twice.
+	 * @dataProvider provide_order_item_types
+	 *
+	 * @param string $type Order item type.
+	 */
+	public function test_remove_item_preserves_other_entry_for_same_unsaved_object( string $type ): void {
+		$order = new WC_Order();
+		$item  = $this->create_unsaved_order_item( $type );
+		$order->add_item( $item );
+		$order->add_item( $item );
+		$item_keys = array_keys( $order->get_items( $type ) );
+
+		$order->remove_item( $item_keys[1] );
+
+		$this->assertSame( array( $item_keys[0] => $item ), $order->get_items( $type ), 'Only the entry at the requested key should be removed.' );
+
+		$order->save();
+
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items( $type ), 'The remaining entry should still be saved.' );
+	}
+
+	/**
+	 * @testdox remove_item() should remove an unsaved item from a woocommerce_before_order_object_save callback.
+	 */
+	public function test_remove_item_removes_unsaved_item_during_before_save_hook(): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( 'line_item', 'Original' ) );
+
+		add_action(
+			'woocommerce_before_order_object_save',
+			function ( $order ) {
+				foreach ( $order->get_items() as $item_id => $item ) {
+					if ( 'Original' === $item->get_name() ) {
+						$order->remove_item( $item_id );
+						$order->add_item( $this->create_unsaved_order_item( 'line_item', 'Replacement' ) );
+					}
+				}
+			}
+		);
+
+		$order->save();
+
+		$names = array_map( fn( $item ) => $item->get_name(), wc_get_order( $order->get_id() )->get_items() );
+		$this->assertSame( array( 'Replacement' ), array_values( $names ), 'Only the replacement item should be saved.' );
+	}
+
+	/**
+	 * @testdox remove_item() should still defer deleting saved items, removed by int or numeric string ID, until the order is saved.
+	 * @dataProvider provide_order_item_types
+	 *
+	 * @param string $type Order item type.
+	 */
+	public function test_remove_item_defers_deleting_saved_items_until_save( string $type ): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( $type, 'first' ) );
+		$order->add_item( $this->create_unsaved_order_item( $type, 'second' ) );
+		$order->save();
+		list( $first_id, $second_id ) = array_keys( $order->get_items( $type ) );
+
+		$order->remove_item( $first_id );
+		$order->remove_item( (string) $second_id );
+
+		$this->assertEmpty( $order->get_items( $type ), 'The saved items should be removed from the order straight away.' );
+		$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $first_id ), 'The item removed by int ID should stay in the database until the order is saved.' );
+		$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $second_id ), 'The item removed by string ID should stay in the database until the order is saved.' );
+
+		$order->save();
+
+		$this->assertFalse( WC_Order_Factory::get_order_item( $first_id ), 'The item removed by int ID should be deleted when the order is saved.' );
+		$this->assertFalse( WC_Order_Factory::get_order_item( $second_id ), 'The item removed by string ID should be deleted when the order is saved.' );
+	}
+
+	/**
+	 * @testdox remove_item() should not remove a saved item when given its ID with a leading zero, a decimal or an exponent.
+	 * @testWith ["0%d"]
+	 *           ["%d.5"]
+	 *           ["%de0"]
+	 *
+	 * @param string $format sprintf() format that turns the item ID into the string to pass.
+	 */
+	public function test_remove_item_ignores_non_canonical_numeric_string_ids( string $format ): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( 'fee' ) );
+		$order->save();
+		$item_id = array_key_first( $order->get_items( 'fee' ) );
+
+		$this->assertFalse( $order->remove_item( sprintf( $format, $item_id ) ) );
+		$this->assertArrayHasKey( $item_id, $order->get_items( 'fee' ), 'The item should stay on the order.' );
+
+		$order->save();
+
+		$this->assertArrayHasKey( $item_id, wc_get_order( $order->get_id() )->get_items( 'fee' ), 'The item should stay in the database.' );
+	}
+
+	/**
+	 * @testdox remove_item() should remove the item it resolves when a woocommerce_order_get_items filter changes the keys.
+	 */
+	public function test_remove_item_removes_resolved_item_when_filter_swaps_keys(): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( 'fee', 'First' ) );
+		$order->add_item( $this->create_unsaved_order_item( 'fee', 'Second' ) );
+		$order->save();
+		list( $first_id, $second_id ) = array_keys( $order->get_items( 'fee' ) );
+
+		add_filter(
+			'woocommerce_order_get_items',
+			function ( $items ) use ( $first_id, $second_id ) {
+				if ( isset( $items[ $first_id ], $items[ $second_id ] ) ) {
+					list( $items[ $first_id ], $items[ $second_id ] ) = array( $items[ $second_id ], $items[ $first_id ] );
+				}
+				return $items;
+			}
+		);
+
+		// A freshly loaded order resolves the key through the filtered list, so the first key returns the second fee.
+		wp_cache_flush();
+		$reloaded = wc_get_order( $order->get_id() );
+		$reloaded->remove_item( $first_id );
+		$remaining_ids = array_map( fn( $item ) => $item->get_id(), $reloaded->get_items( 'fee' ) );
+		$reloaded->save();
+
+		$this->assertSame( array( $first_id ), array_values( $remaining_ids ), 'The resolved item should be removed from the order.' );
+		$this->assertFalse( WC_Order_Factory::get_order_item( $second_id ), 'The resolved item should be deleted.' );
+		$this->assertInstanceOf( WC_Order_Item_Fee::class, WC_Order_Factory::get_order_item( $first_id ), 'The other item should be kept.' );
+	}
+
+	/**
+	 * @testdox remove_coupon() should remove an unsaved coupon line.
+	 */
+	public function test_remove_coupon_removes_unsaved_coupon_line(): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( 'coupon', 'unsaved-coupon' ) );
+
+		$this->assertTrue( $order->remove_coupon( 'unsaved-coupon' ) );
+		$this->assertEmpty( $order->get_coupon_codes(), 'The coupon line should be removed from the order straight away.' );
+
+		$order->save();
+
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_coupon_codes(), 'The removed coupon line should not be saved.' );
+	}
+
+	/**
+	 * @testdox remove_coupon() should remove only the matching coupon when a woocommerce_order_get_items filter renumbers the keys.
+	 */
+	public function test_remove_coupon_removes_matching_coupon_when_filter_renumbers_keys(): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( 'coupon', 'first-coupon' ) );
+		$order->add_item( $this->create_unsaved_order_item( 'coupon', 'second-coupon' ) );
+		$order->save();
+
+		add_filter( 'woocommerce_order_get_items', 'array_values' );
+
+		$order->remove_coupon( 'second-coupon' );
+		$order->save();
+
+		$this->assertSame( array( 'first-coupon' ), wc_get_order( $order->get_id() )->get_coupon_codes() );
+	}
+
+	/**
+	 * @testdox update_taxes() should remove an unsaved tax line that duplicates the rate of a saved one.
+	 */
+	public function test_update_taxes_removes_unsaved_duplicate_tax_line(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+		$fee         = $this->create_unsaved_order_item( 'fee' );
+		$fee->set_taxes( array( 'total' => array( $tax_rate_id => '1' ) ) );
+
+		$order = new WC_Order();
+		$order->add_item( $fee );
+		$order->update_taxes();
+		$saved_tax_id = array_key_first( $order->get_taxes() );
+
+		$duplicate = new WC_Order_Item_Tax();
+		$duplicate->set_rate_id( $tax_rate_id );
+		$order->add_item( $duplicate );
+		$order->update_taxes();
+
+		$this->assertSame( array( $saved_tax_id ), array_keys( $order->get_taxes() ), 'Only the saved tax line should remain on the order.' );
+		$this->assertSame( array( $saved_tax_id ), array_keys( wc_get_order( $order->get_id() )->get_taxes() ), 'The duplicate tax line should not be saved.' );
+	}
+
+	/**
+	 * @testdox update_taxes() should remove an unsaved tax line whose rate is no longer used by the order.
+	 */
+	public function test_update_taxes_removes_obsolete_unsaved_tax_line(): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( 'tax' ) );
+
+		$order->update_taxes();
+
+		$this->assertEmpty( $order->get_taxes(), 'The obsolete tax line should be removed from the order.' );
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_taxes(), 'The obsolete tax line should not be saved.' );
 	}
 
 	/**
@@ -1628,30 +2786,25 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_order_data_store', $data_store_filter, PHP_INT_MAX );
 		add_action( 'woocommerce_removed_order_items', $removed_hook, 10, 2 );
 
-		try {
-			$reflection = new ReflectionProperty( WC_Data::class, 'data_store' );
-			$reflection->setAccessible( true );
-			$reflection->setValue( $order, new WC_Data_Store( 'order' ) );
+		$reflection = new ReflectionProperty( WC_Data::class, 'data_store' );
+		$reflection->setAccessible( true );
+		$reflection->setValue( $order, new WC_Data_Store( 'order' ) );
 
-			$order->remove_order_items( $type );
+		$order->remove_order_items( $type );
 
-			$this->assertSame( array( $type ), $custom_data_store->deleted_item_types, 'The custom delete_items() implementation should run synchronously with the requested type.' );
-			$this->assertSame( array( $type ), $removed_item_types, 'The post-removal hook should run synchronously with the requested type.' );
-			foreach ( $expected_deleted_ids as $item_id ) {
-				$this->assertFalse( WC_Order_Factory::get_order_item( $item_id ), 'Items selected for removal should be deleted synchronously.' );
-			}
-			foreach ( $expected_retained_ids as $item_id ) {
-				$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $item_id ), 'Items of other types should be retained.' );
-			}
-
-			$order->save();
-
-			$this->assertSame( array( $type ), $custom_data_store->deleted_item_types, 'Saving should not invoke the custom delete_items() implementation again.' );
-			$this->assertSame( array( $type ), $removed_item_types, 'Saving should not fire the post-removal hook again.' );
-		} finally {
-			remove_filter( 'woocommerce_order_data_store', $data_store_filter, PHP_INT_MAX );
-			remove_action( 'woocommerce_removed_order_items', $removed_hook, 10 );
+		$this->assertSame( array( $type ), $custom_data_store->deleted_item_types, 'The custom delete_items() implementation should run synchronously with the requested type.' );
+		$this->assertSame( array( $type ), $removed_item_types, 'The post-removal hook should run synchronously with the requested type.' );
+		foreach ( $expected_deleted_ids as $item_id ) {
+			$this->assertFalse( WC_Order_Factory::get_order_item( $item_id ), 'Items selected for removal should be deleted synchronously.' );
 		}
+		foreach ( $expected_retained_ids as $item_id ) {
+			$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $item_id ), 'Items of other types should be retained.' );
+		}
+
+		$order->save();
+
+		$this->assertSame( array( $type ), $custom_data_store->deleted_item_types, 'Saving should not invoke the custom delete_items() implementation again.' );
+		$this->assertSame( array( $type ), $removed_item_types, 'Saving should not fire the post-removal hook again.' );
 	}
 
 	/**
@@ -1878,31 +3031,26 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		add_action( 'woocommerce_remove_order_items', $pre_callback, 10, 2 );
 		add_action( 'woocommerce_removed_order_items', $post_callback, 10, 2 );
 
-		try {
-			$order->remove_order_items( 'line_item' );
+		$order->remove_order_items( 'line_item' );
 
-			$this->assertSame(
-				$expected_log,
-				$pre_calls,
-				'woocommerce_remove_order_items should fire once when removal is requested.'
-			);
-			$this->assertSame(
-				array(),
-				$post_calls,
-				'woocommerce_removed_order_items should not fire until the deferred DB delete runs in save().'
-			);
+		$this->assertSame(
+			$expected_log,
+			$pre_calls,
+			'woocommerce_remove_order_items should fire once when removal is requested.'
+		);
+		$this->assertSame(
+			array(),
+			$post_calls,
+			'woocommerce_removed_order_items should not fire until the deferred DB delete runs in save().'
+		);
 
-			$order->save();
+		$order->save();
 
-			$this->assertSame(
-				$expected_log,
-				$post_calls,
-				'woocommerce_removed_order_items should fire once with the requested type after save() commits the delete.'
-			);
-		} finally {
-			remove_action( 'woocommerce_remove_order_items', $pre_callback, 10 );
-			remove_action( 'woocommerce_removed_order_items', $post_callback, 10 );
-		}//end try
+		$this->assertSame(
+			$expected_log,
+			$post_calls,
+			'woocommerce_removed_order_items should fire once with the requested type after save() commits the delete.'
+		);
 	}
 
 	/**
@@ -2030,30 +3178,26 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_order_type_to_group', $adjust );
 
-		try {
-			$items_prop = $reflect->getProperty( 'items' );
-			$items_prop->setAccessible( true );
-			$items = $items_prop->getValue( $order );
+		$items_prop = $reflect->getProperty( 'items' );
+		$items_prop->setAccessible( true );
+		$items = $items_prop->getValue( $order );
 
-			$items['custom_unit_test_lines'] = array( 'sentinel' );
-			$items_prop->setValue( $order, $items );
+		$items['custom_unit_test_lines'] = array( 'sentinel' );
+		$items_prop->setValue( $order, $items );
 
-			$order->remove_order_items();
+		$order->remove_order_items();
 
-			$items_after = $items_prop->getValue( $order );
-			$this->assertArrayHasKey(
-				'custom_unit_test_lines',
-				$items_after,
-				'Filter-registered groups should be present as keys after the in-memory clear.'
-			);
-			$this->assertSame(
-				array(),
-				$items_after['custom_unit_test_lines'],
-				'Filter-registered group should be cleared to an empty array — not left with stale entries.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_order_type_to_group', $adjust );
-		}
+		$items_after = $items_prop->getValue( $order );
+		$this->assertArrayHasKey(
+			'custom_unit_test_lines',
+			$items_after,
+			'Filter-registered groups should be present as keys after the in-memory clear.'
+		);
+		$this->assertSame(
+			array(),
+			$items_after['custom_unit_test_lines'],
+			'Filter-registered group should be cleared to an empty array — not left with stale entries.'
+		);
 	}
 
 	/**
@@ -2106,5 +3250,139 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->save();
 
 		$this->assertSame( $status, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox save() records the exception when the order could not be persisted, and a later successful save() clears it.
+	 */
+	public function test_get_last_save_error_reports_a_failed_save_until_the_next_successful_one(): void {
+		$order = wc_create_order();
+		$this->assertNull( $order->get_last_save_error(), 'A successful save should report no error.' );
+
+		$fail = function () {
+			throw new Exception( 'Forced save failure' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		$order->set_total( '5.00' );
+		$order->save();
+		remove_action( 'woocommerce_before_order_object_save', $fail );
+
+		$this->assertInstanceOf( Exception::class, $order->get_last_save_error() );
+		$this->assertSame( 'Forced save failure', $order->get_last_save_error()->getMessage() );
+
+		$order->save();
+
+		$this->assertNull( $order->get_last_save_error(), 'A later successful save should clear the error.' );
+		$this->assertSame( '5.00', wc_get_order( $order->get_id() )->get_total() );
+	}
+
+	/**
+	 * @testdox save() does not report a failure when only a woocommerce_after_order_object_save callback throws, since the order was already persisted.
+	 */
+	public function test_get_last_save_error_ignores_exceptions_from_after_save_callbacks(): void {
+		$order = wc_create_order();
+
+		$fail = function () {
+			throw new Exception( 'After-save callback failure' );
+		};
+		add_action( 'woocommerce_after_order_object_save', $fail );
+		$order->set_total( '7.00' );
+		$order->save();
+		remove_action( 'woocommerce_after_order_object_save', $fail );
+
+		$this->assertNull( $order->get_last_save_error() );
+		$this->assertSame( '7.00', wc_get_order( $order->get_id() )->get_total() );
+	}
+
+	/**
+	 * @testdox update_status() returns false when the order could not be saved.
+	 */
+	public function test_update_status_returns_false_when_the_save_fails(): void {
+		$order = wc_create_order();
+
+		$fail = function () {
+			throw new Exception( 'Forced save failure' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		$result = $order->update_status( OrderStatus::PROCESSING );
+		remove_action( 'woocommerce_before_order_object_save', $fail );
+
+		$this->assertFalse( $result );
+		$this->assertTrue( $order->update_status( OrderStatus::PROCESSING ), 'update_status() should return true once the save succeeds.' );
+	}
+
+	/**
+	 * Try to hold the per-user coupon allowance for a new, unsaved order, as the checkout does.
+	 *
+	 * @param string $code          Coupon code in the cart.
+	 * @param string $billing_email Billing email of the checkout.
+	 * @return string|null The error message, or null when the hold was taken.
+	 */
+	private function try_hold_coupon( string $code, string $billing_email ): ?string {
+		WC()->cart->set_applied_coupons( array( $code ) );
+		$order = new WC_Order();
+		$order->set_billing_email( $billing_email );
+		try {
+			$order->hold_applied_coupons( $billing_email );
+			return null;
+		} catch ( Exception $e ) {
+			return $e->getMessage();
+		}
+	}
+
+	/**
+	 * @testdox A guest cannot hold a per-user coupon that the account owning the billing email already used.
+	 */
+	public function test_hold_applied_coupons_counts_use_of_account_that_owns_guest_email(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'owner@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'hold_owner_use', array( 'usage_limit_per_user' => '1' ) );
+		add_post_meta( ( new WC_Coupon( 'hold_owner_use' ) )->get_id(), '_used_by', (string) $user_id );
+		wp_set_current_user( 0 );
+
+		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_owner_use', 'owner@example.com' ), 'A use stored under the owner ID, with no email record, is found by email' );
+		$this->assertNull( $this->try_hold_coupon( 'hold_owner_use', 'someone-else@example.com' ), 'An unrelated guest keeps their allowance' );
+	}
+
+	/**
+	 * @testdox A logged in customer cannot take a second hold while their first hold is still active.
+	 */
+	public function test_hold_applied_coupons_counts_own_active_hold(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'parallel@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'hold_parallel', array( 'usage_limit_per_user' => '1' ) );
+		wp_set_current_user( $user_id );
+
+		$this->assertNull( $this->try_hold_coupon( 'hold_parallel', 'parallel@example.com' ), 'The first checkout takes the hold' );
+		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_parallel', 'parallel@example.com' ), 'The second checkout sees the first hold' );
+	}
+
+	/**
+	 * @testdox A per-user limit of two still lets the same customer take two holds.
+	 */
+	public function test_hold_applied_coupons_allows_uses_up_to_limit(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'twice@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'hold_limit_two', array( 'usage_limit_per_user' => '2' ) );
+		wp_set_current_user( $user_id );
+
+		$this->assertNull( $this->try_hold_coupon( 'hold_limit_two', 'twice@example.com' ), 'First hold' );
+		$this->assertNull( $this->try_hold_coupon( 'hold_limit_two', 'twice@example.com' ), 'Second hold, still within the limit' );
+		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_limit_two', 'twice@example.com' ), 'Third hold is over the limit' );
+	}
+
+	/**
+	 * @testdox A guest cannot hold a per-user coupon with an email whose owner used it, after the owner changes their account email.
+	 */
+	public function test_hold_applied_coupons_counts_use_after_account_email_change(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'before@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'hold_email_change', array( 'usage_limit_per_user' => '1' ) );
+		( new WC_Coupon( 'hold_email_change' ) )->increase_usage_count( (string) $user_id );
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'after@example.com',
+			)
+		);
+		wp_set_current_user( 0 );
+
+		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_email_change', 'before@example.com' ), 'The use is found through the email recorded with it' );
 	}
 }

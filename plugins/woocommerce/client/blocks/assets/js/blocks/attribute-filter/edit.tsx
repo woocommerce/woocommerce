@@ -229,11 +229,11 @@ const Edit = ( {
 									? __(
 											'Choose to return filter results for all of the attributes selected.',
 											'woocommerce'
-									  )
+										)
 									: __(
 											'Choose to return filter results for any of the attributes selected.',
 											'woocommerce'
-									  )
+										)
 							}
 							value={ queryType }
 							onChange={ ( value: string ) =>

@@ -22,19 +22,19 @@
 		"@woocommerce/monorepo-utils": "workspace:*",
 		"commander": "^9.5.0",
 		"dotenv": "^10.0.0",
-		"simple-git": "^3.21.0"
+		"simple-git": "catalog:tooling"
 	},
 	"devDependencies": {
-		"@types/jest": "29.5.x",
+		"@types/jest": "catalog:tooling",
 		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^10.0.0",
-		"jest": "29.5.x",
-		"ts-jest": "29.1.x",
+		"eslint": "catalog:tooling",
+		"jest": "catalog:tooling",
+		"ts-jest": "catalog:tooling",
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2",
-		"typescript": "5.7.x"
+		"typescript": "catalog:tooling"
 	},
 	"engines": {
 		"node": "^24.15.0"

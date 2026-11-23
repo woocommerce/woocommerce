@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/order-confirmation-downloads",
-	"version": "1.0.0",
 	"title": "Order Downloads",
 	"description": "Display links to purchased downloads.",
 	"category": "woocommerce",
@@ -62,6 +61,10 @@
 			"default": ""
 		}
 	},
+	"style": [
+		"wc-blocks-style",
+		"file:../order-confirmation-downloads.css"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

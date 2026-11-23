@@ -308,7 +308,7 @@ export const SelectTree = function SelectTree( {
 									( i ) =>
 										i.label === escapeHTML( inputValue )
 								)
-						  )
+							)
 						: props.selected?.label === escapeHTML( inputValue );
 					if ( item && ! isAlreadySelected ) {
 						props.onSelect?.( item );
@@ -380,7 +380,7 @@ export const SelectTree = function SelectTree( {
 							? __(
 									'Separate with commas or the Enter key.',
 									'woocommerce'
-							  )
+								)
 							: help
 					}
 				>
@@ -456,7 +456,9 @@ export const SelectTree = function SelectTree( {
 									props.createValue || ''
 								) }
 								onChange={ ( value ) => {
-									if ( onInputChange ) onInputChange( value );
+									if ( onInputChange ) {
+										onInputChange( value );
+									}
 									const item = items.find(
 										( i ) => i.label === escapeHTML( value )
 									);

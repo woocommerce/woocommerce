@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
+import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce';
 
 export interface ProductGalleryBlockAttributes {
 	hoverZoom: boolean;
@@ -58,9 +58,6 @@ export interface ProductGalleryContext {
 	isDialogOpen: boolean;
 	videoLocation?: 'dialog' | 'gallery';
 	productId: string;
-	touchStartX: number;
-	touchCurrentX: number;
-	isDragging: boolean;
 	imageData: number[];
 	thumbnailsOverflow: {
 		top: boolean;

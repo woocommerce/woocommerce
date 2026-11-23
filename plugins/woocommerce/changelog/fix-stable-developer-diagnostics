@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show WooCommerce developer notices and debug log messages in English on every site language, so they are easy to search.

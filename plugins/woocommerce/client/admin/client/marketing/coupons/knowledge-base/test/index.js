@@ -298,7 +298,7 @@ describe( 'No posts and not loading', () => {
 describe( 'Clicking on a post', () => {
 	afterAll( () => jest.clearAllMocks() );
 
-	it( 'should record an event when clicked', () => {
+	it( 'should record an event when clicked', async () => {
 		const { getByRole } = render(
 			<KnowledgeBase
 				posts={ mockPosts }
@@ -307,7 +307,7 @@ describe( 'Clicking on a post', () => {
 			/>
 		);
 
-		userEvent.click( getByRole( 'link', { name: /Post 1/ } ) );
+		await userEvent.click( getByRole( 'link', { name: /Post 1/ } ) );
 
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith(
@@ -317,7 +317,7 @@ describe( 'Clicking on a post', () => {
 			}
 		);
 
-		userEvent.click( getByRole( 'link', { name: /Post 2/ } ) );
+		await userEvent.click( getByRole( 'link', { name: /Post 2/ } ) );
 
 		expect( recordEvent ).toHaveBeenCalledTimes( 2 );
 		expect( recordEvent ).toHaveBeenCalledWith(
@@ -341,7 +341,7 @@ describe( 'Pagination', () => {
 			/>
 		);
 
-		userEvent.click(
+		await userEvent.click(
 			getByLabelText( 'Next Page', { selector: 'button' } )
 		);
 
@@ -362,7 +362,7 @@ describe( 'Pagination', () => {
 			}
 		);
 
-		userEvent.click(
+		await userEvent.click(
 			getByLabelText( 'Previous Page', { selector: 'button' } )
 		);
 

@@ -170,6 +170,74 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox WooCommerce template part is resolvable through get_block_template.
+	 */
+	public function test_woocommerce_template_part_renders_content(): void {
+		$this->create_template_part( 'test-woo-part', BlockTemplateUtils::PLUGIN_SLUG );
+		$this->flush_block_template_caches();
+
+		$template_part = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//test-woo-part', 'wp_template_part' );
+		$this->assertSame( '<!-- wp:paragraph --><p>Test</p><!-- /wp:paragraph -->', $template_part->content ?? null, 'Template part should contain the expected content.' );
+	}
+
+	/**
+	 * @testdox Missing WooCommerce template part resolves to null.
+	 */
+	public function test_missing_woocommerce_template_part_resolves_to_null(): void {
+		$template_part = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//non-existent-part-' . uniqid(), 'wp_template_part' );
+		$this->assertNull( $template_part, 'Missing template part should resolve to null.' );
+	}
+
+	/**
+	 * @testdox BC filters (render_block_data, render_block, render_block_core/template-part) fire for WooCommerce template parts.
+	 */
+	public function test_bc_filters_fire_for_woocommerce_template_part(): void {
+		$this->sut->init();
+
+		$this->create_template_part( 'test-filtered-part', BlockTemplateUtils::PLUGIN_SLUG );
+		$this->flush_block_template_caches();
+
+		$block_filter  = static fn( $block ) => array_merge_recursive( $block, ( 'core/template-part' === ( $block['blockName'] ?? null ) ? array( 'attrs' => array( 'className' => 'injected-by-filter' ) ) : array() ) );
+		$output_filter = static fn( $content, $block ) => $content . ( 'core/template-part' === ( $block['blockName'] ?? null ) ? '<!-- filtered -->' : '' );
+		add_filter( 'render_block_data', $block_filter, 10, 1 );
+		add_filter( 'render_block', $output_filter, 10, 2 );
+		add_filter( 'render_block_core/template-part', $output_filter, 10, 2 );
+
+		$parsed_block = array(
+			'blockName' => 'core/template-part',
+			'attrs'     => array(
+				'theme'   => 'woocommerce/woocommerce',
+				'slug'    => 'test-filtered-part',
+				'tagName' => 'span',
+			),
+		);
+		$result       = $this->sut->pre_render_woocommerce_template_part( null, $parsed_block );
+
+		remove_filter( 'render_block_data', $block_filter, 10 );
+		remove_filter( 'render_block', $output_filter, 10 );
+		remove_filter( 'render_block_core/template-part', $output_filter, 10 );
+
+		$expected = '<span class="injected-by-filter wp-block-template-part"><p class="wp-block-paragraph">Test</p></span><!-- filtered --><!-- filtered -->';
+		$this->assertSame( $expected, $result, 'render_block_data, render_block, and render_block_core/template-part filter output should all be included.' );
+	}
+
+	/**
+	 * @testdox WooCommerce template part with className renders it in the wrapper.
+	 */
+	public function test_woocommerce_template_part_renders_classname_in_wrapper(): void {
+		$this->sut->init();
+
+		$this->create_template_part( 'test-classed-part', BlockTemplateUtils::PLUGIN_SLUG );
+		$this->flush_block_template_caches();
+
+		$markup = '<!-- wp:template-part {"slug":"test-classed-part","theme":"woocommerce/woocommerce","className":"my-custom-class"} /-->';
+		$output = do_blocks( $markup );
+
+		$expected = '<div class="my-custom-class wp-block-template-part"><p class="wp-block-paragraph">Test</p></div>';
+		$this->assertSame( $expected, $output, 'Custom className should appear in the rendered wrapper.' );
+	}
+
+	/**
 	 * Clears template ID caches so newly created posts are visible.
 	 */
 	private function flush_block_template_caches(): void {

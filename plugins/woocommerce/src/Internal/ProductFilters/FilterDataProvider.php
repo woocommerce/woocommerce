@@ -33,16 +33,25 @@ class FilterDataProvider {
 	private $taxonomy_hierarchy_data;
 
 	/**
+	 * Instance of Params.
+	 *
+	 * @var Params
+	 */
+	private $params;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
 	 * @param TaxonomyHierarchyData $taxonomy_hierarchy_data Instance of TaxonomyHierarchyData.
+	 * @param Params                $params Instance of Params.
 	 *
 	 * @return void
 	 */
-	final public function init( TaxonomyHierarchyData $taxonomy_hierarchy_data ): void {
+	final public function init( TaxonomyHierarchyData $taxonomy_hierarchy_data, Params $params ): void {
 		$this->taxonomy_hierarchy_data = $taxonomy_hierarchy_data;
+		$this->params                  = $params;
 	}
 
 	/**
@@ -54,7 +63,7 @@ class FilterDataProvider {
 		$class_name = get_class( $query_clauses_generator );
 
 		if ( ! isset( $this->providers[ $class_name ] ) ) {
-			$this->providers[ $class_name ] = new FilterData( $query_clauses_generator, $this->taxonomy_hierarchy_data );
+			$this->providers[ $class_name ] = new FilterData( $query_clauses_generator, $this->taxonomy_hierarchy_data, $this->params );
 		}
 
 		return $this->providers[ $class_name ];

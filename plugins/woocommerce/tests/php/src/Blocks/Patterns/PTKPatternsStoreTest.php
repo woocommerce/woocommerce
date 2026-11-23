@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\Patterns;
 
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WP_Error;
 
 /**
@@ -52,6 +53,9 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		// Clean up options.
 		delete_option( PTKPatternsStore::OPTION_NAME );
 		delete_option( 'woocommerce_allow_tracking' );
+
+		// A test that fails between registering and resetting a proxy mock must not leak it into later tests.
+		wc_get_container()->get( LegacyProxy::class )->reset();
 
 		parent::tearDown();
 	}
@@ -174,9 +178,9 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test fetching patterns is scheduled when tracking is allowed.
+	 * @testdox Old fetch jobs are canceled when tracking is allowed.
 	 */
-	public function test_fetching_patterns_is_schedule_when_tracking_is_allowed() {
+	public function test_fetching_patterns_is_not_scheduled_when_tracking_is_allowed() {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$expected_patterns = array(
 			array(
@@ -194,10 +198,11 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 			),
 		);
 		update_option( PTKPatternsStore::OPTION_NAME, $expected_patterns );
+		as_schedule_single_action( time(), 'fetch_patterns', array(), 'woocommerce' );
 
 		$this->pattern_store->flush_or_fetch_patterns();
 
-		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ) );
+		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Old fetch jobs should be canceled' );
 	}
 
 	/**
@@ -434,14 +439,15 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ensure_recurring_fetch_patterns_if_enabled schedules recurring action when tracking is enabled.
+	 * @testdox The recurring action hook cancels old fetch jobs.
 	 */
-	public function test_ensure_recurring_fetch_patterns_schedules_recurring_action_when_tracking_enabled() {
+	public function test_ensure_recurring_fetch_patterns_cancels_old_actions() {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
+		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'fetch_patterns', array(), 'woocommerce' );
 
 		$this->pattern_store->ensure_recurring_fetch_patterns_if_enabled();
 
-		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'fetch_patterns action should be scheduled' );
+		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Old fetch jobs should be canceled' );
 	}
 
 	/**
@@ -473,30 +479,26 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test flush_cached_patterns defers unscheduling when called before action_scheduler_init.
+	 * Test flush_cached_patterns defers unscheduling when called before Action Scheduler is ready.
 	 *
-	 * This test simulates the scenario where flush_cached_patterns is called during early
-	 * initialization, before Action Scheduler has been initialized.
+	 * ActionSchedulerUtil::when_ready() decides readiness through the LegacyProxy, so the test makes
+	 * both `action_scheduler_init` and `init` look unfired there, which is how an early call sees them.
 	 */
 	public function test_flush_cached_patterns_defers_unscheduling_before_action_scheduler_init() {
-		global $wp_actions;
-
 		// Schedule an action.
 		as_schedule_single_action( time(), 'fetch_patterns', array(), 'woocommerce' );
 		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Action should be scheduled initially' );
 
-		// Save the original action_scheduler_init count.
-		$original_count = $wp_actions['action_scheduler_init'] ?? 0;
+		$proxy = wc_get_container()->get( LegacyProxy::class );
+		$proxy->register_function_mocks(
+			array(
+				'did_action' => function ( $hook ) {
+					return in_array( $hook, array( 'action_scheduler_init', 'init' ), true ) ? 0 : did_action( $hook );
+				},
+			)
+		);
 
-		// Simulate that action_scheduler_init has not yet fired by unsetting it.
-		if ( isset( $wp_actions['action_scheduler_init'] ) ) {
-			unset( $wp_actions['action_scheduler_init'] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
-
-		// Verify did_action returns 0 (not fired).
-		$this->assertEquals( 0, did_action( 'action_scheduler_init' ), 'action_scheduler_init should appear not fired' );
-
-		// Call flush_cached_patterns before action_scheduler_init has fired.
+		// Call flush_cached_patterns before Action Scheduler is ready.
 		$this->pattern_store->flush_cached_patterns();
 
 		// The option should be deleted immediately.
@@ -505,6 +507,8 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		// The action should still be scheduled (unscheduling is deferred).
 		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Action should still be scheduled before action_scheduler_init fires' );
+
+		$proxy->reset();
 
 		/**
 		 * Simulate action_scheduler_init firing.
@@ -517,7 +521,9 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		// After action_scheduler_init fires, the action should be unscheduled.
 		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Action should be unscheduled after action_scheduler_init fires' );
 
-		// Restore the original action count.
-		$wp_actions['action_scheduler_init'] = $original_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		// The deferred unscheduling runs once: a later firing must leave a newly scheduled action alone.
+		as_schedule_single_action( time(), 'fetch_patterns', array(), 'woocommerce' );
+		do_action( 'action_scheduler_init' );
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'The deferred unscheduling should not run a second time' );
 	}
 }

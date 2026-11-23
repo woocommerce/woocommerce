@@ -4,8 +4,15 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Triggers;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+use Throwable;
+use WC_Logger_Interface;
 use WC_Order;
 
 defined( 'ABSPATH' ) || exit;
@@ -42,6 +49,13 @@ class NewOrderNotificationTrigger {
 	);
 
 	/**
+	 * Order meta recording when the order first reached a notifiable status.
+	 *
+	 * @since 11.4.0
+	 */
+	const NOTIFIABLE_META_KEY = '_wc_push_notification_notifiable_at';
+
+	/**
 	 * Registers WordPress hooks for order events.
 	 *
 	 * @return void
@@ -51,6 +65,19 @@ class NewOrderNotificationTrigger {
 	public function register(): void {
 		add_action( 'woocommerce_new_order', array( $this, 'on_new_order' ), 10, 2 );
 		add_action( 'woocommerce_order_status_changed', array( $this, 'on_order_status_changed' ), 10, 4 );
+	}
+
+	/**
+	 * Registers only the notifiable marker, for when push notifications are
+	 * switched off. Orders reaching a notifiable status meanwhile are then not
+	 * announced as new once they are back on.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return void
+	 */
+	public function register_while_disabled(): void {
+		add_action( 'woocommerce_order_status_changed', array( $this, 'on_order_status_changed_while_disabled' ), 10, 4 );
 	}
 
 	/**
@@ -91,15 +118,146 @@ class NewOrderNotificationTrigger {
 		WC_Order $order
 	): void {
 		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		if (
-			in_array( $previous_status, self::NOTIFIABLE_STATUSES, true )
-			|| ! in_array( $next_status, self::NOTIFIABLE_STATUSES, true )
-		) {
+		if ( ! self::enters_notifiable_status( $previous_status, $next_status ) ) {
 			return;
 		}
 
-		wc_get_container()->get( PendingNotificationStore::class )->add(
-			new NewOrderNotification( $order_id )
-		);
+		$was_notifiable = $order->meta_exists( self::NOTIFIABLE_META_KEY );
+		$this->mark_notifiable( $order );
+
+		$notification = new NewOrderNotification( $order_id );
+
+		if ( $was_notifiable ) {
+			wc_get_container()->get( NotificationStepLogger::class )->log_notification_step( $notification, 'triggered', 'previously_notifiable' );
+			return;
+		}
+
+		if ( $this->predates_push_notifications( $previous_status, $order ) ) {
+			wc_get_container()->get( NotificationStepLogger::class )->log_notification_step( $notification, 'triggered', 'predates_push_notifications' );
+			return;
+		}
+
+		wc_get_container()->get( PendingNotificationStore::class )->add( $notification );
+	}
+
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed
+	/**
+	 * Handles the woocommerce_order_status_changed hook while push notifications
+	 * are switched off: marks the order without queuing a notification, on sites
+	 * that have used push notifications.
+	 *
+	 * Parameters are untyped and optional because this runs on every store, where
+	 * a bad or missing value must not become a fatal.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $order_id        The order ID.
+	 * @param mixed $previous_status The previous order status.
+	 * @param mixed $next_status     The new order status.
+	 * @param mixed $order           The order object.
+	 * @return void
+	 */
+	public function on_order_status_changed_while_disabled( $order_id = null, $previous_status = null, $next_status = null, $order = null ): void {
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed
+		// The option is read last, so only when an order moves into a notifiable status.
+		if (
+			$order instanceof WC_Order
+			&& self::enters_notifiable_status( $previous_status, $next_status )
+			&& null !== wc_get_container()->get( PushNotifications::class )->get_enabled_at()
+		) {
+			$this->mark_notifiable( $order );
+		}
+	}
+
+	/**
+	 * Whether the order moves into a notifiable status from one that is not.
+	 *
+	 * Moves between notifiable statuses are skipped and not marked: a plugin that
+	 * completes the order from the processing hook fires processing to completed
+	 * before pending to processing.
+	 *
+	 * @param mixed $previous_status The previous order status.
+	 * @param mixed $next_status     The new order status.
+	 * @return bool
+	 */
+	private static function enters_notifiable_status( $previous_status, $next_status ): bool {
+		return ! in_array( $previous_status, self::NOTIFIABLE_STATUSES, true )
+			&& in_array( $next_status, self::NOTIFIABLE_STATUSES, true );
+	}
+
+	/**
+	 * Records that the order has reached a notifiable status, once. Failures are
+	 * logged rather than thrown, as this runs inside another plugin's status change.
+	 *
+	 * Writes meta only, and the key is listed as ephemeral in OrdersTableDataStore,
+	 * so on HPOS the write does not turn into a full order save.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @return void
+	 */
+	private function mark_notifiable( WC_Order $order ): void {
+		try {
+			if ( $order->meta_exists( self::NOTIFIABLE_META_KEY ) ) {
+				return;
+			}
+
+			$order->update_meta_data( self::NOTIFIABLE_META_KEY, (string) time() );
+			$order->save_meta_data();
+		} catch ( Throwable $e ) {
+			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+
+			if ( $logger instanceof WC_Logger_Interface ) {
+				$logger->error(
+					sprintf( 'Could not mark order %d as notifiable: %s', $order->get_id(), $e->getMessage() ),
+					array( 'source' => PushNotifications::FEATURE_NAME )
+				);
+			}
+		}
+	}
+
+	/**
+	 * Whether the order was created before push notifications were enabled.
+	 *
+	 * Such an order was never marked as notified, so moving it out of a custom
+	 * status into a notifiable one would otherwise announce an old order as new.
+	 * Moves out of a status that can take a payment are a payment arriving, so
+	 * they still notify.
+	 *
+	 * @param string   $previous_status The previous order status.
+	 * @param WC_Order $order           The order object.
+	 * @return bool
+	 */
+	private function predates_push_notifications( string $previous_status, WC_Order $order ): bool {
+		$enabled_at   = wc_get_container()->get( PushNotifications::class )->get_enabled_at();
+		$date_created = $order->get_date_created();
+
+		if ( null === $enabled_at || null === $date_created || $date_created->getTimestamp() >= $enabled_at ) {
+			return false;
+		}
+
+		return ! $this->can_be_paid_from_status( $previous_status, $order );
+	}
+
+	/**
+	 * Whether an order can be paid from this status: those
+	 * WC_Order::payment_complete() accepts, plus checkout drafts.
+	 *
+	 * @param string   $status The order status.
+	 * @param WC_Order $order  The order object.
+	 * @return bool
+	 */
+	private function can_be_paid_from_status( string $status, WC_Order $order ): bool {
+		/**
+		 * This filter is documented in includes/class-wc-order.php
+		 *
+		 * @since 2.7.0
+		 */
+		$statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', OrderStatus::PAYMENT_COMPLETE_STATUSES, $order );
+		$statuses = is_array( $statuses ) ? array_filter( $statuses, 'is_string' ) : OrderStatus::PAYMENT_COMPLETE_STATUSES;
+
+		$statuses   = array_map( array( OrderUtil::class, 'remove_status_prefix' ), $statuses );
+		$statuses[] = OrderStatus::CHECKOUT_DRAFT;
+
+		return in_array( $status, $statuses, true );
 	}
 }

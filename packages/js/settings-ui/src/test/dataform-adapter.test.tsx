@@ -98,6 +98,7 @@ describe( 'dataform adapter', () => {
 			[ 'radio', 'text' ],
 			[ 'checkbox', 'boolean' ],
 			[ 'number', 'number' ],
+			[ 'integer', 'integer' ],
 			[ 'array', 'array' ],
 		];
 
@@ -165,7 +166,7 @@ describe( 'dataform adapter', () => {
 			expect( field.elements ).toEqual( options );
 		} );
 
-		it( 'renders info fields read-only with only the sanitized description', () => {
+		it( 'renders sanitized info content without a Woo-owned control', () => {
 			const infoField: SettingsUIField = {
 				id: 'info_field',
 				label: 'Read this',
@@ -190,11 +191,14 @@ describe( 'dataform adapter', () => {
 			);
 			expect(
 				container.querySelector( '.wc-settings-ui__info' )
-			).not.toBeNull();
-			expect( container.querySelector( 'script' ) ).toBeNull();
-			// DataForm owns the label for read-only fields, so the render
+			).toBeNull();
+			// DataForm owns the label for a read-only field, so the render
 			// contributes the description and nothing else.
 			expect( container.textContent ).toBe( 'Useful information.' );
+			expect( container.querySelector( 'strong' )?.textContent ).toBe(
+				'information'
+			);
+			expect( container.querySelector( 'script' ) ).toBeNull();
 		} );
 
 		it.each( [
@@ -251,6 +255,32 @@ describe( 'dataform adapter', () => {
 			);
 			expect( container.querySelector( 'script' ) ).toBeNull();
 			expect( container.textContent ).toBe( 'A link.' );
+		} );
+
+		it( 'preserves disabled explanations as text alongside sanitized help', () => {
+			const settingsField: SettingsUIField = {
+				id: 'disabled',
+				label: 'Disabled',
+				type: 'text',
+				disabled: true,
+				description: 'Read <strong>this</strong>.',
+				customAttributes: {
+					'disabled-tooltip':
+						'<img src=x onerror=alert(1)> unavailable',
+				},
+			};
+			const field = buildDataFormField(
+				settingsField,
+				createOptions( [ settingsField ] )
+			);
+			const { container } = renderElement( <>{ field.description }</> );
+			expect( container.textContent ).toBe(
+				'Read this. <img src=x onerror=alert(1)> unavailable'
+			);
+			expect( container.querySelector( 'strong' )?.textContent ).toBe(
+				'this'
+			);
+			expect( container.querySelector( 'img' ) ).toBeNull();
 		} );
 
 		it( 'strips group descriptions to plain text', () => {
@@ -647,6 +677,34 @@ describe( 'dataform adapter', () => {
 
 			expect( field.isValid?.min ).toBe( 0 );
 			expect( field.isValid?.max ).toBe( 100 );
+		} );
+
+		it( 'maps integer range attributes to numeric constraints', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					type: 'integer',
+					customAttributes: { min: '0', max: 100 },
+				},
+				createOptions( [] )
+			);
+
+			expect( field.isValid?.min ).toBe( 0 );
+			expect( field.isValid?.max ).toBe( 100 );
+		} );
+
+		it( 'maps canonical numeric validation to range constraints', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					type: 'integer',
+					validation: { min: 1, max: 9 },
+				},
+				createOptions( [] )
+			);
+
+			expect( field.isValid?.min ).toBe( 1 );
+			expect( field.isValid?.max ).toBe( 9 );
 		} );
 
 		it( 'maps date range attributes as strings', () => {

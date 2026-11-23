@@ -393,7 +393,6 @@ export class RemoteLogger {
 		 * @param {boolean}               shouldSendError Whether the error should be sent.
 		 * @param {Error}                 error           The error object.
 		 * @param {TraceKit.StackFrame[]} stackFrames     The stack frames of the error.
-		 *
 		 */
 		return applyFilters(
 			REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER,
@@ -442,7 +441,6 @@ function canLog( _logger: RemoteLogger | null ): _logger is RemoteLogger {
  * This function should be called once at the start of the application.
  *
  * @param config - Configuration object for the RemoteLogger.
- *
  */
 export function init( config: RemoteLoggerConfig ) {
 	if ( ! window.wcSettings?.isRemoteLoggingEnabled ) {
@@ -473,7 +471,6 @@ export function init( config: RemoteLoggerConfig ) {
  * @param severity  - The severity of the log.
  * @param message   - The message to log.
  * @param extraData - Optional additional data to include in the log.
- *
  */
 export async function log(
 	severity: Exclude< LogData[ 'severity' ], undefined >,

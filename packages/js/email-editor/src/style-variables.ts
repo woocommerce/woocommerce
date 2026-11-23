@@ -8,7 +8,9 @@
 export function unwrapCompressedPresetStyleVariableName(
 	value: string
 ): string | null {
-	if ( typeof value !== 'string' ) return null;
+	if ( typeof value !== 'string' ) {
+		return null;
+	}
 	const match = value.match(
 		/^var:preset\|([a-zA-Z0-9-]+)\|([a-zA-Z0-9-]+)$/
 	);
@@ -24,9 +26,13 @@ export function unwrapCompressedPresetStyleVariable( value: string ): string {
 // Get the raw value of a compressed variable read from the root element
 export function getCompressedVariableValue( value: string ): string {
 	const variableName = unwrapCompressedPresetStyleVariableName( value );
-	if ( ! variableName ) return value;
+	if ( ! variableName ) {
+		return value;
+	}
 	const root = document.querySelector( ':root' );
-	if ( ! root ) return value;
+	if ( ! root ) {
+		return value;
+	}
 	const computedStyle = getComputedStyle( root );
 	return computedStyle.getPropertyValue( variableName ).trim() || value;
 }

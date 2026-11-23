@@ -57,13 +57,9 @@ const PrivateSelectedItems = < ItemType, >(
 
 	const lastRemoveButtonRef = useRef< HTMLButtonElement >( null );
 
-	useImperativeHandle(
-		ref,
-		() => {
-			return () => lastRemoveButtonRef.current?.focus();
-		},
-		[]
-	);
+	useImperativeHandle( ref, () => {
+		return () => lastRemoveButtonRef.current?.focus();
+	}, [] );
 
 	if ( isReadOnly ) {
 		return (
@@ -102,7 +98,7 @@ const PrivateSelectedItems = < ItemType, >(
 				return (
 					// Disable reason: We prevent the default action to keep the input focused on click.
 					// Keyboard users are unaffected by this change.
-					/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
+					/* eslint-disable jsx-a11y/no-static-element-interactions */
 					<div
 						key={ `selected-item-${ index }` }
 						className="woocommerce-experimental-select-control__selected-item"

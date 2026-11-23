@@ -77,7 +77,7 @@ interface Attributes {
 type AttributeItemProps = {
 	blocks: BlockInstance[];
 	isSelected: boolean;
-	onSelect(): void;
+	onSelect: () => void;
 };
 
 function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Load product images in order emails right away, so they show in Apple Mail.

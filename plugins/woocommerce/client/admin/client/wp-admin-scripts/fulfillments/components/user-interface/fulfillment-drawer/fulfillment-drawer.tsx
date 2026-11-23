@@ -64,7 +64,9 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 	// Handle keyboard navigation: Escape to close and focus trapping
 	useEffect( () => {
 		const handleKeyDown = ( event: KeyboardEvent ) => {
-			if ( ! isOpen ) return;
+			if ( ! isOpen ) {
+				return;
+			}
 
 			// Close drawer on Escape key
 			if ( event.key === 'Escape' ) {
@@ -75,13 +77,17 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 			// Focus trap: Only trap Tab navigation, allow all other keys (including scrolling)
 			if ( event.key === 'Tab' ) {
 				const drawerElement = drawerRef.current;
-				if ( ! drawerElement ) return;
+				if ( ! drawerElement ) {
+					return;
+				}
 
 				const focusableElements = drawerElement.querySelectorAll(
 					'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
 				);
 
-				if ( focusableElements.length === 0 ) return;
+				if ( focusableElements.length === 0 ) {
+					return;
+				}
 
 				const firstElement = focusableElements[ 0 ] as HTMLElement;
 				const lastElement = focusableElements[

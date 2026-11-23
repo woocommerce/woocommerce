@@ -1,4 +1,46 @@
 /*global woocommerce_admin_meta_boxes, _ */
+jQuery( document ).on( 'tinymce-editor-init', function ( event, editor ) {
+	if ( 'excerpt' !== editor.id ) {
+		return;
+	}
+
+	editor.getWin().addEventListener(
+		'pagehide',
+		function () {
+			const textarea = editor.getElement();
+			const restoreVisualMode = ! editor.isHidden();
+
+			// Moving the iframe unloads its document. Save before that document is lost.
+			if ( restoreVisualMode ) {
+				editor.save();
+			}
+			const content = textarea.value;
+
+			window.setTimeout( function () {
+				if (
+					! document.body.contains( textarea ) ||
+					window.tinymce.get( 'excerpt' ) !== editor
+				) {
+					return;
+				}
+
+				editor.remove();
+				// Removing a hidden editor can overwrite newer Text-mode content.
+				textarea.value = content;
+				textarea.removeAttribute( 'aria-hidden' );
+
+				// WordPress initializes Text-mode editors when the Visual tab is selected.
+				if ( restoreVisualMode ) {
+					window.tinymce.init(
+						window.tinyMCEPreInit.mceInit.excerpt
+					);
+				}
+			} );
+		},
+		{ once: true }
+	);
+} );
+
 jQuery( function ( $ ) {
 	let isPageUnloading = false;
 
@@ -54,6 +96,26 @@ jQuery( function ( $ ) {
 			return false;
 		}
 	} );
+
+	// WordPress discards empty auto-drafts before WooCommerce can save the product data.
+	const postForm = document.getElementById( 'post' );
+	if ( postForm ) {
+		postForm.addEventListener( 'formdata', function ( event ) {
+			const title = event.formData.get( 'post_title' );
+
+			if (
+				'auto-draft' ===
+					event.formData.get( 'original_post_status' ) &&
+				typeof title === 'string' &&
+				'' === title.trim()
+			) {
+				event.formData.set(
+					'post_title',
+					woocommerce_admin_meta_boxes.i18n_no_title
+				);
+			}
+		} );
+	}
 
 	// Type box.
 	if ( $( 'body' ).hasClass( 'wc-wp-version-gte-55' ) ) {
@@ -197,7 +259,13 @@ jQuery( function ( $ ) {
 			show_and_hide_panels();
 			change_product_type_tip( get_product_tip_content( select_val ) );
 
-			$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).trigger( 'click' );
+			$( 'ul.wc-tabs li' )
+				.filter( function () {
+					return $( this ).css( 'display' ) !== 'none';
+				} )
+				.eq( 0 )
+				.find( 'a' )
+				.trigger( 'click' );
 
 			$( document.body ).trigger(
 				'woocommerce-product-type-change',
@@ -378,7 +446,15 @@ jQuery( function ( $ ) {
 			$( this ).hide();
 			$wrap.find( '.sale_schedule' ).show();
 			$wrap.find( '.sale_price_dates_fields' ).hide();
-			$wrap.find( '.sale_price_dates_fields' ).find( 'input' ).val( '' );
+			// Only fire change for dates that had a value, so cancelling an empty schedule does not mark the variation as changed.
+			$wrap
+				.find( '.sale_price_dates_fields' )
+				.find( 'input' )
+				.filter( function () {
+					return this.value !== '';
+				} )
+				.val( '' )
+				.trigger( 'change' );
 
 			return false;
 		}
@@ -855,6 +931,24 @@ jQuery( function ( $ ) {
 				.prop( 'selected', false );
 			$( this ).closest( 'td' ).find( 'select' ).trigger( 'change' );
 			return false;
+		}
+	);
+
+	// Links already support Enter, but role="button" does not add Space-key support.
+	// Prevent Space from scrolling and activate on keyup, as native buttons do.
+	$( '#product_attributes' ).on(
+		'keydown keyup',
+		'.product_attributes a.remove_row[role="button"]',
+		function ( event ) {
+			if ( event.key !== ' ' ) {
+				return;
+			}
+
+			event.preventDefault();
+
+			if ( event.type === 'keyup' ) {
+				this.click();
+			}
 		}
 	);
 
@@ -1405,11 +1499,11 @@ jQuery( function ( $ ) {
 	function createProductGalleryMediaItem( attachment, $el, allowVideos ) {
 		const mediaType = attachment.type;
 
-		if ( 'image' === mediaType ) {
+		if ( 'video' !== mediaType ) {
 			return createProductGalleryImageItem( attachment, $el );
 		}
 
-		if ( allowVideos && 'video' === mediaType ) {
+		if ( allowVideos ) {
 			return createProductGalleryVideoItem( attachment, $el );
 		}
 
@@ -1479,9 +1573,6 @@ jQuery( function ( $ ) {
 			states: [
 				new wp.media.controller.Library( {
 					title: $el.data( 'choose' ),
-					library: wp.media.query( {
-						type: allowVideos ? [ 'image', 'video' ] : 'image',
-					} ),
 					filterable: 'all',
 					multiple: true,
 				} ),

@@ -2,19 +2,15 @@
  * External dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { recordEvent } from '@woocommerce/tracks';
+
+/**
+ * Internal dependencies
+ */
+import { trackPluginNoticeLinks } from '~/utils/plugin-notice-tracking';
 
 domReady( () => {
-	const enableAutorenewLink = document.querySelectorAll(
-		'.woocommerce-enable-autorenew'
+	trackPluginNoticeLinks(
+		'.woocommerce-enable-autorenew',
+		'woo_enable_autorenew_in_plugins'
 	);
-
-	if ( enableAutorenewLink.length > 0 ) {
-		recordEvent( 'woo_enable_autorenew_in_plugins_shown' );
-		enableAutorenewLink.forEach( ( link ) => {
-			link.addEventListener( 'click', function () {
-				recordEvent( 'woo_enable_autorenew_in_plugins_clicked' );
-			} );
-		} );
-	}
 } );

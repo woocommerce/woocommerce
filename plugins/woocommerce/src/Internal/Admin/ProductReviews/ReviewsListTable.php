@@ -124,7 +124,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return int Customized per-page value if available, or 20 as the default.
 	 */
 	protected function get_per_page() : int {
-		return $this->get_items_per_page( 'edit_comments_per_page' );
+		return $this->get_items_per_page( Reviews::PER_PAGE_USER_OPTION_KEY );
 	}
 
 	/**
@@ -1226,7 +1226,7 @@ class ReviewsListTable extends WP_List_Table {
 		ob_start();
 
 		if ( ! empty( $rating ) && is_numeric( $rating ) ) {
-			$rating = (int) $rating;
+			$rating = max( 0, min( 5, (int) $rating ) );
 
 			$accessibility_label = sprintf(
 				/* translators: 1: number representing a rating */

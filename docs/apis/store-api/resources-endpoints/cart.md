@@ -29,6 +29,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 	"items": [
 		{
 			"key": "a5771bce93e200c36f7cd9dfd0e5deaa",
+			"parent_item_key": null,
 			"id": 38,
 			"quantity": 1,
 			"quantity_limits": {
@@ -96,6 +97,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 		},
 		{
 			"key": "b6d767d2f8ed5d21a44b0e5886680cb9",
+			"parent_item_key": null,
 			"id": 22,
 			"quantity": 1,
 			"quantity_limits": {
@@ -483,6 +485,8 @@ The JSON payload for adding multiple items to the cart would look like this:
 }
 ```
 
+If a cart subrequest fails while loading its session, it returns a `500` response with the `woocommerce_rest_unknown_server_error` error code. Later cart subrequests in the same batch also return `500` instead of using the incomplete cart, while non-cart subrequests continue normally. These failed cart responses do not include `Cart-Token` or `Cart-Hash` headers.
+
 ## Remove Item
 
 Remove an item from the cart and return the full cart response, or an error.
@@ -596,6 +600,33 @@ POST /cart/update-customer
 | `shipping_address.state`      | string |    no    | ISO code, or name, for the state, province, or district of the address being shipped to. |
 | `shipping_address.postcode`   | string |    no    | Zip or Postcode of the address being shipped to.                                         |
 | `shipping_address.country`    | string |    no    | ISO code for the country of the address being shipped to.                                |
+
+Send the addresses as a JSON body. Only the fields you include are updated, with one exception: if the cart doesn't need shipping and you omit `shipping_address`, the shipping address is set to the billing address.
+
+```sh
+curl --header "Nonce: 12345" --header "Content-Type: application/json" --request POST https://example-store.com/wp-json/wc/store/v1/cart/update-customer --data '{
+    "billing_address": {
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "address_1": "123 Main Street",
+      "city": "San Francisco",
+      "state": "CA",
+      "postcode": "94107",
+      "country": "US",
+      "email": "jane@example.com",
+      "phone": "555-0100"
+    },
+    "shipping_address": {
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "address_1": "123 Main Street",
+      "city": "San Francisco",
+      "state": "CA",
+      "postcode": "94107",
+      "country": "US"
+    }
+  }'
+```
 
 Returns the full [Cart Response](#cart-response) on success, or an [Error Response](#error-response) on failure.
 

@@ -8,11 +8,10 @@ import type { ColorPaletteOption } from '@woocommerce/editor-components/color-pa
  */
 import { Attributes } from '../edit';
 
-interface MaybeInCompatibleAttributes
-	extends Omit<
-		Attributes,
-		'priceColor' | 'iconColor' | 'productCountColor'
-	> {
+interface MaybeInCompatibleAttributes extends Omit<
+	Attributes,
+	'priceColor' | 'iconColor' | 'productCountColor'
+> {
 	priceColorValue?: string;
 	iconColorValue?: string;
 	productCountColorValue?: string;

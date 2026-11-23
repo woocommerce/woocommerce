@@ -532,7 +532,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test product schema.
+	 * @testdox The product schema includes MPN.
 	 *
 	 * @since 3.0.0
 	 */
@@ -543,6 +543,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 65, count( $properties ) );
+		$this->assertEquals( 66, count( $properties ) );
+		$this->assertArrayHasKey( 'mpn', $properties );
 	}
 }

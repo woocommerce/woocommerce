@@ -94,11 +94,11 @@ const GridLayoutControl = ( {
 						? __(
 								'Align the last block to the bottom.',
 								'woocommerce'
-						  )
+							)
 						: __(
 								'The last inner block will follow other content.',
 								'woocommerce'
-						  )
+							)
 				}
 				checked={ alignButtons }
 				onChange={ () =>

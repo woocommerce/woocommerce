@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductDescriptionUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductItemTrait;
 
 /**
@@ -29,6 +30,126 @@ class OrderItemSchema extends ItemSchema {
 	 * @var string
 	 */
 	const IDENTIFIER = 'order-item';
+
+	/**
+	 * Item schema properties.
+	 *
+	 * The inherited `item_data` describes the cart's display data. Order items carry stored meta
+	 * rows, which have different properties.
+	 *
+	 * @return array
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_properties() {
+		$properties = parent::get_properties();
+
+		$properties['item_data'] = [
+			'description' => __( 'Metadata related to the item.', 'woocommerce' ),
+			'type'        => 'array',
+			'context'     => [ 'view', 'edit' ],
+			'readonly'    => true,
+			'items'       => [
+				'type'       => 'object',
+				'properties' => [
+					'id'            => [
+						'description' => __( 'Order item metadata ID. Null for an entry that no displayed metadata row backs, such as one an extension added.', 'woocommerce' ),
+						'type'        => [ 'integer', 'null' ],
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+					'key'           => [
+						'description' => __( 'Metadata key.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+					'value'         => [
+						'description' => __( 'Metadata value.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+					'display_key'   => [
+						'description' => __( 'Metadata key, formatted for display.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+					'display_value' => [
+						'description' => __( 'Metadata value, formatted for display.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+				],
+			],
+		];
+
+		return $properties;
+	}
+
+	/**
+	 * Get order item metadata as a list.
+	 *
+	 * Keyed by meta row ID at source; the Store API sends a list, so the ID moves into `id`.
+	 *
+	 * @param \WC_Order_Item $order_item Order item instance.
+	 * @return array
+	 */
+	private function get_item_data( $order_item ) {
+		$item_data = [];
+
+		// A callback appending with `$formatted_meta[] =` gets PHP's next integer key, not a row ID.
+		// Mirror what `get_formatted_meta_data()` skips for this call's `_` prefix and `$include_all`:
+		// a row it leaves out never keys an entry, so counting its ID lets that key land on a hidden
+		// row saved right after the visible ones. Read rows first; formatting rewrites keys and values.
+		$meta_row_ids = [];
+
+		/**
+		 * `get_meta_data()` is documented as returning bare objects.
+		 *
+		 * @var \WC_Meta_Data[] $meta_rows
+		 */
+		$meta_rows = $order_item->get_meta_data();
+
+		foreach ( $meta_rows as $meta ) {
+			if ( empty( $meta->id ) || '' === $meta->value || ! is_scalar( $meta->value ) || 0 === strpos( (string) $meta->key, '_' ) ) {
+				continue;
+			}
+
+			$meta_row_ids[ $meta->id ] = true;
+		}
+
+		$formatted_meta_data = $order_item->get_all_formatted_meta_data();
+
+		// A `woocommerce_order_item_get_formatted_meta_data` callback can return anything, and a bad
+		// one must not take the endpoint down.
+		if ( ! is_array( $formatted_meta_data ) ) {
+			return $item_data;
+		}
+
+		foreach ( $formatted_meta_data as $meta_id => $meta ) {
+			// Only public fields are meant to ship. Casting an object reaches past them and
+			// publishes mangled names, so let it serialize itself first, then read what is public.
+			if ( $meta instanceof \JsonSerializable ) {
+				$meta = $meta->jsonSerialize();
+			}
+
+			if ( is_object( $meta ) ) {
+				$meta = get_object_vars( $meta );
+			}
+
+			if ( ! is_array( $meta ) ) {
+				continue;
+			}
+
+			// Union keeps the left operand, so a callback's own `id` cannot shadow the row ID.
+			$item_data[] = [ 'id' => isset( $meta_row_ids[ $meta_id ] ) ? $meta_id : null ] + $meta;
+		}
+
+		return $item_data;
+	}
 
 	/**
 	 * Get order items data.
@@ -73,8 +194,18 @@ class OrderItemSchema extends ItemSchema {
 		];
 
 		if ( is_a( $product, 'WC_Product' ) ) {
-			$product_properties['short_description']  = $product->get_short_description();
-			$product_properties['description']        = $product->get_description();
+			$product_properties['short_description']  = ProductDescriptionUtils::guarded_format(
+				$product,
+				function () use ( $product ) {
+					return wc_format_content( wp_kses_post( $product->get_short_description() ) );
+				}
+			);
+			$product_properties['description']        = ProductDescriptionUtils::guarded_format(
+				$product,
+				function () use ( $product ) {
+					return wc_format_content( wp_kses_post( $product->get_description() ) );
+				}
+			);
 			$product_properties['sku']                = $product->get_sku();
 			$product_properties['permalink']          = $product->get_permalink();
 			$product_properties['catalog_visibility'] = $product->get_catalog_visibility();
@@ -100,8 +231,8 @@ class OrderItemSchema extends ItemSchema {
 				'editable'    => false,
 			),
 			'name'                 => $order_item->get_name(),
-			'short_description'    => $this->prepare_html_response( wc_format_content( wp_kses_post( $product_properties['short_description'] ) ) ),
-			'description'          => $this->prepare_html_response( wc_format_content( wp_kses_post( $product_properties['description'] ) ) ),
+			'short_description'    => $this->prepare_html_response( $product_properties['short_description'] ),
+			'description'          => $this->prepare_html_response( $product_properties['description'] ),
 			'sku'                  => $this->prepare_html_response( $product_properties['sku'] ),
 			'low_stock_remaining'  => null,
 			'backorders_allowed'   => false,
@@ -110,7 +241,7 @@ class OrderItemSchema extends ItemSchema {
 			'permalink'            => $product_properties['permalink'],
 			'images'               => $product_properties['images'],
 			'variation'            => $product_properties['variation'],
-			'item_data'            => $order_item->get_all_formatted_meta_data(),
+			'item_data'            => $this->get_item_data( $order_item ),
 			'prices'               => (object) $product_properties['prices'],
 			'totals'               => (object) $this->prepare_currency_response( $this->get_totals( $order_item ) ),
 			'catalog_visibility'   => $product_properties['catalog_visibility'],

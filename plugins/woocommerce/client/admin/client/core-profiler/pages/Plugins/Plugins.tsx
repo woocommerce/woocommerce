@@ -61,8 +61,8 @@ export const computePluginsSelection = (
 	availablePlugins: Extension[],
 	selectedPlugins: Set< Extension >
 ) => {
-	const selectedPluginSlugs = Array.from( selectedPlugins ).map( ( plugin ) =>
-		plugin.key.replace( ':alt', '' )
+	const selectedPluginKeys = Array.from( selectedPlugins ).map(
+		( plugin ) => plugin.key
 	);
 
 	const pluginsShown: string[] = [];
@@ -74,13 +74,13 @@ export const computePluginsSelection = (
 
 		if (
 			! plugin.is_activated &&
-			! selectedPluginSlugs.includes( pluginSlug )
+			! selectedPluginKeys.includes( plugin.key )
 		) {
 			pluginsUnselected.push( pluginSlug );
 		}
 	} );
 
-	return { pluginsShown, pluginsUnselected, selectedPluginSlugs };
+	return { pluginsShown, pluginsUnselected, selectedPluginKeys };
 };
 
 export const Plugins = ( {
@@ -136,7 +136,7 @@ export const Plugins = ( {
 	};
 
 	const submitInstallationRequest = () => {
-		const { pluginsShown, pluginsUnselected, selectedPluginSlugs } =
+		const { pluginsShown, pluginsUnselected, selectedPluginKeys } =
 			computePluginsSelection(
 				context.pluginsAvailable,
 				selectedPlugins
@@ -146,7 +146,7 @@ export const Plugins = ( {
 			type: 'PLUGINS_INSTALLATION_REQUESTED',
 			payload: {
 				pluginsShown,
-				pluginsSelected: selectedPluginSlugs,
+				pluginsSelected: selectedPluginKeys,
 				pluginsUnselected,
 			},
 		} );

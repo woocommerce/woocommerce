@@ -43,13 +43,103 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down.
+	 * @testdox wc_is_attribute_in_product_name() should only search the attributes area of a variation name when the variation is given.
 	 */
-	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_attribute_taxonomies' );
-		remove_all_filters( 'sanitize_taxonomy_name' );
+	public function test_wc_is_attribute_in_product_name_ignores_the_parent_name_when_the_variation_is_given(): void {
+		// Three attributes keep the attribute list out of the variation title, so it is just "Vienna Black".
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Black',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
 
-		parent::tearDown();
+		try {
+			$this->assertSame( 'Vienna Black', $variation->get_name() );
+
+			$this->assertFalse(
+				wc_is_attribute_in_product_name( 'Black', 'Vienna Black', $variation ),
+				'A value that only appears in the parent name is not shown by the variation name.'
+			);
+			$this->assertTrue(
+				wc_is_attribute_in_product_name( 'Black', 'Vienna Black - Huge, Black', $variation ),
+				'A value in the attribute list after the parent name is shown by the variation name.'
+			);
+			$this->assertTrue(
+				wc_is_attribute_in_product_name( 'Black', 'Vienna Black' ),
+				'Without the variation the whole name is searched, as before.'
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox wc_is_attribute_in_product_name() should match the parent name whether the variation name is raw or entity-decoded.
+	 */
+	public function test_wc_is_attribute_in_product_name_matches_raw_and_decoded_parent_names(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Black &amp; White',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'white',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		try {
+			$this->assertFalse( wc_is_attribute_in_product_name( 'White', 'Black &amp; White', $variation ), 'Raw name.' );
+			$this->assertFalse( wc_is_attribute_in_product_name( 'White', 'Black & White', $variation ), 'Decoded name.' );
+			$this->assertTrue( wc_is_attribute_in_product_name( 'White', 'Black & White - Huge, White', $variation ), 'Decoded name with the attribute list.' );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox wc_is_attribute_in_product_name() should match the parent name when a filter changes the product title.
+	 */
+	public function test_wc_is_attribute_in_product_name_ignores_the_product_title_filter(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Black',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		$append_badge = function ( $title ) {
+			return $title . ' (New)';
+		};
+		add_filter( 'woocommerce_product_title', $append_badge );
+
+		try {
+			$this->assertFalse( wc_is_attribute_in_product_name( 'Black', 'Vienna Black', $variation ) );
+		} finally {
+			remove_filter( 'woocommerce_product_title', $append_badge );
+			$variation->delete( true );
+			$product->delete( true );
+		}
 	}
 
 	/**
@@ -115,6 +205,76 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			$this->filter_recorder->getInvocationCount(),
 			'Filter `sanitize_taxonomy_name` should not be triggered a second time because the slug should be loaded from the cache.'
 		);
+	}
+
+	/**
+	 * @testdox wc_create_attribute() strips markup from the attribute name before storing it.
+	 */
+	public function test_wc_create_attribute_strips_markup_from_name(): void {
+		$id = wc_create_attribute(
+			array(
+				'name' => 'Color<b>bold</b>',
+				'slug' => 'markup-color',
+			)
+		);
+		$this->assertIsInt( $id );
+
+		try {
+			$this->assertSame( 'Colorbold', $this->get_stored_attribute_label( $id ) );
+			$this->assertSame( 'Colorbold', wc_get_attribute( $id )->name );
+
+			$result = wc_update_attribute( $id, array( 'name' => '<em>Size</em>' ) );
+			$this->assertIsInt( $result );
+			$this->assertSame( 'Size', $this->get_stored_attribute_label( $id ) );
+			$this->assertSame( 'Size', wc_get_attribute( $id )->name );
+
+			$error = wc_create_attribute( array( 'name' => '<b></b>' ) );
+			$this->assertWPError( $error );
+			$this->assertSame( 'missing_attribute_name', $error->get_error_code() );
+		} finally {
+			wc_delete_attribute( $id );
+		}
+	}
+
+	/**
+	 * @testdox The default slug is derived from the name as given, so cleaning the label does not change it.
+	 */
+	public function test_wc_create_attribute_default_slug_ignores_label_cleanup(): void {
+		$id = wc_create_attribute( array( 'name' => 'Width <5cm' ) );
+		$this->assertIsInt( $id );
+
+		try {
+			$attribute = wc_get_attribute( $id );
+			$this->assertSame( 'pa_width', $attribute->slug );
+			$this->assertSame( 'Width &lt;5cm', $attribute->name );
+		} finally {
+			wc_delete_attribute( $id );
+		}
+	}
+
+	/**
+	 * @testdox Attribute rows stored with markup are read back as plain text and produce plain-text taxonomy labels and messages.
+	 */
+	public function test_stored_attribute_label_with_markup_is_normalized_on_read(): void {
+		$attribute_id = $this->insert_raw_attribute_row( 'Colour<b>bold</b>', 'rawcolour' );
+
+		try {
+			$this->assertSame( 'Colourbold', wc_get_attribute( $attribute_id )->name );
+
+			// register_taxonomies() is a no-op once product_type exists.
+			unregister_taxonomy( 'product_type' );
+			WC_Post_Types::register_taxonomies();
+
+			$labels = get_taxonomy( 'pa_rawcolour' )->labels;
+			$this->assertSame( 'Colourbold', $labels->singular_name );
+			$messages = WC_Post_Types::updated_term_messages( array() );
+			foreach ( array( $labels->add_new_item, $labels->edit_item, $messages['pa_rawcolour'][1] ) as $text ) {
+				$this->assertStringContainsString( 'Colourbold', $text );
+				$this->assertStringNotContainsString( '<', $text );
+			}
+		} finally {
+			$this->clean_up_attribute_test_state( array( $attribute_id ), 'pa_rawcolour' );
+		}
 	}
 
 	/**
@@ -225,6 +385,191 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should unregister a deleted attribute after its deletion hook and allow recreating the slug.
+	 */
+	public function test_wc_delete_attribute_unregisters_runtime_entries_and_allows_recreation(): void {
+		global $wc_product_attributes;
+
+		$slug                     = $this->get_unique_attribute_slug( 'normal' );
+		$attribute                = $this->create_registered_attribute( $slug );
+		$replacement_attribute_id = null;
+		$hook_taxonomy            = null;
+		$hook_wc_attribute        = null;
+		$deleted_callback         = static function ( $id, $name, $taxonomy ) use ( &$hook_taxonomy, &$hook_wc_attribute, &$wc_product_attributes ): void {
+			$hook_taxonomy     = get_taxonomy( $taxonomy );
+			$hook_wc_attribute = $wc_product_attributes[ $taxonomy ] ?? null;
+		};
+
+		add_action( 'woocommerce_attribute_deleted', $deleted_callback, 10, 3 );
+
+		try {
+			$this->assertTrue( wc_delete_attribute( $attribute['id'] ), 'The attribute should be deleted successfully.' );
+			$this->assertSame( $attribute['wp_taxonomy'], $hook_taxonomy, 'The deletion hook should observe the original WordPress taxonomy.' );
+			$this->assertSame( $attribute['wc_attribute'], $hook_wc_attribute, 'The deletion hook should observe the original WooCommerce attribute entry.' );
+			$this->assertFalse( taxonomy_exists( $attribute['taxonomy'] ), 'The deleted attribute taxonomy should be unregistered after the deletion hook.' );
+			$this->assertArrayNotHasKey( $attribute['taxonomy'], $wc_product_attributes, 'The deleted WooCommerce attribute entry should be removed after the deletion hook.' );
+			$this->assertFalse( taxonomy_is_product_attribute( $attribute['taxonomy'] ), 'The deleted taxonomy should no longer be reported as a product attribute.' );
+
+			$replacement_attribute_id = wc_create_attribute(
+				array(
+					'name' => 'Recreated attribute',
+					'slug' => $slug,
+				)
+			);
+
+			$this->assertIsInt( $replacement_attribute_id, 'The deleted attribute slug should be reusable in the same request.' );
+		} finally {
+			remove_action( 'woocommerce_attribute_deleted', $deleted_callback, 10 );
+			$this->clean_up_attribute_test_state(
+				array( $attribute['id'], $replacement_attribute_id ),
+				$attribute['taxonomy']
+			);
+		}
+	}
+
+	/**
+	 * @testdox Should tolerate a deletion callback unregistering the original taxonomy first.
+	 */
+	public function test_wc_delete_attribute_is_idempotent_when_taxonomy_is_pre_unregistered(): void {
+		global $wc_product_attributes;
+
+		$slug                = $this->get_unique_attribute_slug( 'pre-unreg' );
+		$attribute           = $this->create_registered_attribute( $slug );
+		$unregister_callback = static function ( $id, $name, $taxonomy ): void {
+			unregister_taxonomy( $taxonomy );
+		};
+
+		add_action( 'woocommerce_before_attribute_delete', $unregister_callback, 10, 3 );
+
+		try {
+			$this->assertTrue( wc_delete_attribute( $attribute['id'] ), 'The attribute should still be deleted after its taxonomy is unregistered by a callback.' );
+			$this->assertFalse( taxonomy_exists( $attribute['taxonomy'] ), 'The pre-unregistered taxonomy should remain absent.' );
+			$this->assertArrayNotHasKey( $attribute['taxonomy'], $wc_product_attributes, 'The original WooCommerce attribute entry should still be removed.' );
+			$this->assertFalse( taxonomy_is_product_attribute( $attribute['taxonomy'] ), 'The deleted taxonomy should no longer be reported as a product attribute.' );
+		} finally {
+			remove_action( 'woocommerce_before_attribute_delete', $unregister_callback, 10 );
+			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
+		}
+	}
+
+	/**
+	 * @testdox Should leave the attribute taxonomy registered when the database deletion fails.
+	 */
+	public function test_wc_delete_attribute_failed_delete_leaves_taxonomy_registered(): void {
+		global $wpdb, $wc_product_attributes;
+
+		$slug                   = $this->get_unique_attribute_slug( 'failure' );
+		$attribute              = $this->create_registered_attribute( $slug );
+		$before_delete_callback = static function ( $id ) use ( $attribute, $wpdb ): void {
+			if ( $attribute['id'] !== $id ) {
+				return;
+			}
+
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = %d",
+					$id
+				)
+			); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The test needs the outer deletion query to affect no rows.
+		};
+
+		add_action( 'woocommerce_before_attribute_delete', $before_delete_callback, 10, 3 );
+
+		try {
+			$this->assertFalse( wc_delete_attribute( $attribute['id'] ), 'The outer deletion should fail after the callback removes the database row.' );
+			$this->assertTrue( taxonomy_exists( $attribute['taxonomy'] ), 'A failed deletion should leave the taxonomy registered.' );
+			$this->assertArrayHasKey( $attribute['taxonomy'], $wc_product_attributes, 'A failed deletion should leave the WooCommerce attribute entry in place.' );
+			$this->assertTrue( taxonomy_is_product_attribute( $attribute['taxonomy'] ), 'A failed deletion should leave the taxonomy reported as a product attribute.' );
+		} finally {
+			remove_action( 'woocommerce_before_attribute_delete', $before_delete_callback, 10 );
+			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
+		}
+	}
+
+	/**
+	 * @testdox Should flush deferred term counts before unregistering the taxonomy.
+	 */
+	public function test_wc_delete_attribute_flushes_deferred_term_counts(): void {
+		$slug      = $this->get_unique_attribute_slug( 'deferred' );
+		$attribute = $this->create_registered_attribute( $slug );
+
+		$term = wp_insert_term( 'Deferred term', $attribute['taxonomy'] );
+		$this->assertIsArray( $term, 'The fixture term should be created.' );
+
+		$product_id = wp_insert_post(
+			array(
+				'post_type'   => 'product',
+				'post_title'  => 'Deferred counting product',
+				'post_status' => 'publish',
+			)
+		);
+		$this->assertIsInt( $product_id, 'The fixture product should be created.' );
+		wp_set_object_terms( $product_id, array( (int) $term['term_id'] ), $attribute['taxonomy'] );
+
+		// Record whether the queued count for this taxonomy resolves while it is still registered.
+		$counted_while_registered = false;
+		$count_callback           = static function ( $tt_id, $taxonomy_name ) use ( $attribute, &$counted_while_registered ): void {
+			if ( $taxonomy_name === $attribute['taxonomy'] && taxonomy_exists( $taxonomy_name ) ) {
+				$counted_while_registered = true;
+			}
+		};
+		add_action( 'edited_term_taxonomy', $count_callback, 10, 2 );
+
+		wp_defer_term_counting( true );
+
+		try {
+			$this->assertTrue( wc_delete_attribute( $attribute['id'] ), 'The attribute should be deleted successfully.' );
+			$this->assertFalse( taxonomy_exists( $attribute['taxonomy'] ), 'The deleted attribute taxonomy should be unregistered.' );
+			$this->assertTrue( $counted_while_registered, 'The queued term count should be resolved before the taxonomy is unregistered.' );
+
+			$this->assertSame( array(), $this->drain_deferred_term_counts(), 'Draining the queue must not resolve the unregistered taxonomy.' );
+		} finally {
+			remove_action( 'edited_term_taxonomy', $count_callback, 10 );
+			$this->drain_deferred_term_counts();
+			wp_delete_post( $product_id, true );
+			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
+		}
+	}
+
+	/**
+	 * @testdox Should flush counts the caller already queued for the taxonomy before unregistering it.
+	 */
+	public function test_wc_delete_attribute_flushes_counts_queued_by_the_caller(): void {
+		$slug      = $this->get_unique_attribute_slug( 'caller-queue' );
+		$attribute = $this->create_registered_attribute( $slug );
+
+		$term = wp_insert_term( 'Caller deleted term', $attribute['taxonomy'] );
+		$this->assertIsArray( $term, 'The fixture term should be created.' );
+
+		$product_id = wp_insert_post(
+			array(
+				'post_type'   => 'product',
+				'post_title'  => 'Caller queued counting product',
+				'post_status' => 'publish',
+			)
+		);
+		$this->assertIsInt( $product_id, 'The fixture product should be created.' );
+		wp_set_object_terms( $product_id, array( (int) $term['term_id'] ), $attribute['taxonomy'] );
+
+		wp_defer_term_counting( true );
+
+		try {
+			// The caller removes the term itself, which queues a count for the taxonomy.
+			// The attribute then has no terms left for wc_delete_attribute() to remove.
+			$this->assertTrue( wp_delete_term( (int) $term['term_id'], $attribute['taxonomy'] ), 'The fixture term should be deleted by the caller.' );
+
+			$this->assertTrue( wc_delete_attribute( $attribute['id'] ), 'The attribute should be deleted successfully.' );
+			$this->assertFalse( taxonomy_exists( $attribute['taxonomy'] ), 'The deleted attribute taxonomy should be unregistered.' );
+
+			$this->assertSame( array(), $this->drain_deferred_term_counts(), 'Draining the queue must not resolve the unregistered taxonomy.' );
+		} finally {
+			$this->drain_deferred_term_counts();
+			wp_delete_post( $product_id, true );
+			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
+		}
+	}
+
+	/**
 	 * Describes the behavior of the wc_update_attribute() function.
 	 *
 	 * @return void
@@ -270,6 +615,110 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertIsInt( $update, 'The product attribute was successfully updated, even if some non-essential parameters were invalid.' );
 		$this->assertEquals( 'Ready-to-go-ness', $attribute->name, 'The product attribute name was updated.' );
 		$this->assertEquals( 'menu_order', $attribute->order_by, 'Any invalid property changes will be reset to their defaults.' );
+	}
+
+	/**
+	 * @testdox wc_create_attribute() registers the taxonomy before woocommerce_attribute_added fires.
+	 */
+	public function test_wc_create_attribute_registers_the_taxonomy_before_the_added_hook(): void {
+		$slug     = $this->get_unique_attribute_slug( 'new' );
+		$taxonomy = wc_attribute_taxonomy_name( $slug );
+		$term     = null;
+		add_action(
+			'woocommerce_attribute_added',
+			function () use ( $taxonomy, &$term ) {
+				$term = wp_insert_term( 'Red', $taxonomy );
+			}
+		);
+
+		wc_create_attribute(
+			array(
+				'name' => 'Color',
+				'slug' => $slug,
+			)
+		);
+
+		$this->assertIsArray( $term, 'A hook listener should be able to add a term.' );
+		$this->assertSame( 'manage_product_terms', get_taxonomy( $taxonomy )->cap->manage_terms, 'The taxonomy should have the init arguments.' );
+	}
+
+	/**
+	 * @testdox wc_create_attribute() rejects a slug that was already created in the same request.
+	 */
+	public function test_wc_create_attribute_rejects_the_same_slug_twice_in_one_request(): void {
+		$slug = $this->get_unique_attribute_slug( 'dup' );
+
+		$first  = wc_create_attribute(
+			array(
+				'name' => 'First',
+				'slug' => $slug,
+			)
+		);
+		$second = wc_create_attribute(
+			array(
+				'name' => 'Second',
+				'slug' => $slug,
+			)
+		);
+
+		$this->assertIsInt( $first );
+		$this->assertWPError( $second );
+		$this->assertSame( 'invalid_product_attribute_slug_already_exists', $second->get_error_code() );
+	}
+
+	/**
+	 * @testdox wc_update_attribute() keeps object types that other code attached to the taxonomy.
+	 */
+	public function test_wc_update_attribute_keeps_attached_object_types(): void {
+		$slug     = $this->get_unique_attribute_slug( 'types' );
+		$taxonomy = wc_attribute_taxonomy_name( $slug );
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'Color',
+				'slug' => $slug,
+			)
+		);
+		register_taxonomy_for_object_type( $taxonomy, 'post' );
+
+		wc_update_attribute( $attribute_id, array( 'name' => 'Colour' ) );
+
+		$this->assertContains( 'post', get_taxonomy( $taxonomy )->object_type, 'The attached object type should stay.' );
+		$this->assertSame( 'Colour', get_taxonomy( $taxonomy )->labels->singular_name, 'The taxonomy should use the new name.' );
+	}
+
+	/**
+	 * @testdox wc_update_attribute() registers the new taxonomy and removes the old one when the slug changes.
+	 */
+	public function test_wc_update_attribute_slug_rename_registers_the_new_taxonomy(): void {
+		$old_slug     = $this->get_unique_attribute_slug( 'old' );
+		$new_slug     = $this->get_unique_attribute_slug( 'new' );
+		$old_taxonomy = wc_attribute_taxonomy_name( $old_slug );
+		$new_taxonomy = wc_attribute_taxonomy_name( $new_slug );
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'Color',
+				'slug' => $old_slug,
+			)
+		);
+		wp_insert_term( 'Red', $old_taxonomy );
+		register_taxonomy_for_object_type( $old_taxonomy, 'post' );
+
+		wc_update_attribute(
+			$attribute_id,
+			array(
+				'name' => 'Color',
+				'slug' => $new_slug,
+			)
+		);
+
+		$this->assertFalse( taxonomy_exists( $old_taxonomy ), 'The old taxonomy should be gone.' );
+		$this->assertTrue( taxonomy_exists( $new_taxonomy ), 'The new taxonomy should be registered.' );
+		// A copy of the old taxonomy object under the new name would keep the old name.
+		$this->assertSame( $new_taxonomy, get_taxonomy( $new_taxonomy )->name, 'The new taxonomy should be its own registration.' );
+		$this->assertNotEmpty( term_exists( 'red', $new_taxonomy ), 'The term should move to the new taxonomy.' );
+		$this->assertContains( 'post', get_taxonomy( $new_taxonomy )->object_type, 'Attached object types should move to the new taxonomy.' );
 	}
 
 	/**
@@ -357,5 +806,137 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			array( 'pa_SubStr', 'substr' ),
 			array( 'ĂnîC°Dę', 'anicde' ),
 		);
+	}
+
+	/**
+	 * Creates a uniquely named attribute with entries in both runtime registries.
+	 *
+	 * @param string $slug Attribute slug.
+	 * @return array{id: int, taxonomy: string, wp_taxonomy: WP_Taxonomy, wc_attribute: object}
+	 */
+	private function create_registered_attribute( string $slug ): array {
+		global $wc_product_attributes;
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'Runtime attribute',
+				'slug' => $slug,
+			)
+		);
+		$this->assertIsInt( $attribute_id, 'The runtime attribute fixture should be created.' );
+
+		$taxonomy = wc_attribute_taxonomy_name( $slug );
+		register_taxonomy( $taxonomy, array( 'product' ) );
+		$wp_taxonomy = get_taxonomy( $taxonomy );
+		$this->assertInstanceOf( WP_Taxonomy::class, $wp_taxonomy, 'The runtime attribute fixture should have a registered taxonomy.' );
+
+		$wc_attribute                       = (object) array( 'attribute_id' => $attribute_id );
+		$wc_product_attributes[ $taxonomy ] = $wc_attribute;
+
+		return array(
+			'id'           => $attribute_id,
+			'taxonomy'     => $taxonomy,
+			'wp_taxonomy'  => $wp_taxonomy,
+			'wc_attribute' => $wc_attribute,
+		);
+	}
+
+	/**
+	 * Stops deferring term counts, which drains WordPress's queue, and captures any PHP warnings raised while doing so.
+	 *
+	 * The queue resolves each taxonomy by name, so a queued taxonomy that was unregistered
+	 * in the meantime surfaces as a warning. Capturing it keeps the assertion independent
+	 * of PHPUnit converting warnings to exceptions.
+	 *
+	 * @return string[] Warning messages raised during the drain.
+	 */
+	private function drain_deferred_term_counts(): array {
+		$warnings = array();
+
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capturing the warning is the assertion; PHPUnit would otherwise convert it to an exception, and PHPUnit 10 stops doing that.
+		set_error_handler(
+			static function ( int $errno, string $errstr ) use ( &$warnings ): bool {
+				$warnings[] = $errstr;
+				return true;
+			}
+		);
+
+		try {
+			wp_defer_term_counting( false );
+		} finally {
+			restore_error_handler();
+		}
+
+		return $warnings;
+	}
+
+	/**
+	 * Returns a unique attribute slug within WordPress's taxonomy byte limit.
+	 *
+	 * @param string $context Slug context.
+	 * @return string
+	 */
+	private function get_unique_attribute_slug( string $context ): string {
+		return 'runtime-' . $context . '-' . strtolower( wp_generate_password( 5, false, false ) );
+	}
+
+	/**
+	 * Insert an attribute row directly, bypassing wc_create_attribute(), and reset the attribute caches.
+	 *
+	 * @param string $label Raw label to store.
+	 * @param string $slug  Attribute slug (without the `pa_` prefix).
+	 * @return int Attribute ID.
+	 */
+	private function insert_raw_attribute_row( string $label, string $slug ): int {
+		global $wpdb;
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+			array(
+				'attribute_label'   => $label,
+				'attribute_name'    => $slug,
+				'attribute_type'    => 'select',
+				'attribute_orderby' => 'menu_order',
+				'attribute_public'  => 0,
+			)
+		);
+		delete_transient( 'wc_attribute_taxonomies' );
+		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+
+		return (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Read the attribute label straight from the table, bypassing the normalizing readers.
+	 *
+	 * @param int $attribute_id Attribute ID.
+	 * @return string|null
+	 */
+	private function get_stored_attribute_label( int $attribute_id ): ?string {
+		global $wpdb;
+
+		return $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = %d", $attribute_id ) );
+	}
+
+	/**
+	 * Removes database and runtime state created by an attribute deletion test.
+	 *
+	 * @param array<int|null> $attribute_ids Attribute IDs to remove.
+	 * @param string          $taxonomy      Attribute taxonomy name.
+	 * @return void
+	 */
+	private function clean_up_attribute_test_state( array $attribute_ids, string $taxonomy ): void {
+		global $wc_product_attributes;
+
+		if ( taxonomy_exists( $taxonomy ) ) {
+			unregister_taxonomy( $taxonomy );
+		}
+		unset( $wc_product_attributes[ $taxonomy ] );
+
+		foreach ( $attribute_ids as $attribute_id ) {
+			if ( is_int( $attribute_id ) ) {
+				wc_delete_attribute( $attribute_id );
+			}
+		}
 	}
 }

@@ -92,8 +92,7 @@ class Filterer {
 			$in_stock_clause = '';
 		}
 
-		$attribute_ids_for_and_filtering = array();
-		$clauses                         = array();
+		$clauses = array();
 		foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
 			$all_terms                  = get_terms( $taxonomy, array( 'hide_empty' => false ) );
 			$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
@@ -106,7 +105,24 @@ class Filterer {
 
 			if ( 0 !== $count ) {
 				if ( $is_and_query && $count > 1 ) {
-					$attribute_ids_for_and_filtering = array_merge( $attribute_ids_for_and_filtering, $term_ids_to_filter_by );
+					$clauses[] = "
+						{$clause_root}
+						SELECT product_or_parent_id
+						FROM {$this->lookup_table_name} lt
+						WHERE is_variation_attribute=0
+						{$in_stock_clause}
+						AND term_id in {$term_ids_to_filter_by_list}
+						GROUP BY product_id
+						HAVING COUNT(product_id)={$count}
+						UNION
+						SELECT product_or_parent_id
+						FROM {$this->lookup_table_name} lt
+						WHERE is_variation_attribute=1
+						{$in_stock_clause}
+						AND term_id in {$term_ids_to_filter_by_list}
+						GROUP BY product_or_parent_id
+						HAVING COUNT(DISTINCT term_id)={$count}
+					)";
 				} else {
 					$clauses[] = "
 							{$clause_root}
@@ -117,29 +133,6 @@ class Filterer {
 						)";
 				}
 			}
-		}
-
-		if ( ! empty( $attribute_ids_for_and_filtering ) ) {
-			$count                      = count( $attribute_ids_for_and_filtering );
-			$term_ids_to_filter_by_list = '(' . join( ',', $attribute_ids_for_and_filtering ) . ')';
-			$clauses[]                  = "
-				{$clause_root}
-				SELECT product_or_parent_id
-				FROM {$this->lookup_table_name} lt
-				WHERE is_variation_attribute=0
-				{$in_stock_clause}
-				AND term_id in {$term_ids_to_filter_by_list}
-				GROUP BY product_id
-				HAVING COUNT(product_id)={$count}
-				UNION
-				SELECT product_or_parent_id
-				FROM {$this->lookup_table_name} lt
-				WHERE is_variation_attribute=1
-				{$in_stock_clause}
-				AND term_id in {$term_ids_to_filter_by_list}
-				GROUP BY product_or_parent_id
-				HAVING COUNT(DISTINCT term_id)={$count}
-			)";
 		}
 
 		if ( ! empty( $clauses ) ) {
@@ -180,7 +173,7 @@ class Filterer {
 		$tax_query  = new TaxQuery( $tax_query );
 
 		if ( $this->filtering_via_lookup_table_is_active() ) {
-			$query = $this->get_product_counts_query_using_lookup_table( $tax_query, $meta_query, $taxonomy, $term_ids );
+			$query = $this->get_product_counts_query_using_lookup_table( $tax_query, $meta_query, $taxonomy, $term_ids, $query_type );
 		} else {
 			$query = $this->get_product_counts_query_not_using_lookup_table( $tax_query, $meta_query, $term_ids );
 		}
@@ -264,9 +257,10 @@ class Filterer {
 	 * @param \WP_Meta_Query $meta_query The current main meta query.
 	 * @param string         $taxonomy The attribute name to get the term counts for.
 	 * @param string         $term_ids The term ids to include in the search.
+	 * @param string         $query_type The query type for the attribute being counted.
 	 * @return array An array of SQL query parts.
 	 */
-	private function get_product_counts_query_using_lookup_table( $tax_query, $meta_query, $taxonomy, $term_ids ) {
+	private function get_product_counts_query_using_lookup_table( $tax_query, $meta_query, $taxonomy, $term_ids, $query_type ) {
 		global $wpdb;
 
 		$meta_query_sql = $meta_query->get_sql( 'post', $this->lookup_table_name, 'product_or_parent_id' );
@@ -301,26 +295,46 @@ class Filterer {
 			{$in_stock_clause}";
 
 		if ( ! empty( $term_ids ) ) {
+			// The main tax query does not include selected attributes while the lookup table is in use, so they are added here.
 			$attributes_to_filter_by = \WC_Query::get_layered_nav_chosen_attributes();
 
 			if ( ! empty( $attributes_to_filter_by ) ) {
-				$and_term_ids = array();
-
-				foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
-					if ( 'and' !== $data['query_type'] ) {
+				foreach ( $attributes_to_filter_by as $filter_taxonomy => $data ) {
+					// Skip an attribute's own OR selection so its other terms stay available.
+					if ( 'or' === $data['query_type'] && $filter_taxonomy === $taxonomy && 'or' === $query_type ) {
 						continue;
 					}
-					$all_terms             = get_terms( $taxonomy, array( 'hide_empty' => false ) );
-					$term_ids_by_slug      = wp_list_pluck( $all_terms, 'term_id', 'slug' );
-					$term_ids_to_filter_by = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
-					$and_term_ids          = array_merge( $and_term_ids, $term_ids_to_filter_by );
-				}
+					$all_terms         = get_terms(
+						array(
+							'taxonomy'   => $filter_taxonomy,
+							'hide_empty' => false,
+						)
+					);
+					$term_ids_by_slug  = wp_list_pluck( $all_terms, 'term_id', 'slug' );
+					$selected_term_ids = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 
-				if ( ! empty( $and_term_ids ) ) {
-					$terms_count   = count( $and_term_ids );
-					$term_ids_list = '(' . join( ',', $and_term_ids ) . ')';
-					// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
-					// (causes the filtering subquery to be executed only once).
+					if ( empty( $selected_term_ids ) ) {
+						continue;
+					}
+					$terms_count   = count( $selected_term_ids );
+					$term_ids_list = $this->get_term_ids_sql( $selected_term_ids );
+
+					if ( 'or' === $data['query_type'] ) {
+						// Check stock on these rows so an in-stock row for another term cannot match this selection.
+						// Taxonomy lets the query use the lookup index. Term IDs are unique, so it does not change which rows match.
+						// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
+						// (causes the filtering subquery to be executed only once).
+						$taxonomy_clause = $wpdb->prepare( 'taxonomy = %s', $filter_taxonomy );
+						$query['where'] .= "
+							AND product_or_parent_id IN ( SELECT product_or_parent_id FROM (
+								SELECT product_or_parent_id
+								FROM {$this->lookup_table_name} lt
+								WHERE {$taxonomy_clause} AND term_id IN {$term_ids_list}
+								{$in_stock_clause}
+							) temp )";
+						continue;
+					}
+
 					$query['where'] .= "
 						AND product_or_parent_id IN ( SELECT product_or_parent_id FROM (
 							SELECT product_or_parent_id

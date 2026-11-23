@@ -63,8 +63,9 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 		 */
 		public function __construct() {
 
-			$this->id             = 'customer_reset_password';
-			$this->customer_email = true;
+			$this->id              = 'customer_reset_password';
+			$this->customer_email  = true;
+			$this->supports_cc_bcc = false;
 
 			$this->title       = __( 'Reset password', 'woocommerce' );
 			$this->description = __( 'Send an email to customers notifying them that their password has been reset', 'woocommerce' );

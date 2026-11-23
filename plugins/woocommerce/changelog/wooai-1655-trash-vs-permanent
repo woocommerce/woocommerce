@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Say in the product-delete ability result whether a product was moved to the trash or deleted permanently.

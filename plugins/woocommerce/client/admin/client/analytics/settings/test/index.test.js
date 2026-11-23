@@ -115,6 +115,27 @@ describe( 'Settings - Import Mode Modal', () => {
 		).toBeChecked();
 	} );
 
+	it( 'shows immediate import mode when the scheduled setting is absent', () => {
+		useSettings.mockReturnValue( {
+			settingsError: false,
+			isRequesting: false,
+			isDirty: false,
+			persistSettings: mockPersistSettings,
+			updateAndPersistSettings: jest.fn(),
+			updateSettings: mockUpdateSettings,
+			wcAdminSettings: {},
+		} );
+
+		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
+
+		expect(
+			screen.getByRole( 'radio', { name: /immediately/i } )
+		).toBeChecked();
+		expect(
+			screen.getByRole( 'radio', { name: /scheduled/i } )
+		).not.toBeChecked();
+	} );
+
 	it( 'shows modal when switching from scheduled to immediate mode', async () => {
 		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
 
@@ -162,6 +183,9 @@ describe( 'Settings - Import Mode Modal', () => {
 		} );
 
 		expect( mockUpdateSettings ).not.toHaveBeenCalled();
+		expect(
+			screen.getByRole( 'radio', { name: /scheduled/i } )
+		).toBeChecked();
 	} );
 
 	it( 'updates setting when modal is confirmed', async () => {

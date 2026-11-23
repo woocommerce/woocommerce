@@ -100,9 +100,6 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -188,9 +185,6 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( '_priority', $suggestion_category, 'Suggestion category `_order` entry is missing' );
 		$this->assertArrayHasKey( 'title', $suggestion_category, 'Suggestion category `title` entry is missing' );
 		$this->assertArrayHasKey( 'description', $suggestion_category, 'Suggestion category `description` entry is missing' );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -251,7 +245,7 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 		foreach ( $data['suggestions'] as $suggestion ) {
 			$this->assertArrayHasKey( 'id', $suggestion, 'Suggestion `id` entry is missing' );
 			$this->assertArrayHasKey( '_priority', $suggestion, 'Suggestion `_priority` entry is missing' );
-			$this->assertIsInteger( $suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
+			$this->assertIsInt( $suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
 			$this->assertArrayHasKey( '_type', $suggestion, 'Suggestion `_type` entry is missing' );
 			$this->assertArrayHasKey( 'title', $suggestion, 'Suggestion `title` entry is missing' );
 			$this->assertArrayHasKey( 'description', $suggestion, 'Suggestion `description` entry is missing' );
@@ -269,9 +263,6 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 			$this->assertIsArray( $suggestion['tags'] );
 			$this->assertArrayHasKey( 'category', $suggestion, 'Suggestion `category` entry is missing' );
 		}
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -500,9 +491,6 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertCount( 2, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 3, $data['suggestion_categories'] );
-
-		// Clean up.
-		delete_option( 'woocommerce_default_country' );
 	}
 
 	/**
@@ -979,7 +967,7 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 				'_order'      => $order++,
 				'_type'       => PaymentsProviders::TYPE_OFFLINE_PM,
 				'title'       => 'Direct bank transfer',
-				'description' => 'Take payments in person via BACS. More commonly known as direct bank/wire transfer.',
+				'description' => 'Accept offline bank-to-bank and wire transfer payments.',
 				'supports'    => array(
 					'products',
 				),

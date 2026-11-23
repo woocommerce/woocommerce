@@ -50,7 +50,7 @@ class Template {
 	 */
 	private string $content;
 	/**
-	 * The list of supoorted post types.
+	 * The list of supported post types.
 	 *
 	 * @var string[]
 	 */

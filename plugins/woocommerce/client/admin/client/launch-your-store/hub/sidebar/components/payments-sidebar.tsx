@@ -158,9 +158,12 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		>
 			{ payments_task?.additionalData?.wooPaymentsIsInstalled
 				? /* translators: %s: WooPayments */
-				  sprintf( __( 'Enable %s', 'woocommerce' ), 'WooPayments' )
+					sprintf( __( 'Enable %s', 'woocommerce' ), 'WooPayments' )
 				: /* translators: %s: WooPayments */
-				  sprintf( __( 'Install %s', 'woocommerce' ), 'WooPayments' ) }
+					sprintf(
+						__( 'Install %s', 'woocommerce' ),
+						'WooPayments'
+					) }
 		</SidebarNavigationItem>
 	);
 

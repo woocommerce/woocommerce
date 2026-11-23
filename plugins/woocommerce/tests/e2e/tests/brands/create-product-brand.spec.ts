@@ -144,6 +144,11 @@ test( 'Merchant can add brands', async ( { page } ) => {
 			.first()
 			.click();
 
+		// The delete confirm is bound by a footer script on DOM ready. Clicking
+		// "Delete" before the page has loaded follows the link with no dialog and
+		// leaves the listener below to fire on the next delete.
+		await page.waitForURL( /term\.php/ );
+
 		// After clicking the "Delete" button, there will be a confirmation dialog.
 		page.once( 'dialog', ( dialog ) => {
 			// Click "OK" to confirm the deletion.

@@ -54,16 +54,16 @@
 	BISFormManager.prototype.onShowVariation = function( event, variation ) {
 		var form = event.data.bisForm;
 		if ( variation.is_in_stock && variation.is_purchasable ) {
-			form.$formContainer.addClass( 'hidden' );
+			form.$formContainer.prop( 'hidden', true );
 			return;
 		}
 
 		if ( ! variation.variation_is_active || ! variation.variation_is_visible ) {
-			form.$formContainer.addClass( 'hidden' );
+			form.$formContainer.prop( 'hidden', true );
 			return;
 		}
 
-		form.$formContainer.removeClass( 'hidden' );
+		form.$formContainer.prop( 'hidden', false );
 	};
 
 	/**
@@ -74,7 +74,7 @@
 	BISFormManager.prototype.onAnnounceReset = function( event ) {
 		var form = event.data.bisForm;
 		form.$formProductInput.val( form.product_id ).trigger( 'change' );
-		form.$formContainer.addClass( 'hidden' );
+		form.$formContainer.prop( 'hidden', true );
 	};
 
 	/**

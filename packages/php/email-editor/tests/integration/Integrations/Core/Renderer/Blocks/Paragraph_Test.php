@@ -75,6 +75,34 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it renders a paragraph that only contains a personalization tag
+	 */
+	public function testItRendersParagraphWithOnlyPersonalizationTag(): void {
+		$content  = '<p><!--[woocommerce/customer-first-name]--></p>';
+		$rendered = $this->paragraph_renderer->render( $content, $this->parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( '<!--[woocommerce/customer-first-name]-->', $rendered );
+
+		$content  = "<p>\n\t<!--[woocommerce/customer-first-name default=\"there\"]--> </p>";
+		$rendered = $this->paragraph_renderer->render( $content, $this->parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( '<!--[woocommerce/customer-first-name default="there"]-->', $rendered );
+
+		$content  = '<p><!--[woocommerce/customer-first-name default="[guest]"]--></p>';
+		$rendered = $this->paragraph_renderer->render( $content, $this->parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( '<!--[woocommerce/customer-first-name default="[guest]"]-->', $rendered );
+	}
+
+	/**
+	 * Test it does not render an empty paragraph
+	 */
+	public function testItDoesNotRenderEmptyParagraph(): void {
+		$rendered = $this->paragraph_renderer->render( '<p> </p>', $this->parsed_paragraph, $this->rendering_context );
+		$this->assertStringNotContainsString( 'email-text-block', $rendered );
+
+		$rendered = $this->paragraph_renderer->render( '<p><!-- comment --></p>', $this->parsed_paragraph, $this->rendering_context );
+		$this->assertStringNotContainsString( 'email-text-block', $rendered );
+	}
+
+	/**
 	 * Test it uses RTL default alignment when alignment is absent.
 	 */
 	public function testItRendersContentWithRtlDefaultAlignment(): void {
@@ -224,6 +252,57 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
 		$this->assertStringContainsString( 'color:#ff0000;', $rendered );
+	}
+
+	/**
+	 * Inside a Group with its own font size, a paragraph without one uses the Group's size.
+	 *
+	 * @dataProvider inherited_font_size_provider
+	 * @param string $inherited Font size passed down in email_attrs.
+	 * @param string $expected Font size the paragraph renders with.
+	 */
+	public function testItUsesInheritedFontSizeFromEmailAttrs( string $inherited, string $expected ): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+		unset( $parsed_paragraph['attrs']['style']['typography'] );
+		$parsed_paragraph['email_attrs'] = array( 'font-size' => $inherited );
+
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( 'font-size:' . $expected . ';', $rendered );
+	}
+
+	/**
+	 * Inherited font sizes and what they render as.
+	 */
+	public function inherited_font_size_provider(): array {
+		return array(
+			'px'    => array( '32px', '32px' ),
+			'clamp' => array( 'clamp(20px, 2vw, 40px)', '20px' ),
+		);
+	}
+
+	/**
+	 * An inherited font size that isn’t a plain px length adds nothing to the styles.
+	 */
+	public function testItIgnoresInheritedFontSizeWithExtraDeclarations(): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+		unset( $parsed_paragraph['attrs']['style']['typography'] );
+		$parsed_paragraph['email_attrs'] = array( 'font-size' => '16px;display:none;--x:1px' );
+
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
+		$this->assertStringNotContainsString( 'display:none', $rendered );
+		$this->assertStringNotContainsString( 'font-size', $rendered );
+	}
+
+	/**
+	 * A paragraph's own font size wins over the inherited one.
+	 */
+	public function testItPrefersOwnFontSizeOverInheritedOne(): void {
+		$parsed_paragraph                = $this->parsed_paragraph;
+		$parsed_paragraph['email_attrs'] = array( 'font-size' => '32px' );
+
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( 'font-size:16px;', $rendered );
+		$this->assertStringNotContainsString( 'font-size:32px', $rendered );
 	}
 
 	/**

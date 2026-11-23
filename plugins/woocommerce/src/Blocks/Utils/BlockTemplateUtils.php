@@ -187,17 +187,12 @@ class BlockTemplateUtils {
 			$template->origin = 'plugin';
 		}
 
-		/*
-		* Run the block hooks algorithm introduced in WP 6.4 on the template content.
-		*/
-		if ( function_exists( 'inject_ignored_hooked_blocks_metadata_attributes' ) ) {
-			$hooked_blocks = get_hooked_blocks();
-			if ( ! empty( $hooked_blocks ) || has_filter( 'hooked_block_types' ) ) {
-				$before_block_visitor = make_before_block_visitor( $hooked_blocks, $template );
-				$after_block_visitor  = make_after_block_visitor( $hooked_blocks, $template );
-				$blocks               = parse_blocks( $template->content );
-				$template->content    = traverse_and_serialize_blocks( $blocks, $before_block_visitor, $after_block_visitor );
-			}
+		$hooked_blocks = get_hooked_blocks();
+		if ( ! empty( $hooked_blocks ) || has_filter( 'hooked_block_types' ) ) {
+			$before_block_visitor = make_before_block_visitor( $hooked_blocks, $template );
+			$after_block_visitor  = make_after_block_visitor( $hooked_blocks, $template );
+			$blocks               = parse_blocks( $template->content );
+			$template->content    = traverse_and_serialize_blocks( $blocks, $before_block_visitor, $after_block_visitor );
 		}
 
 		return $template;
@@ -623,8 +618,8 @@ class BlockTemplateUtils {
 	 * Determines whether the provided $blocks contains any of the $block_names,
 	 * or if they contain a pattern that contains any of the $block_names.
 	 *
-	 * @param string[]   $block_names Full block types to look for.
-	 * @param WP_Block[] $blocks      Array of block objects.
+	 * @param string[] $block_names Full block types to look for.
+	 * @param array    $blocks      Array of blocks as returned by parse_blocks().
 	 * @return bool Whether the content contains the specified block.
 	 */
 	public static function has_block_including_patterns( $block_names, $blocks ) {
@@ -752,11 +747,11 @@ class BlockTemplateUtils {
 		$saved_templates = $request_level_cache[ $template_type ][ $theme ];
 		if ( ! empty( $saved_templates ) && is_array( $slugs ) && array() !== $slugs ) {
 			$slugs           = array_map( 'sanitize_title', $slugs );
-			$saved_templates = array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) );
+			$saved_templates = array_filter( $saved_templates, static fn( $template ) => in_array( $template->post_name, $slugs, true ) );
 		}
 		if ( ! empty( $saved_templates ) ) {
-			$block_templates = array_map( fn( $template ) => self::build_template_result_from_post( $template ), $saved_templates );
-			$block_templates = array_values( array_filter( $block_templates, fn( $template ) => $template instanceof \WP_Block_Template ) );
+			$block_templates = array_map( static fn( $template ) => self::build_template_result_from_post( $template ), $saved_templates );
+			$block_templates = array_values( array_filter( $block_templates, static fn( $template ) => $template instanceof \WP_Block_Template ) );
 
 			return $block_templates;
 		}

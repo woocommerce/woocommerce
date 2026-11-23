@@ -30,6 +30,16 @@ class WC_Privacy_Erasers {
 
 		$user = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
 
+		$coupon_data_store = WC_Data_Store::load( 'coupon' );
+		if ( $coupon_data_store->has_callable( 'remove_used_by_email_records' ) ) {
+			// @phpstan-ignore-next-line method.notFound (WC_Data_Store forwards the call to the coupon data store.)
+			$removed = $coupon_data_store->remove_used_by_email_records( (string) $email_address, $user instanceof WP_User ? $user->ID : 0 );
+			if ( $removed ) {
+				$response['messages'][]    = __( 'Removed customer email from coupon usage records', 'woocommerce' );
+				$response['items_removed'] = true;
+			}
+		}
+
 		if ( ! $user instanceof WP_User ) {
 			return $response;
 		}
@@ -336,6 +346,10 @@ class WC_Privacy_Erasers {
 			}
 		}
 
+		$identities = $order->get_meta( '_coupon_usage_identities' );
+		if ( $identities && is_array( $identities ) ) {
+			$order->update_meta_data( '_coupon_usage_identities', array_fill_keys( array_keys( $identities ), '' ) );
+		}
 		$order->update_meta_data( '_anonymized', 'yes' );
 		$order->save();
 

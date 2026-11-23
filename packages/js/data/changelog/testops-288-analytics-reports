@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move Analytics report, settings and dashboard matrices below E2E; three browser titles are added for behaviors that would otherwise lose their last coverage.
+

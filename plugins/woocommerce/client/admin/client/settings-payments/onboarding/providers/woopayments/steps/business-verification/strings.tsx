@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /**
  * External dependencies
  */
@@ -7,10 +6,10 @@ import interpolateComponents from '@automattic/interpolate-components';
 import React from 'react';
 
 const documentationUrls = {
-	tos: 'https://wordpress.com/tos/',
+	tos: 'https://automattic.com/tos/',
 	signUpLink:
 		'https://woocommerce.com/document/woopayments/startup-guide/#sign-up-process',
-	merchantTerms: 'https://wordpress.com/tos/#more-woopay-specifically',
+	merchantTerms: 'https://automattic.com/tos/#ecommerce-services',
 	privacyPolicy: 'https://automattic.com/privacy/',
 };
 
@@ -85,6 +84,7 @@ export default {
 			'What category of legal entity identify your business?',
 			'woocommerce'
 		),
+		// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
 		mcc: __(
 			'What type of goods or services does your business sell? ',
 			'woocommerce'

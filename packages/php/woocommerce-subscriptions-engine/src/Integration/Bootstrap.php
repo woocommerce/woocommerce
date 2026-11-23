@@ -15,9 +15,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\ContractsController;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispatcher;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch\DueDispatcher;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ContractCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
@@ -46,31 +45,26 @@ final class Bootstrap {
 
 		self::$initialized = true;
 
-		CapabilityRegistry::init();
-
-		// Register the callbacks that dispatch renewals back into the engine. Plain
-		// add_action calls, safe before Action Scheduler has loaded; must run on every
-		// boot (not just activation) so the hooks can fire.
-		( new RenewalEngine() )->register_hooks();
+		ContractCapabilities::register_hooks();
 		PlansController::register_hooks();
 		ContractsController::register_hooks();
-		( new RenewalDispatcher() )->register_hooks();
+		( new DueDispatcher() )->register_hooks();
 
-		// Deferred boot work, each on the most specific moment it needs: the schema install
-		// reads options and runs dbDelta, so it waits for `init`; the recurring-action
-		// enqueue needs the `as_*` functions, so it waits for `action_scheduler_init` - the
-		// hook Action Scheduler fires once it is ready. Run immediately when a consumer
-		// boots the engine after a hook already fired.
+		// Deferred boot work, each on the moment it needs: the schema install reads options
+		// and runs dbDelta, so it waits for `init`; the recurring-scan check waits for
+		// `wp_loaded`, when Action Scheduler is up and consumers registering on `init` have
+		// registered their due handlers (one registered later schedules the scan itself).
+		// Run immediately when a consumer boots the engine after a hook already fired.
 		if ( did_action( 'init' ) ) {
 			SchemaInstaller::maybe_install();
 		} else {
 			add_action( 'init', array( SchemaInstaller::class, 'maybe_install' ) );
 		}
 
-		if ( did_action( 'action_scheduler_init' ) ) {
-			RenewalDispatcher::ensure_scheduled();
+		if ( did_action( 'wp_loaded' ) ) {
+			DueDispatcher::ensure_scheduled();
 		} else {
-			add_action( 'action_scheduler_init', array( RenewalDispatcher::class, 'ensure_scheduled' ) );
+			add_action( 'wp_loaded', array( DueDispatcher::class, 'ensure_scheduled' ) );
 		}
 	}
 }

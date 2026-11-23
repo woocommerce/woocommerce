@@ -126,12 +126,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	 */
 	private static array $initial_option_states = array();
 
-	/** @var bool Whether the WooPayments version override existed before the test. */
-	private bool $initial_wcpay_version_override_exists = false;
-
-	/** @var mixed WooPayments version override value before the test. */
-	private $initial_wcpay_version_override;
-
 	/**
 	 * Saves values of initial country and currency before running test suite.
 	 */
@@ -167,8 +161,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->initial_wcpay_version_override_exists = array_key_exists( 'WCPAY_VERSION_NUMBER', Constants::$set_constants );
-		$this->initial_wcpay_version_override        = Constants::$set_constants['WCPAY_VERSION_NUMBER'] ?? null;
 
 		$gateways                   = \WC_Payment_Gateways::instance();
 		$gateways->payment_gateways = array();
@@ -205,7 +197,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		);
 		$this->run_cleanup_step( fn() => wc_get_container()->reset_all_resolved(), $cleanup_errors );
 		$this->run_cleanup_step( fn() => $this->clear_rest_server(), $cleanup_errors );
-		$this->run_cleanup_step( fn() => $this->restore_wcpay_version_override(), $cleanup_errors );
 		$this->run_cleanup_step( fn() => parent::tearDown(), $cleanup_errors );
 		$this->run_cleanup_step( fn() => self::invalidate_test_option_caches(), $cleanup_errors );
 
@@ -225,17 +216,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			$callback();
 		} catch ( \Throwable $error ) {
 			$errors[] = $error;
-		}
-	}
-
-	/**
-	 * Restore only the Jetpack constant override owned by this fixture.
-	 */
-	private function restore_wcpay_version_override(): void {
-		if ( $this->initial_wcpay_version_override_exists ) {
-			Constants::set_constant( 'WCPAY_VERSION_NUMBER', $this->initial_wcpay_version_override );
-		} else {
-			Constants::clear_single_constant( 'WCPAY_VERSION_NUMBER' );
 		}
 	}
 
@@ -379,9 +359,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -427,9 +404,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		$this->assertCount( 0, $data['suggestions'] );
 		// But we do get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -467,7 +441,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
 		// We only have PSPs because there is no payment gateway enabled.
-		$this->assertCount( 4, $data['suggestions'] );
+		$this->assertCount( 5, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -478,9 +452,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Assert that the other suggestions are all PSPs.
 		$other_suggestions = $data['suggestions'];
 		$this->assertSame( array( PaymentsExtensionSuggestions::TYPE_PSP ), array_unique( array_column( $other_suggestions, '_type' ) ) );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -513,7 +484,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
 		// We get all the suggestions.
-		$this->assertCount( 8, $data['suggestions'] );
+		$this->assertCount( 9, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -683,7 +654,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
 		// We get all the suggestions.
-		$this->assertCount( 8, $data['suggestions'] );
+		$this->assertCount( 9, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -831,9 +802,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( '_priority', $suggestion_category, 'Suggestion category `_order` entry is missing' );
 		$this->assertArrayHasKey( 'title', $suggestion_category, 'Suggestion category `title` entry is missing' );
 		$this->assertArrayHasKey( 'description', $suggestion_category, 'Suggestion category `description` entry is missing' );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -881,8 +849,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
-		// We don't get BNPL suggestions since WooPayments is active (even if not enabled), so only 5 suggestions are returned.
-		$this->assertCount( 5, $data['suggestions'] );
+		// We don't get BNPL suggestions since WooPayments is active (even if not enabled), so only 6 suggestions are returned.
+		$this->assertCount( 6, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -1022,9 +990,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Assert that the PayPal gateway is returned as enabled.
 		$provider = $data['providers'][1];
 		$this->assertTrue( $provider['state']['enabled'] );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -1095,8 +1060,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
-		// We don't get BNPL suggestions since WooPayments is active, so only 5 suggestions are returned.
-		$this->assertCount( 5, $data['suggestions'] );
+		// We don't get BNPL suggestions since WooPayments is active, so only 6 suggestions are returned.
+		$this->assertCount( 6, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -1214,9 +1179,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Assert that the PayPal gateway is returned as enabled.
 		$provider = $data['providers'][1];
 		$this->assertTrue( $provider['state']['enabled'] );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -1264,8 +1226,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
-		// We get BNPL suggestions since WooPayments or Stripe are not active, so 7 suggestions are returned.
-		$this->assertCount( 7, $data['suggestions'] );
+		// We get BNPL suggestions since WooPayments or Stripe are not active, so 8 suggestions are returned.
+		$this->assertCount( 8, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -1348,9 +1310,52 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Assert that the PayPal gateway is returned as enabled.
 		$provider = $data['providers'][3];
 		$this->assertTrue( $provider['state']['enabled'] );
+	}
 
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
+	/**
+	 * @testdox Leaves the WPCOM authorization URL out of the WooPayments onboarding steps.
+	 */
+	public function test_get_payment_providers_leaves_out_woopayments_wpcom_authorization_url(): void {
+		// The store is registered with WPCOM, but no user has connected their account yet.
+		$this->mock_wpcom_connection_manager = $this->getMockBuilder( WPCOM_Connection_Manager::class )
+													->onlyMethods( array( 'is_connected', 'has_connected_owner', 'is_connection_owner' ) )
+													->getMock();
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
+		$this->mock_wpcom_connection_manager->method( 'has_connected_owner' )->willReturn( false );
+		$this->setup_legacy_proxy_mocks();
+		$this->reinitialize_services_and_controller();
+
+		$authorization_requested = false;
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_wpcom_connection_authorization' => function () use ( &$authorization_requested ) {
+						$authorization_requested = true;
+						return array(
+							'success' => true,
+							'errors'  => array(),
+							'url'     => 'https://wordpress.com/auth?secret=some_secret',
+						);
+					},
+				),
+			)
+		);
+		$this->mock_payment_gateways();
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
+		$request->set_param( 'location', 'US' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$providers  = array_column( $response->get_data()['providers'], null, 'id' );
+		$steps      = array_column( $providers['woocommerce_payments']['onboarding']['steps'], null, 'id' );
+		$wpcom_step = $steps[ WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION ];
+		$this->assertSame( WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED, $wpcom_step['status'] );
+		$this->assertArrayHasKey( 'start', $wpcom_step['actions'] );
+		$this->assertArrayNotHasKey( 'auth', $wpcom_step['actions'] );
+		$this->assertFalse( $authorization_requested, 'The providers list should not generate the authorization URL' );
+		$this->assertStringNotContainsString( 'some_secret', (string) wp_json_encode( $response->get_data() ) );
 	}
 
 	/**

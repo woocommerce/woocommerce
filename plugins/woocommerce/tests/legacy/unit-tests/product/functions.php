@@ -1148,9 +1148,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_min_max_price_meta_query()
-	 *
-	 * @expectedDeprecated wc_get_min_max_price_meta_query()
+	 * @testdox wc_get_min_max_price_meta_query() builds a _price meta query without a deprecation notice.
 	 */
 	public function test_wc_get_min_max_price_meta_query() {
 		$meta_query = wc_get_min_max_price_meta_query(
@@ -1266,16 +1264,19 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 3.6.0
 	 */
 	public function test_wc_get_product_stock_status_options() {
-		$status_options = (array) apply_filters(
-			'woocommerce_product_stock_status_options',
-			array(
-				ProductStockStatus::IN_STOCK     => 'In stock',
-				ProductStockStatus::OUT_OF_STOCK => 'Out of stock',
-				ProductStockStatus::ON_BACKORDER => 'On backorder',
-			)
+		$status_options = array(
+			ProductStockStatus::IN_STOCK     => 'In stock',
+			ProductStockStatus::OUT_OF_STOCK => 'Out of stock',
+			ProductStockStatus::ON_BACKORDER => 'On backorder',
 		);
+		$this->assertSame( $status_options, wc_get_product_stock_status_options() );
 
-		$this->assertEquals( $status_options, wc_get_product_stock_status_options() );
+		add_filter( 'woocommerce_product_stock_status_options', '__return_null' );
+		$this->assertSame( $status_options, wc_get_product_stock_status_options() );
+		remove_filter( 'woocommerce_product_stock_status_options', '__return_null' );
+
+		add_filter( 'woocommerce_product_stock_status_options', '__return_empty_array' );
+		$this->assertSame( array(), wc_get_product_stock_status_options() );
 	}
 
 	/**

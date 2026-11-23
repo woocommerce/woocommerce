@@ -72,7 +72,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 			return $this->post_type;
 		}
 
-		wc_doing_it_wrong( $key, __( 'Product properties should not be accessed directly.', 'woocommerce' ), '3.0' );
+		wc_doing_it_wrong( $key, 'Product properties should not be accessed directly.', '3.0' );
 
 		switch ( $key ) {
 			case 'id' :

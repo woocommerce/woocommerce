@@ -41,7 +41,7 @@ describe( 'AnalyticsError', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'refreshes the page when Reload Page button is clicked', () => {
+	it( 'refreshes the page when Reload Page button is clicked', async () => {
 		const reloadMock = jest.fn();
 		Object.defineProperty( window.location, 'reload', {
 			configurable: true,
@@ -50,7 +50,7 @@ describe( 'AnalyticsError', () => {
 
 		render( <AnalyticsError /> );
 
-		userEvent.click( screen.getByText( 'Reload' ) );
+		await userEvent.click( screen.getByText( 'Reload' ) );
 
 		expect( reloadMock ).toHaveBeenCalled();
 	} );

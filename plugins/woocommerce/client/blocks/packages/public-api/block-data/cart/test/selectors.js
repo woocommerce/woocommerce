@@ -10,6 +10,7 @@ import {
 	getCouponBeingApplied,
 	isRemovingCoupon,
 	getCouponBeingRemoved,
+	isShippingRatesStale,
 } from '../selectors';
 
 const state = {
@@ -201,4 +202,34 @@ describe( 'getCouponBeingRemoved', () => {
 			state.metaData.removingCoupon
 		);
 	} );
+} );
+
+describe( 'isShippingRatesStale', () => {
+	const withMeta = ( metaData ) => ( {
+		...state,
+		metaData: { ...state.metaData, ...metaData },
+	} );
+
+	it.each( [
+		[ false, false, false ],
+		[ true, false, true ],
+		[ false, true, true ],
+		[ true, true, true ],
+	] )(
+		'is %s queued and %s updating -> %s',
+		(
+			isShippingRatesUpdateQueued,
+			updatingAddressFieldsForShippingRates,
+			expected
+		) => {
+			expect(
+				isShippingRatesStale(
+					withMeta( {
+						isShippingRatesUpdateQueued,
+						updatingAddressFieldsForShippingRates,
+					} )
+				)
+			).toBe( expected );
+		}
+	);
 } );

@@ -7,6 +7,12 @@ declare(strict_types=1);
  * Author: WooCommerce
  * @package woocommerce-blocks-test-additional-checkout-fields
  */
+
+// Only requests from specs that enable this plugin send the cookie.
+if ( ! isset( $_COOKIE['woocommerce-blocks-test-additional-checkout-fields'] ) ) {
+	return;
+}
+
 class Additional_Checkout_Fields_Test_Helper {
 	/**
 	 * Constructor.

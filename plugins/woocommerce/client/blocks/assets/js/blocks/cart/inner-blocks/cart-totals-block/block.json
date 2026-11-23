@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/cart-totals-block",
-	"version": "1.0.0",
 	"title": "Cart Totals",
 	"description": "Column containing the cart totals.",
 	"category": "woocommerce",

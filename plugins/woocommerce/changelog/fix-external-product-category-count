@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Refresh category, tag, and brand counts after an out-of-stock product visibility term is removed.

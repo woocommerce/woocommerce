@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop tooltip deprecation warnings in the browser console on Analytics report summaries and select menus.

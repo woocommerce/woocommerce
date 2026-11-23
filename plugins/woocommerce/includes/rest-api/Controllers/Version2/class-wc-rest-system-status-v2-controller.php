@@ -15,8 +15,10 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_DataSynchronizer;
 use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Enums\{ DefaultCustomerAddress, TaxBasedOn, TaxDisplayMode };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
  * System status controller class.
@@ -52,6 +54,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		add_action( 'switch_theme', array( __CLASS__, 'clean_theme_cache' ) );
 		add_action( 'activate_plugin', array( __CLASS__, 'clean_plugin_cache' ) );
 		add_action( 'deactivate_plugin', array( __CLASS__, 'clean_plugin_cache' ) );
+		add_action( 'deleted_plugin', array( __CLASS__, 'clean_plugin_cache' ) );
 		add_action(
 			'upgrader_process_complete',
 			function ( $upgrader, $extra ) {
@@ -165,6 +168,51 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
+						'action_scheduler'          => array(
+							'description' => __( 'The Action Scheduler copy that is loaded. It can be older than the newest copy installed.', 'woocommerce' ),
+							'type'        => 'object',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'loaded_version'     => array(
+									'description' => __( 'Version of the loaded copy, or null when none is loaded.', 'woocommerce' ),
+									'type'        => array( 'string', 'null' ),
+									'context'     => array( 'view' ),
+									'readonly'    => true,
+								),
+								'registered_version' => array(
+									'description' => __( 'Newest version installed, which may differ from the loaded one.', 'woocommerce' ),
+									'type'        => array( 'string', 'null' ),
+									'context'     => array( 'view' ),
+									'readonly'    => true,
+								),
+								'source_type'        => array(
+									'description' => __( 'What loads the copy: woocommerce, plugin, mu-plugin, theme or other.', 'woocommerce' ),
+									'type'        => array( 'string', 'null' ),
+									'enum'        => array( 'woocommerce', 'plugin', 'mu-plugin', 'theme', 'other', null ),
+									'context'     => array( 'view' ),
+									'readonly'    => true,
+								),
+								'source_name'        => array(
+									'description' => __( 'Name of the plugin or theme that loads the copy. Empty when unknown.', 'woocommerce' ),
+									'type'        => array( 'string', 'null' ),
+									'context'     => array( 'view' ),
+									'readonly'    => true,
+								),
+								'source_path'        => array(
+									'description' => __( 'Directory of the loaded copy.', 'woocommerce' ),
+									'type'        => array( 'string', 'null' ),
+									'context'     => array( 'view' ),
+									'readonly'    => true,
+								),
+								'is_risky'           => array(
+									'description' => __( 'Does the loaded copy lack features WooCommerce relies on?', 'woocommerce' ),
+									'type'        => 'boolean',
+									'context'     => array( 'view' ),
+									'readonly'    => true,
+								),
+							),
+						),
 						'log_directory'             => array(
 							'description' => __( 'Log directory.', 'woocommerce' ),
 							'type'        => 'string',
@@ -190,7 +238,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'readonly'    => true,
 						),
 						'wp_memory_limit'           => array(
-							'description' => __( 'WordPress memory limit.', 'woocommerce' ),
+							'description' => __( 'WordPress memory limit in bytes, or at least 32G if there is no memory limit.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -628,6 +676,105 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
+						'taxes_enabled'                  => array(
+							'description' => __( 'Are tax rates and calculations enabled?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'prices_include_tax'             => array(
+							'description' => __( 'Are prices treated as including tax?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'tax_based_on'                   => array(
+							'description' => __( 'Address type used to calculate tax.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'shipping_tax_class'             => array(
+							'description' => __( 'Tax class used for shipping.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'tax_round_at_subtotal'          => array(
+							'description' => __( 'Is tax rounded at subtotal level?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'additional_tax_classes'         => array(
+							'description' => __( 'Additional tax classes.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+							'items'       => array(
+								'type' => 'string',
+							),
+						),
+						'tax_display_shop'               => array(
+							'description' => __( 'How prices are displayed in the shop.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'tax_display_cart'               => array(
+							'description' => __( 'How prices are displayed during cart and checkout.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'price_display_suffix'           => array(
+							'description' => __( 'Price display suffix.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'tax_total_display'              => array(
+							'description' => __( 'How tax totals are displayed.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'tax_rate_count'                 => array(
+							'description' => __( 'Number of configured tax rates.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'store_base_country'             => array(
+							'description' => __( 'Store base country.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'store_base_state'               => array(
+							'description' => __( 'Store base state.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'store_base_postcode'            => array(
+							'description' => __( 'Store base postcode.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'store_base_city'                => array(
+							'description' => __( 'Store base city.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'default_customer_location'      => array(
+							'description' => __( 'Default customer location.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
 						'taxonomies'                     => array(
 							'description' => __( 'Taxonomy terms for product/order statuses.', 'woocommerce' ),
 							'type'        => 'array',
@@ -939,9 +1086,11 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		// WP memory limit.
-		$wp_memory_limit = wc_let_to_num( WP_MEMORY_LIMIT );
+		$wp_memory_limit = wp_convert_hr_to_bytes( WP_MEMORY_LIMIT );
 		if ( function_exists( 'memory_get_usage' ) ) {
-			$wp_memory_limit = max( $wp_memory_limit, wc_let_to_num( @ini_get( 'memory_limit' ) ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			$php_memory_limit = @wc_get_container()->get( LegacyProxy::class )->call_function( 'ini_get', 'memory_limit' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			// Use 32G for no limit (-1) so numeric comparisons keep working.
+			$wp_memory_limit = max( $wp_memory_limit, wp_convert_hr_to_bytes( '-1' === $php_memory_limit ? '32G' : $php_memory_limit ) );
 		}
 
 		// Test POST requests.
@@ -1001,12 +1150,25 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		$database_version = wc_get_server_database_version();
 		$log_directory    = LoggingUtil::get_log_directory( false );
 
+		// The copy answering calls can be older than the newest registered one, so report both.
+		$action_scheduler_path   = ActionSchedulerUtil::get_loaded_path();
+		$action_scheduler_source = null === $action_scheduler_path ? null : ActionSchedulerUtil::get_loaded_source();
+		$action_scheduler        = array(
+			'loaded_version'     => ActionSchedulerUtil::get_loaded_version(),
+			'registered_version' => ActionSchedulerUtil::get_highest_registered_version(),
+			'source_type'        => $action_scheduler_source['type'] ?? null,
+			'source_name'        => $action_scheduler_source['name'] ?? null,
+			'source_path'        => $action_scheduler_path,
+			'is_risky'           => ActionSchedulerUtil::is_risky(),
+		);
+
 		// Return all environment info. Described by JSON Schema.
 		return array(
 			'home_url'                  => get_option( 'home' ),
 			'site_url'                  => get_option( 'siteurl' ),
 			'store_id'                  => get_option( \WC_Install::STORE_ID_OPTION, null ),
 			'version'                   => WC()->version,
+			'action_scheduler'          => $action_scheduler,
 			'log_directory'             => $log_directory,
 			'log_directory_writable'    => wp_is_writable( $log_directory ),
 			'wp_version'                => get_bloginfo( 'version' ),
@@ -1343,65 +1505,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				);
 			}
 
-			/**
-			 * Scan the theme directory for all WC templates to see if our theme
-			 * overrides any of them.
-			 */
-			$override_files     = array();
-			$outdated_templates = false;
-			$scan_files         = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates/' );
-
-			// Include *-product_<cat|tag> templates for backwards compatibility.
-			$scan_files[] = 'content-product_cat.php';
-			$scan_files[] = 'taxonomy-product_cat.php';
-			$scan_files[] = 'taxonomy-product_tag.php';
-
-			$wc_templates_dir = WC()->plugin_path() . '/templates/';
-
-			foreach ( $scan_files as $file ) {
-				$located = wc_locate_template( $file, WC()->template_path(), $wc_templates_dir );
-
-				/**
-				 * Allow 3rd party plugins to filter the template file location.
-				 *
-				 * @param string $located       The located template path.
-				 * @param string $file          The template file name.
-				 * @param array  $args          Template arguments.
-				 * @param string $template_path The template path.
-				 * @param string $default_path  The default path.
-				 *
-				 * @since 2.1.0
-				 */
-				$located = apply_filters( 'wc_get_template', $located, $file, array(), WC()->template_path(), $wc_templates_dir );
-
-				// Check if the template is overridden (located outside WC core templates dir).
-				$override_file = false;
-				if ( 0 !== strpos( $located, $wc_templates_dir ) && file_exists( $located ) ) {
-					$override_file = $located;
-				}
-
-				if ( ! empty( $override_file ) ) {
-					$core_file = $file;
-
-					// Update *-product_<cat|tag> template name before searching in core.
-					if ( false !== strpos( $core_file, '-product_cat' ) || false !== strpos( $core_file, '-product_tag' ) ) {
-						$core_file = str_replace( '_', '-', $core_file );
-					}
-
-					$core_version     = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $core_file );
-					$override_version = WC_Admin_Status::get_file_version( $override_file );
-					if ( $core_version && '' !== $override_version && version_compare( $override_version, $core_version, '<' ) ) {
-						if ( ! $outdated_templates ) {
-							$outdated_templates = true;
-						}
-					}
-					$override_files[] = array(
-						'file'         => str_replace( ABSPATH, '', $override_file ),
-						'version'      => $override_version,
-						'core_version' => $core_version,
-					);
-				}
-			}
+			$templates = $this->get_template_overrides();
 
 			$active_theme_info = array(
 				'name'                    => $active_theme->name,
@@ -1412,8 +1516,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				'is_block_theme'          => wp_is_block_theme(),
 				'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),
 				'has_woocommerce_file'    => ( file_exists( get_stylesheet_directory() . '/woocommerce.php' ) || file_exists( get_template_directory() . '/woocommerce.php' ) ),
-				'has_outdated_templates'  => $outdated_templates,
-				'overrides'               => $override_files,
+				'has_outdated_templates'  => $templates['has_outdated_templates'],
+				'overrides'               => $templates['overrides'],
 			);
 
 			$theme_info = array_merge( $active_theme_info, $parent_theme_info );
@@ -1421,6 +1525,79 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		return $theme_info;
+	}
+
+	/**
+	 * Scan the template files WooCommerce would load, after the template filters, for theme overrides.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return array{overrides: array<int, array<string, string>>, has_outdated_templates: bool}
+	 */
+	public function get_template_overrides(): array {
+		$override_files     = array();
+		$outdated_templates = false;
+		$scan_files         = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates/' );
+
+		// Include *-product_<cat|tag> templates for backwards compatibility.
+		$scan_files[] = 'content-product_cat.php';
+		$scan_files[] = 'taxonomy-product_cat.php';
+		$scan_files[] = 'taxonomy-product_tag.php';
+
+		$wc_templates_dir = WC()->plugin_path() . '/templates/';
+
+		foreach ( $scan_files as $file ) {
+			$located = wc_locate_template( $file, WC()->template_path(), $wc_templates_dir );
+
+			/**
+			 * Allow 3rd party plugins to filter the template file location.
+			 *
+			 * @param string $located       The located template path.
+			 * @param string $file          The template file name.
+			 * @param array  $args          Template arguments.
+			 * @param string $template_path The template path.
+			 * @param string $default_path  The default path.
+			 *
+			 * @since 2.1.0
+			 */
+			$located = apply_filters( 'wc_get_template', $located, $file, array(), WC()->template_path(), $wc_templates_dir );
+			if ( ! is_string( $located ) || '' === $located ) {
+				continue;
+			}
+
+			// Check if the template is overridden (located outside WC core templates dir).
+			$override_file = false;
+			if ( 0 !== strpos( $located, $wc_templates_dir ) && file_exists( $located ) ) {
+				$override_file = $located;
+			}
+
+			if ( ! empty( $override_file ) ) {
+				$core_file = $file;
+
+				// Update *-product_<cat|tag> template name before searching in core.
+				if ( false !== strpos( $core_file, '-product_cat' ) || false !== strpos( $core_file, '-product_tag' ) ) {
+					$core_file = str_replace( '_', '-', $core_file );
+				}
+
+				$core_version     = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $core_file );
+				$override_version = WC_Admin_Status::get_file_version( $override_file );
+				if ( $core_version && '' !== $override_version && version_compare( $override_version, $core_version, '<' ) ) {
+					if ( ! $outdated_templates ) {
+						$outdated_templates = true;
+					}
+				}
+				$override_files[] = array(
+					'file'         => str_replace( ABSPATH, '', $override_file ),
+					'version'      => $override_version,
+					'core_version' => $core_version,
+				);
+			}
+		}
+
+		return array(
+			'overrides'              => $override_files,
+			'has_outdated_templates' => $outdated_templates,
+		);
 	}
 
 	/**
@@ -1446,6 +1623,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_settings() {
+		global $wpdb;
+
 		// Get a list of terms used for product/order taxonomies.
 		$term_response = array();
 		$terms         = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
@@ -1468,6 +1647,9 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			)
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$tax_rate_count = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rates" );
+
 		// Return array of useful settings for debugging.
 		return array(
 			'api_enabled'                    => WC()->legacy_rest_api_is_available(),
@@ -1486,6 +1668,22 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				),
 				true
 			),
+			'taxes_enabled'                  => wc_tax_enabled(),
+			'prices_include_tax'             => wc_prices_include_tax(),
+			'tax_based_on'                   => get_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING ),
+			'shipping_tax_class'             => get_option( 'woocommerce_shipping_tax_class', 'inherit' ),
+			'tax_round_at_subtotal'          => 'yes' === get_option( 'woocommerce_tax_round_at_subtotal', 'no' ),
+			'additional_tax_classes'         => WC_Tax::get_tax_classes(),
+			'tax_display_shop'               => get_option( 'woocommerce_tax_display_shop', TaxDisplayMode::EXCLUSIVE ),
+			'tax_display_cart'               => get_option( 'woocommerce_tax_display_cart', TaxDisplayMode::EXCLUSIVE ),
+			'price_display_suffix'           => get_option( 'woocommerce_price_display_suffix', '' ),
+			'tax_total_display'              => get_option( 'woocommerce_tax_total_display', 'single' ),
+			'tax_rate_count'                 => absint( $tax_rate_count ),
+			'store_base_country'             => WC()->countries->get_base_country(),
+			'store_base_state'               => WC()->countries->get_base_state(),
+			'store_base_postcode'            => WC()->countries->get_base_postcode(),
+			'store_base_city'                => WC()->countries->get_base_city(),
+			'default_customer_location'      => get_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE ),
 			'taxonomies'                     => $term_response,
 			'product_visibility_terms'       => $product_visibility_terms,
 			'woocommerce_com_connected'      => ConnectionHelper::is_connected() ? 'yes' : 'no',

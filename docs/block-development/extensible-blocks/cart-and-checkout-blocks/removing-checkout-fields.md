@@ -131,23 +131,25 @@ As with the above, this is not something we recommend unless you sell to a very 
 
 ```php
 add_filter('woocommerce_get_country_locale', function( $locale ) {
-	foreach ( $locale as $key => $value ) {
-		$locale[ $key ]['address_1'] = [
+	$countries = array_keys( WC()->countries->get_allowed_countries() + WC()->countries->get_shipping_countries() );
+
+	foreach ( $countries as $country ) {
+		$locale[ $country ]['address_1'] = [
 			'required' => false,
 			'hidden'   => true,
 		];
 
-		$locale[ $key ]['postcode'] = [
+		$locale[ $country ]['postcode'] = [
 			'required' => false,
 			'hidden'   => true,
 		];
 
-		$locale[ $key ]['city'] = [
+		$locale[ $country ]['city'] = [
 			'required' => false,
 			'hidden'   => true,
 		];
 
-		$locale[ $key ]['state'] = [
+		$locale[ $country ]['state'] = [
 			'required' => false,
 			'hidden'   => true,
 		];
@@ -157,7 +159,7 @@ add_filter('woocommerce_get_country_locale', function( $locale ) {
 });
 ```
 
-The above code would loop over all counties you sell and disable the fields there.
+The above code loops over all countries you sell or ship to and disables the fields there. Looping over `$locale` instead would skip countries that have no entry in it by default, so those countries would keep their fields.
 
 ## Limiting changes to virtual carts only
 

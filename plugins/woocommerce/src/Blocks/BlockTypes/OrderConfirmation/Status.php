@@ -2,12 +2,14 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * Status class.
  */
 class Status extends AbstractOrderConfirmationBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -78,10 +80,10 @@ class Status extends AbstractOrderConfirmationBlock {
 					/**
 					 * Filter the title shown after a checkout is complete.
 					 *
-					 * @since 9.6.0
+					 * @since 9.7.0
 					 *
-					 * @param string         $title The title.
-					 * @param WC_Order|false $order The order created during checkout, or false if order data is not available.
+					 * @param string    $title The title.
+					 * @param \WC_Order $order The order created during checkout.
 					 */
 					apply_filters(
 						'woocommerce_thankyou_order_received_title',
@@ -246,7 +248,7 @@ class Status extends AbstractOrderConfirmationBlock {
 		$my_account_page        = wc_get_page_permalink( 'myaccount' );
 
 		$content  = '<p>';
-		$content .= esc_html__( 'Great news! Your order has been received, and a confirmation will be sent to your email address.', 'woocommerce' );
+		$content .= esc_html__( 'A confirmation will be sent to your email address.', 'woocommerce' );
 		$content .= $my_account_page ? ' ' . sprintf(
 			/* translators: 1: opening a link tag 2: closing a link tag */
 			esc_html__( 'Have an account with us? %1$sLog in here%2$s to view your order.', 'woocommerce' ),

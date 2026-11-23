@@ -388,6 +388,36 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 	}
 
 	/**
+	 * Get design-aligned overrides for the shipping method restriction fields
+	 * shared by the offline gateways (COD, BACS and Cheque).
+	 *
+	 * The gateway's own multiselect options are only loaded on the classic settings
+	 * page, so the options are loaded here for the REST API.
+	 *
+	 * @param WC_Payment_Gateway $gateway Gateway instance.
+	 * @return array Map of field_id => override, to merge into the core field overrides.
+	 */
+	protected function get_shipping_method_restriction_field_overrides( WC_Payment_Gateway $gateway ): array {
+		$method_title = $gateway->get_method_title();
+
+		return array(
+			'enable_for_methods' => array(
+				'label'   => __( 'Available for shipping methods', 'woocommerce' ),
+				'type'    => 'multiselect',
+				/* translators: %s: payment method title. */
+				'desc'    => sprintf( __( 'Choose which shipping methods support %s.', 'woocommerce' ), $method_title ),
+				'options' => method_exists( $gateway, 'get_shipping_method_options' ) ? $gateway->get_shipping_method_options() : array(),
+			),
+			'enable_for_virtual' => array(
+				'label' => __( 'Accept for virtual orders', 'woocommerce' ),
+				'type'  => 'checkbox',
+				/* translators: %s: payment method title. */
+				'desc'  => sprintf( __( 'Accept %s if the order is virtual', 'woocommerce' ), $method_title ),
+			),
+		);
+	}
+
+	/**
 	 * Build fields array from gateway form_fields with design-aligned overrides.
 	 *
 	 * Iterates the gateway's form_fields to build the schema fields list.

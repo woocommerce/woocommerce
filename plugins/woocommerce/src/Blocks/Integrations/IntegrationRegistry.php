@@ -32,7 +32,7 @@ class IntegrationRegistry {
 		}
 
 		if ( empty( $this->registry_identifier ) ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Integration registry requires an identifier.', 'woocommerce' ), '4.6.0' );
+			_doing_it_wrong( __METHOD__, esc_html( 'Integration registry requires an identifier.' ), '4.6.0' );
 			return false;
 		}
 
@@ -45,7 +45,7 @@ class IntegrationRegistry {
 		 *
 		 * @since 4.6.0
 		 *
-		 * @param IntegrationRegistry $this Instance of the IntegrationRegistry class which exposes the IntegrationRegistry::register() method.
+		 * @param IntegrationRegistry $registry Instance of the IntegrationRegistry class which exposes the IntegrationRegistry::register() method.
 		 */
 		do_action( 'woocommerce_blocks_' . $this->registry_identifier . '_registration', $this );
 
@@ -65,8 +65,7 @@ class IntegrationRegistry {
 		$name = $integration->get_name();
 
 		if ( $this->is_registered( $name ) ) {
-			/* translators: %s: Integration name. */
-			_doing_it_wrong( __METHOD__, esc_html( sprintf( __( '"%s" is already registered.', 'woocommerce' ), $name ) ), '4.6.0' );
+			_doing_it_wrong( __METHOD__, esc_html( sprintf( '"%s" is already registered.', $name ) ), '4.6.0' );
 			return false;
 		}
 
@@ -96,8 +95,7 @@ class IntegrationRegistry {
 		}
 
 		if ( ! $this->is_registered( $name ) ) {
-			/* translators: %s: Integration name. */
-			_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Integration "%s" is not registered.', 'woocommerce' ), $name ) ), '4.6.0' );
+			_doing_it_wrong( __METHOD__, esc_html( sprintf( 'Integration "%s" is not registered.', $name ) ), '4.6.0' );
 			return false;
 		}
 
@@ -131,17 +129,12 @@ class IntegrationRegistry {
 	 * @return string[]
 	 */
 	public function get_all_registered_editor_script_handles() {
-		$script_handles          = [];
-		$registered_integrations = $this->get_all_registered();
-
-		foreach ( $registered_integrations as $registered_integration ) {
-			$script_handles = array_merge(
-				$script_handles,
-				$registered_integration->get_editor_script_handles()
-			);
+		$script_handles = array( array() );
+		foreach ( $this->get_all_registered() as $registered_integration ) {
+			$script_handles[] = $registered_integration->get_editor_script_handles();
 		}
 
-		return array_unique( array_filter( $script_handles ) );
+		return array_unique( array_filter( array_merge( ...$script_handles ) ) );
 	}
 
 	/**
@@ -150,17 +143,12 @@ class IntegrationRegistry {
 	 * @return string[]
 	 */
 	public function get_all_registered_script_handles() {
-		$script_handles          = [];
-		$registered_integrations = $this->get_all_registered();
-
-		foreach ( $registered_integrations as $registered_integration ) {
-			$script_handles = array_merge(
-				$script_handles,
-				$registered_integration->get_script_handles()
-			);
+		$script_handles = array( array() );
+		foreach ( $this->get_all_registered() as $registered_integration ) {
+			$script_handles[] = $registered_integration->get_script_handles();
 		}
 
-		return array_unique( array_filter( $script_handles ) );
+		return array_unique( array_filter( array_merge( ...$script_handles ) ) );
 	}
 
 	/**
@@ -169,10 +157,8 @@ class IntegrationRegistry {
 	 * @return array
 	 */
 	public function get_all_registered_script_data() {
-		$script_data             = [];
-		$registered_integrations = $this->get_all_registered();
-
-		foreach ( $registered_integrations as $registered_integration ) {
+		$script_data = array();
+		foreach ( $this->get_all_registered() as $registered_integration ) {
 			$script_data[ $registered_integration->get_name() . '_data' ] = $registered_integration->get_script_data();
 		}
 

@@ -2,6 +2,17 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0](https://www.npmjs.com/package/@woocommerce/create-woo-extension/v/2.1.0) - 2026-10-20 
+
+-   Patch - Fix dependency installation for generated extensions by matching WooCommerce's React peer requirements. [#70014]
+-   Patch - Fix ESLint errors in the default scaffolded extension: allow the extension's own text domain, skip `no-require-imports` on CommonJS config files, declare `@wordpress/components`/`@wordpress/element`, and fix the example page's undefined `setInlineSelect` handler. [#66788]
+-   Patch - Fix JavaScript linting in generated extension projects. [#70023]
+-   Patch - Pin wp-prettier in scaffolded extensions so `prettier/prettier` stops reporting WordPress code style as errors. [#66762]
+-   Patch - Pin `i18n-calypso` to 8.1.0 in scaffolded extensions so `npm install` no longer fails on an unparseable Yarn `patch:` dependency spec. [#66782]
+-   Minor - Scaffold ESLint Flat Config (`eslint.config.mjs`) instead of `.eslintrc.js`, which recent ESLint versions no longer read. [#66753]
+-   Patch - Removed stray wireit devDependency. [#65210]
+-   Patch - Update PHP development dependencies to versions that resolve reported security advisories. [#67596]
+
 ## [2.0.1](https://www.npmjs.com/package/@woocommerce/create-woo-extension/v/2.0.1) - 2025-12-12 
 
 -   Patch - Replace deprecated "templatesPath" with "blockTemplatesPath" and "pluginTemplatesPath" properties. [#62417]
@@ -20,7 +31,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Bump node version. [#45148]
 -   Minor - Monorepo: bump pnpm version to 9.15.0 [#54189]
 -   Minor - Fix typos in README.md files [#48569]
--   **Breaking Change:**  Adds variants for multiple extension scaffolds, templatesPath moved to variants/default subdirectory, new variants API structure introduced, postinstall script modified, and @wordpress/scripts version unpinned [#62297]
+-   Major [ **BREAKING CHANGE** ] - Adds variants for multiple extension scaffolds, templatesPath moved to variants/default subdirectory, new variants API structure introduced, postinstall script modified, and @wordpress/scripts version unpinned [#62297]
 
 ## [1.1.0](https://www.npmjs.com/package/@woocommerce/create-woo-extension/v/1.1.0) - 2024-01-31 
 

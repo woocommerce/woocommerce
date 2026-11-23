@@ -199,7 +199,7 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 		{
 			a: (
 				// Suppress the warning as this <a> will be interpolated into the string with content.
-				// eslint-disable-next-line jsx-a11y/anchor-has-content
+
 				<ExternalLink href="https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/" />
 			),
 		}

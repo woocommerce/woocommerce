@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error when a plugin renders the checkout login or coupon form outside a frontend request, such as during cron.

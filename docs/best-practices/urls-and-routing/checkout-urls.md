@@ -5,7 +5,7 @@ sidebar_label: Checkout URLs
 
 # Shareable Checkout URLs
 
-Custom checkout links automatically populate the cart with specific products and redirect customers straight to checkout with a unique session id. 
+Custom checkout links automatically populate the cart with specific products and redirect customers straight to checkout.
 
 The custom checkout link path is `/checkout-link/` and is not customizable.
 
@@ -13,11 +13,49 @@ The custom checkout link path is `/checkout-link/` and is not customizable.
 
 ### Products
 
+The `products` parameter accepts a comma-separated list of products. Each product uses the following positional format:
+
 ```plaintext
-products=123:2,456:1
+id-or-sku:quantity:variation-data:cart-item-data
 ```
 
-A comma-separated list of product IDs and quantities. For example, `123:2,456:1`. This feature supports simple products with no additional options. Individual variations can also be added to cart by using the correct variation ID.
+The quantity, variation data, and cart item data are optional. The default quantity is `1`. Keep an empty field between colons when omitting a field that comes before one you want to provide.
+
+The product identifier can be:
+
+- A product or variation ID, such as `123`.
+- A nonnumeric SKU, such as `BLUE-SHIRT`.
+- A numeric SKU prefixed with `sku=`, such as `sku=999999`. Without the prefix, a numeric identifier is treated as a product ID.
+
+Variation and cart item data use `key=value` pairs. Separate multiple pairs in the same field with semicolons. Variation data selects a variation, while cart item data passes additional values consumed by extensions or custom product types. The accepted cart item data depends on the extension handling the product.
+
+Cart item data in a checkout link comes from the shopper, not a trusted extension. Treat it as untrusted input, the same as any other external data.
+
+:::note
+For products sold individually, cart item data is dropped by default: since the shopper is in charge of this input, letting it vary would let a checkout link add more than one unit. An extension can restore it for a specific product with the `woocommerce_checkout_link_sold_individually_cart_item_data` filter, and restored data then behaves like any other item data. To keep both the data and the limit, add a check to the `woocommerce_add_cart_item_data` filter (it runs on every add to cart) that rejects the add if the cart already has a line for that product.
+:::
+
+For example:
+
+```plaintext
+products=123
+products=123:2
+products=BLUE-SHIRT:2
+products=sku=999999:2
+products=123:1:color=black;size=medium
+products=123:1::nyp=120
+products=123:2:color=black;size=medium:nyp=120
+```
+
+The last three examples add variation data, cart item data, or both. The empty variation field in `123:1::nyp=120` is required so that `nyp=120` is treated as cart item data.
+
+Commas separate products, colons separate product fields, and semicolons separate data pairs. Prefix one of these delimiters with `~` when it is part of an SKU or data value rather than a separator. For example, the SKU `ABC,123:BLUE` is represented as follows:
+
+```plaintext
+products=ABC~,123~:BLUE:1
+```
+
+Existing links containing only product IDs and quantities continue to work.
 
 ### Coupon
 
@@ -35,11 +73,13 @@ https://yourstore.com/checkout-link/?products=123:2,456:1&coupon=SPRING10
 
 In this link:
 
-- Product ID `123` will be added with quantity `2`
-- Product ID `456` with quantity `1`
-- The coupon code `SPRING10` will be applied
-- The customer is taken directly to the checkout page
+- Product ID `123` will be added with quantity `2`.
+- Product ID `456` will be added with quantity `1`.
+- The coupon code `SPRING10` will be applied.
+- The customer will be taken directly to the checkout page.
 
 ## Sessions
 
-Once the user is redirected to the checkout page, the cart is populated with the products and coupon code. The final URL includes a `session` parameter storing the ID of the session. Future changes to the checkout will be persisted in the session, enabling persistent and shareable carts.
+Once the user is redirected to the checkout page, the cart is populated with the products and coupon code. For guests, the final URL includes a `session` parameter so the cart is kept if they open the page in another browser, for example when leaving an app's built-in browser. The cart is copied without the shopper's address or contact details.
+
+To share a cart with other people, share the `/checkout-link/` URL. Each person who opens it gets their own cart with the same products and coupon.

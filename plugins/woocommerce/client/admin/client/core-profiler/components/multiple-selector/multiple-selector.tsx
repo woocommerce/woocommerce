@@ -41,6 +41,7 @@ export const MultipleSelector = ( {
 			getFilteredItems={ ( allItems ) => allItems }
 			selected={ selectedOptions }
 			inputProps={ {
+				readOnly: true,
 				'aria-readonly': true,
 				'aria-label': __(
 					'Use up and down arrow keys to navigate',
@@ -93,7 +94,7 @@ export const MultipleSelector = ( {
 					? selectedOptions.filter(
 							( existingItem ) =>
 								existingItem.value !== item.value
-					  )
+						)
 					: [ ...selectedOptions, item ];
 				onSelect( updatedPlatforms );
 			} }

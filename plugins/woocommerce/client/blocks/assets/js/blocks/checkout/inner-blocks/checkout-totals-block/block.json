@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-totals-block",
-	"version": "1.0.0",
 	"title": "Checkout Totals",
 	"description": "Column containing the checkout totals.",
 	"category": "woocommerce",

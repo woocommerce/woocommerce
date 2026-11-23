@@ -13,9 +13,9 @@ describe( 'getValidityMessageForInput', () => {
 	it( 'Returns nothing if the input is valid', async () => {
 		render( <input type="text" data-testid="custom-input" /> );
 
-		const textInputElement = ( await screen.getByTestId(
+		const textInputElement = screen.getByTestId(
 			'custom-input'
-		) ) as HTMLInputElement;
+		) as HTMLInputElement;
 
 		const validityMessage = getValidityMessageForInput(
 			'Test',
@@ -26,9 +26,9 @@ describe( 'getValidityMessageForInput', () => {
 	it( 'Returns error message if a required input is empty', async () => {
 		render( <input type="text" required data-testid="custom-input" /> );
 
-		const textInputElement = ( await screen.getByTestId(
+		const textInputElement = screen.getByTestId(
 			'custom-input'
-		) ) as HTMLInputElement;
+		) as HTMLInputElement;
 
 		const validityMessage = getValidityMessageForInput(
 			'Test',
@@ -49,9 +49,9 @@ describe( 'getValidityMessageForInput', () => {
 			/>
 		);
 
-		const textInputElement = ( await screen.getByTestId(
+		const textInputElement = screen.getByTestId(
 			'custom-input'
-		) ) as HTMLInputElement;
+		) as HTMLInputElement;
 
 		await act( async () => {
 			await userEvent.type( textInputElement, 'Invalid Value' );

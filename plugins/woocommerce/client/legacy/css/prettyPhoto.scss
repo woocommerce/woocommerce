@@ -7,9 +7,9 @@
 /**
  * Imports
  */
-@import 'mixins';
-@import 'variables';
-@import 'fonts';
+@import "mixins";
+@import "variables";
+@import "fonts";
 
 /**
  * Mixins
@@ -23,6 +23,7 @@
 	color: #fff !important;
 	font-size: 16px !important;
 	line-height: 1em;
+
 	@include transition();
 
 	&:hover {
@@ -34,25 +35,31 @@
  * Custom WooCommerce prettyPhoto theme
  */
 div.pp_woocommerce {
+
 	.pp_content_container {
 		background: #fff;
 		border-radius: 3px;
 		box-shadow: 0 1px 30px rgba(0, 0, 0, 0.25);
 		padding: 20px 0;
+
 		@include clearfix();
 	}
 
 	.pp_loaderIcon {
+
 		@include loader();
 	}
 
 	div.ppt {
-		color: black;
+		color: #000;
 	}
 
 	.pp_gallery {
+
 		ul {
+
 			li {
+
 				a {
 					border: 1px solid rgba(0, 0, 0, 0.5);
 					background: #fff;
@@ -66,6 +73,7 @@ div.pp_woocommerce {
 				}
 
 				&.selected {
+
 					a {
 						border-color: #000;
 					}
@@ -76,10 +84,12 @@ div.pp_woocommerce {
 
 	.pp_previous,
 	.pp_next {
+
 		&::before {
+
 			@include button();
-			font-family: 'WooCommerce';
-			content: '\e00b';
+			font-family: WooCommerce;
+			content: "\e00b";
 			text-indent: 0;
 			display: none;
 			position: absolute;
@@ -89,6 +99,7 @@ div.pp_woocommerce {
 		}
 
 		&:hover {
+
 			&::before {
 				display: block;
 			}
@@ -96,16 +107,18 @@ div.pp_woocommerce {
 	}
 
 	.pp_previous {
+
 		&::before {
 			left: 1em;
 		}
 	}
 
 	.pp_next {
+
 		&::before {
 			right: 1em;
-			font-family: 'WooCommerce';
-			content: '\e008';
+			font-family: WooCommerce;
+			content: "\e008";
 		}
 	}
 
@@ -134,14 +147,15 @@ div.pp_woocommerce {
 	}
 
 	.pp_close {
+
 		@include button();
 		top: -0.5em;
 		right: -0.5em;
 		font-size: 1.618em !important;
 
 		&::before {
-			font-family: 'WooCommerce';
-			content: '\e013';
+			font-family: WooCommerce;
+			content: "\e013";
 			display: block;
 			position: absolute;
 			top: 0;
@@ -155,13 +169,14 @@ div.pp_woocommerce {
 
 	.pp_arrow_previous,
 	.pp_arrow_next {
+
 		@include button();
 		position: relative;
 		margin-top: -1px;
 
 		&::before {
-			font-family: 'WooCommerce';
-			content: '\e00b';
+			font-family: WooCommerce;
+			content: "\e00b";
 			display: block;
 			position: absolute;
 			top: 0;
@@ -181,12 +196,13 @@ div.pp_woocommerce {
 		margin-left: 0.5em;
 
 		&::before {
-			content: '\e008';
+			content: "\e008";
 		}
 	}
 
 	a.pp_expand,
 	a.pp_contract {
+
 		@include button();
 		right: auto;
 		left: -0.5em;
@@ -194,8 +210,8 @@ div.pp_woocommerce {
 		font-size: 1.618em !important;
 
 		&::before {
-			font-family: 'WooCommerce';
-			content: '\e005';
+			font-family: WooCommerce;
+			content: "\e005";
 			display: block;
 			position: absolute;
 			top: 0;
@@ -208,8 +224,9 @@ div.pp_woocommerce {
 	}
 
 	a.pp_contract {
+
 		&::before {
-			content: '\e004';
+			content: "\e004";
 		}
 	}
 
@@ -227,13 +244,15 @@ div.pp_woocommerce {
 	}
 
 	.pp_inline {
-		padding: 0!important;
+		padding: 0 !important;
 	}
 }
 
 // RTL support
 .rtl {
+
 	div.pp_woocommerce {
+
 		.pp_content_container {
 			text-align: right;
 		}
@@ -241,6 +260,7 @@ div.pp_woocommerce {
 }
 
 @media only screen and (max-width: 768px) {
+
 	div.pp_woocommerce {
 		left: 5% !important;
 		right: 5% !important;
@@ -281,7 +301,8 @@ div.pp_woocommerce {
 		width: 100% !important;
 
 		#pp_full_res {
-			& > img {
+
+			> img {
 				width: 100% !important;
 				height: auto !important;
 			}

@@ -20,7 +20,7 @@ class PriceSeparators {
 	 * @return string
 	 */
 	public static function get_decimal(): string {
-		return html_entity_decode( wc_get_price_decimal_separator(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 );
+		return self::to_plain_text( wc_get_price_decimal_separator() );
 	}
 
 	/**
@@ -29,6 +29,16 @@ class PriceSeparators {
 	 * @return string
 	 */
 	public static function get_thousand(): string {
-		return html_entity_decode( wc_get_price_thousand_separator(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 );
+		return self::to_plain_text( wc_get_price_thousand_separator() );
+	}
+
+	/**
+	 * Decode HTML entities in a separator. Separators are plain text, so markup characters are dropped.
+	 *
+	 * @param string $separator The stored separator.
+	 * @return string
+	 */
+	private static function to_plain_text( string $separator ): string {
+		return str_replace( array( '<', '>' ), '', html_entity_decode( $separator, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 ) );
 	}
 }

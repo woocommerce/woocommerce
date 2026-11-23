@@ -142,26 +142,4 @@ class FullRefundFixDataToolNoticeTest extends WC_Unit_Test_Case {
 
 		$this->assertEmpty( $note_ids, 'Note should be removed once the store no longer has legacy refund data' );
 	}
-
-	/**
-	 * Clean up after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		$data_store = \WC_Data_Store::load( 'admin-note' );
-		$note_ids   = $data_store->get_notes_with_name( FullRefundFixDataToolNotice::NOTE_NAME );
-
-		foreach ( $note_ids as $note_id ) {
-			$note = \Automattic\WooCommerce\Admin\Notes\Notes::get_note( $note_id );
-			if ( $note ) {
-				$note->delete();
-			}
-		}
-
-		delete_option( 'woocommerce_analytics_enabled' );
-		delete_option( 'woocommerce_db_version' );
-		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
-		delete_option( 'woocommerce_analytics_show_old_refund_data_tool' );
-	}
 }

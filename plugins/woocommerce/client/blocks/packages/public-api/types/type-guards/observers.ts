@@ -1,7 +1,8 @@
 /**
  * Internal dependencies
  */
-import { FieldValidationStatus, isObject, objectHasProp } from '../';
+import { isObject, objectHasProp } from './object';
+import type { FieldValidationStatus } from '../type-defs/validation';
 
 export enum responseTypes {
 	SUCCESS = 'success',

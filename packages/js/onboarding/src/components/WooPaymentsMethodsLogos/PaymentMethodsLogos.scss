@@ -25,7 +25,7 @@
 		// Carries the same 2px as the bordered logos so the badge matches their
 		// 40x26 footprint, and gives the hover border something to paint on.
 		border: 1px solid transparent;
-		background-color: rgba($gray-700, 0.10);
+		background-color: rgba($gray-700, 0.1);
 		color: $gray-900;
 		text-align: center;
 		line-height: 24px;
@@ -99,6 +99,6 @@
 		grid-template-columns: repeat(4, 1fr);
 		grid-template-rows: repeat(3, 1fr);
 		gap: $gap-smaller;
-		padding: 0px;
+		padding: 0;
 	}
 }

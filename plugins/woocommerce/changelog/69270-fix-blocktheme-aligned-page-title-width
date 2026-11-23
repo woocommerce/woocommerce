@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the generic 1000px width cap so Cart, Checkout and My account can use their block layouts.

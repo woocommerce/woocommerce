@@ -3,7 +3,7 @@
  */
 import '@testing-library/jest-dom';
 import { screen, waitFor } from '@testing-library/react';
-import { createBlock } from '@wordpress/blocks';
+import { createBlock, getBlockType } from '@wordpress/blocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 
@@ -17,8 +17,8 @@ import '../inner-blocks/product-gallery-large-image';
 import '../inner-blocks/product-gallery-thumbnails';
 import '../../next-previous-buttons';
 import '../../single-product';
-import '../../../atomic/blocks/product-elements/image';
-import '../../../atomic/blocks/product-elements/sale-badge';
+import '../../product-elements-blocks/image';
+import '../../product-elements-blocks/sale-badge';
 
 // Setup MSW
 const handlers = [
@@ -68,6 +68,15 @@ const handlers = [
 	} ),
 
 	http.get( '/wp/v2/types', () => {
+		return HttpResponse.json( {} );
+	} ),
+
+	http.get( '/wp/v2/settings', () => {
+		return HttpResponse.json( {} );
+	} ),
+
+	// The editor preflights several of its requests, and an unhandled request makes MSW warn.
+	http.options( '*', () => {
 		return HttpResponse.json( {} );
 	} ),
 
@@ -152,6 +161,21 @@ async function setup( attributes = {} ) {
 }
 
 describe( 'Product Gallery Block', () => {
+	it( 'uses the registered default gallery settings', () => {
+		const productGalleryBlock = createBlock( blockJson.name );
+
+		expect( productGalleryBlock.attributes ).toMatchObject( {
+			hoverZoom: true,
+			fullScreenOnClick: true,
+		} );
+	} );
+
+	it( 'restricts registration to Single Product descendants', () => {
+		expect( getBlockType( blockJson.name )?.ancestor ).toEqual( [
+			'woocommerce/single-product',
+		] );
+	} );
+
 	it( 'should render the block in the editor with correct structure', async () => {
 		await setup();
 
@@ -235,9 +259,5 @@ describe( 'Product Gallery Block', () => {
 			name: /Block: Thumbnails/i,
 		} );
 		expect( thumbnailsBlock ).toBeInTheDocument();
-
-		// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-		// opt out of without changing the visual output.
-		expect( console ).toHaveWarned();
 	} );
 } );

@@ -534,130 +534,9 @@ test.describe(
 			}
 		} );
 
-		test( 'Scenario 3 — per-product reviews disabled hides the row and shows the dismissible notice', async ( {
-			page,
-			restApi,
-		} ) => {
-			const { order, productIds } = await seedCompletedOrder( restApi, [
-				{ name: 'CRR Reviewable' },
-				{
-					name: 'CRR Reviews Off',
-					reviews_allowed: false,
-				},
-			] );
-
-			try {
-				await page.goto( reviewOrderUrl( order ) );
-
-				const rows = page.locator( '.woocommerce-review-order__item' );
-				await expect( rows ).toHaveCount( 1 );
-				await expect( rows.nth( 0 ) ).toContainText( 'CRR Reviewable' );
-
-				const notice = page.locator(
-					'.woocommerce-review-order__notice'
-				);
-				await expect( notice ).toBeVisible();
-				await expect( notice ).toContainText(
-					"Don't see all your products?"
-				);
-
-				await page
-					.locator( '.woocommerce-review-order__notice-dismiss' )
-					.click();
-				await expect( notice ).toBeHidden();
-			} finally {
-				await cleanupOrder( restApi, order.id );
-				await cleanupProducts( restApi, productIds );
-			}
-		} );
-
-		test( 'Scenario 4 — order with no reviewable items renders the empty-state thank-you', async ( {
-			page,
-			restApi,
-		} ) => {
-			// All items have reviews_allowed:false → has_actionable_items()
-			// returns false → empty-state renders. Same template branch the
-			// site-wide-reviews-disabled gate hits, without mutating a global
-			// option that could leak into other tests if this one times out.
-			const { order, productIds } = await seedCompletedOrder( restApi, [
-				{ name: 'CRR No Reviews', reviews_allowed: false },
-			] );
-
-			try {
-				await page.goto( reviewOrderUrl( order ) );
-
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Nothing to review here',
-					} )
-				).toBeVisible();
-				await expect(
-					page.locator( '.woocommerce-review-order__form' )
-				).toHaveCount( 0 );
-				await expect(
-					page.locator( '.woocommerce-review-order__submit' )
-				).toHaveCount( 0 );
-			} finally {
-				await cleanupOrder( restApi, order.id );
-				await cleanupProducts( restApi, productIds );
-			}
-		} );
-
 		// Note: cancellation-unschedules-action coverage lives in PHPUnit
 		// (SubmissionHandlerTest); the admin Scheduled Actions UI proved too
 		// fragile for E2E across shards.
-
-		test( 'Scenario 6 — typing review text without a rating surfaces the inline error', async ( {
-			page,
-			restApi,
-		} ) => {
-			const { order, productIds } = await seedCompletedOrder( restApi, [
-				{ name: 'CRR Rating Required' },
-			] );
-
-			try {
-				await page.goto( reviewOrderUrl( order ) );
-
-				const row = page
-					.locator( '.woocommerce-review-order__item' )
-					.first();
-				await row.locator( 'textarea' ).fill( 'Loved it.' );
-				await page
-					.locator( '.woocommerce-review-order__submit' )
-					.click();
-
-				const error = row.locator(
-					'.woocommerce-review-order__item-rating-error'
-				);
-				await expect( error ).toBeVisible();
-				await expect( error ).toContainText(
-					'Please rate this product before submitting your review.'
-				);
-				// Form did not submit.
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Thank you for your reviews',
-					} )
-				).toHaveCount( 0 );
-
-				// Selecting a rating clears the error.
-				await rateRow( row, 5 );
-				await expect( error ).toBeHidden();
-
-				// Submitting now succeeds.
-				await page
-					.locator( '.woocommerce-review-order__submit' )
-					.click();
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Thank you for your reviews',
-					} )
-				).toBeVisible();
-			} finally {
-				await cleanupOrder( restApi, order.id );
-				await cleanupProducts( restApi, productIds );
-			}
-		} );
 
 		test( 'Variations — two variations of one parent render two distinct rows with their attribute summaries', async ( {
 			page,
@@ -744,6 +623,385 @@ test.describe(
 			} finally {
 				await cleanupOrder( restApi, order.id );
 				await cleanupProducts( restApi, [ parentId ] );
+			}
+		} );
+
+		test( 'Star control — arrow keys follow the visual order and the fill tracks the selection', async ( {
+			page,
+			restApi,
+		} ) => {
+			const { order, productIds } = await seedCompletedOrder( restApi, [
+				{ name: 'CRR Star Product' },
+			] );
+
+			try {
+				await page.goto( reviewOrderUrl( order ) );
+
+				// Without this the icons fade over 100ms, and an assertion
+				// that a star is unfilled passes on the first sample of a
+				// fill that is still fading in.
+				await page.addStyleTag( {
+					content:
+						'.woocommerce-star-rating__icon { transition: none !important; }',
+				} );
+
+				const row = page
+					.locator( '.woocommerce-review-order__item' )
+					.nth( 0 );
+				const starInput = ( stars: number ) =>
+					row.locator(
+						`.woocommerce-star-rating__input[value="${ stars }"]`
+					);
+				const starLabel = ( stars: number ) =>
+					row.locator(
+						`.woocommerce-star-rating__input[value="${ stars }"] + label`
+					);
+				const checkedValue = () =>
+					row
+						.locator( '.woocommerce-star-rating__input:checked' )
+						.getAttribute( 'value' );
+				const iconOpacity = ( stars: number ) =>
+					starLabel( stars )
+						.locator( '.woocommerce-star-rating__icon' )
+						.evaluate( ( icon ) =>
+							parseFloat(
+								window.getComputedStyle( icon ).opacity
+							)
+						);
+				const expectFilled = async ( stars: number ) =>
+					expect( await iconOpacity( stars ) ).toBe( 1 );
+				const expectUnfilled = async ( stars: number ) =>
+					expect( await iconOpacity( stars ) ).toBeLessThan( 1 );
+
+				// A floor, not an equality: below 0.55 the unfilled
+				// star drops under the 3:1 of WCAG 1.4.11.
+				const resting = await iconOpacity( 1 );
+				expect( resting ).toBeGreaterThanOrEqual( 0.55 );
+				expect( resting ).toBeLessThan( 1 );
+
+				// Star markup is ordered 5..1, which the keys must not follow.
+				await starInput( 1 ).focus();
+				await page.keyboard.press( 'ArrowRight' );
+				expect( await checkedValue() ).toBe( '2' );
+
+				await page.keyboard.press( 'ArrowLeft' );
+				expect( await checkedValue() ).toBe( '1' );
+
+				await page.keyboard.press( 'End' );
+				expect( await checkedValue() ).toBe( '5' );
+
+				await page.keyboard.press( 'Home' );
+				expect( await checkedValue() ).toBe( '1' );
+
+				// A selection fills up to it and no further, and hovering a
+				// higher star must add no fill the customer did not pick.
+				await rateRow( row, 4 );
+				for ( const stars of [ 1, 2, 3, 4 ] ) {
+					await expectFilled( stars );
+				}
+				await expectUnfilled( 5 );
+
+				await starLabel( 5 ).hover();
+				for ( const stars of [ 1, 2, 3, 4 ] ) {
+					await expectFilled( stars );
+				}
+				await expectUnfilled( 5 );
+
+				// The fill still follows the next selection under that pointer.
+				await page.keyboard.press( 'End' );
+				expect( await checkedValue() ).toBe( '5' );
+				await expectFilled( 5 );
+			} finally {
+				await cleanupOrder( restApi, order.id );
+				await cleanupProducts( restApi, productIds );
+			}
+		} );
+
+		test( 'Reflow — the page fits a 640px and a 320px viewport and stays operable', async ( {
+			page,
+			restApi,
+		} ) => {
+			// A long unbroken token is what actually stresses reflow; a short
+			// name would pass on any layout.
+			const { order, productIds } = await seedCompletedOrder( restApi, [
+				{ name: 'CRR Reflow Unterwasserfotografieausruestungstasche' },
+			] );
+
+			try {
+				const row = page
+					.locator( '.woocommerce-review-order__item' )
+					.nth( 0 );
+
+				// Viewport emulation rather than real zoom: WCAG 1.4.10 states its
+				// target as 320 CSS px, the width a 1280px viewport reaches at 400%
+				// zoom, and 640px is the same at 200%.
+				for ( const width of [ 640, 320 ] ) {
+					await page.setViewportSize( { width, height: 512 } );
+					await page.goto( reviewOrderUrl( order ) );
+
+					// The success criterion itself: no horizontal page scrolling.
+					const pageOverflow = await page.evaluate(
+						() =>
+							document.documentElement.scrollWidth -
+							document.documentElement.clientWidth
+					);
+					expect(
+						pageOverflow,
+						`page scrolls horizontally at ${ width }px`
+					).toBeLessThanOrEqual( 1 );
+
+					// Then which of our own elements would cause it. Measured per
+					// element because `scrollWidth` rounds to whole pixels and flakes
+					// on a fractional layout, and on both edges so the mirror failure
+					// in RTL is visible too.
+					const overflowing = await page
+						.locator( '.woocommerce-review-order' )
+						.evaluate( ( root ) => {
+							const bounds = root.getBoundingClientRect();
+							return Array.from( root.querySelectorAll( '*' ) )
+								.filter( ( el ) => {
+									// A non-rendered element reports a zero-size
+									// rect at the origin, which reads as overflow
+									// to the left of the container.
+									if ( ! el.getClientRects().length ) {
+										return false;
+									}
+									const box = el.getBoundingClientRect();
+									// 2px for sub-pixel headroom over the
+									// clipped radios, which paint nothing and
+									// sit exactly 1px out on `margin: -1px`.
+									return (
+										box.right > bounds.right + 2 ||
+										box.left < bounds.left - 2
+									);
+								} )
+								.map( ( el ) => {
+									const box = el.getBoundingClientRect();
+									const cls =
+										el.getAttribute( 'class' ) || '';
+									return `${ el.tagName }.${ cls } right${ (
+										box.right - bounds.right
+									).toFixed( 1 ) } left${ (
+										box.left - bounds.left
+									).toFixed( 1 ) }`;
+								} );
+						} );
+					expect(
+						overflowing,
+						`elements past the container at ${ width }px`
+					).toEqual( [] );
+
+					await expect( row.locator( 'textarea' ) ).toBeVisible();
+					await expect(
+						page.locator( '.woocommerce-review-order__submit' )
+					).toBeVisible();
+
+					// Still operable at this width.
+					await rateRow( row, 3 );
+					await expect(
+						row.locator( '.woocommerce-star-rating__input:checked' )
+					).toHaveAttribute( 'value', '3' );
+				}
+			} finally {
+				await cleanupOrder( restApi, order.id );
+				await cleanupProducts( restApi, productIds );
+			}
+		} );
+
+		test( 'Keyboard — submitting moves focus into the thank-you view', async ( {
+			page,
+			restApi,
+		} ) => {
+			const { order, productIds } = await seedCompletedOrder( restApi, [
+				{ name: 'CRR Focus Product' },
+			] );
+
+			try {
+				await page.goto( reviewOrderUrl( order ) );
+
+				const row = page
+					.locator( '.woocommerce-review-order__item' )
+					.nth( 0 );
+				await rateRow( row, 4 );
+				await row
+					.locator( 'textarea' )
+					.fill( 'Submitted by keyboard.' );
+
+				const submit = page.locator(
+					'.woocommerce-review-order__submit'
+				);
+				await submit.focus();
+				await page.keyboard.press( 'Enter' );
+
+				await expect(
+					page.getByRole( 'heading', {
+						name: 'Thank you for your reviews',
+					} )
+				).toBeVisible();
+
+				// The form and the focused button in it are hidden on success,
+				// so focus must move to something with a name.
+				await expect(
+					page.locator(
+						'.woocommerce-review-order__success .woocommerce-review-order__empty-title'
+					)
+				).toBeFocused();
+			} finally {
+				await cleanupOrder( restApi, order.id );
+				await cleanupProducts( restApi, productIds );
+			}
+		} );
+
+		test( 'Keyboard — a text-only row sends focus to its rating and links the error', async ( {
+			page,
+			restApi,
+		} ) => {
+			const { order, productIds } = await seedCompletedOrder( restApi, [
+				{ name: 'CRR Validation Product' },
+				{ name: 'CRR Validation Product 2' },
+			] );
+
+			try {
+				await page.goto( reviewOrderUrl( order ) );
+
+				const row = page
+					.locator( '.woocommerce-review-order__item' )
+					.nth( 0 );
+				await row
+					.locator( 'textarea' )
+					.fill( 'Text without a rating.' );
+				await page
+					.locator( '.woocommerce-review-order__submit' )
+					.click();
+
+				// On the radio that takes focus, not on the wrapper.
+				const lowest = row.locator(
+					'.woocommerce-star-rating__input[value="1"]'
+				);
+				await expect( lowest ).toHaveAttribute(
+					'aria-invalid',
+					'true'
+				);
+
+				const errorId = await row
+					.locator( '.woocommerce-review-order__item-rating-error' )
+					.getAttribute( 'id' );
+				expect(
+					await lowest.getAttribute( 'aria-describedby' )
+				).toContain( errorId );
+
+				// Focus lands on the rating the customer has to fill in.
+				await expect( lowest ).toBeFocused();
+
+				// Script-moved focus after a pointer click does not match
+				// `:focus-visible`; the width alone proves nothing because it
+				// resolves to `medium` even with `outline-style: none`.
+				const outline = await row
+					.locator(
+						'.woocommerce-star-rating__input[value="1"] + label'
+					)
+					.evaluate( ( label ) => {
+						const style = window.getComputedStyle( label );
+						return {
+							style: style.outlineStyle,
+							width: parseFloat( style.outlineWidth ),
+						};
+					} );
+				expect( outline.style ).not.toBe( 'none' );
+				expect( outline.width ).toBeGreaterThan( 0 );
+
+				// `nearest` bottom-aligns the label, so the edge lands on the
+				// boundary itself and only a whole pixel of slack is real.
+				const expectInViewport = async (
+					scope: Locator,
+					selector: string,
+					height: number,
+					what: string
+				) => {
+					const box = ( await scope
+						.locator( selector )
+						.boundingBox() )!;
+					expect(
+						box.y,
+						`${ what } above the fold at ${ height }px`
+					).toBeGreaterThanOrEqual( -1 );
+					expect(
+						box.y + box.height,
+						`${ what } below the fold at ${ height }px`
+					).toBeLessThanOrEqual( height + 1 );
+				};
+				const submitSecondRowAt = async ( size: {
+					width: number;
+					height: number;
+				} ) => {
+					await page.setViewportSize( size );
+					await page.goto( reviewOrderUrl( order ) );
+					const second = page
+						.locator( '.woocommerce-review-order__item' )
+						.nth( 1 );
+					await second
+						.locator( 'textarea' )
+						.fill( 'Text without a rating.' );
+					await page
+						.locator( '.woocommerce-review-order__submit' )
+						.click();
+					return second;
+				};
+				const errorSelector =
+					'.woocommerce-review-order__item-rating-error';
+				const starSelector =
+					'.woocommerce-star-rating__input[value="1"] + label';
+
+				// Stacked, the error sits above a 240px image column, which
+				// puts 364px between it and the stars. Both still fit here.
+				let second = await submitSecondRowAt( {
+					width: 390,
+					height: 664,
+				} );
+				await expectInViewport( second, errorSelector, 664, 'error' );
+				await expectInViewport( second, starSelector, 664, 'star' );
+
+				// 320x256 is 1280x1024 at the 400% zoom WCAG 1.4.10 names, and
+				// the pair cannot both fit: the ring wins, because it is the
+				// clipped radios' only indicator and `aria-describedby` still
+				// carries the message.
+				second = await submitSecondRowAt( { width: 320, height: 256 } );
+				await expectInViewport( second, starSelector, 256, 'star' );
+			} finally {
+				await cleanupOrder( restApi, order.id );
+				await cleanupProducts( restApi, productIds );
+			}
+		} );
+
+		test( 'Keyboard — dismissing the disabled-products notice keeps focus on the page', async ( {
+			page,
+			restApi,
+		} ) => {
+			const { order, productIds } = await seedCompletedOrder( restApi, [
+				{ name: 'CRR Reviewable Product' },
+				{ name: 'CRR Closed Product', reviews_allowed: false },
+			] );
+
+			try {
+				await page.goto( reviewOrderUrl( order ) );
+
+				const notice = page.locator(
+					'.woocommerce-review-order__notice'
+				);
+				await expect( notice ).toBeVisible();
+
+				await notice
+					.locator( '.woocommerce-review-order__notice-dismiss' )
+					.click();
+
+				await expect( notice ).toBeHidden();
+				// Focus must not fall back to the document.
+				await expect(
+					page.locator( '.woocommerce-review-order__title' )
+				).toBeFocused();
+			} finally {
+				await cleanupOrder( restApi, order.id );
+				await cleanupProducts( restApi, productIds );
 			}
 		} );
 	}

@@ -30,9 +30,10 @@ class BlockRegistrationContext {
 		 *
 		 * Registration is skipped on known non-rendering contexts (the Store API and other WooCommerce REST
 		 * namespaces, cron, AJAX, XML-RPC, favicon, robots.txt and XML sitemaps) as a performance optimisation.
-		 * Product and variation descriptions rendered through do_blocks are already handled on demand (see the
-		 * woocommerce_short_description hook in Bootstrap), so this filter is only needed to opt back in when an
-		 * extension renders WooCommerce blocks some other way in one of those contexts.
+		 * Product and variation descriptions rendered through do_blocks and emails rendered by the email editor are
+		 * already handled on demand (see the woocommerce_short_description and woocommerce_email_editor_render_start
+		 * hooks in Bootstrap), so this filter is only needed to opt back in when an extension renders WooCommerce
+		 * blocks some other way in one of those contexts.
 		 *
 		 * @since 11.1.0
 		 *

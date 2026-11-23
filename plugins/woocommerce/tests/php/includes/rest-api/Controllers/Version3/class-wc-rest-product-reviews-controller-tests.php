@@ -301,6 +301,38 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Review content that must be stored exactly as sent.
+	 *
+	 * @return array
+	 */
+	public function provide_review_content_with_slashes(): array {
+		return array(
+			'quotes'    => array( 'It\'s "great"' ),
+			'backslash' => array( 'Cable 1\\2 inch' ),
+			'mixed'     => array( 'It\'s a 1\\2" cable' ),
+		);
+	}
+
+	/**
+	 * @testdox Updating review content stores quotes and backslashes as sent.
+	 * @dataProvider provide_review_content_with_slashes
+	 *
+	 * @param string $content Review content.
+	 */
+	public function test_update_item_stores_review_content_as_sent( string $content ): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$review_id  = $this->create_review( $product_id, 'First draft.', 5 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_body_params( array( 'review' => $content ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( $content, get_comment( $review_id )->comment_content );
+	}
+
+	/**
 	 * @testdox A rating-only edit stores the rating and refreshes aggregates in one product save.
 	 */
 	public function test_update_item_with_only_a_rating_recalculates_aggregates_in_one_product_save() {
@@ -591,6 +623,184 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$destination = wc_get_product( $destination_id );
 		$this->assertEquals( 0, $source->get_average_rating() );
 		$this->assertEquals( 4, $destination->get_average_rating() );
+	}
+
+	/**
+	 * @testdox Creating a review eagerly populates the verified-owner meta at creation time, not lazily during response preparation.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $include_verified Whether to include the verified parameter in the request.
+	 */
+	public function test_create_item_populates_verified_meta( bool $include_verified ): void {
+		$product = ProductHelper::create_simple_product();
+		$order   = OrderHelper::create_order( 0, $product );
+		$order->set_billing_email( 'jane.smith@example.org' );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		// Stub prepare_item_for_response so it cannot backfill the meta as a side effect.
+		$sut = new class() extends WC_REST_Product_Reviews_Controller {
+			public function prepare_item_for_response( $review, $request ) { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				return rest_ensure_response( array( 'id' => (int) $review->comment_ID ) );
+			}
+		};
+
+		$body = array(
+			'product_id'     => $product->get_id(),
+			'review'         => $include_verified ? 'Verified by the caller.' : 'Great product, would buy again.',
+			'reviewer'       => 'Jane Smith',
+			'reviewer_email' => 'jane.smith@example.org',
+			'rating'         => 5,
+		);
+		if ( $include_verified ) {
+			$body['verified'] = true;
+		}
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews' );
+		$request->set_body_params( $body );
+
+		$response = $sut->create_item( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( '1', get_comment_meta( $response->get_data()['id'], 'verified', true ), 'The verified meta must be populated eagerly at creation time.' );
+	}
+
+	/**
+	 * Provides ratings the API must reject.
+	 *
+	 * @return array<string, array{mixed}> Invalid ratings.
+	 */
+	public function data_provider_invalid_ratings(): array {
+		return array(
+			'above maximum' => array( 6 ),
+			'negative'      => array( -1 ),
+			'fractional'    => array( 4.5 ),
+			'boolean'       => array( true ),
+		);
+	}
+
+	/**
+	 * @testdox Creating a review with an invalid rating is rejected.
+	 * @dataProvider data_provider_invalid_ratings
+	 *
+	 * @param mixed $rating Invalid rating.
+	 */
+	public function test_create_item_rejects_invalid_rating( $rating ): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews' );
+		$request->set_body_params(
+			array(
+				'product_id'     => $product_id,
+				'review'         => 'Invalid rating.',
+				'reviewer'       => 'Jane Smith',
+				'reviewer_email' => 'jane.smith@example.org',
+				'rating'         => $rating,
+			)
+		);
+
+		$response = $this->sut->create_item( $request );
+
+		$this->assertWPError( $response );
+		$this->assertSame( 400, $response->get_error_data()['status'] );
+		$this->assertSame( 0, wc_get_product( $product_id )->get_review_count() );
+	}
+
+	/**
+	 * @testdox Updating a review with an invalid rating is rejected.
+	 * @dataProvider data_provider_invalid_ratings
+	 *
+	 * @param mixed $rating Invalid rating.
+	 */
+	public function test_update_item_rejects_invalid_rating( $rating ): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$review_id  = $this->create_review( $product_id, 'Still five stars.', 5 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_param( 'id', $review_id );
+		$request->set_param( 'rating', $rating );
+
+		$response = $this->sut->update_item( $request );
+
+		$this->assertWPError( $response );
+		$this->assertSame( 400, $response->get_error_data()['status'] );
+		$this->assertSame( 5, (int) get_comment_meta( $review_id, 'rating', true ) );
+		$this->assertEquals( 5, wc_get_product( $product_id )->get_average_rating() );
+	}
+
+	/**
+	 * @testdox Batch creating and updating reviews with an invalid rating returns a 400 error per item.
+	 * @dataProvider data_provider_invalid_ratings
+	 *
+	 * @param mixed $rating Invalid rating.
+	 */
+	public function test_batch_rejects_invalid_rating( $rating ): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$review_id  = $this->create_review( $product_id, 'Still five stars.', 5 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews/batch' );
+		$request->set_body_params(
+			array(
+				'create' => array(
+					array(
+						'product_id'     => $product_id,
+						'review'         => 'Invalid rating.',
+						'reviewer'       => 'Jane Smith',
+						'reviewer_email' => 'jane.smith@example.org',
+						'rating'         => $rating,
+					),
+				),
+				'update' => array(
+					array(
+						'id'     => $review_id,
+						'rating' => $rating,
+					),
+				),
+			)
+		);
+
+		$data = $this->sut->batch_items( $request );
+
+		foreach ( array( 'create', 'update' ) as $operation ) {
+			$this->assertSame( 400, $data[ $operation ][0]['error']['data']['status'] );
+		}
+		$this->assertSame( 5, (int) get_comment_meta( $review_id, 'rating', true ) );
+		$this->assertEquals( 1, wc_get_product( $product_id )->get_review_count() );
+	}
+
+	/**
+	 * @testdox A numeric string rating is normalized to an integer for single and batch creation.
+	 */
+	public function test_numeric_string_rating_is_normalized_for_single_and_batch(): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$body       = array(
+			'product_id'     => $product_id,
+			'review'         => 'Four stars.',
+			'reviewer'       => 'Jane Smith',
+			'reviewer_email' => 'jane.smith@example.org',
+			'rating'         => '04',
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews' );
+		$request->set_body_params( $body );
+		$single = $this->sut->create_item( $request );
+
+		$this->assertNotWPError( $single );
+		$this->assertSame( '4', get_comment_meta( $single->get_data()['id'], 'rating', true ) );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews/batch' );
+		// Use different content so WordPress does not reject the review as a duplicate of the first one.
+		$body['review'] = 'Four stars, in a batch.';
+		$request->set_body_params( array( 'create' => array( $body ) ) );
+		$data = $this->sut->batch_items( $request );
+
+		$this->assertArrayNotHasKey( 'error', $data['create'][0] );
+		$this->assertSame( '4', get_comment_meta( $data['create'][0]['id'], 'rating', true ) );
 	}
 
 	/**

@@ -20,7 +20,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	private $transaction_id_26960 = 'dummy_id_26960';
 
 	/**
-	 * @var string Dummy indentifiable error message.
+	 * @var string Dummy identifiable error message.
 	 */
 	private $error_message_26960 = 'Paypal error for GH issue 26960';
 
@@ -188,8 +188,9 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 
 		$form_fields = $mock_gateway->get_form_fields();
 
-		// Verify that the number of fields are correct.
-		$this->assertEquals( count( $form_fields ), 12 );
+		// Orders v2 always sends shipping details, but merchants can still lock the address.
+		$this->assertArrayNotHasKey( 'send_shipping', $form_fields );
+		$this->assertArrayHasKey( 'address_override', $form_fields );
 
 		// When Orders v2 is enabled, paypal_buttons field should be present.
 		$this->assertArrayHasKey( 'paypal_buttons', $form_fields );

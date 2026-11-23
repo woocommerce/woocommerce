@@ -19,20 +19,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	private $original_resolved_route;
 
 	/**
-	 * Whether REQUEST_URI was set before the test ran.
-	 *
-	 * @var bool
-	 */
-	private $had_request_uri;
-
-	/**
-	 * The request URI the test ran with, verbatim.
-	 *
-	 * @var string|null
-	 */
-	private $original_request_uri;
-
-	/**
 	 * The authentication state WC_REST_Authentication held before the test ran.
 	 *
 	 * @var array<string, mixed>
@@ -52,13 +38,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$this->original_resolved_route = $wp->query_vars['rest_route'] ?? null;
 		unset( $wp->query_vars['rest_route'] );
 
-		$this->had_request_uri = array_key_exists( 'REQUEST_URI', $_SERVER );
-		// Stored and restored verbatim, so tearDown leaves $_SERVER exactly as it found it. Sanitizing
-		// would drop the characters these tests use to tell a WooCommerce route from one that only looks
-		// like it, and unslashing would undo what wp_magic_quotes() put there.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Round-tripped between $_SERVER and $_SERVER, never output or stored.
-		$this->original_request_uri = $this->had_request_uri ? $_SERVER['REQUEST_URI'] : null;
-
 		foreach ( array( 'user', 'error', 'auth_method' ) as $name ) {
 			$this->original_authentication_state[ $name ] = $this->authentication_property( $name )->getValue( $this->sut );
 		}
@@ -74,12 +53,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			unset( $wp->query_vars['rest_route'] );
 		} else {
 			$wp->query_vars['rest_route'] = $this->original_resolved_route;
-		}
-
-		if ( $this->had_request_uri ) {
-			$_SERVER['REQUEST_URI'] = $this->original_request_uri;
-		} else {
-			unset( $_SERVER['REQUEST_URI'] );
 		}
 
 		foreach ( $this->original_authentication_state as $name => $value ) {
@@ -115,6 +88,18 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Simulate the value wp_is_rest_endpoint() should report for the current test.
+	 *
+	 * @param bool $dispatching Whether wp_is_rest_endpoint() should return true.
+	 * @return void
+	 */
+	private function simulate_rest_dispatching( bool $dispatching ): void {
+		remove_filter( 'wp_is_rest_endpoint', '__return_true' );
+		remove_filter( 'wp_is_rest_endpoint', '__return_false' );
+		add_filter( 'wp_is_rest_endpoint', $dispatching ? '__return_true' : '__return_false' );
+	}
+
+	/**
 	 * Put WC_REST_Authentication into the state it reaches after an API key authenticates a request.
 	 *
 	 * @param int    $user_id     User the key belongs to.
@@ -141,6 +126,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	 * @param bool   $expected    Expected result.
 	 */
 	public function test_is_request_to_rest_api_checks_path_only( string $request_uri, bool $expected ): void {
+		$this->simulate_rest_dispatching( true );
 		$_SERVER['REQUEST_URI'] = $request_uri;
 
 		$this->assertSame( $expected, $this->is_request_to_rest_api() );
@@ -190,6 +176,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	public function test_is_request_to_rest_api_checks_resolved_route( string $request_uri, string $resolved_route, bool $expected ): void {
 		global $wp;
 
+		$this->simulate_rest_dispatching( true );
 		$_SERVER['REQUEST_URI']       = $request_uri;
 		$wp->query_vars['rest_route'] = $resolved_route;
 
@@ -207,6 +194,178 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			'route differs from resolved route'   => array( '/en/wp-json/wc/v3/products', '/wp/v2/users', false ),
 			'custom rewrite without REST prefix'  => array( '/shop-api/products', '/wc/v3/products', true ),
 			'resolved route overrides URI route'  => array( '/wp-json/wp/v2/users', '/wc/v3/products', true ),
+			'resolved route is the Store API'     => array( '/wp-json/wc/v3/products', '/wc/store/v1/cart', false ),
+		);
+	}
+
+	/**
+	 * @testdox Should not trust a rest_route query parameter unless WordPress is dispatching the request as REST.
+	 *
+	 * @dataProvider provider_request_uris_with_rest_route_query_param
+	 *
+	 * @param string $request_uri Request URI.
+	 */
+	public function test_is_request_to_rest_api_trusts_query_string_route_only_when_dispatching( string $request_uri ): void {
+		$_SERVER['REQUEST_URI'] = $request_uri;
+
+		$this->simulate_rest_dispatching( false );
+		$this->assertFalse(
+			$this->is_request_to_rest_api(),
+			'A rest_route query parameter on a request WordPress is not dispatching as REST must not authenticate a key.'
+		);
+
+		$this->simulate_rest_dispatching( true );
+		$this->assertTrue(
+			$this->is_request_to_rest_api(),
+			'The same route must still be recognized once WordPress is dispatching it as REST.'
+		);
+	}
+
+	/**
+	 * Data provider for URIs that carry a route only in their query string.
+	 *
+	 * @return array[]
+	 */
+	public static function provider_request_uris_with_rest_route_query_param(): array {
+		return array(
+			'plain permalink route'                  => array( '/?rest_route=/wc/v3/products' ),
+			'unrelated endpoint, query string route' => array( '/wp-admin/admin-ajax.php?action=whoami&rest_route=/wc/v3' ),
+			'unrelated endpoint, rewritten path'     => array( '/wc-auth/v1/authorize?rest_route=/wc/v3/products' ),
+		);
+	}
+
+	/**
+	 * @testdox Should treat a path as a WooCommerce REST API request only while WordPress is dispatching REST.
+	 *
+	 * @testWith ["/wp-json/wc/v3/products"]
+	 *           ["/wp-json/wc/v3/products?wc-auth-version=1&wc-auth-route=authorize"]
+	 *           ["/wp-json/wc/../../wp-admin/admin-ajax.php?action=whoami"]
+	 *
+	 * @param string $request_uri Request URI.
+	 */
+	public function test_is_request_to_rest_api_requires_rest_dispatch( string $request_uri ): void {
+		$_SERVER['REQUEST_URI'] = $request_uri;
+
+		$this->simulate_rest_dispatching( false );
+		$this->assertFalse(
+			$this->is_request_to_rest_api(),
+			'A request WordPress is not dispatching as REST is not a WooCommerce REST API request.'
+		);
+
+		$this->simulate_rest_dispatching( true );
+		$this->assertTrue(
+			$this->is_request_to_rest_api(),
+			'The same path must still be recognized once WordPress is dispatching it as REST.'
+		);
+	}
+
+	/**
+	 * @testdox Should authenticate a valid key once WordPress is dispatching the request as REST.
+	 */
+	public function test_authenticate_accepts_valid_key_only_when_dispatching(): void {
+		global $wpdb;
+
+		$consumer_key    = 'ck_' . wp_generate_password( 32, false );
+		$consumer_secret = 'cs_' . wp_generate_password( 32, false );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array(
+				'user_id'         => 1,
+				'description'     => 'Dispatch test key',
+				'permissions'     => 'read',
+				'consumer_key'    => wc_api_hash( $consumer_key ),
+				'consumer_secret' => $consumer_secret,
+				'truncated_key'   => substr( $consumer_key, -7 ),
+			)
+		);
+
+		// Basic auth needs SSL.
+		$_SERVER['HTTPS']         = 'on';
+		$_SERVER['PHP_AUTH_USER'] = $consumer_key;
+		$_SERVER['PHP_AUTH_PW']   = $consumer_secret;
+		$_SERVER['REQUEST_URI']   = '/wp-json/wc/v3/products';
+
+		try {
+			$this->simulate_rest_dispatching( false );
+			$this->assertFalse( $this->sut->authenticate( false ), 'A key is not checked before REST dispatch.' );
+			$this->assertNull( $this->authentication_property( 'user' )->getValue( $this->sut ) );
+			$this->assertSame(
+				'',
+				$this->authentication_property( 'auth_method' )->getValue( $this->sut ),
+				'Authentication must be left untried, so that authentication_fallback() can still run it once dispatch starts.'
+			);
+
+			$this->simulate_rest_dispatching( true );
+			$this->assertEquals( 1, $this->sut->authenticate( false ), 'The same key must authenticate once WordPress is dispatching the request as REST.' );
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
+		}
+	}
+
+	/**
+	 * @testdox Should not fall back to the path route when a query string names a different route.
+	 *
+	 * @dataProvider provider_conflicting_path_and_query_string_routes
+	 *
+	 * @param string $request_uri Request URI.
+	 * @param bool   $expected    Expected result once WordPress is genuinely dispatching.
+	 */
+	public function test_is_request_to_rest_api_ignores_path_when_query_string_names_another_route( string $request_uri, bool $expected ): void {
+		$_SERVER['REQUEST_URI'] = $request_uri;
+
+		$this->simulate_rest_dispatching( false );
+		$this->assertFalse(
+			$this->is_request_to_rest_api(),
+			'A path naming a WooCommerce route must not authenticate a key while a query string names a different route and dispatch is not yet confirmed.'
+		);
+
+		$this->simulate_rest_dispatching( true );
+		$this->assertSame( $expected, $this->is_request_to_rest_api() );
+	}
+
+	/**
+	 * @return array[]
+	 */
+	public static function provider_conflicting_path_and_query_string_routes(): array {
+		return array(
+			'query string names a foreign route'           => array( '/wp-json/wc/v3/products?rest_route=/wp/v2/users', false ),
+			'query string names another woocommerce route' => array( '/wp-json/wc/v3/products?rest_route=/wc/v3/orders', true ),
+		);
+	}
+
+	/**
+	 * @testdox Should not fall back to the path route when a query string route is not a string.
+	 */
+	public function test_is_request_to_rest_api_ignores_path_when_query_string_route_is_not_a_string(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products?rest_route[]=/wp/v2/users';
+
+		$this->simulate_rest_dispatching( false );
+		$this->assertFalse( $this->is_request_to_rest_api() );
+
+		$this->simulate_rest_dispatching( true );
+		$this->assertFalse( $this->is_request_to_rest_api() );
+	}
+
+	/**
+	 * @testdox Should not trust the route WordPress resolved unless WordPress is dispatching the request as REST.
+	 */
+	public function test_is_request_to_rest_api_trusts_resolved_route_only_when_dispatching(): void {
+		global $wp;
+
+		$_SERVER['REQUEST_URI']       = '/wc-auth/v1/authorize';
+		$wp->query_vars['rest_route'] = '/wc/v3/products';
+
+		$this->simulate_rest_dispatching( false );
+		$this->assertFalse(
+			$this->is_request_to_rest_api(),
+			'A resolved route on a request WordPress is not dispatching as REST must not authenticate a key.'
+		);
+
+		$this->simulate_rest_dispatching( true );
+		$this->assertTrue(
+			$this->is_request_to_rest_api(),
+			'The same resolved route must still be recognized once WordPress is dispatching it as REST.'
 		);
 	}
 
@@ -224,13 +383,10 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		};
 
 		add_filter( 'option_home', $home_filter );
+		$this->simulate_rest_dispatching( true );
 		$_SERVER['REQUEST_URI'] = $request_uri;
 
-		try {
-			$this->assertSame( $expected, $this->is_request_to_rest_api() );
-		} finally {
-			remove_filter( 'option_home', $home_filter );
-		}
+		$this->assertSame( $expected, $this->is_request_to_rest_api() );
 	}
 
 	/**
@@ -291,6 +447,9 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			'core users route'              => array( '/wp/v2/users', false ),
 			'route index'                   => array( '/', false ),
 			'woocommerce route as a suffix' => array( '/wp/v2/users?x=wc/v3/products', false ),
+			'store api route'               => array( '/wc/store/v1/cart', false ),
+			'unversioned store api route'   => array( '/wc/store/cart', false ),
+			'store api route, mixed case'   => array( '/wc/Store/v1/cart', false ),
 		);
 	}
 
@@ -363,6 +522,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox Should treat a namespace opted in through the woocommerce_rest_is_request_to_rest_api filter as a WooCommerce request.
 	 */
 	public function test_is_request_to_rest_api_honours_scope_filter(): void {
+		$this->simulate_rest_dispatching( true );
 		$_SERVER['REQUEST_URI'] = '/wp-json/myplugin/v1/resource';
 
 		$this->assertFalse(
@@ -372,14 +532,16 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 
 		add_filter( 'woocommerce_rest_is_request_to_rest_api', '__return_true' );
 
-		try {
-			$this->assertTrue(
-				$this->is_request_to_rest_api(),
-				'A namespace opted in through the filter must be treated as a WooCommerce request.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_rest_is_request_to_rest_api', '__return_true' );
-		}
+		$this->assertTrue(
+			$this->is_request_to_rest_api(),
+			'A namespace opted in through the filter must be treated as a WooCommerce request.'
+		);
+
+		$this->simulate_rest_dispatching( false );
+		$this->assertFalse(
+			$this->is_request_to_rest_api(),
+			'The filter must not opt in a request WordPress is not dispatching as REST.'
+		);
 	}
 
 	/**
@@ -425,9 +587,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	public function test_reject_out_of_scope_route_rejects_method_override_to_foreign_route(): void {
 		global $wp;
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Saved and restored verbatim, never output or stored.
-		$original_method = $_SERVER['REQUEST_METHOD'] ?? null;
-
 		// The scope check ignores the HTTP method, including a '_method' override in the query string,
 		// and only compares the resolved route to the one the URI names. A resolved route the URI never
 		// named is rejected either way.
@@ -437,18 +596,10 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->authenticate_as( 1 );
 
-		try {
-			$result = $this->sut->reject_out_of_scope_route( null );
+		$result = $this->sut->reject_out_of_scope_route( null );
 
-			$this->assertWPError( $result, 'A method override must not let a key reach a route the URI never named.' );
-			$this->assertSame( 'woocommerce_rest_authentication_error', $result->get_error_code() );
-		} finally {
-			if ( null === $original_method ) {
-				unset( $_SERVER['REQUEST_METHOD'] );
-			} else {
-				$_SERVER['REQUEST_METHOD'] = $original_method;
-			}
-		}
+		$this->assertWPError( $result, 'A method override must not let a key reach a route the URI never named.' );
+		$this->assertSame( 'woocommerce_rest_authentication_error', $result->get_error_code() );
 	}
 
 	/**
@@ -474,6 +625,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 
 		// authentication_fallback() only authenticates when nothing did so during
 		// 'determine_current_user', which is the state left by setUp. Basic auth needs SSL.
+		$this->simulate_rest_dispatching( true );
 		$_SERVER['HTTPS']             = 'on';
 		$_SERVER['PHP_AUTH_USER']     = $consumer_key;
 		$_SERVER['PHP_AUTH_PW']       = $consumer_secret;
@@ -491,7 +643,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertSame( 401, $result->get_error_data()['status'] );
 		} finally {
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
-			unset( $_SERVER['HTTPS'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
 			wp_set_current_user( 0 );
 		}
 	}
@@ -523,6 +674,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
+		$this->simulate_rest_dispatching( true );
 		$_SERVER['HTTPS']             = 'on';
 		$_SERVER['PHP_AUTH_USER']     = $consumer_key;
 		$_SERVER['PHP_AUTH_PW']       = $consumer_secret;
@@ -538,7 +690,111 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertTrue( $authenticated, 'The fallback must still authenticate a genuine WooCommerce route.' );
 		} finally {
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
-			unset( $_SERVER['HTTPS'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Should still authenticate its own key, and still enforce read/write permissions, when an
+	 * earlier rest_authentication_errors callback already answered true.
+	 */
+	public function test_authentication_fallback_still_binds_key_when_earlier_callback_reports_true(): void {
+		global $wp, $wpdb;
+
+		$consumer_key    = 'ck_' . wp_generate_password( 32, false );
+		$consumer_secret = 'cs_' . wp_generate_password( 32, false );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array(
+				'user_id'         => 1,
+				'description'     => 'Early true callback test key',
+				'permissions'     => 'read',
+				'consumer_key'    => wc_api_hash( $consumer_key ),
+				'consumer_secret' => $consumer_secret,
+				'truncated_key'   => substr( $consumer_key, -7 ),
+			)
+		);
+
+		$this->simulate_rest_dispatching( true );
+		$_SERVER['HTTPS']             = 'on';
+		$_SERVER['PHP_AUTH_USER']     = $consumer_key;
+		$_SERVER['PHP_AUTH_PW']       = $consumer_secret;
+		$_SERVER['REQUEST_URI']       = '/wp-json/wc/v3/products';
+		$wp->query_vars['rest_route'] = '/wc/v3/products';
+
+		wp_set_current_user( 0 );
+
+		// A third-party plugin authenticating by its own scheme and reporting success ahead of our priority 8.
+		add_filter( 'rest_authentication_errors', '__return_true', 5 );
+
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Running WordPress core's filter so both of our callbacks fire in order; not defining a hook.
+			$authenticated = apply_filters( 'rest_authentication_errors', null );
+
+			$this->assertTrue( $authenticated, 'An earlier plugin reporting success must not be overridden.' );
+
+			$result = $this->sut->check_user_permissions( null, $this->server, new WP_REST_Request( 'POST', '/wc/v3/products' ) );
+
+			$this->assertWPError( $result, 'Read/write permissions still apply to the key after an earlier callback returned true.' );
+		} finally {
+			remove_filter( 'rest_authentication_errors', '__return_true', 5 );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Should still authenticate its own key even when an earlier, undispatched pass left
+	 * a stale Application Passwords error behind.
+	 */
+	public function test_authentication_fallback_ignores_stale_application_password_error(): void {
+		global $wp, $wpdb, $wp_rest_application_password_status, $current_user;
+
+		$consumer_key    = 'ck_' . wp_generate_password( 32, false );
+		$consumer_secret = 'cs_' . wp_generate_password( 32, false );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array(
+				'user_id'         => 1,
+				'description'     => 'Stale application password error test key',
+				'permissions'     => 'read',
+				'consumer_key'    => wc_api_hash( $consumer_key ),
+				'consumer_secret' => $consumer_secret,
+				'truncated_key'   => substr( $consumer_key, -7 ),
+			)
+		);
+
+		$this->simulate_rest_dispatching( true );
+		$_SERVER['HTTPS']             = 'on';
+		$_SERVER['PHP_AUTH_USER']     = $consumer_key;
+		$_SERVER['PHP_AUTH_PW']       = $consumer_secret;
+		$_SERVER['REQUEST_URI']       = '/wp-json/wc/v3/products';
+		$wp->query_vars['rest_route'] = '/wc/v3/products';
+
+		// Clear the current user the way serve_request() does, so resolving it below goes through
+		// the real determine_current_user pass instead of our own direct authenticate() call.
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reproducing serve_request()'s own cache-busting exactly, not a WC global.
+		$current_user = null;
+
+		// Save the global, then simulate the stale error a premature pass would leave behind.
+		$original_status                     = $wp_rest_application_password_status;
+		$wp_rest_application_password_status = new WP_Error( 'invalid_username', 'The username is not registered on this site.' );
+
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Running WordPress core's filter chain, including core's own rest_application_password_check_errors(); not defining a hook.
+			$authenticated = apply_filters( 'rest_authentication_errors', null );
+
+			$this->assertTrue( $authenticated, 'Our own key must still authenticate; core must not act on the stale Application Passwords error.' );
+			$this->assertEquals(
+				1,
+				$this->authentication_property( 'user' )->getValue( $this->sut )->user_id,
+				'The key must still authenticate.'
+			);
+		} finally {
+			$wp_rest_application_password_status = $original_status;
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
 			wp_set_current_user( 0 );
 		}
 	}
@@ -555,6 +811,174 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			$this->sut->reject_out_of_scope_route( null ),
 			'A request without WooCommerce API key credentials should be left alone.'
 		);
+	}
+
+	/**
+	 * @testdox Should not treat a Store API request as one an API key may authenticate.
+	 *
+	 * @dataProvider provider_store_api_request_uris
+	 *
+	 * @param string $request_uri Request URI.
+	 * @param bool   $expected    Expected result.
+	 */
+	public function test_is_request_to_rest_api_excludes_store_api( string $request_uri, bool $expected ): void {
+		$_SERVER['REQUEST_URI'] = $request_uri;
+		$this->simulate_rest_dispatching( true );
+
+		$this->assertSame( $expected, $this->is_request_to_rest_api() );
+	}
+
+	/**
+	 * Data provider for Store API request detection.
+	 *
+	 * @return array[]
+	 */
+	public static function provider_store_api_request_uris(): array {
+		return array(
+			'store api route'                         => array( '/wp-json/wc/store/v1/cart', false ),
+			'unversioned store api route'             => array( '/wp-json/wc/store/cart', false ),
+			'store api namespace index'               => array( '/wp-json/wc/store', false ),
+			'plain permalink store api route'         => array( '/?rest_route=/wc/store/v1/cart', false ),
+			'query string names the store api'        => array( '/wp-json/wc/v3/products?rest_route=/wc/store/v1/cart', false ),
+			// WordPress matches routes case-insensitively, so these still reach the Store API.
+			'store api route, upper case'             => array( '/wp-json/wc/STORE/v1/cart', false ),
+			'store api route, percent-encoded'        => array( '/wp-json/wc/%73tore/v1/cart', false ),
+			'namespace that only starts with "store"' => array( '/wp-json/wc/store-locator/v1/stores', true ),
+		);
+	}
+
+	/**
+	 * @testdox Should reject a key on the Store API even when a filter claims the request.
+	 */
+	public function test_reject_out_of_scope_route_rejects_store_api_when_filter_claims_it(): void {
+		global $wp;
+
+		add_filter( 'woocommerce_rest_is_request_to_rest_api', '__return_true' );
+
+		$this->simulate_rest_dispatching( true );
+		$_SERVER['REQUEST_URI']       = '/wp-json/wc/store/v1/cart';
+		$wp->query_vars['rest_route'] = '/wc/store/v1/cart';
+
+		$this->authenticate_as( 1 );
+
+		try {
+			$this->assertTrue( $this->is_request_to_rest_api(), 'The filter should still be able to claim the request.' );
+
+			$result = $this->sut->reject_out_of_scope_route( null );
+
+			$this->assertWPError( $result, 'A key must not reach the Store API, whatever the filter says.' );
+			$this->assertSame( 'woocommerce_rest_authentication_error', $result->get_error_code() );
+		} finally {
+			remove_filter( 'woocommerce_rest_is_request_to_rest_api', '__return_true' );
+		}
+	}
+
+	/**
+	 * @testdox Should leave a key-signed Store API request unauthenticated so it is served as a guest.
+	 *
+	 * @testWith ["read"]
+	 *           ["read_write"]
+	 *
+	 * @param string $permissions Key permissions.
+	 */
+	public function test_rest_authentication_errors_ignores_key_on_store_api( string $permissions ): void {
+		global $wp, $wpdb;
+
+		$consumer_key    = 'ck_' . wp_generate_password( 32, false );
+		$consumer_secret = 'cs_' . wp_generate_password( 32, false );
+		$user_id         = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array(
+				'user_id'         => $user_id,
+				'description'     => 'Store API scope test key',
+				'permissions'     => $permissions,
+				'consumer_key'    => wc_api_hash( $consumer_key ),
+				'consumer_secret' => $consumer_secret,
+				'truncated_key'   => substr( $consumer_key, -7 ),
+			)
+		);
+
+		$this->simulate_rest_dispatching( true );
+		$_SERVER['HTTPS']             = 'on';
+		$_SERVER['PHP_AUTH_USER']     = $consumer_key;
+		$_SERVER['PHP_AUTH_PW']       = $consumer_secret;
+		$_SERVER['REQUEST_URI']       = '/wp-json/wc/store/v1/cart';
+		$wp->query_vars['rest_route'] = '/wc/store/v1/cart';
+
+		wp_set_current_user( 0 );
+
+		try {
+			$this->assertFalse( $this->sut->authenticate( false ), 'An API key must not set the current user on the Store API.' );
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Running WordPress core's filter so our callbacks fire in order; not defining a hook.
+			$result = apply_filters( 'rest_authentication_errors', null );
+
+			$this->assertNotWPError( $result, 'The key should be ignored, not rejected.' );
+			$this->assertSame( 0, get_current_user_id(), 'The request should be served as a guest.' );
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
+			unset( $_SERVER['HTTPS'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Should not authenticate a Basic-auth key on the Store API when application passwords are in use.
+	 */
+	public function test_basic_auth_key_on_store_api_with_application_passwords_in_use(): void {
+		global $wp, $wpdb, $wp_rest_application_password_status;
+
+		$consumer_key    = 'ck_' . wp_generate_password( 32, false );
+		$consumer_secret = 'cs_' . wp_generate_password( 32, false );
+		$user_id         = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array(
+				'user_id'         => $user_id,
+				'description'     => 'Store API scope test key',
+				'permissions'     => 'read',
+				'consumer_key'    => wc_api_hash( $consumer_key ),
+				'consumer_secret' => $consumer_secret,
+				'truncated_key'   => substr( $consumer_key, -7 ),
+			)
+		);
+
+		// Application passwords need SSL, and core only accepts them on API requests. REST_REQUEST is not defined here.
+		$_SERVER['HTTPS'] = 'on';
+		WP_Application_Passwords::create_new_application_password( $this->factory->user->create( array( 'role' => 'administrator' ) ), array( 'name' => 'Store API scope test' ) );
+		add_filter( 'application_password_is_api_request', '__return_true' );
+
+		$this->simulate_rest_dispatching( true );
+		$_SERVER['PHP_AUTH_USER']     = $consumer_key;
+		$_SERVER['PHP_AUTH_PW']       = $consumer_secret;
+		$_SERVER['REQUEST_URI']       = '/wp-json/wc/store/v1/cart';
+		$wp->query_vars['rest_route'] = '/wc/store/v1/cart';
+
+		wp_set_current_user( 0 );
+
+		try {
+			$this->assertTrue( WP_Application_Passwords::is_in_use(), 'Application passwords should be in use for this test.' );
+
+			// Core's wp_validate_application_password() runs after us and reads the key as a username.
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Running WordPress core's filter so core's callbacks run after ours; not defining a hook.
+			$this->assertFalse( apply_filters( 'determine_current_user', false ), 'An API key must not set the current user on the Store API.' );
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Running WordPress core's filter so core's callbacks run after ours; not defining a hook.
+			$result = apply_filters( 'rest_authentication_errors', null );
+
+			$this->assertWPError( $result, 'WordPress should reject credentials it cannot match to a user.' );
+			$this->assertSame( 401, $result->get_error_data()['status'] ?? null );
+			$this->assertSame( 0, get_current_user_id(), 'The key user must not be authenticated.' );
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
+			unset( $_SERVER['HTTPS'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
+			remove_filter( 'application_password_is_api_request', '__return_true' );
+			$wp_rest_application_password_status = null;
+			wp_set_current_user( 0 );
+		}
 	}
 
 	/**
@@ -614,5 +1038,209 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$authenticated_user->setAccessible( false );
 		$update_last_access->setAccessible( false );
 		add_filter( 'woocommerce_disable_rest_api_access_log', $last_access_spy );
+	}
+
+	/**
+	 * @testdox Should accept two distinct nonces
+	 */
+	public function test_check_oauth_timestamp_and_nonce_accepts_distinct_nonces_at_same_timestamp(): void {
+		global $wpdb;
+
+		$key_id = $this->insert_nonce_test_key();
+
+		try {
+			$timestamp = time();
+
+			$first = $this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'nonce-a' );
+			$this->assertTrue( $first, 'The first request should be accepted.' );
+
+			$second = $this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'nonce-b' );
+			$this->assertTrue( $second, 'A second, distinct nonce must also be accepted.' );
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Should reject a nonce that was already used.
+	 */
+	public function test_check_oauth_timestamp_and_nonce_rejects_reused_nonce(): void {
+		global $wpdb;
+
+		$key_id = $this->insert_nonce_test_key();
+
+		try {
+			$timestamp = time();
+
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'nonce-a' );
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'nonce-b' );
+
+			$repeat = $this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'nonce-a' );
+
+			$this->assertWPError( $repeat, 'A nonce already recorded must be rejected on reuse.' );
+			$this->assertSame( 'woocommerce_rest_authentication_error', $repeat->get_error_code() );
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Should purge nonces older than the 15-minute validity window instead of retaining them indefinitely.
+	 */
+	public function test_check_oauth_timestamp_and_nonce_purges_expired_nonces(): void {
+		global $wpdb;
+
+		$key_id = $this->insert_nonce_test_key();
+
+		try {
+			$expired_timestamp = time() - ( 16 * MINUTE_IN_SECONDS );
+
+			$wpdb->update(
+				$wpdb->prefix . 'woocommerce_api_keys',
+				array( 'nonces' => maybe_serialize( array( $expired_timestamp => 'expired-nonce' ) ) ),
+				array( 'key_id' => $key_id )
+			);
+
+			$timestamp = time();
+
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'fresh-nonce' );
+
+			$stored_nonces = maybe_unserialize( $this->fetch_nonce_test_user( $key_id )->nonces );
+
+			$this->assertSame( array( $timestamp => 'fresh-nonce' ), $stored_nonces, 'Only the nonce from the current request must remain.' );
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Should reject a nonce that a previous version stored, and keep that entry.
+	 */
+	public function test_check_oauth_timestamp_and_nonce_rejects_previously_stored_nonce(): void {
+		global $wpdb;
+
+		$key_id = $this->insert_nonce_test_key();
+
+		try {
+			$stored_timestamp = time() - MINUTE_IN_SECONDS;
+
+			$wpdb->update(
+				$wpdb->prefix . 'woocommerce_api_keys',
+				array( 'nonces' => maybe_serialize( array( $stored_timestamp => 'stored-nonce' ) ) ),
+				array( 'key_id' => $key_id )
+			);
+
+			$repeat = $this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $stored_timestamp, 'stored-nonce' );
+			$this->assertWPError( $repeat, 'A nonce stored before the update must still be rejected on reuse.' );
+
+			$timestamp = time();
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'fresh-nonce' );
+
+			$stored_nonces = maybe_unserialize( $this->fetch_nonce_test_user( $key_id )->nonces );
+
+			$this->assertSame(
+				array(
+					$stored_timestamp => 'stored-nonce',
+					$timestamp        => 'fresh-nonce',
+				),
+				$stored_nonces,
+				'A still-valid stored nonce must survive a later request.'
+			);
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Should store a single nonce as a string and nonces sharing a timestamp as a list.
+	 */
+	public function test_check_oauth_timestamp_and_nonce_stored_shape(): void {
+		global $wpdb;
+
+		$key_id = $this->insert_nonce_test_key();
+
+		try {
+			$shared_timestamp = time() - 1;
+			$single_timestamp = time();
+
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $shared_timestamp, 'nonce-a' );
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $shared_timestamp, 'nonce-b' );
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $shared_timestamp, 'nonce-c' );
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $single_timestamp, 'nonce-d' );
+
+			$stored_nonces = maybe_unserialize( $this->fetch_nonce_test_user( $key_id )->nonces );
+
+			$this->assertSame(
+				array(
+					$shared_timestamp => array( 'nonce-a', 'nonce-b', 'nonce-c' ),
+					$single_timestamp => 'nonce-d',
+				),
+				$stored_nonces,
+				'A lone nonce must keep the plain string shape; only a shared timestamp becomes a list.'
+			);
+
+			$repeat = $this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $shared_timestamp, 'nonce-b' );
+			$this->assertWPError( $repeat, 'A nonce held in a list must be rejected on reuse.' );
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ) );
+		}
+	}
+
+	/**
+	 * Insert a real API key row for the nonce tests and return its key_id.
+	 *
+	 * @return int
+	 */
+	private function insert_nonce_test_key(): int {
+		global $wpdb;
+
+		$consumer_key = 'ck_' . wp_generate_password( 32, false );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array(
+				'user_id'         => 1,
+				'description'     => 'Nonce test key',
+				'permissions'     => 'read_write',
+				'consumer_key'    => wc_api_hash( $consumer_key ),
+				'consumer_secret' => 'cs_' . wp_generate_password( 32, false ),
+				'truncated_key'   => substr( $consumer_key, -7 ),
+			)
+		);
+
+		return (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Fetch a fresh copy of the user data check_oauth_timestamp_and_nonce() expects, the way a live request
+	 * would after WC_REST_Authentication re-reads the key row from the database.
+	 *
+	 * @param int $key_id API key row to fetch.
+	 * @return object
+	 */
+	private function fetch_nonce_test_user( int $key_id ): object {
+		global $wpdb;
+
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT key_id, user_id, permissions, consumer_key, consumer_secret, nonces FROM {$wpdb->prefix}woocommerce_api_keys WHERE key_id = %d",
+				$key_id
+			)
+		);
+	}
+
+	/**
+	 * Call the private check_oauth_timestamp_and_nonce() for the given user/timestamp/nonce.
+	 *
+	 * @param object $user      User data, as returned by fetch_nonce_test_user().
+	 * @param int    $timestamp OAuth timestamp.
+	 * @param string $nonce     OAuth nonce.
+	 * @return bool|WP_Error
+	 */
+	private function check_oauth_timestamp_and_nonce( object $user, int $timestamp, string $nonce ) {
+		$method = new ReflectionMethod( $this->sut, 'check_oauth_timestamp_and_nonce' );
+		$method->setAccessible( true );
+
+		return $method->invoke( $this->sut, $user, $timestamp, $nonce );
 	}
 }

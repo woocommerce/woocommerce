@@ -10,7 +10,7 @@ use Exception;
 /**
  * MarketingChannels repository class
  *
- * @since x.x.x
+ * @since 7.4.0
  */
 class MarketingChannels {
 	/**
@@ -57,7 +57,7 @@ class MarketingChannels {
 		 *
 		 * @param MarketingChannelInterface[] $channels Array of registered marketing channels.
 		 *
-		 * @since x.x.x
+		 * @since 7.4.0
 		 */
 		$channels = apply_filters( 'woocommerce_marketing_channels', $this->registered_channels );
 

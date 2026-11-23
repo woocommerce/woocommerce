@@ -44,7 +44,6 @@
 - [woocommerce_store_api_cart_errors](#woocommerce_store_api_cart_errors)
 - [woocommerce_store_api_cart_select_shipping_rate](#woocommerce_store_api_cart_select_shipping_rate)
 - [woocommerce_store_api_cart_update_customer_from_request](#woocommerce_store_api_cart_update_customer_from_request)
-- [woocommerce_store_api_cart_update_order_from_request](#woocommerce_store_api_cart_update_order_from_request)
 - [woocommerce_store_api_checkout_order_created](#woocommerce_store_api_checkout_order_created)
 - [woocommerce_store_api_checkout_order_processed](#woocommerce_store_api_checkout_order_processed)
 - [woocommerce_store_api_checkout_update_customer_from_request](#woocommerce_store_api_checkout_update_customer_from_request)
@@ -546,7 +545,7 @@ do_action( 'woocommerce_blocks_validate_location_{$location}_fields', \WP_Error 
 Fires when the IntegrationRegistry is initialized.
 
 ```php
-do_action( 'woocommerce_blocks_{$this->registry_identifier}_registration', \IntegrationRegistry $this )
+do_action( 'woocommerce_blocks_{$this->registry_identifier}_registration', \IntegrationRegistry $registry )
 ```
 
 ### Description
@@ -557,7 +556,7 @@ Runs before integrations are initialized allowing new integration to be register
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $this | \IntegrationRegistry | Instance of the IntegrationRegistry class which exposes the IntegrationRegistry::register() method. |
+| $registry | \IntegrationRegistry | Instance of the IntegrationRegistry class which exposes the IntegrationRegistry::register() method. |
 
 ### Source
 
@@ -565,7 +564,7 @@ Runs before integrations are initialized allowing new integration to be register
 
 ---
 
-## ~~woocommerce_check_cart_items~~
+## woocommerce_check_cart_items
 
 
 Fires when cart items are being validated.
@@ -575,14 +574,13 @@ do_action( 'woocommerce_check_cart_items' )
 ```
 
 
-**Deprecated:** This hook is deprecated and will be removed
-
-
 **Note:** Matches action name in WooCommerce core.
 
 ### Description
 
-Allow 3rd parties to validate cart items. This is a legacy hook from Woo core. This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture notices and convert to wp errors instead.
+Allow 3rd parties to validate cart items. This is a legacy hook from Woo core.
+
+This action will be deprecated in the Store API because it encourages wc_add_notice: the API has to capture those notices and convert them to WP_Error objects. Prefer `woocommerce_store_api_cart_errors`, which passes a WP_Error to callbacks directly. Core keeps firing this action from the classic cart and checkout, so it is not deprecated there.
 
 ### Source
 
@@ -682,7 +680,7 @@ do_action( 'woocommerce_set_additional_field_value', string $key, mixed $value, 
 
 ### Source
 
-- [Blocks/Domain/Services/CheckoutFields.php](../../../../../../src/Blocks/Domain/Services/CheckoutFields.php)
+- [Blocks/Domain/Services/CheckoutFieldsStorage.php](../../../../../../src/Blocks/Domain/Services/CheckoutFieldsStorage.php)
 
 ---
 
@@ -809,29 +807,6 @@ do_action( 'woocommerce_store_api_cart_update_customer_from_request', \WC_Custom
 
 ---
 
-## woocommerce_store_api_cart_update_order_from_request
-
-
-Fires when the order is synced with cart data from a cart route.
-
-```php
-do_action( 'woocommerce_store_api_cart_update_order_from_request', \WC_Order $draft_order, \WC_Customer $customer, \WP_REST_Request $request )
-```
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $draft_order | \WC_Order | Order object. |
-| $customer | \WC_Customer | Customer object. |
-| $request | \WP_REST_Request | Full details about the request. |
-
-### Source
-
-- [StoreApi/Routes/V1/AbstractCartRoute.php](../../../../../../src/StoreApi/Routes/V1/AbstractCartRoute.php)
-
----
-
 ## woocommerce_store_api_checkout_order_created
 
 
@@ -860,7 +835,7 @@ Use this hook for first-touch logic that should only run when the draft order is
 ## woocommerce_store_api_checkout_order_processed
 
 
-Fires before an order is processed by the Checkout Block/Store API.
+Fires after the Checkout Block/Store API request has populated and validated the order.
 
 ```php
 do_action( 'woocommerce_store_api_checkout_order_processed', \WC_Order $order )
@@ -868,7 +843,7 @@ do_action( 'woocommerce_store_api_checkout_order_processed', \WC_Order $order )
 
 ### Description
 
-This hook informs extensions that $order has completed processing and is ready for payment.
+The action runs before payment is processed, so callbacks can still act on the order on its way to the gateway. Do not use this action for payment-completion logic or to call WC_Order::payment_complete(). Use woocommerce_payment_complete or woocommerce_order_status_completed instead.
 
 This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:
 
@@ -892,7 +867,7 @@ function my_function_callback( $order ) {
   $order->save();
 }
 
-add_action( 'woocommerce_blocks_checkout_order_processed', 'my_function_callback', 10 );
+add_action( 'woocommerce_store_api_checkout_order_processed', 'my_function_callback', 10 );
 ```
 
 
