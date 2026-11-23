@@ -803,7 +803,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			array_column( $view['sections'], 'title' ),
 			'Listings come before Buying through AI assistants'
 		);
-		$this->assertSame( 'Some checks only run when AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', $sections['access']['note'], 'UCP is off in this test' );
+		$this->assertNull( $sections['access']['note'], 'UCP is off and Store access has nothing else to check, so the card says what turning it on checks instead' );
+		$this->assertSame( 'These checks run once AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', $sections['access']['empty']['title'] );
+		$this->assertSame( 'Turn on AI shopping', $sections['access']['empty']['link']['text'] );
+		$this->assertSame( AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ), $sections['access']['empty']['link']['href'], 'The button opens the page with the AI shopping switch' );
+		$this->assertSame( 'Not checked yet', $sections['access']['badge']['text'] );
 		$this->assertSame(
 			array(
 				'intent' => 'low',
@@ -1513,6 +1517,35 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'agent_readiness=', $this->row( 'Add a brand to 4 products' )['link']['href'], 'Several products open the Products list filtered to them' );
 		$counted = array_filter( (array) $this->view()['fix_first']['items'], static fn( array $item ): bool => false !== strpos( $item['title'], ' 4 products' ) );
 		$this->assertNotEmpty( $counted, 'Fix first has a product fix that counts the products' );
+	}
+
+	/**
+	 * @testdox With AI shopping off, Store access with checks to show keeps them and the note, and no Turn on AI shopping button.
+	 */
+	public function test_store_access_with_checks_keeps_the_ucp_off_note(): void {
+		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+		$row    = static fn( string $id ): array => array(
+			'id'      => $id,
+			'ok'      => true,
+			'blocks'  => 'listing',
+			'group'   => 'access',
+			'level'   => 'required',
+			'name'    => $id,
+			'why'     => $id . ' why',
+			'fix'     => $id . ' fix',
+			'fix_url' => '',
+		);
+		update_option(
+			'woocommerce_agent_readiness_report',
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array( $row( 'no_noindex_directives' ), $row( 'pages_public' ) ),
+			)
+		);
+		$access = array_column( $this->view()['sections'], null, 'id' )['access'];
+		$this->assertSame( 'Some checks only run when AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', $access['note'] );
+		$this->assertNull( $access['empty'] );
+		$this->assertCount( 2, $access['folded'], 'The passed checks stay, as in the design' );
 	}
 
 	/**

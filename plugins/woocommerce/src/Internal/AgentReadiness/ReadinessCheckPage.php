@@ -1313,19 +1313,29 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				continue;
 			}
 			// When no check could run, one row says why in their place.
-			$cant       = array() !== $report && self::none_ran( $group[1] );
-			$checks     = $cant ? array() : $group[1];
-			$folded     = array_filter( $checks, static fn( array $check ): bool => true === $check['ok'] );
-			$rows       = self::check_rows( array_values( array_diff_key( $checks, $folded ) ), $launched );
+			$cant    = array() !== $report && self::none_ran( $group[1] );
+			$checks  = $cant ? array() : $group[1];
+			$folded  = array_filter( $checks, static fn( array $check ): bool => true === $check['ok'] );
+			$rows    = self::check_rows( array_values( array_diff_key( $checks, $folded ) ), $launched );
+			$ucp_off = 'access' === $id && ! UcpUtils::is_enabled();
+			// With AI shopping off, Store access may have nothing left to show: say what turning it on checks.
+			$ucp_only   = $ucp_off && array() !== $report && ! $cant && array() === $checks;
 			$sections[] = array(
 				'id'       => $id,
 				'title'    => $group[0],
 				'badge'    => self::badge_data( $cant && array() === $rows ? self::cant_check_badge() : self::group_badge( $checks ) ),
-				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? self::ucp_off_note() : ( 'understand' === $id ? self::sample_note( $report ) : null ),
+				'note'     => $ucp_off && ! $ucp_only ? self::ucp_off_note() : ( 'understand' === $id ? self::sample_note( $report ) : null ),
 				'channels' => array(),
 				'rows'     => $cant ? array_merge( $rows, array( self::cant_check_row( $launched ) ) ) : $rows,
 				'folded'   => self::check_rows( array_values( $folded ), $launched ),
-				'empty'    => null,
+				'empty'    => $ucp_only ? array(
+					'title' => __( 'These checks run once AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', 'woocommerce' ),
+					'text'  => '',
+					'link'  => array(
+						'href' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ),
+						'text' => __( 'Turn on AI shopping', 'woocommerce' ),
+					),
+				) : null,
 			);
 		}
 		return $sections;
