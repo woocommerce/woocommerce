@@ -137,6 +137,9 @@ class StockNotificationsRestController extends RestApiControllerBase {
 			)
 		) : array();
 
+		// Load every product on the page in one query instead of one per item.
+		_prime_post_caches( array_unique( array_map( fn( $notification ) => $notification->get_product_id(), $notifications ) ) );
+
 		$items = array();
 		foreach ( $notifications as $notification ) {
 			// Embed the item links in the data, as WP_REST_Controller::prepare_response_for_collection() does.
