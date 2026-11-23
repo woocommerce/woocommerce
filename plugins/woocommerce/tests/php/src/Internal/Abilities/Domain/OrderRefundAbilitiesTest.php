@@ -1482,6 +1482,54 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep a gateway refund that a callback makes before the call's refund is first saved, and delete only its own refund, when an Error follows.
+	 */
+	public function test_crash_keeps_a_gateway_refund_made_before_the_first_save(): void {
+		$order  = $this->create_order_without_lines();
+		$nested = null;
+		add_filter(
+			'woocommerce_order_get_items',
+			static function ( $items, $refund ) use ( $order, &$nested ) {
+				if ( null === $nested && $refund instanceof \WC_Order_Refund && 0 === $refund->get_id() && '5' === (string) $refund->get_amount() ) {
+					$nested = wc_create_refund(
+						array(
+							'amount'         => '2',
+							'order_id'       => $order->get_id(),
+							'refund_payment' => true,
+						)
+					);
+				}
+				return $items;
+			},
+			10,
+			2
+		);
+		add_action(
+			'woocommerce_after_order_refund_object_save',
+			static function ( $refund ) {
+				if ( '5' === (string) $refund->get_amount() ) {
+					throw new \Error( 'Extension save hook crashed.' );
+				}
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '5',
+			)
+		);
+
+		$this->assertInstanceOf( \WC_Order_Refund::class, $nested );
+		$this->assertWPError( $result );
+		$this->assertSame( array( '2' ), $this->gateway->refunded );
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds );
+		$this->assertSame( $nested->get_id(), $refunds[0]->get_id() );
+		$this->assertTrue( $refunds[0]->get_refunded_payment() );
+	}
+
+	/**
 	 * @testdox Should tell the client not to refund again when the call fails after woocommerce_create_refund ran and the refund is rolled back.
 	 */
 	public function test_reports_lost_refund_when_the_call_fails_after_the_create_hook(): void {

@@ -252,13 +252,18 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		 */
 		$candidate = null;
 
+		// A refund of the order that a callback makes during the call is left alone: it differs in amount, reason or user, or saves after this one.
+		$reason  = isset( $input['reason'] ) ? sanitize_textarea_field( $input['reason'] ) : null;
+		$user_id = get_current_user_id();
+		$matches = static fn( $refund ): bool => $refund instanceof \WC_Order_Refund
+			&& $refund->get_parent_id() === $order_id
+			&& $refund->get_refunded_by() === $user_id
+			&& $refund->get_reason() === (string) $reason
+			&& wc_format_decimal( $refund->get_amount(), $decimals ) === wc_format_decimal( $amount, $decimals );
+
 		// First, so the meta is on the refund before callbacks that move money see it, and a lost lock declines it before they run.
-		// Only the refund that wc_create_refund() saved first, so a refund of the order that a callback makes during the call is left alone.
-		$tag = static function ( $refund ) use ( $order_id, $lock, $fingerprint, $resolved_fingerprint, $refund_payment, &$candidate, &$tagged, &$lock_error ): void {
-			if ( null !== $tagged || ! $refund instanceof \WC_Order_Refund || $refund->get_parent_id() !== $order_id ) {
-				return;
-			}
-			if ( null !== $candidate && $refund !== $candidate ) {
+		$tag = static function ( $refund ) use ( $order_id, $lock, $fingerprint, $resolved_fingerprint, $refund_payment, $matches, &$candidate, &$tagged, &$lock_error ): void {
+			if ( null !== $tagged || ! $matches( $refund ) || ( null !== $candidate && $refund !== $candidate ) ) {
 				return;
 			}
 			$tagged = $refund;
@@ -274,8 +279,8 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			}
 		};
 		// wc_create_refund() sets the paid flag only after the gateway refunded, so a save that carries it means the money moved.
-		$watch_paid = static function ( $refund ) use ( $order_id, &$candidate, &$tagged, &$paid ): void {
-			if ( null === $candidate && $refund instanceof \WC_Order_Refund && 0 === $refund->get_id() && $refund->get_parent_id() === $order_id ) {
+		$watch_paid = static function ( $refund ) use ( $matches, &$candidate, &$tagged, &$paid ): void {
+			if ( null === $candidate && $matches( $refund ) && 0 === $refund->get_id() ) {
 				$candidate = $refund;
 			}
 			$paid = $paid || ( null !== $tagged && $refund === $tagged && $refund->get_refunded_payment() );
@@ -287,19 +292,24 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		add_action( 'woocommerce_create_refund', $tag, PHP_INT_MIN );
 		add_action( 'woocommerce_before_order_refund_object_save', $watch_paid, PHP_INT_MIN );
 		add_action( 'woocommerce_after_order_refund_object_save', $watch_save, PHP_INT_MIN );
+		/**
+		 * Whether a callback threw an Error. Set in the catch, which PHPStan takes for dead.
+		 *
+		 * @var bool $crashed
+		 */
 		$crashed = false;
 		try {
 			$result = wc_create_refund(
 				array(
 					'amount'         => $amount,
-					'reason'         => isset( $input['reason'] ) ? sanitize_textarea_field( $input['reason'] ) : null,
+					'reason'         => $reason,
 					'order_id'       => $order_id,
 					'line_items'     => $prepared['line_items'],
 					'refund_payment' => $refund_payment,
 					'restock_items'  => $input['restock_items'] ?? false,
 				)
 			);
-		} catch ( \Error $e ) {
+		} catch ( \Error $e ) { // @phpstan-ignore catch.neverThrown (Callbacks that wc_create_refund() runs can throw an Error, which its @throws does not list.)
 			// wc_create_refund() catches only exceptions, so delete the half-made refund as it would. It saves the refund before woocommerce_create_refund, so the refund can exist untagged.
 			$crashed = true;
 			$result  = new \WP_Error( 'error', $e->getMessage() );
@@ -549,20 +559,18 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 	 * @return \WC_Order_Refund[]
 	 */
 	private static function find_recent_refunds( \WC_Order $order ): array {
-		$refund_ids = wc_get_orders(
+		$refunds = wc_get_orders(
 			array(
 				'type'    => 'shop_order_refund',
 				'parent'  => $order->get_id(),
 				'limit'   => -1,
 				'orderby' => 'ID',
 				'order'   => 'DESC',
-				'return'  => 'ids',
 			)
 		);
 
 		$found = array();
-		foreach ( is_array( $refund_ids ) ? $refund_ids : array() as $refund_id ) {
-			$refund = wc_get_order( $refund_id );
+		foreach ( is_array( $refunds ) ? $refunds : array() as $refund ) {
 			if ( ! $refund instanceof \WC_Order_Refund ) {
 				continue;
 			}
