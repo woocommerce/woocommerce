@@ -1777,7 +1777,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			array(
 				array(
 					'contents'        => $this->get_items_needing_shipping(),
-					'contents_cost'   => array_sum( wp_list_pluck( $this->get_items_needing_shipping(), 'line_total' ) ),
+					'contents_cost'   => array_sum( array_column( $this->get_items_needing_shipping(), 'line_total' ) ),
 					'applied_coupons' => $this->get_applied_coupons(),
 					'user'            => array(
 						'ID' => get_current_user_id(),
