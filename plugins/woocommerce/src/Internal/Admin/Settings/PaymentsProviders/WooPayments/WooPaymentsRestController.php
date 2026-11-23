@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPa
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
+use Automattic\WooCommerce\Internal\RestApi\InteractiveSessionCheck;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
 use Exception;
@@ -223,7 +224,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_wpcom_connection_authorize' ),
-					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'permission_callback' => fn( $request ) => $this->check_wpcom_connection_authorize_permissions( $request ),
 					'args'                => array(
 						'source' => array(
 							'description'       => esc_html__( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
@@ -528,8 +529,11 @@ class WooPaymentsRestController extends RestApiControllerBase {
 
 		$source = $request->get_param( 'source' );
 
+		// The WPCOM authorization URL is only returned to an interactive admin session.
+		$is_interactive_session = ! is_wp_error( InteractiveSessionCheck::require_interactive_session( $request ) );
+
 		try {
-			$onboarding_details = $this->woopayments->get_onboarding_details( $location, $this->get_rest_url_path( 'onboarding' ), $source );
+			$onboarding_details = $this->woopayments->get_onboarding_details( $location, $this->get_rest_url_path( 'onboarding' ), $source, $is_interactive_session );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( Exception $e ) {
@@ -982,6 +986,25 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$error_information['message'],
 			array( 'status' => rest_authorization_required_code() )
 		);
+	}
+
+	/**
+	 * Permissions check for the WPCOM connection authorize endpoint.
+	 *
+	 * Requires an interactive admin session on top of the general permissions.
+	 *
+	 * @param WP_REST_Request $request The request for which the permission is checked.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return bool|WP_Error True if the request is allowed, otherwise an error or False if no error is available for the request method.
+	 */
+	private function check_wpcom_connection_authorize_permissions( WP_REST_Request $request ) {
+		$session = InteractiveSessionCheck::require_interactive_session( $request );
+		if ( is_wp_error( $session ) ) {
+			return $session;
+		}
+
+		return $this->check_permissions( $request );
 	}
 
 	/**
