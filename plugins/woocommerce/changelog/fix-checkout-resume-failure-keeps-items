@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep a pending order's items unchanged when a retried checkout fails before the order is saved.

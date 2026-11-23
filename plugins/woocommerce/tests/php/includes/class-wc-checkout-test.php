@@ -1720,6 +1720,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_create_order_resume_keeps_original_items_when_checkout_fails(): void {
 		$order_id = $this->create_order_with_line_item_and_fee();
+		// Retried a minute later, so a meta change on the order can trigger a full save, as it does for a real shopper.
+		$order = wc_get_order( $order_id );
+		$order->set_date_modified( time() - MINUTE_IN_SECONDS );
+		$order->save();
 		$this->change_cart_section( $order_id, 'fee' );
 		wc_add_order_item(
 			$order_id,

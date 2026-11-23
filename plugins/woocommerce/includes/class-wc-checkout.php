@@ -629,7 +629,13 @@ class WC_Checkout {
 			return $order_id;
 		} catch ( Exception $e ) {
 			if ( $order instanceof WC_Order ) {
-				wc_release_coupons_for_order( $order );
+				// Saving the released coupon meta can trigger a full order save, which would persist item changes staged by this failed attempt.
+				add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
+				try {
+					wc_release_coupons_for_order( $order );
+				} finally {
+					remove_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
+				}
 				/**
 				 * Action hook fired when an order is discarded due to Exception.
 				 *
