@@ -619,10 +619,11 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 			$this->sut->all();
 		};
 
+		$today = gmdate( 'Y-m-d' );
 		$run( array( 200, '{"ucp":{"status":"success"},"products":[]}' ) );
 		$counts = StoreOutputChecks::search_counts();
-		$this->assertSame( gmdate( 'Y-m-d' ), $counts['since'] );
-		$this->assertSame( array( 1, 0, 0, 0, '' ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'], $counts['no_answer'], $counts['last_seen'] ), 'A pass counts only as a check' );
+		$this->assertSame( $today, $counts['since'] );
+		$this->assertSame( array( 1, 0, 0, 0, '', '', '', '' ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'], $counts['no_answer'], $counts['last_seen'], $counts['last_seen_on'], $counts['last_recovered'], $counts['last_recovered_on'] ), 'A pass counts only as a check' );
 
 		$run( array( 403, '<html>Blocked</html>', array( 'content-type' => 'text/html; charset=UTF-8' ) ) );
 		$run( null );
@@ -632,13 +633,15 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $counts['failed'], 'A refusal fails after the retry' );
 		$this->assertSame( 1, $counts['no_answer'], 'A timeout is no answer, shown as couldn\'t check' );
 		$this->assertSame( '403 text/html', $counts['last_seen'], 'No answer leaves the last answer in place' );
+		$this->assertSame( $today, $counts['last_seen_on'] );
+		$this->assertSame( '', $counts['last_recovered'] );
 
 		$run( array( 503, '<html>Unavailable</html>', array( 'content-type' => 'text/html' ) ) );
 		$counts = StoreOutputChecks::search_counts();
-		$this->assertSame( array( 4, 3, 1, 2, '503 text/html' ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'], $counts['no_answer'], $counts['last_seen'] ), 'A 5xx is no answer and keeps what came back' );
+		$this->assertSame( array( 4, 3, 1, 2, '503 text/html', $today ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'], $counts['no_answer'], $counts['last_seen'], $counts['last_seen_on'] ), 'A 5xx is no answer and keeps what came back' );
 
 		$this->serve( $responses );
-		$answers = array( array( 403, '<html>Blocked</html>' ), array( 200, '{"ucp":{"status":"success"},"products":[]}' ) );
+		$answers = array( array( 403, '<html>Blocked</html>', array( 'content-type' => 'text/html' ) ), array( 200, '{"ucp":{"status":"success"},"products":[]}' ) );
 		add_filter(
 			'pre_http_request',
 			function ( $pre, $args, $url ) use ( $search, &$answers ) {
@@ -647,7 +650,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 				}
 				$answer = array_shift( $answers );
 				return array(
-					'headers'  => new \WpOrg\Requests\Utility\CaseInsensitiveDictionary( array() ),
+					'headers'  => new \WpOrg\Requests\Utility\CaseInsensitiveDictionary( $answer[2] ?? array() ),
 					'body'     => $answer[1],
 					'response' => array(
 						'code'    => $answer[0],
@@ -662,6 +665,9 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->sut->all();
 		$counts = StoreOutputChecks::search_counts();
 		$this->assertSame( array( 5, 4, 1 ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'] ), 'A refusal the retry gets past counts as a first-try failure only' );
+		$this->assertSame( '503 text/html', $counts['last_seen'], 'A recovery leaves the last failure in place' );
+		$this->assertSame( '403 text/html', $counts['last_recovered'], 'A recovery keeps what the first try answered' );
+		$this->assertSame( $today, $counts['last_recovered_on'] );
 
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		$this->serve( $responses );
@@ -712,11 +718,13 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$counts = StoreOutputChecks::search_counts();
 		$this->assertNull( $checks['ucp_endpoints_live']['ok'], 'A retry that times out is couldn\'t check' );
 		$this->assertSame( '403 text/html', $checks['ucp_endpoints_live']['source'], 'A retry that times out keeps the first answer' );
-		$this->assertSame( array( 6, 5, 1, 3, '403 text/html' ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'], $counts['no_answer'], $counts['last_seen'] ) );
+		$this->assertSame( array( 6, 5, 1, 3, '403 text/html', $today ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'], $counts['no_answer'], $counts['last_seen'], $counts['last_seen_on'] ) );
+		$this->assertSame( '403 text/html', $counts['last_recovered'], 'A later failure leaves the last recovery in place' );
 
 		$run( array( 403, '<html>Blocked</html>', array( 'content-type' => 'https://store.example/cart' ) ) );
 		$counts = StoreOutputChecks::search_counts();
 		$this->assertSame( '403', $counts['last_seen'], 'An unknown content type is left out' );
+		$this->assertSame( $today, $counts['last_seen_on'] );
 		$this->assertSame( array( 7, 6, 2 ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'] ) );
 	}
 

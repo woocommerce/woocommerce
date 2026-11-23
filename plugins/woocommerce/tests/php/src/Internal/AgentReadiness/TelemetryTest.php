@@ -166,12 +166,15 @@ class TelemetryTest extends WC_Unit_Test_Case {
 	 */
 	public function test_catalog_search_counts(): void {
 		$counts = array(
-			'since'            => '2026-11-20',
-			'checks'           => 11,
-			'first_try_failed' => 3,
-			'failed'           => 1,
-			'no_answer'        => 0,
-			'last_seen'        => '403 text/html',
+			'since'             => '2026-11-20',
+			'checks'            => 11,
+			'first_try_failed'  => 3,
+			'failed'            => 1,
+			'no_answer'         => 0,
+			'last_seen'         => '403 text/html',
+			'last_seen_on'      => '2026-11-18',
+			'last_recovered'    => '403 text/html',
+			'last_recovered_on' => '2026-11-19',
 		);
 		update_option( StoreOutputChecks::SEARCH_COUNTS_OPTION, $counts );
 

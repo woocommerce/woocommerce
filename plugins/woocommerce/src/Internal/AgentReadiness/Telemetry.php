@@ -76,7 +76,7 @@ class Telemetry implements RegisterHooksInterface {
 	 * The store conditions are read now; output and product checks are as the last scan left them.
 	 * `ucp_search` counts the catalog search checks, to see how often they fail and whether the retry helps.
 	 *
-	 * @return array{feature_enabled:string,last_scan:string,truncated:string,store_checks:array<string,string>,product_checks:array<string,string>,ucp_search?:array{since:string,checks:int,first_try_failed:int,failed:int,no_answer:int,last_seen:string}}
+	 * @return array{feature_enabled:string,last_scan:string,truncated:string,store_checks:array<string,string>,product_checks:array<string,string>,ucp_search?:array{since:string,checks:int,first_try_failed:int,failed:int,no_answer:int,last_seen:string,last_seen_on:string,last_recovered:string,last_recovered_on:string}}
 	 */
 	public function snapshot(): array {
 		$snapshot = array(

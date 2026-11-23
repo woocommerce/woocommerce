@@ -1450,12 +1450,17 @@ class StoreOutputChecks {
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private static function ucp_endpoint_answers( StoreResponses $responses ): ?bool {
-		$url   = self::catalog_search_url( $responses );
-		$first = self::endpoint_answer( $responses->post_json( $url, array() ) );
+		$url            = self::catalog_search_url( $responses );
+		$first_response = $responses->post_json( $url, array() );
+		$first          = self::endpoint_answer( $first_response );
 		// Asked once more before it fails, so one slow or briefly refused request doesn't mark AI shopping as broken.
 		$answer = true === $first ? true : self::endpoint_answer( $responses->post_json_again( $url, array() ) );
 		if ( $responses->can_request( $url ) ) {
-			self::count_search_answer( $first, $answer, true === $answer ? '' : self::search_seen( $responses ) );
+			// The first answer is read before the retry replaces it, so a recovery still says what was in the way.
+			$first_seen = self::seen_from( $first_response );
+			$recovered  = true === $answer && true !== $first ? $first_seen : '';
+			$seen       = true === $answer ? '' : self::search_seen( $responses );
+			self::count_search_answer( $first, $answer, $seen, $recovered );
 		}
 		return $answer;
 	}
@@ -1464,11 +1469,12 @@ class StoreOutputChecks {
 	 * Add one catalog search check to the running counts the tracker snapshot sends, so we can see
 	 * how often stores fail it, and whether the retry helps.
 	 *
-	 * @param bool|null $first  The first answer: true when it was the JSON, null when the store didn't answer.
-	 * @param bool|null $answer The result after the retry.
-	 * @param string    $seen   What the store last answered, such as `403 text/html`, when the check didn't pass.
+	 * @param bool|null $first     The first answer: true when it was the JSON, null when the store didn't answer.
+	 * @param bool|null $answer    The result after the retry.
+	 * @param string    $seen      What the store last answered, such as `403 text/html`, when the check didn't pass.
+	 * @param string    $recovered What the first try answered when the retry got past it.
 	 */
-	private static function count_search_answer( ?bool $first, ?bool $answer, string $seen ): void {
+	private static function count_search_answer( ?bool $first, ?bool $answer, string $seen, string $recovered ): void {
 		$counts          = self::search_counts();
 		$counts['since'] = '' === $counts['since'] ? gmdate( 'Y-m-d' ) : $counts['since'];
 		++$counts['checks'];
@@ -1480,8 +1486,14 @@ class StoreOutputChecks {
 		} elseif ( null === $answer ) {
 			++$counts['no_answer'];
 		}
+		$today = gmdate( 'Y-m-d' );
 		if ( '' !== $seen ) {
-			$counts['last_seen'] = $seen;
+			$counts['last_seen']    = $seen;
+			$counts['last_seen_on'] = $today;
+		}
+		if ( '' !== $recovered ) {
+			$counts['last_recovered']    = $recovered;
+			$counts['last_recovered_on'] = $today;
 		}
 		update_option( self::SEARCH_COUNTS_OPTION, $counts, false );
 	}
@@ -1489,22 +1501,27 @@ class StoreOutputChecks {
 	/**
 	 * Running counts of catalog search checks since `since`. `first_try_failed` includes `failed`
 	 * and `no_answer` (a 5xx or none, shown as couldn't check). The retry recovered
-	 * `first_try_failed - failed - no_answer`. `last_seen` is what the store last answered when one didn't pass.
+	 * `first_try_failed - failed - no_answer`. `last_seen` / `last_seen_on` are what the store last
+	 * answered when one didn't pass, and the day. `last_recovered` / `last_recovered_on` are what the
+	 * first try answered when the retry got past it, and the day.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @return array{since:string,checks:int,first_try_failed:int,failed:int,no_answer:int,last_seen:string}
+	 * @return array{since:string,checks:int,first_try_failed:int,failed:int,no_answer:int,last_seen:string,last_seen_on:string,last_recovered:string,last_recovered_on:string}
 	 */
 	public static function search_counts(): array {
 		$stored = get_option( self::SEARCH_COUNTS_OPTION, array() );
 		$stored = is_array( $stored ) ? $stored : array();
 		return array(
-			'since'            => is_string( $stored['since'] ?? null ) ? $stored['since'] : '',
-			'checks'           => (int) ( $stored['checks'] ?? 0 ),
-			'first_try_failed' => (int) ( $stored['first_try_failed'] ?? 0 ),
-			'failed'           => (int) ( $stored['failed'] ?? 0 ),
-			'no_answer'        => (int) ( $stored['no_answer'] ?? 0 ),
-			'last_seen'        => is_string( $stored['last_seen'] ?? null ) ? $stored['last_seen'] : '',
+			'since'             => is_string( $stored['since'] ?? null ) ? $stored['since'] : '',
+			'checks'            => (int) ( $stored['checks'] ?? 0 ),
+			'first_try_failed'  => (int) ( $stored['first_try_failed'] ?? 0 ),
+			'failed'            => (int) ( $stored['failed'] ?? 0 ),
+			'no_answer'         => (int) ( $stored['no_answer'] ?? 0 ),
+			'last_seen'         => is_string( $stored['last_seen'] ?? null ) ? $stored['last_seen'] : '',
+			'last_seen_on'      => is_string( $stored['last_seen_on'] ?? null ) ? $stored['last_seen_on'] : '',
+			'last_recovered'    => is_string( $stored['last_recovered'] ?? null ) ? $stored['last_recovered'] : '',
+			'last_recovered_on' => is_string( $stored['last_recovered_on'] ?? null ) ? $stored['last_recovered_on'] : '',
 		);
 	}
 
@@ -1524,7 +1541,16 @@ class StoreOutputChecks {
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private static function search_seen( StoreResponses $responses ): string {
-		$response = $responses->post_json( self::catalog_search_url( $responses ), array() );
+		return self::seen_from( $responses->post_json( self::catalog_search_url( $responses ), array() ) );
+	}
+
+	/**
+	 * Status and content type from one catalog search answer, such as `403 text/html`. Only a known
+	 * media type is kept. Empty when there was no answer.
+	 *
+	 * @param array{status:int,body:string,headers:array<string,string>,truncated:bool}|null $response Response.
+	 */
+	private static function seen_from( ?array $response ): string {
 		if ( null === $response ) {
 			return '';
 		}
