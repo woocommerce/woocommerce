@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\TaxRateAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -16,6 +17,8 @@ defined( 'ABSPATH' ) || exit;
  * no object an extension could read or change, so they take no extension fields.
  */
 class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
+
+	use TaxRateAbilityTrait;
 
 	/**
 	 * Get the ability name.
@@ -122,8 +125,8 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$conditions[] = $wpdb->prepare( "tax_rate_id IN ({$placeholders})", $include );
 		}
 		if ( isset( $input['class'] ) ) {
-			$tax_class = sanitize_title( $input['class'] );
-			if ( 'standard' !== $tax_class && ! in_array( $tax_class, \WC_Tax::get_tax_class_slugs(), true ) ) {
+			$tax_class = self::get_stored_tax_class( $input['class'] );
+			if ( null === $tax_class ) {
 				return array(
 					'rates'       => array(),
 					'total'       => 0,
@@ -132,7 +135,7 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'per_page'    => $per_page,
 				);
 			}
-			$conditions[] = $wpdb->prepare( 'tax_rate_class = %s', 'standard' === $tax_class ? '' : $tax_class );
+			$conditions[] = $wpdb->prepare( 'tax_rate_class = %s', $tax_class );
 		}
 		if ( isset( $input['country'] ) ) {
 			$conditions[] = $wpdb->prepare( "tax_rate_country IN ( '', %s )", strtoupper( $input['country'] ) );
@@ -181,101 +184,5 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 */
 	public static function can_query_taxes(): bool {
 		return (bool) wc_rest_check_manager_permissions( 'settings', 'read' );
-	}
-
-	/**
-	 * Get the postcodes and cities of the given tax rates in one query.
-	 *
-	 * @param int[] $rate_ids Tax rate IDs.
-	 * @return array<int, array{postcodes?: string[], cities?: string[]}> Locations keyed by tax rate ID.
-	 */
-	private static function get_locations( array $rate_ids ): array {
-		global $wpdb;
-
-		if ( empty( $rate_ids ) ) {
-			return array();
-		}
-
-		$placeholders = implode( ', ', array_fill( 0, count( $rate_ids ), '%d' ) );
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The placeholders are generated for each ID.
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT tax_rate_id, location_code, location_type FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id IN ({$placeholders}) ORDER BY location_id",
-				$rate_ids
-			)
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-
-		$locations = array();
-		foreach ( $rows as $row ) {
-			$key = 'postcode' === $row->location_type ? 'postcodes' : ( 'city' === $row->location_type ? 'cities' : null );
-			if ( null !== $key ) {
-				$locations[ (int) $row->tax_rate_id ][ $key ][] = (string) $row->location_code;
-			}
-		}
-
-		return $locations;
-	}
-
-	/**
-	 * Format a tax rate row.
-	 *
-	 * @param \stdClass $rate      Row of the tax rates table.
-	 * @param array     $locations Postcodes and cities of the rate.
-	 * @return array
-	 */
-	private static function format_rate_for_response( \stdClass $rate, array $locations ): array {
-		return array(
-			'id'        => (int) $rate->tax_rate_id,
-			'country'   => (string) $rate->tax_rate_country,
-			'state'     => (string) $rate->tax_rate_state,
-			'postcodes' => $locations['postcodes'] ?? array(),
-			'cities'    => $locations['cities'] ?? array(),
-			'rate'      => (string) $rate->tax_rate,
-			'name'      => (string) $rate->tax_rate_name,
-			'priority'  => (int) $rate->tax_rate_priority,
-			'compound'  => (bool) $rate->tax_rate_compound,
-			'shipping'  => (bool) $rate->tax_rate_shipping,
-			'class'     => '' === (string) $rate->tax_rate_class ? 'standard' : (string) $rate->tax_rate_class,
-		);
-	}
-
-	/**
-	 * Get the schema of a tax rate in a response.
-	 *
-	 * @return array
-	 */
-	private static function get_rate_output_schema(): array {
-		$list = array(
-			'type'  => 'array',
-			'items' => array( 'type' => 'string' ),
-		);
-
-		return array(
-			'type'                 => 'object',
-			'properties'           => array(
-				'id'        => array( 'type' => 'integer' ),
-				'country'   => array(
-					'type'        => 'string',
-					'description' => __( 'Empty for every country.', 'woocommerce' ),
-				),
-				'state'     => array( 'type' => 'string' ),
-				'postcodes' => $list,
-				'cities'    => $list,
-				'rate'      => array(
-					'type'        => 'string',
-					'description' => __( 'Percentage as a decimal string.', 'woocommerce' ),
-				),
-				'name'      => array( 'type' => 'string' ),
-				'priority'  => array( 'type' => 'integer' ),
-				'compound'  => array( 'type' => 'boolean' ),
-				'shipping'  => array(
-					'type'        => 'boolean',
-					'description' => __( 'Whether the rate also applies to shipping.', 'woocommerce' ),
-				),
-				'class'     => array( 'type' => 'string' ),
-			),
-			'additionalProperties' => false,
-		);
 	}
 }
