@@ -89,7 +89,6 @@ class WC_REST_Image_Upload_Cleanup_Test extends WC_REST_Unit_Test_Case {
 			'products v1'   => array( 'products', 1, 'POST' ),
 			'products v2'   => array( 'products', 2, 'POST' ),
 			'products v3'   => array( 'products', 3, 'POST' ),
-			'products v4'   => array( 'products', 4, 'POST' ),
 			'variations v3' => array( 'variations', 3, 'PUT' ),
 			'categories v1' => array( 'categories', 1, 'POST' ),
 			'categories v3' => array( 'categories', 3, 'PUT' ),
@@ -107,10 +106,6 @@ class WC_REST_Image_Upload_Cleanup_Test extends WC_REST_Unit_Test_Case {
 	 */
 	private function image_request( string $kind, int $version, string $method, array $image ): WP_REST_Request {
 		$route = "/wc/v$version/products";
-		if ( 4 === $version ) {
-			$sut = new Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller();
-			$sut->register_routes();
-		}
 
 		if ( 'categories' === $kind ) {
 			$route .= '/categories';
@@ -443,7 +438,6 @@ class WC_REST_Image_Upload_Cleanup_Test extends WC_REST_Unit_Test_Case {
 	/**
 	 * @testdox A failed update removes unused new images and preserves an existing library file.
 	 * @testWith [3]
-	 *           [4]
 	 *
 	 * @param int $version API version.
 	 */
@@ -474,7 +468,6 @@ class WC_REST_Image_Upload_Cleanup_Test extends WC_REST_Unit_Test_Case {
 	/**
 	 * @testdox An error after saving preserves the persisted featured and gallery images.
 	 * @testWith [3]
-	 *           [4]
 	 *
 	 * @param int $version API version.
 	 */

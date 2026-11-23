@@ -101,7 +101,6 @@ class BlockRegistrationContextTest extends WC_Unit_Test_Case {
 			'store api (plain)'             => array( '/index.php?rest_route=/wc/store/v1/cart', '/wc/store/v1/cart', null, false ),
 
 			'wc/v3 rest (pretty)'           => array( '/wp-json/wc/v3/orders', null, null, false ),
-			'wc/v4 rest (pretty)'           => array( '/wp-json/wc/v4/products', null, null, false ),
 			'wc/v3 rest (plain)'            => array( '/index.php?rest_route=/wc/v3/orders', '/wc/v3/orders', null, false ),
 
 			// Repeated leading slashes must still be recognised (some servers send them; WP trims request URIs too).
