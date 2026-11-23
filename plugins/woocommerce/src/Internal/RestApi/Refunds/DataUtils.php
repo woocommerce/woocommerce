@@ -479,13 +479,11 @@ class DataUtils {
 						$already_refunded_tax = (float) ( $refund_data['tax_totals'][ $line_item_id ][ $tax_id ] ?? 0.0 );
 						$remaining_tax        = abs( $stored_tax ) - $already_refunded_tax;
 						if ( abs( $requested_tax ) > NumberUtil::round( $remaining_tax, $price_decimals ) ) {
-							// 400, not the 422 the over-refund caps above use: this is the
-							// status the released wc/v4 envelope already backfills for this
-							// error, so anything else would change a shipped response. It
-							// also keeps the code-to-status mapping one-to-one across this
-							// file — invalid_refund_amount is 400 at every site, sharing the
-							// code with the wrong-sign guard above, which is malformed
-							// input, while each 422 carries its own over-refund code.
+							// 400, not the 422 the over-refund caps above use: this keeps the
+							// code-to-status mapping one-to-one across this file —
+							// invalid_refund_amount is 400 at every site, sharing the code
+							// with the wrong-sign guard above, which is malformed input,
+							// while each 422 carries its own over-refund code.
 							return new WP_Error(
 								'invalid_refund_amount',
 								sprintf(
@@ -1293,10 +1291,9 @@ class DataUtils {
 	 * Normalizes the caller-supplied refund_total values, validates the line
 	 * items, builds the preview, and applies the two aggregate guards (a
 	 * non-positive total, and a total exceeding the order's remaining
-	 * refundable amount). Shared by the wc/v3 and wc/v4 preview endpoints so
-	 * a fix lands once; error codes are emitted unprefixed and each caller
+	 * refundable amount). Error codes are emitted unprefixed; the caller
 	 * applies its own surface convention (wc/v3 prefixes with
-	 * `woocommerce_rest_`, wc/v4 wraps in its error envelope).
+	 * `woocommerce_rest_`).
 	 *
 	 * @param WC_Order $order      The order the preview is computed for.
 	 * @param array    $line_items Line items in schema format (line_item_id keyed).
@@ -1383,18 +1380,17 @@ class DataUtils {
 	}
 
 	/**
-	 * Run the shared refund creation preparation pipeline for one request.
+	 * Run the refund creation preparation pipeline for one request.
 	 *
 	 * Fills missing refund_total values from quantities, validates the line
 	 * items against the order's refund history, converts them to the internal
 	 * wc_create_refund() format, resolves the refund amount, and applies the
 	 * three aggregate guards (non-positive amount, an override below the line
 	 * items total, and an amount exceeding the order's remaining refundable
-	 * amount). Shared by the wc/v3 compute_totals path and the wc/v4 creation
-	 * endpoint so a fix lands once; error codes are emitted unprefixed with
-	 * their HTTP status in the error data, and each caller applies its own
-	 * surface convention. Request mutation, hooks, metadata, and the
-	 * wc_create_refund() call itself stay with the callers.
+	 * amount). Error codes are emitted unprefixed with their HTTP status in
+	 * the error data; the caller applies its own surface convention. Request
+	 * mutation, hooks, metadata, and the wc_create_refund() call itself stay
+	 * with the caller.
 	 *
 	 * The amount override is passed as a flag plus raw value because an
 	 * explicitly supplied zero or null must be rejected, never silently
@@ -1509,9 +1505,6 @@ class DataUtils {
 
 	/**
 	 * Get the REST argument schema for a preview request's line_items parameter.
-	 *
-	 * Shared by the wc/v3 and wc/v4 preview endpoints so the accepted payload
-	 * cannot drift between versions.
 	 *
 	 * @return array
 	 *
