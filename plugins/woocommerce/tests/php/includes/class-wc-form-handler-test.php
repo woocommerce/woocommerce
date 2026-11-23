@@ -102,6 +102,73 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Order statuses when the pay form is posted, and whether pay_action() should take each one on.
+	 *
+	 * @return array<string, array{0: string, 1: bool}>
+	 */
+	public function provider_pay_action_order_statuses(): array {
+		return array(
+			'pending order is processed'      => array( OrderStatus::PENDING, true ),
+			'checkout-draft order is refused' => array( OrderStatus::CHECKOUT_DRAFT, false ),
+		);
+	}
+
+	/**
+	 * @testdox pay_action() takes on a pending order but not a checkout-draft, which has not passed checkout validation.
+	 *
+	 * @dataProvider provider_pay_action_order_statuses
+	 * @covers WC_Form_Handler::pay_action()
+	 *
+	 * @param string $status           Order status when the form is posted.
+	 * @param bool   $expect_processed Whether pay_action() should start processing the order.
+	 */
+	public function test_pay_action_processes_payable_orders_but_not_checkout_drafts( string $status, bool $expect_processed ): void {
+		global $wp;
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_status( $status );
+		$order->save();
+
+		$this->assertTrue( $order->needs_payment(), 'Baseline: needs_payment() is true for both, so only the draft check can tell them apart.' );
+
+		// No payment method is posted, so a processed order stops at "Invalid payment method" instead of redirecting.
+		$_GET['key']                       = $order->get_order_key();
+		$_POST['woocommerce_pay']          = '1';
+		$_REQUEST['woocommerce-pay-nonce'] = wp_create_nonce( 'woocommerce-pay' );
+		$wp->query_vars['order-pay']       = $order->get_id();
+
+		$processed = false;
+		add_action(
+			'woocommerce_before_pay_action',
+			function () use ( &$processed ) {
+				$processed = true;
+			}
+		);
+
+		$customer_billing = array(
+			'billing_country'  => WC()->customer->get_billing_country(),
+			'billing_state'    => WC()->customer->get_billing_state(),
+			'billing_postcode' => WC()->customer->get_billing_postcode(),
+			'billing_city'     => WC()->customer->get_billing_city(),
+		);
+		$ob_level         = ob_get_level();
+
+		try {
+			WC_Form_Handler::pay_action();
+		} finally {
+			// pay_action() copies the order's billing location (country, state, postcode, city) onto the shared customer and leaves its output buffer open.
+			WC()->customer->set_props( $customer_billing );
+			WC()->customer->save();
+			while ( ob_get_level() > $ob_level ) {
+				ob_end_clean();
+			}
+			unset( $wp->query_vars['order-pay'], $_GET['key'], $_POST['woocommerce_pay'], $_REQUEST['woocommerce-pay-nonce'] );
+		}
+
+		$this->assertSame( $expect_processed, $processed, 'pay_action() must take on a pending order and leave a draft alone.' );
+	}
+
+	/**
 	 * @testdox cancel_order() redirects to a clean endpoint when no custom redirect is provided.
 	 *
 	 * @covers WC_Form_Handler::cancel_order()

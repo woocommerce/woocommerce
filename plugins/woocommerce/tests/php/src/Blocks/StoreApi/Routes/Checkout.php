@@ -3587,6 +3587,39 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Existing order payment refuses a checkout-draft order, which has not passed checkout validation, and leaves it a draft.
+	 */
+	public function test_checkout_order_rejects_checkout_draft_order(): void {
+		$order = $this->create_pay_for_order_with_shipping_address();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+
+		$this->assertTrue( $order->needs_payment(), 'Baseline: needs_payment() is still true for a draft, so the route has to refuse it explicitly.' );
+
+		$response = $this->dispatch_pay_for_order_request( $order );
+
+		$this->assertTrue( $response->is_error(), 'A draft must not be accepted for payment: ' . print_r( $response->get_data(), true ) );
+		$this->assertSame( 'invalid_order_update_status', $response->get_data()['code'], 'A draft must be refused as an order that cannot be paid for.' );
+		$this->assertSame( 400, $response->get_status(), 'A refused draft is a client error, not a server error.' );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CHECKOUT_DRAFT ), 'A refused draft must stay a draft.' );
+	}
+
+	/**
+	 * @testdox Existing order payment refuses an order that no longer needs payment with a 400.
+	 */
+	public function test_checkout_order_rejects_order_not_needing_payment_with_400(): void {
+		$order = $this->create_pay_for_order_with_shipping_address();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$response = $this->dispatch_pay_for_order_request( $order );
+
+		$this->assertSame( 'invalid_order_update_status', $response->get_data()['code'], 'A paid order must be refused as an order that cannot be paid for.' );
+		$this->assertSame( 400, $response->get_status(), 'A refused order is a client error, not a server error.' );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::PROCESSING ), 'A refused order must keep its status.' );
+	}
+
+	/**
 	 * @testdox Existing order payment should reject a shipping address that moves the order to a different destination.
 	 */
 	public function test_checkout_order_rejects_shipping_location_change() {
@@ -4445,7 +4478,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox Existing order payment should refuse a gateway the shipping method excludes when a guest pays their own checkout draft.
+	 * @testdox Existing order payment should refuse a guest's own checkout draft even with a gateway the shipping method excludes.
 	 */
 	public function test_checkout_order_refuses_gateway_not_enabled_for_checkout_draft_shipping_method() {
 		$this->restrict_offline_gateway( 'cod', array( 'local_pickup' ) );
@@ -4459,7 +4492,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$response = $this->dispatch_pay_for_order_request( $order, array(), null, true, 'cod' );
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'woocommerce_rest_checkout_payment_method_disabled', $response->get_data()['code'] );
+		$this->assertEquals( 'invalid_order_update_status', $response->get_data()['code'] );
 		$this->assertEquals( 'checkout-draft', wc_get_order( $order->get_id() )->get_status() );
 	}
 
