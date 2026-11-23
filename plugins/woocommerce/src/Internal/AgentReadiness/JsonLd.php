@@ -22,7 +22,7 @@ class JsonLd {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public static function items( string $html, string ...$types ): array {
-		if ( ! preg_match_all( '#<script\b[^>]*\btype\s*=\s*["\']?application/ld\+json["\']?[^>]*>(.*?)</script>#is', $html, $blocks ) ) {
+		if ( ! preg_match_all( '#<script\b(?:[^>"\']|"[^"]*"|\'[^\']*\')*?(?<![\w-])type\s*=\s*["\']?application/ld\+json["\']?(?:[^>"\']|"[^"]*"|\'[^\']*\')*>(.*?)</script>#is', $html, $blocks ) ) {
 			return array();
 		}
 		$items = array();

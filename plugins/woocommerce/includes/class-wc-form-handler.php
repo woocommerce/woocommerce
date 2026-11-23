@@ -853,14 +853,14 @@ class WC_Form_Handler {
 				// Update payment method.
 				if ( $order->needs_payment() ) {
 					try {
-						$payment_method_id = isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : false;
+						$payment_method_id  = isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : false;
+						$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
-						if ( ! $payment_method_id ) {
-							throw new Exception( __( 'Invalid payment method.', 'woocommerce' ) );
+						if ( ! $payment_method_id && ! empty( $available_gateways ) ) {
+							throw new Exception( __( 'Please select a payment method.', 'woocommerce' ) );
 						}
 
-						$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-						$payment_method     = isset( $available_gateways[ $payment_method_id ] ) ? $available_gateways[ $payment_method_id ] : false;
+						$payment_method = $payment_method_id && isset( $available_gateways[ $payment_method_id ] ) ? $available_gateways[ $payment_method_id ] : false;
 
 						if ( ! $payment_method ) {
 							throw new Exception( __( 'Invalid payment method.', 'woocommerce' ) );
@@ -1409,8 +1409,9 @@ class WC_Form_Handler {
 			$quantity_set = false;
 
 			foreach ( $items as $item => $quantity ) {
+				$item     = absint( $item );
 				$quantity = wc_stock_amount( $quantity );
-				if ( $quantity <= 0 ) {
+				if ( ! $item || $quantity <= 0 ) {
 					continue;
 				}
 				$quantity_set = true;
@@ -1473,7 +1474,7 @@ class WC_Form_Handler {
 		}
 
 		// Prevent parent variable product from being added to cart.
-		if ( empty( $variation_id ) && $product && $product->is_type( ProductType::VARIABLE ) ) {
+		if ( empty( $variation_id ) && $product && $product->is_type( ProductType::VARIABLE ) && $product->is_viewable() ) {
 			$current_url        = isset( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH ) : '';
 			$product_url        = wp_parse_url( get_permalink( $product_id ), PHP_URL_PATH );
 			$is_in_product_page = $current_url && $product_url && untrailingslashit( $current_url ) === untrailingslashit( $product_url );

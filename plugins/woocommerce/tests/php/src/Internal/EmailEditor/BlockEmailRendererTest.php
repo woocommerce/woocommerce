@@ -204,14 +204,10 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 		// sending must hand back null so the classic pipeline takes over.
 		add_filter( 'woocommerce_email_block_template_html', '__return_empty_string' );
 
-		try {
-			$this->assertNull(
-				$this->block_email_renderer->maybe_render_block_email( $wc_mail_mock ),
-				'An empty file template must yield null, not an empty-bodied email'
-			);
-		} finally {
-			remove_filter( 'woocommerce_email_block_template_html', '__return_empty_string' );
-		}
+		$this->assertNull(
+			$this->block_email_renderer->maybe_render_block_email( $wc_mail_mock ),
+			'An empty file template must yield null, not an empty-bodied email'
+		);
 	}
 
 	/**
@@ -419,7 +415,6 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		WCTransactionalEmailPostsManager::get_instance()->clear_caches();
-		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 	}
 
 	/**

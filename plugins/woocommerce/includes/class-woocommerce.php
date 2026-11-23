@@ -461,10 +461,13 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Ucp\UcpDiscovery::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\LlmsTxt\LlmsTxt::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ReadinessCheckPage::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ProductsList::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\Telemetry::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductDownloads\DownloadableFileAttachments::class )->register();
 		$container->get( ProductUtil::class )->register();
@@ -537,14 +540,22 @@ final class WooCommerce {
 			);
 
 			if ( false !== strpos( $message, 'Stack trace:' ) ) {
-				$segments  = explode( 'Stack trace:', $message );
-				$message   = str_replace( PHP_EOL, ' ', trim( $segments[0] ) );
-				$backtrace = array_map(
-					'trim',
-					explode( PHP_EOL, $segments[1] )
-				);
+				$segments = explode( 'Stack trace:', $message, 2 );
+				$message  = str_replace( PHP_EOL, ' ', trim( $segments[0] ) );
 
-				$context['backtrace'] = $backtrace;
+				$context['backtrace'] = array();
+				foreach ( explode( "\n", trim( $segments[1] ) ) as $line ) {
+					// Cap each line so one huge line cannot hit the PCRE backtrack limit.
+					$line = substr( $line, 0, 4096 );
+					// Keep only frame headers, including eval, anonymous class and PHP 8.4 closure frames, and drop their arguments.
+					// PHP escapes newlines inside trace arguments, so an argument cannot start a frame line of its own.
+					if ( preg_match( '/^#\d+ (?:(?:\[internal function\]|.*?\(\d+\)): (?:\{closure[^{}\'\r\n]*+\}|[^(\r\n])++\(|\{main\})/', $line, $frame ) ) {
+						$context['backtrace'][] = '(' === substr( $frame[0], -1 ) ? $frame[0] . ')' : $frame[0];
+					} elseif ( preg_match( '/^Next ([\w\\\\]+): /', $line, $next ) ) {
+						// Keep the chained exception class, not its message.
+						$context['backtrace'][] = 'Next ' . $next[1];
+					}
+				}
 			} else {
 				$context['backtrace'] = true;
 			}
@@ -694,7 +705,7 @@ final class WooCommerce {
 	 * pages, so callers can skip the same work — block and template registration, site tracking.
 	 *
 	 * This is a rendering decision only. StoreApi\Authentication keeps its own, narrower check
-	 * and does not treat UCP as Store API: its filters assume a browser client with a nonce,
+	 * and gives UCP only its rate limiting: its other filters assume a browser client with a nonce,
 	 * which a UCP agent never sends, so UCP routes must not inherit them.
 	 *
 	 * @return bool

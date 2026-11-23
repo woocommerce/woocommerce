@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductTermAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -137,6 +138,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			_prime_post_caches( $image_ids );
 		}
 
+		ExtensibleAbilities::prime( 'product_term', $terms );
 		$formatted = array();
 		foreach ( $terms as $term ) {
 			$data = self::format_term( $term );

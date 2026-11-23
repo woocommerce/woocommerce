@@ -22,15 +22,6 @@ class WC_Shipping_Zones_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		WC_Helper_Shipping_Zones::remove_mock_zones();
-	}
-
-	/**
 	 * @testdox Should warn when a postcode zone is below a broader state zone.
 	 */
 	public function test_warns_when_postcode_zone_is_below_broader_state_zone(): void {
@@ -141,6 +132,36 @@ class WC_Shipping_Zones_Test extends WC_Unit_Test_Case {
 			),
 			'A postcode past the top of the range should not.'
 		);
+	}
+
+	/**
+	 * A ZIP+4 code lies within its 5-digit ZIP code, so it lands in a zone limited to that ZIP code
+	 * or to a range of 5-digit ZIP codes rather than falling through to a wider zone.
+	 *
+	 * @testdox A ZIP+4 postcode matches zones limited to its 5-digit ZIP code or a range of them.
+	 *
+	 * @testWith ["96701...96898"]
+	 *           ["96801"]
+	 *
+	 * @param string $rule Postcode rule of the zone.
+	 */
+	public function test_a_zip_plus_four_postcode_matches_its_zip_code_zone( string $rule ): void {
+		$this->zone_with( 'Hawaii', $rule, 'postcode' );
+		$this->zone_with( 'United States', 'US', 'country', 2 );
+
+		foreach ( array( '96801', '96801-1234', '968011234' ) as $postcode ) {
+			$this->assertSame(
+				'Hawaii',
+				$this->matched_zone_name(
+					array(
+						'country'  => 'US',
+						'state'    => 'HI',
+						'postcode' => $postcode,
+					)
+				),
+				"{$postcode} should land in the zone limited to {$rule}."
+			);
+		}
 	}
 
 	/**

@@ -31,7 +31,6 @@ class BlockHooksTests extends WC_Unit_Test_Case {
 			$hooked_block_types,
 			'Test block should be included in hooked blocks with correct version'
 		);
-		delete_option( self::$option_name );
 	}
 
 	/**
@@ -60,6 +59,5 @@ class BlockHooksTests extends WC_Unit_Test_Case {
 			$hooked_block_types,
 			'Test block should not be included in hooked blocks with lower version'
 		);
-		delete_option( self::$option_name );
 	}
 }

@@ -143,8 +143,6 @@ class FeaturePluginTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Serving and expiring existing exports stays enabled when Analytics is disabled.
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_export_files_are_still_handled_when_analytics_is_disabled(): void {
 		$export_hook        = ReportExporter::get_action( 'export_report' );

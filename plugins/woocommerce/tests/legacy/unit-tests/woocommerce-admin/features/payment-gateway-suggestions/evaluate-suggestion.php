@@ -148,8 +148,6 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		);
 
 		EvaluateSuggestion::evaluate( (object) $suggestion, array( 'source' => 'unit-tests' ) );
-
-		remove_filter( 'woocommerce_admin_remote_specs_evaluator_should_log', '__return_true' );
 	}
 
 	/**
@@ -183,8 +181,6 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		$this->mock_logger_debug_calls();
 
 		EvaluateSuggestion::evaluate( (object) $suggestion, array( 'source' => 'unit-tests' ) );
-
-		remove_filter( 'woocommerce_admin_remote_specs_evaluator_should_log', '__return_false' );
 	}
 
 	/**
@@ -228,8 +224,6 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		);
 
 		EvaluateSuggestion::evaluate( (object) $suggestion, array( 'source' => 'unit-tests' ) );
-
-		remove_filter( 'woocommerce_admin_remote_specs_evaluator_should_log', '__return_true' );
 	}
 
 	/**
@@ -273,8 +267,6 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		);
 
 		EvaluateSuggestion::evaluate( (object) $suggestion, array( 'source' => 'unit-tests' ) );
-
-		remove_filter( 'woocommerce_admin_remote_specs_evaluator_should_log', '__return_true' );
 	}
 
 	/**
@@ -318,14 +310,15 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		);
 
 		EvaluateSuggestion::evaluate( (object) $suggestion );
-
-		remove_filter( 'woocommerce_admin_remote_specs_evaluator_should_log', '__return_true' );
 	}
 
 	/**
 	 * Test that the memo is set correctly.
 	 */
 	public function test_memo_set_correctly() {
+		// Other tests evaluate specs through the same static memo.
+		TestableEvaluateSuggestion::reset_memo();
+
 		$specs = array(
 			array(
 				'id'         => 'test-gateway-1',

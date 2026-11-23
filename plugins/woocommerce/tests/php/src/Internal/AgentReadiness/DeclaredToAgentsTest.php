@@ -63,24 +63,22 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A 401 or 403 is not checked: a firewall can refuse a file that exists.
+	 * @testdox A 401, 403 or 429 is not checked: a firewall or rate limit can refuse a file that exists.
 	 */
 	public function test_blocked_response_is_not_checked(): void {
 		$results = $this->results(
 			array(
 				'/ai.txt'                      => array( 403, 'Forbidden' ),
 				'/.well-known/agent-card.json' => array( 401, '' ),
-				'/feed/'                       => array( 403, '' ),
+				'/llms-full.txt'               => array( 429, 'Too Many Requests' ),
 				'markdown /'                   => array( 403, '' ),
-				'/sitemap.xml'                 => array( 403, '' ),
 			)
 		);
 
 		$this->assertNull( $results['ai-txt'] );
 		$this->assertNull( $results['a2a-agent-card'] );
-		$this->assertNull( $results['feed-present'] );
+		$this->assertNull( $results['llms-full'] );
 		$this->assertNull( $results['markdown-pages'] );
-		$this->assertNull( $results['sitemap-lastmod'] );
 	}
 
 	/**
@@ -89,17 +87,25 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	public function test_files(): void {
 		$results = $this->results(
 			array(
-				'/ai.txt'                  => array( 200, 'User-Agent: *' ),
-				'/.well-known/agents.json' => array( 200, '<!doctype html><html></html>' ),
-				'/AGENTS.md'               => array( 200, '{"code":"not_found","message":"No route"}' ),
-				'/auth.md'                 => array( 200, 'Not found', array( 'content-type' => 'text/html; charset=UTF-8' ) ),
-				'/sitemap.md'              => array( 200, "\xEF\xBB\xBF<!doctype html><html></html>" ),
+				'/ai.txt'                   => array( 200, 'User-Agent: *' ),
+				'/.well-known/agents.json'  => array( 200, '<!doctype html><html></html>' ),
+				'/AGENTS.md'                => array( 200, '{"code":"not_found","message":"No route"}' ),
+				'/auth.md'                  => array( 200, 'Not found', array( 'content-type' => 'text/html; charset=UTF-8' ) ),
+				'/sitemap.md'               => array( 200, "\xEF\xBB\xBF<!doctype html><html></html>" ),
+				'/.well-known/security.txt' => array(
+					404,
+					"\n\n",
+					array(
+						'content-type'   => 'text/plain',
+						'content-length' => '999999',
+					),
+				),
 			)
 		);
 
 		$this->assertTrue( $results['ai-txt'] );
 		$this->assertFalse( $results['agents-json'], 'A page is not a JSON document' );
-		$this->assertFalse( $results['security-txt'], 'A 404' );
+		$this->assertFalse( $results['security-txt'], 'A truncated 404 is still missing' );
 		$this->assertFalse( $results['agents-md'], 'A 200 JSON error is not a file' );
 		$this->assertFalse( $results['auth-md'], 'A 200 HTML answer is not a file' );
 		$this->assertFalse( $results['sitemap-md'], 'A page behind a byte order mark is not a file' );
@@ -228,49 +234,88 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox lastmod is read from a sitemap or from the first sitemap an index lists.
+	 * @testdox The API catalog, llms-full.txt and a Link header to agent resources are found when served.
 	 */
-	public function test_sitemap_lastmod(): void {
-		$child = home_url( '/products.xml' );
-		$this->assertTrue( $this->results( array( '/sitemap.xml' => array( 200, '<urlset><url><loc>a</loc><lastmod>2026-01-01</lastmod></url></urlset>' ) ) )['sitemap-lastmod'] );
-		remove_all_filters( 'pre_http_request' );
-		$this->assertFalse( $this->results( array( '/sitemap.xml' => array( 200, '<urlset><url><loc>a</loc></url></urlset>' ) ) )['sitemap-lastmod'] );
-		remove_all_filters( 'pre_http_request' );
-		$this->assertTrue(
-			$this->results(
-				array(
-					'/sitemap.xml'  => array( 200, "<sitemapindex><sitemap><loc>$child</loc></sitemap></sitemapindex>" ),
-					'/products.xml' => array( 200, '<urlset><url><loc>a</loc><lastmod>2026-01-01</lastmod></url></urlset>' ),
-				)
-			)['sitemap-lastmod']
+	public function test_api_catalog_llms_full_and_link_header(): void {
+		$results = $this->results(
+			array(
+				'/.well-known/api-catalog' => array( 200, '{"linkset":[{"anchor":"https://example.com/wp-json/"}]}' ),
+				'/llms-full.txt'           => array( 200, '# Store' ),
+				'/'                        => array( 200, '<html></html>', array( 'link' => '</.well-known/api-catalog>; rel="api-catalog"' ) ),
+			)
 		);
+		$this->assertTrue( $results['api-catalog'] );
+		$this->assertTrue( $results['llms-full'] );
+		$this->assertTrue( $results['link-header-agent-resources'] );
+
+		remove_all_filters( 'pre_http_request' );
+		$results = $this->results(
+			array(
+				'/.well-known/api-catalog' => array( 200, '{"error":"not found"}' ),
+				'/'                        => array( 200, '<html></html>', array( 'link' => '<https://example.com/wp-json/>; rel="https://api.w.org/"' ) ),
+			)
+		);
+		$this->assertFalse( $results['api-catalog'], 'A JSON error is not a catalog' );
+		$this->assertFalse( $results['llms-full'] );
+		$this->assertFalse( $results['link-header-agent-resources'], 'The REST API link is not an agent resource' );
+
+		remove_all_filters( 'pre_http_request' );
+		$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '</llms.txt>; rel="alternate"; type="text/plain"' ) ) ) );
+		$this->assertTrue( $results['link-header-agent-resources'], 'A link to llms.txt counts' );
+
+		$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+		foreach ( array( '<llms.txt>; rel="alternate"', '<./llms.txt>; rel="alternate"', '<https://' . $host . '/llms.txt>; rel="alternate"' ) as $header ) {
+			remove_all_filters( 'pre_http_request' );
+			$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => $header ) ) ) );
+			$this->assertTrue( $results['link-header-agent-resources'], $header );
+		}
+
+		foreach ( array( '</llms.txt.bak>; rel="preload"', '</docs/llms.txt>; rel="alternate"', '<https://other.example/llms.txt>; rel="alternate"', '</.well-known/api-catalog>; rel="not-api-catalog"', '</a>; title="rel=api-catalog"', '</a>; title="x; rel=api-catalog"' ) as $header ) {
+			remove_all_filters( 'pre_http_request' );
+			$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => $header ) ) ) );
+			$this->assertFalse( $results['link-header-agent-resources'], $header );
+		}
+		remove_all_filters( 'pre_http_request' );
+		$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '<https://example.com/wp-json/>; rel="https://api.w.org/", </.well-known/api-catalog>; rel="service-desc api-catalog"' ) ) ) );
+		$this->assertTrue( $results['link-header-agent-resources'], 'The second of two values, with two rel tokens' );
+
+		remove_all_filters( 'pre_http_request' );
+		$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '</.well-known/api-catalog>; rel=api-catalog' ) ) ) );
+		$this->assertTrue( $results['link-header-agent-resources'], 'An unquoted rel' );
 	}
 
 	/**
-	 * @testdox lastmod is not found on a sitemap without dates, and not checked when a sitemap or robots.txt fails.
+	 * @testdox A relative llms.txt link is the file at the host root when WordPress is in a subdirectory.
 	 */
-	public function test_sitemap_lastmod_unknown(): void {
-		$child = home_url( '/products.xml' );
-		$index = array( 200, "<sitemapindex><sitemap><loc>$child</loc></sitemap></sitemapindex>" );
-		$this->assertFalse(
-			$this->results(
-				array(
-					'/sitemap.xml'  => $index,
-					'/products.xml' => array( 200, '<urlset><url><loc>a</loc></url></urlset>' ),
-				)
-			)['sitemap-lastmod']
+	public function test_llms_txt_link_in_a_subdirectory(): void {
+		add_filter(
+			'home_url',
+			static function ( $url ) {
+				$parts = wp_parse_url( (string) $url );
+				if ( ! is_array( $parts ) || empty( $parts['host'] ) ) {
+					return $url;
+				}
+				$path = $parts['path'] ?? '';
+				if ( '/shop' === $path || str_starts_with( $path, '/shop/' ) ) {
+					return $url;
+				}
+				$built = ( $parts['scheme'] ?? 'http' ) . '://' . $parts['host'];
+				if ( isset( $parts['port'] ) ) {
+					$built .= ':' . $parts['port'];
+				}
+				$built .= '/shop' . $path;
+				if ( isset( $parts['query'] ) ) {
+					$built .= '?' . $parts['query'];
+				}
+				return $built;
+			}
 		);
-		remove_all_filters( 'pre_http_request' );
-		$this->assertNull(
-			$this->results(
-				array(
-					'/sitemap.xml'  => $index,
-					'/products.xml' => array( 503, '' ),
-				)
-			)['sitemap-lastmod']
-		);
-		remove_all_filters( 'pre_http_request' );
-		$this->assertNull( $this->results( array( '/robots.txt' => array( 403, '' ) ) )['sitemap-lastmod'] );
+		try {
+			$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '<llms.txt>; rel="alternate"' ) ) ) );
+			$this->assertTrue( $results['link-header-agent-resources'], 'llms.txt is at the host root, not under /shop' );
+		} finally {
+			remove_all_filters( 'home_url' );
+		}
 	}
 
 	/**
@@ -312,32 +357,28 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The feed and home page structured data are read from what the store serves.
+	 * @testdox Home page structured data are read from what the store serves.
 	 */
-	public function test_feed_and_home_page(): void {
+	public function test_home_page_structured_data(): void {
 		$results = $this->results(
 			array(
-				'/feed/' => array( 200, '<?xml version="1.0"?><rss version="2.0"></rss>' ),
-				'/'      => array( 200, '<html><head><script type="application/ld+json">{"@type":"WebSite","potentialAction":{"@type":"SearchAction"}}</script></head></html>' ),
+				'/' => array( 200, '<html><head><script type="application/ld+json">{"@type":"WebSite","potentialAction":{"@type":"SearchAction"}}</script></head></html>' ),
 			)
 		);
 
-		$this->assertTrue( $results['feed-present'] );
 		$this->assertTrue( $results['site-search-action'] );
 		$this->assertFalse( $results['sameas-links'] );
 	}
 
 	/**
-	 * @testdox A failing feed is not checked, and only a SearchAction counts as on-site search.
+	 * @testdox Only a SearchAction counts as on-site search.
 	 */
-	public function test_failing_feed_and_other_actions(): void {
+	public function test_only_search_action_counts(): void {
 		$results = $this->results(
 			array(
-				'/feed/' => array( 503, '' ),
-				'/'      => array( 200, '<html><script type="application/ld+json">{"@type":"WebSite","potentialAction":{"@type":"ReadAction"}}</script></html>' ),
+				'/' => array( 200, '<html><script type="application/ld+json">{"@type":"WebSite","potentialAction":{"@type":"ReadAction"}}</script></html>' ),
 			)
 		);
-		$this->assertNull( $results['feed-present'] );
 		$this->assertFalse( $results['site-search-action'] );
 
 		remove_all_filters( 'pre_http_request' );
@@ -399,14 +440,13 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox DNS-AID and an automated product feed are listed as not checked yet.
+	 * @testdox Only items the scan reads are listed: DNS-AID and an automated product feed would always be not checked.
 	 */
-	public function test_not_read_yet(): void {
+	public function test_lists_only_what_the_scan_reads(): void {
 		$results = $this->results( array() );
 
-		$this->assertArrayHasKey( 'dns-aid', $results );
-		$this->assertNull( $results['dns-aid'] );
-		$this->assertNull( $results['product-feed-automation'] );
+		$this->assertArrayNotHasKey( 'dns-aid', $results );
+		$this->assertArrayNotHasKey( 'product-feed-automation', $results );
 	}
 
 	/**
@@ -457,5 +497,80 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 		foreach ( $this->scan() as $item ) {
 			$this->assertNull( $item['found'], $item['id'] );
 		}
+	}
+
+	/**
+	 * @testdox With WooCommerce's llms.txt fallback, its guidance is found when the served llms.txt holds it, from any provider; without the fallback the item isn't listed.
+	 */
+	public function test_llms_txt_guidance(): void {
+		$section = "## Agentic capabilities\n\n- [WooCommerce Store API](" . home_url( '/wp-json/wc/store/v1' ) . ')';
+		$sut     = new class() extends DeclaredToAgents {
+			/**
+			 * The status to report.
+			 *
+			 * @var array{status:string,section:string}|null
+			 */
+			public $status;
+
+			/**
+			 * The status set by the test.
+			 */
+			protected function llms_txt_status(): ?array {
+				return $this->status;
+			}
+		};
+		$found   = function ( array $responses ) use ( $sut ): array {
+			$this->results( $responses );
+			return array_column( $sut->all( wc_get_container()->get( StoreOutputChecks::class )->responses() ), 'found', 'id' );
+		};
+
+		$this->assertArrayNotHasKey( 'llms-txt-woocommerce-guidance', $found( array() ), 'Not listed without the fallback' );
+
+		$sut->status = array(
+			'status'  => 'unknown',
+			'section' => $section . "\n",
+		);
+		$this->assertTrue( $found( array( '/llms.txt' => array( 200, "# Shop\n\n" . $section . "\n" ) ) )['llms-txt-woocommerce-guidance'] );
+		$this->assertTrue(
+			$found(
+				array(
+					'/llms.txt' => array( 200, "# Shop\r\n\r\n" . str_replace( "\n", "\r\n", $section ) . "\r\n" ),
+				)
+			)['llms-txt-woocommerce-guidance'],
+			'CRLF line endings still match'
+		);
+		$this->assertFalse( $found( array( '/llms.txt' => array( 200, "# Shop\n\n- [About](" . home_url( '/about/' ) . ')' ) ) )['llms-txt-woocommerce-guidance'], 'Another provider\'s file without it' );
+		$this->assertFalse( $found( array() )['llms-txt-woocommerce-guidance'], 'No llms.txt' );
+		$this->assertNull( $found( array( '/llms.txt' => array( 503, '' ) ) )['llms-txt-woocommerce-guidance'], 'Couldn\'t check' );
+		$this->assertNull( $found( array( '/llms.txt' => array( 429, '' ) ) )['llms-txt-woocommerce-guidance'], 'Rate limited' );
+		$this->assertNull(
+			$found(
+				array(
+					'/llms.txt' => array( 200, "# Shop\n", array( 'content-length' => '999999' ) ),
+				)
+			)['llms-txt-woocommerce-guidance'],
+			'Truncated body with no match is couldn\'t check'
+		);
+		$this->assertNull(
+			$found(
+				array(
+					'/llms.txt' => array(
+						200,
+						"\n\n",
+						array(
+							'content-type'   => 'text/plain',
+							'content-length' => '999999',
+						),
+					),
+				)
+			)['llms-txt-woocommerce-guidance'],
+			'A body cut off in leading blank lines is couldn\'t check'
+		);
+
+		$sut->status = array(
+			'status'  => 'disabled',
+			'section' => '',
+		);
+		$this->assertArrayNotHasKey( 'llms-txt-woocommerce-guidance', $found( array() ), 'Not listed while WooCommerce adds no guidance' );
 	}
 }

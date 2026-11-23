@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\AgentReadiness\Checks;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\FeedChannels;
+use Automattic\WooCommerce\Internal\AgentReadiness\ProductFields;
+use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 
 defined( 'ABSPATH' ) || exit;
@@ -30,6 +32,36 @@ abstract class AbstractReadinessCheck implements ReadinessRule {
 				'effect' => $effect,
 			)
 		);
+	}
+
+	/**
+	 * The published variations of a failing variable product that have the problem, so only their
+	 * sales count against it. Null when the problem is the whole product's.
+	 *
+	 * @param \WC_Product $product Product that fails the rule.
+	 * @param ProductScan $scan    Catalog-wide lookups.
+	 * @return array<int, int>|null Variation ids.
+	 */
+	public function failing_variations( \WC_Product $product, ProductScan $scan ): ?array {
+		unset( $product, $scan );
+		return null;
+	}
+
+	/**
+	 * Only the ids of the variations a test fails, or null when none does, as when the parent fails.
+	 *
+	 * @param \WC_Product $product Product.
+	 * @param callable    $test    Whether a variation has the problem: fn( \WC_Product ): bool.
+	 * @return array<int, int>|null
+	 */
+	protected static function variation_ids_where( \WC_Product $product, callable $test ): ?array {
+		$ids = array();
+		foreach ( ProductFields::variations( $product ) as $variation ) {
+			if ( $test( $variation ) ) {
+				$ids[] = $variation->get_id();
+			}
+		}
+		return array() === $ids ? null : $ids;
 	}
 
 	/**

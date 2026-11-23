@@ -27,6 +27,8 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		StoreOutputChecksTest::block_requests();
+		// Orders other tests left in the Analytics tables would count toward the sales share.
+		\WC_Helper_Reports::reset_stats_dbs();
 		$this->readiness = wc_get_container()->get( AgentReadiness::class );
 	}
 
@@ -98,9 +100,38 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A product that becomes hidden after start() is not recorded and its old rows are cleared.
+	 */
+	public function test_product_hidden_between_start_and_batch_is_cleared(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$id      = $product->get_id();
+		$this->readiness->refresh_report();
+		$this->assertNotEmpty( ProductFailures::for_product( $id ) );
+
+		$hook = static function ( array $product_ids ) use ( $id ): void {
+			if ( ! in_array( $id, array_map( 'intval', $product_ids ), true ) ) {
+				return;
+			}
+			$product = wc_get_product( $id );
+			$product->set_catalog_visibility( 'hidden' );
+			$product->save();
+		};
+		add_action( 'woocommerce_agent_readiness_scan_batch', $hook );
+		try {
+			$this->readiness->refresh_report();
+		} finally {
+			remove_action( 'woocommerce_agent_readiness_scan_batch', $hook );
+		}
+
+		$this->assertSame( array(), ProductFailures::for_product( $id ) );
+	}
+
+	/**
 	 * @testdox A product that stores rows while the scan runs keeps them.
 	 */
 	public function test_product_stored_during_scan_keeps_its_rows(): void {
+		// A product to scan, so there is a batch for the new product to be saved during.
+		WC_Helper_Product::create_simple_product();
 		$during_id = 0;
 		$hook      = static function () use ( &$during_id ) {
 			if ( 0 !== $during_id ) {
@@ -151,6 +182,73 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 
 		$this->assertArrayNotHasKey( ProductFailures::CHECKED, $on_other );
 		$this->assertSame( 1, ProductFailures::counts()[ ProductFailures::CHECKED ] ?? 0, 'Back on the first site' );
+	}
+
+	/**
+	 * @testdox A check's share of sales is dropped once its count changes after the scan, since it was measured on the products failing then.
+	 */
+	public function test_sales_share_dropped_when_count_changes(): void {
+		update_option( 'woocommerce_analytics_enabled', 'yes' );
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		for ( $i = 0; $i < \Automattic\WooCommerce\Internal\AgentReadiness\ProductSales::MIN_ORDERS; $i++ ) {
+			$order = wc_create_order();
+			$order->add_product( $product, 1 );
+			$order->set_status( 'completed' );
+			$order->calculate_totals();
+			$order->save();
+			\Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::sync_order( $order->get_id() );
+			\Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::sync_order_products( $order->get_id() );
+		}
+		$share = fn(): ?float => array_column( (array) $this->readiness->get_cached_report()['checks'], 'sales_share', 'id' )['missing_images'];
+
+		$this->readiness->refresh_report();
+		$this->assertSame( 1.0, $share() );
+
+		ProductFailures::store( $product->get_id(), array() );
+		$this->assertNull( $share() );
+		$this->assertSame( 1.0, array_column( (array) $this->readiness->get_cached_report()['checks'], 'ranked_share', 'id' )['missing_images'], 'Fix first still ranks by the share from the check' );
+	}
+
+	/**
+	 * @testdox A check's share of sales is also dropped when the example products change while the count stays the same.
+	 */
+	public function test_sales_share_dropped_when_example_membership_changes(): void {
+		$kept  = WC_Helper_Product::create_simple_product();
+		$fixed = WC_Helper_Product::create_simple_product();
+		$added = WC_Helper_Product::create_simple_product();
+		$fail  = array(
+			'missing_images' => array(
+				'chatgpt' => array(
+					'field'  => 'image',
+					'effect' => 'gaps',
+				),
+			),
+		);
+		ProductFailures::store( $kept->get_id(), $fail );
+		ProductFailures::store( $fixed->get_id(), array() );
+		ProductFailures::store( $added->get_id(), $fail );
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'failures_stored' => true,
+				'products'        => 3,
+				'channels'        => array(),
+				'checks'          => array(
+					array(
+						'id'          => 'missing_images',
+						'count'       => 2,
+						'product_ids' => array( $kept->get_id(), $fixed->get_id() ),
+						'sales_share' => 0.5,
+					),
+				),
+			)
+		);
+
+		$check = array_column( (array) $this->readiness->get_cached_report()['checks'], null, 'id' )['missing_images'];
+		$this->assertSame( 2, $check['count'], 'Count still two failing products' );
+		$this->assertNull( $check['sales_share'], 'Share cleared: examples no longer match the scan' );
+		$this->assertSame( 0.5, $check['ranked_share'] );
+		$this->assertSame( array( $kept->get_id() ), $check['product_ids'], 'Only examples that still fail remain' );
 	}
 
 	/**

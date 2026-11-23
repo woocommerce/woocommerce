@@ -1,0 +1,85 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G01A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
+			"before": {
+				"file": "fixtures/G01A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G01A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "    do_action( 'woocommerce_order_export_status', $id, 'wc-' . $status );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G01B-v4",
+			"path": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
+			"before": {
+				"file": "fixtures/G01B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G01B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "    $args = array( 'id' => $order->get_id(), 'state' => $order->get_status() );"
+					},
+					{
+						"file": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
+						"lines": [
+							8,
+							8
+						],
+						"anchor": "    $args['include_in_export'] = 'pending' === $args['status'];"
+					}
+				]
+			}
+		},
+		{
+			"id": "G01C-v3",
+			"path": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
+			"before": {
+				"file": "fixtures/G01C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G01C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G01D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
+			"before": {
+				"file": "fixtures/G01D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G01D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

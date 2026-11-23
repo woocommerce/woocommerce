@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop WooCommerce.com extension updates that need a newer WordPress from installing, and say which version an update needs.

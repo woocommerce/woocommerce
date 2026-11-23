@@ -27,14 +27,6 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		$this->disable_cogs_feature();
-	}
-
-	/**
 	 * Test that read_product_data loads basic variation properties correctly
 	 */
 	public function test_read_product_data_loads_all_properties_for_the_variation() {

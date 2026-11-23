@@ -9,14 +9,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		$this->disable_cogs_feature();
-	}
-
-	/**
 	 * @testdox Variations should appear when searching for parent product's SKU.
 	 */
 	public function test_variation_searches_parent_sku() {

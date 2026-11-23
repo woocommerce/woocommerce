@@ -80,7 +80,6 @@ class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		ShippingPartnerSuggestionsDataSourcePoller::get_instance()->delete_specs_transient();
-		remove_all_filters( 'transient_woocommerce_admin_' . ShippingPartnerSuggestionsDataSourcePoller::ID . '_specs' );
 		update_option( 'woocommerce_default_country', 'US' );
 
 		parent::tearDown();
@@ -170,8 +169,6 @@ class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_default_country', 'ZA' );
 		ShippingPartnerSuggestions::get_suggestions();
-
-		remove_filter( 'woocommerce_admin_remote_specs_evaluator_should_log', '__return_true' );
 	}
 
 	/**

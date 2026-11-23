@@ -16,7 +16,10 @@ import ProductCard from '../product-card/product-card';
 import { Product } from '../product-list/types';
 import ConnectAccountButton from '../my-subscriptions/table/actions/connect-account-button';
 import { installingStore } from '../../contexts/install-store';
-import { downloadProduct } from '../../utils/functions';
+import {
+	downloadProduct,
+	getRequirementErrorNotice,
+} from '../../utils/functions';
 import { createOrder } from './create-order';
 import { MARKETPLACE_PATH, WP_ADMIN_PLUGIN_LIST_URL } from '../constants';
 import { getAdminSetting } from '../../../utils/admin-settings';
@@ -216,6 +219,11 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 					setNotice( {
 						status: 'error',
 						message:
+							getRequirementErrorNotice(
+								'install',
+								product?.title ?? '',
+								error
+							)?.message ??
 							error.data.message ??
 							__(
 								'An error occurred. Please try again later.',

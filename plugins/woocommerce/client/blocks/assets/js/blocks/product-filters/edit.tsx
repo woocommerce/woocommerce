@@ -31,6 +31,9 @@ import { type BlockAttributes } from './types';
 import { getColorsFromBlockSupports } from './utils/get-colors-from-block-supports';
 import { getOverlayMode, isOverlayMode } from './utils/overlay-mode';
 import { presetToCssVariable } from './utils/preset-to-css-variable';
+import { getDefaultAttributeId } from './inner-blocks/attribute-filter/utils';
+
+const DEFAULT_ATTRIBUTE_ID = getDefaultAttributeId();
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
@@ -47,7 +50,11 @@ const TEMPLATE: InnerBlockTemplate[] = [
 	[ 'woocommerce/product-filter-active' ],
 	[ 'woocommerce/product-filter-price' ],
 	[ 'woocommerce/product-filter-rating' ],
-	[ 'woocommerce/product-filter-attribute' ],
+	[
+		'woocommerce/product-filter-attribute',
+		// Persist the ID: a block attribute equal to its default isn't saved.
+		DEFAULT_ATTRIBUTE_ID > 0 ? { attributeId: DEFAULT_ATTRIBUTE_ID } : {},
+	],
 	[ 'woocommerce/product-filter-taxonomy' ],
 	[ 'woocommerce/product-filter-status' ],
 ];

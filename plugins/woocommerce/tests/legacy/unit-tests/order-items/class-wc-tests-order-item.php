@@ -50,14 +50,6 @@ class WC_Tests_Base_Order_Item extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		$this->disable_cogs_feature();
-	}
-
-	/**
 	 * @testdox Order item classes don't manage Cost of Goods Sold by default.
 	 */
 	public function test_order_items_dont_have_cogs_by_default() {

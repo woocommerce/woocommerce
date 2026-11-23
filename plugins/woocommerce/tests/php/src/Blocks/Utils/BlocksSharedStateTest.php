@@ -29,7 +29,6 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 	 * Tear down each test.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_cart_contents_count' );
 		$this->reset_shared_state();
 		parent::tearDown();
 	}

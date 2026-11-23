@@ -70,11 +70,11 @@ async function gotToVariationsTab( page: Page ) {
 	await test.step( 'Click on the "Variations" tab.', async () => {
 		await expect( async () => {
 			await page
-				.getByRole( 'link', { name: 'Variations' } )
+				.getByRole( 'tab', { name: 'Variations' } )
 				.last()
 				.click();
 
-			// Sometimes the click on link is too fast and the initial tab (General) is still visible
+			// Sometimes the click on the tab is too fast and the initial tab (General) is still visible
 			// so we need to wait make sure some content from the variations tab is visible.
 			const expandButton = page
 				.getByRole( 'link', { name: 'Expand' } )

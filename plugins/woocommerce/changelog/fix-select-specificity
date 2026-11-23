@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Make select elements in blocks follow global styles better

@@ -43,6 +43,112 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Why `/.well-known/ucp` does or doesn't serve WooCommerce's current profile, from the
+	 * permalink setting and the static file, read on every call so nothing is stored.
+	 *
+	 * Plain permalinks, and structures that start with index.php, don't route that address.
+	 * Before UCP is on, a folder WooCommerce can write still counts as ok: turning UCP on writes the file.
+	 *
+	 * @return string One of `ok`, `no_file`, `file_in_the_way`, `not_readable`, `file_unusable`, `file_outdated`.
+	 */
+	public static function serve_status(): string {
+		$path = self::get_file_path();
+		if ( ! is_file( $path ) ) {
+			if ( self::rewrite_serves_discovery() ) {
+				return 'ok';
+			}
+			// UCP off and a writable folder: enabling UCP writes the file, so permalinks don't have to change.
+			if ( ! Utils::is_enabled() && self::can_create_file( $path ) ) {
+				return 'ok';
+			}
+			return 'no_file';
+		}
+
+		if ( ! is_readable( $path ) ) {
+			return 'not_readable';
+		}
+
+		// The profile is a few KB; cap the read so a large file someone else put there isn't read whole.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$profile = json_decode( (string) file_get_contents( $path, false, null, 0, 65536 ), true );
+		if ( ! is_array( $profile ) ) {
+			return 'file_unusable';
+		}
+
+		$links = $profile['links'] ?? null;
+		if ( ! is_array( $links ) || ! in_array( self::LINK_REL, array_column( $links, 'rel' ), true ) ) {
+			return 'file_in_the_way';
+		}
+
+		// Compare the decoded `ucp` part, not the raw text, so formatting and the ownership link don't matter.
+		// The current profile goes through the same JSON round trip, so objects and arrays compare alike.
+		$current = json_decode( (string) wp_json_encode( ( new self() )->get_profile()['ucp'] ), true );
+		return ( $profile['ucp'] ?? null ) === $current ? 'ok' : 'file_outdated';
+	}
+
+	/**
+	 * Whether the site is hosted on WordPress.com, the same test as Jetpack's Host::is_atomic_platform().
+	 */
+	public static function is_wordpress_com(): bool {
+		return defined( 'ATOMIC_SITE_ID' ) && ATOMIC_SITE_ID && defined( 'ATOMIC_CLIENT_ID' ) && ATOMIC_CLIENT_ID;
+	}
+
+	/**
+	 * What a merchant should do for a failing serve_status() value. Includes the file path.
+	 *
+	 * On WordPress.com the fix names its support instead of the hosting provider.
+	 *
+	 * @param string    $status        A status from serve_status().
+	 * @param bool|null $wordpress_com Whether the site is on WordPress.com, or null to detect it.
+	 * @return string Empty when the address is already served.
+	 */
+	public static function discovery_fix( string $status, ?bool $wordpress_com = null ): string {
+		$path = self::get_file_path();
+		$dir  = dirname( $path );
+
+		// On WordPress.com its support stands in for the hosting provider.
+		$wordpress_com = $wordpress_com ?? self::is_wordpress_com();
+
+		switch ( $status ) {
+			case 'not_readable':
+				return $wordpress_com
+					/* translators: %s: discovery file path. */
+					? sprintf( __( 'WooCommerce can’t read the file at %s. Delete it, or contact WordPress.com support to make it readable.', 'woocommerce' ), $path )
+					/* translators: %s: discovery file path. */
+					: sprintf( __( 'WooCommerce can’t read the file at %s. Delete it, or ask your hosting provider to make it readable.', 'woocommerce' ), $path );
+			case 'file_unusable':
+				return $wordpress_com
+					/* translators: 1: discovery file path, 2: folder path. */
+					? sprintf( __( 'The file at %1$s is incomplete or damaged. Delete it, and check that your server has free disk space. If you can’t delete it, contact WordPress.com support to make %2$s writable.', 'woocommerce' ), $path, $dir )
+					/* translators: 1: discovery file path, 2: folder path. */
+					: sprintf( __( 'The file at %1$s is incomplete or damaged. Delete it, and check that your server has free disk space. If you can’t delete it, ask your hosting provider to make %2$s writable.', 'woocommerce' ), $path, $dir );
+			case 'file_in_the_way':
+				return $wordpress_com
+					/* translators: 1: discovery file path, 2: folder path. */
+					? sprintf( __( 'A file at %1$s that WooCommerce didn’t create is loading instead. Remove it, or contact WordPress.com support to make %2$s writable.', 'woocommerce' ), $path, $dir )
+					/* translators: 1: discovery file path, 2: folder path. */
+					: sprintf( __( 'A file at %1$s that WooCommerce didn’t create is loading instead. Remove it, or ask your hosting provider to make %2$s writable.', 'woocommerce' ), $path, $dir );
+			case 'file_outdated':
+				return $wordpress_com
+					/* translators: 1: discovery file path, 2: folder path. */
+					? sprintf( __( 'The file at %1$s has old store details. Delete it, or contact WordPress.com support to make %2$s writable so WooCommerce can replace it.', 'woocommerce' ), $path, $dir )
+					/* translators: 1: discovery file path, 2: folder path. */
+					: sprintf( __( 'The file at %1$s has old store details. Delete it, or ask your hosting provider to make %2$s writable so WooCommerce can replace it.', 'woocommerce' ), $path, $dir );
+			case 'no_file':
+				if ( is_multisite() ) {
+					return __( 'Choose any structure except Plain. Structures that start with index.php don’t work either.', 'woocommerce' );
+				}
+				return $wordpress_com
+					/* translators: %s: folder path. */
+					? sprintf( __( 'Choose any structure except Plain. Structures that start with index.php don’t work either. If you need to keep your current structure, contact WordPress.com support to make %s writable, so WooCommerce can add your connection file.', 'woocommerce' ), $dir )
+					/* translators: %s: folder path. */
+					: sprintf( __( 'Choose any structure except Plain. Structures that start with index.php don’t work either. If you need to keep your current structure, ask your hosting provider to make %s writable, so WooCommerce can add your connection file.', 'woocommerce' ), $dir );
+			default:
+				return '';
+		}
+	}
+
+	/**
 	 * Register the renderer, plus the rewrite rule when pretty permalinks are on, when UCP is enabled.
 	 */
 	public function register_feature_hooks(): void {
@@ -107,20 +213,19 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Keep the static discovery file in sync on admin screens: write it under plain permalinks, delete it under pretty ones.
-	 * The file only refreshes on admin page loads.
+	 * Keep the static discovery file in sync: write it when permalinks don't route `/.well-known/ucp`
+	 * (Plain, or a structure that starts with index.php), and delete it when they do.
+	 * The file only refreshes on admin page loads, and when UCP is turned on.
 	 *
 	 * Failures are silent here: the Agentic Readiness checks report an unreachable or invalid discovery endpoint.
 	 */
 	public function maybe_sync_file(): void {
-		global $wp_rewrite;
-
 		// admin_init also fires for anonymous admin-ajax.php/admin-post.php requests and on every heartbeat.
 		if ( wp_doing_ajax() || ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
-		if ( $wp_rewrite->using_permalinks() ) {
+		if ( self::rewrite_serves_discovery() ) {
 			// A file that cannot be deleted keeps overriding the profile WooCommerce serves, as the web server answers first.
 			$this->delete_file();
 			return;
@@ -176,11 +281,49 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Whether the permalink structure routes `/.well-known/ucp` to WordPress.
+	 * Structures that start with index.php (PATHINFO) do not: the web server only does
+	 * when it sends every path to WordPress, and the static file covers that case.
+	 *
+	 * @return bool
+	 */
+	private static function rewrite_serves_discovery(): bool {
+		global $wp_rewrite;
+
+		return $wp_rewrite->using_mod_rewrite_permalinks();
+	}
+
+	/**
+	 * Whether WooCommerce can create the static file, including the `.well-known` folder.
+	 * One file under ABSPATH can't hold a profile per site, so multisite never can.
+	 *
+	 * @param string $path Absolute file path.
+	 * @return bool
+	 */
+	private static function can_create_file( string $path ): bool {
+		if ( is_multisite() ) {
+			return false;
+		}
+
+		$dir = dirname( $path );
+		while ( ! is_dir( $dir ) ) {
+			$parent = dirname( $dir );
+			if ( $parent === $dir ) {
+				return false;
+			}
+			$dir = $parent;
+		}
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+		return is_writable( $dir );
+	}
+
+	/**
 	 * Path of the static discovery file served under plain permalinks.
 	 *
 	 * @return string
 	 */
-	private function get_file_path(): string {
+	private static function get_file_path(): string {
 		/**
 		 * Filters the path of the static UCP discovery file written when plain permalinks are active.
 		 *
@@ -232,8 +375,8 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	public function get_profile(): array {
 		return array(
 			'ucp'   => array(
-				'version'      => Utils::VERSION,
-				'services'     => array(
+				'version'          => Utils::VERSION,
+				'services'         => array(
 					'dev.ucp.shopping' => array(
 						array(
 							'version'   => Utils::VERSION,
@@ -244,12 +387,14 @@ final class UcpDiscovery implements RegisterHooksInterface {
 						),
 					),
 				),
-				'capabilities' => array_map(
+				'capabilities'     => array_map(
 					static function ( array $declaration ): array {
 						return array( $declaration );
 					},
 					Utils::capability_declarations()
 				),
+				// UCP requires the registry even when empty. Encodes as `{}`, since the store offers no payment handlers yet.
+				'payment_handlers' => new \stdClass(),
 			),
 			'links' => array(
 				array(

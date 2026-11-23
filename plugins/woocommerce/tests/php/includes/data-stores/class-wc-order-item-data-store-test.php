@@ -30,14 +30,6 @@ class WC_Order_Item_Data_Store_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		$this->disable_cogs_feature();
-	}
-
-	/**
 	 * @testdox The Cost of Goods Sold value for order items is not persisted when the item is saved if the feature is disabled.
 	 */
 	public function test_cogs_is_not_persisted_when_cogs_is_disabled() {

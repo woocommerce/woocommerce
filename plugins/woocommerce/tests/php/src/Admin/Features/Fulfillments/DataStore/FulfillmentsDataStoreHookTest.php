@@ -285,7 +285,6 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$db_fulfillment = new Fulfillment( $fulfillment->get_id() );
 		$this->assertFalse( $db_fulfillment->get_is_fulfilled() );
-		remove_all_filters( 'woocommerce_fulfillment_before_fulfill' );
 	}
 
 	/**
@@ -328,7 +327,6 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$db_fulfillment = new Fulfillment( $fulfillment->get_id() );
 		$this->assertTrue( $db_fulfillment->get_is_fulfilled() );
-		remove_all_filters( 'woocommerce_fulfillment_before_fulfill' );
 	}
 
 	/**
@@ -380,7 +378,6 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 			$this->expectExceptionMessage( 'Fulfillment not found.' );
 			new Fulfillment( $fulfillment->get_id() );
 		}
-		remove_all_filters( 'woocommerce_fulfillment_before_fulfill' );
 	}
 
 	/**
@@ -432,7 +429,6 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key_2' ), $fulfillment->get_meta( 'test_meta_key_2' ) );
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_update' ), $fulfillment->get_meta( 'test_meta_update' ) );
 		$this->assertEquals( $received_fulfillment->get_items(), $fulfillment->get_items() );
-		remove_all_actions( 'woocommerce_fulfillment_after_fulfill' );
 	}
 
 	/**

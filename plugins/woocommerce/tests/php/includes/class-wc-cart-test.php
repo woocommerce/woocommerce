@@ -853,6 +853,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$fixed_variation->set_parent_id( $product->get_id() );
 		$fixed_variation->set_attributes( array( 'finish' => 'Black%20White' ) );
 		$fixed_variation->set_regular_price( '10' );
+		$fixed_variation->set_menu_order( 1 );
 		$fixed_variation->save();
 
 		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $fixed_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
@@ -862,10 +863,12 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		WC()->cart->empty_cart();
 
+		// Ordered before the fixed variation so that variation does not claim this selection.
 		$any_variation = new WC_Product_Variation();
 		$any_variation->set_parent_id( $product->get_id() );
 		$any_variation->set_attributes( array( 'finish' => '' ) );
 		$any_variation->set_regular_price( '10' );
+		$any_variation->set_menu_order( 0 );
 		$any_variation->save();
 
 		$any_cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $any_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
@@ -936,6 +939,82 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		$variable_product->delete( true );
+	}
+
+	/**
+	 * Create a variable product with an "Any" variation for the unpublished product tests.
+	 *
+	 * @param string $status Status of the variable product.
+	 * @return WC_Product_Variation The (published) variation.
+	 */
+	private function create_any_variation_of_product_with_status( string $status ): WC_Product_Variation {
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Secret Finish' );
+		$attribute->set_options( array( 'Matte', 'Gloss' ) );
+		$attribute->set_variation( true );
+		$product->set_name( 'Unreleased Product' );
+		$product->set_status( $status );
+		$product->set_date_created( 'future' === $status ? time() + DAY_IN_SECONDS : time() );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'secret-finish' => '' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		return $variation;
+	}
+
+	/**
+	 * @testdox Add to cart errors do not name a variable product, or its attributes, when the shopper cannot view it.
+	 * @testWith ["draft"]
+	 *           ["pending"]
+	 *           ["private"]
+	 *           ["future"]
+	 * @param string $status Status of the variable product.
+	 */
+	public function test_add_to_cart_errors_do_not_name_products_the_shopper_cannot_view( string $status ): void {
+		wp_set_current_user( 0 );
+		WC()->cart->empty_cart();
+
+		$variation      = $this->create_any_variation_of_product_with_status( $status );
+		$product_id     = $variation->get_parent_id();
+		$single_product = WC_Helper_Product::create_simple_product();
+
+		$requests = array(
+			'no variation'      => array( $product_id, 1, 0, array(), 'Sorry, this product cannot be purchased.' ),
+			'missing attribute' => array( $product_id, 1, $variation->get_id(), array(), 'Sorry, this product cannot be purchased.' ),
+			'invalid attribute' => array( $product_id, 1, $variation->get_id(), array( 'attribute_secret-finish' => 'Nope' ), 'Sorry, this product cannot be purchased.' ),
+			'variation by ID'   => array( $variation->get_id(), 1, 0, array(), 'Sorry, this product cannot be purchased.' ),
+			'foreign variation' => array( $product_id, 1, $single_product->get_id(), array(), 'The selected product is invalid.' ),
+		);
+
+		foreach ( $requests as $label => $request ) {
+			WC()->session->set( 'wc_notices', null );
+			$expected = array_pop( $request );
+
+			$this->assertFalse( WC()->cart->add_to_cart( ...$request ), $label );
+			$this->assertSame( array( $expected ), wp_list_pluck( wc_get_notices( 'error' ), 'notice' ), $label );
+		}
+
+		$this->assertCount( 0, WC()->cart->get_cart_contents() );
+	}
+
+	/**
+	 * @testdox Add to cart errors still name an unpublished variable product for a user who can edit it.
+	 */
+	public function test_add_to_cart_errors_name_unpublished_products_the_user_can_edit(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$variation = $this->create_any_variation_of_product_with_status( 'draft' );
+
+		$this->assertFalse( WC()->cart->add_to_cart( $variation->get_parent_id() ) );
+		$this->assertStringContainsString( 'Unreleased Product', wc_get_notices( 'error' )[0]['notice'] );
 	}
 
 	/**
@@ -1126,14 +1205,10 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->customer->set_shipping_location( 'US', 'NY', '', '' );
 
-		try {
-			$this->assertSame( $expected, WC()->cart->show_shipping(), 'Shipping should only stay hidden while the shopper has a postcode field to fill in.' );
+		$this->assertSame( $expected, WC()->cart->show_shipping(), 'Shipping should only stay hidden while the shopper has a postcode field to fill in.' );
 
-			WC()->customer->set_shipping_location( 'US', '', '', '' );
-			$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
-		} finally {
-			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
-		}
+		WC()->customer->set_shipping_location( 'US', '', '', '' );
+		$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
 	}
 
 	/**
@@ -1651,6 +1726,24 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'error', $notices );
 		$this->assertCount( 1, $notices['error'] );
 		$this->assertMatchesRegularExpression( '/Please choose product options by visiting/', $notices['error'][0]['notice'] );
+	}
+
+	/**
+	 * @testdox The add to cart form handler does not name a variable product the shopper cannot view.
+	 *
+	 * @see WC_Form_Handler::add_to_cart_action()
+	 */
+	public function test_form_handler_add_to_cart_action_with_unpublished_parent_variable_product(): void {
+		wp_set_current_user( 0 );
+		WC()->session->set( 'wc_notices', null );
+
+		$_REQUEST['add-to-cart'] = $this->create_any_variation_of_product_with_status( 'draft' )->get_parent_id();
+
+		WC_Form_Handler::add_to_cart_action();
+
+		unset( $_REQUEST['add-to-cart'] );
+
+		$this->assertSame( array( 'Sorry, this product cannot be purchased.' ), wp_list_pluck( wc_get_notices( 'error' ), 'notice' ) );
 	}
 
 	/**
@@ -2228,8 +2321,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2269,8 +2360,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2308,8 +2397,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNotEmpty( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2345,8 +2432,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -3031,5 +3116,45 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$skipped_child->delete( true );
 			$first_child->delete( true );
 		}
+	}
+
+	/**
+	 * @testdox Add to cart rejects a variation when an earlier variation matches.
+	 */
+	public function test_add_to_cart_rejects_a_variation_when_an_earlier_variation_matches(): void {
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$red = new WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '10' );
+		$red->set_menu_order( 0 );
+		$red->save();
+
+		$any = new WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '5' );
+		$any->set_menu_order( 1 );
+		$any->save();
+
+		wc_clear_notices();
+		$cart_item_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$any->get_id(),
+			array(
+				'attribute_color' => 'Red',
+			)
+		);
+
+		$this->assertFalse( $cart_item_key, 'Add to cart should reject a variation when an earlier variation matches.' );
+		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
 	}
 }

@@ -9,15 +9,6 @@ declare( strict_types = 1 );
 class WC_Email_Header_Template_Test extends \WC_Unit_Test_Case {
 
 	/**
-	 * Tear down after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		delete_option( 'woocommerce_email_header_image' );
-		update_option( 'woocommerce_feature_email_improvements_enabled', 'no' );
-	}
-
-	/**
 	 * @testdox Email header template includes blog name when store name is not set.
 	 */
 	public function test_html_includes_blog_name_when_store_name_is_not_set() {
