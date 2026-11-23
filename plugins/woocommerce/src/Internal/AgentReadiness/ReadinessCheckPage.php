@@ -44,6 +44,14 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	private const HIDDEN_PRODUCT_CHECKS = array( 'image_alt_text' );
 
 	/**
+	 * Product ids already loaded while building one view, by check id and limit. A check that appears
+	 * in Fix first and on its card is queried once. view() clears this, so the next call reads current products.
+	 *
+	 * @var array<string, array<int, int[]>>
+	 */
+	private static $failing_ids = array();
+
+	/**
 	 * Whether Sales readiness hides this product check (it still appears in the support download).
 	 *
 	 * @param string $id Check id.
@@ -279,6 +287,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @return array<string, mixed>
 	 */
 	public function view(): array {
+		self::$failing_ids = array();
 		// Pending on either side of the report read: a scan that finishes during the read must not
 		// pair an old report with pending false, and a scan queued during the read must not be hidden.
 		$pending  = $this->scheduled_scan->is_pending();
@@ -308,7 +317,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'description'  => __( 'Check how well AI assistants can find and shop your store, and what to improve first.', 'woocommerce' ),
 			'last_checked' => self::last_checked( $report ),
 			'checked_note' => $truncated,
-			'intro'        => null === $report ? __( 'Run a check to see what AI assistants get when they visit your store and read your products.', 'woocommerce' ) : null,
+			'checked'      => null !== $report,
 			'run'          => array(
 				'label'   => null === $report ? __( 'Check your store', 'woocommerce' ) : __( 'Check again', 'woocommerce' ),
 				'pending' => $pending,
@@ -774,15 +783,15 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	/**
 	 * One check row for the React views.
 	 *
-	 * @param string                                      $id      The check's id.
-	 * @param string                                      $state   open, required, unknown or pass.
-	 * @param string                                      $title   Title: what to do while it fails.
-	 * @param string                                      $text    Why it matters, and what was found while it fails.
-	 * @param string                                      $fix     What to do, or '' when the title says it.
-	 * @param array{href:string,text:string}|null         $link    Where to fix it, or the products it affects.
-	 * @param array{0:string,1:string}|null               $badge   Badge class and text: Required.
-	 * @param array{href:string,text:string}|null         $seen_at The page a conflict was seen on.
-	 * @param array{href:string,text:string,at?:int}|null $text_link A name in the text to link, such as a tool to test with, and where it starts.
+	 * @param string                                         $id      The check's id.
+	 * @param string                                         $state   open, required, unknown or pass.
+	 * @param string                                         $title   Title: what to do while it fails.
+	 * @param string                                         $text    Why it matters, and what was found while it fails.
+	 * @param string                                         $fix     What to do, or '' when the title says it.
+	 * @param array{href:string,text:string,sr?:string}|null $link Where to fix it, or the products it affects. `sr` is what screen readers hear.
+	 * @param array{0:string,1:string}|null                  $badge   Badge class and text: Required.
+	 * @param array{href:string,text:string}|null            $seen_at The page a conflict was seen on.
+	 * @param array{href:string,text:string,at?:int}|null    $text_link A name in the text to link, such as a tool to test with, and where it starts.
 	 * @return array<string, mixed>
 	 */
 	private static function row( string $id, string $state, string $title, string $text, string $fix = '', ?array $link = null, ?array $badge = null, ?array $seen_at = null, ?array $text_link = null ): array {
@@ -806,7 +815,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks Store checks shown on the page.
 	 * @param array<string, mixed>                                                                                                                                                                           $report Stored report.
-	 * @return array<int, array{id:string,tier:int,title:string,why:string,link:array{href:string,text:string}|null,share:float|null,store:bool,rank:float,count:int}>
+	 * @return array<int, array{id:string,tier:int,title:string,why:string,link:array{href:string,text:string,sr?:string}|null,share:float|null,store:bool,rank:float,count:int}>
 	 */
 	private function fix_first_items( array $checks, array $report ): array {
 		$required = array();
@@ -1056,7 +1065,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @return int[]
 	 */
 	private static function failing_product_ids( string $check_id, int $limit ): array {
-		return array_map(
+		foreach ( self::$failing_ids[ $check_id ] ?? array() as $cached_limit => $ids ) {
+			if ( $cached_limit >= $limit ) {
+				return array_slice( $ids, 0, $limit );
+			}
+		}
+		$ids                                      = array_map(
 			'intval',
 			get_posts(
 				array(
@@ -1071,6 +1085,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				)
 			)
 		);
+		self::$failing_ids[ $check_id ][ $limit ] = $ids;
+		return $ids;
 	}
 
 	/**

@@ -13,7 +13,7 @@ import type { ReadinessView } from '../types';
 const firstVisit = {
 	last_checked: 'Not checked yet',
 	checked_note: null,
-	intro: 'Run a check to see what AI assistants get.',
+	checked: false,
 	run: {
 		label: 'Check your store',
 		pending: false,
@@ -70,6 +70,32 @@ describe( 'CheckedCard', () => {
 		expect(
 			screen.getByRole( 'button', { name: 'Check again' } )
 		).toHaveAttribute( 'aria-disabled', 'true' );
+	} );
+
+	it( 'shows the stalled message, not a spinner, when the check cannot start', () => {
+		const stalled = {
+			...firstVisit,
+			run: {
+				...firstVisit.run,
+				pending: true,
+				stalled: true,
+				message:
+					'Checks can’t start because scheduled actions aren’t running.',
+			},
+		};
+		const { container } = render(
+			<CheckedCard
+				view={ stalled }
+				running={ false }
+				onRun={ jest.fn() }
+				onDownloadError={ jest.fn() }
+			/>
+		);
+
+		expect( container.querySelector( '.components-spinner' ) ).toBeNull();
+		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+			'Checks can’t start'
+		);
 	} );
 
 	it( 'shows the running state as soon as Check your store is clicked', () => {

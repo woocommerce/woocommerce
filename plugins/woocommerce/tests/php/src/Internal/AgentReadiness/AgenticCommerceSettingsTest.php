@@ -1950,7 +1950,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Not checked yet', $view['last_checked'], 'No check has run' );
 		$this->assertSame( 'Check your store', $view['run']['label'], 'and the page offers to run one' );
 		$this->assertFalse( $view['run']['pending'] );
-		$this->assertSame( 'Run a check to see what AI assistants get when they visit your store and read your products.', $view['intro'], 'No results before the first scan' );
+		$this->assertFalse( $view['checked'], 'No results before the first scan' );
 		$this->assertSame( array(), $view['sections'] );
 		$this->assertNull( $view['fix_first'] );
 

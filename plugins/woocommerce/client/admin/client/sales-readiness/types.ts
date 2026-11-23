@@ -108,7 +108,8 @@ export interface ReadinessView {
 	description: string;
 	last_checked: string;
 	checked_note: string | null;
-	intro: string | null;
+	/** False before the first check. */
+	checked: boolean;
 	run: {
 		label: string;
 		pending: boolean;

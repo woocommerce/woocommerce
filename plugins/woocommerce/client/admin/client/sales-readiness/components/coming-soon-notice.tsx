@@ -9,7 +9,7 @@ import { Notice } from '@wordpress/ui';
  * Internal dependencies
  */
 import type { ViewLink } from '../types';
-import { asLink } from './shopping-checklist';
+import { asLink } from './as-link';
 
 /**
  * The warning that the store is in coming soon mode, with a link to its visibility settings.

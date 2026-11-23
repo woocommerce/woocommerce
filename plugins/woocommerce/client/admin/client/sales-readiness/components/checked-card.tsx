@@ -61,7 +61,7 @@ export const CheckedCard = ( {
 									{ view.checked_note }
 								</Text>
 							) }
-							{ ! view.intro && (
+							{ view.checked && (
 								<Text
 									variant="body-sm"
 									className="wc-sales-readiness__muted"

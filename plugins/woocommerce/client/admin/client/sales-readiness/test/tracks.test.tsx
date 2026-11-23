@@ -24,7 +24,7 @@ const checkedView: ReadinessView = {
 	description: 'See how AI assistants see your store.',
 	last_checked: 'Last checked today',
 	checked_note: null,
-	intro: null,
+	checked: true,
 	run: {
 		label: 'Check again',
 		pending: false,
@@ -187,9 +187,7 @@ describe( 'Sales readiness tracking', () => {
 	it( 'records Run checks, without a second viewed event after the reload', async () => {
 		mockedApiFetch.mockImplementation( ( { method } ) =>
 			Promise.resolve(
-				method === 'POST'
-					? {}
-					: { ...checkedView, intro: 'Run a check.' }
+				method === 'POST' ? {} : { ...checkedView, checked: false }
 			)
 		);
 		render( <SalesReadiness /> );
@@ -367,7 +365,7 @@ describe( 'Sales readiness tracking', () => {
 	it( 'keeps the Overview cards when starting a check fails', async () => {
 		const first = {
 			...checkedView,
-			intro: 'Run a check.',
+			checked: false,
 			fix_first: null,
 			run: {
 				label: 'Run checks',

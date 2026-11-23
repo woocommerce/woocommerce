@@ -446,6 +446,7 @@ describe( 'AiShopping', () => {
 		expect(
 			window.sessionStorage.getItem( 'wc-ai-shopping-snackbar' )
 		).toBe( 'AI assistants can now shop your store.' );
+		expect( mockCreateSuccessNotice ).not.toHaveBeenCalled();
 	} );
 
 	it( 'shows the switch’s snackbar on the page that loads after it saves, once', () => {
@@ -455,6 +456,7 @@ describe( 'AiShopping', () => {
 		);
 		renderPage( view() );
 
+		expect( mockCreateSuccessNotice ).toHaveBeenCalledTimes( 1 );
 		expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
 			'AI assistants can no longer shop your store.',
 			{ type: 'snackbar' }
