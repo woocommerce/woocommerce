@@ -403,14 +403,16 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		}
 
 		$wc_admin_notices = WC_Admin_Notices::get_notices();
-		if ( empty( $wc_admin_notices ) ) {
-			// If there are no WooCommerce core notices, we can remove all actions hooked into `admin_notices`.
+		if ( empty( $wc_admin_notices ) && ! has_filter( 'woocommerce_settings_payments_keep_admin_notice' ) ) {
+			// If there are no WooCommerce core notices and no extension can opt in, we can remove all actions hooked into `admin_notices`.
 			remove_all_actions( 'admin_notices' );
 			return;
 		}
 
-		// Go through the callbacks hooked into `admin_notices` and
-		// remove any that are NOT from the WooCommerce core (i.e. from the `WC_Admin_Notices` class).
+		// Go through the callbacks hooked into `admin_notices` and remove the ones that are not kept: by default,
+		// those that are NOT from the WooCommerce core (i.e. from the `WC_Admin_Notices` class).
+		$keep_any        = ! empty( $wc_admin_notices );
+		$loader_wrappers = array();
 		foreach ( $wp_admin_notices_hook->callbacks as $priority => $callbacks ) {
 			if ( ! is_array( $callbacks ) ) {
 				continue;
@@ -418,36 +420,51 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			foreach ( $callbacks as $callback ) {
 				// Ignore malformed callbacks.
-				if ( ! is_array( $callback ) ) {
-					continue;
-				}
-				// WooCommerce doesn't use closures to handle notices.
-				// WooCommerce core notices are handled by `WC_Admin_Notices` class methods.
-				// Remove plain functions or closures.
-				if ( ! is_array( $callback['function'] ) ) {
-					remove_action( 'admin_notices', $callback['function'], $priority );
+				if ( ! is_array( $callback ) || ! isset( $callback['function'] ) ) {
 					continue;
 				}
 
-				$class_or_object = $callback['function'][0] ?? null;
+				$class_or_object = is_array( $callback['function'] ) ? ( $callback['function'][0] ?? null ) : null;
+
 				// We need to allow Automattic\WooCommerce\Internal\Admin\Loader methods callbacks
-				// because they are used to wrap notices.
+				// because they are used to wrap notices. They are kept only if any notice is.
 				// @see Automattic\WooCommerce\Internal\Admin\Loader::inject_before_notices().
 				// @see Automattic\WooCommerce\Internal\Admin\Loader::inject_after_notices().
-				if (
-					(
-						// We have a class name.
-						is_string( $class_or_object ) &&
-						! ( WC_Admin_Notices::class === $class_or_object || Loader::class === $class_or_object )
-					) ||
-					(
-						// We have a class instance.
-						is_object( $class_or_object ) &&
-						! ( $class_or_object instanceof WC_Admin_Notices || $class_or_object instanceof Loader )
-					)
-				) {
+				if ( Loader::class === $class_or_object || $class_or_object instanceof Loader ) {
+					$loader_wrappers[] = array( $callback['function'], $priority );
+					continue;
+				}
+
+				// WooCommerce doesn't use closures or plain functions to handle notices.
+				// WooCommerce core notices are handled by `WC_Admin_Notices` class methods.
+				$is_core_notice = ! empty( $wc_admin_notices )
+					&& ( WC_Admin_Notices::class === $class_or_object || $class_or_object instanceof WC_Admin_Notices );
+
+				/**
+				 * Filters whether an `admin_notices` callback is kept on the React-powered Settings > Payments page.
+				 *
+				 * Other notices are removed there to keep the page uncluttered, so an extension can use this to keep a
+				 * notice that belongs on this page, such as one about payment settings.
+				 *
+				 * @since 11.4.0
+				 *
+				 * @param bool     $keep     Whether to keep the callback. Default: true only for WooCommerce core notices.
+				 * @param callable $callback The `admin_notices` callback.
+				 * @param int      $priority The priority the callback is hooked at.
+				 */
+				$keep = (bool) apply_filters( 'woocommerce_settings_payments_keep_admin_notice', $is_core_notice, $callback['function'], $priority );
+
+				if ( $keep ) {
+					$keep_any = true;
+				} else {
 					remove_action( 'admin_notices', $callback['function'], $priority );
 				}
+			}
+		}
+
+		if ( ! $keep_any ) {
+			foreach ( $loader_wrappers as $loader_wrapper ) {
+				remove_action( 'admin_notices', $loader_wrapper[0], $loader_wrapper[1] );
 			}
 		}
 	}

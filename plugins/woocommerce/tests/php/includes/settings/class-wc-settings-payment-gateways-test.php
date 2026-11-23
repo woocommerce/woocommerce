@@ -132,6 +132,75 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Extension admin notices are removed from the React Payments settings page by default.
+	 */
+	public function test_suppress_admin_notices_removes_extension_notices_by_default(): void {
+		$extension_notice = static function () {
+			echo 'Extension notice';
+		};
+
+		$this->run_suppress_admin_notices_with( $extension_notice );
+
+		$this->assertFalse( has_action( 'admin_notices', $extension_notice ) );
+	}
+
+	/**
+	 * @testdox An extension can keep an admin notice on the React Payments settings page through a filter.
+	 */
+	public function test_suppress_admin_notices_keeps_extension_notices_the_filter_keeps(): void {
+		$kept_notice  = static function () {
+			echo 'Payments notice';
+		};
+		$other_notice = static function () {
+			echo 'Unrelated notice';
+		};
+		$received     = array();
+		$keep_filter  = static function ( $keep, $callback, $priority ) use ( $kept_notice, &$received ) {
+			$received[] = array( $keep, $priority );
+			return $callback === $kept_notice ? true : $keep;
+		};
+
+		add_action( 'admin_notices', $other_notice, 20 );
+		add_filter( 'woocommerce_settings_payments_keep_admin_notice', $keep_filter, 10, 3 );
+		try {
+			$this->run_suppress_admin_notices_with( $kept_notice );
+		} finally {
+			remove_filter( 'woocommerce_settings_payments_keep_admin_notice', $keep_filter, 10 );
+			remove_action( 'admin_notices', $other_notice, 20 );
+		}
+
+		$this->assertSame( 10, has_action( 'admin_notices', $kept_notice ), 'The notice the filter keeps stays hooked.' );
+		$this->assertFalse( has_action( 'admin_notices', $other_notice ), 'Other extension notices are still removed.' );
+		$this->assertContains( array( false, 10 ), $received, 'The filter defaults to removing an extension notice.' );
+		$this->assertContains( array( false, 20 ), $received );
+	}
+
+	/**
+	 * Hook the given callback into `admin_notices` and run `suppress_admin_notices()` on the React Payments page.
+	 *
+	 * @param callable $callback The `admin_notices` callback.
+	 */
+	private function run_suppress_admin_notices_with( callable $callback ): void {
+		global $current_tab, $current_section;
+
+		$previous_tab     = $current_tab;
+		$previous_section = $current_section;
+		$current_tab      = 'checkout';
+		$current_section  = '';
+
+		set_current_screen( 'woocommerce_page_wc-settings' );
+		add_action( 'admin_notices', $callback );
+
+		try {
+			( new WC_Settings_Payment_Gateways() )->suppress_admin_notices();
+		} finally {
+			$current_tab     = $previous_tab;
+			$current_section = $previous_section;
+			set_current_screen( 'front' );
+		}
+	}
+
+	/**
 	 * @testDox 'save' will trigger 'init' (and 'process_admin_options' if current section is the name of an existing gateway), and the appropriate actions.
 	 *
 	 * @testWith ["bacs", false]
