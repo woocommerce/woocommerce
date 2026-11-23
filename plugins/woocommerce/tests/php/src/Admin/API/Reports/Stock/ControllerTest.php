@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Stock;
 
 use Automattic\WooCommerce\Admin\API\Reports\Stock\Controller;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\StockNotifications\StockReportColumns;
@@ -45,7 +46,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		unset( $GLOBALS['current_screen'], $GLOBALS['wp_rest_additional_fields']['report_stock'] );
+		unset( $GLOBALS['current_screen'] );
 		$this->restore_stock_notifications_feature_option();
 
 		parent::tearDown();
@@ -122,7 +123,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$item       = array(
 			'name'           => 'Test product',
 			'sku'            => 'test-sku',
-			'stock_status'   => 'outofstock',
+			'stock_status'   => ProductStockStatus::OUT_OF_STOCK,
 			'stock_quantity' => 0,
 			'active_signups' => 2,
 			'days_waiting'   => 5,
@@ -184,6 +185,42 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report the stock notification columns for a page holding a single product.
+	 */
+	public function test_notification_columns_for_single_product_page(): void {
+		$this->enable_stock_notification_columns();
+		$ids = $this->create_notification_fixture();
+
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT );
+		$request->set_param( 'include', (string) $ids['simple_a'] );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 1, $response->get_data() );
+		$this->assertSame( 2, $response->get_data()[0]['active_signups'] );
+		$this->assertSame( 5, $response->get_data()[0]['days_waiting'] );
+	}
+
+	/**
+	 * @testdox Should not sort other product queries by the stock notification columns.
+	 */
+	public function test_orderby_clauses_only_apply_to_the_report(): void {
+		global $wpdb;
+
+		$this->enable_stock_notification_columns();
+
+		$query = new \WP_Query(
+			array(
+				'post_type' => 'product',
+				'orderby'   => 'active_signups',
+				'order'     => 'DESC',
+			)
+		);
+
+		$this->assertStringNotContainsString( $wpdb->prefix . 'wc_stock_notifications', $query->request );
+	}
+
+	/**
 	 * @testdox Should sort by active sign-up count in both orders.
 	 */
 	public function test_orderby_active_signups(): void {
@@ -238,7 +275,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Create two simple products, one without sign-ups, and a variable product with one variation, plus their notifications.
+	 * Create three simple products, one without sign-ups, and a variable product with one variation, plus their notifications.
 	 *
 	 * @return array<string, int> Product IDs keyed by role.
 	 */

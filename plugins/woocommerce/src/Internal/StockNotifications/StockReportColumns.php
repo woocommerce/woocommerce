@@ -29,7 +29,7 @@ class StockReportColumns {
 	public function __construct() {
 		add_filter( 'woocommerce_analytics_orderby_enum_reports/stock', array( $this, 'add_orderby_options' ) );
 		add_filter( 'posts_clauses', array( $this, 'add_orderby_clauses' ), 10, 2 );
-		add_action( 'woocommerce_analytics_stock_report_products_loaded', array( $this, 'load_stats' ) );
+		add_action( 'woocommerce_analytics_stock_report_products_loaded', array( $this, 'load_stats' ), 10, 2 );
 		add_filter( 'woocommerce_report_stock_export_columns', array( $this, 'add_export_columns' ) );
 		add_filter( 'woocommerce_report_stock_prepare_export_item', array( $this, 'add_export_values' ), 10, 2 );
 
@@ -75,7 +75,7 @@ class StockReportColumns {
 	}
 
 	/**
-	 * Sort by the new columns.
+	 * Sort the stock report query by the new columns.
 	 *
 	 * @internal
 	 *
@@ -84,7 +84,7 @@ class StockReportColumns {
 	 * @return mixed
 	 */
 	public function add_orderby_clauses( $clauses, $wp_query ) {
-		if ( ! is_array( $clauses ) || ! $wp_query instanceof \WP_Query ) {
+		if ( ! is_array( $clauses ) || ! $wp_query instanceof \WP_Query || true !== $wp_query->get( 'wc_analytics_stock_report' ) ) {
 			return $clauses;
 		}
 
@@ -112,14 +112,15 @@ class StockReportColumns {
 	 *
 	 * @internal
 	 *
+	 * @param mixed $request  The report request.
 	 * @param mixed $products The products on this page.
 	 */
-	public function load_stats( $products ): void {
+	public function load_stats( $request, $products ): void {
 		global $wpdb;
 
 		$this->stats = array();
 
-		$product_ids = array_map( fn( $product ) => $product->get_id(), array_filter( (array) $products ) );
+		$product_ids = array_map( fn( $product ) => $product->get_id(), array_filter( is_array( $products ) ? $products : array(), fn( $product ) => $product instanceof \WC_Product ) );
 		if ( empty( $product_ids ) ) {
 			return;
 		}

@@ -88,6 +88,9 @@ class Controller extends GenericController implements ExportableInterface {
 
 		$args['ignore_sticky_posts'] = true;
 
+		// Marks the query as the stock report's, for `posts_clauses` callbacks. Not a public query var, so URLs can't set it.
+		$args['wc_analytics_stock_report'] = true;
+
 		return $args;
 	}
 
@@ -142,10 +145,10 @@ class Controller extends GenericController implements ExportableInterface {
 		 *
 		 * @since 11.4.0
 		 *
-		 * @param array           $products The products on this page.
 		 * @param WP_REST_Request $request  The request.
+		 * @param array           $products The products on this page.
 		 */
-		do_action( 'woocommerce_analytics_stock_report_products_loaded', $query_results['objects'], $request );
+		do_action( 'woocommerce_analytics_stock_report_products_loaded', $request, $query_results['objects'] );
 
 		$objects = array();
 		foreach ( $query_results['objects'] as $object ) {
