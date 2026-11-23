@@ -133,6 +133,28 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A withdrawal request with only the endpoint key, not its slug, still skips address texturizing.
+	 */
+	public function test_skips_address_texturize_on_withdrawal_request_with_only_the_endpoint_key(): void {
+		global $wp;
+
+		update_option( 'woocommerce_feature_order_withdrawal_enabled', 'yes' );
+		wc_get_container()->get( OrderWithdrawalController::class )->register_feature_hooks();
+		$page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_myaccount_page_id', $page_id );
+		$this->go_to( add_query_arg( OrderWithdrawalEndpoint::ENDPOINT_KEY, '', get_permalink( $page_id ) ) );
+		$this->assertArrayNotHasKey( OrderWithdrawalEndpoint::ENDPOINT_SLUG, $wp->query_vars, 'The request should carry only the endpoint key.' );
+
+		$this->sut->skip_address_texturize_on_order_pages();
+
+		$this->assertStringContainsString(
+			"o'neil--shop@48x17.com",
+			$this->texturize_to_text( "<address>o'neil--shop@48x17.com</address>" ),
+			'Address content should not be texturized.'
+		);
+	}
+
+	/**
 	 * @testdox A review-order query var on another page still texturizes address content.
 	 */
 	public function test_texturizes_address_when_review_order_query_var_is_on_another_page(): void {

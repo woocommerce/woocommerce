@@ -53,6 +53,8 @@ class TexturizeExclusions implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	private function should_skip_address_texturize(): bool {
+		global $wp;
+
 		if ( ! wp_is_block_theme() ) {
 			return false;
 		}
@@ -61,7 +63,8 @@ class TexturizeExclusions implements RegisterHooksInterface {
 			return true;
 		}
 
-		if ( is_wc_endpoint_url( OrderWithdrawalEndpoint::ENDPOINT_KEY ) ) {
+		// The withdrawal form renders on the endpoint key, which WooCommerce also fills from the slug.
+		if ( isset( $wp->query_vars[ OrderWithdrawalEndpoint::ENDPOINT_KEY ] ) ) {
 			return true;
 		}
 
