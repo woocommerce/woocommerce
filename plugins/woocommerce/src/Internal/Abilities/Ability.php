@@ -15,8 +15,9 @@ defined( 'ABSPATH' ) || exit;
  * WordPress 7.2 prepares the ability input with WP_Ability::prepare_input() before
  * the callbacks run. This class backports that method, so the callbacks get converted
  * input on WordPress 7.0 and 7.1 too. Direct permission checks must pass the result
- * of prepare_input() to check_permissions(). Pass raw input to execute(), which
- * prepares it before checking permissions.
+ * of prepare_input() to check_permissions(), and must return early when that result
+ * is a WP_Error, because check_permissions() hands it to the permission callback.
+ * Pass raw input to execute(), which prepares it before checking permissions.
  *
  * @since 11.4.0
  */
