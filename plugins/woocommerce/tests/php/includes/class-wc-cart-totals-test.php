@@ -219,6 +219,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 	 */
 	public function test_fixed_cart_coupon_with_fractional_quantities_stays_within_amount() {
 		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
 		WC()->cart->empty_cart();
 
 		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
@@ -242,6 +243,44 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		$product_a->delete( true );
 		$product_b->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * Three equal fractional lines must still come to the coupon amount.
+	 *
+	 * A $30 coupon on three $100 products at qty 1.2 used to leave the discount
+	 * at $30.00 while per-line rounding made the cart total $329.99.
+	 */
+	public function test_fixed_cart_coupon_fractional_lines_match_cart_total() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		WC()->cart->empty_cart();
+
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'frac-lines-fixed-cart',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '30',
+			)
+		);
+
+		$products = array();
+		for ( $i = 0; $i < 3; $i++ ) {
+			$products[] = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+			WC()->cart->add_to_cart( end( $products )->get_id(), 1.2 );
+		}
+
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( '30.00', wc_format_decimal( WC()->cart->get_discount_total(), 2 ) );
+		$this->assertEquals( '330.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+
+		WC()->cart->empty_cart();
+		foreach ( $products as $product ) {
+			$product->delete( true );
+		}
 		$coupon->delete( true );
 	}
 
