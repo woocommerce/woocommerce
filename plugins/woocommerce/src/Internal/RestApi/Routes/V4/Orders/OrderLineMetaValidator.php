@@ -3,7 +3,7 @@
  * Backward compatibility shim: keeps the old OrderLineMetaValidator FQCN resolving after the class
  * moved to the version-neutral Internal\RestApi\Orders namespace.
  *
- * @deprecated 11.4.0 Use Automattic\WooCommerce\Internal\RestApi\Orders\OrderLineMetaValidator instead.
+ * @deprecated 11.5.0 Use Automattic\WooCommerce\Internal\RestApi\Orders\OrderLineMetaValidator instead.
  * @package Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders
  */
 

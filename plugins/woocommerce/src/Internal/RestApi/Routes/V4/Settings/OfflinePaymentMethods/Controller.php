@@ -14,10 +14,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Offline Payment Methods Settings controller.
  *
- * The real controller was removed with the experimental `rest-api-v4` namespace. This stub lets a
- * pre-swap controller list still instantiate it instead of fataling on the deleted file.
+ * Kept for compatibility with the upgrade path to 11.5.0. Registers nothing.
  *
- * @deprecated 11.4.0
+ * @deprecated 11.5.0
  */
 class Controller {
 
