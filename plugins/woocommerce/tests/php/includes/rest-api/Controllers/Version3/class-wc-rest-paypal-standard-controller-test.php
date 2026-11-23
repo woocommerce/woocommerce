@@ -516,6 +516,14 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @param string   $shipping_cost    The shipping cost of the order.
 	 */
 	private function finalize_paypal_order( WC_Order $order, string $shipping_rate_id, string $paypal_order_id, string $shipping_cost = '10' ): void {
+		// Callbacks only update attempts created from the shipping address with an editable preference.
+		$order->update_meta_data(
+			'_paypal_address_context',
+			array(
+				'address_source'      => 'shipping',
+				'shipping_preference' => 'GET_FROM_FILE',
+			)
+		);
 		$order->set_shipping_country( 'US' );
 		$order->set_shipping_state( 'CA' );
 		$order->set_shipping_postcode( '90210' );

@@ -225,6 +225,11 @@ class Request {
 			return;
 		}
 
+		if ( 'yes' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESS_REVIEW, true ) ) {
+			\WC_Gateway_Paypal::log( 'PayPal delivery address needs review. Cannot ' . $action . ' payment. Order ID: ' . $order->get_id() );
+			return;
+		}
+
 		$paypal_debug_id = null;
 		$paypal_order_id = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID );
 		if ( ! $paypal_order_id ) {
@@ -352,6 +357,13 @@ class Request {
 		// Skip if the payment is voided.
 		if ( PayPalConstants::VOIDED === $paypal_status ) {
 			\WC_Gateway_Paypal::log( 'PayPal payment voided. Skipping capture. Order ID: ' . $order->get_id() );
+			return;
+		}
+
+		// Skip if the delivery address needs review. Merchants move these orders by hand, so leave a note.
+		if ( 'yes' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESS_REVIEW, true ) ) {
+			\WC_Gateway_Paypal::log( 'PayPal delivery address needs review. Skipping capture. Order ID: ' . $order->get_id() );
+			$order->add_order_note( __( 'PayPal payment was not captured because the delivery address needs review. Verify the payment in PayPal before fulfilling this order.', 'woocommerce' ) );
 			return;
 		}
 
@@ -794,6 +806,19 @@ class Request {
 			throw new Exception( 'Shipping address is required for PayPal create-order request. Order ID: ' . esc_html( (string) $order->get_id() ) );
 		}
 
+		$order->update_meta_data(
+			PayPalConstants::PAYPAL_ORDER_META_ADDRESS_CONTEXT,
+			array(
+				'address_source'      => 'shipping',
+				'shipping_preference' => $shipping_preference,
+				'shipping_address'    => $order->get_address( 'shipping' ),
+				'expected_address'    => $shipping['address'] ?? array(),
+			)
+		);
+		$order->delete_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED );
+		$order->delete_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESS_REVIEW );
+		$order->delete_meta_data( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_AWAITING_ADDRESS );
+
 		return $params;
 	}
 
@@ -972,7 +997,7 @@ class Request {
 			return null;
 		}
 
-		$address_type = 'yes' === $this->gateway->get_option( 'send_shipping' ) ? 'shipping' : 'billing';
+		$address_type = 'shipping';
 
 		$full_name      = trim( $order->{"get_formatted_{$address_type}_full_name"}() );
 		$address_line_1 = trim( $order->{"get_{$address_type}_address_1"}() );
