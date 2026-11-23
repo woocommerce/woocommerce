@@ -234,7 +234,7 @@ class WC_Discounts {
 	 * @return int
 	 */
 	public function get_discounted_price_in_cents( $item ) {
-		return absint( NumberUtil::round( $item->price - $this->get_discount( $item->key, true ) ) );
+		return (int) max( 0, NumberUtil::round( $item->price - $this->get_discount( $item->key, true ) ) );
 	}
 
 	/**
