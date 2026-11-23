@@ -179,7 +179,8 @@ function wc_reduce_stock_levels( $order_id ) {
 		return;
 	}
 
-	$changes = array();
+	$changes       = array();
+	$reserve_stock = new ReserveStock();
 
 	// Loop over all items.
 	foreach ( $order->get_items() as $item ) {
@@ -212,6 +213,9 @@ function wc_reduce_stock_levels( $order_id ) {
 			continue;
 		}
 
+		// The reduced stock now covers these units, so lower the hold before they are counted twice.
+		$reserve_stock->lower_held_stock_for_product( $order->get_id(), $product->get_stock_managed_by_id(), wc_stock_amount( $qty ) );
+
 		$item->add_meta_data( '_reduced_stock', $qty, true );
 		$item->save();
 
@@ -231,6 +235,11 @@ function wc_reduce_stock_levels( $order_id ) {
 		 * @since 7.6.0
 		 */
 		do_action( 'woocommerce_reduce_order_item_stock', $item, $change, $order );
+	}
+
+	// Drop whatever is left of the hold, e.g. for items that were skipped or changed since it was placed.
+	if ( $order instanceof WC_Order ) {
+		wc_release_stock_for_order( $order );
 	}
 
 	wc_trigger_stock_change_notifications( $order, $changes );
@@ -412,9 +421,11 @@ function wc_increase_stock_levels( $order_id ) {
 }
 
 /**
- * See how much stock is being held in pending orders.
+ * See how much stock is held by orders that have not yet reduced it.
  *
  * @since 3.5.0
+ * @since 11.3.1 Also counts holds for failed, processing, on-hold and completed orders until the
+ *               hold is released or expires. See the woocommerce_reserved_stock_order_statuses filter.
  * @param WC_Product $product Product to check.
  * @param integer    $exclude_order_id Order ID to exclude.
  * @return int
@@ -467,21 +478,14 @@ add_action( 'woocommerce_checkout_order_created', 'wc_reserve_stock_for_order' )
 /**
  * Release held stock for an order.
  *
+ * Not subject to woocommerce_hold_stock_for_checkout: a hold counts against stock until it is
+ * released or expires, so a release must never be skipped because of the context it runs in.
+ *
  * @since 4.3.0
+ * @since 11.3.1 No longer skipped when woocommerce_hold_stock_for_checkout returns false.
  * @param \WC_Order|int $order Order ID or instance.
  */
 function wc_release_stock_for_order( $order ) {
-	/**
-	 * Filter: woocommerce_hold_stock_for_checkout
-	 * Allows enable/disable hold stock functionality on checkout.
-	 *
-	 * @since 4.3.0
-	 * @param bool $enabled Default to true if managing stock globally.
-	 */
-	if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', wc_string_to_bool( get_option( 'woocommerce_manage_stock', 'yes' ) ) ) ) {
-		return;
-	}
-
 	$order = $order instanceof WC_Order ? $order : wc_get_order( $order );
 
 	if ( $order ) {
@@ -492,6 +496,7 @@ function wc_release_stock_for_order( $order ) {
 add_action( 'woocommerce_checkout_order_exception', 'wc_release_stock_for_order' );
 add_action( 'woocommerce_payment_complete', 'wc_release_stock_for_order', 11 );
 add_action( 'woocommerce_order_status_cancelled', 'wc_release_stock_for_order', 11 );
+add_action( 'woocommerce_order_status_failed', 'wc_release_stock_for_order', 11 );
 add_action( 'woocommerce_order_status_completed', 'wc_release_stock_for_order', 11 );
 add_action( 'woocommerce_order_status_processing', 'wc_release_stock_for_order', 11 );
 add_action( 'woocommerce_order_status_on-hold', 'wc_release_stock_for_order', 11 );
