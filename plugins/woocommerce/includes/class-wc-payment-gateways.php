@@ -128,12 +128,21 @@ class WC_Payment_Gateways {
 				continue;
 			}
 
+			$position = null;
 			if ( isset( $ordering[ $gateway->id ] ) && is_numeric( $ordering[ $gateway->id ] ) ) {
-				// Add in position, moving to the next free one if another gateway has the same number.
+				// Use the saved position, moving to the next free one if another gateway has the same number.
 				$position = (int) $ordering[ $gateway->id ];
-				while ( isset( $this->payment_gateways[ $position ] ) ) {
+				while ( isset( $this->payment_gateways[ $position ] ) && $position < PHP_INT_MAX ) {
 					++$position;
 				}
+				// Fall back to the end of the list if no free integer position is left.
+				if ( isset( $this->payment_gateways[ $position ] ) ) {
+					$position = null;
+				}
+			}
+
+			if ( null !== $position ) {
+				// Add in position.
 				$this->payment_gateways[ $position ] = $gateway;
 			} else {
 				// Add to end of the array, skipping any position already taken.

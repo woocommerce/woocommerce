@@ -558,6 +558,33 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep every gateway and return when several are saved at the maximum integer position.
+	 */
+	public function test_init_keeps_all_gateways_when_saved_at_max_int(): void {
+		update_option(
+			'woocommerce_gateway_order',
+			array(
+				WC_Gateway_BACS::ID   => PHP_INT_MAX,
+				WC_Gateway_Cheque::ID => PHP_INT_MAX,
+				WC_Gateway_COD::ID    => PHP_INT_MAX,
+			)
+		);
+
+		$sut = new WC_Payment_Gateways();
+
+		$gateway_ids = array_map(
+			static function ( $gateway ) {
+				return $gateway->id;
+			},
+			array_values( $sut->payment_gateways )
+		);
+
+		$this->assertContains( WC_Gateway_BACS::ID, $gateway_ids );
+		$this->assertContains( WC_Gateway_Cheque::ID, $gateway_ids );
+		$this->assertContains( WC_Gateway_COD::ID, $gateway_ids );
+	}
+
+	/**
 	 * @testdox Should keep a gateway without a saved order when an earlier gateway was saved at the end slot.
 	 */
 	public function test_init_keeps_unordered_gateway_when_end_slot_is_taken(): void {
