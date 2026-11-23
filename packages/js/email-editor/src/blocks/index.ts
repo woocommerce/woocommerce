@@ -29,6 +29,7 @@ import { enhanceQuoteBlock } from './core/quote';
 import { filterSetUrlAttribute } from './core/block-edit';
 import { enhanceSocialLinksBlock } from './core/social-links';
 import { enhanceSiteLogoBlock } from './core/site-logo';
+import { enhanceSiteTitleBlock } from './core/site-title';
 import { enableFullWidthBlocks } from './core/full-width';
 import { enableProductImageAlignment } from './woocommerce/product-image';
 
@@ -56,6 +57,7 @@ export function initBlocks() {
 	alterSupportConfiguration();
 	enhanceSocialLinksBlock();
 	enhanceSiteLogoBlock();
+	enhanceSiteTitleBlock();
 	enableFullWidthBlocks();
 	enableProductImageAlignment();
 	removeBlockStylesFromAllBlocks();
