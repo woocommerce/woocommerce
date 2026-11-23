@@ -260,7 +260,7 @@ describe( 'AiShopping', () => {
 		expect( screen.queryByText( 'Required' ) ).toBeNull();
 	} );
 
-	it( 'says what to do in coming soon mode, with a way to change store visibility', () => {
+	it( 'says what to do in coming soon mode, with a way to change site visibility', () => {
 		renderPage(
 			view( {
 				coming_soon: {
