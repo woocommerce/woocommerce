@@ -20,15 +20,7 @@ class WC_Helper_Admin_Test extends WC_Unit_Test_Case {
 	 * @param bool   $gets_install_url     Whether the user should get the install link.
 	 */
 	public function test_add_marketplace_settings_by_capability( string $role, bool $gets_connection, bool $gets_install_url ): void {
-		WC_Helper_Options::update(
-			'auth',
-			array(
-				'access_token'        => self::ACCESS_TOKEN,
-				'access_token_secret' => 'test-access-token-secret',
-				'site_id'             => 1,
-			)
-		);
-		WC_Helper_Options::update( 'auth_user_data', array( 'email' => 'owner@example.org' ) );
+		// Connecting refreshes subscription notes, which fetches subscriptions from WooCommerce.com.
 		add_filter(
 			'pre_http_request',
 			static fn() => array(
@@ -41,6 +33,15 @@ class WC_Helper_Admin_Test extends WC_Unit_Test_Case {
 				'cookies'  => array(),
 			)
 		);
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'access_token'        => self::ACCESS_TOKEN,
+				'access_token_secret' => 'test-access-token-secret',
+				'site_id'             => 1,
+			)
+		);
+		WC_Helper_Options::update( 'auth_user_data', array( 'email' => 'owner@example.org' ) );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => $role ) ) );
 
 		$settings = WC_Helper_Admin::add_marketplace_settings( array() )['wccomHelper'];
