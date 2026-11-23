@@ -51,6 +51,12 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 	private const LOCK_OPTION_PREFIX = 'woocommerce_ability_order_refund_lock_';
 
 	/**
+	 * Key of the wc_create_refund() argument that carries a value unique to the call, which woocommerce_create_refund
+	 * passes on with the refund, so a refund that a callback makes during the call is not taken for the call's own.
+	 */
+	public const CALL_ARG = 'woocommerce_ability_call';
+
+	/**
 	 * Seconds after which a lock is stale, longer than a gateway call takes, so a crashed request cannot block the order.
 	 */
 	private const LOCK_TTL = 5 * MINUTE_IN_SECONDS;
@@ -246,24 +252,27 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		$lock_error = null;
 
 		/**
-		 * The refund that wc_create_refund() saved first. $watch_paid sets it, which PHPStan does not follow into $tag.
+		 * The refund of the order that saved first during the call and has not reached woocommerce_create_refund as
+		 * another call's, so the call's own until then. $watch_paid sets it, which PHPStan does not follow into $tag.
 		 *
 		 * @var \WC_Order_Refund|null $candidate
 		 */
 		$candidate = null;
-
-		// A refund of the order that a callback makes during the call is left alone: it differs in amount, reason or user, or saves after this one.
-		$reason  = isset( $input['reason'] ) ? sanitize_textarea_field( $input['reason'] ) : null;
-		$user_id = get_current_user_id();
-		$matches = static fn( $refund ): bool => $refund instanceof \WC_Order_Refund
-			&& $refund->get_parent_id( 'edit' ) === $order_id
-			&& $refund->get_refunded_by( 'edit' ) === $user_id
-			&& $refund->get_reason( 'edit' ) === (string) $reason
-			&& wc_format_decimal( $refund->get_amount( 'edit' ), $decimals ) === wc_format_decimal( $amount, $decimals );
+		$marker    = wp_generate_uuid4();
+		$reason    = isset( $input['reason'] ) ? sanitize_textarea_field( $input['reason'] ) : null;
 
 		// First, so the meta is on the refund before callbacks that move money see it, and a lost lock declines it before they run.
-		$tag = static function ( $refund ) use ( $order_id, $lock, $fingerprint, $resolved_fingerprint, $refund_payment, $matches, &$candidate, &$tagged, &$lock_error ): void {
-			if ( null !== $tagged || ! $matches( $refund ) || ( null !== $candidate && $refund !== $candidate ) ) {
+		$tag = static function ( $refund, $args ) use ( $order_id, $lock, $marker, $fingerprint, $resolved_fingerprint, $refund_payment, &$candidate, &$tagged, &$lock_error ): void {
+			if ( ! $refund instanceof \WC_Order_Refund || $refund->get_parent_id( 'edit' ) !== $order_id ) {
+				return;
+			}
+			if ( ! is_array( $args ) || ( $args[ self::CALL_ARG ] ?? null ) !== $marker ) {
+				if ( $refund === $candidate ) {
+					$candidate = null;
+				}
+				return;
+			}
+			if ( null !== $tagged ) {
 				return;
 			}
 			$tagged = $refund;
@@ -275,8 +284,8 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			self::add_fingerprints( $refund, $fingerprint, $resolved_fingerprint, $refund_payment );
 		};
 		// wc_create_refund() sets the paid flag only after the gateway refunded, so a save that carries it means the money moved.
-		$watch_paid = static function ( $refund ) use ( $matches, &$candidate, &$tagged, &$paid ): void {
-			if ( null === $candidate && $matches( $refund ) && 0 === $refund->get_id() ) {
+		$watch_paid = static function ( $refund ) use ( $order_id, &$candidate, &$tagged, &$paid ): void {
+			if ( null === $candidate && $refund instanceof \WC_Order_Refund && 0 === $refund->get_id() && $refund->get_parent_id( 'edit' ) === $order_id ) {
 				$candidate = $refund;
 			}
 			$paid = $paid || ( null !== $tagged && $refund === $tagged && $refund->get_refunded_payment() );
@@ -285,7 +294,7 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			$saved = $saved || ( null !== $tagged && $refund === $tagged );
 		};
 
-		add_action( 'woocommerce_create_refund', $tag, PHP_INT_MIN );
+		add_action( 'woocommerce_create_refund', $tag, PHP_INT_MIN, 2 );
 		add_action( 'woocommerce_before_order_refund_object_save', $watch_paid, PHP_INT_MIN );
 		add_action( 'woocommerce_after_order_refund_object_save', $watch_save, PHP_INT_MIN );
 		/**
@@ -303,14 +312,16 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 					'line_items'     => $prepared['line_items'],
 					'refund_payment' => $refund_payment,
 					'restock_items'  => $input['restock_items'] ?? false,
+					self::CALL_ARG   => $marker,
 				)
 			);
 		} catch ( \Error $e ) { // @phpstan-ignore catch.neverThrown (Callbacks that wc_create_refund() runs can throw an Error, which its @throws does not list.)
 			// wc_create_refund() catches only exceptions, so delete the half-made refund as it would. It saves the refund before woocommerce_create_refund, so the refund can exist untagged.
+			// A paid refund stays as the record of the money, so a retry finds it, and an untagged one was paid by another call.
 			$crashed = true;
 			$result  = new \WP_Error( 'error', $e->getMessage() );
 			$made    = $tagged ?? $candidate;
-			if ( null !== $made && $made->get_id() > 0 ) {
+			if ( null !== $made && $made->get_id() > 0 && ! $made->get_refunded_payment( 'edit' ) ) {
 				$made->delete( true );
 			}
 		} finally {
@@ -320,12 +331,6 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		}
 
 		if ( $result instanceof \WC_Order_Refund ) {
-			// The returned refund is the call's own, so one that an extension changed until it no longer matched still blocks a retry.
-			if ( $result !== $tagged ) {
-				self::add_fingerprints( $result, $fingerprint, $resolved_fingerprint, $refund_payment );
-				$result->save_meta_data();
-			}
-
 			// An order save stores its exception instead of throwing, so wc_create_refund() goes on after a failed save.
 			$save_error = $result->get_last_save_error();
 			if ( null !== $save_error ) {
@@ -357,6 +362,9 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 
 		$made = $tagged ?? $candidate;
 		if ( null !== $made && $made->get_id() > 0 && wc_get_order( $made->get_id() ) instanceof \WC_Order_Refund ) {
+			if ( null === $tagged && $made->get_refunded_payment( 'edit' ) ) {
+				return self::unconfirmed_refund_error( $made->get_id(), $result );
+			}
 			return self::kept_refund_error( $made->get_id(), $result, $paid );
 		}
 
@@ -386,6 +394,30 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		if ( $refund_payment ) {
 			$refund->update_meta_data( self::PAYMENT_REQUESTED_META_KEY, 'yes' );
 		}
+	}
+
+	/**
+	 * The error of a call that failed before its refund reached the payment gateway, while a paid refund of the order
+	 * that it cannot tell for its own was saved during the call. That refund is left as it is.
+	 *
+	 * @param int   $refund_id ID of the paid refund.
+	 * @param mixed $result    Result of wc_create_refund().
+	 * @return \WP_Error
+	 */
+	private static function unconfirmed_refund_error( int $refund_id, $result ): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_ability_order_refund_failed',
+			sprintf(
+				/* translators: 1: error message, 2: refund ID. */
+				__( 'The refund failed before it was sent to the payment gateway: %1$s Refund %2$d of this order, which the payment gateway refunded, was saved during the call, but the call could not confirm that it made it. Check the refunds of the order with the merchant before you retry.', 'woocommerce' ),
+				is_wp_error( $result ) ? $result->get_error_message() : __( 'The refund could not be created.', 'woocommerce' ),
+				$refund_id
+			),
+			array(
+				'status'    => 500,
+				'refund_id' => $refund_id,
+			)
+		);
 	}
 
 	/**

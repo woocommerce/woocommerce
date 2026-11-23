@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderRefundCreate;
 use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 use WC_Helper_Order;
@@ -1052,7 +1053,7 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertSame( $legacy_hooks, $this->fired, 'The hooks should fire in the same order.' );
 		foreach ( $args as $hook => $calls ) {
 			$this->assertCount( 2, $calls, $hook );
-			$this->assertSame( array_keys( $calls[0] ), array_keys( $calls[1] ), "$hook should get the arguments of wc_create_refund()." );
+			$this->assertSame( array_merge( array_keys( $calls[0] ), array( OrderRefundCreate::CALL_ARG ) ), array_keys( $calls[1] ), "$hook should get the arguments of wc_create_refund() and the call marker." );
 			$this->assertSame( $legacy_order->get_id(), $calls[0]['order_id'], $hook );
 			$this->assertSame( $order->get_id(), $calls[1]['order_id'], $hook );
 			$this->assertSame( $calls[0]['refund_id'], $calls[1]['refund_id'], $hook );
@@ -1482,22 +1483,31 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep a gateway refund that a callback makes before the call's refund is first saved, and delete only its own refund, when an Error follows.
+	 * @testdox Should keep a gateway refund of the same amount and user that a callback makes before the call's refund is first saved, without the call's fingerprints.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $crash Whether an Error follows before woocommerce_create_refund of the call's refund.
 	 */
-	public function test_crash_keeps_a_gateway_refund_made_before_the_first_save(): void {
-		$order  = $this->create_order_without_lines();
-		$nested = null;
+	public function test_keeps_a_same_amount_refund_made_before_the_first_save( bool $crash ): void {
+		$order   = $this->create_order_without_lines();
+		$nested  = null;
+		$inside  = false;
+		$crashed = false;
 		add_filter(
 			'woocommerce_order_get_items',
-			static function ( $items, $refund ) use ( $order, &$nested ) {
-				if ( null === $nested && $refund instanceof \WC_Order_Refund && 0 === $refund->get_id() && '5' === (string) $refund->get_amount() ) {
+			static function ( $items, $refund ) use ( $order, &$nested, &$inside ) {
+				if ( ! $inside && null === $nested && $refund instanceof \WC_Order_Refund && 0 === $refund->get_id() ) {
+					$inside = true;
 					$nested = wc_create_refund(
 						array(
-							'amount'         => '2',
+							'amount'         => '5',
 							'order_id'       => $order->get_id(),
 							'refund_payment' => true,
 						)
 					);
+					$inside = false;
 				}
 				return $items;
 			},
@@ -1506,8 +1516,9 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		);
 		add_action(
 			'woocommerce_after_order_refund_object_save',
-			static function ( $refund ) {
-				if ( '5' === (string) $refund->get_amount() ) {
+			static function ( $refund ) use ( $crash, &$nested, &$inside, &$crashed ) {
+				if ( $crash && ! $crashed && ! $inside && null !== $nested && $refund !== $nested ) {
+					$crashed = true;
 					throw new \Error( 'Extension save hook crashed.' );
 				}
 			}
@@ -1521,12 +1532,115 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertInstanceOf( \WC_Order_Refund::class, $nested );
+		$this->assertSame( $crash, $crashed );
+		$this->assertSame( array( '5' ), $this->gateway->refunded );
+		$kept = wc_get_order( $nested->get_id() );
+		$this->assertInstanceOf( \WC_Order_Refund::class, $kept );
+		$this->assertTrue( $kept->get_refunded_payment() );
+		$this->assertSame( '', (string) $kept->get_meta( '_woocommerce_ability_refund_fingerprint' ) );
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		if ( $crash ) {
+			$this->assertWPError( $result );
+			$this->assertCount( 1, $refunds );
+			return;
+		}
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertCount( 2, $refunds );
+		$this->assertNotSame( '', (string) wc_get_order( $result['refund']['id'] )->get_meta( '_woocommerce_ability_refund_fingerprint' ) );
+	}
+
+	/**
+	 * @testdox Should leave a paid refund that it cannot tell for its own alone, and say to check the refunds before a retry, when an Error follows.
+	 */
+	public function test_leaves_an_unconfirmed_paid_refund_alone_after_an_error(): void {
+		$order = $this->create_order_without_lines();
+		$built = null;
+		add_filter(
+			'woocommerce_order_get_items',
+			static function ( $items, $refund ) use ( $order, &$built ) {
+				if ( null === $built && $refund instanceof \WC_Order_Refund && 0 === $refund->get_id() ) {
+					$built = new \WC_Order_Refund();
+					$built->set_parent_id( $order->get_id() );
+					$built->set_amount( '3' );
+					$built->set_refunded_payment( true );
+					$built->save();
+				}
+				return $items;
+			},
+			10,
+			2
+		);
+		add_action(
+			'woocommerce_after_order_refund_object_save',
+			static function ( $refund ) use ( &$built ) {
+				if ( null !== $built && $refund !== $built ) {
+					throw new \Error( 'Extension save hook crashed.' );
+				}
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '5',
+			)
+		);
+
 		$this->assertWPError( $result );
-		$this->assertSame( array( '2' ), $this->gateway->refunded );
+		$this->assertSame( 'woocommerce_ability_order_refund_failed', $result->get_error_code() );
+		$this->assertSame( $built->get_id(), $result->get_error_data()['refund_id'] );
+		$this->assertStringContainsString( 'could not confirm that it made it', $result->get_error_message() );
+		$this->assertStringNotContainsString( 'no money was returned', $result->get_error_message() );
+		$this->assertInstanceOf( \WC_Order_Refund::class, wc_get_order( $built->get_id() ) );
+		$this->assertSame( array(), $this->gateway->refunded );
+	}
+
+	/**
+	 * @testdox Should keep a paid refund, and refuse the retry, when an extension changes its reason before its first save and an Error follows the gateway.
+	 */
+	public function test_keeps_a_paid_refund_and_refuses_retry_when_an_error_follows_the_gateway(): void {
+		$order  = $this->create_order_without_lines();
+		$thrown = false;
+		add_filter(
+			'woocommerce_order_get_items',
+			static function ( $items, $refund ) {
+				if ( $refund instanceof \WC_Order_Refund && 0 === $refund->get_id() ) {
+					$refund->set_reason( 'Normalized by an extension.' );
+				}
+				return $items;
+			},
+			10,
+			2
+		);
+		add_action(
+			'woocommerce_order_partially_refunded',
+			static function () use ( &$thrown ) {
+				if ( ! $thrown ) {
+					$thrown = true;
+					throw new \Error( 'Notification service crashed.' );
+				}
+			}
+		);
+		$input = array(
+			'id'             => $order->get_id(),
+			'amount'         => '5',
+			'reason'         => 'Damaged parcel',
+			'refund_payment' => true,
+		);
+
+		$first  = $this->refund( $input );
+		$second = $this->refund( $input );
+
 		$refunds = wc_get_order( $order->get_id() )->get_refunds();
 		$this->assertCount( 1, $refunds );
-		$this->assertSame( $nested->get_id(), $refunds[0]->get_id() );
 		$this->assertTrue( $refunds[0]->get_refunded_payment() );
+		$this->assertWPError( $first );
+		$this->assertSame( 'woocommerce_ability_order_refund_incomplete', $first->get_error_code() );
+		$this->assertSame( $refunds[0]->get_id(), $first->get_error_data()['refund_id'] );
+		$this->assertStringNotContainsString( 'no money was returned', $first->get_error_message() );
+		$this->assertWPError( $second );
+		$this->assertSame( 'woocommerce_ability_order_refund_duplicate', $second->get_error_code() );
+		$this->assertSame( array( '5' ), $this->gateway->refunded );
 	}
 
 	/**
