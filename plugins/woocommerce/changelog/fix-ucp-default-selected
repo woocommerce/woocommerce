@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+UCP: Report the featured variant's options as selected when a catalog product request makes no selection.

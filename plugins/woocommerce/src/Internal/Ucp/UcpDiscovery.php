@@ -375,8 +375,8 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	public function get_profile(): array {
 		return array(
 			'ucp'   => array(
-				'version'      => Utils::VERSION,
-				'services'     => array(
+				'version'          => Utils::VERSION,
+				'services'         => array(
 					'dev.ucp.shopping' => array(
 						array(
 							'version'   => Utils::VERSION,
@@ -387,12 +387,14 @@ final class UcpDiscovery implements RegisterHooksInterface {
 						),
 					),
 				),
-				'capabilities' => array_map(
+				'capabilities'     => array_map(
 					static function ( array $declaration ): array {
 						return array( $declaration );
 					},
 					Utils::capability_declarations()
 				),
+				// UCP requires the registry even when empty. Encodes as `{}`, since the store offers no payment handlers yet.
+				'payment_handlers' => new \stdClass(),
 			),
 			'links' => array(
 				array(

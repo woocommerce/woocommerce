@@ -109,7 +109,7 @@ class UcpCheckout extends ControllerTestCase {
 	 * @param string $method HTTP method.
 	 * @param string $path Route path under /wc/ucp/v1.
 	 * @param array  $body Request body.
-	 * @param array  $headers Extra request headers.
+	 * @param array  $headers Extra request headers; an `Idempotency-Key` replaces the fresh one.
 	 * @return \WP_REST_Response
 	 */
 	private function request( string $method, string $path, array $body = array(), array $headers = array() ) {
@@ -117,7 +117,9 @@ class UcpCheckout extends ControllerTestCase {
 		$request->set_headers( $headers );
 		$request->set_header( 'content-type', 'application/json' );
 		// A write needs a key of its own; the key itself is the UcpIdempotency suite's concern.
-		$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
+		if ( null === $request->get_header( 'Idempotency-Key' ) ) {
+			$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
+		}
 		$request->set_body( wp_json_encode( $body ) );
 
 		return rest_get_server()->dispatch( $request );
@@ -232,6 +234,22 @@ class UcpCheckout extends ControllerTestCase {
 
 		$missing = $this->request( 'POST', '/checkout-sessions', array() );
 		$this->assertSame( 400, $missing->get_status(), 'line_items is required without a cart_id.' );
+	}
+
+	/**
+	 * @testdox A replayed create answers the same body, with payment_handlers still an empty object.
+	 */
+	public function test_replay_keeps_the_empty_payment_handlers_object(): void {
+		$key   = wp_generate_uuid4();
+		$body  = array( 'line_items' => array( $this->line_item( 0, 1 ) ) );
+		$first = $this->request( 'POST', '/checkout-sessions', $body, array( 'Idempotency-Key' => $key ) );
+		$this->assertSame( 201, $first->get_status() );
+		$this->simulate_new_request();
+		$replay = $this->request( 'POST', '/checkout-sessions', $body, array( 'Idempotency-Key' => $key ) );
+
+		$this->assertSame( 'true', $replay->get_headers()['Idempotency-Replayed'] ?? '' );
+		$this->assertInstanceOf( \stdClass::class, $replay->get_data()['ucp']['payment_handlers'] );
+		$this->assertSame( wp_json_encode( $first->get_data() ), wp_json_encode( $replay->get_data() ) );
 	}
 
 	/**
