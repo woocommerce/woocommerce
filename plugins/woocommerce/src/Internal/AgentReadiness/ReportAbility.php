@@ -39,9 +39,8 @@ class ReportAbility implements AbilityDefinition {
 			'category'            => 'woocommerce',
 			'input_schema'        => array(
 				'type'                 => 'object',
-				'properties'           => array(),
-				'additionalProperties' => false,
 				'default'              => array(),
+				'additionalProperties' => false,
 			),
 			'output_schema'       => self::output_schema(),
 			'execute_callback'    => array( self::class, 'execute' ),
