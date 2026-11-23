@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { ShoppingView } from '../types';
+import { trackReadiness } from '../tracks';
 import { asLink } from './as-link';
 import { Row, useSrDescription } from './check-row';
 
@@ -20,11 +21,14 @@ type Checklist = ShoppingView[ 'checklist' ];
  * A step's button, with the policy it is for read as its description.
  *
  * @param props      Props.
+ * @param props.step The step.
  * @param props.link The step's link.
  */
 const StepButton = ( {
+	step,
 	link,
 }: {
+	step: Checklist[ 'steps' ][ number ];
 	link: NonNullable< Checklist[ 'steps' ][ number ][ 'link' ] >;
 } ) => {
 	const sr = useSrDescription( link.sr );
@@ -34,7 +38,14 @@ const StepButton = ( {
 				variant="outline"
 				size="compact"
 				className="wc-sales-readiness-ui-button"
-				{ ...asLink( link.href ) }
+				{ ...asLink( link.href, () =>
+					trackReadiness( 'link_clicked', {
+						surface: 'shopping',
+						area: 'setup',
+						check_id: step.id,
+						state: step.state,
+					} )
+				) }
 				{ ...sr.props }
 			>
 				{ link.text }
@@ -77,7 +88,12 @@ export const ShoppingChecklist = ( {
 							badge={ step.badge }
 							srState={ issue }
 							action={
-								step.link && <StepButton link={ step.link } />
+								step.link && (
+									<StepButton
+										step={ step }
+										link={ step.link }
+									/>
+								)
 							}
 						>
 							{ step.lines.map( ( line ) => (

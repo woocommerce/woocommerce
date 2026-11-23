@@ -25,6 +25,7 @@ import { Button, Link, Stack, Text } from '@wordpress/ui';
  * Internal dependencies
  */
 import { safeHref } from './safe-href';
+import { trackReadiness } from './tracks';
 import './sales-readiness.scss';
 import './ai-shopping.scss';
 import type { ShoppingView } from './types';
@@ -292,6 +293,12 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 						<Link
 							href={ safeHref( ucp.learn_more.href ) }
 							openInNewTab
+							onClick={ () =>
+								trackReadiness( 'link_clicked', {
+									surface: 'shopping',
+									area: 'learn_more',
+								} )
+							}
 						>
 							{ ucp.learn_more.text }
 						</Link>
@@ -319,7 +326,10 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 				isVisible: () => view.coming_soon !== null,
 				render: () =>
 					view.coming_soon && (
-						<ComingSoonNotice notice={ view.coming_soon } />
+						<ComingSoonNotice
+							notice={ view.coming_soon }
+							surface="shopping"
+						/>
 					),
 			},
 			{

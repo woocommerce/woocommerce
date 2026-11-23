@@ -62,7 +62,10 @@ export default function SalesReadiness() {
 							onDownloadError={ setDownloadError }
 						/>
 						{ view.coming_soon && (
-							<ComingSoonNotice notice={ view.coming_soon } />
+							<ComingSoonNotice
+								notice={ view.coming_soon }
+								surface="page"
+							/>
 						) }
 						{ view.fix_first && (
 							<FixFirstCard fixFirst={ view.fix_first } />

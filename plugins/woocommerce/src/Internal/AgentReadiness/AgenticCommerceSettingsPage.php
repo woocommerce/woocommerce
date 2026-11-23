@@ -254,7 +254,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				'text' => __( 'Your store is in coming soon mode, so AI assistants can’t find your products yet.', 'woocommerce' ),
 				'link' => array(
 					'href' => $launched['fix_url'],
-					'text' => __( 'Change store visibility', 'woocommerce' ),
+					'text' => __( 'Change site visibility', 'woocommerce' ),
 				),
 			) : null,
 			'visibility'  => self::visibility( $report ),

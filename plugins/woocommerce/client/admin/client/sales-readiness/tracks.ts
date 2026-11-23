@@ -8,8 +8,8 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import type { ReadinessView } from './types';
 
-/** Where the event happened: the Sales readiness page or the AI tools Overview. */
-export type Surface = 'page' | 'overview';
+/** Where the event happened: AI shopping health, the AI tools Overview, or AI shopping. */
+export type Surface = 'page' | 'overview' | 'shopping';
 
 type Props = Record< string, string | number | boolean >;
 
