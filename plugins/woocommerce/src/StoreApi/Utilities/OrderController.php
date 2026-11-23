@@ -1315,8 +1315,15 @@ class OrderController {
 		$cart            = $cart_controller->get_cart_instance();
 		$cart_hashes     = $cart_controller->get_cart_hashes();
 
-		if ( $order->get_cart_hash() !== $cart_hashes['line_items'] ) {
-			$order->set_cart_hash( $cart_hashes['line_items'] );
+		// The cart hash covers the cart total too, and checkout only resumes an order whose cart hash matches the cart.
+		$order->set_cart_hash( $cart_hashes['line_items'] );
+
+		// Extensions such as Subscriptions also set the cart hash so checkout resumes their order, so it can't tell whether
+		// the line items were built from this cart. Hash the cart contents for that, like classic checkout does.
+		$line_items_hash = md5( (string) wp_json_encode( $cart->get_cart_for_session() ) );
+
+		if ( $order->get_meta( '_line_items_hash' ) !== $line_items_hash ) {
+			$order->update_meta_data( '_line_items_hash', $line_items_hash );
 			$order->remove_order_items( OrderItemType::LINE_ITEM );
 			wc()->checkout->create_order_line_items( $order, $cart );
 		}
