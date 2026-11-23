@@ -232,13 +232,10 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * sent with an application password isn't accepted yet at that point, so a guest session is loaded instead.
 	 */
 	private function discard_session_not_named_by_cart_token(): void {
-		$session = WC()->session;
-		if ( ! $session instanceof \WC_Session ) {
-			return;
-		}
+		$session           = WC()->session;
+		$token_customer_id = (string) CartTokenUtils::get_cart_token_payload( CartTokenUtils::get_request_cart_token() )['user_id'];
 
-		$token_customer_id = CartTokenUtils::get_cart_token_payload( CartTokenUtils::get_request_cart_token() )['user_id'];
-		if ( (string) $session->get_customer_id() !== (string) $token_customer_id ) {
+		if ( $session instanceof \WC_Session && (string) $session->get_customer_id() !== $token_customer_id ) {
 			$this->discard_preloaded_cart_session();
 		}
 	}
@@ -250,6 +247,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * rebuild through the token handler, whatever ran earlier in the request. The dropped
 	 * cart stays hooked, so its session writes are turned off first: an empty cart would
 	 * otherwise clear data such as the draft order from the session that replaces it.
+	 *
+	 * @since 11.4.0
 	 */
 	protected function discard_preloaded_cart_session(): void {
 		if ( WC()->cart instanceof \WC_Cart ) {

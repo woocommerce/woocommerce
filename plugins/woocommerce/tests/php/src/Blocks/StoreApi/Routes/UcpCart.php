@@ -1053,25 +1053,21 @@ class UcpCart extends UcpCartTestCase {
 		$cart_id = CartTokenUtils::get_cart_token( $customer_id );
 		wp_set_current_user( (int) $other_id );
 
-		try {
-			$requests = array(
-				array( 'GET', '' ),
-				array( 'PUT', '' ),
-				array( 'POST', '/cancel' ),
-			);
-			foreach ( $requests as list( $method, $suffix ) ) {
-				$this->simulate_new_request();
-				$body     = 'PUT' === $method ? array( 'line_items' => array( $this->line_item( 0, 1 ) ) ) : array();
-				$response = $this->request( $method, '/carts/' . $cart_id . $suffix, $body );
-
-				$this->assertSame( 'not_found', $response->get_data()['messages'][0]['code'] ?? null, $method . $suffix );
-			}
-
-			// What shutdown would write.
+		$requests = array(
+			array( 'GET', '' ),
+			array( 'PUT', '' ),
+			array( 'POST', '/cancel' ),
+		);
+		foreach ( $requests as list( $method, $suffix ) ) {
 			$this->simulate_new_request();
-		} finally {
-			wp_set_current_user( 0 );
+			$body     = 'PUT' === $method ? array( 'line_items' => array( $this->line_item( 0, 1 ) ) ) : array();
+			$response = $this->request( $method, '/carts/' . $cart_id . $suffix, $body );
+
+			$this->assertSame( 'not_found', $response->get_data()['messages'][0]['code'] ?? null, $method . $suffix );
 		}
+
+		// What shutdown would write.
+		$this->simulate_new_request();
 
 		foreach ( $session_keys as $session_key ) {
 			$this->assertSame(
