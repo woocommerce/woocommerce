@@ -22,7 +22,7 @@ class CheckoutMapper {
 	 *
 	 * @param array                $cart Store API cart response, as nested arrays.
 	 * @param string               $checkout_id Checkout identifier (a Store API cart token).
-	 * @param array<string, mixed> $state Stored `status` and `continue_url`, and the `order` once paid.
+	 * @param array<string, mixed> $state Stored `status` and `continue_url`, the `order_id` of an order handed off for payment, and the `order` once paid.
 	 * @param array<string, mixed> $context Optional `messages` and `discount_codes`, as {@see CartMapper::build_cart()} takes them.
 	 * @return array
 	 */
@@ -33,7 +33,7 @@ class CheckoutMapper {
 		$missing  = $placed ? array() : $this->missing_requirements( $cart );
 		$messages = array_merge( $payload['messages'] ?? array(), $missing );
 
-		// A checkout carries its own `continue_url`, the payment page, only at escalation.
+		// A checkout carries a `continue_url` only at escalation: the payment page, or the cart's own when nothing is to pay.
 		unset( $payload['continue_url'] );
 
 		if ( '' === $status ) {
@@ -53,7 +53,10 @@ class CheckoutMapper {
 			$messages[]              = array(
 				'type'         => 'error',
 				'code'         => 'ESCALATION_REQUIRED',
-				'content'      => __( 'Payment must be completed by the buyer at continue_url.', 'woocommerce' ),
+				// Without an order the hand-off is the cart alone: the store checkout asks the buyer's details again.
+				'content'      => empty( $state['order_id'] )
+					? __( 'There is nothing to pay, so the buyer must place the order on the store, starting from the cart at continue_url.', 'woocommerce' )
+					: __( 'Payment must be completed by the buyer at continue_url.', 'woocommerce' ),
 				'severity'     => 'requires_buyer_review',
 				'path'         => '$',
 				'content_type' => 'plain',
