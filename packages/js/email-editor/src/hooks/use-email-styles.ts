@@ -37,15 +37,8 @@ function isNestedEmpty( obj ) {
 	if ( typeof obj !== 'object' ) {
 		return obj === '';
 	}
-	const isNotEmpty = Object.keys( obj ).some( ( key ) => {
-		const value = obj[ key ];
-		return (
-			typeof value !== 'object' ||
-			value === null ||
-			Object.keys( value ).length > 0
-		);
-	} );
-	return ! isNotEmpty;
+	// Children are already cleaned, so any key left holds a value.
+	return Object.keys( obj ).length === 0;
 }
 
 /**

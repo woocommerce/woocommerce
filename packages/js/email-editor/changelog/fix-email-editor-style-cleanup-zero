@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep email style values set to 0, false or a number when the email editor saves styles.
+Keep email style values set to 0, false or a number, and drop empty ones without an error, when the email editor saves styles.
