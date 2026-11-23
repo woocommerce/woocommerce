@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Orders\OrderAttributionController;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CartMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
@@ -62,7 +63,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 * order, the Store API draft order of this session, and `continue_url` is its payment page.
 	 * Stock is held for the order first, as the Store API checkout does, because the payment
 	 * page trusts a pending order's stock to be held and checks nothing itself.
-	 * A cart with nothing to pay is refused: these routes complete no order, and the payment page takes no such order.
+	 * A cart with nothing to pay makes no order, which the payment page would not take: `continue_url` is the cart's own, and the buyer places the order on the store.
 	 * A checkout that is not ready yet is returned as it is, with messages naming what is missing.
 	 * So is one already handed off and unchanged since, with a warning: its order is not written to again.
 	 *
@@ -112,13 +113,24 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			return $this->checkout_response( $checkout_id, $this->checkout_state() ?? $state, 200, $cart );
 		}
 
-		if ( ! $this->cart_controller->get_cart_instance()->needs_payment() ) {
-			return $this->ucp_error( 'payment_not_required', __( 'This checkout has nothing to pay, so it cannot be handed off for payment. It must be made on the store itself.', 'woocommerce' ), 'unrecoverable', 200 );
-		}
-
 		// Handed off already and unchanged. The buyer may be paying this order now, so it is not written to again.
 		if ( ! empty( $state['order_id'] ) ) {
 			return $this->already_handed_off_response( $checkout_id, $cart );
+		}
+
+		// Below the return above, so the store is never handed a cart whose order is still payable.
+		if ( ! $this->cart_controller->get_cart_instance()->needs_payment() ) {
+			$state = array_merge(
+				$state,
+				array(
+					'status'       => CheckoutMapper::STATUS_REQUIRES_ESCALATION,
+					'continue_url' => ( new CartMapper() )->continue_url( $checkout_id ),
+					'fingerprint'  => $fingerprint,
+				)
+			);
+			$this->save_checkout_state( $state );
+
+			return $this->checkout_response( $checkout_id, $state, 200, $cart );
 		}
 
 		if ( $order ) {

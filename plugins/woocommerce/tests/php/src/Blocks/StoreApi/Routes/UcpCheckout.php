@@ -682,6 +682,7 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 'requires_escalation', $data['status'] );
 		$this->assertContains( 'ESCALATION_REQUIRED', array_column( $data['messages'], 'code' ) );
+		$this->assertContains( 'Payment must be completed by the buyer at continue_url.', array_column( $data['messages'], 'content' ) );
 
 		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
 		$this->assertInstanceOf( \WC_Order::class, $order );
@@ -703,9 +704,9 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Complete refuses a checkout with nothing to pay, which the payment page would not take, and makes no order.
+	 * @testdox Complete hands a checkout with nothing to pay to the store with its cart, makes no order, and a later request reads the hand-off back.
 	 */
-	public function test_complete_refuses_a_free_checkout(): void {
+	public function test_complete_hands_a_free_checkout_to_the_store(): void {
 		$product = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -722,8 +723,15 @@ class UcpCheckout extends ControllerTestCase {
 
 		$data = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
 
-		$this->assertSame( 'payment_not_required', $data['messages'][0]['code'] );
+		$this->assertSame( 'requires_escalation', $data['status'] );
+		$this->assertSame( add_query_arg( 'session', $created['id'], wc_get_cart_url() ), $data['continue_url'] );
+		$this->assertStringNotContainsString( 'Payment must be completed', implode( ' ', array_column( $data['messages'], 'content' ) ) );
 		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ) );
+
+		$this->simulate_new_request( $created['id'] );
+		$read_back = $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data();
+		$this->assertSame( 'requires_escalation', $read_back['status'] );
+		$this->assertSame( $data['continue_url'], $read_back['continue_url'] );
 	}
 
 	/**
