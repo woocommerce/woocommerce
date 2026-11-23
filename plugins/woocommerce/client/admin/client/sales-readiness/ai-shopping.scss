@@ -166,12 +166,6 @@ body.woocommerce_page_wc-settings:has(.wc-ai-shopping) {
 	}
 }
 
-// The coming soon notice's button is a link, so wp-admin's link blue would override the neutral button's label.
-.wc-ai-shopping__notice-action,
-.wc-ai-shopping__notice-action:is(:hover, :focus, :active) {
-	color: var(--wpds-color-foreground-interactive-neutral);
-}
-
 // DataForm cards.
 .wc-ai-shopping .dataforms-layouts-card__field {
 	position: relative;
@@ -206,4 +200,10 @@ body.woocommerce_page_wc-settings:has(.wc-ai-shopping) {
 	position: absolute;
 	inset-block-start: var(--wpds-dimension-padding-2xl);
 	inset-inline-end: var(--wpds-dimension-padding-2xl);
+}
+
+// The design centres the switch's snackbar at the bottom of the content area; other pages keep it on the left.
+body:has(.wc-ai-shopping) .woocommerce-transient-notices {
+	left: 50%;
+	transform: translateX(-50%);
 }

@@ -307,9 +307,10 @@ class ReadinessRestController extends RestApiControllerBase {
 				'type'    => array( 'string', 'null' ),
 				'context' => array( 'view' ),
 			),
-			'intro'        => array(
-				'type'    => array( 'string', 'null' ),
-				'context' => array( 'view' ),
+			'checked'      => array(
+				'description' => __( 'Whether the store has been checked at least once.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => array( 'view' ),
 			),
 			'run'          => array(
 				'description' => __( 'The check button: its label, whether a check is pending or stalled, and a status message.', 'woocommerce' ),
@@ -320,6 +321,11 @@ class ReadinessRestController extends RestApiControllerBase {
 				'description' => __( 'Where the page sends merchants to contact support.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'uri',
+				'context'     => array( 'view' ),
+			),
+			'coming_soon'  => array(
+				'description' => __( 'The notice shown while the store is in coming soon mode and the results are from when it was live.', 'woocommerce' ),
+				'type'        => array( 'object', 'null' ),
 				'context'     => array( 'view' ),
 			),
 			'fix_first'    => array(

@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { asLink } from '../components/shopping-checklist';
+import { asLink } from '../components/as-link';
 
 describe( 'asLink', () => {
 	it( 'disables the button when the URL is rejected', () => {
