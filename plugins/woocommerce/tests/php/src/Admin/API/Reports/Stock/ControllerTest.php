@@ -189,10 +189,12 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_notification_columns_for_single_product_page(): void {
 		$this->enable_stock_notification_columns();
-		$ids = $this->create_notification_fixture();
+		$product_id = $this->create_product( ProductStatus::PUBLISH )->get_id();
+		$this->insert_notification( $product_id, NotificationStatus::ACTIVE, 5 );
+		$this->insert_notification( $product_id, NotificationStatus::ACTIVE, 1 );
 
 		$request = new WP_REST_Request( 'GET', self::ENDPOINT );
-		$request->set_param( 'include', (string) $ids['simple_a'] );
+		$request->set_param( 'include', (string) $product_id );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( 200, $response->get_status() );
@@ -235,6 +237,22 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 			array( $ids['simple_b'], $ids['simple_a'], $ids['variation'] ),
 			array_slice( $this->get_sorted_ids( $ids, 'active_signups', 'asc' ), 2 )
 		);
+	}
+
+	/**
+	 * @testdox Should not serve a cached order when sign-ups change between report requests.
+	 */
+	public function test_orderby_active_signups_is_not_cached(): void {
+		$this->enable_stock_notification_columns();
+		$ids = $this->create_notification_fixture();
+
+		$this->assertSame( $ids['variation'], $this->get_sorted_ids( $ids, 'active_signups', 'desc' )[0] );
+
+		$this->insert_notification( $ids['simple_b'], NotificationStatus::ACTIVE, 1 );
+		$this->insert_notification( $ids['simple_b'], NotificationStatus::ACTIVE, 1 );
+		$this->insert_notification( $ids['simple_b'], NotificationStatus::ACTIVE, 1 );
+
+		$this->assertSame( $ids['simple_b'], $this->get_sorted_ids( $ids, 'active_signups', 'desc' )[0] );
 	}
 
 	/**

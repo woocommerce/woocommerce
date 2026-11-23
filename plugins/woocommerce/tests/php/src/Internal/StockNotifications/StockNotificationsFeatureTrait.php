@@ -52,7 +52,10 @@ trait StockNotificationsFeatureTrait {
 	 * Restore the feature option to its pre-test value, and drop the Stock report fields the feature's services register.
 	 */
 	private function restore_stock_notifications_feature_option(): void {
-		unset( $GLOBALS['wp_rest_additional_fields']['report_stock'] );
+		unset(
+			$GLOBALS['wp_rest_additional_fields']['report_stock']['active_signups'],
+			$GLOBALS['wp_rest_additional_fields']['report_stock']['days_waiting']
+		);
 
 		if ( false === $this->stock_notifications_original_feature_option ) {
 			delete_option( StockNotifications::ENABLE_OPTION_NAME );

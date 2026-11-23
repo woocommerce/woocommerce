@@ -94,6 +94,11 @@ class StockReportColumns {
 		$order   = $wp_query->get( 'order' );
 		$order   = is_string( $order ) && 'ASC' === strtoupper( $order ) ? 'ASC' : 'DESC';
 
+		if ( in_array( $orderby, array( 'active_signups', 'days_waiting' ), true ) ) {
+			// Sign-up changes don't bust WP_Query's cached post IDs, so a cached order would go stale.
+			$wp_query->set( 'cache_results', false );
+		}
+
 		if ( 'active_signups' === $orderby ) {
 			$clauses['join']   .= $this->get_stats_join();
 			$clauses['orderby'] = " COALESCE( sn.sn_count, 0 ) {$order}, {$wpdb->posts}.ID {$order} ";
