@@ -57,18 +57,14 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
-			remove_all_filters( 'woocommerce_available_payment_gateways' );
+			parent::tearDown();
 		} finally {
-			try {
-				parent::tearDown();
-			} finally {
-				$this->invalidate_dashboard_option_caches();
+			$this->invalidate_dashboard_option_caches();
 
-				if ( $this->default_country_option_existed ) {
-					update_option( 'woocommerce_default_country', $this->default_country_option_value );
-				} else {
-					delete_option( 'woocommerce_default_country' );
-				}
+			if ( $this->default_country_option_existed ) {
+				update_option( 'woocommerce_default_country', $this->default_country_option_value );
+			} else {
+				delete_option( 'woocommerce_default_country' );
 			}
 		}
 	}
@@ -440,8 +436,6 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 			// Should redirect to setup wizard when profiler is not completed.
 			$this->assertStringContainsString( 'path=/setup-wizard', $button_link );
 		}
-
-		delete_option( 'woocommerce_onboarding_profile' );
 	}
 
 	/**
@@ -462,8 +456,6 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 			// Should redirect to setup wizard when profiler is not completed.
 			$this->assertStringContainsString( 'path=/setup-wizard', $button_link );
 		}
-
-		delete_option( 'woocommerce_onboarding_profile' );
 	}
 
 	/**
@@ -486,8 +478,6 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 			// Should contain the task ID or actionUrl.
 			$this->assertMatchesRegularExpression( '/(task=|path=)/', $button_link );
 		}
-
-		delete_option( 'woocommerce_onboarding_profile' );
 	}
 
 	/**
@@ -510,8 +500,6 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 			// Should contain the task ID or actionUrl.
 			$this->assertMatchesRegularExpression( '/(task=|path=)/', $button_link );
 		}
-
-		delete_option( 'woocommerce_onboarding_profile' );
 	}
 
 	/**

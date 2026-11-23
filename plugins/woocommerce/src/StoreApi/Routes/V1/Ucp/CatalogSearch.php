@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * UCP `POST /catalog/search` route.
@@ -57,7 +57,7 @@ class CatalogSearch extends AbstractCatalogRoute {
 	 * @return string
 	 */
 	protected function get_capability(): string {
-		return UcpUtils::CAPABILITY_CATALOG_SEARCH;
+		return Utils::CAPABILITY_CATALOG_SEARCH;
 	}
 
 	/**
@@ -99,9 +99,9 @@ class CatalogSearch extends AbstractCatalogRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$query      = trim( (string) UcpUtils::json_param( $request, 'query' ) );
-		$filters    = (array) ( UcpUtils::json_param( $request, 'filters' ) ?? array() );
-		$pagination = (array) ( UcpUtils::json_param( $request, 'pagination' ) ?? array() );
+		$query      = trim( (string) Utils::json_param( $request, 'query' ) );
+		$filters    = (array) ( Utils::json_param( $request, 'filters' ) ?? array() );
+		$pagination = (array) ( Utils::json_param( $request, 'pagination' ) ?? array() );
 		$context    = $this->get_context( $request );
 
 		$invalid = $this->validate_search_input( $query, $filters );
@@ -197,45 +197,7 @@ class CatalogSearch extends AbstractCatalogRoute {
 			);
 		}
 
-		if ( ! $has_price ) {
-			return null;
-		}
-
-		$bounds = array();
-
-		foreach ( array( 'min', 'max' ) as $bound ) {
-			if ( ! isset( $filters['price'][ $bound ] ) ) {
-				continue;
-			}
-
-			$value = $filters['price'][ $bound ];
-
-			if ( ! is_numeric( $value ) || (float) $value < 0 ) {
-				return $this->ucp_error(
-					'VALIDATION_ERROR',
-					sprintf(
-						/* translators: %s: price filter bound name, `min` or `max`. */
-						__( 'filters.price.%s must be a non-negative amount in minor units.', 'woocommerce' ),
-						$bound
-					),
-					'recoverable',
-					400
-				);
-			}
-
-			$bounds[ $bound ] = (int) $value;
-		}
-
-		if ( isset( $bounds['min'], $bounds['max'] ) && $bounds['min'] > $bounds['max'] ) {
-			return $this->ucp_error(
-				'VALIDATION_ERROR',
-				__( 'filters.price.min must not exceed filters.price.max.', 'woocommerce' ),
-				'recoverable',
-				400
-			);
-		}
-
-		return null;
+		return $this->validate_price_filter( $filters );
 	}
 
 	/**

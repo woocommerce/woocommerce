@@ -5,9 +5,12 @@
  * @package WooCommerce\Tests\Checkout.
  */
 
+declare( strict_types = 1 );
+
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
+use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
@@ -48,24 +51,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * @var callable[] Callbacks registering extra checkout fields, all removed on tear down.
-	 */
-	private $extra_field_filters = array();
-
-	/**
 	 * @var WC_Session|null The session the test base installed, put back after a test swapped in a real handler.
 	 */
 	private $original_session;
-
-	/**
-	 * @var WC_Customer|null The customer the test base installed, put back after a test ran a full checkout into a fresh one.
-	 */
-	private $original_session_customer;
-
-	/**
-	 * @var array The customer's location and VAT exemption before each test, restored on tear down.
-	 */
-	private $original_customer = array();
 
 	/**
 	 * Runs before each test.
@@ -94,6 +82,14 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			public function update_session( $data ) {
 				return parent::update_session( $data );
 			}
+
+			public function process_order_for_test( $order_id, $with_payment ) {
+				if ( $with_payment ) {
+					return parent::process_order_payment( $order_id, WC_Gateway_BACS::ID );
+				}
+
+				return parent::process_order_without_payment( $order_id );
+			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 
@@ -106,9 +102,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		WC()->cart->empty_cart();
 
-		$customer                = WC()->customer;
-		$this->original_customer = array( $customer->get_billing_country(), $customer->get_billing_state(), $customer->get_shipping_country(), $customer->get_shipping_state(), $customer->get_is_vat_exempt() );
-
 		add_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 	}
 
@@ -116,40 +109,254 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
+		global $wpdb;
+
+		try {
+			$shutdown_callback_property = new ReflectionProperty( OrderController::class, 'unlock_orders_on_shutdown' );
+			$shutdown_callback_property->setAccessible( true );
+			$shutdown_callback = $shutdown_callback_property->getValue();
+			if ( $shutdown_callback ) {
+				$shutdown_callback();
+			}
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( OrderController::ORDER_LOCK_OPTION_PREFIX ) . '%' ) );
+
+			delete_option( 'woocommerce_calc_taxes' );
+			delete_option( 'woocommerce_allowed_countries' );
+			delete_option( 'woocommerce_specific_allowed_countries' );
+
+			if ( $this->original_session ) {
+				WC()->session           = $this->original_session;
+				$this->original_session = null;
+			}
+
+			wp_set_current_user( 0 );
+			WC()->session->set( 'customer', null );
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
+	 * @testdox Legacy checkout refuses an order currently locked by another request.
+	 */
+	public function test_create_order_refuses_locked_awaiting_payment_order(): void {
+		global $wpdb;
+
+		$order = WC_Helper_Order::create_order();
+		WC()->session->set( 'order_awaiting_payment', $order->get_id() );
+		$inserted = $wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => OrderController::ORDER_LOCK_OPTION_PREFIX . $order->get_id(),
+				'option_value' => number_format( microtime( true ) + 60, 6, '.', '' ),
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
+		);
+		$this->assertSame( 1, $inserted, 'The competing request lock should be inserted.' );
+
+		$result = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'Your order is still being processed by another request. Please try again.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Legacy checkout locks an order after creating it.
+	 */
+	public function test_create_order_locks_new_order(): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+
+		$this->assertIsInt( $order_id, 'Checkout should create an order.' );
+		$this->assertNotNull(
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
+					OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id
+				)
+			),
+			'The newly created order should remain locked for the request.'
+		);
+	}
+
+	/**
+	 * @testdox Legacy checkout verifies lock ownership immediately before payment processing.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $with_payment Whether to exercise the payment-gateway path.
+	 */
+	public function test_payment_processing_refuses_lost_order_lock( bool $with_payment ): void {
+		global $wpdb;
+
+		$order = WC_Helper_Order::create_order();
+		$this->assertTrue( OrderController::lock_order( $order->get_id(), 0 ), 'The test request should initially own the lock.' );
+
+		$wpdb->update(
+			$wpdb->options,
+			array( 'option_value' => number_format( microtime( true ) + 120, 6, '.', '' ) ),
+			array( 'option_name' => OrderController::ORDER_LOCK_OPTION_PREFIX . $order->get_id() ),
+			array( '%s' ),
+			array( '%s' )
+		);
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Your order is still being processed by another request. Please try again.' );
+
+		$this->sut->process_order_for_test( $order->get_id(), $with_payment );
+	}
+
+	/**
+	 * Re-type the billing country field, the way a checkout field editor plugin can.
+	 *
+	 * The filter is tracked with the extra field filters, so tear down removes it.
+	 */
+	private function retype_billing_country_field(): void {
+		$filter = function ( $fields ) {
+			$fields['billing']['billing_country']['type'] = 'select';
+			return $fields;
+		};
+
+		$this->extra_field_filters[] = $filter;
+
+		add_filter( 'woocommerce_checkout_fields', $filter );
+	}
+
+	/**
+	 * @testdox Classic checkout enforces the merchant's account policy before creating a customer, order or payment.
+	 *
+	 * @testWith ["no", "no", false, false]
+	 *           ["no", "yes", false, true]
+	 *           ["yes", "no", false, true]
+	 *           ["yes", "yes", false, true]
+	 *           ["no", "no", true, true]
+	 *           ["no", "no", false, true, true, null]
+	 *           ["no", "no", false, true, null, false]
+	 *           ["yes", "no", false, false, false, null]
+	 *           ["no", "yes", false, false, null, true]
+	 *
+	 * @param string    $registration_enabled Whether checkout registration is enabled.
+	 * @param string    $guest_checkout_enabled Whether guest checkout is enabled.
+	 * @param bool      $logged_in Whether the customer is signed in.
+	 * @param bool      $allowed Whether checkout can reach customer, order and payment processing.
+	 * @param bool|null $filtered_registration_enabled Optional extension override for registration.
+	 * @param bool|null $filtered_registration_required Optional extension override for requiring registration.
+	 */
+	public function test_process_checkout_registration_policy( string $registration_enabled, string $guest_checkout_enabled, bool $logged_in, bool $allowed, ?bool $filtered_registration_enabled = null, ?bool $filtered_registration_required = null ): void {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
-		delete_option( 'woocommerce_calc_taxes' );
-		WC()->countries->locale = array();
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $registration_enabled );
+		update_option( 'woocommerce_enable_guest_checkout', $guest_checkout_enabled );
+		if ( null !== $filtered_registration_enabled ) {
+			add_filter( 'woocommerce_checkout_registration_enabled', $filtered_registration_enabled ? '__return_true' : '__return_false' );
+		}
+		if ( null !== $filtered_registration_required ) {
+			add_filter( 'woocommerce_checkout_registration_required', $filtered_registration_required ? '__return_true' : '__return_false' );
+		}
+		wp_set_current_user( $logged_in ? self::factory()->user->create( array( 'role' => 'customer' ) ) : 0 );
+		wc_clear_notices();
 
-		foreach ( $this->extra_field_filters as $extra_field_filter ) {
-			remove_filter( 'woocommerce_checkout_fields', $extra_field_filter );
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+		$order = WC_Helper_Order::create_order();
+		$order->set_total( 10 );
+		$order->save();
+		$posted_data = array( 'payment_method' => 'test_gateway' );
+
+		// Isolate this checkout policy from address validation and payment-provider side effects.
+		$sut = $this->getMockBuilder( WC_Checkout::class )->onlyMethods(
+			array( 'get_posted_data', 'update_session', 'validate_checkout', 'process_customer', 'create_order', 'process_order_payment', 'process_order_without_payment', 'send_ajax_failure_response' )
+		)->getMock();
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'get_posted_data' )->willReturn( $posted_data );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'update_session' );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'validate_checkout' );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'process_customer' )->with( $posted_data );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'create_order' )->with( $posted_data )->willReturn( $order->get_id() );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'process_order_payment' )->with( $order->get_id(), 'test_gateway' );
+		$sut->expects( $this->never() )->method( 'process_order_without_payment' );
+
+		$before_process   = did_action( 'woocommerce_before_checkout_process' );
+		$process          = did_action( 'woocommerce_checkout_process' );
+		$original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve the test request.
+		$_REQUEST         = array( 'woocommerce-process-checkout-nonce' => wp_create_nonce( 'woocommerce-process_checkout' ) );
+		try {
+			$sut->process_checkout();
+		} finally {
+			$_REQUEST = $original_request;
 		}
 
-		$this->extra_field_filters = array();
-
-		if ( $this->original_session ) {
-			WC()->session                    = $this->original_session;
-			WC()->customer                   = $this->original_session_customer;
-			$this->original_session          = null;
-			$this->original_session_customer = null;
+		$this->assertSame( $before_process + 1, did_action( 'woocommerce_before_checkout_process' ), 'Extensions must still see the checkout attempt.' );
+		$this->assertSame( $process + ( $allowed ? 1 : 0 ), did_action( 'woocommerce_checkout_process' ), 'Denied checkout must not dispatch processing hooks.' );
+		$this->assertSame( $allowed ? 0 : 1, wc_notice_count( 'error' ), 'Only a guest who cannot register or use guest checkout should be denied.' );
+		if ( ! $allowed ) {
+			$this->assertTrue( wc_has_notice( 'You must be logged in to checkout.', 'error' ), 'The customer should receive the account-policy error.' );
 		}
+	}
 
+	/**
+	 * @testdox Empty-cart requests fire the attempt hook, and forbidden ones get the account-policy error.
+	 * @testWith ["yes", true]
+	 *           ["no", false]
+	 * @param string $guest_checkout Whether guest checkout is enabled.
+	 * @param bool   $allowed Whether the account policy allows this request.
+	 */
+	public function test_empty_cart_preparation_hook_policy( string $guest_checkout, bool $allowed ): void {
+		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'no' );
+		update_option( 'woocommerce_enable_guest_checkout', $guest_checkout );
 		wp_set_current_user( 0 );
-		WC()->session->set( 'customer', null );
-		WC()->customer = new WC_Customer( 0, true );
+		wc_clear_notices();
+		WC()->cart->empty_cart();
+		$sut = $this->getMockBuilder( WC_Checkout::class )->onlyMethods( array( 'get_posted_data', 'send_ajax_failure_response' ) )->getMock();
+		$sut->expects( $this->never() )->method( 'get_posted_data' );
+		$before_process   = did_action( 'woocommerce_before_checkout_process' );
+		$original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve the test request.
+		$_REQUEST         = array( 'woocommerce-process-checkout-nonce' => wp_create_nonce( 'woocommerce-process_checkout' ) );
+		try {
+			$sut->process_checkout();
+		} finally {
+			$_REQUEST = $original_request;
+		}
+		$this->assertSame( $before_process + 1, did_action( 'woocommerce_before_checkout_process' ) );
+		$this->assertSame( ! $allowed, wc_has_notice( 'You must be logged in to checkout.', 'error' ) );
+	}
 
-		$customer = WC()->customer;
-		$customer->set_billing_location( $this->original_customer[0], $this->original_customer[1] );
-		$customer->set_shipping_location( $this->original_customer[2], $this->original_customer[3] );
-		$customer->set_is_vat_exempt( $this->original_customer[4] );
-		WC_Helper_Shipping::delete_simple_flat_rate();
+	/**
+	 * @testdox Posted createaccount cannot enable registration when the merchant has disabled it.
+	 *
+	 * @testWith ["no", 0]
+	 *           ["yes", 1]
+	 *
+	 * @param string $registration_enabled Whether checkout registration is enabled.
+	 * @param int    $expected_createaccount Expected sanitized account-creation choice.
+	 */
+	public function test_get_posted_data_honors_registration_setting( string $registration_enabled, int $expected_createaccount ): void {
+		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $registration_enabled );
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+		wp_set_current_user( 0 );
 
-		parent::tearDown();
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve the test request.
+		$_POST         = array( 'createaccount' => '1' );
+		try {
+			$posted_data = $this->sut->get_posted_data();
+		} finally {
+			$_POST = $original_post;
+		}
+
+		$this->assertSame( $expected_createaccount, $posted_data['createaccount'], 'Submitted form data must respect the effective registration setting.' );
 	}
 
 	/**
 	 * Register an extra checkout field in an arbitrary fieldset, the way checkout field editor plugins do.
 	 *
-	 * Can be called more than once per test: each callback is tracked and removed on tear down.
+	 * Can be called more than once per test.
 	 *
 	 * @param string $fieldset_key Fieldset the field belongs to.
 	 * @param string $key          Field key.
@@ -161,8 +368,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 			return $fields;
 		};
-
-		$this->extra_field_filters[] = $extra_field_filter;
 
 		add_filter( 'woocommerce_checkout_fields', $extra_field_filter );
 	}
@@ -278,6 +483,36 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A logged in customer's cart stays empty after a zero-total order instead of coming back from the saved cart.
+	 */
+	public function test_process_order_without_payment_clears_logged_in_customers_saved_cart(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+
+		$order = wc_create_order();
+		$order->save();
+
+		add_filter(
+			'woocommerce_checkout_no_payment_needed_redirect',
+			function () {
+				throw new RuntimeException( 'Stop the test before checkout sends its redirect.' );
+			}
+		);
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should reach its no-payment redirect.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertSame( 'Stop the test before checkout sends its redirect.', $exception->getMessage() );
+		}
+
+		// Load the cart the way the order received page does on the next request.
+		WC()->cart->get_cart_from_session();
+
+		$this->assertTrue( WC()->cart->is_empty(), 'The purchased items should not be restored from the saved cart.' );
+	}
+
+	/**
 	 * @testdox A logged in customer's VAT exemption should survive checkout saving their account.
 	 */
 	public function test_process_customer_keeps_logged_in_customer_vat_exemption(): void {
@@ -287,30 +522,24 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		wp_set_current_user( $customer_id );
 		WC()->session->init();
 
-		$original_customer = WC()->customer;
-		WC()->customer     = new WC_Customer( $customer_id, true );
+		WC()->customer = new WC_Customer( $customer_id, true );
+		WC()->customer->set_is_vat_exempt( true );
+		WC()->customer->save();
 
-		try {
-			WC()->customer->set_is_vat_exempt( true );
-			WC()->customer->save();
+		$this->sut->process_customer(
+			array(
+				'billing_first_name' => 'Classic',
+				'billing_address_1'  => '456 Classic Road',
+				'billing_email'      => 'classic-vat-exempt@example.com',
+			)
+		);
 
-			$this->sut->process_customer(
-				array(
-					'billing_first_name' => 'Classic',
-					'billing_address_1'  => '456 Classic Road',
-					'billing_email'      => 'classic-vat-exempt@example.com',
-				)
-			);
+		// The session customer is saved on shutdown in a real request.
+		WC()->customer->save();
 
-			// The session customer is saved on shutdown in a real request.
-			WC()->customer->save();
-
-			$reloaded_customer = new WC_Customer( $customer_id, true );
-			$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so a retry is not charged tax.' );
-			$this->assertSame( '456 Classic Road', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
-		} finally {
-			WC()->customer = $original_customer;
-		}
+		$reloaded_customer = new WC_Customer( $customer_id, true );
+		$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so a retry is not charged tax.' );
+		$this->assertSame( '456 Classic Road', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
 	}
 
 	/**
@@ -594,8 +823,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * country rules, so this also pins that no country is assumed when the customer can't supply one.
 	 */
 	public function test_validate_posted_data_does_not_throw_without_a_customer_object() {
-		$original_customer = WC()->customer;
-
 		WC()->customer = null;
 
 		$data = array(
@@ -605,11 +832,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$errors = new WP_Error();
 
-		try {
-			$this->sut->validate_posted_data( $data, $errors );
-		} finally {
-			WC()->customer = $original_customer;
-		}
+		$this->sut->validate_posted_data( $data, $errors );
 
 		$this->assertEmpty(
 			$errors->get_error_message( 'billing_postcode_validation' ),
@@ -621,8 +844,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @testdox 'validate_posted_data' prefers the posted country over the one stored on the customer.
 	 */
 	public function test_validate_posted_data_prefers_the_posted_country() {
-		$original_billing_country = WC()->customer->get_billing_country();
-
 		WC()->customer->set_billing_country( 'GB' );
 
 		$data = array(
@@ -633,11 +854,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$errors = new WP_Error();
 
-		try {
-			$this->sut->validate_posted_data( $data, $errors );
-		} finally {
-			WC()->customer->set_billing_country( $original_billing_country );
-		}
+		$this->sut->validate_posted_data( $data, $errors );
 
 		$this->assertEmpty(
 			$errors->get_error_message( 'billing_postcode_validation' ),
@@ -660,9 +877,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function test_validate_posted_data_falls_back_to_the_customer_country( $fieldset_key, $customer_country, $expect_error ) {
 		add_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
 
-		$original_billing_country  = WC()->customer->get_billing_country();
-		$original_shipping_country = WC()->customer->get_shipping_country();
-
 		WC()->customer->set_billing_country( $customer_country );
 		WC()->customer->set_shipping_country( $customer_country );
 
@@ -677,8 +891,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		try {
 			$this->sut->validate_posted_data( $data, $errors );
 		} finally {
-			WC()->customer->set_billing_country( $original_billing_country );
-			WC()->customer->set_shipping_country( $original_shipping_country );
 			remove_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
 		}
 
@@ -751,6 +963,210 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'get_posted_data' converts posted state names to state codes.
+	 *
+	 * @testWith ["Hawaii", "HI"]
+	 *           ["hawaii", "HI"]
+	 *           ["California", "CA"]
+	 *           ["ıL", "IL"]
+	 *           ["HI", "HI"]
+	 *
+	 * @param string $posted_state   Posted state value.
+	 * @param string $expected_state Expected state code.
+	 */
+	public function test_get_posted_data_converts_state_names_to_codes( string $posted_state, string $expected_state ): void {
+		add_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'woocommerce-process-checkout-nonce' => 'test-nonce',
+			'billing_country'                    => 'US',
+			'billing_state'                      => $posted_state,
+			'ship_to_different_address'          => '1',
+			'shipping_country'                   => 'US',
+			'shipping_state'                     => $posted_state,
+		);
+
+		try {
+			$data = $this->sut->get_posted_data();
+		} finally {
+			$_POST = $original_post;
+			remove_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
+		}
+
+		$this->assertSame( $expected_state, $data['billing_state'], 'The billing state should be a state code before totals are calculated.' );
+		$this->assertSame( $expected_state, $data['shipping_state'], 'The shipping state should be a state code before totals are calculated.' );
+	}
+
+	/**
+	 * @testdox 'get_posted_data' leaves an unknown state to be refused by 'validate_posted_data'.
+	 */
+	public function test_get_posted_data_keeps_unknown_state_invalid(): void {
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'woocommerce-process-checkout-nonce' => 'test-nonce',
+			'billing_country'                    => 'US',
+			'billing_state'                      => 'Nowhere',
+		);
+
+		try {
+			$data = $this->sut->get_posted_data();
+		} finally {
+			$_POST = $original_post;
+		}
+
+		$errors = new WP_Error();
+		$this->sut->validate_posted_data( $data, $errors );
+
+		$this->assertNotEmpty( $errors->get_error_message( 'billing_state_validation' ), 'A value that is neither a state code nor a state name should still be refused.' );
+	}
+
+	/**
+	 * @testdox Checkout charges the state shipping zone rate when the state name is posted instead of its code.
+	 *
+	 * @testWith ["HI"]
+	 *           ["Hawaii"]
+	 *           ["hawaii"]
+	 *
+	 * @param string $posted_state Posted billing state.
+	 */
+	public function test_update_session_uses_state_shipping_zone_for_posted_state_name( string $posted_state ): void {
+		$shipping_was_enabled     = WC()->shipping()->enabled;
+		WC()->shipping()->enabled = true;
+		$zones                    = array();
+
+		try {
+			$zones[] = $this->create_flat_rate_zone( 1, 'US:HI', 'state', '60' );
+			$zones[] = $this->create_flat_rate_zone( 2, 'US', 'country', '5' );
+
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$data = $this->post_checkout_and_update_session( $posted_state );
+		} finally {
+			foreach ( $zones as $zone ) {
+				foreach ( $zone->get_shipping_methods() as $method ) {
+					delete_option( 'woocommerce_flat_rate_' . $method->get_instance_id() . '_settings' );
+				}
+				$zone->delete();
+			}
+			WC_Cache_Helper::get_transient_version( 'shipping', true );
+			WC()->shipping()->enabled = $shipping_was_enabled;
+		}
+
+		$this->assertSame( 'HI', $data['billing_state'], 'The order should be saved with the state code.' );
+		$this->assertSame( 60.0, (float) WC()->cart->get_shipping_total(), 'The Hawaii zone rate should be charged.' );
+	}
+
+	/**
+	 * @testdox Checkout charges the state tax rate when the state name is posted instead of its code.
+	 *
+	 * @testWith ["CA", "CA"]
+	 *           ["CA", "California"]
+	 *           ["IL", "IL"]
+	 *           ["IL", "Illinois"]
+	 *           ["IL", "ıL"]
+	 *
+	 * @param string $rate_state   State the tax rate is limited to.
+	 * @param string $posted_state Posted billing state.
+	 */
+	public function test_update_session_uses_state_tax_rate_for_posted_state_name( string $rate_state, string $posted_state ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC()->customer->set_is_vat_exempt( false );
+
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => $rate_state,
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'State tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$data = $this->post_checkout_and_update_session( $posted_state );
+		} finally {
+			WC_Tax::_delete_tax_rate( $tax_rate_id );
+		}
+
+		$this->assertSame( $rate_state, $data['billing_state'], 'The order should be saved with the state code.' );
+		$this->assertEqualsWithDelta( 1.0, (float) WC()->cart->get_cart_contents_tax(), 0.001, 'The state tax rate should be charged.' );
+	}
+
+	/**
+	 * Create a shipping zone with a single flat rate.
+	 *
+	 * @param int    $order    Zone order.
+	 * @param string $location Zone location code.
+	 * @param string $type     Zone location type.
+	 * @param string $cost     Flat rate cost.
+	 * @return WC_Shipping_Zone
+	 */
+	private function create_flat_rate_zone( int $order, string $location, string $type, string $cost ): WC_Shipping_Zone {
+		$zone = new WC_Shipping_Zone();
+		$zone->set_zone_name( $location );
+		$zone->set_zone_order( $order );
+		$zone->add_location( $location, $type );
+		$zone->save();
+
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+		update_option(
+			'woocommerce_flat_rate_' . $instance_id . '_settings',
+			array(
+				'enabled'    => 'yes',
+				'title'      => 'Flat rate',
+				'tax_status' => 'none',
+				'cost'       => $cost,
+			)
+		);
+
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping()->load_shipping_methods();
+
+		return $zone;
+	}
+
+	/**
+	 * Post a guest checkout with a US billing address and update the session from it, like 'process_checkout' does.
+	 *
+	 * @param string $posted_state Posted billing state.
+	 * @return array Posted data.
+	 */
+	private function post_checkout_and_update_session( string $posted_state ): array {
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'woocommerce-process-checkout-nonce' => 'test-nonce',
+			'billing_first_name'                 => 'Test',
+			'billing_last_name'                  => 'Shopper',
+			'billing_address_1'                  => '1 Main Street',
+			'billing_city'                       => 'Springfield',
+			'billing_postcode'                   => '12345',
+			'billing_country'                    => 'US',
+			'billing_state'                      => $posted_state,
+			'billing_phone'                      => '5555555555',
+			'billing_email'                      => 'shopper@example.com',
+			'payment_method'                     => 'cod',
+		);
+
+		try {
+			$data = $this->sut->get_posted_data();
+			$this->sut->update_session( $data );
+		} finally {
+			$_POST = $original_post;
+		}
+
+		return $data;
+	}
+
+	/**
 	 * @testdox 'validate_checkout' adds a "We don't ship to country X" error but only if the country exists.
 	 *
 	 * @testWith [ "XX", false ]
@@ -803,7 +1219,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$expect_we_dont_ship_error ? 'Unfortunately, <strong>we do not ship to Japan</strong>. Please enter an alternative shipping address.' : '',
 			$errors->get_error_message( 'shipping' )
 		);
-		remove_all_filters( 'woocommerce_countries_allowed_countries' );
 	}
 
 	/**
@@ -1202,18 +1617,48 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'validate_checkout' names the payment problem: no method on offer, none selected, or one that isn't available.
+	 * @testWith [[], "", "Invalid payment method."]
+	 *           [["cod"], "", "Please select a payment method."]
+	 *           [["cod"], "bacs", "Invalid payment method."]
+	 *
+	 * @param string[] $available Gateway ids available for the cart.
+	 * @param string   $posted    The payment method the shopper submitted.
+	 * @param string   $expected  Expected payment error.
+	 */
+	public function test_validate_checkout_names_the_payment_problem( array $available, string $posted, string $expected ): void {
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		add_filter( 'woocommerce_cart_needs_payment', '__return_true' );
+		add_filter(
+			'woocommerce_available_payment_gateways',
+			function () use ( $available ) {
+				return array_intersect_key( WC()->payment_gateways()->payment_gateways(), array_flip( $available ) );
+			}
+		);
+
+		$data   = array(
+			'ship_to_different_address' => false,
+			'billing_country'           => 'US',
+			'shipping_country'          => 'US',
+			'payment_method'            => $posted,
+		);
+		$errors = new WP_Error();
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame( $expected, $errors->get_error_message( 'payment' ) );
+	}
+
+	/**
 	 * @testdox If the WooCommerce class's customer object is null (like if WC has not been fully initialized yet),
 	 *          calling WC_Checkout::get_value should not throw an error.
 	 */
 	public function test_get_value_no_error_on_null_customer() {
 		$sut = WC_Checkout::instance();
 
-		$orig_customer = WC()->customer;
 		WC()->customer = null;
 
 		$this->assertNull( $sut->get_value( 'billing_country' ) );
-
-		WC()->customer = $orig_customer;
 	}
 
 	/**
@@ -1379,6 +1824,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @testdox Resuming a pending order with an unchanged cart keeps its item IDs.
 	 */
 	public function test_create_order_resume_keeps_item_ids_when_cart_is_unchanged(): void {
+		$this->assertNotFalse(
+			has_action( 'woocommerce_new_order_item', array( WC()->deprecated_hook_handlers['actions'], 'maybe_handle_deprecated_hook' ) ),
+			'The core legacy hook forwarder must not prevent item reuse.'
+		);
 		$order_id        = $this->create_order_with_line_item_and_fee();
 		$before          = $this->get_order_item_ids_by_type( $order_id );
 		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
@@ -1394,7 +1843,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Resuming a pending order whose $item_type cart section changed replaces only those items, and fires woocommerce_remove_order_items once for them.
+	 * @testdox Resuming a pending order whose $item_type cart section changed replaces only those items.
 	 * @testWith ["fee"]
 	 *           ["shipping"]
 	 *           ["tax"]
@@ -1407,20 +1856,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$before   = $this->get_order_item_ids_by_type( $order_id );
 		$this->change_cart_section( $order_id, $item_type );
 		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
-		$removed_types   = array();
-		add_action(
-			'woocommerce_remove_order_items',
-			function ( $order, $type ) use ( &$removed_types ) {
-				unset( $order );
-				$removed_types[] = $type;
-			},
-			10,
-			2
-		);
+		$removal_calls   = did_action( 'woocommerce_remove_order_items' );
 
 		$this->resume_order( $order_id );
 
-		$this->assertSame( array( $item_type ), $removed_types, 'Only the changed type should be removed, once.' );
+		$this->assertSame( $removal_calls + 1, did_action( 'woocommerce_remove_order_items' ), 'Only the changed type should be removed, once.' );
 		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array( $item_type ) );
 		$this->assertSame( $line_item_calls, did_action( 'woocommerce_checkout_create_order_line_item' ), 'Kept line items should not be created again.' );
 		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) wc_get_order( $order_id )->get_total(), 'The order total should match the cart.' );
@@ -1780,6 +2220,221 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resuming an order rebuilds every item when $hook has a callback, even if the callback does not change items.
+	 * @testWith ["woocommerce_checkout_create_order_line_item"]
+	 *           ["woocommerce_checkout_create_order_fee_item"]
+	 *           ["woocommerce_checkout_create_order_shipping_item"]
+	 *           ["woocommerce_checkout_create_order_tax_item"]
+	 *           ["woocommerce_checkout_create_order_coupon_item"]
+	 *           ["woocommerce_checkout_create_order_line_item_object"]
+	 *           ["woocommerce_new_order_item"]
+	 *
+	 * @param string $hook The creation hook to register after the first checkout.
+	 */
+	public function test_create_order_resume_rebuilds_items_with_creation_callbacks( string $hook ): void {
+		$order_id = $this->create_order_with_shipping_taxes_and_coupon();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$calls    = 0;
+		add_filter(
+			$hook,
+			function ( $value ) use ( &$calls ) {
+				++$calls;
+				return $value;
+			},
+			0
+		);
+		add_filter( 'woocommerce_checkout_keep_order_items_on_resume', '__return_true' );
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+		$this->assert_items_replaced( $before, $after, array_keys( $before ) );
+		$this->assertGreaterThan( 0, $calls, 'The newly registered callback must run on retry.' );
+
+		$calls = 0;
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+		$this->assert_items_replaced( $after, $this->get_order_item_ids_by_type( $order_id ), array_keys( $after ) );
+		$this->assertGreaterThan( 0, $calls, 'The callback must also run on subsequent retries.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) wc_get_order( $order_id )->get_total() );
+	}
+
+	/**
+	 * @testdox Resuming an order calls $hook once for all items when it has a callback.
+	 * @testWith ["woocommerce_remove_order_items"]
+	 *           ["woocommerce_removed_order_items"]
+	 *
+	 * @param string $hook The removal hook.
+	 */
+	public function test_create_order_resume_rebuilds_items_with_removal_callbacks( string $hook ): void {
+		$order_id = $this->create_order_with_shipping_taxes_and_coupon();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$types    = array();
+		add_action(
+			$hook,
+			function ( $order, $type ) use ( &$types ) {
+				$types[] = $type;
+			},
+			10,
+			2
+		);
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assertSame( array( null ), $types, 'The removal callback must receive the original whole-order call.' );
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_keys( $before ) );
+	}
+
+	/**
+	 * @testdox Resuming an order rebuilds items when the core forwarder has a listener on $hook.
+	 * @testWith ["woocommerce_order_add_shipping"]
+	 *           ["woocommerce_order_add_coupon"]
+	 *           ["woocommerce_order_add_tax"]
+	 *           ["woocommerce_order_add_fee"]
+	 *           ["woocommerce_add_shipping_order_item"]
+	 *           ["woocommerce_add_order_item_meta"]
+	 *           ["woocommerce_add_order_fee_meta"]
+	 *
+	 * @param string $hook The deprecated creation hook.
+	 */
+	public function test_create_order_resume_rebuilds_items_with_legacy_callbacks( string $hook ): void {
+		$this->setExpectedDeprecated( $hook );
+		$order_id = $this->create_order_with_shipping_taxes_and_coupon();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$calls    = 0;
+		add_action(
+			$hook,
+			function () use ( &$calls ) {
+				++$calls;
+			}
+		);
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assertGreaterThan( 0, $calls, 'The core forwarder must call the legacy listener on retry.' );
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_keys( $before ) );
+	}
+
+	/**
+	 * @testdox Resuming an order refreshes derived item data through $hook, including a callback that initially writes nothing.
+	 * @testWith ["woocommerce_checkout_create_order_line_item", "old@example.com"]
+	 *           ["woocommerce_checkout_create_order_line_item", ""]
+	 *           ["woocommerce_checkout_create_order_line_item_object", "old@example.com"]
+	 *
+	 * @param string $hook The item creation hook.
+	 * @param string $email The billing email on the first checkout.
+	 */
+	public function test_create_order_resume_refreshes_item_data_from_order( string $hook, string $email ): void {
+		add_filter(
+			$hook,
+			function ( $item, $cart_item_key, $values, $order ) {
+				if ( '' !== $order->get_billing_email() ) {
+					$item->add_meta_data( '_recipient', $order->get_billing_email(), true );
+				}
+				return $item;
+			},
+			10,
+			4
+		);
+		$order_id = $this->create_order_with_line_item_and_fee( array( 'billing_email' => $email ) );
+		$items    = wc_get_order( $order_id )->get_items();
+		$this->assertSame( $email, current( $items )->get_meta( '_recipient' ) );
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id, array( 'billing_email' => 'new@example.com' ) ) );
+		$items = wc_get_order( $order_id )->get_items();
+
+		$this->assertSame( 'new@example.com', current( $items )->get_meta( '_recipient' ) );
+	}
+
+	/**
+	 * @testdox Resuming an order refreshes item metadata written directly to the database during item creation.
+	 */
+	public function test_create_order_resume_refreshes_item_data_written_during_save(): void {
+		add_action(
+			'woocommerce_new_order_item',
+			function ( $item_id, $item, $order_id ) {
+				wc_update_order_item_meta( $item_id, '_recipient', wc_get_order( $order_id )->get_billing_email() );
+			},
+			10,
+			3
+		);
+		$order_id = $this->create_order_with_line_item_and_fee( array( 'billing_email' => 'old@example.com' ) );
+		$items    = wc_get_order( $order_id )->get_items();
+		$this->assertSame( 'old@example.com', current( $items )->get_meta( '_recipient' ) );
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id, array( 'billing_email' => 'new@example.com' ) ) );
+		$items = wc_get_order( $order_id )->get_items();
+
+		$this->assertSame( 'new@example.com', current( $items )->get_meta( '_recipient' ) );
+	}
+
+	/**
+	 * @testdox Resuming an order keeps item IDs after its item creation callback is removed.
+	 */
+	public function test_create_order_resume_keeps_items_after_callback_is_removed(): void {
+		add_action( 'woocommerce_checkout_create_order_line_item', '__return_null' );
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		remove_action( 'woocommerce_checkout_create_order_line_item', '__return_null' );
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ) );
+	}
+
+	/**
+	 * @testdox Resuming a failed order detects item callbacks registered by $hook during the retry.
+	 * @testWith ["woocommerce_resume_order"]
+	 *           ["woocommerce_checkout_keep_order_items_on_resume"]
+	 *
+	 * @param string $hook The hook that registers the item callback.
+	 */
+	public function test_create_order_resume_detects_callbacks_registered_during_retry( string $hook ): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$order    = wc_get_order( $order_id );
+		$order->set_status( OrderStatus::FAILED );
+		$order->save();
+		$before = $this->get_order_item_ids_by_type( $order_id );
+		add_filter(
+			$hook,
+			function ( $value ) {
+				add_action( 'woocommerce_checkout_create_order_line_item', '__return_null' );
+				return $value;
+			}
+		);
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_keys( $before ) );
+	}
+
+	/**
+	 * @testdox Resuming an order treats an overridden legacy forwarder as an extension callback.
+	 */
+	public function test_create_order_resume_rebuilds_items_with_custom_legacy_forwarder(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$handler  = new class() extends WC_Deprecated_Action_Hooks {
+			/**
+			 * Number of callback invocations.
+			 *
+			 * @var int
+			 */
+			public $calls = 0;
+
+			/**
+			 * Record invocations instead of forwarding legacy hooks.
+			 */
+			public function maybe_handle_deprecated_hook() {
+				++$this->calls;
+			}
+		};
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assertGreaterThan( 0, $handler->calls );
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_keys( $before ) );
+	}
+
+	/**
 	 * @testdox Resuming a pending order replaces line items that no longer match the cart, even when the cart hash still matches.
 	 */
 	public function test_create_order_resume_replaces_line_items_when_cart_hash_misses_a_quantity_change(): void {
@@ -1854,9 +2509,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Creates an order from a cart with one product and one fee.
 	 *
+	 * @param array $data Posted checkout data to add.
 	 * @return int The order ID.
 	 */
-	private function create_order_with_line_item_and_fee(): int {
+	private function create_order_with_line_item_and_fee( array $data = array() ): int {
 		$product = WC_Helper_Product::create_simple_product();
 		add_action(
 			'woocommerce_cart_calculate_fees',
@@ -1867,7 +2523,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
-		$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		$order_id = $this->sut->create_order( array_merge( array( 'payment_method' => WC_Gateway_BACS::ID ), $data ) );
 		$this->assertIsInt( $order_id );
 
 		return $order_id;
@@ -2094,14 +2750,15 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Runs checkout again with the order set as awaiting payment, as when a shopper retries a failed payment.
 	 *
-	 * @param int $order_id The order awaiting payment.
+	 * @param int   $order_id The order awaiting payment.
+	 * @param array $data     Posted checkout data to add.
 	 * @return int|WP_Error The order ID returned by create_order().
 	 */
-	private function resume_order( int $order_id ) {
+	private function resume_order( int $order_id, array $data = array() ) {
 		$original = WC()->session->get( 'order_awaiting_payment' );
 		WC()->session->set( 'order_awaiting_payment', $order_id );
 		try {
-			return $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+			return $this->sut->create_order( array_merge( array( 'payment_method' => WC_Gateway_BACS::ID ), $data ) );
 		} finally {
 			WC()->session->set( 'order_awaiting_payment', $original );
 		}
@@ -2785,11 +3442,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Swap the test base's in-memory session for a real handler, which is what process_order_payment() needs (it calls save_data()).
 	 *
-	 * The customer is swapped too, because a full checkout writes the posted address into it and nothing else resets that singleton.
+	 * The customer is swapped for a fresh one too, because a full checkout writes the posted address into it.
 	 */
 	private function use_real_session(): void {
-		$this->original_session          = WC()->session;
-		$this->original_session_customer = WC()->customer;
+		$this->original_session = WC()->session;
 
 		WC()->session = new WC_Session_Handler();
 		WC()->session->init();
@@ -3038,5 +3694,490 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $variation->get_id(), $attributes );
 		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
 		WC()->cart->calculate_totals();
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses a billing country the store doesn't sell to.
+	 */
+	public function test_validate_checkout_refuses_a_billing_country_the_store_does_not_sell_to() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$data   = array(
+			'billing_country'           => 'DE',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertEquals(
+			'Sorry, we do not allow orders from the provided country (Germany)',
+			$errors->get_error_message( 'billing_country_not_allowed' )
+		);
+		$this->assertEquals( array( 'id' => 'billing_country' ), $errors->get_error_data( 'billing_country_not_allowed' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' accepts a billing country the store sells to.
+	 *
+	 * @testWith ["specific", "US"]
+	 *           ["all", "DE"]
+	 *
+	 * @param string $allowed_countries Value of the 'woocommerce_allowed_countries' option.
+	 * @param string $billing_country   Posted billing country.
+	 */
+	public function test_validate_checkout_accepts_a_billing_country_the_store_sells_to( $allowed_countries, $billing_country ) {
+		update_option( 'woocommerce_allowed_countries', $allowed_countries );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$data   = array(
+			'billing_country'           => $billing_country,
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertEquals( '', $errors->get_error_message( 'billing_country_not_allowed' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' checks the customer's billing country when the field isn't posted.
+	 */
+	public function test_validate_checkout_falls_back_to_the_customers_billing_country() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$original_billing_country = WC()->customer->get_billing_country();
+
+		// A store that removes the field posts no value, and the session country is what calculates tax.
+		WC()->customer->set_billing_country( 'DE' );
+
+		$data   = array( 'ship_to_different_address' => false );
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			WC()->customer->set_billing_country( $original_billing_country );
+		}
+
+		$this->assertEquals(
+			'Sorry, we do not allow orders from the provided country (Germany)',
+			$errors->get_error_message( 'billing_country_not_allowed' )
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses the order when the customer object isn't set up yet.
+	 */
+	public function test_validate_checkout_refuses_without_a_customer_object() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$original_customer = WC()->customer;
+
+		WC()->customer = null;
+
+		$data   = array( 'ship_to_different_address' => false );
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			WC()->customer = $original_customer;
+		}
+
+		$this->assertSame(
+			array( 'Please enter a billing country.' ),
+			$errors->get_error_messages( 'billing_country_validation' ),
+			'Without a customer object there is no billing country, so the order cannot be taxed or placed.'
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' still checks a billing country field a plugin has re-typed.
+	 *
+	 * 'validate_posted_data' only checks a field it still recognises as a country, so the selling location
+	 * check can't assume it has already run.
+	 */
+	public function test_validate_checkout_checks_a_retyped_billing_country_field() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$this->retype_billing_country_field();
+
+		$data   = array(
+			'billing_country'           => 'ZZ',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame( array( "'ZZ' is not a valid country code." ), $errors->get_error_messages( 'billing_country_validation' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses a billing country that isn't a string.
+	 *
+	 * 'wc_clean' maps over arrays, so 'billing_country[]=DE' arrives as one. Reaching 'country_exists' with it
+	 * would be a TypeError, and letting it through would leave the order with no taxable country.
+	 */
+	public function test_validate_checkout_refuses_a_non_string_billing_country() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$this->retype_billing_country_field();
+
+		$data   = array(
+			'billing_country'           => array( 'DE' ),
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame( array( 'Please enter a billing country.' ), $errors->get_error_messages( 'billing_country_validation' ) );
+		$this->assertSame( array(), $errors->get_error_messages( 'billing_country_not_allowed' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses an empty billing country a plugin left unvalidated.
+	 *
+	 * 'WC_AJAX::update_order_review' writes whatever country it is sent onto the session customer, so a store
+	 * whose checkout no longer has the field can reach 'validate_checkout' with nothing to tax.
+	 */
+	public function test_validate_checkout_refuses_an_empty_billing_country() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$remove_billing_country = function ( $fields ) {
+			unset( $fields['billing']['billing_country'] );
+			return $fields;
+		};
+
+		$this->extra_field_filters[] = $remove_billing_country;
+
+		add_filter( 'woocommerce_checkout_fields', $remove_billing_country );
+
+		$original_country = WC()->customer->get_billing_country();
+
+		WC()->customer->set_billing_country( '' );
+
+		$data   = array( 'ship_to_different_address' => false );
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			WC()->customer->set_billing_country( $original_country );
+		}
+
+		$this->assertSame(
+			array( 'This store cannot accept your order without a billing country.' ),
+			$errors->get_error_messages( 'billing_country_validation' ),
+			'With no field on the form the shopper cannot act on a notice asking for the country.'
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' leaves the required-field notice alone for an empty billing country.
+	 */
+	public function test_validate_checkout_does_not_duplicate_the_required_billing_country_notice() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$data   = array(
+			'billing_country'           => '',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame( array(), $errors->get_error_messages( 'billing_country_validation' ) );
+		$this->assertNotEmpty(
+			$errors->get_error_messages( 'billing_country_required' ),
+			"'validate_posted_data' reports the empty field, so the shopper should only see that one notice."
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' prefers the posted billing country over the one stored on the customer.
+	 */
+	public function test_validate_checkout_prefers_the_posted_billing_country() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$original_billing_country = WC()->customer->get_billing_country();
+
+		WC()->customer->set_billing_country( 'DE' );
+
+		$data   = array(
+			'billing_country'           => 'US',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			WC()->customer->set_billing_country( $original_billing_country );
+		}
+
+		$this->assertEquals( '', $errors->get_error_message( 'billing_country_not_allowed' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' reports an unknown billing country left on the customer.
+	 */
+	public function test_validate_checkout_reports_an_unknown_billing_country_left_on_the_customer() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$original_billing_country = WC()->customer->get_billing_country();
+
+		// update_order_review() stores whatever country it is sent, so an unposted one is never checked elsewhere.
+		WC()->customer->set_billing_country( 'XX' );
+
+		$data   = array( 'ship_to_different_address' => false );
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			WC()->customer->set_billing_country( $original_billing_country );
+		}
+
+		// An unknown code is not a selling-location refusal, so it gets the same message a posted one gets.
+		$this->assertSame( array( "'XX' is not a valid country code." ), $errors->get_error_messages( 'billing_country_validation' ) );
+		$this->assertSame( array(), $errors->get_error_messages( 'billing_country_not_allowed' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' leaves a non-existing billing country to 'validate_posted_data'.
+	 */
+	public function test_validate_checkout_leaves_a_non_existing_billing_country_alone() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$data   = array(
+			'billing_country'           => 'XX',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame( array( "'XX' is not a valid country code." ), $errors->get_error_messages( 'billing_country_validation' ) );
+		$this->assertSame( array(), $errors->get_error_messages( 'billing_country_not_allowed' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses a posted foreign billing address on a store with a physical product.
+	 *
+	 * Drives the real request path so the check is exercised against the shape 'get_posted_data' produces, and
+	 * alongside the shipping check: both fieldsets hold the refused country, so both notices are expected.
+	 */
+	public function test_validate_checkout_refuses_a_posted_foreign_billing_country_with_shipping() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+		add_filter( 'wc_shipping_enabled', '__return_true' );
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'wc_get_shipping_method_count' => function () {
+					return 1;
+				},
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'billing_first_name' => 'Test',
+			'billing_last_name'  => 'Shopper',
+			'billing_address_1'  => 'Unter den Linden 1',
+			'billing_city'       => 'Berlin',
+			'billing_postcode'   => '10117',
+			'billing_phone'      => '5555555555',
+			'billing_email'      => 'shopper@example.com',
+			'billing_country'    => 'DE',
+			'billing_state'      => 'DE-BE',
+			'payment_method'     => 'cod',
+		);
+
+		$errors            = new WP_Error();
+		$original_billing  = WC()->customer->get_billing( 'edit' );
+		$original_shipping = WC()->customer->get_shipping( 'edit' );
+
+		try {
+			$data           = $this->sut->get_posted_data();
+			$needs_shipping = WC()->cart->needs_shipping();
+
+			// Writes the posted address onto the shared customer singleton, so it is restored below.
+			$this->sut->update_session( $data );
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			$_POST = $original_post;
+			remove_filter( 'wc_shipping_enabled', '__return_true' );
+
+			foreach ( $original_billing as $key => $value ) {
+				WC()->customer->{"set_billing_$key"}( $value );
+			}
+
+			foreach ( $original_shipping as $key => $value ) {
+				WC()->customer->{"set_shipping_$key"}( $value );
+			}
+
+			WC()->customer->save();
+		}
+
+		$this->assertTrue( $needs_shipping, 'The shipping check should have run alongside the billing one.' );
+		$this->assertSame( 'DE', $data['shipping_country'], "'get_posted_data' copies the billing country when there is no separate shipping address." );
+		$this->assertSame(
+			array( 'Sorry, we do not allow orders from the provided country (Germany)' ),
+			$errors->get_error_messages( 'billing_country_not_allowed' )
+		);
+		$this->assertSame(
+			array( 'Unfortunately, <strong>we do not ship to Germany</strong>. Please enter an alternative shipping address.' ),
+			$errors->get_error_messages( 'shipping' ),
+			'Shipping countries default to the selling countries, so the copied shipping address is refused too.'
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses a blank billing country the store made optional.
+	 *
+	 * 'validate_posted_data' skips the required check for an optional or hidden field, and 'update_session'
+	 * copies the blank onto the customer, so the order would be placed with no taxable country.
+	 *
+	 * @testWith ["required", false, "Please enter a billing country."]
+	 *           ["hidden", true, "This store cannot accept your order without a billing country."]
+	 *
+	 * @param string $property Field property a store commonly overrides.
+	 * @param bool   $value    Value it is set to.
+	 * @param string $message  Notice the shopper sees, which asks for the country only when the field is visible.
+	 */
+	public function test_validate_checkout_refuses_a_blank_billing_country_the_store_made_optional( $property, $value, $message ) {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$relax_billing_country = function ( $fields ) use ( $property, $value ) {
+			$fields['billing']['billing_country'][ $property ] = $value;
+			return $fields;
+		};
+
+		$this->extra_field_filters[] = $relax_billing_country;
+
+		add_filter( 'woocommerce_checkout_fields', $relax_billing_country );
+
+		$data   = array(
+			'billing_country'           => '',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame( array(), $errors->get_error_messages( 'billing_country_required' ), "The store's own setting should keep 'validate_posted_data' quiet." );
+		$this->assertSame( array( $message ), $errors->get_error_messages( 'billing_country_validation' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' doesn't ask for a billing country the store renders as a hidden input.
+	 *
+	 * 'validate_posted_data' keys its required check on the 'hidden' flag, so a field hidden by its type alone
+	 * has to be recognised here.
+	 */
+	public function test_validate_checkout_refuses_a_blank_billing_country_in_a_hidden_input() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$hide_billing_country = function ( $fields ) {
+			$fields['billing']['billing_country']['type']     = 'hidden';
+			$fields['billing']['billing_country']['required'] = false;
+			return $fields;
+		};
+
+		$this->extra_field_filters[] = $hide_billing_country;
+
+		add_filter( 'woocommerce_checkout_fields', $hide_billing_country );
+
+		$data   = array(
+			'billing_country'           => '',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame(
+			array( 'This store cannot accept your order without a billing country.' ),
+			$errors->get_error_messages( 'billing_country_validation' )
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' reports a missing billing country once when the order needs shipping.
+	 *
+	 * 'get_posted_data' copies the billing country onto the shipping address, so one blank would otherwise
+	 * raise the shipping notice as well.
+	 */
+	public function test_validate_checkout_does_not_add_the_shipping_notice_for_a_missing_billing_country() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+		add_filter( 'wc_shipping_enabled', '__return_true' );
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'wc_get_shipping_method_count' => function () {
+					return 1;
+				},
+			)
+		);
+
+		$remove_billing_country = function ( $fields ) {
+			unset( $fields['billing']['billing_country'] );
+			return $fields;
+		};
+
+		$this->extra_field_filters[] = $remove_billing_country;
+
+		add_filter( 'woocommerce_checkout_fields', $remove_billing_country );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$original_billing_country  = WC()->customer->get_billing_country();
+		$original_shipping_country = WC()->customer->get_shipping_country();
+
+		WC()->customer->set_billing_country( '' );
+		WC()->customer->set_shipping_country( '' );
+
+		$data   = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => 'cod',
+		);
+		$errors = new WP_Error();
+
+		try {
+			$needs_shipping = WC()->cart->needs_shipping();
+
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			remove_filter( 'wc_shipping_enabled', '__return_true' );
+			WC()->customer->set_billing_country( $original_billing_country );
+			WC()->customer->set_shipping_country( $original_shipping_country );
+		}
+
+		$this->assertTrue( $needs_shipping, 'The shipping check should have run alongside the billing one.' );
+		$this->assertSame(
+			array( 'This store cannot accept your order without a billing country.' ),
+			$errors->get_error_messages( 'billing_country_validation' )
+		);
+		$this->assertSame( array(), $errors->get_error_messages( 'shipping' ), 'One missing country should raise one notice.' );
 	}
 }

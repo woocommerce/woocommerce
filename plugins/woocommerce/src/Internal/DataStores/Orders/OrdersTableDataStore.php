@@ -996,6 +996,74 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	}
 
 	/**
+	 * Clears the "coupon usage counted" flag, if it is still set and the stored order status still matches the order object.
+	 *
+	 * The check and the write are one database update, so the flag is cleared by at most one call.
+	 *
+	 * @since 11.3.1
+	 *
+	 * @internal For use by wc_update_coupon_usage_counts() only.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return bool True if this call cleared the flag.
+	 */
+	public function clear_recorded_coupon_usage_counts( $order ): bool {
+		global $wpdb;
+
+		$order_id = $order->get_id();
+		$status   = $order->get_status( 'edit' );
+		if ( ! $order_id || ! $status ) {
+			return false;
+		}
+
+		$operational_data_table = self::get_operational_data_table_name();
+		$orders_table           = self::get_orders_table_name();
+
+		// Whether a status is stored with the "wc-" prefix depends on the post statuses registered when the order was saved.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table names.
+		$cleared = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$operational_data_table} SET coupon_usages_are_counted = 0
+				WHERE order_id = %d AND coupon_usages_are_counted = 1
+				AND EXISTS ( SELECT 1 FROM {$orders_table} WHERE id = %d AND status IN ( %s, %s ) )",
+				$order_id,
+				$order_id,
+				$status,
+				'wc-' . $status
+			)
+		);
+		// phpcs:enable
+
+		if ( (int) $cleared < 1 ) {
+			return false;
+		}
+
+		$this->set_recorded_coupon_usage_counts( $order, false );
+		return true;
+	}
+
+	/**
+	 * Reads the "coupon usage counted" flag straight from the database, skipping the order cache.
+	 *
+	 * @since 11.3.1
+	 *
+	 * @internal For use by WC_Abstract_Order::remove_coupon() only.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return bool
+	 */
+	public function get_stored_recorded_coupon_usage_counts( $order ): bool {
+		global $wpdb;
+
+		$operational_data_table = self::get_operational_data_table_name();
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+		$value = $wpdb->get_var( $wpdb->prepare( "SELECT coupon_usages_are_counted FROM {$operational_data_table} WHERE order_id = %d", $order->get_id() ) );
+
+		return (bool) $value;
+	}
+
+	/**
 	 * Whether email have been sent for this order.
 	 *
 	 * @param \WC_Order|int $order Order object.
@@ -3673,7 +3741,7 @@ CREATE TABLE $meta_table (
 		$delete_meta     = $this->data_store_meta->delete_meta( $object, $meta );
 		$changes_applied = $this->after_meta_change( $object, $meta );
 
-		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() && isset( $meta->key ) ) {
+		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && ! isset( self::$sync_on_read_order_ids[ $object->get_id() ] ) && $this->should_backfill_post_record() && isset( $meta->key ) ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			if ( is_object( $meta->value ) && '__PHP_Incomplete_Class' === get_class( $meta->value ) ) {
 				$meta_value = maybe_serialize( $meta->value );
@@ -3708,15 +3776,17 @@ CREATE TABLE $meta_table (
 	 * @return int|bool  meta ID or false on failure
 	 */
 	public function add_meta( &$object, $meta ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
-		$add_meta        = $this->data_store_meta->add_meta( $object, $meta );
-		$meta->id        = $add_meta;
-		$changes_applied = $this->after_meta_change( $object, $meta );
+		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
+		$meta->id = $add_meta;
 
-		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+		// Write the post meta before after_meta_change(): a full order save there would add any later meta first.
+		if ( $object instanceof WC_Abstract_Order && ! isset( self::$sync_on_read_order_ids[ $object->get_id() ] ) && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			add_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
+
+		$this->after_meta_change( $object, $meta );
 
 		return $add_meta;
 	}
@@ -3733,7 +3803,7 @@ CREATE TABLE $meta_table (
 		$update_meta     = $this->data_store_meta->update_meta( $object, $meta );
 		$changes_applied = $this->after_meta_change( $object, $meta );
 
-		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && ! isset( self::$sync_on_read_order_ids[ $object->get_id() ] ) && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			update_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );

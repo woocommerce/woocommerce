@@ -14,6 +14,8 @@ WooCommerce includes two ways to authenticate with the WP REST API. It is also p
 
 Pre-generated keys can be used to authenticate use of the REST API endpoints. New keys can be generated either through the WordPress admin interface or they can be auto-generated through an endpoint.
 
+REST API keys do not authenticate requests to the [Store API](/docs/apis/store-api/) (`/wp-json/wc/store/`). Since WooCommerce 11.3.1, a Store API request that sends a key is not run as the key's user.
+
 ### Authentication timing for extensions
 
 Starting in WooCommerce 11.2.2, WooCommerce API keys are authenticated only during a WordPress REST request. If a request relies on an API key and no other authentication method has identified a user, code running on `init` or `wp_loaded` must not assume that the current user is the key owner. WooCommerce normally resolves the key user during `rest_authentication_errors` at priority 8. Use a REST endpoint's permission callback for checks that depend on the authenticated user.

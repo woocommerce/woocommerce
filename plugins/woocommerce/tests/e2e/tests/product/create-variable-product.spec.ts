@@ -50,7 +50,7 @@ test.describe( 'Add variable product', { tag: tags.GUTENBERG }, () => {
 		await test.step( 'Scroll into the "Attributes" tab and click it.', async () => {
 			const attributesTab = page
 				.locator( '.attribute_tab' )
-				.getByRole( 'link', { name: 'Attributes' } );
+				.getByRole( 'tab', { name: 'Attributes' } );
 
 			await attributesTab.scrollIntoViewIfNeeded();
 

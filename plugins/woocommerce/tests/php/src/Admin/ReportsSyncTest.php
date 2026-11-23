@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin;
 
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\ReportsSync;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use WC_Unit_Test_Case;
@@ -87,5 +88,32 @@ class ReportsSyncTest extends WC_Unit_Test_Case {
 		$failed = OrdersScheduler::get_failed_order_imports();
 		$this->assertSame( array( 11 ), $failed['ids'], 'Stored failed IDs must survive a windowed import' );
 		$this->assertSame( 3, $failed['overflow'] );
+	}
+
+	/**
+	 * @testdox Adding, updating or deleting $option drops cached report results.
+	 *
+	 * @testWith ["start_of_week", "1", "0"]
+	 *           ["woocommerce_excluded_report_order_statuses", ["pending", "failed", "cancelled"], ["pending", "failed", "cancelled", "on-hold"]]
+	 *
+	 * @param string $option    Option that shapes report results.
+	 * @param mixed  $old_value Value before the change.
+	 * @param mixed  $new_value Value after the change.
+	 */
+	public function test_changing_report_option_invalidates_report_cache( string $option, $old_value, $new_value ): void {
+		ReportsSync::init();
+		update_option( $option, $old_value );
+
+		ReportsCache::set( 'wc_reports_sync_test', 'cached' );
+		update_option( $option, $new_value );
+		$this->assertFalse( ReportsCache::get( 'wc_reports_sync_test' ), 'Updating the option should drop cached reports.' );
+
+		ReportsCache::set( 'wc_reports_sync_test', 'cached' );
+		delete_option( $option );
+		$this->assertFalse( ReportsCache::get( 'wc_reports_sync_test' ), 'Deleting the option should drop cached reports.' );
+
+		ReportsCache::set( 'wc_reports_sync_test', 'cached' );
+		add_option( $option, $old_value );
+		$this->assertFalse( ReportsCache::get( 'wc_reports_sync_test' ), 'Adding the option should drop cached reports.' );
 	}
 }

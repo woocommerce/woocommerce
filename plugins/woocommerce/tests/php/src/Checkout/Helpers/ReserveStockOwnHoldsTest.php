@@ -42,13 +42,6 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	private $original_session;
 
 	/**
-	 * The customer the bootstrap set up, put back in tearDown.
-	 *
-	 * @var WC_Customer|null
-	 */
-	private $original_customer;
-
-	/**
 	 * $_COOKIE as it was before the test, put back in tearDown.
 	 *
 	 * @var array
@@ -65,8 +58,7 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_schema_version', 430 );
 		update_option( 'woocommerce_hold_stock_minutes', self::HOLD_MINUTES );
 
-		$this->original_session  = WC()->session;
-		$this->original_customer = WC()->customer;
+		$this->original_session = WC()->session;
 
 		// Earlier suites can leave a valid session cookie in $_COOKIE (the test
 		// framework never resets it), and WC_Session_Handler::init() would then
@@ -94,9 +86,8 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 
 		wp_set_current_user( 0 );
 
-		$_COOKIE       = $this->original_cookies;
-		WC()->session  = $this->original_session;
-		WC()->customer = $this->original_customer;
+		$_COOKIE      = $this->original_cookies;
+		WC()->session = $this->original_session;
 
 		parent::tearDown();
 	}
@@ -161,6 +152,56 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 		$this->hold_stock( $order, $product->get_id(), 1, 2000 );
 
 		$this->assertSame( 1, wc_get_held_stock_quantity( $product, 0 ) );
+	}
+
+	/**
+	 * @testdox The shopper's own stale hold on a failed order is excluded after an opted-in threshold.
+	 */
+	public function test_own_stale_failed_hold_is_excluded(): void {
+		$product = $this->create_stock_managed_product( 1 );
+		$shopper = $this->create_signed_in_shopper();
+		$order   = $this->create_unpaid_order_for( $shopper, $product, OrderStatus::FAILED );
+
+		$this->hold_stock( $order, $product->get_id(), 1, 11 );
+
+		$this->assertSame( 0, $this->get_held_stock_quantity_with_threshold( $product, 0, 10 ) );
+	}
+
+	/**
+	 * @testdox A paid order found through the customer lookup keeps its hold counted until its stock is reduced.
+	 */
+	public function test_own_stale_paid_hold_from_customer_lookup_still_blocks(): void {
+		$product = $this->create_stock_managed_product( 1 );
+		$shopper = $this->create_signed_in_shopper();
+		$order   = $this->create_unpaid_order_for( $shopper, $product );
+
+		$this->hold_stock( $order, $product->get_id(), 1, 11 );
+
+		// Precondition: while unpaid, the customer lookup excludes the hold and memoises the order id.
+		$this->assertSame( 0, $this->get_held_stock_quantity_with_threshold( $product, 0, 10 ) );
+
+		$this->pay_without_reducing_stock( $order );
+
+		$this->assertSame( 1, $this->get_held_stock_quantity_with_threshold( $product, 0, 10 ) );
+	}
+
+	/**
+	 * @testdox A paid order recorded in the session list keeps its hold counted until its stock is reduced.
+	 */
+	public function test_own_stale_paid_hold_from_session_list_still_blocks(): void {
+		$product = $this->create_stock_managed_product( 1 );
+		$order   = $this->create_unpaid_order_for( 0, $product );
+
+		// The real reservation path, which is what records the order in the session.
+		wc_reserve_stock_for_order( wc_get_order( $order ) );
+		$this->age_hold( $order, 11 );
+
+		// Precondition: while unpaid, the session list excludes the hold.
+		$this->assertSame( 0, $this->get_held_stock_quantity_with_threshold( $product, 0, 10 ) );
+
+		$this->pay_without_reducing_stock( $order );
+
+		$this->assertSame( 1, $this->get_held_stock_quantity_with_threshold( $product, 0, 10 ) );
 	}
 
 	/**
@@ -345,6 +386,7 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 4242, $seen['exclude_order_id'] );
 		$this->assertSame( $product->get_id(), $seen['product_id'] );
 		$this->assertStringContainsString( 'AND NOT (', $seen['query'], 'The filter sees the complete core query.' );
+		$this->assertStringContainsString( "IN ( 'wc-checkout-draft', 'wc-pending' )", $seen['query'], 'The pre-11.3.1 status literal is kept for callbacks that string-replace it.' );
 	}
 
 	// ---------------------------------------------------------------------
@@ -475,6 +517,22 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 			)
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * Move an order to processing without reducing its stock.
+	 *
+	 * @param int $order_id Order to pay.
+	 */
+	private function pay_without_reducing_stock( int $order_id ): void {
+		remove_action( 'woocommerce_order_status_processing', 'wc_maybe_reduce_stock_levels' );
+		remove_action( 'woocommerce_order_status_processing', 'wc_release_stock_for_order', 11 );
+		try {
+			wc_get_order( $order_id )->update_status( OrderStatus::PROCESSING );
+		} finally {
+			add_action( 'woocommerce_order_status_processing', 'wc_maybe_reduce_stock_levels' );
+			add_action( 'woocommerce_order_status_processing', 'wc_release_stock_for_order', 11 );
+		}
 	}
 
 	/**

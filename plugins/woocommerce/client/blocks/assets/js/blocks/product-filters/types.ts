@@ -58,7 +58,6 @@ export type OverlayMode = 'off' | 'mobile' | 'always';
 
 export type BlockAttributes = {
 	productId?: string;
-	isPreview: boolean;
 	overlayMode?: OverlayMode;
 	overlayPosition?: 'left' | 'right';
 };

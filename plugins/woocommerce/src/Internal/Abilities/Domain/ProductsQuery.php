@@ -63,7 +63,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_collection_output_schema( 'products', self::get_product_output_schema() ),
+			'output_schema'       => self::get_output_schema(),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_query_products' ),
 			'meta'                => array(
@@ -112,6 +112,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 			return array(
 				'products'    => $products,
+				'total'       => 1,
 				'total_pages' => 1,
 				'page'        => 1,
 				'per_page'    => 1,
@@ -125,6 +126,10 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'page'     => $page,
 			'paginate' => true,
 			'return'   => 'objects',
+			'orderby'  => array(
+				'date' => 'DESC',
+				'ID'   => 'DESC',
+			),
 		);
 
 		foreach ( array( 'status', 'stock_status' ) as $field ) {
@@ -135,6 +140,10 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		if ( ! empty( $input['sku'] ) ) {
 			$args['sku'] = wc_clean( $input['sku'] );
+		}
+
+		if ( ! empty( $input['global_unique_id'] ) ) {
+			$args['global_unique_id'] = $input['global_unique_id'];
 		}
 
 		if ( isset( $input['type'] ) ) {
@@ -150,6 +159,10 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		if ( ! empty( $input['parent_id'] ) ) {
 			$args['parent'] = $input['parent_id'];
 			$args['type']   = $args['type'] ?? ProductType::VARIATION;
+		}
+
+		if ( ! empty( $args['global_unique_id'] ) && ! isset( $args['type'] ) ) {
+			$args['type'] = array_merge( array_keys( wc_get_product_types() ), array( ProductType::VARIATION ) );
 		}
 
 		foreach ( array( 'virtual', 'downloadable' ) as $field ) {
@@ -181,10 +194,25 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		add_filter( 'posts_where', array( __CLASS__, 'limit_to_parent_types' ), 10, 2 );
 		$results = wc_get_products( $args );
-		remove_filter( 'posts_where', array( __CLASS__, 'limit_to_parent_types' ) );
 
 		$products = is_object( $results ) && isset( $results->products ) ? $results->products : array();
-		$pages    = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $products ) > 0 ? 1 : 0 );
+		$total    = is_object( $results ) && isset( $results->total ) ? (int) $results->total : count( $products );
+		$pages    = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : (int) ceil( $total / $per_page );
+
+		// Queries skip their count when the requested page has no rows.
+		if ( 0 === $total && empty( $products ) && $page > 1 ) {
+			$count_args = array_merge(
+				$args,
+				array(
+					'page'   => 1,
+					'return' => 'ids',
+				)
+			);
+			$count      = wc_get_products( $count_args );
+			$total      = is_object( $count ) && isset( $count->total ) ? (int) $count->total : 0;
+			$pages      = is_object( $count ) && isset( $count->max_num_pages ) ? (int) $count->max_num_pages : (int) ceil( $total / $per_page );
+		}
+		remove_filter( 'posts_where', array( __CLASS__, 'limit_to_parent_types' ) );
 
 		$image_ids = array_unique( array_merge( array(), ...array_map( array( __CLASS__, 'get_product_image_ids' ), $products ) ) );
 		if ( ! empty( $image_ids ) ) {
@@ -198,6 +226,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		return array(
 			'products'    => $products,
+			'total'       => $total,
 			'total_pages' => $pages,
 			'page'        => $page,
 			'per_page'    => $per_page,
@@ -254,7 +283,22 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	public static function can_query_products( $input = array() ): bool {
 		$product_id = self::get_product_permission_id( self::get_id_from_input( $input ) );
 
-		return wc_rest_check_post_permissions( 'product', 'read', $product_id );
+		return (bool) wc_rest_check_post_permissions( 'product', 'read', $product_id );
+	}
+
+	/**
+	 * Get the ability output schema.
+	 *
+	 * @return array
+	 */
+	private static function get_output_schema(): array {
+		$schema                        = self::get_collection_output_schema( 'products', self::get_product_output_schema() );
+		$schema['properties']['total'] = array(
+			'type'        => 'integer',
+			'description' => __( 'Total number of matching products across all pages.', 'woocommerce' ),
+		);
+
+		return $schema;
 	}
 
 	/**
@@ -266,46 +310,56 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'id'           => array(
+				'id'               => array(
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'search'       => array( 'type' => 'string' ),
-				'sku'          => array(
+				'search'           => array( 'type' => 'string' ),
+				'sku'              => array(
 					'type'        => 'string',
 					'description' => __( 'Limit results to products with SKUs that partially match this string. Use * to match products with any non-empty SKU.', 'woocommerce' ),
 				),
-				'status'       => array(
+				'global_unique_id' => array(
+					'type'        => 'array',
+					'description' => __( 'Exact GTINs, UPCs, EANs or ISBNs. Matches any of them. Finds variations too, unless category, tag or brand is also sent.', 'woocommerce' ),
+					'maxItems'    => 100,
+					'items'       => array(
+						'type'      => 'string',
+						'minLength' => 1,
+						'pattern'   => self::get_global_unique_id_input_pattern(),
+					),
+				),
+				'status'           => array(
 					'type' => 'string',
 					'enum' => self::get_product_query_status_slugs(),
 				),
-				'type'         => self::get_product_type_schema( array_values( array_unique( array_merge( array_keys( self::get_supported_product_type_configs() ), array_keys( self::get_variation_subclass_parent_types() ) ) ) ) ),
-				'parent_id'    => array(
+				'type'             => self::get_product_type_schema( array_values( array_unique( array_merge( array_keys( self::get_supported_product_type_configs() ), array_keys( self::get_variation_subclass_parent_types() ) ) ) ) ),
+				'parent_id'        => array(
 					'type'        => 'integer',
 					'description' => __( 'Limit results to the variations of this variable product.', 'woocommerce' ),
 					'minimum'     => 1,
 				),
-				'virtual'      => array(
+				'virtual'          => array(
 					'type'        => 'boolean',
 					'description' => __( 'Limit results to products that are not shipped (true) or that are shipped (false).', 'woocommerce' ),
 				),
-				'downloadable' => array(
+				'downloadable'     => array(
 					'type'        => 'boolean',
 					'description' => __( 'Limit results to products that have files to download (true) or that do not (false).', 'woocommerce' ),
 				),
-				'stock_status' => array(
+				'stock_status'     => array(
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
 				),
-				'category'     => self::get_term_filter_input_schema( __( 'Only products in any of these product category IDs, including their child categories.', 'woocommerce' ) ),
-				'tag'          => self::get_term_filter_input_schema( __( 'Only products with any of these product tag IDs.', 'woocommerce' ) ),
-				'brand'        => self::get_term_filter_input_schema( __( 'Only products of any of these brand IDs, including their child brands.', 'woocommerce' ) ),
-				'page'         => array(
+				'category'         => self::get_term_filter_input_schema( __( 'Only products in any of these product category IDs, including their child categories.', 'woocommerce' ) ),
+				'tag'              => self::get_term_filter_input_schema( __( 'Only products with any of these product tag IDs.', 'woocommerce' ) ),
+				'brand'            => self::get_term_filter_input_schema( __( 'Only products of any of these brand IDs, including their child brands.', 'woocommerce' ) ),
+				'page'             => array(
 					'type'    => 'integer',
 					'default' => 1,
 					'minimum' => 1,
 				),
-				'per_page'     => array(
+				'per_page'         => array(
 					'type'    => 'integer',
 					'default' => 10,
 					'minimum' => 1,

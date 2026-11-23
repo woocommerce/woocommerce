@@ -483,7 +483,7 @@ export const BlueprintUploadDropzone = () => {
 					>
 						{ createInterpolateElement(
 							__(
-								'Blueprint imports are disabled by default for live sites. <br/>Enable <link>Coming Soon mode</link> or define "ALLOW_BLUEPRINT_IMPORT_IN_LIVE_MODE" as true.',
+								'Blueprint imports are disabled by default for live sites. Enable <link>Coming Soon mode</link> or define "ALLOW_BLUEPRINT_IMPORT_IN_LIVE_MODE" as true. <br/>Imports also require site administrator permissions and, on multisite, super admin access.',
 								'woocommerce'
 							),
 							{

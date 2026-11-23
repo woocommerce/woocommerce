@@ -103,12 +103,6 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	 */
 	private static array $initial_option_states = array();
 
-	/** @var bool Whether the WooPayments version override existed before the test. */
-	private bool $initial_wcpay_version_override_exists = false;
-
-	/** @var mixed WooPayments version override value before the test. */
-	private $initial_wcpay_version_override;
-
 	/**
 	 * Saves values of initial country and currency before running test suite.
 	 */
@@ -144,8 +138,6 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->initial_wcpay_version_override_exists = array_key_exists( 'WCPAY_VERSION_NUMBER', Constants::$set_constants );
-		$this->initial_wcpay_version_override        = Constants::$set_constants['WCPAY_VERSION_NUMBER'] ?? null;
 
 		$gateways                   = \WC_Payment_Gateways::instance();
 		$gateways->payment_gateways = array();
@@ -334,9 +326,9 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		);
 		$this->run_cleanup_step( fn() => wc_get_container()->reset_all_resolved(), $cleanup_errors );
 		$this->run_cleanup_step( fn() => $this->clear_rest_server(), $cleanup_errors );
-		$this->run_cleanup_step( fn() => $this->restore_wcpay_version_override(), $cleanup_errors );
 		$this->run_cleanup_step( fn() => parent::tearDown(), $cleanup_errors );
 		$this->run_cleanup_step( fn() => self::invalidate_test_option_caches(), $cleanup_errors );
+		unset( $GLOBALS['wp_rest_auth_cookie'] );
 
 		if ( array() !== $cleanup_errors ) {
 			throw $cleanup_errors[0];
@@ -354,17 +346,6 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			$callback();
 		} catch ( \Throwable $error ) {
 			$errors[] = $error;
-		}
-	}
-
-	/**
-	 * Restore only the Jetpack constant override owned by this fixture.
-	 */
-	private function restore_wcpay_version_override(): void {
-		if ( $this->initial_wcpay_version_override_exists ) {
-			Constants::set_constant( 'WCPAY_VERSION_NUMBER', $this->initial_wcpay_version_override );
-		} else {
-			Constants::clear_single_constant( 'WCPAY_VERSION_NUMBER' );
 		}
 	}
 
@@ -512,9 +493,6 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -565,9 +543,6 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'check', $step['actions'] );
 		$this->assertArrayHasKey( 'finish', $step['actions'] );
 		$this->assertArrayHasKey( 'clean', $step['actions'] );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -1277,6 +1252,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
 		$request->set_param( 'source', 'test_source' );
+		$this->add_interactive_session( $request );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -1296,7 +1272,8 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			->expects( $this->never() )
 			->method( 'try_registration' );
 
-		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$this->add_interactive_session( $request );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( \WP_Http::CONFLICT, $response->get_status() );
@@ -1337,6 +1314,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		if ( null !== $source ) {
 			$request->set_param( 'source', $source );
 		}
+		$this->add_interactive_session( $request );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( \WP_Http::OK, $response->get_status() );
@@ -1359,7 +1337,8 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			->willReturn( new \WP_Error( 'siteurl_private_ip', 'The site URL is a private IP address.' ) );
 
 		// Act.
-		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$this->add_interactive_session( $request );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -1376,7 +1355,8 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			->expects( $this->never() )
 			->method( 'try_registration' );
 
-		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$this->add_interactive_session( $request );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( \WP_Http::FORBIDDEN, $response->get_status() );
@@ -1407,7 +1387,8 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$this->add_interactive_session( $request );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( \WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
@@ -1435,7 +1416,8 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$this->add_interactive_session( $request );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( \WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
@@ -1466,7 +1448,8 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 				)
 			);
 
-		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$this->add_interactive_session( $request );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -1474,6 +1457,104 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'woocommerce_woopayments_onboarding_action_error', $data['code'] );
 		$this->assertSame( $registration_error_code, $data['data']['registration_error_code'] ?? null );
 		$this->assertSame( 'Diagnostic data', $data['data']['detail'] ?? null );
+	}
+
+	/**
+	 * @testdox Rejects authorization, without registering the store or generating the URL, when the request has no interactive session.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_requires_interactive_session(): void {
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->never() )
+			->method( 'try_registration' );
+		$authorization_requested = false;
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_wpcom_connection_authorization' => function () use ( &$authorization_requested ) {
+						$authorization_requested = true;
+						return array(
+							'success' => true,
+							'url'     => 'https://wordpress.com/auth',
+						);
+					},
+				),
+			)
+		);
+
+		// The current user can manage WooCommerce, but nothing ties the request to their browser session.
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::FORBIDDEN, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_missing_session', $response->get_data()['code'] );
+		$this->assertFalse( $authorization_requested, 'The authorization URL should not be generated without an interactive session' );
+	}
+
+	/**
+	 * @testdox Rejects authorization from an interactive session of a user who cannot manage WooCommerce.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_requires_capability(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'customer' ) ) );
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->never() )
+			->method( 'try_registration' );
+
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$this->add_interactive_session( $request );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::FORBIDDEN, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_cannot_create', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Includes the WPCOM authorization URL in the onboarding details only for an interactive session.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $interactive_session Whether the request comes from an interactive session.
+	 */
+	public function test_get_onboarding_details_wpcom_authorization_url_requires_interactive_session( bool $interactive_session ): void {
+		// The store is registered with WPCOM, but no user has connected their account yet.
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
+		$this->mock_wpcom_connection_manager->method( 'has_connected_owner' )->willReturn( false );
+		$authorization_requested = false;
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_wpcom_connection_authorization' => function () use ( &$authorization_requested ) {
+						$authorization_requested = true;
+						return array(
+							'success' => true,
+							'errors'  => array(),
+							'url'     => 'https://wordpress.com/auth?secret=some_secret',
+						);
+					},
+				),
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
+		$request->set_param( 'location', 'US' );
+		if ( $interactive_session ) {
+			$this->add_interactive_session( $request );
+		}
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::OK, $response->get_status() );
+		$steps      = array_column( $response->get_data()['steps'], null, 'id' );
+		$wpcom_step = $steps[ WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION ];
+		$this->assertSame( WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED, $wpcom_step['status'] );
+		$this->assertArrayHasKey( 'start', $wpcom_step['actions'], 'The other step actions should not depend on the session' );
+		$this->assertSame( $interactive_session, $authorization_requested );
+		if ( $interactive_session ) {
+			$this->assertSame( 'https://wordpress.com/auth?secret=some_secret', $wpcom_step['actions']['auth']['href'] );
+		} else {
+			$this->assertArrayNotHasKey( 'auth', $wpcom_step['actions'] );
+			$this->assertStringNotContainsString( 'some_secret', (string) wp_json_encode( $response->get_data() ) );
+		}
 	}
 
 	/**
@@ -1858,5 +1939,20 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			'US' => 'United States (US)',
 			'PR' => 'Puerto Rico',
 		);
+	}
+
+	/**
+	 * Make the request look like it comes from the current user's browser session.
+	 *
+	 * @param WP_REST_Request $request The request to add the session to.
+	 */
+	private function add_interactive_session( WP_REST_Request $request ): void {
+		$user_id    = get_current_user_id();
+		$expiration = time() + DAY_IN_SECONDS;
+		$token      = \WP_Session_Tokens::get_instance( $user_id )->create( $expiration );
+
+		// Validating the cookie fires auth_cookie_valid, which core records in $wp_rest_auth_cookie.
+		wp_validate_auth_cookie( wp_generate_auth_cookie( $user_id, $expiration, 'logged_in', $token ), 'logged_in' );
+		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
 	}
 }

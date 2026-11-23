@@ -47,7 +47,6 @@ class CustomerAccountTest extends WP_UnitTestCase {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'pre_get_avatar_data' );
 		wp_set_current_user( 0 );
 		wp_delete_user( $this->user_id );
 		update_option( 'show_avatars', $this->original_show_avatars );

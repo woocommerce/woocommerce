@@ -745,6 +745,123 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Refunding an item copies its metadata without allowing refund hooks to change the original metadata.
+	 * @dataProvider data_provider_refund_item_metadata
+	 *
+	 * @param string $item_class Order item class.
+	 * @param string $operation  Metadata operation performed by the new order item hook.
+	 */
+	public function test_wc_create_refund_preserves_original_item_metadata( string $item_class, string $operation ): void {
+		$order = wc_create_order();
+		$item  = new $item_class();
+		$item->set_name( 'Refund metadata test' );
+		$item->set_total( 10 );
+		$item->add_meta_data( 'foo', 'bar', true );
+		$item->add_meta_data( 'duplicate', 'first' );
+		$item->add_meta_data( 'duplicate', 'second' );
+		$item->add_meta_data(
+			'structured',
+			array(
+				'nested' => array(
+					'zero'  => 0,
+					'empty' => '',
+				),
+			)
+		);
+		$order->add_item( $item );
+		$order->calculate_totals( false );
+		$item->read_meta_data( true );
+
+		$original_meta = array_map(
+			static function ( $meta ) {
+				return $meta->get_data();
+			},
+			$item->get_meta_data()
+		);
+		$callback      = static function ( $item_id, $new_item ) use ( $operation ) {
+			switch ( $operation ) {
+				case 'add':
+					$new_item->add_meta_data( 'foo', 'refund value', true );
+					break;
+				case 'update':
+					$new_item->update_meta_data( 'foo', 'refund value' );
+					break;
+				case 'delete':
+					$new_item->delete_meta_data( 'foo' );
+					break;
+			}
+			$new_item->save_meta_data();
+		};
+
+		add_action( 'woocommerce_new_order_item', $callback, 10, 2 );
+		try {
+			$refund = wc_create_refund(
+				array(
+					'order_id'   => $order->get_id(),
+					'amount'     => 10,
+					'line_items' => array(
+						$item->get_id() => array(
+							'qty'          => 1,
+							'refund_total' => 10,
+						),
+					),
+				)
+			);
+		} finally {
+			remove_action( 'woocommerce_new_order_item', $callback, 10 );
+		}
+
+		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
+		$item->read_meta_data( true );
+		$this->assertSame(
+			$original_meta,
+			array_map(
+				static function ( $meta ) {
+					return $meta->get_data();
+				},
+				$item->get_meta_data()
+			),
+			'The original metadata IDs, keys, and values should remain unchanged in the database.'
+		);
+
+		$refund_items = $refund->get_items( $item->get_type() );
+		$this->assertCount( 1, $refund_items, 'There should be one refunded item.' );
+		$refund_item = reset( $refund_items );
+		$refund_item->read_meta_data( true );
+		$this->assertSame( $item->get_id(), (int) $refund_item->get_meta( '_refunded_item_id' ), 'The refund should reference the original item.' );
+		$this->assertSame(
+			'copy' === $operation ? 'bar' : ( 'delete' === $operation ? '' : 'refund value' ),
+			$refund_item->get_meta( 'foo' ),
+			'The refund metadata should reflect the hook operation.'
+		);
+		$this->assertSame(
+			array( 'first', 'second' ),
+			array_values( wp_list_pluck( $refund_item->get_meta( 'duplicate', false ), 'value' ) ),
+			'Copying metadata should preserve repeated keys.'
+		);
+		$this->assertSame( $item->get_meta( 'structured' ), $refund_item->get_meta( 'structured' ), 'Structured metadata should be copied unchanged.' );
+		$this->assertEmpty(
+			array_intersect( wp_list_pluck( $original_meta, 'id' ), wp_list_pluck( $refund_item->get_meta_data(), 'id' ) ),
+			'The refund metadata should have its own database IDs.'
+		);
+	}
+
+	/**
+	 * Provide refundable item types and metadata operations.
+	 *
+	 * @return array
+	 */
+	public static function data_provider_refund_item_metadata(): array {
+		$cases = array();
+		foreach ( array( WC_Order_Item_Product::class, WC_Order_Item_Fee::class, WC_Order_Item_Shipping::class ) as $item_class ) {
+			foreach ( array( 'copy', 'add', 'update', 'delete' ) as $operation ) {
+				$cases[ $item_class . '-' . $operation ] = array( $item_class, $operation );
+			}
+		}
+		return $cases;
+	}
+
+	/**
 	 * @testdox Should record the logged-in user who issued the refund.
 	 */
 	public function test_wc_create_refund_records_the_current_user(): void {
@@ -1199,5 +1316,49 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	private function get_download_permission_product_ids( WC_Order $order ): array {
 		$downloads = WC_Data_Store::load( 'customer-download' )->get_downloads( array( 'order_id' => $order->get_id() ) );
 		return array_map( fn( $download ) => (int) $download->get_product_id(), $downloads );
+	}
+
+	/**
+	 * @testdox Counting a customer's order records its emails on a per-user coupon, and cancelling it removes them with the use.
+	 */
+	public function test_customer_order_records_and_releases_used_by_emails() {
+		$customer_id = $this->factory->user->create( array( 'user_email' => 'lifecycle@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'lifecycle_emails', array( 'usage_limit_per_user' => '1' ) );
+
+		$order = $this->create_counted_customer_order( $customer_id, 'lifecycle_emails' );
+
+		$coupon_id = ( new WC_Coupon( 'lifecycle_emails' ) )->get_id();
+		$this->assertContains( $customer_id . ':lifecycle@example.com', get_post_meta( $coupon_id, '_used_by_email', false ) );
+		$this->assertContains( $customer_id . ':' . strtolower( $order->get_billing_email() ), get_post_meta( $coupon_id, '_used_by_email', false ) );
+
+		wc_get_order( $order->get_id() )->update_status( OrderStatus::CANCELLED );
+
+		$coupon = new WC_Coupon( 'lifecycle_emails' );
+		$this->assertSame( array(), array_values( $coupon->get_used_by() ) );
+		$this->assertEquals( 0, $coupon->get_usage_count() );
+		$this->assertSame( array(), get_post_meta( $coupon_id, '_used_by_email', false ) );
+	}
+
+	/**
+	 * @testdox Applying a per-user coupon to a customer order that already counts its coupons records the order's billing email.
+	 */
+	public function test_apply_coupon_to_counted_order_records_billing_email() {
+		$customer_id = $this->factory->user->create( array( 'user_email' => 'apply-account@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'apply_counted_emails', array( 'usage_limit_per_user' => '1' ) );
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_billing_email( 'apply-billing@example.com' );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
+
+		wc_get_order( $order->get_id() )->apply_coupon( 'apply_counted_emails' );
+
+		$coupon  = new WC_Coupon( 'apply_counted_emails' );
+		$records = get_post_meta( $coupon->get_id(), '_used_by_email', false );
+		$this->assertContains( $customer_id . ':apply-account@example.com', $records );
+		$this->assertContains( $customer_id . ':apply-billing@example.com', $records );
+		$this->assertEquals( 1, $coupon->get_usage_count(), 'The use is counted once.' );
+		$this->assertSame( array( (string) $customer_id ), array_values( $coupon->get_used_by() ) );
 	}
 }

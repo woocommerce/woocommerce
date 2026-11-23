@@ -23,22 +23,12 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	protected $add_to_cart_quantity_filter_args = array();
 
 	/**
-	 * Customer shipping address before the test, restored at teardown.
-	 *
-	 * @var array<string, string>
-	 */
-	private $previous_shipping_address = array();
-
-	/**
 	 * Called before every test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
-
-		// Several tests change the shipping address on WC()->customer, which outlives a test.
-		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 	}
 
 	/**
@@ -46,12 +36,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-
-		WC()->customer->set_is_vat_exempt( false );
-		foreach ( $this->previous_shipping_address as $key => $value ) {
-			WC()->customer->{"set_shipping_{$key}"}( $value );
-		}
-		WC()->session->set( 'wc_notices', null );
 
 		// The checkout fields may have been built while a test's filters were attached.
 		$this->clear_checkout_fields();
@@ -63,8 +47,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		foreach ( array( 'shipping_method_counts', 'previous_shipping_methods', 'shipping_for_package_0', 'shipping_for_package_1', 'chosen_shipping_methods' ) as $key ) {
 			WC()->session->set( $key, null );
 		}
-
-		remove_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10 );
 	}
 
 	/**
@@ -871,6 +853,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$fixed_variation->set_parent_id( $product->get_id() );
 		$fixed_variation->set_attributes( array( 'finish' => 'Black%20White' ) );
 		$fixed_variation->set_regular_price( '10' );
+		$fixed_variation->set_menu_order( 1 );
 		$fixed_variation->save();
 
 		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $fixed_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
@@ -880,10 +863,12 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		WC()->cart->empty_cart();
 
+		// Ordered before the fixed variation so that variation does not claim this selection.
 		$any_variation = new WC_Product_Variation();
 		$any_variation->set_parent_id( $product->get_id() );
 		$any_variation->set_attributes( array( 'finish' => '' ) );
 		$any_variation->set_regular_price( '10' );
+		$any_variation->set_menu_order( 0 );
 		$any_variation->save();
 
 		$any_cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $any_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
@@ -954,6 +939,82 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		$variable_product->delete( true );
+	}
+
+	/**
+	 * Create a variable product with an "Any" variation for the unpublished product tests.
+	 *
+	 * @param string $status Status of the variable product.
+	 * @return WC_Product_Variation The (published) variation.
+	 */
+	private function create_any_variation_of_product_with_status( string $status ): WC_Product_Variation {
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Secret Finish' );
+		$attribute->set_options( array( 'Matte', 'Gloss' ) );
+		$attribute->set_variation( true );
+		$product->set_name( 'Unreleased Product' );
+		$product->set_status( $status );
+		$product->set_date_created( 'future' === $status ? time() + DAY_IN_SECONDS : time() );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'secret-finish' => '' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		return $variation;
+	}
+
+	/**
+	 * @testdox Add to cart errors do not name a variable product, or its attributes, when the shopper cannot view it.
+	 * @testWith ["draft"]
+	 *           ["pending"]
+	 *           ["private"]
+	 *           ["future"]
+	 * @param string $status Status of the variable product.
+	 */
+	public function test_add_to_cart_errors_do_not_name_products_the_shopper_cannot_view( string $status ): void {
+		wp_set_current_user( 0 );
+		WC()->cart->empty_cart();
+
+		$variation      = $this->create_any_variation_of_product_with_status( $status );
+		$product_id     = $variation->get_parent_id();
+		$single_product = WC_Helper_Product::create_simple_product();
+
+		$requests = array(
+			'no variation'      => array( $product_id, 1, 0, array(), 'Sorry, this product cannot be purchased.' ),
+			'missing attribute' => array( $product_id, 1, $variation->get_id(), array(), 'Sorry, this product cannot be purchased.' ),
+			'invalid attribute' => array( $product_id, 1, $variation->get_id(), array( 'attribute_secret-finish' => 'Nope' ), 'Sorry, this product cannot be purchased.' ),
+			'variation by ID'   => array( $variation->get_id(), 1, 0, array(), 'Sorry, this product cannot be purchased.' ),
+			'foreign variation' => array( $product_id, 1, $single_product->get_id(), array(), 'The selected product is invalid.' ),
+		);
+
+		foreach ( $requests as $label => $request ) {
+			WC()->session->set( 'wc_notices', null );
+			$expected = array_pop( $request );
+
+			$this->assertFalse( WC()->cart->add_to_cart( ...$request ), $label );
+			$this->assertSame( array( $expected ), wp_list_pluck( wc_get_notices( 'error' ), 'notice' ), $label );
+		}
+
+		$this->assertCount( 0, WC()->cart->get_cart_contents() );
+	}
+
+	/**
+	 * @testdox Add to cart errors still name an unpublished variable product for a user who can edit it.
+	 */
+	public function test_add_to_cart_errors_name_unpublished_products_the_user_can_edit(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$variation = $this->create_any_variation_of_product_with_status( 'draft' );
+
+		$this->assertFalse( WC()->cart->add_to_cart( $variation->get_parent_id() ) );
+		$this->assertStringContainsString( 'Unreleased Product', wc_get_notices( 'error' )[0]['notice'] );
 	}
 
 	/**
@@ -1144,15 +1205,10 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->customer->set_shipping_location( 'US', 'NY', '', '' );
 
-		try {
-			$this->assertSame( $expected, WC()->cart->show_shipping(), 'Shipping should only stay hidden while the shopper has a postcode field to fill in.' );
+		$this->assertSame( $expected, WC()->cart->show_shipping(), 'Shipping should only stay hidden while the shopper has a postcode field to fill in.' );
 
-			WC()->customer->set_shipping_location( 'US', '', '', '' );
-			$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
-		} finally {
-			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
-			WC()->customer->set_shipping_location( '', '', '', '' );
-		}
+		WC()->customer->set_shipping_location( 'US', '', '', '' );
+		$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
 	}
 
 	/**
@@ -1555,13 +1611,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$customer                        = WC()->cart->get_customer();
-		$this->original_shipping_address = array(
-			'shipping_country'  => $customer->get_shipping_country(),
-			'shipping_state'    => $customer->get_shipping_state(),
-			'shipping_city'     => $customer->get_shipping_city(),
-			'shipping_postcode' => $customer->get_shipping_postcode(),
-		);
+		$customer = WC()->cart->get_customer();
 		$customer->set_shipping_country( 'GB' );
 		$customer->set_shipping_state( '' );
 		$customer->set_shipping_city( '' );
@@ -1679,6 +1729,24 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The add to cart form handler does not name a variable product the shopper cannot view.
+	 *
+	 * @see WC_Form_Handler::add_to_cart_action()
+	 */
+	public function test_form_handler_add_to_cart_action_with_unpublished_parent_variable_product(): void {
+		wp_set_current_user( 0 );
+		WC()->session->set( 'wc_notices', null );
+
+		$_REQUEST['add-to-cart'] = $this->create_any_variation_of_product_with_status( 'draft' )->get_parent_id();
+
+		WC_Form_Handler::add_to_cart_action();
+
+		unset( $_REQUEST['add-to-cart'] );
+
+		$this->assertSame( array( 'Sorry, this product cannot be purchased.' ), wp_list_pluck( wc_get_notices( 'error' ), 'notice' ) );
+	}
+
+	/**
 	 * Test case sensitivity fix for coupon discount amounts.
 	 *
 	 * This test verifies that the fix for issue #58864 works correctly.
@@ -1689,7 +1757,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * @see https://github.com/woocommerce/woocommerce/issues/58864
 	 */
 	public function test_coupon_discount_amount_case_sensitivity() {
-		$old_calc_taxes = get_option( 'woocommerce_calc_taxes', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
 		$tax_rate = array(
@@ -1703,7 +1770,11 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			'tax_rate_order'    => '1',
 		);
 
-		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Rates are only ever found for a customer with a country.
+		WC()->customer->set_shipping_country( 'GB' );
+		WC()->customer->set_billing_country( 'GB' );
 
 		// Create a product to add to cart.
 		$product = WC_Helper_Product::create_simple_product();
@@ -1743,18 +1814,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Test get_coupon_discount_tax_amount with uppercase code.
 		$tax_amount_upper = WC()->cart->get_coupon_discount_tax_amount( 'TESTCOUPON123' );
 		$this->assertEquals( 2.00, $tax_amount_upper, 'get_coupon_discount_tax_amount should return correct value with uppercase code' );
-
-		// Clean up.
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		$product->delete( true );
-		$coupon->delete( true );
-
-		// Restore global state.
-		update_option( 'woocommerce_calc_taxes', $old_calc_taxes );
-		if ( $tax_rate_id ) {
-			WC_Tax::_delete_tax_rate( $tax_rate_id );
-		}
 	}
 
 		/**
@@ -2184,6 +2243,54 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should clear the cart of the order this session sent to the gateway, even when its totals changed after checkout.
+	 */
+	public function test_clear_cart_after_payment_ignores_totals_for_the_order_sent_to_gateway(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$coupon  = WC_Helper_Coupon::create_coupon( 'sent-to-gateway' );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::PENDING ) );
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
+
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+		$order->payment_complete( 'txn_paid_offsite' );
+
+		// The shopper comes back from the gateway without the coupon, say because it hit its usage limit, so the totals no longer match the order.
+		WC()->cart->remove_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$this->assertFalse( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The test needs a cart whose hash no longer matches the order.' );
+
+		wc_clear_cart_after_payment();
+
+		$this->assertTrue( WC()->cart->is_empty(), 'The order came from this cart, so a coupon dropped since checkout should not keep it.' );
+	}
+
+	/**
+	 * @testdox Should keep items added after checkout, even for the order this session sent to the gateway.
+	 */
+	public function test_clear_cart_after_payment_keeps_items_added_after_the_order_sent_to_gateway(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::PENDING ) );
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
+
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+		$order->payment_complete( 'txn_paid_offsite' );
+
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id(), 1 );
+
+		wc_clear_cart_after_payment();
+
+		$this->assertSame( 2, WC()->cart->get_cart_contents_count(), 'Items added in another tab after checkout are a new purchase.' );
+	}
+
+	/**
 	 * @testdox Should allow woocommerce_should_clear_cart_after_payment to override the final clear cart value.
 	 */
 	public function test_clear_cart_after_payment_filter_can_override_final_value(): void {
@@ -2262,8 +2369,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2303,8 +2408,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2342,8 +2445,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNotEmpty( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2379,8 +2480,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -3065,5 +3164,145 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$skipped_child->delete( true );
 			$first_child->delete( true );
 		}
+	}
+
+	/**
+	 * @testdox Add to cart rejects a variation when an earlier variation matches.
+	 */
+	public function test_add_to_cart_rejects_a_variation_when_an_earlier_variation_matches(): void {
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$red = new WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '10' );
+		$red->set_menu_order( 0 );
+		$red->save();
+
+		$any = new WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '5' );
+		$any->set_menu_order( 1 );
+		$any->save();
+
+		wc_clear_notices();
+		$cart_item_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$any->get_id(),
+			array(
+				'attribute_color' => 'Red',
+			)
+		);
+
+		$this->assertFalse( $cart_item_key, 'Add to cart should reject a variation when an earlier variation matches.' );
+		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
+	}
+
+	/**
+	 * Run the classic checkout's per-user check for a guest and return the error notices it added.
+	 *
+	 * @param string $code          Coupon code.
+	 * @param string $billing_email Posted billing email.
+	 * @return string[]
+	 */
+	private function get_guest_coupon_check_errors( string $code, string $billing_email ): array {
+		wp_set_current_user( 0 );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+		WC()->cart->set_applied_coupons( array( $code ) );
+		wc_clear_notices();
+
+		WC()->cart->check_customer_coupons( array( 'billing_email' => $billing_email ) );
+
+		return wp_list_pluck( wc_get_notices( 'error' ), 'notice' );
+	}
+
+	/**
+	 * @testdox The classic checkout refuses a guest a per-user coupon that the account owning the billing email already used.
+	 */
+	public function test_check_customer_coupons_counts_use_of_account_that_owns_guest_email(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'cart-owner@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'cart_owner_use', array( 'usage_limit_per_user' => '1' ) );
+		add_post_meta( ( new WC_Coupon( 'cart_owner_use' ) )->get_id(), '_used_by', (string) $user_id );
+
+		$errors = $this->get_guest_coupon_check_errors( 'cart_owner_use', 'cart-owner@example.com' );
+
+		$this->assertStringContainsString( 'Usage limit for coupon', implode( ' ', $errors ), 'A use stored under the owner ID, with no email record, is found by email' );
+		$this->assertSame( array(), $this->get_guest_coupon_check_errors( 'cart_owner_use', 'cart-other@example.com' ), 'An unrelated guest keeps their allowance' );
+	}
+
+	/**
+	 * @testdox The classic checkout keeps the usage count of a custom coupon data store that overrides get_usage_by_email().
+	 */
+	public function test_check_customer_coupons_keeps_custom_store_email_usage_count(): void {
+		WC_Helper_Coupon::create_coupon( 'cart_custom_store', array( 'usage_limit_per_user' => '1' ) );
+		$store  = new class() extends WC_Coupon_Data_Store_CPT {
+			/**
+			 * Report one use for every email.
+			 *
+			 * @param WC_Coupon $coupon Coupon object.
+			 * @param string    $email  Email address.
+			 * @return int
+			 */
+			public function get_usage_by_email( &$coupon, $email ) {
+				return 1;
+			}
+		};
+		$filter = fn() => $store;
+		add_filter( 'woocommerce_coupon_data_store', $filter );
+
+		$errors = $this->get_guest_coupon_check_errors( 'cart_custom_store', 'cart-custom@example.com' );
+		remove_filter( 'woocommerce_coupon_data_store', $filter );
+
+		$this->assertStringContainsString( 'Usage limit for coupon', implode( ' ', $errors ), 'The custom count is used' );
+	}
+
+	/**
+	 * @testdox The classic checkout counts a guest's earlier use once when the coupon allows two uses per user.
+	 */
+	public function test_check_customer_coupons_counts_guest_use_once(): void {
+		WC_Helper_Coupon::create_coupon( 'cart_two_uses', array( 'usage_limit_per_user' => '2' ) );
+		add_post_meta( ( new WC_Coupon( 'cart_two_uses' ) )->get_id(), '_used_by', 'cart-two@example.com' );
+
+		$this->assertSame( array(), $this->get_guest_coupon_check_errors( 'cart_two_uses', 'cart-two@example.com' ), 'One of two uses is left' );
+	}
+
+	/**
+	 * @testdox The classic checkout tells a guest to try again later when the account owning the billing email holds the coupon.
+	 */
+	public function test_check_customer_coupons_shows_try_again_message_for_owner_hold(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'cart-held@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'cart_owner_hold', array( 'usage_limit_per_user' => '1' ) );
+		$coupon = new WC_Coupon( 'cart_owner_hold' );
+		WC_Data_Store::load( 'coupon' )->check_and_hold_coupon_for_user( $coupon, array( $user_id ), $user_id );
+
+		$errors = $this->get_guest_coupon_check_errors( 'cart_owner_hold', 'cart-held@example.com' );
+
+		$this->assertStringContainsString( 'Please try again after some time', implode( ' ', $errors ) );
+	}
+
+	/**
+	 * @testdox The classic checkout refuses a guest a per-user coupon with an email whose owner used it, after the owner changes their account email.
+	 */
+	public function test_check_customer_coupons_counts_use_after_account_email_change(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'cart-before@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'cart_email_change', array( 'usage_limit_per_user' => '1' ) );
+		( new WC_Coupon( 'cart_email_change' ) )->increase_usage_count( (string) $user_id );
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'cart-after@example.com',
+			)
+		);
+
+		$this->assertStringContainsString( 'Usage limit for coupon', implode( ' ', $this->get_guest_coupon_check_errors( 'cart_email_change', 'cart-before@example.com' ) ), 'The use is found through the email recorded with it' );
 	}
 }

@@ -384,7 +384,7 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Remove registered filters and reset test state.
+	 * Reset test state.
 	 */
 	public function tearDown(): void {
 		if ( $this->states_global_existed ) {
@@ -395,31 +395,6 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 
 		$this->states_global_existed = false;
 		$this->states_global_value   = null;
-
-		remove_filter( 'determine_locale', array( $this, 'filter_active_locale' ) );
-		remove_filter( 'determine_locale', array( $this, 'filter_counted_active_locale' ) );
-		remove_filter( 'determine_locale', array( $this, 'filter_stateful_locale' ) );
-		remove_filter( 'woocommerce_countries', array( $this, 'filter_country_names' ) );
-		remove_filter( 'woocommerce_countries', array( $this, 'record_country_filter_call' ) );
-		remove_filter( 'woocommerce_countries', array( $this, 'filter_empty_geographical_data' ) );
-		remove_filter( 'woocommerce_states', array( $this, 'filter_state_names' ) );
-		remove_filter( 'woocommerce_states', array( $this, 'filter_empty_geographical_data' ) );
-		remove_filter( 'woocommerce_continents', array( $this, 'filter_continent_names' ) );
-		remove_filter( 'woocommerce_continents', array( $this, 'filter_empty_geographical_data' ) );
-		remove_filter( 'woocommerce_get_country_locale', array( $this, 'filter_country_locale' ) );
-		remove_filter( 'pre_option_woocommerce_allowed_countries', array( $this, 'return_all_countries' ) );
-		remove_filter( 'pre_option_woocommerce_ship_to_countries', array( $this, 'return_all_countries' ) );
-		remove_filter( 'locale', array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
-		remove_filter( 'determine_locale', array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
-		remove_filter( 'pre_determine_locale', array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
-		remove_filter( 'woocommerce_countries', array( $this, 'determine_locale_while_building' ) );
-		remove_filter( 'woocommerce_states', array( $this, 'determine_locale_while_building' ) );
-		remove_filter( 'woocommerce_get_country_locale', array( $this, 'determine_locale_while_building' ) );
-		remove_filter( 'woocommerce_countries', array( $this, 'stamp_country_names_with_switched_locale' ) );
-		remove_filter( 'woocommerce_get_country_locale', array( $this, 'stamp_country_locale_with_switched_locale' ) );
-		remove_filter( 'get_available_languages', array( $this, 'add_available_test_locale' ) );
-		remove_filter( 'locale', array( $this, 'read_default_location_in_locale_filter' ), 20 );
-		remove_filter( 'determine_locale', array( $this, 'read_default_location_in_locale_filter' ), 20 );
 
 		if ( null !== $this->original_countries ) {
 			WC()->countries = $this->original_countries;
@@ -1006,6 +981,22 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( $fields['billing_postcode']['required'], 'Macao has no postal codes, so the field should not be required.' );
 		$this->assertTrue( $fields['billing_state']['hidden'] ?? false, 'Macao has no subdivisions, so the state should be hidden.' );
 		$this->assertFalse( $fields['billing_state']['required'], 'Macao has no subdivisions, so the state should not be required.' );
+	}
+
+	/**
+	 * Benin has no postal codes: mail goes to a PO box ("BP") in a locality. Its 12 departments stay a required list.
+	 *
+	 * @testdox 'get_address_fields' hides the postcode for Benin and labels the state as a department, like Bolivia.
+	 *
+	 * @return void
+	 */
+	public function test_get_address_fields_hides_postcode_and_labels_departments_for_benin() {
+		$fields = ( new WC_Countries() )->get_address_fields( 'BJ', 'billing_' );
+
+		$this->assertTrue( $fields['billing_postcode']['hidden'] ?? false, 'Benin has no postal codes, so the field should be hidden.' );
+		$this->assertFalse( $fields['billing_postcode']['required'], 'Benin has no postal codes, so the field should not be required.' );
+		$this->assertSame( 'Department', $fields['billing_state']['label'], 'Benin is divided into departments.' );
+		$this->assertTrue( $fields['billing_state']['required'], 'Benin keeps its required list of 12 departments.' );
 	}
 
 	/**

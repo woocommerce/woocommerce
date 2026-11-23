@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
+use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 
@@ -44,7 +45,9 @@ defined( 'ABSPATH' ) || exit;
  * adds write what the saved objects imply elsewhere, such as the price range a
  * variable parent derives from its variations, or a row in a table of the
  * extension. A sync also sees the objects the call deleted and the input of
- * the call. A refusal there rolls the call back too. A rollback drops the
+ * the call. A refusal there rolls the call back too. When a query hits a
+ * deadlock, a lock wait timeout or a snapshot conflict with a parallel call, the call rolls
+ * back and fails with a WP_Error instead of reporting the write. A rollback drops the
  * object caches of the objects the call saved or deleted. It does not undo what a sync
  * did outside the database, such as an HTTP request, and it does nothing on a
  * table engine without transactions. The other steps must not save, send email
@@ -89,7 +92,7 @@ abstract class ActionableAbility extends Ability {
 	 *
 	 * @param \WC_Data $subject Primary object to change.
 	 * @param array    $input   Ability input.
-	 * @return null|\WP_Error|array<int, array{0: \WC_Data, 1: array, 2?: string}> A WP_Error rejects the change, and nothing is saved. An array lists the secondary objects.
+	 * @return null|\WP_Error|array<int, array{0: \WC_Data, 1: array, 2?: string}> A WP_Error rejects the change, and nothing is saved. The field writes and the validators of the primary object still run, so the client gets their refusals in the same error. An array lists the secondary objects.
 	 */
 	abstract protected function change( $subject, array $input );
 
@@ -208,13 +211,16 @@ abstract class ActionableAbility extends Ability {
 			return $updates;
 		}
 
+		$refused = new \WP_Error();
 		try {
 			$changed = $this->change( $subject, $input );
 		} catch ( \WC_Data_Exception $e ) {
-			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+			$changed = new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		}
-		if ( is_wp_error( $changed ) ) {
-			return $changed;
+		$core_refused = is_wp_error( $changed );
+		if ( $core_refused ) {
+			$refused->merge_from( $changed );
+			$changed = null;
 		}
 
 		$objects = array( array( $subject, $updates, $this->get_resource() ) );
@@ -251,12 +257,11 @@ abstract class ActionableAbility extends Ability {
 			$objects[] = array( $secondary[0], $fields, $resource_name );
 		}
 
-		$refused = new \WP_Error();
 		foreach ( $objects as list( $object, $fields ) ) {
 			$this->apply_fields( $object, $fields, $refused );
 		}
 
-		$deleting = $this->get_objects_to_delete();
+		$deleting = $core_refused ? array() : $this->get_objects_to_delete();
 		$staged   = array_column( $objects, 0 );
 		$to_check = $objects;
 		foreach ( $deleting as $object ) {
@@ -277,8 +282,8 @@ abstract class ActionableAbility extends Ability {
 				$refused
 			);
 		}
-		if ( $refused->has_errors() ) {
-			return $refused;
+		if ( $core_refused || $refused->has_errors() ) {
+			return self::join_refusals( $refused );
 		}
 
 		try {
@@ -347,8 +352,8 @@ abstract class ActionableAbility extends Ability {
 	/**
 	 * Drop the object caches of the objects a rolled back save() touched. The
 	 * saves filled the caches with rows the rollback removed, so a read in the
-	 * same request would still see them. The `WC_Data` meta cache and the
-	 * product instance cache are separate from the post cache.
+	 * same request would still see them. The `WC_Data` meta cache, the product type cache, the
+	 * product instance cache and the price lookup cache are separate from the post cache.
 	 *
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects.
 	 * @param \WC_Data[]                                          $deleted The objects the call deleted.
@@ -362,16 +367,21 @@ abstract class ActionableAbility extends Ability {
 			}
 			if ( $id > 0 && $object instanceof \WC_Product ) {
 				clean_post_cache( $id );
+				wp_cache_delete( 'lookup_table', 'object_' . $id );
+				\WC_Cache_Helper::invalidate_cache_group( 'product_' . $id );
 				wc_delete_product_transients( $id );
 				$product_cache->remove( $id );
 				if ( $object->get_parent_id() > 0 ) {
 					clean_post_cache( $object->get_parent_id() );
+					wp_cache_delete( 'lookup_table', 'object_' . $object->get_parent_id() );
 					wc_delete_product_transients( $object->get_parent_id() );
 					$product_cache->remove( $object->get_parent_id() );
 				}
 			} elseif ( $id > 0 && $object instanceof \WC_Abstract_Order ) {
 				wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->remove( $id );
 				clean_post_cache( $id );
+			} elseif ( $id > 0 && $object instanceof \WC_Customer ) {
+				clean_user_cache( $id );
 			}
 		}
 	}
@@ -598,7 +608,8 @@ abstract class ActionableAbility extends Ability {
 	 * `<namespace>:<code>`, so refusals with the same code keep their own data.
 	 * When the code is already taken in the same namespace, it gets a numeric
 	 * suffix, as `<namespace>:<code>:2`. The errors keep the run order, so the
-	 * first rejection gives the response its code, message and status.
+	 * first rejection gives the response its code and status, and
+	 * join_refusals() puts every message into the first one.
 	 *
 	 * @param \WP_Error $rejected  Rejection from run_callback().
 	 * @param string    $extension Extension that owns the callback.
@@ -616,6 +627,23 @@ abstract class ActionableAbility extends Ability {
 			}
 			$refused->add_data( array_merge( $rejected->get_error_data( $code ), array( 'namespace' => $extension ) ), $key );
 		}
+	}
+
+	/**
+	 * Put every refusal message into the first message, once each, because an
+	 * MCP client shows only the first message of an error. The other codes and
+	 * messages stay as they are for the clients that read all of them.
+	 *
+	 * @param \WP_Error $refused Refusals in run order.
+	 * @return \WP_Error
+	 */
+	private static function join_refusals( \WP_Error $refused ): \WP_Error {
+		$messages = $refused->get_error_messages();
+		if ( count( $messages ) > 1 ) {
+			$refused->errors[ $refused->get_error_code() ][0] = implode( ' ', array_unique( $messages ) );
+		}
+
+		return $refused;
 	}
 
 	/**

@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	BLOCK_THEME_SLUG,
+	enableTestPlugin,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -40,11 +45,9 @@ test.describe( 'Product Collection: Product Picker', () => {
 		},
 	];
 
-	// Activate plugin which registers custom product collections
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-register-product-collection'
-		);
+	// Enable the plugin which registers custom product collections.
+	test.beforeEach( async ( { context } ) => {
+		await enableTestPlugin( context, 'register-product-collection' );
 	} );
 
 	CUSTOM_COLLECTIONS.forEach( ( collection ) => {

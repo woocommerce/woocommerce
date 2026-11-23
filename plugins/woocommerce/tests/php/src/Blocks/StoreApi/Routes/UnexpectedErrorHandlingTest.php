@@ -32,7 +32,6 @@ class UnexpectedErrorHandlingTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
-		Constants::clear_single_constant( 'WP_DEBUG' );
 		parent::tearDown();
 	}
 
