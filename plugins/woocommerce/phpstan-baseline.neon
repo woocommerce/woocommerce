@@ -33568,7 +33568,7 @@ parameters:
 			path: includes/wc-stock-functions.php
 
 		-
-			message: '#^@param int \$new_stock does not accept actual type of parameter\: bool\|int\|null\.$#'
+			message: '#^@param int \$new_stock does not accept actual type of parameter\: int\|true\|null\.$#'
 			identifier: parameter.phpDocType
 			count: 1
 			path: includes/wc-stock-functions.php
