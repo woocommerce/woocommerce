@@ -764,6 +764,8 @@ class ListTable extends \WP_List_Table {
 
 		$redirect_url = NotificationsPage::PAGE_URL;
 
+		$processed = 0;
+
 		if ( 'enable' === $this->current_action() ) {
 			foreach ( $notifications as $id ) {
 
@@ -773,22 +775,25 @@ class ListTable extends \WP_List_Table {
 				}
 				$notification->set_status( NotificationStatus::ACTIVE );
 				$this->data_store->update( $notification );
+				++$processed;
 
 			}
-			$notice_message = sprintf(
-				/* translators: %s: Notifications count */
-				_nx(
-					'%s notification updated.',
-					'%s notifications updated.',
-					count( $notifications ),
-					'notifications_status',
-					'woocommerce'
-				),
-				count( $notifications )
-			);
 
-			NotificationsPage::add_notice( $notice_message, 'success' );
+			if ( $processed > 0 ) {
+				$notice_message = sprintf(
+					/* translators: %s: Notifications count */
+					_nx(
+						'%s notification updated.',
+						'%s notifications updated.',
+						$processed,
+						'notifications_status',
+						'woocommerce'
+					),
+					$processed
+				);
 
+				NotificationsPage::add_notice( $notice_message, 'success' );
+			}
 		} elseif ( 'cancel' === $this->current_action() ) {
 			foreach ( $notifications as $id ) {
 				$notification = Factory::get_notification( $id );
@@ -797,22 +802,24 @@ class ListTable extends \WP_List_Table {
 				}
 				$notification->set_status( NotificationStatus::CANCELLED );
 				$this->data_store->update( $notification );
+				++$processed;
 			}
 
-			$notice_message = sprintf(
-				/* translators: %s: Notifications count */
-				_nx(
-					'%s notification updated.',
-					'%s notifications updated.',
-					count( $notifications ),
-					'notifications_status',
-					'woocommerce'
-				),
-				count( $notifications )
-			);
+			if ( $processed > 0 ) {
+				$notice_message = sprintf(
+					/* translators: %s: Notifications count */
+					_nx(
+						'%s notification updated.',
+						'%s notifications updated.',
+						$processed,
+						'notifications_status',
+						'woocommerce'
+					),
+					$processed
+				);
 
-			NotificationsPage::add_notice( $notice_message, 'success' );
-
+				NotificationsPage::add_notice( $notice_message, 'success' );
+			}
 		} elseif ( 'delete' === $this->current_action() ) {
 			foreach ( $notifications as $id ) {
 				$notification = Factory::get_notification( $id );
@@ -820,21 +827,24 @@ class ListTable extends \WP_List_Table {
 					continue;
 				}
 				$this->data_store->delete( $notification );
+				++$processed;
 			}
 
-			$notice_message = sprintf(
-				/* translators: %s: Notifications count */
-				_nx(
-					'%s notification deleted.',
-					'%s notifications deleted.',
-					count( $notifications ),
-					'notifications_status',
-					'woocommerce'
-				),
-				count( $notifications )
-			);
+			if ( $processed > 0 ) {
+				$notice_message = sprintf(
+					/* translators: %s: Notifications count */
+					_nx(
+						'%s notification deleted.',
+						'%s notifications deleted.',
+						$processed,
+						'notifications_status',
+						'woocommerce'
+					),
+					$processed
+				);
 
-			NotificationsPage::add_notice( $notice_message, 'success' );
+				NotificationsPage::add_notice( $notice_message, 'success' );
+			}
 		}
 
 		wp_safe_redirect( $redirect_url );
