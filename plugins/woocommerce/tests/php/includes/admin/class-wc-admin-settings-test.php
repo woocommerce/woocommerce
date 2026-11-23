@@ -664,7 +664,7 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 			'encoded nested key'        => array( array( 'test_parent' => array( 'A' => 'decoded value' ) ) + $id_value, 'test_parent[%41]', 'decoded value' ),
 			'nothing stored under name' => array( $id_value, 'test_parent[key]', 'id value' ),
 			'two levels'                => array( array( 'test_parent' => array( 'deep' => array( 'leaf' => 'deep value' ) ) ) + $id_value, 'test_parent[deep][leaf]', 'id value' ),
-			'string option'             => array( array( 'test_string' => 'abc' ) + $id_value, 'test_string[0]', 'id value' ),
+			'string option'             => array( array( 'test_string' => 'abc' ) + $id_value, 'test_string[1]', 'id value' ),
 			'object value under key'    => array( array( 'test_object' => array( 'key' => new stdClass() ) ) + $id_value, 'test_object[key]', 'id value' ),
 			'name split by &'           => array( array( 'test_split' => array( 'key' => 'other value' ) ) + $id_value, 'test_split&other[key]', 'id value' ),
 		);
