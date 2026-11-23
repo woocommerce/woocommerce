@@ -7,6 +7,11 @@ import apiFetch from '@wordpress/api-fetch';
 import { Link } from '@wordpress/ui';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import { trackReadiness } from '../tracks';
+
 export const SUPPORT_REPORT_PATH = '/wc/v3/agent-readiness/support-report';
 
 /**
@@ -23,6 +28,10 @@ export const SupportDownload = ( {
 	const [ busy, setBusy ] = useState( false );
 
 	const download = async () => {
+		trackReadiness( 'link_clicked', {
+			surface: 'page',
+			area: 'support_download',
+		} );
 		setBusy( true );
 		onError( '' );
 		try {

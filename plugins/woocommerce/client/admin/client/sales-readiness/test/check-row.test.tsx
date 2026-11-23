@@ -213,7 +213,7 @@ describe( 'CheckRow', () => {
 			} )
 		);
 
-		expect( screen.getByText( "Couldn't check:" ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Not checked yet:' ) ).toBeInTheDocument();
 		expect(
 			screen.getByText( "This couldn't be checked. Try again later." )
 		).toBeInTheDocument();

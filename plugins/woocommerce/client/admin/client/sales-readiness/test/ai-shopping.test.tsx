@@ -14,10 +14,13 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import AiShopping from '../ai-shopping';
+import { trackReadiness } from '../tracks';
 import type { ShoppingView } from '../types';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 jest.mock( '@wordpress/a11y', () => ( { speak: jest.fn() } ) );
+jest.mock( '../tracks', () => ( { trackReadiness: jest.fn() } ) );
+const mockedTrack = trackReadiness as jest.Mock;
 const mockCreateSuccessNotice = jest.fn();
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -257,14 +260,14 @@ describe( 'AiShopping', () => {
 		expect( screen.queryByText( 'Required' ) ).toBeNull();
 	} );
 
-	it( 'says what to do in coming soon mode, with a way to change store visibility', () => {
+	it( 'says what to do in coming soon mode, with a way to change site visibility', () => {
 		renderPage(
 			view( {
 				coming_soon: {
 					text: 'Your store is in coming soon mode, so AI assistants can’t find your products yet.',
 					link: {
 						href: '/wp-admin/admin.php?page=wc-settings&tab=site-visibility',
-						text: 'Change store visibility',
+						text: 'Change site visibility',
 					},
 				},
 			} )
@@ -274,7 +277,7 @@ describe( 'AiShopping', () => {
 			screen.getByText( /coming soon mode/, { selector: 'span' } )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'link', { name: 'Change store visibility' } )
+			screen.getByRole( 'link', { name: 'Change site visibility' } )
 		).toHaveAttribute(
 			'href',
 			'/wp-admin/admin.php?page=wc-settings&tab=site-visibility'
@@ -563,6 +566,64 @@ describe( 'AiShopping', () => {
 			'href',
 			'https://woocommerce.com/document/woocommerce-ai/agentic-commerce/'
 		);
+	} );
+
+	it( 'records the Setup checklist, product visibility, Learn how it works, coming soon and connection URL clicks', () => {
+		mockedTrack.mockClear();
+		renderPage(
+			view( {
+				coming_soon: {
+					text: 'Your store is in coming soon mode.',
+					link: {
+						href: '/wp-admin/admin.php?page=wc-settings&tab=site-visibility',
+						text: 'Change site visibility',
+					},
+				},
+			} )
+		);
+		const click = ( name: string | RegExp, index = 0 ) =>
+			fireEvent.click( screen.getAllByRole( 'link', { name } )[ index ] );
+
+		click( 'View Site Health' );
+		click( 'View products', 1 );
+		click( /Learn how it works/ );
+		click( 'Change site visibility' );
+		click( /Test the connection in UCP Playground/ );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Copy' } ) );
+
+		const calls = mockedTrack.mock.calls.map( ( [ name, props ] ) => [
+			name,
+			props,
+		] );
+		expect( calls ).toEqual( [
+			[
+				'link_clicked',
+				{
+					surface: 'shopping',
+					area: 'setup',
+					check_id: 'https',
+					state: 'required',
+				},
+			],
+			[
+				'link_clicked',
+				{
+					surface: 'shopping',
+					area: 'product_visibility',
+					count_id: 'hidden',
+				},
+			],
+			[ 'link_clicked', { surface: 'shopping', area: 'learn_more' } ],
+			[ 'link_clicked', { surface: 'shopping', area: 'coming_soon' } ],
+			[
+				'link_clicked',
+				{ surface: 'shopping', area: 'connection_url_test' },
+			],
+			[
+				'link_clicked',
+				{ surface: 'shopping', area: 'connection_url_copy' },
+			],
+		] );
 	} );
 
 	it( 'goes to a policy field from a link, on load and from the Setup checklist on this page', () => {

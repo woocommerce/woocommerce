@@ -481,7 +481,7 @@ describe( 'Sales readiness page', () => {
 				text: 'Your store is in coming soon mode.',
 				link: {
 					href: 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=site-visibility',
-					text: 'Change store visibility',
+					text: 'Change site visibility',
 				},
 			},
 		} );
@@ -491,7 +491,7 @@ describe( 'Sales readiness page', () => {
 			'Your store is in coming soon mode.'
 		);
 		expect(
-			screen.getByRole( 'link', { name: 'Change store visibility' } )
+			screen.getByRole( 'link', { name: 'Change site visibility' } )
 		).toHaveAttribute(
 			'href',
 			'https://example.com/wp-admin/admin.php?page=wc-settings&tab=site-visibility'
