@@ -28,7 +28,20 @@ inputs:
 runs:
     using: 'composite'
     steps:
+        # pnpm/action-setup downloads pnpm from the npm registry, which occasionally drops the
+        # connection (ECONNRESET). Composite steps can't retry a `uses:`, so retry once after a pause.
         - name: 'Setup PNPM'
+          id: 'setup-pnpm'
+          continue-on-error: true
+          uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        - name: 'Setup PNPM: wait before retrying'
+          if: ${{ steps.setup-pnpm.outcome == 'failure' }}
+          shell: 'bash'
+          run: |
+              echo "::warning::setup-pnpm-retry attempt=1/2 -- retrying in 15s"
+              sleep 15
+        - name: 'Setup PNPM: retry'
+          if: ${{ steps.setup-pnpm.outcome == 'failure' }}
           uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         # Next step is rudimentary - fixes a know composite action bug during post-actions:
         # Error: Index was out of range. Must be non-negative and less than the size of the collection.
