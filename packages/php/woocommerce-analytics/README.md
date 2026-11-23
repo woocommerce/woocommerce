@@ -312,7 +312,7 @@ Called from an MU-plugin, it serves on `muplugins_loaded`, when a `wp_consent_co
 
 The module serves only while proxy tracking is enabled, and otherwise leaves the request to the REST route. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route too, which applies the consent check.
 
-Earlier versions could write a `woocommerce-analytics-proxy-speed-module.php` MU-plugin into the site. The package now removes that file, and `woocommerce_analytics_auto_install_proxy_speed_module` is deprecated with no effect.
+Earlier versions could write a `woocommerce-analytics-proxy-speed-module.php` MU-plugin into the site. The package now removes that file, and `woocommerce_analytics_auto_install_proxy_speed_module` is deprecated with no effect. Where the package cannot delete it, such as on a read-only filesystem, remove it before calling `enable()`, since it would answer first with its own older code.
 
 ### Debugging
 

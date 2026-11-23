@@ -102,6 +102,9 @@ class Proxy_Speed_Module {
 			// Match the superglobals the REST route sees.
 			wp_magic_quotes();
 
+			// Authorized means proxy tracking was on at the last init, before the plugin that turns it on has loaded.
+			add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+
 			$response = self::handle_events( (string) file_get_contents( 'php://input' ) );
 			WC_Analytics_Tracking::send_batched_pixels();
 		} catch ( \Throwable $e ) {

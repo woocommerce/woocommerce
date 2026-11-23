@@ -127,16 +127,80 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	}
 
 	/**
-	 * A file an earlier version installed runs stale code, so the daily check removes it.
+	 * A file an earlier version installed runs stale code, so the daily check removes it, and retries if it cannot.
+	 *
+	 * @dataProvider provide_leftover_module_files
+	 *
+	 * @param bool $deletable Whether the file can be deleted.
 	 */
-	public function test_maybe_update_proxy_speed_module_removes_a_leftover_module(): void {
-		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+	#[DataProvider( 'provide_leftover_module_files' )]
+	public function test_maybe_update_proxy_speed_module_removes_a_leftover_module( $deletable ): void {
 		$this->set_speed_module_enabled( true );
 		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION, '0.18.1' );
+		// Not wp_mkdir_p(): it refuses the `..` in the test bootstrap's WPMU_PLUGIN_DIR.
+		$created_dir = ! is_dir( WPMU_PLUGIN_DIR ) && mkdir( WPMU_PLUGIN_DIR, 0755, true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
+		$file        = trailingslashit( WPMU_PLUGIN_DIR ) . 'woocommerce-analytics-proxy-speed-module.php';
+		file_put_contents( $file, '<?php' );
+		if ( ! $deletable ) {
+			chmod( $file, 0444 );
+		}
 
-		Woocommerce_Analytics::maybe_update_proxy_speed_module();
+		try {
+			Woocommerce_Analytics::maybe_update_proxy_speed_module();
 
-		$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION ) );
+			$this->assertSame( ! $deletable, file_exists( $file ) );
+			$this->assertSame(
+				$deletable ? false : '0.18.1',
+				get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION ),
+				'The version option schedules the retry, so only a removed file may clear it.'
+			);
+		} finally {
+			if ( file_exists( $file ) ) {
+				chmod( $file, 0644 );
+				unlink( $file );
+			}
+			if ( $created_dir ) {
+				rmdir( WPMU_PLUGIN_DIR );
+			}
+		}
+	}
+
+	/**
+	 * Leftover module files.
+	 *
+	 * @return array
+	 */
+	public static function provide_leftover_module_files(): array {
+		return array(
+			'deletable'   => array( true ),
+			'undeletable' => array( false ),
+		);
+	}
+
+	/**
+	 * A callback on the deprecated filter still runs during its deprecation window, and is told so.
+	 */
+	public function test_the_daily_check_still_fires_the_deprecated_auto_install_filter(): void {
+		$notices = 0;
+		add_action(
+			'deprecated_hook_run',
+			function () use ( &$notices ) {
+				++$notices;
+			}
+		);
+		add_filter( 'deprecated_hook_trigger_error', '__return_false' );
+		add_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
+
+		try {
+			Woocommerce_Analytics::maybe_update_proxy_speed_module();
+
+			$this->assertSame( 1, $notices );
+			$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION ), 'The deprecated filter must not install anything.' );
+		} finally {
+			remove_all_actions( 'deprecated_hook_run' );
+			remove_all_filters( 'deprecated_hook_trigger_error' );
+			remove_all_filters( 'woocommerce_analytics_auto_install_proxy_speed_module' );
+		}
 	}
 
 	/**

@@ -148,6 +148,7 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 			),
 			json_decode( $output, true )
 		);
+		$this->assertTrue( Features::is_proxy_tracking_enabled(), 'A shopper without a tk_ai cookie needs the IP-based visitor id, which reads this.' );
 	}
 
 	/**

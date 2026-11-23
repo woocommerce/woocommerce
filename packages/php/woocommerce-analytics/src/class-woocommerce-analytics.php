@@ -307,6 +307,9 @@ class Woocommerce_Analytics {
 			return;
 		}
 
+		// Fire the deprecated filter during its deprecation window, so its callbacks get the notice.
+		\Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled();
+
 		if ( false !== get_option( self::PROXY_SPEED_MODULE_VERSION_OPTION, false ) ) {
 			self::maybe_remove_proxy_speed_module();
 		}
@@ -353,16 +356,15 @@ class Woocommerce_Analytics {
 
 		global $wp_filesystem;
 
-		/**
-		 * Clean up MU plugin.
-		 */
 		$file_path = trailingslashit( WPMU_PLUGIN_DIR ) . 'woocommerce-analytics-proxy-speed-module.php';
 
-		if ( $wp_filesystem->exists( $file_path ) && $wp_filesystem->is_writable( $file_path ) ) {
-			$deleted = $wp_filesystem->delete( $file_path );
-			if ( ! $deleted && function_exists( 'wc_get_logger' ) ) {
+		if ( $wp_filesystem->exists( $file_path )
+			&& ( ! $wp_filesystem->is_writable( $file_path ) || ! $wp_filesystem->delete( $file_path ) ) ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
 				wc_get_logger()->error( 'Failed to delete WooCommerce Analytics proxy speed module file. The MU-plugin may continue running.', array( 'source' => 'woocommerce-analytics' ) );
 			}
+			// Keep the version option, which is what schedules the next attempt.
+			return;
 		}
 
 		delete_option( self::PROXY_SPEED_MODULE_VERSION_OPTION );
