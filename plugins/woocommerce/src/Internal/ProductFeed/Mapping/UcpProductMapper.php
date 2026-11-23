@@ -773,14 +773,21 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * Walk the cartesian product of value sets, last set fastest, less the combinations claimed.
 	 *
 	 * Claimed branches are cut rather than walked: a claim with one key left takes its value
-	 * out of that set, and one with none left takes the whole branch. Claims that cover a
-	 * branch only between them, several keys deep, are still walked into before they cut.
+	 * out of that set, and one with none left takes the whole branch. A branch found empty is
+	 * remembered by the sets and claims it was entered with, so the same claims met again
+	 * under other values of unrelated keys cost one lookup, whatever order the keys are in.
 	 *
 	 * @param array $sets Values by key.
 	 * @param array $claims Combinations to leave out, each a value by key for some of the keys.
+	 * @param array $dead Branches found empty so far, for the walk's own use.
 	 * @return \Generator Yields one value by key.
 	 */
-	private function combinations( array $sets, array $claims = array() ): \Generator {
+	private function combinations( array $sets, array $claims = array(), array &$dead = array() ): \Generator {
+		$branch = $claims ? (string) wp_json_encode( array( $sets, $claims ) ) : '';
+		if ( isset( $dead[ $branch ] ) ) {
+			return;
+		}
+
 		foreach ( $claims as $index => $claim ) {
 			if ( empty( $claim ) ) {
 				return;
@@ -803,6 +810,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 
 		$key    = array_key_first( $sets );
 		$values = $sets[ $key ];
+		$found  = false;
 		unset( $sets[ $key ] );
 
 		foreach ( $values as $value ) {
@@ -815,9 +823,14 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 				}
 			}
 
-			foreach ( $this->combinations( $sets, $open ) as $rest ) {
+			foreach ( $this->combinations( $sets, $open, $dead ) as $rest ) {
+				$found = true;
 				yield array( $key => $value ) + $rest;
 			}
+		}
+
+		if ( ! $found && '' !== $branch ) {
+			$dead[ $branch ] = true;
 		}
 	}
 
