@@ -11,7 +11,7 @@ GET /cart/items
 There are no extra parameters needed to use this endpoint.
 
 ```sh
-curl "https://example-store.com/wp-json/wc/store/v1/cart/items"
+curl --header "Cart-Token: $CART_TOKEN" "https://example-store.com/wp-json/wc/store/v1/cart/items"
 ```
 
 **Example response:**
@@ -236,7 +236,7 @@ GET /cart/items/:key
 | `key`     | string |   Yes    | The key of the cart item to retrieve. |
 
 ```sh
-curl "https://example-store.com/wp-json/wc/store/v1/cart/items/c74d97b01eae257e44aa9d5bade97baf"
+curl --header "Cart-Token: $CART_TOKEN" "https://example-store.com/wp-json/wc/store/v1/cart/items/c74d97b01eae257e44aa9d5bade97baf"
 ```
 
 **Example response:**
