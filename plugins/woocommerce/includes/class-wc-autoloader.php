@@ -107,13 +107,17 @@ class WC_Autoloader {
 			$path = $this->include_path . 'integrations/' . substr( str_replace( '_', '-', $class ), 15 ) . '/';
 		} elseif ( 0 === strpos( $class, 'wc_notes_' ) ) {
 			$path = $this->include_path . 'admin/notes/';
+		} elseif ( 'wc_rest_settings_v4_controller' === $class ) {
+			// Compatibility stub for the removed experimental REST API v4; kept resolvable so a
+			// pre-swap controller list can still instantiate it instead of fataling during an upgrade.
+			$this->load_file( $this->include_path . 'rest-api/Controllers/Version4/' . $file );
+			return;
 		} elseif ( 0 === strpos( $class, 'wc_rest_' ) ) {
 			// Handle REST API controllers in subdirectories.
 			$rest_controller_paths = array(
 				'rest-api/Controllers/Version1/',
 				'rest-api/Controllers/Version2/',
 				'rest-api/Controllers/Version3/',
-				'rest-api/Controllers/Version4/',
 				'rest-api/Controllers/Telemetry/',
 			);
 
