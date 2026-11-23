@@ -256,10 +256,10 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		$reason  = isset( $input['reason'] ) ? sanitize_textarea_field( $input['reason'] ) : null;
 		$user_id = get_current_user_id();
 		$matches = static fn( $refund ): bool => $refund instanceof \WC_Order_Refund
-			&& $refund->get_parent_id() === $order_id
-			&& $refund->get_refunded_by() === $user_id
-			&& $refund->get_reason() === (string) $reason
-			&& wc_format_decimal( $refund->get_amount(), $decimals ) === wc_format_decimal( $amount, $decimals );
+			&& $refund->get_parent_id( 'edit' ) === $order_id
+			&& $refund->get_refunded_by( 'edit' ) === $user_id
+			&& $refund->get_reason( 'edit' ) === (string) $reason
+			&& wc_format_decimal( $refund->get_amount( 'edit' ), $decimals ) === wc_format_decimal( $amount, $decimals );
 
 		// First, so the meta is on the refund before callbacks that move money see it, and a lost lock declines it before they run.
 		$tag = static function ( $refund ) use ( $order_id, $lock, $fingerprint, $resolved_fingerprint, $refund_payment, $matches, &$candidate, &$tagged, &$lock_error ): void {
@@ -272,11 +272,7 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 				$lock_error = null === $holds ? self::lock_failed_error() : self::lock_lost_error();
 				throw new \Exception( 'The refund lock of the order could not be confirmed.' );
 			}
-			$refund->update_meta_data( self::FINGERPRINT_META_KEY, $fingerprint );
-			$refund->update_meta_data( self::RESOLVED_FINGERPRINT_META_KEY, $resolved_fingerprint );
-			if ( $refund_payment ) {
-				$refund->update_meta_data( self::PAYMENT_REQUESTED_META_KEY, 'yes' );
-			}
+			self::add_fingerprints( $refund, $fingerprint, $resolved_fingerprint, $refund_payment );
 		};
 		// wc_create_refund() sets the paid flag only after the gateway refunded, so a save that carries it means the money moved.
 		$watch_paid = static function ( $refund ) use ( $matches, &$candidate, &$tagged, &$paid ): void {
@@ -324,6 +320,12 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		}
 
 		if ( $result instanceof \WC_Order_Refund ) {
+			// The returned refund is the call's own, so one that an extension changed until it no longer matched still blocks a retry.
+			if ( $result !== $tagged ) {
+				self::add_fingerprints( $result, $fingerprint, $resolved_fingerprint, $refund_payment );
+				$result->save_meta_data();
+			}
+
 			// An order save stores its exception instead of throwing, so wc_create_refund() goes on after a failed save.
 			$save_error = $result->get_last_save_error();
 			if ( null !== $save_error ) {
@@ -368,6 +370,22 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		}
 
 		return self::create_error( $result, $order_id, $lock_error, $saved || $crashed, $paid, $refund_payment && ! $crashed );
+	}
+
+	/**
+	 * Mark a refund with the fingerprints of the call, and as asked to refund the payment when it was. Not saved.
+	 *
+	 * @param \WC_Order_Refund $refund               Refund.
+	 * @param string           $fingerprint          Fingerprint of the call input.
+	 * @param string           $resolved_fingerprint Fingerprint of the amount and lines the call resolved to.
+	 * @param bool             $refund_payment       Whether the call asked the gateway to refund the payment.
+	 */
+	private static function add_fingerprints( \WC_Order_Refund $refund, string $fingerprint, string $resolved_fingerprint, bool $refund_payment ): void {
+		$refund->update_meta_data( self::FINGERPRINT_META_KEY, $fingerprint );
+		$refund->update_meta_data( self::RESOLVED_FINGERPRINT_META_KEY, $resolved_fingerprint );
+		if ( $refund_payment ) {
+			$refund->update_meta_data( self::PAYMENT_REQUESTED_META_KEY, 'yes' );
+		}
 	}
 
 	/**

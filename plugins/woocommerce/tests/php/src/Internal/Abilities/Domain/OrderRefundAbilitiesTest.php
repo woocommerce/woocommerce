@@ -1530,6 +1530,66 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse the retry of a gateway refund when a filter changes what the refund getters return.
+	 *
+	 * @testWith ["woocommerce_order_refund_get_reason", "Redacted"]
+	 *           ["woocommerce_order_refund_get_refunded_by", 0]
+	 *
+	 * @param string     $hook  Getter filter.
+	 * @param int|string $value Value the filter returns.
+	 */
+	public function test_refuses_retry_when_a_filter_changes_the_refund_getters( string $hook, $value ): void {
+		$order = $this->create_order_without_lines();
+		add_filter( $hook, static fn() => $value );
+		$input = array(
+			'id'             => $order->get_id(),
+			'amount'         => '5',
+			'reason'         => 'Damaged parcel',
+			'refund_payment' => true,
+		);
+
+		$first  = $this->refund( $input );
+		$second = $this->refund( $input );
+
+		$this->assertIsArray( $first, is_wp_error( $first ) ? $first->get_error_message() : '' );
+		$this->assertWPError( $second );
+		$this->assertSame( 'woocommerce_ability_order_refund_duplicate', $second->get_error_code() );
+		$this->assertSame( array( '5' ), $this->gateway->refunded );
+	}
+
+	/**
+	 * @testdox Should still refuse the retry when an extension changes the refund before its first save, so it no longer matches the call.
+	 */
+	public function test_refuses_retry_when_an_extension_changes_the_refund_before_its_first_save(): void {
+		$order = $this->create_order_without_lines();
+		add_filter(
+			'woocommerce_order_get_items',
+			static function ( $items, $refund ) {
+				if ( $refund instanceof \WC_Order_Refund && 0 === $refund->get_id() ) {
+					$refund->set_reason( 'Normalized by an extension.' );
+				}
+				return $items;
+			},
+			10,
+			2
+		);
+		$input = array(
+			'id'             => $order->get_id(),
+			'amount'         => '5',
+			'reason'         => 'Damaged parcel',
+			'refund_payment' => true,
+		);
+
+		$first  = $this->refund( $input );
+		$second = $this->refund( $input );
+
+		$this->assertIsArray( $first, is_wp_error( $first ) ? $first->get_error_message() : '' );
+		$this->assertWPError( $second );
+		$this->assertSame( 'woocommerce_ability_order_refund_duplicate', $second->get_error_code() );
+		$this->assertSame( array( '5' ), $this->gateway->refunded );
+	}
+
+	/**
 	 * @testdox Should tell the client not to refund again when the call fails after woocommerce_create_refund ran and the refund is rolled back.
 	 */
 	public function test_reports_lost_refund_when_the_call_fails_after_the_create_hook(): void {
