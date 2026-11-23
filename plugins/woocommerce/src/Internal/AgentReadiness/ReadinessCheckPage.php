@@ -249,11 +249,13 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 *
 	 * @template T of array{id:string,level:string}
 	 * @param array<int|string, T> $checks Store conditions, already in setup order.
-	 * @return array<int, T>
+	 * @return list<T>
 	 */
 	private static function required_first( array $checks ): array {
 		$required = array( StoreConditions::class, 'shows_required' );
-		return array_merge( array_values( array_filter( $checks, $required ) ), array_values( array_filter( $checks, static fn( array $check ): bool => ! $required( $check ) ) ) );
+		/** @var list<T> $sorted */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- PHPStan loses the template type through array_filter.
+		$sorted = array_merge( array_values( array_filter( $checks, $required ) ), array_values( array_filter( $checks, static fn( array $check ): bool => ! $required( $check ) ) ) );
+		return $sorted;
 	}
 
 	/**
@@ -262,7 +264,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 *
 	 * @template T of array{id:string}
 	 * @param array<int|string, T> $checks Store conditions.
-	 * @return array<int, T>
+	 * @return list<T>
 	 */
 	private static function setup_order( array $checks ): array {
 		$rank   = array_flip( self::SETUP_ORDER );
@@ -276,7 +278,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			}
 		}
 		ksort( $ranked );
-		return array_merge( array_values( $ranked ), $rest );
+		/** @var list<T> $sorted */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- PHPStan loses the template type through array_filter.
+		$sorted = array_merge( array_values( $ranked ), $rest );
+		return $sorted;
 	}
 
 	/**
@@ -1108,7 +1112,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'code'    => __( 'In your page code', 'woocommerce' ),
 			'unknown' => __( 'Not checked yet', 'woocommerce' ),
 		);
-		$groups = array_fill_keys( array_keys( $titles ), array() );
+		$groups = array();
 		foreach ( $items as $item ) {
 			$found              = $item['found'] ?? null;
 			$group              = null === $found ? 'unknown' : DeclaredToAgents::group( (string) ( $item['id'] ?? '' ) );
@@ -1118,7 +1122,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			);
 		}
 		$found   = count( array_filter( $items, static fn( array $item ): bool => true === ( $item['found'] ?? null ) ) );
-		$checked = count( $items ) - count( $groups['unknown'] );
+		$checked = count( $items ) - count( $groups['unknown'] ?? array() );
 		// The count covers the items the scan could read, so a store in coming soon mode isn't told it shares none.
 		$text = 0 === $checked
 			? __( 'These are other files and code that some AI assistants use to learn about your store. None are required, so there’s nothing to fix.', 'woocommerce' )
@@ -1145,17 +1149,13 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'title'  => __( 'Extra details for AI assistants', 'woocommerce' ),
 			'badge'  => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
 			'text'   => $text,
-			'groups' => array_values(
-				array_filter(
-					array_map(
-						static fn( string $key ): array => array(
-							'title' => $titles[ $key ],
-							'items' => $groups[ $key ],
-						),
-						array_keys( $titles )
-					),
-					static fn( array $group ): bool => array() !== $group['items']
-				)
+			// In the order of $titles, leaving out the groups with no items.
+			'groups' => array_map(
+				static fn( string $key ): array => array(
+					'title' => $titles[ $key ],
+					'items' => $groups[ $key ],
+				),
+				array_keys( array_intersect_key( $titles, $groups ) )
 			),
 		);
 	}
@@ -1226,7 +1226,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$seen_at  = '' !== $seen_url
 				? array(
 					'href' => $seen_url,
-					'text' => (string) $check['seen_at'],
+					'text' => (string) ( $check['seen_at'] ?? '' ),
 				)
 				: null;
 			$rows[]   = self::row( $check['id'], $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'], $failing['link'] ?? '', $failing['sr'] ?? '' ), $required ? self::required_badge() : null, $seen_at, $failing['tool'] ?? null );
