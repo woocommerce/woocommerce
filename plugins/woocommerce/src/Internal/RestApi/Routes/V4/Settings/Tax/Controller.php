@@ -1,7 +1,8 @@
 <?php
 /**
- * REST API V4 Tax Settings controller (compatibility stub).
+ * REST API V4 Settings Tax controller (compatibility stub).
  *
+ * @deprecated 11.5.0 The v4 REST API was removed.
  * @package Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Tax
  */
 
@@ -11,17 +12,4 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Tax;
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Tax Settings controller.
- *
- * Kept for compatibility with the upgrade path to 11.5.0. Registers nothing.
- *
- * @deprecated 11.5.0
- */
-class Controller {
-
-	/**
-	 * Register routes. Intentionally a no-op.
-	 */
-	public function register_routes(): void {}
-}
+class_alias( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\NoOpStub::class, __NAMESPACE__ . '\Controller' );

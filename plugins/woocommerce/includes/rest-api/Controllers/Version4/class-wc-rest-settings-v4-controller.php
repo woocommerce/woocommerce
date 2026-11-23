@@ -2,6 +2,7 @@
 /**
  * REST API Settings V4 controller (compatibility stub).
  *
+ * @deprecated 11.5.0 The v4 REST API was removed.
  * @package WooCommerce\RestApi
  */
 
@@ -11,17 +12,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
- * REST API Settings V4 controller class.
- *
- * Kept for compatibility with the upgrade path to 11.5.0. Registers nothing.
- *
- * @deprecated 11.5.0
- */
-class WC_REST_Settings_V4_Controller {
-
-	/**
-	 * Register routes. Intentionally a no-op.
-	 */
-	public function register_routes(): void {}
-}
+class_alias( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\NoOpStub::class, 'WC_REST_Settings_V4_Controller' );
