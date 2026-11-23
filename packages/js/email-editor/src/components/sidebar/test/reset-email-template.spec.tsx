@@ -111,8 +111,20 @@ describe( 'reset email template action', () => {
 				content: { raw: '<!-- default -->' },
 			} );
 			apiFetchMock.mockResolvedValueOnce( {} );
+			let finishSave: () => void;
+			dispatch.saveEditedEntityRecord.mockReturnValueOnce(
+				new Promise< void >( ( resolve ) => {
+					finishSave = resolve;
+				} )
+			);
 
 			await clickReset();
+
+			// The custom copy may only be deleted once the save has finished.
+			expect( dispatch.saveEditedEntityRecord ).toHaveBeenCalled();
+			expect( apiFetchMock ).toHaveBeenCalledTimes( 1 );
+			expect( dispatch.createSuccessNotice ).not.toHaveBeenCalled();
+			await act( async () => finishSave() );
 
 			await waitFor( () => expect( closeModal ).toHaveBeenCalled() );
 			expect( apiFetchMock ).toHaveBeenNthCalledWith( 1, {
