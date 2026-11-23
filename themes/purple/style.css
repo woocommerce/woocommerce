@@ -329,6 +329,17 @@ body {
 	font-style: normal;
 }
 
+/* ==========================================================================
+   WooCommerce — Cart
+   ========================================================================== */
+
+.wc-block-cart-item__quantity {
+	margin-top: var(--wp--preset--spacing--20);
+}
+
+/* ==========================================================================
+   WordPress fixes
+   ========================================================================== */
 /* Closed accordion panels are server-rendered without [hidden] (the
  * Interactivity API only applies it after hydration), so they flash open
  * on load. Collapse them from first paint via the server-rendered
@@ -341,10 +352,8 @@ body {
 	}
 }
 
-/* ==========================================================================
-   WooCommerce — Cart
-   ========================================================================== */
-
-.wc-block-cart-item__quantity {
-	margin-top: var(--wp--preset--spacing--20);
+/* @todo Remove once https://github.com/WordPress/gutenberg/pull/87262/
+ * has shipped in the minium WP supported version. */
+.wp-block-navigation.wp-block-navigation .has-child .wp-block-navigation__submenu-container {
+	z-index: 11;
 }
