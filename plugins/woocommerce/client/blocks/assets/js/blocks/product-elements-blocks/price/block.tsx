@@ -12,7 +12,6 @@ import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { CurrencyCode } from '@woocommerce/type-defs/currency';
 import type { HTMLAttributes } from 'react';
-import type { Currency } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -38,29 +37,6 @@ interface PriceProps {
 	sale_price: string;
 	price_range: null | { min_amount: string; max_amount: string };
 }
-
-/**
- * Converts a price string from the Admin API format to the Store API format.
- *
- * The Admin API returns prices as decimal numbers (e.g., "12.99"), while the Store API
- * expects prices as integers representing the smallest currency unit (e.g., "1299" for $12.99).
- * This function multiplies the price by 100 to convert from decimal to minor units.
- *
- * @param priceString The price as a string from the Admin API (e.g., "12.99")
- * @param currency    The currency object
- * @param fallback    The fallback value if priceString is null/undefined (defaults to "0")
- * @return The price converted to minor units as a string (e.g., "1299")
- */
-export const convertAdminPriceToStoreApiFormat = (
-	priceString: string | null | undefined,
-	currency: Currency,
-	fallback = '0'
-) => {
-	const multiplier = 10 ** currency.minorUnit;
-	return Math.round(
-		Number.parseFloat( priceString ?? fallback ) * multiplier
-	).toString();
-};
 
 export const Block = ( props: Props ): JSX.Element | null => {
 	const {
