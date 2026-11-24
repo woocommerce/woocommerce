@@ -1,13 +1,12 @@
 @use "sass:meta";
 
+// Tooltip renders in a portal outside the token field wrapper.
+@include meta.load-css(
+	"node_modules/@wordpress/components/src/tooltip/style"
+);
+
 // Scope the WordPress component styles to the storefront token field.
 .wc-blocks-components-form-token-field-wrapper {
-	@include meta.load-css(
-		"node_modules/@wordpress/components/src/popover/style"
-	);
-	@include meta.load-css(
-		"node_modules/@wordpress/components/src/tooltip/style"
-	);
 	@include meta.load-css(
 		"node_modules/@wordpress/components/src/form-token-field/style"
 	);
