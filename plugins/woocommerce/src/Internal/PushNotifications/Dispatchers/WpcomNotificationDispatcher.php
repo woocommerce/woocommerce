@@ -76,7 +76,7 @@ class WpcomNotificationDispatcher {
 	/**
 	 * Returns the store's WordPress.com blog ID used for push notifications, or null when Jetpack has no ID.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 *
 	 * @return int|null
 	 */
