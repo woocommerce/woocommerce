@@ -1492,12 +1492,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 			);
 		} ).toPass();
 
-		await expect(
-			addToCartBlocks.nth( 1 ).getByRole( 'alert' )
-		).toHaveCount( 0 );
-		await expect( page.locator( '.wc-block-store-notices' ) ).toHaveText(
-			''
-		);
+		// The notice shows once on the whole page: not in the second block,
+		// nor in the page-level Store Notices block.
+		await expect( page.getByRole( 'alert' ) ).toHaveCount( 1 );
 	} );
 
 	test( 'shows Add to wishlist errors inside the block', async ( {
