@@ -10,6 +10,7 @@ import {
 } from '@wordpress/data';
 import { controls } from '@wordpress/data-controls';
 import { forwardRef } from '@wordpress/element';
+import { applyFilters } from '@wordpress/hooks';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -125,6 +126,7 @@ const renderWithPreviewState = (
 		reducer,
 		initialState: {
 			...initialState,
+			postType: 'woo_email',
 			preview: {
 				...initialState.preview,
 				isModalOpened: true,
@@ -147,6 +149,12 @@ const renderWithPreviewState = (
 };
 
 describe( 'SendPreviewEmail', () => {
+	beforeEach( () => {
+		( applyFilters as jest.Mock ).mockImplementation(
+			( _hook: string, value: unknown ) => value
+		);
+	} );
+
 	it( 'should render the modal with input and buttons', () => {
 		renderWithPreviewState();
 		expect( screen.getByTestId( 'modal' ) ).toBeInTheDocument();
@@ -221,6 +229,55 @@ describe( 'SendPreviewEmail', () => {
 		expect(
 			screen.getByText( /Error: Server failure/ )
 		).toBeInTheDocument();
+	} );
+
+	it( 'shows only the error text, with no MailPoet content, when no filter adds help', () => {
+		renderWithPreviewState( {
+			sendingPreviewStatus: SendingPreviewStatus.ERROR,
+			errorMessage: 'Server failure',
+		} );
+
+		expect( screen.queryByRole( 'list' ) ).not.toBeInTheDocument();
+		expect( screen.queryByRole( 'link' ) ).not.toBeInTheDocument();
+		expect( screen.getByTestId( 'modal' ) ).not.toHaveTextContent(
+			/MailPoet/
+		);
+	} );
+
+	it( 'lists the configuration link and help items from filters added after the editor loaded', () => {
+		const { registry } = renderWithPreviewState( {
+			isModalOpened: false,
+			sendingPreviewStatus: SendingPreviewStatus.ERROR,
+			errorMessage: 'Server failure',
+		} );
+
+		( applyFilters as jest.Mock ).mockImplementation(
+			( hook: string, value: unknown, postType: string ) => {
+				if (
+					hook ===
+					'woocommerce_email_editor_check_sending_method_configuration_link'
+				) {
+					return 'https://example.com/smtp';
+				}
+				if (
+					hook === 'woocommerce_email_editor_send_preview_help_items'
+				) {
+					return [ <span key="a">Help for { postType }</span> ];
+				}
+				return value;
+			}
+		);
+		act( () => {
+			registry.dispatch( storeName ).togglePreviewModal( true );
+		} );
+
+		expect(
+			screen.getByRole( 'link', {
+				name: 'sending method configuration',
+			} )
+		).toHaveAttribute( 'href', 'https://example.com/smtp' );
+		expect( screen.getAllByRole( 'listitem' ) ).toHaveLength( 2 );
+		expect( screen.getByText( 'Help for woo_email' ) ).toBeVisible();
 	} );
 
 	it( 'should show success message when status is SUCCESS', () => {

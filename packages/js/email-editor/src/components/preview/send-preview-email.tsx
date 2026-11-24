@@ -10,11 +10,11 @@ import {
 	useRef,
 	createInterpolateElement,
 	memo,
-	useMemo,
 } from '@wordpress/element';
 import { ENTER } from '@wordpress/keycodes';
 import { isEmail } from '@wordpress/url';
 import { applyFilters } from '@wordpress/hooks';
+import type { ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -50,15 +50,6 @@ function RawSendPreviewEmail() {
 		void requestSendingNewsletterPreview( previewToEmail );
 	};
 
-	const sendingMethodConfigurationLink = useMemo(
-		() =>
-			applyFilters(
-				'woocommerce_email_editor_check_sending_method_configuration_link',
-				`https://www.mailpoet.com/blog/mailpoet-smtp-plugin/?utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ postType }`
-			) as string,
-		[ postType ]
-	);
-
 	const closeCallback = () => {
 		recordEvent( 'send_preview_email_modal_closed' );
 		void togglePreviewModal( false );
@@ -75,6 +66,23 @@ function RawSendPreviewEmail() {
 	if ( ! isModalOpened ) {
 		return null;
 	}
+
+	// Read on every render, so callbacks added after the editor loaded still apply.
+	const filteredLink = applyFilters(
+		'woocommerce_email_editor_check_sending_method_configuration_link',
+		'',
+		postType
+	);
+	const sendingMethodConfigurationLink =
+		typeof filteredLink === 'string' ? filteredLink : '';
+	const filteredHelpItems = applyFilters(
+		'woocommerce_email_editor_send_preview_help_items',
+		[],
+		postType
+	);
+	const helpItems = Array.isArray( filteredHelpItems )
+		? ( filteredHelpItems as ReactNode[] )
+		: [];
 
 	return (
 		<Modal
@@ -101,58 +109,41 @@ function RawSendPreviewEmail() {
 							) }
 					</strong>
 
-					<ul>
-						<li>
-							{ sendingMethodConfigurationLink &&
-								createInterpolateElement(
-									__(
-										'Please check your <link>sending method configuration</link> with your hosting provider.',
-										__i18n_text_domain__
-									),
-									{
-										link: (
-											// eslint-disable-next-line jsx-a11y/anchor-has-content
-											<a
-												href={
-													sendingMethodConfigurationLink
-												}
-												target="_blank"
-												rel="noopener noreferrer"
-												onClick={ () =>
-													recordEvent(
-														'send_preview_email_modal_check_sending_method_configuration_link_clicked'
-													)
-												}
-											/>
+					{ ( sendingMethodConfigurationLink ||
+						helpItems.length > 0 ) && (
+						<ul>
+							{ sendingMethodConfigurationLink && (
+								<li>
+									{ createInterpolateElement(
+										__(
+											'Please check your <link>sending method configuration</link> with your hosting provider.',
+											__i18n_text_domain__
 										),
-									}
-								) }
-						</li>
-						<li>
-							{ createInterpolateElement(
-								__(
-									'Or, sign up for MailPoet Sending Service to easily send emails. <link>Sign up for free</link>',
-									__i18n_text_domain__
-								),
-								{
-									link: (
-										// eslint-disable-next-line jsx-a11y/anchor-has-content
-										<a
-											href={ `https://account.mailpoet.com/?s=1&g=1&utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ postType }` }
-											key="sign-up-for-free"
-											target="_blank"
-											rel="noopener noreferrer"
-											onClick={ () =>
-												recordEvent(
-													'send_preview_email_modal_sign_up_for_mailpoet_sending_service_link_clicked'
-												)
-											}
-										/>
-									),
-								}
+										{
+											link: (
+												// eslint-disable-next-line jsx-a11y/anchor-has-content
+												<a
+													href={
+														sendingMethodConfigurationLink
+													}
+													target="_blank"
+													rel="noopener noreferrer"
+													onClick={ () =>
+														recordEvent(
+															'send_preview_email_modal_check_sending_method_configuration_link_clicked'
+														)
+													}
+												/>
+											),
+										}
+									) }
+								</li>
 							) }
-						</li>
-					</ul>
+							{ helpItems.map( ( item, index ) => (
+								<li key={ index }>{ item }</li>
+							) ) }
+						</ul>
+					) }
 				</div>
 			) : null }
 			<p>
