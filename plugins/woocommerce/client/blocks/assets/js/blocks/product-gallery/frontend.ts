@@ -516,13 +516,11 @@ const productGallery = {
 		},
 		onViewerImageKeyDown: withSyncEvent( ( event: KeyboardEvent ) => {
 			const { fullScreenOnClick } = getContext();
+			const isActivationKey = event.key === 'Enter' || event.key === ' ';
 			if ( event.key === ' ' ) {
 				event.preventDefault();
 			}
-			if (
-				fullScreenOnClick &&
-				( event.key === 'Enter' || event.key === ' ' )
-			) {
+			if ( fullScreenOnClick && isActivationKey ) {
 				actions.openDialog();
 			}
 
