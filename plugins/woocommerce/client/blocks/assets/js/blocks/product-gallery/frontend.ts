@@ -516,13 +516,13 @@ const productGallery = {
 		},
 		onViewerImageKeyDown: withSyncEvent( ( event: KeyboardEvent ) => {
 			const { fullScreenOnClick } = getContext();
+			if ( event.key === ' ' ) {
+				event.preventDefault();
+			}
 			if (
 				fullScreenOnClick &&
 				( event.key === 'Enter' || event.key === ' ' )
 			) {
-				if ( event.key === ' ' ) {
-					event.preventDefault();
-				}
 				actions.openDialog();
 			}
 

@@ -286,9 +286,9 @@ test.describe( `${ blockData.name }`, () => {
 					const viewer = viewerBlock.locator(
 						'.wc-block-product-gallery-large-image__container'
 					);
-					const dialog = page.getByRole( 'dialog', {
-						includeHidden: true,
-					} );
+					const dialog = page.locator(
+						'.wp-block-woocommerce-product-gallery dialog.wc-block-product-gallery-dialog'
+					);
 					const initialImageId = await pageObject.getViewerImageId();
 					expect( initialImageId ).not.toBeNull();
 					await viewer.press( 'ArrowRight' );
@@ -307,7 +307,23 @@ test.describe( `${ blockData.name }`, () => {
 					for ( const key of [ 'Enter', 'Space' ] ) {
 						await test.step( key, async () => {
 							await page.goto( beanieTemplate.productUrl );
+							await viewer.evaluate( ( element ) => {
+								element.ownerDocument.addEventListener(
+									'keydown',
+									( event ) => {
+										element.setAttribute(
+											'data-key-default-prevented',
+											String( event.defaultPrevented )
+										);
+									},
+									{ once: true }
+								);
+							} );
 							await viewer.press( key );
+							await expect( viewer ).toHaveAttribute(
+								'data-key-default-prevented',
+								String( key === 'Space' )
+							);
 							await expect( dialog ).toBeVisible( {
 								visible: fullScreenOnClick,
 							} );
@@ -318,15 +334,20 @@ test.describe( `${ blockData.name }`, () => {
 		}
 
 		test( 'keeps keyboard activation scoped to each gallery', async ( {
-			pageObject,
 			page,
 			editor,
 			beanieTemplate,
 		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-			await editor.openDocumentSettingsSidebar();
-			await pageObject.toggleFullScreenOnClickSetting( false );
-			await pageObject.addProductGalleryBlock( { cleanContent: false } );
+			await editor.setContent( '' );
+			for ( const fullScreenOnClick of [ false, true ] ) {
+				await editor.insertBlock( {
+					name: 'woocommerce/product-gallery',
+					attributes: {
+						fullScreenOnClick,
+						className: `gallery-pop-up-${ fullScreenOnClick ? 'enabled' : 'disabled' }`,
+					},
+				} );
+			}
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
 			} );
@@ -336,15 +357,20 @@ test.describe( `${ blockData.name }`, () => {
 				'.wp-block-woocommerce-product-gallery'
 			);
 			await expect( galleries ).toHaveCount( 2 );
-			for ( const index of [ 0, 1 ] ) {
-				const gallery = galleries.nth( index );
+			for ( const fullScreenOnClick of [ false, true ] ) {
+				const gallery = galleries.and(
+					page.locator(
+						`.gallery-pop-up-${ fullScreenOnClick ? 'enabled' : 'disabled' }`
+					)
+				);
+				await expect( gallery ).toHaveCount( 1 );
 				await gallery
 					.locator(
 						'.wc-block-product-gallery-large-image__container'
 					)
 					.press( 'Enter' );
 				await expect( gallery.locator( 'dialog' ) ).toBeVisible( {
-					visible: index === 1,
+					visible: fullScreenOnClick,
 				} );
 			}
 		} );
