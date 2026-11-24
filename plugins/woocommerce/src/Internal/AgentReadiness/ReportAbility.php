@@ -150,13 +150,21 @@ class ReportAbility implements AbilityDefinition {
 										'type'        => 'boolean',
 										'description' => __( 'On output checks: true for a check of output a coming WooCommerce update builds; it does not run yet.', 'woocommerce' ),
 									),
+									'skipped'  => array(
+										'type'        => 'boolean',
+										'description' => __( 'On output checks: true when none of the products checked has the detail, such as a barcode, so there was nothing to check.', 'woocommerce' ),
+									),
 									'seen_at'  => array(
 										'type'        => 'string',
-										'description' => __( 'On a likely conflict: the address where it was seen.', 'woocommerce' ),
+										'description' => __( 'On a likely conflict: the address where it was seen. On a broken llms.txt link: that link. On a UCP endpoint check that didn\'t pass: the catalog search address that answered.', 'woocommerce' ),
 									),
 									'source'   => array(
 										'type'        => 'string',
-										'description' => __( 'On a failed UCP version check: the version the store serves. On a failed UCP endpoint check: the status and content type catalog search answered with, such as 403 text/html. Otherwise empty.', 'woocommerce' ),
+										'description' => __( 'On a failed UCP version check: the version the store serves. On a UCP endpoint check that didn\'t pass: the status and content type catalog search answered with, such as 403 text/html. On the llms.txt check: woocommerce, file or other when served; disabled or not_reached when not. Otherwise empty.', 'woocommerce' ),
+									),
+									'product'  => array(
+										'type'        => 'integer',
+										'description' => __( 'On a failed check of product pages: the ID of the product whose page failed. The check reads up to five product pages, the best seller first, and stops at the first that fails. Otherwise 0.', 'woocommerce' ),
 									),
 								),
 							),
@@ -211,6 +219,10 @@ class ReportAbility implements AbilityDefinition {
 							),
 						),
 						'truncated'           => array( 'type' => 'boolean' ),
+						'pages_best_seller'   => array(
+							'type'        => 'boolean',
+							'description' => __( 'Whether the up to five product pages the page checks read start with the best seller. False when they start with the newest product.', 'woocommerce' ),
+						),
 						'sales'               => array(
 							'type'        => array( 'object', 'null' ),
 							'description' => __( 'The sales the shares compare: the last days, from Analytics, how many orders, and whether Analytics has imported the store\'s orders for that period. Null while Analytics is off.', 'woocommerce' ),

@@ -50,6 +50,10 @@ class Carts extends AbstractCartRoute {
 						'description' => __( 'Items to put in the new cart.', 'woocommerce' ),
 						'type'        => 'array',
 					),
+					'discounts'  => array(
+						'description' => __( 'Discount codes to apply, replacing any applied before.', 'woocommerce' ),
+						'type'        => 'object',
+					),
 				),
 			),
 			'schema' => array( $this->schema, 'get_public_item_schema' ),
@@ -70,6 +74,12 @@ class Carts extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		$codes = $this->parse_discount_codes( $request );
+
+		if ( $codes instanceof \WP_REST_Response ) {
+			return $codes;
+		}
+
 		$line_items = Utils::json_param( $request, 'line_items' );
 
 		if ( null !== $line_items ) {
@@ -97,6 +107,6 @@ class Carts extends AbstractCartRoute {
 			);
 		}
 
-		return $this->cart_response( $cart_id );
+		return $this->cart_response( $cart_id, $this->apply_discount_codes( $codes ) );
 	}
 }

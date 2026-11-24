@@ -11,12 +11,15 @@ $place-order-column-width: max(50%, 260px);
 	}
 
 	.wc-block-checkout__actions_row {
-		@include font-small-locked;
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
 		align-items: center;
 		gap: $gap-small;
+
+		.wc-block-components-checkout-return-to-cart-button {
+			@include font-small-locked;
+		}
 
 		.wc-block-components-checkout-place-order-button--full-width {
 			width: 100%;

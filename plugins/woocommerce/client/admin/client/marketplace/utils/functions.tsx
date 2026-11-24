@@ -552,27 +552,42 @@ const getRefreshErrorMessage = ( error: unknown ): string => {
 };
 
 /**
- * Build the notice for a failed My Subscriptions update, explaining WordPress and PHP requirement failures by error code.
+ * Build the notice for an install or update that failed because the extension needs a newer WordPress or PHP.
+ *
+ * @return The notice, or null when the failure is for another reason.
  */
-const getUpdateErrorNotice = (
+const getRequirementErrorNotice = (
+	operation: 'install' | 'update',
 	productName: string,
-	error: unknown,
-	onRetry: () => void
-): { message: string; actions: NoticeAction[] } => {
-	const { message: wpMessage, code } = getWpAjaxErrorData( error );
+	error: unknown
+): { message: string; actions: NoticeAction[] } | null => {
+	const { code } = getWpAjaxErrorData( error );
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
+	const isInstall = operation === 'install';
+
 	switch ( code ) {
-		case 'incompatible_wp_required_version':
+		case 'incompatible_wp_required_version': {
+			const message = isInstall
+				? sprintf(
+						// translators: %s is the product name.
+						__(
+							'%s couldn’t be installed. It requires a newer version of WordPress.',
+							'woocommerce'
+						),
+						productName
+					)
+				: sprintf(
+						// translators: %s is the product name.
+						__(
+							'%s couldn’t be updated. This version requires a newer version of WordPress.',
+							'woocommerce'
+						),
+						productName
+					);
+
 			return {
-				message: sprintf(
-					// translators: %s is the product name.
-					__(
-						'%s couldn’t be updated. This version requires a newer version of WordPress.',
-						'woocommerce'
-					),
-					productName
-				),
+				message,
 				actions: wccomSettings.updateCoreUrl
 					? [
 							{
@@ -582,16 +597,28 @@ const getUpdateErrorNotice = (
 						]
 					: [],
 			};
-		case PHP_REQUIREMENT_ERROR_CODE:
+		}
+		case PHP_REQUIREMENT_ERROR_CODE: {
+			const message = isInstall
+				? sprintf(
+						// translators: %s is the product name.
+						__(
+							'%s couldn’t be installed. It requires a newer version of PHP.',
+							'woocommerce'
+						),
+						productName
+					)
+				: sprintf(
+						// translators: %s is the product name.
+						__(
+							'%s couldn’t be updated. This version requires a newer version of PHP.',
+							'woocommerce'
+						),
+						productName
+					);
+
 			return {
-				message: sprintf(
-					// translators: %s is the product name.
-					__(
-						'%s couldn’t be updated. This version requires a newer version of PHP.',
-						'woocommerce'
-					),
-					productName
-				),
+				message,
 				actions: wccomSettings.updatePhpUrl
 					? [
 							{
@@ -602,7 +629,30 @@ const getUpdateErrorNotice = (
 						]
 					: [],
 			};
+		}
 	}
+
+	return null;
+};
+
+/**
+ * Build the notice for a failed My Subscriptions update, explaining WordPress and PHP requirement failures by error code.
+ */
+const getUpdateErrorNotice = (
+	productName: string,
+	error: unknown,
+	onRetry: () => void
+): { message: string; actions: NoticeAction[] } => {
+	const requirementNotice = getRequirementErrorNotice(
+		'update',
+		productName,
+		error
+	);
+	if ( requirementNotice ) {
+		return requirementNotice;
+	}
+
+	const { message: wpMessage } = getWpAjaxErrorData( error );
 
 	let message = sprintf(
 		// translators: %s is the product name.
@@ -739,6 +789,7 @@ export {
 	updateProduct,
 	addNotice,
 	getRefreshErrorMessage,
+	getRequirementErrorNotice,
 	getUpdateErrorNotice,
 	getWpAjaxErrorData,
 	PHP_REQUIREMENT_ERROR_CODE,

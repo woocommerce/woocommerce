@@ -65,10 +65,14 @@ class CatalogLookup extends AbstractCatalogRoute {
 		return array_merge(
 			parent::get_request_args(),
 			array(
-				'ids' => array(
+				'ids'     => array(
 					'description' => __( 'Product or variant identifiers to look up.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array( 'type' => array( 'string', 'integer' ) ),
+				),
+				'filters' => array(
+					'description' => __( 'Filter criteria to narrow the returned products and variants.', 'woocommerce' ),
+					'type'        => 'object',
 				),
 			)
 		);
@@ -107,6 +111,12 @@ class CatalogLookup extends AbstractCatalogRoute {
 				'recoverable',
 				400
 			);
+		}
+
+		$filters = (array) ( Utils::json_param( $request, 'filters' ) ?? array() );
+		$invalid = $this->validate_price_filter( $filters );
+		if ( null !== $invalid ) {
+			return $invalid;
 		}
 
 		$messages = array();
@@ -156,11 +166,16 @@ class CatalogLookup extends AbstractCatalogRoute {
 
 		// One response spans several mapping calls here, so the per-response state
 		// is started explicitly rather than by the mapper.
-		$this->mapper()->begin_response();
+		$this->mapper()->begin_response( $this->price_bounds( $filters ) );
 
 		$products = array();
 		foreach ( $groups as $group ) {
-			$products[] = $this->mapper()->map_lookup_product( $group['product'], $group['inputs'] );
+			$product = $this->mapper()->map_lookup_product( $group['product'], $group['inputs'] );
+
+			// UCP: a product whose variants all fall outside the filters is excluded.
+			if ( ! empty( $product['variants'] ) ) {
+				$products[] = $product;
+			}
 		}
 
 		$messages = array_merge(

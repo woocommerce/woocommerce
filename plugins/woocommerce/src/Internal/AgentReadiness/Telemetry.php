@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Adds the readiness check to the weekly WC Tracker snapshot, which only stores that opted in to usage tracking send.
- * Check ids and statuses only: no URLs, product names or store content.
+ * Check ids and statuses, and counts of catalog search checks: no URLs, product names or page content.
  */
 class Telemetry implements RegisterHooksInterface {
 
@@ -74,8 +74,9 @@ class Telemetry implements RegisterHooksInterface {
 	/**
 	 * The feature flag, when the last scan ran, whether it stopped at the product limit, and each check's status.
 	 * The store conditions are read now; output and product checks are as the last scan left them.
+	 * `ucp_search` counts the catalog search checks, to see how often they fail and whether the retry helps.
 	 *
-	 * @return array{feature_enabled:string,last_scan:string,truncated:string,store_checks:array<string,string>,product_checks:array<string,string>}
+	 * @return array{feature_enabled:string,last_scan:string,truncated:string,store_checks:array<string,string>,product_checks:array<string,string>,ucp_search?:array{since:string,checks:int,first_try_failed:int,failed:int,no_answer:int,last_seen:string,last_seen_on:string,last_recovered:string,last_recovered_on:string}}
 	 */
 	public function snapshot(): array {
 		$snapshot = array(
@@ -89,6 +90,7 @@ class Telemetry implements RegisterHooksInterface {
 			return $snapshot;
 		}
 		$snapshot['feature_enabled'] = 'yes';
+		$snapshot['ucp_search']      = StoreOutputChecks::search_counts();
 
 		// Setup steps are read now, so they are known before the first scan too.
 		$report = $this->agent_readiness->get_served_report();

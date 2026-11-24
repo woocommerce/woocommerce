@@ -196,17 +196,15 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 			return new WP_REST_Response( array( 'error' => 'Invalid PayPal order' ), 404 );
 		}
 
-		// If order is already in draft status, do nothing and return success.
-		if ( $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
-			return new WP_REST_Response( array( 'success' => true ), 200 );
-		}
-
-		// If order is not pending, return an error.
-		if ( ! $order->has_status( OrderStatus::PENDING ) ) {
+		if ( ! $order->has_status( array( OrderStatus::PENDING, OrderStatus::CHECKOUT_DRAFT ) ) ) {
 			return new WP_REST_Response( array( 'error' => 'Order is not pending' ), 409 );
 		}
 
-		$order->update_status( OrderStatus::CHECKOUT_DRAFT );
+		// Draft orders also accept shipping callbacks, so cancellation must revoke their credential.
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, '' );
+		if ( $order->has_status( OrderStatus::PENDING ) ) {
+			$order->update_status( OrderStatus::CHECKOUT_DRAFT );
+		}
 		$order->save();
 
 		return new WP_REST_Response( array( 'success' => true ), 200 );

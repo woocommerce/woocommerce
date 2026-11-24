@@ -67,7 +67,7 @@ final class BlockTypesLazyController {
 
 		foreach ( $inner_block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
-				if ( isset( $whitelisted[ $block_class ] ) && false === has_action( "woocommerce_blocks_{$block_name}_block_registration" ) ) {
+				if ( isset( $whitelisted[ $block_class ] ) ) {
 					$registered_block_type = register_block_type_from_metadata(
 						$this->asset_api->generate_block_metadata_path( $block_name, 'inner-blocks/' ),
 						array(
@@ -91,7 +91,7 @@ final class BlockTypesLazyController {
 		);
 		foreach ( $block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
-				if ( isset( $whitelisted[ $block_class ] ) && false === has_action( "woocommerce_blocks_{$block_name}_block_registration" ) ) {
+				if ( isset( $whitelisted[ $block_class ] ) ) {
 					// Backward compatibility: use original handles for the editor scripts and blocks styles.
 					if ( ! $unified_editor_assets && $is_admin ) {
 						$this->asset_api->register_script( 'wc-' . $block_name . '-block', $this->asset_api->get_block_asset_build_path( $block_name ), array( 'wc-blocks' ) );
