@@ -167,8 +167,10 @@ class ExtensibleAbilities {
 	 *                                  same namespace returned for it, and returns the value. The entry is null
 	 *                                  when no list was loaded for the object, or when the prime callback failed
 	 *                                  or returned no array. The callback then loads the data of that one
-	 *                                  object itself. A callback that needs no entry can take only the object.
-	 *                                  A second parameter always receives the entry, so the callback must not
+	 *                                  object itself. A user-defined function, method or closure that needs no
+	 *                                  entry can take only the object. A PHP built-in function with a fixed
+	 *                                  number of parameters, such as `get_class`, fails on the extra argument,
+	 *                                  so wrap it in a closure. A second parameter always receives the entry, so the callback must not
 	 *                                  use it for another value with a default. A field without it
 	 *                                  is not in the output. Required with `output_schema`. Return null when the
 	 *                                  object has no value, and the field is left out with no error. Any other
