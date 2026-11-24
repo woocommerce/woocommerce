@@ -271,6 +271,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Record a batch of events posted to the tracking proxy, shared by the REST route and the speed module.
 	 *
+	 * @internal Not for use outside this package; the contract may change.
 	 * @since 0.19.0
 	 *
 	 * @param mixed $events Decoded request body: a list of events, or a single event.

@@ -212,6 +212,11 @@ class Proxy_Speed_Module {
 	 * @return bool
 	 */
 	private static function is_proxy_tracking_enabled() {
+		// Mid-deploy, an older Woocommerce_Analytics may lack it, and this runs outside respond()'s try.
+		if ( ! defined( Woocommerce_Analytics::class . '::PROXY_TRACKING_ENABLED_OPTION' ) ) {
+			return false;
+		}
+
 		return 'yes' === get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
 	}
 }
