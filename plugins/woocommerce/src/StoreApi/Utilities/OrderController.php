@@ -36,6 +36,14 @@ class OrderController {
 	private const CART_ORDER_ITEMS_SNAPSHOT_META_KEY = '_store_api_cart_order_items_snapshot';
 
 	/**
+	 * Item data the snapshot leaves out: tax amounts, which calculate_totals() recalculates on every sync, and the cost of
+	 * goods, which isn't charged and reads back as null when it's 0.
+	 *
+	 * @var string[]
+	 */
+	private const SNAPSHOT_IGNORED_ITEM_KEYS = [ 'subtotal_tax', 'total_tax', 'taxes', 'tax_total', 'shipping_tax_total', 'cogs_value' ];
+
+	/**
 	 * Prefix of the option name used as a self-expiring mutex around an order. The order ID is appended.
 	 *
 	 * The row holds the lock's release time (a microtime float); its mere existence is the lock. It lives in the
@@ -186,7 +194,7 @@ class OrderController {
 			$is_new_item   = ! isset( $items_before_sync[ $item_id ] );
 			$was_cart_item = null === $previous_snapshot || isset( $previous_snapshot[ $item->get_type() ][ $item_id ] );
 			if ( $is_new_item || $was_cart_item ) {
-				$snapshot[ $item->get_type() ][ $item_id ] = OrderItemFingerprint::get( $item );
+				$snapshot[ $item->get_type() ][ $item_id ] = OrderItemFingerprint::get( $item, self::SNAPSHOT_IGNORED_ITEM_KEYS );
 			}
 		}
 
@@ -229,7 +237,7 @@ class OrderController {
 			$fingerprints = $snapshot[ $item_type ] ?? [];
 			$has_added    = in_array( $item_type, [ OrderItemType::LINE_ITEM, OrderItemType::COUPON ], true ) && array_diff_key( $order_items, $fingerprints );
 
-			if ( $has_added || ! OrderItemFingerprint::items_match( $order_items, $fingerprints ) ) {
+			if ( $has_added || ! OrderItemFingerprint::items_match( $order_items, $fingerprints, self::SNAPSHOT_IGNORED_ITEM_KEYS ) ) {
 				$changed_types[] = $item_type;
 			}
 		}

@@ -37,13 +37,14 @@ final class OrderItemFingerprint {
 	 * Hashes an item's stored amounts and properties. Names and meta are left out, so renaming an item or adding meta
 	 * to it, as gateways do, doesn't count as a change.
 	 *
-	 * @param WC_Order_Item $item The order item.
+	 * @param WC_Order_Item $item         The order item.
+	 * @param string[]      $ignored_keys Other data keys to leave out.
 	 * @return string
 	 */
-	public static function get( WC_Order_Item $item ): string {
+	public static function get( WC_Order_Item $item, array $ignored_keys = array() ): string {
 		// Include unsaved changes, so an item can be compared before and after it's saved.
 		$data = array_replace_recursive( $item->get_data(), $item->get_changes() );
-		unset( $data['id'], $data['order_id'], $data['name'], $data['meta_data'] );
+		$data = array_diff_key( $data, array_flip( array_merge( array( 'id', 'order_id', 'name', 'meta_data' ), $ignored_keys ) ) );
 
 		return md5( (string) wp_json_encode( self::sort_keys_recursively( $data ) ) );
 	}
@@ -53,11 +54,12 @@ final class OrderItemFingerprint {
 	 *
 	 * @param WC_Order_Item[]    $order_items  The order's items of one type, keyed by ID.
 	 * @param array<int, string> $fingerprints Fingerprints of the items the cart created, keyed by ID.
+	 * @param string[]           $ignored_keys Data keys the fingerprints left out.
 	 * @return bool
 	 */
-	public static function items_match( array $order_items, array $fingerprints ): bool {
+	public static function items_match( array $order_items, array $fingerprints, array $ignored_keys = array() ): bool {
 		foreach ( $fingerprints as $item_id => $fingerprint ) {
-			if ( ! isset( $order_items[ $item_id ] ) || self::get( $order_items[ $item_id ] ) !== (string) $fingerprint ) {
+			if ( ! isset( $order_items[ $item_id ] ) || self::get( $order_items[ $item_id ], $ignored_keys ) !== (string) $fingerprint ) {
 				return false;
 			}
 		}

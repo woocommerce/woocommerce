@@ -791,6 +791,62 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() keeps the items of an unchanged retried order with Cost of Goods Sold on and a product without a cost.
+	 */
+	public function test_update_order_from_cart_keeps_items_with_cost_of_goods_sold_on(): void {
+		// A cost of 0 is held as 0 in memory but isn't saved, so the item reads back with no cost.
+		update_option( 'woocommerce_feature_cost_of_goods_sold_enabled', 'yes' );
+		$order  = $this->create_retried_order_with_shipping_and_fee();
+		$before = $this->get_item_ids_by_type( $order );
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertSame( $before, $this->get_item_ids_by_type( $order ), 'Every item should keep its ID.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps items whose tax a merchant edited on a retried order, since the taxes are recalculated.
+	 *
+	 * @testWith ["line_item"]
+	 *           ["tax"]
+	 *
+	 * @param string $item_type The item type whose tax the merchant edits.
+	 */
+	public function test_update_order_from_cart_recalculates_tax_a_merchant_edited( string $item_type ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		\WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		$order  = $this->create_retried_order_with_shipping_and_fee();
+		$before = $this->get_item_ids_by_type( $order );
+		$item   = current( $order->get_items( $item_type ) );
+		if ( 'tax' === $item_type ) {
+			$item->set_tax_total( (float) $item->get_tax_total() + 5 );
+		} else {
+			$taxes          = $item->get_taxes();
+			$rate_id        = key( $taxes['total'] );
+			$taxes['total'] = array( $rate_id => (float) $taxes['total'][ $rate_id ] + 5 );
+			$item->set_taxes( $taxes );
+		}
+		$item->save();
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertSame( $before, $this->get_item_ids_by_type( $order ), 'Every item should keep its ID.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
+		$this->assertSame( 30.0, (float) $order->get_total(), 'The order should be charged the cart total, with 20% tax.' );
+	}
+
+	/**
 	 * @testdox update_order_from_cart() rebuilds the items a merchant edited on a retried order, so the order total matches the cart.
 	 *
 	 * @testWith ["shipping"]
@@ -845,35 +901,6 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $before, $this->get_item_ids_by_type( $order ), 'Every item should keep its ID.' );
 		$this->assertSame( 'ref-123', current( $order->get_items( $item_type ) )->get_meta( '_gateway_reference' ), 'The item meta should be kept.' );
-	}
-
-	/**
-	 * @testdox update_order_from_cart() rebuilds a tax line a merchant edited on a retried order.
-	 */
-	public function test_update_order_from_cart_rebuilds_an_edited_tax_line(): void {
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		\WC_Tax::_insert_tax_rate(
-			array(
-				'tax_rate_country'  => '',
-				'tax_rate'          => '20.0000',
-				'tax_rate_name'     => 'VAT',
-				'tax_rate_priority' => '1',
-				'tax_rate_compound' => '0',
-				'tax_rate_shipping' => '1',
-				'tax_rate_order'    => '1',
-				'tax_rate_class'    => '',
-			)
-		);
-		$order    = $this->create_retried_order_with_shipping_and_fee();
-		$tax_line = current( $order->get_taxes() );
-		$tax_line->set_tax_total( (float) $tax_line->get_tax_total() + 5 );
-		$tax_line->save();
-
-		$order = $this->sync_order_in_a_new_request( $order );
-
-		$this->assertNotContains( $tax_line->get_id(), array_keys( $order->get_taxes() ), 'The edited tax line should be rebuilt.' );
-		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
-		$this->assertSame( 30.0, (float) $order->get_total(), 'The order should be charged the cart total, with 20% tax.' );
 	}
 
 	/**
