@@ -55,9 +55,9 @@ describe( 'truncateRenderableHTML', () => {
 		Intl.Segmenter = undefined;
 
 		try {
-			expect( truncateRenderableHTML( '<div>e\u0301clair</div>', 1 ) ).toBe(
-				'<div>e\u0301</div>...'
-			);
+			expect(
+				truncateRenderableHTML( '<div>e\u0301clair</div>', 1 )
+			).toBe( '<div>e\u0301</div>...' );
 			expect( truncateRenderableHTML( '<div>👨‍👩‍👧 family</div>', 1 ) ).toBe(
 				'<div>👨‍👩‍👧</div>...'
 			);
