@@ -7,15 +7,15 @@ use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 
 /**
- * Turns the extensible abilities feature on for one test, and puts the registries, the
- * action counts and the hooks back after it.
+ * Turns the extensible abilities feature on for one test, and puts the registries back after it.
+ * The WordPress test case restores the hooks and the action counts.
  */
 trait ExtensibleAbilitiesTestTrait {
 
 	/**
-	 * The registries and the action counts from before the test changed them. Null when it did not.
+	 * The registries from before the test changed them. Null when it did not.
 	 *
-	 * @var array{registries: array<string, array>, actions: array<string, int|null>}|null
+	 * @var array<string, array>|null
 	 */
 	private ?array $extensible_abilities_before = null;
 
@@ -23,8 +23,6 @@ trait ExtensibleAbilitiesTestTrait {
 	 * Empty the registries of ExtensibleAbilities, so the test starts without resources and fields.
 	 */
 	private function isolate_extensible_abilities(): void {
-		global $wp_actions;
-
 		$registries = array();
 		foreach ( array( 'resources', 'fields', 'validators', 'syncs', 'primes', 'filters' ) as $name ) {
 			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
@@ -32,14 +30,7 @@ trait ExtensibleAbilitiesTestTrait {
 			$registries[ $name ] = $property->getValue();
 			$property->setValue( null, array() );
 		}
-
-		$this->extensible_abilities_before ??= array(
-			'registries' => $registries,
-			'actions'    => array(
-				'woocommerce_extensible_abilities_resources_init' => $wp_actions['woocommerce_extensible_abilities_resources_init'] ?? null,
-				'woocommerce_extensible_abilities_init' => $wp_actions['woocommerce_extensible_abilities_init'] ?? null,
-			),
-		);
+		$this->extensible_abilities_before ??= $registries;
 	}
 
 	/**
@@ -51,52 +42,26 @@ trait ExtensibleAbilitiesTestTrait {
 		$this->isolate_extensible_abilities();
 		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', 'yes' );
 
-		$register_resources = array( AbilitiesLoader::class, 'register_core_resources' );
-		$hooked             = has_action( 'woocommerce_extensible_abilities_resources_init', $register_resources );
-		if ( false === $hooked ) {
-			add_action( 'woocommerce_extensible_abilities_resources_init', $register_resources, 0 );
-		}
+		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
 		if ( $register ) {
 			add_action( 'woocommerce_extensible_abilities_init', $register );
 		}
-		try {
-			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in AbilitiesLoader::init_extensions().
-			do_action( 'woocommerce_extensible_abilities_resources_init' );
-			do_action( 'woocommerce_extensible_abilities_init' );
-			// phpcs:enable
-		} finally {
-			if ( false === $hooked ) {
-				remove_action( 'woocommerce_extensible_abilities_resources_init', $register_resources, 0 );
-			}
-			if ( $register ) {
-				remove_action( 'woocommerce_extensible_abilities_init', $register );
-			}
-		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in AbilitiesLoader::init_extensions().
+		do_action( 'woocommerce_extensible_abilities_resources_init' );
+		do_action( 'woocommerce_extensible_abilities_init' );
+		// phpcs:enable
 	}
 
 	/**
-	 * Put back what isolate_extensible_abilities() and enable_extensible_abilities() changed.
-	 * The test transaction rolls the feature option back.
+	 * Put the registries back. The test transaction rolls the feature option back.
 	 *
 	 * @after
 	 */
 	public function restore_extensible_abilities(): void {
-		global $wp_actions;
-
-		if ( null === $this->extensible_abilities_before ) {
-			return;
-		}
-		foreach ( $this->extensible_abilities_before['registries'] as $name => $value ) {
+		foreach ( $this->extensible_abilities_before ?? array() as $name => $value ) {
 			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
 			$property->setAccessible( true );
 			$property->setValue( null, $value );
-		}
-		foreach ( $this->extensible_abilities_before['actions'] as $action => $count ) {
-			if ( null === $count ) {
-				unset( $wp_actions[ $action ] );
-			} else {
-				$wp_actions[ $action ] = $count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restores the count from before the test.
-			}
 		}
 		$this->extensible_abilities_before = null;
 	}
