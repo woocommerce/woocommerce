@@ -3,8 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -27,12 +25,6 @@ class ProductsList {
 	 */
 	private const READINESS_META = array( '_wc_gla_brand', '_wc_gla_mpn' );
 
-	/**
-	 * Features controller.
-	 *
-	 * @var FeaturesController
-	 */
-	private FeaturesController $features_controller;
 
 	/**
 	 * Readiness service.
@@ -67,12 +59,10 @@ class ProductsList {
 	 *
 	 * @internal
 	 *
-	 * @param FeaturesController $features_controller Features controller.
-	 * @param AgentReadiness     $agent_readiness     Readiness service.
+	 * @param AgentReadiness $agent_readiness     Readiness service.
 	 */
-	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness ): void {
-		$this->features_controller = $features_controller;
-		$this->agent_readiness     = $agent_readiness;
+	final public function init( AgentReadiness $agent_readiness ): void {
+		$this->agent_readiness = $agent_readiness;
 	}
 
 	/**
@@ -161,7 +151,7 @@ class ProductsList {
 	 * @param \WC_Product $product Product.
 	 */
 	private function retest( \WC_Product $product ): void {
-		if ( ! $this->agent_readiness->has_report() || ! $this->enabled() ) {
+		if ( ! $this->agent_readiness->has_report() ) {
 			return;
 		}
 		$product_id = $product instanceof \WC_Product_Variation ? $product->get_parent_id() : $product->get_id();
@@ -295,7 +285,7 @@ class ProductsList {
 	public function apply_filter( $query ): void {
 		global $pagenow;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- A list filter that changes nothing.
-		if ( ! $query instanceof \WP_Query || ! is_admin() || 'edit.php' !== $pagenow || ! $query->is_main_query() || 'product' !== $query->get( 'post_type' ) || ! $this->enabled() || empty( $_GET[ self::FILTER_PARAM ] ) ) {
+		if ( ! $query instanceof \WP_Query || ! is_admin() || 'edit.php' !== $pagenow || ! $query->is_main_query() || 'product' !== $query->get( 'post_type' ) || empty( $_GET[ self::FILTER_PARAM ] ) ) {
 			return;
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- A list filter that changes nothing.
@@ -334,7 +324,7 @@ class ProductsList {
 	public function filter_notice(): void {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads whether the list filter is set.
-		if ( ! $screen || 'edit-product' !== $screen->id || ! $this->enabled() || empty( $_GET[ self::FILTER_PARAM ] ) ) {
+		if ( ! $screen || 'edit-product' !== $screen->id || empty( $_GET[ self::FILTER_PARAM ] ) ) {
 			return;
 		}
 		printf(
@@ -343,12 +333,5 @@ class ProductsList {
 			esc_url( admin_url( 'edit.php?post_type=product' ) ),
 			esc_html__( 'Show all products', 'woocommerce' )
 		);
-	}
-
-	/**
-	 * Whether the feature is on.
-	 */
-	private function enabled(): bool {
-		return $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID );
 	}
 }

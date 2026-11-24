@@ -129,7 +129,7 @@ describe( 'DeclaredCard', () => {
 							],
 						},
 						{
-							title: 'Not checked yet',
+							title: 'Couldn’t check',
 							items: [ { name: 'TDMRep', found: null } ],
 						},
 					],
@@ -148,10 +148,37 @@ describe( 'DeclaredCard', () => {
 		expect( groups[ 0 ] ).toHaveTextContent( 'Files in your root folder' );
 		expect( groups[ 0 ] ).toHaveTextContent( 'Found: ai.txt usage file' );
 		expect( groups[ 0 ] ).toHaveTextContent( 'Not found: AGENTS.md' );
-		expect( groups[ 1 ] ).toHaveTextContent( 'Not checked yet: TDMRep' );
+		expect( groups[ 1 ] ).toHaveTextContent( 'Couldn’t check: TDMRep' );
 		// Missing items say so on screen, as in the design; found and not checked ones don't.
 		expect( groups[ 0 ] ).toHaveTextContent( 'AGENTS.md · not found' );
 		expect( groups[ 0 ] ).not.toHaveTextContent( 'ai.txt usage file ·' );
 		expect( groups[ 1 ] ).not.toHaveTextContent( 'not found' );
+	} );
+
+	it( 'says Not checked yet for unread items while the store is in coming soon mode', async () => {
+		const { container } = render(
+			<DeclaredCard
+				declared={ {
+					title: 'Extra details for AI assistants',
+					badge: { intent: 'none', text: 'Optional' },
+					text: '',
+					waiting: true,
+					groups: [
+						{
+							title: 'Not checked yet',
+							items: [ { name: 'TDMRep', found: null } ],
+						},
+					],
+				} }
+			/>
+		);
+
+		await userEvent.click(
+			screen.getByText( 'Extra details for AI assistants' )
+		);
+
+		expect(
+			container.querySelector( '.wc-sales-readiness-declared__group' )
+		).toHaveTextContent( 'Not checked yet: TDMRep' );
 	} );
 } );

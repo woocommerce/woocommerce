@@ -42,6 +42,8 @@ export interface CheckRow {
 	seen_at: ViewLink | null;
 	/** A name in the text to link, such as a tool to test with. */
 	text_link?: TextLink | null;
+	/** A check that couldn't run because it waits for the merchant, as in coming soon mode. */
+	waiting?: boolean;
 }
 
 export interface FixFirstItem {
@@ -88,7 +90,9 @@ export interface Declared {
 	title: string;
 	badge: ViewBadge;
 	text: string;
-	/** Items under where they live: root folder, standard addresses, page code, extra details, not checked yet. */
+	/** Whether unread items wait for the store to go live (coming soon mode). */
+	waiting?: boolean;
+	/** Items under where they live: root folder, standard addresses, page code, extra details, couldn't check. */
 	groups: {
 		title: string;
 		/** `found` is null for an item the scan couldn't read. */
