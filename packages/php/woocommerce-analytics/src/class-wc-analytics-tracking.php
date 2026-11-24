@@ -3,7 +3,7 @@
  * WooCommerce Analytics Tracking for tracking frontend events
  *
  * This class is designed to work without WooCommerce dependencies,
- * enabling it to run at the MU-plugin stage without loading WooCommerce to optimize performance.
+ * so the proxy speed module can run it before WooCommerce loads.
  *
  * @package automattic/woocommerce-analytics
  */

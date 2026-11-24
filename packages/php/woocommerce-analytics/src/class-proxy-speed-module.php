@@ -34,11 +34,14 @@ class Proxy_Speed_Module {
 	 * Serve proxy tracking requests early on this site.
 	 *
 	 * From an MU-plugin it serves on `muplugins_loaded`; from a plugin's main file it serves at once.
+	 * A call after `plugins_loaded` is refused with a `_doing_it_wrong()` notice.
+	 *
+	 * @since 0.19.0
 	 *
 	 * @return void
 	 */
 	public static function enable() {
-		// Too late to save anything.
+		// Plugins have already loaded, so serving now would save nothing.
 		if ( did_action( 'plugins_loaded' ) ) {
 			_doing_it_wrong( __METHOD__, 'Call it before plugins_loaded, from an MU-plugin or a plugin main file.', '0.19.0' );
 			return;
@@ -58,6 +61,8 @@ class Proxy_Speed_Module {
 	 * Answer the current request and exit if it is a proxy request this module may serve.
 	 *
 	 * Returns without output otherwise, so WordPress continues loading and the REST route answers.
+	 *
+	 * @since 0.19.0
 	 *
 	 * @return void
 	 */

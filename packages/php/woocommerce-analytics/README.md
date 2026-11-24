@@ -112,7 +112,7 @@ register filters and cannot read them:
     `yes` lets it serve; otherwise it falls through to the REST route rather than
     answering itself, so the `403` always comes from one place.
 
-**These filters must resolve to the same value for every request on a site, and must
+**The filter must resolve to the same value for every request on a site, and must
 be registered before `init` priority 20.** A value that varies by cohort,
 percentage or geo makes cached pages disagree with what `/track` decides, and flips
 the option the speed module reads on alternate runs. A callback added

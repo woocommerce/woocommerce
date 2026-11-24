@@ -47,7 +47,7 @@ class Features {
 	}
 
 	/**
-	 * Check if auto-installation of the proxy speed module MU-plugin is enabled.
+	 * Fire the deprecated auto-install filter, so its callbacks get the deprecation notice.
 	 *
 	 * @deprecated 0.19.0 The package no longer installs the MU-plugin. Call Proxy_Speed_Module::enable() instead.
 	 *

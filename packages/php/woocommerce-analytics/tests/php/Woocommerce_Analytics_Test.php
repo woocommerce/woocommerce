@@ -247,7 +247,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The MU-plugin reads what this writes, and the conditions the early returns in
+	 * The speed module reads what this writes, and the conditions the early returns in
 	 * should_track_store() test say nothing about whether the feature is on. Losing
 	 * the registration, or moving it below one of them, leaves the module serving on
 	 * a stale value with the whole suite green.
