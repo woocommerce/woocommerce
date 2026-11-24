@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve product structured data when single product templates omit the Product Summary block.

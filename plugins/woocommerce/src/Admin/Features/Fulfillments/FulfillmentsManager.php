@@ -41,6 +41,7 @@ class FulfillmentsManager {
 		$this->init_fulfillment_status_hooks();
 		$this->init_refund_hooks();
 		$this->init_email_template_tracking_hooks();
+		$this->init_completed_order_email_hooks();
 		$this->init_order_deletion_hooks();
 
 		if ( ! $this->fulfillment_order_notes ) {
@@ -93,6 +94,83 @@ class FulfillmentsManager {
 				}
 			);
 		}
+	}
+
+	/**
+	 * Hook the "Completed order" email so a store can opt out of it for fully fulfilled orders.
+	 *
+	 * @since 11.4.0
+	 */
+	private function init_completed_order_email_hooks(): void {
+		add_filter( 'woocommerce_email_enabled_customer_completed_order', array( $this, 'maybe_suppress_completed_order_email' ), 10, 2 );
+	}
+
+	/**
+	 * Skip the "Completed order" email for an order whose items have all been fulfilled.
+	 *
+	 * Opt-in only: the email is left as it is unless a store returns true from
+	 * `woocommerce_fulfillment_suppress_completed_order_email`.
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param bool  $enabled Whether the email is enabled.
+	 * @param mixed $order   The order the email is about, when the email has one.
+	 * @return bool Whether the email is enabled.
+	 */
+	public function maybe_suppress_completed_order_email( $enabled, $order ): bool {
+		if ( ! $enabled || ! $order instanceof WC_Order ) {
+			return (bool) $enabled;
+		}
+
+		// Only the send that follows the order being completed, so that a resend still reaches the
+		// customer. The second action is the one deferred emails are sent on.
+		if ( ! doing_action( 'woocommerce_order_status_completed' ) && ! doing_action( 'woocommerce_send_queued_transactional_email' ) ) {
+			return (bool) $enabled;
+		}
+
+		/**
+		 * Filters whether the "Completed order" email is skipped for fully fulfilled orders.
+		 *
+		 * Returns false by default, which sends both emails, and only true skips the email. A
+		 * callback decides whether the order can do without the order-level email: reaching the
+		 * `fulfilled` status does not prove the customer was emailed, and an order that skips the
+		 * "Processing" status carries its totals and download links in this email alone.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param bool     $suppress Whether to skip the email for fully fulfilled orders.
+		 * @param WC_Order $order    The order the email is about.
+		 */
+		if ( true !== apply_filters( 'woocommerce_fulfillment_suppress_completed_order_email', false, $order ) ) {
+			return (bool) $enabled;
+		}
+
+		// The stored status can be out of date: the email can carry an instance read before the last
+		// fulfillment was saved, and it is not recalculated when the order's items change.
+		$stored_order = wc_get_order( $order->get_id() );
+		if ( ! $stored_order instanceof WC_Order ) {
+			return (bool) $enabled;
+		}
+
+		try {
+			/**
+			 * Fulfillments data store.
+			 *
+			 * @var \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore $fulfillments_data_store
+			 */
+			$fulfillments_data_store = \WC_Data_Store::load( 'order-fulfillment' );
+			$fulfillments            = $fulfillments_data_store->read_fulfillments( \WC_Order::class, (string) $stored_order->get_id() );
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Failed to load fulfillments for order %d: %s', $stored_order->get_id(), $e->getMessage() ),
+				array( 'source' => 'fulfillments' )
+			);
+			return (bool) $enabled;
+		}
+
+		return 'fulfilled' !== FulfillmentUtils::calculate_order_fulfillment_status( $stored_order, $fulfillments );
 	}
 
 	/**

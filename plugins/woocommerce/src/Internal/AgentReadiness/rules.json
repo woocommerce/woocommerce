@@ -1,8 +1,13 @@
 {
-	"version": "2026-11-17",
+	"version": "2026-11-18",
 	"store_checks": {
 		"search_visible": { "required": true },
-		"payment_method": { "required": true }
+		"payment_method": { "required": true },
+		"order_emails": { "required": true },
+		"privacy_page": { "required": true },
+		"terms_page": { "required": true },
+		"refund_returns_page": { "required": true },
+		"pages_public": { "required": false }
 	},
 	"checks": {
 		"missing_regular_price": {

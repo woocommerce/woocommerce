@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Utilities\SiteLocale;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
+use Automattic\WooCommerce\Internal\Utilities\PostcodeValidation;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -1622,6 +1623,12 @@ function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
 		$postcodes[] = ( function_exists( 'mb_substr' ) ? mb_substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) : substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) ) . '*';
 	}
 
+	// A ZIP+4 code lies within its 5-digit ZIP code, so it also matches rules written as that ZIP code.
+	$zip_code = PostcodeValidation::get_zip_code_from_zip_plus_four( (string) $postcode, (string) $country );
+	if ( '' !== $zip_code ) {
+		$postcodes[] = $zip_code;
+	}
+
 	return $postcodes;
 }
 
@@ -1640,6 +1647,7 @@ function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
 function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $object_compare_key, $country = '' ) {
 	$postcode           = wc_normalize_postcode( $postcode );
 	$wildcard_postcodes = array_map( 'wc_clean', wc_get_wildcard_postcodes( $postcode, $country ) );
+	$zip_code           = PostcodeValidation::get_zip_code_from_zip_plus_four( (string) $postcode, (string) $country );
 	$matches            = array();
 
 	foreach ( $objects as $object ) {
@@ -1661,6 +1669,10 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 				$compare = wc_make_numeric_postcode( $postcode );
 				$min     = str_pad( wc_make_numeric_postcode( $min ), strlen( $compare ), '0' );
 				$max     = str_pad( wc_make_numeric_postcode( $max ), strlen( $compare ), '0' );
+			} elseif ( '' !== $zip_code && (int) $max < 100000 ) {
+				// Compare a ZIP+4 code with a range of 5-digit ZIP codes by its 5-digit part. The bound's
+				// value decides this, not its length: a ZIP+4 range may omit its leading zeroes.
+				$compare = $zip_code;
 			} else {
 				$compare = $postcode;
 			}

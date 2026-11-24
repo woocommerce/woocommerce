@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Update the stock reservation developer doc for the counted order statuses; docs only, no code change.
+

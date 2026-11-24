@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Refuse to trash a product or order that is already in the trash through the delete abilities, instead of reporting a new trash.

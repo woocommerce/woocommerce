@@ -913,7 +913,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				continue;
 			}
 
-			// Check stock based on all items in the cart and consider any held stock within pending orders.
+			// Check stock based on all items in the cart and consider any stock held by other orders.
 			$held_stock     = wc_get_held_stock_quantity( $product, $current_session_order_id );
 			$required_stock = $product_qty_in_cart[ $product->get_stock_managed_by_id() ];
 
@@ -1225,6 +1225,15 @@ class WC_Cart extends WC_Legacy_Cart {
 				return false;
 			}
 
+			if ( ! $product_data->is_viewable() && ! $product_data->is_purchasable() ) {
+				/**
+				 * This filter is documented further down in this method.
+				 *
+				 * @since 3.8.0
+				 */
+				throw new Exception( apply_filters( 'woocommerce_cart_product_cannot_be_purchased_message', __( 'Sorry, this product cannot be purchased.', 'woocommerce' ), $product_data ) );
+			}
+
 			// Variable product cannot be added to cart without a specified variation.
 			if ( ! $variation_id && $product_data->is_type( ProductType::VARIABLE ) ) {
 				/* translators: 1: product link, 2: product name */
@@ -1341,7 +1350,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				)
 			) {
 				$product = wc_get_product( $product_id );
-				if ( ! ( $product instanceof WC_Product ) ) {
+				if ( ! ( $product instanceof WC_Product ) || ! $product->is_viewable() ) {
 					throw new Exception( __( 'The selected product is invalid.', 'woocommerce' ) );
 				}
 
@@ -2053,8 +2062,29 @@ class WC_Cart extends WC_Legacy_Cart {
 					// For guest, usage per user has not been enforced yet. Enforce it now.
 					$coupon_data_store = $coupon->get_data_store();
 					$billing_email     = strtolower( sanitize_email( $billing_email ) );
-					if ( $coupon_data_store && $coupon_data_store->get_usage_by_email( $coupon, $billing_email ) >= $coupon_usage_limit ) {
-						if ( $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( $billing_email ) ) ) {
+					// A use by the account that owns this email is recorded under its user ID, not the email.
+					$email_owner = $billing_email ? get_user_by( 'email', $billing_email ) : false;
+					$aliases     = array_filter( array( $billing_email, $email_owner ? $email_owner->ID : 0 ) );
+					$uses_alias  = $coupon_data_store instanceof WC_Data_Store && $coupon_data_store->has_callable( 'get_usage_by_aliases' );
+					$usage_count = 0;
+					if ( $coupon_data_store ) {
+						$usage_count = (int) $coupon_data_store->get_usage_by_email( $coupon, $billing_email );
+						if ( $email_owner ) {
+							// @phpstan-ignore-next-line method.notFound (Part of WC_Coupon_Data_Store_Interface, called via __call() on the coupon data store instance.)
+							$usage_count += (int) $coupon_data_store->get_usage_by_user_id( $coupon, $email_owner->ID );
+						}
+					}
+					// The larger count keeps a custom store's get_usage_by_email() override in effect.
+					if ( $uses_alias ) {
+						// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the coupon data store instance.)
+						$usage_count = max( $usage_count, (int) $coupon_data_store->get_usage_by_aliases( $coupon, $aliases ) );
+					}
+					if ( $coupon_data_store && $usage_count >= $coupon_usage_limit ) {
+						if ( $uses_alias ) {
+							// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the coupon data store instance.)
+							$aliases = $coupon_data_store->add_recorded_user_ids_to_aliases( $coupon, $aliases );
+						}
+						if ( $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), $aliases ) ) {
 							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST );
 						} else {
 							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );

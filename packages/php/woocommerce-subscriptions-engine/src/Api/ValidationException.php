@@ -122,6 +122,12 @@ final class ValidationException extends InvalidArgumentException {
 					return wp_sprintf( __( 'Must be one of %l.', 'woocommerce' ), array_values( array_filter( $params['allowed'], 'is_string' ) ) );
 				}
 				break;
+			case ValidationErrorCode::INVALID_PATTERN:
+				if ( isset( $params['pattern'] ) && is_string( $params['pattern'] ) ) {
+					/* translators: %s: the required format, as a regular expression. */
+					return sprintf( __( 'Must match the pattern %s.', 'woocommerce' ), $params['pattern'] );
+				}
+				break;
 			case ValidationErrorCode::NOT_REGISTERED:
 				if ( isset( $params['value'] ) && is_scalar( $params['value'] ) ) {
 					/* translators: %s: the status that is not registered. */

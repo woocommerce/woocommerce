@@ -25,27 +25,6 @@ declare global {
 }
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
-	// Each new post gets an ID when the editor opens it, so this deletes
-	// published posts and drafts alike.
-	admin: async ( { admin, requestUtils, cleanup }, use ) => {
-		const createNewPost = admin.createNewPost.bind( admin );
-		admin.createNewPost = async ( ...args ) => {
-			await createNewPost( ...args );
-			const postId = await (
-				await admin.page.waitForFunction( () =>
-					window.wp.data.select( 'core/editor' )?.getCurrentPostId()
-				)
-			).jsonValue();
-			cleanup( () =>
-				requestUtils.rest( {
-					method: 'DELETE',
-					path: `/wp/v2/posts/${ postId }`,
-					params: { force: true },
-				} )
-			);
-		};
-		await use( admin );
-	},
 	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new ProductCollectionPage( {
 			page,

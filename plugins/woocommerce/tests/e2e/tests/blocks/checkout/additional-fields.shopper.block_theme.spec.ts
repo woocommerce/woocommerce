@@ -1,17 +1,17 @@
 /**
  * External dependencies
  */
+import { randomUUID } from 'crypto';
 import {
 	expect,
 	test as base,
-	customerFile,
 	enableTestPlugin,
+	guestFile,
 } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
-import { REGULAR_PRICED_PRODUCT_NAME } from './constants';
 import { CheckoutPage } from './checkout.page';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
@@ -26,18 +26,51 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 
 test.describe( 'Shopper → Additional Checkout Fields', () => {
 	test.describe( 'Logged in shopper', () => {
-		test.use( { storageState: customerFile } );
+		test.use( { storageState: guestFile } );
 
-		test.beforeEach( async ( { context } ) => {
+		// Each test logs in as a new customer. The shared customer's cart and
+		// saved checkout values would carry over between tests, because
+		// `blocks-parallel` does not reset the database.
+		test.beforeEach( async ( { context, page, requestUtils, cleanup } ) => {
 			await enableTestPlugin( context, 'additional-checkout-fields' );
+
+			const username = `additional-fields-${ randomUUID().slice( 0, 8 ) }`;
+			const password = 'password';
+			const { id } = await requestUtils.rest< { id: number } >( {
+				method: 'POST',
+				path: 'wc/v3/customers',
+				data: {
+					username,
+					password,
+					email: `${ username }@example.com`,
+				},
+			} );
+			cleanup( () =>
+				requestUtils.rest( {
+					method: 'DELETE',
+					path: `wc/v3/customers/${ id }`,
+					params: { force: true },
+				} )
+			);
+
+			const login = await page.request.post( 'wp-login.php', {
+				form: { log: username, pwd: password },
+			} );
+			// A failed login shows the form again instead of redirecting.
+			expect( login.url() ).not.toContain( 'wp-login.php' );
 		} );
 
 		test( 'Shopper can fill in the checkout form with additional fields and can have different value for same field in shipping and billing address', async ( {
 			checkoutPageObject,
 			frontendUtils,
+			page,
+			createHiddenProduct,
 		} ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			const { id: productId } = await createHiddenProduct( {
+				name: 'Additional fields product',
+				regular_price: '20',
+			} );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			await checkoutPageObject.editShippingDetails();
@@ -121,8 +154,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			).toBe( true );
 
 			await frontendUtils.emptyCart();
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			await checkoutPageObject.editShippingDetails();
@@ -215,9 +247,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		test( 'Shopper can change the values of fields multiple times and place the order', async ( {
 			checkoutPageObject,
 			frontendUtils,
+			page,
+			createHiddenProduct,
 		} ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			const { id: productId } = await createHiddenProduct( {
+				name: 'Additional fields product',
+				regular_price: '20',
+			} );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			await checkoutPageObject.editShippingDetails();
@@ -378,9 +415,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		test( 'Shopper can input unsanitized values that become sanitized after checkout', async ( {
 			checkoutPageObject,
 			frontendUtils,
+			page,
+			createHiddenProduct,
 		} ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			const { id: productId } = await createHiddenProduct( {
+				name: 'Additional fields product',
+				regular_price: '20',
+			} );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			await checkoutPageObject.editShippingDetails();
@@ -464,8 +506,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			).toBe( true );
 
 			await frontendUtils.emptyCart();
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			await checkoutPageObject.editShippingDetails();
@@ -558,9 +599,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		test( 'Shopper can see server-side validation errors', async ( {
 			checkoutPageObject,
 			frontendUtils,
+			page,
+			createHiddenProduct,
 		} ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			const { id: productId } = await createHiddenProduct( {
+				name: 'Additional fields product',
+				regular_price: '20',
+			} );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			await checkoutPageObject.editShippingDetails();
@@ -697,9 +743,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		test( 'Shopper can see and edit submitted fields in my account area. Values are also sanitized and validated in my account area.', async ( {
 			checkoutPageObject,
 			frontendUtils,
+			page,
+			createHiddenProduct,
 		} ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			const { id: productId } = await createHiddenProduct( {
+				name: 'Additional fields product',
+				regular_price: '20',
+			} );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			await checkoutPageObject.editShippingDetails();
@@ -968,9 +1019,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		test( 'Shopper can refresh the page, and not lose any entered data', async ( {
 			checkoutPageObject,
 			frontendUtils,
+			page,
+			createHiddenProduct,
 		} ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			const { id: productId } = await createHiddenProduct( {
+				name: 'Additional fields product',
+				regular_price: '20',
+			} );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			await checkoutPageObject.editShippingDetails();
