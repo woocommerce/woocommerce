@@ -52,8 +52,7 @@ final class ProductDataView implements \ArrayAccess, \JsonSerializable {
 	 * @param mixed $offset The product or variation ID.
 	 * @return array|null The record in Store API shape, or null when there is none.
 	 */
-	#[\ReturnTypeWillChange]
-	public function offsetGet( $offset ) {
+	public function offsetGet( $offset ): ?array {
 		$state = wp_interactivity_state( 'woocommerce/products' );
 
 		return $state[ $this->member ][ $offset ] ?? null;
