@@ -317,6 +317,18 @@ test( 'serializes reruns and labels before the Linear issue step', () => {
 	assert.ok( ! workflow.includes( 'continue-on-error:' ) );
 } );
 
+test( 'reads the Linear IDs from variables and only the token from secrets', () => {
+	assert.match(
+		workflow,
+		/LINEAR_TEAM_ID: \$\{\{ vars\.LINEAR_DOCS_TEAM_ID \}\}/
+	);
+	assert.match(
+		workflow,
+		/LINEAR_LABEL_ID: \$\{\{ vars\.LINEAR_DOCS_AUTO_LABEL \}\}/
+	);
+	assert.ok( ! /secrets\.LINEAR_DOCS_/.test( workflow ) );
+} );
+
 test( 'the GitHub Actions entry point fails the step on a Linear error', async () => {
 	const entryPoint = workflow
 		.split( "      - name: 'Create Linear Issue'" )[ 1 ]

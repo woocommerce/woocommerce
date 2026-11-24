@@ -185,8 +185,8 @@ jobs:
           NODE_PATH: ${{ runner.temp }}/linear/node_modules
           STRUCTURED_OUTPUT: ${{ steps.analyze.outputs.structured_output }}
           LINEAR_API_KEY: ${{ secrets.LINEAR_OAUTH_TOKEN }}
-          LINEAR_TEAM_ID: ${{ secrets.LINEAR_DOCS_TEAM_ID }}
-          LINEAR_LABEL_ID: ${{ secrets.LINEAR_DOCS_AUTO_LABEL }}
+          LINEAR_TEAM_ID: ${{ vars.LINEAR_DOCS_TEAM_ID }}
+          LINEAR_LABEL_ID: ${{ vars.LINEAR_DOCS_AUTO_LABEL }}
         with:
           script: |
             try {
