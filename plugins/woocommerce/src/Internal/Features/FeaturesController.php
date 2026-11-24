@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Features;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\AgentReadiness\AiShoppingExperiments;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use WC_Tracks;
 use WC_Site_Tracking;
@@ -671,6 +672,15 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				// Hidden while it is a preview.
 				'disable_ui'                   => true,
+				'is_experimental'              => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
+			AiShoppingExperiments::FEATURE_NAME    => array(
+				'name'                         => __( 'AI shopping experiments', 'woocommerce' ),
+				'description'                  => AiShoppingExperiments::get_description(),
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
 				'is_experimental'              => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
@@ -1504,6 +1514,10 @@ class FeaturesController {
 			}
 
 			if ( 'new_navigation' === $id && 'yes' !== get_option( $this->feature_enable_option_name( $id ), 'no' ) ) {
+				continue;
+			}
+
+			if ( AiShoppingExperiments::FEATURE_NAME === $id && ! $this->feature_is_enabled( 'agent_readiness' ) ) {
 				continue;
 			}
 
