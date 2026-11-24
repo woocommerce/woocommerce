@@ -1522,10 +1522,15 @@ test.describe( 'Add to Cart + Options Block', () => {
 			);
 			productIds.push( cliOutput.stdout.match( /\d+/g )?.pop() );
 		}
+		// The first block follows a paragraph, to measure the space above it.
 		const singleProductBlocks = productIds
 			.map(
-				( productId ) =>
-					`<!-- wp:woocommerce/single-product {"productId":${ productId }} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/add-to-cart-with-options /--></div><!-- /wp:woocommerce/single-product -->`
+				( productId, index ) =>
+					`<!-- wp:woocommerce/single-product {"productId":${ productId }} --><div class="wp-block-woocommerce-single-product woocommerce">${
+						index === 0
+							? '<!-- wp:paragraph --><p>Before the block.</p><!-- /wp:paragraph --><!-- wp:woocommerce/add-to-cart-with-options /-->'
+							: '<!-- wp:woocommerce/add-to-cart-with-options /-->'
+					}</div><!-- /wp:woocommerce/single-product -->`
 			)
 			.join( '' );
 		const testPage = await requestUtils.rest< { link: string } >( {
@@ -1543,20 +1548,51 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const addToCartBlocks = page.locator(
 			'[data-block-name="woocommerce/add-to-cart-with-options"]'
 		);
-		const firstBlockNotice = addToCartBlocks.nth( 0 ).getByRole( 'alert' );
+		const firstBlock = addToCartBlocks.nth( 0 );
 
-		// There is the chance the button might be clicked before the iAPI
-		// stores have been loaded.
+		await test.step( 'takes the width of the Single Product block and adds no space above itself', async () => {
+			const layout = await firstBlock.evaluate( ( block ) => {
+				const px = ( element: Element, property: string ) =>
+					parseFloat(
+						getComputedStyle( element ).getPropertyValue( property )
+					);
+				const box = block.getBoundingClientRect();
+				const parent = block.parentElement as Element;
+				const previous = block.previousElementSibling as Element;
+				return {
+					width: box.width,
+					parentContentWidth:
+						parent.getBoundingClientRect().width -
+						px( parent, 'padding-inline-start' ) -
+						px( parent, 'padding-inline-end' ) -
+						px( parent, 'border-inline-start-width' ) -
+						px( parent, 'border-inline-end-width' ),
+					gapAbove: box.top - previous.getBoundingClientRect().bottom,
+					previousMargin: px( previous, 'margin-block-end' ),
+				};
+			} );
+
+			expect( layout.width ).toBeCloseTo( layout.parentContentWidth );
+			expect( layout.gapAbove ).toBeCloseTo( layout.previousMargin );
+		} );
+
+		// Before its JavaScript is ready, an Add to cart click submits the
+		// form natively and reloads the page. Selecting an option only works
+		// once the JavaScript is ready, so wait for that first.
+		const colorBlueOption = firstBlock
+			.getByRole( 'radiogroup', { name: 'Color' } )
+			.getByRole( 'radio', { name: 'Blue', exact: true } );
 		await expect( async () => {
-			await addToCartBlocks
-				.nth( 0 )
-				.getByRole( 'button', { name: 'Add to cart', exact: true } )
-				.click();
-			await expect( firstBlockNotice ).toHaveText(
-				'Please select product attributes before adding to cart.',
-				{ timeout: 1_000 }
-			);
+			await colorBlueOption.click();
+			await expect( colorBlueOption ).toBeChecked( { timeout: 1_000 } );
 		} ).toPass();
+
+		await firstBlock
+			.getByRole( 'button', { name: 'Add to cart', exact: true } )
+			.click();
+		await expect( firstBlock.getByRole( 'alert' ) ).toHaveText(
+			'Please select product attributes before adding to cart.'
+		);
 
 		// The notice shows once on the whole page: not in the second block,
 		// nor in the page-level Store Notices block.
