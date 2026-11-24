@@ -239,6 +239,49 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox query throws on a failed read instead of returning no plans.
+	 */
+	public function test_query_throws_on_a_failed_read(): void {
+		$repo = new PlanRepository();
+		$this->insert_plan( $repo, 'Stored' );
+
+		$this->fail_next_query( '/^\s*SELECT \* FROM \S*selling_plans\b.* LIMIT /s' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read plans' );
+
+		$repo->query();
+	}
+
+	/**
+	 * @testdox count throws on a failed read, filtered or not, instead of counting zero.
+	 * @dataProvider provide_count_args
+	 *
+	 * @param array<string, mixed> $args Count args.
+	 */
+	public function test_count_throws_on_a_failed_read( array $args ): void {
+		$repo = new PlanRepository();
+		$this->insert_plan( $repo, 'Stored' );
+
+		$this->fail_next_query( '/^\s*SELECT COUNT\(\*\) FROM \S*selling_plans\b/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to count plans' );
+
+		$repo->count( $args );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_count_args(): array {
+		return array(
+			'unfiltered' => array( array() ),
+			'filtered'   => array( array( 'status' => PlanStatus::ACTIVE ) ),
+		);
+	}
+
+	/**
 	 * @testdox update_fields writes nothing and returns false when the row belongs to another extension.
 	 */
 	public function test_update_fields_writes_nothing_to_a_row_of_another_extension(): void {

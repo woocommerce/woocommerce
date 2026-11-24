@@ -1206,6 +1206,29 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox list and get_meta throw on a failed read instead of returning an empty value.
+	 */
+	public function test_list_and_get_meta_throw_on_a_failed_read(): void {
+		$id = $this->create();
+
+		$this->fail_next_query( '/^\s*SELECT \* FROM \S*selling_plans\b.* LIMIT /s' );
+		try {
+			Plans::list();
+			$this->fail( 'Expected list() to throw.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Failed to read plans', $e->getMessage() );
+		}
+
+		$this->fail_next_query( '/^\s*SELECT meta_key, meta_value FROM \S*selling_plan_meta/' );
+		try {
+			Plans::get_meta( $id, 'note', true );
+			$this->fail( 'Expected get_meta() to throw.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( "Failed to read plan meta for plan {$id}", $e->getMessage() );
+		}
+	}
+
+	/**
 	 * @testdox list without args returns every extension's plans in every status, oldest id first.
 	 */
 	public function test_list_without_args_returns_every_plan_in_id_order(): void {
