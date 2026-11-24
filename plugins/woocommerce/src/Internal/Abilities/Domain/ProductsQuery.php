@@ -184,7 +184,11 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		if ( is_wp_error( $extension_args ) ) {
 			return $extension_args;
 		}
-		foreach ( array( 'include_ids' => 'post__in', 'exclude_ids' => 'post__not_in' ) as $key => $query_var ) {
+		$id_query_vars = array(
+			'include_ids' => 'post__in',
+			'exclude_ids' => 'post__not_in',
+		);
+		foreach ( $id_query_vars as $key => $query_var ) {
 			if ( isset( $extension_args[ $key ] ) ) {
 				$extension_args[ $query_var ] = $extension_args[ $key ];
 				unset( $extension_args[ $key ] );
