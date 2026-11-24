@@ -848,11 +848,16 @@ class StoreOutputChecks {
 
 	/**
 	 * Run a test on the Product items in a product page's JSON-LD, or null when no product page could be loaded.
+	 * With no product to open, the check is marked as waiting for one, as in on_product_page().
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 * @param callable       $test      Test, given the Product items.
 	 */
 	private function with_products( StoreResponses $responses, callable $test ): ?bool {
+		if ( null === $responses->product() ) {
+			$this->no_product_page = true;
+			return null;
+		}
 		$page = $responses->product_page();
 		if ( null === $page ) {
 			return null;
