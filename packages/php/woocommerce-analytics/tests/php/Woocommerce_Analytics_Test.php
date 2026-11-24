@@ -203,6 +203,34 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Proxy tracking is off here, the case where a leftover MU-plugin answering would be wrong.
+	 */
+	public function test_the_sync_revokes_a_leftover_module_authorization(): void {
+		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, 'yes' );
+
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+
+		$this->assertFalse(
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
+			'The leftover MU-plugin serves while this is yes, so the first sync after an update must drop it.'
+		);
+	}
+
+	/**
+	 * Deactivation has to stop the module even if another plugin's copy of the package never runs `init`.
+	 */
+	public function test_deactivation_clears_the_proxy_tracking_state(): void {
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+
+		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
+
+		Woocommerce_Analytics::maybe_remove_proxy_speed_module();
+
+		$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
+	}
+
+	/**
 	 * The sync runs on `init` for every request on every site carrying this package,
 	 * and the module already treats an absent option as off. Writing `no`
 	 * anyway puts an autoloaded row on the overwhelming majority of installs that
@@ -267,9 +295,8 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
 
-		// Both filters stay on, so a later sync cannot be what clears the option: the
-		// removal itself has to, or a module file that outlives a deactivation keeps
-		// serving on the last value written.
+		// No sync runs once the plugin is deactivated, so the removal itself has to
+		// clear it, or a module file that outlives a deactivation keeps serving.
 		Woocommerce_Analytics::maybe_remove_proxy_speed_module();
 
 		$this->assertNotSame(

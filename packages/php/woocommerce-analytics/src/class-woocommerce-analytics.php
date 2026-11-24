@@ -40,7 +40,7 @@ class Woocommerce_Analytics {
 	const PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT = 'woocommerce_analytics_proxy_speed_module_version_check';
 
 	/**
-	 * Authorization read by the MU-plugin earlier package versions installed. No longer written, so that file cannot serve.
+	 * Authorization read by the MU-plugin earlier package versions installed. Deleted at `init`, so that file cannot serve.
 	 *
 	 * @since 0.18.0
 	 *
@@ -267,6 +267,14 @@ class Woocommerce_Analytics {
 	 * @return void
 	 */
 	public static function sync_proxy_tracking_state() {
+		// One query covers both, so sites without these rows do not pay a query each.
+		wp_prime_option_caches( array( self::PROXY_TRACKING_ENABLED_OPTION, self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
+
+		// A leftover MU-plugin keeps answering while this is yes, even after proxy tracking is turned off.
+		if ( false !== get_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) ) {
+			delete_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
+		}
+
 		$enabled = \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled();
 
 		if ( $enabled && 'yes' !== get_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION ) ) {
@@ -315,7 +323,7 @@ class Woocommerce_Analytics {
 		\Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled();
 
 		if ( false !== get_option( self::PROXY_SPEED_MODULE_VERSION_OPTION, false ) ) {
-			self::maybe_remove_proxy_speed_module();
+			self::remove_legacy_proxy_speed_module();
 		}
 
 		// A failed removal keeps the version option, so it is retried once this expires.
@@ -332,11 +340,21 @@ class Woocommerce_Analytics {
 	}
 
 	/**
+	 * Stop the speed module serving once the plugin carrying this package is deactivated.
+	 *
+	 * A copy of this package in another plugin that never runs `init` would otherwise keep serving on the stored state.
+	 */
+	public static function maybe_remove_proxy_speed_module() {
+		delete_option( self::PROXY_TRACKING_ENABLED_OPTION );
+		self::remove_legacy_proxy_speed_module();
+	}
+
+	/**
 	 * Remove a speed module MU-plugin left by an earlier package version, and the authorization it reads.
 	 *
 	 * Clear its authorization because an undeletable MU-plugin can still load.
 	 */
-	public static function maybe_remove_proxy_speed_module() {
+	private static function remove_legacy_proxy_speed_module() {
 		// Revoked before anything can fail: WP_Filesystem() returns false outright on
 		// hosts that ask for credentials, and that is exactly the case where the file
 		// survives and keeps loading.
