@@ -823,7 +823,7 @@ class ExtensibleAbilities {
 	 * @return int The ID, or 0 when the object has none.
 	 */
 	private static function get_object_id( object $subject ): int {
-		if ( method_exists( $subject, 'get_id' ) ) {
+		if ( is_callable( array( $subject, 'get_id' ) ) ) {
 			return (int) $subject->get_id();
 		}
 		return (int) ( $subject->term_id ?? $subject->comment_ID ?? $subject->ID ?? 0 );
