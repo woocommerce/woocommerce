@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Internal\Customers\SearchService as CustomerSearchService;
+use Automattic\WooCommerce\Internal\Orders\OrderItemFingerprint;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Enums\OrderItemType;
@@ -27,19 +28,6 @@ class OrderController {
 	 * @var string[]
 	 */
 	private const LOCATION_FIELDS = [ 'country', 'state', 'postcode', 'city' ];
-
-	/**
-	 * Order item types that update_line_items_from_cart() creates from the cart.
-	 *
-	 * @var string[]
-	 */
-	private const CART_ORDER_ITEM_TYPES = [
-		OrderItemType::LINE_ITEM,
-		OrderItemType::FEE,
-		OrderItemType::SHIPPING,
-		OrderItemType::TAX,
-		OrderItemType::COUPON,
-	];
 
 	/**
 	 * Order meta that stores a fingerprint of each item the cart created, by item type and ID, so the next sync can
@@ -150,7 +138,7 @@ class OrderController {
 			wc()->cart->calculate_totals();
 		}
 
-		$items_before_sync = $order->get_items( self::CART_ORDER_ITEM_TYPES );
+		$items_before_sync = $order->get_items( OrderItemFingerprint::CART_ITEM_TYPES );
 
 		// Update the current order to match the current cart.
 		$this->update_line_items_from_cart( $order );
@@ -171,11 +159,8 @@ class OrderController {
 	}
 
 	/**
-	 * Stores a fingerprint of each item the cart created, read after calculate_totals() saved the order.
-	 *
-	 * Those are the items this sync added, and the ones it kept that the previous snapshot listed. Items an extension
-	 * added are left out, so they can't make a type look changed. An order without a snapshot, such as one placed before
-	 * the snapshot existed, counts all the items it had as created by the cart.
+	 * Stores a fingerprint of each item the cart created: the items this sync added, and the kept ones the previous
+	 * snapshot listed, so items extensions added are left out. Without a previous snapshot, every kept item counts.
 	 *
 	 * @param \WC_Order        $order             The synced order.
 	 * @param \WC_Order_Item[] $items_before_sync The order's items before the sync, keyed by ID.
@@ -186,14 +171,13 @@ class OrderController {
 		}
 
 		$previous_snapshot = $this->get_cart_order_items_snapshot( $order );
-		$previous_item_ids = null === $previous_snapshot
-			? array_keys( $items_before_sync )
-			: array_merge( ...array_values( array_map( 'array_keys', $previous_snapshot ) ) );
 
 		$snapshot = [];
-		foreach ( $order->get_items( self::CART_ORDER_ITEM_TYPES ) as $item_id => $item ) {
-			if ( ! isset( $items_before_sync[ $item_id ] ) || in_array( $item_id, $previous_item_ids, true ) ) {
-				$snapshot[ $item->get_type() ][ $item_id ] = wc()->checkout()->get_order_item_fingerprint( $item );
+		foreach ( $order->get_items( OrderItemFingerprint::CART_ITEM_TYPES ) as $item_id => $item ) {
+			$is_new_item   = ! isset( $items_before_sync[ $item_id ] );
+			$was_cart_item = null === $previous_snapshot || isset( $previous_snapshot[ $item->get_type() ][ $item_id ] );
+			if ( $is_new_item || $was_cart_item ) {
+				$snapshot[ $item->get_type() ][ $item_id ] = OrderItemFingerprint::get( $item );
 			}
 		}
 
@@ -229,18 +213,13 @@ class OrderController {
 			return [];
 		}
 
-		$changed_types = [];
-		foreach ( $snapshot as $item_type => $fingerprints ) {
-			$order_items = $order->get_items( $item_type );
-			foreach ( $fingerprints as $item_id => $fingerprint ) {
-				if ( ! isset( $order_items[ $item_id ] ) || wc()->checkout()->get_order_item_fingerprint( $order_items[ $item_id ] ) !== (string) $fingerprint ) {
-					$changed_types[] = $item_type;
-					break;
-				}
-			}
-		}
-
-		return $changed_types;
+		return array_keys(
+			array_filter(
+				$snapshot,
+				fn( array $fingerprints, string $item_type ) => ! OrderItemFingerprint::items_match( $order->get_items( $item_type ), $fingerprints ),
+				ARRAY_FILTER_USE_BOTH
+			)
+		);
 	}
 
 	/**

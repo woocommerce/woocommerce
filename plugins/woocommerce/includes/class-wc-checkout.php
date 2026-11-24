@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\Orders\OrderItemFingerprint;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
@@ -93,19 +94,6 @@ class WC_Checkout {
 	 * @var WC_Customer|null
 	 */
 	private $saved_customer = null;
-
-	/**
-	 * Order item types that set_data_from_cart() creates from the cart.
-	 *
-	 * @var string[]
-	 */
-	private const CART_ORDER_ITEM_TYPES = array(
-		OrderItemType::LINE_ITEM,
-		OrderItemType::FEE,
-		OrderItemType::SHIPPING,
-		OrderItemType::TAX,
-		OrderItemType::COUPON,
-	);
 
 	/**
 	 * Order meta that stores a hash of each cart section and a fingerprint of each item the cart created, so a resumed
@@ -573,8 +561,8 @@ class WC_Checkout {
 
 			// Captured before woocommerce_checkout_create_order, so items extensions add or change there can be told apart.
 			$cart_order_items = array_map(
-				fn( WC_Order_Item $item ) => array( $item, $this->get_order_item_fingerprint( $item ) ),
-				$order->get_items( self::CART_ORDER_ITEM_TYPES )
+				fn( WC_Order_Item $item ) => array( $item, OrderItemFingerprint::get( $item ) ),
+				$order->get_items( OrderItemFingerprint::CART_ITEM_TYPES )
 			);
 
 			/**
@@ -769,55 +757,19 @@ class WC_Checkout {
 	 * @return array{hashes: array<string, string>, items: array<string, array<int, string>>}
 	 */
 	private function get_cart_order_items_snapshot( WC_Abstract_Order $persisted_order, array $cart_order_items, array $cart_hashes ): array {
-		$persisted_items = $persisted_order->get_items( self::CART_ORDER_ITEM_TYPES );
+		$persisted_items = $persisted_order->get_items( OrderItemFingerprint::CART_ITEM_TYPES );
 		$items           = array();
 		foreach ( $cart_order_items as list( $item, $fingerprint ) ) {
 			$persisted_item = $persisted_items[ $item->get_id() ] ?? null;
-			$is_unchanged   = $persisted_item && $fingerprint === $this->get_order_item_fingerprint( $item );
+			$is_unchanged   = $persisted_item && OrderItemFingerprint::get( $item ) === $fingerprint;
 
-			$items[ $item->get_type() ][ $item->get_id() ] = $is_unchanged ? $this->get_order_item_fingerprint( $persisted_item ) : '';
+			$items[ $item->get_type() ][ $item->get_id() ] = $is_unchanged ? OrderItemFingerprint::get( $persisted_item ) : '';
 		}
 
 		return array(
 			'hashes' => $cart_hashes,
 			'items'  => $items,
 		);
-	}
-
-	/**
-	 * Hashes an item's stored amounts and properties. Names and meta are left out, so renaming an item or adding meta
-	 * to it, as gateways do, doesn't count as a change. The Store API uses it to detect edits to a retried order too.
-	 *
-	 * @internal
-	 *
-	 * @since 11.5.0
-	 *
-	 * @param WC_Order_Item $item The order item.
-	 * @return string
-	 */
-	public function get_order_item_fingerprint( WC_Order_Item $item ): string {
-		// Include unsaved changes, so an item can be compared before and after it's saved.
-		$data = array_replace_recursive( $item->get_data(), $item->get_changes() );
-		unset( $data['id'], $data['order_id'], $data['name'], $data['meta_data'] );
-
-		return md5( (string) wp_json_encode( $this->sort_keys_recursively( $data ) ) );
-	}
-
-	/**
-	 * Sorts an array's keys at every level, since saving an item can reorder nested keys such as its taxes.
-	 *
-	 * @param array $data The array to sort.
-	 * @return array
-	 */
-	private function sort_keys_recursively( array $data ): array {
-		ksort( $data );
-		foreach ( $data as $key => $value ) {
-			if ( is_array( $value ) ) {
-				$data[ $key ] = $this->sort_keys_recursively( $value );
-			}
-		}
-
-		return $data;
 	}
 
 	/**
@@ -841,12 +793,12 @@ class WC_Checkout {
 		}
 
 		$kept_types = array();
-		foreach ( self::CART_ORDER_ITEM_TYPES as $item_type ) {
+		foreach ( OrderItemFingerprint::CART_ITEM_TYPES as $item_type ) {
 			$cart_section_unchanged = ( $snapshot['hashes'][ $item_type ] ?? '' ) === $cart_hashes[ $item_type ];
 			$order_items            = $cart_section_unchanged ? $order->get_items( $item_type ) : array();
 			$snapshot_items         = (array) ( $snapshot['items'][ $item_type ] ?? array() );
 
-			if ( ! $cart_section_unchanged || ! $this->order_items_match_snapshot( $order_items, $snapshot_items ) ) {
+			if ( ! $cart_section_unchanged || ! OrderItemFingerprint::items_match( $order_items, $snapshot_items ) ) {
 				$order->remove_order_items( $item_type );
 				continue;
 			}
@@ -864,28 +816,11 @@ class WC_Checkout {
 				$order->get_id()
 			)
 		);
-		foreach ( array_diff( $persisted_types, self::CART_ORDER_ITEM_TYPES ) as $item_type ) {
+		foreach ( array_diff( $persisted_types, OrderItemFingerprint::CART_ITEM_TYPES ) as $item_type ) {
 			$order->remove_order_items( $item_type );
 		}
 
 		return $kept_types;
-	}
-
-	/**
-	 * Whether every item in the snapshot is still on the order with the same fingerprint.
-	 *
-	 * @param WC_Order_Item[]    $order_items    The order's items of one type, keyed by ID.
-	 * @param array<int, string> $snapshot_items Fingerprints of the items the cart created, keyed by ID.
-	 * @return bool
-	 */
-	private function order_items_match_snapshot( array $order_items, array $snapshot_items ): bool {
-		foreach ( $snapshot_items as $item_id => $fingerprint ) {
-			if ( ! isset( $order_items[ $item_id ] ) || (string) $fingerprint !== $this->get_order_item_fingerprint( $order_items[ $item_id ] ) ) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	/**
