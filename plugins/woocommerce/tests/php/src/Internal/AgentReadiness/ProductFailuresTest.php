@@ -180,13 +180,17 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox After cleanup, a cached product query on the rows, like the Products list filter, no longer finds the product.
+	 * @testdox After cleanup, with cache invalidation $_dataName, the cached rows and a cached product query on them, like the Products list filter, no longer find the product.
+	 * @dataProvider provide_cache_invalidation
+	 *
+	 * @param bool $suspended Whether cache invalidation is suspended during cleanup.
 	 */
-	public function test_cleanup_reruns_cached_product_queries(): void {
+	public function test_cleanup_drops_cached_rows_and_queries( bool $suspended ): void {
 		$before = microtime( true );
 		$id     = WC_Helper_Product::create_simple_product()->get_id();
 		ProductFailures::store( $id, array( 'missing_images' => array() ), false );
 		update_post_meta( $id, ProductFailures::WRITTEN_META, sprintf( '%.6F', $before - 5 ) );
+		$this->assertNotEmpty( ProductFailures::stored( $id ), 'Fixture precondition: the meta cache holds the rows' );
 		$query = static fn(): array => get_posts(
 			array(
 				'post_type'  => 'product',
@@ -195,11 +199,29 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 				'meta_value' => 'missing_images', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			)
 		);
-		$this->assertSame( array( $id ), $query(), 'Fixture precondition: the query finds the product and caches the result' );
+		$this->assertSame( array( $id ), $query(), 'Fixture precondition: the query result is cached' );
 
-		ProductFailures::forget_unless_written_since( array( $id ), $before );
+		$was_suspended = wp_suspend_cache_invalidation( $suspended );
+		try {
+			ProductFailures::forget_unless_written_since( array( $id ), $before );
+		} finally {
+			wp_suspend_cache_invalidation( $was_suspended );
+		}
 
-		$this->assertSame( array(), $query() );
+		$this->assertSame( array(), ProductFailures::stored( $id ) );
+		$this->assertSame( array(), $query(), 'The cached query runs again' );
+	}
+
+	/**
+	 * Cache invalidation on and suspended. Imports suspend it; the meta API clears these caches either way.
+	 *
+	 * @return array<string, array{0:bool}>
+	 */
+	public function provide_cache_invalidation(): array {
+		return array(
+			'on'        => array( false ),
+			'suspended' => array( true ),
+		);
 	}
 
 	/**

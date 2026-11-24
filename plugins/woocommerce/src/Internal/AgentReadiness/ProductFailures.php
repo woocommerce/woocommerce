@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -182,14 +184,15 @@ class ProductFailures {
 			if ( ! $deleted ) {
 				continue;
 			}
-			// The delete bypasses the meta API, so clear what its hooks would. clean_post_cache() drops the
-			// meta cache and the cached product (ProductCacheController), and makes cached post queries,
-			// like the Products list filter, run again. The WooCommerce product meta cache that
-			// WC_Post_Data::flush_object_meta_cache() clears on those hooks is cleared here too.
-			_prime_post_caches( $chunk, false, false ); // One query for the chunk; clean_post_cache() loads each post.
+			// The delete bypasses the meta API, so clear what its deleted_post_meta listeners would, also while
+			// cache invalidation is suspended: the meta cache, cached post queries like the Products list filter,
+			// WooCommerce's product meta cache and the cached product (product instance caching).
+			wp_cache_delete_multiple( $chunk, 'post_meta' );
+			wp_cache_set_posts_last_changed();
+			$product_cache = wc_get_container()->get( ProductCache::class );
 			foreach ( $chunk as $product_id ) {
-				clean_post_cache( $product_id );
 				\WC_Cache_Helper::invalidate_cache_group( 'object_' . $product_id );
+				$product_cache->remove( $product_id );
 			}
 		}
 	}
