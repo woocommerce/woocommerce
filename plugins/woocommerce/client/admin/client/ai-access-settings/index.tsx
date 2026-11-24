@@ -41,18 +41,46 @@ type Props = {
 	onDirtyChange?: ( isDirty: boolean ) => void;
 };
 
-const getNotice = ( status: AiAccessStatus ): string | null => {
+type SectionNotice = {
+	status: 'warning' | 'info';
+	content: ReturnType< typeof createInterpolateElement > | string;
+};
+
+/**
+ * The notice that replaces the controls when WooCommerce's settings aren't the ones in effect.
+ */
+const getNotice = (
+	status: AiAccessStatus,
+	data: AiAccessData
+): SectionNotice | null => {
 	switch ( status ) {
 		case 'robots_file':
-			return __(
-				'These settings aren’t being used. Your site has its own robots.txt file, so WooCommerce can’t add to it. Remove the file, or ask whoever set it up to add these preferences.',
-				'woocommerce'
-			);
+			return {
+				status: 'warning',
+				content: __(
+					'These settings aren’t being used. Your site has its own robots.txt file, so WooCommerce can’t add to it. Remove the file, or ask whoever set it up to add these preferences.',
+					'woocommerce'
+				),
+			};
+		case 'jetpack':
+			return {
+				status: 'info',
+				content: createInterpolateElement(
+					__(
+						'Jetpack manages AI access for your site. <a>Change it in Jetpack</a>.',
+						'woocommerce'
+					),
+					{ a: createElement( 'a', { href: data.jetpackUrl } ) }
+				),
+			};
 		case 'other_plugin':
-			return __(
-				'These settings aren’t being used. Another plugin already sets AI preferences for your site. Change them there, or turn that setting off to use these.',
-				'woocommerce'
-			);
+			return {
+				status: 'warning',
+				content: __(
+					'These settings aren’t being used. Another plugin already sets AI preferences for your site. Change them there, or turn that setting off to use these.',
+					'woocommerce'
+				),
+			};
 		default:
 			return null;
 	}
@@ -80,63 +108,33 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 		return null;
 	}
 
-	// Jetpack's AI access controls take precedence, so the section links there instead of showing
-	// its own. Nothing is posted, so saving the page leaves the stored settings as they are.
-	if ( status === 'jetpack' ) {
+	// A robots.txt file, Jetpack or another plugin decides instead, so a notice replaces the controls:
+	// disabled controls would read as the site's settings. Nothing is posted, so saving the page leaves
+	// the stored settings as they are.
+	const notice = getNotice( status, data );
+	if ( notice ) {
 		return (
 			<div className="woocommerce-ai-access-settings">
 				<h2>{ __( 'AI access', 'woocommerce' ) }</h2>
 				<Notice
-					status="info"
+					status={ notice.status }
 					isDismissible={ false }
 					className="woocommerce-ai-access-settings__notice"
 				>
-					{ createInterpolateElement(
-						__(
-							'Jetpack manages AI access for your site. <a>Change it in Jetpack</a>.',
-							'woocommerce'
-						),
-						{
-							a: createElement( 'a', { href: data.jetpackUrl } ),
-						}
-					) }
+					{ notice.content }
 				</Notice>
 			</div>
 		);
 	}
 
-	const notice = getNotice( status );
-	const isDisabled = notice !== null;
 	const showAiShoppingNotice =
-		! isDisabled && answers === 'no' && data.aiShoppingEnabled === true;
+		answers === 'no' && data.aiShoppingEnabled === true;
 
 	return (
 		<div className="woocommerce-ai-access-settings">
-			{ /* Disabled settings aren't posted, so saving the page leaves them as they are. */ }
-			{ ! isDisabled && (
-				<>
-					<input
-						type="hidden"
-						name={ ANSWERS_OPTION }
-						value={ answers }
-					/>
-					<input
-						type="hidden"
-						name={ TRAINING_OPTION }
-						value={ training }
-					/>
-				</>
-			) }
+			<input type="hidden" name={ ANSWERS_OPTION } value={ answers } />
+			<input type="hidden" name={ TRAINING_OPTION } value={ training } />
 			<h2>{ __( 'AI access', 'woocommerce' ) }</h2>
-			{ notice && (
-				<Notice
-					status="warning"
-					isDismissible={ false }
-					className="woocommerce-ai-access-settings__notice"
-				>
-					{ notice }
-				</Notice>
-			) }
 			<p className="woocommerce-ai-access-settings__intro">
 				{ __(
 					'These settings apply to your whole site. They ask AI companies to respect your choices.',
@@ -146,7 +144,6 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 			<div className="woocommerce-ai-access-settings__field">
 				<ToggleControl
 					__nextHasNoMarginBottom
-					disabled={ isDisabled }
 					label={
 						<>
 							{ __(
@@ -189,7 +186,6 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 			<div className="woocommerce-ai-access-settings__field">
 				<RadioControl
 					label={ __( 'AI training', 'woocommerce' ) }
-					disabled={ isDisabled }
 					selected={ training }
 					options={ [
 						{

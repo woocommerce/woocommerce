@@ -23,11 +23,6 @@
 			align-items: baseline;
 		}
 
-		// Matches the core disabled toggle, whose styles aren't loaded on classic settings pages.
-		.components-form-toggle.is-disabled {
-			opacity: 0.3;
-		}
-
 		.components-base-control__field p {
 			margin: 6px 0 0;
 		}

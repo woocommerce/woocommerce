@@ -163,7 +163,7 @@ describe( 'AiAccessSettings', () => {
 		[ 'robots_file', /Your site has its own robots\.txt file/ ],
 		[ 'other_plugin', /Another plugin already sets AI preferences/ ],
 	] as const )(
-		'shows a warning and disables the controls for %s',
+		'shows only a warning in place of the controls for %s',
 		( status, noticeText ) => {
 			const { container } = renderWith( {
 				status,
@@ -171,17 +171,13 @@ describe( 'AiAccessSettings', () => {
 				aiShoppingEnabled: true,
 			} );
 
-			const notices = container.querySelectorAll( '.components-notice' );
+			const notices = container.querySelectorAll(
+				'.woocommerce-ai-access-settings__notice'
+			);
 			expect( notices ).toHaveLength( 1 );
 			expect( notices[ 0 ] ).toHaveTextContent( noticeText );
-			expect(
-				screen.getByRole( 'checkbox', {
-					name: /Allow AI assistants to use your content in answers/,
-				} )
-			).toBeDisabled();
-			screen
-				.getAllByRole( 'radio' )
-				.forEach( ( radio ) => expect( radio ).toBeDisabled() );
+			expect( screen.queryByRole( 'checkbox' ) ).toBeNull();
+			expect( screen.queryByRole( 'radio' ) ).toBeNull();
 			expect( hiddenInput( container, ANSWERS_OPTION ) ).toBeNull();
 			expect( hiddenInput( container, TRAINING_OPTION ) ).toBeNull();
 		}
