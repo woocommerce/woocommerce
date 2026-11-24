@@ -477,9 +477,9 @@ abstract class ActionableAbility extends Ability {
 	}
 
 	/**
-	 * Say what is wrong with a value that the input schema of its field refused. WordPress
-	 * names an unknown nested key without its path, and names no type when a value matches
-	 * no `anyOf` branch, so those two refusals get a path or the types. Others keep the WordPress message.
+	 * Say what is wrong with a value that the input schema of its field refused. An unknown
+	 * nested key gets its path, the fix and the keys its object accepts. A value that matches
+	 * no `anyOf` branch gets the types. Others keep the WordPress message.
 	 *
 	 * @param \WP_Error $error  Refusal from rest_validate_value_from_schema().
 	 * @param mixed     $value  Value from the input.
@@ -490,23 +490,29 @@ abstract class ActionableAbility extends Ability {
 	private static function describe_value_refusal( \WP_Error $error, $value, array $schema, string $param ): string {
 		$unknown_key = in_array( $error->get_error_code(), self::UNKNOWN_KEY_ERROR_CODES, true ) ? self::find_unknown_key( $value, $schema, $param ) : null;
 		if ( null !== $unknown_key ) {
+			list( $key_path, $object_path, $accepted ) = $unknown_key;
 			/* translators: %s: Path of the key in the input, such as extensions.my_ext.size.unit. */
-			return sprintf( __( '%s is not a valid property of Object.', 'woocommerce' ), $unknown_key );
+			$message = sprintf( __( '"%s" is not a key of this field. Remove it from the input.', 'woocommerce' ), $key_path );
+			if ( empty( $accepted ) ) {
+				return $message;
+			}
+			/* translators: 1: Path of the object in the input, such as extensions.my_ext.size. 2: Comma-separated list of keys. */
+			return $message . ' ' . sprintf( __( '"%1$s" accepts: %2$s.', 'woocommerce' ), $object_path, implode( ', ', $accepted ) );
 		}
 		return ( isset( $schema['anyOf'] ) ? self::describe_any_of_refusal( $value, $schema['anyOf'], $param ) : null ) ?? $error->get_error_message();
 	}
 
 	/**
 	 * Follow the first refusal of rest_validate_value_from_schema() down the value, and
-	 * return the path of the key when that refusal is a key the schema does not allow.
+	 * describe the key when that refusal is a key the schema does not allow.
 	 * Like WordPress, it follows an `anyOf` or `oneOf` only when one branch has the type of the value.
 	 *
 	 * @param mixed  $value  Value from the input.
 	 * @param array  $schema Schema of the value.
 	 * @param string $path   Path of the value in the input.
-	 * @return string|null Path of the key, such as `extensions.my_ext.size.unit`, or null when the first refusal is another one.
+	 * @return array{0: string, 1: string, 2: array<int|string>}|null Path of the key, such as `extensions.my_ext.size.unit`, path of its object and the keys named in the `properties` of that object, or null when the first refusal is another one.
 	 */
-	private static function find_unknown_key( $value, array $schema, string $path ): ?string {
+	private static function find_unknown_key( $value, array $schema, string $path ): ?array {
 		foreach ( array( 'anyOf', 'oneOf' ) as $keyword ) {
 			if ( ! is_array( $schema[ $keyword ] ?? null ) ) {
 				continue;
@@ -547,7 +553,7 @@ abstract class ActionableAbility extends Ability {
 		}
 		foreach ( $children as list( $child, $child_schema, $child_path ) ) {
 			if ( null === $child_schema ) {
-				return $child_path;
+				return array( $child_path, $path, array_keys( is_array( $schema['properties'] ?? null ) ? $schema['properties'] : array() ) );
 			}
 			$valid = rest_validate_value_from_schema( $child, $child_schema, $child_path );
 			if ( is_wp_error( $valid ) ) {
