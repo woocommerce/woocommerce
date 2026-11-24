@@ -507,7 +507,7 @@ trait OrderAbilityTrait {
 	 *
 	 * @param \WC_Order $order    Order object.
 	 * @param string[]  $includes Optional parts: `line_items`, and `lines` for the shipping, fee, coupon and tax lines.
-	 * @return array|\WP_Error A WP_Error when an extension field value does not match its schema.
+	 * @return array|\WP_Error A WP_Error when an extension field fails or returns a value its schema does not allow.
 	 */
 	protected static function format_order_for_response( \WC_Order $order, array $includes ) {
 		$billing_email = $order->get_billing_email();
@@ -616,7 +616,7 @@ trait OrderAbilityTrait {
 	 * Format the shipping, fee, coupon and tax lines of an order, with the keys of wc/v3/orders. Tax lines have no extension fields.
 	 *
 	 * @param \WC_Order $order Order object.
-	 * @return array|\WP_Error A WP_Error when an extension field value does not match its schema.
+	 * @return array|\WP_Error A WP_Error when an extension field fails or returns a value its schema does not allow.
 	 */
 	private static function format_order_lines_for_response( \WC_Order $order ) {
 		$lines = array(

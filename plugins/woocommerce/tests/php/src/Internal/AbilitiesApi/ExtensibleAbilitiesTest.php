@@ -1250,13 +1250,17 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should call the order and order item prime callbacks once with every order and every product line.
+	 * @testdox Should call the order and order item prime callbacks once with every order and every product, shipping, fee and coupon line.
 	 */
 	public function test_prime_callbacks_get_orders_and_line_items(): void {
 		$product = \WC_Helper_Product::create_simple_product();
 		$orders  = array( wc_create_order(), wc_create_order() );
 		foreach ( $orders as $order ) {
 			$order->add_product( $product );
+			$order->add_item( new \WC_Order_Item_Fee() );
+			$order->add_item( new \WC_Order_Item_Shipping() );
+			$order->add_item( new \WC_Order_Item_Coupon() );
+			$order->add_item( new \WC_Order_Item_Tax() );
 			$order->save();
 		}
 		$calls = array();
@@ -1275,11 +1279,12 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			array(
 				'per_page'           => 2,
 				'include_line_items' => true,
+				'include_lines'      => true,
 			)
 		);
 
-		$item_ids = array_merge( ...array_map( static fn( \WC_Order $order ) => array_keys( $order->get_items() ), $orders ) );
-		$this->assertCount( 2, $item_ids );
+		$item_ids = array_merge( ...array_map( static fn( \WC_Order $order ) => array_keys( $order->get_items( array( 'line_item', 'shipping', 'fee', 'coupon' ) ) ), $orders ) );
+		$this->assertCount( 8, $item_ids );
 		$this->assertCount( 1, $calls['order'] );
 		$this->assertEqualsCanonicalizing( array_map( static fn( \WC_Order $order ) => $order->get_id(), $orders ), $calls['order'][0] );
 		$this->assertCount( 1, $calls['order_item'] );

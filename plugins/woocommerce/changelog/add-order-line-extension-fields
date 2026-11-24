@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Extensible abilities: return order item extension fields on shipping, fee and coupon lines; experimental flag.
+Comment: Extensible abilities: return order item fields on shipping, fee and coupon lines; experimental.
 
