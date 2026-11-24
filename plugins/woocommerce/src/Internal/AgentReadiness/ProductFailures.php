@@ -162,7 +162,7 @@ class ProductFailures {
 			$ids = implode( ',', $chunk );
 			// $ids are absint. The write time is in this delete, so a save that commits after a separate read is not removed.
 			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->query(
+			$deleted = $wpdb->query(
 				$wpdb->prepare(
 					"DELETE pm FROM {$wpdb->postmeta} AS pm
 					LEFT JOIN {$wpdb->postmeta} AS fresh
@@ -179,10 +179,16 @@ class ProductFailures {
 				)
 			);
 			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			// The delete bypasses the meta API, so clear the caches its hooks would: WordPress's meta
-			// cache and WooCommerce's product meta cache (WC_Post_Data::flush_object_meta_cache()).
+			if ( ! $deleted ) {
+				continue;
+			}
+			// The delete bypasses the meta API, so clear what its hooks would. clean_post_cache() drops the
+			// meta cache and the cached product (ProductCacheController), and makes cached post queries,
+			// like the Products list filter, run again. The WooCommerce product meta cache that
+			// WC_Post_Data::flush_object_meta_cache() clears on those hooks is cleared here too.
+			_prime_post_caches( $chunk, false, false ); // One query for the chunk; clean_post_cache() loads each post.
 			foreach ( $chunk as $product_id ) {
-				wp_cache_delete( $product_id, 'post_meta' );
+				clean_post_cache( $product_id );
 				\WC_Cache_Helper::invalidate_cache_group( 'object_' . $product_id );
 			}
 		}

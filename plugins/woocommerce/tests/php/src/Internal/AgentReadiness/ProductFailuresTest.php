@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductFailures;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
+use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -175,6 +177,63 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 		$this->assertSame( '', get_post_meta( $stale->get_id(), ProductFailures::WRITTEN_META, true ) );
 		$this->assertSame( array( ProductFailures::CHECKED ), ProductFailures::stored( $fresh->get_id() ) );
 		$this->assertNotSame( '', get_post_meta( $fresh->get_id(), ProductFailures::WRITTEN_META, true ) );
+	}
+
+	/**
+	 * @testdox After cleanup, a cached product query on the rows, like the Products list filter, no longer finds the product.
+	 */
+	public function test_cleanup_reruns_cached_product_queries(): void {
+		$before = microtime( true );
+		$id     = WC_Helper_Product::create_simple_product()->get_id();
+		ProductFailures::store( $id, array( 'missing_images' => array() ), false );
+		update_post_meta( $id, ProductFailures::WRITTEN_META, sprintf( '%.6F', $before - 5 ) );
+		$query = static fn(): array => get_posts(
+			array(
+				'post_type'  => 'product',
+				'fields'     => 'ids',
+				'meta_key'   => ProductFailures::META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => 'missing_images', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			)
+		);
+		$this->assertSame( array( $id ), $query(), 'Fixture precondition: the query finds the product and caches the result' );
+
+		ProductFailures::forget_unless_written_since( array( $id ), $before );
+
+		$this->assertSame( array(), $query() );
+	}
+
+	/**
+	 * @testdox With product instance caching on, cleanup drops the cached product, so it no longer has the removed rows.
+	 */
+	public function test_cleanup_drops_the_cached_product(): void {
+		$option     = 'woocommerce_feature_' . ProductCacheController::FEATURE_NAME . '_enabled';
+		$was        = get_option( $option );
+		$controller = wc_get_container()->get( ProductCacheController::class );
+		update_option( $option, 'yes' );
+		$controller->register_hooks();
+		try {
+			$before = microtime( true );
+			$id     = WC_Helper_Product::create_simple_product()->get_id();
+			ProductFailures::store( $id, array( 'missing_images' => array() ), false );
+			update_post_meta( $id, ProductFailures::WRITTEN_META, sprintf( '%.6F', $before - 5 ) );
+			$cached = wc_get_product( $id );
+			$cached->get_meta( ProductFailures::META_KEY, false ); // Meta loads on first read, so the cached product holds the rows.
+			wc_get_container()->get( ProductCache::class )->set( $cached );
+			$this->assertTrue( wc_get_container()->get( ProductCache::class )->is_cached( $id ), 'Fixture precondition: the product is cached' );
+
+			ProductFailures::forget_unless_written_since( array( $id ), $before );
+
+			$this->assertSame( array(), wc_get_product( $id )->get_meta( ProductFailures::META_KEY, false ) );
+		} finally {
+			wc_get_container()->get( ProductCache::class )->flush();
+			remove_action( 'clean_post_cache', array( $controller, 'invalidate_product_cache_on_clean' ), 10 );
+			foreach ( array( 'updated_post_meta', 'added_post_meta', 'deleted_post_meta' ) as $hook ) {
+				remove_action( $hook, array( $controller, 'invalidate_product_cache_by_meta' ), 10 );
+			}
+			remove_action( 'woocommerce_updated_product_stock', array( $controller, 'invalidate_product_cache' ), 10 );
+			remove_action( 'woocommerce_updated_product_sales', array( $controller, 'invalidate_product_cache' ), 10 );
+			false === $was ? delete_option( $option ) : update_option( $option, $was );
+		}
 	}
 
 	/**
