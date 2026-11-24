@@ -503,4 +503,37 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $order->get_refunds(), 'get_refunds() must not read refunds from the database.' );
 		$this->assertSame( array(), $order->get_customer_order_notes(), 'get_customer_order_notes() must not read notes from the database.' );
 	}
+
+	/**
+	 * @testdox Email preview must not leak real order notes when a template or hook calls wc_get_order_notes().
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/71100
+	 */
+	public function test_preview_does_not_leak_order_notes_via_wc_get_order_notes(): void {
+		$real_order = WC_Helper_Order::create_order();
+		$real_order->add_order_note( 'Secret customer note from real order', 1 );
+		$real_order->save();
+
+		$captured_notes = null;
+		add_action(
+			'woocommerce_email_order_details',
+			function ( $order ) use ( &$captured_notes ) {
+				$captured_notes = wc_get_order_notes(
+					array(
+						'order_id' => $order->get_id(),
+						'type'     => 'customer',
+					)
+				);
+				foreach ( $captured_notes as $note ) {
+					echo wp_kses_post( wpautop( $note->content ) );
+				}
+			}
+		);
+
+		$this->sut->set_email_type( 'WC_Email_Customer_Completed_Order' );
+		$content = $this->sut->render();
+
+		$this->assertSame( array(), $captured_notes, 'wc_get_order_notes() must return no notes for the preview order.' );
+		$this->assertStringNotContainsString( 'Secret customer note from real order', $content, 'Real order notes must not appear in the rendered email preview.' );
+	}
 }

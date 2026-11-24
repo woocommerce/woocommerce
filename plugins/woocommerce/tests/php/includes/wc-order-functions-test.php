@@ -945,6 +945,52 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return no order notes when order_id or post_id is empty or non-positive unless order__in or post__in is provided.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/71100
+	 */
+	public function test_wc_get_order_notes_returns_empty_for_empty_or_invalid_order_id(): void {
+		$order1 = WC_Helper_Order::create_order();
+		$order1->add_order_note( 'Order 1 internal note' );
+		$order1->add_order_note( 'Order 1 customer note', 1 );
+
+		$order2 = WC_Helper_Order::create_order();
+		$order2->add_order_note( 'Order 2 internal note' );
+
+		$invalid_ids = array( 0, '0', '', null, false, -1, 'invalid' );
+		foreach ( $invalid_ids as $invalid_id ) {
+			$this->assertSame(
+				array(),
+				wc_get_order_notes( array( 'order_id' => $invalid_id ) ),
+				sprintf( 'Expected empty array for order_id=%s', var_export( $invalid_id, true ) ) // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+			);
+			$this->assertSame(
+				array(),
+				wc_get_order_notes( array( 'post_id' => $invalid_id ) ),
+				sprintf( 'Expected empty array for post_id=%s', var_export( $invalid_id, true ) ) // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+			);
+		}
+
+		// Calling without order_id or post_id should continue returning notes across orders.
+		$all_customer_notes = wc_get_order_notes( array( 'type' => 'customer' ) );
+		$this->assertContains( 'Order 1 customer note', wp_list_pluck( $all_customer_notes, 'content' ) );
+
+		// Using order__in / post__in should continue working even without order_id or with default order_id => 0.
+		$order1_notes = wc_get_order_notes( array( 'order__in' => array( $order1->get_id() ) ) );
+		$this->assertContains( 'Order 1 internal note', wp_list_pluck( $order1_notes, 'content' ) );
+		$this->assertNotContains( 'Order 2 internal note', wp_list_pluck( $order1_notes, 'content' ) );
+
+		$order2_notes = wc_get_order_notes(
+			array(
+				'order_id'  => 0,
+				'order__in' => array( $order2->get_id() ),
+			)
+		);
+		$this->assertContains( 'Order 2 internal note', wp_list_pluck( $order2_notes, 'content' ) );
+		$this->assertNotContains( 'Order 1 internal note', wp_list_pluck( $order2_notes, 'content' ) );
+	}
+
+	/**
 	 * @testdox Should show an order note's time in the current site timezone after the timezone changes.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/48953
