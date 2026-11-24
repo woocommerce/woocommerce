@@ -212,9 +212,10 @@ class StockNotificationsRestControllerTests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A prepare filter that returns something other than a response is ignored.
+	 * @testdox A prepare filter that returns something other than a response is ignored and flagged as incorrect usage.
 	 */
 	public function test_prepare_filter_invalid_return(): void {
+		$this->setExpectedIncorrectUsage( 'woocommerce_rest_prepare_stock_notification' );
 		$notification = $this->create_notification();
 		$filter       = fn() => new \WP_Error( 'broken', 'Broken.' );
 		add_filter( 'woocommerce_rest_prepare_stock_notification', $filter );

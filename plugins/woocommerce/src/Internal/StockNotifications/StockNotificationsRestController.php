@@ -240,8 +240,12 @@ class StockNotificationsRestController extends RestApiControllerBase {
 		 * @param WP_REST_Request  $request      The request.
 		 */
 		$filtered = apply_filters( 'woocommerce_rest_prepare_stock_notification', $response, $notification, $request );
+		if ( ! $filtered instanceof WP_REST_Response ) {
+			_doing_it_wrong( 'woocommerce_rest_prepare_stock_notification', esc_html( 'The filter must return a WP_REST_Response.' ), '11.5.0' );
+			return $response;
+		}
 
-		return $filtered instanceof WP_REST_Response ? $filtered : $response;
+		return $filtered;
 	}
 
 	/**
