@@ -1136,6 +1136,7 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 *           ["var:preset|spacing|20", "display: block; margin: 0; margin-top: 24px;"]
 	 *           ["16px; font-size: 0", "display: block; margin: 0;"]
 	 *           ["16px } p { display: none", "display: block; margin: 0;"]
+	 *           ["var(--x} p { display:none)", "display: block; margin: 0;"]
 	 *           ["junk", "display: block; margin: 0;"]
 	 *
 	 * @param string $block_gap      Block gap set in the email's theme.json.
