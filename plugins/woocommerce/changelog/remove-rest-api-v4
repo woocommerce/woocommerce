@@ -1,5 +1,5 @@
 Significance: patch
 Type: dev
-Comment: Remove the unused experimental REST API v4; no production change.
+Comment: Remove the unused experimental REST API v4. No production change.
 
 
