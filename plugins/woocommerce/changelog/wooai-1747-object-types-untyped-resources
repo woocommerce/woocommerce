@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Refuse object_types on extension fields of resources whose objects have no type; the feature is experimental.
+Comment: Let a resource of the experimental extensible abilities name the type of its objects, so object_types works on terms.
 

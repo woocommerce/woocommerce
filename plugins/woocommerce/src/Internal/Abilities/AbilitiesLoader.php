@@ -176,12 +176,10 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function register_core_resources(): void {
-		foreach ( array( 'product', 'order', 'order_item', 'order_refund' ) as $resource_name ) {
-			ExtensibleAbilities::register_resource( $resource_name, true );
-		}
-		foreach ( array( 'product_term', 'product_review', 'customer' ) as $resource_name ) {
+		foreach ( array( 'product', 'order', 'order_item', 'order_refund', 'product_review', 'customer' ) as $resource_name ) {
 			ExtensibleAbilities::register_resource( $resource_name );
 		}
+		ExtensibleAbilities::register_resource( 'product_term', array( 'object_type_callback' => static fn( \WP_Term $term ): string => $term->taxonomy ) );
 	}
 
 	/**

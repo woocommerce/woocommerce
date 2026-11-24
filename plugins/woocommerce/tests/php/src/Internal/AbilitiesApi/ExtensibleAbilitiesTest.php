@@ -4993,7 +4993,29 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse a $resource_name field with object_types, and still list the $resource_name objects.
+	 * @testdox Should limit a term field with object_types to the terms of those taxonomies.
+	 */
+	public function test_object_types_limit_a_term_field_to_some_taxonomies(): void {
+		$this->register_typed_field( 'product_term', array( 'product_brand' ) );
+		$list_terms = fn( string $taxonomy ): array => $this->run_ability(
+			'woocommerce/product-terms-query',
+			array(
+				'taxonomy'   => $taxonomy,
+				'include'    => array( self::factory()->term->create( array( 'taxonomy' => $taxonomy ) ) ),
+				'hide_empty' => false,
+			)
+		)['terms'];
+
+		$brands     = $list_terms( 'product_brand' );
+		$categories = $list_terms( 'product_cat' );
+
+		$this->assertSame( 'value', $brands[0]['extensions']['test-ext']['typed'] );
+		$this->assertCount( 1, $categories );
+		$this->assertArrayNotHasKey( 'extensions', $categories[0] );
+	}
+
+	/**
+	 * @testdox Should ignore object_types on a $resource_name field, because the objects have no type.
 	 * @dataProvider provide_resources_without_object_types
 	 *
 	 * @param string   $resource_name Resource whose objects have no type.
@@ -5001,28 +5023,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @param string   $list_key      Output key of the list.
 	 * @param callable $create_input  Creates two objects and returns the ability input that lists them.
 	 */
-	public function test_object_types_on_a_resource_without_types_is_refused( string $resource_name, string $ability, string $list_key, callable $create_input ): void {
-		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
-		$this->add_test_action(
-			'woocommerce_extensible_abilities_init',
-			static function () use ( $resource_name ) {
-				ExtensibleAbilities::register_field(
-					array(
-						'resource'      => $resource_name,
-						'namespace'     => 'test-ext',
-						'field'         => 'typed',
-						'output_schema' => array( 'type' => 'string' ),
-						'object_types'  => array( 'simple' ),
-						'get_callback'  => static fn() => 'value',
-					)
-				);
-			}
-		);
+	public function test_object_types_have_no_effect_on_a_resource_without_types( string $resource_name, string $ability, string $list_key, callable $create_input ): void {
+		$this->register_typed_field( $resource_name, array( 'simple' ) );
 
 		$list = $this->run_ability( $ability, $create_input() )[ $list_key ];
 
 		$this->assertCount( 2, $list );
-		$this->assertArrayNotHasKey( 'extensions', $list[0] );
+		$this->assertSame( 'value', $list[0]['extensions']['test-ext']['typed'] );
 	}
 
 	/**
@@ -5031,7 +5038,31 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @return array<string, array>
 	 */
 	public function provide_resources_without_object_types(): array {
-		return array_diff_key( $this->provide_list_abilities(), array_flip( array( 'product', 'order_refund' ) ) );
+		return array_intersect_key( $this->provide_list_abilities(), array_flip( array( 'product_review', 'customer' ) ) );
+	}
+
+	/**
+	 * Register a readable `test-ext.typed` field with object_types.
+	 *
+	 * @param string   $resource_name Resource of the field.
+	 * @param string[] $object_types  Object types the field applies to.
+	 */
+	private function register_typed_field( string $resource_name, array $object_types ): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name, $object_types ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => $resource_name,
+						'namespace'     => 'test-ext',
+						'field'         => 'typed',
+						'output_schema' => array( 'type' => 'string' ),
+						'object_types'  => $object_types,
+						'get_callback'  => static fn() => 'value',
+					)
+				);
+			}
+		);
 	}
 
 	/**

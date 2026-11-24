@@ -42,9 +42,9 @@ class ExtensibleAbilities {
 	private static array $fields = array();
 
 	/**
-	 * Registered resources, keyed by resource name. The value says whether the objects of the resource have a type.
+	 * Registered resources, keyed by resource name. The value holds the arguments from `register_resource()`.
 	 *
-	 * @var array<string, bool>
+	 * @var array<string, array<string, mixed>>
 	 */
 	private static array $resources = array();
 
@@ -108,11 +108,17 @@ class ExtensibleAbilities {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param string $resource_name    Slug of the resource, such as `ticket`.
-	 * @param bool   $has_object_types Optional. Whether every object of the resource has a `get_type()` method, so
-	 *                                 fields can set `object_types`. Default false.
+	 * @param string $resource_name Slug of the resource, such as `ticket`.
+	 * @param array  $args          {
+	 *     Optional. Arguments of the resource.
+	 *
+	 *     @type callable $object_type_callback Optional. Receives an object of the resource and returns its type as
+	 *                                          a string, which the `object_types` of a field are compared with.
+	 *                                          Core's `product_term` returns the taxonomy of the term. Without it,
+	 *                                          the type is `get_type()` of the object.
+	 * }
 	 */
-	public static function register_resource( string $resource_name, bool $has_object_types = false ): void {
+	public static function register_resource( string $resource_name, array $args = array() ): void {
 		if ( did_action( 'woocommerce_extensible_abilities_resources_init' ) && ! doing_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
 			wc_doing_it_wrong( __METHOD__, 'Register a resource inside the woocommerce_extensible_abilities_resources_init action, before the fields are registered.', '11.3.0' );
 			return;
@@ -122,7 +128,12 @@ class ExtensibleAbilities {
 			return;
 		}
 
-		self::$resources[ $resource_name ] = self::$resources[ $resource_name ] ?? $has_object_types;
+		if ( isset( $args['object_type_callback'] ) && ! is_callable( $args['object_type_callback'] ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "object_type_callback" argument must be callable.', '11.5.0' );
+			return;
+		}
+
+		self::$resources[ $resource_name ] = self::$resources[ $resource_name ] ?? $args;
 	}
 
 	/**
@@ -152,14 +163,12 @@ class ExtensibleAbilities {
 	 *                                  which are the keywords with a nested schema that WordPress supports (see
 	 *                                  `rest_get_allowed_schema_keywords()`), and under `allOf`, which
 	 *                                  WooCommerce also reads, because some clients refuse it.
-	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
-	 *                                  object returns them, such as `simple` and `subscription` for a product or
-	 *                                  `line_item` for an order item. The abilities leave the field out of the
-	 *                                  other objects and refuse a write to them. Omit it for every type. Only a
-	 *                                  resource registered with `$has_object_types` accepts it: `product`, `order`,
-	 *                                  `order_item` and `order_refund` in Core. On another resource, such as
-	 *                                  `product_term`, the field is refused. There, the callbacks check the object
-	 *                                  instead, for example the taxonomy of a term.
+	 *     @type string[] $object_types Optional. The object types the field applies to, such as `simple` and
+	 *                                  `subscription` for a product, `line_item` for an order item or
+	 *                                  `product_brand` for a term. The abilities leave the field out of the
+	 *                                  other objects and refuse a write to them. Omit it for every type. It has
+	 *                                  no effect on a resource whose objects have no type, such as
+	 *                                  `product_review` and `customer`.
 	 *     @type callable $get_callback Optional. Receives the object and returns the value. A field without it
 	 *                                  is not in the output. Required with `output_schema`. Return null when the
 	 *                                  object has no value, and the field is left out with no error. Any other
@@ -268,17 +277,6 @@ class ExtensibleAbilities {
 		}
 		if ( isset( $args['object_types'] ) && ( ! is_array( $args['object_types'] ) || empty( $args['object_types'] ) || array_filter( $args['object_types'], static fn( $type ) => ! is_string( $type ) ) ) ) {
 			wc_doing_it_wrong( __METHOD__, 'The "object_types" argument must be a list of object types.', '11.4.0' );
-			return;
-		}
-		if ( isset( $args['object_types'] ) && ! self::$resources[ $args['resource'] ] ) {
-			wc_doing_it_wrong(
-				__METHOD__,
-				sprintf(
-					'The "%s" resource does not accept "object_types", because its objects have no type. Remove "object_types", and check the object in the callbacks instead.',
-					$args['resource']
-				),
-				'11.5.0'
-			);
 			return;
 		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
@@ -897,23 +895,32 @@ class ExtensibleAbilities {
 	 * @since 11.4.0
 	 *
 	 * @param array<string, mixed> $args    Field arguments from `register_field()`.
-	 * @param mixed                $subject The object. It must have a `get_type()` method.
+	 * @param mixed                $subject The object.
 	 * @return bool
 	 */
 	public static function field_applies_to( array $args, $subject ): bool {
-		return empty( $args['object_types'] ) || in_array( $subject->get_type(), $args['object_types'], true );
+		if ( empty( $args['object_types'] ) ) {
+			return true;
+		}
+		$type = self::get_object_type( $subject, $args['resource'] );
+		return '' === $type || in_array( $type, $args['object_types'], true );
 	}
 
 	/**
-	 * The type of an object, from its `get_type()` method.
+	 * The type of an object, from the `object_type_callback` of its resource or else its `get_type()` method.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param mixed $subject The object. It must have a `get_type()` method.
-	 * @return string
+	 * @param mixed  $subject       The object.
+	 * @param string $resource_name Optional. Resource of the object.
+	 * @return string The type, or an empty string when the object has none.
 	 */
-	public static function get_object_type( $subject ): string {
-		return $subject->get_type();
+	public static function get_object_type( $subject, string $resource_name = '' ): string {
+		if ( isset( self::$resources[ $resource_name ]['object_type_callback'] ) ) {
+			$type = call_user_func( self::$resources[ $resource_name ]['object_type_callback'], $subject );
+			return is_string( $type ) ? $type : '';
+		}
+		return is_object( $subject ) && method_exists( $subject, 'get_type' ) ? (string) $subject->get_type() : '';
 	}
 
 	/**
