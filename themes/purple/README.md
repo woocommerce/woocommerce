@@ -24,7 +24,7 @@ pnpm --filter=@woocommerce/theme-cli wp-env start purple
 
 ### Update versions and changelog
 
-Create a pull request including these changes (see #71001 and #71051 for an example):
+Create a pull request including these changes (see [#71001](https://github.com/woocommerce/woocommerce/pull/71001) and [#71051](https://github.com/woocommerce/woocommerce/pull/71051) for an example):
 
 * Move changelog entries to `readme.txt`.
 * Update WC and WP compatibility versions, we follow a L-1 compatibility policy.
@@ -41,7 +41,7 @@ pnpm --filter=@woocommerce/theme-purple build
 
 A ZIP will be generated in `themes/purple/artifacts/purple.zip`.
 
-Install that ZIP on a test site with the [Theme Check](https://wordpress.org/plugins/theme-check/) plugin active, go to Appearance > Theme Check and verify all checks pass. Smoke test a few screens.
+Install that ZIP on a test site with the [Theme Check](https://wordpress.org/plugins/theme-check/) plugin active, go to Appearance > Theme Check and verify all checks pass. Install WooCommerce and smoke test a few screens.
 
 ### Tag and push
 
