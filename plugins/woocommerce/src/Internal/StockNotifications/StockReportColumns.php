@@ -28,7 +28,8 @@ class StockReportColumns {
 	 */
 	public function __construct() {
 		add_filter( 'woocommerce_analytics_orderby_enum_reports/stock', array( $this, 'add_orderby_options' ) );
-		add_filter( 'posts_clauses', array( $this, 'add_orderby_clauses' ), 10, 2 );
+		add_filter( 'woocommerce_analytics_clauses_join_stock', array( $this, 'add_orderby_join' ), 10, 2 );
+		add_filter( 'woocommerce_analytics_clauses_order_by_stock', array( $this, 'add_orderby_clauses' ), 10, 2 );
 		add_action( 'woocommerce_analytics_stock_report_products_loaded', array( $this, 'load_stats' ), 10, 2 );
 		add_filter( 'woocommerce_report_stock_export_columns', array( $this, 'add_export_columns' ) );
 		add_filter( 'woocommerce_report_stock_prepare_export_item', array( $this, 'add_export_values' ), 10, 2 );
@@ -75,41 +76,54 @@ class StockReportColumns {
 	}
 
 	/**
-	 * Sort the stock report query by the new columns.
+	 * Join the notification stats when the stock report is sorted by the new columns.
 	 *
 	 * @internal
 	 *
-	 * @param mixed $clauses  The query clauses.
-	 * @param mixed $wp_query The query.
+	 * @param mixed $clauses  The JOIN clauses.
+	 * @param mixed $wp_query The stock report query.
+	 * @return mixed
+	 */
+	public function add_orderby_join( $clauses, $wp_query ) {
+		if ( ! is_array( $clauses ) || ! $this->is_sorted_by_stats( $wp_query ) ) {
+			return $clauses;
+		}
+
+		// Sign-up changes don't bust WP_Query's cached post IDs, so a cached order would go stale.
+		$wp_query->set( 'cache_results', false );
+
+		$clauses[] = $this->get_stats_join();
+
+		return $clauses;
+	}
+
+	/**
+	 * Sort the stock report by the new columns.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $clauses  The ORDER BY clauses.
+	 * @param mixed $wp_query The stock report query.
 	 * @return mixed
 	 */
 	public function add_orderby_clauses( $clauses, $wp_query ) {
-		if ( ! is_array( $clauses ) || ! $wp_query instanceof \WP_Query || true !== $wp_query->get( 'wc_analytics_stock_report' ) ) {
+		if ( ! is_array( $clauses ) || ! $this->is_sorted_by_stats( $wp_query ) ) {
 			return $clauses;
 		}
 
 		global $wpdb;
 
-		$orderby = $wp_query->get( 'orderby' );
-		$order   = $wp_query->get( 'order' );
-		$order   = is_string( $order ) && 'ASC' === strtoupper( $order ) ? 'ASC' : 'DESC';
+		$order = $wp_query->get( 'order' );
+		$order = is_string( $order ) && 'ASC' === strtoupper( $order ) ? 'ASC' : 'DESC';
 
-		if ( in_array( $orderby, array( 'active_signups', 'days_waiting' ), true ) ) {
-			// Sign-up changes don't bust WP_Query's cached post IDs, so a cached order would go stale.
-			$wp_query->set( 'cache_results', false );
+		if ( 'active_signups' === $wp_query->get( 'orderby' ) ) {
+			return array( " COALESCE( sn.sn_count, 0 ) {$order}, {$wpdb->posts}.ID {$order} " );
 		}
 
-		if ( 'active_signups' === $orderby ) {
-			$clauses['join']   .= $this->get_stats_join();
-			$clauses['orderby'] = " COALESCE( sn.sn_count, 0 ) {$order}, {$wpdb->posts}.ID {$order} ";
-		} elseif ( 'days_waiting' === $orderby ) {
-			// More days waiting means an older sign-up, so the date sorts the other way. Rows without sign-ups always go last.
-			$date_order         = 'ASC' === $order ? 'DESC' : 'ASC';
-			$clauses['join']   .= $this->get_stats_join();
-			$clauses['orderby'] = " sn.sn_oldest IS NULL, sn.sn_oldest {$date_order}, {$wpdb->posts}.ID {$order} ";
-		}
+		// More days waiting means an older sign-up, so the date sorts the other way. Rows without sign-ups always go last.
+		$date_order = 'ASC' === $order ? 'DESC' : 'ASC';
 
-		return $clauses;
+		return array( " sn.sn_oldest IS NULL, sn.sn_oldest {$date_order}, {$wpdb->posts}.ID {$order} " );
 	}
 
 	/**
@@ -189,6 +203,16 @@ class StockReportColumns {
 		$export_item['days_waiting']   = $item['days_waiting'] ?? '';
 
 		return $export_item;
+	}
+
+	/**
+	 * Whether the stock report query is sorted by one of the new columns.
+	 *
+	 * @param mixed $wp_query The stock report query.
+	 * @return bool
+	 */
+	private function is_sorted_by_stats( $wp_query ): bool {
+		return $wp_query instanceof \WP_Query && in_array( $wp_query->get( 'orderby' ), array( 'active_signups', 'days_waiting' ), true );
 	}
 
 	/**

@@ -88,9 +88,6 @@ class Controller extends GenericController implements ExportableInterface {
 
 		$args['ignore_sticky_posts'] = true;
 
-		// Marks the query as the stock report's, for `posts_clauses` callbacks. Not a public query var, so URLs can't set it.
-		$args['wc_analytics_stock_report'] = true;
-
 		return $args;
 	}
 
@@ -290,6 +287,29 @@ class Controller extends GenericController implements ExportableInterface {
 				$args['orderby'] = " wc_product_meta_lookup.sku {$order}, wc_product_meta_lookup.product_id {$order} ";
 				break;
 		}
+
+		/**
+		 * Filters the stock report's JOIN clauses, like `woocommerce_analytics_clauses_join_{context}` in the other reports.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param string[] $clauses  The JOIN clauses.
+		 * @param object   $wp_query The stock report `WP_Query`.
+		 */
+		$join = apply_filters( 'woocommerce_analytics_clauses_join_stock', array( $args['join'] ), $wp_query );
+
+		/**
+		 * Filters the stock report's ORDER BY clauses, like `woocommerce_analytics_clauses_order_by_{context}` in the other reports.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param string[] $clauses  The ORDER BY clauses, without the `ORDER BY` keyword.
+		 * @param object   $wp_query The stock report `WP_Query`.
+		 */
+		$order_by = apply_filters( 'woocommerce_analytics_clauses_order_by_stock', array( $args['orderby'] ), $wp_query );
+
+		$args['join']    = is_array( $join ) ? implode( ' ', $join ) : $args['join'];
+		$args['orderby'] = is_array( $order_by ) ? implode( ' ', $order_by ) : $args['orderby'];
 
 		return $args;
 	}
