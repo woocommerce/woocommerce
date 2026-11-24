@@ -101,7 +101,14 @@ export interface Declared {
 export interface DeclaredExperiments {
 	enabled: boolean;
 	/** The offer to turn the experiments on: null once they're on, or when nothing they add is missing. */
-	offer: { title: string; text: string; button: string } | null;
+	offer: {
+		title: string;
+		/** Wraps the path to the Features page in <link></link>. */
+		text: string;
+		/** The Features page. */
+		href: string;
+		button: string;
+	} | null;
 	/** After the offer's button succeeds, until the next check finishes. */
 	turned_on: { text: string; button: string };
 	/** Once they're on. */

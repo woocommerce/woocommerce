@@ -1175,14 +1175,15 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * The AI assistant experiments notice at the top of Extra details. While the feature is off, it offers
-	 * to turn it on when any item the experiments add is not found, naming every experiment as the
-	 * Features page does. Once on, a line links to Features.
+	 * to turn it on when any item the experiments add is not found, linking to the Features page that
+	 * lists every experiment. Once on, a line links to Features.
 	 *
 	 * @param array<int, array<string, mixed>> $items   Items from the report.
 	 * @param bool                             $enabled Whether the feature is on.
 	 * @return array<string, mixed>
 	 */
 	private static function experiments_notice( array $items, bool $enabled ): array {
+		$features_url   = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
 		$experiment_ids = AiAssistantExperiments::get_declared_item_ids();
 		$missing        = array_filter(
 			$items,
@@ -1192,11 +1193,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'enabled'   => $enabled,
 			'offer'     => $enabled || array() === $missing ? null : array(
 				'title'  => __( 'Add newer ways for AI assistants to read and shop your store', 'woocommerce' ),
-				'text'   => sprintf(
-					/* translators: %s: list of experiments, for example "WebMCP on store forms, Markdown versions of pages, and AI training notices". */
-					__( 'AI assistant experiments add %s. The standards aren’t settled, and few AI assistants use them yet. Turn them off at any time in Features.', 'woocommerce' ),
-					AiAssistantExperiments::get_list()
-				),
+				/* translators: <link> and </link> wrap the path to the Features page, where every experiment is listed. */
+				'text'   => __( 'These add files and page code from newer AI standards, which few AI assistants use yet. Turn them off at any time in <link>Settings > Advanced > Features</link>.', 'woocommerce' ),
+				'href'   => $features_url,
 				'button' => __( 'Turn on AI assistant experiments', 'woocommerce' ),
 			),
 			'turned_on' => array(
@@ -1206,7 +1205,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'on'        => array(
 				'text' => __( 'AI assistant experiments are on', 'woocommerce' ),
 				'link' => array(
-					'href' => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ),
+					'href' => $features_url,
 					'text' => __( 'Turn off in Features', 'woocommerce' ),
 				),
 			),

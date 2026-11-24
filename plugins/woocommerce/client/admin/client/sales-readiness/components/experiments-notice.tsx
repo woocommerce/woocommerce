@@ -2,7 +2,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
-import { useState } from '@wordpress/element';
+import { createInterpolateElement, useState } from '@wordpress/element';
 /* eslint-disable @wordpress/use-recommended-components -- The page uses these @wordpress/ui components; this chunk bundles the package. */
 import { Link, Notice, Text } from '@wordpress/ui';
 /* eslint-enable @wordpress/use-recommended-components */
@@ -106,6 +106,8 @@ export const ExperimentsNotice = ( {
 		}
 	};
 
+	const offerHref = safeHref( experiments.offer.href );
+
 	return (
 		<>
 			{ failed && (
@@ -114,7 +116,13 @@ export const ExperimentsNotice = ( {
 			<Notice.Root key="offer" intent="info">
 				<Notice.Title>{ experiments.offer.title }</Notice.Title>
 				<Notice.Description>
-					{ experiments.offer.text }
+					{ createInterpolateElement( experiments.offer.text, {
+						link: offerHref ? (
+							<Link href={ offerHref } />
+						) : (
+							<span />
+						),
+					} ) }
 				</Notice.Description>
 				<Notice.Actions>
 					<Notice.ActionButton

@@ -174,7 +174,8 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 		enabled: false,
 		offer: {
 			title: 'Add newer ways for AI assistants to read and shop your store',
-			text: 'AI assistant experiments add WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, a Markdown sitemap and AI catalog, and AI training notices. The standards aren’t settled, and few AI assistants use them yet. Turn them off at any time in Features.',
+			text: 'These add files and page code from newer AI standards, which few AI assistants use yet. Turn them off at any time in <link>Settings > Advanced > Features</link>.',
+			href: 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features',
 			button: 'Turn on AI assistant experiments',
 		},
 		turned_on: {
@@ -223,7 +224,7 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 		mockApiFetch.mockReset();
 	} );
 
-	it( 'offers to turn the experiments on, naming them, above the card’s description', async () => {
+	it( 'offers to turn the experiments on, linking to Features, above the card’s description', async () => {
 		const { container } = render(
 			<DeclaredCard
 				declared={ declared( experiments() ) }
@@ -239,7 +240,15 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 			'Add newer ways for AI assistants to read and shop your store'
 		);
 		expect( notice ).toHaveTextContent(
-			'AI assistant experiments add WebMCP on store forms, Markdown versions of pages'
+			'These add files and page code from newer AI standards, which few AI assistants use yet. Turn them off at any time in Settings > Advanced > Features.'
+		);
+		expect(
+			screen.getByRole( 'link', {
+				name: 'Settings > Advanced > Features',
+			} )
+		).toHaveAttribute(
+			'href',
+			'https://example.com/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features'
 		);
 		expect(
 			screen.getByRole( 'button', {
@@ -253,6 +262,32 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 				)
 			)
 		).toBe( window.Node.DOCUMENT_POSITION_FOLLOWING );
+	} );
+
+	it( 'shows the Features path as plain text when its link is unsafe', async () => {
+		const notice = experiments();
+		render(
+			<DeclaredCard
+				declared={ declared( {
+					...notice,
+					offer: notice.offer && {
+						...notice.offer,
+						href: 'javascript:alert(1)',
+					},
+				} ) }
+				run={ run() }
+			/>
+		);
+		await open();
+
+		expect(
+			screen.getByText( 'Settings > Advanced > Features' )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'link', {
+				name: 'Settings > Advanced > Features',
+			} )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'turns the experiments on, asks to run the check, then shows they are on once it finishes', async () => {

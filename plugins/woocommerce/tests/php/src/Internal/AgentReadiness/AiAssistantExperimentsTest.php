@@ -132,7 +132,7 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox While the feature is off and an item the experiments add is missing, Extra details offers them, naming all of them.
+	 * @testdox While the feature is off and an item the experiments add is missing, Extra details offers them and links to Features.
 	 */
 	public function test_declared_offers_missing_items_while_off(): void {
 		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
@@ -150,10 +150,10 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $declared['experiments']['enabled'] );
 		$this->assertSame( 'Add newer ways for AI assistants to read and shop your store', $declared['experiments']['offer']['title'] );
 		$this->assertSame(
-			'AI assistant experiments add WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, a Markdown sitemap and AI catalog, and AI training notices. The standards aren’t settled, and few AI assistants use them yet. Turn them off at any time in Features.',
-			$declared['experiments']['offer']['text'],
-			'Every experiment is named, as on the Features page, even when only some of their items are missing'
+			'These add files and page code from newer AI standards, which few AI assistants use yet. Turn them off at any time in <link>Settings > Advanced > Features</link>.',
+			$declared['experiments']['offer']['text']
 		);
+		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ), $declared['experiments']['offer']['href'] );
 		$this->assertArrayNotHasKey( 'experiment', $declared['groups'][0]['items'][0], 'Items are not marked' );
 		$this->assertSame( 'Turn on AI assistant experiments', $declared['experiments']['offer']['button'] );
 		$this->assertSame( 'AI assistant experiments are on. Run the check again to see the new files.', $declared['experiments']['turned_on']['text'] );
