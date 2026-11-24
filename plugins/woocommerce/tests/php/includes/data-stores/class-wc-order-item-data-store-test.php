@@ -30,17 +30,6 @@ class WC_Order_Item_Data_Store_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		$this->disable_cogs_feature();
-
-		remove_all_filters( 'woocommerce_save_order_item_cogs_value' );
-		remove_all_filters( 'woocommerce_load_order_item_cogs_value' );
-	}
-
-	/**
 	 * @testdox The Cost of Goods Sold value for order items is not persisted when the item is saved if the feature is disabled.
 	 */
 	public function test_cogs_is_not_persisted_when_cogs_is_disabled() {
@@ -355,5 +344,23 @@ class WC_Order_Item_Data_Store_Test extends WC_Unit_Test_Case {
 		$reloaded_coupon = new WC_Order_Item_Coupon( $coupon_copy->get_id() );
 		$this->assertSame( '7', $reloaded_coupon->get_discount() );
 		$this->assertSame( '2', $reloaded_coupon->get_discount_tax() );
+	}
+
+	/**
+	 * @testdox Deleting an order item through the data store returns how many item rows the call deleted.
+	 */
+	public function test_delete_returns_number_of_deleted_rows(): void {
+		$order = WC_Helper_Order::create_order();
+		$item  = new WC_Order_Item_Coupon();
+		$item->set_code( 'delete-count' );
+		$order->add_item( $item );
+		$order->save();
+		$first_copy  = new WC_Order_Item_Coupon( $item->get_id() );
+		$second_copy = new WC_Order_Item_Coupon( $item->get_id() );
+		$unsaved     = new WC_Order_Item_Coupon();
+
+		$this->assertSame( 1, $first_copy->get_data_store()->delete( $first_copy ), 'The first delete should remove the row' );
+		$this->assertSame( 0, $second_copy->get_data_store()->delete( $second_copy ), 'A second delete of the same row should remove nothing' );
+		$this->assertSame( 0, $unsaved->get_data_store()->delete( $unsaved ), 'An item without ID should remove nothing' );
 	}
 }

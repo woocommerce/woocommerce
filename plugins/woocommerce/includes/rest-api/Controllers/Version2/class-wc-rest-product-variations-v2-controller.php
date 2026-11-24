@@ -393,6 +393,10 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 			$variation = new WC_Product_Variation();
 		}
 
+		if ( ! $variation instanceof WC_Product_Variation ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
 		// Update parent ID just once.
 		if ( 0 === $variation->get_parent_id() ) {
 			$variation->set_parent_id( absint( $request['product_id'] ) );

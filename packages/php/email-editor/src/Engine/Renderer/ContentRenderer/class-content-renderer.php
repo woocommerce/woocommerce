@@ -155,6 +155,19 @@ class Content_Renderer {
 	}
 
 	/**
+	 * Typography support callbacks that turn font sizes into fluid clamp() values: core's, and the
+	 * Gutenberg plugin's, which replaces core's when the plugin is active.
+	 */
+	private const TYPOGRAPHY_SUPPORT_CALLBACKS = array( 'wp_render_typography_support', 'gutenberg_render_typography_support' );
+
+	/**
+	 * Priorities of the typography support callbacks removed for email rendering, by callback name.
+	 *
+	 * @var array<string, int>
+	 */
+	private array $removed_typography_support = array();
+
+	/**
 	 * Initialize the content renderer
 	 *
 	 * @return void
@@ -162,6 +175,16 @@ class Content_Renderer {
 	private function initialize() {
 		add_filter( 'render_block', array( $this, 'render_block' ), 10, 2 );
 		add_filter( 'block_parser_class', array( $this, 'block_parser' ) );
+
+		// Typography support turns font sizes into fluid clamp() values, which many email clients
+		// can’t read. Keep the static sizes while the email renders.
+		foreach ( self::TYPOGRAPHY_SUPPORT_CALLBACKS as $callback ) {
+			$priority = has_filter( 'render_block', $callback );
+			if ( false !== $priority ) {
+				remove_filter( 'render_block', $callback, $priority );
+				$this->removed_typography_support[ $callback ] = $priority;
+			}
+		}
 		add_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 
 		// Swap core/post-content render callback for email rendering.
@@ -262,7 +285,7 @@ class Content_Renderer {
 
 		return array(
 			'html'   => $rendered_html,
-			'styles' => $this->collect_styles( $post, $template ),
+			'styles' => $this->collect_styles( $post ),
 		);
 	}
 
@@ -554,6 +577,12 @@ class Content_Renderer {
 	private function reset(): void {
 		remove_filter( 'render_block', array( $this, 'render_block' ) );
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
+		foreach ( $this->removed_typography_support as $callback => $priority ) {
+			if ( is_callable( $callback ) ) {
+				add_filter( 'render_block', $callback, $priority, 2 );
+			}
+		}
+		$this->removed_typography_support = array();
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 
 		$this->post_content_width = null;
@@ -632,11 +661,10 @@ class Content_Renderer {
 	/**
 	 * Collects CSS for the rendered content without inlining it.
 	 *
-	 * @param WP_Post                $post Post object.
-	 * @param WP_Block_Template|null $template Block template.
+	 * @param WP_Post $post Post object.
 	 * @return string The collected CSS string (without <style> wrapper).
 	 */
-	private function collect_styles( WP_Post $post, $template = null ): string {
+	private function collect_styles( WP_Post $post ): string {
 		$styles  = (string) file_get_contents( __DIR__ . '/' . self::CONTENT_STYLES_FILE );
 		$styles .= (string) file_get_contents( __DIR__ . '/../../content-shared.css' );
 
@@ -660,7 +688,7 @@ class Content_Renderer {
 		);
 
 		// Get styles from theme.
-		$styles              .= $this->theme_controller->get_stylesheet_for_rendering( $post, $template );
+		$styles              .= $this->theme_controller->get_stylesheet_for_rendering();
 		$block_support_styles = $this->theme_controller->get_stylesheet_from_context( 'block-supports', array() );
 		// Get styles from block-supports stylesheet. This includes rules such as layout (contentWidth) that some blocks use.
 		// @see https://github.com/WordPress/WordPress/blob/3c5da9c74344aaf5bf8097f2e2c6a1a781600e03/wp-includes/script-loader.php#L3134

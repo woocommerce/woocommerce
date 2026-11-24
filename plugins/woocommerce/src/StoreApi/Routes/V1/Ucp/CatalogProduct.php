@@ -3,7 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * UCP `POST /catalog/product` route.
@@ -47,7 +47,7 @@ class CatalogProduct extends AbstractCatalogRoute {
 	 * @return string
 	 */
 	protected function get_capability(): string {
-		return UcpUtils::CAPABILITY_CATALOG_LOOKUP;
+		return Utils::CAPABILITY_CATALOG_LOOKUP;
 	}
 
 	/**
@@ -70,6 +70,10 @@ class CatalogProduct extends AbstractCatalogRoute {
 					'description' => __( 'Option selections used to narrow the returned variants.', 'woocommerce' ),
 					'type'        => 'array',
 				),
+				'filters'  => array(
+					'description' => __( 'Filter criteria to narrow the returned variants.', 'woocommerce' ),
+					'type'        => 'object',
+				),
 			)
 		);
 	}
@@ -84,13 +88,13 @@ class CatalogProduct extends AbstractCatalogRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$id = trim( strval( UcpUtils::json_param( $request, 'id' ) ) );
+		$id = trim( strval( Utils::json_param( $request, 'id' ) ) );
 
 		if ( '' === $id ) {
 			return $this->ucp_error( 'VALIDATION_ERROR', __( 'id is required.', 'woocommerce' ), 'recoverable', 400 );
 		}
 
-		$selected = (array) ( UcpUtils::json_param( $request, 'selected' ) ?? array() );
+		$selected = (array) ( Utils::json_param( $request, 'selected' ) ?? array() );
 
 		// Checked before the product is loaded: an over-long selection is refused
 		// without paying for the lookup it would have been applied to.
@@ -105,6 +109,12 @@ class CatalogProduct extends AbstractCatalogRoute {
 				'recoverable',
 				400
 			);
+		}
+
+		$filters = (array) ( Utils::json_param( $request, 'filters' ) ?? array() );
+		$invalid = $this->validate_price_filter( $filters );
+		if ( null !== $invalid ) {
+			return $invalid;
 		}
 
 		$resolved = $this->resolve_product( $id );
@@ -130,8 +140,28 @@ class CatalogProduct extends AbstractCatalogRoute {
 			);
 		}
 
-		$this->mapper()->begin_response();
+		$this->mapper()->begin_response( $this->price_bounds( $filters ) );
 		$product = $this->mapper()->map_detail_product( $resolved['product'], $this->normalize_selected( $selected ), (int) $resolved['variation_id'] );
+
+		// `variants` cannot be empty, so a product the filters leave nothing of is an error.
+		if ( empty( $product['variants'] ) ) {
+			return new \WP_REST_Response(
+				array(
+					'ucp'      => $this->ucp_metadata( 'error' ),
+					'messages' => array(
+						array(
+							'type'         => 'error',
+							'code'         => 'not_found',
+							'content'      => __( 'No variant of this product matches the filters.', 'woocommerce' ),
+							'severity'     => 'recoverable',
+							'path'         => '$.filters',
+							'content_type' => 'plain',
+						),
+					),
+				),
+				200
+			);
+		}
 
 		$response = array(
 			'ucp'     => $this->ucp_metadata( 'success' ),

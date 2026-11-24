@@ -70,14 +70,6 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 	}
 
 	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		remove_all_filters( DataSourcePoller::FILTER_NAME );
-	}
-
-	/**
 	 * Test that a data source can be read.
 	 */
 	public function test_read_data_source() {

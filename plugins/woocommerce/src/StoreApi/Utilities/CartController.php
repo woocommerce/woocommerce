@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\ProductVariations\VariationMatcher;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\NotPurchasableException;
 use Automattic\WooCommerce\StoreApi\Exceptions\OutOfStockException;
@@ -1138,12 +1139,12 @@ class CartController {
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
 	 * @param array $request Add to cart request params.
-	 * @return \WC_Product|Error Returns a product object if purchasable.
+	 * @return \WC_Product Product to add. Throws if it does not exist or is trashed.
 	 */
 	protected function get_product_for_cart( $request ) {
 		$product = wc_get_product( $request['id'] );
 
-		if ( ! $product || ProductStatus::TRASH === $product->get_status() ) {
+		if ( ! $product instanceof \WC_Product || ProductStatus::TRASH === $product->get_status() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_invalid_product',
 				sprintf(
@@ -1153,6 +1154,11 @@ class CartController {
 				),
 				400
 			);
+		}
+
+		// Later errors name the product or its attributes, so refuse unpublished products the shopper cannot view before reaching them.
+		if ( ! $product->is_viewable() && ! $product->is_purchasable() ) {
+			$this->throw_default_product_exception( $product );
 		}
 
 		return $product;
@@ -1179,13 +1185,13 @@ class CartController {
 	}
 
 	/**
-	 * Get product name, hiding it for draft and private products.
+	 * Get product name, hiding it for products the current user cannot view (unpublished products, or variations of one).
 	 *
 	 * @param \WC_Product $product Product instance.
 	 * @return string
 	 */
 	protected function get_product_name( \WC_Product $product ) {
-		if ( $product->get_status() === ProductStatus::DRAFT || $product->get_status() === ProductStatus::PRIVATE ) {
+		if ( ! $product->is_viewable() ) {
 			return '';
 		}
 		return $product->get_name();
@@ -1366,6 +1372,18 @@ class CartController {
 						wc_format_list_of_items( $missing_attributes )
 					)
 				),
+				400
+			);
+		}
+
+		$variation_product = wc_get_product( $request['id'] );
+		if (
+			$variation_product instanceof \WC_Product_Variation &&
+			wc_get_container()->get( VariationMatcher::class )->has_earlier_match( $variation_product, $request['variation'] )
+		) {
+			throw new RouteException(
+				'woocommerce_rest_invalid_variation_data',
+				esc_html__( 'The selected options belong to a different variation of this product.', 'woocommerce' ),
 				400
 			);
 		}

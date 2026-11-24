@@ -57,14 +57,6 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		$this->disable_cogs_feature();
-	}
-
-	/**
 	 * @testdox Formatting metadata preserves raw keys and values across repeated calls and saves.
 	 * @testWith ["Finish%20type", "Black%2520White", "Finish type", "Black%20White"]
 	 *           ["finish", "Black%20White", "finish", "Black White"]

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent product REST API errors and incorrect in-stock statuses when an extension returns invalid stock status options.

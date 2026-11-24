@@ -122,20 +122,16 @@ class SingleProductMetaTemplateTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_product_meta_category_orderby', $orderby_filter );
 
-		try {
-			$expected = implode(
-				', ',
-				array( $this->category_names['leaf'], $this->category_names['mid'], $this->category_names['root'] )
-			);
+		$expected = implode(
+			', ',
+			array( $this->category_names['leaf'], $this->category_names['mid'], $this->category_names['root'] )
+		);
 
-			$this->assertStringContainsString(
-				'Categories: ' . $expected,
-				wp_strip_all_tags( wc_get_template_html( 'single-product/meta.php' ) ),
-				'Single product meta should honor the filtered product category ordering mode.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_product_meta_category_orderby', $orderby_filter );
-		}
+		$this->assertStringContainsString(
+			'Categories: ' . $expected,
+			wp_strip_all_tags( wc_get_template_html( 'single-product/meta.php' ) ),
+			'Single product meta should honor the filtered product category ordering mode.'
+		);
 	}
 
 	/**

@@ -25,34 +25,11 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Original value of the fulfillments feature flag.
-	 *
-	 * @var mixed
-	 */
-	private static $original_fulfillments_flag;
-
-	/**
-	 * Enable the fulfillments feature and register its data store.
+	 * Create the fulfillments tables.
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
-	}
-
-	/**
-	 * Restore the fulfillments feature flag.
-	 */
-	public static function tearDownAfterClass(): void {
-		if ( false === self::$original_fulfillments_flag ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
-		}
-		parent::tearDownAfterClass();
+		FulfillmentsHelper::create_tables();
 	}
 
 	/**
@@ -60,6 +37,9 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Only the flag, not enable_fulfillments(): it would hook the container's FulfillmentsPrivacy
+		// too, and the end-to-end tests would pass on those hooks instead of the ones $this->sut adds.
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
 		$this->sut = new FulfillmentsPrivacy();
 	}
 
@@ -619,5 +599,79 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 
 		$reloaded = $this->reload_fulfillment( $order->get_id(), $fulfillment->get_id() );
 		$this->assertNull( $reloaded->get_tracking_number(), 'The valid key should be redacted and the non-scalar entry ignored.' );
+	}
+
+	/**
+	 * @testdox The eraser falls back to the default meta keys and logs a warning when the filter returns a non-array.
+	 *
+	 * @dataProvider provider_non_array_filter_values
+	 *
+	 * @param mixed $filtered_value The invalid value returned by the filter.
+	 */
+	public function test_eraser_falls_back_to_default_keys_for_non_array_filter_value( $filtered_value ): void {
+		list( $order, $fulfillment ) = $this->create_order_with_fulfillment(
+			array(
+				'_tracking_number' => 'TRACK123456',
+				'_tracking_url'    => 'https://example.com/track/TRACK123456',
+			)
+		);
+
+		$logger = $this->createMock( \WC_Logger_Interface::class );
+		$logger->expects( $this->once() )
+			->method( 'warning' )
+			->with( $this->stringContains( 'order ' . $order->get_id() ), $this->arrayHasKey( 'source' ) );
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $logger ) {
+				return $logger;
+			}
+		);
+		add_filter(
+			'woocommerce_privacy_remove_fulfillment_personal_data_meta',
+			function () use ( $filtered_value ) {
+				return $filtered_value;
+			}
+		);
+
+		$this->sut->remove_fulfillment_personal_data( $order );
+
+		$reloaded = $this->reload_fulfillment( $order->get_id(), $fulfillment->get_id() );
+		$this->assertNull( $reloaded->get_tracking_number(), 'The default tracking number key should still be cleared.' );
+		$this->assertNull( $reloaded->get_tracking_url(), 'The default tracking URL key should still be cleared.' );
+	}
+
+	/**
+	 * @return array<string, array<mixed>>
+	 */
+	public function provider_non_array_filter_values(): array {
+		return array(
+			'string' => array( 'invalid' ),
+			'null'   => array( null ),
+			'false'  => array( false ),
+		);
+	}
+
+	/**
+	 * @testdox The eraser clears nothing, without a warning, when the filter explicitly returns an empty array.
+	 */
+	public function test_eraser_clears_nothing_when_filter_returns_empty_array(): void {
+		list( $order, $fulfillment ) = $this->create_order_with_fulfillment(
+			array( '_tracking_number' => 'TRACK123456' )
+		);
+
+		$logger = $this->createMock( \WC_Logger_Interface::class );
+		$logger->expects( $this->never() )->method( 'warning' );
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $logger ) {
+				return $logger;
+			}
+		);
+		add_filter( 'woocommerce_privacy_remove_fulfillment_personal_data_meta', '__return_empty_array' );
+
+		$this->sut->remove_fulfillment_personal_data( $order );
+
+		$reloaded = $this->reload_fulfillment( $order->get_id(), $fulfillment->get_id() );
+		$this->assertSame( 'TRACK123456', $reloaded->get_tracking_number(), 'An explicit empty array is an opt-out and should clear nothing.' );
 	}
 }

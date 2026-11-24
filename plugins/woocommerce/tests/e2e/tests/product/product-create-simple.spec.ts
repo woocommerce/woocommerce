@@ -107,7 +107,7 @@ for ( const productType of Object.keys( productData ) ) {
 					.getByLabel( 'Regular price ($)' )
 					.fill( productData[ productType ].regularPrice );
 				await page
-					.getByRole( 'link' )
+					.getByRole( 'tab' )
 					.filter( { hasText: 'Inventory' } )
 					.click();
 
@@ -122,7 +122,7 @@ for ( const productType of Object.keys( productData ) ) {
 				const attributeName = getFakeAttribute().name;
 				await page
 					.locator( '#woocommerce-product-data' )
-					.getByRole( 'link', { name: 'Attributes' } )
+					.getByRole( 'tab', { name: 'Attributes' } )
 					.click();
 				await page
 					.getByPlaceholder( 'e.g. length or weight' )
@@ -144,7 +144,7 @@ for ( const productType of Object.keys( productData ) ) {
 			await test.step( 'add product advanced information', async () => {
 				// Advanced information
 				await page
-					.getByRole( 'link' )
+					.getByRole( 'tab' )
 					.filter( { hasText: 'Advanced' } )
 					.first()
 					.click();
@@ -188,7 +188,7 @@ for ( const productType of Object.keys( productData ) ) {
 			await test.step( 'add shipping details', async () => {
 				await page
 					.locator( '#woocommerce-product-data' )
-					.getByRole( 'link', { name: 'Shipping' } )
+					.getByRole( 'tab', { name: 'Shipping' } )
 					.click();
 				await expect(
 					page.getByText( 'Shipping class', { exact: true } )

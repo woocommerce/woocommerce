@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
  *
  * @since 10.4.0
  */
-class MiniCartFooterBlock extends \WP_UnitTestCase {
+class MiniCartFooterBlock extends \WC_Unit_Test_Case {
 	use BlockTypeRegistryTrait;
 
 	/**
@@ -38,14 +38,6 @@ class MiniCartFooterBlock extends \WP_UnitTestCase {
 				new IntegrationRegistry()
 			)
 		);
-	}
-
-	/**
-	 * Tear down test.
-	 */
-	public function tearDown(): void {
-		unset( $this->block );
-		parent::tearDown();
 	}
 
 	/**

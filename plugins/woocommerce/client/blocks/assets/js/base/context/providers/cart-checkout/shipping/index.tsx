@@ -73,12 +73,16 @@ export const ShippingDataProvider = ( {
 	}, [ observers ] );
 
 	// increment/decrement checkout calculating counts when shipping is loading.
+	// The cleanup releases only the count this effect added, so other holds on
+	// the counter survive.
 	useEffect( () => {
-		if ( isLoadingRates ) {
-			void __internalStartCalculation();
-		} else {
-			void __internalFinishCalculation();
+		if ( ! isLoadingRates ) {
+			return;
 		}
+		void __internalStartCalculation();
+		return () => {
+			void __internalFinishCalculation();
+		};
 	}, [
 		isLoadingRates,
 		__internalStartCalculation,
@@ -87,11 +91,13 @@ export const ShippingDataProvider = ( {
 
 	// increment/decrement checkout calculating counts when shipping rates are being selected.
 	useEffect( () => {
-		if ( isSelectingRate ) {
-			void __internalStartCalculation();
-		} else {
-			void __internalFinishCalculation();
+		if ( ! isSelectingRate ) {
+			return;
 		}
+		void __internalStartCalculation();
+		return () => {
+			void __internalFinishCalculation();
+		};
 	}, [
 		__internalStartCalculation,
 		__internalFinishCalculation,

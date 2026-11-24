@@ -155,7 +155,7 @@ class Options extends \WC_REST_Data_Controller {
 	 * @return array
 	 */
 	public static function get_default_option_permissions() {
-		$is_woocommerce_admin = \Automattic\WooCommerce\Internal\Admin\Homescreen::is_admin_user();
+		$is_woocommerce_admin = current_user_can( 'manage_woocommerce' );
 
 		/**
 		 * IMPORTANT: This list is frozen for legacy support.

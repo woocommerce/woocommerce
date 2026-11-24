@@ -134,8 +134,6 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'pre_http_request' );
-
 		delete_option( self::HAD_WOOPAYMENTS_OPTION );
 		delete_option( self::HAD_WOOPAYMENTS_VERSION_OPTION );
 		delete_option( 'wcpay_account_data' );
@@ -244,9 +242,6 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertTrue( $result );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -287,9 +282,6 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertFalse( $result );
-
-		// Clean up.
-		delete_option( 'wcpay_account_data' );
 	}
 
 	/**

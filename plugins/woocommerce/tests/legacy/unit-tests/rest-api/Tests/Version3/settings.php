@@ -16,6 +16,13 @@ class Settings extends WC_REST_Unit_Test_Case {
 	use ArraySubsetAsserts;
 
 	/**
+	 * Each test registers the settings filters that route registration reads.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {

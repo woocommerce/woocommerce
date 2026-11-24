@@ -61,6 +61,8 @@ package-lock.json
 .wp-env.override.json
 .wp-env.test.override.json
 .wp-env.e2e.override.json
+# Written by `pnpm utils ci-jobs --json`.
+/jobs.json
 
 # Unit tests
 tmp/

@@ -7,9 +7,12 @@ import type {
 	RichTextFormat as WPFormat,
 } from '@wordpress/rich-text/build-types/types';
 import { __ } from '@wordpress/i18n';
-import { BlockControls } from '@wordpress/block-editor';
+import {
+	BlockControls,
+	store as blockEditorStore,
+} from '@wordpress/block-editor';
 import { ToolbarButton, ToolbarGroup } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
+import { dispatch, select, useSelect } from '@wordpress/data';
 import { useCallback, useState } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import * as React from '@wordpress/element';
@@ -19,6 +22,7 @@ import * as React from '@wordpress/element';
  */
 import {
 	getElementRange,
+	getOffsetAfterTagReplacement,
 	renameTagComment,
 	insertPersonalizationTag,
 	replacePersonalizationTagsWithHTMLComments,
@@ -209,7 +213,7 @@ function extendRichTextFormats() {
 
 const personalizationTagsLiveContentUpdate = createHigherOrderComponent(
 	( BlockEdit ) => ( props ) => {
-		const { attributes, setAttributes, name } = props;
+		const { attributes, setAttributes, name, clientId } = props;
 		const { content } = attributes;
 
 		// Fetch the personalization tags list
@@ -239,18 +243,40 @@ const personalizationTagsLiveContentUpdate = createHigherOrderComponent(
 						...newAttributes,
 						content: replacedContent,
 					} );
+
+					// RichText selected the end of the typed tag, which the shorter content no longer reaches.
+					const { clientId: selectedId, offset } =
+						select( blockEditorStore ).getSelectionStart();
+					if (
+						replacedContent !== newAttributes.content &&
+						selectedId === clientId &&
+						offset !== undefined
+					) {
+						const newOffset = getOffsetAfterTagReplacement(
+							newAttributes.content,
+							replacedContent,
+							offset
+						);
+						void dispatch( blockEditorStore ).selectionChange(
+							clientId,
+							'content',
+							newOffset,
+							newOffset
+						);
+					}
 				} else {
 					setAttributes( newAttributes );
 				}
 			},
-			[ list, setAttributes ]
+			[ clientId, list, setAttributes ]
 		);
 
 		// Only process supported blocks
 		if (
 			name === 'core/paragraph' ||
 			name === 'core/heading' ||
-			name === 'core/list-item'
+			name === 'core/list-item' ||
+			name === 'core/preformatted'
 		) {
 			return (
 				<BlockEdit

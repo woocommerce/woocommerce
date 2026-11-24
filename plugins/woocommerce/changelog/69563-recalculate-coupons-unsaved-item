@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop recalculating coupons on an unsaved order from adding a second line for the same coupon.

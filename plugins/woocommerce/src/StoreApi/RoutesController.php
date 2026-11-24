@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * RoutesController class.
@@ -84,13 +84,20 @@ class RoutesController {
 				Routes\V1\ShopperListItemsByKey::IDENTIFIER => Routes\V1\ShopperListItemsByKey::class,
 			],
 			'ucp'           => [
-				// Universal Commerce Protocol endpoints, gated by UcpUtils::is_enabled().
+				// Universal Commerce Protocol endpoints, gated by Utils::is_enabled().
 				Routes\V1\Ucp\CatalogSearch::IDENTIFIER  => Routes\V1\Ucp\CatalogSearch::class,
 				Routes\V1\Ucp\CatalogLookup::IDENTIFIER  => Routes\V1\Ucp\CatalogLookup::class,
 				Routes\V1\Ucp\CatalogProduct::IDENTIFIER => Routes\V1\Ucp\CatalogProduct::class,
 				Routes\V1\Ucp\Carts::IDENTIFIER          => Routes\V1\Ucp\Carts::class,
 				Routes\V1\Ucp\CartsById::IDENTIFIER      => Routes\V1\Ucp\CartsById::class,
 				Routes\V1\Ucp\CartsCancel::IDENTIFIER    => Routes\V1\Ucp\CartsCancel::class,
+			],
+			'ucp_checkout'  => [
+				// Gated further by Utils::is_checkout_enabled().
+				Routes\V1\Ucp\CheckoutSessions::IDENTIFIER => Routes\V1\Ucp\CheckoutSessions::class,
+				Routes\V1\Ucp\CheckoutSessionsById::IDENTIFIER => Routes\V1\Ucp\CheckoutSessionsById::class,
+				Routes\V1\Ucp\CheckoutSessionsComplete::IDENTIFIER => Routes\V1\Ucp\CheckoutSessionsComplete::class,
+				Routes\V1\Ucp\CheckoutSessionsCancel::IDENTIFIER => Routes\V1\Ucp\CheckoutSessionsCancel::class,
 			],
 		];
 	}
@@ -107,8 +114,12 @@ class RoutesController {
 			$this->register_routes( 'shopper_lists', self::$api_namespace . '/v1' );
 		}
 
-		if ( UcpUtils::is_enabled() ) {
+		if ( Utils::is_enabled() ) {
 			$this->register_routes( 'ucp', 'wc/ucp/v1' );
+
+			if ( Utils::is_checkout_enabled() ) {
+				$this->register_routes( 'ucp_checkout', 'wc/ucp/v1' );
+			}
 		}
 	}
 

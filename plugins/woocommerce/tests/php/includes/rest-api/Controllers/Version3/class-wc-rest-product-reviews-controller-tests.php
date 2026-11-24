@@ -667,6 +667,143 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Provides ratings the API must reject.
+	 *
+	 * @return array<string, array{mixed}> Invalid ratings.
+	 */
+	public function data_provider_invalid_ratings(): array {
+		return array(
+			'above maximum' => array( 6 ),
+			'negative'      => array( -1 ),
+			'fractional'    => array( 4.5 ),
+			'boolean'       => array( true ),
+		);
+	}
+
+	/**
+	 * @testdox Creating a review with an invalid rating is rejected.
+	 * @dataProvider data_provider_invalid_ratings
+	 *
+	 * @param mixed $rating Invalid rating.
+	 */
+	public function test_create_item_rejects_invalid_rating( $rating ): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews' );
+		$request->set_body_params(
+			array(
+				'product_id'     => $product_id,
+				'review'         => 'Invalid rating.',
+				'reviewer'       => 'Jane Smith',
+				'reviewer_email' => 'jane.smith@example.org',
+				'rating'         => $rating,
+			)
+		);
+
+		$response = $this->sut->create_item( $request );
+
+		$this->assertWPError( $response );
+		$this->assertSame( 400, $response->get_error_data()['status'] );
+		$this->assertSame( 0, wc_get_product( $product_id )->get_review_count() );
+	}
+
+	/**
+	 * @testdox Updating a review with an invalid rating is rejected.
+	 * @dataProvider data_provider_invalid_ratings
+	 *
+	 * @param mixed $rating Invalid rating.
+	 */
+	public function test_update_item_rejects_invalid_rating( $rating ): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$review_id  = $this->create_review( $product_id, 'Still five stars.', 5 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_param( 'id', $review_id );
+		$request->set_param( 'rating', $rating );
+
+		$response = $this->sut->update_item( $request );
+
+		$this->assertWPError( $response );
+		$this->assertSame( 400, $response->get_error_data()['status'] );
+		$this->assertSame( 5, (int) get_comment_meta( $review_id, 'rating', true ) );
+		$this->assertEquals( 5, wc_get_product( $product_id )->get_average_rating() );
+	}
+
+	/**
+	 * @testdox Batch creating and updating reviews with an invalid rating returns a 400 error per item.
+	 * @dataProvider data_provider_invalid_ratings
+	 *
+	 * @param mixed $rating Invalid rating.
+	 */
+	public function test_batch_rejects_invalid_rating( $rating ): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$review_id  = $this->create_review( $product_id, 'Still five stars.', 5 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews/batch' );
+		$request->set_body_params(
+			array(
+				'create' => array(
+					array(
+						'product_id'     => $product_id,
+						'review'         => 'Invalid rating.',
+						'reviewer'       => 'Jane Smith',
+						'reviewer_email' => 'jane.smith@example.org',
+						'rating'         => $rating,
+					),
+				),
+				'update' => array(
+					array(
+						'id'     => $review_id,
+						'rating' => $rating,
+					),
+				),
+			)
+		);
+
+		$data = $this->sut->batch_items( $request );
+
+		foreach ( array( 'create', 'update' ) as $operation ) {
+			$this->assertSame( 400, $data[ $operation ][0]['error']['data']['status'] );
+		}
+		$this->assertSame( 5, (int) get_comment_meta( $review_id, 'rating', true ) );
+		$this->assertEquals( 1, wc_get_product( $product_id )->get_review_count() );
+	}
+
+	/**
+	 * @testdox A numeric string rating is normalized to an integer for single and batch creation.
+	 */
+	public function test_numeric_string_rating_is_normalized_for_single_and_batch(): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$body       = array(
+			'product_id'     => $product_id,
+			'review'         => 'Four stars.',
+			'reviewer'       => 'Jane Smith',
+			'reviewer_email' => 'jane.smith@example.org',
+			'rating'         => '04',
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews' );
+		$request->set_body_params( $body );
+		$single = $this->sut->create_item( $request );
+
+		$this->assertNotWPError( $single );
+		$this->assertSame( '4', get_comment_meta( $single->get_data()['id'], 'rating', true ) );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews/batch' );
+		// Use different content so WordPress does not reject the review as a duplicate of the first one.
+		$body['review'] = 'Four stars, in a batch.';
+		$request->set_body_params( array( 'create' => array( $body ) ) );
+		$data = $this->sut->batch_items( $request );
+
+		$this->assertArrayNotHasKey( 'error', $data['create'][0] );
+		$this->assertSame( '4', get_comment_meta( $data['create'][0]['id'], 'rating', true ) );
+	}
+
+	/**
 	 * Creates two products and a review that can be moved between them.
 	 *
 	 * @param int $rating Rating for the review.
