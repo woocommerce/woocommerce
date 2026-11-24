@@ -127,8 +127,7 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 		);
 	}
 
-	const showAiShoppingNotice =
-		answers === 'no' && data.aiShoppingEnabled === true;
+	const answersOff = answers === 'no';
 
 	return (
 		<div className="woocommerce-ai-access-settings">
@@ -163,23 +162,29 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 						setAnswers( enabled ? 'yes' : 'no' )
 					}
 				/>
-				{ showAiShoppingNotice && (
+				{ /* Turning answers off has a cost: AI assistants are less likely to recommend the store. */ }
+				{ answersOff && (
 					<Notice
 						status="info"
 						isDismissible={ false }
 						className="woocommerce-ai-access-settings__notice"
 					>
-						{ createInterpolateElement(
-							__(
-								'AI shopping is on, so AI assistants can still get your product details. Turn it off in <a>AI tools</a>.',
-								'woocommerce'
-							),
-							{
-								a: createElement( 'a', {
-									href: data.aiShoppingUrl,
-								} ),
-							}
-						) }
+						{ data.aiShoppingEnabled
+							? createInterpolateElement(
+									__(
+										'AI assistants are less likely to recommend your store when they can’t use your content. AI shopping is still on, so they can browse your products and build carts. <a>Manage AI shopping</a>',
+										'woocommerce'
+									),
+									{
+										a: createElement( 'a', {
+											href: data.aiShoppingUrl,
+										} ),
+									}
+								)
+							: __(
+									'AI assistants are less likely to recommend your store when they can’t use your content.',
+									'woocommerce'
+								) }
 					</Notice>
 				) }
 			</div>

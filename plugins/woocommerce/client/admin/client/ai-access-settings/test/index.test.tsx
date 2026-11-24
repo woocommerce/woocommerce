@@ -113,9 +113,9 @@ describe( 'AiAccessSettings', () => {
 
 		fireEvent.click( toggle );
 		const notice = container.querySelector( '.components-notice' );
-		expect( notice ).toHaveTextContent( /AI shopping is on/ );
+		expect( notice ).toHaveTextContent( /AI shopping is still on/ );
 		expect(
-			screen.getByRole( 'link', { name: 'AI tools' } )
+			screen.getByRole( 'link', { name: 'Manage AI shopping' } )
 		).toHaveAttribute(
 			'href',
 			'/wp-admin/admin.php?page=wc-settings&tab=agentic-commerce&section=shopping'
@@ -125,14 +125,21 @@ describe( 'AiAccessSettings', () => {
 		expect( container.querySelector( '.components-notice' ) ).toBeNull();
 	} );
 
-	it( 'does not show the AI shopping notice while AI shopping is off', () => {
+	it( 'shows the shorter answers notice while AI shopping is off', () => {
 		const { container } = renderWith( {
 			status: 'default',
 			[ ANSWERS_OPTION ]: 'no',
 			aiShoppingEnabled: false,
 		} );
 
-		expect( container.querySelector( '.components-notice' ) ).toBeNull();
+		const notice = container.querySelector(
+			'.woocommerce-ai-access-settings__notice'
+		);
+		expect( notice ).toHaveTextContent(
+			'AI assistants are less likely to recommend your store when they can’t use your content.'
+		);
+		expect( notice ).not.toHaveTextContent( /AI shopping is still on/ );
+		expect( screen.queryByRole( 'link' ) ).toBeNull();
 	} );
 
 	it( 'links to Jetpack instead of showing the controls while Jetpack manages AI access', () => {
