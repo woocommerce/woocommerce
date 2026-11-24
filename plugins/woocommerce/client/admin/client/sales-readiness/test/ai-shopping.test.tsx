@@ -493,6 +493,9 @@ describe( 'AiShopping', () => {
 		expect( toggle() ).toBeChecked();
 		expect( mockCreateSuccessNotice ).not.toHaveBeenCalled();
 		expect(
+			window.sessionStorage.getItem( 'wc-ai-shopping-snackbar' )
+		).toBeNull();
+		expect(
 			screen.getByText( 'Save your changes to see the updated status.' )
 		).toBeInTheDocument();
 	} );

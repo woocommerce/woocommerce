@@ -23,6 +23,11 @@ class ProductFailures {
 	public const WRITTEN_META = '_wc_agent_readiness_written_at';
 
 	/**
+	 * Products per cleanup delete statement.
+	 */
+	public const CLEANUP_CHUNK = 100;
+
+	/**
 	 * The value every checked product has, passing or not.
 	 */
 	public const CHECKED = 'checked';
@@ -153,7 +158,7 @@ class ProductFailures {
 		unset( self::$counts[ get_current_blog_id() ] );
 		global $wpdb;
 		// A scan can name thousands of products. Each statement stays small, and each one decides from the write time it sees.
-		foreach ( array_chunk( $product_ids, 100 ) as $chunk ) {
+		foreach ( array_chunk( $product_ids, self::CLEANUP_CHUNK ) as $chunk ) {
 			$ids = implode( ',', $chunk );
 			// $ids are absint. The write time is in this delete, so a save that commits after a separate read is not removed.
 			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -174,21 +179,11 @@ class ProductFailures {
 				)
 			);
 			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// The delete bypasses the meta API, so clear the caches its hooks would: WordPress's meta
+			// cache and WooCommerce's product meta cache (WC_Post_Data::flush_object_meta_cache()).
 			foreach ( $chunk as $product_id ) {
 				wp_cache_delete( $product_id, 'post_meta' );
-				foreach ( array( self::META_KEY, self::WRITTEN_META ) as $meta_key ) {
-					/**
-					 * Tells meta listeners these rows were removed, so the product meta cache drops them.
-					 *
-					 * @since 11.4.0
-					 *
-					 * @param int[]  $meta_ids    Unused. The rows were removed by one delete.
-					 * @param int    $product_id  Product id.
-					 * @param string $meta_key    Meta key removed.
-					 * @param string $meta_value  Unused.
-					 */
-					do_action( 'deleted_post_meta', array(), $product_id, $meta_key, '' );
-				}
+				\WC_Cache_Helper::invalidate_cache_group( 'object_' . $product_id );
 			}
 		}
 	}

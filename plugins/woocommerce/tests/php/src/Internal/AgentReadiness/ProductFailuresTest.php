@@ -165,12 +165,70 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 		update_post_meta( $stale->get_id(), ProductFailures::WRITTEN_META, sprintf( '%.6F', $before - 5 ) );
 		ProductFailures::store( $fresh->get_id(), array(), true );
 
+		// Read through the product, so its meta cache holds the rows.
+		$this->assertNotEmpty( wc_get_product( $stale->get_id() )->get_meta( ProductFailures::META_KEY, false ) );
+
 		ProductFailures::forget_unless_written_since( array( $stale->get_id(), $fresh->get_id() ), $before );
 
 		$this->assertSame( array(), ProductFailures::stored( $stale->get_id() ) );
+		$this->assertSame( array(), wc_get_product( $stale->get_id() )->get_meta( ProductFailures::META_KEY, false ), 'The product meta cache drops the removed rows' );
 		$this->assertSame( '', get_post_meta( $stale->get_id(), ProductFailures::WRITTEN_META, true ) );
 		$this->assertSame( array( ProductFailures::CHECKED ), ProductFailures::stored( $fresh->get_id() ) );
 		$this->assertNotSame( '', get_post_meta( $fresh->get_id(), ProductFailures::WRITTEN_META, true ) );
+	}
+
+	/**
+	 * @testdox A save records its write time before it changes the rows, so cleanup that runs during the save keeps them.
+	 */
+	public function test_cleanup_during_a_save_keeps_its_rows(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$id      = $product->get_id();
+		ProductFailures::store( $id, array(), false );
+		$scan_started = microtime( true );
+
+		// Cleanup of a scan that lists this product runs while the save is writing its rows.
+		$cleanup = static function ( $meta_id, $object_id, $meta_key ) use ( $id, $scan_started ): void {
+			unset( $meta_id );
+			if ( $id === (int) $object_id && ProductFailures::META_KEY === $meta_key ) {
+				ProductFailures::forget_unless_written_since( array( $id ), $scan_started );
+			}
+		};
+		add_action( 'added_post_meta', $cleanup, 10, 3 );
+		try {
+			ProductFailures::store( $id, array( 'missing_images' => array() ) );
+		} finally {
+			remove_action( 'added_post_meta', $cleanup, 10 );
+		}
+
+		$this->assertSame( array( ProductFailures::CHECKED, 'missing_images' ), ProductFailures::stored( $id ) );
+	}
+
+	/**
+	 * @testdox Cleanup of more products than one delete takes removes old rows past the first chunk, keeps fresh ones, and clears their cached meta.
+	 */
+	public function test_forget_unless_written_since_past_one_chunk(): void {
+		$ids           = self::factory()->post->create_many( ProductFailures::CLEANUP_CHUNK + 50 );
+		$last_in_first = ProductFailures::CLEANUP_CHUNK - 1;
+		foreach ( $ids as $id ) {
+			ProductFailures::store( $id, array(), false );
+		}
+		$scan_started = microtime( true );
+		$fresh        = array( $ids[5], $ids[ ProductFailures::CLEANUP_CHUNK + 20 ] );
+		foreach ( $fresh as $id ) {
+			ProductFailures::store( $id, array() );
+		}
+		foreach ( $ids as $id ) {
+			ProductFailures::stored( $id ); // Prime the meta cache.
+		}
+
+		ProductFailures::forget_unless_written_since( $ids, $scan_started );
+
+		foreach ( array( $ids[0], $ids[ $last_in_first ], $ids[ ProductFailures::CLEANUP_CHUNK ], end( $ids ) ) as $id ) {
+			$this->assertSame( array(), ProductFailures::stored( $id ), "Old rows of product $id are removed" );
+		}
+		foreach ( $fresh as $id ) {
+			$this->assertSame( array( ProductFailures::CHECKED ), ProductFailures::stored( $id ), "Fresh rows of product $id stay" );
+		}
 	}
 
 	/**
