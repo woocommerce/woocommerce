@@ -102,10 +102,11 @@ class Quote_Preprocessor implements Preprocessor {
 				if ( ! isset( $block['attrs'] ) ) {
 					$block['attrs'] = array();
 				}
-				if ( ! isset( $block['attrs']['style'] ) ) {
+				// A string style (e.g. Calendly's "style":"inline") is not a style object, so treat it as absent.
+				if ( ! isset( $block['attrs']['style'] ) || ! is_array( $block['attrs']['style'] ) ) {
 					$block['attrs']['style'] = array();
 				}
-				if ( ! isset( $block['attrs']['style']['typography'] ) ) {
+				if ( ! isset( $block['attrs']['style']['typography'] ) || ! is_array( $block['attrs']['style']['typography'] ) ) {
 					$block['attrs']['style']['typography'] = array();
 				}
 
