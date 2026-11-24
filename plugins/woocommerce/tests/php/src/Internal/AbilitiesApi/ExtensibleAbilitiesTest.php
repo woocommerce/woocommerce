@@ -1978,18 +1978,20 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should name the full path of an unknown nested key, also under a nullable anyOf and in a list.
-	 * @testWith [{"metal":{"gold":1}}, "extensions.probe.dims.metal.gold"]
-	 *           [{"wood":{"oak":1}}, "extensions.probe.dims.wood.oak"]
-	 *           [{"stones":[{"name":"ruby"},{"carat":2}]}, "extensions.probe.dims.stones[1].carat"]
+	 * @testdox Should name the full path of an unknown nested key, also under a nullable anyOf and in a list, and keep the WordPress message when a required key is missing.
+	 * @testWith [{"metal":{"gold":1}}, "extensions.probe.dims.metal.gold is not a valid property of Object."]
+	 *           [{"wood":{"pine":1,"oak":1}}, "extensions.probe.dims.wood.oak is not a valid property of Object."]
+	 *           [{"stones":[{"name":"ruby"},{"carat":2}]}, "extensions.probe.dims.stones[1].carat is not a valid property of Object."]
+	 *           [{"wood":{"oak":1}}, "extensions.probe.dims[wood] does not match the expected format. Reason: pine is a required property of extensions.probe.dims[wood]."]
 	 *
-	 * @param array  $dims Value of the field.
-	 * @param string $path Expected path of the unknown key.
+	 * @param array  $dims    Value of the field.
+	 * @param string $message Expected refusal.
 	 */
-	public function test_an_unknown_nested_key_is_refused_with_its_full_path( array $dims, string $path ): void {
-		$strict = static fn( array $properties ): array => array(
+	public function test_an_unknown_nested_key_is_refused_with_its_full_path( array $dims, string $message ): void {
+		$strict = static fn( array $properties, array $required = array() ): array => array(
 			'type'                 => 'object',
 			'properties'           => $properties,
+			'required'             => $required,
 			'additionalProperties' => false,
 		);
 		add_action(
@@ -2003,7 +2005,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 						'input_schema' => $strict(
 							array(
 								'metal'  => $strict( array( 'iron' => array( 'type' => 'integer' ) ) ),
-								'wood'   => array( 'anyOf' => array( $strict( array( 'pine' => array( 'type' => 'integer' ) ) ), array( 'type' => 'null' ) ) ),
+								'wood'   => array( 'anyOf' => array( $strict( array( 'pine' => array( 'type' => 'integer' ) ), array( 'pine' ) ), array( 'type' => 'null' ) ) ),
 								'stones' => array(
 									'type'  => 'array',
 									'items' => $strict( array( 'name' => array( 'type' => 'string' ) ) ),
@@ -2027,7 +2029,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( $path . ' is not a valid property of Object.', $refused->get_data()['message'] );
+		$this->assertSame( $message, $refused->get_data()['message'] );
 	}
 
 	/**

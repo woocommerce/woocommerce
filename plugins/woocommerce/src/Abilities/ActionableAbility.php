@@ -60,6 +60,12 @@ defined( 'ABSPATH' ) || exit;
 abstract class ActionableAbility extends Ability {
 
 	/**
+	 * Error codes of rest_validate_value_from_schema() that can come from a key the schema does not allow.
+	 * An `anyOf` or `oneOf` hides the code of its branch behind `rest_no_matching_schema`.
+	 */
+	private const UNKNOWN_KEY_ERROR_CODES = array( 'rest_additional_properties_forbidden', 'rest_no_matching_schema' );
+
+	/**
 	 * Resource that the ability changes, for example `product` or `order`. The fields of this resource are written.
 	 *
 	 * @since 11.3.0
@@ -482,7 +488,7 @@ abstract class ActionableAbility extends Ability {
 	 * @return string
 	 */
 	private static function describe_value_refusal( \WP_Error $error, $value, array $schema, string $param ): string {
-		$unknown_key = in_array( $error->get_error_code(), array( 'rest_additional_properties_forbidden', 'rest_no_matching_schema' ), true ) ? self::find_unknown_key( $value, $schema, $param ) : null;
+		$unknown_key = in_array( $error->get_error_code(), self::UNKNOWN_KEY_ERROR_CODES, true ) ? self::find_unknown_key( $value, $schema, $param ) : null;
 		if ( null !== $unknown_key ) {
 			/* translators: %s: Path of the key in the input, such as extensions.my_ext.size.unit. */
 			return sprintf( __( '%s is not a valid property of Object.', 'woocommerce' ), $unknown_key );
@@ -507,15 +513,20 @@ abstract class ActionableAbility extends Ability {
 			}
 			$refused_by = array();
 			foreach ( $schema[ $keyword ] as $branch ) {
-				$valid = is_array( $branch ) ? rest_validate_value_from_schema( $value, $branch, $path ) : true;
+				// WordPress gives a branch without a type the type of its parent, and warns when there is none.
+				$branch = is_array( $branch ) ? $branch + array_intersect_key( $schema, array( 'type' => true ) ) : array();
+				if ( ! isset( $branch['type'] ) ) {
+					return null;
+				}
+				$valid = rest_validate_value_from_schema( $value, $branch, $path );
 				if ( ! is_wp_error( $valid ) ) {
 					continue 2;
 				}
 				if ( 'rest_invalid_type' !== $valid->get_error_code() || ( $valid->get_error_data()['param'] ?? $path ) !== $path ) {
-					$refused_by[] = $branch;
+					$refused_by[] = array( $branch, $valid->get_error_code() );
 				}
 			}
-			return 1 === count( $refused_by ) ? self::find_unknown_key( $value, $refused_by[0], $path ) : null;
+			return 1 === count( $refused_by ) && in_array( $refused_by[0][1], self::UNKNOWN_KEY_ERROR_CODES, true ) ? self::find_unknown_key( $value, $refused_by[0][0], $path ) : null;
 		}
 		if ( ! is_array( $value ) ) {
 			return null;
@@ -538,8 +549,9 @@ abstract class ActionableAbility extends Ability {
 			if ( null === $child_schema ) {
 				return $child_path;
 			}
-			if ( is_wp_error( rest_validate_value_from_schema( $child, $child_schema, $child_path ) ) ) {
-				return self::find_unknown_key( $child, $child_schema, $child_path );
+			$valid = rest_validate_value_from_schema( $child, $child_schema, $child_path );
+			if ( is_wp_error( $valid ) ) {
+				return in_array( $valid->get_error_code(), self::UNKNOWN_KEY_ERROR_CODES, true ) ? self::find_unknown_key( $child, $child_schema, $child_path ) : null;
 			}
 		}
 		return null;
