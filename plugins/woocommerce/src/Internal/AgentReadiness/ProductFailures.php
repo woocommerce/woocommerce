@@ -49,9 +49,7 @@ class ProductFailures {
 	 *
 	 * @param int                                                             $product_id   Product id.
 	 * @param array<string, array<string, array{field:string,effect:string}>> $failures     Channel map of each failed check, by check id.
-	 * @param bool                                                            $mark_written Whether to record the write time. A save does, so a scan
-	 *                                                                                      in progress keeps its rows. The scan's own writes don't:
-	 *                                                                                      keep_only() and abandon_refresh() read the time for products the scan did not test or that had no rows when it started.
+	 * @param bool                                                            $mark_written Whether to record the write time. A save does, so cleanup keeps its rows. The scan's own writes don't, so they can be removed.
 	 */
 	public static function store( int $product_id, array $failures, bool $mark_written = true ): void {
 		$values = array_merge( array( self::CHECKED ), array_map( 'strval', array_keys( $failures ) ) );
@@ -134,34 +132,52 @@ class ProductFailures {
 	}
 
 	/**
-	 * Remove the rows of these products, except rows written at or after $written_after, such as by a save during a scan.
+	 * Remove the rows of these products, except rows whose write time is at or after $written_after.
+	 *
+	 * The write time is checked in the delete. A list of fresh ids read earlier would miss a save that commits before the loop reaches that product.
 	 *
 	 * @param array<int, int> $product_ids   Product ids.
 	 * @param float|null      $written_after Unix time the scan started, or null to remove them all.
 	 */
 	public static function forget_unless_written_since( array $product_ids, ?float $written_after ): void {
+		$product_ids = array_values( array_unique( array_filter( array_map( 'absint', $product_ids ) ) ) );
 		if ( array() === $product_ids ) {
 			return;
 		}
-		$fresh = null === $written_after ? array() : array_fill_keys( self::ids_written_since( $written_after ), true );
-		foreach ( array_map( 'intval', $product_ids ) as $product_id ) {
-			if ( ! isset( $fresh[ $product_id ] ) ) {
+		if ( null === $written_after ) {
+			foreach ( $product_ids as $product_id ) {
 				self::forget( $product_id );
 			}
+			return;
 		}
-	}
-
-	/**
-	 * Products whose rows were written at or after a scan started.
-	 *
-	 * @param float $after Unix time.
-	 * @return array<int, int>
-	 */
-	private static function ids_written_since( float $after ): array {
+		unset( self::$counts[ get_current_blog_id() ] );
 		global $wpdb;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One read of write times, which are not cached with the check rows.
-		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND CAST(meta_value AS DECIMAL(16,6)) >= %f", self::WRITTEN_META, $after ) );
-		return array_map( 'intval', (array) $ids );
+		// A scan can name thousands of products. Each statement stays small, and each one decides from the write time it sees.
+		foreach ( array_chunk( $product_ids, 100 ) as $chunk ) {
+			$ids = implode( ',', $chunk );
+			// $ids are absint. The write time is in this delete, so a save that commits after a separate read is not removed.
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE pm FROM {$wpdb->postmeta} AS pm
+					LEFT JOIN {$wpdb->postmeta} AS fresh
+						ON fresh.post_id = pm.post_id
+						AND fresh.meta_key = %s
+						AND CAST(fresh.meta_value AS DECIMAL(16,6)) >= %f
+					WHERE pm.post_id IN ($ids)
+					AND pm.meta_key IN (%s, %s)
+					AND fresh.meta_id IS NULL",
+					self::WRITTEN_META,
+					$written_after,
+					self::META_KEY,
+					self::WRITTEN_META
+				)
+			);
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			foreach ( $chunk as $product_id ) {
+				wp_cache_delete( $product_id, 'post_meta' );
+			}
+		}
 	}
 
 	/**

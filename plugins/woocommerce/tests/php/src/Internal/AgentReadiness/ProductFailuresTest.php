@@ -155,6 +155,25 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A write at or after the given time stays, and an older write is removed with its marker.
+	 */
+	public function test_forget_unless_written_since_keeps_a_later_write(): void {
+		$before = microtime( true );
+		$stale  = WC_Helper_Product::create_simple_product();
+		$fresh  = WC_Helper_Product::create_simple_product();
+		ProductFailures::store( $stale->get_id(), array(), false );
+		update_post_meta( $stale->get_id(), ProductFailures::WRITTEN_META, sprintf( '%.6F', $before - 5 ) );
+		ProductFailures::store( $fresh->get_id(), array(), true );
+
+		ProductFailures::forget_unless_written_since( array( $stale->get_id(), $fresh->get_id() ), $before );
+
+		$this->assertSame( array(), ProductFailures::stored( $stale->get_id() ) );
+		$this->assertSame( '', get_post_meta( $stale->get_id(), ProductFailures::WRITTEN_META, true ) );
+		$this->assertSame( array( ProductFailures::CHECKED ), ProductFailures::stored( $fresh->get_id() ) );
+		$this->assertNotSame( '', get_post_meta( $fresh->get_id(), ProductFailures::WRITTEN_META, true ) );
+	}
+
+	/**
 	 * @testdox Two rows for one value on one product count as one product.
 	 */
 	public function test_duplicate_rows_count_once(): void {
