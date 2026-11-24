@@ -24,11 +24,12 @@ class OrderUpdateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Reload the gateways, whose instances outlive the rolled-back gateway settings.
+	 * Reload the gateways, whose instances and cached settings outlive the rolled-back gateway settings.
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
 
+		wp_cache_flush();
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 	}
@@ -431,8 +432,7 @@ class OrderUpdateTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array( 'woocommerce_ability_order_payment_method_invalid' ), $error->get_error_codes() );
-		$this->assertStringContainsString( 'bacs', $error->get_error_message() );
-		$this->assertStringNotContainsString( 'cod', $error->get_error_message(), 'A disabled gateway should not be offered.' );
+		$this->assertStringEndsWith( 'Send one of: bacs.', $error->get_error_message(), 'Only enabled gateways should be offered.' );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertSame( 'bacs', $order->get_payment_method() );
 		$this->assertSame( '', $order->get_customer_note() );

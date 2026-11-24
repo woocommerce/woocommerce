@@ -268,10 +268,7 @@ class OrderCreate extends ActionableAbility {
 				'billing'        => self::get_address_input_schema( array_merge( self::get_address_fields(), array( 'email' ) ) ),
 				'shipping'       => self::get_address_input_schema( self::get_address_fields() ),
 				'customer_note'  => array( 'type' => 'string' ),
-				'payment_method' => array(
-					'type'        => 'string',
-					'description' => __( 'ID of an enabled payment gateway, such as bacs or cheque, to record how the order was paid. Sets the payment method title from the gateway. Nothing is charged. Use the woocommerce/payment-gateways-query ability to list the gateways.', 'woocommerce' ),
-				),
+				'payment_method' => self::get_payment_method_input_schema(),
 				'line_items'     => array(
 					'type'        => 'array',
 					'description' => __( 'Product lines. A variation uses its own ID as product_id. The price is the current price of the product.', 'woocommerce' ),

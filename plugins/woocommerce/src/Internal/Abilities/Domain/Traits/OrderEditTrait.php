@@ -196,8 +196,8 @@ trait OrderEditTrait {
 	}
 
 	/**
-	 * Set the payment method and its title in memory, as the order screen does. Only an enabled gateway is
-	 * accepted. Nothing is charged or captured: the gateway only names how the order was paid.
+	 * Set the payment method and its title in memory. Only an enabled gateway is accepted. Nothing is charged
+	 * or captured: the gateway only names how the order was paid.
 	 *
 	 * @param \WC_Order $order      Order.
 	 * @param string    $gateway_id Gateway ID sent by the client.
@@ -225,6 +225,18 @@ trait OrderEditTrait {
 		$order->set_payment_method_title( self::get_payment_gateway_title( $enabled[ $gateway_id ] ) );
 
 		return null;
+	}
+
+	/**
+	 * Input schema of payment_method, shared by order-create and order-update.
+	 *
+	 * @return array<string, string>
+	 */
+	private static function get_payment_method_input_schema(): array {
+		return array(
+			'type'        => 'string',
+			'description' => __( 'ID of an enabled payment gateway, such as bacs or cheque, to record how the order was paid. Sets the payment method title from the gateway. Nothing is charged. Use the woocommerce/payment-gateways-query ability to list the gateways.', 'woocommerce' ),
+		);
 	}
 
 	/**

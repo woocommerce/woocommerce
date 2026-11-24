@@ -24,11 +24,12 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Reload the gateways, whose instances outlive the rolled-back gateway settings.
+	 * Reload the gateways, whose instances and cached settings outlive the rolled-back gateway settings.
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
 
+		wp_cache_flush();
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 	}

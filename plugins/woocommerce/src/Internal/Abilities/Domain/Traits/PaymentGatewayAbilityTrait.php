@@ -37,6 +37,8 @@ trait PaymentGatewayAbilityTrait {
 	/**
 	 * Saved title of a gateway. The title getter runs a checkout filter that may expect a cart.
 	 *
+	 * @since 11.5.0
+	 *
 	 * @param \WC_Payment_Gateway $gateway Gateway.
 	 * @return string
 	 */
