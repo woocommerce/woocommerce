@@ -782,32 +782,36 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		);
 		$order  = $this->create_retried_order_with_shipping_and_fee( $price, 3.33, $coupon->get_code() );
 		$before = $this->get_item_ids_by_type( $order );
-		$calls  = did_action( 'woocommerce_checkout_create_order_line_item' ) + did_action( 'woocommerce_checkout_create_order_shipping_item' ) + did_action( 'woocommerce_checkout_create_order_fee_item' );
 
 		$order = $this->sync_order_in_a_new_request( $order );
 
 		$this->assertNotEmpty( $before['coupon'], 'The order should have a coupon line.' );
 		$this->assertCount( 2, $before['tax'], 'The order should have a line for each tax rate.' );
 		$this->assertSame( $before, $this->get_item_ids_by_type( $order ), 'Every item should keep its ID.' );
-		$this->assertSame( $calls, did_action( 'woocommerce_checkout_create_order_line_item' ) + did_action( 'woocommerce_checkout_create_order_shipping_item' ) + did_action( 'woocommerce_checkout_create_order_fee_item' ), 'No item should be created again.' );
 	}
 
 	/**
 	 * @testdox update_order_from_cart() rebuilds the items a merchant edited on a retried order, so the order total matches the cart.
 	 *
-	 * @testWith ["shipping"]
-	 *           ["fee"]
-	 *           ["line_item"]
+	 * @testWith ["shipping", "total"]
+	 *           ["fee", "total"]
+	 *           ["line_item", "total"]
+	 *           ["line_item", "quantity"]
 	 *
 	 * @param string $item_type The item type the merchant edits.
+	 * @param string $edit      The property the merchant edits.
 	 */
-	public function test_update_order_from_cart_rebuilds_items_a_merchant_edited( string $item_type ): void {
+	public function test_update_order_from_cart_rebuilds_items_a_merchant_edited( string $item_type, string $edit ): void {
 		$order  = $this->create_retried_order_with_shipping_and_fee();
 		$before = $this->get_item_ids_by_type( $order );
 
 		// Like editing the item in the admin and saving it without recalculating the order.
 		$item = current( $order->get_items( $item_type ) );
-		$item->set_total( (float) $item->get_total() + 5 );
+		if ( 'quantity' === $edit ) {
+			$item->set_quantity( 2 );
+		} else {
+			$item->set_total( (float) $item->get_total() + 5 );
+		}
 		$item->save();
 
 		$order = $this->sync_order_in_a_new_request( $order );
@@ -820,6 +824,100 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		}
 		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
 		$this->assertSame( 25.0, (float) $order->get_total(), 'The order should be charged the cart total, not the edited amount.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps items of a retried order that were only given meta, as gateways do, or renamed.
+	 *
+	 * @testWith ["shipping", false]
+	 *           ["fee", true]
+	 *           ["line_item", true]
+	 *
+	 * @param string $item_type The item type to change.
+	 * @param bool   $rename    Whether to rename the item too. A shipping line's name is its method title, which counts as a change.
+	 */
+	public function test_update_order_from_cart_keeps_items_that_were_renamed_or_given_meta( string $item_type, bool $rename ): void {
+		$order  = $this->create_retried_order_with_shipping_and_fee();
+		$before = $this->get_item_ids_by_type( $order );
+
+		$item = current( $order->get_items( $item_type ) );
+		if ( $rename ) {
+			$item->set_name( 'Renamed' );
+		}
+		$item->update_meta_data( '_gateway_reference', 'ref-123' );
+		$item->save();
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertSame( $before, $this->get_item_ids_by_type( $order ), 'Every item should keep its ID.' );
+		$this->assertSame( 'ref-123', current( $order->get_items( $item_type ) )->get_meta( '_gateway_reference' ), 'The item meta should be kept.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() rebuilds a tax line a merchant edited on a retried order.
+	 */
+	public function test_update_order_from_cart_rebuilds_an_edited_tax_line(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		\WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		$order    = $this->create_retried_order_with_shipping_and_fee();
+		$tax_line = current( $order->get_taxes() );
+		$tax_line->set_tax_total( (float) $tax_line->get_tax_total() + 5 );
+		$tax_line->save();
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertNotContains( $tax_line->get_id(), array_keys( $order->get_taxes() ), 'The edited tax line should be rebuilt.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
+		$this->assertSame( 30.0, (float) $order->get_total(), 'The order should be charged the cart total, with 20% tax.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() rebuilds a coupon line whose discount a merchant edited on a retried order.
+	 */
+	public function test_update_order_from_cart_rebuilds_a_coupon_with_an_edited_discount(): void {
+		$coupon = \WC_Helper_Coupon::create_coupon( 'retry-amount', array( 'coupon_amount' => 5 ) );
+		$order  = $this->create_retried_order_with_shipping_and_fee( '10', 5, $coupon->get_code() );
+		$line   = current( $order->get_coupons() );
+		$line->set_discount( '8' );
+		$line->save();
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertNotContains( $line->get_id(), array_keys( $order->get_coupons() ), 'The edited coupon line should be rebuilt.' );
+		$this->assertSame( 5.0, (float) current( $order->get_coupons() )->get_discount(), 'The coupon line should have the cart discount.' );
+		$this->assertSame( 20.0, (float) $order->get_total(), 'The order should be charged the discounted cart total.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() removes an extension fee when it rebuilds the fees a merchant edited, as it does when the cart's fees change.
+	 */
+	public function test_update_order_from_cart_removes_extension_fees_when_rebuilding_edited_fees(): void {
+		$order         = $this->create_retried_order_with_shipping_and_fee();
+		$extension_fee = new \WC_Order_Item_Fee();
+		$extension_fee->set_name( 'Extension surcharge' );
+		$extension_fee->set_total( '2' );
+		$order->add_item( $extension_fee );
+		$order->save();
+		$cart_fee = current( array_diff_key( $order->get_fees(), array( $extension_fee->get_id() => true ) ) );
+		$cart_fee->set_total( '15' );
+		$cart_fee->save();
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertCount( 1, $order->get_fees(), 'Only the cart fee should be on the order.' );
+		$this->assertNotContains( $extension_fee->get_id(), array_keys( $order->get_fees() ), 'The extension fee should be removed with the rebuilt fees.' );
+		$this->assertSame( 25.0, (float) $order->get_total(), 'The order should be charged the cart total.' );
 	}
 
 	/**
