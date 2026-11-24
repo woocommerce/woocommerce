@@ -340,16 +340,32 @@ test.describe( 'Add to Cart + Options Block', () => {
 			expect( noticeBox?.y ).toBeLessThan( colorBox?.y ?? 0 );
 
 			// Submitting the invalid form again replaces the notice instead of
-			// adding a second one.
+			// adding a second one. The replacement is a new element, so wait
+			// for it before counting.
+			await notice.evaluate( ( element ) =>
+				element.setAttribute( 'data-test-first-submit', '' )
+			);
 			await addToCartButton.click();
+			await expect(
+				addToCartBlock.locator(
+					'[role="alert"]:not([data-test-first-submit])'
+				)
+			).toHaveCount( 1 );
 			await expect( notice ).toHaveCount( 1 );
 
-			// Dismissing the notice doesn't submit the form, which would
-			// show the notice again.
+			// Dismissing the notice doesn't submit the form.
+			await addToCartBlock.evaluate( ( form ) => {
+				form.addEventListener( 'submit', () => {
+					form.setAttribute( 'data-test-submitted', '' );
+				} );
+			} );
 			await notice
 				.getByRole( 'button', { name: 'Dismiss this notice' } )
 				.click();
 			await expect( notice ).toHaveCount( 0 );
+			await expect( addToCartBlock ).not.toHaveAttribute(
+				'data-test-submitted'
+			);
 		} );
 
 		await test.step( 'updates blocks rendering variation data when attributes are selected', async () => {
