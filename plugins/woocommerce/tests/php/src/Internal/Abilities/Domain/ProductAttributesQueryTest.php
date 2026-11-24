@@ -8,16 +8,18 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
-use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributesQuery;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
+use Automattic\WooCommerce\Tests\Internal\Abilities\ExtensibleAbilitiesTestTrait;
 
 /**
  * Tests global attribute reads through the registered ability.
  */
 class ProductAttributesQueryTest extends WC_Unit_Test_Case {
+
+	use ExtensibleAbilitiesTestTrait;
 
 	/**
 	 * The System Under Test.
@@ -26,12 +28,6 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	 */
 	private $sut;
 
-	/**
-	 * Process state restored after each test.
-	 *
-	 * @var array
-	 */
-	private $saved_state = array();
 
 	/**
 	 * An administrator that every test acts as.
@@ -54,27 +50,10 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		foreach ( array( 'resources', 'fields', 'primes' ) as $name ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
-			$property->setAccessible( true );
-			$this->saved_state[ $name ] = $property->getValue();
-			$property->setValue( null, array() );
-		}
+		$this->isolate_extensible_abilities();
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
 		$this->sut = new Ability( ProductAttributesQuery::get_name(), ProductAttributesQuery::get_registration_args() );
 		wp_set_current_user( self::$administrator_id );
-	}
-
-	/**
-	 * Restore extension state.
-	 */
-	public function tearDown(): void {
-		foreach ( $this->saved_state as $name => $value ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
-			$property->setAccessible( true );
-			$property->setValue( null, $value );
-		}
-		parent::tearDown();
 	}
 
 	/**
@@ -163,10 +142,7 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 		$input     = array( 'include' => array( $attribute['attribute_id'], $second['attribute_id'] ) );
 		$primed    = array();
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
-		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
-		do_action( 'woocommerce_extensible_abilities_resources_init' );
-		add_action(
-			'woocommerce_extensible_abilities_init',
+		$this->enable_extensible_abilities(
 			static function () use ( &$primed ) {
 				ExtensibleAbilities::register_prime(
 					array(
@@ -193,7 +169,6 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 				);
 			}
 		);
-		do_action( 'woocommerce_extensible_abilities_init' );
 		$ability = new \WP_Ability( ProductAttributesQuery::get_name(), ProductAttributesQuery::get_registration_args() );
 
 		$result = $ability->execute( $input );
