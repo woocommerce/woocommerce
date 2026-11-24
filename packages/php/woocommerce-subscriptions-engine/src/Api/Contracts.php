@@ -729,7 +729,7 @@ final class Contracts {
 			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
 		}
 
-		return self::cycle_views( ( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit, $offset ) );
+		return self::cycle_views( ( new ContractRepository() )->find_cycles( $contract_id, Cycle::KIND_BILLING, $limit, $offset ) );
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
