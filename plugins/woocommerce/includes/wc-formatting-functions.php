@@ -417,12 +417,7 @@ function wc_clean( $var ) {
 }
 
 /**
- * Sanitize data to valid UTF-8 with recursive array support.
- *
- * Replaces invalid byte sequences with the Unicode replacement character (U+FFFD).
- * Before 11.5.0 it returned an empty string for invalid UTF-8 and only checked when blog_charset was UTF-8.
- *
- * @since 11.5.0 Uses wp_scrub_utf8() instead of the deprecated wp_check_invalid_utf8().
+ * Function wp_check_invalid_utf8 with recursive array support.
  *
  * @param string|array $var Data to sanitize.
  * @return string|array
@@ -431,7 +426,7 @@ function wc_check_invalid_utf8( $var ) {
 	if ( is_array( $var ) ) {
 		return array_map( 'wc_check_invalid_utf8', $var );
 	} else {
-		return wp_scrub_utf8( (string) $var );
+		return wp_check_invalid_utf8( $var );
 	}
 }
 

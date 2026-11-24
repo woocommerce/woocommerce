@@ -114,7 +114,7 @@ final class CustomsDataValidator {
 			return null;
 		}
 
-		if ( is_string( $value ) && wp_is_valid_utf8( $value ) ) {
+		if ( is_string( $value ) && '' !== wp_check_invalid_utf8( $value ) ) {
 			$text = trim( (string) preg_replace( '/[\r\n\t ]+/', ' ', $value ) );
 			if ( '' === $text ) {
 				return null;

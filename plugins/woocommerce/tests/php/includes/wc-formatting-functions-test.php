@@ -375,26 +375,4 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 	}
-
-	/**
-	 * @testdox wc_check_invalid_utf8 should turn null leaves into empty strings and replace invalid bytes with U+FFFD.
-	 */
-	public function test_wc_check_invalid_utf8_normalizes_null_and_invalid_bytes(): void {
-		$result = wc_check_invalid_utf8(
-			array(
-				'name'   => null,
-				'nested' => array( 'label' => "Caf\xE9" ),
-				'valid'  => 'Café',
-			)
-		);
-
-		$this->assertSame(
-			array(
-				'name'   => '',
-				'nested' => array( 'label' => "Caf\u{FFFD}" ),
-				'valid'  => 'Café',
-			),
-			$result
-		);
-	}
 }

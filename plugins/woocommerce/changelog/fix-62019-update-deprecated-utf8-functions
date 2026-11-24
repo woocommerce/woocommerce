@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Stop deprecation notices from UTF-8 checks in imports, order items and scripts on WordPress 6.9 and later.
+Convert ISO-8859-1 tax rate CSV data to UTF-8 without the utf8_encode() function, which is deprecated in PHP 8.2.

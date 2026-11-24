@@ -125,11 +125,11 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 * @return string
 	 */
 	public function format_data_from_csv( $data, $enc ) {
-		$data = (string) $data;
-
 		if ( 'UTF-8' === $enc ) {
 			return $data;
 		}
+
+		$data = (string) $data;
 
 		if ( function_exists( 'mb_convert_encoding' ) ) {
 			$converted = mb_convert_encoding( $data, 'UTF-8', 'ISO-8859-1' );
@@ -150,8 +150,8 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	private static function latin1_to_utf8( string $data ): string {
 		return (string) preg_replace_callback(
 			'/[\x80-\xFF]/',
-			static function ( $match ) {
-				$byte = ord( $match[0] );
+			static function ( $matches ) {
+				$byte = ord( $matches[0] );
 				return chr( 0xC0 | ( $byte >> 6 ) ) . chr( 0x80 | ( $byte & 0x3F ) );
 			},
 			$data

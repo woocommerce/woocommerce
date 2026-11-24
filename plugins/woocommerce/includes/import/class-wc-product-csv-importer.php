@@ -560,7 +560,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	private static function convert_to_utf8( $value ): string {
 		if ( ! function_exists( 'mb_convert_encoding' ) ) {
-			return wp_scrub_utf8( $value );
+			return wp_check_invalid_utf8( $value, true );
 		}
 
 		$encoding = mb_detect_encoding( $value, mb_detect_order(), true );
