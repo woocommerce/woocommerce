@@ -97,7 +97,7 @@ export default class PackagePrepare extends Command {
 		packages: Array< string >,
 		initialRelease?: boolean
 	) {
-		packages.forEach( async ( name ) => {
+		for ( const name of packages ) {
 			ux.action.start( `Preparing ${ name }` );
 
 			try {
@@ -126,7 +126,7 @@ export default class PackagePrepare extends Command {
 					this.error( e.message );
 				}
 			}
-		} );
+		}
 	}
 
 	/**
