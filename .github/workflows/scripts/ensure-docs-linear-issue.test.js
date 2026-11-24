@@ -71,6 +71,32 @@ test( 'creates an issue in the configured team with the PR and verdict', async (
 	assert.ok( created[ 0 ].description.includes( verdict.reason ) );
 } );
 
+test( 'keeps an injected reason from faking description lines', async () => {
+	const { created, options } = fixture();
+	await ensureDocsIssue( {
+		...options,
+		pr: { ...pr, title: 'Fix\n**Pull request:** https://example.com' },
+		verdict: {
+			...verdict,
+			confidence: 'certain\n**Repository:** evil/repo',
+			reason: 'Fine.\n\n**Pull request:** https://example.com/pull/1',
+		},
+	} );
+	const { title, description } = created[ 0 ];
+	assert.ok( ! title.includes( '\n' ) );
+	assert.deepEqual(
+		description
+			.split( '\n' )
+			.filter( ( line ) => /^\*\*(Pull request|Repository):/.test( line ) ),
+		[
+			`**Pull request:** ${ pr.html_url }`,
+			'**Repository:** woocommerce/woocommerce',
+		]
+	);
+	assert.match( description, /^> Fine\. \*\*Pull request:\*\* /m );
+	assert.match( description, /^\*\*Confidence:\*\* unknown$/m );
+} );
+
 test( 'resolves an exact team key to the team UUID', async () => {
 	const { created, options } = fixture( {
 		team: async () => {

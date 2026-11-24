@@ -134,13 +134,20 @@ module.exports = async ( {
 		);
 	}
 
+	// The PR title and the AI reason are untrusted: the reason comes from a model that read the diff.
+	// Keep each on one line and quote the reason, so neither can add or fake a description line.
+	const oneLine = ( text ) => String( text ?? '' ).replace( /\s+/g, ' ' ).trim();
+	const confidence = [ 'high', 'medium', 'low' ].includes( verdict.confidence )
+		? verdict.confidence
+		: 'unknown';
 	const description = [
 		'A pull request was flagged as containing user-facing changes that may require documentation updates.',
 		'',
 		`**Pull request:** ${ pr.html_url }`,
 		`**Repository:** ${ repoFullName }`,
-		`**Confidence:** ${ verdict.confidence }`,
-		`**AI reasoning:** ${ verdict.reason }`,
+		`**Confidence:** ${ confidence }`,
+		'**AI reasoning:**',
+		`> ${ oneLine( verdict.reason ) }`,
 	].join( '\n' );
 
 	let result;
@@ -148,7 +155,7 @@ module.exports = async ( {
 	try {
 		result = await linearClient.createIssue( {
 			teamId: team.id,
-			title: `Docs update needed: ${ pr.title }`,
+			title: `Docs update needed: ${ oneLine( pr.title ) }`,
 			description,
 			labelIds: [ label.id ],
 		} );
