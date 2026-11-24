@@ -12,6 +12,8 @@ import { SendPreview } from '../send-preview';
 
 jest.mock( '@wordpress/data', () => ( {
 	useDispatch: () => ( { togglePreviewModal: jest.fn() } ),
+	useSelect: ( mapSelect: ( select: () => object ) => unknown ) =>
+		mapSelect( () => ( { getEmailPostType: () => 'woo_email' } ) ),
 } ) );
 
 jest.mock( '@wordpress/editor', () => ( {
@@ -44,14 +46,6 @@ jest.mock( '../../../events', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
-const filterEnabledTo = ( enabled: boolean ) =>
-	( applyFilters as jest.Mock ).mockImplementation(
-		( hook: string, value: unknown ) =>
-			hook === 'woocommerce_email_editor_send_preview_enabled'
-				? enabled
-				: value
-	);
-
 describe( 'SendPreview', () => {
 	it( 'adds the menu item and the modal by default', () => {
 		( applyFilters as jest.Mock ).mockImplementation(
@@ -67,8 +61,13 @@ describe( 'SendPreview', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'renders neither the menu item nor the modal when the enabled filter returns false', () => {
-		filterEnabledTo( false );
+	it( 'renders neither the menu item nor the modal when the enabled filter returns false for the email type', () => {
+		( applyFilters as jest.Mock ).mockImplementation(
+			( hook: string, value: unknown, postType: string ) =>
+				hook === 'woocommerce_email_editor_send_preview_enabled'
+					? postType !== 'woo_email'
+					: value
+		);
 		const { container } = render( <SendPreview /> );
 
 		expect( container ).toBeEmptyDOMElement();
