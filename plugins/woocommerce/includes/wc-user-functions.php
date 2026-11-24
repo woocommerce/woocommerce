@@ -636,8 +636,8 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 					break;
 				}
 
-				// An account created in this session has no password yet, so a logged out shopper can pay for its orders like a guest order.
-				if ( 0 === $user_id && $order instanceof WC_Order && wc_get_container()->get( NewCustomerSession::class )->is_unverified_new_customer_order( $order ) ) {
+				// An order that created an unconfirmed account has no password to log in with, so a logged out shopper can pay for it like a guest order.
+				if ( 0 === $user_id && $order instanceof WC_Order && wc_get_container()->get( NewCustomerSession::class )->is_unconfirmed_new_account_order( $order ) ) {
 					$allcaps['pay_for_order'] = true;
 				}
 				break;

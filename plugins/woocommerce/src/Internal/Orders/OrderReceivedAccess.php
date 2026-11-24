@@ -170,7 +170,7 @@ class OrderReceivedAccess {
 	 * @return bool
 	 */
 	private function needs_login( \WC_Order $order ): bool {
-		return $order->get_customer_id() > 0 && ! $this->new_customer_session->is_unverified_new_customer_order( $order );
+		return $order->get_customer_id() > 0 && ! $this->new_customer_session->is_unconfirmed_new_account_order( $order );
 	}
 
 	/**

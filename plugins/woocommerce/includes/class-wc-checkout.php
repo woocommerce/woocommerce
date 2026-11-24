@@ -559,6 +559,9 @@ class WC_Checkout {
 			 * @since 3.0.0 or earlier
 			 */
 			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', $this->get_default_customer_id() ) );
+			if ( $order instanceof WC_Order ) {
+				wc_get_container()->get( NewCustomerSession::class )->mark_order_created_customer( $order, $this->new_customer_id );
+			}
 			$order->set_currency( get_woocommerce_currency() );
 			$order->set_prices_include_tax( wc_prices_include_tax() );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );

@@ -22,6 +22,11 @@ class NewCustomerSession {
 	private const SESSION_KEY = 'new_customer';
 
 	/**
+	 * Order meta that stores the ID of the account the order created at checkout.
+	 */
+	private const ORDER_META_KEY = '_created_customer_id';
+
+	/**
 	 * Email verification service.
 	 *
 	 * @var EmailVerificationService
@@ -91,8 +96,7 @@ class NewCustomerSession {
 	/**
 	 * Whether the order belongs to the account created in this session, and that account has not verified its email.
 	 *
-	 * The shopper cannot log in to this account yet, so pages that require a login for customer orders
-	 * should apply the guest order rules instead.
+	 * Only the session that created the account can keep it on an order, for example when a failed payment is retried.
 	 *
 	 * @since 11.5.0
 	 *
@@ -103,6 +107,44 @@ class NewCustomerSession {
 		$customer_id = $order->get_customer_id();
 
 		return $customer_id > 0 && $customer_id === $this->get_unverified_customer_id();
+	}
+
+	/**
+	 * Record on the order that it created its customer's account. The caller saves the order.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param \WC_Order $order       Order object.
+	 * @param int       $customer_id ID of the account the order created.
+	 */
+	public function mark_order_created_customer( \WC_Order $order, int $customer_id ): void {
+		if ( $customer_id > 0 && $order->get_customer_id() === $customer_id ) {
+			$order->update_meta_data( self::ORDER_META_KEY, (string) $customer_id );
+		}
+	}
+
+	/**
+	 * Whether the order created its account, and that account has not confirmed its email address yet.
+	 *
+	 * The account has no password until then, so the order received and pay pages treat its order like a guest order.
+	 * Unlike {@see self::is_unverified_new_customer_order()}, this works in any session, such as a separate express
+	 * checkout session, because the order records the account it created.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return bool
+	 */
+	public function is_unconfirmed_new_account_order( \WC_Order $order ): bool {
+		if ( $this->is_unverified_new_customer_order( $order ) ) {
+			return true;
+		}
+
+		$customer_id = $order->get_customer_id();
+
+		return $customer_id > 0
+			&& (int) $order->get_meta( self::ORDER_META_KEY ) === $customer_id
+			&& ! $this->email_verification_service->is_verified( $customer_id );
 	}
 
 	/**

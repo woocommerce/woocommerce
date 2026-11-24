@@ -165,6 +165,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 
 		// Associate customer with the order.
 		$order->set_customer_id( $customer_id );
+		wc_get_container()->get( NewCustomerSession::class )->mark_order_created_customer( $order, $customer_id );
 		$order->save();
 
 		// Associate addresses from the order with the customer.

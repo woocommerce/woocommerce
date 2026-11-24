@@ -1190,6 +1190,7 @@ class Checkout extends AbstractCartRoute {
 
 			// Associate customer with the order. The shopper stays logged out until they set a password.
 			$order->set_customer_id( $customer_id );
+			wc_get_container()->get( NewCustomerSession::class )->mark_order_created_customer( $order, $customer_id );
 			wc_log_order_step( '[Store API #6::process_customer] Created new customer', array( 'customer_id' => $customer_id ) );
 		}
 
