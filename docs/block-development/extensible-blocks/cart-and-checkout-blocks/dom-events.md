@@ -46,7 +46,7 @@ new CustomEvent( 'wc-blocks_added_to_cart', {
 
 The jQuery bridges use the same event name and target with `detail: {}` and `cancelable: false`; only the Mini-Cart registration sets `bubbles: true`.
 
-For the iAPI path, a mutation cycle can contain work from unrelated callers. One successful add-origin mutation causes the single cycle event even when a sibling mutation from another caller fails. The failed caller still receives a failed `addCartItem` outcome. A successful keyed quantity update made through `addCartItem` also has add origin, so this event does not prove that a new cart line was created.
+For the iAPI path, a mutation cycle can contain work from unrelated callers. One successful add-origin mutation causes the single cycle event even when a sibling mutation from another caller fails. The failed caller still receives a failed `addCartItem` outcome. A successful quantity update made through `updateCartItem` also has add origin, so this event does not prove that a new cart line was created.
 
 `preserveCartData` tells listeners whether to retain current cart data. When it is `false`, listeners can invalidate and refetch cart data. Producers that have already updated the store set it to `true` to avoid an unnecessary refetch.
 

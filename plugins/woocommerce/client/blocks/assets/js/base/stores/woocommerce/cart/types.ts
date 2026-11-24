@@ -28,11 +28,7 @@ export type OptimisticCartItem = {
 export type AddCartItemPayload = {
 	/** The product or variation id. */
 	id: number;
-	/**
-	 * The amount to add to the cart. Defaults to 1 when omitted. A numeric
-	 * string from untyped data, such as a server-rendered context value, is
-	 * added as the number it holds.
-	 */
+	/** The amount to add to the cart. Defaults to 1 when omitted. */
 	quantity?: number;
 	/** The selected attributes, when the product is a variation. */
 	variation?: SelectedAttributes[];
@@ -111,8 +107,9 @@ export type Store = {
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		/**
 		 * Replaces `state.cart` with a fresh GET of the Store API cart. It
-		 * does nothing while a cart mutation is in flight or another refresh is
-		 * pending, and retries after a delay when the request fails.
+		 * does nothing while a cart change is being sent or another refresh is
+		 * pending, and retries after a delay when the request fails, unless a
+		 * cart change is being sent by then.
 		 */
 		refreshCart: () => Promise< void >;
 		waitForIdle: () => Promise< void >;

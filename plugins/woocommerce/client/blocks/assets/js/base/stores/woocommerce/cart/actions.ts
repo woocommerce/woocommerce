@@ -458,9 +458,7 @@ const { actions } = store< Store >(
 						},
 						meta: {
 							quantityChanges: {
-								cartItemsPendingQuantity: existingItem
-									? [ key ]
-									: [],
+								cartItemsPendingQuantity: [ key ],
 							},
 							origin: 'add',
 						},
@@ -516,8 +514,7 @@ const { actions } = store< Store >(
 				// The amount posted is always the caller's delta, never a
 				// function of the matched line. The rendered quantity is the
 				// current one (which includes optimistic updates from previous
-				// clicks) plus that delta, so rapid clicks compound. A numeric
-				// string from untyped data counts as the number it holds.
+				// clicks) plus that delta, so rapid clicks compound.
 				const delta = Number( quantity ?? 1 );
 				const targetQuantity = ( existingItem?.quantity ?? 0 ) + delta;
 
@@ -712,8 +709,7 @@ const { actions } = store< Store >(
 						} );
 
 						// As in `addCartItem`, the amount posted is the item's
-						// delta, never a function of the matched line, and a
-						// numeric string counts as the number it holds.
+						// delta, never a function of the matched line.
 						const delta = Number( item.quantity ?? 1 );
 						const targetQuantity =
 							( existingItem?.quantity ?? 0 ) + delta;
@@ -858,6 +854,8 @@ const { actions } = store< Store >(
 			 * adopts the response's nonce. Skips the request without `restUrl`,
 			 * while a mutation cycle is running, or while another refresh is
 			 * pending. A failed request is retried after 3 s, doubling each time.
+			 * A retry that comes while a cart change is being sent is dropped,
+			 * since that change brings back the server's cart.
 			 */
 			*refreshCart(): AsyncAction< void > {
 				// Skip when the server did not provide the interactivity
