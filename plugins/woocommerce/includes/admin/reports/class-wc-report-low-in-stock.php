@@ -66,8 +66,10 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 			)
 		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		$this->max_items = $wpdb->get_var(
-			"SELECT COUNT( posts.ID ) {$query_from}"
-		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$this->max_items = $wpdb->get_var(
+	"SELECT COUNT(*) FROM (
+		SELECT posts.ID as id, posts.post_parent as parent {$query_from}
+	) AS low_stock_results"
+); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 }
