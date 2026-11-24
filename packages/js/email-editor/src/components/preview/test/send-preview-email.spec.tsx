@@ -280,6 +280,23 @@ describe( 'SendPreviewEmail', () => {
 		expect( screen.getByText( 'Help for woo_email' ) ).toBeVisible();
 	} );
 
+	it( 'skips help items that are not text or elements', () => {
+		( applyFilters as jest.Mock ).mockImplementation(
+			( hook: string, value: unknown ) =>
+				hook === 'woocommerce_email_editor_send_preview_help_items'
+					? [ { label: 'Not renderable' }, 'Check your mailer' ]
+					: value
+		);
+		renderWithPreviewState( {
+			sendingPreviewStatus: SendingPreviewStatus.ERROR,
+		} );
+
+		expect( screen.getAllByRole( 'listitem' ) ).toHaveLength( 1 );
+		expect( screen.getByRole( 'listitem' ) ).toHaveTextContent(
+			'Check your mailer'
+		);
+	} );
+
 	it( 'should show success message when status is SUCCESS', () => {
 		renderWithPreviewState( {
 			sendingPreviewStatus: SendingPreviewStatus.SUCCESS,

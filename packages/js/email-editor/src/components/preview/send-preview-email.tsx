@@ -10,6 +10,7 @@ import {
 	useRef,
 	createInterpolateElement,
 	memo,
+	isValidElement,
 } from '@wordpress/element';
 import { ENTER } from '@wordpress/keycodes';
 import { isEmail } from '@wordpress/url';
@@ -81,7 +82,10 @@ function RawSendPreviewEmail() {
 		postType
 	);
 	const helpItems = Array.isArray( filteredHelpItems )
-		? ( filteredHelpItems as ReactNode[] )
+		? ( filteredHelpItems as unknown[] ).filter(
+				( item ): item is ReactNode =>
+					typeof item === 'string' || isValidElement( item )
+			)
 		: [];
 
 	return (
