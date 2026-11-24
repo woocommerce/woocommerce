@@ -3652,6 +3652,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected, $seen['validator'] );
 		$this->assertEquals( $expected, $seen['sync'] );
+		$this->assertNull( $seen['validator']['shirt-s']['vendor'] );
+		$this->assertNull( $seen['sync']['shirt-s']['vendor'] );
 	}
 
 	/**

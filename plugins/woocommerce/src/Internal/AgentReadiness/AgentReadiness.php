@@ -468,7 +468,7 @@ class AgentReadiness {
 	 *
 	 * @param array<string, mixed>|null                                                                                                               $report Stored report.
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>|null $live   Store conditions already read, or null to read them.
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,skipped?:bool,seen_at?:string,source?:string,product?:int}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,skipped?:bool,no_product?:bool,seen_at?:string,source?:string,product?:int}>
 	 */
 	public function get_store_checks( ?array $report, ?array $live = null ): array {
 		$checks   = $live ?? $this->store_conditions->all();
@@ -481,23 +481,24 @@ class AgentReadiness {
 				continue;
 			}
 			$checks[] = array(
-				'id'       => (string) $check['id'],
-				'ok'       => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
-				'blocks'   => (string) ( $check['blocks'] ?? '' ),
-				'group'    => (string) ( $check['group'] ?? '' ),
-				'level'    => StoreConditions::LEVEL_RECOMMENDED,
-				'name'     => (string) $check['name'],
-				'label'    => (string) ( $check['label'] ?? '' ),
-				'why'      => (string) ( $check['why'] ?? '' ),
-				'fix'      => (string) ( $check['fix'] ?? '' ),
-				'fix_url'  => (string) ( $check['fix_url'] ?? '' ),
-				'conflict' => ! empty( $check['conflict'] ),
-				'pending'  => ! empty( $check['pending'] ),
-				'skipped'  => ! empty( $check['skipped'] ),
-				'seen_at'  => (string) ( $check['seen_at'] ?? '' ),
-				'source'   => sanitize_text_field( (string) ( $check['source'] ?? '' ) ),
+				'id'         => (string) $check['id'],
+				'ok'         => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
+				'blocks'     => (string) ( $check['blocks'] ?? '' ),
+				'group'      => (string) ( $check['group'] ?? '' ),
+				'level'      => StoreConditions::LEVEL_RECOMMENDED,
+				'name'       => (string) $check['name'],
+				'label'      => (string) ( $check['label'] ?? '' ),
+				'why'        => (string) ( $check['why'] ?? '' ),
+				'fix'        => (string) ( $check['fix'] ?? '' ),
+				'fix_url'    => (string) ( $check['fix_url'] ?? '' ),
+				'conflict'   => ! empty( $check['conflict'] ),
+				'pending'    => ! empty( $check['pending'] ),
+				'skipped'    => ! empty( $check['skipped'] ),
+				'no_product' => ! empty( $check['no_product'] ),
+				'seen_at'    => (string) ( $check['seen_at'] ?? '' ),
+				'source'     => sanitize_text_field( (string) ( $check['source'] ?? '' ) ),
 				// The product whose page failed, so the found line can name it.
-				'product'  => absint( $check['product'] ?? 0 ),
+				'product'    => absint( $check['product'] ?? 0 ),
 			);
 		}
 		return $checks;
