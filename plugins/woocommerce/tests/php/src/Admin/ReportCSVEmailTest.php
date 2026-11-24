@@ -15,6 +15,7 @@ use Automattic\WooCommerce\EmailEditor\Bootstrap;
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
+use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\EmailEditor\Package;
 use WC_Unit_Test_Case;
 
@@ -199,13 +200,7 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 	 * @testdox With the block email editor on, the email is sent in the block design with the download link, date range and retention period.
 	 */
 	public function test_email_is_sent_in_block_design(): void {
-		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
-		wc_get_container()->get( Package::class )->init();
-		wc_get_container()->get( Integration::class )->initialize();
-		Email_Editor_Container::container()->get( Bootstrap::class )->initialize();
-		if ( ! Email_Editor_Container::container()->get( Dependency_Check::class )->are_dependencies_met() ) {
-			$this->markTestSkipped( 'The test environment does not meet the block email editor requirements.' );
-		}
+		$this->enable_block_email_editor();
 
 		$content = $this->create_email( 'June 1, 2026 - June 30, 2026' )->get_content();
 
@@ -215,5 +210,67 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Date range: June 1, 2026 - June 30, 2026', $content );
 		$this->assertStringContainsString( 'This link is available for ' . human_time_diff( 0, ReportExporter::EXPORT_RETENTION_PERIOD ) . '.', $content );
 		$this->assertStringContainsString( '. All Rights Reserved.', $content, 'Only the block email template renders this footer.' );
+	}
+
+	/**
+	 * @testdox The on/off switch applies only while the block email editor, where it can be changed, is on.
+	 * @testWith ["yes", "no", 0]
+	 *           ["yes", "yes", 1]
+	 *           ["no", "no", 1]
+	 *
+	 * @param string $block_editor_enabled Value of the block email editor feature option.
+	 * @param string $email_enabled        Saved value of the email's on/off setting.
+	 * @param int    $expected_sent        Number of emails expected to be sent.
+	 */
+	public function test_on_off_switch_applies_only_with_the_block_editor( string $block_editor_enabled, string $email_enabled, int $expected_sent ): void {
+		update_option( 'woocommerce_feature_block_email_editor_enabled', $block_editor_enabled );
+		update_option( 'woocommerce_admin_report_export_download_settings', array( 'enabled' => $email_enabled ) );
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$mailer  = tests_retrieve_phpmailer_instance();
+		$before  = count( $mailer->mock_sent );
+
+		( new ReportCSVEmail() )->trigger( $user_id, 'orders', 'https://example.org/?action=woocommerce_admin_download_report_csv&filename=wc-orders-report-export' );
+
+		$this->assertSame( $expected_sent, count( $mailer->mock_sent ) - $before );
+	}
+
+	/**
+	 * @testdox The email preview shows a sample Orders report instead of an empty report name.
+	 */
+	public function test_preview_shows_a_sample_report(): void {
+		$this->enable_block_email_editor();
+		$this->reset_mailer();
+
+		try {
+			$preview = new EmailPreview();
+			$preview->set_email_type( ReportCSVEmail::class );
+
+			$this->assertStringNotContainsString( '{report_name}', $preview->get_subject() );
+			$this->assertStringContainsString( 'Download your Orders Report', $preview->get_email()->get_content_html() );
+		} finally {
+			$this->reset_mailer();
+		}
+	}
+
+	/**
+	 * Turn on the block email editor and set it up, or skip when the environment can't run it.
+	 */
+	private function enable_block_email_editor(): void {
+		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
+		wc_get_container()->get( Package::class )->init();
+		wc_get_container()->get( Integration::class )->initialize();
+		Email_Editor_Container::container()->get( Bootstrap::class )->initialize();
+		if ( ! Email_Editor_Container::container()->get( Dependency_Check::class )->are_dependencies_met() ) {
+			$this->markTestSkipped( 'The test environment does not meet the block email editor requirements.' );
+		}
+	}
+
+	/**
+	 * Reset the WC_Emails singleton, so the next WC()->mailer() call builds its list of emails again.
+	 */
+	private function reset_mailer(): void {
+		$instance = new \ReflectionProperty( \WC_Emails::class, 'instance' );
+		$instance->setAccessible( true );
+		$instance->setValue( null, null );
 	}
 }

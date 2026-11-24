@@ -97,20 +97,37 @@ class ReportCSVEmail extends \WC_Email {
 	/**
 	 * Initialise settings form fields.
 	 *
-	 * The email is always sent when a report export finishes, so it has no on/off or format setting.
+	 * The email is always sent as HTML, so it has no format setting.
 	 */
 	public function init_form_fields() {
 		parent::init_form_fields();
-		unset( $this->form_fields['enabled'], $this->form_fields['email_type'] );
+		unset( $this->form_fields['email_type'] );
 	}
 
 	/**
-	 * The email is always sent when a merchant exports a report by email.
+	 * Whether the email is sent.
+	 *
+	 * The on/off switch can only be changed in the block email editor, so it applies only while the editor is on.
 	 *
 	 * @return bool
 	 */
 	public function is_enabled() {
-		return true;
+		return ! $this->block_email_editor_enabled || parent::is_enabled();
+	}
+
+	/**
+	 * Fill the email with a sample Orders report for the email preview.
+	 *
+	 * @since 11.5.0
+	 * @return void
+	 */
+	public function prepare_for_preview() {
+		$this->report_type                   = $this->report_labels['orders'] ?? __( 'Orders', 'woocommerce' );
+		$this->placeholders['{report_name}'] = $this->report_type;
+		$this->download_url                  = 'https://example.com/report-download';
+		$this->set_report_date_range(
+			date_i18n( wc_date_format(), strtotime( 'first day of last month' ) ) . ' - ' . date_i18n( wc_date_format(), strtotime( 'last day of last month' ) )
+		);
 	}
 
 	/**
@@ -248,6 +265,10 @@ class ReportCSVEmail extends \WC_Email {
 	 * @param string $download_url The URL for downloading the report.
 	 */
 	public function trigger( $user_id, $report_type, $download_url ) {
+		if ( ! $this->is_enabled() ) {
+			return;
+		}
+
 		$user               = new \WP_User( $user_id );
 		$this->recipient    = $user->user_email;
 		$this->download_url = $download_url;
