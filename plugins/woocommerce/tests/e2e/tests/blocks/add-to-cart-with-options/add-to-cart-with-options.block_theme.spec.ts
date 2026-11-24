@@ -1413,6 +1413,61 @@ test.describe( 'Add to Cart + Options Block', () => {
 		).toBeVisible();
 	} );
 
+	test( 'shows notices only in the block that raised them when a page has several', async ( {
+		page,
+		requestUtils,
+	} ) => {
+		const productIds = [];
+		for ( const slug of [ 'hoodie', 'v-neck-t-shirt' ] ) {
+			const cliOutput = await wpCLI(
+				`post list --post_type=product --field=ID --name="${ slug }" --format=ids`
+			);
+			productIds.push( cliOutput.stdout.match( /\d+/g )?.pop() );
+		}
+		const singleProductBlocks = productIds
+			.map(
+				( productId ) =>
+					`<!-- wp:woocommerce/single-product {"productId":${ productId }} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/add-to-cart-with-options /--></div><!-- /wp:woocommerce/single-product -->`
+			)
+			.join( '' );
+		const testPage = await requestUtils.rest< { link: string } >( {
+			method: 'POST',
+			path: '/wp/v2/pages',
+			data: {
+				status: 'publish',
+				title: 'Two Add to Cart + Options blocks',
+				content: `<!-- wp:woocommerce/store-notices /-->${ singleProductBlocks }`,
+			},
+		} );
+
+		await page.goto( testPage.link );
+
+		const addToCartBlocks = page.locator(
+			'[data-block-name="woocommerce/add-to-cart-with-options"]'
+		);
+		const firstBlockNotice = addToCartBlocks.nth( 0 ).getByRole( 'alert' );
+
+		// There is the chance the button might be clicked before the iAPI
+		// stores have been loaded.
+		await expect( async () => {
+			await addToCartBlocks
+				.nth( 0 )
+				.getByRole( 'button', { name: 'Add to cart', exact: true } )
+				.click();
+			await expect( firstBlockNotice ).toHaveText(
+				'Please select product attributes before adding to cart.',
+				{ timeout: 1_000 }
+			);
+		} ).toPass();
+
+		await expect(
+			addToCartBlocks.nth( 1 ).getByRole( 'alert' )
+		).toHaveCount( 0 );
+		await expect( page.locator( '.wc-block-store-notices' ) ).toHaveText(
+			''
+		);
+	} );
+
 	test( 'shows Add to wishlist errors inside the block', async ( {
 		page,
 		pageObject,
