@@ -35,6 +35,7 @@
 - [woocommerce_breadcrumb_product_terms_args](#woocommerce_breadcrumb_product_terms_args)
 - [woocommerce_cart_contents_changed](#woocommerce_cart_contents_changed)
 - [woocommerce_cart_item_permalink](#woocommerce_cart_item_permalink)
+- [woocommerce_cart_ready_to_calc_shipping](#woocommerce_cart_ready_to_calc_shipping)
 - [woocommerce_checkout_link_sold_individually_cart_item_data](#woocommerce_checkout_link_sold_individually_cart_item_data)
 - [woocommerce_checkout_must_be_logged_in_message](#woocommerce_checkout_must_be_logged_in_message)
 - [woocommerce_checkout_show_terms](#woocommerce_checkout_show_terms)
@@ -61,6 +62,7 @@
 - [woocommerce_pay_order_product_in_stock](#woocommerce_pay_order_product_in_stock)
 - [woocommerce_product_details_hooked_blocks](#woocommerce_product_details_hooked_blocks)
 - [woocommerce_product_image_loading_attr](#woocommerce_product_image_loading_attr)
+- [woocommerce_product_is_visible](#woocommerce_product_is_visible)
 - [woocommerce_product_review_comment_form_args](#woocommerce_product_review_comment_form_args)
 - [woocommerce_product_tabs](#woocommerce_product_tabs)
 - [woocommerce_quantity_input_placeholder](#woocommerce_quantity_input_placeholder)
@@ -867,6 +869,21 @@ This is a hook taken from the legacy cart/mini-cart templates that allows the pe
 
 ---
 
+## woocommerce_cart_ready_to_calc_shipping
+
+
+This filter is documented in includes/class-wc-cart.php.
+
+```php
+apply_filters( 'woocommerce_cart_ready_to_calc_shipping' )
+```
+
+### Source
+
+- [StoreApi/Utilities/OrderController.php](../../../../../../src/StoreApi/Utilities/OrderController.php)
+
+---
+
 ## woocommerce_checkout_link_sold_individually_cart_item_data
 
 
@@ -1503,6 +1520,28 @@ Allowed values are 'lazy', 'eager', and 'auto'. Any other value will result in d
 
 ---
 
+## woocommerce_product_is_visible
+
+
+Filters the product visibility for catalog lookup (same hook as WC_Product::is_visible).
+
+```php
+apply_filters( 'woocommerce_product_is_visible', bool $visible, int $product_id )
+```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $visible | bool | Whether the product is considered visible. |
+| $product_id | int | Product ID. |
+
+### Source
+
+- [StoreApi/Routes/V1/Ucp/AbstractCatalogRoute.php](../../../../../../src/StoreApi/Routes/V1/Ucp/AbstractCatalogRoute.php)
+
+---
+
 ## woocommerce_product_review_comment_form_args
 
 
@@ -2121,7 +2160,7 @@ apply_filters( 'woocommerce_ucp_idempotency_retention_seconds', int $seconds )
 
 ### Description
 
-How long a retry carrying the same key is answered from storage. The [UCP spec](https://ucp.dev/2026-04-08/specification/checkout-rest/) requires at least 24 hours.
+The UCP spec requires at least 24 hours.
 
 ### Parameters
 
@@ -2146,7 +2185,7 @@ apply_filters( 'woocommerce_ucp_idempotency_strict', bool $strict )
 
 ### Description
 
-True, the default, matches the UCP OpenAPI document, which declares the header required on every mutating cart operation: a missing or malformed key is refused at 400. False honours a key when one is sent and lets a keyless write through.
+True, the default, matches the UCP specs, and returns 400 for a missing or malformed key. False honors a key when one is sent and lets a keyless write through.
 
 ### Parameters
 
