@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep translated image alt text and pagination labels intact in patterns, and drop markup from translatable stockist names.
+Show translated image alt text and pagination labels correctly in pattern blocks.
