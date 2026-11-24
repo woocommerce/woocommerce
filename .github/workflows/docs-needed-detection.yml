@@ -63,12 +63,13 @@ jobs:
             SKIP CONDITIONS (check these FIRST, before analyzing the diff)
             1. Get the PR metadata:
                gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json title,labels
-            2. If the "needs: documentation" label is already present, still ensure a
-               Linear issue exists (a previous run may have failed after labeling). Output
-               needs_docs=true, confidence="high", reason="Already labeled",
-               then stop.
-            3. If the PR title starts with "Revert " (case-insensitive), output
+            2. If the PR title starts with "Revert " (case-insensitive), output
                needs_docs=false, confidence="high", reason="Revert PR", then stop.
+            3. If the "needs: documentation" label is already present, do NOT stop: a
+               previous run may have failed after labeling, so a Linear issue must still
+               be ensured. Analyze the diff as described below and report its confidence
+               and reason, but output needs_docs=true even where the analysis would
+               otherwise output needs_docs=false.
 
             CLASSIFICATION CRITERIA
             Core question: "Would a non-technical store owner or site administrator

@@ -312,7 +312,11 @@ test( 'serializes reruns and labels before the Linear issue step', () => {
 	);
 	assert.match(
 		workflow,
-		/needs_docs=true, confidence="high", reason="Already labeled"/
+		/label is already present, do NOT stop[\s\S]*output needs_docs=true even where/
+	);
+	assert.ok(
+		workflow.indexOf( 'starts with "Revert "' ) <
+			workflow.indexOf( 'label is already present' )
 	);
 	assert.ok( ! workflow.includes( 'continue-on-error:' ) );
 } );
