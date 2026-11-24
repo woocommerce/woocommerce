@@ -446,6 +446,51 @@ class ShippingUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Adding a new cart line with taxes on raises no line_total warning and keeps the chosen method in the tax lookup. Flat rate is a control: only a pickup choice builds the packages there.
+	 *
+	 * @testWith [ "local_pickup:2", "local_pickup" ]
+	 *           [ "flat_rate:1", "flat_rate" ]
+	 *
+	 * @param string $rate_id   Chosen and listed rate id.
+	 * @param string $method_id Method id expected from wc_get_chosen_shipping_method_ids().
+	 */
+	public function test_adding_new_cart_line_with_taxes_on_reads_no_missing_line_total( string $rate_id, string $method_id ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC()->session->set( 'previous_shipping_methods', array( 0 => array( $rate_id ) ) );
+		WC()->session->set( 'chosen_shipping_methods', array( 0 => $rate_id ) );
+		$seen = array();
+		add_filter(
+			'woocommerce_cart_totals_get_item_tax_rates',
+			function ( $rates ) use ( &$seen ) {
+				$seen[] = wc_get_chosen_shipping_method_ids();
+				return $rates;
+			}
+		);
+		$warnings = array();
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Records warnings PHPUnit would otherwise turn into exceptions that add_to_cart() catches.
+		set_error_handler(
+			function ( $errno, $errstr ) use ( &$warnings ) {
+				unset( $errno );
+				$warnings[] = $errstr;
+				return true;
+			}
+		);
+
+		try {
+			$item_key = WC()->cart->add_to_cart( \WC_Helper_Product::create_simple_product()->get_id() );
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertNotFalse( $item_key );
+		foreach ( $warnings as $warning ) {
+			$this->assertStringNotContainsString( 'line_total', $warning );
+		}
+		$this->assertNotEmpty( $seen );
+		$this->assertSame( array( $method_id ), $seen[0], 'The chosen method must be kept in the tax lookup before the new line has totals.' );
+	}
+
+	/**
 	 * @testdox filter_chosen_shipping_methods returns an empty array for a value that is not an array.
 	 */
 	public function test_filter_chosen_shipping_methods_with_invalid_input(): void {
