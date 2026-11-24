@@ -3,6 +3,7 @@
  */
 import { select } from '@wordpress/data';
 import { apiFetch } from '@wordpress/data-controls';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -21,6 +22,10 @@ jest.mock( '@wordpress/core-data', () => ( {
 
 jest.mock( '@wordpress/data-controls', () => ( {
 	apiFetch: jest.fn(),
+} ) );
+
+jest.mock( '@wordpress/hooks', () => ( {
+	applyFilters: jest.fn( ( _hook: string, value: unknown ) => value ),
 } ) );
 
 jest.mock( '../../events', () => ( {
@@ -85,6 +90,28 @@ describe( 'requestSendingNewsletterPreview', () => {
 				},
 			},
 			done: false,
+		} );
+	} );
+
+	it( 'posts the preview request to the path returned by the API path filter', () => {
+		( applyFilters as jest.Mock ).mockImplementationOnce(
+			( hook: string, value: unknown ) =>
+				hook === 'woocommerce_email_editor_send_preview_api_path'
+					? '/my-plugin/v1/test-email'
+					: value
+		);
+
+		const action = requestSendingNewsletterPreview( 'test@example.com' );
+		action.next();
+		action.next();
+
+		expect( apiFetchMock ).toHaveBeenCalledWith( {
+			path: '/my-plugin/v1/test-email',
+			method: 'POST',
+			data: {
+				email: 'test@example.com',
+				postId: 123,
+			},
 		} );
 	} );
 

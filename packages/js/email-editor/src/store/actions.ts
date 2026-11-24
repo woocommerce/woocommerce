@@ -4,6 +4,7 @@
 import { select } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
 import { apiFetch } from '@wordpress/data-controls';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -118,8 +119,17 @@ export function* requestSendingNewsletterPreview( email: string ) {
 	try {
 		const postId = select( storeName ).getEmailPostId();
 
+		const defaultPath = '/woocommerce-email-editor/v1/send_preview_email';
+		const filteredPath = applyFilters(
+			'woocommerce_email_editor_send_preview_api_path',
+			defaultPath
+		);
+
 		yield apiFetch( {
-			path: '/woocommerce-email-editor/v1/send_preview_email',
+			path:
+				typeof filteredPath === 'string' && filteredPath
+					? filteredPath
+					: defaultPath,
 			method: 'POST',
 			data: {
 				email,
