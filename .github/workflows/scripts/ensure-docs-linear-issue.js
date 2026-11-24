@@ -83,17 +83,29 @@ module.exports = async ( {
 
 	let label;
 	let labelTeam;
+	// Sub-teams can use labels inherited from their parent teams.
+	const usableLabelTeamIds = new Set();
 	try {
 		label = await linearClient.issueLabel( labelId );
 		labelTeam = await label.team;
+		for (
+			let current = team;
+			current?.id && ! usableLabelTeamIds.has( current.id );
+			current = await current.parent
+		) {
+			usableLabelTeamIds.add( current.id );
+		}
 	} catch {
 		throw new Error(
 			"Cannot read the documentation label. Check LINEAR_DOCS_AUTO_LABEL and the token's access to that label."
 		);
 	}
-	if ( ! label?.id || ( labelTeam && labelTeam.id !== team.id ) ) {
+	if (
+		! label?.id ||
+		( labelTeam && ! usableLabelTeamIds.has( labelTeam.id ) )
+	) {
 		throw new Error(
-			'LINEAR_DOCS_AUTO_LABEL must identify a workspace label or a label belonging to the configured documentation team.'
+			'LINEAR_DOCS_AUTO_LABEL must identify a workspace label or a label belonging to the configured documentation team or one of its parent teams.'
 		);
 	}
 

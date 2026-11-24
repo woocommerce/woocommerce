@@ -242,6 +242,17 @@ test( 'accepts workspace-wide labels', async () => {
 	assert.equal( ( await ensureDocsIssue( options ) ).reused, false );
 } );
 
+test( 'accepts labels inherited from a parent team', async () => {
+	const { options } = fixture( {
+		team: async () => ( {
+			id: teamId,
+			parent: Promise.resolve( { id: 'parent-team' } ),
+		} ),
+		issueLabel: async () => ( { id: labelId, team: { id: 'parent-team' } } ),
+	} );
+	assert.equal( ( await ensureDocsIssue( options ) ).reused, false );
+} );
+
 test( 'rejects labels belonging to a different team', async () => {
 	const { calls, options } = fixture( {
 		issueLabel: async () => ( { id: labelId, team: { id: 'other-team' } } ),
