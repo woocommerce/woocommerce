@@ -6086,8 +6086,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				'id'         => $created['product']['id'],
 				'variations' => array(
 					array(
-						'id'            => $variation_id,
-						'regular_price' => '11.00',
+						'id'         => $variation_id,
+						// Writing a field loads the variation's meta, so a response from the changed object would miss the sync's value.
+						'extensions' => array( 'test-ext' => array( 'color' => 'red' ) ),
 					),
 				),
 			)
