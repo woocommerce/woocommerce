@@ -1221,7 +1221,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it.each< [ string, string[] ] >( [
-			[ 'configs/rules.js', [ 'first', 'second' ] ],
+			[ 'configs/rules.js', [ 'first', 'second', 'direct' ] ],
 			[ 'README.md', [] ],
 		] )(
 			'should schedule every config consumer for a plugin-only change to %s',
@@ -1252,32 +1252,40 @@ describe( 'Job Processing', () => {
 					{
 						name: 'root',
 						path: '',
-						dependencies: [ 'first', 'second' ].map( ( name ) => ( {
-							name,
-							path: name,
-							ciConfig: {
-								jobs: [
-									{
-										type: JobType.Lint as const,
-										changes: [ /test.js$/ ],
-										ignore: [ /[.]md$/ ],
-										command: 'lint',
-										events: [],
-									},
-									{
-										type: JobType.Test as const,
-										testType: 'unit',
-										name: 'Default',
-										changes: [ /test.js$/ ],
-										ignore: [ /[.]md$/ ],
-										command: 'test',
-										shardingArguments: [],
-										events: [],
-									},
-								],
-							},
-							dependencies: [ eslintConfig ],
-						} ) ),
+						dependencies: [ 'first', 'second', 'direct' ].map(
+							( name ) => ( {
+								name,
+								path: name,
+								ciConfig: {
+									jobs: [
+										{
+											type: JobType.Lint as const,
+											changes: [ /test.js$/ ],
+											ignore: [ /[.]md$/ ],
+											command: 'lint',
+											events: [],
+										},
+										{
+											type: JobType.Test as const,
+											testType: 'unit',
+											name: 'Default',
+											changes: [ /test.js$/ ],
+											ignore: [ /[.]md$/ ],
+											command: 'test',
+											shardingArguments: [],
+											events: [],
+										},
+									],
+								},
+								dependencies:
+									name === 'direct'
+										? [
+												eslintConfig,
+												...eslintConfig.dependencies,
+											]
+										: [ eslintConfig ],
+							} )
+						),
 					},
 					{ '@woocommerce/eslint-plugin': [ file ] },
 					{}
