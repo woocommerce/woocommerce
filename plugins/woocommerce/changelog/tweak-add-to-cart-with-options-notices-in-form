@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-Render the Add to Cart + Options block without an extra wrapper around its form, keeping its notices in place.
+Show the Add to Cart + Options block at the same width and spacing as the blocks around it.
