@@ -5,6 +5,21 @@
 		"description": "Find orders by ID or common order filters."
 	},
 	{
+		"name": "woocommerce/coupons-query",
+		"label": "Query coupons",
+		"description": "Find coupons by ID, exact code, or search term."
+	},
+	{
+		"name": "woocommerce/coupon-create",
+		"label": "Create coupon",
+		"description": "Create a coupon. Defaults to a published fixed cart discount. Requires publication permission even for drafts, matching WooCommerce REST."
+	},
+	{
+		"name": "woocommerce/coupon-update",
+		"label": "Update coupon",
+		"description": "Update an existing coupon, such as its amount, expiry date or usage limits."
+	},
+	{
 		"name": "woocommerce/order-add-note",
 		"label": "Add order note",
 		"description": "Add a note to an order."
@@ -18,6 +33,16 @@
 		"name": "woocommerce/order-notes-query",
 		"label": "Query order notes",
 		"description": "List every note of an order, newest first."
+	},
+	{
+		"name": "woocommerce/order-refunds-query",
+		"label": "Query order refunds",
+		"description": "List the refunds of an order, newest first. Use the woocommerce/order-refund-create ability to refund an order."
+	},
+	{
+		"name": "woocommerce/order-refund-create",
+		"label": "Refund order",
+		"description": "Refund an amount or lines of an order. With refund_payment, the payment gateway sends the money back; without it, the refund is only recorded and the money is returned outside WooCommerce."
 	},
 	{
 		"name": "woocommerce/order-send-email",
@@ -115,6 +140,11 @@
 		"description": "List shipping zones in matching order, with the regions each covers and its shipping methods. Zone 0 covers every location no other zone matches."
 	},
 	{
+		"name": "woocommerce/system-status-get",
+		"label": "Get system status",
+		"description": "Get the WooCommerce and database versions, order storage, environment checks, installed plugins, enabled WooCommerce features, the theme, the store pages, security checks and post counts. WordPress, PHP and database server versions come from core/get-environment-info."
+	},
+	{
 		"name": "woocommerce/system-status-tools-query",
 		"label": "Query status tools",
 		"description": "List the maintenance tools under WooCommerce > Status > Tools, in screen order, and what each does. Run a runnable one with woocommerce/system-status-tool-run."
@@ -145,8 +175,48 @@
 		"description": "List the tax rates of every tax class, in the order of the tax settings."
 	},
 	{
+		"name": "woocommerce/tax-rate-create",
+		"label": "Create tax rate",
+		"description": "Add a tax rate to a tax class. Takes the fields that tax-rates-query returns, so check there first that no rate already covers the location."
+	},
+	{
+		"name": "woocommerce/tax-rate-update",
+		"label": "Update tax rate",
+		"description": "Change a tax rate. Send its id from tax-rates-query and only the fields to change. An empty postcodes or cities list makes the rate apply to every postcode or city."
+	},
+	{
+		"name": "woocommerce/tax-rate-delete",
+		"label": "Delete tax rate",
+		"description": "Permanently delete a tax rate by its id from tax-rates-query. Returns the deleted rate; send its fields except id to tax-rate-create to add it back."
+	},
+	{
 		"name": "woocommerce/customers-query",
 		"label": "Query customers",
-		"description": "Find registered customers by ID or role, with their order count and total spent. Names, usernames, emails, phone numbers and addresses are withheld. Guest customers are not included."
+		"description": "Find registered and guest customers by ID, user ID, name or email, with their order count, total spent and activity dates, as WooCommerce Analytics counts them. A registered customer appears once Analytics has recorded them: when they register, order, or visit signed in, or the store imports historical data. Guest orders with the same email count as one guest. Core fields leave out names, usernames, emails, phone numbers and addresses."
+	},
+	{
+		"name": "woocommerce/store-settings-get",
+		"label": "Get store settings",
+		"description": "Read store location, currency, units, tax, stock and checkout configuration. Fields whose WooCommerce settings are not opted into ability reads are omitted. For site identity use core/get-site-info."
+	},
+	{
+		"name": "woocommerce/settings-query",
+		"label": "Query settings",
+		"description": "Read approved settings in a group. Use include for specific setting IDs. Country fields return codes without choices. Unapproved fields and passwords are omitted."
+	},
+	{
+		"name": "woocommerce/settings-update",
+		"label": "Update settings",
+		"description": "Change approved settings in one group, such as the currency, store address or checkout pages. Changes apply to the whole store and every customer at once, so confirm them with the merchant before you send them. Read current values with woocommerce/settings-query first. Unapproved fields and passwords cannot be changed. If any setting is refused, nothing is saved. Each result returns the previous value, so a change can be undone."
+	},
+	{
+		"name": "woocommerce/settings-groups-query",
+		"label": "Query settings groups",
+		"description": "List settings groups, including extension and email groups. Use settings-query to read approved settings in a group."
+	},
+	{
+		"name": "woocommerce/customer-update",
+		"label": "Update customer",
+		"description": "Update the first name, last name, billing address and shipping address of a registered customer. Fields that are not sent keep their value. Guest customers have no account to update; their addresses live on their orders. The response lists the changed fields without their values. Analytics refreshes the name and address it searches only for customer roles; for other roles, woocommerce/customers-query finds the old values until their next order."
 	}
 ]

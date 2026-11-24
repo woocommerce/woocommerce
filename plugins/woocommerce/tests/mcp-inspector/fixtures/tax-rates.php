@@ -1,21 +1,19 @@
 <?php
 /**
- * Tax rates named with an MCP prefix, replaced on every seed: German standard and reduced rates, and one for every country.
+ * Tax rates replaced on every seed: German standard and reduced rates, and one for every country.
  *
  * @package WooCommerce\Tests\McpInspector
  */
 
 declare( strict_types = 1 );
 
+$mcp_remove_tax_rates = require __DIR__ . '/remove-tax-rates.php';
+
 /**
  * @return array{standard: int, reduced: int, everywhere: int}
  */
-return static function (): array {
-	global $wpdb;
-
-	foreach ( $wpdb->get_col( "SELECT tax_rate_id FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_name LIKE 'MCP %'" ) as $id ) {
-		WC_Tax::_delete_tax_rate( (int) $id );
-	}
+return static function () use ( $mcp_remove_tax_rates ): array {
+	$mcp_remove_tax_rates( array( 'names' => array( 'MCP DE standard', 'MCP DE reduced', 'MCP everywhere' ) ) );
 
 	$rate = static function ( string $name, string $country, string $rate, string $tax_class, array $postcodes = array() ): int {
 		$id = WC_Tax::_insert_tax_rate(

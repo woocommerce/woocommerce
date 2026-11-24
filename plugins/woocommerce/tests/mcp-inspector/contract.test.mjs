@@ -204,6 +204,9 @@ const order = await seed( 'order', { key: 'contract' } );
 const product = await seed( 'product', { sku: 'mcp-contract' } );
 const review = await seed( 'review', { sku: 'mcp-contract-review' } );
 const zone = await seed( 'shipping-zone', { name: 'MCP contract zone' } );
+const coupon = await seed( 'coupon', { code: 'mcp-contract' } );
+const customer = await seed( 'customer', { key: 'contract' } );
+const taxRate = await seed( 'tax-rate', { name: 'MCP contract rate' } );
 const [ category ] = (
 	await call( 'woocommerce/product-terms-query', {
 		taxonomy: 'product_cat',
@@ -214,10 +217,18 @@ const [ category ] = (
 // Input is validated before the permission check, and a check that reads a record refuses everyone without one,
 // so this input is valid and names a real record.
 const PERMISSION_INPUT = {
+	'woocommerce/coupon-create': { code: 'mcp-permission-check' },
+	'woocommerce/coupon-update': { id: coupon.id, amount: '10' },
+	'woocommerce/customer-update': {
+		id: customer.customer_id,
+		first_name: 'MCP',
+	},
 	'woocommerce/order-add-note': { id: order.id, note: 'Contract' },
 	'woocommerce/order-create': { line_items: [ { product_id: product.id } ] },
 	'woocommerce/order-delete': { id: order.id },
 	'woocommerce/order-notes-query': { id: order.id },
+	'woocommerce/order-refund-create': { id: order.id, amount: '1' },
+	'woocommerce/order-refunds-query': { id: order.id },
 	'woocommerce/order-send-email': { id: order.id, email: 'invoice' },
 	'woocommerce/order-update': { id: order.id },
 	'woocommerce/order-update-status': { id: order.id, status: 'processing' },
@@ -243,6 +254,11 @@ const PERMISSION_INPUT = {
 	},
 	'woocommerce/product-terms-query': { taxonomy: 'product_cat' },
 	'woocommerce/product-update': { id: product.id },
+	'woocommerce/settings-query': { group: 'general' },
+	'woocommerce/settings-update': {
+		group: 'general',
+		settings: [ { id: 'woocommerce_store_address_2', value: '' } ],
+	},
 	'woocommerce/shipping-zone-create': {
 		name: 'MCP permission check',
 		locations: [ { code: 'DE', type: 'country' } ],
@@ -256,6 +272,9 @@ const PERMISSION_INPUT = {
 		enabled: true,
 	},
 	'woocommerce/system-status-tool-run': { id: 'clear_template_cache' },
+	'woocommerce/tax-rate-create': { rate: '1', class: 'zero-rate' },
+	'woocommerce/tax-rate-delete': { id: taxRate.id },
+	'woocommerce/tax-rate-update': { id: taxRate.id, rate: '1' },
 };
 
 describe(

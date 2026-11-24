@@ -1,0 +1,141 @@
+{
+	"name": "woocommerce/customer-update",
+	"label": "Update customer",
+	"description": "Update the first name, last name, billing address and shipping address of a registered customer. Fields that are not sent keep their value. Guest customers have no account to update; their addresses live on their orders. The response lists the changed fields without their values. Analytics refreshes the name and address it searches only for customer roles; for other roles, woocommerce/customers-query finds the old values until their next order.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"description": "Customer ID from the woocommerce/customers-query ability.",
+				"minimum": 1
+			},
+			"first_name": {
+				"type": "string"
+			},
+			"last_name": {
+				"type": "string"
+			},
+			"billing": {
+				"type": "object",
+				"description": "Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.",
+				"properties": {
+					"first_name": {
+						"type": "string"
+					},
+					"last_name": {
+						"type": "string"
+					},
+					"company": {
+						"type": "string"
+					},
+					"address_1": {
+						"type": "string"
+					},
+					"address_2": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"state": {
+						"type": "string"
+					},
+					"postcode": {
+						"type": "string"
+					},
+					"country": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": false,
+				"minProperties": 1
+			},
+			"shipping": {
+				"type": "object",
+				"description": "Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.",
+				"properties": {
+					"first_name": {
+						"type": "string"
+					},
+					"last_name": {
+						"type": "string"
+					},
+					"company": {
+						"type": "string"
+					},
+					"address_1": {
+						"type": "string"
+					},
+					"address_2": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"state": {
+						"type": "string"
+					},
+					"postcode": {
+						"type": "string"
+					},
+					"country": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": false,
+				"minProperties": 1
+			}
+		},
+		"required": [
+			"id"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"customer": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"user_id": {
+						"type": "integer"
+					},
+					"updated_fields": {
+						"type": "array",
+						"description": "Fields whose value changed, such as first_name or billing.city, and each extension field sent, as extensions.<namespace>.<field>.",
+						"items": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": true,
+			"idempotent": false
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

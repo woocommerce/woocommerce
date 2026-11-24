@@ -1,0 +1,115 @@
+{
+	"name": "woocommerce/order-refunds-query",
+	"label": "Query order refunds",
+	"description": "List the refunds of an order, newest first. Use the woocommerce/order-refund-create ability to refund an order.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"description": "Order ID.",
+				"minimum": 1
+			},
+			"include": {
+				"type": "array",
+				"description": "Limit the result to these refund IDs of the order.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				},
+				"minItems": 1,
+				"maxItems": 200
+			}
+		},
+		"required": [
+			"id"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"refunds": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer",
+							"description": "Refund ID."
+						},
+						"order_id": {
+							"type": "integer"
+						},
+						"amount": {
+							"type": "string"
+						},
+						"reason": {
+							"type": "string",
+							"description": "Reason for the refund. Omitted when none was given."
+						},
+						"refunded_by": {
+							"type": "integer",
+							"description": "ID of the user who made the refund. Omitted when nobody was logged in."
+						},
+						"refunded_payment": {
+							"type": "boolean",
+							"description": "Whether WooCommerce recorded that the payment gateway refunded the payment. False for a manual refund, but also when the gateway or an extension refunded it and the refund was not marked as paid, so check with the gateway when a refund error asked you to."
+						},
+						"date_created": {
+							"type": "string",
+							"format": "date-time",
+							"description": "Refund date in the store timezone."
+						},
+						"line_items": {
+							"type": "array",
+							"description": "Order lines that the refund covers. Empty for a refund of an amount only.",
+							"items": {
+								"type": "object",
+								"properties": {
+									"refunded_item_id": {
+										"type": "integer",
+										"description": "ID of the order line."
+									},
+									"name": {
+										"type": "string"
+									},
+									"quantity": {
+										"type": "number"
+									},
+									"total": {
+										"type": "string",
+										"description": "Amount refunded for the line, excluding tax. Negative for a discount or credit line."
+									},
+									"total_tax": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"total": {
+				"type": "integer",
+				"description": "Number of refunds returned."
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

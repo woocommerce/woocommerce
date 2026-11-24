@@ -1,0 +1,136 @@
+{
+	"name": "woocommerce/tax-rate-create",
+	"label": "Create tax rate",
+	"description": "Add a tax rate to a tax class. Takes the fields that tax-rates-query returns, so check there first that no rate already covers the location.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"rate": {
+				"type": "string",
+				"description": "Percentage as a decimal string, such as \"19\" or \"7.25\".",
+				"pattern": "^([0-9]{1,3}|[0-9]{0,3}\\.[0-9]{1,4})$"
+			},
+			"country": {
+				"type": "string",
+				"description": "Two-letter country code, or empty for every country.",
+				"pattern": "^([A-Za-z]{2})?$"
+			},
+			"state": {
+				"type": "string",
+				"description": "State code such as CA, or empty for every state. For a country with no state list, the state as customers enter it.",
+				"maxLength": 200
+			},
+			"postcodes": {
+				"type": "array",
+				"items": {
+					"type": "string",
+					"pattern": "^[^;]*[^\\s;*-][^;]*$",
+					"maxLength": 200
+				},
+				"description": "Postcodes the rate is limited to. Takes ranges such as 10000...19999 and wildcards such as 10*. Empty for every postcode."
+			},
+			"cities": {
+				"type": "array",
+				"items": {
+					"type": "string",
+					"pattern": "^[^;]*[^\\s;*-][^;]*$",
+					"maxLength": 200
+				},
+				"description": "Cities the rate is limited to. Empty for every city."
+			},
+			"name": {
+				"type": "string",
+				"description": "Name shown on the cart, checkout and invoices. Empty saves the name Tax.",
+				"maxLength": 200
+			},
+			"priority": {
+				"type": "integer",
+				"description": "Only one matching rate per priority applies. Use a different priority to stack rates.",
+				"minimum": 0
+			},
+			"compound": {
+				"type": "boolean",
+				"description": "Whether the rate applies on top of the other taxes."
+			},
+			"shipping": {
+				"type": "boolean",
+				"description": "Whether the rate also applies to shipping."
+			},
+			"class": {
+				"type": "string",
+				"description": "Tax class slug; standard for the standard rates."
+			}
+		},
+		"required": [
+			"rate"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"rate": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"country": {
+						"type": "string",
+						"description": "Empty for every country."
+					},
+					"state": {
+						"type": "string"
+					},
+					"postcodes": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"cities": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"rate": {
+						"type": "string",
+						"description": "Percentage as a decimal string."
+					},
+					"name": {
+						"type": "string"
+					},
+					"priority": {
+						"type": "integer"
+					},
+					"compound": {
+						"type": "boolean"
+					},
+					"shipping": {
+						"type": "boolean",
+						"description": "Whether the rate also applies to shipping."
+					},
+					"class": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": false,
+			"idempotent": false
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

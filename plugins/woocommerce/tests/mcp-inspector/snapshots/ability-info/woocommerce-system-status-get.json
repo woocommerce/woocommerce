@@ -1,0 +1,247 @@
+{
+	"name": "woocommerce/system-status-get",
+	"label": "Get system status",
+	"description": "Get the WooCommerce and database versions, order storage, environment checks, installed plugins, enabled WooCommerce features, the theme, the store pages, security checks and post counts. WordPress, PHP and database server versions come from core/get-environment-info.",
+	"input_schema": {
+		"type": "object",
+		"default": [],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"system_status": {
+				"type": "object",
+				"properties": {
+					"woocommerce_version": {
+						"type": "string"
+					},
+					"woocommerce_db_version": {
+						"type": "string"
+					},
+					"order_storage": {
+						"type": "string",
+						"enum": [
+							"hpos",
+							"posts"
+						]
+					},
+					"environment": {
+						"type": "object",
+						"properties": {
+							"wp_cron": {
+								"type": "boolean",
+								"description": "Whether WP-Cron runs on page loads; false when DISABLE_WP_CRON is set."
+							},
+							"wp_debug_mode": {
+								"type": "boolean"
+							},
+							"external_object_cache": {
+								"type": "boolean"
+							},
+							"memory_limit": {
+								"type": "integer",
+								"description": "PHP memory limit in bytes, which WordPress raises to WP_MEMORY_LIMIT; -1 for no limit."
+							},
+							"max_upload_size": {
+								"type": "integer",
+								"description": "Bytes."
+							},
+							"log_directory_writable": {
+								"type": "boolean"
+							}
+						},
+						"additionalProperties": false
+					},
+					"active_plugins": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"plugin": {
+									"type": "string",
+									"description": "Plugin file, relative to the plugins directory."
+								},
+								"name": {
+									"type": "string"
+								},
+								"version": {
+									"type": "string"
+								},
+								"author": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"inactive_plugins": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"plugin": {
+									"type": "string",
+									"description": "Plugin file, relative to the plugins directory."
+								},
+								"name": {
+									"type": "string"
+								},
+								"version": {
+									"type": "string"
+								},
+								"author": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"mu_plugins": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"plugin": {
+									"type": "string",
+									"description": "Plugin file, relative to the plugins directory."
+								},
+								"name": {
+									"type": "string"
+								},
+								"version": {
+									"type": "string"
+								},
+								"author": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"dropins": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"plugin": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"enabled_features": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"theme": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"version": {
+								"type": "string"
+							},
+							"is_block_theme": {
+								"type": "boolean"
+							},
+							"has_woocommerce_support": {
+								"type": "boolean"
+							},
+							"has_outdated_templates": {
+								"type": "boolean",
+								"description": "Whether the theme overrides a WooCommerce template with an older version of it."
+							},
+							"parent_name": {
+								"type": "string",
+								"description": "Only for a child theme."
+							},
+							"parent_version": {
+								"type": "string",
+								"description": "Only for a child theme."
+							}
+						},
+						"additionalProperties": false
+					},
+					"pages": {
+						"type": "array",
+						"description": "The WooCommerce pages: whether each is assigned in settings, exists, is published, and has the content it needs. Where both shortcode_required and block_required are true, the page needs exactly one of the shortcode or block; both present is a problem.",
+						"items": {
+							"type": "object",
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"set": {
+									"type": "boolean"
+								},
+								"exists": {
+									"type": "boolean"
+								},
+								"visible": {
+									"type": "boolean"
+								},
+								"shortcode_required": {
+									"type": "boolean"
+								},
+								"shortcode_present": {
+									"type": "boolean"
+								},
+								"block_required": {
+									"type": "boolean"
+								},
+								"block_present": {
+									"type": "boolean"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"security": {
+						"type": "object",
+						"properties": {
+							"secure_connection": {
+								"type": "boolean",
+								"description": "Whether the shop page URL uses HTTPS."
+							},
+							"hide_errors": {
+								"type": "boolean",
+								"description": "Whether the configuration hides PHP errors from visitors: WP_DEBUG_DISPLAY when WP_DEBUG is on, otherwise display_errors in the PHP configuration. An ini_set() override at runtime is not seen."
+							}
+						},
+						"additionalProperties": false
+					},
+					"post_type_counts": {
+						"type": "object",
+						"description": "Number of posts of each post type, in every status.",
+						"additionalProperties": {
+							"type": "integer"
+						}
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

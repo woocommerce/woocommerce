@@ -1,0 +1,221 @@
+{
+	"name": "woocommerce/settings-update",
+	"label": "Update settings",
+	"description": "Change approved settings in one group, such as the currency, store address or checkout pages. Changes apply to the whole store and every customer at once, so confirm them with the merchant before you send them. Read current values with woocommerce/settings-query first. Unapproved fields and passwords cannot be changed. If any setting is refused, nothing is saved. Each result returns the previous value, so a change can be undone.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"group": {
+				"type": "string",
+				"minLength": 1
+			},
+			"settings": {
+				"type": "array",
+				"minItems": 1,
+				"maxItems": 20,
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "string",
+							"minLength": 1
+						},
+						"value": {
+							"description": "A single value, or a retention period with number and unit.",
+							"anyOf": [
+								{
+									"type": "string"
+								},
+								{
+									"type": "number"
+								},
+								{
+									"type": "boolean"
+								},
+								{
+									"type": "object",
+									"properties": {
+										"number": {
+											"anyOf": [
+												{
+													"type": "string"
+												},
+												{
+													"type": "number"
+												}
+											]
+										},
+										"unit": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false
+								}
+							]
+						},
+						"values": {
+							"description": "A list, for multiselect and country list settings. Lists from woocommerce/settings-query or previous go here.",
+							"type": "array",
+							"items": {
+								"anyOf": [
+									{
+										"type": "string"
+									},
+									{
+										"type": "number"
+									},
+									{
+										"type": "boolean"
+									}
+								]
+							}
+						}
+					},
+					"required": [
+						"id"
+					],
+					"additionalProperties": false
+				}
+			}
+		},
+		"required": [
+			"group",
+			"settings"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"settings": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "string"
+						},
+						"previous": {
+							"anyOf": [
+								{
+									"type": "string"
+								},
+								{
+									"type": "number"
+								},
+								{
+									"type": "boolean"
+								},
+								{
+									"type": "array",
+									"items": {
+										"anyOf": [
+											{
+												"type": "string"
+											},
+											{
+												"type": "number"
+											},
+											{
+												"type": "boolean"
+											}
+										]
+									}
+								},
+								{
+									"type": "object",
+									"properties": {
+										"number": {
+											"anyOf": [
+												{
+													"type": "string"
+												},
+												{
+													"type": "number"
+												}
+											]
+										},
+										"unit": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false
+								}
+							]
+						},
+						"value": {
+							"anyOf": [
+								{
+									"type": "string"
+								},
+								{
+									"type": "number"
+								},
+								{
+									"type": "boolean"
+								},
+								{
+									"type": "array",
+									"items": {
+										"anyOf": [
+											{
+												"type": "string"
+											},
+											{
+												"type": "number"
+											},
+											{
+												"type": "boolean"
+											}
+										]
+									}
+								},
+								{
+									"type": "object",
+									"properties": {
+										"number": {
+											"anyOf": [
+												{
+													"type": "string"
+												},
+												{
+													"type": "number"
+												}
+											]
+										},
+										"unit": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false
+								}
+							]
+						}
+					},
+					"required": [
+						"id",
+						"value"
+					],
+					"additionalProperties": false
+				}
+			}
+		},
+		"required": [
+			"settings"
+		],
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": true,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}
