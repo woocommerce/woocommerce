@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove unused E2E environments and convert the plugin-installing ones (Gutenberg stable/nightly, object cache) to wp-env config variants so plugins are installed and activated inside the captured baseline; drop the now-unused env-setup mechanism.
