@@ -988,6 +988,28 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		);
 		$this->assertContains( 'Order 2 internal note', wp_list_pluck( $order2_notes, 'content' ) );
 		$this->assertNotContains( 'Order 1 internal note', wp_list_pluck( $order2_notes, 'content' ) );
+
+		// An empty order__in overrides post__in after mapping, so zero order_id must still return empty.
+		$this->assertSame(
+			array(),
+			wc_get_order_notes(
+				array(
+					'order_id'  => 0,
+					'post__in'  => array( $order1->get_id() ),
+					'order__in' => array(),
+				)
+			)
+		);
+
+		// A null order_id falls back to a valid post_id to match isset()-based mapping precedence.
+		$post_id_fallback_notes = wc_get_order_notes(
+			array(
+				'order_id' => null,
+				'post_id'  => $order1->get_id(),
+			)
+		);
+		$this->assertContains( 'Order 1 internal note', wp_list_pluck( $post_id_fallback_notes, 'content' ) );
+		$this->assertNotContains( 'Order 2 internal note', wp_list_pluck( $post_id_fallback_notes, 'content' ) );
 	}
 
 	/**

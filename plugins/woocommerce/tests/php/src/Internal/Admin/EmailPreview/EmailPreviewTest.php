@@ -510,7 +510,7 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 	 * @see https://github.com/woocommerce/woocommerce/issues/71100
 	 */
 	public function test_preview_does_not_leak_order_notes_via_wc_get_order_notes(): void {
-		$real_order = WC_Helper_Order::create_order();
+		$real_order = wc_create_order();
 		$real_order->add_order_note( 'Secret customer note from real order', 1 );
 		$real_order->save();
 

@@ -1315,19 +1315,7 @@ function wc_get_order_note( $data ) {
  * @return stdClass[]              Array of stdClass objects with order notes details.
  */
 function wc_get_order_notes( $args ) {
-	// WP_Comment_Query treats post_id = 0/empty as "no filter" and returns notes across all orders.
-	if ( is_array( $args ) && empty( $args['order__in'] ) && empty( $args['post__in'] ) ) {
-		$id_key = null;
-		if ( array_key_exists( 'order_id', $args ) ) {
-			$id_key = 'order_id';
-		} elseif ( array_key_exists( 'post_id', $args ) ) {
-			$id_key = 'post_id';
-		}
-
-		if ( null !== $id_key && ( ! is_numeric( $args[ $id_key ] ) || (int) $args[ $id_key ] <= 0 ) ) {
-			return array();
-		}
-	}
+	$has_null_order_id = is_array( $args ) && array_key_exists( 'order_id', $args ) && null === $args['order_id'];
 
 	$key_mapping = array(
 		'limit'         => 'number',
@@ -1341,6 +1329,17 @@ function wc_get_order_notes( $args ) {
 		if ( isset( $args[ $query_key ] ) ) {
 			$args[ $db_key ] = $args[ $query_key ];
 			unset( $args[ $query_key ] );
+		}
+	}
+
+	// WP_Comment_Query treats post_id = 0/empty as "no filter" and returns notes across all orders.
+	if ( is_array( $args ) && empty( $args['post__in'] ) ) {
+		if ( array_key_exists( 'post_id', $args ) ) {
+			if ( ! is_numeric( $args['post_id'] ) || (int) $args['post_id'] <= 0 ) {
+				return array();
+			}
+		} elseif ( $has_null_order_id ) {
+			return array();
 		}
 	}
 
