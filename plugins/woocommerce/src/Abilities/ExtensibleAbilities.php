@@ -754,9 +754,10 @@ class ExtensibleAbilities {
 	 *                               throws, Core logs the error, and the get_callbacks get null. They
 	 *                               also get null when it returns no array, which Core reports with
 	 *                               wc_doing_it_wrong(). Core keeps an entry until the get_callbacks of
-	 *                               its object have read it, or until the next list of the resource, so
-	 *                               a write never gets an old entry. Core calls prime callbacks only on
-	 *                               reads, not on writes.
+	 *                               its object have read it, until the next list of the resource, or
+	 *                               until an ActionableAbility starts a write, so such a write never
+	 *                               gets an old entry. Core calls prime callbacks only on reads, not on
+	 *                               writes.
 	 * }
 	 */
 	public static function register_prime( array $args ): void {
@@ -814,6 +815,18 @@ class ExtensibleAbilities {
 			}
 		}
 		self::$primed[ $resource_name ] = $primed;
+	}
+
+	/**
+	 * Drop the entries of every resource. ActionableAbility calls it when a write starts,
+	 * so the write does not format an object with an entry from before the write.
+	 *
+	 * @internal
+	 *
+	 * @since 11.5.0
+	 */
+	public static function forget_primed(): void {
+		self::$primed = array();
 	}
 
 	/**

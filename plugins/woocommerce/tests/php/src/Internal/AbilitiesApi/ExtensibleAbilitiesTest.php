@@ -1275,7 +1275,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should pass a primed entry to one read of its object, so a later read loads its own data.
+	 * @testdox Should pass a primed entry to one read of its object, and drop the unread entries when a write starts.
 	 */
 	public function test_a_primed_entry_is_read_once(): void {
 		$product = \WC_Helper_Product::create_simple_product();
@@ -1289,6 +1289,18 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 'primed', $read['extensions']['test-ext']['entry'] );
 		$this->assertSame( 'loaded', $re_read['extensions']['test-ext']['entry'], 'A write that formats the same object must not get the old entry.' );
+
+		ExtensibleAbilities::prime( 'product', array( $product ) );
+		$this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Renamed',
+			)
+		);
+		$after_write = ExtensibleAbilities::add_fields_to_object( array(), 'product', $product );
+
+		$this->assertSame( 'loaded', $after_write['extensions']['test-ext']['entry'], 'A write drops the entry of an object that no read formatted.' );
 	}
 
 	/**

@@ -198,7 +198,8 @@ abstract class ActionableAbility extends Ability {
 	 * @throws \Throwable When save() throws, after the rollback.
 	 */
 	public function execute_change( $input = null ) {
-		$input   = is_array( $input ) ? $input : array();
+		$input = is_array( $input ) ? $input : array();
+		ExtensibleAbilities::forget_primed();
 		$subject = $this->load( $input );
 		if ( is_wp_error( $subject ) ) {
 			return $subject;
