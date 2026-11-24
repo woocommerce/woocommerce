@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\StockNotifications;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\StockNotifications\Controller;
+use Automattic\WooCommerce\Admin\API\Reports\StockNotifications\DataStore as ReportDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
@@ -297,7 +298,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should serve cached data until a notification write that changes report data bumps the cache version.
+	 * @testdox Should serve cached data until a notification write that changes report data bumps this report's cache version only.
 	 */
 	public function test_notification_write_invalidates_cache(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -311,28 +312,30 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->insert_row( $product->get_id(), NotificationStatus::ACTIVE, gmdate( 'Y-m-d H:i:s' ) );
 		$this->assertSame( 1, $this->get_rows( $period )[ $product->get_id() ]['signups'], 'A direct insert should not invalidate the cache.' );
 
-		$version      = ReportsCache::get_version();
+		$version      = ReportDataStore::get_cache_version();
+		$global       = ReportsCache::get_version();
 		$notification = new Notification();
 		$notification->set_product_id( $product->get_id() );
 		$notification->set_user_email( 'crud@example.com' );
 		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification->save();
 
-		$this->assertNotSame( $version, ReportsCache::get_version(), 'Saving a notification should invalidate the reports cache.' );
+		$this->assertNotSame( $version, ReportDataStore::get_cache_version(), 'Saving a notification should invalidate the report cache.' );
+		$this->assertSame( $global, ReportsCache::get_version(), 'Other reports should keep their cache.' );
 		$this->assertSame( 3, $this->get_rows( $period )[ $product->get_id() ]['signups'], 'The report should be recomputed after the bump.' );
 
-		$version = ReportsCache::get_version();
+		$version = ReportDataStore::get_cache_version();
 		$notification->set_date_last_attempt( time() );
 		$notification->save();
-		$this->assertSame( $version, ReportsCache::get_version(), 'A send-attempt bookkeeping save should keep the reports cache.' );
+		$this->assertSame( $version, ReportDataStore::get_cache_version(), 'A send-attempt bookkeeping save should keep the report cache.' );
 
 		$notification->set_status( NotificationStatus::CANCELLED );
 		$notification->save();
-		$this->assertNotSame( $version, ReportsCache::get_version(), 'A status change should invalidate the reports cache.' );
+		$this->assertNotSame( $version, ReportDataStore::get_cache_version(), 'A status change should invalidate the report cache.' );
 
-		$version = ReportsCache::get_version();
+		$version = ReportDataStore::get_cache_version();
 		$notification->delete( true );
-		$this->assertNotSame( $version, ReportsCache::get_version(), 'Deleting a notification should invalidate the reports cache.' );
+		$this->assertNotSame( $version, ReportDataStore::get_cache_version(), 'Deleting a notification should invalidate the report cache.' );
 	}
 
 	/**

@@ -7,7 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\DataStores\StockNotifications;
 
-use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\API\Reports\StockNotifications\DataStore as StockNotificationsReportDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
@@ -202,7 +202,7 @@ CREATE TABLE $meta_table_name (
 		$notification->apply_changes();
 
 		// After reading insert_id: invalidating can add an option row, which overwrites it.
-		ReportsCache::invalidate();
+		StockNotificationsReportDataStore::invalidate_cache();
 
 		/**
 		 * Action: woocommerce_new_stock_notification
@@ -322,7 +322,7 @@ CREATE TABLE $meta_table_name (
 
 			// Only the props the Analytics report reads; bookkeeping saves such as send attempts keep the cache.
 			if ( array_intersect( array( 'product_id', 'user_email', 'status', 'date_created', 'date_notified' ), array_keys( $changes ) ) ) {
-				ReportsCache::invalidate();
+				StockNotificationsReportDataStore::invalidate_cache();
 			}
 		}
 
@@ -378,7 +378,7 @@ CREATE TABLE $meta_table_name (
 
 		if ( $deleted > 0 ) {
 			$this->data_store_meta->delete_by_notification_id( $notification_id );
-			ReportsCache::invalidate();
+			StockNotificationsReportDataStore::invalidate_cache();
 
 			/**
 			 * Action: woocommerce_delete_stock_notification

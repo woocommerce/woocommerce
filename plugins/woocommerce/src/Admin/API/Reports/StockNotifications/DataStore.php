@@ -53,6 +53,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected $cache_key = 'stock_notifications';
 
 	/**
+	 * Transient version group for this report's cache, so sign-up changes don't clear other reports.
+	 */
+	const CACHE_VERSION_GROUP = 'woocommerce_reports_stock_notifications';
+
+	/**
 	 * Data store context used to pass to filters.
 	 *
 	 * @override ReportsDataStore::$context
@@ -257,6 +262,37 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$defaults['extended_info']    = false;
 
 		return $defaults;
+	}
+
+	/**
+	 * Clear the cached Stock notifications report data, leaving other reports cached.
+	 *
+	 * @internal
+	 */
+	public static function invalidate_cache(): void {
+		\WC_Cache_Helper::get_transient_version( self::CACHE_VERSION_GROUP, true );
+	}
+
+	/**
+	 * Get the current version of this report's cache.
+	 *
+	 * @internal
+	 * @return string
+	 */
+	public static function get_cache_version(): string {
+		return (string) \WC_Cache_Helper::get_transient_version( self::CACHE_VERSION_GROUP );
+	}
+
+	/**
+	 * Include this report's cache version, so invalidate_cache() expires only these entries.
+	 *
+	 * @override ReportsDataStore::get_cache_key()
+	 *
+	 * @param array $params Query parameters.
+	 * @return string
+	 */
+	protected function get_cache_key( $params ) {
+		return parent::get_cache_key( $params ) . '_' . self::get_cache_version();
 	}
 
 	/**
