@@ -178,9 +178,12 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 
 		try {
 			$responses = array();
+			$logged    = array();
 			foreach ( array( 'item', 'actions' ) as $route ) {
+				$errors = array();
 				$this->fail_next_query( self::ROW_READ );
 				$responses[ $route ] = 'item' === $route ? $this->get( (int) $contract->get_id() ) : $this->list_actions( (int) $contract->get_id() );
+				$logged[ $route ]    = $errors;
 			}
 		} finally {
 			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
@@ -190,9 +193,9 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 			$this->assertSame( 500, $response->get_status(), "The {$route} route answers 500." );
 			$this->assertSame( 'woocommerce_subscriptions_engine_contract_read_failed', $this->response_data( $response )['code'] );
 			$this->assertStringNotContainsString( 'table_that_does_not_exist', (string) wp_json_encode( $response->get_data() ), 'Database details stay out of the response.' );
+			$this->assertNotEmpty( $logged[ $route ], "The {$route} route logs the failed read." );
+			$this->assertStringContainsString( 'table_that_does_not_exist', $logged[ $route ][0], "The {$route} route's log carries the database error." );
 		}
-		$this->assertNotEmpty( $errors, 'A failed read is logged.' );
-		$this->assertStringContainsString( 'table_that_does_not_exist', $errors[0], 'The log carries the database error.' );
 	}
 
 	/**

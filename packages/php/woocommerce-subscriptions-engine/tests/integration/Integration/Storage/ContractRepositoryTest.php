@@ -2109,13 +2109,14 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @param int $skip Snapshot reads to let through first: 0 breaks the plan snapshot, 1 the items snapshot.
 	 */
 	public function test_cycle_read_throws_on_a_failed_snapshot_read( int $skip ): void {
-		$id = $this->insert_released( $this->make_contract() );
-		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$this->seed_cycle_snapshots( $id ) ) );
+		$id           = $this->insert_released( $this->make_contract() );
+		$snapshot_ids = $this->seed_cycle_snapshots( $id );
+		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$snapshot_ids ) );
 
 		$this->fail_next_query( '/^\s*SELECT payload, schema_version FROM \S*subscription_snapshots WHERE id = /', $skip );
 
 		$this->expectException( \RuntimeException::class );
-		$this->expectExceptionMessage( 'Failed to read snapshot' );
+		$this->expectExceptionMessage( "Failed to read snapshot {$snapshot_ids[ $skip ]}:" );
 
 		$this->sut->find_cycle_history( $id );
 	}

@@ -172,8 +172,9 @@ final class ContractsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check whether the current user may run the requested action on the contract. Anything
-	 * that is not a 401 is the same 404, so a caller cannot probe for contracts it may not act on.
+	 * Check whether the current user may run the requested action on the contract. Anything that
+	 * is not a 401 or a failed read (500) is the same 404, so a caller cannot probe for contracts
+	 * it may not act on.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return true|WP_Error
