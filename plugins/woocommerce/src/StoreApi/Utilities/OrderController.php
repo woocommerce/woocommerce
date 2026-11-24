@@ -85,6 +85,14 @@ class OrderController {
 	private CheckoutFields $additional_fields_controller;
 
 	/**
+	 * Item types the current sync found changed since the snapshot but couldn't rebuild, such as shipping that wasn't
+	 * calculated yet. They keep their previous fingerprints, so the next sync rebuilds them.
+	 *
+	 * @var string[]
+	 */
+	private array $changed_item_types_not_rebuilt = [];
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -138,7 +146,8 @@ class OrderController {
 			wc()->cart->calculate_totals();
 		}
 
-		$items_before_sync = $order->get_items( OrderItemFingerprint::CART_ITEM_TYPES );
+		$items_before_sync                    = $order->get_items( OrderItemFingerprint::CART_ITEM_TYPES );
+		$this->changed_item_types_not_rebuilt = [];
 
 		// Update the current order to match the current cart.
 		$this->update_line_items_from_cart( $order );
@@ -172,8 +181,8 @@ class OrderController {
 
 		$previous_snapshot = $this->get_cart_order_items_snapshot( $order );
 
-		$snapshot = [];
-		foreach ( $order->get_items( OrderItemFingerprint::CART_ITEM_TYPES ) as $item_id => $item ) {
+		$snapshot = array_intersect_key( $previous_snapshot ?? [], array_flip( $this->changed_item_types_not_rebuilt ) );
+		foreach ( $order->get_items( array_diff( OrderItemFingerprint::CART_ITEM_TYPES, $this->changed_item_types_not_rebuilt ) ) as $item_id => $item ) {
 			$is_new_item   = ! isset( $items_before_sync[ $item_id ] );
 			$was_cart_item = null === $previous_snapshot || isset( $previous_snapshot[ $item->get_type() ][ $item_id ] );
 			if ( $is_new_item || $was_cart_item ) {
@@ -1413,6 +1422,8 @@ class OrderController {
 			$order->remove_order_items( OrderItemType::SHIPPING );
 			wc()->checkout->create_order_shipping_lines( $order, wc()->session->get( 'chosen_shipping_methods' ), wc()->shipping()->get_packages() );
 			$order->update_meta_data( '_shipping_hash', $cart_hashes['shipping'] );
+		} elseif ( in_array( OrderItemType::SHIPPING, $changed_types, true ) ) {
+			$this->changed_item_types_not_rebuilt[] = OrderItemType::SHIPPING;
 		}
 
 		if ( $order->get_meta( '_coupons_hash' ) !== $cart_hashes['coupons'] || in_array( OrderItemType::COUPON, $changed_types, true ) ) {

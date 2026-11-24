@@ -823,6 +823,26 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() still rebuilds a shipping line a merchant edited after a sync that didn't calculate shipping.
+	 */
+	public function test_update_order_from_cart_rebuilds_edited_shipping_after_a_sync_without_shipping(): void {
+		$order    = $this->create_retried_order_with_shipping_and_fee();
+		$shipping = current( $order->get_shipping_methods() );
+		$shipping->set_total( '15' );
+		$shipping->save();
+
+		add_filter( 'woocommerce_cart_ready_to_calc_shipping', '__return_false' );
+		$order = $this->sync_order_in_a_new_request( $order );
+		remove_filter( 'woocommerce_cart_ready_to_calc_shipping', '__return_false' );
+		$this->assertContains( $shipping->get_id(), array_keys( $order->get_shipping_methods() ), 'Shipping should not be rebuilt while it is not calculated.' );
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertNotContains( $shipping->get_id(), array_keys( $order->get_shipping_methods() ), 'The edited shipping line should be rebuilt once shipping is calculated.' );
+		$this->assertSame( 25.0, (float) $order->get_total(), 'The order should be charged the cart total, not the edited amount.' );
+	}
+
+	/**
 	 * @testdox update_order_from_cart() adds back the coupon a merchant removed from a retried order.
 	 */
 	public function test_update_order_from_cart_adds_back_a_coupon_removed_from_a_retried_order(): void {
