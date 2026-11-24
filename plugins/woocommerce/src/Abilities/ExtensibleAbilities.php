@@ -131,10 +131,10 @@ class ExtensibleAbilities {
 	 * A field declares `get_callback` and `output_schema` to be readable, and `input_schema` to be writable.
 	 * A `set_callback` is optional on a writable field, and it is refused without `input_schema`.
 	 *
-	 * There are two kinds of writable field. A field kept on the object, such as a meta value, has a
+	 * There are two kinds of writable field. A field kept on a `WC_Data` object, such as a meta value, has a
 	 * `set_callback` that stages the value, and Core saves it with the object. A field kept elsewhere, such
-	 * as a row in a table of the extension, has no `set_callback`: a sync that register_sync() adds writes
-	 * the value from `$context['fields']`.
+	 * as a row in a table of the extension or the meta of a term, has no `set_callback`: a sync that
+	 * register_sync() adds writes the value from `$context['fields']`.
 	 *
 	 * @since 11.3.0
 	 *
