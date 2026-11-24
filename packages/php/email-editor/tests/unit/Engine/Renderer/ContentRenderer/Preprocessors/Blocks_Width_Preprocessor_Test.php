@@ -777,7 +777,7 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$this->assertArrayNotHasKey( 'column-width', $columns[0]['email_attrs'] );
 		$this->assertEquals( '100px', $columns[0]['email_attrs']['width'] );
 
-		// Zero widths in that row used to divide by zero.
+		// Zero widths in that row would otherwise divide by zero.
 		$blocks[0]['innerBlocks'] = $this->get_columns_blocks( array( '0%', '0px' ) )[0]['innerBlocks'];
 		$columns                  = $this->preprocessor->preprocess( $blocks, array( 'contentSize' => '100px' ), $this->styles )[0]['innerBlocks'];
 		$this->assertArrayNotHasKey( 'column-width', $columns[0]['email_attrs'] );
