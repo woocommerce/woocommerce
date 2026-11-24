@@ -52,12 +52,10 @@
 <!-- /wp:group -->
 
 <!-- wp:woocommerce/product-collection-no-results -->
-<!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"left","flexWrap":"wrap"}} -->
-<div class="wp-block-group"><!-- wp:paragraph -->
+<!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element, 3. is the start of a 'a' HTML element, 4. is the end of a 'a' HTML element */
 printf( esc_html__( 'No results found. You can try %1$sclearing any filters%2$s or head to our %3$sstore\'s home.%4$s', 'purple' ), '<a class="wc-link-clear-any-filters" href="' . esc_url( '#' ) . '">', '</a>', '<a class="wc-link-stores-home" href="' . esc_url( '#' ) . '">', '</a>' ); ?></p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
+<!-- /wp:paragraph -->
 <!-- /wp:woocommerce/product-collection-no-results --></div>
 <!-- /wp:woocommerce/product-collection --></div>
 <!-- /wp:group -->
