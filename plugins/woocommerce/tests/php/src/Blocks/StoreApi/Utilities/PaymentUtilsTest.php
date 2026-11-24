@@ -275,6 +275,107 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should start a checkout that lists its gateways on the first one listed, instead of the first enabled gateway.
+	 */
+	public function test_shortcode_checkout_payment_method_starts_on_the_first_listed_gateway(): void {
+		WC()->session->set( 'chosen_payment_method', null );
+		$available = WC()->payment_gateways()->get_available_payment_gateways();
+		$listed    = array(
+			'cod'  => $available['cod'],
+			'bacs' => $available['bacs'],
+		);
+
+		$this->assertSame( 'cod', PaymentUtils::get_shortcode_checkout_payment_method( $listed ) );
+	}
+
+	/**
+	 * @testdox Should keep a listed session choice even when the callback returns nothing.
+	 */
+	public function test_shortcode_checkout_payment_method_keeps_a_listed_session_choice(): void {
+		$listed = WC()->payment_gateways()->get_available_payment_gateways();
+		add_filter( self::FILTER, '__return_empty_string' );
+
+		$this->assertSame( 'cod', PaymentUtils::get_shortcode_checkout_payment_method( $listed ) );
+	}
+
+	/**
+	 * @testdox Should fall back to the default when the session choice is not one of the listed gateways.
+	 */
+	public function test_shortcode_checkout_payment_method_ignores_a_session_choice_that_is_not_listed(): void {
+		$available = WC()->payment_gateways()->get_available_payment_gateways();
+		add_filter( self::FILTER, '__return_empty_string' );
+
+		$this->assertSame( '', PaymentUtils::get_shortcode_checkout_payment_method( array( 'bacs' => $available['bacs'] ) ) );
+	}
+
+	/**
+	 * @testdox Should hand the listed gateways to the callback, and select nothing when it picks a gateway that is not listed.
+	 */
+	public function test_shortcode_checkout_payment_method_hands_the_listed_gateways_to_the_callback(): void {
+		WC()->session->set( 'chosen_payment_method', null );
+		$available = WC()->payment_gateways()->get_available_payment_gateways();
+		$received  = null;
+		add_filter(
+			self::FILTER,
+			function ( $payment_method, $gateways ) use ( &$received ) {
+				unset( $payment_method ); // Avoid parameter not used PHPCS errors.
+				$received = array_keys( $gateways );
+				return 'cod';
+			},
+			10,
+			2
+		);
+
+		$this->assertSame( '', PaymentUtils::get_shortcode_checkout_payment_method( array( 'bacs' => $available['bacs'] ) ) );
+		$this->assertSame( array( 'bacs' ), $received );
+	}
+
+	/**
+	 * @testdox Should fall back to the default without a session, as in WP-CLI or cron, instead of failing.
+	 */
+	public function test_checkout_payment_method_falls_back_to_the_default_without_a_session(): void {
+		$session = WC()->session;
+		add_filter(
+			self::FILTER,
+			function ( $payment_method ) {
+				return 'bacs' === $payment_method ? 'cod' : $payment_method;
+			}
+		);
+
+		try {
+			WC()->session = null;
+
+			$this->assertSame( 'cod', PaymentUtils::get_checkout_payment_method() );
+		} finally {
+			WC()->session = $session;
+		}
+	}
+
+	/**
+	 * @testdox Should tell whether a listed gateway is marked as chosen, with none, one or several gateways listed.
+	 * @testWith [[], false]
+	 *           [[false], false]
+	 *           [[true], true]
+	 *           [[false, false], false]
+	 *           [[false, true], true]
+	 *
+	 * @param bool[] $chosen_flags The `chosen` value of each listed gateway, in order.
+	 * @param bool   $expected     Expected answer.
+	 */
+	public function test_has_chosen_gateway( array $chosen_flags, bool $expected ): void {
+		$gateways = array();
+
+		foreach ( $chosen_flags as $index => $chosen ) {
+			$gateway                  = new \WC_Gateway_COD();
+			$gateway->id              = 'gateway_' . $index;
+			$gateway->chosen          = $chosen;
+			$gateways[ $gateway->id ] = $gateway;
+		}
+
+		$this->assertSame( $expected, PaymentUtils::has_chosen_gateway( $gateways ) );
+	}
+
+	/**
 	 * Hide COD from the available gateways, as a shipping restriction would, while it stays enabled.
 	 *
 	 * @param array $gateways Available gateways keyed by id.

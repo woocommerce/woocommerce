@@ -406,8 +406,8 @@ class UcpCart extends UcpCartTestCase {
 
 		$this->assertSame( '2026-04-08', $data['ucp']['version'] );
 		$this->assertSame( 'success', $data['ucp']['status'] );
-		// The envelope names only the capability relevant to the operation answered.
-		$this->assertSame( array( 'dev.ucp.shopping.cart' ), array_keys( $data['ucp']['capabilities'] ) );
+		// The envelope names only the capability relevant to the operation answered, and its extensions.
+		$this->assertSame( array( 'dev.ucp.shopping.cart', 'dev.ucp.shopping.discount' ), array_keys( $data['ucp']['capabilities'] ) );
 
 		$this->assertNotEmpty( $data['id'] );
 		$this->assertSame( get_woocommerce_currency(), $data['currency'] );
@@ -426,6 +426,21 @@ class UcpCart extends UcpCartTestCase {
 		// `tax` is always present, zero included (schema allows it); a zero `discount` is omitted.
 		$this->assertSame( 0, $this->total( $data['totals'], 'tax' ) );
 		$this->assertNull( $this->total( $data['totals'], 'discount' ) );
+	}
+
+	/**
+	 * The cart hands the buyer a URL that restores the same cart in a browser.
+	 */
+	public function test_continue_url_carries_the_cart_token(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+		$data = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
+
+		$query = array();
+		wp_parse_str( (string) wp_parse_url( $data['continue_url'], PHP_URL_QUERY ), $query );
+
+		// WC_Session_Handler restores or clones the guest session named by this token.
+		$this->assertSame( $data['id'], $query['session'] );
+		$this->assertStringStartsWith( wc_get_cart_url(), $data['continue_url'] );
 	}
 
 	/**
@@ -866,6 +881,7 @@ class UcpCart extends UcpCartTestCase {
 		$this->assertCount( 1, $data['line_items'] );
 		$this->assertSame( 2, $data['line_items'][0]['quantity'] );
 		$this->assertSame( 'CANCELED', $data['messages'][0]['code'] );
+		$this->assertArrayNotHasKey( 'continue_url', $data );
 
 		foreach ( array( 'GET', 'PUT' ) as $method ) {
 			$after = $this->request( $method, '/carts/' . $created['id'] )->get_data();
@@ -1064,8 +1080,8 @@ class UcpCart extends UcpCartTestCase {
 	/**
 	 * Cancelling a cart must not break a storefront session cloned from it.
 	 *
-	 * The marker lives in the WooCommerce session, which a storefront session cloned
-	 * from this token would carry too, so only the UCP routes may act on it.
+	 * The marker lives in the WooCommerce session, which the buyer's browser can
+	 * reach through `continue_url`, so only the UCP routes may act on it.
 	 */
 	public function test_cancelling_a_cart_leaves_the_storefront_session_usable(): void {
 		$created = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
@@ -1188,5 +1204,111 @@ class UcpCart extends UcpCartTestCase {
 		$this->assertSame( 'recoverable', $data['messages'][0]['severity'] );
 		$this->assertSame( '$.line_items', $data['messages'][0]['path'] );
 		$this->assertSame( 'Only 1 of "UCP Cart Mug" left.', $data['messages'][0]['content'] );
+	}
+
+	/**
+	 * @testdox Submitted discount codes apply as coupons, and each rejected one is warned about at its index.
+	 */
+	public function test_discount_codes_apply_and_rejected_codes_are_warned(): void {
+		\WC_Helper_Coupon::create_coupon( 'save5', array( 'coupon_amount' => '5' ) );
+		$expired = new \WC_Coupon();
+		$expired->set_code( 'gone10' );
+		$expired->set_amount( 10 );
+		$expired->set_date_expires( time() - DAY_IN_SECONDS );
+		$expired->save();
+
+		$data = $this->request(
+			'POST',
+			'/carts',
+			array(
+				'line_items' => array( $this->line_item( 0, 2 ) ),
+				'discounts'  => array( 'codes' => array( ' SAVE5 ', 'nope', 'gone10' ) ),
+			)
+		)->get_data();
+
+		$this->assertSame( array( 'save5', 'nope', 'gone10' ), $data['discounts']['codes'], 'Rejected codes are still echoed.' );
+		$this->assertSame(
+			array(
+				array(
+					'code'   => 'save5',
+					'title'  => 'save5',
+					'amount' => 500,
+				),
+			),
+			$data['discounts']['applied']
+		);
+		$this->assertSame( -500, $this->total( $data['totals'], 'discount' ) );
+		$this->assertSame( 3498, $this->total( $data['totals'], 'total' ) );
+		$this->assertSame(
+			array(
+				'$.discounts.codes[1]' => 'discount_code_invalid',
+				'$.discounts.codes[2]' => 'discount_code_expired',
+			),
+			array_column( $data['messages'], 'code', 'path' )
+		);
+		$this->assertSame( array( 'warning', 'warning' ), array_column( $data['messages'], 'type' ) );
+
+		$too_many = $this->request( 'POST', '/carts', array( 'discounts' => array( 'codes' => array_fill( 0, AbstractCartRoute::DISCOUNT_CODES_MAX + 1, 'save5' ) ) ) );
+		$this->assertSame( 400, $too_many->get_status() );
+		$this->assertSame( '$.discounts.codes', $too_many->get_data()['messages'][0]['path'] );
+	}
+
+	/**
+	 * @testdox Submitted codes replace the applied ones, an empty list clears them, and omitting them leaves them alone.
+	 */
+	public function test_discount_codes_replace_the_applied_set(): void {
+		\WC_Helper_Coupon::create_coupon( 'save5', array( 'coupon_amount' => '5' ) );
+		\WC_Helper_Coupon::create_coupon( 'take2', array( 'coupon_amount' => '2' ) );
+		$created = $this->request(
+			'POST',
+			'/carts',
+			array(
+				'line_items' => array( $this->line_item( 0, 1 ) ),
+				'discounts'  => array( 'codes' => array( 'save5' ) ),
+			)
+		)->get_data();
+		$path    = '/carts/' . $created['id'];
+
+		$this->simulate_new_request( $created['id'] );
+		$replaced = $this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'take2' ) ) ) )->get_data();
+		$this->assertSame( array( 'take2' ), array_column( $replaced['discounts']['applied'], 'code' ) );
+
+		$this->simulate_new_request( $created['id'] );
+		$untouched = $this->request( 'PUT', $path, array( 'line_items' => array( $this->line_item( 0, 2 ) ) ) )->get_data();
+		$this->assertSame( array( 'take2' ), $untouched['discounts']['codes'], 'Without a submission the applied codes are echoed.' );
+
+		$this->simulate_new_request( $created['id'] );
+		$cleared = $this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array() ) ) )->get_data();
+		$this->assertSame(
+			array(
+				'codes'   => array(),
+				'applied' => array(),
+			),
+			$cleared['discounts']
+		);
+		$this->assertNull( $this->total( $cleared['totals'], 'discount' ) );
+	}
+
+	/**
+	 * @testdox A store with coupons off declares no discount extension and rejects every submitted code.
+	 */
+	public function test_discount_codes_are_rejected_when_coupons_are_disabled(): void {
+		\WC_Helper_Coupon::create_coupon( 'save5', array( 'coupon_amount' => '5' ) );
+		update_option( 'woocommerce_enable_coupons', 'no' );
+
+		$data = $this->request(
+			'POST',
+			'/carts',
+			array(
+				'line_items' => array( $this->line_item( 0, 1 ) ),
+				'discounts'  => array( 'codes' => array( 'save5' ) ),
+			)
+		)->get_data();
+
+		$this->assertSame( array( 'dev.ucp.shopping.cart' ), array_keys( $data['ucp']['capabilities'] ) );
+		$this->assertArrayNotHasKey( 'discounts', $data );
+		$this->assertSame( 'discount_code_invalid', $data['messages'][0]['code'] );
+		$this->assertSame( '$.discounts.codes[0]', $data['messages'][0]['path'] );
+		$this->assertSame( 1999, $this->total( $data['totals'], 'total' ) );
 	}
 }

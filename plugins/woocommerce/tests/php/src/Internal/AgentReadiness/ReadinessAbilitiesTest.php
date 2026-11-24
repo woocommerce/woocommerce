@@ -48,7 +48,6 @@ class ReadinessAbilitiesTest extends WC_Unit_Test_Case {
 			do_action( 'wp_abilities_api_categories_init' );
 			remove_action( 'wp_abilities_api_categories_init', $category );
 		}
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$this->register();
 	}
@@ -93,9 +92,9 @@ class ReadinessAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox AbilitiesLoader registers the abilities with the Ability class, only while the feature is enabled.
+	 * @testdox AbilitiesLoader registers the abilities with the Ability class.
 	 */
-	public function test_registered_only_with_feature(): void {
+	public function test_registered_with_ability_class(): void {
 		$this->assertTrue( wp_has_ability( ReportAbility::NAME ) );
 		$this->assertInstanceOf( Ability::class, wp_get_ability( ReportAbility::NAME ) );
 		$this->assertInstanceOf( Ability::class, wp_get_ability( RunCheckAbility::NAME ) );
@@ -103,11 +102,6 @@ class ReadinessAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $meta['mcp']['public'] );
 		$this->assertTrue( $meta['annotations']['readonly'] );
 		$this->assertFalse( wp_get_ability( RunCheckAbility::NAME )->get_meta()['annotations']['idempotent'] );
-
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
-		$this->register();
-		$this->assertFalse( wp_has_ability( ReportAbility::NAME ) );
-		$this->assertFalse( wp_has_ability( RunCheckAbility::NAME ) );
 	}
 
 	/**
@@ -125,12 +119,14 @@ class ReadinessAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Before the first scan the report is null; after one it matches the output schema, with store checks read now.
+	 * @testdox Before the first scan the report is left out; after one it matches the output schema, with store checks read now and no null field.
 	 */
 	public function test_report_matches_output_schema(): void {
 		delete_option( AgentReadiness::REPORT_OPTION );
 		$ability = wp_get_ability( ReportAbility::NAME );
-		$this->assertNull( $ability->execute()['report'] );
+		$before  = $ability->execute();
+		$this->assertArrayNotHasKey( 'report', $before, 'Core ability output is never null: an unavailable field is left out' );
+		$this->assertTrue( rest_validate_value_from_schema( $before, $ability->get_output_schema() ) );
 
 		WC_Helper_Product::create_simple_product();
 		wc_get_container()->get( AgentReadiness::class )->refresh_report();
@@ -139,9 +135,11 @@ class ReadinessAbilitiesTest extends WC_Unit_Test_Case {
 		$output = $ability->execute();
 
 		$this->assertTrue( rest_validate_value_from_schema( $output, $ability->get_output_schema() ) );
-		$store_checks = array_column( $output['report']['store_checks'], 'ok', 'id' );
-		$this->assertFalse( $store_checks['guest_checkout'], 'A setting changed after the scan shows its current state' );
+		$store_checks = array_column( $output['report']['store_checks'], null, 'id' );
+		$this->assertFalse( $store_checks['guest_checkout']['ok'], 'A setting changed after the scan shows its current state' );
 		$this->assertArrayHasKey( 'sitemap_lists_products', $store_checks, 'Store output checks come from the stored report' );
+		$this->assertArrayNotHasKey( 'ok', $store_checks['sitemap_lists_products'], 'The store can\'t load its own pages in tests, so the check couldn\'t run and ok is left out' );
+		$this->assertFalse( strpos( (string) wp_json_encode( $output ), ':null' ), 'No field anywhere is null' );
 		$this->assertContains( 'missing_brand', array_column( $output['report']['checks'], 'id' ) );
 		$this->assertFalse( $output['scan_pending'] );
 		$this->assertFalse( $output['scan_stalled'] );
@@ -205,7 +203,7 @@ class ReadinessAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertTrue( rest_validate_value_from_schema( $output, $ability->get_output_schema() ) );
 		$this->assertTrue( $output['scan_pending'] );
 		$this->assertFalse( $output['scan_stalled'] );
-		$this->assertNull( $output['report_generated_at'] );
+		$this->assertArrayNotHasKey( 'report_generated_at', $output, 'Left out before the first check' );
 		$this->assertNull( get_option( AgentReadiness::REPORT_OPTION, null ), 'Nothing ran in the request' );
 	}
 

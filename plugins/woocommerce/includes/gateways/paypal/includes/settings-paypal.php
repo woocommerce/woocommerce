@@ -80,6 +80,7 @@ $settings = array(
 		'desc_tip'    => true,
 	),
 	'send_shipping'    => array(
+		'is_legacy'   => true,
 		'title'       => __( 'Shipping details', 'woocommerce' ),
 		'type'        => 'checkbox',
 		'label'       => __( 'Send shipping details to PayPal instead of billing.', 'woocommerce' ),

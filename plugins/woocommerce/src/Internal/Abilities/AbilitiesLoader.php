@@ -13,12 +13,18 @@ use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderRefundCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderRefundsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderSendEmail;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CustomersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CustomerUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewayUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributeCreate;
@@ -37,13 +43,18 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneMethodCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneMethodUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusGet;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolRun;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRateCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRateDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRateUpdate;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
 use Automattic\WooCommerce\Internal\AgentReadiness\RunCheckAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\StoreSettingsGet;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsGroupsQuery;
 
 defined( 'ABSPATH' ) || exit;
@@ -67,9 +78,14 @@ class AbilitiesLoader {
 	 */
 	private const CORE_ABILITY_DEFINITION_CLASSES = array(
 		OrdersQuery::class,
+		CouponsQuery::class,
+		CouponCreate::class,
+		CouponUpdate::class,
 		OrderAddNote::class,
 		OrderCreate::class,
 		OrderNotesQuery::class,
+		OrderRefundsQuery::class,
+		OrderRefundCreate::class,
 		OrderSendEmail::class,
 		OrderDelete::class,
 		OrderUpdate::class,
@@ -91,16 +107,22 @@ class AbilitiesLoader {
 		ReportAbility::class,
 		RunCheckAbility::class,
 		ShippingZonesQuery::class,
+		SystemStatusGet::class,
 		SystemStatusToolsQuery::class,
 		SystemStatusToolRun::class,
 		ShippingZoneCreate::class,
 		ShippingZoneMethodCreate::class,
 		ShippingZoneMethodUpdate::class,
 		TaxRatesQuery::class,
+		TaxRateCreate::class,
+		TaxRateUpdate::class,
+		TaxRateDelete::class,
 		CustomersQuery::class,
 		StoreSettingsGet::class,
 		SettingsQuery::class,
+		SettingsUpdate::class,
 		SettingsGroupsQuery::class,
+		CustomerUpdate::class,
 	);
 
 	/**
@@ -154,7 +176,7 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function register_core_resources(): void {
-		foreach ( array( 'product', 'order', 'order_item', 'product_term', 'product_review', 'customer' ) as $resource_name ) {
+		foreach ( array( 'product', 'order', 'order_item', 'order_refund', 'product_term', 'product_review', 'customer' ) as $resource_name ) {
 			ExtensibleAbilities::register_resource( $resource_name );
 		}
 	}

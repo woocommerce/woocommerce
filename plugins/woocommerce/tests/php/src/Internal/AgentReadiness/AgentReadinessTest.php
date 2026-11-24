@@ -99,7 +99,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$report = $this->sut->get_report();
 
-		$this->assertSame( array( 'generated_at', 'products', 'available', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'declared', 'channels', 'checks', 'truncated', 'sales' ), array_keys( $report ) );
+		$this->assertSame( array( 'generated_at', 'products', 'available', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'declared', 'pages_best_seller', 'channels', 'checks', 'truncated', 'sales' ), array_keys( $report ) );
 		$this->assertFalse( $report['truncated'] );
 		$this->assertSame( array( 'id', 'ok', 'blocks', 'group', 'level', 'name', 'label', 'why', 'fix', 'fix_url' ), array_keys( $report['store_checks'][0] ) );
 		$this->assertSame( array( 'chatgpt', 'google', 'copilot' ), array_keys( $report['channels'] ) );
@@ -459,5 +459,25 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->sut->get_failing_check_ids( WC_Helper_Product::create_simple_product() );
 
 		$this->assertSame( 1, $calls );
+	}
+
+	/**
+	 * @testdox A stored output check keeps the detail of what the store served.
+	 */
+	public function test_get_store_checks_keeps_the_served_detail(): void {
+		$checks = $this->sut->get_store_checks(
+			array(
+				'store_checks' => array(
+					array(
+						'id'     => 'ucp_endpoints_live',
+						'name'   => 'Catalog search answers',
+						'ok'     => false,
+						'source' => '403 text/html',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( '403 text/html', array_column( $checks, 'source', 'id' )['ucp_endpoints_live'] );
 	}
 }

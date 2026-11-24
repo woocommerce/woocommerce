@@ -138,17 +138,16 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox When the store can't reach itself, the guards that read pages are couldn't check.
+	 * @testdox When the store can't reach itself, every guard is couldn't check, including reviews when no page needs loading.
 	 */
 	public function test_unreachable_store(): void {
 		add_filter( 'pre_http_request', static fn() => new \WP_Error( 'http_request_failed', 'Blocked in tests' ) );
 
 		$results = array_column( wc_get_container()->get( StoreOutputChecks::class )->all(), 'ok', 'id' );
 
-		foreach ( array_diff( self::GUARDS, array( 'product_review_markup' ) ) as $id ) {
+		foreach ( self::GUARDS as $id ) {
 			$this->assertNull( $results[ $id ], $id );
 		}
-		$this->assertTrue( $results['product_review_markup'], 'No product has reviews, so there is nothing to mark up and no page is loaded' );
 	}
 
 	/**
@@ -265,6 +264,20 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 		$store['/'] = array( 200, '<html lang="de"><body><noscript><img src="pixel" /></noscript><img src="hero.jpg"></body></html>', array( 'content-type' => 'text/html; charset=UTF-8' ) );
 		$this->assertFalse( $this->results( $store )['images_have_alt'], 'A visible image after the noscript block still needs alt' );
+	}
+
+	/**
+	 * @testdox The Mini-Cart block's empty item images, whose alt a script fills in, need no alt; a lazy-loaded image without one still fails.
+	 */
+	public function test_mini_cart_item_images_need_no_alt(): void {
+		$mini_cart  = '<td class="wc-block-cart-item__image" aria-hidden="true"><img data-wp-bind--hidden="context.isImageHidden" data-wp-bind--src="state.itemThumbnail" data-wp-bind--alt="state.cartItemName" data-wp-on--error="actions.hideImage"></td>';
+		$store      = $this->healthy_store();
+		$store['/'] = array( 200, '<html lang="en"><body><img alt="Logo" src="logo.png">' . $mini_cart . '</body></html>', array( 'content-type' => 'text/html; charset=UTF-8' ) );
+		$this->assertTrue( $this->results( $store )['images_have_alt'], 'The Mini-Cart block in a header doesn\'t fail the check' );
+
+		remove_all_filters( 'pre_http_request' );
+		$store['/'] = array( 200, '<html lang="en"><body>' . $mini_cart . '<img data-src="hero.jpg" class="lazyload"></body></html>', array( 'content-type' => 'text/html; charset=UTF-8' ) );
+		$this->assertFalse( $this->results( $store )['images_have_alt'], 'A lazy-loaded image with no src and no alt still needs alt' );
 	}
 
 	/**
@@ -551,6 +564,29 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 			)
 		);
 		$store[ self::path( $visible->get_permalink() ) ] = array( 200, '<script type="application/ld+json">' . $json . '</script>' );
+
+		$this->assertFalse( $this->results( $store )['product_review_markup'] );
+	}
+
+	/**
+	 * @testdox A reviewed Search results only product is sampled, so missing rating markup fails.
+	 */
+	public function test_review_markup_samples_search_only_products(): void {
+		update_option( 'woocommerce_enable_reviews', 'yes' );
+		update_option( 'woocommerce_enable_review_rating', 'yes' );
+		$search = WC_Helper_Product::create_simple_product();
+		$search->set_catalog_visibility( 'search' );
+		$search->save();
+		update_post_meta( $search->get_id(), '_wc_average_rating', '4.00' );
+
+		$store = $this->healthy_store();
+		$json  = wp_json_encode(
+			array(
+				'@type' => 'Product',
+				'name'  => $search->get_name(),
+			)
+		);
+		$store[ self::path( $search->get_permalink() ) ] = array( 200, '<script type="application/ld+json">' . $json . '</script>' );
 
 		$this->assertFalse( $this->results( $store )['product_review_markup'] );
 	}

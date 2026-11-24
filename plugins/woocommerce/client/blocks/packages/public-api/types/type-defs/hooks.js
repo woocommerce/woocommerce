@@ -52,6 +52,9 @@
  *                                       API.
  * @property {boolean}  isLoading        True when coupon data is being loaded.
  * @property {Function} applyCoupon      Callback for applying a coupon by code.
+ *                                       Resolves true once applied; rejects
+ *                                       with an Error whose message can be
+ *                                       shown to the shopper otherwise.
  * @property {Function} removeCoupon     Callback for removing a coupon by code.
  * @property {boolean}  isApplyingCoupon True when a coupon is being applied.
  * @property {boolean}  isRemovingCoupon True when a coupon is being removed.

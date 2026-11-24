@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Stop tracking shoppers who denied statistics consent when the consent plugin sets no consent type.

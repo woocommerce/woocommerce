@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 11.3.0
+ * @version 11.4.0
  */
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
@@ -26,15 +26,25 @@ $order_table_class      = 'email-order-details';
 $order_total_text_align = 'right';
 
 if ( null === $fulfillment->get_date_deleted() ) {
-	$tracking_number   = $fulfillment->get_meta( '_tracking_number', true );
-	$tracking_url      = $fulfillment->get_meta( '_tracking_url' );
-	$shipment_provider = $fulfillment->get_meta( '_shipment_provider' );
-	if ( ! $tracking_number && ! $tracking_url && ! $shipment_provider ) {
+	// A line is only printed when it has something to show. esc_url() empties a URL WordPress will
+	// not allow, so it also decides whether the link is offered at all.
+	$tracking_number = trim( (string) $fulfillment->get_tracking_number() );
+	$provider_label  = trim( FulfillmentUtils::get_provider_display_name( $fulfillment ) );
+	$tracking_url    = trim( (string) $fulfillment->get_tracking_url() );
+	$renderable_url  = esc_url( $tracking_url );
+
+	if ( '' === $tracking_number && '' === $provider_label && '' === $renderable_url ) {
 		echo '<p>' . esc_html__( 'No tracking information available for this fulfillment at the moment.', 'woocommerce' ) . '</p>';
 	} else {
-		echo '<p><strong>' . esc_html__( 'Tracking Number', 'woocommerce' ) . ':</strong> ' . esc_attr( $tracking_number ) . '</p>';
-		echo '<p><strong>' . esc_html__( 'Shipment Provider', 'woocommerce' ) . ':</strong> ' . esc_html( FulfillmentUtils::get_provider_display_name( $fulfillment ) ) . '</p>';
-		echo '<p><a href="' . esc_url( $tracking_url ) . '" target="_blank">' . esc_attr__( 'Track your shipment', 'woocommerce' ) . '</a></p>';
+		if ( '' !== $tracking_number ) {
+			echo '<p><strong>' . esc_html__( 'Tracking Number', 'woocommerce' ) . ':</strong> ' . esc_attr( $tracking_number ) . '</p>';
+		}
+		if ( '' !== $provider_label ) {
+			echo '<p><strong>' . esc_html__( 'Shipment Provider', 'woocommerce' ) . ':</strong> ' . esc_html( $provider_label ) . '</p>';
+		}
+		if ( '' !== $renderable_url ) {
+			echo '<p><a href="' . esc_url( $tracking_url ) . '" target="_blank">' . esc_attr__( 'Track your shipment', 'woocommerce' ) . '</a></p>';
+		}
 	}
 	echo '<br />';
 	echo '<p>';

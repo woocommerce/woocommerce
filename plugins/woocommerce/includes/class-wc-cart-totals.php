@@ -499,12 +499,17 @@ final class WC_Cart_Totals {
 	 *
 	 * @since  3.2.0
 	 * @param  object $item_key Item to get the price of.
-	 * @return int
+	 * @return int|float
 	 */
 	protected function get_discounted_price_in_cents( $item_key ) {
-		$item  = $this->items[ $item_key ];
-		$price = isset( $this->coupon_discount_totals[ $item_key ] ) ? $item->price - $this->coupon_discount_totals[ $item_key ] : $item->price;
-		return $price;
+		$item = $this->items[ $item_key ];
+
+		if ( ! isset( $this->coupon_discount_totals[ $item_key ] ) ) {
+			return $item->price;
+		}
+
+		// A coupon can't push a line below zero, but a line with a negative price keeps that price.
+		return max( min( 0, $item->price ), $item->price - $this->coupon_discount_totals[ $item_key ] );
 	}
 
 	/**

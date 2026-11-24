@@ -314,6 +314,15 @@ trait OrderAbilityTrait {
 	protected static function get_order_from_input( array $input ) {
 		$order = wc_get_order( $input['id'] );
 
+		if ( $order instanceof \WC_Order_Refund ) {
+			return new \WP_Error(
+				'woocommerce_order_not_found',
+				/* translators: 1: refund ID, 2: ID of the refunded order. */
+				sprintf( __( '%1$d is the ID of a refund of order %2$d, not of an order. Use order ID %2$d.', 'woocommerce' ), $input['id'], $order->get_parent_id() ),
+				array( 'status' => 404 )
+			);
+		}
+
 		if ( ! $order instanceof \WC_Order ) {
 			return new \WP_Error(
 				'woocommerce_order_not_found',
@@ -428,11 +437,14 @@ trait OrderAbilityTrait {
 	 * @return array|\WP_Error
 	 */
 	protected static function format_orders_for_response( array $orders, array $includes ) {
+		ExtensibleAbilities::prime( 'order', $orders );
 		if ( in_array( 'line_items', $includes, true ) ) {
 			$product_ids = array();
+			$items       = array();
 			foreach ( $orders as $order ) {
 				foreach ( $order->get_items() as $item ) {
 					if ( $item instanceof \WC_Order_Item_Product ) {
+						$items[]       = $item;
 						$product_ids[] = $item->get_product_id();
 						$product_ids[] = $item->get_variation_id();
 					}
@@ -443,6 +455,7 @@ trait OrderAbilityTrait {
 				// Prime caches to reduce future queries.
 				_prime_post_caches( $product_ids );
 			}
+			ExtensibleAbilities::prime( 'order_item', $items );
 		}
 
 		$formatted = array();

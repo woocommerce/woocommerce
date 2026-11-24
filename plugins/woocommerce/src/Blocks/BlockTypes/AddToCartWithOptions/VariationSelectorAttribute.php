@@ -127,6 +127,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 		);
 
 		$interactive_attributes = array(
+			'role'                => 'listitem',
 			'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
 			'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
 		);

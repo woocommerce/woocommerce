@@ -40,7 +40,7 @@ try {
 }
 ```
 
-This either holds stock, or rejects the order if the stock cannot be reserved for whatever reason. Stock is immediately released when defined time passes, or when the order changes to a “paid” status such as processing, on-hold, or complete.
+This either holds stock, or rejects the order if the stock cannot be reserved for whatever reason. Stock is released when the defined time passes, when the order's stock is reduced (`wc_reduce_stock_levels()`), or when the order is paid, cancelled, or fails. A hold on an order in a paid status such as processing, on-hold, or completed keeps counting until it is released or expires.
 
 Some things worth noting:
 
@@ -62,17 +62,17 @@ This operation locks the tables so that separate processes do not fight over the
 
 On the technical side:
 
--   The `ReserveStock` class joins the `wc_reserved_stock` table to `wp_posts` using the post/order ID
+-   The `ReserveStock` class joins the `wc_reserved_stock` table to the orders table (`wc_orders` with HPOS, `wp_posts` otherwise) using the order ID
 -   Only non-expired rows are used
--   Only draft/pending order rows are used
+-   Only rows for orders in a counted status are used: checkout-draft, pending, failed, processing, on-hold, and completed by default. Change the list with the `woocommerce_reserved_stock_order_statuses` filter.
 
-Here is an example query getting stock for Product ID 99 and excluding order ID 100.
+Here is an example query getting stock for Product ID 99 and excluding order ID 100, on a store using posts storage.
 
 ```sql
 SELECT COALESCE( SUM( stock_table.`stock_quantity` ), 0 )
 FROM wp_wc_reserved_stock stock_table
 LEFT JOIN wp_posts posts ON stock_table.`order_id` = posts.ID
-WHERE posts.post_status IN ( 'wc-checkout-draft', 'wc-pending' )
+WHERE ( posts.post_status IN ( 'wc-checkout-draft', 'wc-pending' ) OR posts.post_status IN ( 'wc-failed', 'wc-processing', 'wc-on-hold', 'wc-completed' ) )
 AND stock_table.`expires` > NOW()
 AND stock_table.`product_id` = 99
 AND stock_table.`order_id` != 100
