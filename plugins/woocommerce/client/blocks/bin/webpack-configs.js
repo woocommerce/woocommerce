@@ -278,6 +278,14 @@ const getMainConfig = ( options = {} ) => {
 const getFrontConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
 	const resolve = getResolve( { alias, resolvePlugins } );
+	const filterEntries = new Set( [
+		'attribute-filter',
+		'rating-filter',
+		'stock-filter',
+		'attribute-filter-wrapper',
+		'rating-filter-wrapper',
+		'stock-filter-wrapper',
+	] );
 	return {
 		entry: getEntryConfig( 'frontend', options.exclude || [] ),
 		output: {
@@ -342,6 +350,29 @@ const getFrontConfig = ( options = {} ) => {
 				minSize: 200000,
 				automaticNameDelimiter: '--',
 				cacheGroups: {
+					filterVendors: {
+						// Keep libraries used only by legacy filters out of the shared storefront bundle.
+						test: ( module, { chunkGraph } ) => {
+							if (
+								! /[\\/]node_modules[\\/]/.test(
+									module.nameForCondition() ?? ''
+								)
+							) {
+								return false;
+							}
+							const chunks = chunkGraph.getModuleChunks( module );
+							return (
+								chunks.length > 0 &&
+								chunks.every( ( chunk ) =>
+									filterEntries.has( chunk.name )
+								)
+							);
+						},
+						name: 'wc-blocks-legacy-filter-vendors',
+						chunks: 'all',
+						priority: 10,
+						enforce: true,
+					},
 					vendor: {
 						test: /[\\/]node_modules[\\/]/,
 						// Note that filenames are suffixed with `frontend` so the generated file is `wc-blocks-frontend-vendors-frontend`.
@@ -362,7 +393,9 @@ const getFrontConfig = ( options = {} ) => {
 				bundleAnalyzerReportTitle: 'Frontend',
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Frontend' ) ),
-			new AddSplitChunkDependencies(),
+			new AddSplitChunkDependencies( [
+				'wc-blocks-legacy-filter-vendors',
+			] ),
 		],
 		resolve: {
 			...resolve,
