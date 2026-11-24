@@ -314,6 +314,15 @@ trait OrderAbilityTrait {
 	protected static function get_order_from_input( array $input ) {
 		$order = wc_get_order( $input['id'] );
 
+		if ( $order instanceof \WC_Order_Refund ) {
+			return new \WP_Error(
+				'woocommerce_order_not_found',
+				/* translators: 1: refund ID, 2: ID of the refunded order. */
+				sprintf( __( '%1$d is the ID of a refund of order %2$d, not of an order. Use order ID %2$d.', 'woocommerce' ), $input['id'], $order->get_parent_id() ),
+				array( 'status' => 404 )
+			);
+		}
+
 		if ( ! $order instanceof \WC_Order ) {
 			return new \WP_Error(
 				'woocommerce_order_not_found',

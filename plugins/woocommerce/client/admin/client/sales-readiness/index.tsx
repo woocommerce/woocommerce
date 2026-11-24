@@ -12,6 +12,7 @@ import { __ } from '@wordpress/i18n';
 import './sales-readiness.scss';
 import { useReadinessView } from './use-readiness-view';
 import { CheckedCard } from './components/checked-card';
+import { ComingSoonNotice } from './components/coming-soon-notice';
 import { ErrorNotice } from './components/error-notice';
 import { FixFirstCard } from './components/fix-first';
 import { DeclaredCard, SectionCard } from './components/section-card';
@@ -60,6 +61,12 @@ export default function SalesReadiness() {
 							onRun={ runCheck }
 							onDownloadError={ setDownloadError }
 						/>
+						{ view.coming_soon && (
+							<ComingSoonNotice
+								notice={ view.coming_soon }
+								surface="page"
+							/>
+						) }
 						{ view.fix_first && (
 							<FixFirstCard fixFirst={ view.fix_first } />
 						) }

@@ -317,7 +317,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertStringContainsString( 'Hidden: 1', $text );
 		$this->assertStringContainsString( 'Not supported: 2', $text );
 		$this->assertMatchesRegularExpression( '/^[^\n]*\(search_visible\): ❌ AI assistants /m', $text, 'A failing setup step uses the page\'s words.' );
-		$this->assertStringNotContainsString( 'couldn’t check your pages', $text, 'Some checks ran.' );
+		$this->assertStringNotContainsString( 'Your pages couldn’t be checked', $text, 'Some checks ran.' );
 		$this->assertMatchesRegularExpression( '/^[^\n]*\(ucp_on\): ❌ Some checks only run when AI shopping is on/m', $text );
 		$this->assertMatchesRegularExpression( '/^llms\.txt \(llms_txt_present\): ❌ \S[^\n]*Store response: 404 text\/html$/m', $text );
 		$this->assertMatchesRegularExpression( '/^Sitemap lists products \(sitemap_lists_products\): Couldn’t check( \(not shown on the page\))?$/m', $text );
@@ -372,8 +372,8 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$text = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
 
-		$this->assertStringContainsString( "### Store checks ###\n\nWe couldn’t check your pages. Your hosting setup blocked the check from opening them.", $text );
-		$this->assertSame( 1, substr_count( $text, 'couldn’t check your pages' ) );
+		$this->assertStringContainsString( "### Store checks ###\n\nYour pages couldn’t be checked. Your hosting setup blocked the check from opening them.", $text );
+		$this->assertSame( 1, substr_count( $text, 'Your pages couldn’t be checked' ) );
 	}
 
 	/**

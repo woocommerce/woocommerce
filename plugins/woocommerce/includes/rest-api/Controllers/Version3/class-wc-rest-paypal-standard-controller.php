@@ -87,26 +87,18 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			return false;
 		}
 
-		// If shipping callback token is not stored in order meta, return true for this order as the token is not generated for the original order.
-		// We will not validate the token if the order did not generate a token in the create order request.
-		// This is done to prevent orders created before the shipping callback token feature was introduced from being blocked from updating their shipping details.
-		if ( ! $order->meta_exists( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN ) ) {
-			return true;
-		}
-
-		// Validate the token.
 		$token = $request->get_param( 'token' );
-		if ( empty( $token ) ) {
+		if ( ! is_string( $token ) || '' === $token ) {
 			return false;
 		}
 
 		$shipping_callback_token = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, true );
 
-		if ( empty( $shipping_callback_token ) || ! hash_equals( $token, $shipping_callback_token ) ) {
+		if ( ! is_string( $shipping_callback_token ) || '' === $shipping_callback_token ) {
 			return false;
 		}
 
-		return true;
+		return hash_equals( $shipping_callback_token, $token );
 	}
 
 	/**
@@ -175,12 +167,28 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			return new WP_REST_Response( $response, 422 );
 		}
 
+		$address_context = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESS_CONTEXT, true );
+		if ( 'shipping' !== ( $address_context['address_source'] ?? '' ) ) {
+			WC_Gateway_Paypal::log(
+				'PayPal order was not created from the shipping address, cannot update shipping. Order ID: ' . $order->get_id()
+			);
+			return new WP_REST_Response( $this->get_update_shipping_error_response(), 422 );
+		}
+		if ( PayPalConstants::SHIPPING_GET_FROM_FILE !== ( $address_context['shipping_preference'] ?? '' ) ) {
+			WC_Gateway_Paypal::log(
+				'PayPal order does not allow shipping address changes, cannot update shipping. Order ID: ' . $order->get_id() .
+				'. Shipping preference: ' . ( $address_context['shipping_preference'] ?? '' )
+			);
+			return new WP_REST_Response( $this->get_update_shipping_error_response(), 422 );
+		}
+
 		if ( ! WC()->session ) {
 			WC()->session = new WC_Session_Handler();
 		}
 		WC()->session->init();
 
 		// Update the shipping address before we do anything else.
+		$previous_shipping_address = $order->get_address( 'shipping' );
 		$this->update_order_shipping_address( $order, $shipping_address );
 
 		$re_add_cart_item_fees = static function ( $cart ) use ( $order ) {
@@ -202,6 +210,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		};
 		add_action( 'woocommerce_cart_calculate_fees', $re_add_cart_item_fees );
 
+		$address_priced = false;
 		try {
 			// We need to rebuild the cart from the order, as we do not have session cart data
 			// for REST API requests.
@@ -243,6 +252,18 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			$paypal_request = new PayPalRequest( WC_Gateway_Paypal::get_instance() );
 			$updated_amount = $paypal_request->get_paypal_order_purchase_unit_amount( $order );
 
+			$address_context['shipping_address'] = $order->get_address( 'shipping' );
+			$address_context['expected_address'] = array(
+				'country_code' => $order->get_shipping_country(),
+				'admin_area_1' => $order->get_shipping_state(),
+				'admin_area_2' => $order->get_shipping_city(),
+				'postal_code'  => $order->get_shipping_postcode(),
+			);
+			$address_context['callback_amount']  = $updated_amount;
+			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESS_CONTEXT, $address_context );
+			$order->save();
+			$address_priced = true;
+
 			$response = array(
 				'id'             => $paypal_order_id,
 				'purchase_units' => array(
@@ -257,6 +278,11 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			return new WP_REST_Response( $response, 200 );
 		} finally {
 			remove_action( 'woocommerce_cart_calculate_fees', $re_add_cart_item_fees );
+			// A failed callback must not leave an address PayPal never priced on the order.
+			if ( ! $address_priced ) {
+				$order->set_shipping_address( $previous_shipping_address );
+				$order->save();
+			}
 		}
 	}
 
@@ -426,8 +452,14 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		$order->save();
 
 		// Get customer from order and update their shipping location.
-		$customer = new WC_Customer();
-		$customer->set_location( $country, $state, $postcode, $city );
+		$customer            = new WC_Customer();
+		$has_billing_country = (bool) $order->get_billing_country();
+		$customer->set_location(
+			$has_billing_country ? $order->get_billing_country() : $country,
+			$has_billing_country ? $order->get_billing_state() : $state,
+			$has_billing_country ? $order->get_billing_postcode() : $postcode,
+			$has_billing_country ? $order->get_billing_city() : $city
+		);
 		$customer->set_shipping_location( $country, $state, $postcode, $city );
 		$customer->set_calculated_shipping( true );
 		WC()->customer = $customer;

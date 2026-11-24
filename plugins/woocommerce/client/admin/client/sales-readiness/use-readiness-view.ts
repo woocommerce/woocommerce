@@ -113,7 +113,7 @@ export function useReadinessView(
 	const runCheck = useCallback( async () => {
 		trackReadiness( 'run_check_clicked', {
 			surface,
-			first_check: !! view?.intro,
+			first_check: !! view && ! view.checked,
 		} );
 		setRunning( true );
 		try {
@@ -130,7 +130,7 @@ export function useReadinessView(
 		} finally {
 			setRunning( false );
 		}
-	}, [ load, surface, view?.intro ] );
+	}, [ load, surface, view?.checked ] );
 
 	return { view, error, reload, running, runCheck };
 }
