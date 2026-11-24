@@ -2059,6 +2059,83 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox find throws when a child read fails after the row read, instead of returning a partial contract.
+	 * @dataProvider provide_failing_child_reads
+	 *
+	 * @param string $pattern Regex of the child read to break.
+	 * @param string $message Expected message prefix.
+	 */
+	public function test_find_throws_on_a_failed_child_read( string $pattern, string $message ): void {
+		$id       = $this->insert_released( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$this->seed_plan_snapshot( $contract, array( 'selling_plan_id' => 7 ) );
+
+		$this->fail_next_query( $pattern );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( $message );
+
+		$this->sut->find( $id );
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function provide_failing_child_reads(): array {
+		return array(
+			'items'         => array( '/^\s*SELECT \* FROM \S*contract_items WHERE contract_id/', 'Failed to read the items of contract' ),
+			'addresses'     => array( '/^\s*SELECT \* FROM \S*contract_addresses WHERE contract_id/', 'Failed to read the addresses of contract' ),
+			'plan snapshot' => array( '/^\s*SELECT payload, schema_version FROM \S*subscription_snapshots WHERE id = /', 'Failed to read snapshot' ),
+		);
+	}
+
+	/**
+	 * @testdox A cycle read throws when its snapshot read fails, instead of a cycle without its snapshot.
+	 * @dataProvider provide_failing_cycle_snapshot_reads
+	 *
+	 * @param int $skip Snapshot reads to let through first: 0 breaks the plan snapshot, 1 the items snapshot.
+	 */
+	public function test_cycle_read_throws_on_a_failed_snapshot_read( int $skip ): void {
+		$id = $this->insert_released( $this->make_contract() );
+		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$this->seed_cycle_snapshots( $id ) ) );
+
+		$this->fail_next_query( '/^\s*SELECT payload, schema_version FROM \S*subscription_snapshots WHERE id = /', $skip );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read snapshot' );
+
+		$this->sut->find_cycle_history( $id );
+	}
+
+	/**
+	 * @return array<string, array{0: int}>
+	 */
+	public function provide_failing_cycle_snapshot_reads(): array {
+		return array(
+			'plan snapshot'  => array( 0 ),
+			'items snapshot' => array( 1 ),
+		);
+	}
+
+	/**
+	 * @testdox A list read throws when its plan snapshot batch read fails, instead of contracts without plan terms.
+	 */
+	public function test_list_read_throws_on_a_failed_snapshot_batch_read(): void {
+		$id       = $this->insert_released( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$this->seed_plan_snapshot( $contract, array( 'selling_plan_id' => 7 ) );
+
+		$this->fail_next_query( '/FROM \S*subscription_snapshots\s+WHERE id IN/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read plan snapshots' );
+
+		$this->sut->query();
+	}
+
+	/**
 	 * @testdox Multiple non-counting cycles (count = null) coexist in one chain.
 	 */
 	public function test_multiple_null_count_cycles_coexist(): void {
