@@ -446,7 +446,7 @@ class ShippingUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Adding a new cart line with taxes on raises no line_total warning and keeps the chosen method in the tax lookup.
+	 * @testdox Adding a new cart line with taxes on raises no line_total warning and keeps the chosen method in the tax lookup. Flat rate is a control: only a pickup choice builds the packages there.
 	 *
 	 * @testWith [ "local_pickup:2", "local_pickup" ]
 	 *           [ "flat_rate:1", "flat_rate" ]
