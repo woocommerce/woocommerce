@@ -848,14 +848,12 @@ class StoreOutputChecks {
 
 	/**
 	 * Run a test on the Product items in a product page's JSON-LD, or null when no product page could be loaded.
-	 * With no product to open, the check is marked as waiting for one, as in on_product_page().
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 * @param callable       $test      Test, given the Product items.
 	 */
 	private function with_products( StoreResponses $responses, callable $test ): ?bool {
-		if ( null === $responses->product() ) {
-			$this->no_product_page = true;
+		if ( $this->without_product( $responses ) ) {
 			return null;
 		}
 		$page = $responses->product_page();
@@ -925,12 +923,25 @@ class StoreOutputChecks {
 	 * @param callable       $test      Test, given the HTML.
 	 */
 	private function on_product_page( StoreResponses $responses, callable $test ): ?bool {
-		if ( null === $responses->product() ) {
-			$this->no_product_page = true;
+		if ( $this->without_product( $responses ) ) {
 			return null;
 		}
 		$page = $responses->product_page();
 		return null === $page ? null : (bool) $test( $page['body'] );
+	}
+
+	/**
+	 * Whether the scan has no product to open. If so, marks the check being run as waiting for one
+	 * (Not checked yet) rather than couldn't check. Every check that reads the product page calls this first.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private function without_product( StoreResponses $responses ): bool {
+		if ( null !== $responses->product() ) {
+			return false;
+		}
+		$this->no_product_page = true;
+		return true;
 	}
 
 	/**
@@ -2270,8 +2281,7 @@ class StoreOutputChecks {
 	 */
 	private function reviews_marked_up( StoreResponses $responses ): ?bool {
 		// The passes below load no page. Without a product page the rest of the card couldn't run, so neither does this.
-		if ( null === $responses->product() ) {
-			$this->no_product_page = true;
+		if ( $this->without_product( $responses ) ) {
 			return null;
 		}
 		if ( null === $responses->product_page() ) {
