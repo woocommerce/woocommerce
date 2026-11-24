@@ -39,6 +39,7 @@ class Quote_Preprocessor implements Preprocessor {
 			if ( 'core/quote' === $block['blockName'] ) {
 				$quote_align      = $block['attrs']['textAlign'] ?? null;
 				$quote_typography = $block['attrs']['style']['typography'] ?? array();
+				$quote_typography = is_array( $quote_typography ) ? $quote_typography : array();
 
 				// Apply quote's text alignment to its children.
 				$block['innerBlocks'] = $this->apply_alignment_to_children( $block['innerBlocks'], $quote_align );
