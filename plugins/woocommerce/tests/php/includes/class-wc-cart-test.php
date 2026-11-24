@@ -3305,4 +3305,19 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'Usage limit for coupon', implode( ' ', $this->get_guest_coupon_check_errors( 'cart_email_change', 'cart-before@example.com' ) ), 'The use is found through the email recorded with it' );
 	}
+
+	/**
+	 * @testdox get_shipping_packages() sums the line totals that exist and reads no missing line_total.
+	 */
+	public function test_get_shipping_packages_contents_cost_skips_lines_without_line_total(): void {
+		$cart      = WC()->cart;
+		$first_key = $cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+		$new_key   = $cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id(), 2 );
+		// A line added during the totals calculation has no line_total until the calculation sets it.
+		unset( $cart->cart_contents[ $new_key ]['line_total'] );
+
+		$packages = $cart->get_shipping_packages();
+
+		$this->assertEquals( $cart->cart_contents[ $first_key ]['line_total'], $packages[0]['contents_cost'] );
+	}
 }
