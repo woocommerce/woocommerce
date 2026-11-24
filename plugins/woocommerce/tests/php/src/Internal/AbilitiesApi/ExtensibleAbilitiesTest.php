@@ -3200,6 +3200,110 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should write a refund field and run the refund validators before the payment gateway refunds, and the refund syncs after.
+	 */
+	public function test_order_refund_create_writes_fields_and_runs_validators_before_the_gateway_and_syncs_after(): void {
+		$this->register_refund_rma_field();
+		$validated = array();
+		$this->register_validator(
+			'order_refund',
+			'test-ext',
+			static function ( \WC_Order_Refund $refund, ActionableAbility $ability, array $context ) use ( &$validated ) {
+				$validated[] = array( $refund->get_meta( '_test_rma' ), $refund->get_refunded_payment(), $ability->get_name(), $context['primary'] === $refund );
+				return null;
+			}
+		);
+		$synced = array();
+		$this->register_sync(
+			'order_refund',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$synced ) {
+				$synced[] = array( $saved[0]->get_id(), $saved[0]->get_refunded_payment(), $context['input']['extensions'] );
+				return null;
+			}
+		);
+
+		list( $order_id, $result, $gateway_refunds ) = $this->refund_through_gateway(
+			array(
+				'amount'         => '5',
+				'refund_payment' => true,
+				'extensions'     => array( 'test-ext' => array( 'rma' => 'RMA-1' ) ),
+			)
+		);
+
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertSame( 1, $gateway_refunds );
+		$this->assertSame( 'RMA-1', $result['refund']['extensions']['test-ext']['rma'] );
+		$this->assertSame( 'RMA-1', wc_get_order( $result['refund']['id'] )->get_meta( '_test_rma' ) );
+		$this->assertSame( array( array( 'RMA-1', false, 'woocommerce/order-refund-create', true ) ), $validated, 'The validator should see the field on the refund before the gateway refunds it.' );
+		$this->assertSame( array( array( $result['refund']['id'], true, array( 'test-ext' => array( 'rma' => 'RMA-1' ) ) ) ), $synced, 'The sync should run once, after the gateway refunded.' );
+		$this->assertCount( 1, wc_get_order( $order_id )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should leave no refund and not call the payment gateway when a refund validator refuses.
+	 */
+	public function test_order_refund_create_refused_by_a_validator_leaves_no_refund_and_does_not_call_the_gateway(): void {
+		$this->register_refund_rma_field();
+		$this->register_validator(
+			'order_refund',
+			'test-ext',
+			static function ( \WC_Order_Refund $refund ) {
+				return '' === $refund->get_meta( '_test_rma' ) ? new \WP_Error( 'rma_required', 'Send the RMA of the return.' ) : null;
+			}
+		);
+
+		list( $order_id, $result, $gateway_refunds ) = $this->refund_through_gateway(
+			array(
+				'amount'         => '5',
+				'refund_payment' => true,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'test-ext:rma_required', $result->get_error_code() );
+		$this->assertSame( 'Send the RMA of the return.', $result->get_error_message() );
+		$this->assertSame( 400, $result->get_error_data()['status'] );
+		$this->assertSame( 0, $gateway_refunds );
+		$this->assertCount( 0, wc_get_order( $order_id )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should keep the paid refund, roll back the sync writes and name the refund when a refund sync refuses.
+	 */
+	public function test_order_refund_create_refused_by_a_sync_keeps_the_paid_refund(): void {
+		global $wpdb;
+
+		$this->register_sync(
+			'order_refund',
+			'test-ext',
+			static function () {
+				update_option( 'test_refund_sync', 'written' );
+				return new \WP_Error( 'sync_failed', 'The return could not be recorded.' );
+			}
+		);
+
+		list( $order_id, $result, $gateway_refunds ) = $this->refund_through_gateway(
+			array(
+				'amount'         => '5',
+				'refund_payment' => true,
+			)
+		);
+
+		$refunds = wc_get_order( $order_id )->get_refunds();
+		$this->assertWPError( $result );
+		$this->assertSame( 'sync_failed', $result->get_error_code() );
+		$this->assertStringContainsString( 'do not send it again', $result->get_error_message() );
+		$this->assertSame( 1, $gateway_refunds );
+		$this->assertCount( 1, $refunds );
+		$this->assertTrue( $refunds[0]->get_refunded_payment() );
+		$this->assertTrue( $result->get_error_data()['saved'] );
+		$this->assertSame( $refunds[0]->get_id(), $result->get_error_data()['id'] );
+		$this->assertTrue( $result->get_error_data()['refunded_payment'] );
+		$this->assertNull( $wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name = 'test_refund_sync'" ), 'The sync write should be rolled back.' );
+	}
+
+	/**
 	 * @testdox Should name the saved order in the error when order-update-status saves and an order field value then fails its schema.
 	 */
 	public function test_an_order_status_that_saves_before_a_field_fails_names_the_saved_order(): void {
@@ -7688,6 +7792,87 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				);
 			}
 		);
+	}
+
+	/**
+	 * Register a writable refund field that keeps its value in the `_test_rma` meta.
+	 */
+	private function register_refund_rma_field(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'order_refund',
+						'namespace'     => 'test-ext',
+						'field'         => 'rma',
+						'input_schema'  => array( 'type' => 'string' ),
+						'output_schema' => array( 'type' => 'string' ),
+						'set_callback'  => static function ( \WC_Order_Refund $refund, string $value ) {
+							$refund->update_meta_data( '_test_rma', $value );
+						},
+						'get_callback'  => static function ( \WC_Order_Refund $refund ) {
+							return '' === $refund->get_meta( '_test_rma' ) ? null : $refund->get_meta( '_test_rma' );
+						},
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * Run order-refund-create on a processing order paid with a gateway that refunds.
+	 *
+	 * @param array $input Ability input without the order ID.
+	 * @return array{0: int, 1: mixed, 2: int} The order ID, the result, and the number of refunds the gateway made.
+	 */
+	private function refund_through_gateway( array $input ): array {
+		$gateway           = new class() extends \WC_Payment_Gateway {
+			/**
+			 * Number of refunds made.
+			 *
+			 * @var int
+			 */
+			public $refunds = 0;
+
+			/**
+			 * Set the ID and the refund support.
+			 */
+			public function __construct() {
+				$this->id       = 'field_test_gateway';
+				$this->enabled  = 'yes';
+				$this->supports = array( 'products', 'refunds' );
+			}
+
+			/**
+			 * Refund the payment.
+			 *
+			 * @param int        $order_id Order ID.
+			 * @param float|null $amount   Amount.
+			 * @param string     $reason   Reason.
+			 * @return bool
+			 */
+			public function process_refund( $order_id, $amount = null, $reason = '' ) {
+				unset( $order_id, $amount, $reason );
+				++$this->refunds;
+				return true;
+			}
+		};
+		$gateways          = WC()->payment_gateways();
+		$original_gateways = $gateways->payment_gateways;
+		$gateways->payment_gateways['field_test_gateway'] = $gateway;
+		$order = \WC_Helper_Order::create_order();
+		$order->set_payment_method( 'field_test_gateway' );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		try {
+			$result = wp_get_ability( 'woocommerce/order-refund-create' )->execute( array_merge( array( 'id' => $order->get_id() ), $input ) );
+		} finally {
+			$gateways->payment_gateways = $original_gateways;
+		}
+
+		return array( $order->get_id(), $result, $gateway->refunds );
 	}
 
 	/**

@@ -7,23 +7,33 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderRefundAbilityTrait;
 use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Refunds an order with wc_create_refund(), as the admin screen and the REST API do, after checking that the
- * call does not repeat a recent refund.
+ * call does not repeat a recent refund. The `order_refund` fields and validators run on the refund that
+ * wc_create_refund() built, before the payment gateway is called. The syncs run after it returns, outside the
+ * rollback, because a rollback cannot undo a gateway refund.
  */
-class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefinition {
+class OrderRefundCreate extends ActionableAbility {
 
+	use DomainAbilityHelpers;
 	use OrderAbilityTrait;
 	use OrderRefundAbilityTrait;
+
+	/**
+	 * Ability name.
+	 */
+	public const ABILITY_NAME = 'woocommerce/order-refund-create';
 
 	/**
 	 * Seconds for which a refund blocks the same refund of the order, so a call retried after a timeout cannot refund twice.
@@ -85,17 +95,6 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 	);
 
 	/**
-	 * Get the ability name.
-	 *
-	 * @return string
-	 *
-	 * @since 11.4.0
-	 */
-	public static function get_name(): string {
-		return 'woocommerce/order-refund-create';
-	}
-
-	/**
 	 * Get the ability registration arguments.
 	 *
 	 * @return array
@@ -112,7 +111,6 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			'category'            => 'woocommerce',
 			'input_schema'        => self::build_input_schema(),
 			'output_schema'       => self::build_output_schema(),
-			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_refund_order' ),
 			'meta'                => array(
 				'show_in_rest' => true,
@@ -130,21 +128,71 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * Refund the order while holding its lock, so a second call cannot pass the duplicate and amount checks
-	 * before the first refund is saved.
+	 * Resource that the ability changes.
+	 *
+	 * @return string
+	 */
+	public function get_resource(): string {
+		return 'order_refund';
+	}
+
+	/**
+	 * Load the order to refund.
 	 *
 	 * @param array $input Ability input.
-	 * @return array|\WP_Error
-	 *
-	 * @since 11.4.0
+	 * @return \WC_Order|\WP_Error
 	 */
-	public static function execute( array $input ) {
+	protected function load( array $input ) {
+		return self::get_order_from_input( $input );
+	}
+
+	/**
+	 * Nothing changes before the refund, because wc_create_refund() builds it. execute_change() writes the
+	 * fields to that refund.
+	 *
+	 * @param \WC_Order $subject Order.
+	 * @param array     $input   Ability input.
+	 * @return null
+	 */
+	protected function change( $subject, array $input ) {
+		return null;
+	}
+
+	/**
+	 * The ability output for the refund.
+	 *
+	 * @param \WC_Order_Refund $subject Refund.
+	 * @return array|\WP_Error
+	 */
+	protected function prepare_response( $subject ) {
+		$formatted = self::format_refund_for_response( $subject );
+
+		return is_wp_error( $formatted ) ? $formatted : array( 'refund' => $formatted );
+	}
+
+	/**
+	 * Refund the order while holding its lock, so a second call cannot pass the duplicate and amount checks
+	 * before the first refund is saved. It replaces the steps of ActionableAbility, because wc_create_refund()
+	 * builds the refund, saves it and calls the payment gateway in one call.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $input Ability input.
+	 * @return array|\WP_Error
+	 */
+	public function execute_change( $input = null ) {
+		$input = is_array( $input ) ? $input : array();
 		if ( ! isset( $input['amount'] ) && ! isset( $input['line_items'] ) ) {
 			return new \WP_Error(
 				'woocommerce_ability_order_refund_missing_amount',
 				__( 'No amount or lines to refund were sent, so no refund was created. Send amount, line_items, or both.', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
+		}
+
+		$updates = ExtensibleAbilities::is_enabled() ? $this->prepare_fields( $input['extensions'] ?? array(), $this->get_resource() ) : array();
+		if ( is_wp_error( $updates ) ) {
+			return $updates;
 		}
 
 		$order_id = $input['id'];
@@ -161,12 +209,12 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		}
 
 		try {
-			$order = self::get_order_from_input( $input );
+			$order = $this->load( $input );
 			if ( is_wp_error( $order ) ) {
 				return $order;
 			}
 
-			return self::refund( $order, $input, $lock );
+			return $this->refund( $order, $input, $lock, $updates );
 		} finally {
 			self::unlock_order( $order_id, $lock );
 		}
@@ -175,12 +223,13 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 	/**
 	 * Check the call against recent refunds and the gateway, then create the refund.
 	 *
-	 * @param \WC_Order $order Order.
-	 * @param array     $input Ability input.
-	 * @param string    $lock  Lock value of the call.
+	 * @param \WC_Order $order   Order.
+	 * @param array     $input   Ability input.
+	 * @param string    $lock    Lock value of the call.
+	 * @param array     $updates Extension field values from prepare_fields().
 	 * @return array|\WP_Error
 	 */
-	private static function refund( \WC_Order $order, array $input, string $lock ) {
+	private function refund( \WC_Order $order, array $input, string $lock, array $updates ) {
 		$decimals       = wc_get_price_decimals();
 		$refund_payment = $input['refund_payment'] ?? false;
 
@@ -245,11 +294,12 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			);
 		}
 
-		$order_id   = $order->get_id();
-		$tagged     = null;
-		$saved      = false;
-		$paid       = false;
-		$lock_error = null;
+		$order_id = $order->get_id();
+		$tagged   = null;
+		$saved    = false;
+		$paid     = false;
+		$refusal  = null;
+		$enabled  = ExtensibleAbilities::is_enabled();
 
 		/**
 		 * The refund of the order that saved first during the call and has not reached woocommerce_create_refund as
@@ -261,8 +311,8 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 		$marker    = wp_generate_uuid4();
 		$reason    = isset( $input['reason'] ) ? sanitize_textarea_field( $input['reason'] ) : null;
 
-		// First, so the meta is on the refund before callbacks that move money see it, and a lost lock declines it before they run.
-		$tag = static function ( $refund, $args ) use ( $order_id, $lock, $marker, $fingerprint, $resolved_fingerprint, $refund_payment, &$candidate, &$tagged, &$lock_error ): void {
+		// First, so the meta and fields are on the refund before callbacks that move money see it, and a lost lock or a validator declines it before they run.
+		$tag = function ( $refund, $args ) use ( $order_id, $lock, $marker, $fingerprint, $resolved_fingerprint, $refund_payment, $enabled, $updates, &$candidate, &$tagged, &$refusal ): void {
 			if ( ! $refund instanceof \WC_Order_Refund || $refund->get_parent_id( 'edit' ) !== $order_id ) {
 				return;
 			}
@@ -278,10 +328,14 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			$tagged = $refund;
 			$holds  = self::holds_lock( $order_id, $lock );
 			if ( true !== $holds ) {
-				$lock_error = null === $holds ? self::lock_failed_error() : self::lock_lost_error();
+				$refusal = null === $holds ? self::lock_failed_error() : self::lock_lost_error();
 				throw new \Exception( 'The refund lock of the order could not be confirmed.' );
 			}
 			self::add_fingerprints( $refund, $fingerprint, $resolved_fingerprint, $refund_payment );
+			$refusal = $enabled ? $this->write_fields( $refund, $updates ) : null;
+			if ( null !== $refusal ) {
+				throw new \Exception( 'An extension refused the refund.' );
+			}
 		};
 		// wc_create_refund() sets the paid flag only after the gateway refunded, so a save that carries it means the money moved.
 		$watch_paid = static function ( $refund ) use ( $order_id, &$candidate, &$tagged, &$paid ): void {
@@ -352,12 +406,15 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 				);
 			}
 
-			$formatted = self::format_refund_for_response( $result );
-			if ( is_wp_error( $formatted ) ) {
-				return ExtensibleAbilities::saved_write_error( $formatted, 'order_refund', $result->get_id(), array( 'refunded_payment' => $paid ) );
+			$response = $enabled ? DatabaseTransaction::run( fn() => $this->sync( array( array( $result, $updates, $this->get_resource() ) ), $input ) ) : null;
+			if ( ! is_wp_error( $response ) ) {
+				$response = $this->prepare_response( $result );
+			}
+			if ( is_wp_error( $response ) ) {
+				return ExtensibleAbilities::saved_write_error( $response, $this->get_resource(), $result->get_id(), array( 'refunded_payment' => $paid ) );
 			}
 
-			return array( 'refund' => $formatted );
+			return $response;
 		}
 
 		$made = $tagged ?? $candidate;
@@ -377,7 +434,33 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 			);
 		}
 
-		return self::create_error( $result, $order_id, $lock_error, $saved || $crashed, $paid, $refund_payment && ! $crashed );
+		return self::create_error( $result, $order_id, $refusal, $saved || $crashed, $paid, $refund_payment && ! $crashed );
+	}
+
+	/**
+	 * Write the extension fields to the refund that wc_create_refund() built, and run the `order_refund`
+	 * validators on it. The refund is not sent to the payment gateway yet.
+	 *
+	 * @param \WC_Order_Refund $refund  Refund.
+	 * @param array            $updates Extension field values from prepare_fields().
+	 * @return \WP_Error|null Every refusal in one error, or null when none refused.
+	 */
+	private function write_fields( \WC_Order_Refund $refund, array $updates ): ?\WP_Error {
+		$refused = new \WP_Error();
+		$this->apply_fields( $refund, $updates, $refused );
+		$this->validate(
+			$refund,
+			$this->get_resource(),
+			array(
+				'primary'           => $refund,
+				'deleting'          => false,
+				'objects'           => array( $refund ),
+				'objects_to_delete' => array(),
+			),
+			$refused
+		);
+
+		return $refused->has_errors() ? self::join_refusals( $refused ) : null;
 	}
 
 	/**
@@ -453,17 +536,17 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 	 *
 	 * @param mixed          $result        Result of wc_create_refund().
 	 * @param int            $order_id       Order ID.
-	 * @param \WP_Error|null $lock_error     Error of the lock check that declined the refund, if it did.
+	 * @param \WP_Error|null $refusal        Error of the lock check or the extensions that declined the refund, if they did.
 	 * @param bool           $saved          Whether the refund was saved after woocommerce_create_refund, or a callback crashed.
 	 * @param bool           $paid           Whether the gateway refunded the payment.
 	 * @param bool           $refund_payment Whether the call asked the gateway to refund the payment.
 	 * @return \WP_Error
 	 */
-	private static function create_error( $result, int $order_id, ?\WP_Error $lock_error, bool $saved, bool $paid, bool $refund_payment ): \WP_Error {
+	private static function create_error( $result, int $order_id, ?\WP_Error $refusal, bool $saved, bool $paid, bool $refund_payment ): \WP_Error {
 		$reason = is_wp_error( $result ) ? $result->get_error_message() : __( 'The refund could not be created.', 'woocommerce' );
 
-		if ( null !== $lock_error ) {
-			return $lock_error;
+		if ( null !== $refusal ) {
+			return $refusal;
 		}
 
 		if ( ! $saved ) {
