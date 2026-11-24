@@ -761,7 +761,8 @@ class Html_Processing_Helper {
 	/**
 	 * Check whether HTML has anything an email shows: an element or non-whitespace text.
 	 *
-	 * Comments and `<style>`/`<script>` elements don't count, since the email doesn't show them.
+	 * Comments, doctypes, stray closers such as `</2>` or `</>`, and `<style>`/`<script>` elements
+	 * don't count, since the email doesn't show them.
 	 *
 	 * @param string $html HTML to check.
 	 * @return bool
@@ -770,7 +771,7 @@ class Html_Processing_Helper {
 		$processor = new \WP_HTML_Tag_Processor( $html );
 		while ( $processor->next_token() ) {
 			$token_type = $processor->get_token_type();
-			if ( '#comment' === $token_type ) {
+			if ( in_array( $token_type, array( '#comment', '#doctype', '#funky-comment', '#presumptuous-tag' ), true ) ) {
 				continue;
 			}
 			if ( '#text' === $token_type ) {

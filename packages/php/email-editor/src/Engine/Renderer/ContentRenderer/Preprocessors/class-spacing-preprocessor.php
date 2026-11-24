@@ -229,6 +229,9 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	/**
 	 * Check whether a block is raw HTML that shows nothing in the email, such as only a `<style>` tag.
 	 *
+	 * This reads the saved HTML, before rendering. A `pre_render_block` callback that replaces such a
+	 * block with visible HTML leaves the next block without its gap.
+	 *
 	 * @param array $block Parsed block.
 	 * @return bool
 	 */
