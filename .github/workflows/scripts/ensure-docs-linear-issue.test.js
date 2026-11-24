@@ -97,6 +97,15 @@ test( 'keeps an injected reason from faking description lines', async () => {
 	assert.match( description, /^\*\*Confidence:\*\* unknown$/m );
 } );
 
+test( 'leaves out confidence and reasoning when only the label is known', async () => {
+	const { created, options } = fixture();
+	await ensureDocsIssue( { ...options, verdict: null } );
+	const { description } = created[ 0 ];
+	assert.ok( description.includes( `**Pull request:** ${ pr.html_url }` ) );
+	assert.ok( ! /Confidence|AI reasoning/.test( description ) );
+	assert.match( description, /needs: documentation/ );
+} );
+
 test( 'resolves an exact team key to the team UUID', async () => {
 	const { created, options } = fixture( {
 		team: async () => {

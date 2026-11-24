@@ -25,7 +25,7 @@ const linearErrorDetails = ( error ) => {
  * @param {string} options.labelId      Configured label UUID.
  * @param {Object} options.pr           Pull request from the GitHub event.
  * @param {string} options.repoFullName Repository name, including its owner.
- * @param {Object} options.verdict      Structured documentation verdict.
+ * @param {?Object} options.verdict     Structured documentation verdict, or null when only the label is known.
  * @return {Promise<Object>} Existing or newly created issue and whether it was reused.
  */
 module.exports = async ( {
@@ -137,18 +137,28 @@ module.exports = async ( {
 	// The PR title and the AI reason are untrusted: the reason comes from a model that read the diff.
 	// Keep each on one line and quote the reason, so neither can add or fake a description line.
 	const oneLine = ( text ) => String( text ?? '' ).replace( /\s+/g, ' ' ).trim();
-	const confidence = [ 'high', 'medium', 'low' ].includes( verdict.confidence )
-		? verdict.confidence
-		: 'unknown';
-	const description = [
+	const lines = [
 		'A pull request was flagged as containing user-facing changes that may require documentation updates.',
 		'',
 		`**Pull request:** ${ pr.html_url }`,
 		`**Repository:** ${ repoFullName }`,
-		`**Confidence:** ${ confidence }`,
-		'**AI reasoning:**',
-		`> ${ oneLine( verdict.reason ) }`,
-	].join( '\n' );
+	];
+	if ( verdict ) {
+		const confidence = [ 'high', 'medium', 'low' ].includes(
+			verdict.confidence
+		)
+			? verdict.confidence
+			: 'unknown';
+		lines.push(
+			`**Confidence:** ${ confidence }`,
+			'**AI reasoning:**',
+			`> ${ oneLine( verdict.reason ) }`
+		);
+	} else {
+		// No analysis ran: a person or an earlier run labeled the PR. Don't invent an assessment.
+		lines.push( '**Flagged by:** the `needs: documentation` label' );
+	}
+	const description = lines.join( '\n' );
 
 	let result;
 	let issue;
