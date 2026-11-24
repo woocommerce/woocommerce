@@ -185,7 +185,16 @@ final class DueDispatcher {
 
 		$utc      = new DateTimeZone( 'UTC' );
 		$scan_now = $now ?? new DateTimeImmutable( 'now', $utc );
-		$due_rows = $this->contracts->find_due( $scan_now, $limit, $owners );
+		try {
+			$due_rows = $this->contracts->find_due( $scan_now, $limit, $owners );
+		} catch ( Throwable $e ) {
+			// A failed scan reads like "nothing due" for this tick; the next tick scans again.
+			wc_get_logger()->error(
+				sprintf( 'DueDispatcher::run_batch(): due-index scan failed - due dispatch may stall until this is fixed. %s', $e->getMessage() ),
+				array( 'source' => self::LOG_SOURCE )
+			);
+			return 0;
+		}
 
 		$notified = 0;
 		$skipped  = 0;
@@ -195,7 +204,7 @@ final class DueDispatcher {
 			$contract_id = $row['id'];
 
 			try {
-				$lock = $this->contracts->acquire_lock( $contract_id, self::LOCK_OPERATION, array( 'next_payment_gmt' => $row['next_payment_gmt'] ) );
+				$lock = $this->contracts->acquire_lock( $contract_id, $row['extension_slug'], self::LOCK_OPERATION, array( 'next_payment_gmt' => $row['next_payment_gmt'] ) );
 				if ( null === $lock ) {
 					++$skipped;
 					continue;

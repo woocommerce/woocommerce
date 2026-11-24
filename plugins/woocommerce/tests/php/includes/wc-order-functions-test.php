@@ -945,6 +945,74 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return no order notes when order_id or post_id is empty or non-positive unless order__in or post__in is provided.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/71100
+	 */
+	public function test_wc_get_order_notes_returns_empty_for_empty_or_invalid_order_id(): void {
+		$order1 = WC_Helper_Order::create_order();
+		$order1->add_order_note( 'Order 1 internal note' );
+		$order1->add_order_note( 'Order 1 customer note', 1 );
+
+		$order2 = WC_Helper_Order::create_order();
+		$order2->add_order_note( 'Order 2 internal note' );
+
+		$invalid_ids = array( 0, '0', '', null, false, -1, 'invalid' );
+		foreach ( $invalid_ids as $invalid_id ) {
+			$this->assertSame(
+				array(),
+				wc_get_order_notes( array( 'order_id' => $invalid_id ) ),
+				sprintf( 'Expected empty array for order_id=%s', var_export( $invalid_id, true ) ) // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+			);
+			$this->assertSame(
+				array(),
+				wc_get_order_notes( array( 'post_id' => $invalid_id ) ),
+				sprintf( 'Expected empty array for post_id=%s', var_export( $invalid_id, true ) ) // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+			);
+		}
+
+		// Calling without order_id or post_id should continue returning notes across orders.
+		$all_customer_notes = wc_get_order_notes( array( 'type' => 'customer' ) );
+		$this->assertContains( 'Order 1 customer note', wp_list_pluck( $all_customer_notes, 'content' ) );
+
+		// Using order__in / post__in should continue working even without order_id or with default order_id => 0.
+		$order1_notes = wc_get_order_notes( array( 'order__in' => array( $order1->get_id() ) ) );
+		$this->assertContains( 'Order 1 internal note', wp_list_pluck( $order1_notes, 'content' ) );
+		$this->assertNotContains( 'Order 2 internal note', wp_list_pluck( $order1_notes, 'content' ) );
+
+		$order2_notes = wc_get_order_notes(
+			array(
+				'order_id'  => 0,
+				'order__in' => array( $order2->get_id() ),
+			)
+		);
+		$this->assertContains( 'Order 2 internal note', wp_list_pluck( $order2_notes, 'content' ) );
+		$this->assertNotContains( 'Order 1 internal note', wp_list_pluck( $order2_notes, 'content' ) );
+
+		// An empty order__in overrides post__in after mapping, so zero order_id must still return empty.
+		$this->assertSame(
+			array(),
+			wc_get_order_notes(
+				array(
+					'order_id'  => 0,
+					'post__in'  => array( $order1->get_id() ),
+					'order__in' => array(),
+				)
+			)
+		);
+
+		// A null order_id falls back to a valid post_id to match isset()-based mapping precedence.
+		$post_id_fallback_notes = wc_get_order_notes(
+			array(
+				'order_id' => null,
+				'post_id'  => $order1->get_id(),
+			)
+		);
+		$this->assertContains( 'Order 1 internal note', wp_list_pluck( $post_id_fallback_notes, 'content' ) );
+		$this->assertNotContains( 'Order 2 internal note', wp_list_pluck( $post_id_fallback_notes, 'content' ) );
+	}
+
+	/**
 	 * @testdox Should show an order note's time in the current site timezone after the timezone changes.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/48953
@@ -1316,5 +1384,49 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	private function get_download_permission_product_ids( WC_Order $order ): array {
 		$downloads = WC_Data_Store::load( 'customer-download' )->get_downloads( array( 'order_id' => $order->get_id() ) );
 		return array_map( fn( $download ) => (int) $download->get_product_id(), $downloads );
+	}
+
+	/**
+	 * @testdox Counting a customer's order records its emails on a per-user coupon, and cancelling it removes them with the use.
+	 */
+	public function test_customer_order_records_and_releases_used_by_emails() {
+		$customer_id = $this->factory->user->create( array( 'user_email' => 'lifecycle@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'lifecycle_emails', array( 'usage_limit_per_user' => '1' ) );
+
+		$order = $this->create_counted_customer_order( $customer_id, 'lifecycle_emails' );
+
+		$coupon_id = ( new WC_Coupon( 'lifecycle_emails' ) )->get_id();
+		$this->assertContains( $customer_id . ':lifecycle@example.com', get_post_meta( $coupon_id, '_used_by_email', false ) );
+		$this->assertContains( $customer_id . ':' . strtolower( $order->get_billing_email() ), get_post_meta( $coupon_id, '_used_by_email', false ) );
+
+		wc_get_order( $order->get_id() )->update_status( OrderStatus::CANCELLED );
+
+		$coupon = new WC_Coupon( 'lifecycle_emails' );
+		$this->assertSame( array(), array_values( $coupon->get_used_by() ) );
+		$this->assertEquals( 0, $coupon->get_usage_count() );
+		$this->assertSame( array(), get_post_meta( $coupon_id, '_used_by_email', false ) );
+	}
+
+	/**
+	 * @testdox Applying a per-user coupon to a customer order that already counts its coupons records the order's billing email.
+	 */
+	public function test_apply_coupon_to_counted_order_records_billing_email() {
+		$customer_id = $this->factory->user->create( array( 'user_email' => 'apply-account@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'apply_counted_emails', array( 'usage_limit_per_user' => '1' ) );
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_billing_email( 'apply-billing@example.com' );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
+
+		wc_get_order( $order->get_id() )->apply_coupon( 'apply_counted_emails' );
+
+		$coupon  = new WC_Coupon( 'apply_counted_emails' );
+		$records = get_post_meta( $coupon->get_id(), '_used_by_email', false );
+		$this->assertContains( $customer_id . ':apply-account@example.com', $records );
+		$this->assertContains( $customer_id . ':apply-billing@example.com', $records );
+		$this->assertEquals( 1, $coupon->get_usage_count(), 'The use is counted once.' );
+		$this->assertSame( array( (string) $customer_id ), array_values( $coupon->get_used_by() ) );
 	}
 }

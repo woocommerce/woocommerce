@@ -5,12 +5,16 @@
 /**
  * External dependencies
  */
-import { createRoot } from '@wordpress/element';
+import { createRoot, lazy, Suspense } from '@wordpress/element';
+import { isRTL } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import './settings-ui.scss';
+import { readJsonDataset } from './read-json-dataset';
+import type { ConnectView } from '~/sales-readiness/components/agent-connect';
+import type { ReadinessView } from '~/sales-readiness/types';
 import { isFeatureEnabled } from '~/utils/features';
 import {
 	SettingsPaymentsBacsWrapper,
@@ -72,6 +76,75 @@ const renderPaymentsSettings = () => {
 	} );
 };
 
+const SalesReadinessOverview = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "sales-readiness-overview" */ '~/sales-readiness/overview'
+		)
+);
+
+/**
+ * WooCommerce > Settings > AI tools opens on the Overview, which the PHP tab leaves a root for.
+ */
+const renderSalesReadinessOverview = () => {
+	const root = document.getElementById( 'wc-agent-readiness-overview' );
+	if ( root ) {
+		// Read each attribute on its own. One try would hide the connection card
+		// when the readiness view does not parse; that view can reload, the card cannot.
+		const initialView = readJsonDataset< ReadinessView >(
+			root.dataset.view
+		);
+		const connect = readJsonDataset< ConnectView >( root.dataset.connect );
+		createRoot( root ).render(
+			<Suspense fallback={ null }>
+				<SalesReadinessOverview
+					initialView={ initialView }
+					connect={ connect }
+				/>
+			</Suspense>
+		);
+	}
+};
+
+const AiShopping = lazy( () =>
+	Promise.all( [
+		import(
+			/* webpackChunkName: "ai-shopping" */ '~/sales-readiness/ai-shopping'
+		),
+		// Chunk stylesheets bypass the RTL swap WordPress applies to registered styles.
+		isRTL()
+			? import(
+					/* webpackChunkName: "ai-shopping-styles-rtl" */ '~/sales-readiness/ai-shopping-dataviews-rtl.scss'
+				)
+			: import(
+					/* webpackChunkName: "ai-shopping-styles" */ '~/sales-readiness/ai-shopping-dataviews.scss'
+				),
+	] ).then( ( [ module ] ) => module )
+);
+
+/**
+ * AI tools > AI shopping, which the PHP section leaves a root for with its data.
+ */
+const renderAiShopping = () => {
+	const root = document.getElementById( 'wc-ai-shopping' );
+	if ( ! root ) {
+		return;
+	}
+	let view = null;
+	try {
+		view = JSON.parse( root.dataset.view ?? 'null' );
+	} catch {
+		// Nothing to show without the page's data.
+	}
+	if ( view ) {
+		createRoot( root ).render(
+			<Suspense fallback={ null }>
+				<AiShopping view={ view } />
+			</Suspense>
+		);
+	}
+};
+
 const registerSlotFills = () => {
 	possiblyRenderSettingsSlots();
 	registerTaxSettingsConflictErrorFill();
@@ -100,4 +173,6 @@ const registerSlotFills = () => {
 };
 
 renderPaymentsSettings();
+renderSalesReadinessOverview();
+renderAiShopping();
 registerSlotFills();

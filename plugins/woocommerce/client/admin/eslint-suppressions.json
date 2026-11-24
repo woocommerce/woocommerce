@@ -289,11 +289,6 @@
       "count": 2
     }
   },
-  "client/task-lists/fills/PaymentGatewaySuggestions/components/Setup/Setup.js": {
-    "@wordpress/use-recommended-components": {
-      "count": 2
-    }
-  },
   "client/task-lists/fills/PaymentGatewaySuggestions/components/WCPayBNPL/Suggestion.js": {
     "@wordpress/use-recommended-components": {
       "count": 3
@@ -317,11 +312,6 @@
   "client/task-lists/fills/tax/components/partners.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 3
-    }
-  },
-  "client/task-lists/fills/tax/index.tsx": {
-    "@wordpress/use-recommended-components": {
-      "count": 2
     }
   },
   "client/task-lists/setup-task-list/components/task-list-completed-header.tsx": {
@@ -355,11 +345,6 @@
     }
   },
   "client/wp-admin-scripts/fulfillments/components/shipment-form/shipment-tracking-number-form.tsx": {
-    "@wordpress/use-recommended-components": {
-      "count": 1
-    }
-  },
-  "client/wp-admin-scripts/print-shipping-label-banner/shipping-banner/index.js": {
     "@wordpress/use-recommended-components": {
       "count": 1
     }

@@ -12,7 +12,6 @@ import metadata from './block.json';
 import deprecated from './deprecated';
 import edit from './edit';
 import save from './save';
-import defaults from './defaults';
 
 const { name } = metadata;
 export { metadata, name };
@@ -30,7 +29,6 @@ const settings = {
 	// Save the props to post content.
 	save,
 	deprecated,
-	defaults,
 };
 
 registerBlockType( name, settings );

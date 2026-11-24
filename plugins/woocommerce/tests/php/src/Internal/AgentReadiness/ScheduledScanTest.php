@@ -4,8 +4,11 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\ProductFailures;
+use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -26,11 +29,14 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
+		// Report tests stay offline: store output checks would load the test site's pages.
+		StoreOutputChecksTest::block_requests();
 		add_filter( 'woocommerce_agent_readiness_rules_url', '__return_empty_string' );
 		delete_option( AgentReadiness::REPORT_OPTION );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
+		as_unschedule_all_actions( ScheduledScan::NEXT_HOOK );
+		delete_option( AgentReadiness::SCAN_OPTION );
 		$this->sut = wc_get_container()->get( ScheduledScan::class );
 	}
 
@@ -40,8 +46,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
-		delete_option( 'woocommerce_feature_agent_readiness_enabled' );
-		remove_filter( 'woocommerce_agent_readiness_rules_url', '__return_empty_string' );
+		as_unschedule_all_actions( ScheduledScan::NEXT_HOOK );
 		parent::tearDown();
 	}
 
@@ -194,6 +199,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 
 		$this->sut->run();
 		$this->sut->run();
+		$this->run_batches();
 
 		$report = wc_get_container()->get( AgentReadiness::class )->get_cached_report();
 		$this->assertSame( 1, $report['products'] );
@@ -225,6 +231,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		WC_Helper_Product::create_simple_product();
 
 		$this->sut->run();
+		$this->run_batches();
 		remove_filter( 'pre_http_request', $answer );
 		delete_option( RemoteRules::OPTION );
 
@@ -249,6 +256,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		WC_Helper_Product::create_simple_product();
 
 		$this->sut->run();
+		$this->run_batches();
 		remove_filter( 'pre_http_request', $fail );
 
 		$report = wc_get_container()->get( AgentReadiness::class )->get_cached_report();
@@ -279,15 +287,539 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With the feature disabled a run stores nothing and schedules nothing, ending the daily chain.
+	 * Run the scan's batch actions as Action Scheduler would, until the scan stores its report.
+	 *
+	 * @return int Batch actions run.
 	 */
-	public function test_run_with_feature_disabled(): void {
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
+	private function run_batches(): int {
+		$runs = 0;
+		while ( $runs < 20 && is_array( get_option( AgentReadiness::SCAN_OPTION ) ) ) {
+			$this->sut->run_batch( get_option( AgentReadiness::SCAN_OPTION )['id'] );
+			++$runs;
+		}
+		return $runs;
+	}
+
+	/**
+	 * Create published simple products quickly, without images, so they fail the image check.
+	 *
+	 * @param int $count Products to create.
+	 * @return array<int, int> Product ids.
+	 */
+	private function create_products( int $count ): array {
+		$ids = array();
+		for ( $i = 0; $i < $count; $i++ ) {
+			$id = wp_insert_post(
+				array(
+					'post_type'   => 'product',
+					'post_status' => 'publish',
+					'post_title'  => 'Product ' . $i,
+				)
+			);
+			wp_set_object_terms( $id, 'simple', 'product_type' );
+			update_post_meta( $id, '_regular_price', '10' );
+			update_post_meta( $id, '_price', '10' );
+			$ids[] = $id;
+		}
+		return $ids;
+	}
+
+	/**
+	 * @testdox A scan tests one batch per action, then stores the same report a single pass gives.
+	 */
+	public function test_scan_runs_one_batch_per_action_and_matches_a_single_pass(): void {
+		$this->create_products( ProductScan::BATCH_SIZE + 1 );
+		$single  = wc_get_container()->get( AgentReadiness::class )->get_report();
+		$batches = array();
+		$count   = static function ( array $product_ids ) use ( &$batches ): void {
+			$batches[] = count( $product_ids );
+		};
+		add_action( 'woocommerce_agent_readiness_scan_batch', $count );
 
 		$this->sut->run();
+		$this->assertTrue( $this->sut->is_pending(), 'A scan testing batches is pending' );
+		$runs = $this->run_batches();
+		remove_action( 'woocommerce_agent_readiness_scan_batch', $count );
 
-		$this->assertNull( wc_get_container()->get( AgentReadiness::class )->get_cached_report() );
-		$this->assertFalse( as_has_scheduled_action( ScheduledScan::DAILY_HOOK ) );
+		$this->assertSame( array( ProductScan::BATCH_SIZE, 1 ), $batches, 'One batch per action' );
+		$this->assertSame( 3, $runs, 'Two batches, then the report' );
+		$this->assertFalse( $this->sut->is_pending() );
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::NEXT_HOOK ), 'No retry is left behind' );
+		$report = wc_get_container()->get( AgentReadiness::class )->get_cached_report();
+		$this->assertSame( ProductScan::BATCH_SIZE + 1, $report['products'] );
+		foreach ( array( 'products', 'available', 'channels', 'truncated' ) as $key ) {
+			$this->assertSame( $single[ $key ], $report[ $key ], $key );
+		}
+		$this->assertSame( array_column( $single['checks'], 'count', 'id' ), array_column( $report['checks'], 'count', 'id' ) );
+	}
+
+	/**
+	 * @testdox A batch that ends early is tried again from where the last finished batch stopped.
+	 */
+	public function test_stopped_batch_resumes(): void {
+		$this->create_products( ProductScan::BATCH_SIZE + 1 );
+		$this->sut->run();
+		$chain = get_option( AgentReadiness::SCAN_OPTION )['id'];
+		$this->sut->run_batch( $chain );
+		$crash = static function (): void {
+			throw new \RuntimeException( 'Timed out' );
+		};
+		add_action( 'woocommerce_agent_readiness_scan_batch', $crash );
+		// Action Scheduler has started the queued batch, so it is no longer pending.
+		as_unschedule_all_actions( ScheduledScan::NEXT_HOOK );
+
+		try {
+			$this->sut->run_batch( $chain );
+			$this->fail( 'The batch should have stopped' );
+		} catch ( \RuntimeException $e ) {
+			unset( $e );
+		} finally {
+			remove_action( 'woocommerce_agent_readiness_scan_batch', $crash );
+		}
+
+		$retry = as_next_scheduled_action( ScheduledScan::NEXT_HOOK, array( $chain ), ScheduledScan::GROUP );
+		$this->assertIsInt( $retry, 'A retry is queued' );
+		$this->assertGreaterThan( time() + ScheduledScan::RETRY_AFTER / 2, $retry, 'The retry waits for the stopped action to time out' );
+		$this->assertSame( ProductScan::BATCH_SIZE, get_option( AgentReadiness::SCAN_OPTION )['position'], 'The finished batch is kept' );
+
+		$this->run_batches();
+		$this->assertSame( ProductScan::BATCH_SIZE + 1, wc_get_container()->get( AgentReadiness::class )->get_cached_report()['products'] );
+	}
+
+	/**
+	 * @testdox A batch that fails every time ends the scan after MAX_ATTEMPTS, keeping the last report.
+	 */
+	public function test_batch_that_always_fails_gives_up(): void {
+		$this->create_products( 1 );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'products' => 7 ) );
+		$this->sut->run();
+		$crash = static function (): void {
+			throw new \RuntimeException( 'Fatal on this product' );
+		};
+		add_action( 'woocommerce_agent_readiness_scan_batch', $crash );
+		$chain = get_option( AgentReadiness::SCAN_OPTION )['id'];
+
+		for ( $i = 0; $i < AgentReadiness::MAX_ATTEMPTS; $i++ ) {
+			try {
+				$this->sut->run_batch( $chain );
+			} catch ( \RuntimeException $e ) {
+				unset( $e );
+			}
+		}
+		remove_action( 'woocommerce_agent_readiness_scan_batch', $crash );
+		$this->sut->run_batch( $chain );
+
+		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::NEXT_HOOK, array( $chain ) ), 'No retry is left behind' );
+		$this->assertSame( 7, get_option( AgentReadiness::REPORT_OPTION )['products'] );
+	}
+
+	/**
+	 * @testdox Giving up after a finished batch removes failure rows that batch wrote for products the last report never covered, and keeps rows a save wrote while the scan ran.
+	 */
+	public function test_give_up_drops_failure_rows_the_last_report_did_not_cover(): void {
+		$ids = $this->create_products( ProductScan::BATCH_SIZE + 1 );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'products' => 7 ) );
+		$this->sut->run();
+		$chain = get_option( AgentReadiness::SCAN_OPTION )['id'];
+		$this->sut->run_batch( $chain );
+		// The scan walks newest products first, so the first batch covers the last id created, not $ids[0].
+		$covered = (int) end( $ids );
+		$this->assertNotEmpty( ProductFailures::stored( $covered ), 'The finished batch wrote failure rows' );
+		// The first product created is left for the next batch. A save checks it now.
+		$saved = (int) $ids[0];
+		$this->assertSame( array(), ProductFailures::stored( $saved ), 'The first batch did not reach it' );
+		ProductFailures::store( $saved, array() );
+
+		$crash = static function (): void {
+			throw new \RuntimeException( 'Fatal on the next batch' );
+		};
+		add_action( 'woocommerce_agent_readiness_scan_batch', $crash );
+		for ( $i = 0; $i < AgentReadiness::MAX_ATTEMPTS; $i++ ) {
+			try {
+				$this->sut->run_batch( $chain );
+			} catch ( \RuntimeException $e ) {
+				unset( $e );
+			}
+		}
+		remove_action( 'woocommerce_agent_readiness_scan_batch', $crash );
+		$this->sut->run_batch( $chain );
+
+		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
+		$this->assertSame( array(), ProductFailures::stored( $covered ), 'Rows the abandoned scan added are removed' );
+		$this->assertSame( array( ProductFailures::CHECKED ), ProductFailures::stored( $saved ), 'Rows the save wrote stay' );
+		$this->assertSame( 7, get_option( AgentReadiness::REPORT_OPTION )['products'] );
+	}
+
+	/**
+	 * @testdox A new scan request during a scan starts over, and the replaced scan's actions do nothing.
+	 */
+	public function test_new_request_restarts_the_scan(): void {
+		$this->create_products( ProductScan::BATCH_SIZE + 1 );
+		$this->sut->run();
+		$first = get_option( AgentReadiness::SCAN_OPTION )['id'];
+		$this->sut->run_batch( $first );
+
+		$this->sut->queue();
+		$this->assertTrue( as_has_scheduled_action( ScheduledScan::RUN_NOW_HOOK ), 'A request during a scan queues a new one' );
+		$this->sut->run();
+		$second = get_option( AgentReadiness::SCAN_OPTION );
+
+		$this->assertNotSame( $first, $second['id'] );
+		$this->assertSame( 0, $second['position'] );
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::NEXT_HOOK, array( $first ) ), 'The old scan has nothing left to run' );
+		$this->sut->run_batch( $first );
+		$this->assertSame( 0, get_option( AgentReadiness::SCAN_OPTION )['position'], 'The old scan changes nothing' );
+
+		$this->run_batches();
+		$this->assertSame( ProductScan::BATCH_SIZE + 1, wc_get_container()->get( AgentReadiness::class )->get_cached_report()['products'] );
+	}
+
+	/**
+	 * @testdox A batch replaced mid-run does not store the failure rows it collected.
+	 */
+	public function test_replaced_batch_does_not_store_failures(): void {
+		$ids = $this->create_products( ProductScan::BATCH_SIZE + 1 );
+		$this->sut->run();
+		$first   = get_option( AgentReadiness::SCAN_OPTION )['id'];
+		$covered = (int) end( $ids );
+
+		$replace = function (): void {
+			$this->sut->run();
+		};
+		add_action( 'woocommerce_agent_readiness_scan_batch', $replace );
+		$this->sut->run_batch( $first );
+		remove_action( 'woocommerce_agent_readiness_scan_batch', $replace );
+
+		$this->assertNotSame( $first, get_option( AgentReadiness::SCAN_OPTION )['id'] );
+		$this->assertSame( array(), ProductFailures::stored( $covered ), 'The replaced batch stored nothing' );
+	}
+
+	/**
+	 * @testdox A scan replaced while its batch stores rows does not write its progress over the new scan.
+	 */
+	public function test_scan_replaced_during_the_store_loop_keeps_the_new_progress(): void {
+		$this->create_products( ProductScan::BATCH_SIZE + 1 );
+		$this->sut->run();
+		$first = get_option( AgentReadiness::SCAN_OPTION )['id'];
+
+		$replaced = false;
+		$replace  = function ( $meta_id, $object_id, $meta_key ) use ( &$replaced ): void {
+			unset( $meta_id, $object_id );
+			if ( $replaced || ProductFailures::META_KEY !== $meta_key ) {
+				return;
+			}
+			$replaced = true;
+			$this->sut->run();
+		};
+		add_action( 'added_post_meta', $replace, 10, 3 );
+		try {
+			$this->sut->run_batch( $first );
+		} finally {
+			remove_action( 'added_post_meta', $replace, 10 );
+		}
+
+		$state = get_option( AgentReadiness::SCAN_OPTION );
+		$this->assertTrue( $replaced );
+		$this->assertNotSame( $first, $state['id'] );
+		$this->assertSame( 0, $state['position'], 'The new scan has not tested a batch yet' );
+	}
+
+	/**
+	 * @testdox A scan that finds nothing changed writes no product meta.
+	 */
+	public function test_unchanged_scan_writes_no_product_meta(): void {
+		$ids = $this->create_products( 2 );
+		$this->sut->run();
+		$this->run_batches();
+		$this->assertSame( '', get_post_meta( $ids[0], ProductFailures::WRITTEN_META, true ), 'The scan records no write time' );
+
+		$writes = 0;
+		$count  = static function ( $meta_id, $object_id, $meta_key ) use ( &$writes ): void {
+			unset( $meta_id, $object_id );
+			if ( in_array( $meta_key, array( ProductFailures::META_KEY, ProductFailures::WRITTEN_META ), true ) ) {
+				++$writes;
+			}
+		};
+		foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+			add_action( $hook, $count, 10, 3 );
+		}
+		try {
+			$this->sut->run();
+			$this->run_batches();
+		} finally {
+			foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+				remove_action( $hook, $count, 10 );
+			}
+		}
+
+		$this->assertSame( 0, $writes );
+	}
+
+	/**
+	 * @testdox A report that fails to store leaves the previous report's failure rows in place.
+	 */
+	public function test_failed_report_write_keeps_the_previous_rows(): void {
+		$stale = $this->create_products( 1 )[0];
+		ProductFailures::store( $stale, array() );
+		$this->hide_product( $stale );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'products' => 4 ) );
+		$this->create_products( 1 );
+		$this->sut->run();
+		$keep_old = static function ( $value, $old ) {
+			unset( $value );
+			return $old;
+		};
+		add_filter( 'pre_update_option_' . AgentReadiness::REPORT_OPTION, $keep_old, 10, 2 );
+		try {
+			$this->run_batches();
+		} finally {
+			remove_filter( 'pre_update_option_' . AgentReadiness::REPORT_OPTION, $keep_old, 10 );
+		}
+
+		$this->assertSame( array( ProductFailures::CHECKED ), ProductFailures::stored( $stale ) );
+		$this->assertSame( 4, get_option( AgentReadiness::REPORT_OPTION )['products'] );
+	}
+
+	/**
+	 * @testdox Rows saved after a product was skipped by its batch are still there when the scan finishes.
+	 */
+	public function test_rows_saved_after_a_skipped_product_stay(): void {
+		$kept  = $this->create_products( 1 )[0];
+		$stale = $this->create_products( 1 )[0];
+		ProductFailures::store( $kept, array() );
+		ProductFailures::store( $stale, array() );
+		$this->hide_product( $stale );
+		$skip = function () use ( $kept ): void {
+			$this->hide_product( $kept );
+		};
+		add_action( 'woocommerce_agent_readiness_scan_batch', $skip );
+		$this->sut->run();
+		$this->sut->run_batch( get_option( AgentReadiness::SCAN_OPTION )['id'] );
+		remove_action( 'woocommerce_agent_readiness_scan_batch', $skip );
+		wp_set_object_terms( $kept, array(), 'product_visibility' );
+		clean_post_cache( $kept );
+		ProductFailures::store( $kept, array() );
+
+		$this->run_batches();
+
+		$this->assertSame( array( ProductFailures::CHECKED ), ProductFailures::stored( $kept ) );
+		$this->assertSame( array(), ProductFailures::stored( $stale ), 'Rows from before the scan, on a product it did not test, are removed' );
+	}
+
+	/**
+	 * @testdox Giving up after the report is stored keeps the rows that report counts.
+	 */
+	public function test_give_up_after_the_report_is_stored_keeps_its_rows(): void {
+		$product_id = $this->create_products( 1 )[0];
+		$this->sut->run();
+		$this->run_batches();
+		$report = get_option( AgentReadiness::REPORT_OPTION );
+		$this->assertNotEmpty( ProductFailures::stored( $product_id ) );
+
+		update_option(
+			AgentReadiness::SCAN_OPTION,
+			array(
+				'id'         => $report['scan_id'],
+				'attempts'   => AgentReadiness::MAX_ATTEMPTS,
+				'ids'        => array( $product_id ),
+				'had_rows'   => array(),
+				'tested'     => array( $product_id ),
+				'position'   => 1,
+				'rows_as_of' => microtime( true ),
+			),
+			false
+		);
+		$this->sut->run_batch( $report['scan_id'] );
+
+		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
+		$this->assertContains( ProductFailures::CHECKED, ProductFailures::stored( $product_id ) );
+		$this->assertArrayNotHasKey( 'scan_id', wc_get_container()->get( AgentReadiness::class )->get_cached_report() );
+	}
+
+	/**
+	 * @testdox An empty product list from a successful query is an empty catalog, and a query error stops the scan.
+	 */
+	public function test_empty_product_list_follows_the_query(): void {
+		$this->create_products( 1 );
+		$selection = static function ( $posts, $query ) {
+			if ( ProductScan::PRODUCT_LIMIT + 1 !== (int) $query->get( 'posts_per_page' ) ) {
+				return $posts;
+			}
+			return array();
+		};
+		add_filter( 'posts_pre_query', $selection, 10, 2 );
+		try {
+			$this->assertSame( array(), ( new ProductScan() )->start() );
+		} finally {
+			remove_filter( 'posts_pre_query', $selection, 10 );
+		}
+
+		$fail = static function ( $posts, $query ) {
+			if ( ProductScan::PRODUCT_LIMIT + 1 !== (int) $query->get( 'posts_per_page' ) ) {
+				return $posts;
+			}
+			global $wpdb;
+			$wpdb->last_error = 'database unavailable';
+			return array();
+		};
+		add_filter( 'posts_pre_query', $fail, 10, 2 );
+		try {
+			$this->expectException( \RuntimeException::class );
+			( new ProductScan() )->start();
+		} finally {
+			remove_filter( 'posts_pre_query', $fail, 10 );
+			global $wpdb;
+			$wpdb->last_error = '';
+		}
+	}
+
+	/**
+	 * @testdox A failed product list query is not cached, so the next scan lists the products.
+	 */
+	public function test_failed_list_query_is_not_cached(): void {
+		global $wpdb;
+		$ids   = $this->create_products( 1 );
+		$break = static function ( $sql ) {
+			return false !== strpos( (string) $sql, 'LIMIT 0, ' . ( ProductScan::PRODUCT_LIMIT + 1 ) ) ? $sql . ' BROKEN' : $sql;
+		};
+		add_filter( 'query', $break );
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			( new ProductScan() )->start();
+			$this->fail( 'A list query error stops the scan' );
+		} catch ( \RuntimeException $e ) {
+			unset( $e );
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $suppress );
+			$wpdb->last_error = '';
+		}
+
+		$this->assertSame( $ids, ( new ProductScan() )->start() );
+	}
+
+	/**
+	 * @testdox A product list query error stops the scan even when the counts found no products.
+	 */
+	public function test_list_query_error_stops_the_scan_without_products(): void {
+		$fail = static function ( $posts, $query ) {
+			if ( ProductScan::PRODUCT_LIMIT + 1 !== (int) $query->get( 'posts_per_page' ) ) {
+				return $posts;
+			}
+			global $wpdb;
+			$wpdb->last_error = 'database unavailable';
+			return array();
+		};
+		add_filter( 'posts_pre_query', $fail, 10, 2 );
+		try {
+			$this->expectException( \RuntimeException::class );
+			( new ProductScan() )->start();
+		} finally {
+			remove_filter( 'posts_pre_query', $fail, 10 );
+			global $wpdb;
+			$wpdb->last_error = '';
+		}
+	}
+
+	/**
+	 * @testdox A selected product that still exists but fails to load stops the batch so prior rows stay, and a later batch can finish.
+	 */
+	public function test_product_load_failure_retries_and_keeps_prior_rows(): void {
+		$product_id = $this->create_products( 1 )[0];
+		ProductFailures::store( $product_id, array( 'missing_images' => array() ) );
+		$prior = ProductFailures::stored( $product_id );
+
+		$fail = static function ( $classname, $product_type, $context, $id ) use ( $product_id ) {
+			unset( $product_type, $context );
+			return (int) $id === $product_id ? BrokenAgentReadinessProduct::class : $classname;
+		};
+		add_filter( 'woocommerce_product_class', $fail, 10, 4 );
+		wc_get_container()->get( ProductCache::class )->remove( $product_id );
+		clean_post_cache( $product_id );
+		$this->sut->run();
+		$chain = get_option( AgentReadiness::SCAN_OPTION )['id'];
+		try {
+			$this->sut->run_batch( $chain );
+			$this->fail( 'A product load failure stops the batch' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( (string) $product_id, $e->getMessage() );
+		} finally {
+			remove_filter( 'woocommerce_product_class', $fail, 10 );
+			wc_get_container()->get( ProductCache::class )->remove( $product_id );
+			clean_post_cache( $product_id );
+		}
+
+		$state = get_option( AgentReadiness::SCAN_OPTION );
+		$this->assertSame( 0, $state['position'], 'The batch must not advance past a load failure' );
+		$this->assertSame( $prior, ProductFailures::stored( $product_id ), 'Prior rows stay until a successful test' );
+
+		$this->run_batches();
+
+		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
+		$this->assertContains( ProductFailures::CHECKED, ProductFailures::stored( $product_id ) );
+	}
+
+	/**
+	 * @testdox On the last attempt, a product that still fails to load is skipped so the scan finishes and its rows stay.
+	 */
+	public function test_product_load_failure_on_last_attempt_skips_and_keeps_rows(): void {
+		$ids = $this->create_products( 2 );
+		ProductFailures::store( $ids[0], array( 'missing_images' => array() ) );
+		$prior = ProductFailures::stored( $ids[0] );
+
+		$fail = static function ( $classname, $product_type, $context, $id ) use ( $ids ) {
+			unset( $product_type, $context );
+			return (int) $id === $ids[0] ? BrokenAgentReadinessProduct::class : $classname;
+		};
+		add_filter( 'woocommerce_product_class', $fail, 10, 4 );
+		wc_get_container()->get( ProductCache::class )->remove( $ids[0] );
+		clean_post_cache( $ids[0] );
+		$this->sut->run();
+		$state             = get_option( AgentReadiness::SCAN_OPTION );
+		$state['attempts'] = AgentReadiness::MAX_ATTEMPTS - 1;
+		update_option( AgentReadiness::SCAN_OPTION, $state, false );
+
+		try {
+			$this->run_batches();
+		} finally {
+			remove_filter( 'woocommerce_product_class', $fail, 10 );
+			wc_get_container()->get( ProductCache::class )->remove( $ids[0] );
+			clean_post_cache( $ids[0] );
+		}
+
+		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
+		$this->assertSame( $prior, ProductFailures::stored( $ids[0] ), 'Rows for the unloadable product stay' );
+		$this->assertContains( ProductFailures::CHECKED, ProductFailures::stored( $ids[1] ) );
+		$this->assertNotNull( wc_get_container()->get( AgentReadiness::class )->get_cached_report() );
+	}
+
+	/**
+	 * @testdox A product deleted between listing and its batch is skipped without retrying the batch.
+	 */
+	public function test_deleted_product_is_skipped_without_retry(): void {
+		$ids = $this->create_products( 2 );
+		ProductFailures::store( $ids[0], array() );
+		$this->sut->run();
+		$chain = get_option( AgentReadiness::SCAN_OPTION )['id'];
+		wp_delete_post( $ids[0], true );
+
+		$this->sut->run_batch( $chain );
+		$this->run_batches();
+
+		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
+		$this->assertSame( array(), ProductFailures::stored( $ids[0] ), 'Rows for a deleted product are removed at finish' );
+		$this->assertContains( ProductFailures::CHECKED, ProductFailures::stored( $ids[1] ) );
+	}
+
+	/**
+	 * Set a product to Catalog visibility Hidden without saving it through the product editor.
+	 *
+	 * @param int $product_id Product id.
+	 */
+	private function hide_product( int $product_id ): void {
+		wp_set_object_terms( $product_id, array( 'exclude-from-catalog', 'exclude-from-search' ), 'product_visibility' );
+		clean_post_cache( $product_id );
 	}
 
 	/**
@@ -299,3 +831,24 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}actionscheduler_actions SET last_attempt_gmt = %s WHERE status IN ( 'complete', 'failed', 'in-progress' )", gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ) );
 	}
 }
+
+/**
+ * Product class that fails to construct, so wc_get_product() returns false while the post remains.
+ *
+ * phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
+ * phpcs:disable Squiz.Classes.ClassFileName.NoMatch
+ * phpcs:disable SlevomatCodingStandard.Files.TypeNameMatchesFileName.NoMatchBetweenTypeNameAndFileName
+ * phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+ */
+class BrokenAgentReadinessProduct extends \WC_Product_Simple {
+
+	/**
+	 * @param mixed $data Product id or data ignored; construction always fails.
+	 * @param array $args Unused factory args.
+	 */
+	public function __construct( $data = 0, $args = array() ) {
+		unset( $data, $args );
+		throw new \Exception( 'forced product load failure' );
+	}
+}
+// phpcs:enable

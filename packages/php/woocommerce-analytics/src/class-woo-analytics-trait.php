@@ -345,13 +345,20 @@ trait Woo_Analytics_Trait {
 	 * @return array
 	 */
 	public function get_product_details( $product ) {
-		return array(
+		$details = array(
 			'pi' => $product->get_id(),
 			'pn' => $product->get_title(),
 			'pc' => $this->get_product_categories_concatenated( $product ),
-			'pp' => $product->get_price(),
 			'pt' => $product->get_type(),
 		);
+
+		// Only a numeric price is sent: get_price() is '' for a product without one, and a filter can return a label.
+		$price = $product->get_price();
+		if ( is_numeric( $price ) ) {
+			$details['pp'] = (string) wc_float_to_string( $price );
+		}
+
+		return $details;
 	}
 
 	/**
@@ -620,7 +627,7 @@ trait Woo_Analytics_Trait {
 	}
 
 	/**
-	 * Get number of items in the cart
+	 * Get the number of products in the cart, not the sum of their quantities, which can be fractional.
 	 *
 	 * @return int
 	 */
@@ -629,7 +636,18 @@ trait Woo_Analytics_Trait {
 		if ( $cart === null ) {
 			return 0;
 		}
-		return $cart->get_cart_contents_count();
+		return count( $cart->get_cart() );
+	}
+
+	/**
+	 * Get the number of products in an order, counted the same way as get_cart_items_count().
+	 * Unlike WC_Order::get_item_count(), this does not sum quantities.
+	 *
+	 * @param \WC_Order $order Order.
+	 * @return int
+	 */
+	public function get_order_items_count( $order ) {
+		return count( $order->get_items() );
 	}
 
 	/**

@@ -22,6 +22,7 @@ class ValidationTest extends WP_UnitTestCase {
 	 *           [{"format": "date", "formatMaximum": "2026-02-30"}, "/formatMaximum", "date"]
 	 *           [{"format": "date", "formatMinimum": {"$data": "not-a-pointer"}}, "/formatMinimum/$data", "json-pointer"]
 	 *           [{"anyOf": [{"maxLength": -1}]}, "/anyOf/0/maxLength", "0"]
+	 *           [{"pattern": "["}, "/pattern", "regex"]
 	 *
 	 * @param array  $rules  The invalid schema.
 	 * @param string $path   The expected keyword path.
@@ -36,6 +37,28 @@ class ValidationTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( $reason, $message );
 		$this->assertStringNotContainsString( '/properties/test', $message );
 		$this->assertStringNotContainsString( '{properties}', $message );
+	}
+
+	/**
+	 * @testdox PHP-valid schemas with browser-incompatible patterns produce a separate warning with the keyword path.
+	 *
+	 * @testWith [{"anyOf": [{"not": {"properties": {"pattern": {"pattern": "\\@"}}}}]}, "/anyOf/0/not/properties/pattern/pattern"]
+	 *           [{"items": {"pattern": "\\@"}}, "/items/pattern"]
+	 *           [{"items": [{"pattern": "\\@"}]}, "/items/0/pattern"]
+	 *           [{"patternProperties": {"^[a-z]+\\-$": {"type": "string"}}}, "/patternProperties"]
+	 *
+	 * @param array  $rules The schema with a browser-incompatible pattern.
+	 * @param string $path  The expected keyword path.
+	 */
+	public function test_browser_incompatible_patterns_preserve_valid_schema( array $rules, string $path ): void {
+		$this->assertTrue( Validation::is_valid_schema( $rules ), 'Browser compatibility must not invalidate a PHP-valid schema.' );
+		$warning = Validation::find_unsupported_pattern( $rules );
+
+		$this->assertWPError( $warning );
+		$message = $warning->get_error_message();
+		$this->assertStringContainsString( 'At "' . $path . '"', $message );
+		$this->assertStringContainsString( 'JavaScript', $message );
+		$this->assertStringNotContainsString( '/properties/test', $message );
 	}
 
 	/**

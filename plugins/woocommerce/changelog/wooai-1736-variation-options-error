@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+The product-update ability now tells agents to change a variation's options through its parent product.

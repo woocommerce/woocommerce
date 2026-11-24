@@ -115,6 +115,12 @@ class ProductSchema extends AbstractSchema {
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit', 'embed' ],
 			],
+			'global_unique_id'      => [
+				'description' => __( 'GTIN, UPC, EAN or ISBN, as entered for the product or variation. Empty when none is set.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit', 'embed' ],
+				'readonly'    => true,
+			],
 			'prices'                => [
 				'description' => __( 'Price data provided using the smallest unit of the currency.', 'woocommerce' ),
 				'type'        => 'object',
@@ -622,6 +628,7 @@ class ProductSchema extends AbstractSchema {
 			'variation'             => $this->prepare_html_response( $product->is_type( ProductType::VARIATION ) ? wc_get_formatted_variation( $product, true, true, false ) : '' ),
 			'permalink'             => $product->get_permalink(),
 			'sku'                   => $this->prepare_html_response( $product->get_sku() ),
+			'global_unique_id'      => (string) $product->get_global_unique_id(),
 			'short_description'     => $short_description,
 			'description'           => $description,
 			'on_sale'               => $product->is_on_sale(),

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add ExtensibleAbilities::register_prime(), so an extension can load the field data of a whole list of objects in one query.

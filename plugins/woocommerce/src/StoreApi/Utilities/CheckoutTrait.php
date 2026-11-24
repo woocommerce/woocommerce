@@ -35,7 +35,7 @@ trait CheckoutTrait {
 		];
 
 		if ( isset( $item->payment_result ) && $item->payment_result instanceof PaymentResult ) {
-			$response->set_status( $status_codes[ $item->payment_result->status ] ?? 200 );
+			$response->set_status( $status_codes[ $item->payment_result->get_status() ] ?? 200 );
 		}
 
 		return $response;
@@ -287,7 +287,7 @@ trait CheckoutTrait {
 		if ( null !== $payment_method ) {
 			WC()->session->set( 'chosen_payment_method', $payment_method->id );
 			$order->set_payment_method( $payment_method->id );
-			$order->set_payment_method_title( $payment_method->title );
+			$order->set_payment_method_title( $payment_method->get_title() );
 		} else {
 			$order_needs_payment = $order->needs_payment();
 			if ( $order_needs_payment && 'POST' === $request->get_method() ) {

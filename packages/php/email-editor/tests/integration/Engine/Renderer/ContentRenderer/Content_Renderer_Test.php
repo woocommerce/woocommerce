@@ -9,6 +9,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer as Core_Initializer;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 
@@ -79,16 +80,22 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			)
 		);
 		$this->assertIsInt( $email_post_id );
-		update_post_meta(
-			$email_post_id,
-			'woocommerce_email_theme',
+		$user_theme_post = $this->di_container->get( User_Theme::class )->get_user_theme_post();
+		wp_update_post(
 			array(
-				'styles' => array(
-					'elements' => array(
-						'caption' => array(
-							'color' => array( 'text' => '#f78da7' ),
+				'ID'           => $user_theme_post->ID,
+				'post_content' => (string) wp_json_encode(
+					array(
+						'version'                     => 3,
+						'isGlobalStylesUserThemeJSON' => true,
+						'styles'                      => array(
+							'elements' => array(
+								'caption' => array(
+									'color' => array( 'text' => '#f78da7' ),
+								),
+							),
 						),
-					),
+					)
 				),
 			)
 		);
@@ -1079,5 +1086,27 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			return is_string( $attribute ) ? $attribute : null;
 		}
 		return null;
+	}
+
+	/**
+	 * Test bold text gets an explicit weight, so it stays bold when the email's text weight is light.
+	 */
+	public function testItRendersBoldTextWithExplicitWeight(): void {
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:paragraph --><p>Plain <strong>Bold text</strong></p><!-- /wp:paragraph -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$content           = $this->renderer->render( $email_post, $template );
+
+		$this->assertSame( 1, preg_match( '/<strong[^>]*>Bold text<\/strong>/', $content, $strong ) );
+		$this->assertMatchesRegularExpression( '/style="[^"]*font-weight:\s*bold\s*(;|")/', $strong[0] );
 	}
 }

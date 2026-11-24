@@ -3,25 +3,23 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils as UcpUtils;
-use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WooCommerce > Settings > Agentic commerce. The UCP switch saves on its own
- * through wc/v3/agent-readiness/ucp; the store policy fields save with
- * Save changes. Only created by AgenticCommerceSettings while the
- * agent_readiness feature is enabled, after WC_Settings_Page has loaded.
+ * WooCommerce > Settings > AI tools. It opens on the Overview, a React view with the WordPress.com connection
+ * card, the AI shopping card and the Sales readiness card; Manage opens AI shopping, a React view with the UCP switch, Product visibility, the
+ * Setup checklist, the store policy fields and the connection URL. settings-embed mounts both, from data
+ * this class builds. The UCP switch saves on its own through wc/v3/agent-readiness/ucp; the store policy
+ * fields save with Save, which posts this settings form. Only created by AgenticCommerceSettings,
+ * after WC_Settings_Page has loaded.
  *
  * @since 11.4.0
  */
 class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 
-	use ScriptDebug;
-
-	private const SCRIPT_HANDLE = 'wc-agentic-commerce-settings';
+	use ReadinessMarkup;
 
 	private const POLICIES_SECTION = 'agentic_commerce_policies';
 
@@ -45,41 +43,79 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	private AgentReadiness $agent_readiness;
 
 	/**
-	 * UCP switch.
+	 * Sales readiness, linked from Status.
 	 *
-	 * @var UcpSwitch
+	 * @var ReadinessCheckPage
 	 */
-	private UcpSwitch $ucp_switch;
+	private ReadinessCheckPage $readiness_page;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param StoreConditions $store_conditions Store conditions.
-	 * @param AgentReadiness  $agent_readiness  Readiness service.
-	 * @param UcpSwitch       $ucp_switch       UCP switch.
+	 * @param StoreConditions    $store_conditions Store conditions.
+	 * @param AgentReadiness     $agent_readiness  Readiness service.
+	 * @param ReadinessCheckPage $readiness_page   Sales readiness.
 	 */
-	public function __construct( StoreConditions $store_conditions, AgentReadiness $agent_readiness, UcpSwitch $ucp_switch ) {
+	public function __construct( StoreConditions $store_conditions, AgentReadiness $agent_readiness, ReadinessCheckPage $readiness_page ) {
 		$this->id               = AgenticCommerceSettings::TAB;
-		$this->label            = __( 'Agentic commerce', 'woocommerce' );
+		$this->label            = __( 'AI tools', 'woocommerce' );
 		$this->store_conditions = $store_conditions;
 		$this->agent_readiness  = $agent_readiness;
-		$this->ucp_switch       = $ucp_switch;
+		$this->readiness_page   = $readiness_page;
 
 		parent::__construct();
 
 		add_filter( 'woocommerce_admin_settings_sanitize_option', array( $this, 'sanitize_page_option' ), 10, 3 );
-		add_action( 'woocommerce_settings_' . self::POLICIES_SECTION . '_after', array( $this, 'render_policies_footnote' ) );
 	}
 
 	/**
-	 * The store policy fields. The privacy policy page is a WordPress setting, so it is
-	 * listed, and saved, only for users who can manage privacy options.
+	 * The Overview and AI shopping.
+	 *
+	 * @return array<string, string>
+	 */
+	protected function get_own_sections() {
+		return array(
+			''                                        => __( 'Overview', 'woocommerce' ),
+			AgenticCommerceSettings::SHOPPING_SECTION => __( 'AI shopping', 'woocommerce' ),
+		);
+	}
+
+	/**
+	 * No section links: the landing page's cards and AI shopping's breadcrumb replace them.
+	 *
+	 * @return void
+	 */
+	public function output_sections() {
+	}
+
+	/**
+	 * The landing page has no fields.
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
 	protected function get_settings_for_default_section() {
+		return array();
+	}
+
+	/**
+	 * A page title for a dropdown. Tags are removed and entities decoded, so a stored title shows as the merchant wrote it.
+	 *
+	 * @param \WP_Post $page Page.
+	 * @return string
+	 */
+	private static function page_title( \WP_Post $page ): string {
+		return html_entity_decode( wp_strip_all_tags( get_the_title( $page ) ), ENT_QUOTES, 'UTF-8' );
+	}
+
+	/**
+	 * The store policy fields, on AI shopping. The privacy policy page is a WordPress setting, so it is
+	 * listed, and saved, only for users who can manage privacy options.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	protected function get_settings_for_shopping_section() {
 		$store_pages = StoreConditions::store_page_ids();
-		$pages       = array( '' => __( 'Select a page…', 'woocommerce' ) );
+		$pages       = array( '' => __( 'Choose a page', 'woocommerce' ) );
 		$published   = get_pages(
 			array(
 				'post_status' => 'publish',
@@ -87,9 +123,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			)
 		);
 		foreach ( is_array( $published ) ? $published : array() as $page ) {
-			$pages[ (string) $page->ID ] = $page->post_title;
+			$pages[ (string) $page->ID ] = self::page_title( $page );
 		}
-		$page_field = static function ( string $option, string $title, string $desc = '' ) use ( $pages, $store_pages ): array {
+		$page_field = static function ( string $option, string $title ) use ( $pages, $store_pages ): array {
 			$options = $pages;
 			$stored  = get_post( (int) get_option( $option ) );
 			// A stored page that can't be chosen here stays listed, so saving another field keeps it.
@@ -97,11 +133,10 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				$status = get_post_status_object( $stored->post_status );
 				$state  = in_array( $stored->ID, $store_pages, true ) ? __( 'Store page', 'woocommerce' ) : ( $status ? $status->label : $stored->post_status );
 				/* translators: 1: page title, 2: page status, such as Draft, or "Store page". */
-				$options[ (string) $stored->ID ] = sprintf( __( '%1$s (%2$s)', 'woocommerce' ), $stored->post_title, $state );
+				$options[ (string) $stored->ID ] = sprintf( __( '%1$s (%2$s)', 'woocommerce' ), self::page_title( $stored ), $state );
 			}
 			return array(
 				'title'              => $title,
-				'desc'               => $desc,
 				'id'                 => $option,
 				'type'               => 'select',
 				'options'            => $options,
@@ -116,15 +151,15 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			array(
 				'title' => __( 'Store policies', 'woocommerce' ),
 				'type'  => 'title',
-				'desc'  => __( 'Choose the pages AI agents will link shoppers to before they buy, so they know your return, shipping and privacy terms up front.', 'woocommerce' ),
+				'desc'  => __( 'AI assistants share these pages with shoppers. The pages you choose here are also used across the rest of your store.', 'woocommerce' ),
 				'id'    => self::POLICIES_SECTION,
 			),
-			$page_field( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Refund and returns', 'woocommerce' ) ),
-			$page_field( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Shipping policy', 'woocommerce' ) ),
+			$page_field( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Refund and returns policy', 'woocommerce' ) ),
+			$page_field( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Shipping policy (optional)', 'woocommerce' ) ),
 			...( current_user_can( 'manage_privacy_options' ) ? array( $page_field( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Privacy policy', 'woocommerce' ) ) ) : array() ),
 			$page_field( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Terms and conditions', 'woocommerce' ) ),
-			$page_field( AgenticCommerceSettings::FAQ_PAGE_OPTION, __( 'FAQ', 'woocommerce' ), __( 'Optional.', 'woocommerce' ) ),
-			$page_field( AgenticCommerceSettings::WARRANTY_PAGE_OPTION, __( 'Warranty', 'woocommerce' ), __( 'Optional.', 'woocommerce' ) ),
+			$page_field( AgenticCommerceSettings::FAQ_PAGE_OPTION, __( 'FAQ (optional)', 'woocommerce' ) ),
+			$page_field( AgenticCommerceSettings::WARRANTY_PAGE_OPTION, __( 'Warranty policy (optional)', 'woocommerce' ) ),
 			array(
 				'type' => 'sectionend',
 				'id'   => self::POLICIES_SECTION,
@@ -133,28 +168,167 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * Render the page as the design's cards: the switch, what agents can see, Status,
-	 * the store policy fields, the store address and Security.
+	 * Render the current section. Both are React roots the settings-embed script mounts: the Overview, and
+	 * AI shopping with the switch, Product visibility, the Setup checklist, the store policy fields and the
+	 * connection URL. The data comes with the page, so the React views draw without a request.
 	 */
 	public function output(): void {
-		$checks  = $this->store_conditions->all();
-		$failing = $this->store_conditions->failing_required( $checks );
+		global $current_section;
 
-		$this->enqueue_script( count( $failing ) );
+		if ( AgenticCommerceSettings::SHOPPING_SECTION !== $current_section ) {
+			// Cards only; nothing here saves with Save changes.
+			$GLOBALS['hide_save_button'] = true;
+			printf(
+				'<div class="wc-agentic-commerce"><div id="wc-agent-readiness-overview" class="wc-agent-readiness-overview" data-view="%s" data-connect="%s"></div></div>',
+				esc_attr( self::view_json( $this->readiness_page->view() ) ),
+				esc_attr( self::view_json( AgenticCommerceSettings::connect_view() ) )
+			);
+			return;
+		}
+		// Save is in the React page header. It submits this form, with the store policy fields as hidden
+		// inputs, so they save and validate as settings fields do; the nonce stays under the form.
+		// wc-settings-prevent-change-event keeps settings.js from adding its "Leave site?" prompt to the
+		// switch, which saves on its own; React tracks unsaved fields itself.
+		$GLOBALS['hide_save_button'] = true;
+		printf(
+			'<div id="wc-ai-shopping" class="wc-ai-shopping-root wc-settings-prevent-change-event" data-view="%s"></div>',
+			esc_attr( self::view_json( $this->shopping_view() ) )
+		);
+	}
 
-		echo '<div class="wc-agentic-commerce">';
-		echo '<p class="wc-agentic-commerce-intro">' . esc_html__( 'Let AI shopping assistants find your products, build a cart, and send shoppers to your checkout to pay. Uses the Universal Commerce Protocol (UCP).', 'woocommerce' ) . '</p>';
-		$this->render_switch( $checks, count( $failing ) );
-		$this->render_visibility( $this->agent_readiness->get_cached_report() );
-		$this->render_status( $checks, $this->ucp_switch->status( $failing ), count( $failing ) );
+	/**
+	 * A view as JSON for a data attribute. The hex flags encode &, quotes, < and > inside its strings, so
+	 * an entity already in a value, such as &quot;, which esc_attr() leaves as it is, can't decode to a
+	 * quote that ends a JSON string.
+	 *
+	 * @param array<string, mixed> $view View data.
+	 * @return string JSON for the attribute.
+	 */
+	private static function view_json( array $view ): string {
+		return (string) wp_json_encode( $view, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT );
+	}
 
-		echo '<div class="wc-agentic-commerce-card wc-agentic-commerce-policies">';
-		parent::output();
-		echo '</div>';
+	/**
+	 * Everything AI shopping shows, as data for its React view: the switch, the coming soon notice,
+	 * Product visibility, the Setup checklist, the store policy fields with their pages, and the
+	 * connection URL.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function shopping_view(): array {
+		$report   = $this->agent_readiness->get_cached_report();
+		$checks   = $this->store_conditions->all();
+		$enabled  = UcpUtils::is_enabled();
+		$failing  = $this->store_conditions->failing_required( $checks );
+		$launched = current( array_filter( $checks, static fn( array $check ): bool => 'launched' === $check['id'] ) );
 
-		$this->render_address_and_test();
-		$this->render_security();
-		echo '</div>';
+		return array(
+			'parent'      => array(
+				'href' => AgenticCommerceSettings::url(),
+				'text' => $this->label,
+			),
+			'title'       => __( 'AI shopping', 'woocommerce' ),
+			'description' => __( 'Control how AI assistants shop your store.', 'woocommerce' ),
+			// The switch saves on its own, through wc/v3/agent-readiness/ucp. It can't be turned on while a
+			// required step fails; turning it off always works.
+			'ucp'         => array(
+				'enabled'     => $enabled,
+				'blocked'     => ! $enabled && array() !== $failing,
+				'title'       => __( 'Allow AI assistants to shop your store', 'woocommerce' ),
+				'description' => __( 'Your products can be found by AI assistants and added to a shopper’s cart. Orders come through your checkout as usual.', 'woocommerce' ),
+				'learn_more'  => array(
+					'href' => 'https://woocommerce.com/document/woocommerce-ai/agentic-commerce/',
+					'text' => __( 'Learn how it works', 'woocommerce' ),
+				),
+				// The snackbar after the switch saves, as in the design.
+				'turned_on'   => __( 'AI assistants can now shop your store.', 'woocommerce' ),
+				'turned_off'  => __( 'AI assistants can no longer shop your store.', 'woocommerce' ),
+				'path'        => '/wc/v3/agent-readiness/ucp',
+				// Shown when the switch didn't save, unless the reason is required steps that aren't done.
+				'error_on'    => __( 'AI shopping wasn’t turned on. Reload the page and try again.', 'woocommerce' ),
+				'error_off'   => __( 'AI shopping wasn’t turned off. Reload the page and try again.', 'woocommerce' ),
+				'unsaved'     => __( 'Save your changes to see the updated status.', 'woocommerce' ),
+			),
+			// Agents can't shop a store that isn't live.
+			'coming_soon' => $launched && ! $launched['ok'] ? array(
+				'text' => __( 'Your store is in coming soon mode, so AI assistants can’t find your products yet.', 'woocommerce' ),
+				'link' => array(
+					'href' => $launched['fix_url'],
+					'text' => __( 'Change site visibility', 'woocommerce' ),
+				),
+			) : null,
+			'visibility'  => self::visibility( $report ),
+			'checklist'   => self::checklist( $checks ),
+			'policies'    => array(
+				'title'       => __( 'Store policies', 'woocommerce' ),
+				'description' => __( 'AI assistants share these pages with shoppers. The pages you choose here are also used across the rest of your store.', 'woocommerce' ),
+				'fields'      => $this->policy_fields(),
+			),
+			'connection'  => array(
+				'title'       => __( 'Connection URL', 'woocommerce' ),
+				'description' => __( 'A separate address, just for AI assistants to connect to your store. It was created automatically.', 'woocommerce' ),
+				'url'         => home_url( '/.well-known/ucp' ),
+				'copy'        => __( 'Copy', 'woocommerce' ),
+				'copied'      => __( 'Copied', 'woocommerce' ),
+				'test'        => array(
+					'href' => 'https://ucpplayground.com',
+					'text' => __( 'Test the connection in UCP Playground', 'woocommerce' ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Whether a setting of the AI shopping section is a store policy field, the only kind the page posts.
+	 * Filtered settings may lack keys; only complete select fields become form controls.
+	 *
+	 * @param mixed $field Setting.
+	 */
+	private static function is_policy_field( $field ): bool {
+		return is_array( $field ) && 'select' === ( $field['type'] ?? null ) && ! empty( $field['id'] ) && is_array( $field['options'] ?? null );
+	}
+
+	/**
+	 * Save only the fields the AI shopping page posts, so a setting a filter adds to the section, which
+	 * the page doesn't show, keeps its value instead of being reset.
+	 */
+	protected function save_settings_for_current_section(): void {
+		global $current_section;
+
+		if ( AgenticCommerceSettings::SHOPPING_SECTION !== $current_section ) {
+			parent::save_settings_for_current_section();
+			return;
+		}
+		\WC_Admin_Settings::save_fields( array_filter( $this->get_settings( $current_section ), array( self::class, 'is_policy_field' ) ) );
+	}
+
+	/**
+	 * The store policy fields as the form saves them, with their pages as a list, so the order holds in
+	 * JavaScript. A stored page that is no longer listed starts on "Choose a page", as a select would.
+	 *
+	 * @return array<int, array{id:string,name:string,label:string,value:string,options:array<int, array{value:string,label:string}>}>
+	 */
+	private function policy_fields(): array {
+		$fields = array();
+		foreach ( array_filter( $this->get_settings_for_section( AgenticCommerceSettings::SHOPPING_SECTION ), array( self::class, 'is_policy_field' ) ) as $field ) {
+			$options = array();
+			foreach ( $field['options'] as $value => $label ) {
+				$options[] = array(
+					'value' => (string) $value,
+					'label' => (string) $label,
+				);
+			}
+			$value    = (string) \WC_Admin_Settings::get_option( $field['id'], '' );
+			$fields[] = array(
+				'id'      => (string) $field['id'],
+				// The key WC_Admin_Settings::save_fields() reads the posted value from.
+				'name'    => (string) ( $field['field_name'] ?? $field['id'] ),
+				'label'   => (string) ( $field['title'] ?? '' ),
+				'value'   => in_array( $value, array_column( $options, 'value' ), true ) ? $value : '',
+				'options' => $options,
+			);
+		}
+		return $fields;
 	}
 
 	/**
@@ -184,331 +358,117 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * Footnote under the store policy fields.
-	 *
-	 * @internal
-	 */
-	public function render_policies_footnote(): void {
-		echo '<p class="description">' . esc_html__( 'Refund and returns, privacy policy and terms and conditions are the pages your store already uses at checkout and in your footer. Changing a page here changes it everywhere in your store.', 'woocommerce' ) . '</p>';
-	}
-
-	/**
-	 * Product counts from the last stored readiness report.
+	 * Product visibility: the counts from the last stored readiness report, each with a link to those
+	 * products, or a line saying they show after the first check.
 	 *
 	 * @param array<string, mixed>|null $report Stored report, or null before the first scan.
+	 * @return array{title:string,description:string,empty:string|null,counts:array<int, array{id:string,label:string,count:string,tip:string,tip_label:string,link:array{href:string,text:string}}>}
 	 */
-	private function render_visibility( ?array $report ): void {
-		echo '<div class="wc-agentic-commerce-card">';
-		echo '<div class="wc-agentic-commerce-card__header"><h2>' . esc_html__( 'What agents can see', 'woocommerce' ) . '</h2>';
-		echo '<p>' . esc_html__( 'Agents see the same products shoppers see in your shop. To keep a product away from agents, set its catalog visibility to Hidden.', 'woocommerce' ) . '</p></div>';
-
-		if ( null === $report ) {
-			printf(
-				'<p class="wc-agentic-commerce-card__body">%1$s <a href="%2$s">%3$s</a></p></div>',
-				esc_html__( 'Product counts appear after the first agent readiness check.', 'woocommerce' ),
-				esc_url( admin_url( 'admin.php?page=wc-status&tab=' . StatusTab::TAB ) ),
-				esc_html__( 'Run the check', 'woocommerce' )
+	private static function visibility( ?array $report ): array {
+		$counts = array();
+		if ( null !== $report ) {
+			$cards = array(
+				// The whole catalog, like the other two; `products` stops at PRODUCT_LIMIT. Reports from before `available` have only `products`.
+				array( ProductScan::COUNT_AVAILABLE, __( 'Visible', 'woocommerce' ), (int) ( $report['available'] ?? $report['products'] ?? 0 ), '', '' ),
+				array( ProductScan::COUNT_HIDDEN, __( 'Hidden', 'woocommerce' ), (int) ( $report['hidden_from_catalog'] ?? 0 ), __( 'Products set to Hidden in Catalog visibility.', 'woocommerce' ), __( 'More information about hidden products', 'woocommerce' ) ),
+				array( ProductScan::COUNT_UNSUPPORTED, __( 'Not supported', 'woocommerce' ), (int) ( $report['unsupported_types'] ?? 0 ), __( 'AI assistants can find these products, but shoppers can\'t buy them through an assistant yet. This includes grouped, external, subscription, booking, and bundle products.', 'woocommerce' ), __( 'More information about products that aren’t supported', 'woocommerce' ) ),
 			);
-			return;
-		}
-
-		$list_url  = static fn( array $args ): string => add_query_arg(
-			array_merge(
-				array(
-					'post_type'   => 'product',
-					'post_status' => 'publish',
-				),
-				$args
-			),
-			admin_url( 'edit.php' )
-		);
-		$supported = ProductType::SIMPLE . ',' . ProductType::VARIABLE;
-		// The products list can't filter out hidden products, so the available count has no list to link to.
-		$cards = array(
-			array(
-				'count' => (int) ( $report['products'] ?? 0 ),
-				'label' => __( 'Available to agents', 'woocommerce' ),
-				'url'   => '',
-			),
-			array(
-				'count' => (int) ( $report['hidden_from_catalog'] ?? 0 ),
-				'label' => __( 'Hidden from your catalog', 'woocommerce' ),
-				'url'   => $list_url(
-					array(
-						'product_type'       => $supported,
-						'product_visibility' => 'exclude-from-catalog',
-					)
-				),
-			),
-			array(
-				'count' => (int) ( $report['unsupported_types'] ?? 0 ),
-				'label' => __( 'Not supported yet', 'woocommerce' ),
-				'url'   => $list_url( array( 'product_type' => implode( ',', $this->unsupported_product_types() ) ) ),
-			),
-		);
-
-		echo '<ul class="wc-agentic-commerce-counts">';
-		foreach ( $cards as $card ) {
-			printf(
-				'<li><span>%1$s</span> <strong>%2$s</strong>%3$s</li>',
-				esc_html( $card['label'] ),
-				esc_html( number_format_i18n( $card['count'] ) ),
-				'' === $card['url'] ? '' : ' <a href="' . esc_url( $card['url'] ) . '">' . esc_html__( 'View products', 'woocommerce' ) . '</a>'
-			);
-		}
-		echo '</ul>';
-		echo '<p class="wc-agentic-commerce-card__footer">' . esc_html__( 'Simple and variable products only, for now.', 'woocommerce' ) . '</p>';
-		echo '</div>';
-	}
-
-	/**
-	 * The UCP switch card. The switch saves right away, apart from Save changes. While the
-	 * store is in coming soon mode, the card says so: agents can't shop a store that isn't live.
-	 *
-	 * @param array<int, array{id:string,ok:bool,fix_url:string}> $checks           Store conditions.
-	 * @param int                                                 $failing_required Number of failing required setup checks.
-	 */
-	private function render_switch( array $checks, int $failing_required ): void {
-		$enabled  = UcpUtils::is_enabled();
-		$message  = $enabled ? self::on_message( $failing_required ) : '';
-		$launched = current( array_filter( $checks, static fn( array $check ): bool => 'launched' === $check['id'] ) );
-		?>
-		<div class="wc-agentic-commerce-card wc-agentic-commerce-switch-card">
-			<div class="wc-agentic-commerce-switch-row">
-				<button type="button" class="wc-agentic-commerce-ucp-switch button-link" role="switch" aria-checked="<?php echo $enabled ? 'true' : 'false'; ?>" aria-labelledby="wc-agentic-commerce-ucp-title" aria-describedby="wc-agentic-commerce-ucp-desc" <?php disabled( ! $enabled && $failing_required > 0 ); ?>>
-					<span class="woocommerce-input-toggle woocommerce-input-toggle--<?php echo $enabled ? 'enabled' : 'disabled'; ?>"><?php echo $enabled ? esc_html__( 'Yes', 'woocommerce' ) : esc_html__( 'No', 'woocommerce' ); ?></span>
-				</button>
-				<div>
-					<h2 id="wc-agentic-commerce-ucp-title"><?php esc_html_e( 'Let AI agents shop your store', 'woocommerce' ); ?></h2>
-					<p id="wc-agentic-commerce-ucp-desc"><?php esc_html_e( 'AI shopping assistants find your products and build a cart. Shoppers pay on your checkout, so you keep the order and the customer. Turn it off at any time to stop all agent access.', 'woocommerce' ); ?></p>
-					<p class="wc-agentic-commerce-ucp-message" role="status"><?php echo esc_html( $message ); ?></p>
-				</div>
-			</div>
-			<?php if ( $launched && ! $launched['ok'] ) : ?>
-				<div class="wc-agentic-commerce-notice">
-					<span class="dashicons dashicons-warning" aria-hidden="true"></span>
-					<p><?php esc_html_e( 'Your store is in coming soon mode, so agents can\'t shop it yet. Take it live to let them in.', 'woocommerce' ); ?></p>
-					<a class="button button-primary" href="<?php echo esc_url( $launched['fix_url'] ); ?>"><?php esc_html_e( 'Go to Site visibility', 'woocommerce' ); ?></a>
-				</div>
-			<?php endif; ?>
-		</div>
-		<?php
-	}
-
-	/**
-	 * What the switch says while UCP is on.
-	 *
-	 * @param int $failing_required Number of failing required setup checks.
-	 */
-	private static function on_message( int $failing_required ): string {
-		if ( $failing_required > 0 ) {
-			/* translators: %d: number of failing required setup checks. */
-			return sprintf( _n( 'AI agents can shop your store, but %d required setup check below still needs fixing.', 'AI agents can shop your store, but %d required setup checks below still need fixing.', $failing_required, 'woocommerce' ), $failing_required );
-		}
-		return __( 'AI agents can now find and shop your store.', 'woocommerce' );
-	}
-
-	/**
-	 * The Status card: a badge, then the setup checks grouped into Required, Recommended and Done.
-	 * Each open check says what to do and links to where to do it. UCP itself is the switch, so it is not listed.
-	 *
-	 * @param array<int, array{id:string,level:string,ok:bool,name:string,label:string,fix_url:string}> $checks           Store conditions.
-	 * @param string                                                                                    $status           UcpSwitch status.
-	 * @param int                                                                                       $failing_required Number of failing required setup checks.
-	 */
-	private function render_status( array $checks, string $status, int $failing_required ): void {
-		$statuses = self::status_labels();
-		$classes  = array(
-			UcpSwitch::STATUS_ACTIVE          => 'pass',
-			UcpSwitch::STATUS_OFF             => 'off',
-			UcpSwitch::STATUS_NEEDS_ATTENTION => 'fix',
-		);
-		$groups   = array(
-			'required'    => array( __( 'Required', 'woocommerce' ), array() ),
-			'recommended' => array( __( 'Recommended', 'woocommerce' ), array() ),
-			'done'        => array( __( 'Done', 'woocommerce' ), array() ),
-		);
-		foreach ( $checks as $check ) {
-			if ( 'ucp_on' === $check['id'] ) {
-				continue;
+			foreach ( $cards as $card ) {
+				$counts[] = array(
+					'id'        => $card[0],
+					'label'     => $card[1],
+					'count'     => number_format_i18n( $card[2] ),
+					'tip'       => $card[3],
+					'tip_label' => $card[4],
+					'link'      => array(
+						'href' => ProductsList::url( $card[0] ),
+						'text' => __( 'View products', 'woocommerce' ),
+					),
+				);
 			}
-			$group                 = $check['ok'] ? 'done' : ( StoreConditions::LEVEL_REQUIRED === $check['level'] ? 'required' : 'recommended' );
-			$groups[ $group ][1][] = $check;
 		}
-		$summary = $failing_required > 0
-			/* translators: %d: number of failing required setup checks. */
-			? sprintf( _n( '%d required step to finish so agents can shop your store.', '%d required steps to finish so agents can shop your store.', $failing_required, 'woocommerce' ), $failing_required )
-			: __( 'Everything agents need is set up.', 'woocommerce' );
-		?>
-		<div class="wc-agentic-commerce-card wc-agentic-commerce-status-card">
-			<div class="wc-agentic-commerce-card__header wc-agentic-commerce-card__header--split">
-				<div>
-					<h2><?php esc_html_e( 'Status', 'woocommerce' ); ?></h2>
-					<p><?php echo esc_html( $summary ); ?></p>
-				</div>
-				<mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--<?php echo esc_attr( $classes[ $status ] ); ?> wc-agentic-commerce-status"><?php echo esc_html( $statuses[ $status ] ); ?></mark>
-			</div>
-			<?php foreach ( $groups as $id => $group ) : ?>
-				<?php
-				if ( array() === $group[1] ) {
-					continue;
-				}
-				$heading = sprintf( '%1$s <span class="wc-agentic-commerce-count">%2$s</span>', esc_html( $group[0] ), esc_html( number_format_i18n( count( $group[1] ) ) ) );
-				?>
-				<?php if ( 'done' === $id ) : ?>
-					<details class="wc-agentic-commerce-group wc-agentic-commerce-group--done">
-						<summary class="wc-agentic-commerce-group__title"><?php echo wp_kses_post( $heading ); ?></summary>
-						<ul>
-							<?php foreach ( $group[1] as $check ) : ?>
-								<li class="wc-agentic-commerce-check wc-agentic-commerce-check--done"><span class="dashicons dashicons-yes-alt" aria-hidden="true"></span><span><?php echo esc_html( $check['name'] ); ?></span></li>
-							<?php endforeach; ?>
-						</ul>
-					</details>
-				<?php else : ?>
-					<div class="wc-agentic-commerce-group wc-agentic-commerce-group--<?php echo esc_attr( $id ); ?>">
-						<h3 class="wc-agentic-commerce-group__title"><?php echo wp_kses_post( $heading ); ?></h3>
-						<ul>
-							<?php foreach ( $group[1] as $check ) : ?>
-								<?php $action = $this->check_action( $check ); ?>
-								<li class="wc-agentic-commerce-check wc-agentic-commerce-check--<?php echo esc_attr( $id ); ?>">
-									<span class="wc-agentic-commerce-check__icon" aria-hidden="true"></span>
-									<span class="wc-agentic-commerce-check__text"><?php echo esc_html( $action[0] ); ?></span>
-									<?php if ( '' !== $action[2] ) : ?>
-										<a class="button" href="<?php echo esc_url( $action[2] ); ?>"><?php echo esc_html( $action[1] ); ?></a>
-									<?php endif; ?>
-								</li>
-							<?php endforeach; ?>
-						</ul>
-					</div>
-				<?php endif; ?>
-			<?php endforeach; ?>
-		</div>
-		<?php
-	}
-
-	/**
-	 * What an open check asks the merchant to do: the action, the button text and where it goes.
-	 * A policy page that is chosen but not published links to its editor; a published store page asks for another page.
-	 *
-	 * @param array{id:string,label:string,fix_url:string} $check Store condition.
-	 * @return array{0:string,1:string,2:string}
-	 */
-	private function check_action( array $check ): array {
-		$policies = array(
-			'privacy_page'         => array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Publish your privacy policy page', 'woocommerce' ), __( 'Choose a privacy policy page', 'woocommerce' ) ),
-			'terms_page'           => array( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Publish your terms and conditions page', 'woocommerce' ), __( 'Choose a terms and conditions page', 'woocommerce' ) ),
-			'refund_returns_page'  => array( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Publish your refund and returns policy page', 'woocommerce' ), __( 'Choose a refund and returns policy page', 'woocommerce' ) ),
-			'shipping_policy_page' => array( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Publish your shipping policy page', 'woocommerce' ), __( 'Choose a shipping policy page', 'woocommerce' ) ),
-		);
-		if ( isset( $policies[ $check['id'] ] ) ) {
-			$page_id = (int) get_option( $policies[ $check['id'] ][0] );
-			$edit    = $page_id > 0 && get_post( $page_id ) && 'publish' !== get_post_status( $page_id ) ? (string) get_edit_post_link( $page_id, 'raw' ) : '';
-			return '' !== $edit
-				? array( $policies[ $check['id'] ][1], __( 'Review and publish', 'woocommerce' ), $edit )
-				: array( $policies[ $check['id'] ][2], __( 'Choose a page', 'woocommerce' ), $check['fix_url'] );
-		}
-		$actions = array(
-			'launched'       => array( __( 'Take your store out of coming soon mode', 'woocommerce' ), __( 'Go to Site visibility', 'woocommerce' ) ),
-			'https'          => array( __( 'Move your store to HTTPS', 'woocommerce' ), __( 'Learn how', 'woocommerce' ) ),
-			'search_visible' => array( __( 'Let search engines index your store', 'woocommerce' ), __( 'Open settings', 'woocommerce' ) ),
-			'guest_checkout' => array( __( 'Allow guest checkout', 'woocommerce' ), __( 'Open settings', 'woocommerce' ) ),
-			'order_emails'   => array( __( 'Turn on order confirmation emails', 'woocommerce' ), __( 'Open settings', 'woocommerce' ) ),
-		);
-		$action  = $actions[ $check['id'] ] ?? array( $check['label'], __( 'Open settings', 'woocommerce' ) );
-		return array( $action[0], $action[1], $check['fix_url'] );
-	}
-
-	/**
-	 * The store address agents start from, and Test your setup (WOOAI-1619, not built yet).
-	 */
-	private function render_address_and_test(): void {
-		?>
-		<div class="wc-agentic-commerce-card wc-agentic-commerce-card--split">
-			<div>
-				<h3><label for="wc-agentic-commerce-ucp-url"><?php esc_html_e( 'Store address for agents', 'woocommerce' ); ?></label></h3>
-				<input type="text" id="wc-agentic-commerce-ucp-url" class="regular-text code" readonly value="<?php echo esc_attr( home_url( '/.well-known/ucp' ) ); ?>" />
-				<button type="button" class="button wc-agentic-commerce-copy" data-copy-target="wc-agentic-commerce-ucp-url"><?php esc_html_e( 'Copy', 'woocommerce' ); ?></button>
-			</div>
-			<div class="wc-agentic-commerce-placeholder">
-				<h3><?php esc_html_e( 'Test your setup', 'woocommerce' ); ?></h3>
-				<p><?php esc_html_e( 'Coming in a WooCommerce update.', 'woocommerce' ); ?></p>
-			</div>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Security (WOOAI-1620, not built yet). Keys are set up automatically, so there is nothing to do here today.
-	 */
-	private function render_security(): void {
-		?>
-		<div class="wc-agentic-commerce-card wc-agentic-commerce-placeholder">
-			<div class="wc-agentic-commerce-card__header">
-				<h2><?php esc_html_e( 'Security', 'woocommerce' ); ?></h2>
-				<p><?php esc_html_e( 'Set up automatically. Nothing to do here.', 'woocommerce' ); ?></p>
-			</div>
-			<p class="wc-agentic-commerce-card__footer"><?php esc_html_e( 'Signing key details are coming in a WooCommerce update.', 'woocommerce' ); ?></p>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Status badge text, by UcpSwitch status.
-	 *
-	 * @return array<string, string>
-	 */
-	private static function status_labels(): array {
 		return array(
-			UcpSwitch::STATUS_ACTIVE          => __( 'Active', 'woocommerce' ),
-			UcpSwitch::STATUS_OFF             => __( 'Off', 'woocommerce' ),
-			UcpSwitch::STATUS_NEEDS_ATTENTION => __( 'Action needed', 'woocommerce' ),
+			'title'       => __( 'Product visibility', 'woocommerce' ),
+			'description' => __( 'AI assistants can see the same products as shoppers. For now, shoppers can only buy simple and variable products through an assistant.', 'woocommerce' ),
+			'empty'       => null === $report ? __( 'Product counts show after the first AI shopping health check.', 'woocommerce' ) : null,
+			'counts'      => $counts,
 		);
 	}
 
 	/**
-	 * Product type slugs agents don't support yet, for the product list filter.
+	 * The Setup checklist: how many steps are left, then the open setup checks in one list, required ones first and
+	 * marked Required. Each says why it matters, with a button to where to fix it. Completed checks fold
+	 * behind "Show N completed steps". UCP itself is the switch, so it is not listed.
 	 *
-	 * @return array<int, string>
+	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
+	 * @return array<string, mixed>
 	 */
-	private function unsupported_product_types(): array {
-		$slugs = get_terms(
-			array(
-				'taxonomy'   => 'product_type',
-				'hide_empty' => false,
-				'fields'     => 'slugs',
-			)
-		);
-		if ( ! is_array( $slugs ) ) {
-			return array( ProductType::GROUPED, ProductType::EXTERNAL );
+	private static function checklist( array $checks ): array {
+		$done     = ReadinessCheckPage::done_steps( $checks );
+		$open     = ReadinessCheckPage::open_steps( $checks );
+		$required = count( array_filter( $open, array( StoreConditions::class, 'shows_required' ) ) );
+		if ( $required > 0 ) {
+			/* translators: %d: number of failing required setup steps. */
+			$summary = sprintf( _n( 'Finish %d required step to get your store ready for AI shopping.', 'Finish %d required steps to get your store ready for AI shopping.', $required, 'woocommerce' ), $required );
+		} elseif ( array() !== $open ) {
+			/* translators: %d: number of open setup steps. */
+			$summary = sprintf( _n( 'Your store is ready for AI shopping. You have %d optional step left.', 'Your store is ready for AI shopping. You have %d optional steps left.', count( $open ), 'woocommerce' ), count( $open ) );
+		} elseif ( UcpUtils::is_enabled() ) {
+			$summary = __( 'Your store is ready for AI shopping.', 'woocommerce' );
+		} else {
+			$summary = __( 'Your store is ready for AI shopping. Turn it on to let AI assistants find your products.', 'woocommerce' );
 		}
-		return array_values( array_diff( array_map( 'strval', $slugs ), array( ProductType::SIMPLE, ProductType::VARIABLE ) ) );
-	}
 
-	/**
-	 * Load the switch and copy button script.
-	 *
-	 * @param int $failing_required Number of failing required setup checks, for the message shown after turning UCP on.
-	 */
-	private function enqueue_script( int $failing_required ): void {
-		wp_enqueue_script(
-			self::SCRIPT_HANDLE,
-			plugins_url( 'assets/js/admin/wc-agentic-commerce-settings' . $this->get_script_suffix() . '.js', WC_PLUGIN_FILE ),
-			array( 'wp-api-fetch' ),
-			WC_VERSION,
-			true
-		);
-		wp_localize_script(
-			self::SCRIPT_HANDLE,
-			'wcAgenticCommerceSettings',
-			array(
-				'path' => '/wc/v3/agent-readiness/ucp',
-				'i18n' => array(
-					'on'          => self::on_message( $failing_required ),
-					'error'       => __( 'The setting could not be changed. Reload the page and try again.', 'woocommerce' ),
-					'copied'      => __( 'Copied', 'woocommerce' ),
-					'statusLabel' => self::status_labels(),
+		$steps = array();
+		foreach ( $open as $check ) {
+			$action  = self::check_action( $check );
+			$is_req  = StoreConditions::shows_required( $check );
+			$label   = self::step_button( $check['id'], $action[3] );
+			$steps[] = array(
+				'id'    => $check['id'],
+				'state' => $is_req ? 'required' : 'open',
+				'title' => $action[0],
+				'badge' => $is_req ? array(
+					'intent' => 'low',
+					'text'   => __( 'Required', 'woocommerce' ),
+				) : null,
+				'lines' => array_values( array_filter( array( $action[1], $action[4] ), static fn( string $line ): bool => '' !== trim( $line ) ) ),
+				// Policy steps repeat the same button, so screen readers also hear which policy it is for.
+				'link'  => '' === $action[2] ? null : array(
+					'href' => $action[2],
+					'text' => $label[0],
+					'sr'   => $label[1],
 				),
-			)
+			);
+		}
+		$passed = array();
+		// A completed step keeps its title and why it matters, as in the design.
+		foreach ( $done as $check ) {
+			$action   = self::passed_step( $check );
+			$passed[] = array(
+				'id'    => $check['id'],
+				'title' => $action[0],
+				'text'  => $action[1],
+			);
+		}
+
+		return array(
+			'title'     => __( 'Setup checklist', 'woocommerce' ),
+			// As in the design: the steps left, or All steps done in green once none are.
+			'badge'     => array() === $open ? array(
+				'intent' => 'stable',
+				'text'   => __( 'All steps done', 'woocommerce' ),
+			) : array(
+				'intent' => 'none',
+				/* translators: %d: number of setup steps left. */
+				'text'   => sprintf( _n( '%d step left', '%d steps left', count( $open ), 'woocommerce' ), count( $open ) ),
+			),
+			'summary'   => $summary,
+			'steps'     => $steps,
+			'done'      => $passed,
+			/* translators: %d: number of completed setup steps. */
+			'show_done' => sprintf( _n( 'Show %d completed step', 'Show %d completed steps', count( $done ), 'woocommerce' ), count( $done ) ),
+			'hide_done' => __( 'Hide completed steps', 'woocommerce' ),
 		);
 	}
 }

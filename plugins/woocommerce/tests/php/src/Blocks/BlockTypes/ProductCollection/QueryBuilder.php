@@ -881,19 +881,15 @@ class QueryBuilder extends \WC_Unit_Test_Case {
 
 		add_filter( 'wp_date', $wp_date_mock, 10, 2 );
 
-		try {
-			$first_seed   = ProductCollectionUtils::get_random_order_seed( 53919, $query_context );
-			$rotation_key = '2026-06-04';
-			$second_seed  = ProductCollectionUtils::get_random_order_seed( 53919, $query_context );
+		$first_seed   = ProductCollectionUtils::get_random_order_seed( 53919, $query_context );
+		$rotation_key = '2026-06-04';
+		$second_seed  = ProductCollectionUtils::get_random_order_seed( 53919, $query_context );
 
-			$this->assertNotSame(
-				$first_seed,
-				$second_seed,
-				'Random sorting should use a different seed when the daily rotation key changes.'
-			);
-		} finally {
-			remove_filter( 'wp_date', $wp_date_mock, 10 );
-		}
+		$this->assertNotSame(
+			$first_seed,
+			$second_seed,
+			'Random sorting should use a different seed when the daily rotation key changes.'
+		);
 	}
 
 	/**

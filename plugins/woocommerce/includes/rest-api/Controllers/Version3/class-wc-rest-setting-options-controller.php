@@ -86,6 +86,10 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Setting_Options_V2_Cont
 
 		$filtered_settings = array();
 		foreach ( $settings as $setting ) {
+			if ( ! in_array( $setting['type'] ?? '', array( 'title', 'sectionend' ), true ) ) {
+				unset( $setting['value'], $setting['fixed_value'] );
+			}
+
 			$option_key = $setting['option_key'];
 			$setting    = $this->filter_setting( $setting );
 			$default    = isset( $setting['default'] ) ? $setting['default'] : '';

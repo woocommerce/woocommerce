@@ -12,7 +12,6 @@ use WP_Block;
  * Block type for Variation Selector in the Add to Cart + Options block.
  */
 class VariationSelectorAttribute extends AbstractBlock {
-
 	use EnableBlockJsonAssetsTrait;
 
 	/**
@@ -128,6 +127,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 		);
 
 		$interactive_attributes = array(
+			'role'                => 'listitem',
 			'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
 			'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
 		);

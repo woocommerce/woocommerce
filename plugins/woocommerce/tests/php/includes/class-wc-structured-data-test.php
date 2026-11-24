@@ -1,6 +1,7 @@
 <?php
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 
 /**
@@ -17,9 +18,22 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function setUp(): void {
+		parent::setUp();
 		include_once WC_ABSPATH . 'includes/class-wc-structured-data.php';
 		$this->structured_data = new WC_Structured_Data();
-		parent::setUp();
+	}
+
+	/**
+	 * Outputs structured data through the footer hook.
+	 *
+	 * @return string
+	 */
+	private function output_footer_structured_data(): string {
+		// The test bootstrap retains this deprecated core callback, which is unrelated to structured data.
+		remove_action( 'wp_footer', 'the_block_template_skip_link' );
+		ob_start();
+		do_action( 'wp_footer' );
+		return ob_get_clean();
 	}
 
 	/**
@@ -349,6 +363,158 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $this->structured_data->prepare_gtin( array( '123-456-78', '123-456-78' ) ), '' );
 		$this->assertEquals( $this->structured_data->prepare_gtin( '+12345678' ), '12345678' );
 		$this->assertEquals( $this->structured_data->prepare_gtin( '123.4e-5' ), '12345' );
+	}
+
+	/**
+	 * @testdox Product structured data is generated when the product template omits the summary action.
+	 */
+	public function test_output_structured_data_generates_missing_product_data_in_footer(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		$this->output_footer_structured_data();
+
+		$this->assertSame(
+			'Product',
+			$this->structured_data->get_data()[0]['@type'] ?? null,
+			'The queried product should have structured data even when the summary action did not run.'
+		);
+	}
+
+	/**
+	 * @testdox Direct output outside the footer does not generate product data.
+	 */
+	public function test_output_structured_data_does_not_generate_product_data_outside_footer(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		ob_start();
+		$this->structured_data->output_structured_data();
+		$output = ob_get_clean();
+
+		$this->assertSame( array(), $this->structured_data->get_data(), 'Direct output must not generate product data outside the footer.' );
+		$this->assertStringNotContainsString( '"Product"', $output, 'Direct output must not include Product schema.' );
+	}
+
+	/**
+	 * @testdox Password-protected products do not generate structured data from either the summary or the footer.
+	 */
+	public function test_password_protected_product_does_not_generate_product_data(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_post_password( 'secret' );
+		$product->save();
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		$this->structured_data->generate_product_data( $product );
+		$this->output_footer_structured_data();
+
+		$this->assertSame( array(), $this->structured_data->get_data(), 'Password-protected products must not expose their details in structured data.' );
+	}
+
+	/**
+	 * @testdox Removing the product summary callback also disables the footer fallback.
+	 */
+	public function test_output_structured_data_respects_removed_summary_callback(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+		remove_action( 'woocommerce_single_product_summary', array( $this->structured_data, 'generate_product_data' ), 60 );
+
+		$this->output_footer_structured_data();
+
+		$this->assertSame( array(), $this->structured_data->get_data(), 'The fallback must respect extensions that disable product schema generation.' );
+	}
+
+	/**
+	 * @testdox Product structured data is not duplicated when the product summary already generated it.
+	 */
+	public function test_output_structured_data_does_not_duplicate_existing_product_data(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+		$this->structured_data->generate_product_data( $product );
+
+		$this->output_footer_structured_data();
+
+		$this->assertCount( 1, $this->structured_data->get_data(), 'The fallback should not duplicate existing product data.' );
+	}
+
+	/**
+	 * @testdox Product structured data for another product does not prevent generating data for the queried product.
+	 */
+	public function test_output_structured_data_ignores_other_product_data(): void {
+		$product       = WC_Helper_Product::create_simple_product();
+		$other_product = WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+		$this->structured_data->generate_product_data( $other_product );
+
+		$this->output_footer_structured_data();
+
+		$data = $this->structured_data->get_data();
+		$this->assertCount( 2, $data, 'The fallback should generate data for the queried product.' );
+		$this->assertSame( get_permalink( $product->get_id() ) . '#product', $data[1]['@id'], 'The second Product node should describe the queried product.' );
+	}
+
+	/**
+	 * @testdox Product schema includes unique gallery images after the featured image.
+	 */
+	public function test_product_schema_includes_gallery_images(): void {
+		$featured  = $this->create_schema_attachment( 'featured.jpg' );
+		$gallery   = $this->create_schema_attachment( 'gallery.jpg' );
+		$duplicate = $this->create_schema_attachment( 'gallery.jpg' );
+		$pdf       = $this->create_schema_attachment( 'document.pdf', 'application/pdf' );
+		$invalid   = self::factory()->post->create();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured );
+		$product->set_gallery_image_ids( array( $gallery, $featured, $duplicate, $pdf, $invalid ) );
+		$this->structured_data->generate_product_data( $product );
+
+		$this->assertSame(
+			array( wp_get_attachment_url( $featured ), wp_get_attachment_url( $gallery ) ),
+			$this->structured_data->get_data()[0]['image'],
+			'The featured image should precede unique, valid gallery URLs.'
+		);
+	}
+
+	/**
+	 * @testdox Product schema preserves single-image output and supports a gallery without a featured image.
+	 * @testWith [true, false]
+	 *           [false, true]
+	 *           [false, false]
+	 *
+	 * @param bool $featured Whether to set a featured image.
+	 * @param bool $gallery Whether to set a gallery image.
+	 */
+	public function test_product_schema_with_one_or_no_image( bool $featured, bool $gallery ): void {
+		$image   = $this->create_schema_attachment( 'product.jpg' );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured ? $image : 0 );
+		$product->set_gallery_image_ids( $gallery ? array( $image ) : array() );
+		$this->structured_data->generate_product_data( $product );
+
+		$data = $this->structured_data->get_data()[0];
+		if ( $featured || $gallery ) {
+			$this->assertSame( wp_get_attachment_url( $image ), $data['image'] );
+		} else {
+			$this->assertArrayNotHasKey( 'image', $data );
+		}
+	}
+
+	/**
+	 * Create an attachment for product schema tests.
+	 *
+	 * @param string $file Attachment file name.
+	 * @param string $mime_type Attachment MIME type.
+	 * @return int Attachment ID.
+	 */
+	private function create_schema_attachment( string $file, string $mime_type = 'image/jpeg' ): int {
+		$id = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => $mime_type,
+			)
+		);
+		update_post_meta( $id, '_wp_attached_file', $file );
+		return $id;
 	}
 
 	/**
@@ -1016,6 +1182,87 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		// Clean up.
 		$order->delete( true );
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox A simple product's structured data links to checkout and respects the offer filter.
+	 */
+	public function test_simple_product_schema_checkout_link(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->structured_data->generate_product_data( $product );
+		$markup = $this->structured_data->get_data()[0];
+		$url    = $markup['offers'][0]['checkoutPageURLTemplate'];
+
+		$this->assertSame( $url, $markup['potentialAction']['target']['urlTemplate'] );
+		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+		$this->assertSame(
+			array(
+				'checkout-link' => '1',
+				'products'      => $product->get_id() . ':1',
+			),
+			$query
+		);
+
+		add_filter(
+			'woocommerce_structured_data_product_offer',
+			static function ( $offer ) {
+				unset( $offer['checkoutPageURLTemplate'] );
+				return $offer;
+			}
+		);
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$markup = $sut->get_data()[0];
+		$this->assertArrayNotHasKey( 'checkoutPageURLTemplate', $markup['offers'][0] );
+		$this->assertArrayNotHasKey( 'potentialAction', $markup );
+	}
+
+	/**
+	 * @testdox Only a fixed variation gets a checkout link in structured data.
+	 * @testWith ["", false]
+	 *           ["Large", true]
+	 *
+	 * @param string $variation_size Variation size, or an empty string for any size.
+	 * @param bool   $has_link       Whether a checkout link is expected.
+	 */
+	public function test_variation_schema_checkout_link( string $variation_size, bool $has_link ): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'Large' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Shirt' );
+		$product->set_status( ProductStatus::PUBLISH );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'size' => $variation_size ) );
+		$variation->set_regular_price( '20' );
+		$variation->set_status( ProductStatus::PUBLISH );
+		$variation->save();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		$previous_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		try {
+			$_GET = array( 'attribute_size' => 'Large' );
+			$this->structured_data->generate_product_data( $product );
+			$markup = $this->structured_data->get_data()[0];
+			if ( ! $has_link ) {
+				$this->assertArrayNotHasKey( 'checkoutPageURLTemplate', $markup['offers'][0] );
+				$this->assertArrayNotHasKey( 'potentialAction', $markup );
+				return;
+			}
+			$url = $markup['offers'][0]['checkoutPageURLTemplate'];
+			$this->assertSame( $url, $markup['potentialAction']['target']['urlTemplate'] );
+			wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+			$this->assertSame( $variation->get_id() . ':1', $query['products'] );
+		} finally {
+			$_GET = $previous_get;
+		}
 	}
 
 	/**

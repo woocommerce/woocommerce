@@ -49,7 +49,6 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
-		wc_clear_notices();
 		$this->restore_option( 'woocommerce_enable_guest_checkout', $this->previous_guest_checkout_option );
 		parent::tearDown();
 	}
@@ -192,7 +191,7 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 
 		update_user_option( $user_id, 'default_password_nag', true, true );
 
-		$this->assertFalse( $this->sut->should_show_prompt(), 'Temp-password accounts confirm via their set-password link, so the prompt is suppressed' );
+		$this->assertFalse( $this->sut->should_show_prompt(), 'Temp-password accounts see the email-confirmation prompt after setting their password' );
 	}
 
 	/**

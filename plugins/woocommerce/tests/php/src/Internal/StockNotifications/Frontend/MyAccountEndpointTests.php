@@ -46,9 +46,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	 * Tear down the test.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'wp_redirect', array( $this, 'capture_redirect' ) );
 		$this->redirect_location = null;
-		\wc_clear_notices();
 		\wp_set_current_user( 0 );
 		delete_option( MyAccountEndpoint::ENDPOINT_OPTION );
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -667,6 +665,27 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$updated = Factory::get_notification( $notification->get_id() );
 		$this->assertInstanceOf( Notification::class, $updated );
 		$this->assertSame( NotificationStatus::ACTIVE, $updated->get_status() );
+	}
+
+	/**
+	 * @testdox A cancel notice escapes the product name.
+	 */
+	public function test_cancel_notice_escapes_the_product_name(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+		$product      = wc_get_product( $notification->get_product_id() );
+		$this->assertInstanceOf( \WC_Product::class, $product );
+		$product->set_name( 'Lamp & "quoted"' );
+		$product->save();
+
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id(), true );
+		$this->run_action_expecting_redirect();
+
+		$notices = \wc_get_notices( 'success' );
+		$this->assertCount( 1, $notices, 'Cancelling should queue one success notice.' );
+		$this->assertStringContainsString( 'Lamp &amp; &quot;quoted&quot;', $notices[0]['notice'], 'The product name should be escaped.' );
+		$this->assertStringNotContainsString( 'Lamp & "', $notices[0]['notice'], 'The product name should not be stored raw.' );
 	}
 
 	/**

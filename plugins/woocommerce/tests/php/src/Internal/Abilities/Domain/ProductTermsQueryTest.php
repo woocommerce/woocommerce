@@ -26,6 +26,22 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	private $saved_state = array();
 
 	/**
+	 * An administrator that every test acts as.
+	 *
+	 * @var int
+	 */
+	private static $administrator_id;
+
+	/**
+	 * Create the fixtures that no test changes beyond its own transaction.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$administrator_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
 	 * Set up ability registration.
 	 */
 	public function setUp(): void {
@@ -37,7 +53,7 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 			$property->setValue( null, array() );
 		}
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::$administrator_id );
 	}
 
 	/**
@@ -672,5 +688,50 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should return each term exactly once across pages when terms share a name, paging by $paging in $order order.
+	 * @testWith ["page", "asc"]
+	 *           ["page", "desc"]
+	 *           ["offset", "asc"]
+	 * @param string $paging Paging input.
+	 * @param string $order  Sort direction.
+	 */
+	public function test_pages_terms_with_the_same_name_once_each( string $paging, string $order ): void {
+		$ids = array();
+		for ( $i = 0; $i < 5; $i++ ) {
+			$parent = self::factory()->term->create(
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Parent ' . $i,
+				)
+			);
+			$ids[]  = self::factory()->term->create(
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Twin',
+					'parent'   => $parent,
+				)
+			);
+		}
+
+		$paged = array();
+		for ( $page = 1; $page <= 3; $page++ ) {
+			$input  = array(
+				'taxonomy' => 'product_cat',
+				'search'   => 'Twin',
+				'order'    => $order,
+				'per_page' => 2,
+			);
+			$input += 'page' === $paging ? array( 'page' => $page ) : array( 'offset' => ( $page - 1 ) * 2 );
+			$result = ProductTermsQuery::execute( $input );
+			$paged  = array_merge( $paged, array_column( $result['terms'], 'id' ) );
+		}
+
+		if ( 'desc' === $order ) {
+			rsort( $ids );
+		}
+		$this->assertSame( $ids, $paged, 'Terms with the same name should be sorted by ID in the requested direction.' );
 	}
 }
