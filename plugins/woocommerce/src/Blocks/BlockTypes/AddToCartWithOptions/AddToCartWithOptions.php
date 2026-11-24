@@ -699,13 +699,13 @@ class AddToCartWithOptions extends AbstractBlock {
 	 * Render interactivity API powered notices that can be added client-side. This reuses classes
 	 * from the woocommerce/store-notices block to ensure style consistency.
 	 *
-	 * @deprecated 11.4.0 The block renders its notices list inside the form, which holds the store notices context.
+	 * @deprecated 11.5.0 The block renders its notices list inside the form, which holds the store notices context.
 	 *
 	 * @param string $form_html The form HTML.
 	 * @return string The rendered store notices HTML.
 	 */
 	protected function render_interactivity_notices_region( $form_html ) {
-		wc_deprecated_function( __METHOD__, '11.4.0' );
+		wc_deprecated_function( __METHOD__, '11.5.0' );
 
 		$context_directive = wp_interactivity_data_wp_context(
 			array(
