@@ -284,8 +284,7 @@ trait OrderAbilityTrait {
 						'compound'           => array( 'type' => 'boolean' ),
 						'tax_total'          => array( 'type' => 'string' ),
 						'shipping_tax_total' => array( 'type' => 'string' ),
-					),
-					'tax'
+					)
 				),
 			),
 			'additionalProperties' => false,
@@ -296,22 +295,19 @@ trait OrderAbilityTrait {
 	/**
 	 * Schema of one kind of order line other than line items. The include_lines input describes when they are present.
 	 *
-	 * @param array  $properties Properties of one line.
-	 * @param string $item_type  Order item type of the line, such as `fee`.
+	 * @param array       $properties Properties of one line.
+	 * @param string|null $item_type  Order item type of the line, such as `fee`, to list the extension fields that apply to it. Null lists none.
 	 * @return array
 	 */
-	private static function get_order_lines_schema( array $properties, string $item_type ): array {
+	private static function get_order_lines_schema( array $properties, ?string $item_type = null ): array {
+		$schema = array(
+			'type'                 => 'object',
+			'properties'           => $properties,
+			'additionalProperties' => false,
+		);
 		return array(
 			'type'  => 'array',
-			'items' => ExtensibleAbilities::add_fields_schema(
-				array(
-					'type'                 => 'object',
-					'properties'           => $properties,
-					'additionalProperties' => false,
-				),
-				'order_item',
-				self::order_item_field_filter( $item_type )
-			),
+			'items' => null === $item_type ? $schema : ExtensibleAbilities::add_fields_schema( $schema, 'order_item', self::order_item_field_filter( $item_type ) ),
 		);
 	}
 
@@ -480,7 +476,7 @@ trait OrderAbilityTrait {
 		}
 		if ( in_array( 'lines', $includes, true ) ) {
 			foreach ( $orders as $order ) {
-				array_push( $items, ...array_values( $order->get_items( array( 'shipping', 'fee', 'coupon', 'tax' ) ) ) );
+				array_push( $items, ...array_values( $order->get_items( array( 'shipping', 'fee', 'coupon' ) ) ) );
 			}
 		}
 		ExtensibleAbilities::prime( 'order_item', $items );
@@ -617,7 +613,7 @@ trait OrderAbilityTrait {
 	}
 
 	/**
-	 * Format the shipping, fee, coupon and tax lines of an order, with the keys of wc/v3/orders, and their extension fields.
+	 * Format the shipping, fee, coupon and tax lines of an order, with the keys of wc/v3/orders. Tax lines have no extension fields.
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @return array|\WP_Error A WP_Error when an extension field value does not match its schema.
@@ -661,20 +657,6 @@ trait OrderAbilityTrait {
 					);
 				},
 			),
-			'tax_lines'      => array(
-				$order->get_taxes(),
-				static function ( \WC_Order_Item_Tax $item ): array {
-					return array(
-						'id'                 => $item->get_id(),
-						'rate_code'          => $item->get_rate_code(),
-						'rate_id'            => $item->get_rate_id(),
-						'label'              => $item->get_label(),
-						'compound'           => $item->is_compound(),
-						'tax_total'          => self::format_amount_for_response( $item->get_tax_total() ),
-						'shipping_tax_total' => self::format_amount_for_response( $item->get_shipping_tax_total() ),
-					);
-				},
-			),
 		);
 
 		$data = array();
@@ -688,6 +670,23 @@ trait OrderAbilityTrait {
 				$data[ $key ][] = $line;
 			}
 		}
+
+		$data['tax_lines'] = array_values(
+			array_map(
+				static function ( \WC_Order_Item_Tax $item ): array {
+					return array(
+						'id'                 => $item->get_id(),
+						'rate_code'          => $item->get_rate_code(),
+						'rate_id'            => $item->get_rate_id(),
+						'label'              => $item->get_label(),
+						'compound'           => $item->is_compound(),
+						'tax_total'          => self::format_amount_for_response( $item->get_tax_total() ),
+						'shipping_tax_total' => self::format_amount_for_response( $item->get_shipping_tax_total() ),
+					);
+				},
+				$order->get_taxes()
+			)
+		);
 		return $data;
 	}
 }

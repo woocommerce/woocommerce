@@ -1082,6 +1082,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->assertArrayNotHasKey( 'fee_reason', $schema[ $key ]['items']['properties']['extensions']['properties']['test-ext']['properties'], $key );
 			$this->assertArrayHasKey( 'gift', $schema[ $key ]['items']['properties']['extensions']['properties']['test-ext']['properties'], $key );
 		}
+		$this->assertArrayNotHasKey( 'extensions', $schema['tax_lines']['items']['properties'], 'Tax lines have no extension fields.' );
 	}
 
 	/**
