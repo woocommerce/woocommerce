@@ -17,22 +17,22 @@
 <h2 class="wp-block-heading has-text-align-left alignwide"><?php esc_html_e( 'Reviews', 'purple' ); ?></h2>
 <!-- /wp:heading -->
 
-<!-- wp:columns {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Items', 'Block name', 'purple' ) ); ?>},"align":"wide"} -->
-<div class="wp-block-columns alignwide"><!-- wp:column {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Item', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"0.63rem"}}} -->
+<!-- wp:columns {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Items', 'Block name for a list of reviews', 'purple' ) ); ?>},"align":"wide"} -->
+<div class="wp-block-columns alignwide"><!-- wp:column {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Item', 'Block name for a single review', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"0.63rem"}}} -->
 <div class="wp-block-column"><!-- wp:jetpack/rating-star {"rating":4.5,"className":"is-style-filled"} -->
 <figure class="wp-block-jetpack-rating-star is-style-filled" style="text-align:left"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></figure>
 <!-- /wp:jetpack/rating-star -->
 
-<!-- wp:paragraph {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Review', 'Block name', 'purple' ) ); ?>},"className":"is-testimonial-review"} -->
+<!-- wp:paragraph {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Review', 'Block name for the review text', 'purple' ) ); ?>},"className":"is-testimonial-review"} -->
 <p class="is-testimonial-review"><?php esc_html_e( 'I couldn\'t be happier with my purchase. The quality is outstanding, and the attention to detail is impressive. I\'ll definitely be back for more!', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Name', 'Block name', 'purple' ) ); ?>},"className":"is-testimonial-name"} -->
+<!-- wp:paragraph {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Name', 'Block name for the reviewer name', 'purple' ) ); ?>},"className":"is-testimonial-name"} -->
 <p class="is-testimonial-name"><em><?php esc_html_e( '— Aya Nakamura', 'purple' ); ?></em></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column -->
 
-<!-- wp:column {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Item', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"0.63rem"}}} -->
+<!-- wp:column {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Item', 'Block name for a single review', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"0.63rem"}}} -->
 <div class="wp-block-column"><!-- wp:jetpack/rating-star {"rating":4.5,"className":"is-style-filled"} -->
 <figure class="wp-block-jetpack-rating-star is-style-filled" style="text-align:left"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></figure>
 <!-- /wp:jetpack/rating-star -->
@@ -41,12 +41,12 @@
 <p class="is-testimonial-review"><?php esc_html_e( 'From start to finish, the process was seamless. It\'s better than I imagined, and the customer support was incredibly responsive and friendly.', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Name', 'Block name', 'purple' ) ); ?>},"className":"is-testimonial-name"} -->
+<!-- wp:paragraph {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Name', 'Block name for the reviewer name', 'purple' ) ); ?>},"className":"is-testimonial-name"} -->
 <p class="is-testimonial-name"><em><?php esc_html_e( '— Aya Nakamura', 'purple' ); ?></em></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column -->
 
-<!-- wp:column {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Item', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"0.63rem"}}} -->
+<!-- wp:column {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Item', 'Block name for a single review', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"0.63rem"}}} -->
 <div class="wp-block-column"><!-- wp:jetpack/rating-star {"rating":4.5,"className":"is-style-filled"} -->
 <figure class="wp-block-jetpack-rating-star is-style-filled" style="text-align:left"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></figure>
 <!-- /wp:jetpack/rating-star -->
@@ -55,7 +55,7 @@
 <p class="is-testimonial-review"><?php esc_html_e( 'Amazing quality! It\'s rare to find something that checks all the boxes, but this did. I\'ll be recommending it to everyone I know!', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Name', 'Block name', 'purple' ) ); ?>},"className":"is-testimonial-name"} -->
+<!-- wp:paragraph {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Name', 'Block name for the reviewer name', 'purple' ) ); ?>},"className":"is-testimonial-name"} -->
 <p class="is-testimonial-name"><em><?php esc_html_e( '— Aya Nakamura', 'purple' ); ?></em></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column --></div>
