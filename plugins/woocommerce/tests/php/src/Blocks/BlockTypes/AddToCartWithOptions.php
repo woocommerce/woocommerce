@@ -316,6 +316,9 @@ class AddToCartWithOptions extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( \DOMElement::class, $notices_list, 'The form has child elements.' );
 		$this->assertSame( 'woocommerce/store-notices', $notices_list->getAttribute( 'data-wp-interactive' ), 'The notices list is the first child of the form.' );
 		$this->assertStringContainsString( 'wc-block-components-notices', $notices_list->getAttribute( 'class' ), 'The notices list uses the store notices styles.' );
+		foreach ( $notices_list->attributes as $attribute ) {
+			$this->assertStringStartsNotWith( 'data-wp-context', $attribute->name, 'The notices list reads the form\'s store notices context instead of declaring its own.' );
+		}
 
 		$dismiss_button = $xpath->query( './/button[@data-wp-on--click="actions.removeNotice"]', $notices_list )->item( 0 );
 		$this->assertInstanceOf( \DOMElement::class, $dismiss_button, 'Each notice has a dismiss button.' );
