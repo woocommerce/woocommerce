@@ -115,7 +115,8 @@ class ExtensibleAbilities {
 	 *     @type callable $object_type_callback Optional. Receives an object of the resource and returns its type as
 	 *                                          a string, which the `object_types` of a field are compared with.
 	 *                                          Core's `product_term` returns the taxonomy of the term. Without it,
-	 *                                          the type is `get_type()` of the object.
+	 *                                          the type is `get_type()` of the object. When it returns another
+	 *                                          value, no field with `object_types` applies to the object.
 	 * }
 	 */
 	public static function register_resource( string $resource_name, array $args = array() ): void {
@@ -862,10 +863,13 @@ class ExtensibleAbilities {
 		$extensions = array();
 		foreach ( self::$fields[ $resource_name ] as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
-				if ( ! isset( $args['get_callback'] ) || ! self::field_applies_to( $args, $subject ) ) {
+				if ( ! isset( $args['get_callback'] ) ) {
 					continue;
 				}
 				try {
+					if ( ! self::field_applies_to( $args, $subject ) ) {
+						continue;
+					}
 					$value = call_user_func( $args['get_callback'], $subject );
 				} catch ( \Throwable $e ) {
 					return self::field_callback_failed_error( $args, $e );
@@ -903,7 +907,10 @@ class ExtensibleAbilities {
 			return true;
 		}
 		$type = self::get_object_type( $subject, $args['resource'] );
-		return '' === $type || in_array( $type, $args['object_types'], true );
+		if ( '' === $type && ! isset( self::$resources[ $args['resource'] ]['object_type_callback'] ) ) {
+			return true;
+		}
+		return in_array( $type, $args['object_types'], true );
 	}
 
 	/**

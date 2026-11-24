@@ -564,21 +564,26 @@ abstract class ActionableAbility extends Ability {
 	 */
 	private function apply_fields( $subject, array $updates, \WP_Error $refused ): void {
 		foreach ( $updates as $param => list( $args, $value ) ) {
-			if ( ! ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
-				$rejected = new \WP_Error(
-					'woocommerce_ability_field_object_type',
-					sprintf(
-						/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
-						__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
-						$param,
-						ExtensibleAbilities::get_object_type( $subject, $args['resource'] ),
-						implode( ', ', $args['object_types'] )
-					),
-					array( 'status' => 400 )
-				);
-			} else {
-				$rejected = self::run_callback( $args['set_callback'], array( $subject, $value ), array( 'field' => $param ) );
-			}
+			$rejected = self::run_callback(
+				static function () use ( $args, $subject, $value, $param ) {
+					if ( ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
+						return call_user_func( $args['set_callback'], $subject, $value );
+					}
+					return new \WP_Error(
+						'woocommerce_ability_field_object_type',
+						sprintf(
+							/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
+							__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
+							$param,
+							ExtensibleAbilities::get_object_type( $subject, $args['resource'] ),
+							implode( ', ', $args['object_types'] )
+						),
+						array( 'status' => 400 )
+					);
+				},
+				array(),
+				array( 'field' => $param )
+			);
 			if ( null !== $rejected ) {
 				self::add_refusal( $rejected, explode( '.', $param )[1], $refused );
 			}

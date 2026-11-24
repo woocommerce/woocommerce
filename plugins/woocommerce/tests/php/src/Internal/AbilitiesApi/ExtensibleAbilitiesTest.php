@@ -5015,6 +5015,35 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave a field with object_types out when the object_type_callback returns no string, and return an error when it throws.
+	 */
+	public function test_object_type_callback_that_misbehaves_does_not_open_the_field(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$register_resource = static function () {
+			ExtensibleAbilities::register_resource(
+				'typed_ticket',
+				array(
+					'object_type_callback' => static function ( \stdClass $ticket ) {
+						if ( 'broken' === $ticket->state ) {
+							throw new \RuntimeException( 'No state.' );
+						}
+						return $ticket->state;
+					},
+				)
+			);
+		};
+		add_action( 'woocommerce_extensible_abilities_resources_init', $register_resource );
+		$this->register_typed_field( 'typed_ticket', array( 'open' ) );
+		$this->get_output_schema( 'woocommerce/products-query' );
+		remove_action( 'woocommerce_extensible_abilities_resources_init', $register_resource );
+		$read = static fn( $state ) => ExtensibleAbilities::add_fields_to_object( array(), 'typed_ticket', (object) array( 'state' => $state ) );
+
+		$this->assertSame( array( 'test-ext' => array( 'typed' => 'value' ) ), $read( 'open' )['extensions'] );
+		$this->assertSame( array(), $read( null ) );
+		$this->assertSame( 'woocommerce_ability_extension_failed', $read( 'broken' )->get_error_code() );
+	}
+
+	/**
 	 * @testdox Should ignore object_types on a $resource_name field, because the objects have no type.
 	 * @dataProvider provide_resources_without_object_types
 	 *
