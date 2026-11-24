@@ -65,13 +65,9 @@
 		]
 	},
 	"dependencies": {
-		"@wordpress/api-fetch": "catalog:wp-min",
-		"@wordpress/components": "catalog:wp-min",
-		"@wordpress/compose": "catalog:wp-min",
 		"@wordpress/element": "catalog:wp-min",
 		"@wordpress/hooks": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
-		"@wordpress/notices": "catalog:wp-min",
 		"@wordpress/url": "catalog:wp-min",
 		"history": "^5.3.0",
 		"qs": "^6.11.2"
