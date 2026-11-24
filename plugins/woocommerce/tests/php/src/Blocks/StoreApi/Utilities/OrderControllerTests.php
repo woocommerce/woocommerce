@@ -904,24 +904,31 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox update_order_from_cart() removes an extension fee when it rebuilds the fees a merchant edited, as it does when the cart's fees change.
+	 * @testdox update_order_from_cart() keeps an extension's fee or shipping line when it rebuilds the ones a merchant edited.
+	 *
+	 * @testWith ["fee"]
+	 *           ["shipping"]
+	 *
+	 * @param string $item_type The item type the merchant edits.
 	 */
-	public function test_update_order_from_cart_removes_extension_fees_when_rebuilding_edited_fees(): void {
-		$order         = $this->create_retried_order_with_shipping_and_fee();
-		$extension_fee = new \WC_Order_Item_Fee();
-		$extension_fee->set_name( 'Extension surcharge' );
-		$extension_fee->set_total( '2' );
-		$order->add_item( $extension_fee );
+	public function test_update_order_from_cart_keeps_extension_items_when_rebuilding_edited_ones( string $item_type ): void {
+		$order          = $this->create_retried_order_with_shipping_and_fee();
+		$cart_item      = current( $order->get_items( $item_type ) );
+		$extension_item = 'fee' === $item_type ? new \WC_Order_Item_Fee() : new \WC_Order_Item_Shipping();
+		$extension_item->set_name( 'Extension line' );
+		$extension_item->set_total( '2' );
+		$order->add_item( $extension_item );
 		$order->save();
-		$cart_fee = current( array_diff_key( $order->get_fees(), array( $extension_fee->get_id() => true ) ) );
-		$cart_fee->set_total( '15' );
-		$cart_fee->save();
+		$cart_item->set_total( '15' );
+		$cart_item->save();
 
 		$order = $this->sync_order_in_a_new_request( $order );
+		$ids   = array_keys( $order->get_items( $item_type ) );
 
-		$this->assertCount( 1, $order->get_fees(), 'Only the cart fee should be on the order.' );
-		$this->assertNotContains( $extension_fee->get_id(), array_keys( $order->get_fees() ), 'The extension fee should be removed with the rebuilt fees.' );
-		$this->assertSame( 25.0, (float) $order->get_total(), 'The order should be charged the cart total.' );
+		$this->assertNotContains( $cart_item->get_id(), $ids, "The edited {$item_type} line should be rebuilt." );
+		$this->assertContains( $extension_item->get_id(), $ids, "The extension's {$item_type} line should be kept." );
+		$this->assertCount( 2, $ids, "Only the cart's and the extension's {$item_type} lines should be on the order." );
+		$this->assertSame( 27.0, (float) $order->get_total(), "The order should be charged the cart total plus the extension's line." );
 	}
 
 	/**

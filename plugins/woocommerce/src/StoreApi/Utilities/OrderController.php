@@ -1432,8 +1432,9 @@ class OrderController {
 		// A non-null methods value means evaluation ran; it may still be an empty array.
 		$shipping_evaluated = $cart->has_calculated_shipping() || ( ! $cart->needs_shipping() && null !== $cart->get_shipping_methods() );
 
-		if ( $shipping_evaluated && ( $order->get_meta( '_shipping_hash' ) !== $cart_hashes['shipping'] || in_array( OrderItemType::SHIPPING, $changed_types, true ) ) ) {
-			$order->remove_order_items( OrderItemType::SHIPPING );
+		$shipping_hash_changed = $order->get_meta( '_shipping_hash' ) !== $cart_hashes['shipping'];
+		if ( $shipping_evaluated && ( $shipping_hash_changed || in_array( OrderItemType::SHIPPING, $changed_types, true ) ) ) {
+			$this->remove_items_to_rebuild( $order, OrderItemType::SHIPPING, $shipping_hash_changed );
 			wc()->checkout->create_order_shipping_lines( $order, wc()->session->get( 'chosen_shipping_methods' ), wc()->shipping()->get_packages() );
 			$order->update_meta_data( '_shipping_hash', $cart_hashes['shipping'] );
 		} elseif ( in_array( OrderItemType::SHIPPING, $changed_types, true ) ) {
@@ -1446,9 +1447,10 @@ class OrderController {
 			wc()->checkout->create_order_coupon_lines( $order, $cart );
 		}
 
-		if ( $order->get_meta( '_fees_hash' ) !== $cart_hashes['fees'] || in_array( OrderItemType::FEE, $changed_types, true ) ) {
+		$fees_hash_changed = $order->get_meta( '_fees_hash' ) !== $cart_hashes['fees'];
+		if ( $fees_hash_changed || in_array( OrderItemType::FEE, $changed_types, true ) ) {
 			$order->update_meta_data( '_fees_hash', $cart_hashes['fees'] );
-			$order->remove_order_items( OrderItemType::FEE );
+			$this->remove_items_to_rebuild( $order, OrderItemType::FEE, $fees_hash_changed );
 			wc()->checkout->create_order_fee_lines( $order, $cart );
 		}
 
@@ -1456,6 +1458,25 @@ class OrderController {
 			$order->update_meta_data( '_taxes_hash', $cart_hashes['taxes'] );
 			$order->remove_order_items( OrderItemType::TAX );
 			wc()->checkout->create_order_tax_lines( $order, $cart );
+		}
+	}
+
+	/**
+	 * Removes the fees or shipping lines that are about to be rebuilt from the cart. When the cart section changed, all of
+	 * them go, as before. When only a merchant edit was found, only the cart's own items go, so ones extensions added stay.
+	 *
+	 * @param \WC_Order $order                The order.
+	 * @param string    $item_type            OrderItemType::FEE or OrderItemType::SHIPPING.
+	 * @param bool      $cart_section_changed Whether the cart section's hash changed.
+	 */
+	private function remove_items_to_rebuild( \WC_Order $order, string $item_type, bool $cart_section_changed ): void {
+		if ( $cart_section_changed ) {
+			$order->remove_order_items( $item_type );
+			return;
+		}
+
+		foreach ( array_keys( $this->get_cart_order_items_snapshot( $order )[ $item_type ] ?? [] ) as $item_id ) {
+			$order->remove_item( (int) $item_id );
 		}
 	}
 
