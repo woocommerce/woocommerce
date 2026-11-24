@@ -57,7 +57,7 @@ class OrderCreate extends ActionableAbility {
 		return array(
 			'label'               => __( 'Create order', 'woocommerce' ),
 			'description'         => __(
-				'Create an order, as the order screen does, for example for a phone order. Without customer_id, the order is a guest order. Without status, the order gets the default status of the store, which is pending payment unless an extension changes it. A processing, on-hold or completed status reduces the stock of the products and sends the order emails to the store and the customer, so confirm the status before you send it.',
+				'Create an order, as the order screen does, for example for a phone order. Without customer_id, the order is a guest order. payment_method records how the order was paid, for example by bank transfer, and charges nothing. Without status, the order gets the default status of the store, which is pending payment unless an extension changes it. A processing, on-hold or completed status reduces the stock of the products and sends the order emails to the store and the customer, so confirm the status before you send it.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
@@ -115,7 +115,7 @@ class OrderCreate extends ActionableAbility {
 	}
 
 	/**
-	 * Set the customer, addresses and lines in memory. Every refusal comes back in one error. The product
+	 * Set the customer, addresses, payment method and lines in memory. Every refusal comes back in one error. The product
 	 * lines are the secondary objects, of the `order_item` resource.
 	 *
 	 * @param \WC_Order $subject New order.
@@ -154,6 +154,11 @@ class OrderCreate extends ActionableAbility {
 
 		if ( isset( $input['customer_note'] ) ) {
 			$subject->set_customer_note( sanitize_textarea_field( $input['customer_note'] ) );
+		}
+
+		$error = isset( $input['payment_method'] ) ? self::set_payment_method( $subject, $input['payment_method'] ) : null;
+		if ( is_wp_error( $error ) ) {
+			$refused->merge_from( $error );
 		}
 
 		foreach ( $input['shipping_lines'] ?? array() as $line ) {
@@ -278,6 +283,7 @@ class OrderCreate extends ActionableAbility {
 				'billing'        => self::get_address_input_schema( array_merge( self::get_address_fields(), array( 'email' ) ) ),
 				'shipping'       => self::get_address_input_schema( self::get_address_fields() ),
 				'customer_note'  => array( 'type' => 'string' ),
+				'payment_method' => self::get_payment_method_input_schema(),
 				'line_items'     => array(
 					'type'        => 'array',
 					'description' => __( 'Product lines. A variation uses its own ID as product_id. The price is the current price of the product.', 'woocommerce' ),

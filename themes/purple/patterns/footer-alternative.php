@@ -13,7 +13,7 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"name":"Store Footer","categories":["footer","purple"],"patternName":"purple/footer-alternative"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store footer', 'Pattern title', 'purple' ) ); ?>,"categories":["footer","purple"],"patternName":"purple/footer-alternative"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)"><!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|10","left":"var:preset|spacing|10"}}}} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"50%"} -->
 <div class="wp-block-column" style="flex-basis:50%"><!-- wp:site-title {"level":0} /-->
@@ -60,9 +60,9 @@
 <div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--20)">
 
 <!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"fontSize":"small","layout":{"type":"flex","orientation":"horizontal"}} -->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Shipping & returns', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Privacy policy', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Terms & conditions', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'Shipping & returns', 'purple' ) ); ?>,"url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'Privacy policy', 'purple' ) ); ?>,"url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'Terms & conditions', 'purple' ) ); ?>,"url":"#"} /-->
 <!-- /wp:navigation -->
 
 <!-- wp:paragraph {"style":{"typography":{"textAlign":"left"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->

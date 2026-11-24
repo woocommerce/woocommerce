@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Fix AI shopping health scan cleanup, UCP switch status and Connect redirect check; unreleased feature.
+

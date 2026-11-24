@@ -2,6 +2,7 @@
  * External dependencies
  */
 import path from 'path';
+import { randomUUID } from 'crypto';
 import { readFile } from 'fs/promises';
 import Handlebars from 'handlebars';
 import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
@@ -60,6 +61,10 @@ export async function createPostFromFile( this: RequestUtils, name: string ) {
 					date_gmt: new Date().toISOString(),
 					content,
 					title: name,
+					// WordPress does not lock the slug check, so posts that parallel
+					// workers publish at the same time can share a slug, and
+					// `post.link` then opens the wrong post.
+					slug: `${ name }-${ randomUUID() }`,
 				},
 			} );
 		},

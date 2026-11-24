@@ -321,7 +321,7 @@ final class ContractRepository {
 	 *
 	 * @param int $id Contract id.
 	 * @return Contract|null Hydrated contract, or null if not found.
-	 * @throws \RuntimeException If the contract row read fails.
+	 * @throws \RuntimeException If the contract row or a child read fails: a failed child read must not look like a contract without it.
 	 */
 	public function find( int $id ): ?Contract {
 		$row = $this->find_contract_row( $id );
@@ -344,6 +344,7 @@ final class ContractRepository {
 	 * @param int $contract_id Contract id.
 	 * @param int $customer_id Customer that must own the contract.
 	 * @return Contract|null Hydrated contract when owned by `$customer_id`, else null.
+	 * @throws \RuntimeException If the row or a child read fails: a failed read must not look like "not yours".
 	 */
 	public function find_for_customer( int $contract_id, int $customer_id ): ?Contract {
 		global $wpdb;
@@ -353,6 +354,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT {$select} FROM {$table} WHERE id = %d AND customer_id = %d", $contract_id, $customer_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
 		if ( ! is_array( $row ) ) {
 			return null;
 		}
@@ -365,6 +369,7 @@ final class ContractRepository {
 	 * items and addresses - the one full-read construction path.
 	 *
 	 * @param array<string, mixed> $row Contract row.
+	 * @throws \RuntimeException If a child read fails.
 	 */
 	private function hydrate_row( array $row ): Contract {
 		$id = Coercion::coerce_int( $row['id'] ?? 0 );
@@ -427,6 +432,7 @@ final class ContractRepository {
 	 *     @type string $search  A numeric term matches contract id or origin order id; a text term matches the owning customer.
 	 * }
 	 * @return array<int, Contract> Contracts in the requested order.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like no contracts.
 	 */
 	public function query( array $args = array() ): array {
 		global $wpdb;
@@ -463,6 +469,9 @@ final class ContractRepository {
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read contracts: %s', $wpdb->last_error ) ) );
+		}
 
 		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
 	}
@@ -577,6 +586,7 @@ final class ContractRepository {
 	 * the views count the whole store, not the current page).
 	 *
 	 * @return array<string, int> Status => count, every registered status present.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like zero counts.
 	 */
 	public function count_by_status(): array {
 		global $wpdb;
@@ -585,6 +595,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( "SELECT status, COUNT(*) AS total FROM {$table} GROUP BY status", ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to count contracts by status: %s', $wpdb->last_error ) ) );
+		}
 
 		// Seed every registered status at 0 so the map is complete and stably ordered.
 		$counts = array();
@@ -615,6 +628,7 @@ final class ContractRepository {
 	 *
 	 * @param array<string, mixed> $args Query args (only `status` and `search` are read).
 	 * @return int The matching contract count.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a zero count.
 	 */
 	public function count( array $args = array() ): int {
 		global $wpdb;
@@ -631,6 +645,9 @@ final class ContractRepository {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 			$total = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}", $params ) );
 		}
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to count contracts: %s', $wpdb->last_error ) ) );
+		}
 
 		return Coercion::coerce_int( $total );
 	}
@@ -644,6 +661,7 @@ final class ContractRepository {
 	 *
 	 * @param array<int, int> $contract_ids Contract ids to count items for.
 	 * @return array<int, int> Contract id => line-item count, one entry per requested id.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like zero items.
 	 */
 	public function count_items_by_contract( array $contract_ids ): array {
 		// Keep only scalar, positive ids (this is a public entry point): casting an object or
@@ -673,6 +691,9 @@ final class ContractRepository {
 		// The id placeholders join dynamically, so the sniff sees none in the literal.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT contract_id, COUNT(*) AS total FROM {$table} WHERE contract_id IN ({$placeholders}) GROUP BY contract_id", $ids ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to count contract items: %s', $wpdb->last_error ) ) );
+		}
 
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( ! is_array( $row ) ) {
@@ -694,6 +715,7 @@ final class ContractRepository {
 	 *
 	 * @param array<int, mixed> $rows Fetched rows (non-arrays are skipped).
 	 * @return array<int, Contract> Contracts in row order.
+	 * @throws \RuntimeException If the snapshot read fails.
 	 */
 	private function contracts_from_rows( array $rows ): array {
 		$clean_rows = array();
@@ -731,6 +753,7 @@ final class ContractRepository {
 	 * @param int                $limit  Maximum rows to return (the batch size).
 	 * @param array<int, string> $owners Owner slugs whose contracts may be selected.
 	 * @return array<int, array{id: int, extension_slug: string, next_payment_gmt: string}> Due rows, least recently locked first, then oldest-due.
+	 * @throws \RuntimeException If the scan fails: a failed scan must not look like "nothing due".
 	 */
 	public function find_due( DateTimeImmutable $now, int $limit, array $owners ): array {
 		if ( $limit < 1 ) {
@@ -772,13 +795,8 @@ final class ContractRepository {
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
-		// A failed scan otherwise reads exactly like "nothing due" and dispatch stalls
-		// store-wide with no signal; the return stays empty either way.
 		if ( '' !== $wpdb->last_error ) {
-			wc_get_logger()->error(
-				sprintf( 'ContractRepository::find_due(): due-index scan failed - due dispatch may stall until this is fixed. %s', $wpdb->last_error ),
-				array( 'source' => self::LOG_SOURCE )
-			);
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read due contracts: %s', $wpdb->last_error ) ) );
 		}
 
 		$result = array();
@@ -1247,6 +1265,7 @@ final class ContractRepository {
 	 *                                  guards use). Absent: every extension.
 	 * }
 	 * @return array<int, Contract> Contracts the customer owns, newest first.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like no contracts.
 	 */
 	public function find_by_customer_id( int $customer_id, ?array $args = null ): array {
 		global $wpdb;
@@ -1301,6 +1320,9 @@ final class ContractRepository {
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the contracts of customer %d: %s', $customer_id, $wpdb->last_error ) ) );
+		}
 
 		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
 	}
@@ -1311,6 +1333,7 @@ final class ContractRepository {
 	 *
 	 * @param int $order_id Origin order id.
 	 * @return array<int, Contract>
+	 * @throws \RuntimeException If the read fails: a failed read must not look like an order without contracts.
 	 */
 	public function find_by_origin_order( int $order_id ): array {
 		global $wpdb;
@@ -1320,6 +1343,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT {$select} FROM {$table} WHERE origin_order_id = %d ORDER BY id ASC", $order_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the contracts of order %d: %s', $order_id, $wpdb->last_error ) ) );
+		}
 
 		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
 	}
@@ -1937,6 +1963,7 @@ final class ContractRepository {
 	 * @param int    $limit       Maximum rows to return.
 	 * @param int    $offset      Rows to skip (for paging).
 	 * @return array<int, Cycle> Cycles newest first.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like an empty chain.
 	 */
 	public function find_cycle_history( int $contract_id, string $kind = Cycle::KIND_BILLING, int $limit = 20, int $offset = 0 ): array {
 		global $wpdb;
@@ -1945,6 +1972,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d AND kind = %s ORDER BY sequence_no DESC LIMIT %d OFFSET %d", $contract_id, $kind, $limit, $offset ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the cycles of contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
 
 		$cycles = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
@@ -1963,6 +1993,7 @@ final class ContractRepository {
 	 *
 	 * @param int $order_id WooCommerce order id.
 	 * @return array<int, Cycle> Cycles linked to the order, newest first.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like an order that bills no cycle.
 	 */
 	public function find_cycles_by_order_id( int $order_id ): array {
 		global $wpdb;
@@ -1971,6 +2002,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d ORDER BY id DESC", $order_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the cycles of order %d: %s', $order_id, $wpdb->last_error ) ) );
+		}
 
 		$cycles = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
@@ -1988,6 +2022,7 @@ final class ContractRepository {
 	 *
 	 * @param array<string, mixed> $row Cycle row.
 	 * @return Cycle The hydrated cycle.
+	 * @throws \RuntimeException If a snapshot read fails.
 	 */
 	private function hydrate_cycle( array $row ): Cycle {
 		$cycle = Cycle::from_storage( $row );
@@ -2057,6 +2092,7 @@ final class ContractRepository {
 	 *
 	 * @param int|null $snapshot_id Snapshot row id, or null.
 	 * @return PlanSnapshot|null The decoded value object, or null.
+	 * @throws \RuntimeException If the read fails.
 	 */
 	private function find_plan_snapshot( ?int $snapshot_id ): ?PlanSnapshot {
 		$decoded = $this->find_snapshot_payload( $snapshot_id );
@@ -2074,6 +2110,7 @@ final class ContractRepository {
 	 *
 	 * @param array<int, int> $snapshot_ids Snapshot row ids (deduplicated by the caller or not - the IN() dedupes).
 	 * @return array<int, PlanSnapshot> Decoded value objects keyed by snapshot row id.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like contracts without plan terms.
 	 */
 	private function find_plan_snapshots( array $snapshot_ids ): array {
 		global $wpdb;
@@ -2098,6 +2135,9 @@ final class ContractRepository {
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read plan snapshots: %s', $wpdb->last_error ) ) );
+		}
 
 		$snapshots = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
@@ -2120,6 +2160,7 @@ final class ContractRepository {
 	 *
 	 * @param int|null $snapshot_id Snapshot row id, or null.
 	 * @return ItemsSnapshot|null The decoded value object, or null.
+	 * @throws \RuntimeException If the read fails.
 	 */
 	private function find_items_snapshot( ?int $snapshot_id ): ?ItemsSnapshot {
 		$decoded = $this->find_snapshot_payload( $snapshot_id );
@@ -2135,6 +2176,7 @@ final class ContractRepository {
 	 *
 	 * @param int|null $snapshot_id Snapshot row id, or null.
 	 * @return array{payload: array<int|string, mixed>, schema_version: int}|null
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a missing snapshot.
 	 */
 	private function find_snapshot_payload( ?int $snapshot_id ): ?array {
 		global $wpdb;
@@ -2147,6 +2189,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT payload, schema_version FROM {$table} WHERE id = %d", $snapshot_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read snapshot %d: %s', $snapshot_id, $wpdb->last_error ) ) );
+		}
 
 		if ( null === $row ) {
 			return null;
@@ -2457,6 +2502,7 @@ final class ContractRepository {
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return array<int, array<string, mixed>>
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a contract without items.
 	 */
 	private function find_items( int $contract_id ): array {
 		global $wpdb;
@@ -2465,6 +2511,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d ORDER BY id ASC", $contract_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the items of contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
 
 		return Coercion::coerce_list_of_arrays( $rows );
 	}
@@ -2474,6 +2523,7 @@ final class ContractRepository {
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return array<string, array<string, mixed>>
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a contract without addresses.
 	 */
 	private function find_addresses( int $contract_id ): array {
 		global $wpdb;
@@ -2482,6 +2532,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d", $contract_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the addresses of contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
 
 		$by_type = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
