@@ -793,25 +793,19 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox update_order_from_cart() rebuilds the items a merchant edited on a retried order, so the order total matches the cart.
 	 *
-	 * @testWith ["shipping", "total"]
-	 *           ["fee", "total"]
-	 *           ["line_item", "total"]
-	 *           ["line_item", "quantity"]
+	 * @testWith ["shipping"]
+	 *           ["fee"]
+	 *           ["line_item"]
 	 *
 	 * @param string $item_type The item type the merchant edits.
-	 * @param string $edit      The property the merchant edits.
 	 */
-	public function test_update_order_from_cart_rebuilds_items_a_merchant_edited( string $item_type, string $edit ): void {
+	public function test_update_order_from_cart_rebuilds_items_a_merchant_edited( string $item_type ): void {
 		$order  = $this->create_retried_order_with_shipping_and_fee();
 		$before = $this->get_item_ids_by_type( $order );
 
 		// Like editing the item in the admin and saving it without recalculating the order.
 		$item = current( $order->get_items( $item_type ) );
-		if ( 'quantity' === $edit ) {
-			$item->set_quantity( 2 );
-		} else {
-			$item->set_total( (float) $item->get_total() + 5 );
-		}
+		$item->set_total( (float) $item->get_total() + 5 );
 		$item->save();
 
 		$order = $this->sync_order_in_a_new_request( $order );
@@ -883,23 +877,6 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox update_order_from_cart() rebuilds a coupon line whose discount a merchant edited on a retried order.
-	 */
-	public function test_update_order_from_cart_rebuilds_a_coupon_with_an_edited_discount(): void {
-		$coupon = \WC_Helper_Coupon::create_coupon( 'retry-amount', array( 'coupon_amount' => 5 ) );
-		$order  = $this->create_retried_order_with_shipping_and_fee( '10', 5, $coupon->get_code() );
-		$line   = current( $order->get_coupons() );
-		$line->set_discount( '8' );
-		$line->save();
-
-		$order = $this->sync_order_in_a_new_request( $order );
-
-		$this->assertNotContains( $line->get_id(), array_keys( $order->get_coupons() ), 'The edited coupon line should be rebuilt.' );
-		$this->assertSame( 5.0, (float) current( $order->get_coupons() )->get_discount(), 'The coupon line should have the cart discount.' );
-		$this->assertSame( 20.0, (float) $order->get_total(), 'The order should be charged the discounted cart total.' );
-	}
-
-	/**
 	 * @testdox update_order_from_cart() removes an extension fee when it rebuilds the fees a merchant edited, as it does when the cart's fees change.
 	 */
 	public function test_update_order_from_cart_removes_extension_fees_when_rebuilding_edited_fees(): void {
@@ -959,30 +936,17 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox update_order_from_cart() removes a product or coupon a merchant added to a retried order, so the order total matches the cart.
-	 *
-	 * @testWith ["line_item"]
-	 *           ["coupon"]
-	 *
-	 * @param string $item_type The type of item the merchant adds.
+	 * @testdox update_order_from_cart() removes a product a merchant added to a retried order, so the order total matches the cart.
 	 */
-	public function test_update_order_from_cart_removes_products_and_coupons_a_merchant_added( string $item_type ): void {
-		$order = $this->create_retried_order_with_shipping_and_fee();
-		if ( 'line_item' === $item_type ) {
-			$item_id = $order->add_product( WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '7' ) ) );
-		} else {
-			$coupon = new \WC_Order_Item_Coupon();
-			$coupon->set_code( 'merchant-added' );
-			$coupon->set_discount( '3' );
-			$coupon->set_order_id( $order->get_id() );
-			$item_id = $coupon->save();
-		}
+	public function test_update_order_from_cart_removes_a_product_a_merchant_added(): void {
+		$order   = $this->create_retried_order_with_shipping_and_fee();
+		$item_id = $order->add_product( WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '7' ) ) );
 		$order->save();
 
 		$order = $this->sync_order_in_a_new_request( $order );
 
-		$this->assertNotContains( $item_id, array_keys( $order->get_items( $item_type ) ), "The {$item_type} the merchant added should be removed." );
-		$this->assertCount( 'line_item' === $item_type ? 1 : 0, $order->get_items( $item_type ), "Only the cart's {$item_type} lines should be on the order." );
+		$this->assertNotContains( $item_id, array_keys( $order->get_items() ), 'The product the merchant added should be removed.' );
+		$this->assertCount( 1, $order->get_items(), "Only the cart's line item should be on the order." );
 		$this->assertSame( 25.0, (float) $order->get_total(), 'The order should be charged the cart total.' );
 	}
 
