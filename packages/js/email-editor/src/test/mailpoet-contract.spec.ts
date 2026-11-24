@@ -132,6 +132,8 @@ describe( 'MailPoet contract', () => {
 		[ 'index.ts', 'EmailActionsFill' ],
 		[ 'index.ts', 'TemplateSelection' ],
 		[ 'index.ts', 'RecentEmailsQuery' ],
+		// Marked internal, but MailPoet's email presets use it until they move off it.
+		[ 'index.ts', 'registerEntityAction' ],
 		[ 'store/constants.ts', 'storeName' ],
 		[ 'store/types.ts', 'EmailContentValidationRule' ],
 		[ 'store/types.ts', 'RecentEmailsQuery' ],
