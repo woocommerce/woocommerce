@@ -130,7 +130,7 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 			wp_die( esc_html__( 'Sorry, you are not allowed to connect this store.', 'woocommerce' ), 403 );
 		}
 		check_admin_referer( self::CONNECT_ACTION );
-		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- wordpress_com_https_url() allows only https on wordpress.com.
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- wordpress_com_https_url() allows only https on wordpress.com and jetpack.wordpress.com.
 		wp_redirect( self::connect_redirect() );
 		exit;
 	}
@@ -163,7 +163,8 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	}
 
 	/**
-	 * An https WordPress.com URL with a lowercased scheme, or an empty string.
+	 * An https URL on wordpress.com or jetpack.wordpress.com, the hosts Jetpack sends users to for the
+	 * connection, with a lowercased scheme, or an empty string.
 	 *
 	 * @since 11.4.0
 	 *
@@ -171,6 +172,10 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 * @return string
 	 */
 	public static function wordpress_com_https_url( string $url ): string {
+		// Browsers read a backslash as a slash, so a host PHP parses as on wordpress.com could lead elsewhere.
+		if ( 1 === preg_match( '/[\\\\\s]/', $url ) ) {
+			return '';
+		}
 		$parts = wp_parse_url( $url );
 		if ( ! is_array( $parts ) || isset( $parts['user'] ) || isset( $parts['pass'] ) ) {
 			return '';
@@ -178,9 +183,7 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 		$raw_scheme = isset( $parts['scheme'] ) ? $parts['scheme'] : '';
 		$scheme     = strtolower( $raw_scheme );
 		$host       = strtolower( (string) ( $parts['host'] ?? '' ) );
-		$suffix     = '.wordpress.com';
-		$on_wp      = 'wordpress.com' === $host || ( strlen( $host ) > strlen( $suffix ) && substr( $host, -strlen( $suffix ) ) === $suffix );
-		if ( 'https' !== $scheme || ! $on_wp ) {
+		if ( 'https' !== $scheme || ! in_array( $host, array( 'wordpress.com', 'jetpack.wordpress.com' ), true ) ) {
 			return '';
 		}
 		return 'https' . substr( $url, strlen( $raw_scheme ) );
