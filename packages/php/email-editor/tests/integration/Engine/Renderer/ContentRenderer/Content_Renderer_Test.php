@@ -1143,11 +1143,8 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			return $theme;
 		};
 		add_filter( 'woocommerce_email_editor_theme_json', $set_block_gap );
-		try {
-			$paragraphs = $this->render_paragraph_styles( '<!-- wp:html --><p>First</p><p>Second</p><!-- /wp:html -->' );
-		} finally {
-			remove_filter( 'woocommerce_email_editor_theme_json', $set_block_gap );
-		}
+
+		$paragraphs = $this->render_paragraph_styles( '<!-- wp:html --><p>First</p><p>Second</p><!-- /wp:html -->' );
 
 		$this->assertStringEndsWith( 'margin-top: 24px;', $paragraphs['Second'] );
 	}
