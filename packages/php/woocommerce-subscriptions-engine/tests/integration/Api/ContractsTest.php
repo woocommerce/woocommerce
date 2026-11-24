@@ -3048,4 +3048,50 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertNull( Contracts::get_for_customer( $id, 45 ), 'foreign-owned reads as not found' );
 		$this->assertNull( Contracts::get_for_customer( 987654, 44 ), 'unknown id reads as not found' );
 	}
+
+	/**
+	 * @testdox Every facade read throws on a failed query instead of returning an empty value.
+	 */
+	public function test_facade_reads_throw_on_a_failed_query(): void {
+		$contract    = $this->sign_up_contract( 46 );
+		$contract_id = (int) $contract->get_id();
+		$order_id    = (int) $contract->get_origin_order_id();
+		$row_read    = '/^\s*SELECT\s+\*,\s*\(\s*lock_token.*WHERE id = \d+\s*$/s';
+
+		$reads = array(
+			'get'                  => array( $row_read, static fn () => Contracts::get( $contract_id ) ),
+			'get_for_customer'     => array( '/WHERE id = \d+ AND customer_id = \d+/', static fn () => Contracts::get_for_customer( $contract_id, 46 ) ),
+			'list'                 => array( '/^\s*SELECT\s+\*,\s*\(\s*lock_token.*LIMIT \d+ OFFSET/s', static fn () => Contracts::list() ),
+			'count'                => array( '/^\s*SELECT COUNT\(\*\) FROM \S*subscription_contracts WHERE/', static fn () => Contracts::count() ),
+			'count_by_status'      => array( '/SELECT status, COUNT\(\*\) AS total/', static fn () => Contracts::count_by_status() ),
+			'item_counts'          => array( '/SELECT contract_id, COUNT\(\*\) AS total/', static fn () => Contracts::item_counts( array( $contract_id ) ) ),
+			'list_for_customer'    => array( '/WHERE customer_id = \d+/', static fn () => Contracts::list_for_customer( 46 ) ),
+			'find_by_origin_order' => array( '/WHERE origin_order_id = \d+/', static fn () => Contracts::find_by_origin_order( $order_id ) ),
+			'get_cycles'           => array( '/^\s*SELECT \* FROM \S*subscription_cycles WHERE contract_id = \d+ AND kind/', static fn () => Contracts::get_cycles( $contract_id ) ),
+			'find_cycles_by_order' => array( '/^\s*SELECT \* FROM \S*subscription_cycles WHERE order_id = \d+/', static fn () => Contracts::find_cycles_by_order( $order_id ) ),
+			'get_meta'             => array( '/^\s*SELECT\s+meta_key,\s*meta_value/i', static fn () => Contracts::get_meta( $contract_id, 'note', true ) ),
+			'update'               => array(
+				$row_read,
+				static fn () => Contracts::update(
+					$contract_id,
+					array(
+						'extension_slug' => (string) $contract->get_extension_slug(),
+						'billing_total'  => '29.99',
+					)
+				),
+			),
+		);
+
+		foreach ( $reads as $name => $read ) {
+			$this->fail_next_query( $read[0] );
+			try {
+				$read[1]();
+				$this->fail( "Expected {$name}() to throw." );
+			} catch ( \RuntimeException $e ) {
+				$this->assertStringStartsWith( 'Failed to ', $e->getMessage(), "{$name}() reports the failed read." );
+			}
+		}
+
+		$this->assertSame( '19.99000000', $this->entity( $contract_id )->get_billing_total(), 'The refused update wrote nothing.' );
+	}
 }

@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api\Rest;
 
+use RuntimeException;
 use SplObjectStorage;
 use Throwable;
 use UnexpectedValueException;
@@ -153,8 +154,8 @@ final class ContractsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check whether the current user may read the contract. Anything that is not a 401 is the
-	 * same 404, so a caller cannot probe for contracts it may not read.
+	 * Check whether the current user may read the contract. Anything that is not a 401 or a
+	 * failed read (500) is the same 404, so a caller cannot probe for contracts it may not read.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return true|WP_Error
@@ -393,14 +394,21 @@ final class ContractsController extends WP_REST_Controller {
 
 	/**
 	 * The contract, once the current user may read it (`read_subscription_contract`); resolved
-	 * once per request. Unknown and unreadable contracts are the same 404.
+	 * once per request. Unknown and unreadable contracts are the same 404; a failed read is a
+	 * 500, answered before the ownership check.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return ContractView|WP_Error
 	 */
 	private function resolve_read( WP_REST_Request $request ) {
 		if ( ! isset( $this->resolved_reads[ $request ] ) ) {
-			$contract = Contracts::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
+			$contract_id = Coercion::coerce_int( $request->get_param( 'id' ) );
+			try {
+				$contract = Contracts::get( $contract_id );
+			} catch ( RuntimeException $e ) {
+				$this->resolved_reads[ $request ] = $this->get_read_failed_error( $e, $contract_id );
+				return $this->resolved_reads[ $request ];
+			}
 
 			$this->resolved_reads[ $request ] = null !== $contract && current_user_can( ContractCapabilities::READ, $contract )
 				? $contract
@@ -463,6 +471,28 @@ final class ContractsController extends WP_REST_Controller {
 			'woocommerce_subscriptions_engine_contract_not_found',
 			__( 'Contract not found.', 'woocommerce' ),
 			array( 'status' => 404 )
+		);
+	}
+
+	/**
+	 * Log a failed contract read and return a generic 500, so database details stay out of the response.
+	 *
+	 * @param RuntimeException $e           Failure.
+	 * @param int              $contract_id Contract id.
+	 */
+	private function get_read_failed_error( RuntimeException $e, int $contract_id ): WP_Error {
+		wc_get_logger()->error(
+			sprintf( 'ContractsController: the read of contract %d failed: %s', $contract_id, $e->getMessage() ),
+			array(
+				'source'      => self::LOG_SOURCE,
+				'contract_id' => $contract_id,
+			)
+		);
+
+		return new WP_Error(
+			'woocommerce_subscriptions_engine_contract_read_failed',
+			__( 'The contract could not be read.', 'woocommerce' ),
+			array( 'status' => 500 )
 		);
 	}
 

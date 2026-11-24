@@ -1946,6 +1946,119 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox query throws on a failed read instead of returning no contracts.
+	 */
+	public function test_query_throws_on_a_failed_read(): void {
+		$this->insert_released( $this->make_contract() );
+
+		$this->fail_next_query( '/^\s*SELECT\s+\*,\s*\(\s*lock_token.*LIMIT \d+ OFFSET/s' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read contracts' );
+
+		$this->sut->query();
+	}
+
+	/**
+	 * @testdox count throws on a failed read, filtered or not, instead of counting zero.
+	 * @dataProvider provide_count_args
+	 *
+	 * @param array<string, mixed> $args Count args.
+	 */
+	public function test_count_throws_on_a_failed_read( array $args ): void {
+		$this->insert_released( $this->make_contract() );
+
+		$this->fail_next_query( '/^\s*SELECT COUNT\(\*\) FROM \S*subscription_contracts WHERE/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to count contracts' );
+
+		$this->sut->count( $args );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_count_args(): array {
+		return array(
+			'unfiltered' => array( array() ),
+			'filtered'   => array( array( 'status' => ContractStatus::ACTIVE ) ),
+		);
+	}
+
+	/**
+	 * @testdox find_by_origin_order throws on a failed read instead of finding no contract.
+	 */
+	public function test_find_by_origin_order_throws_on_a_failed_read(): void {
+		$this->insert_released( $this->make_contract() );
+
+		$this->fail_next_query( '/WHERE origin_order_id = \d+/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read the contracts of order 1001' );
+
+		$this->sut->find_by_origin_order( 1001 );
+	}
+
+	/**
+	 * @testdox find_cycle_history throws on a failed read instead of returning an empty chain.
+	 */
+	public function test_find_cycle_history_throws_on_a_failed_read(): void {
+		$id = $this->insert_released( $this->make_contract() );
+		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
+
+		$this->fail_next_query( '/^\s*SELECT \* FROM \S*subscription_cycles WHERE contract_id = \d+ AND kind/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( "Failed to read the cycles of contract {$id}" );
+
+		$this->sut->find_cycle_history( $id );
+	}
+
+	/**
+	 * @testdox find_cycles_by_order_id throws on a failed read instead of finding no cycle.
+	 */
+	public function test_find_cycles_by_order_id_throws_on_a_failed_read(): void {
+		$id = $this->insert_released( $this->make_contract() );
+		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', null, null, 5005 ) );
+
+		$this->fail_next_query( '/^\s*SELECT \* FROM \S*subscription_cycles WHERE order_id = \d+/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read the cycles of order 5005' );
+
+		$this->sut->find_cycles_by_order_id( 5005 );
+	}
+
+	/**
+	 * @testdox count_by_status throws on a failed read instead of counting zero per status.
+	 */
+	public function test_count_by_status_throws_on_a_failed_read(): void {
+		$this->insert_released( $this->make_contract() );
+
+		$this->fail_next_query( '/SELECT status, COUNT\(\*\) AS total/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to count contracts by status' );
+
+		$this->sut->count_by_status();
+	}
+
+	/**
+	 * @testdox count_items_by_contract throws on a failed read instead of counting zero items.
+	 */
+	public function test_count_items_by_contract_throws_on_a_failed_read(): void {
+		$id = $this->insert_released( $this->make_contract() );
+
+		$this->fail_next_query( '/SELECT contract_id, COUNT\(\*\) AS total/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to count contract items' );
+
+		$this->sut->count_items_by_contract( array( $id ) );
+	}
+
+	/**
 	 * @testdox Multiple non-counting cycles (count = null) coexist in one chain.
 	 */
 	public function test_multiple_null_count_cycles_coexist(): void {

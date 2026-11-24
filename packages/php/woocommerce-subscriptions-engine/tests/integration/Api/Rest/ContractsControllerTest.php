@@ -30,6 +30,11 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	private const EXTENSION_SLUG = 'test-extension';
 
 	/**
+	 * The contract row read by id.
+	 */
+	private const ROW_READ = '/^\s*SELECT\s+\*,\s*\(\s*lock_token.*WHERE id = \d+\s*$/s';
+
+	/**
 	 * Action callback calls, as `array( action, contract id, action_args )`.
 	 *
 	 * @var array<int, array{0: string, 1: int, 2: array<string, mixed>}>
@@ -152,6 +157,59 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		$response = $this->get( $contract->get_id() );
 		$this->assertSame( 404, $response->get_status() );
 		$this->assertSame( 'woocommerce_subscriptions_engine_contract_not_found', $this->response_data( $response )['code'] );
+	}
+
+	/**
+	 * A failed contract read is a logged 500 on the item and the action list, with no database
+	 * details in the response.
+	 */
+	public function test_a_failed_contract_read_is_a_logged_500(): void {
+		$contract = $this->create_contract( null );
+		wp_set_current_user( $this->create_user( 'administrator' ) );
+
+		$errors  = array();
+		$capture = static function ( $message, $level, $context ) use ( &$errors ) {
+			if ( 'error' === $level && is_string( $message ) && is_array( $context ) && 'woocommerce-subscriptions-engine' === ( $context['source'] ?? null ) ) {
+				$errors[] = $message;
+			}
+			return $message;
+		};
+		add_filter( 'woocommerce_logger_log_message', $capture, 10, 3 );
+
+		try {
+			$responses = array();
+			foreach ( array( 'item', 'actions' ) as $route ) {
+				$this->fail_next_query( self::ROW_READ );
+				$responses[ $route ] = 'item' === $route ? $this->get( (int) $contract->get_id() ) : $this->list_actions( (int) $contract->get_id() );
+			}
+		} finally {
+			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
+		}
+
+		foreach ( $responses as $route => $response ) {
+			$this->assertSame( 500, $response->get_status(), "The {$route} route answers 500." );
+			$this->assertSame( 'woocommerce_subscriptions_engine_contract_read_failed', $this->response_data( $response )['code'] );
+			$this->assertStringNotContainsString( 'table_that_does_not_exist', (string) wp_json_encode( $response->get_data() ), 'Database details stay out of the response.' );
+		}
+		$this->assertNotEmpty( $errors, 'A failed read is logged.' );
+		$this->assertStringContainsString( 'table_that_does_not_exist', $errors[0], 'The log carries the database error.' );
+	}
+
+	/**
+	 * A failed row read is a 500 before any ownership check: a caller without access gets the same
+	 * 500 for a contract it cannot read and for an unknown id, never a 404 that depends on existence.
+	 */
+	public function test_a_failed_row_read_is_a_500_for_a_caller_without_access(): void {
+		$contract = $this->create_contract( $this->create_user( 'customer' ) );
+		wp_set_current_user( $this->create_user( 'customer' ) );
+
+		foreach ( array( (int) $contract->get_id(), 999999 ) as $contract_id ) {
+			$this->fail_next_query( self::ROW_READ );
+			$response = $this->get( $contract_id );
+
+			$this->assertSame( 500, $response->get_status() );
+			$this->assertSame( 'woocommerce_subscriptions_engine_contract_read_failed', $this->response_data( $response )['code'] );
+		}
 	}
 
 	/**
