@@ -282,7 +282,7 @@ class ReadinessRestController extends RestApiControllerBase {
 		if ( ! $this->features_controller->feature_is_enabled( AiAssistantExperiments::FEATURE_NAME ) ) {
 			return new \WP_Error(
 				'woocommerce_ai_assistant_experiments_not_enabled',
-				__( 'AI assistant experiments weren’t turned on. Try again.', 'woocommerce' ),
+				__( 'We couldn’t turn on AI assistant experiments. Try again.', 'woocommerce' ),
 				array( 'status' => 500 )
 			);
 		}

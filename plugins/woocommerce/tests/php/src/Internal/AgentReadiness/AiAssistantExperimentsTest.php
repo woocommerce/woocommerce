@@ -44,7 +44,7 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 		$link = '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=site-visibility' ) ) . '">';
 
 		$this->assertSame(
-			'Turn on newer ways for AI assistants to read and shop your store: WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, a Markdown sitemap and AI catalog, and AI training notices. Uses your ' . $link . 'AI training choice</a>.',
+			'Turn on newer ways for AI assistants to read your store: WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, a Markdown sitemap and AI catalog, and AI training notices. Uses your ' . $link . 'AI training choice</a>.',
 			AiAssistantExperiments::get_description()
 		);
 	}
@@ -59,7 +59,7 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 		$description = AiAssistantExperiments::get_description( $experiments );
 
 		$this->assertSame(
-			'Turn on newer ways for AI assistants to read and shop your store: WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, and a Markdown sitemap and AI catalog.',
+			'Turn on newer ways for AI assistants to read your store: WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, and a Markdown sitemap and AI catalog.',
 			$description
 		);
 	}
@@ -75,7 +75,7 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( 'Turn on newer ways for AI assistants to read and shop your store: First and Second.', $description );
+		$this->assertSame( 'Turn on newer ways for AI assistants to read your store: First and Second.', $description );
 	}
 
 	/**
@@ -148,7 +148,7 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertFalse( $declared['experiments']['enabled'] );
-		$this->assertSame( 'Add newer ways for AI assistants to read and shop your store', $declared['experiments']['offer']['title'] );
+		$this->assertSame( 'Add newer ways for AI assistants to read your store', $declared['experiments']['offer']['title'] );
 		$this->assertSame(
 			'These add files and page code from newer AI standards, which few AI assistants use yet. Turn them off at any time in <link>Settings > Advanced > Features</link>.',
 			$declared['experiments']['offer']['text']
@@ -157,8 +157,8 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'experiment', $declared['groups'][0]['items'][0], 'Items are not marked' );
 		$this->assertSame( 'Turn on AI assistant experiments', $declared['experiments']['offer']['button'] );
 		$this->assertSame( 'AI assistant experiments are on. Run the check again to see the new files.', $declared['experiments']['turned_on']['text'] );
-		$this->assertSame( 'Run check', $declared['experiments']['turned_on']['button'] );
-		$this->assertSame( 'AI assistant experiments weren’t turned on. Try again.', $declared['experiments']['error'] );
+		$this->assertSame( 'Check again', $declared['experiments']['turned_on']['button'] );
+		$this->assertSame( 'We couldn’t turn on AI assistant experiments. Try again.', $declared['experiments']['error'] );
 	}
 
 	/**
@@ -189,7 +189,7 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $declared['experiments']['enabled'] );
 		$this->assertNull( $declared['experiments']['offer'] );
 		$this->assertSame( 'AI assistant experiments are on', $declared['experiments']['on']['text'] );
-		$this->assertSame( 'Turn off in Features', $declared['experiments']['on']['link']['text'] );
+		$this->assertSame( 'Turn off in Settings > Advanced > Features', $declared['experiments']['on']['link']['text'] );
 		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ), $declared['experiments']['on']['link']['href'] );
 	}
 

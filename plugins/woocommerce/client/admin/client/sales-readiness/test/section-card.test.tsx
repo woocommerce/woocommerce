@@ -173,23 +173,23 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 	): DeclaredExperiments => ( {
 		enabled: false,
 		offer: {
-			title: 'Add newer ways for AI assistants to read and shop your store',
+			title: 'Add newer ways for AI assistants to read your store',
 			text: 'These add files and page code from newer AI standards, which few AI assistants use yet. Turn them off at any time in <link>Settings > Advanced > Features</link>.',
 			href: 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features',
 			button: 'Turn on AI assistant experiments',
 		},
 		turned_on: {
 			text: 'AI assistant experiments are on. Run the check again to see the new files.',
-			button: 'Run check',
+			button: 'Check again',
 		},
 		on: {
 			text: 'AI assistant experiments are on',
 			link: {
 				href: 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features',
-				text: 'Turn off in Features',
+				text: 'Turn off in Settings > Advanced > Features',
 			},
 		},
-		error: 'AI assistant experiments weren’t turned on. Try again.',
+		error: 'We couldn’t turn on AI assistant experiments. Try again.',
 		...overrides,
 	} );
 
@@ -237,7 +237,7 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 			'.wc-sales-readiness-experiments'
 		);
 		expect( notice ).toHaveTextContent(
-			'Add newer ways for AI assistants to read and shop your store'
+			'Add newer ways for AI assistants to read your store'
 		);
 		expect( notice ).toHaveTextContent(
 			'These add files and page code from newer AI standards, which few AI assistants use yet. Turn them off at any time in Settings > Advanced > Features.'
@@ -318,7 +318,7 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 		).toBeInTheDocument();
 
 		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Run check' } )
+			screen.getByRole( 'button', { name: 'Check again' } )
 		);
 		expect( checks.onRun ).toHaveBeenCalled();
 
@@ -348,7 +348,9 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 			)
 		).not.toBeInTheDocument();
 		expect(
-			screen.getByRole( 'link', { name: 'Turn off in Features' } )
+			screen.getByRole( 'link', {
+				name: 'Turn off in Settings > Advanced > Features',
+			} )
 		).toBeInTheDocument();
 	} );
 
@@ -370,7 +372,7 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 
 		expect(
 			await screen.findByText(
-				'AI assistant experiments weren’t turned on. Try again.'
+				'We couldn’t turn on AI assistant experiments. Try again.'
 			)
 		).toBeInTheDocument();
 		expect(
@@ -394,10 +396,12 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 		expect(
 			container.querySelector( '.wc-sales-readiness-experiments__on' )
 		).toHaveTextContent(
-			'AI assistant experiments are on · Turn off in Features'
+			'AI assistant experiments are on · Turn off in Settings > Advanced > Features'
 		);
 		expect(
-			screen.getByRole( 'link', { name: 'Turn off in Features' } )
+			screen.getByRole( 'link', {
+				name: 'Turn off in Settings > Advanced > Features',
+			} )
 		).toHaveAttribute(
 			'href',
 			'https://example.com/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features'

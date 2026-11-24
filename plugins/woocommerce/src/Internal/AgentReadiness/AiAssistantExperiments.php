@@ -7,7 +7,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * The "AI assistant experiments" feature: one switch on the Features page for a
- * bundle of experimental ways for AI assistants to read and shop the store.
+ * bundle of experimental ways for AI assistants to read the store.
  *
  * @since 11.5.0
  */
@@ -70,7 +70,7 @@ final class AiAssistantExperiments {
 
 		$description = sprintf(
 			/* translators: %s: list of experiments, for example "WebMCP on store forms, Markdown versions of pages, and AI training notices". */
-			__( 'Turn on newer ways for AI assistants to read and shop your store: %s.', 'woocommerce' ),
+			__( 'Turn on newer ways for AI assistants to read your store: %s.', 'woocommerce' ),
 			self::get_list( $experiments )
 		);
 

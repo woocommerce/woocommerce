@@ -1192,7 +1192,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		return array(
 			'enabled'   => $enabled,
 			'offer'     => $enabled || array() === $missing ? null : array(
-				'title'  => __( 'Add newer ways for AI assistants to read and shop your store', 'woocommerce' ),
+				'title'  => __( 'Add newer ways for AI assistants to read your store', 'woocommerce' ),
 				/* translators: <link> and </link> wrap the path to the Features page, where every experiment is listed. */
 				'text'   => __( 'These add files and page code from newer AI standards, which few AI assistants use yet. Turn them off at any time in <link>Settings > Advanced > Features</link>.', 'woocommerce' ),
 				'href'   => $features_url,
@@ -1200,16 +1200,16 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			),
 			'turned_on' => array(
 				'text'   => __( 'AI assistant experiments are on. Run the check again to see the new files.', 'woocommerce' ),
-				'button' => __( 'Run check', 'woocommerce' ),
+				'button' => __( 'Check again', 'woocommerce' ),
 			),
 			'on'        => array(
 				'text' => __( 'AI assistant experiments are on', 'woocommerce' ),
 				'link' => array(
 					'href' => $features_url,
-					'text' => __( 'Turn off in Features', 'woocommerce' ),
+					'text' => __( 'Turn off in Settings > Advanced > Features', 'woocommerce' ),
 				),
 			),
-			'error'     => __( 'AI assistant experiments weren’t turned on. Try again.', 'woocommerce' ),
+			'error'     => __( 'We couldn’t turn on AI assistant experiments. Try again.', 'woocommerce' ),
 		);
 	}
 
