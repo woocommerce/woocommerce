@@ -291,6 +291,31 @@ test.describe( 'Add to Cart + Options Block', () => {
 						.locator( '.wp-block-accordion-panel' )
 				: page.getByLabel( 'Additional Information', { exact: true } );
 
+		await test.step( 'follows the flow layout of its sibling blocks', async () => {
+			const [ previous, current, next ] = await page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options"]'
+				)
+				.evaluate( ( block ) =>
+					[
+						block.previousElementSibling,
+						block,
+						block.nextElementSibling,
+					].map( ( element ) => {
+						const { x, top, bottom, width } = (
+							element as Element
+						 ).getBoundingClientRect();
+						return { x, top, bottom, width };
+					} )
+				);
+
+			expect( current.x ).toBe( previous.x );
+			expect( current.width ).toBe( previous.width );
+			expect( current.top - previous.bottom ).toBeCloseTo(
+				next.top - current.bottom
+			);
+		} );
+
 		await test.step( 'displays an error when attributes are not selected', async () => {
 			await addToCartButton.click();
 
