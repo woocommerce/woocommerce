@@ -221,7 +221,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Only an https WordPress.com URL can be the connection redirect, and its scheme is lowercased.
+	 * @testdox Only an https URL on wordpress.com or jetpack.wordpress.com can be the connection redirect, and its scheme is lowercased.
 	 *
 	 * @testWith ["https://jetpack.wordpress.com/jetpack.authorize/1/?x=1", "https://jetpack.wordpress.com/jetpack.authorize/1/?x=1"]
 	 *           ["HTTPS://jetpack.wordpress.com/path", "https://jetpack.wordpress.com/path"]
@@ -230,6 +230,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 *           ["https://evil.example/phish", ""]
 	 *           ["https://wordpress.com.evil.example/", ""]
 	 *           ["https://user@jetpack.wordpress.com/path", ""]
+	 *           ["https://someone.wordpress.com/", ""]
+	 *           ["https://evil.example\\.jetpack.wordpress.com/", ""]
+	 *           ["https://jetpack.wordpress.com/a b", ""]
 	 *           ["", ""]
 	 *
 	 * @param string $url      Candidate redirect.

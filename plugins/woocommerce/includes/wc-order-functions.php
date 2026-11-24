@@ -1288,6 +1288,7 @@ function wc_get_order_note( $data ) {
  * Get order notes.
  *
  * @since  3.2.0
+ * @since  11.5.0 Return an empty array when order_id or post_id is explicitly provided as 0 or empty without order__in/post__in.
  * @param  array $args Query arguments {
  *     Array of query parameters.
  *
@@ -1314,6 +1315,8 @@ function wc_get_order_note( $data ) {
  * @return stdClass[]              Array of stdClass objects with order notes details.
  */
 function wc_get_order_notes( $args ) {
+	$has_null_order_id = is_array( $args ) && array_key_exists( 'order_id', $args ) && null === $args['order_id'];
+
 	$key_mapping = array(
 		'limit'         => 'number',
 		'page'          => 'paged',
@@ -1326,6 +1329,17 @@ function wc_get_order_notes( $args ) {
 		if ( isset( $args[ $query_key ] ) ) {
 			$args[ $db_key ] = $args[ $query_key ];
 			unset( $args[ $query_key ] );
+		}
+	}
+
+	// WP_Comment_Query treats post_id = 0/empty as "no filter" and returns notes across all orders.
+	if ( is_array( $args ) && empty( $args['post__in'] ) ) {
+		if ( array_key_exists( 'post_id', $args ) ) {
+			if ( ! is_numeric( $args['post_id'] ) || (int) $args['post_id'] <= 0 ) {
+				return array();
+			}
+		} elseif ( $has_null_order_id ) {
+			return array();
 		}
 	}
 

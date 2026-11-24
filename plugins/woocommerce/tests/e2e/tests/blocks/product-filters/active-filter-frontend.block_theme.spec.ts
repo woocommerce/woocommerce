@@ -1,20 +1,23 @@
 /**
  * External dependencies
  */
-import { TemplateCompiler, test as base, expect } from '@woocommerce/e2e-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
-const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-	templateCompiler: async ( { requestUtils }, use ) => {
-		const compiler = await requestUtils.createTemplateFromFile(
-			'archive-product_active-filters'
-		);
-		await use( compiler );
-	},
-} );
+// The post's Product Collection has `queryId: 1`, so its filters read
+// `wcp-1-` prefixed URL params.
+const withFilters = ( link: string, params: Record< string, string > ) => {
+	const url = new URL( link );
+	for ( const [ key, value ] of Object.entries( params ) ) {
+		url.searchParams.set( `wcp-1-${ key }`, value );
+	}
+	return url.href;
+};
 
 test.describe( 'woocommerce/product-filter-active - Frontend', () => {
-	test.beforeEach( async ( { page, templateCompiler } ) => {
-		await templateCompiler.compile();
+	let postLink: string;
+
+	test.beforeEach( async ( { page, createPost } ) => {
+		( { link: postLink } = await createPost( 'active-filters' ) );
 
 		await page.addInitScript( () => {
 			// Mock the wc global variable.
@@ -33,7 +36,7 @@ test.describe( 'woocommerce/product-filter-active - Frontend', () => {
 	test( 'Without any filters selected, active block should not be rendered', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop' );
+		await page.goto( postLink );
 
 		const chips = page.locator(
 			'.wp-block-woocommerce-product-filter-active'
@@ -45,7 +48,7 @@ test.describe( 'woocommerce/product-filter-active - Frontend', () => {
 	test( 'With rating filters applied it shows the correct active filters', async ( {
 		page,
 	} ) => {
-		await page.goto( `${ '/shop' }?rating_filter=1,2,5` );
+		await page.goto( withFilters( postLink, { rating_filter: '1,2,5' } ) );
 
 		await expect(
 			page.getByText( 'Rating: Rated 1 out of 5' ).first()
@@ -62,7 +65,9 @@ test.describe( 'woocommerce/product-filter-active - Frontend', () => {
 		page,
 	} ) => {
 		await page.goto(
-			`${ '/shop' }?filter_stock_status=instock,onbackorder`
+			withFilters( postLink, {
+				filter_stock_status: 'instock,onbackorder',
+			} )
 		);
 
 		await expect(
@@ -77,7 +82,10 @@ test.describe( 'woocommerce/product-filter-active - Frontend', () => {
 		page,
 	} ) => {
 		await page.goto(
-			`${ '/shop' }?filter_color=blue,gray&query_type_color=or`
+			withFilters( postLink, {
+				filter_color: 'blue,gray',
+				query_type_color: 'or',
+			} )
 		);
 
 		await expect( page.getByText( 'Color: Blue' ).first() ).toBeVisible();
@@ -87,7 +95,9 @@ test.describe( 'woocommerce/product-filter-active - Frontend', () => {
 	test( 'With price filters applied it shows the correct active filters', async ( {
 		page,
 	} ) => {
-		await page.goto( `${ '/shop' }?min_price=17&max_price=71` );
+		await page.goto(
+			withFilters( postLink, { min_price: '17', max_price: '71' } )
+		);
 
 		await expect(
 			page.getByText( 'Price: $17 - $71' ).first()

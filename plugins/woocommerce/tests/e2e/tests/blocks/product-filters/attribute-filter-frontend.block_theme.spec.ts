@@ -1,40 +1,30 @@
 /**
  * External dependencies
  */
-import {
-	TemplateCompiler,
-	test as base,
-	expect,
-	getProductAttributeIds,
-} from '@woocommerce/e2e-utils';
+import { test, expect, getProductAttributeIds } from '@woocommerce/e2e-utils';
 
 const GRAY_PRODUCT_TITLES = [ 'T-Shirt', 'T-Shirt with Logo' ];
+// Tests that depend on option order use `name-asc`: the default `count-desc`
+// sorts by site-wide term counts, which hidden products from other workers change.
 const COLOR_ATTRIBUTES_WITH_COUNTS = [
 	'Blue (4)',
-	'Red (4)',
-	'Green (3)',
 	'Gray (2)',
+	'Green (3)',
+	'Red (4)',
 	'Yellow (1)',
 ];
 
-const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-	templateCompiler: async ( { requestUtils }, use ) => {
-		const compiler = await requestUtils.createTemplateFromFile(
-			'archive-product_attribute-filter'
-		);
-		await use( compiler );
-	},
-} );
-
 test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 	test.describe( 'With default display style', () => {
-		test.beforeEach( async ( { templateCompiler, page } ) => {
+		let postLink: string;
+
+		test.beforeEach( async ( { createPost, page } ) => {
 			const { colorAttributeId } = await getProductAttributeIds();
-			await templateCompiler.compile( {
+			( { link: postLink } = await createPost( 'attribute-filter', {
 				attributes: {
 					attributeId: colorAttributeId,
 				},
-			} );
+			} ) );
 
 			await page.addInitScript( () => {
 				// Mock the wc global variable.
@@ -53,7 +43,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 		test( 'selects and clears an attribute while keeping URL, products, and controls in sync', async ( {
 			page,
 		} ) => {
-			await page.goto( '/shop' );
+			await page.goto( postLink );
 
 			const grayCheckbox = page.getByRole( 'checkbox', { name: 'Gray' } );
 			const clearButton = page.getByRole( 'button', {
@@ -73,8 +63,10 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 					.poll( () => {
 						const params = new URL( page.url() ).searchParams;
 						return {
-							filterColor: params.get( 'filter_color' ),
-							queryTypeColor: params.get( 'query_type_color' ),
+							filterColor: params.get( 'wcp-1-filter_color' ),
+							queryTypeColor: params.get(
+								'wcp-1-query_type_color'
+							),
 						};
 					} )
 					.toEqual( {
@@ -116,11 +108,11 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 	} );
 
 	test( 'Dropdown updates results on each checkbox selection and supports keyboard dismissal', async ( {
-		templateCompiler,
+		createPost,
 		page,
 	} ) => {
 		const { colorAttributeId } = await getProductAttributeIds();
-		await templateCompiler.compile( {
+		const { link } = await createPost( 'attribute-filter', {
 			dropdown: true,
 			attributes: {
 				attributeId: colorAttributeId,
@@ -129,7 +121,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 				sortOrder: 'name-asc',
 			},
 		} );
-		await page.goto( '/shop' );
+		await page.goto( link );
 		const trigger = page.getByRole( 'button', {
 			name: 'Color: Choose options',
 		} );
@@ -173,8 +165,9 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 		);
 		await page.waitForURL(
 			( url ) =>
-				url.searchParams.get( 'filter_color' )?.includes( 'gray' ) ??
-				false
+				url.searchParams
+					.get( 'wcp-1-filter_color' )
+					?.includes( 'gray' ) ?? false
 		);
 		await page.reload();
 		await expect( selectedTrigger ).toBeVisible();
@@ -193,19 +186,20 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 	} );
 
 	test( 'Escape dismisses the Dropdown before the filter overlay', async ( {
-		templateCompiler,
+		createPost,
 		page,
 	} ) => {
 		const { colorAttributeId } = await getProductAttributeIds();
-		await templateCompiler.compile( {
+		const { link } = await createPost( 'attribute-filter', {
 			dropdown: true,
 			attributes: {
 				attributeId: colorAttributeId,
 				displayStyle: 'woocommerce/dropdown',
+				sortOrder: 'name-asc',
 			},
 		} );
 		await page.setViewportSize( { width: 390, height: 844 } );
-		await page.goto( '/shop' );
+		await page.goto( link );
 		await page.getByRole( 'button', { name: 'Filter products' } ).click();
 		const overlay = page.getByRole( 'dialog', { name: 'Product Filters' } );
 		const trigger = overlay.getByRole( 'button', {
@@ -237,21 +231,22 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 	} );
 
 	test( 'Dropdown summary retains active selections hidden by another filter', async ( {
-		templateCompiler,
+		createPost,
 		page,
 		browser,
 	} ) => {
 		const { colorAttributeId } = await getProductAttributeIds();
-		await templateCompiler.compile( {
+		const { link } = await createPost( 'attribute-filter', {
 			dropdown: true,
 			taxonomy: true,
 			attributes: {
 				attributeId: colorAttributeId,
 				displayStyle: 'woocommerce/dropdown',
 				hideEmpty: true,
+				sortOrder: 'name-asc',
 			},
 		} );
-		await page.goto( '/shop' );
+		await page.goto( link );
 		const color = page.locator(
 			'.wp-block-woocommerce-product-filter-attribute'
 		);
@@ -289,8 +284,9 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 		await expect( trigger ).toHaveText( 'Color: Blue, Green +1' );
 		await page.waitForURL(
 			( url ) =>
-				url.searchParams.get( 'filter_color' )?.includes( 'green' ) ??
-				false
+				url.searchParams
+					.get( 'wcp-1-filter_color' )
+					?.includes( 'green' ) ?? false
 		);
 		const noScript = await browser.newContext( {
 			javaScriptEnabled: false,
@@ -310,7 +306,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 	} );
 
 	test( 'Dropdown defaults allow theme CSS overrides in either load order', async ( {
-		templateCompiler,
+		createPost,
 		page,
 	} ) => {
 		const { colorAttributeId } = await getProductAttributeIds();
@@ -318,8 +314,11 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			attributeId: colorAttributeId,
 			displayStyle: 'woocommerce/dropdown',
 		};
-		await templateCompiler.compile( { dropdown: true, attributes } );
-		await page.goto( '/shop' );
+		const { link } = await createPost( 'attribute-filter', {
+			dropdown: true,
+			attributes,
+		} );
+		await page.goto( link );
 		const trigger = page.getByRole( 'button', {
 			name: 'Color: Choose options',
 		} );
@@ -348,11 +347,11 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 	} );
 
 	test( 'Dropdown Core colors and borders override theme CSS and preserve separate corners', async ( {
-		templateCompiler,
+		createPost,
 		page,
 	} ) => {
 		const { colorAttributeId } = await getProductAttributeIds();
-		await templateCompiler.compile( {
+		const { link } = await createPost( 'attribute-filter', {
 			dropdown: true,
 			attributes: {
 				attributeId: colorAttributeId,
@@ -375,7 +374,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 				},
 			},
 		} );
-		await page.goto( '/shop' );
+		await page.goto( link );
 		const trigger = page.getByRole( 'button', {
 			name: /^Color:/,
 		} );
@@ -449,20 +448,23 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 	} );
 
 	test.describe( 'With show counts enabled', () => {
-		test.beforeEach( async ( { templateCompiler } ) => {
+		let postLink: string;
+
+		test.beforeEach( async ( { createPost } ) => {
 			const { colorAttributeId } = await getProductAttributeIds();
-			await templateCompiler.compile( {
+			( { link: postLink } = await createPost( 'attribute-filter', {
 				attributes: {
 					attributeId: colorAttributeId,
 					showCounts: true,
+					sortOrder: 'name-asc',
 				},
-			} );
+			} ) );
 		} );
 
 		test( 'renders current product counts for every attribute', async ( {
 			page,
 		} ) => {
-			await page.goto( '/shop' );
+			await page.goto( postLink );
 
 			const listItems = page
 				.getByRole( 'heading', {

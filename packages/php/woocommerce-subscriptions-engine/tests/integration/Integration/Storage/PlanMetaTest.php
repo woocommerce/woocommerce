@@ -162,6 +162,35 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox get_meta throws on a failed read instead of reading the key as absent.
+	 * @dataProvider provide_get_meta_shapes
+	 *
+	 * @param string $key    Meta key; empty for every key.
+	 * @param bool   $single Return the first value only.
+	 */
+	public function test_get_meta_throws_on_a_failed_read( string $key, bool $single ): void {
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'one' );
+
+		$this->fail_next_query( '/^\s*SELECT meta_key, meta_value FROM \S*selling_plan_meta/' );
+
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( "Failed to read plan meta for plan {$this->id}" );
+
+		$this->sut->get_meta( $this->id, $key, $single );
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: bool}>
+	 */
+	public function provide_get_meta_shapes(): array {
+		return array(
+			'every key'    => array( '', false ),
+			'one key'      => array( 'note', false ),
+			'single value' => array( 'note', true ),
+		);
+	}
+
+	/**
 	 * @testdox arrays round-trip through serialization.
 	 */
 	public function test_arrays_round_trip_through_serialization(): void {
