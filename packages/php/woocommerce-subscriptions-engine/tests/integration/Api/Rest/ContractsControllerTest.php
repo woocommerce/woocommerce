@@ -41,6 +41,13 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	 */
 	private $calls = array();
 
+	/**
+	 * Engine error log messages captured by a test.
+	 *
+	 * @var string[]
+	 */
+	private $logged_errors = array();
+
 	public function set_up(): void {
 		parent::set_up();
 
@@ -167,10 +174,9 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		$contract = $this->create_contract( null );
 		wp_set_current_user( $this->create_user( 'administrator' ) );
 
-		$errors  = array();
-		$capture = static function ( $message, $level, $context ) use ( &$errors ) {
+		$capture = function ( $message, $level, $context ) {
 			if ( 'error' === $level && is_string( $message ) && is_array( $context ) && 'woocommerce-subscriptions-engine' === ( $context['source'] ?? null ) ) {
-				$errors[] = $message;
+				$this->logged_errors[] = $message;
 			}
 			return $message;
 		};
@@ -180,10 +186,10 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 			$responses = array();
 			$logged    = array();
 			foreach ( array( 'item', 'actions' ) as $route ) {
-				$errors = array();
+				$logged_before = count( $this->logged_errors );
 				$this->fail_next_query( self::ROW_READ );
 				$responses[ $route ] = 'item' === $route ? $this->get( (int) $contract->get_id() ) : $this->list_actions( (int) $contract->get_id() );
-				$logged[ $route ]    = $errors;
+				$logged[ $route ]    = array_slice( $this->logged_errors, $logged_before );
 			}
 		} finally {
 			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
