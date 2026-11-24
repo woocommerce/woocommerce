@@ -135,6 +135,45 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The deprecated filter no longer sets the stored backorder meta key. It only customizes the displayed label.
+	 */
+	public function test_backorder_meta_key_is_fixed_and_filter_only_affects_display_label(): void {
+		add_filter(
+			'woocommerce_backordered_item_meta_name',
+			static function () {
+				return 'Pendiente';
+			}
+		);
+
+		$this->product->set_manage_stock( true );
+		$this->product->set_stock_quantity( 0 );
+		$this->product->set_backorders( 'notify' );
+		$this->product->save();
+
+		$this->item->set_quantity( 1 );
+		$this->item->set_backorder_meta();
+		$this->item->save();
+
+		$reloaded = new WC_Order_Item_Product( $this->item->get_id() );
+		$this->assertSame( '1', $reloaded->get_meta( WC_Order_Item_Product::BACKORDER_META_KEY ), 'The stored key must stay fixed regardless of the filter.' );
+		$this->assertSame( '', $reloaded->get_meta( 'Pendiente' ), 'The deprecated filter must no longer affect the stored meta key.' );
+
+		$this->setExpectedDeprecated( 'woocommerce_backordered_item_meta_name' );
+		$formatted = $reloaded->get_formatted_meta_data();
+		$backorder = current(
+			array_filter(
+				$formatted,
+				function ( $meta ) {
+					return WC_Order_Item_Product::BACKORDER_META_KEY === $meta->key;
+				}
+			)
+		);
+
+		$this->assertNotFalse( $backorder, 'Backorder meta should be present in formatted meta data.' );
+		$this->assertSame( 'Pendiente', $backorder->display_key, 'The filter should still customize the displayed label.' );
+	}
+
+	/**
 	 * Test that backorder meta is excluded from formatted meta data
 	 * for completed orders.
 	 */
@@ -146,7 +185,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$this->product->save();
 
 		// 2. Add backorder meta.
-		$backorder_meta_key = 'Backordered';
+		$backorder_meta_key = WC_Order_Item_Product::BACKORDER_META_KEY;
 		$this->item->add_meta_data( $backorder_meta_key, 1, true ); // Value typically is the backordered quantity.
 		$this->item->save();
 
@@ -182,6 +221,31 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		// Clean up.
 		WC_Helper_Product::delete_product( $this->product->get_id() );
 		WC_Helper_Order::delete_order( $this->order->get_id() );
+	}
+
+	/**
+	 * @testdox A backorder note stored under an older, filtered key is still hidden once the order is completed.
+	 */
+	public function test_get_formatted_meta_data_excludes_legacy_keyed_backorder_on_completed(): void {
+		add_filter(
+			'woocommerce_backordered_item_meta_name',
+			static function () {
+				return 'Pendiente';
+			}
+		);
+
+		// Simulate a note saved before 11.5.0, under the translated value active at the time.
+		$this->item->add_meta_data( 'Pendiente', 1, true );
+		$this->item->save();
+
+		$this->order->update_status( OrderStatus::COMPLETED );
+		$this->order->save();
+
+		$this->setExpectedDeprecated( 'woocommerce_backordered_item_meta_name' );
+		$order_item = $this->order->get_item( $this->item->get_id() );
+		foreach ( $order_item->get_formatted_meta_data() as $meta ) {
+			$this->assertNotSame( 'Pendiente', $meta->key, 'Legacy-keyed backorder meta should be excluded after order completion.' );
+		}
 	}
 
 	/**
