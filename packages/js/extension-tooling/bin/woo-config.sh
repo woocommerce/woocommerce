@@ -138,7 +138,7 @@ config=$(jq -ce '
 		e2e: {
 			projects: ($e2e | opt("projects"; [ "" ])),
 			timeoutMinutes: ($e2e | opt("timeoutMinutes"; 20)),
-			privatePlugins: ($e2e | opt("privatePlugins"; false))
+			privatePlugins: (($e2e | opt("privatePlugins"; false)) or ([ ($c | opt("privatePlugins"; []))[] | opt("suites"; []) | index("e2e") ] | any))
 		},
 		phpunit: {
 			timeoutMinutes: ($unit | opt("timeoutMinutes"; 10)),

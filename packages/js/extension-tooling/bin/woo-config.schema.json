@@ -228,7 +228,7 @@
 				"privatePlugins": {
 					"type": "boolean",
 					"default": false,
-					"description": "Trusted runs pass ORG_DOWNLOADS to bin/e2e.sh prepare (bin/hooks/e2e-prepare.sh)."
+					"description": "Runs that can't download private plugins skip specs tagged @integration. A privatePlugins entry with the e2e suite turns this on; set alone, trusted CI runs fail, because E2E no longer gets ORG_DOWNLOADS."
 				}
 			}
 		},
@@ -328,7 +328,7 @@
 		},
 		"privatePlugins": {
 			"type": "array",
-			"description": "Private plugin ZIPs that trusted PHPUnit runs download before checkout.",
+			"description": "Private plugin ZIPs that trusted PHPUnit and E2E runs download before checkout: $WOO_PRIVATE_PLUGIN_ZIPS_DIR/<slug>.zip, unzipped to $WOO_PRIVATE_PLUGINS_DIR/<slug>.",
 			"items": {
 				"type": "object",
 				"additionalProperties": false,
@@ -345,9 +345,10 @@
 					"suites": {
 						"type": "array",
 						"items": {
-							"enum": [ "unit", "integration" ]
+							"enum": [ "unit", "integration", "e2e" ]
 						},
-						"default": [ "unit" ]
+						"default": [ "unit" ],
+						"description": "unit and integration: the PHPUnit suites; e2e: bin/e2e.sh prepare (bin/hooks/e2e-prepare.sh)."
 					},
 					"dirEnv": {
 						"type": "string",
@@ -377,7 +378,7 @@
 				"privatePlugins": {
 					"type": "boolean",
 					"default": false,
-					"description": "The E2E and integration suites need privatePlugins in every run: same-repository pull requests download them (E2E gets ORG_DOWNLOADS, the integration suite runs), fork pull requests skip both with a warning."
+					"description": "The E2E and integration suites need privatePlugins in every run: same-repository pull requests download them and run both, fork pull requests skip both with a warning."
 				}
 			}
 		},
