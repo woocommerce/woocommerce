@@ -59,9 +59,14 @@ module.exports = async ( {
 			},
 			includeArchived: true,
 		} );
-		// A PR title can change. Match its URL, including a boundary so #123 cannot match #1234.
+		// Match only the "Pull request" line this helper writes, so an issue that merely mentions
+		// the PR is not taken for its docs issue. Linear may wrap the URL as an autolink, and the
+		// trailing boundary keeps #123 from matching #1234.
 		const prUrl = new RegExp(
-			pr.html_url.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' ) + '(?![0-9])'
+			'^\\*\\*Pull request:\\*\\* [<[]?' +
+				pr.html_url.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' ) +
+				'(?![0-9])',
+			'm'
 		);
 		for (;;) {
 			const issue = existingIssues.nodes.find( ( candidate ) =>

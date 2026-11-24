@@ -125,6 +125,34 @@ test( 'does not confuse a longer PR number with the requested PR', async () => {
 	assert.equal( created.length, 1 );
 } );
 
+test( 'does not reuse an issue that only mentions the PR', async () => {
+	const { created, options } = fixture( {
+		issues: async () =>
+			page( [
+				{ ...issue, description: `Related work: ${ pr.html_url }` },
+				{
+					...issue,
+					description: `**AI reasoning:** See **Pull request:** ${ pr.html_url }`,
+				},
+			] ),
+	} );
+	assert.equal( ( await ensureDocsIssue( options ) ).reused, false );
+	assert.equal( created.length, 1 );
+} );
+
+test( 'reuses an issue whose PR line Linear turned into a link', async () => {
+	const { options } = fixture( {
+		issues: async () =>
+			page( [
+				{
+					...issue,
+					description: `Intro\n\n**Pull request:** [${ pr.html_url }](${ pr.html_url })`,
+				},
+			] ),
+	} );
+	assert.equal( ( await ensureDocsIssue( options ) ).reused, true );
+} );
+
 test( 'finds an existing issue on a later page', async () => {
 	const { created, options } = fixture( {
 		issues: async () => ( {
