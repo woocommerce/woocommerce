@@ -23,6 +23,11 @@ use WP_Theme_JSON;
  * See register_post_type for details about EmailPostType args.
  */
 class Email_Editor {
+	/**
+	 * Post meta key for per-email theme styles. Nothing writes this meta; email styles live in User_Theme.
+	 *
+	 * @deprecated 2.21.0
+	 */
 	public const WOOCOMMERCE_EMAIL_META_THEME_TYPE = 'woocommerce_email_theme';
 
 	/**
@@ -112,7 +117,6 @@ class Email_Editor {
 	public function initialize(): void {
 		$this->logger->info( 'Initializing email editor' );
 		do_action( 'woocommerce_email_editor_initialized' );
-		add_filter( 'woocommerce_email_editor_rendering_theme_styles', array( $this, 'extend_email_theme_styles' ), 10, 2 );
 
 		$this->register_block_patterns();
 		$this->register_email_post_types();
@@ -402,11 +406,14 @@ class Email_Editor {
 	/**
 	 * Extends the email theme styles with the email specific styles.
 	 *
+	 * @deprecated 2.21.0 Email styles live in User_Theme, so there is nothing to merge.
+	 *
 	 * @param WP_Theme_JSON $theme Email theme styles.
 	 * @param WP_Post       $post Email post object.
 	 * @return WP_Theme_JSON
 	 */
 	public function extend_email_theme_styles( WP_Theme_JSON $theme, WP_Post $post ): WP_Theme_JSON {
+		_deprecated_function( __METHOD__, '2.21.0' );
 		$email_theme = get_post_meta( $post->ID, self::WOOCOMMERCE_EMAIL_META_THEME_TYPE, true );
 		if ( $email_theme && is_array( $email_theme ) ) {
 			$theme->merge( new WP_Theme_JSON( $email_theme ) );

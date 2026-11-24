@@ -9,6 +9,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer as Core_Initializer;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 
@@ -79,16 +80,22 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			)
 		);
 		$this->assertIsInt( $email_post_id );
-		update_post_meta(
-			$email_post_id,
-			'woocommerce_email_theme',
+		$user_theme_post = $this->di_container->get( User_Theme::class )->get_user_theme_post();
+		wp_update_post(
 			array(
-				'styles' => array(
-					'elements' => array(
-						'caption' => array(
-							'color' => array( 'text' => '#f78da7' ),
+				'ID'           => $user_theme_post->ID,
+				'post_content' => (string) wp_json_encode(
+					array(
+						'version'                     => 3,
+						'isGlobalStylesUserThemeJSON' => true,
+						'styles'                      => array(
+							'elements' => array(
+								'caption' => array(
+									'color' => array( 'text' => '#f78da7' ),
+								),
+							),
 						),
-					),
+					)
 				),
 			)
 		);

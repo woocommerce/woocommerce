@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Frontend;
 
+use Automattic\WooCommerce\Internal\Orders\TexturizeExclusions;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
@@ -144,8 +145,18 @@ class NotificationManagementService {
 			exit;
 		}
 
-		/* translators: %s user email. */
-		wc_add_notice( sprintf( esc_html__( 'Verification email sent to %s.', 'woocommerce' ), $notification->get_user_email() ), 'success' );
+		$notice = sprintf(
+			/* translators: %s user email. */
+			esc_html__( 'Verification email sent to %s.', 'woocommerce' ),
+			esc_html( $notification->get_user_email() )
+		);
+
+		// Block themes texturize the whole page, but skip address elements.
+		if ( wp_is_block_theme() ) {
+			$notice = '<address class="' . TexturizeExclusions::VERIFICATION_EMAIL_CLASS . '">' . $notice . '</address>';
+		}
+
+		wc_add_notice( $notice, 'success' );
 		wp_safe_redirect( $redirect_url );
 		exit;
 	}

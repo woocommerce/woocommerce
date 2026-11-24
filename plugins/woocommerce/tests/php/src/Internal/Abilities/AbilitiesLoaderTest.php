@@ -78,6 +78,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/system-status-tools-query',
 		'woocommerce/system-status-tool-run',
 		'woocommerce/payment-gateway-update',
+		'woocommerce/get-agent-readiness',
+		'woocommerce/run-agent-readiness-check',
 	);
 
 	/**
@@ -1333,6 +1335,14 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id'         => 1,
 					'first_name' => 'Denied',
 				),
+			),
+			'get-agent-readiness'         => array(
+				'woocommerce/get-agent-readiness',
+				array(),
+			),
+			'run-agent-readiness-check'   => array(
+				'woocommerce/run-agent-readiness-check',
+				array(),
 			),
 		);
 	}
