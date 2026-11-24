@@ -113,15 +113,17 @@ class StockNotificationsRestController extends RestApiControllerBase {
 		// A second key keeps pages stable when several rows share the same sort value.
 		$order_by['id'] = $order;
 
+		$dates_are_gmt = (bool) $request['dates_are_gmt'];
+
 		$query_args = array(
 			'status'              => (array) $request['status'],
 			'product_id'          => (array) $request['product_id'],
 			'user_id'             => (int) $request['user_id'],
 			'user_email'          => (string) $request['email'],
-			'start_date'          => $this->to_gmt_mysql_date( $request['after'] ),
-			'end_date'            => $this->to_gmt_mysql_date( $request['before'] ),
-			'notified_start_date' => $this->to_gmt_mysql_date( $request['notified_after'] ),
-			'notified_end_date'   => $this->to_gmt_mysql_date( $request['notified_before'] ),
+			'start_date'          => $this->to_gmt_mysql_date( $request['after'], $dates_are_gmt ),
+			'end_date'            => $this->to_gmt_mysql_date( $request['before'], $dates_are_gmt ),
+			'notified_start_date' => $this->to_gmt_mysql_date( $request['notified_after'], $dates_are_gmt ),
+			'notified_end_date'   => $this->to_gmt_mysql_date( $request['notified_before'], $dates_are_gmt ),
 		);
 
 		$total         = NotificationQuery::count_notifications( $query_args );
@@ -263,17 +265,18 @@ class StockNotificationsRestController extends RestApiControllerBase {
 	/**
 	 * Convert a REST date-time argument to a GMT MySQL datetime for the data store.
 	 *
-	 * Like the dates in the response, a value without a timezone offset is in the site's timezone.
+	 * Like the dates in the response, a value without a timezone offset is in the site's timezone, unless `$is_gmt` is true.
 	 *
-	 * @param mixed $value The argument value.
+	 * @param mixed $value  The argument value.
+	 * @param bool  $is_gmt Whether a value without a timezone offset is in GMT.
 	 * @return string Empty when the argument is absent.
 	 */
-	private function to_gmt_mysql_date( $value ): string {
+	private function to_gmt_mysql_date( $value, bool $is_gmt ): string {
 		if ( empty( $value ) ) {
 			return '';
 		}
 
-		$date = rest_get_date_with_gmt( (string) $value );
+		$date = rest_get_date_with_gmt( (string) $value, $is_gmt );
 
 		return $date ? $date[1] : '';
 	}
@@ -363,24 +366,29 @@ class StockNotificationsRestController extends RestApiControllerBase {
 				'format'      => 'email',
 			),
 			'after'           => array(
-				'description' => __( 'Limit response to notifications created after a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone.', 'woocommerce' ),
+				'description' => __( 'Limit response to notifications created after a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone, unless dates_are_gmt is true.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 			),
 			'before'          => array(
-				'description' => __( 'Limit response to notifications created before a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone.', 'woocommerce' ),
+				'description' => __( 'Limit response to notifications created before a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone, unless dates_are_gmt is true.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 			),
 			'notified_after'  => array(
-				'description' => __( 'Limit response to notifications sent after a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone.', 'woocommerce' ),
+				'description' => __( 'Limit response to notifications sent after a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone, unless dates_are_gmt is true.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 			),
 			'notified_before' => array(
-				'description' => __( 'Limit response to notifications sent before a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone.', 'woocommerce' ),
+				'description' => __( 'Limit response to notifications sent before a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone, unless dates_are_gmt is true.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
+			),
+			'dates_are_gmt'   => array(
+				'description' => __( 'Whether date filters without a timezone offset are in GMT instead of the site\'s timezone.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'default'     => false,
 			),
 		);
 	}

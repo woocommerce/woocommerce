@@ -306,7 +306,7 @@ class StockNotificationsRestControllerTests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Dates without an offset are in the site's timezone, in both the response and the date filters.
+	 * @testdox Dates without an offset are in the site's timezone, in both the response and the date filters, unless dates_are_gmt is set.
 	 */
 	public function test_dates_use_site_timezone(): void {
 		update_option( 'timezone_string', 'Europe/Athens' );
@@ -321,6 +321,12 @@ class StockNotificationsRestControllerTests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( array(), $ids( array( 'after' => '2026-01-10T12:00:01' ) ) );
 		$this->assertSame( array( $notification->get_id() ), $ids( array( 'after' => '2026-01-10T10:00:00Z' ) ) );
 		$this->assertSame( array(), $ids( array( 'after' => '2026-01-10T12:00:01+02:00' ) ) );
+		$gmt = fn( string $after ) => array(
+			'after'         => $after,
+			'dates_are_gmt' => true,
+		);
+		$this->assertSame( array( $notification->get_id() ), $ids( $gmt( '2026-01-10T10:00:00' ) ) );
+		$this->assertSame( array(), $ids( $gmt( '2026-01-10T10:00:01' ) ) );
 
 		delete_option( 'timezone_string' );
 	}
