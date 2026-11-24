@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributesQuery;
 use WC_Helper_Product;
@@ -23,6 +25,13 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	 * @var Ability
 	 */
 	private $sut;
+
+	/**
+	 * Process state restored after each test.
+	 *
+	 * @var array
+	 */
+	private $saved_state = array();
 
 	/**
 	 * An administrator that every test acts as.
@@ -45,8 +54,27 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		foreach ( array( 'resources', 'fields' ) as $name ) {
+			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property->setAccessible( true );
+			$this->saved_state[ $name ] = $property->getValue();
+			$property->setValue( null, array() );
+		}
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
 		$this->sut = new Ability( ProductAttributesQuery::get_name(), ProductAttributesQuery::get_registration_args() );
 		wp_set_current_user( self::$administrator_id );
+	}
+
+	/**
+	 * Restore extension state.
+	 */
+	public function tearDown(): void {
+		foreach ( $this->saved_state as $name => $value ) {
+			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property->setAccessible( true );
+			$property->setValue( null, $value );
+		}
+		parent::tearDown();
 	}
 
 	/**
@@ -124,6 +152,50 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 		$this->assertSame( 3, $page['total'] );
 		$this->assertSame( 2, $page['total_pages'] );
 		$this->assertSame( array( 'Test Pattern' ), wp_list_pluck( $page['attributes'], 'name' ), 'Attributes are sorted by slug.' );
+	}
+
+	/**
+	 * @testdox Should return the product_term extension fields on each term, as product-terms-query does.
+	 */
+	public function test_term_extension_fields(): void {
+		$attribute = WC_Helper_Product::create_attribute( 'Test Swatch', array( 'Red', 'Blue' ) );
+		$input     = array( 'include' => array( $attribute['attribute_id'] ) );
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
+		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
+		do_action( 'woocommerce_extensible_abilities_resources_init' );
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'product_term',
+						'namespace'     => 'test-ext',
+						'field'         => 'color',
+						'output_schema' => array(
+							'type'  => 'string',
+							'title' => 'Color',
+						),
+						'get_callback'  => static function ( \WP_Term $term ) {
+							return 'hex-' . $term->slug;
+						},
+					)
+				);
+			}
+		);
+		do_action( 'woocommerce_extensible_abilities_init' );
+		$ability = new \WP_Ability( ProductAttributesQuery::get_name(), ProductAttributesQuery::get_registration_args() );
+
+		$result = $ability->execute( $input );
+
+		$this->assertIsArray( $result );
+		$terms = $result['attributes'][0]['terms'];
+		$this->assertCount( 2, $terms );
+		foreach ( $terms as $term ) {
+			$this->assertSame( 'hex-' . $term['slug'], $term['extensions']['test-ext']['color'] );
+		}
+		$this->assertSame( 'string', $ability->get_output_schema()['properties']['attributes']['items']['properties']['terms']['items']['properties']['extensions']['properties']['test-ext']['properties']['color']['type'] );
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
+		$this->assertArrayNotHasKey( 'extensions', $this->sut->execute( $input )['attributes'][0]['terms'][0] );
 	}
 
 	/**
