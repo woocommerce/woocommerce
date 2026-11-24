@@ -889,6 +889,23 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() removes a coupon a merchant applied to a retried order, along with its discount.
+	 */
+	public function test_update_order_from_cart_removes_a_coupon_a_merchant_applied(): void {
+		$coupon = \WC_Helper_Coupon::create_coupon( 'merchant-applied', array( 'coupon_amount' => 3 ) );
+		$order  = $this->create_retried_order_with_shipping_and_fee();
+		$order->apply_coupon( $coupon->get_code() );
+		$order->save();
+		$this->assertSame( array( $coupon->get_code() ), $order->get_coupon_codes(), 'The merchant should have applied the coupon.' );
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertEmpty( $order->get_coupons(), 'The coupon line should be removed.' );
+		$this->assertSame( 0.0, (float) $order->get_discount_total(), 'The order should have no discount.' );
+		$this->assertSame( 25.0, (float) $order->get_total(), 'The order should be charged the cart total.' );
+	}
+
+	/**
 	 * @testdox update_order_from_cart() keeps repaired items, and items an extension added, on the next unchanged sync.
 	 */
 	public function test_update_order_from_cart_keeps_repaired_and_extension_items_on_the_next_sync(): void {
