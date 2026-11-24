@@ -15,7 +15,7 @@ import type { DeclaredExperiments } from '../types';
 import { ErrorNotice } from './error-notice';
 
 export const EXPERIMENTS_PATH =
-	'/wc/v3/agent-readiness/ai-shopping-experiments';
+	'/wc/v3/agent-readiness/ai-assistant-experiments';
 
 export type ExperimentsRun = {
 	/** Runs the same check as Check again. */
@@ -25,7 +25,7 @@ export type ExperimentsRun = {
 };
 
 /**
- * The AI shopping experiments notice at the top of Extra details for AI assistants: the offer to
+ * The AI assistant experiments notice at the top of Extra details for AI assistants: the offer to
  * turn them on, then a prompt to run the check once they're on, then a line linking to Features.
  */
 export const ExperimentsNotice = ( {

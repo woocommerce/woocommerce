@@ -94,7 +94,7 @@ export interface Declared {
 		/** `found` is null for an item the scan couldn't read. */
 		items: { name: string; found: boolean | null }[];
 	}[];
-	/** The AI shopping experiments notice. Null for users who can't manage WooCommerce. */
+	/** The AI assistant experiments notice. Null for users who can't manage WooCommerce. */
 	experiments?: DeclaredExperiments | null;
 }
 

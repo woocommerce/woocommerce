@@ -8,7 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Features;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
-use Automattic\WooCommerce\Internal\AgentReadiness\AiShoppingExperiments;
+use Automattic\WooCommerce\Internal\AgentReadiness\AiAssistantExperiments;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use WC_Tracks;
 use WC_Site_Tracking;
@@ -676,9 +676,9 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			AiShoppingExperiments::FEATURE_NAME    => array(
-				'name'                         => __( 'AI shopping experiments', 'woocommerce' ),
-				'description'                  => AiShoppingExperiments::get_description(),
+			AiAssistantExperiments::FEATURE_NAME   => array(
+				'name'                         => __( 'AI assistant experiments', 'woocommerce' ),
+				'description'                  => AiAssistantExperiments::get_description(),
 				'enabled_by_default'           => false,
 				// First among the experimental features, where the AI shopping health page sends merchants.
 				'order'                        => 11,
@@ -1519,7 +1519,7 @@ class FeaturesController {
 				continue;
 			}
 
-			if ( AiShoppingExperiments::FEATURE_NAME === $id && ! $this->feature_is_enabled( 'agent_readiness' ) ) {
+			if ( AiAssistantExperiments::FEATURE_NAME === $id && ! $this->feature_is_enabled( 'agent_readiness' ) ) {
 				continue;
 			}
 

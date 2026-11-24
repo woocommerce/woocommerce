@@ -254,7 +254,7 @@ export const DeclaredCard = ( {
 	run?: { onRun: () => void; running: boolean; pending: boolean };
 } ) => {
 	const experiments = declared.experiments ?? null;
-	// After AI shopping experiments are turned on here, until the next check finishes.
+	// After AI assistant experiments are turned on here, until the next check finishes.
 	const [ turnedOn, setTurnedOn ] = useState( false );
 	const sawPending = useRef( false );
 	const pending = !! run?.pending;

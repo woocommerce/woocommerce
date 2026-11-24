@@ -1094,23 +1094,23 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Whether the AI shopping experiments feature is on, or null for a user who can't manage
+	 * Whether the AI assistant experiments feature is on, or null for a user who can't manage
 	 * WooCommerce, who sees no offer to turn it on.
 	 */
 	private function experiments_enabled(): ?bool {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return null;
 		}
-		return $this->features_controller->feature_is_enabled( AiShoppingExperiments::FEATURE_NAME );
+		return $this->features_controller->feature_is_enabled( AiAssistantExperiments::FEATURE_NAME );
 	}
 
 	/**
 	 * Protocols and files the store serves to agents, as information, never pass or fail: how many were
 	 * found, then every item under where it lives. Items the scan couldn't read are under Not checked yet.
-	 * Leads with the AI shopping experiments notice. Null with no items in the report.
+	 * Leads with the AI assistant experiments notice. Null with no items in the report.
 	 *
 	 * @param array     $items          Items from the report.
-	 * @param bool|null $experiments_on Whether AI shopping experiments are on; null leaves out the notice.
+	 * @param bool|null $experiments_on Whether AI assistant experiments are on; null leaves out the notice.
 	 * @return array{title:string,badge:array{intent:string,text:string},text:string,groups:array<int, array{title:string,items:array<int, array{name:string,found:bool|null}>}>,experiments:array<string, mixed>|null}|null
 	 */
 	private static function declared( array $items, ?bool $experiments_on = null ): ?array {
@@ -1174,7 +1174,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The AI shopping experiments notice at the top of Extra details. While the feature is off, it offers
+	 * The AI assistant experiments notice at the top of Extra details. While the feature is off, it offers
 	 * to turn it on when any item the experiments add is not found, naming every experiment as the
 	 * Features page does. Once on, a line links to Features.
 	 *
@@ -1183,7 +1183,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @return array<string, mixed>
 	 */
 	private static function experiments_notice( array $items, bool $enabled ): array {
-		$experiment_ids = AiShoppingExperiments::get_declared_item_ids();
+		$experiment_ids = AiAssistantExperiments::get_declared_item_ids();
 		$missing        = array_filter(
 			$items,
 			static fn( array $item ): bool => false === ( $item['found'] ?? null ) && in_array( (string) ( $item['id'] ?? '' ), $experiment_ids, true )
@@ -1194,23 +1194,23 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'title'  => __( 'Add newer ways for AI assistants to read and shop your store', 'woocommerce' ),
 				'text'   => sprintf(
 					/* translators: %s: list of experiments, for example "WebMCP on store forms, Markdown versions of pages, and AI training notices". */
-					__( 'AI shopping experiments add %s. The standards aren’t settled, and few AI assistants use them yet. Turn them off at any time in Features.', 'woocommerce' ),
-					AiShoppingExperiments::get_list()
+					__( 'AI assistant experiments add %s. The standards aren’t settled, and few AI assistants use them yet. Turn them off at any time in Features.', 'woocommerce' ),
+					AiAssistantExperiments::get_list()
 				),
-				'button' => __( 'Turn on AI shopping experiments', 'woocommerce' ),
+				'button' => __( 'Turn on AI assistant experiments', 'woocommerce' ),
 			),
 			'turned_on' => array(
-				'text'   => __( 'AI shopping experiments are on. Run the check again to see the new files.', 'woocommerce' ),
+				'text'   => __( 'AI assistant experiments are on. Run the check again to see the new files.', 'woocommerce' ),
 				'button' => __( 'Run check', 'woocommerce' ),
 			),
 			'on'        => array(
-				'text' => __( 'AI shopping experiments are on', 'woocommerce' ),
+				'text' => __( 'AI assistant experiments are on', 'woocommerce' ),
 				'link' => array(
 					'href' => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ),
 					'text' => __( 'Turn off in Features', 'woocommerce' ),
 				),
 			),
-			'error'     => __( 'AI shopping experiments weren’t turned on. Try again.', 'woocommerce' ),
+			'error'     => __( 'AI assistant experiments weren’t turned on. Try again.', 'woocommerce' ),
 		);
 	}
 

@@ -569,46 +569,46 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox POST ai-shopping-experiments turns the AI shopping experiments feature on, and succeeds when it's already on.
+	 * @testdox POST ai-assistant-experiments turns the AI assistant experiments feature on, and succeeds when it's already on.
 	 */
-	public function test_ai_shopping_experiments_turned_on(): void {
-		update_option( 'woocommerce_feature_ai_shopping_experiments_enabled', 'no' );
+	public function test_ai_assistant_experiments_turned_on(): void {
+		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-shopping-experiments' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-assistant-experiments' ) );
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( array( 'enabled' => true ), $response->get_data() );
-		$this->assertSame( 'yes', get_option( 'woocommerce_feature_ai_shopping_experiments_enabled' ) );
+		$this->assertSame( 'yes', get_option( 'woocommerce_feature_ai_assistant_experiments_enabled' ) );
 
-		$again = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-shopping-experiments' ) );
+		$again = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-assistant-experiments' ) );
 		$this->assertSame( 200, $again->get_status(), 'Already on still counts as on' );
 	}
 
 	/**
-	 * @testdox When the AI shopping experiments option can't be saved, POST ai-shopping-experiments answers with an error.
+	 * @testdox When the AI assistant experiments option can't be saved, POST ai-assistant-experiments answers with an error.
 	 */
-	public function test_ai_shopping_experiments_failed_save(): void {
-		update_option( 'woocommerce_feature_ai_shopping_experiments_enabled', 'no' );
-		add_filter( 'pre_update_option_woocommerce_feature_ai_shopping_experiments_enabled', static fn( $value, $old_value ) => $old_value, 10, 2 );
+	public function test_ai_assistant_experiments_failed_save(): void {
+		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
+		add_filter( 'pre_update_option_woocommerce_feature_ai_assistant_experiments_enabled', static fn( $value, $old_value ) => $old_value, 10, 2 );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-shopping-experiments' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-assistant-experiments' ) );
 
 		$this->assertSame( 500, $response->get_status() );
-		$this->assertSame( 'woocommerce_ai_shopping_experiments_not_enabled', $response->get_data()['code'] );
-		$this->assertSame( 'no', get_option( 'woocommerce_feature_ai_shopping_experiments_enabled' ) );
+		$this->assertSame( 'woocommerce_ai_assistant_experiments_not_enabled', $response->get_data()['code'] );
+		$this->assertSame( 'no', get_option( 'woocommerce_feature_ai_assistant_experiments_enabled' ) );
 	}
 
 	/**
-	 * @testdox A user without manage_woocommerce can't turn AI shopping experiments on.
+	 * @testdox A user without manage_woocommerce can't turn AI assistant experiments on.
 	 */
-	public function test_ai_shopping_experiments_requires_manage_woocommerce(): void {
-		update_option( 'woocommerce_feature_ai_shopping_experiments_enabled', 'no' );
+	public function test_ai_assistant_experiments_requires_manage_woocommerce(): void {
+		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-shopping-experiments' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-assistant-experiments' ) );
 
 		$this->assertSame( 403, $response->get_status() );
-		$this->assertSame( 'no', get_option( 'woocommerce_feature_ai_shopping_experiments_enabled' ) );
+		$this->assertSame( 'no', get_option( 'woocommerce_feature_ai_assistant_experiments_enabled' ) );
 	}
 
 	/**

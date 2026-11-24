@@ -6,17 +6,17 @@ namespace Automattic\WooCommerce\Internal\AgentReadiness;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The "AI shopping experiments" feature: one switch on the Features page for a
+ * The "AI assistant experiments" feature: one switch on the Features page for a
  * bundle of experimental ways for AI assistants to read and shop the store.
  *
  * @since 11.5.0
  */
-final class AiShoppingExperiments {
+final class AiAssistantExperiments {
 
 	/**
 	 * Feature slug used with FeaturesController.
 	 */
-	public const FEATURE_NAME = 'ai_shopping_experiments';
+	public const FEATURE_NAME = 'ai_assistant_experiments';
 
 	/**
 	 * Experiment that relies on the store's AI training choice.

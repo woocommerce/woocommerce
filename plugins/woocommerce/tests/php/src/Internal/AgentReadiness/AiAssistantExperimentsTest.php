@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
-use Automattic\WooCommerce\Internal\AgentReadiness\AiShoppingExperiments;
+use Automattic\WooCommerce\Internal\AgentReadiness\AiAssistantExperiments;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessCheckPage;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -12,9 +12,9 @@ use Automattic\WooCommerce\Utilities\PluginUtil;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the AI shopping experiments feature and its Features page row.
+ * Tests for the AI assistant experiments feature and its Features page row.
  */
-class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
+class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 
 	/**
 	 * The System Under Test.
@@ -45,7 +45,7 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			'Turn on newer ways for AI assistants to read and shop your store: WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, a Markdown sitemap and AI catalog, and AI training notices. Uses your ' . $link . 'AI training choice</a>.',
-			AiShoppingExperiments::get_description()
+			AiAssistantExperiments::get_description()
 		);
 	}
 
@@ -53,10 +53,10 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 	 * @testdox The AI training sentence is left out when AI training notices are not in the list.
 	 */
 	public function test_description_omits_ai_training_sentence_without_ai_training_notices(): void {
-		$experiments = AiShoppingExperiments::get_experiments();
-		unset( $experiments[ AiShoppingExperiments::AI_TRAINING_NOTICES ] );
+		$experiments = AiAssistantExperiments::get_experiments();
+		unset( $experiments[ AiAssistantExperiments::AI_TRAINING_NOTICES ] );
 
-		$description = AiShoppingExperiments::get_description( $experiments );
+		$description = AiAssistantExperiments::get_description( $experiments );
 
 		$this->assertSame(
 			'Turn on newer ways for AI assistants to read and shop your store: WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, and a Markdown sitemap and AI catalog.',
@@ -68,7 +68,7 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 	 * @testdox The description joins two experiments without a comma.
 	 */
 	public function test_description_joins_two_experiments_with_and(): void {
-		$description = AiShoppingExperiments::get_description(
+		$description = AiAssistantExperiments::get_description(
 			array(
 				'first'  => array( 'First', array() ),
 				'second' => array( 'Second', array() ),
@@ -82,14 +82,14 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 	 * @testdox The feature is experimental, off by default, and skips plugin compatibility checks.
 	 */
 	public function test_feature_definition(): void {
-		$definition = $this->sut->get_feature_definition( AiShoppingExperiments::FEATURE_NAME );
+		$definition = $this->sut->get_feature_definition( AiAssistantExperiments::FEATURE_NAME );
 
 		$this->assertNotNull( $definition, 'The feature should be registered.' );
-		$this->assertSame( 'AI shopping experiments', $definition['name'] );
+		$this->assertSame( 'AI assistant experiments', $definition['name'] );
 		$this->assertFalse( $definition['enabled_by_default'], 'The feature should be off by default.' );
 		$this->assertTrue( $definition['is_experimental'], 'The feature should be experimental.' );
-		$this->assertTrue( $this->sut->should_skip_compatibility_checks( AiShoppingExperiments::FEATURE_NAME ), 'Plugin compatibility checks should be skipped.' );
-		$this->assertFalse( $this->sut->feature_is_enabled( AiShoppingExperiments::FEATURE_NAME ), 'The feature should start off.' );
+		$this->assertTrue( $this->sut->should_skip_compatibility_checks( AiAssistantExperiments::FEATURE_NAME ), 'Plugin compatibility checks should be skipped.' );
+		$this->assertFalse( $this->sut->feature_is_enabled( AiAssistantExperiments::FEATURE_NAME ), 'The feature should start off.' );
 	}
 
 	/**
@@ -103,7 +103,7 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_row_is_shown_only_when_agent_readiness_is_on( string $agent_readiness, int $expected_rows ): void {
 		update_option( 'woocommerce_feature_agent_readiness_enabled', $agent_readiness );
-		$option_name = $this->sut->feature_enable_option_name( AiShoppingExperiments::FEATURE_NAME );
+		$option_name = $this->sut->feature_enable_option_name( AiAssistantExperiments::FEATURE_NAME );
 
 		$rows = array_values(
 			array_filter(
@@ -114,10 +114,10 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 
 		$this->assertCount( $expected_rows, $rows );
 		if ( $expected_rows ) {
-			$this->assertSame( 'AI shopping experiments', $rows[0]['title'] );
+			$this->assertSame( 'AI assistant experiments', $rows[0]['title'] );
 			$this->assertSame( 'checkbox', $rows[0]['type'] );
 			$this->assertSame( 'no', $rows[0]['default'], 'The row should default to off.' );
-			$this->assertSame( AiShoppingExperiments::get_description(), $rows[0]['desc'] );
+			$this->assertSame( AiAssistantExperiments::get_description(), $rows[0]['desc'] );
 		}
 	}
 
@@ -127,7 +127,7 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 	public function test_declared_item_ids(): void {
 		$this->assertSame(
 			array( 'webmcp-forms-schema', 'markdown-pages', 'markdown-alternate-link', 'markdown-frontmatter', 'llms-full', 'sitemap-md', 'ai-catalog', 'ard-manifest', 'ai-txt', 'tdmrep' ),
-			AiShoppingExperiments::get_declared_item_ids()
+			AiAssistantExperiments::get_declared_item_ids()
 		);
 	}
 
@@ -135,7 +135,7 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 	 * @testdox While the feature is off and an item the experiments add is missing, Extra details offers them, naming all of them.
 	 */
 	public function test_declared_offers_missing_items_while_off(): void {
-		update_option( 'woocommerce_feature_ai_shopping_experiments_enabled', 'no' );
+		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
 
 		$declared = $this->declared_view(
 			array(
@@ -150,22 +150,22 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $declared['experiments']['enabled'] );
 		$this->assertSame( 'Add newer ways for AI assistants to read and shop your store', $declared['experiments']['offer']['title'] );
 		$this->assertSame(
-			'AI shopping experiments add WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, a Markdown sitemap and AI catalog, and AI training notices. The standards aren’t settled, and few AI assistants use them yet. Turn them off at any time in Features.',
+			'AI assistant experiments add WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, a Markdown sitemap and AI catalog, and AI training notices. The standards aren’t settled, and few AI assistants use them yet. Turn them off at any time in Features.',
 			$declared['experiments']['offer']['text'],
 			'Every experiment is named, as on the Features page, even when only some of their items are missing'
 		);
 		$this->assertArrayNotHasKey( 'experiment', $declared['groups'][0]['items'][0], 'Items are not marked' );
-		$this->assertSame( 'Turn on AI shopping experiments', $declared['experiments']['offer']['button'] );
-		$this->assertSame( 'AI shopping experiments are on. Run the check again to see the new files.', $declared['experiments']['turned_on']['text'] );
+		$this->assertSame( 'Turn on AI assistant experiments', $declared['experiments']['offer']['button'] );
+		$this->assertSame( 'AI assistant experiments are on. Run the check again to see the new files.', $declared['experiments']['turned_on']['text'] );
 		$this->assertSame( 'Run check', $declared['experiments']['turned_on']['button'] );
-		$this->assertSame( 'AI shopping experiments weren’t turned on. Try again.', $declared['experiments']['error'] );
+		$this->assertSame( 'AI assistant experiments weren’t turned on. Try again.', $declared['experiments']['error'] );
 	}
 
 	/**
 	 * @testdox There is no offer when every item the experiments add is found or not checked.
 	 */
 	public function test_declared_has_no_offer_when_nothing_is_missing(): void {
-		update_option( 'woocommerce_feature_ai_shopping_experiments_enabled', 'no' );
+		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
 
 		$declared = $this->declared_view(
 			array(
@@ -182,13 +182,13 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 	 * @testdox Once the feature is on, Extra details says so and links to Features instead of offering it.
 	 */
 	public function test_declared_links_to_features_when_on(): void {
-		update_option( 'woocommerce_feature_ai_shopping_experiments_enabled', 'yes' );
+		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'yes' );
 
 		$declared = $this->declared_view( array( 'ai-txt' => false ) );
 
 		$this->assertTrue( $declared['experiments']['enabled'] );
 		$this->assertNull( $declared['experiments']['offer'] );
-		$this->assertSame( 'AI shopping experiments are on', $declared['experiments']['on']['text'] );
+		$this->assertSame( 'AI assistant experiments are on', $declared['experiments']['on']['text'] );
 		$this->assertSame( 'Turn off in Features', $declared['experiments']['on']['link']['text'] );
 		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ), $declared['experiments']['on']['link']['href'] );
 	}

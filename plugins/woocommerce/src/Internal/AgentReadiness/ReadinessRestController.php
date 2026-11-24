@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * (null before the first scan) and whether a scan is pending, so a settings
  * page can show the last result and poll while a scan runs. POST
  * wc/v3/agent-readiness/ucp turns UCP on or off for the AI tools settings
- * page, POST wc/v3/agent-readiness/ai-shopping-experiments turns the AI shopping
+ * page, POST wc/v3/agent-readiness/ai-assistant-experiments turns the AI shopping
  * experiments feature on, GET wc/v3/agent-readiness/view gives the Sales readiness page and
  * the AI tools Overview what they show, and GET wc/v3/agent-readiness/support-report
  * gives the text file a merchant sends to support.
@@ -171,11 +171,11 @@ class ReadinessRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
-			'/agent-readiness/ai-shopping-experiments',
+			'/agent-readiness/ai-assistant-experiments',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'enable_ai_shopping_experiments' ),
+					'callback'            => fn( $request ) => $this->run( $request, 'enable_ai_assistant_experiments' ),
 					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'manage_woocommerce' ),
 				),
 			)
@@ -269,20 +269,20 @@ class ReadinessRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Turn the AI shopping experiments feature on. Turning it off is left to the Features page.
+	 * Turn the AI assistant experiments feature on. Turning it off is left to the Features page.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return array{enabled:bool}|\WP_Error
 	 */
-	protected function enable_ai_shopping_experiments( WP_REST_Request $request ) {
+	protected function enable_ai_assistant_experiments( WP_REST_Request $request ) {
 		unset( $request );
 		// change_feature_enable() also returns false when the feature is already on, so read the result back.
-		$this->features_controller->change_feature_enable( AiShoppingExperiments::FEATURE_NAME, true );
-		if ( ! $this->features_controller->feature_is_enabled( AiShoppingExperiments::FEATURE_NAME ) ) {
+		$this->features_controller->change_feature_enable( AiAssistantExperiments::FEATURE_NAME, true );
+		if ( ! $this->features_controller->feature_is_enabled( AiAssistantExperiments::FEATURE_NAME ) ) {
 			return new \WP_Error(
-				'woocommerce_ai_shopping_experiments_not_enabled',
-				__( 'AI shopping experiments weren’t turned on. Try again.', 'woocommerce' ),
+				'woocommerce_ai_assistant_experiments_not_enabled',
+				__( 'AI assistant experiments weren’t turned on. Try again.', 'woocommerce' ),
 				array( 'status' => 500 )
 			);
 		}

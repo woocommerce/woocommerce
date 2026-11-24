@@ -167,28 +167,28 @@ describe( 'DeclaredCard', () => {
 	} );
 } );
 
-describe( 'DeclaredCard AI shopping experiments', () => {
+describe( 'DeclaredCard AI assistant experiments', () => {
 	const experiments = (
 		overrides: Partial< DeclaredExperiments > = {}
 	): DeclaredExperiments => ( {
 		enabled: false,
 		offer: {
 			title: 'Add newer ways for AI assistants to read and shop your store',
-			text: 'AI shopping experiments add WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, a Markdown sitemap and AI catalog, and AI training notices. The standards aren’t settled, and few AI assistants use them yet. Turn them off at any time in Features.',
-			button: 'Turn on AI shopping experiments',
+			text: 'AI assistant experiments add WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, a Markdown sitemap and AI catalog, and AI training notices. The standards aren’t settled, and few AI assistants use them yet. Turn them off at any time in Features.',
+			button: 'Turn on AI assistant experiments',
 		},
 		turned_on: {
-			text: 'AI shopping experiments are on. Run the check again to see the new files.',
+			text: 'AI assistant experiments are on. Run the check again to see the new files.',
 			button: 'Run check',
 		},
 		on: {
-			text: 'AI shopping experiments are on',
+			text: 'AI assistant experiments are on',
 			link: {
 				href: 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features',
 				text: 'Turn off in Features',
 			},
 		},
-		error: 'AI shopping experiments weren’t turned on. Try again.',
+		error: 'AI assistant experiments weren’t turned on. Try again.',
 		...overrides,
 	} );
 
@@ -239,11 +239,11 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 			'Add newer ways for AI assistants to read and shop your store'
 		);
 		expect( notice ).toHaveTextContent(
-			'AI shopping experiments add WebMCP on store forms, Markdown versions of pages'
+			'AI assistant experiments add WebMCP on store forms, Markdown versions of pages'
 		);
 		expect(
 			screen.getByRole( 'button', {
-				name: 'Turn on AI shopping experiments',
+				name: 'Turn on AI assistant experiments',
 			} )
 		).toBeInTheDocument();
 		expect(
@@ -268,17 +268,17 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 
 		await userEvent.click(
 			screen.getByRole( 'button', {
-				name: 'Turn on AI shopping experiments',
+				name: 'Turn on AI assistant experiments',
 			} )
 		);
 
 		expect( mockApiFetch ).toHaveBeenCalledWith( {
-			path: '/wc/v3/agent-readiness/ai-shopping-experiments',
+			path: '/wc/v3/agent-readiness/ai-assistant-experiments',
 			method: 'POST',
 		} );
 		expect(
 			await screen.findByText(
-				'AI shopping experiments are on. Run the check again to see the new files.'
+				'AI assistant experiments are on. Run the check again to see the new files.'
 			)
 		).toBeInTheDocument();
 
@@ -295,7 +295,7 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 		);
 		expect(
 			screen.getByText(
-				'AI shopping experiments are on. Run the check again to see the new files.'
+				'AI assistant experiments are on. Run the check again to see the new files.'
 			)
 		).toBeInTheDocument();
 
@@ -309,7 +309,7 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 		);
 		expect(
 			screen.queryByText(
-				'AI shopping experiments are on. Run the check again to see the new files.'
+				'AI assistant experiments are on. Run the check again to see the new files.'
 			)
 		).not.toBeInTheDocument();
 		expect(
@@ -329,18 +329,18 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 
 		await userEvent.click(
 			screen.getByRole( 'button', {
-				name: 'Turn on AI shopping experiments',
+				name: 'Turn on AI assistant experiments',
 			} )
 		);
 
 		expect(
 			await screen.findByText(
-				'AI shopping experiments weren’t turned on. Try again.'
+				'AI assistant experiments weren’t turned on. Try again.'
 			)
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole( 'button', {
-				name: 'Turn on AI shopping experiments',
+				name: 'Turn on AI assistant experiments',
 			} )
 		).toBeInTheDocument();
 	} );
@@ -359,7 +359,7 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 		expect(
 			container.querySelector( '.wc-sales-readiness-experiments__on' )
 		).toHaveTextContent(
-			'AI shopping experiments are on · Turn off in Features'
+			'AI assistant experiments are on · Turn off in Features'
 		);
 		expect(
 			screen.getByRole( 'link', { name: 'Turn off in Features' } )
@@ -369,7 +369,7 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 		);
 		expect(
 			screen.queryByRole( 'button', {
-				name: 'Turn on AI shopping experiments',
+				name: 'Turn on AI assistant experiments',
 			} )
 		).not.toBeInTheDocument();
 	} );
@@ -385,11 +385,11 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 
 		expect(
 			screen.queryByRole( 'button', {
-				name: 'Turn on AI shopping experiments',
+				name: 'Turn on AI assistant experiments',
 			} )
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByText( 'AI shopping experiments are on' )
+			screen.queryByText( 'AI assistant experiments are on' )
 		).not.toBeInTheDocument();
 	} );
 
