@@ -162,22 +162,6 @@ CSS;
 	}
 
 	/**
-	 * Resolve the style of the button that opens the overlay.
-	 *
-	 * Blocks saved before the style setting existed have no value. They keep the
-	 * plain button, so updating WooCommerce doesn't change how stores look.
-	 * Keep in sync with getOverlayButtonStyle() in JS.
-	 *
-	 * @param array $attributes Block attributes.
-	 * @return string Button style: plain or button.
-	 */
-	private function get_overlay_button_style( $attributes ) {
-		$button_style = $attributes['overlayButtonStyle'] ?? null;
-
-		return 'button' === $button_style ? 'button' : 'plain';
-	}
-
-	/**
 	 * Include and render the block.
 	 *
 	 * @param array    $attributes Block attributes. Default empty array.
@@ -250,9 +234,9 @@ CSS;
 		$overlay_mode     = $this->get_overlay_mode( $attributes );
 		$has_overlay      = 'off' !== $overlay_mode;
 		$overlay_position = isset( $attributes['overlayPosition'] ) && 'right' === $attributes['overlayPosition'] ? 'right' : 'left';
-		$button_style     = $this->get_overlay_button_style( $attributes );
+		$is_button_style  = isset( $attributes['overlayButtonStyle'] ) && 'button' === $attributes['overlayButtonStyle'];
 		$button_classes   = array( 'wc-block-product-filters__open-overlay' );
-		if ( 'button' === $button_style ) {
+		if ( $is_button_style ) {
 			$button_classes[] = wp_theme_get_element_class_name( 'button' );
 		}
 
@@ -271,7 +255,7 @@ CSS;
 		if ( $has_overlay && 'right' === $overlay_position ) {
 			$wrapper_classes[] = 'is-overlay-right';
 		}
-		if ( $has_overlay && 'button' === $button_style ) {
+		if ( $has_overlay && $is_button_style ) {
 			$wrapper_classes[] = 'has-styled-overlay-button';
 		}
 
