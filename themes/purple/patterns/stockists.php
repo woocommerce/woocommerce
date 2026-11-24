@@ -26,7 +26,7 @@
 <!-- wp:group {"metadata":{"categories":["purple"],"patternName":"purple/stockists"},"align":"full","style":{"spacing":{"margin":{"top":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="margin-top:var(--wp--preset--spacing--70)"><!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|140"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Europe', 'Block name', 'purple' ) ); ?>},"layout":{"type":"default"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( __( 'Europe', 'purple' ) ); ?>},"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
 <h2 class="wp-block-heading"><?php esc_html_e( 'Europe', 'purple' );?></h2>
 <!-- /wp:heading -->
@@ -148,7 +148,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:column -->
 
 <!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|140"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'North America', 'Block name', 'purple' ) ); ?>},"layout":{"type":"default"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( __( 'North America', 'purple' ) ); ?>},"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
 <h2 class="wp-block-heading"><?php esc_html_e( 'North America', 'purple' );?></h2>
 <!-- /wp:heading -->
@@ -208,7 +208,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:columns --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'South America', 'Block name', 'purple' ) ); ?>},"layout":{"type":"default"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( __( 'South America', 'purple' ) ); ?>},"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
 <h2 class="wp-block-heading"><?php esc_html_e( 'South America', 'purple' );?></h2>
 <!-- /wp:heading -->
