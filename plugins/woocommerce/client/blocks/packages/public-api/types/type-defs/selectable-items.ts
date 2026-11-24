@@ -17,9 +17,10 @@ export type SelectableItem< T = unknown > = (
 	 */
 	looksDisabled?: boolean;
 	/**
-	 * Tooltip text for the item. Inner blocks may ignore it.
+	 * Short status text for the item, e.g. "Out of stock". Inner blocks may
+	 * show it as a tooltip and expose it to assistive technology.
 	 */
-	title?: string;
+	description?: string;
 	type?: string;
 } & T;
 

@@ -263,7 +263,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			wp_interactivity_config(
 				'woocommerce/add-to-cart-with-options',
 				array(
-					'errorMessages'         => array(
+					'errorMessages'               => array(
 						'invalidQuantities'                => esc_html__(
 							'Please select a valid quantity to add to the cart.',
 							'woocommerce'
@@ -285,8 +285,8 @@ class AddToCartWithOptions extends AbstractBlock {
 							$product->get_name()
 						),
 					),
-					// Not HTML-escaped: used as a title attribute value, and wp_interactivity_config() JSON-encodes it.
-					'variationOptionTitles' => array(
+					// Not HTML-escaped: used as attribute and text values, and wp_interactivity_config() JSON-encodes it.
+					'variationOptionDescriptions' => array(
 						'outOfStock' => __( 'Out of stock', 'woocommerce' ),
 					),
 				)

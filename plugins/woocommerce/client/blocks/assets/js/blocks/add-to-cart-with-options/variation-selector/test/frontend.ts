@@ -132,7 +132,7 @@ describe( 'Add to Cart + Options variation selector store', () => {
 				variableProductMissingAttributes: 'Choose options.',
 				variableProductOutOfStock: 'Variation unavailable.',
 			},
-			variationOptionTitles: {
+			variationOptionDescriptions: {
 				outOfStock: 'Out of stock',
 			},
 		} );
@@ -252,12 +252,12 @@ describe( 'Add to Cart + Options variation selector store', () => {
 				disabled: false,
 				hidden: false,
 				looksDisabled: true,
-				title: 'Out of stock',
+				description: 'Out of stock',
 			} );
 			expect( items.m ).toMatchObject( {
 				disabled: false,
 				looksDisabled: false,
-				title: undefined,
+				description: undefined,
 			} );
 		} );
 
@@ -271,7 +271,7 @@ describe( 'Add to Cart + Options variation selector store', () => {
 				selected: true,
 				disabled: false,
 				looksDisabled: true,
-				title: 'Out of stock',
+				description: 'Out of stock',
 			} );
 			expect( items.m ).toMatchObject( {
 				disabled: false,
@@ -328,7 +328,7 @@ describe( 'Add to Cart + Options variation selector store', () => {
 			expect( items.l ).toMatchObject( {
 				disabled: true,
 				looksDisabled: false,
-				title: undefined,
+				description: undefined,
 			} );
 		} );
 

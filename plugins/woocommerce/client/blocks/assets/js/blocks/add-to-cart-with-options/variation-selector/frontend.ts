@@ -300,8 +300,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				} = context;
 				const { selectedAttributes } = state;
 				const hideInvalid = disabledAttributesAction === 'hide';
-				const outOfStockTitle =
-					getConfig()?.variationOptionTitles?.outOfStock ?? '';
+				const outOfStockDescription =
+					getConfig()?.variationOptionDescriptions?.outOfStock ?? '';
 
 				if ( ! Array.isArray( variationAttributeOptions ) ) {
 					return [];
@@ -331,7 +331,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						disabled,
 						hidden: hideInvalid && disabled,
 						looksDisabled: outOfStock,
-						title: outOfStock ? outOfStockTitle : undefined,
+						description: outOfStock
+							? outOfStockDescription
+							: undefined,
 						...( row.visual !== undefined && {
 							visual: row.visual,
 						} ),

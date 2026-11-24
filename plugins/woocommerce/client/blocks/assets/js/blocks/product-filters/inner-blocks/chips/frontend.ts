@@ -35,6 +35,8 @@ type ChipsContext = {
 type ChipsStore = {
 	state: {
 		items: ChipsItem[];
+		itemTitle: string | undefined;
+		descriptionId: string | undefined;
 		swatchHidden: boolean;
 		swatchStyle: string;
 	};
@@ -117,6 +119,25 @@ const { state }: ChipsStore = store< ChipsStore >(
 							! item.selected &&
 							index >= normalizedDisplayLimit ),
 				} ) );
+			},
+			get itemTitle(): string | undefined {
+				const item = getCurrentItem();
+				if ( ! item ) {
+					return undefined;
+				}
+				// Swatches show the label in their tooltip, as the text is hidden.
+				if ( item.visual !== undefined ) {
+					return item.description
+						? `${ item.label } (${ item.description })`
+						: item.label;
+				}
+				return item.description || undefined;
+			},
+			get descriptionId(): string | undefined {
+				const item = getCurrentItem();
+				return item?.description && item.id
+					? `${ item.id }-description`
+					: undefined;
 			},
 			get swatchHidden(): boolean {
 				const item = getCurrentItem();
