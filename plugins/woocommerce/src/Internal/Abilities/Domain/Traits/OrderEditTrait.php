@@ -197,13 +197,18 @@ trait OrderEditTrait {
 
 	/**
 	 * Set the payment method and its title in memory. Only an enabled gateway is accepted. Nothing is charged
-	 * or captured: the gateway only names how the order was paid.
+	 * or captured: the gateway only names how the order was paid. The gateway the order already has changes
+	 * nothing, so a title that a gateway set for this order stays.
 	 *
 	 * @param \WC_Order $order      Order.
 	 * @param string    $gateway_id Gateway ID sent by the client.
 	 * @return null|\WP_Error
 	 */
 	private static function set_payment_method( \WC_Order $order, string $gateway_id ): ?\WP_Error {
+		if ( '' !== $gateway_id && $order->get_payment_method() === $gateway_id ) {
+			return null;
+		}
+
 		$enabled = array_filter(
 			WC()->payment_gateways()->payment_gateways(),
 			static fn( $gateway ) => $gateway instanceof \WC_Payment_Gateway && 'yes' === $gateway->enabled
