@@ -25,17 +25,8 @@ class TelemetryTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		delete_option( AgentReadiness::REPORT_OPTION );
 		$this->sut = wc_get_container()->get( Telemetry::class );
-	}
-
-	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		delete_option( 'woocommerce_feature_agent_readiness_enabled' );
-		parent::tearDown();
 	}
 
 	/**
@@ -108,22 +99,6 @@ class TelemetryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With the feature off, the snapshot says so and reads nothing else.
-	 */
-	public function test_feature_off(): void {
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
-		$this->store_report();
-
-		$snapshot = $this->sut->snapshot();
-
-		$this->assertSame( 'no', $snapshot['feature_enabled'] );
-		$this->assertSame( '', $snapshot['last_scan'] );
-		$this->assertSame( 'no', $snapshot['truncated'] );
-		$this->assertSame( array(), $snapshot['store_checks'] );
-		$this->assertSame( array(), $snapshot['product_checks'] );
-	}
-
-	/**
 	 * @testdox Before the first scan, the snapshot has the setup steps but no scan date or product checks.
 	 */
 	public function test_before_the_first_scan(): void {
@@ -162,7 +137,7 @@ class TelemetryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The snapshot sends the catalog search counts, and none with the feature off.
+	 * @testdox The snapshot sends the catalog search counts.
 	 */
 	public function test_catalog_search_counts(): void {
 		$counts = array(
@@ -179,9 +154,6 @@ class TelemetryTest extends WC_Unit_Test_Case {
 		update_option( StoreOutputChecks::SEARCH_COUNTS_OPTION, $counts );
 
 		$this->assertSame( $counts, $this->sut->snapshot()['ucp_search'] );
-
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
-		$this->assertArrayNotHasKey( 'ucp_search', $this->sut->snapshot() );
 	}
 
 	/**
