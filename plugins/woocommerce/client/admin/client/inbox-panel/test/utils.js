@@ -50,13 +50,16 @@ describe( 'truncateRenderableHTML', () => {
 		);
 	} );
 
-	test( 'it still truncates in browsers without Intl.Segmenter', () => {
+	test( 'it keeps graphemes intact without Intl.Segmenter', () => {
 		const segmenter = Intl.Segmenter;
 		Intl.Segmenter = undefined;
 
 		try {
-			expect( truncateRenderableHTML( '<div>abcdef</div>', 3 ) ).toBe(
-				'<div>abc</div>...'
+			expect( truncateRenderableHTML( '<div>e\u0301clair</div>', 1 ) ).toBe(
+				'<div>e\u0301</div>...'
+			);
+			expect( truncateRenderableHTML( '<div>👨‍👩‍👧 family</div>', 1 ) ).toBe(
+				'<div>👨‍👩‍👧</div>...'
 			);
 		} finally {
 			Intl.Segmenter = segmenter;

@@ -2,10 +2,14 @@
  * External dependencies
  */
 import { filter } from 'lodash';
+import GraphemeSplitter from 'grapheme-splitter';
+
 let segmenter;
+let fallbackSplitter;
 const splitGraphemes = ( text ) => {
 	if ( typeof Intl.Segmenter !== 'function' ) {
-		return Array.from( text );
+		fallbackSplitter ??= new GraphemeSplitter();
+		return fallbackSplitter.splitGraphemes( text );
 	}
 	segmenter ??= new Intl.Segmenter( undefined, { granularity: 'grapheme' } );
 	return Array.from( segmenter.segment( text ), ( { segment } ) => segment );

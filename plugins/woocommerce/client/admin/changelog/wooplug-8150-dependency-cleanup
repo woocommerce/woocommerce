@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Keep letter clusters together when shortening inbox notes in browsers that support grapheme segmentation.

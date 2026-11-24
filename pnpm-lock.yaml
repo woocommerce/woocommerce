@@ -3268,6 +3268,9 @@ importers:
       downshift:
         specifier: ^9.0.8
         version: 9.3.2(react@18.3.1)
+      grapheme-splitter:
+        specifier: ^1.0.4
+        version: 1.0.4
       gridicons:
         specifier: ^3.4.2
         version: 3.4.2(react@18.3.1)
@@ -14479,6 +14482,9 @@ packages:
   gradient-parser@1.1.1:
     resolution: {integrity: sha512-Hu0YfNU+38EsTmnUfLXUKFMXq9yz7htGYpF4x+dlbBhUCvIvzLt0yVLT/gJRmvLKFJdqNFrz4eKkIUjIXSr7Tw==}
     engines: {node: '>=0.10.0'}
+
+  grapheme-splitter@1.0.4:
+    resolution: {integrity: sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==}
 
   graphlib@2.1.8:
     resolution: {integrity: sha512-jcLLfkpoVGmH7/InMC/1hIvOPSUh38oJtGhvrOFGzioE1DZ+0YW16RgmOJhHiuWTvGiJQ9Z1Ik43JvkRPRvE+A==}
@@ -37451,6 +37457,8 @@ snapshots:
   gradient-parser@1.0.2: {}
 
   gradient-parser@1.1.1: {}
+
+  grapheme-splitter@1.0.4: {}
 
   graphlib@2.1.8:
     dependencies:
