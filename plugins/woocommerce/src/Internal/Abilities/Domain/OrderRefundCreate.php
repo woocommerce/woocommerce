@@ -21,8 +21,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Refunds an order with wc_create_refund(), as the admin screen and the REST API do, after checking that the
  * call does not repeat a recent refund. The `order_refund` fields and validators run on the refund that
- * wc_create_refund() built, before the payment gateway is called. The syncs run after it returns, outside the
- * rollback, because a rollback cannot undo a gateway refund.
+ * wc_create_refund() built, before the payment gateway is called. The `order_refund` syncs, and the `order` syncs
+ * with the parent order that wc_create_refund() saved, run after it returns, outside the rollback, because a
+ * rollback cannot undo a gateway refund.
  */
 class OrderRefundCreate extends ActionableAbility {
 
@@ -406,7 +407,11 @@ class OrderRefundCreate extends ActionableAbility {
 				);
 			}
 
-			$objects  = array( array( $result, $updates, $this->get_resource() ) );
+			$objects = array( array( $result, $updates, $this->get_resource() ) );
+			$parent  = $enabled ? wc_get_order( $order_id ) : null;
+			if ( $parent instanceof \WC_Order ) {
+				$objects[] = array( $parent, array(), 'order' );
+			}
 			$response = $enabled ? DatabaseTransaction::run( fn() => $this->sync( $objects, $input ) ) : null;
 			if ( is_wp_error( $response ) ) {
 				self::forget_rolled_back_objects( $objects );

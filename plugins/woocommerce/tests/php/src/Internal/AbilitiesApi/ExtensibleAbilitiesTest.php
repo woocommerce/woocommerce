@@ -3269,18 +3269,20 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep the paid refund, roll back the sync writes and name the refund when a refund sync refuses.
+	 * @testdox Should keep the paid refund, roll back the sync writes and name the refund when an order sync refuses after a refund.
 	 */
 	public function test_order_refund_create_refused_by_a_sync_keeps_the_paid_refund(): void {
 		global $wpdb;
 
 		$this->register_sync(
-			'order_refund',
+			'order',
 			'test-ext',
 			static function ( array $saved ) {
 				update_option( 'test_refund_sync', 'written' );
-				$saved[0]->update_meta_data( '_test_sync', 'written' );
-				$saved[0]->save();
+				foreach ( $saved as $saved_order ) {
+					$saved_order->update_meta_data( '_test_sync', 'written' );
+					$saved_order->save();
+				}
 				return new \WP_Error( 'sync_failed', 'The return could not be recorded.' );
 			}
 		);
@@ -3304,6 +3306,33 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertTrue( $result->get_error_data()['refunded_payment'] );
 		$this->assertNull( $wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name = 'test_refund_sync'" ), 'The sync write should be rolled back.' );
 		$this->assertSame( '', wc_get_order( $refunds[0]->get_id() )->get_meta( '_test_sync' ), 'The rollback should drop the cache of the refund that the sync saved.' );
+		$this->assertSame( '', wc_get_order( $order_id )->get_meta( '_test_sync' ), 'The rollback should drop the cache of the order that the sync saved.' );
+	}
+
+	/**
+	 * @testdox Should run the order syncs once with the parent order that a full or a partial refund saved.
+	 */
+	public function test_order_refund_create_runs_the_order_syncs_with_the_parent_order(): void {
+		$synced = array();
+		$this->register_sync(
+			'order',
+			'test-ext',
+			static function ( array $saved ) use ( &$synced ) {
+				foreach ( $saved as $saved_order ) {
+					if ( $saved_order instanceof \WC_Order ) {
+						$synced[] = $saved_order->get_status();
+					}
+				}
+				return null;
+			}
+		);
+
+		$this->refund_through_gateway( array( 'amount' => '5' ) );
+		$this->assertSame( array( OrderStatus::PROCESSING ), $synced, 'A partial refund saves the order, so the order syncs should run once.' );
+
+		$synced = array();
+		$this->refund_through_gateway( array( 'amount' => '50' ) );
+		$this->assertSame( array( OrderStatus::REFUNDED ), $synced, 'A full refund should give the order syncs the order in its refunded status.' );
 	}
 
 	/**

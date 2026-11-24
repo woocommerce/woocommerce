@@ -706,10 +706,10 @@ class ExtensibleAbilities {
 	 * object. It can run with no saved objects when a call only deletes, and then
 	 * it reads the deleted objects from the context.
 	 *
-	 * order-refund-create runs the `order_refund` syncs after wc_create_refund()
-	 * returns, because a rollback cannot undo a payment gateway refund. A refusal
-	 * there undoes only the writes of the syncs: the refund stays, and the call
-	 * fails with `saved` set to true and the refund ID in the error data.
+	 * order-refund-create runs the `order_refund` syncs, and the `order` syncs with
+	 * the parent order that wc_create_refund() saved, after it returns, because a
+	 * rollback cannot undo a payment gateway refund. A refusal there undoes only
+	 * the writes of the syncs: the refund stays, and the call fails with `saved` set to true and the refund ID in the error data.
 	 *
 	 * @since 11.4.0
 	 *
