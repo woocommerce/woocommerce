@@ -154,26 +154,29 @@ export default class PackagePrepare extends Command {
 				);
 			}
 
-			const refreshLock =
-				packageType === 'php' &&
-				existsSync( `${ filepath }/composer.lock` );
-			const originalManifest = refreshLock
-				? readFileSync( jsonFilepath )
-				: null;
+			const lockFilepath = `${ filepath }/composer.lock`;
+			const originalFiles =
+				packageType === 'php' && existsSync( lockFilepath )
+					? {
+							manifest: readFileSync( jsonFilepath ),
+							lockfile: readFileSync( lockFilepath ),
+						}
+					: null;
 			json.version = version;
 			writeFileSync(
 				jsonFilepath,
 				JSON.stringify( json, null, '\t' ) + '\n'
 			);
 
-			if ( originalManifest ) {
+			if ( originalFiles ) {
 				try {
 					execSync(
 						'composer update --lock --no-install --no-scripts --no-plugins --no-interaction',
 						{ cwd: filepath, stdio: 'inherit' }
 					);
 				} catch ( error ) {
-					writeFileSync( jsonFilepath, originalManifest );
+					writeFileSync( jsonFilepath, originalFiles.manifest );
+					writeFileSync( lockFilepath, originalFiles.lockfile );
 					throw error;
 				}
 			}
