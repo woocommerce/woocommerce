@@ -24,6 +24,17 @@ class OrderUpdateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Reload the gateways, whose instances and cached settings outlive the rolled-back gateway settings.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		wp_cache_flush();
+		WC()->payment_gateways()->payment_gateways = array();
+		WC()->payment_gateways()->init();
+	}
+
+	/**
 	 * Feature states.
 	 *
 	 * @return array<string, array{0: bool}>
@@ -380,6 +391,72 @@ class OrderUpdateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should set the payment method and its title from an enabled gateway, without paying the order.
+	 *
+	 * @dataProvider feature_states
+	 * @param bool $enabled Whether the extensible abilities feature is on.
+	 */
+	public function test_sets_the_payment_method_without_paying_the_order( bool $enabled ): void {
+		$this->set_feature( $enabled );
+		$this->enable_gateway( 'cheque', 'Purchase order' );
+		$order = WC_Helper_Order::create_order();
+
+		$result = $this->execute(
+			array(
+				'id'             => $order->get_id(),
+				'payment_method' => 'cheque',
+			)
+		);
+
+		$this->assertSame( 'cheque', $result['order']['payment_method'] );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'cheque', $order->get_payment_method() );
+		$this->assertSame( 'Purchase order', $order->get_payment_method_title() );
+		$this->assertSame( OrderStatus::PENDING, $order->get_status() );
+		$this->assertNull( $order->get_date_paid() );
+	}
+
+	/**
+	 * @testdox Should refuse a gateway that is not enabled, name the enabled gateways, and save nothing.
+	 */
+	public function test_refuses_a_payment_method_that_is_not_enabled(): void {
+		$this->enable_gateway( 'bacs', 'Bank transfer' );
+		$order = WC_Helper_Order::create_order();
+
+		$error = $this->execute_error(
+			array(
+				'id'             => $order->get_id(),
+				'payment_method' => 'cheque',
+				'customer_note'  => 'Paid by purchase order.',
+			)
+		);
+
+		$this->assertSame( array( 'woocommerce_ability_order_payment_method_invalid' ), $error->get_error_codes() );
+		$this->assertStringEndsWith( 'Send one of: bacs.', $error->get_error_message(), 'Only enabled gateways should be offered.' );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'bacs', $order->get_payment_method() );
+		$this->assertSame( '', $order->get_customer_note() );
+	}
+
+	/**
+	 * @testdox Should keep the payment method title when the call sends the gateway the order already has, even a disabled one.
+	 */
+	public function test_keeps_the_payment_method_title_when_the_gateway_does_not_change(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_payment_method_title( 'Bank transfer (ref 123)' );
+		$order->save();
+
+		$this->execute(
+			array(
+				'id'             => $order->get_id(),
+				'payment_method' => 'bacs',
+			)
+		);
+
+		$this->assertSame( 'Bank transfer (ref 123)', wc_get_order( $order->get_id() )->get_payment_method_title() );
+	}
+
+	/**
 	 * Run order-update and check it succeeded.
 	 *
 	 * @param array $input Ability input.
@@ -414,5 +491,23 @@ class OrderUpdateTest extends WC_Unit_Test_Case {
 	 */
 	private function set_feature( bool $enabled ): void {
 		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', $enabled ? 'yes' : 'no' );
+	}
+
+	/**
+	 * Enable a gateway with a title, and reload the gateways so the change applies.
+	 *
+	 * @param string $id    Gateway ID.
+	 * @param string $title Gateway title.
+	 */
+	private function enable_gateway( string $id, string $title ): void {
+		update_option(
+			'woocommerce_' . $id . '_settings',
+			array(
+				'enabled' => 'yes',
+				'title'   => $title,
+			)
+		);
+		WC()->payment_gateways()->payment_gateways = array();
+		WC()->payment_gateways()->init();
 	}
 }

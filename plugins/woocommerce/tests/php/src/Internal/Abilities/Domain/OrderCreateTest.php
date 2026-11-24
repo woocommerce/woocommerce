@@ -24,6 +24,17 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Reload the gateways, whose instances and cached settings outlive the rolled-back gateway settings.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		wp_cache_flush();
+		WC()->payment_gateways()->payment_gateways = array();
+		WC()->payment_gateways()->init();
+	}
+
+	/**
 	 * Feature states.
 	 *
 	 * @return array<string, array{0: bool}>
@@ -178,13 +189,14 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse every bad customer, address and line in one error, and create no order.
+	 * @testdox Should refuse every bad customer, address, payment method and line in one error, and create no order.
 	 *
 	 * @dataProvider feature_states
 	 * @param bool $enabled Whether the extensible abilities feature is on.
 	 */
 	public function test_refuses_bad_input_and_creates_nothing( bool $enabled ): void {
 		$this->set_feature( $enabled );
+		$this->enable_gateway( 'bacs', 'Bank transfer' );
 		$variable = WC_Helper_Product::create_variation_product();
 		$before   = $this->get_order_ids();
 
@@ -193,6 +205,7 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 				'customer_id'    => PHP_INT_MAX,
 				'status'         => OrderStatus::PROCESSING,
 				'billing'        => array( 'email' => 'not-an-email' ),
+				'payment_method' => 'unknown_gateway',
 				'line_items'     => array(
 					array( 'product_id' => PHP_INT_MAX ),
 					array( 'product_id' => $variable->get_id() ),
@@ -210,6 +223,7 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 			array(
 				'woocommerce_ability_order_customer_not_found',
 				'woocommerce_ability_order_billing_email_invalid',
+				'woocommerce_ability_order_payment_method_invalid',
 				'woocommerce_ability_order_product_not_found',
 				'woocommerce_ability_order_product_variable',
 				'woocommerce_ability_order_shipping_line_total_invalid',
@@ -217,6 +231,31 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 			$error->get_error_codes()
 		);
 		$this->assertEqualsCanonicalizing( $before, $this->get_order_ids() );
+	}
+
+	/**
+	 * @testdox Should create a pending order with the payment method and its title from an enabled gateway.
+	 *
+	 * @dataProvider feature_states
+	 * @param bool $enabled Whether the extensible abilities feature is on.
+	 */
+	public function test_creates_an_order_with_a_payment_method( bool $enabled ): void {
+		$this->set_feature( $enabled );
+		$this->enable_gateway( 'cheque', 'Purchase order' );
+		$product = WC_Helper_Product::create_simple_product();
+
+		$result = $this->execute(
+			array(
+				'payment_method' => 'cheque',
+				'line_items'     => array( array( 'product_id' => $product->get_id() ) ),
+			)
+		);
+
+		$order = wc_get_order( $result['order']['id'] );
+		$this->assertSame( 'cheque', $order->get_payment_method() );
+		$this->assertSame( 'Purchase order', $order->get_payment_method_title() );
+		$this->assertSame( OrderStatus::PENDING, $order->get_status() );
+		$this->assertNull( $order->get_date_paid() );
 	}
 
 	/**
@@ -427,5 +466,23 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 	 */
 	private function set_feature( bool $enabled ): void {
 		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', $enabled ? 'yes' : 'no' );
+	}
+
+	/**
+	 * Enable a gateway with a title, and reload the gateways so the change applies.
+	 *
+	 * @param string $id    Gateway ID.
+	 * @param string $title Gateway title.
+	 */
+	private function enable_gateway( string $id, string $title ): void {
+		update_option(
+			'woocommerce_' . $id . '_settings',
+			array(
+				'enabled' => 'yes',
+				'title'   => $title,
+			)
+		);
+		WC()->payment_gateways()->payment_gateways = array();
+		WC()->payment_gateways()->init();
 	}
 }
