@@ -70,6 +70,14 @@ class ExtensibleAbilities {
 	private static array $primes = array();
 
 	/**
+	 * Entries that the prime callbacks returned for the last list of each resource,
+	 * keyed by resource, then object instance, then namespace.
+	 *
+	 * @var array<string, \SplObjectStorage<object, array<string, mixed>>>
+	 */
+	private static array $primed = array();
+
+	/**
 	 * Whether the store enabled the experimental feature.
 	 *
 	 * @since 11.3.0
@@ -155,7 +163,12 @@ class ExtensibleAbilities {
 	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
 	 *                                  The abilities leave the field out of the other objects and refuse a write
 	 *                                  to them. Omit it for every type.
-	 *     @type callable $get_callback Optional. Receives the object and returns the value. A field without it
+	 *     @type callable $get_callback Optional. Receives the object and the entry that the prime callback of the
+	 *                                  same namespace returned for it, and returns the value. The entry is null
+	 *                                  when no list was loaded for the object, or when the prime callback failed
+	 *                                  or returned no array.
+	 *                                  The callback then loads the data of that one object itself. A callback
+	 *                                  that needs no entry can take only the object. A field without it
 	 *                                  is not in the output. Required with `output_schema`. Return null when the
 	 *                                  object has no value, and the field is left out with no error. Any other
 	 *                                  value that `output_schema` does not allow fails the call with
@@ -716,10 +729,11 @@ class ExtensibleAbilities {
 	 * Register a prime callback on a resource. Before an ability formats a list
 	 * of objects of the resource, Core calls every prime callback of the
 	 * resource once, with the full list. An extension loads the data of its
-	 * fields for the whole list in one query, keeps it in its own cache, and
-	 * its get_callback reads from there.
+	 * fields for the whole list in one query and returns it. Core passes the
+	 * entry of each object to the get_callbacks of the same namespace.
 	 *
-	 * Call it inside the `woocommerce_extensible_abilities_init` action. Prime
+	 * Call it inside the `woocommerce_extensible_abilities_init` action. A namespace
+	 * has one prime callback per resource, and a second one is refused. Prime
 	 * callbacks run only when the `extensible_abilities` feature is on, in the
 	 * order they were registered.
 	 *
@@ -730,20 +744,26 @@ class ExtensibleAbilities {
 	 *
 	 *     @type string   $resource  Resource that an ability formats, such as `product`.
 	 *     @type string   $namespace Slug of the extension that owns the callback, such as `google`.
-	 *     @type callable $callback  Receives `object[] $objects`, every object the ability formats. The
-	 *                               callback skips the objects it does not need. Core ignores the
-	 *                               return value. When it throws, Core logs the error and formats
-	 *                               the objects anyway, so the get_callback must still load its
-	 *                               data for an object that is not in the cache. Core calls prime
-	 *                               callbacks only on reads, not on writes. Key the cache by object ID,
-	 *                               and remove the entry of an object when the object is saved, for
-	 *                               example on `woocommerce_update_product`. Otherwise a write after a
-	 *                               read in the same request returns the old value. Empty the cache at the start of
-	 *                               every call, so a failed load leaves no old entries.
+	 *     @type callable $callback  Receives `object[] $objects`, every object the ability formats, and
+	 *                               returns an array keyed by object ID, with only the objects that have
+	 *                               data. Each object of the list gets its entry, and an object the array
+	 *                               leaves out gets an empty array. Data that the whole list shares goes
+	 *                               in the entry of each object. Core reads the ID with `get_id()`, or
+	 *                               from the `term_id`, `comment_ID` or `ID` property. When the callback
+	 *                               throws, Core logs the error, and the get_callbacks get null. They
+	 *                               also get null when it returns no array, which Core reports with
+	 *                               wc_doing_it_wrong(). Core keeps an entry until the get_callbacks of
+	 *                               its object have read it, or until the next list of the resource, so
+	 *                               a write never gets an old entry. Core calls prime callbacks only on
+	 *                               reads, not on writes.
 	 * }
 	 */
 	public static function register_prime( array $args ): void {
 		if ( ! self::check_callback_args( $args, __METHOD__, 'prime callback', '11.4.0' ) ) {
+			return;
+		}
+		if ( in_array( $args['namespace'], array_column( self::$primes[ $args['resource'] ] ?? array(), 'namespace' ), true ) ) {
+			wc_doing_it_wrong( __METHOD__, sprintf( 'The "%1$s" namespace already has a prime callback for "%2$s". Load the data of all its fields in that one callback.', $args['namespace'], $args['resource'] ), '11.5.0' );
 			return;
 		}
 
@@ -752,9 +772,11 @@ class ExtensibleAbilities {
 
 	/**
 	 * Call every prime callback of a resource with the objects that an ability
-	 * is about to format. A callback that throws is logged, and the next one runs.
-	 * An extension that registers its own resource calls it from its list
-	 * abilities before add_fields_to_object(), as Core's abilities do.
+	 * is about to format, and keep the entries they return for add_fields_to_object().
+	 * The entries replace those of the last list of the resource. A callback that
+	 * throws is logged, and the next one runs. An extension that registers its own
+	 * resource calls it from its list abilities before add_fields_to_object(), as
+	 * Core's abilities do.
 	 *
 	 * @since 11.4.0
 	 *
@@ -762,18 +784,48 @@ class ExtensibleAbilities {
 	 * @param object[] $objects       Objects to format.
 	 */
 	public static function prime( string $resource_name, array $objects ): void {
+		unset( self::$primed[ $resource_name ] );
 		if ( empty( self::$primes[ $resource_name ] ) || empty( $objects ) || ! self::is_enabled() ) {
 			return;
 		}
 
 		$objects = array_values( $objects );
+		$primed  = new \SplObjectStorage();
 		foreach ( self::$primes[ $resource_name ] as $args ) {
 			try {
-				call_user_func( $args['callback'], $objects );
+				$data = call_user_func( $args['callback'], $objects );
 			} catch ( \Throwable $e ) {
 				self::log_error( sprintf( 'Ability prime callback of "%s" for "%s" failed: %s', $args['namespace'], $resource_name, $e->getMessage() ) );
+				continue;
+			}
+			if ( ! is_array( $data ) ) {
+				wc_doing_it_wrong( __CLASS__ . '::register_prime', sprintf( 'The prime callback of "%1$s" for "%2$s" must return an array keyed by object ID. Return an empty array when no object has data.', $args['namespace'], $resource_name ), '11.5.0' );
+				continue;
+			}
+			foreach ( $objects as $subject ) {
+				$id = self::get_object_id( $subject );
+				if ( 0 === $id ) {
+					continue;
+				}
+				$entries                       = $primed->contains( $subject ) ? $primed[ $subject ] : array();
+				$entries[ $args['namespace'] ] = $data[ $id ] ?? array();
+				$primed[ $subject ]            = $entries;
 			}
 		}
+		self::$primed[ $resource_name ] = $primed;
+	}
+
+	/**
+	 * The ID of an object that an ability formats.
+	 *
+	 * @param object $subject Object with a `get_id()` method, or a `term_id`, `comment_ID` or `ID` property.
+	 * @return int The ID, or 0 when the object has none.
+	 */
+	private static function get_object_id( object $subject ): int {
+		if ( method_exists( $subject, 'get_id' ) ) {
+			return (int) $subject->get_id();
+		}
+		return (int) ( $subject->term_id ?? $subject->comment_ID ?? $subject->ID ?? 0 );
 	}
 
 	/**
@@ -846,13 +898,19 @@ class ExtensibleAbilities {
 		}
 
 		$extensions = array();
+		$primed     = self::$primed[ $resource_name ] ?? null;
+		$entries    = array();
+		if ( null !== $primed && $primed->contains( $subject ) ) {
+			$entries = $primed[ $subject ];
+			$primed->detach( $subject );
+		}
 		foreach ( self::$fields[ $resource_name ] as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
 				if ( ! isset( $args['get_callback'] ) || ! self::field_applies_to( $args, $subject ) ) {
 					continue;
 				}
 				try {
-					$value = call_user_func( $args['get_callback'], $subject );
+					$value = call_user_func( $args['get_callback'], $subject, $entries[ $namespace ] ?? null );
 				} catch ( \Throwable $e ) {
 					return self::field_callback_failed_error( $args, $e );
 				}
