@@ -230,6 +230,52 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should detect a Store API request whose route uses different letter case, as the REST server matches routes case-insensitively.
+	 * @testWith ["/wp-json/wc/Store/v1/cart", ""]
+	 *           ["/WP-JSON/WC/STORE/v1/cart", ""]
+	 *           ["/index.php?rest_route=/wc/Store/v1/cart", "/wc/Store/v1/cart"]
+	 *
+	 * @param string $request_uri Request URI.
+	 * @param string $rest_route  The rest_route query argument, or empty for none.
+	 */
+	public function test_is_store_api_request_ignores_letter_case( string $request_uri, string $rest_route ): void {
+		$_SERVER['REQUEST_URI'] = $request_uri;
+		if ( '' !== $rest_route ) {
+			$_GET['rest_route'] = $rest_route;
+		}
+
+		$this->assertTrue( WC()->is_store_api_request() );
+	}
+
+	/**
+	 * @testdox Should detect a Store API request with a percent-encoded path, as WordPress also matches rewrite rules against the decoded path.
+	 * @testWith ["/wp%2Djson/wc/store/v1/cart"]
+	 *           ["/%77p-json/wc/store/v1/cart"]
+	 *           ["/wp-json%2Fwc%2Fstore%2Fv1%2Fcart"]
+	 *           ["/wp%2Djson/wc/st%6Fre/v1/cart"]
+	 *
+	 * @param string $request_uri Request URI.
+	 */
+	public function test_is_store_api_request_decodes_the_path( string $request_uri ): void {
+		$_SERVER['REQUEST_URI'] = $request_uri;
+
+		$this->assertTrue( WC()->is_store_api_request() );
+	}
+
+	/**
+	 * @testdox Should not detect a Store API request from a double-encoded path or an encoded query argument, as WordPress doesn't route these to the Store API.
+	 * @testWith ["/wp%252Djson/wc/store/v1/cart"]
+	 *           ["/some-page/?arg=/wp%2Djson/wc/store/"]
+	 *
+	 * @param string $request_uri Request URI.
+	 */
+	public function test_is_store_api_request_decodes_the_path_only_once( string $request_uri ): void {
+		$_SERVER['REQUEST_URI'] = $request_uri;
+
+		$this->assertFalse( WC()->is_store_api_request() );
+	}
+
+	/**
 	 * @testdox Should not detect a non-Store API plain-permalink request as Store API.
 	 */
 	public function test_is_store_api_request_returns_false_for_plain_permalinks_non_store(): void {

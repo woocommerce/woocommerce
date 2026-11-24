@@ -1,5 +1,17 @@
 // Sales readiness page and the AI tools Overview. Tokens from the design system; the build injects their fallbacks.
 
+// WordPress UI buttons are semibold in the design; the version bundled here sets medium (499).
+// The element in the selector outweighs the button's own class, whichever stylesheet loads last.
+:is(button, a).wc-sales-readiness-ui-button {
+	font-weight: 600;
+}
+
+// The coming soon notice's button is a link, so wp-admin's link blue would override the neutral button's label.
+.wc-ai-shopping__notice-action,
+.wc-ai-shopping__notice-action:is(:hover, :focus, :active) {
+	color: var(--wpds-color-foreground-interactive-neutral);
+}
+
 // The prototype's buttons (WordPress UI minimal and outline): semibold, and a light background
 // on hover and focus that stays after a click until focus moves; the focus ring only for keyboard focus.
 @mixin sales-readiness-button($padding: var(--wpds-dimension-padding-md)) {
@@ -67,6 +79,12 @@ body:has(.wc-sales-readiness) {
 	--wc-sr-link: var(--wpds-color-foreground-interactive-brand);
 
 	color: var(--wpds-color-foreground-content-neutral);
+
+	// The AI shopping health page's background reaches the bottom of the screen, also when the cards are
+	// short. Not the Overview and AI shopping panels, which sit inside the settings form.
+	&:not(.wc-sales-readiness--overview):not(.wc-ai-shopping) {
+		min-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
+	}
 
 	&__content {
 		box-sizing: border-box;
@@ -418,22 +436,28 @@ body:has(.wc-sales-readiness) {
 		gap: 2px;
 	}
 
-	&__intro {
-		display: block;
-		margin-block-end: var(--wpds-dimension-gap-md);
-	}
+	> .wc-sales-readiness-checked__running {
+		flex-direction: row;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-md);
 
-	// Check again: an outline button.
-	> .components-button {
-		@include sales-readiness-button;
-		border-color: var(--wpds-color-stroke-interactive-brand);
-
-		&:not(:disabled):is(:hover, :active, :focus) {
-			border-color: var(--wpds-color-stroke-interactive-brand-active);
-		}
-
-		&:disabled {
-			border-color: var(--wpds-color-stroke-interactive-brand-disabled);
+		.components-spinner {
+			margin: 0;
 		}
 	}
+
+	> button {
+		flex-shrink: 0;
+		white-space: nowrap;
+	}
+}
+
+// Download your results: a button styled like the contact support link.
+.wc-sales-readiness__link-button {
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	text-decoration-line: underline;
+	cursor: pointer;
 }

@@ -3587,6 +3587,39 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Existing order payment refuses a checkout-draft order, which has not passed checkout validation, and leaves it a draft.
+	 */
+	public function test_checkout_order_rejects_checkout_draft_order(): void {
+		$order = $this->create_pay_for_order_with_shipping_address();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+
+		$this->assertTrue( $order->needs_payment(), 'Baseline: needs_payment() is still true for a draft, so the route has to refuse it explicitly.' );
+
+		$response = $this->dispatch_pay_for_order_request( $order );
+
+		$this->assertTrue( $response->is_error(), 'A draft must not be accepted for payment: ' . print_r( $response->get_data(), true ) );
+		$this->assertSame( 'invalid_order_update_status', $response->get_data()['code'], 'A draft must be refused as an order that cannot be paid for.' );
+		$this->assertSame( 400, $response->get_status(), 'A refused draft is a client error, not a server error.' );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CHECKOUT_DRAFT ), 'A refused draft must stay a draft.' );
+	}
+
+	/**
+	 * @testdox Existing order payment refuses an order that no longer needs payment with a 400.
+	 */
+	public function test_checkout_order_rejects_order_not_needing_payment_with_400(): void {
+		$order = $this->create_pay_for_order_with_shipping_address();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$response = $this->dispatch_pay_for_order_request( $order );
+
+		$this->assertSame( 'invalid_order_update_status', $response->get_data()['code'], 'A paid order must be refused as an order that cannot be paid for.' );
+		$this->assertSame( 400, $response->get_status(), 'A refused order is a client error, not a server error.' );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::PROCESSING ), 'A refused order must keep its status.' );
+	}
+
+	/**
 	 * @testdox Existing order payment should reject a shipping address that moves the order to a different destination.
 	 */
 	public function test_checkout_order_rejects_shipping_location_change() {
@@ -4445,7 +4478,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox Existing order payment should refuse a gateway the shipping method excludes when a guest pays their own checkout draft.
+	 * @testdox Existing order payment should refuse a guest's own checkout draft even with a gateway the shipping method excludes.
 	 */
 	public function test_checkout_order_refuses_gateway_not_enabled_for_checkout_draft_shipping_method() {
 		$this->restrict_offline_gateway( 'cod', array( 'local_pickup' ) );
@@ -4459,7 +4492,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$response = $this->dispatch_pay_for_order_request( $order, array(), null, true, 'cod' );
 
 		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'woocommerce_rest_checkout_payment_method_disabled', $response->get_data()['code'] );
+		$this->assertEquals( 'invalid_order_update_status', $response->get_data()['code'] );
 		$this->assertEquals( 'checkout-draft', wc_get_order( $order->get_id() )->get_status() );
 	}
 
@@ -5674,6 +5707,612 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
 		$this->assertNotSame( $order->get_id(), (int) $response->get_data()['order_id'], 'An order the filter says needs no payment must not be reused.' );
+	}
+
+	/**
+	 * @testdox Checkout does not reuse a pending order from the session when the shipping destination moves but the total does not.
+	 * @testWith [{"city": "Other City"}]
+	 *           [{"city": "London", "state": "", "postcode": "SW1A 1AA", "country": "GB"}]
+	 *
+	 * @param array $destination Shipping address fields the checkout request changes.
+	 */
+	public function test_post_does_not_reuse_pending_order_from_session_when_shipping_destination_changes( array $destination ): void {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$order          = $this->create_pending_order_for_us_customer();
+		$original_total = $order->get_total();
+
+		$this->assertTrue( $order->needs_payment(), 'Baseline: the placed order must still need payment.' );
+		$this->assertTrue( $this->get_draft_order_checker()->is_draft( $order ), 'Baseline: the order is the session draft while its destination matches the customer.' );
+		$this->assertSame( $order->get_id(), (int) WC()->session->get( 'store_api_draft_order' ), 'Baseline: the session must point at the placed order.' );
+
+		$request = $this->build_valid_post_request();
+		$posted  = array_merge( $request->get_param( 'shipping_address' ), $destination );
+		$request->set_param( 'shipping_address', $posted );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$new_order = wc_get_order( (int) $response->get_data()['order_id'] );
+		$this->assertNotSame( $order->get_id(), $new_order->get_id(), 'Checkout must place a new order rather than readdress the placed one.' );
+		$this->assertSame( $original_total, $new_order->get_total(), 'The total must not change, so only the destination check can stop reuse.' );
+		$this->assertSame( array( $posted['country'], $posted['city'] ), array( $new_order->get_shipping_country(), $new_order->get_shipping_city() ), 'The new order should ship to the posted destination.' );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $order->has_status( OrderStatus::PENDING ), 'The placed order should stay pending.' );
+		$this->assertSame( array( 'US', 'Test City' ), array( $order->get_shipping_country(), $order->get_shipping_city() ), 'The placed order must keep the destination it was rated for.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a placed pending order once the customer moves to a destination in another shipping zone.
+	 */
+	public function test_placed_order_is_not_reused_when_shipping_destination_changes(): void {
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+
+		$this->assertTrue( $order->needs_payment(), 'Baseline: the placed order must still need payment.' );
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its destination matches the customer.' );
+
+		// Move the customer without recalculating, so the cart hash stays the same.
+		$destination = $this->get_different_destination();
+		WC()->customer->set_shipping_city( $destination['city'] );
+		WC()->customer->set_shipping_state( $destination['state'] );
+		WC()->customer->set_shipping_postcode( $destination['postcode'] );
+		WC()->customer->set_shipping_country( $destination['country'] );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the destination check can change the outcome.' );
+		$this->assertFalse( $checker->is_draft( $order ), 'A placed order whose destination moved to another zone must not be reused as the session draft.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order when a change cannot alter the shipping rate: the street line, the city's letter case, the postcode spacing or the billing address.
+	 */
+	public function test_placed_order_is_reused_when_rate_location_is_unchanged(): void {
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+
+		// Apply the changes one at a time so a failure points at the one that wrongly forced a fresh order.
+		WC()->customer->set_shipping_address_1( '456 Other Ave' );
+		$this->assertTrue( $checker->is_draft( $order ), 'A changed street line cannot alter the rate, so the order must still be reused.' );
+
+		WC()->customer->set_shipping_city( 'TEST CITY' );
+		$this->assertTrue( $checker->is_draft( $order ), 'A change of city letter case must not force a fresh order.' );
+
+		WC()->customer->set_shipping_postcode( '940 16' );
+		$this->assertTrue( $checker->is_draft( $order ), 'A change of postcode spacing must not force a fresh order.' );
+
+		WC()->customer->set_billing_country( 'GB' );
+		$this->assertTrue( $checker->is_draft( $order ), 'A billing-only change must not force a fresh order while tax follows the shipping address.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order when the cart needs no shipping, whatever the destination.
+	 */
+	public function test_placed_order_is_reused_when_cart_needs_no_shipping(): void {
+		wc_empty_cart();
+		WC()->cart->add_to_cart( $this->products[2]->get_id(), 1 );
+		$this->assertFalse( WC()->cart->needs_shipping(), 'Test cart is expected to not need shipping.' );
+
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+
+		WC()->customer->set_shipping_country( 'GB' );
+
+		$this->assertTrue( $checker->is_draft( $order ), 'A cart with nothing to ship has no destination to protect, so the order must still be reused.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a placed pending order when only the shipping $field changes.
+	 * @testWith ["country", "GB"]
+	 *           ["state", "NY"]
+	 *           ["postcode", "10001"]
+	 *           ["city", "Other City"]
+	 *
+	 * @param string $field Destination field to change.
+	 * @param string $value New value for that field.
+	 */
+	public function test_placed_order_is_not_reused_when_one_destination_field_changes( string $field, string $value ): void {
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its destination matches the customer.' );
+
+		WC()->customer->{"set_shipping_{$field}"}( $value );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the destination check can change the outcome.' );
+		$this->assertFalse( $checker->is_draft( $order ), "A placed order must not be reused once only its shipping {$field} changes." );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() takes the billing address as the destination of a placed order without a shipping address, and stops reusing it when that moves.
+	 */
+	public function test_placed_order_without_shipping_address_is_checked_against_billing(): void {
+		$checker = $this->get_draft_order_checker();
+
+		WC()->customer->set_shipping_country( '' );
+		WC()->customer->set_billing_city( 'Test City' );
+		WC()->customer->set_billing_state( 'CA' );
+		WC()->customer->set_billing_postcode( '94016' );
+		WC()->customer->set_billing_country( 'US' );
+		$order = $this->create_session_order_from_cart( OrderStatus::PENDING );
+
+		$this->assertSame( '', $order->get_shipping_country(), 'Baseline: the order must have no shipping address, so its billing address is the destination.' );
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its billing destination matches the customer.' );
+
+		WC()->customer->set_billing_state( 'NY' );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the destination check can change the outcome.' );
+		$this->assertFalse( $checker->is_draft( $order ), 'Moving the billing address must stop reuse when it is the only destination.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a zero-total pending order when the customer moves, since only checkout, which recalculates it, can place it.
+	 */
+	public function test_zero_total_order_is_reused_when_shipping_destination_changes(): void {
+		$checker = $this->get_draft_order_checker();
+		$this->apply_full_discount_coupon();
+		$order = $this->create_pending_order_for_us_customer();
+
+		$this->assertSame( 0.0, (float) $order->get_total(), 'The coupon must take the order to a zero total, which is the case this test covers.' );
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the zero-total order is the session draft while its destination matches the customer.' );
+
+		$destination = $this->get_different_destination();
+		WC()->customer->set_shipping_city( $destination['city'] );
+		WC()->customer->set_shipping_state( $destination['state'] );
+		WC()->customer->set_shipping_postcode( $destination['postcode'] );
+		WC()->customer->set_shipping_country( $destination['country'] );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the destination check could change the outcome.' );
+		$this->assertTrue( $checker->is_draft( $order ), 'A zero-total order, such as a renewal, must stay the session draft when the address changes.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a zero-total order that a filter makes payable once the customer moves, as it would a priced order.
+	 */
+	public function test_zero_total_order_made_payable_is_not_reused_when_shipping_destination_changes(): void {
+		add_filter( 'woocommerce_order_needs_payment', '__return_true' );
+		$checker = $this->get_draft_order_checker();
+		$this->apply_full_discount_coupon();
+		$order = $this->create_pending_order_for_us_customer();
+
+		$this->assertSame( 0.0, (float) $order->get_total(), 'The coupon must take the order to a zero total, which is the case this test covers.' );
+		$this->assertTrue( $order->needs_payment(), 'Baseline: the filter must make the zero-total order payable through pay-for-order.' );
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its destination matches the customer.' );
+
+		WC()->customer->set_shipping_country( 'GB' );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the destination check can change the outcome.' );
+		$this->assertFalse( $checker->is_draft( $order ), 'A zero-total order that can be paid must get the same destination check as a priced one.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() lets a placed order created via $created_via with billing country $billing_country take a first address only if it has none and did not come from the Store API.
+	 * @testWith ["admin", "", true]
+	 *           ["store-api", "", false]
+	 *           ["admin", "US", false]
+	 *
+	 * @param string $created_via     Where the order was created.
+	 * @param string $billing_country Billing country left on the order; any country means it already has an address.
+	 * @param bool   $reused          Whether the order should still be reused.
+	 */
+	public function test_order_without_address_takes_its_first_one_unless_from_the_store_api( string $created_via, string $billing_country, bool $reused ): void {
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+
+		$address = array();
+		foreach ( array( 'billing', 'shipping' ) as $type ) {
+			foreach ( array( 'country', 'state', 'postcode', 'city', 'address_1' ) as $field ) {
+				$address[ "{$type}_{$field}" ] = '';
+			}
+		}
+		$order->set_props( $address );
+		$order->set_billing_country( $billing_country );
+		$order->set_created_via( $created_via );
+		$order->save();
+
+		$this->assertSame( $billing_country, $order->get_billing_country() . $order->get_shipping_country(), 'Baseline: the order must carry only the billing country under test.' );
+		$this->assertTrue( WC()->cart->needs_shipping(), 'Baseline: the cart needs shipping, so the destination check applies.' );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must match so only the address checks decide.' );
+		$this->assertSame( $reused, $checker->is_draft( $order ), $reused ? 'An order made outside the Store API with no address may take its first one, as on the pay-for-order page.' : 'A Store API order always has an address, so one without must not be reused for a new destination.' );
+	}
+
+	/**
+	 * @testdox GET checkout keeps an order made outside the Store API that awaits its first address as the session draft, and gives it the customer's address.
+	 */
+	public function test_get_checkout_reuses_an_order_awaiting_its_first_address(): void {
+		$order = $this->create_pending_order_for_us_customer();
+
+		$address = array();
+		foreach ( array( 'billing', 'shipping' ) as $type ) {
+			foreach ( array( 'country', 'state', 'postcode', 'city', 'address_1' ) as $field ) {
+				$address[ "{$type}_{$field}" ] = '';
+			}
+		}
+		$order->set_props( $address );
+		$order->set_created_via( 'admin' );
+		$order->save();
+
+		$response = $this->dispatch_store_api_request( 'POST', '/wc/store/v1/cart/update-customer', array( 'shipping_address' => (object) $this->get_fallback_shipping_address() ) );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'Baseline: the cart total must not change, so only the address checks decide reuse.' );
+
+		$response = $this->dispatch_store_api_request( 'GET', '/wc/store/v1/checkout' );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $order->get_id(), (int) $response->get_data()['order_id'], 'An order made outside the Store API with no address must stay the session draft, as on the pay-for-order page.' );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( array( 'GB', 'Oxford' ), array( $order->get_shipping_country(), $order->get_shipping_city() ), 'GET checkout should give the reused order the shipping address the customer entered.' );
+	}
+
+	/**
+	 * @testdox GET checkout does not reuse a placed pending order once the customer moves to another destination, and leaves its address and total alone.
+	 */
+	public function test_get_checkout_does_not_reuse_a_placed_order_after_a_destination_change(): void {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$order = $this->create_pending_order_for_us_customer();
+		$total = $order->get_total();
+
+		$response = $this->dispatch_store_api_request( 'POST', '/wc/store/v1/cart/update-customer', array( 'shipping_address' => (object) $this->get_fallback_shipping_address() ) );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'Baseline: the cart total must not change, so only the destination check can stop reuse.' );
+
+		$response = $this->dispatch_store_api_request( 'GET', '/wc/store/v1/checkout' );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 0, (int) $response->get_data()['order_id'], 'GET checkout must answer with a draft response, not the placed order.' );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'US', $order->get_shipping_country(), 'The placed order must keep the destination it was rated for.' );
+		$this->assertSame( $total, $order->get_total(), 'The placed order\'s total must not change.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a placed pending order once the billing address moves to another tax location on a store that taxes on billing, but not for a change that cannot alter the rate.
+	 */
+	public function test_placed_order_is_not_reused_when_billing_tax_location_changes(): void {
+		$this->set_taxes_based_on( 'billing' );
+		$this->give_customer_us_billing_address();
+
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its tax location matches the customer.' );
+
+		WC()->customer->set_billing_address_1( '456 Other Ave' );
+		$this->assertTrue( $checker->is_draft( $order ), 'A changed billing street line cannot alter the tax, so the order must still be reused.' );
+
+		// Move the billing address without recalculating, so the cart hash stays the same.
+		WC()->customer->set_billing_state( 'NY' );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the tax location check can change the outcome.' );
+		$this->assertFalse( $checker->is_draft( $order ), 'A placed order whose billing tax location moved must not be reused as the session draft.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order when the billing address moves but tax follows the shipping address.
+	 */
+	public function test_placed_order_is_reused_when_billing_moves_and_tax_follows_shipping(): void {
+		$this->set_taxes_based_on( 'shipping' );
+		$this->give_customer_us_billing_address();
+
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+
+		WC()->customer->set_billing_state( 'NY' );
+
+		$this->assertTrue( $checker->is_draft( $order ), 'A billing change cannot alter tax worked out on the shipping address, so the order must still be reused.' );
+	}
+
+	/**
+	 * @testdox GET checkout does not reuse a placed pending order once the customer's billing address moves to another tax location on a store that taxes on billing.
+	 */
+	public function test_get_checkout_does_not_reuse_a_placed_order_after_a_billing_tax_location_change(): void {
+		$this->set_taxes_based_on( 'billing' );
+		$this->give_customer_us_billing_address();
+		$order = $this->create_pending_order_for_us_customer();
+
+		// Move the customer's billing address the way a My Account address save does: without touching the cart.
+		WC()->customer->set_billing_state( 'NY' );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'Baseline: the cart hash must still match, so only the tax location check can stop reuse.' );
+
+		$response = $this->dispatch_store_api_request( 'GET', '/wc/store/v1/checkout' );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 0, (int) $response->get_data()['order_id'], 'GET checkout must answer with a draft response, not the placed order.' );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'CA', $order->get_billing_state(), 'The placed order must keep the billing address it was taxed for.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a placed pending order when the customer clears only the shipping country.
+	 */
+	public function test_placed_order_is_not_reused_when_shipping_country_is_cleared(): void {
+		$checker = $this->get_draft_order_checker();
+
+		// Billing matches the shipping country, so on the unfixed code the order's US shipping would wrongly match
+		// the customer's US billing once the shipping country is cleared.
+		$this->give_customer_us_billing_address();
+		$order = $this->create_pending_order_for_us_customer();
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its destination matches the customer.' );
+
+		// Clear only the shipping country, leaving billing in place. The order's shipping lines are still rated for
+		// the old country, so reuse must stop rather than fall back to the matching billing destination.
+		WC()->customer->set_shipping_country( '' );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the destination check can change the outcome.' );
+		$this->assertFalse( $checker->is_draft( $order ), 'Clearing the shipping country must stop reuse; billing is not a fallback once a shipping address was set.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() does not reuse a placed pending order when the tax location filter returns a non-array for the $side.
+	 * @testWith ["order"]
+	 *           ["readdressed copy"]
+	 *
+	 * @param string $side Which of the two compared tax locations the filter replaces with a non-array.
+	 */
+	public function test_placed_order_is_not_reused_when_tax_location_is_not_an_array( string $side ): void {
+		$this->set_taxes_based_on( 'shipping' );
+
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its tax location matches the customer.' );
+
+		// Runs after core's own callback on this filter. The order is compared by identity; the readdressed copy is a clone.
+		add_filter(
+			'woocommerce_order_get_tax_location',
+			static function ( $location, $filtered_order ) use ( $order, $side ) {
+				$is_order = $filtered_order === $order;
+				$replace  = 'order' === $side ? $is_order : ! $is_order;
+
+				return $replace ? 'not-an-array' : $location;
+			},
+			PHP_INT_MAX,
+			2
+		);
+
+		$this->assertFalse( $checker->is_draft( $order ), "A tax location that is not an array on the {$side} must stop reuse rather than reach locations_differ()." );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order in $country when the session fills the customer's empty billing state with the default location's state on the next request.
+	 * @testWith ["GB", "SW1A 1AA"]
+	 *           ["FR", "75001"]
+	 *
+	 * @param string $country  Country of the customer and the order: one with free-text states, one with none.
+	 * @param string $postcode Postcode of the customer and the order.
+	 */
+	public function test_placed_order_is_reused_when_session_fills_empty_billing_state( string $country, string $postcode ): void {
+		$this->set_taxes_based_on( 'billing' );
+		$order = $this->create_pending_order_for_customer_without_state( $country, $postcode );
+
+		$this->reload_customer_from_session();
+
+		$this->assertSame( 'CA', WC()->customer->get_billing_state(), 'Baseline: the session must fill the empty billing state with the shop state.' );
+		$this->assertSame( '', $order->get_billing_state(), 'Baseline: the placed order must have no billing state.' );
+		$this->assertTrue( $this->get_draft_order_checker()->is_draft( $order ), 'A state the session filled in is not a move to another tax location, so the order must still be reused.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order when the default state reaches the shipping address of a customer who left the state empty.
+	 */
+	public function test_placed_order_is_reused_when_default_state_reaches_shipping_address(): void {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$order = $this->create_pending_order_for_customer_without_state( 'GB', 'SW1A 1AA' );
+
+		$this->reload_customer_from_session();
+		// A client that sends the billing address as the shipping address passes the filled-in state along.
+		WC()->customer->set_shipping_state( WC()->customer->get_billing_state() );
+
+		$this->assertSame( 'CA', WC()->customer->get_shipping_state(), 'Baseline: the customer must carry the shop state as the shipping state.' );
+		$this->assertTrue( $this->get_draft_order_checker()->is_draft( $order ), 'A state the session filled in is not a move to another destination, so the order must still be reused.' );
+	}
+
+	/**
+	 * @testdox Checkout reuses a placed pending order when the retry sends back the billing state the session filled in.
+	 */
+	public function test_post_reuses_pending_order_when_request_returns_session_default_state(): void {
+		$this->set_taxes_based_on( 'billing' );
+		$order = $this->create_pending_order_for_customer_without_state( 'GB', 'SW1A 1AA' );
+
+		$this->reload_customer_from_session();
+
+		$cart          = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) )->get_data();
+		$billing_state = ( (array) $cart['billing_address'] )['state'];
+		$this->assertSame( 'CA', $billing_state, 'Baseline: the cart response must hand the client the filled-in billing state.' );
+
+		$address = array(
+			'address_1' => '1 High St',
+			'city'      => 'Test City',
+			'postcode'  => 'SW1A 1AA',
+			'country'   => 'GB',
+		);
+		$request = $this->build_valid_post_request();
+		$request->set_param( 'billing_address', array_merge( $request->get_param( 'billing_address' ), $address, array( 'state' => $billing_state ) ) );
+		$request->set_param( 'shipping_address', array_merge( $request->get_param( 'shipping_address' ), $address, array( 'state' => '' ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $order->get_id(), (int) $response->get_data()['order_id'], 'A retry from the same address must pay the placed order rather than place a second one.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order that took the session's default state on an earlier retry when the customer sends none.
+	 */
+	public function test_placed_order_is_reused_when_only_the_order_has_the_default_state(): void {
+		$this->set_taxes_based_on( 'billing' );
+		$order = $this->create_pending_order_for_customer_without_state( 'GB', 'SW1A 1AA' );
+		$order->set_billing_state( 'CA' );
+		$order->save();
+
+		$this->assertSame( '', WC()->customer->get_billing_state(), 'Baseline: the customer must have no billing state.' );
+		$this->assertTrue( $this->get_draft_order_checker()->is_draft( $order ), 'The default state is read as empty on the order too, so the order must still be reused.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order when the default location changes after the session filled in the state.
+	 */
+	public function test_placed_order_is_reused_when_default_location_changes_after_fill(): void {
+		$this->set_taxes_based_on( 'billing' );
+		$order = $this->create_pending_order_for_customer_without_state( 'GB', 'SW1A 1AA' );
+
+		$this->reload_customer_from_session();
+		// As when geolocation resolves the visitor on a later request.
+		add_filter(
+			'woocommerce_customer_default_location_array',
+			static fn() => array(
+				'country' => 'GB',
+				'state'   => '',
+			)
+		);
+
+		$this->assertSame( 'CA', WC()->customer->get_billing_state(), 'Baseline: the customer must keep the state filled in from the shop base.' );
+		$this->assertTrue( $this->get_draft_order_checker()->is_draft( $order ), 'A state filled in from the shop base is still read as empty once the default location is another one.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order when the filled-in state comes from a filtered default location.
+	 */
+	public function test_placed_order_is_reused_when_filled_state_comes_from_filtered_default(): void {
+		add_filter( 'woocommerce_customer_default_location', static fn() => 'US:NY' );
+		$this->set_taxes_based_on( 'billing' );
+		$order = $this->create_pending_order_for_customer_without_state( 'GB', 'SW1A 1AA' );
+
+		$this->reload_customer_from_session();
+
+		$this->assertSame( 'NY', WC()->customer->get_billing_state(), 'Baseline: the session must fill the empty billing state from the filtered default.' );
+		$this->assertTrue( $this->get_draft_order_checker()->is_draft( $order ), 'A state filled in from the default location is read as empty when it is not the shop base state either.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a placed pending order with no billing state when the customer in $country gets the state $state on a shop based in $base.
+	 * @testWith ["US:CA", "GB", "SW1A 1AA", "KENT"]
+	 *           ["US:WA", "AU", "2000", "WA"]
+	 *           ["GB:KENT", "GB", "SW1A 1AA", "KENT"]
+	 *
+	 * @param string $base     Shop base location, which is the default customer location.
+	 * @param string $country  Country of the customer and the order.
+	 * @param string $postcode Postcode of the customer and the order.
+	 * @param string $state    Billing state the customer gets after the order is placed.
+	 */
+	public function test_placed_order_is_not_reused_when_state_is_not_a_session_default( string $base, string $country, string $postcode, string $state ): void {
+		$this->set_taxes_based_on( 'billing' );
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_customer_without_state( $country, $postcode, $base );
+
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its tax location matches the customer.' );
+
+		WC()->customer->set_billing_state( $state );
+
+		$this->assertFalse( $checker->is_draft( $order ), 'Only the default state on another country, where it is not one of its states, is read as empty; any other state is a move.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a placed pending order when the customer gets the shop state and their country code is stored in lowercase.
+	 */
+	public function test_placed_order_is_not_reused_when_country_differs_from_base_only_in_case(): void {
+		$this->set_taxes_based_on( 'billing' );
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_customer_without_state( 'NZ', '1010', 'NZ:AUK' );
+
+		WC()->customer->set_billing_country( 'nz' );
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: a country code that differs only in case is the same tax location.' );
+
+		WC()->customer->set_billing_state( 'AUK' );
+
+		$this->assertFalse( $checker->is_draft( $order ), 'The shop state on the shop country is a real state whatever the case of the country code, so it is a move.' );
+	}
+
+	/**
+	 * Gives the customer a US billing address matching the shipping address create_pending_order_for_us_customer() sets.
+	 */
+	private function give_customer_us_billing_address(): void {
+		WC()->customer->set_billing_address_1( '123 Test St' );
+		WC()->customer->set_billing_city( 'Test City' );
+		WC()->customer->set_billing_state( 'CA' );
+		WC()->customer->set_billing_postcode( '94016' );
+		WC()->customer->set_billing_country( 'US' );
+	}
+
+	/**
+	 * Dispatches a Store API request with a valid nonce.
+	 *
+	 * @param string $method HTTP method.
+	 * @param string $route  Route path.
+	 * @param array  $body   Body parameters.
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_store_api_request( string $method, string $route, array $body = array() ): \WP_REST_Response {
+		$request = new \WP_REST_Request( $method, $route );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( $body );
+
+		return rest_get_server()->dispatch( $request );
+	}
+
+	/**
+	 * Returns an object that exposes DraftOrderTrait::is_valid_draft_order() as is_draft().
+	 *
+	 * @return object
+	 */
+	private function get_draft_order_checker() {
+		return new class() {
+			use \Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
+
+			/**
+			 * Expose the protected check for the test.
+			 *
+			 * @param \WC_Order $order_object Order to check.
+			 * @return bool
+			 */
+			public function is_draft( $order_object ): bool {
+				return $this->is_valid_draft_order( $order_object );
+			}
+		};
+	}
+
+	/**
+	 * Gives the customer a US shipping address and places a pending order for it from the cart.
+	 *
+	 * @return \WC_Order
+	 */
+	private function create_pending_order_for_us_customer(): \WC_Order {
+		WC()->customer->set_shipping_address_1( '123 Test St' );
+		WC()->customer->set_shipping_city( 'Test City' );
+		WC()->customer->set_shipping_state( 'CA' );
+		WC()->customer->set_shipping_postcode( '94016' );
+		WC()->customer->set_shipping_country( 'US' );
+
+		return $this->create_session_order_from_cart( OrderStatus::PENDING );
+	}
+
+	/**
+	 * Gives the customer a billing and shipping address in the given country with no state and places a pending
+	 * order for it from the cart, on a shop whose default customer location is its base address.
+	 *
+	 * @param string $country  Country code.
+	 * @param string $postcode Postcode.
+	 * @param string $base     Shop base location.
+	 * @return \WC_Order
+	 */
+	private function create_pending_order_for_customer_without_state( string $country, string $postcode, string $base = 'US:CA' ): \WC_Order {
+		update_option( 'woocommerce_default_country', $base );
+		update_option( 'woocommerce_default_customer_address', 'base' );
+
+		foreach ( array( 'billing', 'shipping' ) as $type ) {
+			WC()->customer->{"set_{$type}_address_1"}( '1 High St' );
+			WC()->customer->{"set_{$type}_city"}( 'Test City' );
+			WC()->customer->{"set_{$type}_state"}( '' );
+			WC()->customer->{"set_{$type}_postcode"}( $postcode );
+			WC()->customer->{"set_{$type}_country"}( $country );
+		}
+
+		return $this->create_session_order_from_cart( OrderStatus::PENDING );
+	}
+
+	/**
+	 * Saves the customer to the session and reads it back, as the next request does.
+	 */
+	private function reload_customer_from_session(): void {
+		WC()->customer->save();
+		WC()->customer = new \WC_Customer( get_current_user_id(), true );
 	}
 
 	/**

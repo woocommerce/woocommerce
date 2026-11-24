@@ -317,6 +317,65 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * Price filters every catalog route refuses.
+	 *
+	 * @return array
+	 */
+	public function provider_malformed_price_filters(): array {
+		return array(
+			'not an object'             => array( '1000' ),
+			'fractional bound'          => array( array( 'min' => 1000.9 ) ),
+			'beyond the integer range'  => array( array( 'min' => '1e400' ) ),
+			'reversed after truncation' => array(
+				array(
+					'min' => 1000.9,
+					'max' => 1000.1,
+				),
+			),
+		);
+	}
+
+	/**
+	 * A malformed `filters.price` is refused rather than ignored or truncated.
+	 *
+	 * @dataProvider provider_malformed_price_filters
+	 *
+	 * @param mixed $price The `filters.price` value.
+	 */
+	public function test_malformed_price_filter_returns_ucp_validation_error( $price ): void {
+		$id      = (string) self::$product_ids[0];
+		$filters = array( 'filters' => array( 'price' => $price ) );
+
+		foreach ( array(
+			'/catalog/product' => array( 'id' => $id ),
+			'/catalog/lookup'  => array( 'ids' => array( $id ) ),
+			'/catalog/search'  => array( 'query' => 'product' ),
+		) as $route => $body ) {
+			$response = $this->post( $route, $filters + $body );
+
+			$this->assertSame( 400, $response->get_status(), $route );
+			$this->assertSame( 'VALIDATION_ERROR', $response->get_data()['messages'][0]['code'], $route );
+		}
+	}
+
+	/**
+	 * Zero and integer-valued bounds are accepted.
+	 */
+	public function test_integral_price_bounds_are_accepted(): void {
+		$body = array(
+			'ids'     => array( (string) self::$product_ids[0] ),
+			'filters' => array(
+				'price' => array(
+					'min' => 0,
+					'max' => '1500.0',
+				),
+			),
+		);
+
+		$this->assertSame( 200, $this->post( '/catalog/lookup', $body )->get_status() );
+	}
+
+	/**
 	 * A missing `ids` list is a UCP validation error, not a WordPress one.
 	 */
 	public function test_lookup_without_ids_returns_ucp_validation_error(): void {
@@ -360,6 +419,21 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * A protocol version the store does not implement is refused.
+	 */
+	public function test_an_unsupported_version_is_refused(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/catalog/lookup' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_header( 'UCP-Agent', 'profile="https://agent.example/profile.json"; version="2099-01-01"' );
+		$request->set_body( wp_json_encode( array( 'ids' => array( (string) self::$product_ids[0] ) ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 422, $response->get_status() );
+		$this->assertSame( 'version_unsupported', $response->get_data()['messages'][0]['code'] );
+	}
+
+	/**
 	 * Product detail answers with `ucp.status`, and reports a miss as 200 + `not_found`.
 	 */
 	public function test_product_detail_reports_status_in_the_envelope(): void {
@@ -380,6 +454,84 @@ class UcpCatalog extends ControllerTestCase {
 		$this->assertSame( 'error', $data['ucp']['status'] );
 		$this->assertSame( 'not_found', $data['messages'][0]['code'] );
 		$this->assertSame( 'unrecoverable', $data['messages'][0]['severity'] );
+	}
+
+	/**
+	 * Price filters for the helper's variations, priced 10, 15, 16, 17, 18 and 19.
+	 *
+	 * @return array
+	 */
+	public function provider_variant_price_filters(): array {
+		return array(
+			'max is inclusive'                 => array( array( 'max' => 1500 ), array( 1000, 1500 ) ),
+			'min skips the default first pick' => array(
+				array(
+					'min' => 1600,
+					'max' => 1700,
+				),
+				array( 1600, 1700 ),
+			),
+			'nothing in range'                 => array( array( 'max' => 999 ), array() ),
+		);
+	}
+
+	/**
+	 * @testdox Lookup and product detail should return only the variants inside the price filter.
+	 *
+	 * @dataProvider provider_variant_price_filters
+	 *
+	 * @param array $price Price filter bounds in minor units.
+	 * @param array $expected Variant amounts expected back, or none when the product is excluded.
+	 */
+	public function test_lookup_and_detail_apply_the_price_filter( array $price, array $expected ): void {
+		$id   = (string) \WC_Helper_Product::create_variation_product()->get_id();
+		$body = array( 'filters' => array( 'price' => $price ) );
+
+		$detail = $this->post( '/catalog/product', $body + array( 'id' => $id ) )->get_data();
+		$lookup = $this->post( '/catalog/lookup', $body + array( 'ids' => array( $id ) ) )->get_data();
+
+		if ( empty( $expected ) ) {
+			$this->assertSame( 'error', $detail['ucp']['status'] );
+			$this->assertSame( array(), $lookup['products'] );
+			return;
+		}
+
+		$amounts = static function ( array $product ): array {
+			return array_map(
+				static function ( array $variant ): int {
+					return $variant['price']['amount'];
+				},
+				$product['variants']
+			);
+		};
+
+		$this->assertSame( $expected, $amounts( $detail['product'] ) );
+		$this->assertSame( $expected, $amounts( $lookup['products'][0] ) );
+		$this->assertSame( $detail['product']['variants'][0]['options'], $detail['product']['selected'] );
+	}
+
+	/**
+	 * @testdox A selection matching only variants outside the price filter should be relaxed until one inside it matches.
+	 */
+	public function test_product_detail_relaxes_a_selection_the_price_filter_excludes(): void {
+		$id   = (string) \WC_Helper_Product::create_variation_product()->get_id();
+		$data = $this->post(
+			'/catalog/product',
+			array(
+				'id'       => $id,
+				'selected' => array(
+					array(
+						'name'  => 'size',
+						'label' => 'small',
+					),
+				),
+				'filters'  => array( 'price' => array( 'min' => 1500 ) ),
+			)
+		)->get_data();
+
+		$this->assertSame( 'success', $data['ucp']['status'] );
+		$this->assertSame( array(), $data['product']['selected'] );
+		$this->assertSame( 1500, $data['product']['variants'][0]['price']['amount'] );
 	}
 
 	/**

@@ -109,7 +109,7 @@ class UcpCheckout extends ControllerTestCase {
 	 * @param string $method HTTP method.
 	 * @param string $path Route path under /wc/ucp/v1.
 	 * @param array  $body Request body.
-	 * @param array  $headers Extra request headers.
+	 * @param array  $headers Extra request headers; an `Idempotency-Key` replaces the fresh one.
 	 * @return \WP_REST_Response
 	 */
 	private function request( string $method, string $path, array $body = array(), array $headers = array() ) {
@@ -117,7 +117,9 @@ class UcpCheckout extends ControllerTestCase {
 		$request->set_headers( $headers );
 		$request->set_header( 'content-type', 'application/json' );
 		// A write needs a key of its own; the key itself is the UcpIdempotency suite's concern.
-		$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
+		if ( null === $request->get_header( 'Idempotency-Key' ) ) {
+			$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
+		}
 		$request->set_body( wp_json_encode( $body ) );
 
 		return rest_get_server()->dispatch( $request );
@@ -232,6 +234,64 @@ class UcpCheckout extends ControllerTestCase {
 
 		$missing = $this->request( 'POST', '/checkout-sessions', array() );
 		$this->assertSame( 400, $missing->get_status(), 'line_items is required without a cart_id.' );
+	}
+
+	/**
+	 * @testdox A replayed create answers the same body, with payment_handlers still an empty object.
+	 */
+	public function test_replay_keeps_the_empty_payment_handlers_object(): void {
+		$key   = wp_generate_uuid4();
+		$body  = array( 'line_items' => array( $this->line_item( 0, 1 ) ) );
+		$first = $this->request( 'POST', '/checkout-sessions', $body, array( 'Idempotency-Key' => $key ) );
+		$this->assertSame( 201, $first->get_status() );
+		$this->simulate_new_request();
+		$replay = $this->request( 'POST', '/checkout-sessions', $body, array( 'Idempotency-Key' => $key ) );
+
+		$this->assertSame( 'true', $replay->get_headers()['Idempotency-Replayed'] ?? '' );
+		$this->assertInstanceOf( \stdClass::class, $replay->get_data()['ucp']['payment_handlers'] );
+		$this->assertSame( wp_json_encode( $first->get_data() ), wp_json_encode( $replay->get_data() ) );
+	}
+
+	/**
+	 * Version cases for the `UCP-Agent` header.
+	 *
+	 * @return array<string, array{string, int}>
+	 */
+	public function provider_agent_versions(): array {
+		$profile = 'profile="https://agent.example/profile.json"';
+
+		return array(
+			'supported'                   => array( $profile . '; version="' . Utils::VERSION . '"', 201 ),
+			'newer'                       => array( $profile . '; version="2099-01-01"', 422 ),
+			'older'                       => array( $profile . '; version="2026-01-23"', 422 ),
+			'bare comma'                  => array( $profile . ',version="2099-01-01"', 422 ),
+			'duplicate, unsupported last' => array( $profile . ', version="' . Utils::VERSION . '", version="2099-01-01"', 422 ),
+			'duplicate, supported last'   => array( $profile . ', version="2099-01-01", version="' . Utils::VERSION . '"', 201 ),
+			'escaped quote, newer'        => array( $profile . ', note="a\\"b", version="2099-01-01"', 422 ),
+			'escaped quote, supported'    => array( $profile . ', note="a\\"b", version="' . Utils::VERSION . '"', 201 ),
+		);
+	}
+
+	/**
+	 * Only the protocol version the store implements is served.
+	 *
+	 * @dataProvider provider_agent_versions
+	 *
+	 * @param string $header UCP-Agent header.
+	 * @param int    $status Expected HTTP status.
+	 */
+	public function test_agent_version_is_negotiated( string $header, int $status ): void {
+		$response = $this->request(
+			'POST',
+			'/checkout-sessions',
+			array( 'line_items' => array( $this->line_item( 0, 1 ) ) ),
+			array( 'UCP-Agent' => $header )
+		);
+
+		$this->assertSame( $status, $response->get_status() );
+		if ( 422 === $status ) {
+			$this->assertSame( 'version_unsupported', $response->get_data()['messages'][0]['code'] );
+		}
 	}
 
 	/**
@@ -622,6 +682,7 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 'requires_escalation', $data['status'] );
 		$this->assertContains( 'ESCALATION_REQUIRED', array_column( $data['messages'], 'code' ) );
+		$this->assertContains( 'Payment must be completed by the buyer at continue_url.', array_column( $data['messages'], 'content' ) );
 
 		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
 		$this->assertInstanceOf( \WC_Order::class, $order );
@@ -643,9 +704,9 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Complete refuses a checkout with nothing to pay, which the payment page would not take, and makes no order.
+	 * @testdox Complete hands a checkout with nothing to pay to the store with its cart, makes no order, and a later request reads the hand-off back.
 	 */
-	public function test_complete_refuses_a_free_checkout(): void {
+	public function test_complete_hands_a_free_checkout_to_the_store(): void {
 		$product = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -662,8 +723,15 @@ class UcpCheckout extends ControllerTestCase {
 
 		$data = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
 
-		$this->assertSame( 'payment_not_required', $data['messages'][0]['code'] );
+		$this->assertSame( 'requires_escalation', $data['status'] );
+		$this->assertSame( add_query_arg( 'session', $created['id'], wc_get_cart_url() ), $data['continue_url'] );
+		$this->assertStringNotContainsString( 'Payment must be completed', implode( ' ', array_column( $data['messages'], 'content' ) ) );
 		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ) );
+
+		$this->simulate_new_request( $created['id'] );
+		$read_back = $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data();
+		$this->assertSame( 'requires_escalation', $read_back['status'] );
+		$this->assertSame( $data['continue_url'], $read_back['continue_url'] );
 	}
 
 	/**

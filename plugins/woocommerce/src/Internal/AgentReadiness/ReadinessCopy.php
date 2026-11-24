@@ -152,10 +152,6 @@ final class ReadinessCopy {
 			);
 			$check[4] = $fixes[ $source ] ?? $check[4];
 		}
-		if ( 'ucp_endpoints_live' === $id && '' !== $source ) {
-			/* translators: %s: HTTP status and content type, such as 403 text/html. */
-			$check[3] .= ' ' . sprintf( __( 'The last answer was %s.', 'woocommerce' ), $source );
-		}
 		return array(
 			'title'      => $check[0],
 			'action'     => $check[1],
@@ -564,7 +560,7 @@ final class ReadinessCopy {
 				__( 'AI assistants use it to tell shoppers whether they can return an item before they buy.', 'woocommerce' ),
 				__( 'Your product page code doesn’t include your returns policy, so AI assistants can’t tell shoppers whether they can return an item.', 'woocommerce' ),
 				// Shown only once a published refund and returns page is chosen, so the fix can't be to choose one.
-				__( 'WooCommerce adds it from your refund and returns page. Check the schema settings in your SEO plugin or theme.', 'woocommerce' ),
+				__( 'WooCommerce adds it from your refund and returns policy page. Check the schema settings in your SEO plugin or theme.', 'woocommerce' ),
 			),
 			'product_shipping_schema'        => array(
 				__( 'Product details include shipping', 'woocommerce' ),

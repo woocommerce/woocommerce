@@ -105,6 +105,42 @@ describe( 'AgentConnect', () => {
 		).toBeInTheDocument();
 	} );
 
+	it( 'records once whether the store is connected, and how a connection attempt ended', () => {
+		const mocked = trackReadiness as jest.Mock;
+		mocked.mockClear();
+		const { rerender, unmount } = render(
+			<AgentConnect connect={ { ...connect, notice: 'error' } } />
+		);
+		rerender(
+			<AgentConnect connect={ { ...connect, notice: 'error' } } />
+		);
+		expect( mocked ).toHaveBeenCalledTimes( 1 );
+		expect( mocked ).toHaveBeenCalledWith( 'agent_connect_viewed', {
+			surface: 'overview',
+			connected: false,
+			result: 'error',
+		} );
+		unmount();
+
+		mocked.mockClear();
+		render(
+			<AgentConnect
+				connect={ {
+					connected: true,
+					notice: 'connected',
+					url: '',
+					action: '',
+					nonce: '',
+				} }
+			/>
+		);
+		expect( mocked ).toHaveBeenCalledWith( 'agent_connect_viewed', {
+			surface: 'overview',
+			connected: true,
+			result: 'connected',
+		} );
+	} );
+
 	it( 'keeps the button next to the error when connecting failed', () => {
 		render( <AgentConnect connect={ { ...connect, notice: 'error' } } /> );
 

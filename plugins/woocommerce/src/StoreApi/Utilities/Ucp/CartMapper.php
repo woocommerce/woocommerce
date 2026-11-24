@@ -230,7 +230,7 @@ class CartMapper {
 	 * @param string $cart_id Cart identifier.
 	 * @return string
 	 */
-	private function continue_url( string $cart_id ): string {
+	public function continue_url( string $cart_id ): string {
 		$continue_url = add_query_arg( 'session', $cart_id, wc_get_cart_url() );
 
 		/**

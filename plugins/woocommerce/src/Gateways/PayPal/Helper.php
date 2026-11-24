@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use WC_Order;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 
 defined( 'ABSPATH' ) || exit;
@@ -174,32 +175,43 @@ class Helper {
 			return;
 		}
 
-		// Bail early if '_paypal_addresses_updated' is 'yes', meaning the addresses update already have been successful.
-		if ( 'yes' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, true ) ) {
+		$confirmed = 'yes' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, true );
+		if ( ! self::validate_shipping_address( $order, $paypal_order_details, $confirmed ) ) {
 			return;
 		}
 
-		// Update the shipping information.
-		$full_name = $paypal_order_details['purchase_units'][0]['shipping']['name']['full_name'] ?? '';
-		if ( ! empty( $full_name ) ) {
-			$name_parts             = explode( ' ', $full_name, 2 );
-			$approximate_first_name = $name_parts[0] ?? '';
-			$approximate_last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
-			$order->set_shipping_first_name( $approximate_first_name );
-			$order->set_shipping_last_name( $approximate_last_name );
+		// Bail early if '_paypal_addresses_updated' is 'yes', meaning the addresses update already have been successful.
+		if ( $confirmed ) {
+			return;
 		}
 
-		$shipping_address = $paypal_order_details['purchase_units'][0]['shipping']['address'] ?? array();
-		if ( ! empty( $shipping_address ) ) {
-			$order->set_shipping_country( $shipping_address['country_code'] ?? '' );
-			$order->set_shipping_postcode( $shipping_address['postal_code'] ?? '' );
-			$order->set_shipping_state( $shipping_address['admin_area_1'] ?? '' );
-			$order->set_shipping_city( $shipping_address['admin_area_2'] ?? '' );
-			$order->set_shipping_address_1( $shipping_address['address_line_1'] ?? '' );
-			$order->set_shipping_address_2( $shipping_address['address_line_2'] ?? '' );
+		$context = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESS_CONTEXT, true );
+		if ( ! empty( $context['callback_amount'] ) ) {
+			$full_name = $paypal_order_details['purchase_units'][0]['shipping']['name']['full_name'] ?? '';
+			if ( ! empty( $full_name ) ) {
+				$name_parts             = explode( ' ', $full_name, 2 );
+				$approximate_first_name = $name_parts[0] ?? '';
+				$approximate_last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
+				$order->set_shipping_first_name( $approximate_first_name );
+				$order->set_shipping_last_name( $approximate_last_name );
+			}
+
+			$shipping_address = $paypal_order_details['purchase_units'][0]['shipping']['address'] ?? array();
+			if ( ! empty( $shipping_address ) ) {
+				$order->set_shipping_country( $shipping_address['country_code'] ?? '' );
+				$order->set_shipping_postcode( $shipping_address['postal_code'] ?? '' );
+				$order->set_shipping_state( $shipping_address['admin_area_1'] ?? '' );
+				$order->set_shipping_city( $shipping_address['admin_area_2'] ?? '' );
+				$order->set_shipping_address_1( $shipping_address['address_line_1'] ?? '' );
+				$order->set_shipping_address_2( $shipping_address['address_line_2'] ?? '' );
+			}
+
+			$context['expected_address'] = $shipping_address;
+			$context['shipping_address'] = $order->get_address( 'shipping' );
+			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESS_CONTEXT, $context );
 		}
 
-		// Update the billing information.
+		// Update contact details, preserving the billing location used to calculate taxes.
 		$full_name = $paypal_order_details['payer']['name'] ?? array();
 		$email     = $paypal_order_details['payer']['email_address'] ?? '';
 		if ( ! empty( $full_name ) ) {
@@ -208,8 +220,9 @@ class Helper {
 			$order->set_billing_email( $email );
 		}
 
+		// Orders created without a billing location, such as from product page buttons, take it from the payer.
 		$billing_address = $paypal_order_details['payer']['address'] ?? array();
-		if ( ! empty( $billing_address ) ) {
+		if ( ! empty( $billing_address ) && ! $order->get_billing_country() ) {
 			$order->set_billing_country( $billing_address['country_code'] ?? '' );
 			$order->set_billing_postcode( $billing_address['postal_code'] ?? '' );
 			$order->set_billing_state( $billing_address['admin_area_1'] ?? '' );
@@ -220,5 +233,129 @@ class Helper {
 
 		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, 'yes' );
 		$order->save();
+		self::complete_order_after_address_confirmation( $order );
+	}
+
+	/**
+	 * Mark a captured order paid after its approved address is saved.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @return void
+	 */
+	private static function complete_order_after_address_confirmation( WC_Order $order ): void {
+		if ( 'yes' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_AWAITING_ADDRESS, true )
+			&& PayPalConstants::STATUS_COMPLETED === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true )
+			&& $order->get_transaction_id()
+			&& $order->has_status( OrderStatus::ON_HOLD ) ) {
+			$order->delete_meta_data( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_AWAITING_ADDRESS );
+			$order->save();
+			$order->payment_complete( $order->get_transaction_id() );
+		}
+	}
+
+	/**
+	 * Check the final destination against the address used to price this attempt.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @param array    $details The PayPal order details.
+	 * @param bool     $confirmed Whether an earlier approval already confirmed this attempt's addresses.
+	 * @return bool Whether the destination is safe to use.
+	 */
+	private static function validate_shipping_address( WC_Order $order, array $details, bool $confirmed = false ): bool {
+		if ( 'yes' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESS_REVIEW, true ) ) {
+			return false;
+		}
+
+		$context = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESS_CONTEXT, true );
+		if ( PayPalConstants::SHIPPING_NO_SHIPPING === ( $context['shipping_preference'] ?? '' ) ) {
+			return true;
+		}
+		if ( ! $context && ( $confirmed || ! $order->needs_shipping() ) ) {
+			return true;
+		}
+
+		$address = $details['purchase_units'][0]['shipping']['address'] ?? array();
+		$fields  = array(
+			'country_code'   => 'country',
+			'admin_area_1'   => 'state',
+			'admin_area_2'   => 'city',
+			'postal_code'    => 'postcode',
+			'address_line_1' => 'address_1',
+			'address_line_2' => 'address_2',
+		);
+
+		// Legacy attempts have no reliable settings snapshot. Only an unchanged destination is safe.
+		$expected_address = $context['expected_address'] ?? array();
+		$priced_address   = $context['shipping_address'] ?? $order->get_address( 'shipping' );
+		$address_valid    = ! empty( $address );
+		foreach ( $fields as $provider_field => $order_field ) {
+			$expected = $priced_address[ $order_field ] ?? '';
+			if ( $context && 'billing' !== ( $context['address_source'] ?? '' ) ) {
+				$expected = $expected_address[ $provider_field ] ?? '';
+			}
+			// Callbacks supply only the pricing location. Street details arrive with approval.
+			if ( ! empty( $context['callback_amount'] ) && ! array_key_exists( $provider_field, $expected_address ) ) {
+				continue;
+			}
+			$address_valid = $address_valid && self::normalize_address_field( $address[ $provider_field ] ?? '' ) === self::normalize_address_field( $expected );
+			// Once confirmed, order edits are the merchant's. Only a different PayPal destination needs review.
+			if ( ! $confirmed ) {
+				$address_valid = $address_valid && self::normalize_address_field( $order->{"get_shipping_{$order_field}"}() ) === self::normalize_address_field( $priced_address[ $order_field ] ?? '' );
+			}
+		}
+
+		$currency_valid = true;
+		$amount_valid   = true;
+		if ( ! empty( $context['callback_amount'] ) ) {
+			$amount         = $details['purchase_units'][0]['amount'] ?? array();
+			$currency_valid = ( $amount['currency_code'] ?? '' ) === $context['callback_amount']['currency_code'];
+			$amount_valid   = isset( $amount['value'] ) && is_string( $amount['value'] ) && wc_format_decimal( $amount['value'], wc_get_price_decimals() ) === $context['callback_amount']['value'];
+			$amount_valid   = $amount_valid && ( $confirmed || wc_format_decimal( $order->get_total(), wc_get_price_decimals() ) === $context['callback_amount']['value'] );
+		}
+
+		if ( $address_valid && $currency_valid && $amount_valid ) {
+			return true;
+		}
+
+		$differences = array();
+		if ( ! $address_valid ) {
+			$differences[] = __( 'shipping address', 'woocommerce' );
+		}
+		if ( ! $currency_valid ) {
+			$differences[] = __( 'payment currency', 'woocommerce' );
+		}
+		if ( ! $amount_valid ) {
+			$differences[] = __( 'payment amount', 'woocommerce' );
+		}
+		$note = sprintf(
+			/* translators: %s: comma-separated list of mismatched checkout details. */
+			__( 'PayPal checkout details differ from this order: %s. Review the payment and delivery address before fulfilling.', 'woocommerce' ),
+			implode( ', ', $differences )
+		);
+		if ( PayPalConstants::STATUS_COMPLETED === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) ) {
+			$note .= ' ' . __( 'PayPal reported this payment as captured. This hold does not issue a refund; verify the payment in PayPal.', 'woocommerce' );
+		} else {
+			$note .= ' ' . __( 'WooCommerce will skip automatic capture while this order needs review. Verify the payment status in PayPal before fulfilling.', 'woocommerce' );
+		}
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESS_REVIEW, 'yes' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, '' );
+		if ( $order->has_status( OrderStatus::ON_HOLD ) ) {
+			$order->add_order_note( $note );
+		} else {
+			$order->update_status( OrderStatus::ON_HOLD, $note );
+		}
+		$order->save();
+
+		return false;
+	}
+
+	/**
+	 * Normalize harmless case and surrounding whitespace differences in addresses.
+	 *
+	 * @param mixed $value Address field.
+	 * @return string Normalized value.
+	 */
+	private static function normalize_address_field( $value ): string {
+		return is_string( $value ) ? strtoupper( trim( $value ) ) : '';
 	}
 }

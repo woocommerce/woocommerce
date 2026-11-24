@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+UCP: Keep the empty payment handlers registry an object when a checkout request is retried with the same Idempotency-Key.

@@ -65,6 +65,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 			$this->assertSame( array( $declaration ), $profile['ucp']['capabilities'][ $capability ] );
 		}
 		$this->assertSame( home_url( '/.well-known/ucp' ), $profile['links'][0]['href'] );
+		$this->assertSame( '{}', wp_json_encode( $profile['ucp']['payment_handlers'] ) );
 	}
 
 	/**
@@ -329,7 +330,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		$output = $this->render( self::RULE, '1' );
 
 		$this->assertNotNull( $output );
-		$this->assertSame( $this->sut->get_profile(), json_decode( (string) $output, true ) );
+		$this->assertSame( $this->json_profile(), json_decode( (string) $output, true ) );
 	}
 
 	/**
@@ -338,7 +339,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	public function test_maybe_render_request_uri_fallback(): void {
 		$output = $this->render( '', '', '/.well-known/ucp/' );
 
-		$this->assertSame( $this->sut->get_profile(), json_decode( (string) $output, true ) );
+		$this->assertSame( $this->json_profile(), json_decode( (string) $output, true ) );
 	}
 
 	/**
@@ -366,6 +367,15 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
 			}
 		}
+	}
+
+	/**
+	 * The profile after a JSON round trip, as a client decodes it.
+	 *
+	 * @return array
+	 */
+	private function json_profile(): array {
+		return json_decode( (string) wp_json_encode( $this->sut->get_profile() ), true );
 	}
 
 	/**

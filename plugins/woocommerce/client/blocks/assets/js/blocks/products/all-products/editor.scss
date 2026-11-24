@@ -43,14 +43,11 @@
 		overflow: hidden;
 		text-align: center;
 
-		.components-tip {
+		.wc-block-all-products__layout-notice {
 			max-width: 450px;
-			margin: 20px auto;
-			text-align: left;
-
-			p {
-				margin: 1em 0;
-			}
+			margin-block: 20px;
+			margin-inline: auto;
+			text-align: start;
 		}
 
 		.wc-block-all-products__actions {

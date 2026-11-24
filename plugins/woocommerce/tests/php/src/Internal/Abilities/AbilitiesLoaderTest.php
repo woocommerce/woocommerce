@@ -58,6 +58,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
 		'woocommerce/order-notes-query',
+		'woocommerce/order-refunds-query',
+		'woocommerce/order-refund-create',
 		'woocommerce/payment-gateways-query',
 		'woocommerce/customers-query',
 		'woocommerce/customer-update',
@@ -377,6 +379,16 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
+			),
+			'woocommerce/order-refunds-query'         => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/order-refund-create'         => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
 			),
 			'woocommerce/payment-gateways-query'      => array(
 				'readonly'    => true,
@@ -1222,6 +1234,19 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id' => 1,
 				),
 			),
+			'order-refunds-query'         => array(
+				'woocommerce/order-refunds-query',
+				array(
+					'id' => 1,
+				),
+			),
+			'order-refund-create'         => array(
+				'woocommerce/order-refund-create',
+				array(
+					'id'     => 1,
+					'amount' => '1',
+				),
+			),
 			'payment-gateways-query'      => array(
 				'woocommerce/payment-gateways-query',
 				array(),
@@ -2026,6 +2051,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'order-notes-query'     => array(
 				'woocommerce/order-notes-query',
 				array( 'id' => -123 ),
+			),
+			'order-refunds-query'   => array(
+				'woocommerce/order-refunds-query',
+				array( 'id' => -123 ),
+			),
+			'order-refund-create'   => array(
+				'woocommerce/order-refund-create',
+				array(
+					'id'     => -123,
+					'amount' => '1',
+				),
 			),
 		);
 	}
@@ -3301,14 +3337,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should check the permissions of a direct call with a numeric string id or no input, as the MCP adapter sends them.
+	 * @testdox Should prepare a numeric string id or schema default before checking permissions directly.
 	 */
-	public function test_check_permissions_converts_raw_input(): void {
+	public function test_prepare_input_for_direct_permission_checks(): void {
 		$order   = wc_create_order();
 		$ability = wp_get_ability( 'woocommerce/orders-query' );
 
-		$this->assertTrue( $ability->check_permissions( array( 'id' => (string) $order->get_id() ) ), 'A numeric string id is converted.' );
-		$this->assertTrue( $ability->check_permissions( null ), 'No input gets the schema default.' );
+		$prepared = $ability->prepare_input( array( 'id' => (string) $order->get_id() ) );
+		$this->assertNotWPError( $prepared );
+		$this->assertSame( $order->get_id(), $prepared['id'] );
+		$this->assertTrue( $ability->check_permissions( $prepared ), 'A numeric string id is converted.' );
+
+		$prepared = $ability->prepare_input();
+		$this->assertNotWPError( $prepared );
+		$this->assertTrue( $ability->check_permissions( $prepared ), 'No input gets the schema default.' );
 	}
 
 	/**
