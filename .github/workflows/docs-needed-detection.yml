@@ -176,7 +176,11 @@ jobs:
         if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
         # Install outside the workspace: the checkout put the monorepo root package.json there,
         # whose workspace:* deps make a bare `npm install` abort (npm has no workspace: support).
-        run: npm install --prefix "${{ runner.temp }}/linear" @linear/sdk@71.0.0
+        # Install from the committed lockfile without lifecycle scripts: the next step runs with secrets.
+        run: |
+          mkdir -p "${{ runner.temp }}/linear"
+          cp .github/workflows/scripts/docs-linear/package.json .github/workflows/scripts/docs-linear/package-lock.json "${{ runner.temp }}/linear/"
+          npm ci --ignore-scripts --prefix "${{ runner.temp }}/linear"
 
       - name: 'Create Linear Issue'
         if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
