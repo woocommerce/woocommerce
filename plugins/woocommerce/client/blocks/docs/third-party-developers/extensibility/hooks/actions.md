@@ -820,6 +820,8 @@ do_action( 'woocommerce_store_api_checkout_order_created', \WC_Order $order )
 
 Use this hook for first-touch logic that should only run when the draft order is initially created (e.g. analytics, abandoned-cart trackers). As of WooCommerce 10.8.0 the Store API defers draft order creation to place-order time, so this action fires once at POST rather than on the first PATCH.
 
+Add products and coupons to the cart, not to the order here. When a shopper retries the order, products and coupons that the cart didn't add are removed. Fees and shipping lines added here are kept.
+
 ### Parameters
 
 | Argument | Type | Description |
