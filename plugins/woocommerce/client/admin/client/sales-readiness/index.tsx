@@ -77,7 +77,14 @@ export default function SalesReadiness() {
 							/>
 						) ) }
 						{ view.declared && (
-							<DeclaredCard declared={ view.declared } />
+							<DeclaredCard
+								declared={ view.declared }
+								run={ {
+									onRun: runCheck,
+									running,
+									pending: view.run.pending,
+								} }
+							/>
 						) }
 					</>
 				) }

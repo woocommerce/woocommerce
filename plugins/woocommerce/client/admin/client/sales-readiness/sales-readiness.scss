@@ -461,3 +461,20 @@ body:has(.wc-sales-readiness) {
 	text-decoration-line: underline;
 	cursor: pointer;
 }
+
+// The AI shopping experiments notice, above the card's description.
+.wc-sales-readiness-experiments {
+	margin-block-end: 12px;
+
+	.components-notice {
+		margin: 0 0 12px;
+	}
+}
+
+// While AI shopping experiments are off, the items they add are highlighted.
+.wc-sales-readiness-declared__item--experiment {
+	background: var(--wpds-color-background-interactive-brand-weak);
+	border-radius: 2px;
+	padding-inline: 4px;
+	margin-inline: -4px;
+}

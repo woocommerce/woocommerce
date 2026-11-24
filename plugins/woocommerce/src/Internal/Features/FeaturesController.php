@@ -680,6 +680,8 @@ class FeaturesController {
 				'name'                         => __( 'AI shopping experiments', 'woocommerce' ),
 				'description'                  => AiShoppingExperiments::get_description(),
 				'enabled_by_default'           => false,
+				// First among the experimental features, where the AI shopping health page sends merchants.
+				'order'                        => 11,
 				'disable_ui'                   => false,
 				'is_experimental'              => true,
 				'skip_compatibility_checks'    => true,

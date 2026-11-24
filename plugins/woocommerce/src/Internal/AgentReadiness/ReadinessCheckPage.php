@@ -338,7 +338,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
 			// Setup steps live in the Setup checklist and, while one blocks sales, in Fix first; the cards hold what the scan read.
 			'sections'     => null === $report ? array() : $this->sections( array_values( array_filter( $visible, static fn( array $check ): bool => ! self::is_setup_step( $check ) ) ), $launched, $report ),
-			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ),
+			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array(), $this->experiments_enabled() ),
 			'overview'     => array(
 				'shopping' => $this->shopping_card( $checks ),
 				// After the description, when the last check stopped at the product limit.
@@ -1094,31 +1094,45 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Whether the AI shopping experiments feature is on, or null for a user who can't manage
+	 * WooCommerce, who sees no offer to turn it on and no Experiment tags.
+	 */
+	private function experiments_enabled(): ?bool {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return null;
+		}
+		return $this->features_controller->feature_is_enabled( AiShoppingExperiments::FEATURE_NAME );
+	}
+
+	/**
 	 * Protocols and files the store serves to agents, as information, never pass or fail: how many were
 	 * found, then every item under where it lives. Items the scan couldn't read are under Not checked yet.
-	 * Null with no items in the report.
+	 * Items the AI shopping experiments add are marked, with the notice about them. Null with no items in the report.
 	 *
-	 * @param array $items Items from the report.
-	 * @return array{title:string,badge:array{intent:string,text:string},text:string,groups:array<int, array{title:string,items:array<int, array{name:string,found:bool|null}>}>}|null
+	 * @param array     $items          Items from the report.
+	 * @param bool|null $experiments_on Whether AI shopping experiments are on; null leaves out the notice and the marks.
+	 * @return array{title:string,badge:array{intent:string,text:string},text:string,groups:array<int, array{title:string,items:array<int, array{name:string,found:bool|null,experiment:bool}>}>,experiments:array<string, mixed>|null}|null
 	 */
-	private static function declared( array $items ): ?array {
+	private static function declared( array $items, ?bool $experiments_on = null ): ?array {
 		$items = array_values( array_filter( $items, 'is_array' ) );
 		if ( array() === $items ) {
 			return null;
 		}
-		$titles = array(
+		$titles         = array(
 			'root'    => __( 'Files in your root folder', 'woocommerce' ),
 			'address' => __( 'Files at standard addresses', 'woocommerce' ),
 			'code'    => __( 'In your page code', 'woocommerce' ),
 			'unknown' => __( 'Not checked yet', 'woocommerce' ),
 		);
-		$groups = array();
+		$experiment_ids = null === $experiments_on ? array() : AiShoppingExperiments::get_declared_item_ids();
+		$groups         = array();
 		foreach ( $items as $item ) {
 			$found              = $item['found'] ?? null;
 			$group              = null === $found ? 'unknown' : DeclaredToAgents::group( (string) ( $item['id'] ?? '' ) );
 			$groups[ $group ][] = array(
-				'name'  => (string) ( $item['name'] ?? '' ),
-				'found' => null === $found ? null : true === $found,
+				'name'       => (string) ( $item['name'] ?? '' ),
+				'found'      => null === $found ? null : true === $found,
+				'experiment' => in_array( (string) ( $item['id'] ?? '' ), $experiment_ids, true ),
 			);
 		}
 		$found   = count( array_filter( $items, static fn( array $item ): bool => true === ( $item['found'] ?? null ) ) );
@@ -1146,17 +1160,61 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			}
 		}
 		return array(
-			'title'  => __( 'Extra details for AI assistants', 'woocommerce' ),
-			'badge'  => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
-			'text'   => $text,
+			'title'       => __( 'Extra details for AI assistants', 'woocommerce' ),
+			'badge'       => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
+			'text'        => $text,
 			// In the order of $titles, leaving out the groups with no items.
-			'groups' => array_map(
+			'groups'      => array_map(
 				static fn( string $key ): array => array(
 					'title' => $titles[ $key ],
 					'items' => $groups[ $key ],
 				),
 				array_keys( array_intersect_key( $titles, $groups ) )
 			),
+			'experiments' => null === $experiments_on ? null : self::experiments_notice( $items, $experiment_ids, $experiments_on ),
+		);
+	}
+
+	/**
+	 * The AI shopping experiments notice at the top of Extra details. While the feature is off, it offers
+	 * to turn it on when any item the experiments add is not found. Once on, a line links to Features.
+	 *
+	 * @param array<int, array<string, mixed>> $items          Items from the report.
+	 * @param array<int, string>               $experiment_ids Item ids the experiments add.
+	 * @param bool                             $enabled        Whether the feature is on.
+	 * @return array<string, mixed>
+	 */
+	private static function experiments_notice( array $items, array $experiment_ids, bool $enabled ): array {
+		$missing = count(
+			array_filter(
+				$items,
+				static fn( array $item ): bool => false === ( $item['found'] ?? null ) && in_array( (string) ( $item['id'] ?? '' ), $experiment_ids, true )
+			)
+		);
+		return array(
+			'enabled'   => $enabled,
+			'tag'       => __( 'Experiment', 'woocommerce' ),
+			'offer'     => $enabled || 0 === $missing ? null : array(
+				'title'  => sprintf(
+					/* translators: %s: number of items not found that AI shopping experiments add. */
+					_n( 'WooCommerce can add %s of these with AI shopping experiments.', 'WooCommerce can add %s of these with AI shopping experiments.', $missing, 'woocommerce' ),
+					number_format_i18n( $missing )
+				),
+				'text'   => __( 'They’re marked below. These standards aren’t settled yet, and few AI assistants use them. You can turn them off at any time in Features.', 'woocommerce' ),
+				'button' => __( 'Turn on AI shopping experiments', 'woocommerce' ),
+			),
+			'turned_on' => array(
+				'text'   => __( 'AI shopping experiments are on. Run the check again to see the new files.', 'woocommerce' ),
+				'button' => __( 'Run check', 'woocommerce' ),
+			),
+			'on'        => array(
+				'text' => __( 'AI shopping experiments are on', 'woocommerce' ),
+				'link' => array(
+					'href' => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ),
+					'text' => __( 'Turn off in Features', 'woocommerce' ),
+				),
+			),
+			'error'     => __( 'AI shopping experiments weren’t turned on. Try again.', 'woocommerce' ),
 		);
 	}
 

@@ -24,24 +24,36 @@ final class AiShoppingExperiments {
 	public const AI_TRAINING_NOTICES = 'ai_training_notices';
 
 	/**
-	 * The experiments the switch covers, in display order.
+	 * The experiments the switch covers, in display order, with the "Extra details for AI assistants"
+	 * items (DeclaredToAgents ids) each one adds.
 	 *
-	 * @return array<string, string> Experiment slug => label used in the feature description.
+	 * @return array<string, array{0:string,1:array<int,string>}> Label and item ids, keyed by experiment slug.
 	 */
 	public static function get_experiments(): array {
 		return array(
-			'webmcp'                  => __( 'WebMCP on store forms', 'woocommerce' ),
-			'markdown_pages'          => __( 'Markdown versions of pages', 'woocommerce' ),
-			'llms_full_txt'           => __( 'a full-content llms.txt', 'woocommerce' ),
-			'markdown_sitemap'        => __( 'a Markdown sitemap and AI catalog', 'woocommerce' ),
-			self::AI_TRAINING_NOTICES => __( 'AI training notices', 'woocommerce' ),
+			'webmcp'                  => array( __( 'WebMCP on store forms', 'woocommerce' ), array( 'webmcp-forms-schema' ) ),
+			'markdown_pages'          => array( __( 'Markdown versions of pages', 'woocommerce' ), array( 'markdown-pages', 'markdown-alternate-link', 'markdown-frontmatter' ) ),
+			'llms_full_txt'           => array( __( 'a full-content llms.txt', 'woocommerce' ), array( 'llms-full' ) ),
+			'markdown_sitemap'        => array( __( 'a Markdown sitemap and AI catalog', 'woocommerce' ), array( 'sitemap-md', 'ai-catalog', 'ard-manifest' ) ),
+			self::AI_TRAINING_NOTICES => array( __( 'AI training notices', 'woocommerce' ), array( 'ai-txt', 'tdmrep' ) ),
 		);
+	}
+
+	/**
+	 * The "Extra details for AI assistants" item ids that the experiments add.
+	 *
+	 * @param array<string, array{0:string,1:array<int,string>}>|null $experiments Experiments. Defaults to get_experiments().
+	 * @return array<int, string>
+	 */
+	public static function get_declared_item_ids( ?array $experiments = null ): array {
+		$experiments = $experiments ?? self::get_experiments();
+		return array_values( array_unique( array_merge( array(), ...array_values( array_column( $experiments, 1 ) ) ) ) );
 	}
 
 	/**
 	 * Build the feature description shown next to the checkbox on the Features page.
 	 *
-	 * @param array<string, string>|null $experiments Experiments to list. Defaults to get_experiments().
+	 * @param array<string, array{0:string,1:array<int,string>}>|null $experiments Experiments to list. Defaults to get_experiments().
 	 * @return string Description HTML.
 	 */
 	public static function get_description( ?array $experiments = null ): string {
@@ -50,7 +62,7 @@ final class AiShoppingExperiments {
 		$description = sprintf(
 			/* translators: %s: list of experiments, for example "WebMCP on store forms, Markdown versions of pages, and AI training notices". */
 			__( 'Turn on newer ways for AI assistants to read and shop your store: %s.', 'woocommerce' ),
-			wp_sprintf( '%l', array_values( $experiments ) )
+			wp_sprintf( '%l', array_column( $experiments, 0 ) )
 		);
 
 		if ( isset( $experiments[ self::AI_TRAINING_NOTICES ] ) ) {
