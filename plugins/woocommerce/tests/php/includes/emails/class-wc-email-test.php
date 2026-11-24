@@ -158,6 +158,37 @@ class WC_Email_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox With the block email editor, the POS refunded order subject is filled in and converted to plain text.
+	 */
+	public function test_block_editor_pos_refunded_order_subject_is_plain_text(): void {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$was_enabled         = $features_controller->feature_is_enabled( 'block_email_editor' );
+		$features_controller->change_feature_enable( 'block_email_editor', true );
+		$registry = Email_Editor_Container::container()->get( Personalization_Tags_Registry::class );
+		$registry->register(
+			new Personalization_Tag(
+				'Store',
+				'[wc-email-test/store]',
+				'Test',
+				function () {
+					return 'Tom &amp; Jerry';
+				}
+			)
+		);
+		update_option( 'woocommerce_customer_pos_refunded_order_settings', array( 'subject_full' => '<strong>Refund</strong> a&lt;b from <!--[wc-email-test/store]-->' ) );
+		$email         = new WC_Email_Customer_POS_Refunded_Order();
+		$email->object = WC_Helper_Order::create_order();
+
+		try {
+			$this->assertSame( 'Refund a<b from Tom & Jerry', $email->get_subject() );
+		} finally {
+			delete_option( 'woocommerce_customer_pos_refunded_order_settings' );
+			$registry->unregister( '[wc-email-test/store]' );
+			$features_controller->change_feature_enable( 'block_email_editor', $was_enabled );
+		}
+	}
+
+	/**
 	 * @testdox Emails that do not support Cc/Bcc hide the fields and ignore stored or directly set values.
 	 */
 	public function test_cc_bcc_are_ignored_when_email_does_not_support_them(): void {
