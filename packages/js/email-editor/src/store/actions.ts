@@ -155,12 +155,16 @@ export function* requestSendingNewsletterPreview( email: string ) {
 			error?: unknown;
 			message?: unknown;
 		};
+		const detail = error ?? message;
 		yield {
 			type: 'CHANGE_PREVIEW_STATE',
 			state: {
 				sendingPreviewStatus: SendingPreviewStatus.ERROR,
 				isSendingPreviewEmail: false,
-				errorMessage: JSON.stringify( error ?? message ),
+				errorMessage:
+					typeof detail === 'string'
+						? detail
+						: JSON.stringify( detail ),
 			},
 		};
 	}

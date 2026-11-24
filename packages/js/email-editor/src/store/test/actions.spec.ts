@@ -156,7 +156,7 @@ describe( 'requestSendingNewsletterPreview', () => {
 				state: {
 					sendingPreviewStatus: SendingPreviewStatus.ERROR,
 					isSendingPreviewEmail: false,
-					errorMessage: '"Request failed"',
+					errorMessage: 'Request failed',
 				},
 			},
 			done: false,
@@ -177,7 +177,7 @@ describe( 'requestSendingNewsletterPreview', () => {
 				data: { status: 500 },
 			} ).value
 		).toMatchObject( {
-			state: { errorMessage: '"No mailer configured"' },
+			state: { errorMessage: 'No mailer configured' },
 		} );
 	} );
 } );
