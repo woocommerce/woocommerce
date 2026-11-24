@@ -237,7 +237,7 @@ class AddToCartWithOptions extends \WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'action="https://example.com"', $markup, 'The form has an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter.' );
 		$this->assertStringNotContainsString( 'data-wp-on--submit', $markup, 'The form doesn\'t have an on submit event when redirect after add is enabled.' );
-		$this->assertStringNotContainsString( 'woocommerce/store-notices', $markup, 'The HTML form has no store notices context nor notices list.' );
+		$this->assertStringNotContainsString( 'woocommerce/store-notices', $markup, 'The HTML form has no store notices context or notices list.' );
 
 		// Test when cart redirect is disabled.
 		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
@@ -297,10 +297,11 @@ class AddToCartWithOptions extends \WC_Unit_Test_Case {
 			$product = $previous_product;
 		}
 
-		$dom = new \DOMDocument();
-		libxml_use_internal_errors( true );
+		$dom                  = new \DOMDocument();
+		$previous_libxml_mode = libxml_use_internal_errors( true );
 		$dom->loadHTML( '<?xml encoding="utf-8"?>' . $markup );
 		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_libxml_mode );
 		$xpath = new \DOMXPath( $dom );
 
 		$form = $xpath->query( '//form[contains(concat(" ", @class, " "), " wc-block-add-to-cart-with-options ")]' )->item( 0 );
