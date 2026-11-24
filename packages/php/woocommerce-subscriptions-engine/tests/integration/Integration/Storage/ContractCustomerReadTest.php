@@ -218,4 +218,43 @@ class ContractCustomerReadTest extends EngineIntegrationTestCase {
 		// Indistinguishable from "owned by someone else" - the asymmetric not-found rule.
 		$this->assertNull( $this->sut->find_for_customer( 123456, 14 ) );
 	}
+
+	/**
+	 * @dataProvider provide_customer_list_args
+	 *
+	 * @param array<string, mixed> $args List args.
+	 */
+	public function test_find_by_customer_id_throws_on_a_failed_read( array $args ): void {
+		$this->seed( 30, ContractStatus::ACTIVE );
+
+		$this->fail_next_query( '/^\s*SELECT\s+\*,.*WHERE customer_id = \d+/s' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read the contracts of customer 30' );
+
+		$this->sut->find_by_customer_id( 30, $args );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_customer_list_args(): array {
+		return array(
+			'without an owner filter' => array( array() ),
+			'with an owner filter'    => array( array( 'extension_slug' => 'engine-tests' ) ),
+		);
+	}
+
+	public function test_find_for_customer_throws_on_a_failed_read_and_still_hides_a_foreign_contract(): void {
+		$id = $this->seed( 31, ContractStatus::ACTIVE );
+
+		$this->assertNull( $this->sut->find_for_customer( $id, 32 ), 'A foreign contract still reads as null.' );
+
+		$this->fail_next_query( '/WHERE id = \d+ AND customer_id = \d+/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( "Failed to read contract {$id}" );
+
+		$this->sut->find_for_customer( $id, 31 );
+	}
 }
