@@ -62,6 +62,52 @@ class WC_Product_Download_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The file type check reads the path the download handler opens for $path.
+	 * @testWith ["{site}/wp-content/plugins/woocommerce/woocommerce.php#.jpg", false]
+	 *           ["{site}/wp-content/plugins/woocommerce/woocommerce.php#x.jpg?y", false]
+	 *           ["{site}/wp-content/plugins/woocommerce/woocommerce.PHP#.JPG", false]
+	 *           ["{site}/wp-content/plugins/woocommerce/woocommerce.php?.jpg", false]
+	 *           ["{plugin_dir}/woocommerce/woocommerce.php#.jpg", false]
+	 *           ["wp-content/plugins/woocommerce/woocommerce.php#.jpg", false]
+	 *           ["{site}/wp-content/plugins/woocommerce/woocommerce.php%23.jpg", true]
+	 *           ["{site}/wp-content/plugins/woocommerce/woocommerce.php%3F.jpg", true]
+	 *           ["{site}/wp-content/plugins/woocommerce/assets/images/help.png#v2", true]
+	 *           ["{site}/wp-content/plugins/woocommerce/assets/images/help.png?v=2", true]
+	 *
+	 * @param string $path    File path; {site} is replaced with the site URL and {plugin_dir} with the plugins directory.
+	 * @param bool   $allowed Whether the file type should be allowed.
+	 */
+	public function test_file_type_matches_the_path_the_download_handler_opens( string $path, bool $allowed ): void {
+		$download = new WC_Product_Download();
+		$download->set_file( str_replace( array( '{site}', '{plugin_dir}' ), array( untrailingslashit( site_url() ), untrailingslashit( WP_PLUGIN_DIR ) ), $path ) );
+
+		$opened_path = WC_Download_Handler::parse_file_path( $download->get_file() )['file_path'];
+		$opened_type = wp_check_filetype( $opened_path, $download->get_allowed_mime_types() )['type'];
+
+		$this->assertSame( $opened_type, $download->get_file_type(), "The type check must read the same path the download handler opens ({$opened_path})." );
+		$this->assertSame( $allowed, $download->is_allowed_filetype(), $allowed ? 'The opened file has an allowed type, so the download must be allowed.' : 'The opened file is a PHP file, so the download must be refused.' );
+	}
+
+	/**
+	 * @testdox On Windows, a local file ending in a period is refused even when "$suffix" follows the period.
+	 * @testWith ["#x"]
+	 *           ["?x"]
+	 *
+	 * @param string $suffix Fragment or query string after the period.
+	 */
+	public function test_is_allowed_filetype_on_windows_with_period_before_fragment_or_query( string $suffix ): void {
+		try {
+			\Automattic\Jetpack\Constants::set_constant( 'PHP_OS', 'winnt' );
+			$download = new WC_Product_Download();
+			$download->set_file( site_url( '/wp-config.php.' . $suffix ) );
+
+			$this->assertFalse( $download->is_allowed_filetype(), 'Windows drops the trailing period, so the handler would open wp-config.php.' );
+		} finally {
+			\Automattic\Jetpack\Constants::clear_single_constant( 'PHP_OS' );
+		}
+	}
+
+	/**
 	 * Test that download URLs are automatically added to the approved directories list (for
 	 * "admin"-level users) but that they are not automatically added in other cases.
 	 */

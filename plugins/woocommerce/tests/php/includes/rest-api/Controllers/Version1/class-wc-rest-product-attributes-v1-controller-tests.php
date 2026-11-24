@@ -87,5 +87,73 @@ class WC_REST_Product_Attributes_V1_Controller_Tests extends WC_REST_Unit_Test_C
 
 		$this->assertEquals( 201, $response->get_status() );
 	}
-}
 
+	/**
+	 * @testdox Reading a single attribute whose stored label contains markup returns a plain-text name.
+	 */
+	public function test_get_item_normalizes_stored_label_with_markup() {
+		wp_set_current_user( $this->admin_id );
+
+		$attribute_id = $this->insert_raw_attribute_row( 'Colour<b>bold</b>', 'restrawcolour' );
+
+		try {
+			$request  = new WP_REST_Request( 'GET', '/wc/v1/products/attributes/' . $attribute_id );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 200, $response->get_status() );
+			$this->assertSame( 'Colourbold', $response->get_data()['name'] );
+		} finally {
+			wc_delete_attribute( $attribute_id );
+		}
+	}
+
+	/**
+	 * @testdox Updating an attribute without a slug keeps the stored slug even when the normalized name would slugify differently.
+	 */
+	public function test_update_item_without_slug_keeps_existing_slug() {
+		global $wpdb;
+
+		wp_set_current_user( $this->admin_id );
+
+		$attribute_id = $this->insert_raw_attribute_row( 'Width <5cm', 'width' );
+
+		try {
+			$request = new WP_REST_Request( 'PUT', '/wc/v1/products/attributes/' . $attribute_id );
+			$request->set_body_params( array( 'order_by' => 'name' ) );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 200, $response->get_status() );
+			$this->assertSame( 'pa_width', $response->get_data()['slug'] );
+			$this->assertSame( 'name', $response->get_data()['order_by'] );
+			$this->assertSame( 'width', $wpdb->get_var( $wpdb->prepare( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = %d", $attribute_id ) ) );
+		} finally {
+			wc_delete_attribute( $attribute_id );
+		}
+	}
+
+	/**
+	 * Insert an attribute row directly, bypassing wc_create_attribute(), and reset the attribute caches.
+	 *
+	 * @param string $label Raw label to store.
+	 * @param string $slug  Attribute slug (without the `pa_` prefix).
+	 * @return int Attribute ID.
+	 */
+	private function insert_raw_attribute_row( string $label, string $slug ): int {
+		global $wpdb;
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+			array(
+				'attribute_label'   => $label,
+				'attribute_name'    => $slug,
+				'attribute_type'    => 'select',
+				'attribute_orderby' => 'menu_order',
+				'attribute_public'  => 0,
+			)
+		);
+		delete_transient( 'wc_attribute_taxonomies' );
+		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+
+		return (int) $wpdb->insert_id;
+	}
+}

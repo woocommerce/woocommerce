@@ -60,6 +60,7 @@
 		"wc-blocks-style",
 		"file:../product-sale-badge.css"
 	],
+	"viewScript": "file:../product-sale-badge-frontend.js",
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"example": {},

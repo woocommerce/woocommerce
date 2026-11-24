@@ -102,6 +102,108 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox My Account registration honors its own merchant setting even when checkout registration is enabled.
+	 *
+	 * @testWith ["no", false]
+	 *           ["yes", true]
+	 *
+	 * @param string $registration_enabled Whether My Account registration is enabled.
+	 * @param bool   $expected_customer Whether a customer should be created.
+	 */
+	public function test_process_registration_respects_myaccount_setting( string $registration_enabled, bool $expected_customer ): void {
+		wp_set_current_user( 0 );
+		update_option( 'woocommerce_enable_myaccount_registration', $registration_enabled );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+		add_filter( 'woocommerce_registration_auth_new_customer', '__return_false' );
+		add_filter( 'pre_wp_mail', '__return_true' );
+
+		$_POST             = array(
+			'register'                   => 'Register',
+			'email'                      => 'registration-policy@example.com',
+			'woocommerce-register-nonce' => wp_create_nonce( 'woocommerce-register' ),
+		);
+		$created_customers = did_action( 'woocommerce_created_customer' );
+
+		WC_Form_Handler::process_registration();
+
+		$this->assertSame( $expected_customer, get_user_by( 'email', 'registration-policy@example.com' ) instanceof WP_User, 'The stored customer must reflect the My Account registration setting.' );
+		$this->assertSame( $created_customers + ( $expected_customer ? 1 : 0 ), did_action( 'woocommerce_created_customer' ), 'Disabled registration must not notify customer-creation consumers.' );
+		$this->assertSame( $expected_customer ? 0 : 1, wc_notice_count( 'error' ), 'Only disabled registration should produce an error.' );
+		if ( ! $expected_customer ) {
+			$this->assertTrue( wc_has_notice( 'Registration is disabled.', 'error' ), 'The registration policy error should be shown.' );
+		}
+	}
+
+	/**
+	 * Order statuses when the pay form is posted, and whether pay_action() should take each one on.
+	 *
+	 * @return array<string, array{0: string, 1: bool}>
+	 */
+	public function provider_pay_action_order_statuses(): array {
+		return array(
+			'pending order is processed'      => array( OrderStatus::PENDING, true ),
+			'checkout-draft order is refused' => array( OrderStatus::CHECKOUT_DRAFT, false ),
+		);
+	}
+
+	/**
+	 * @testdox pay_action() takes on a pending order but not a checkout-draft, which has not passed checkout validation.
+	 *
+	 * @dataProvider provider_pay_action_order_statuses
+	 * @covers WC_Form_Handler::pay_action()
+	 *
+	 * @param string $status           Order status when the form is posted.
+	 * @param bool   $expect_processed Whether pay_action() should start processing the order.
+	 */
+	public function test_pay_action_processes_payable_orders_but_not_checkout_drafts( string $status, bool $expect_processed ): void {
+		global $wp;
+
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( $status );
+		$order->save();
+
+		$this->assertTrue( $order->needs_payment(), 'Baseline: needs_payment() is true for both, so only the draft check can tell them apart.' );
+
+		// No payment method is posted, so a processed order stops at "Invalid payment method" instead of redirecting.
+		$_GET['key']                       = $order->get_order_key();
+		$_POST['woocommerce_pay']          = '1';
+		$_REQUEST['woocommerce-pay-nonce'] = wp_create_nonce( 'woocommerce-pay' );
+		$wp->query_vars['order-pay']       = $order->get_id();
+
+		$processed = false;
+		add_action(
+			'woocommerce_before_pay_action',
+			function () use ( &$processed ) {
+				$processed = true;
+			}
+		);
+
+		$customer_billing = array(
+			'billing_country'  => WC()->customer->get_billing_country(),
+			'billing_state'    => WC()->customer->get_billing_state(),
+			'billing_postcode' => WC()->customer->get_billing_postcode(),
+			'billing_city'     => WC()->customer->get_billing_city(),
+		);
+		$ob_level         = ob_get_level();
+
+		try {
+			WC_Form_Handler::pay_action();
+		} finally {
+			// pay_action() copies the order's billing location (country, state, postcode, city) onto the shared customer and leaves its output buffer open.
+			WC()->customer->set_props( $customer_billing );
+			WC()->customer->save();
+			while ( ob_get_level() > $ob_level ) {
+				ob_end_clean();
+			}
+			unset( $wp->query_vars['order-pay'], $_GET['key'], $_POST['woocommerce_pay'], $_REQUEST['woocommerce-pay-nonce'] );
+		}
+
+		$this->assertSame( $expect_processed, $processed, 'pay_action() must take on a pending order and leave a draft alone.' );
+	}
+
+	/**
 	 * @testdox cancel_order() redirects to a clean endpoint when no custom redirect is provided.
 	 *
 	 * @covers WC_Form_Handler::cancel_order()
@@ -1282,6 +1384,354 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Payment authorization rejects other customers before any payment side effects.
+	 * @testWith ["owner", true]
+	 *           ["other", false]
+	 *           ["guest", false]
+	 * @param string $visitor Visitor identity.
+	 * @param bool   $allowed Whether payment should reach the gateway.
+	 */
+	public function test_pay_action_checks_order_owner( string $visitor, bool $allowed ): void {
+		$owner = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$order = $this->create_payment_order( $owner );
+		wp_set_current_user( 'owner' === $visitor ? $owner : ( 'other' === $visitor ? self::factory()->user->create( array( 'role' => 'customer' ) ) : 0 ) );
+
+		$this->assert_payment_authorization( $order, $allowed );
+	}
+
+	/**
+	 * @testdox A denied payment shows only the order-pay page's own reason.
+	 * @testWith ["other", "This order cannot be paid for", 1]
+	 *           ["logged_out", "Please log in to your account below", 0]
+	 *           ["unverified_guest", "verify the email address associated with the order", 0]
+	 * @param string $visitor Visitor identity.
+	 * @param string $reason Text the page shows for this refusal.
+	 * @param int    $refusals Times "This order cannot be paid for" should appear.
+	 */
+	public function test_denied_payment_page_shows_one_reason( string $visitor, string $reason, int $refusals ): void {
+		$owner = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$order = $this->create_payment_order( 'unverified_guest' === $visitor ? 0 : $owner );
+		wp_set_current_user( 'other' === $visitor ? self::factory()->user->create( array( 'role' => 'customer' ) ) : 0 );
+		if ( 'unverified_guest' === $visitor ) {
+			WC()->session = new WC_Mock_Session_Handler();
+		}
+
+		$this->assert_payment_authorization( $order, false );
+
+		$original_query_vars                    = $GLOBALS['wp']->query_vars;
+		$GLOBALS['wp']->query_vars['order-pay'] = $order->get_id();
+		$_GET                                   = array(
+			'pay_for_order' => 'true',
+			'key'           => $order->get_order_key(),
+		);
+		try {
+			ob_start();
+			WC_Shortcode_Checkout::output( array() );
+			$page = ob_get_clean();
+		} finally {
+			$GLOBALS['wp']->query_vars = $original_query_vars;
+		}
+
+		$this->assertStringContainsString( $reason, $page );
+		$this->assertSame( $refusals, substr_count( $page, 'This order cannot be paid for' ) );
+	}
+
+	/**
+	 * @testdox Verified payment proof survives storage and restoration through the production session handler.
+	 */
+	public function test_pay_action_restores_verified_guest_session(): void {
+		wp_set_current_user( 0 );
+		$original_cookies = $_COOKIE;
+		$order            = $this->create_payment_order();
+		$cookie_name      = '';
+		$cookie_value     = '';
+		$capture_cookie   = static function ( $enabled, $name, $value ) use ( &$cookie_name, &$cookie_value ) {
+			if ( false !== strpos( $name, 'woocommerce_session' ) ) {
+				$cookie_name  = $name;
+				$cookie_value = $value;
+			}
+			return false;
+		};
+		add_filter( 'woocommerce_set_cookie_enabled', $capture_cookie, 10, 3 );
+
+		try {
+			$_COOKIE      = array();
+			WC()->session = new WC_Session_Handler();
+			WC()->session->init_session_cookie();
+			WC()->session->set_customer_session_cookie( true );
+			$this->assertNotSame( '', $cookie_value, 'The production handler should issue a signed session cookie.' );
+			$this->assertFalse( \Automattic\WooCommerce\Internal\Utilities\Users::should_user_verify_order_email( $order->get_id(), $order->get_billing_email(), 'order-pay' ) );
+			$customer_id = WC()->session->get_customer_id();
+			WC()->session->save_data();
+			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP ) . $customer_id, WC_SESSION_CACHE_GROUP );
+
+			// Emulate the next request with the signed cookie and a fresh handler loading the database.
+			$_COOKIE[ $cookie_name ] = $cookie_value;
+			WC()->session            = new WC_Session_Handler();
+			WC()->session->init_session_cookie();
+			$this->assertSame( $customer_id, WC()->session->get_customer_id() );
+			$this->assertIsArray( WC()->session->get( 'order_pay_email_verification' ) );
+			$this->assert_payment_authorization( $order, true );
+		} finally {
+			WC()->session->destroy_session();
+			$_COOKIE = $original_cookies;
+			remove_filter( 'woocommerce_set_cookie_enabled', $capture_cookie );
+		}
+	}
+
+	/**
+	 * @testdox Guest payment requires a valid challenge carried forward to the separate payment form.
+	 * @testWith ["verified", true]
+	 *           ["unverified", false]
+	 *           ["wrong_email", false]
+	 *           ["wrong_nonce", false]
+	 *           ["changed_key", false]
+	 *           ["changed_email", false]
+	 *           ["other_order", false]
+	 *           ["expired", false]
+	 *           ["invalid_proof", false]
+	 *           ["other_session", false]
+	 *           ["required_filter", false]
+	 *           ["grace_period", true]
+	 *           ["grace_disabled", false]
+	 *           ["no_email", true]
+	 *           ["verification_disabled", true]
+	 *           ["session_email", true]
+	 * @param string $scenario Verification scenario.
+	 * @param bool   $allowed Whether payment should reach the gateway.
+	 */
+	public function test_pay_action_checks_guest_verification( string $scenario, bool $allowed ): void {
+		wp_set_current_user( 0 );
+		WC()->session = new WC_Mock_Session_Handler();
+		$order        = $this->create_payment_order();
+
+		if ( ! in_array( $scenario, array( 'unverified', 'grace_period', 'grace_disabled', 'no_email', 'verification_disabled', 'session_email' ), true ) ) {
+			$_POST                     = array(
+				'check_submission' => 'wrong_nonce' === $scenario ? 'invalid' : wp_create_nonce( 'wc_verify_email' ),
+				'email'            => 'wrong_email' === $scenario ? 'other@example.org' : strtoupper( $order->get_billing_email() ),
+			);
+			$original_query_vars       = $GLOBALS['wp']->query_vars;
+			$original_customer         = WC()->customer;
+			WC()->customer             = new WC_Customer( 0, true );
+			$GLOBALS['wp']->query_vars = array( 'order-pay' => $order->get_id() );
+			$_GET                      = array(
+				'pay_for_order' => 'true',
+				'key'           => $order->get_order_key(),
+			);
+			ob_start();
+			try {
+				WC_Shortcode_Checkout::output( array() );
+				$output = (string) ob_get_contents();
+			} finally {
+				ob_end_clean();
+				$GLOBALS['wp']->query_vars = $original_query_vars;
+				WC()->customer             = $original_customer;
+			}
+			if ( in_array( $scenario, array( 'wrong_email', 'wrong_nonce' ), true ) ) {
+				$this->assertStringContainsString( 'woocommerce-verify-email', $output );
+				$this->assertNull( WC()->session->get( 'order_pay_email_verification' ) );
+			} else {
+				$this->assertStringContainsString( 'id="order_review"', $output );
+				$this->assertIsArray( WC()->session->get( 'order_pay_email_verification' ) );
+			}
+		}
+
+		switch ( $scenario ) {
+			case 'no_email':
+				$order->set_billing_email( '' );
+				break;
+			case 'invalid_proof':
+				WC()->session->set(
+					'order_pay_email_verification',
+					array(
+						'hash'    => 'invalid',
+						'expires' => time() + HOUR_IN_SECONDS,
+					)
+				);
+				break;
+			case 'changed_key':
+				$order->set_order_key( 'wc_order_replaced_key' );
+				break;
+			case 'changed_email':
+				$order->set_billing_email( 'changed@example.org' );
+				break;
+			case 'other_order':
+				$order = $this->create_payment_order();
+				break;
+			case 'expired':
+				$proof            = WC()->session->get( 'order_pay_email_verification' );
+				$proof['expires'] = time() - 1;
+				WC()->session->set( 'order_pay_email_verification', $proof );
+				break;
+			case 'other_session':
+				$proof        = WC()->session->get( 'order_pay_email_verification' );
+				WC()->session = $this->getMockBuilder( WC_Mock_Session_Handler::class )->onlyMethods( array( 'get_customer_id' ) )->getMock();
+				WC()->session->method( 'get_customer_id' )->willReturn( 'different-session' );
+				WC()->session->set( 'order_pay_email_verification', $proof );
+				break;
+			case 'required_filter':
+				add_filter( 'woocommerce_order_email_verification_required', '__return_true' );
+				break;
+			case 'grace_disabled':
+				add_filter(
+					'woocommerce_order_email_verification_grace_period',
+					static function () {
+						return -1;
+					}
+				);
+				// Fall through to create a new order with verification still required.
+			case 'grace_period':
+				$order->set_date_created( time() );
+				break;
+			case 'verification_disabled':
+				add_filter( 'woocommerce_order_email_verification_required', '__return_false' );
+				break;
+			case 'session_email':
+				WC()->session->set(
+					'customer',
+					array(
+						'id'            => '0',
+						'date_modified' => '',
+						'email'         => $order->get_billing_email(),
+					)
+				);
+				break;
+		}
+		$order->save();
+
+		if ( 'verified' === $scenario ) {
+			$this->assertTrue( \Automattic\WooCommerce\Internal\Utilities\Users::should_user_verify_order_email( $order->get_id(), null, 'order-received' ), 'Payment proof must not authorize another context.' );
+		}
+		$this->assert_payment_authorization( $order, $allowed );
+	}
+
+	/**
+	 * @testdox Invalid order identifiers, keys and payment states never reach payment hooks or gateways.
+	 * @testWith ["missing_id"]
+	 *           ["zero_id"]
+	 *           ["invalid_id"]
+	 *           ["invalid_key"]
+	 *           ["paid"]
+	 * @param string $scenario Invalid payment request.
+	 */
+	public function test_pay_action_rejects_invalid_orders( string $scenario ): void {
+		$order = $this->create_payment_order();
+		if ( 'paid' === $scenario ) {
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->save();
+		}
+		$this->assert_payment_authorization( $order, false, $scenario );
+	}
+
+	/**
+	 * Create a payable order outside the email verification grace period.
+	 *
+	 * @param int $customer_id Order owner, or zero for a guest.
+	 * @return WC_Order
+	 */
+	private function create_payment_order( int $customer_id = 0 ): WC_Order {
+		$order = new WC_Order();
+		$order->set_customer_id( $customer_id );
+		$order->set_billing_email( 'payer@example.org' );
+		$order->set_billing_country( 'US' );
+		$order->set_billing_state( 'NY' );
+		$order->set_billing_city( 'New York' );
+		$order->set_billing_postcode( '10001' );
+		$order->set_date_created( time() - DAY_IN_SECONDS );
+		$order->set_payment_method( 'bacs' );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->save();
+		$order->add_product( $product, 1 );
+		$order->set_total( 10 );
+		$order->save();
+		return $order;
+	}
+
+	/**
+	 * Dispatch a payment POST and assert the gateway boundary and denied-request state.
+	 *
+	 * @param WC_Order $order Order to pay.
+	 * @param bool     $allowed Whether payment is authorized.
+	 * @param string   $scenario Optional invalid request scenario.
+	 */
+	private function assert_payment_authorization( WC_Order $order, bool $allowed, string $scenario = '' ): void {
+		$gateway     = $this->getMockBuilder( WC_Payment_Gateway::class )
+			->onlyMethods( array( 'validate_fields', 'process_payment' ) )
+			->getMockForAbstractClass();
+		$gateway->id = 'authorization_test';
+		$gateway->expects( $allowed ? $this->once() : $this->never() )->method( 'validate_fields' );
+		$gateway->expects( $allowed ? $this->once() : $this->never() )->method( 'process_payment' )
+			->with( $order->get_id() )->willReturn( array( 'result' => 'failure' ) );
+		$gateway_selections = 0;
+		add_filter(
+			'woocommerce_available_payment_gateways',
+			static function () use ( $gateway, &$gateway_selections ) {
+				++$gateway_selections;
+				return array( $gateway->id => $gateway );
+			}
+		);
+
+		$original_customer   = WC()->customer;
+		$original_query_vars = $GLOBALS['wp']->query_vars;
+		WC()->customer       = new WC_Customer( 0, true );
+		WC()->customer->set_billing_country( 'CA' );
+		WC()->customer->set_billing_state( 'ON' );
+		WC()->customer->set_billing_city( 'Toronto' );
+		WC()->customer->set_billing_postcode( 'M5V 1A1' );
+		WC()->customer->save();
+		$customer_before  = WC()->session->get( 'customer' );
+		$before_actions   = did_action( 'woocommerce_before_pay_action' );
+		$after_actions    = did_action( 'woocommerce_after_pay_action' );
+		$status           = $order->get_status();
+		$stock_reduced    = $order->get_data_store()->get_stock_reduced( $order->get_id() );
+		$stock_quantities = array();
+		foreach ( $order->get_items() as $item ) {
+			$stock_quantities[ $item->get_product_id() ] = $item->get_product()->get_stock_quantity();
+		}
+
+		$GLOBALS['wp']->query_vars['order-pay'] = $order->get_id();
+		if ( 'missing_id' === $scenario ) {
+			unset( $GLOBALS['wp']->query_vars['order-pay'] );
+		} elseif ( 'zero_id' === $scenario ) {
+			$GLOBALS['wp']->query_vars['order-pay'] = 0;
+		} elseif ( 'invalid_id' === $scenario ) {
+			$GLOBALS['wp']->query_vars['order-pay'] = PHP_INT_MAX;
+		}
+		$_GET         = array( 'key' => 'invalid_key' === $scenario ? 'invalid' : $order->get_order_key() );
+		$_POST        = array(
+			'woocommerce_pay' => '1',
+			'payment_method'  => $gateway->id,
+		);
+		$_REQUEST     = array( 'woocommerce-pay-nonce' => wp_create_nonce( 'woocommerce-pay' ) );
+		$buffer_level = ob_get_level();
+		try {
+			WC_Form_Handler::pay_action();
+			$this->assertSame( $allowed ? 1 : 0, $gateway_selections );
+			$this->assertSame( $before_actions + ( $allowed ? 1 : 0 ), did_action( 'woocommerce_before_pay_action' ) );
+			$this->assertSame( $after_actions + ( $allowed ? 1 : 0 ), did_action( 'woocommerce_after_pay_action' ) );
+			if ( ! $allowed ) {
+				$this->assertSame( 0, wc_notice_count( 'error' ), 'The order-pay page explains a denied payment; the handler must not queue a second notice.' );
+				$this->assertSame( $customer_before, WC()->session->get( 'customer' ), 'Denied payment must not copy the order billing location into the session.' );
+				$saved_order = wc_get_order( $order->get_id() );
+				$this->assertSame( 'bacs', $saved_order->get_payment_method() );
+				$this->assertSame( $status, $saved_order->get_status() );
+				$this->assertSame( $stock_reduced, $saved_order->get_data_store()->get_stock_reduced( $order->get_id() ) );
+				foreach ( $saved_order->get_items() as $item ) {
+					$this->assertSame( $stock_quantities[ $item->get_product_id() ], $item->get_product()->get_stock_quantity() );
+				}
+			}
+		} finally {
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			WC()->customer             = $original_customer;
+			$GLOBALS['wp']->query_vars = $original_query_vars;
+		}
+	}
+
+	/**
 	 * @testdox add_to_cart_action() validates the same product ID it adds for each item of a grouped product form.
 	 *
 	 * @covers WC_Form_Handler::add_to_cart_action()
@@ -1572,7 +2022,9 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	public function test_pay_action_names_the_payment_problem( array $available, string $posted, string $expected ): void {
 		global $wp;
 
-		$order = WC_Helper_Order::create_order();
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+		$order = WC_Helper_Order::create_order( $customer_id );
 		add_filter(
 			'woocommerce_available_payment_gateways',
 			function () use ( $available ) {

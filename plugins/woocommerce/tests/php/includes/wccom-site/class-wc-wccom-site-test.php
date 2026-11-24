@@ -81,9 +81,10 @@ class WC_WCCOM_Site_Test extends WC_Unit_Test_Case {
 	 * Connect the site to WooCommerce.com and sign the current request with its credentials.
 	 *
 	 * @param int    $user_id     User the connection belongs to.
-	 * @param string $request_uri Request URI to sign.
+	 * @param string $request_uri Request URI as the signer saw it, without token and signature.
+	 * @return string The signature.
 	 */
-	private function sign_request_for_connected_site( int $user_id, string $request_uri ): void {
+	private function sign_request_for_connected_site( int $user_id, string $request_uri ): string {
 		WC_Helper_Options::update(
 			'auth',
 			array(
@@ -99,27 +100,26 @@ class WC_WCCOM_Site_Test extends WC_Unit_Test_Case {
 
 		$signed_data = array(
 			'host'        => 'example.org',
-			'request_uri' => urldecode( remove_query_arg( array( 'token', 'signature' ), $request_uri ) ),
+			'request_uri' => $request_uri,
 			'method'      => 'GET',
 		);
 
-		$_SERVER['HTTP_X_WOO_SIGNATURE'] = hash_hmac( 'sha256', wp_json_encode( $signed_data ), self::ACCESS_TOKEN_SECRET );
+		$signature                       = hash_hmac( 'sha256', wp_json_encode( $signed_data ), self::ACCESS_TOKEN_SECRET );
+		$_SERVER['HTTP_X_WOO_SIGNATURE'] = $signature;
+
+		return $signature;
 	}
 
 	/**
 	 * @testdox Should recognize a WooCommerce.com REST request only by the route WordPress dispatches.
 	 *
-	 * @testWith ["/wp-json/wccom-site/v3/status", false, null, true]
-	 *           ["/blog/wp-json/wccom-site/v3/status", false, null, true]
-	 *           ["/index.php/wp-json/wccom-site/v3/status", false, null, true]
+	 * @testWith ["/wp-json/wccom-site/v3/status", false, null, false]
 	 *           ["/wp-json/wccom-site/v3/status", true, "/wccom-site/v3/status", true]
-	 *           ["/wp-json/wccom-site/v3/status?rest_route=/wp/v2/users", false, null, false]
-	 *           ["/wp-json/wc/v3/products", false, null, false]
-	 *           ["/shop/?/wp-json/wccom-site/=1", false, null, false]
 	 *           ["/wp-json/wccom-site/v3/status", true, "/wp/v2/users", false]
-	 *           ["/wp-admin/admin-ajax.php?rest_route=/wccom-site/v3/status", false, null, false]
-	 *           ["/wp-admin/admin-ajax.php?rest_route=/wccom-site/v3/status", false, "/wccom-site/v3/status", false]
+	 *           ["/wp-json/wc/v3/products", true, "/wc/v3/products", false]
 	 *           ["/?rest_route=/wccom-site/v3/status", true, "/wccom-site/v3/status", true]
+	 *           ["/?rest_route=/wccom-site/v3/status", false, null, false]
+	 *           ["/wp-admin/admin-ajax.php?rest_route=/wccom-site/v3/status", false, "/wccom-site/v3/status", false]
 	 *           ["/?rest_route[]=/wccom-site/v3/status", true, null, false]
 	 *
 	 * @param string      $request_uri    Request URI.
@@ -137,6 +137,98 @@ class WC_WCCOM_Site_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should verify a request signed over its whole path when the URI has no query string.
+	 *
+	 * @testWith ["/wp-json/wccom-site/v3/status"]
+	 *           ["/wp-json/wccom-site/v3/a.b&c=d"]
+	 *
+	 * @param string $request_uri Request URI.
+	 */
+	public function test_verify_wccom_request_signs_the_whole_path( string $request_uri ): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->simulate_request( $request_uri, false );
+		$signature = $this->sign_request_for_connected_site( $user_id, urldecode( $request_uri ) );
+
+		$method = new ReflectionMethod( WC_WCCOM_Site::class, 'verify_wccom_request' );
+		$method->setAccessible( true );
+
+		$this->assertTrue( $method->invoke( null, '', $signature, self::ACCESS_TOKEN_SECRET ) );
+	}
+
+	/**
+	 * @testdox Should reject a signature made for a different request URI.
+	 */
+	public function test_verify_wccom_request_rejects_signature_for_other_path(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->simulate_request( '/wp-json/wccom-site/v3/installer', false );
+		$signature = $this->sign_request_for_connected_site( $user_id, '/wp-json/wccom-site/v3/status' );
+
+		$method = new ReflectionMethod( WC_WCCOM_Site::class, 'verify_wccom_request' );
+		$method->setAccessible( true );
+
+		$this->assertFalse( $method->invoke( null, '', $signature, self::ACCESS_TOKEN_SECRET ) );
+	}
+
+	/**
+	 * @testdox Should verify a request with a query string against the same data as before.
+	 *
+	 * @testWith ["/?rest_route=/wccom-site/v3/status&ts=1700000000&token=t&signature=s"]
+	 *           ["/blog/?rest_route=%2Fwccom-site%2Fv3%2Fstatus&ts=1700000000&token=t"]
+	 *           ["/wp-json/wccom-site/v3/installer?product-id=1&signature=s"]
+	 *
+	 * @param string $request_uri Request URI.
+	 */
+	public function test_verify_wccom_request_keeps_query_string_signing( string $request_uri ): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->simulate_request( $request_uri, false );
+		$signature = $this->sign_request_for_connected_site( $user_id, urldecode( remove_query_arg( array( 'token', 'signature' ), $request_uri ) ) );
+
+		$method = new ReflectionMethod( WC_WCCOM_Site::class, 'verify_wccom_request' );
+		$method->setAccessible( true );
+
+		$this->assertTrue( $method->invoke( null, '', $signature, self::ACCESS_TOKEN_SECRET ) );
+	}
+
+	/**
+	 * @testdox Should authenticate a request signed the way WooCommerce.com signs it, with credentials in the headers or only in the query.
+	 *
+	 * @testWith ["/", true]
+	 *           ["/", false]
+	 *           ["/blog/", false]
+	 *
+	 * @param string $site_path    Path of the store's URL.
+	 * @param bool   $with_headers Whether the token and signature are also sent as headers.
+	 */
+	public function test_authentication_fallback_accepts_request_signed_by_woocommerce_com( string $site_path, bool $with_headers ): void {
+		$user_id    = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$signed_uri = add_query_arg(
+			array(
+				'rest_route' => '/wccom-site/v3/status',
+				'ts'         => 1700000000,
+			),
+			$site_path
+		);
+		$signature  = $this->sign_request_for_connected_site( $user_id, $signed_uri );
+
+		$this->simulate_request(
+			add_query_arg(
+				array(
+					'token'     => self::ACCESS_TOKEN,
+					'signature' => $signature,
+				),
+				$signed_uri
+			),
+			true
+		);
+		if ( ! $with_headers ) {
+			unset( $_SERVER['HTTP_AUTHORIZATION'], $_SERVER['HTTP_X_WOO_SIGNATURE'] );
+		}
+
+		$this->assertTrue( self::with_rest_route_context( '/wccom-site/v3/status', fn() => WC_WCCOM_Site::authentication_fallback( null ) ) );
+		$this->assertSame( $user_id, get_current_user_id() );
+	}
+
+	/**
 	 * @testdox Should leave the current user alone on a request with an array rest_route parameter.
 	 */
 	public function test_authenticate_wccom_ignores_array_rest_route(): void {
@@ -146,17 +238,26 @@ class WC_WCCOM_Site_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should authenticate a signed pretty-permalink request as the connected user before the route is resolved.
+	 * @testdox Should authenticate a signed pretty-permalink request only once WordPress has resolved the route.
+	 *
+	 * @testWith ["/wp-json/wccom-site/v3/status"]
+	 *           ["/blog/wp-json/wccom-site/v3/status"]
+	 *           ["/fr/wp-json/wccom-site/v3/status"]
+	 *           ["/index.php/wp-json/wccom-site/v3/status"]
+	 *
+	 * @param string $request_uri Request URI.
 	 */
-	public function test_authenticate_wccom_accepts_signed_pretty_permalink_request(): void {
+	public function test_authentication_fallback_accepts_signed_pretty_permalink_request( string $request_uri ): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$this->simulate_request( '/wp-json/wccom-site/v3/status', false );
-		$this->sign_request_for_connected_site( $user_id, '/wp-json/wccom-site/v3/status' );
+		$this->simulate_request( $request_uri, false );
+		$this->sign_request_for_connected_site( $user_id, $request_uri );
 
-		$user = self::with_rest_route_context( null, fn() => WC_WCCOM_Site::authenticate_wccom( false ) );
+		$this->assertFalse( self::with_rest_route_context( null, fn() => WC_WCCOM_Site::authenticate_wccom( false ) ) );
 
-		$this->assertInstanceOf( WP_User::class, $user );
-		$this->assertSame( $user_id, $user->ID );
+		add_filter( 'wp_is_rest_endpoint', '__return_true', 11 );
+
+		$this->assertTrue( self::with_rest_route_context( '/wccom-site/v3/status', fn() => apply_filters( 'rest_authentication_errors', null ) ) );
+		$this->assertSame( $user_id, get_current_user_id() );
 	}
 
 	/**
@@ -173,25 +274,18 @@ class WC_WCCOM_Site_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should pass the previous result through for a signed request to a route outside wccom-site.
+	 *
+	 * @testWith ["/?rest_route=/wc/v3/products"]
+	 *           ["/wp-json/wccom-site/v3/status"]
+	 *
+	 * @param string $request_uri Request URI.
 	 */
-	public function test_authentication_fallback_ignores_other_routes(): void {
+	public function test_authentication_fallback_ignores_other_routes( string $request_uri ): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$this->simulate_request( '/?rest_route=/wc/v3/products', true );
-		$this->sign_request_for_connected_site( $user_id, '/?rest_route=/wc/v3/products' );
+		$this->simulate_request( $request_uri, true );
+		$this->sign_request_for_connected_site( $user_id, $request_uri );
 
 		$this->assertNull( self::with_rest_route_context( '/wc/v3/products', fn() => WC_WCCOM_Site::authentication_fallback( null ) ) );
-		$this->assertSame( 0, get_current_user_id() );
-	}
-
-	/**
-	 * @testdox Should leave a pretty-permalink request to determine_current_user.
-	 */
-	public function test_authentication_fallback_skips_requests_without_rest_route(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$this->simulate_request( '/wp-json/wccom-site/v3/status', true );
-		$this->sign_request_for_connected_site( $user_id, '/wp-json/wccom-site/v3/status' );
-
-		$this->assertNull( self::with_rest_route_context( '/wccom-site/v3/status', fn() => WC_WCCOM_Site::authentication_fallback( null ) ) );
 		$this->assertSame( 0, get_current_user_id() );
 	}
 

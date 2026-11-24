@@ -133,13 +133,9 @@ class WC_Session_Handler extends WC_Session {
 	private function init_session_from_request() {
 		$session_token = is_string( $_GET['session'] ?? '' ) ? wc_clean( wp_unslash( $_GET['session'] ?? '' ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		if ( empty( $session_token ) || ! CartTokenUtils::validate_cart_token( $session_token ) ) {
-			return false;
-		}
+		$token_customer_id = is_string( $session_token ) && '' !== $session_token ? CartTokenUtils::get_cart_link_customer_id( $session_token ) : '';
 
-		$payload = CartTokenUtils::get_cart_token_payload( $session_token );
-
-		if ( ! $this->is_customer_guest( $payload['user_id'] ) || ! $this->session_exists( $payload['user_id'] ) ) {
+		if ( ! $token_customer_id || ! $this->is_customer_guest( $token_customer_id ) || ! $this->session_exists( $token_customer_id ) ) {
 			return false;
 		}
 
@@ -148,14 +144,14 @@ class WC_Session_Handler extends WC_Session {
 
 		if ( $cookie ) {
 			// User owns this token. Return and use cookie session.
-			if ( $cookie[0] === $payload['user_id'] ) {
+			if ( $cookie[0] === $token_customer_id ) {
 				return false;
 			}
 
 			$cookie_session_data = (array) $this->get_session( $cookie[0], array() );
 
 			// Cookie session was originally created via this token. Return and use cookie session to prevent creating a new clone.
-			if ( isset( $cookie_session_data['previous_customer_id'] ) && $cookie_session_data['previous_customer_id'] === $payload['user_id'] ) {
+			if ( isset( $cookie_session_data['previous_customer_id'] ) && $cookie_session_data['previous_customer_id'] === $token_customer_id ) {
 				return false;
 			}
 		}
@@ -163,7 +159,7 @@ class WC_Session_Handler extends WC_Session {
 		// Generate new customer ID for the new session before cloning the data.
 		$this->_customer_id = $this->generate_customer_id();
 		$this->set_customer_session_cookie( true );
-		$this->clone_session_data( $payload['user_id'] );
+		$this->clone_session_data( $token_customer_id );
 
 		return true;
 	}
@@ -647,9 +643,9 @@ class WC_Session_Handler extends WC_Session {
 	public function forget_session() {
 		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, $this->use_secure_cookie(), true );
 
-		if ( ! is_admin() ) {
-			include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
-			wc_empty_cart();
+		// Reset the loaded cart so this request can't write it back. Keep the saved cart, which rebuilds a logged-in customer's cart after an expired or mismatched session.
+		if ( ! is_admin() && WC()->cart instanceof WC_Cart ) {
+			WC()->cart->empty_cart( false );
 		}
 
 		$this->_data        = array();

@@ -71,6 +71,7 @@
 	"usesContext": [ "query", "queryId", "postId" ],
 	"keywords": [ "WooCommerce" ],
 	"style": "file:../product-summary.css",
+	"viewScript": "file:../product-summary-frontend.js",
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

@@ -279,7 +279,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			// and resetting its DropdownMenu's internal isOpen state.
 			component: HeaderAccount,
 			options: { page: 'wc-admin' },
-			visible: isHomescreen,
+			visible: isHomescreen && currentUserCan( 'manage_woocommerce' ),
 		};
 
 		const previewSite = {
