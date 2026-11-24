@@ -131,6 +131,7 @@ class AiAccessSettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $expected, $settings['aiAccessSettings']['aiShoppingEnabled'] );
 		$this->assertStringContainsString( 'tab=agentic-commerce&section=shopping', $settings['aiAccessSettings']['aiShoppingUrl'] );
+		$this->assertStringContainsString( 'page=jetpack-seo', $settings['aiAccessSettings']['jetpackUrl'] );
 		$this->assertSame( $ucp_option, get_option( 'woocommerce_feature_ucp_enabled' ), 'The switch is only read' );
 	}
 
@@ -146,6 +147,7 @@ class AiAccessSettingsTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox The preview query argument forces a status, and unknown values fall back to the default.
 	 * @testWith ["robots_file", "robots_file"]
+	 *           ["jetpack", "jetpack"]
 	 *           ["other_plugin", "other_plugin"]
 	 *           ["something_else", "default"]
 	 *

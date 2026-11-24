@@ -135,6 +135,30 @@ describe( 'AiAccessSettings', () => {
 		expect( container.querySelector( '.components-notice' ) ).toBeNull();
 	} );
 
+	it( 'links to Jetpack instead of showing the controls while Jetpack manages AI access', () => {
+		const { container } = renderWith( {
+			status: 'jetpack',
+			[ ANSWERS_OPTION ]: 'no',
+			aiShoppingEnabled: true,
+			jetpackUrl: '/wp-admin/admin.php?page=jetpack-seo',
+		} );
+
+		const notices = container.querySelectorAll(
+			'.woocommerce-ai-access-settings__notice'
+		);
+		expect( notices ).toHaveLength( 1 );
+		expect( notices[ 0 ] ).toHaveTextContent(
+			'Jetpack manages AI access for your site.'
+		);
+		expect(
+			screen.getByRole( 'link', { name: 'Change it in Jetpack' } )
+		).toHaveAttribute( 'href', '/wp-admin/admin.php?page=jetpack-seo' );
+		expect( screen.queryByRole( 'checkbox' ) ).toBeNull();
+		expect( screen.queryByRole( 'radio' ) ).toBeNull();
+		expect( hiddenInput( container, ANSWERS_OPTION ) ).toBeNull();
+		expect( hiddenInput( container, TRAINING_OPTION ) ).toBeNull();
+	} );
+
 	it.each( [
 		[ 'robots_file', /Your site has its own robots\.txt file/ ],
 		[ 'other_plugin', /Another plugin already sets AI preferences/ ],

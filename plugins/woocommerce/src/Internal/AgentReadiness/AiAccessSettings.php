@@ -50,6 +50,16 @@ class AiAccessSettings implements RegisterHooksInterface {
 	public const STATUS_OTHER_PLUGIN = 'other_plugin';
 
 	/**
+	 * Jetpack's AI access controls (Jetpack > SEO > GEO) are active, so Jetpack manages AI access.
+	 */
+	public const STATUS_JETPACK = 'jetpack';
+
+	/**
+	 * Jetpack's SEO page, which holds its AI access controls on the GEO tab.
+	 */
+	private const JETPACK_SEO_PAGE = 'admin.php?page=jetpack-seo';
+
+	/**
 	 * Default value of each option.
 	 */
 	private const DEFAULTS = array(
@@ -140,6 +150,7 @@ class AiAccessSettings implements RegisterHooksInterface {
 			'status'              => $this->get_status(),
 			'aiShoppingEnabled'   => UcpUtils::is_enabled(),
 			'aiShoppingUrl'       => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ),
+			'jetpackUrl'          => admin_url( self::JETPACK_SEO_PAGE ),
 		);
 
 		return $settings;
@@ -155,7 +166,7 @@ class AiAccessSettings implements RegisterHooksInterface {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only preview switch.
 		$preview = isset( $_GET[ self::PREVIEW_QUERY_ARG ] ) ? sanitize_key( wp_unslash( $_GET[ self::PREVIEW_QUERY_ARG ] ) ) : '';
 
-		return in_array( $preview, array( self::STATUS_ROBOTS_FILE, self::STATUS_OTHER_PLUGIN ), true ) ? $preview : self::STATUS_DEFAULT;
+		return in_array( $preview, array( self::STATUS_ROBOTS_FILE, self::STATUS_JETPACK, self::STATUS_OTHER_PLUGIN ), true ) ? $preview : self::STATUS_DEFAULT;
 	}
 
 	/**

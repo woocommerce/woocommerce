@@ -22,7 +22,8 @@ export const TRAINING_OPTION = 'woocommerce_ai_training_allowed';
 
 type YesNo = 'yes' | 'no';
 
-export type AiAccessStatus = 'default' | 'robots_file' | 'other_plugin';
+export type AiAccessStatus =
+	'default' | 'robots_file' | 'jetpack' | 'other_plugin';
 
 export type AiAccessData = {
 	[ ANSWERS_OPTION ]?: YesNo;
@@ -30,6 +31,7 @@ export type AiAccessData = {
 	status?: AiAccessStatus;
 	aiShoppingEnabled?: boolean;
 	aiShoppingUrl?: string;
+	jetpackUrl?: string;
 };
 
 type Props = {
@@ -76,6 +78,31 @@ export const AiAccessSettings = ( { onDirtyChange }: Props ) => {
 
 	if ( ! isFeatureEnabled( 'agent_readiness' ) || ! data.status ) {
 		return null;
+	}
+
+	// Jetpack's AI access controls take precedence, so the section links there instead of showing
+	// its own. Nothing is posted, so saving the page leaves the stored settings as they are.
+	if ( status === 'jetpack' ) {
+		return (
+			<div className="woocommerce-ai-access-settings">
+				<h2>{ __( 'AI access', 'woocommerce' ) }</h2>
+				<Notice
+					status="info"
+					isDismissible={ false }
+					className="woocommerce-ai-access-settings__notice"
+				>
+					{ createInterpolateElement(
+						__(
+							'Jetpack manages AI access for your site. <a>Change it in Jetpack</a>.',
+							'woocommerce'
+						),
+						{
+							a: createElement( 'a', { href: data.jetpackUrl } ),
+						}
+					) }
+				</Notice>
+			</div>
+		);
 	}
 
 	const notice = getNotice( status );
