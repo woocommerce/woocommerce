@@ -1563,6 +1563,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'output_schema' => array( 'type' => 'null' ) ) ) );
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'namespace' => '0' ) ) );
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => '123' ) ) );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'object_types' => array( 'shop_order', '' ) ) ) );
 		$order = \WC_Helper_Order::create_order();
 
 		$this->assertSame(
