@@ -213,25 +213,22 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The on/off switch applies only while the block email editor, where it can be changed, is on.
-	 * @testWith ["yes", "no", 0]
-	 *           ["yes", "yes", 1]
-	 *           ["no", "no", 1]
+	 * @testdox The email is always sent, even with an "off" value saved, because emailed exports have no other way to reach the merchant.
+	 * @testWith ["yes"]
+	 *           ["no"]
 	 *
 	 * @param string $block_editor_enabled Value of the block email editor feature option.
-	 * @param string $email_enabled        Saved value of the email's on/off setting.
-	 * @param int    $expected_sent        Number of emails expected to be sent.
 	 */
-	public function test_on_off_switch_applies_only_with_the_block_editor( string $block_editor_enabled, string $email_enabled, int $expected_sent ): void {
+	public function test_email_is_always_sent( string $block_editor_enabled ): void {
 		update_option( 'woocommerce_feature_block_email_editor_enabled', $block_editor_enabled );
-		update_option( 'woocommerce_admin_report_export_download_settings', array( 'enabled' => $email_enabled ) );
+		update_option( 'woocommerce_admin_report_export_download_settings', array( 'enabled' => 'no' ) );
 		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		$mailer  = tests_retrieve_phpmailer_instance();
 		$before  = count( $mailer->mock_sent );
 
 		( new ReportCSVEmail() )->trigger( $user_id, 'orders', 'https://example.org/?action=woocommerce_admin_download_report_csv&filename=wc-orders-report-export' );
 
-		$this->assertSame( $expected_sent, count( $mailer->mock_sent ) - $before );
+		$this->assertSame( 1, count( $mailer->mock_sent ) - $before );
 	}
 
 	/**
@@ -246,7 +243,7 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 			$preview->set_email_type( ReportCSVEmail::class );
 
 			$this->assertStringNotContainsString( '{report_name}', $preview->get_subject() );
-			$this->assertStringContainsString( 'Download your Orders Report', $preview->get_email()->get_content_html() );
+			$this->assertStringContainsString( 'Download your Orders Report', $preview->get_email()->get_block_editor_email_template_content() );
 		} finally {
 			$this->reset_mailer();
 		}

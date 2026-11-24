@@ -75,7 +75,7 @@ class EmailApiController {
 		}
 
 		$form_fields = $email->get_form_fields();
-		$enabled     = $email->get_option( 'enabled' );
+		$enabled     = array_key_exists( 'enabled', $form_fields ) ? $email->get_option( 'enabled' ) : null;
 		return array(
 			'enabled'                => is_null( $enabled ) ? $email->is_enabled() : 'yes' === $enabled,
 			'is_manual'              => $email->is_manual(),
