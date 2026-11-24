@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { store, getContext } from '@wordpress/interactivity';
-import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import type { SelectedAttributes } from '@woocommerce/stores/woocommerce';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
