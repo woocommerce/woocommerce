@@ -1129,10 +1129,11 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 
 	/**
 	 * The gap between paragraphs that are not paragraph blocks follows the email's block gap setting.
-	 * Anything after the gap that would break out of its CSS rule is dropped, not added to the email.
+	 * A gap that is not a single value adds no rule, so it can't add other styles to the email.
 	 *
 	 * @testWith ["24px", "display: block; margin: 0; margin-top: 24px;"]
-	 *           ["16px; } p { display: none", "display: block; margin: 0; margin-top: 16px;"]
+	 *           ["16px; font-size: 0", "display: block; margin: 0;"]
+	 *           ["16px } p { display: none", "display: block; margin: 0;"]
 	 *
 	 * @param string $block_gap      Block gap set in the email's theme.json.
 	 * @param string $expected_style Expected style of the second paragraph.
