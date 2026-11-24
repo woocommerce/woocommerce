@@ -58,7 +58,7 @@ const getNotice = (
 			return {
 				status: 'warning',
 				content: __(
-					'These settings aren’t being used. Your site has its own robots.txt file, so WooCommerce can’t add to it. Remove the file, or ask whoever set it up to add these preferences.',
+					'Your site’s robots.txt file manages AI access, so WooCommerce can’t add to it. Remove the file, or ask whoever set it up to add your AI preferences.',
 					'woocommerce'
 				),
 			};
@@ -77,7 +77,7 @@ const getNotice = (
 			return {
 				status: 'warning',
 				content: __(
-					'These settings aren’t being used. Another plugin already sets AI preferences for your site. Change them there, or turn that setting off to use these.',
+					'Another plugin manages AI access for your site. Change it there, or turn that setting off to manage it here.',
 					'woocommerce'
 				),
 			};

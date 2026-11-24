@@ -160,8 +160,8 @@ describe( 'AiAccessSettings', () => {
 	} );
 
 	it.each( [
-		[ 'robots_file', /Your site has its own robots\.txt file/ ],
-		[ 'other_plugin', /Another plugin already sets AI preferences/ ],
+		[ 'robots_file', /Your site’s robots\.txt file manages AI access/ ],
+		[ 'other_plugin', /Another plugin manages AI access for your site/ ],
 	] as const )(
 		'shows only a warning in place of the controls for %s',
 		( status, noticeText ) => {
