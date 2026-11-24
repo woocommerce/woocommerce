@@ -293,9 +293,10 @@ test.describe( `${ blockData.name }`, () => {
 					expect( initialImageId ).not.toBeNull();
 					await viewer.press( 'ArrowRight' );
 					await expect( async () => {
-						expect( await pageObject.getViewerImageId() ).not.toBe(
-							initialImageId
-						);
+						const currentImageId =
+							await pageObject.getViewerImageId();
+						expect( currentImageId ).not.toBeNull();
+						expect( currentImageId ).not.toBe( initialImageId );
 					} ).toPass( { timeout: 5_000 } );
 					await viewer.press( 'ArrowLeft' );
 					await expect( async () => {
