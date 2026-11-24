@@ -88,9 +88,9 @@ class ExtensibleAbilities {
 	private static array $filters = array();
 
 	/**
-	 * Query arguments that a filter callback can return.
+	 * Query clauses that a filter callback can return when the list ability does not name its own.
 	 */
-	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'include_ids', 'exclude_ids' );
+	private const DEFAULT_QUERY_CLAUSES = array( 'meta_query', 'include_ids', 'exclude_ids' );
 
 	/**
 	 * Type names that the REST schema check knows. It accepts any value for another name.
@@ -351,20 +351,16 @@ class ExtensibleAbilities {
 	 * @param array $args {
 	 *     Filter arguments.
 	 *
-	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query`,
-	 *                               `orders-query` and `customers-query` apply the filters of `product`, `order`
-	 *                               and `customer`. A `customer` filter returns only `include_ids`, which are
-	 *                               user IDs, so it matches registered customers only. The list ability
-	 *                               of another resource must call `get_query_args()` and `add_query_filters_schema()` itself.
+	 *     @type string   $resource  Resource whose list ability applies the filters. The list ability calls
+	 *                               `get_query_args()` and `add_query_filters_schema()`, and documents the
+	 *                               clauses its backend runs and which IDs `include_ids` and `exclude_ids` hold.
 	 *     @type string   $namespace Slug of the extension that owns the filter, such as `subscriptions`.
 	 *     @type string   $filter    Filter name inside the namespace, such as `subscribable`.
 	 *     @type array    $schema    JSON schema of the value. Its `description` tells agents how to use the filter.
-	 *     @type callable $callback  Receives the value, sanitized with the schema, and returns query arguments:
-	 *                               a `meta_query`, for products also a `tax_query`, `include_ids` or
-	 *                               `exclude_ids`. Core adds each one to the query with AND. Return a
-	 *                               WP_Error to refuse the value. A `tax_query` is accepted only for
-	 *                               `product`. Any other key, a `tax_query` for another resource, or a key other
-	 *                               than `include_ids` for `customer`, fails the call.
+	 *     @type callable $callback  Receives the value, sanitized with the schema, and returns query clauses,
+	 *                               such as a `meta_query`, `include_ids` or `exclude_ids`. The list ability adds
+	 *                               each one to the query with AND. Return a WP_Error to refuse the value. A clause
+	 *                               that the list ability does not accept fails the call.
 	 *                               `include_ids` and `exclude_ids` are lists of object IDs. Use them for
 	 *                               data that is not meta, such as order items or a table of the extension:
 	 *                               query that data and return the IDs that match. Core keeps the IDs that
@@ -470,21 +466,23 @@ class ExtensibleAbilities {
 	}
 
 	/**
-	 * Get the query arguments of the filters in the input of a list ability.
-	 * Each key holds one clause for each filter, so `array_merge_recursive()`
-	 * adds them to WP_Query, wc_get_orders() or WP_User_Query arguments with AND. `post__in`
-	 * holds the IDs that every `include_ids` filter returned, without the IDs
-	 * that any `exclude_ids` filter returned, or `0` when none remain, because
-	 * an empty `post__in` does not filter. Without `include_ids`, the excluded
-	 * IDs go to `post__not_in`, which WP_Query ignores next to `post__in`.
+	 * Get the query clauses of the filters in the input of a list ability, which maps them to its backend.
+	 * Each clause key holds one clause for each filter, to add to the query with AND. `include_ids` holds the
+	 * IDs that every `include_ids` filter returned, without the IDs that any `exclude_ids` filter returned, or
+	 * `0` when none remain, so a backend that ignores an empty list still matches nothing. Without
+	 * `include_ids`, `exclude_ids` holds the excluded IDs.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @param string               $resource_name Resource.
 	 * @param array<string, mixed> $input         Ability input.
+	 * @param string[]             $clauses       Clause keys that the backend of the list ability runs, such as
+	 *                                            `meta_query`, `tax_query`, `include_ids` and `exclude_ids`.
+	 *                                            Defaults to `meta_query`, `include_ids` and `exclude_ids`.
 	 * @return array<string, array>|\WP_Error The error of a value that fails its schema, or of a filter that refused its value or failed.
 	 */
-	public static function get_query_args( string $resource_name, array $input ) {
+	public static function get_query_args( string $resource_name, array $input, array $clauses = self::DEFAULT_QUERY_CLAUSES ) {
+		$allowed    = array_flip( $clauses );
 		$query_args = array();
 		$include    = null;
 		$exclude    = array();
@@ -504,20 +502,18 @@ class ExtensibleAbilities {
 					return $value;
 				}
 				try {
-					$clauses = call_user_func( $args['callback'], $value );
+					$filter_clauses = call_user_func( $args['callback'], $value );
 				} catch ( \Throwable $e ) {
 					self::log_error( sprintf( 'Ability filter "%s.%s" of "%s" failed: %s', $namespace, $filter, $resource_name, $e->getMessage() ) );
-					$clauses = null;
+					$filter_clauses = null;
 				}
-				if ( is_wp_error( $clauses ) ) {
-					return $clauses;
+				if ( is_wp_error( $filter_clauses ) ) {
+					return $filter_clauses;
 				}
 				if (
-					! is_array( $clauses )
-					|| ! empty( array_diff_key( $clauses, array_flip( self::QUERY_ARG_KEYS ) ) )
-					|| ( 'product' !== $resource_name && isset( $clauses['tax_query'] ) )
-					|| ( 'customer' === $resource_name && ! empty( array_diff_key( $clauses, array( 'include_ids' => true ) ) ) )
-					|| in_array( false, array_map( 'is_array', $clauses ), true )
+					! is_array( $filter_clauses )
+					|| ! empty( array_diff_key( $filter_clauses, $allowed ) )
+					|| in_array( false, array_map( 'is_array', $filter_clauses ), true )
 				) {
 					return new \WP_Error(
 						'woocommerce_ability_extension_filter_failed',
@@ -526,23 +522,23 @@ class ExtensibleAbilities {
 						array( 'status' => 500 )
 					);
 				}
-				if ( isset( $clauses['include_ids'] ) ) {
-					$filter_ids = self::get_filter_ids( $clauses['include_ids'], $namespace . '.' . $filter );
+				if ( isset( $filter_clauses['include_ids'] ) ) {
+					$filter_ids = self::get_filter_ids( $filter_clauses['include_ids'], $namespace . '.' . $filter );
 					if ( is_wp_error( $filter_ids ) ) {
 						return $filter_ids;
 					}
 					$include = null === $include ? $filter_ids : array_values( array_intersect( $include, $filter_ids ) );
-					unset( $clauses['include_ids'] );
+					unset( $filter_clauses['include_ids'] );
 				}
-				if ( isset( $clauses['exclude_ids'] ) ) {
-					$filter_ids = self::get_filter_ids( $clauses['exclude_ids'], $namespace . '.' . $filter );
+				if ( isset( $filter_clauses['exclude_ids'] ) ) {
+					$filter_ids = self::get_filter_ids( $filter_clauses['exclude_ids'], $namespace . '.' . $filter );
 					if ( is_wp_error( $filter_ids ) ) {
 						return $filter_ids;
 					}
 					$exclude = array_merge( $exclude, $filter_ids );
-					unset( $clauses['exclude_ids'] );
+					unset( $filter_clauses['exclude_ids'] );
 				}
-				foreach ( $clauses as $key => $clause ) {
+				foreach ( $filter_clauses as $key => $clause ) {
 					if ( empty( $clause ) ) {
 						continue;
 					}
@@ -551,10 +547,10 @@ class ExtensibleAbilities {
 			}
 		}
 		if ( null !== $include ) {
-			$include                = array_values( array_diff( $include, $exclude ) );
-			$query_args['post__in'] = empty( $include ) ? array( 0 ) : $include;
+			$include                   = array_values( array_diff( $include, $exclude ) );
+			$query_args['include_ids'] = empty( $include ) ? array( 0 ) : $include;
 		} elseif ( ! empty( $exclude ) ) {
-			$query_args['post__not_in'] = array_values( array_unique( $exclude ) );
+			$query_args['exclude_ids'] = array_values( array_unique( $exclude ) );
 		}
 		return $query_args;
 	}

@@ -42,6 +42,13 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 	private const FIELDS = array( 'id', 'user_id', 'date_registered', 'date_last_active', 'date_last_order', 'orders_count', 'total_spend' );
 
 	/**
+	 * Clauses that extension filters can return. `include_ids` are user IDs, not the customer IDs of the
+	 * `include` input, so a filter matches registered customers only. The Analytics data store has no
+	 * argument to exclude users, so `exclude_ids` is not accepted.
+	 */
+	private const EXTENSION_FILTER_CLAUSES = array( 'include_ids' );
+
+	/**
 	 * Get the ability name.
 	 *
 	 * @since 11.4.0
@@ -106,7 +113,7 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 			return $unavailable;
 		}
 
-		$extension_args = ExtensibleAbilities::get_query_args( 'customer', $input );
+		$extension_args = ExtensibleAbilities::get_query_args( 'customer', $input, self::EXTENSION_FILTER_CLAUSES );
 		if ( is_wp_error( $extension_args ) ) {
 			return $extension_args;
 		}
@@ -147,7 +154,7 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 			);
 		}
 
-		$users = $extension_args['post__in'] ?? array();
+		$users = $extension_args['include_ids'] ?? array();
 		if ( isset( $input['user_id'] ) ) {
 			$users = ( empty( $users ) || in_array( $input['user_id'], array_map( 'intval', $users ), true ) ) ? array( $input['user_id'] ) : array( 0 );
 		}

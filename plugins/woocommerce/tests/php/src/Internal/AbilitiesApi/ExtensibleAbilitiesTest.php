@@ -867,6 +867,50 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept only the clauses that the list ability names, and return the IDs as include_ids and exclude_ids.
+	 */
+	public function test_the_list_ability_names_the_clauses_it_accepts(): void {
+		$register_resource = static function () {
+			ExtensibleAbilities::register_resource( 'ticket' );
+		};
+		$register          = static function () {
+			ExtensibleAbilities::register_query_filter(
+				array(
+					'resource'  => 'ticket',
+					'namespace' => 'test-ext',
+					'filter'    => 'tagged',
+					'schema'    => array( 'type' => 'boolean' ),
+					'callback'  => static fn( bool $tagged ) => $tagged
+						? array(
+							'tax_query'   => array( array( 'taxonomy' => 'ticket_tag' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+							'include_ids' => array( 3, 5 ),
+						)
+						: array( 'exclude_ids' => array( 7 ) ),
+				)
+			);
+		};
+		add_action( 'woocommerce_extensible_abilities_resources_init', $register_resource );
+		add_action( 'woocommerce_extensible_abilities_init', $register );
+		$this->get_ability( 'woocommerce/products-query' )['input_schema'];
+		remove_action( 'woocommerce_extensible_abilities_resources_init', $register_resource );
+		remove_action( 'woocommerce_extensible_abilities_init', $register );
+
+		$input   = static fn( bool $tagged ) => array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'tagged' => $tagged ) ) ) );
+		$clauses = array( 'tax_query', 'include_ids', 'exclude_ids' );
+
+		$this->assertSame( 'woocommerce_ability_extension_filter_failed', ExtensibleAbilities::get_query_args( 'ticket', $input( true ) )->get_error_code(), 'The default clauses do not include tax_query.' );
+		$this->assertSame(
+			array(
+				'tax_query'   => array( array( array( 'taxonomy' => 'ticket_tag' ) ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'include_ids' => array( 3, 5 ),
+			),
+			ExtensibleAbilities::get_query_args( 'ticket', $input( true ), $clauses )
+		);
+		$this->assertSame( array( 'exclude_ids' => array( 7 ) ), ExtensibleAbilities::get_query_args( 'ticket', $input( false ), $clauses ) );
+		$this->assertSame( 'woocommerce_ability_extension_filter_failed', ExtensibleAbilities::get_query_args( 'ticket', $input( false ), array( 'include_ids' ) )->get_error_code() );
+	}
+
+	/**
 	 * @testdox Should refuse a filter whose namespace or name is only numbers.
 	 */
 	public function test_a_filter_with_a_numeric_slug_is_refused(): void {
