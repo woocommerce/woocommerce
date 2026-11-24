@@ -59,16 +59,16 @@ class ProductFailures {
 			}
 		}
 		unset( self::$counts[ get_current_blog_id() ] );
+		if ( $mark_written ) {
+			// Before the rows change. Cleanup that runs during this save then sees a current write and keeps the rows.
+			update_post_meta( $product_id, self::WRITTEN_META, sprintf( '%.6F', microtime( true ) ) );
+		}
 		$stored = self::stored( $product_id );
 		foreach ( array_diff( $stored, $values ) as $value ) {
 			delete_post_meta( $product_id, self::META_KEY, $value );
 		}
 		foreach ( array_diff( $values, $stored ) as $value ) {
 			add_post_meta( $product_id, self::META_KEY, $value );
-		}
-		if ( $mark_written ) {
-			// Same values still count as a new write, so a save during a scan is not treated as the old rows.
-			update_post_meta( $product_id, self::WRITTEN_META, sprintf( '%.6F', microtime( true ) ) );
 		}
 	}
 
@@ -176,6 +176,19 @@ class ProductFailures {
 			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			foreach ( $chunk as $product_id ) {
 				wp_cache_delete( $product_id, 'post_meta' );
+				foreach ( array( self::META_KEY, self::WRITTEN_META ) as $meta_key ) {
+					/**
+					 * Tells meta listeners these rows were removed, so the product meta cache drops them.
+					 *
+					 * @since 11.4.0
+					 *
+					 * @param int[]  $meta_ids    Unused. The rows were removed by one delete.
+					 * @param int    $product_id  Product id.
+					 * @param string $meta_key    Meta key removed.
+					 * @param string $meta_value  Unused.
+					 */
+					do_action( 'deleted_post_meta', array(), $product_id, $meta_key, '' );
+				}
 			}
 		}
 	}
