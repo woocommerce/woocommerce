@@ -37,6 +37,8 @@ class CustomerStockNotificationVerifyEmail extends WC_Email {
 
 		// Call parent constructor.
 		parent::__construct();
+
+		$this->template_block_content = 'emails/block/general-block-content-for-stock-notification-emails.php';
 	}
 
 	/**
@@ -109,6 +111,32 @@ class CustomerStockNotificationVerifyEmail extends WC_Email {
 					'additional_content' => $this->get_additional_content(),
 					'plain_text'         => false,
 					'email'              => $this,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Get block editor email template content.
+	 *
+	 * @return string
+	 */
+	public function get_block_editor_email_template_content() {
+		$notification = $this->object;
+		if ( ! $notification instanceof Notification ) {
+			return '';
+		}
+
+		return wc_get_template_html(
+			$this->template_block_content,
+			array_merge(
+				$this->get_additional_template_args(),
+				array(
+					'notification'  => $notification,
+					'product'       => $notification->get_product(),
+					'intro_content' => $this->get_intro_content(),
+					'plain_text'    => false,
+					'email'         => $this,
 				),
 			),
 		);

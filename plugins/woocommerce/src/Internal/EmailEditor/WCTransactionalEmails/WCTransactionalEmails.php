@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -74,6 +76,10 @@ class WCTransactionalEmails {
 		if ( FeaturesUtil::feature_is_enabled( 'order_withdrawal' ) ) {
 			$emails[] = 'customer_order_withdrawal_requested';
 			$emails[] = 'order_withdrawal_requested';
+		}
+
+		if ( FeaturesUtil::feature_is_enabled( StockNotifications::FEATURE_NAME ) ) {
+			$emails = array_merge( $emails, EmailManager::$email_ids );
 		}
 
 		return $emails;
