@@ -18,8 +18,8 @@
 		}
 	}
 
-	// The Button style takes the theme's button styles instead.
-	// `:where()` keeps theme overrides of the plain button working.
+	// Reset only the plain button. A Button-style button keeps the theme's
+	// button styles. `:where()` keeps theme overrides of the plain button working.
 	.wc-block-product-filters__open-overlay:where(:not(.wp-element-button)),
 	.wc-block-product-filters__close-overlay {
 		color: inherit;
@@ -45,8 +45,8 @@
 		}
 	}
 
-	// On a phone, the Button style fills the width. Plain blocks keep today's
-	// layout. A container query would collapse the block inside a row.
+	// Under 480px, a Button-style button fills the block's width. Plain blocks
+	// keep today's layout. A container query would collapse the block in a row.
 	@media (width < 480px) {
 		&.has-styled-overlay-button {
 			width: 100%;
