@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Internal\Orders\OrderReceivedAccess;
 
 /**
  * AbstractOrderConfirmationBlock class.
@@ -96,28 +97,11 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 			return false; // Always disallow access to invalid orders and those without a valid key.
 		}
 
-		// For customers with accounts, verify the order belongs to the current user or disallow access.
-		if ( $this->is_customer_order( $order ) ) {
-			/**
-			 * Indicates if known (non-guest) shoppers need to be logged in before we let
-			 * them access the order received page.
-			 *
-			 * @param bool $verify_known_shoppers If verification is required.
-			 *
-			 * @since 8.4.0
-			 */
-			$verify_known_shoppers = apply_filters( 'woocommerce_order_received_verify_known_shoppers', true );
-
-			// If verification for known shoppers is disabled, we can show the order details.
-			if ( ! $verify_known_shoppers ) {
-				return 'full';
-			}
-
-			return $this->is_current_customer_order( $order ) ? 'full' : false;
+		if ( $this->get_order_received_access()->current_user_can_view_order( $order, $this->get_request_order_key() ) ) {
+			return 'full';
 		}
 
-		// Guest orders are displayed only within the grace period or after verification. If email verification is required, return false.
-		return $this->email_verification_required( $order ) ? false : 'full';
+		return $this->email_verification_permitted( $order ) && $this->is_email_verified( $order ) ? 'full' : false;
 	}
 
 	/**
@@ -130,14 +114,13 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	}
 
 	/**
-	 * Guest users without an active session can provide their email address to view order details. This however can only
-	 * be permitted if the user also provided the correct order key, and guest checkout is actually enabled.
+	 * See if a guest can unlock the order details by entering the billing email address.
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @return boolean
 	 */
 	protected function email_verification_permitted( $order ) {
-		return $this->allow_guest_checkout() && $this->has_valid_order_key( $order ) && ! $this->is_customer_order( $order );
+		return $this->get_order_received_access()->guest_can_unlock_order( $order, $this->get_request_order_key() );
 	}
 
 	/**
@@ -147,20 +130,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	 * @return boolean
 	 */
 	protected function is_within_grace_period( $order ) {
-		/**
-		 * Controls the grace period within which we do not require any sort of email verification step before rendering
-		 * the 'order received' or 'order pay' pages.
-		 *
-		 * @see \WC_Shortcode_Checkout::order_received()
-		 * @since 11.4.0
-		 * @param int      $grace_period Time in seconds after an order is placed before email verification may be required.
-		 * @param \WC_Order $order        The order for which this grace period is being assessed.
-		 * @param string   $context      Indicates the context in which we might verify the email address. Typically 'order-pay' or 'order-received'.
-		 */
-		$verification_grace_period = (int) apply_filters( 'woocommerce_order_email_verification_grace_period', 10 * MINUTE_IN_SECONDS, $order, 'order-received' );
-		$date_created              = $order->get_date_created();
-
-		return is_a( $date_created, \WC_DateTime::class ) && time() - $date_created->getTimestamp() <= $verification_grace_period;
+		return $this->get_order_received_access()->is_within_grace_period( $order );
 	}
 
 	/**
@@ -171,7 +141,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	 */
 	protected function is_email_verified( $order ) {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-		if ( empty( $_POST ) || ! isset( $_POST['email'], $_POST['_wpnonce'] ) ) {
+		if ( empty( $_POST ) || ! isset( $_POST['email'], $_POST['_wpnonce'] ) || ! is_string( $_POST['email'] ) ) {
 			return false;
 		}
 
@@ -181,7 +151,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 			return false;
 		}
 
-		return $order->get_billing_email() && sanitize_email( wp_unslash( $_POST['email'] ?? '' ) ) === $order->get_billing_email();
+		return $this->get_order_received_access()->email_unlocks_order( $order, sanitize_email( wp_unslash( $_POST['email'] ) ) );
 	}
 
 	/**
@@ -191,34 +161,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	 * @return boolean
 	 */
 	protected function email_verification_required( $order ) {
-		$session = wc()->session;
-
-		// Skip verification if the current user still has the order in their session.
-		if ( is_a( $session, \WC_Session::class ) && $order->get_id() === (int) $session->get( 'store_api_draft_order' ) ) {
-			return false;
-		}
-
-		// Skip verification if the order was created within the grace period.
-		if ( $this->is_within_grace_period( $order ) ) {
-			return false;
-		}
-
-		// If the user verified their email address, we can skip further verification.
-		if ( $this->is_email_verified( $order ) ) {
-			return false;
-		}
-
-		/**
-		 * Provides an opportunity to override the (potential) requirement for shoppers to verify their email address
-		 * before we show information such as the order summary, or order payment page.
-		 *
-		 * @see \WC_Shortcode_Checkout::order_received()
-		 * @since 11.4.0
-		 * @param bool     $email_verification_required If email verification is required.
-		 * @param WC_Order $order                       The relevant order.
-		 * @param string   $context                     The context under which we are performing this check.
-		 */
-		return (bool) apply_filters( 'woocommerce_order_email_verification_required', true, $order, 'order-received' );
+		return ! $this->get_order_received_access()->current_user_can_view_order( $order, $this->get_request_order_key() ) && ! $this->is_email_verified( $order );
 	}
 
 	/**
@@ -228,8 +171,26 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	 * @return boolean
 	 */
 	protected function has_valid_order_key( $order ) {
+		return $order->key_is_valid( $this->get_request_order_key() );
+	}
+
+	/**
+	 * Get the order key from the request.
+	 *
+	 * @return string
+	 */
+	private function get_request_order_key(): string {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		return isset( $_GET['key'] ) && is_string( $_GET['key'] ) && $order->key_is_valid( wc_clean( wp_unslash( $_GET['key'] ) ) );
+		return isset( $_GET['key'] ) && is_string( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
+	}
+
+	/**
+	 * Get the rules that decide who can see the order.
+	 *
+	 * @return OrderReceivedAccess
+	 */
+	private function get_order_received_access(): OrderReceivedAccess {
+		return wc_get_container()->get( OrderReceivedAccess::class );
 	}
 
 	/**

@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Orders\OrderReceivedAccess;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 
@@ -351,27 +352,16 @@ class WC_Shortcode_Checkout {
 			return;
 		}
 
-		/**
-		 * Indicates if known (non-guest) shoppers need to be logged in before we let
-		 * them access the order received page.
-		 *
-		 * @param bool $verify_known_shoppers If verification is required.
-		 *
-		 * @since 8.4.0
-		 */
-		$verify_known_shoppers = apply_filters( 'woocommerce_order_received_verify_known_shoppers', true );
-		$order_customer_id     = $order->get_customer_id();
+		$access     = wc_get_container()->get( OrderReceivedAccess::class );
+		$can_view   = $access->current_user_can_view_order( $order, $order_key );
+		$can_unlock = $access->guest_can_unlock_order( $order, $order_key );
 
-		// For non-guest orders, require the user to be logged in before showing this page.
-		if ( $verify_known_shoppers && $order_customer_id && get_current_user_id() !== $order_customer_id ) {
-			wc_get_template( 'checkout/order-received.php', array( 'order' => false ) );
-			self::print_notice( esc_html__( 'Please log in to your account to view this order.', 'woocommerce' ), 'notice' );
-			woocommerce_login_form( array( 'redirect' => $order->get_checkout_order_received_url() ) );
+		if ( $can_view || ( $can_unlock && $access->email_unlocks_order( $order, self::get_submitted_email() ) ) ) {
+			wc_get_template( 'checkout/thankyou.php', array( 'order' => $order ) );
 			return;
 		}
 
-		// For guest orders, request they verify their email address (unless we can identify them via the active user session).
-		if ( self::guest_should_verify_email( $order, 'order-received' ) ) {
+		if ( $can_unlock ) {
 			wc_get_template( 'checkout/order-received.php', array( 'order' => false ) );
 			wc_get_template(
 				'checkout/form-verify-email.php',
@@ -383,8 +373,30 @@ class WC_Shortcode_Checkout {
 			return;
 		}
 
-		// Otherwise, display the thank you (order received) page.
-		wc_get_template( 'checkout/thankyou.php', array( 'order' => $order ) );
+		if ( $order->get_customer_id() ) {
+			wc_get_template( 'checkout/order-received.php', array( 'order' => false ) );
+			self::print_notice( esc_html__( 'Please log in to your account to view this order.', 'woocommerce' ), 'notice' );
+			woocommerce_login_form( array( 'redirect' => $order->get_checkout_order_received_url() ) );
+			return;
+		}
+
+		// A guest order that cannot be unlocked gets the same page as an unknown order.
+		wc_get_template( 'checkout/thankyou.php', array( 'order' => false ) );
+	}
+
+	/**
+	 * Get the email address submitted through the order received email form, when its nonce is valid.
+	 *
+	 * @return string Email address, or an empty string.
+	 */
+	private static function get_submitted_email(): string {
+		$nonce = is_string( $_POST['check_submission'] ?? null ) ? sanitize_text_field( wp_unslash( $_POST['check_submission'] ) ) : '';
+
+		if ( ! wp_verify_nonce( $nonce, 'wc_verify_email' ) || ! is_string( $_POST['email'] ?? null ) ) {
+			return '';
+		}
+
+		return sanitize_email( wp_unslash( $_POST['email'] ) );
 	}
 
 	/**
@@ -437,15 +449,8 @@ class WC_Shortcode_Checkout {
 	 */
 	private static function guest_should_verify_email( WC_Order $order, string $context ): bool {
 		// If we cannot match the order with the current user, ask that they verify their email address.
-		$nonce          = is_string( $_POST['check_submission'] ?? null ) ? sanitize_text_field( wp_unslash( $_POST['check_submission'] ) ) : '';
-		$nonce_is_valid = wp_verify_nonce( $nonce, 'wc_verify_email' );
-		$supplied_email = null;
-		$order_id       = $order->get_id();
+		$supplied_email = self::get_submitted_email();
 
-		if ( $nonce_is_valid && is_string( $_POST['email'] ?? null ) ) {
-			$supplied_email = sanitize_email( wp_unslash( $_POST['email'] ) );
-		}
-
-		return Users::should_user_verify_order_email( $order_id, $supplied_email, $context );
+		return Users::should_user_verify_order_email( $order->get_id(), '' === $supplied_email ? null : $supplied_email, $context );
 	}
 }

@@ -294,6 +294,112 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Render the order received page for an order placed an hour ago, after the grace period.
+	 *
+	 * @param WC_Order $order Order to show.
+	 * @return string Rendered markup.
+	 */
+	private function render_old_order_received_page( WC_Order $order ): string {
+		global $wp;
+
+		$order->set_date_created( time() - HOUR_IN_SECONDS );
+		$order->save();
+
+		$wp->query_vars['order-received'] = $order->get_id();
+		$_GET['key']                      = $order->get_order_key();
+
+		ob_start();
+		WC_Shortcode_Checkout::output( array() );
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * @testdox After the grace period, a guest order asks for the billing email, and the right email shows the order.
+	 */
+	public function test_order_received_unlocks_guest_order_with_billing_email(): void {
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+		$order = WC_Helper_Order::create_order( 0 );
+		WC()->session->set( 'customer', array( 'email' => $order->get_billing_email() ) );
+
+		$locked = $this->render_old_order_received_page( $order );
+
+		$_POST['check_submission'] = wp_create_nonce( 'wc_verify_email' );
+		$_POST['email']            = $order->get_billing_email();
+		$unlocked                  = $this->render_old_order_received_page( $order );
+		unset( $_POST['check_submission'], $_POST['email'] );
+		WC()->session->set( 'customer', null );
+		delete_option( 'woocommerce_enable_guest_checkout' );
+
+		$this->assertStringContainsString( 'check_submission', $locked, 'The session email alone should not unlock the order.' );
+		$this->assertStringNotContainsString( 'woocommerce-order-overview', $locked );
+		$this->assertStringContainsString( 'woocommerce-order-overview', $unlocked, 'The billing email should unlock the order.' );
+	}
+
+	/**
+	 * @testdox A wrong email, a missing nonce, or an admin visitor does not unlock a guest order after the grace period.
+	 *
+	 * @testWith ["wrong", true, false]
+	 *           ["right", false, false]
+	 *           ["none", false, true]
+	 *
+	 * @param string $email      Which email to submit: the billing email, a wrong one, or none.
+	 * @param bool   $with_nonce Whether to submit a valid nonce.
+	 * @param bool   $as_admin   Whether an administrator visits the page.
+	 */
+	public function test_order_received_keeps_guest_order_locked( string $email, bool $with_nonce, bool $as_admin ): void {
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+		$order = WC_Helper_Order::create_order( 0 );
+
+		if ( $as_admin ) {
+			wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		}
+		if ( 'none' !== $email ) {
+			$_POST['email'] = 'right' === $email ? $order->get_billing_email() : 'someone-else@example.com';
+		}
+		if ( $with_nonce ) {
+			$_POST['check_submission'] = wp_create_nonce( 'wc_verify_email' );
+		}
+
+		$output = $this->render_old_order_received_page( $order );
+		unset( $_POST['check_submission'], $_POST['email'] );
+		wp_set_current_user( 0 );
+		delete_option( 'woocommerce_enable_guest_checkout' );
+
+		$this->assertStringNotContainsString( 'woocommerce-order-overview', $output );
+		$this->assertStringContainsString( 'check_submission', $output, 'The email form should show again.' );
+	}
+
+	/**
+	 * @testdox The billing email does not unlock a guest order while guest checkout is off.
+	 */
+	public function test_order_received_billing_email_needs_guest_checkout(): void {
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+		$order                     = WC_Helper_Order::create_order( 0 );
+		$_POST['check_submission'] = wp_create_nonce( 'wc_verify_email' );
+		$_POST['email']            = $order->get_billing_email();
+
+		$output = $this->render_old_order_received_page( $order );
+		unset( $_POST['check_submission'], $_POST['email'] );
+		delete_option( 'woocommerce_enable_guest_checkout' );
+
+		$this->assertStringNotContainsString( 'woocommerce-order-overview', $output );
+	}
+
+	/**
+	 * @testdox A guest order after the grace period shows no details and no email form while guest checkout is off.
+	 */
+	public function test_order_received_hides_guest_order_without_guest_checkout(): void {
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+
+		$output = $this->render_old_order_received_page( WC_Helper_Order::create_order( 0 ) );
+		delete_option( 'woocommerce_enable_guest_checkout' );
+
+		$this->assertStringNotContainsString( 'woocommerce-order-overview', $output );
+		$this->assertStringNotContainsString( 'check_submission', $output );
+		$this->assertStringNotContainsString( 'Please log in to your account to view this order.', $output );
+	}
+
+	/**
 	 * @testdox The order received login prompt should render inside the shared notices wrapper.
 	 */
 	public function test_order_received_prints_login_notice_inside_notices_wrapper(): void {
