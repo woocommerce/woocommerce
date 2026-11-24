@@ -473,8 +473,17 @@ body:has(.wc-sales-readiness) {
 
 // While AI shopping experiments are off, the items they add are highlighted.
 .wc-sales-readiness-declared__item--experiment {
-	background: var(--wpds-color-background-interactive-brand-weak);
+	background: var(--wpds-color-background-surface-brand);
 	border-radius: 2px;
 	padding-inline: 4px;
 	margin-inline: -4px;
+}
+
+// A tagged row centres its text on the taller tag.
+.wc-sales-readiness-declared__item:has(.wc-sales-readiness-declared__tag) {
+	align-items: center;
+}
+
+.wc-sales-readiness-declared__tag {
+	flex: 0 0 auto;
 }

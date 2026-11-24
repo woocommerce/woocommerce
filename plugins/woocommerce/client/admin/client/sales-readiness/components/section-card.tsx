@@ -367,7 +367,10 @@ export const DeclaredCard = ( {
 											) }
 										</Text>
 										{ item.experiment && experiments && (
-											<Badge intent="informational">
+											<Badge
+												intent="informational"
+												className="wc-sales-readiness-declared__tag"
+											>
 												{ experiments.tag }
 											</Badge>
 										) }
