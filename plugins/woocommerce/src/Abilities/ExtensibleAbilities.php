@@ -42,7 +42,7 @@ class ExtensibleAbilities {
 	private static array $fields = array();
 
 	/**
-	 * Registered resources, keyed by resource name.
+	 * Registered resources, keyed by resource name. The value says whether the objects of the resource have a type.
 	 *
 	 * @var array<string, bool>
 	 */
@@ -101,16 +101,18 @@ class ExtensibleAbilities {
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
-	 * Core registers `product`, `order` and `order_item` there. An
-	 * extension registers a resource that its own abilities format, and then calls `add_fields_to_object()`
-	 * and `add_fields_schema()` from those abilities, exactly as Core's abilities do.
+	 * Core registers `product`, `order`, `order_item`, `order_refund`, `product_term`, `product_review` and
+	 * `customer` there. An extension registers a resource that its own abilities format, and then calls
+	 * `add_fields_to_object()` and `add_fields_schema()` from those abilities, exactly as Core's abilities do.
 	 * Registering the same resource again does nothing.
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param string $resource_name Slug of the resource, such as `ticket`.
+	 * @param string $resource_name    Slug of the resource, such as `ticket`.
+	 * @param bool   $has_object_types Optional. Whether every object of the resource has a `get_type()` method, so
+	 *                                 fields can set `object_types`. Default false.
 	 */
-	public static function register_resource( string $resource_name ): void {
+	public static function register_resource( string $resource_name, bool $has_object_types = false ): void {
 		if ( did_action( 'woocommerce_extensible_abilities_resources_init' ) && ! doing_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
 			wc_doing_it_wrong( __METHOD__, 'Register a resource inside the woocommerce_extensible_abilities_resources_init action, before the fields are registered.', '11.3.0' );
 			return;
@@ -120,7 +122,7 @@ class ExtensibleAbilities {
 			return;
 		}
 
-		self::$resources[ $resource_name ] = true;
+		self::$resources[ $resource_name ] = self::$resources[ $resource_name ] ?? $has_object_types;
 	}
 
 	/**
@@ -152,9 +154,12 @@ class ExtensibleAbilities {
 	 *                                  WooCommerce also reads, because some clients refuse it.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
-	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
-	 *                                  The abilities leave the field out of the other objects and refuse a write
-	 *                                  to them. Omit it for every type.
+	 *                                  `line_item` for an order item. The abilities leave the field out of the
+	 *                                  other objects and refuse a write to them. Omit it for every type. Only a
+	 *                                  resource registered with `$has_object_types` accepts it: `product`, `order`,
+	 *                                  `order_item` and `order_refund` in Core. On another resource, such as
+	 *                                  `product_term`, the field is refused. There, the callbacks check the object
+	 *                                  instead, for example the taxonomy of a term.
 	 *     @type callable $get_callback Optional. Receives the object and returns the value. A field without it
 	 *                                  is not in the output. Required with `output_schema`. Return null when the
 	 *                                  object has no value, and the field is left out with no error. Any other
@@ -263,6 +268,17 @@ class ExtensibleAbilities {
 		}
 		if ( isset( $args['object_types'] ) && ( ! is_array( $args['object_types'] ) || empty( $args['object_types'] ) || array_filter( $args['object_types'], static fn( $type ) => ! is_string( $type ) ) ) ) {
 			wc_doing_it_wrong( __METHOD__, 'The "object_types" argument must be a list of object types.', '11.4.0' );
+			return;
+		}
+		if ( isset( $args['object_types'] ) && ! self::$resources[ $args['resource'] ] ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					'The "%s" resource does not accept "object_types", because its objects have no type. Remove "object_types", and check the object in the callbacks instead.',
+					$args['resource']
+				),
+				'11.5.0'
+			);
 			return;
 		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {

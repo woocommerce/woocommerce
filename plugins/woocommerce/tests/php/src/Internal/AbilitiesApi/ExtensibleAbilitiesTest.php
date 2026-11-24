@@ -4993,6 +4993,48 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a $resource_name field with object_types, and still list the $resource_name objects.
+	 * @dataProvider provide_resources_without_object_types
+	 *
+	 * @param string   $resource_name Resource whose objects have no type.
+	 * @param string   $ability       List ability.
+	 * @param string   $list_key      Output key of the list.
+	 * @param callable $create_input  Creates two objects and returns the ability input that lists them.
+	 */
+	public function test_object_types_on_a_resource_without_types_is_refused( string $resource_name, string $ability, string $list_key, callable $create_input ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => $resource_name,
+						'namespace'     => 'test-ext',
+						'field'         => 'typed',
+						'output_schema' => array( 'type' => 'string' ),
+						'object_types'  => array( 'simple' ),
+						'get_callback'  => static fn() => 'value',
+					)
+				);
+			}
+		);
+
+		$list = $this->run_ability( $ability, $create_input() )[ $list_key ];
+
+		$this->assertCount( 2, $list );
+		$this->assertArrayNotHasKey( 'extensions', $list[0] );
+	}
+
+	/**
+	 * The rows of provide_list_abilities() for resources whose objects have no type.
+	 *
+	 * @return array<string, array>
+	 */
+	public function provide_resources_without_object_types(): array {
+		return array_diff_key( $this->provide_list_abilities(), array_flip( array( 'product', 'order_refund' ) ) );
+	}
+
+	/**
 	 * @testdox Should list in the variation schemas only the fields that can apply to a variation.
 	 */
 	public function test_variation_schemas_list_only_the_fields_that_apply_to_a_variation(): void {
