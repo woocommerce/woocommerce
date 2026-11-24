@@ -9,7 +9,7 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Single product', 'Block name', 'purple' ) ); ?>},"align":"wide","style":{"spacing":{"blockGap":"0","margin":{"top":"0","bottom":"0"},"padding":{"bottom":"var:preset|spacing|50"}}},"layout":{"type":"default"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Single product', 'Pattern title', 'purple' ) ); ?>},"align":"wide","style":{"spacing":{"blockGap":"0","margin":{"top":"0","bottom":"0"},"padding":{"bottom":"var:preset|spacing|50"}}},"layout":{"type":"default"}} -->
 <div class="wp-block-group alignwide" style="margin-top:0;margin-bottom:0;padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/store-notices /-->
 
 <!-- wp:woocommerce/breadcrumbs /-->
