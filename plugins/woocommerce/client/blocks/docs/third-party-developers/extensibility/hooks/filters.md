@@ -875,8 +875,14 @@ This is a hook taken from the legacy cart/mini-cart templates that allows the pe
 This filter is documented in includes/class-wc-cart.php.
 
 ```php
-apply_filters( 'woocommerce_cart_ready_to_calc_shipping' )
+apply_filters( 'woocommerce_cart_ready_to_calc_shipping', bool $ready )
 ```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $ready | bool | Whether the cart is ready to calculate shipping. |
 
 ### Source
 
@@ -2185,7 +2191,7 @@ apply_filters( 'woocommerce_ucp_idempotency_strict', bool $strict )
 
 ### Description
 
-True, the default, matches the UCP specs, and returns 400 for a missing or malformed key. False honors a key when one is sent and lets a keyless write through.
+True, the default, matches the UCP specs, and returns 400 for a missing or malformed key. False honors a well-formed key when one is sent, ignores a malformed key, and lets a keyless write through.
 
 ### Parameters
 
