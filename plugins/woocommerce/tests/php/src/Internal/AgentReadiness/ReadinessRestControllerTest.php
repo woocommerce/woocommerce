@@ -557,6 +557,40 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox When the discovery file can't be written as UCP turns on, POST ucp answers needs attention, not active.
+	 */
+	public function test_turning_ucp_on_reports_a_failed_discovery_write(): void {
+		if ( is_multisite() ) {
+			$this->markTestSkipped( 'Multisite never writes the discovery file.' );
+		}
+		global $wp_rewrite;
+		StoreConditionsTest::make_store_ready();
+		$wp_rewrite->set_permalink_structure( '' );
+		// A folder where the file goes: its parent is writable, so the switch is allowed, but the write fails.
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/ucp';
+		wp_mkdir_p( $path );
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- The failed write warns, as on a real server.
+		set_error_handler( static fn( int $severity ): bool => E_WARNING === $severity );
+
+		try {
+			$response = $this->dispatch_ucp( true );
+		} finally {
+			restore_error_handler();
+			foreach ( array( $path, dirname( $path ) ) as $dir ) {
+				if ( is_dir( $dir ) ) {
+					rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+				}
+			}
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['enabled'] );
+		$this->assertSame( UcpSwitch::STATUS_NEEDS_ATTENTION, $response->get_data()['status'] );
+		$this->assertContains( 'ucp_discovery', $response->get_data()['failing_checks'] );
+	}
+
+	/**
 	 * @testdox A user without manage_woocommerce can't switch UCP.
 	 */
 	public function test_ucp_switch_requires_manage_woocommerce(): void {

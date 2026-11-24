@@ -51,7 +51,7 @@ class ProductFailures {
 	 * @param array<string, array<string, array{field:string,effect:string}>> $failures     Channel map of each failed check, by check id.
 	 * @param bool                                                            $mark_written Whether to record the write time. A save does, so a scan
 	 *                                                                                      in progress keeps its rows. The scan's own writes don't:
-	 *                                                                                      keep_only() reads the time only for products the scan did not test.
+	 *                                                                                      keep_only() and abandon_refresh() read the time for products the scan did not test or that had no rows when it started.
 	 */
 	public static function store( int $product_id, array $failures, bool $mark_written = true ): void {
 		$values = array_merge( array( self::CHECKED ), array_map( 'strval', array_keys( $failures ) ) );
@@ -130,12 +130,24 @@ class ProductFailures {
 		if ( array() === $drop ) {
 			return;
 		}
+		self::forget_unless_written_since( $drop, $written_after );
+	}
+
+	/**
+	 * Remove the rows of these products, except rows written at or after $written_after, such as by a save during a scan.
+	 *
+	 * @param array<int, int> $product_ids   Product ids.
+	 * @param float|null      $written_after Unix time the scan started, or null to remove them all.
+	 */
+	public static function forget_unless_written_since( array $product_ids, ?float $written_after ): void {
+		if ( array() === $product_ids ) {
+			return;
+		}
 		$fresh = null === $written_after ? array() : array_fill_keys( self::ids_written_since( $written_after ), true );
-		foreach ( $drop as $product_id ) {
-			if ( isset( $fresh[ $product_id ] ) ) {
-				continue;
+		foreach ( array_map( 'intval', $product_ids ) as $product_id ) {
+			if ( ! isset( $fresh[ $product_id ] ) ) {
+				self::forget( $product_id );
 			}
-			self::forget( $product_id );
 		}
 	}
 

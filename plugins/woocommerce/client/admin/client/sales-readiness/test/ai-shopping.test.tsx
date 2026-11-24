@@ -452,6 +452,24 @@ describe( 'AiShopping', () => {
 		expect( mockCreateSuccessNotice ).not.toHaveBeenCalled();
 	} );
 
+	it( 'does not say AI assistants can shop the store when it turns on but needs attention', async () => {
+		mockedFetch.mockResolvedValue( {
+			enabled: true,
+			status: 'needs_attention',
+		} );
+		renderPage( view( { ucp: { ...view().ucp, blocked: false } } ) );
+
+		fireEvent.click( toggle() );
+		await waitFor( () => expect( mockedFetch ).toHaveBeenCalled() );
+		await screen.findByRole( 'checkbox', { name: /Allow AI assistants/ } );
+
+		expect( window.location.assign ).toHaveBeenCalled();
+		expect(
+			window.sessionStorage.getItem( 'wc-ai-shopping-snackbar' )
+		).toBeNull();
+		expect( mockCreateSuccessNotice ).not.toHaveBeenCalled();
+	} );
+
 	it( 'shows the switch’s snackbar on the page that loads after it saves, once', () => {
 		window.sessionStorage.setItem(
 			'wc-ai-shopping-snackbar',
