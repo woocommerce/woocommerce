@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Args, Command, Flags, ux } from '@oclif/core';
-import { existsSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { execSync } from 'child_process';
 
 /**
@@ -103,23 +103,17 @@ export default class PackagePrepare extends Command {
 			try {
 				if ( hasValidChangelogs( name ) ) {
 					validateChangelogEntries( name );
-					let nextVersion = getNextVersion( name );
-					if ( nextVersion ) {
-						writeChangelog( name );
-					} else {
-						if ( initialRelease ) {
-							// @todo: When the composer.json versioning is "wordpress" as is for plugins, this value needs to be 1.0
-							nextVersion = '1.0.0';
-						} else {
-							throw new Error(
-								`Error reading version number for ${ name }. Check that a Changelog file exists and has a version number. If making an initial release, pass the --initialRelease flag.`
-							);
-						}
-
-						writeChangelog( name, nextVersion );
+					const nextVersion = getNextVersion( name );
+					if ( ! nextVersion && ! initialRelease ) {
+						throw new Error(
+							`Error reading version number for ${ name }. Check that a Changelog file exists and has a version number. If making an initial release, pass the --initialRelease flag.`
+						);
 					}
 
-					this.bumpPackageVersion( name, nextVersion );
+					// @todo: When the composer.json versioning is "wordpress" as is for plugins, this value needs to be 1.0
+					const version = nextVersion ?? '1.0.0';
+					this.bumpPackageVersion( name, version );
+					writeChangelog( name, nextVersion ? undefined : version );
 
 					ux.action.stop();
 				} else {
@@ -160,20 +154,28 @@ export default class PackagePrepare extends Command {
 				);
 			}
 
+			const refreshLock =
+				packageType === 'php' &&
+				existsSync( `${ filepath }/composer.lock` );
+			const originalManifest = refreshLock
+				? readFileSync( jsonFilepath )
+				: null;
 			json.version = version;
 			writeFileSync(
 				jsonFilepath,
 				JSON.stringify( json, null, '\t' ) + '\n'
 			);
 
-			if (
-				packageType === 'php' &&
-				existsSync( `${ filepath }/composer.lock` )
-			) {
-				execSync(
-					'composer update --lock --no-install --no-scripts --no-plugins --no-interaction',
-					{ cwd: filepath, stdio: 'inherit' }
-				);
+			if ( originalManifest ) {
+				try {
+					execSync(
+						'composer update --lock --no-install --no-scripts --no-plugins --no-interaction',
+						{ cwd: filepath, stdio: 'inherit' }
+					);
+				} catch ( error ) {
+					writeFileSync( jsonFilepath, originalManifest );
+					throw error;
+				}
 			}
 
 			// if preparing a php package and the package is used in the woocommerce plugin
@@ -202,7 +204,7 @@ export default class PackagePrepare extends Command {
 				}
 			}
 		} catch ( e ) {
-			this.error( `Can't bump version for ${ name }.` );
+			this.error( `Can't bump version for ${ name }. ${ String( e ) }` );
 		}
 	}
 }
