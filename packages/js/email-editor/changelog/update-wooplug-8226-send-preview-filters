@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Add filters to hide “Send a test email”, change its request path, and add help to its error message. The error message no longer shows the MailPoet Sending Service note, and the sending method link is empty by default; consumers that want them add them through the filters.
+Add filters to hide or redirect “Send a test email” and add help to its error; remove the MailPoet defaults from that error.
