@@ -23,15 +23,25 @@ trait PaymentGatewayAbilityTrait {
 	 * @return array
 	 */
 	protected static function format_payment_gateway_for_response( \WC_Payment_Gateway $gateway, int $order ): array {
-		// The title and description getters run checkout filters that may expect a cart.
+		// The description getter runs checkout filters that may expect a cart.
 		return array(
 			'id'           => (string) $gateway->id,
-			'title'        => (string) ( $gateway->title ? $gateway->title : $gateway->get_option( 'title' ) ),
+			'title'        => self::get_payment_gateway_title( $gateway ),
 			'method_title' => (string) $gateway->get_method_title(),
 			'description'  => (string) ( $gateway->description ? $gateway->description : $gateway->get_option( 'description' ) ),
 			'enabled'      => 'yes' === $gateway->enabled,
 			'order'        => $order,
 		);
+	}
+
+	/**
+	 * Saved title of a gateway. The title getter runs a checkout filter that may expect a cart.
+	 *
+	 * @param \WC_Payment_Gateway $gateway Gateway.
+	 * @return string
+	 */
+	protected static function get_payment_gateway_title( \WC_Payment_Gateway $gateway ): string {
+		return (string) ( $gateway->title ? $gateway->title : $gateway->get_option( 'title' ) );
 	}
 
 	/**

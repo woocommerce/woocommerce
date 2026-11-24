@@ -20,6 +20,7 @@ defined( 'ABSPATH' ) || exit;
 trait OrderEditTrait {
 
 	use AddressInputTrait;
+	use PaymentGatewayAbilityTrait;
 
 	/**
 	 * Product lines that change() added or gave a new quantity, for a stock change after the save.
@@ -190,6 +191,38 @@ trait OrderEditTrait {
 		if ( empty( $line['id'] ) ) {
 			$order->add_item( $item );
 		}
+
+		return null;
+	}
+
+	/**
+	 * Set the payment method and its title in memory, as the order screen does. Only an enabled gateway is
+	 * accepted. Nothing is charged or captured: the gateway only names how the order was paid.
+	 *
+	 * @param \WC_Order $order      Order.
+	 * @param string    $gateway_id Gateway ID sent by the client.
+	 * @return null|\WP_Error
+	 */
+	private static function set_payment_method( \WC_Order $order, string $gateway_id ): ?\WP_Error {
+		$enabled = array_filter(
+			WC()->payment_gateways()->payment_gateways(),
+			static fn( $gateway ) => $gateway instanceof \WC_Payment_Gateway && 'yes' === $gateway->enabled
+		);
+
+		if ( ! isset( $enabled[ $gateway_id ] ) ) {
+			if ( empty( $enabled ) ) {
+				/* translators: %s: payment gateway ID sent by the client. */
+				$message = sprintf( __( '"%s" is not an enabled payment gateway, and the store has no enabled payment gateways. Enable one with the woocommerce/payment-gateway-update ability, or leave out payment_method.', 'woocommerce' ), $gateway_id );
+			} else {
+				/* translators: 1: payment gateway ID sent by the client, 2: comma-separated list of gateway IDs. */
+				$message = sprintf( __( '"%1$s" is not an enabled payment gateway. Send one of: %2$s.', 'woocommerce' ), $gateway_id, implode( ', ', array_map( 'strval', array_keys( $enabled ) ) ) );
+			}
+
+			return new \WP_Error( 'woocommerce_ability_order_payment_method_invalid', $message, array( 'status' => 400 ) );
+		}
+
+		$order->set_payment_method( $gateway_id );
+		$order->set_payment_method_title( self::get_payment_gateway_title( $enabled[ $gateway_id ] ) );
 
 		return null;
 	}
