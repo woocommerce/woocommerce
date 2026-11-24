@@ -52,9 +52,9 @@ module.exports = async ( {
 
 	let existingIssues;
 	try {
+		// Search every team the token can read: triage may have moved the issue out of the docs team.
 		existingIssues = await linearClient.issues( {
 			filter: {
-				team: { id: { eq: team.id } },
 				description: { contains: pr.html_url },
 			},
 			includeArchived: true,

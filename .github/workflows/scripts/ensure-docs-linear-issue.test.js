@@ -169,12 +169,11 @@ test( 'reuses a previously created issue even if the PR title has changed', asyn
 	);
 } );
 
-test( 'includes archived issues when checking for an existing ticket', async () => {
+test( 'includes archived issues in every team when checking for an existing ticket', async () => {
 	const { calls, options } = fixture();
 	await ensureDocsIssue( options );
 	assert.deepEqual( calls.find( ( call ) => call[ 0 ] === 'issues' )[ 1 ], {
 		filter: {
-			team: { id: { eq: teamId } },
 			description: { contains: pr.html_url },
 		},
 		includeArchived: true,
