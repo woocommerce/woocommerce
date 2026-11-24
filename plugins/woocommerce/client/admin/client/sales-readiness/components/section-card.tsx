@@ -207,9 +207,11 @@ export const SectionCard = ( { section }: { section: Section } ) => {
 	);
 };
 
-const declaredState = ( found: boolean | null ) => {
+const declaredState = ( found: boolean | null, waiting?: boolean ) => {
 	if ( found === null ) {
-		return __( 'Not checked yet:', 'woocommerce' );
+		return waiting
+			? __( 'Not checked yet:', 'woocommerce' )
+			: __( 'Couldn’t check:', 'woocommerce' );
 	}
 	return found
 		? __( 'Found:', 'woocommerce' )
@@ -307,7 +309,8 @@ export const DeclaredCard = ( { declared }: { declared: Declared } ) => (
 									<Text variant="body-sm">
 										<VisuallyHidden>
 											{ declaredState(
-												item.found
+												item.found,
+												declared.waiting
 											) }{ ' ' }
 										</VisuallyHidden>
 										{ item.name }

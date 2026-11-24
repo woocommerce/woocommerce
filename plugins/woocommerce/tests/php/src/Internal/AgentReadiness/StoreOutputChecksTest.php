@@ -91,6 +91,31 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A product page check, page HTML or JSON-LD, with no product to open is marked no_product; one whose product page didn't load, or a home page check, is not.
+	 */
+	public function test_product_page_check_without_a_product_is_no_product(): void {
+		$this->serve( array( '/' => array( 200, '<html><head><meta name="viewport" content="width=device-width"></head><body></body></html>' ) ) );
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertNull( $checks['canonical_url']['ok'] );
+		$this->assertTrue( $checks['canonical_url']['no_product'], 'No product, so the check waits for one' );
+		$this->assertNull( $checks['product_jsonld_present']['ok'] );
+		$this->assertTrue( $checks['product_jsonld_present']['no_product'], 'A JSON-LD check waits for a product too' );
+		$this->assertNull( $checks['product_review_markup']['ok'] );
+		$this->assertTrue( $checks['product_review_markup']['no_product'], 'So does the review markup check' );
+		$this->assertFalse( $checks['viewport_meta']['no_product'], 'A home page check does not need a product' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$this->serve( array( self::path_of( $product ) => null ) );
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertNull( $checks['canonical_url']['ok'] );
+		$this->assertFalse( $checks['canonical_url']['no_product'], 'The product page timed out: that is couldn\'t check' );
+		$this->assertNull( $checks['product_jsonld_present']['ok'] );
+		$this->assertFalse( $checks['product_jsonld_present']['no_product'], 'A JSON-LD check on a page that timed out is couldn\'t check' );
+		$this->assertNull( $checks['product_review_markup']['ok'] );
+		$this->assertFalse( $checks['product_review_markup']['no_product'] );
+	}
+
+	/**
 	 * @testdox When the store cannot load its own pages, the sitemap check is couldn't check.
 	 */
 	public function test_unreachable_store_couldnt_check(): void {

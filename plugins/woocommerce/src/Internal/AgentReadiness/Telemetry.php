@@ -7,7 +7,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 defined( 'ABSPATH' ) || exit;
@@ -22,12 +21,6 @@ class Telemetry implements RegisterHooksInterface {
 	public const PROBLEM = 'problem';
 	public const UNKNOWN = 'unknown';
 
-	/**
-	 * Feature flags.
-	 *
-	 * @var FeaturesController
-	 */
-	private FeaturesController $features_controller;
 
 	/**
 	 * Readiness report.
@@ -41,12 +34,10 @@ class Telemetry implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param FeaturesController $features_controller Feature flags.
-	 * @param AgentReadiness     $agent_readiness     Readiness report.
+	 * @param AgentReadiness $agent_readiness     Readiness report.
 	 */
-	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness ): void {
-		$this->features_controller = $features_controller;
-		$this->agent_readiness     = $agent_readiness;
+	final public function init( AgentReadiness $agent_readiness ): void {
+		$this->agent_readiness = $agent_readiness;
 	}
 
 	/**
@@ -72,25 +63,22 @@ class Telemetry implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The feature flag, when the last scan ran, whether it stopped at the product limit, and each check's status.
+	 * When the last scan ran, whether it stopped at the product limit, and each check's status.
 	 * The store conditions are read now; output and product checks are as the last scan left them.
 	 * `ucp_search` counts the catalog search checks, to see how often they fail and whether the retry helps.
 	 *
 	 * @return array{feature_enabled:string,last_scan:string,truncated:string,store_checks:array<string,string>,product_checks:array<string,string>,ucp_search?:array{since:string,checks:int,first_try_failed:int,failed:int,no_answer:int,last_seen:string,last_seen_on:string,last_recovered:string,last_recovered_on:string}}
 	 */
 	public function snapshot(): array {
-		$snapshot = array(
-			'feature_enabled' => 'no',
+		$snapshot               = array(
+			// Always yes since the feature flag was removed; kept so readers of the snapshot keep working.
+			'feature_enabled' => 'yes',
 			'last_scan'       => '',
 			'truncated'       => 'no',
 			'store_checks'    => array(),
 			'product_checks'  => array(),
 		);
-		if ( ! $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ) {
-			return $snapshot;
-		}
-		$snapshot['feature_enabled'] = 'yes';
-		$snapshot['ucp_search']      = StoreOutputChecks::search_counts();
+		$snapshot['ucp_search'] = StoreOutputChecks::search_counts();
 
 		// Setup steps are read now, so they are known before the first scan too.
 		$report = $this->agent_readiness->get_served_report();

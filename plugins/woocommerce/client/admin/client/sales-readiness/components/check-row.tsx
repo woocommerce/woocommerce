@@ -250,7 +250,9 @@ export const CheckRow = ( {
 	const states: Record< CheckRowData[ 'state' ], string > = {
 		open: __( 'Issue:', 'woocommerce' ),
 		required: __( 'Issue:', 'woocommerce' ),
-		unknown: __( 'Not checked yet:', 'woocommerce' ),
+		unknown: row.waiting
+			? __( 'Not checked yet:', 'woocommerce' )
+			: __( 'Couldn’t check:', 'woocommerce' ),
 		pass: __( 'Passed:', 'woocommerce' ),
 	};
 	return (
