@@ -314,6 +314,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 			expect( current.top - previous.bottom ).toBeCloseTo(
 				next.top - current.bottom
 			);
+
+			// The first inner block gets no flow margin while no notice is shown.
+			await expect(
+				addToCartBlock.locator(
+					'.wp-block-woocommerce-add-to-cart-with-options-variation-selector'
+				)
+			).toHaveCSS( 'margin-block-start', '0px' );
 		} );
 
 		await test.step( 'displays an error when attributes are not selected', async () => {
