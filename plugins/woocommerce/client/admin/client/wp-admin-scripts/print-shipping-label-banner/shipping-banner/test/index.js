@@ -926,6 +926,18 @@ describe( 'The message in the banner', () => {
 		).toBe( notActivatedMessage );
 	} );
 
+	it( 'should open the Terms of Service and WooCommerce Shipping links in a new tab with noopener noreferrer.', () => {
+		const { getByRole } = createShippingBannerWrapper( {
+			activePlugins: [],
+		} );
+
+		for ( const name of [ /^Terms of Service/, /^WooCommerce Shipping/ ] ) {
+			const link = getByRole( 'link', { name } );
+			expect( link ).toHaveAttribute( 'target', '_blank' );
+			expect( link ).toHaveAttribute( 'rel', 'noopener noreferrer' );
+		}
+	} );
+
 	it( 'should continue to show the initial message "By clicking "Create shipping label"..." after WooCommerce Service is installed successfully.', () => {
 		const { container, rerender } = createShippingBannerWrapper( {
 			activePlugins: [],

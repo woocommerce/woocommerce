@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 
@@ -16,8 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * Each run schedules the next one a day later, so nothing is queued until a
  * merchant or the REST API asks for the first scan, and no request pays for a
  * scheduling check. The next run is scheduled before the scan, so a scan that
- * fails or times out does not end the chain; a run that finds the feature
- * disabled does.
+ * fails or times out does not end the chain. Cancelling the scheduled actions
+ * under Tools > Scheduled Actions stops the chain until the next manual check.
  *
  * A requested scan that has not started 10 minutes after it was due, while no
  * other scheduled action has finished either, is taken as stalled (Action
@@ -34,6 +33,16 @@ class ScheduledScan implements RegisterHooksInterface {
 
 	public const DAILY_HOOK = 'woocommerce_agent_readiness_daily_scan';
 
+	/**
+	 * Hook that tests the next batch of a scan, with the scan's id.
+	 */
+	public const NEXT_HOOK = 'woocommerce_agent_readiness_scan_next';
+
+	/**
+	 * Seconds before a batch that ended early, as on a timeout, is tried again.
+	 */
+	public const RETRY_AFTER = 10 * MINUTE_IN_SECONDS;
+
 	public const GROUP = 'woocommerce-agent-readiness';
 
 	public const STALLED_AFTER = 10 * MINUTE_IN_SECONDS;
@@ -45,12 +54,6 @@ class ScheduledScan implements RegisterHooksInterface {
 	 */
 	public const RUNNING_FOR = 10 * MINUTE_IN_SECONDS;
 
-	/**
-	 * Features controller.
-	 *
-	 * @var FeaturesController
-	 */
-	private FeaturesController $features_controller;
 
 	/**
 	 * Readiness service.
@@ -71,14 +74,12 @@ class ScheduledScan implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param FeaturesController $features_controller Features controller.
-	 * @param AgentReadiness     $agent_readiness     Readiness service.
-	 * @param RemoteRules        $remote_rules        Rules from the published rules file.
+	 * @param AgentReadiness $agent_readiness     Readiness service.
+	 * @param RemoteRules    $remote_rules        Rules from the published rules file.
 	 */
-	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness, RemoteRules $remote_rules ): void {
-		$this->features_controller = $features_controller;
-		$this->agent_readiness     = $agent_readiness;
-		$this->remote_rules        = $remote_rules;
+	final public function init( AgentReadiness $agent_readiness, RemoteRules $remote_rules ): void {
+		$this->agent_readiness = $agent_readiness;
+		$this->remote_rules    = $remote_rules;
 	}
 
 	/**
@@ -87,13 +88,15 @@ class ScheduledScan implements RegisterHooksInterface {
 	public function register(): void {
 		add_action( self::RUN_NOW_HOOK, array( $this, 'run' ) );
 		add_action( self::DAILY_HOOK, array( $this, 'run' ) );
+		add_action( self::NEXT_HOOK, array( $this, 'run_batch' ) );
 	}
 
 	/**
 	 * Queue a scan unless one is already waiting or running.
 	 */
 	public function queue(): void {
-		if ( ! $this->is_pending() ) {
+		// A scan already testing batches is replaced: the new one starts over with the current catalog.
+		if ( ! $this->is_starting() ) {
 			// A single action due now rather than an async one, which has no date to tell a stalled scan by.
 			// Unique, so two requests that both found nothing pending still queue one scan.
 			as_schedule_single_action( time(), self::RUN_NOW_HOOK, array(), self::GROUP, true );
@@ -101,10 +104,17 @@ class ScheduledScan implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Whether a requested scan has not finished yet, or the daily scan started running in the
-	 * last RUNNING_FOR seconds. The next daily scan, still waiting for its date, doesn't count.
+	 * Whether a scan has not finished yet: requested, testing batches, or a daily scan that
+	 * started in the last RUNNING_FOR seconds. The next daily scan, still waiting for its date, doesn't count.
 	 */
 	public function is_pending(): bool {
+		return $this->is_starting() || as_has_scheduled_action( self::NEXT_HOOK, null, self::GROUP );
+	}
+
+	/**
+	 * Whether a requested scan has not started its batches yet, or the daily scan started running in the last RUNNING_FOR seconds.
+	 */
+	private function is_starting(): bool {
 		if ( ActionSchedulerUtil::has_scheduled_action( self::RUN_NOW_HOOK, array(), self::GROUP ) ) {
 			return true;
 		}
@@ -133,6 +143,7 @@ class ScheduledScan implements RegisterHooksInterface {
 		}
 		// The timestamp of a pending action; true while it runs.
 		$due = as_next_scheduled_action( self::RUN_NOW_HOOK, array(), self::GROUP );
+		$due = false === $due ? as_next_scheduled_action( self::NEXT_HOOK, null, self::GROUP ) : $due;
 		if ( ! is_int( $due ) || time() - $due <= self::STALLED_AFTER ) {
 			return false;
 		}
@@ -149,18 +160,35 @@ class ScheduledScan implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Schedule the next daily run, fetch the rules file, then run the scan and store the report.
+	 * Schedule the next daily run, fetch the rules file, then start the scan, replacing one in progress.
+	 * Each batch of products runs in its own action, then the last stores the report.
 	 *
 	 * @internal
 	 */
 	public function run(): void {
-		if ( ! $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ) {
-			return;
-		}
 		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
 		as_schedule_single_action( time() + DAY_IN_SECONDS, self::DAILY_HOOK, array(), self::GROUP );
 
 		$this->remote_rules->refresh( array_keys( $this->agent_readiness->get_default_rules() ) );
-		$this->agent_readiness->refresh_report();
+		as_unschedule_all_actions( self::NEXT_HOOK );
+		as_schedule_single_action( time(), self::NEXT_HOOK, array( $this->agent_readiness->start_refresh() ), self::GROUP );
+	}
+
+	/**
+	 * Test one batch of a scan, then queue the next, or store the report after the last.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $chain Scan id. Untyped, so a stray call without one does nothing instead of failing.
+	 */
+	public function run_batch( $chain = '' ): void {
+		$chain = is_string( $chain ) ? $chain : '';
+		// Runs only if this action ends early, as on a timeout, and goes on from the last finished batch.
+		as_schedule_single_action( time() + self::RETRY_AFTER, self::NEXT_HOOK, array( $chain ), self::GROUP );
+		$more = $this->agent_readiness->continue_refresh( $chain );
+		as_unschedule_all_actions( self::NEXT_HOOK, array( $chain ), self::GROUP );
+		if ( $more ) {
+			as_schedule_single_action( time(), self::NEXT_HOOK, array( $chain ), self::GROUP );
+		}
 	}
 }

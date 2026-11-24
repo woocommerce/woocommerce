@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the text after a “<” in subjects of block editor emails, and show symbols such as € instead of their codes.

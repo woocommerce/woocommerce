@@ -50,6 +50,14 @@ describe( 'getPages', () => {
 			expect( paths ).not.toContain( path );
 		} );
 	} );
+
+	it( 'shows no spinner while the Sales readiness page loads', () => {
+		const page = getPages().find(
+			( { path } ) => path === '/sales-readiness'
+		);
+
+		expect( page.fallback() ).toBeNull();
+	} );
 } );
 
 describe( 'updateLinkHref', () => {

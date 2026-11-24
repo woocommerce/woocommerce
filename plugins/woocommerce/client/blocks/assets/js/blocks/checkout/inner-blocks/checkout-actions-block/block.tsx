@@ -14,6 +14,7 @@ import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { CART_URL } from '@woocommerce/block-settings';
 import { useSelect } from '@wordpress/data';
 import { paymentStore } from '@woocommerce/block-data';
+import { useStyleProps } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -21,9 +22,10 @@ import { paymentStore } from '@woocommerce/block-data';
 import { defaultPlaceOrderButtonLabel } from './constants';
 import { CheckoutOrderSummarySlot } from '../checkout-order-summary-block/slotfills';
 import TermsAndConditions from '../checkout-terms-block/frontend';
+import type { ButtonStyleAttributes } from '../../../cart-checkout-shared/types';
 import './style.scss';
 
-export type BlockAttributes = {
+export type BlockAttributes = ButtonStyleAttributes & {
 	cartPageId: number;
 	showReturnToCart: boolean;
 	className?: string;
@@ -45,7 +47,9 @@ const Block = ( {
 	showTerms,
 	termsCheckbox,
 	termsText,
+	...styleAttributes
 }: BlockAttributes ) => {
+	const buttonStyleProps = useStyleProps( styleAttributes );
 	const { paymentMethodButtonLabel, paymentMethodPlaceOrderButton } =
 		useCheckoutSubmit();
 
@@ -107,6 +111,7 @@ const Block = ( {
 					</ReturnToCartButton>
 				) }
 				<PlaceOrderButton
+					buttonStyleProps={ buttonStyleProps }
 					CustomButtonComponent={ CustomButtonComponent }
 					label={ label }
 					fullWidth

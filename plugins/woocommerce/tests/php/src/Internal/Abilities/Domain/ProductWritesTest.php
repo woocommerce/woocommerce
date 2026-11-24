@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -245,6 +246,641 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $variation->get_sold_individually() );
 		$this->assertSame( '0.3', $variation->get_weight() );
 		$this->assertSame( $shipping_class, $variation->get_shipping_class_id() );
+	}
+
+	/**
+	 * @testdox Should set and read back the GTIN of a product and of its variations.
+	 */
+	public function test_global_unique_id_round_trips(): void {
+		$created = $this->execute(
+			'woocommerce/product-create',
+			array(
+				'name'             => 'Mug',
+				'global_unique_id' => '4006381333931',
+			)
+		)['product'];
+
+		$this->assertSame( '4006381333931', $this->query_product( $created['id'] )['global_unique_id'] );
+
+		$updated = $this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'               => $created['id'],
+				'global_unique_id' => '978-3-16-148410-X',
+			)
+		)['product'];
+
+		$this->assertSame( '978-3-16-148410-X', $updated['global_unique_id'] );
+
+		$variable = $this->execute(
+			'woocommerce/product-create',
+			array(
+				'name'             => 'Cap',
+				'type'             => 'variable',
+				'global_unique_id' => '0012345678905',
+				'attributes'       => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M' ),
+					),
+				),
+				'variations'       => array(
+					array(
+						'attributes'       => array(
+							array(
+								'name'   => 'Size',
+								'option' => 'S',
+							),
+						),
+						'global_unique_id' => '0012345678912',
+					),
+				),
+			)
+		)['product'];
+
+		$this->assertSame( '0012345678905', $variable['global_unique_id'] );
+		$this->assertSame( '0012345678912', $this->query_product( $variable['variation_ids'][0] )['global_unique_id'] );
+	}
+
+	/**
+	 * @testdox Should refuse a GTIN that another product has, that a variation repeats, or that has letters.
+	 */
+	public function test_rejects_duplicate_or_invalid_global_unique_id(): void {
+		$taken = WC_Helper_Product::create_simple_product();
+		$taken->set_global_unique_id( '4006381333931' );
+		$taken->save();
+		$product = WC_Helper_Product::create_simple_product();
+
+		$duplicate = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'               => $product->get_id(),
+				'global_unique_id' => '4006381333931',
+			)
+		);
+
+		$this->assertWPError( $duplicate );
+		$this->assertSame( 'product_invalid_global_unique_id', $duplicate->get_error_code() );
+		$this->assertSame( '', wc_get_product( $product->get_id() )->get_global_unique_id() );
+
+		$letters = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'               => $product->get_id(),
+				'global_unique_id' => 'ABC123',
+			)
+		);
+
+		$this->assertWPError( $letters );
+
+		$misplaced_x = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'               => $product->get_id(),
+				'global_unique_id' => '08044X2957',
+			)
+		);
+
+		$this->assertWPError( $misplaced_x );
+		$this->assertSame( 'product_invalid_global_unique_id_format', $misplaced_x->get_error_code() );
+
+		$product->set_global_unique_id( '5901234123457' );
+		$product->save();
+		foreach ( array( "\n", "5901234123464\n" ) as $newline ) {
+			$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'               => $product->get_id(),
+					'global_unique_id' => $newline,
+				)
+			);
+
+			$this->assertWPError( $result );
+			$this->assertSame( '5901234123457', wc_get_product( $product->get_id() )->get_global_unique_id() );
+		}
+
+		$size      = static fn( string $option ): array => array(
+			array(
+				'name'   => 'Size',
+				'option' => $option,
+			),
+		);
+		$repeating = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'             => 'Cap',
+				'type'             => 'variable',
+				'global_unique_id' => '0012345678905',
+				'attributes'       => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M' ),
+					),
+				),
+				'variations'       => array(
+					array(
+						'attributes'       => $size( 'S' ),
+						'global_unique_id' => '0012345678912',
+					),
+					array(
+						'attributes'       => $size( 'M' ),
+						'global_unique_id' => '0012345678905',
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $repeating );
+		$this->assertSame( 'woocommerce_product_variation_global_unique_id_duplicate', $repeating->get_error_code() );
+
+		$mixed_case = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'       => 'Book',
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M' ),
+					),
+				),
+				'variations' => array(
+					array(
+						'attributes'       => $size( 'S' ),
+						'global_unique_id' => '080442957X',
+					),
+					array(
+						'attributes'       => $size( 'M' ),
+						'global_unique_id' => '080442957x',
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $mixed_case, 'An ISBN-10 check digit X is the same in either case.' );
+		$this->assertSame( 'woocommerce_product_variation_global_unique_id_duplicate', $mixed_case->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should turn a simple product into a variable one with global attributes and priced variations, and keep its ID.
+	 */
+	public function test_update_turns_a_simple_product_into_a_variable_one(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'sku' => 'tee' ) );
+		$size    = WC_Helper_Product::create_attribute( 'size', array( 'small', 'large' ) );
+		$color   = WC_Helper_Product::create_attribute( 'color', array( 'red', 'blue' ) );
+		$items   = array();
+		$prices  = array( '11.00', '12.00', '13.00', '14.00' );
+		foreach ( array( 'small', 'large' ) as $size_slug ) {
+			foreach ( array( 'red', 'blue' ) as $color_slug ) {
+				$items[] = array(
+					'attributes'    => array(
+						array(
+							'id'     => $size['attribute_id'],
+							'option' => $size_slug,
+						),
+						array(
+							'id'     => $color['attribute_id'],
+							'option' => $color_slug,
+						),
+					),
+					'regular_price' => $prices[ count( $items ) ],
+				);
+			}
+		}
+
+		$updated = $this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'id'      => $size['attribute_id'],
+						'options' => array( 'small', 'large' ),
+					),
+					array(
+						'id'      => $color['attribute_id'],
+						'options' => array( 'red', 'blue' ),
+					),
+				),
+				'variations' => $items,
+			)
+		)['product'];
+
+		$this->assertSame( $product->get_id(), $updated['id'] );
+		$this->assertSame( 'variable', $updated['type'] );
+		$this->assertCount( 4, $updated['variation_ids'] );
+		$this->assertSame( 'tee', $updated['sku'] );
+
+		$variable = wc_get_product( $product->get_id() );
+		$this->assertInstanceOf( \WC_Product_Variable::class, $variable );
+		$this->assertSame( array( '11.00', '12.00', '13.00', '14.00' ), array_values( $variable->get_variation_prices()['regular_price'] ) );
+		$this->assertSame( '', get_post_meta( $product->get_id(), '_regular_price', true ), 'The old price of the simple product should be gone.' );
+		$this->assertSame( array( '11.00', '12.00', '13.00', '14.00' ), get_post_meta( $product->get_id(), '_price', false ) );
+	}
+
+	/**
+	 * @testdox Should turn a $source product into a variable one with a variation, and keep its ID.
+	 *
+	 * @testWith ["grouped"]
+	 *           ["external"]
+	 *
+	 * @param string $source Product type before the change.
+	 */
+	public function test_update_turns_a_grouped_or_external_product_into_a_variable_one( string $source ): void {
+		$product = 'grouped' === $source ? WC_Helper_Product::create_grouped_product() : WC_Helper_Product::create_external_product();
+
+		$updated = $this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M' ),
+					),
+				),
+				'variations' => array(
+					array(
+						'attributes'    => array(
+							array(
+								'name'   => 'Size',
+								'option' => 'S',
+							),
+						),
+						'regular_price' => '20',
+					),
+				),
+			)
+		)['product'];
+
+		$this->assertSame( $product->get_id(), $updated['id'] );
+		$this->assertSame( 'variable', $updated['type'] );
+		$this->assertCount( 1, $updated['variation_ids'] );
+		$this->assertSame( array( '20' ), get_post_meta( $product->get_id(), '_price', false ) );
+	}
+
+	/**
+	 * @testdox Should clear the old price and sale dates when a simple product becomes variable without variations.
+	 */
+	public function test_update_to_variable_without_variations_clears_the_old_price(): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price'     => '10',
+				'sale_price'        => '8',
+				'date_on_sale_from' => '2020-01-01',
+				'date_on_sale_to'   => '2040-01-01',
+			)
+		);
+
+		$updated = $this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'type' => 'variable',
+			)
+		)['product'];
+
+		$this->assertSame( 'variable', $updated['type'] );
+		foreach ( array( '_price', '_regular_price', '_sale_price' ) as $meta_key ) {
+			$this->assertFalse( metadata_exists( 'post', $product->get_id(), $meta_key ), "$meta_key should be gone." );
+		}
+		$this->assertEmpty( get_post_meta( $product->get_id(), '_sale_price_dates_from', true ) );
+		$this->assertEmpty( get_post_meta( $product->get_id(), '_sale_price_dates_to', true ) );
+		$lookup = $wpdb->get_row( $wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product->get_id() ), ARRAY_A );
+		$this->assertArrayHasKey( 'min_price', $lookup );
+		$this->assertArrayHasKey( 'max_price', $lookup );
+		$this->assertSame( '0.0000', $lookup['min_price'] );
+		$this->assertSame( '0.0000', $lookup['max_price'] );
+	}
+
+	/**
+	 * @testdox Should turn a variable product into a simple one, keep its ID and delete its variations.
+	 */
+	public function test_update_turns_a_variable_product_into_a_simple_one(): void {
+		$variable   = WC_Helper_Product::create_variation_product();
+		$variations = $variable->get_children();
+
+		$updated = $this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'            => $variable->get_id(),
+				'type'          => 'simple',
+				'regular_price' => '15',
+			)
+		);
+
+		$this->assertGreaterThanOrEqual( 2, count( $variations ) );
+		$this->assertSame( $variable->get_id(), $updated['product']['id'] );
+		$this->assertSame( 'simple', $updated['product']['type'] );
+		$this->assertSame( '15', $updated['product']['regular_price'] );
+		$this->assertSame( array(), $updated['product']['variation_ids'] );
+		$this->assertSame( array(), $updated['variations'] );
+		foreach ( $variations as $variation_id ) {
+			$this->assertNull( get_post( $variation_id ), "Variation $variation_id should be deleted." );
+		}
+	}
+
+	/**
+	 * @testdox Should drop the variation prices from the price lookup when a variable product becomes $type without a price.
+	 *
+	 * @testWith ["simple"]
+	 *           ["external"]
+	 *           ["grouped"]
+	 *
+	 * @param string $type New product type.
+	 */
+	public function test_change_out_of_variable_drops_the_variation_prices( string $type ): void {
+		global $wpdb;
+
+		$items  = array();
+		$prices = array(
+			'S' => '11',
+			'M' => '12',
+		);
+		foreach ( $prices as $option => $price ) {
+			$items[] = array(
+				'attributes'    => array(
+					array(
+						'name'   => 'Size',
+						'option' => $option,
+					),
+				),
+				'regular_price' => $price,
+			);
+		}
+		$created  = $this->execute(
+			'woocommerce/product-create',
+			array(
+				'name'       => 'Shirt',
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M' ),
+					),
+				),
+				'variations' => $items,
+			)
+		);
+		$variable = wc_get_product( $created['product']['id'] );
+
+		$this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'   => $variable->get_id(),
+				'type' => $type,
+			)
+		);
+
+		$this->assertEmpty( array_filter( get_post_meta( $variable->get_id(), '_price', false ), 'strlen' ) );
+		$this->assertLessThanOrEqual( 1, count( get_post_meta( $variable->get_id(), '_price', false ) ) );
+		$lookup = $wpdb->get_row( $wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $variable->get_id() ), ARRAY_A );
+		$this->assertEmpty( (float) $lookup['min_price'] );
+		$this->assertEmpty( (float) $lookup['max_price'] );
+	}
+
+	/**
+	 * @testdox Should take the grouped prices from the children when a grouped product goes to variable and back.
+	 */
+	public function test_grouped_to_variable_and_back_syncs_the_grouped_prices(): void {
+		global $wpdb;
+
+		$grouped = WC_Helper_Product::create_grouped_product();
+		$prices  = array_map( static fn( int $id ) => (float) wc_get_product( $id )->get_price(), $grouped->get_children() );
+
+		$this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'         => $grouped->get_id(),
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S' ),
+					),
+				),
+				'variations' => array(
+					array(
+						'attributes'    => array(
+							array(
+								'name'   => 'Size',
+								'option' => 'S',
+							),
+						),
+						'regular_price' => '99',
+					),
+				),
+			)
+		);
+		$this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'   => $grouped->get_id(),
+				'type' => 'grouped',
+			)
+		);
+
+		$lookup = $wpdb->get_row( $wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $grouped->get_id() ), ARRAY_A );
+		$this->assertSame( min( $prices ), (float) $lookup['min_price'] );
+		$this->assertSame( max( $prices ), (float) $lookup['max_price'] );
+	}
+
+	/**
+	 * @testdox Should answer the permission check without an error for a variation ID or a type that is not a string.
+	 */
+	public function test_permission_check_with_a_variation_id_or_a_bad_type(): void {
+		$variable  = WC_Helper_Product::create_variation_product();
+		$variation = $variable->get_children()[0];
+		$deny      = static fn( $caps, $cap ) => 'delete_post' === $cap ? array( 'do_not_allow' ) : $caps;
+
+		add_filter( 'map_meta_cap', $deny, 10, 2 );
+		$from_variation = ProductUpdate::can_update_product(
+			array(
+				'id'   => $variation,
+				'type' => 'simple',
+			)
+		);
+		$bad_type       = ProductUpdate::can_update_product(
+			array(
+				'id'   => $variable->get_id(),
+				'type' => array( 'simple' ),
+			)
+		);
+		remove_filter( 'map_meta_cap', $deny, 10 );
+
+		$this->assertTrue( $from_variation, 'load() refuses the type change of a variation, so the check needs no delete permission.' );
+		$this->assertTrue( $bad_type, 'The schema refuses a type that is not a string.' );
+	}
+
+	/**
+	 * @testdox Should require the delete permission for a type change that deletes variations.
+	 */
+	public function test_type_change_that_deletes_variations_requires_the_delete_permission(): void {
+		$variable = WC_Helper_Product::create_variation_product();
+		$simple   = WC_Helper_Product::create_simple_product();
+		$deny     = static fn( $caps, $cap ) => 'delete_post' === $cap ? array( 'do_not_allow' ) : $caps;
+
+		add_filter( 'map_meta_cap', $deny, 10, 2 );
+		$refused = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $variable->get_id(),
+				'type' => 'simple',
+			)
+		);
+		$allowed = ProductUpdate::can_update_product(
+			array(
+				'id'   => $simple->get_id(),
+				'type' => 'external',
+			)
+		);
+		remove_filter( 'map_meta_cap', $deny, 10 );
+
+		$this->assertWPError( $refused );
+		$this->assertSame( 'ability_invalid_permissions', $refused->get_error_code() );
+		$this->assertTrue( $allowed, 'A type change that deletes nothing needs only the edit permission.' );
+		$this->assertSame( 'variable', wc_get_product( $variable->get_id() )->get_type() );
+		$this->assertNotEmpty( wc_get_product( $variable->get_id() )->get_children() );
+	}
+
+	/**
+	 * @testdox Should keep the variations when the save of a type change fails.
+	 */
+	public function test_failed_type_change_keeps_the_variations(): void {
+		$variable   = WC_Helper_Product::create_variation_product();
+		$variations = $variable->get_children();
+		$fail       = static function () {
+			throw new \Exception( 'Save failed.' );
+		};
+
+		add_action( 'woocommerce_product_type_changed', $fail, 20 );
+		$failed = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $variable->get_id(),
+				'type' => 'simple',
+			)
+		);
+		remove_action( 'woocommerce_product_type_changed', $fail, 20 );
+
+		$this->assertWPError( $failed );
+		$this->assertSame( 'woocommerce_product_update_failed', $failed->get_error_code() );
+		$this->assertSame( 'variable', wc_get_product( $variable->get_id() )->get_type() );
+		foreach ( $variations as $variation_id ) {
+			$this->assertInstanceOf( \WC_Product_Variation::class, wc_get_product( $variation_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Should roll back a type change when WordPress refuses to delete a variation.
+	 */
+	public function test_type_change_rolls_back_when_a_variation_delete_is_refused(): void {
+		$variable   = WC_Helper_Product::create_variation_product();
+		$variations = $variable->get_children();
+		add_filter( 'pre_delete_post', '__return_false' );
+
+		$failed = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $variable->get_id(),
+				'type' => 'simple',
+			)
+		);
+
+		$this->assertWPError( $failed );
+		$this->assertSame( 'woocommerce_product_update_failed', $failed->get_error_code() );
+		$this->assertSame( 'variable', wc_get_product( $variable->get_id() )->get_type() );
+		$this->assertSame( $variations, wc_get_product( $variable->get_id() )->get_children() );
+	}
+
+	/**
+	 * @testdox Should refuse a type change of a variation, variations sent with a change that deletes them, and a simple-product price on a variable product.
+	 */
+	public function test_update_refuses_type_changes_that_cannot_work(): void {
+		$variable = WC_Helper_Product::create_variation_product();
+		$simple   = WC_Helper_Product::create_simple_product();
+		$ability  = wp_get_ability( 'woocommerce/product-update' );
+
+		$from_variation = $ability->execute(
+			array(
+				'id'   => $variable->get_children()[0],
+				'type' => 'simple',
+			)
+		);
+		$with_items     = $ability->execute(
+			array(
+				'id'         => $variable->get_id(),
+				'type'       => 'simple',
+				'variations' => array( array( 'regular_price' => '1' ) ),
+			)
+		);
+		$price          = $ability->execute(
+			array(
+				'id'            => $simple->get_id(),
+				'type'          => 'variable',
+				'regular_price' => '20',
+			)
+		);
+
+		$this->assertSame( 'woocommerce_product_type_unsupported', $from_variation->get_error_code() );
+		$this->assertSame( 'woocommerce_product_type_unsupported', $with_items->get_error_code() );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $price->get_error_code() );
+		$this->assertSame( 'simple', wc_get_product( $simple->get_id() )->get_type() );
+		$this->assertNotEmpty( wc_get_product( $variable->get_id() )->get_children() );
+	}
+
+	/**
+	 * @testdox Should set the stock of a variable product, which its variations use, and refuse a stock status for it.
+	 */
+	public function test_variable_product_stock_fields(): void {
+		$created = $this->execute(
+			'woocommerce/product-create',
+			array(
+				'name'           => 'Shirt',
+				'type'           => 'variable',
+				'manage_stock'   => true,
+				'stock_quantity' => 5,
+				'attributes'     => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S' ),
+					),
+				),
+				'variations'     => array(
+					array(
+						'attributes'    => array(
+							array(
+								'name'   => 'Size',
+								'option' => 'S',
+							),
+						),
+						'regular_price' => '10',
+					),
+				),
+			)
+		)['product'];
+
+		$this->assertTrue( $created['manage_stock'] );
+		$this->assertSame( 5, $created['stock_quantity'] );
+
+		$updated = $this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'             => $created['id'],
+				'stock_quantity' => 0,
+			)
+		)['product'];
+
+		$variation = wc_get_product( $created['variation_ids'][0] );
+		$this->assertSame( 0, $updated['stock_quantity'] );
+		$this->assertSame( 'outofstock', $updated['stock_status'] );
+		$this->assertSame( 0, $variation->get_stock_quantity(), 'A variation without its own stock uses the stock of the product.' );
+		$this->assertFalse( $variation->is_in_stock() );
+
+		$status = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'           => $created['id'],
+				'stock_status' => 'instock',
+			)
+		);
+		$this->assertWPError( $status );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $status->get_error_code() );
 	}
 
 	/**

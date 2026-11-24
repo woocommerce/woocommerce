@@ -167,7 +167,7 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
 		$fulfillment = $this->create_fulfillment_covering_order( $order );
 
-		$content = $this->render_plain_fulfillment_details( $order, $fulfillment );
+		$content = $this->render_fulfillment_details( $order, $fulfillment, true );
 
 		$this->assertStringContainsString( 'No tracking information available', $content, 'The missing tracking notice should still show' );
 		$this->assertStringContainsString( 'Fulfillment summary', $content, 'The summary should render without tracking information' );
@@ -184,13 +184,198 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		$fulfillment = $this->create_fulfillment_covering_order( $order );
 		$fulfillment->add_meta_data( '_tracking_number', '1Z999AA10123456784', true );
 
-		$content = $this->render_plain_fulfillment_details( $order, $fulfillment );
+		$content = $this->render_fulfillment_details( $order, $fulfillment, true );
 
 		$this->assertStringContainsString( '1Z999AA10123456784', $content, 'The tracking number should show' );
 		$this->assertStringContainsString( 'Fulfillment summary', $content, 'The summary should render with tracking information' );
 		foreach ( $order->get_items() as $item ) {
 			$this->assertStringContainsString( $item->get_name(), $content, 'Every fulfilled item should be listed' );
 		}
+	}
+
+	/**
+	 * @testdox Fulfillment details leave the tracking link out when the fulfillment has no tracking URL.
+	 */
+	public function test_fulfillment_details_leave_out_the_tracking_link_without_a_url(): void {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = $this->create_fulfillment_covering_order( $order );
+		$fulfillment->add_meta_data( '_tracking_number', '1Z999AA10123456784', true );
+		$fulfillment->add_meta_data( '_shipment_provider', 'other', true );
+		$fulfillment->add_meta_data( '_provider_name', 'Acme Freight', true );
+
+		$content = $this->render_fulfillment_details( $order, $fulfillment, false );
+
+		$this->assertStringNotContainsString( 'Track your shipment', $content, 'A link with no destination should not be offered' );
+		$this->assertStringNotContainsString( 'href=""', $content, 'No link should be rendered with an empty destination' );
+		$this->assertStringContainsString( '1Z999AA10123456784', $content, 'The tracking number should still show' );
+		$this->assertStringContainsString( 'Acme Freight', $content, 'The shipment provider should still show' );
+	}
+
+	/**
+	 * @testdox Plain fulfillment details leave the Tracking URL line out when the fulfillment has no tracking URL.
+	 */
+	public function test_plain_fulfillment_details_leave_out_the_tracking_url_line_without_a_url(): void {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = $this->create_fulfillment_covering_order( $order );
+		$fulfillment->add_meta_data( '_tracking_number', '1Z999AA10123456784', true );
+		$fulfillment->add_meta_data( '_shipment_provider', 'other', true );
+		$fulfillment->add_meta_data( '_provider_name', 'Acme Freight', true );
+
+		$content = $this->render_fulfillment_details( $order, $fulfillment, true );
+
+		$this->assertStringNotContainsString( 'Tracking URL', $content, 'A label with nothing after it should not be printed' );
+		$this->assertStringContainsString( "Acme Freight\n\nYou can access", $content, 'The tracking block should still end with a blank line' );
+		$this->assertStringContainsString( '1Z999AA10123456784', $content, 'The tracking number should still show' );
+	}
+
+	/**
+	 * @testdox Fulfillment details render every tracking line the fulfillment has, in order, followed by a blank line.
+	 */
+	public function test_fulfillment_details_render_every_tracking_line_in_order(): void {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = $this->create_fulfillment_covering_order( $order );
+		$fulfillment->add_meta_data( '_tracking_number', '1Z999AA10123456784', true );
+		$fulfillment->add_meta_data( '_shipment_provider', 'other', true );
+		$fulfillment->add_meta_data( '_provider_name', 'Acme Freight', true );
+		$fulfillment->add_meta_data( '_tracking_url', 'https://example.com/track/1Z999AA10123456784', true );
+
+		$html  = $this->render_fulfillment_details( $order, $fulfillment, false );
+		$plain = $this->render_fulfillment_details( $order, $fulfillment, true );
+
+		$this->assertStringContainsString( 'Track your shipment', $html, 'The link should be offered' );
+		$this->assertStringContainsString( 'href="https://example.com/track/1Z999AA10123456784"', $html, 'With the stored URL as its destination' );
+		$this->assertStringContainsString(
+			"Tracking Number: 1Z999AA10123456784\nShipment Provider: Acme Freight\nTracking URL: https://example.com/track/1Z999AA10123456784\n\nYou can access",
+			$plain,
+			'A fulfillment with all three values should read exactly as it did before the lines were guarded'
+		);
+	}
+
+	/**
+	 * @testdox Fulfillment details leave the tracking link out when the stored URL cannot be linked.
+	 * @testWith ["   "]
+	 *           ["javascript:alert(1)"]
+	 *
+	 * @param string $tracking_url The stored tracking URL.
+	 */
+	public function test_fulfillment_details_leave_out_a_tracking_link_that_cannot_be_rendered( string $tracking_url ): void {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = $this->create_fulfillment_covering_order( $order );
+		$fulfillment->add_meta_data( '_tracking_number', '1Z999AA10123456784', true );
+		$fulfillment->add_meta_data( '_tracking_url', $tracking_url, true );
+
+		$html  = $this->render_fulfillment_details( $order, $fulfillment, false );
+		$plain = $this->render_fulfillment_details( $order, $fulfillment, true );
+
+		$this->assertStringNotContainsString( 'href=""', $html, 'A URL that esc_url() empties should not become a link' );
+		$this->assertStringNotContainsString( 'Track your shipment', $html, 'So no link should be offered at all' );
+		$this->assertStringNotContainsString( 'Tracking URL', $plain, 'The plain email should not print a label for it either' );
+		$this->assertStringContainsString( '1Z999AA10123456784', $html, 'The tracking number should still show' );
+		$this->assertStringContainsString( "1Z999AA10123456784\n\nYou can access", $plain, 'The plain email should still render the rest of the block' );
+	}
+
+	/**
+	 * @testdox Fulfillment details encode a tracking URL for the format each email is in.
+	 */
+	public function test_fulfillment_details_encode_the_tracking_url_for_each_format(): void {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = $this->create_fulfillment_covering_order( $order );
+		$fulfillment->add_meta_data( '_tracking_url', 'https://example.com/t?id=1&carrier=ups', true );
+
+		$html  = $this->render_fulfillment_details( $order, $fulfillment, false );
+		$plain = $this->render_fulfillment_details( $order, $fulfillment, true );
+
+		$this->assertStringContainsString( 'href="https://example.com/t?id=1&#038;carrier=ups"', $html, 'An href encodes the ampersand as HTML requires' );
+		$this->assertStringContainsString( "Tracking URL: https://example.com/t?id=1&carrier=ups\n", $plain, 'A plain email needs no entity for an ampersand' );
+	}
+
+	/**
+	 * @testdox Plain fulfillment details keep a character of the tracking URL that an entity would lose.
+	 */
+	public function test_plain_fulfillment_details_keep_a_url_character_an_entity_would_lose(): void {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = $this->create_fulfillment_covering_order( $order );
+		$fulfillment->add_meta_data( '_tracking_url', "https://example.com/t?a='b", true );
+
+		$content = $this->render_fulfillment_details( $order, $fulfillment, true );
+
+		// WC_Email strips entities it does not recognize from a plain email, and "&#039;" is one
+		// of them, so an escaper that produced it would drop the character from the URL entirely.
+		$this->assertStringNotContainsString( '&#039;', $content, 'The apostrophe must not be left as an entity the plain email would delete' );
+		$this->assertStringContainsString( "Tracking URL: https://example.com/t?a='b", $content, 'It should be printed as itself' );
+	}
+
+	/**
+	 * @testdox Fulfillment details show the missing tracking notice when a tracking value is not a string.
+	 */
+	public function test_fulfillment_details_show_the_notice_for_a_tracking_value_that_is_not_a_string(): void {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = $this->create_fulfillment_covering_order( $order );
+		$fulfillment->add_meta_data( '_tracking_number', array( 'not a tracking number' ), true );
+
+		$html  = $this->render_fulfillment_details( $order, $fulfillment, false );
+		$plain = $this->render_fulfillment_details( $order, $fulfillment, true );
+
+		$this->assertStringNotContainsString( 'Array', $html, 'A value that is not a string should not be printed' );
+		$this->assertStringContainsString( 'No tracking information available', $html, 'The notice should take over' );
+		$this->assertStringContainsString( 'No tracking information available', $plain, 'In both formats' );
+	}
+
+	/**
+	 * @testdox Fulfillment details leave the empty labels out when the fulfillment has only a tracking URL.
+	 */
+	public function test_fulfillment_details_leave_out_empty_labels_with_only_a_tracking_url(): void {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = $this->create_fulfillment_covering_order( $order );
+		$fulfillment->add_meta_data( '_tracking_url', 'https://example.com/track/1Z999AA10123456784', true );
+
+		$html  = $this->render_fulfillment_details( $order, $fulfillment, false );
+		$plain = $this->render_fulfillment_details( $order, $fulfillment, true );
+
+		$this->assertStringNotContainsString( 'Tracking Number', $html, 'A tracking number label with nothing after it should not be printed' );
+		$this->assertStringNotContainsString( 'Shipment Provider', $html, 'A provider label with nothing after it should not be printed' );
+		$this->assertStringContainsString( 'Track your shipment', $html, 'The link it does have should still show' );
+		$this->assertStringNotContainsString( 'Tracking Number', $plain, 'The plain email should leave the same labels out' );
+		$this->assertStringContainsString( "Tracking URL: https://example.com/track/1Z999AA10123456784\n\nYou can access", $plain, 'A single line still ends with the blank line that closes the block' );
+	}
+
+	/**
+	 * @testdox Fulfillment details show the missing tracking notice when none of the three lines can be rendered.
+	 */
+	public function test_fulfillment_details_show_the_notice_when_no_line_can_be_rendered(): void {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = $this->create_fulfillment_covering_order( $order );
+		$fulfillment->add_meta_data( '_shipment_provider', 'ups', true );
+
+		// A provider that resolves to nothing, as a callback returning an empty label leaves it.
+		$empty_label = function () {
+			return '';
+		};
+		add_filter( 'woocommerce_fulfillment_shipment_provider_label', $empty_label );
+
+		$html  = $this->render_fulfillment_details( $order, $fulfillment, false );
+		$plain = $this->render_fulfillment_details( $order, $fulfillment, true );
+
+		remove_filter( 'woocommerce_fulfillment_shipment_provider_label', $empty_label );
+
+		$this->assertStringContainsString( 'No tracking information available', $html, 'The notice should take over when every line would be empty' );
+		$this->assertStringContainsString( 'No tracking information available', $plain, 'Both templates carry their own copy of that decision' );
+	}
+
+	/**
+	 * @testdox Fulfillment details leave the shipment provider out when the fulfillment has none.
+	 */
+	public function test_fulfillment_details_leave_out_the_provider_when_there_is_none(): void {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = $this->create_fulfillment_covering_order( $order );
+		$fulfillment->add_meta_data( '_tracking_number', '1Z999AA10123456784', true );
+
+		$html  = $this->render_fulfillment_details( $order, $fulfillment, false );
+		$plain = $this->render_fulfillment_details( $order, $fulfillment, true );
+
+		$this->assertStringContainsString( '1Z999AA10123456784', $html, 'The tracking number should still show' );
+		$this->assertStringNotContainsString( 'Shipment Provider', $html, 'A provider label with nothing after it should not be printed' );
+		$this->assertStringNotContainsString( 'Shipment Provider', $plain, 'In both formats' );
 	}
 
 	/**
@@ -215,13 +400,14 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Render the plain text fulfillment details for an order.
+	 * Render the fulfillment details for an order in one of the two email formats.
 	 *
 	 * @param WC_Order    $order The order the details are about.
 	 * @param Fulfillment $fulfillment The fulfillment the details are about.
+	 * @param bool        $plain_text Whether to render the plain text format instead of the HTML one.
 	 * @return string
 	 */
-	private function render_plain_fulfillment_details( WC_Order $order, Fulfillment $fulfillment ): string {
+	private function render_fulfillment_details( WC_Order $order, Fulfillment $fulfillment, bool $plain_text ): string {
 		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-fulfillment-created.php';
@@ -231,7 +417,7 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		// is first constructed. The email is still passed, because the template hands it to its hooks.
 		$email_object = new WC_Emails();
 		ob_start();
-		$email_object->fulfillment_details( $order, $fulfillment, false, true, new WC_Email_Customer_Fulfillment_Created() );
+		$email_object->fulfillment_details( $order, $fulfillment, false, $plain_text, new WC_Email_Customer_Fulfillment_Created() );
 
 		return (string) ob_get_clean();
 	}

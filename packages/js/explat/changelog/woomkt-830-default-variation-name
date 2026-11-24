@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add useExperimentWithDefaultVariationName, which returns the default variation by name.

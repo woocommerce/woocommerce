@@ -24,14 +24,14 @@ class DeclaredToAgents {
 	public function all( StoreResponses $responses ): array {
 		$responses->home_page();
 		$items = array();
-		foreach ( $this->files() as $id => $file ) {
+		foreach ( self::files() as $id => $file ) {
 			$items[] = array(
 				'id'    => $id,
 				'name'  => $file[0],
 				'found' => self::file_served( $responses, $file[1] ),
 			);
 		}
-		foreach ( $this->documents() as $id => $document ) {
+		foreach ( self::documents() as $id => $document ) {
 			$items[] = array(
 				'id'    => $id,
 				'name'  => $document[0],
@@ -60,7 +60,66 @@ class DeclaredToAgents {
 				'found' => $line[1],
 			);
 		}
+		$status = $this->llms_txt_status();
+		// In a subdirectory WooCommerce serves llms.txt under the home path, not at the host root read here.
+		if ( null !== $status && '' !== trim( $status['section'] ) && '' === trim( (string) wp_parse_url( home_url(), PHP_URL_PATH ), '/' ) ) {
+			$items[] = array(
+				'id'    => 'llms-txt-woocommerce-guidance',
+				'name'  => __( 'WooCommerce’s store guidance in llms.txt (Store API, UCP, policies)', 'woocommerce' ),
+				'found' => self::has_guidance( $responses, $status['section'] ),
+			);
+		}
 		return $items;
+	}
+
+	/**
+	 * Where an item lives, for grouping on the page: 'root' for a file in the site's root folder,
+	 * 'address' for one under /.well-known, 'code' for page markup, headers and Markdown versions.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $id Item id.
+	 */
+	public static function group( string $id ): string {
+		foreach ( array_merge( self::files(), self::documents() ) as $key => $item ) {
+			if ( $key === $id ) {
+				return 0 === strpos( $item[1], '/.well-known/' ) ? 'address' : 'root';
+			}
+		}
+		if ( 'mcp-server-card' === $id ) {
+			return 'address';
+		}
+		// WooCommerce's guidance is part of llms.txt; everything else is in the page code or headers.
+		return 'llms-txt-woocommerce-guidance' === $id ? 'root' : 'code';
+	}
+
+	/**
+	 * WooCommerce's llms.txt status, null without its llms.txt fallback (woocommerce #70741).
+	 *
+	 * @return array{status:string,section:string}|null
+	 */
+	protected function llms_txt_status(): ?array {
+		return StoreOutputChecks::core_llms_txt_status();
+	}
+
+	/**
+	 * Whether the served llms.txt, from WooCommerce or any other provider, holds WooCommerce's guidance.
+	 * Null when the file couldn't be checked (refused, rate-limited, or truncated before a match).
+	 *
+	 * @param StoreResponses $responses Responses of the scan.
+	 * @param string         $section   Guidance WooCommerce adds.
+	 */
+	private static function has_guidance( StoreResponses $responses, string $section ): ?bool {
+		$served = self::file_served( $responses, '/llms.txt' );
+		if ( true !== $served ) {
+			return $served;
+		}
+		$response = $responses->get( StoreOutputChecks::host_root( '/llms.txt' ) );
+		$body     = (string) ( $response['body'] ?? '' );
+		if ( StoreOutputChecks::has_llms_txt_guidance( $body, $section ) ) {
+			return true;
+		}
+		return ! empty( $response['truncated'] ) ? null : false;
 	}
 
 	/**
@@ -68,7 +127,7 @@ class DeclaredToAgents {
 	 *
 	 * @return array<string, array{0:string,1:string}> Name and path from the host root.
 	 */
-	private function files(): array {
+	private static function files(): array {
 		return array(
 			'ai-txt'       => array( __( 'ai.txt usage file', 'woocommerce' ), '/ai.txt' ),
 			'sitemap-md'   => array( __( 'Markdown sitemap', 'woocommerce' ), '/sitemap.md' ),
@@ -85,7 +144,7 @@ class DeclaredToAgents {
 	 *
 	 * @return array<string, array{0:string,1:string,2:callable(array<mixed>):bool}> Name, path from the host root, and test.
 	 */
-	private function documents(): array {
+	private static function documents(): array {
 		$has = static fn( string ...$keys ): callable => static fn( array $document ): bool => array() === array_diff( $keys, array_keys( array_filter( $document ) ) );
 		return array(
 			'api-catalog'              => array( __( 'API catalog', 'woocommerce' ), '/.well-known/api-catalog', $has( 'linkset' ) ),
@@ -278,6 +337,7 @@ class DeclaredToAgents {
 	/**
 	 * Whether a path answers with a text file. A theme that answers every URL with a page, or a host
 	 * that answers unknown paths with a 200 JSON or HTML error, has no such file.
+	 * Null when a 200 body was cut off before any content, so a blank prefix is not a missing file.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 * @param string         $path      Path from the host root.
@@ -288,6 +348,10 @@ class DeclaredToAgents {
 			return null;
 		}
 		$body = ltrim( $response['body'], " \t\r\n\xEF\xBB\xBF" );
+		// Only a 200 can be a file that was cut off before content; a truncated 404 stays missing.
+		if ( 200 === $response['status'] && '' === $body && ! empty( $response['truncated'] ) ) {
+			return null;
+		}
 		return 200 === $response['status'] && '' !== $body && '<' !== $body[0]
 			&& 0 !== stripos( $response['headers']['content-type'] ?? '', 'text/html' )
 			&& null === json_decode( $body );

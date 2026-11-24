@@ -204,7 +204,7 @@ class WC_Register_WP_Admin_Settings {
 			$new_setting['abilities'] = $setting['abilities'];
 		}
 
-		foreach ( array( 'value', 'fixed_value' ) as $key ) {
+		foreach ( array( 'value', 'fixed_value', 'field_name' ) as $key ) {
 			if ( isset( $setting[ $key ] ) ) {
 				$new_setting[ $key ] = $setting[ $key ];
 			}

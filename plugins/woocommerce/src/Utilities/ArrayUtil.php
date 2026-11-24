@@ -369,6 +369,18 @@ class ArrayUtil {
 	}
 
 	/**
+	 * Check whether a value is an array whose direct values are all scalars.
+	 *
+	 * @since 11.3.1
+	 *
+	 * @param mixed $value Value to check.
+	 * @return bool
+	 */
+	public static function is_flat_scalar_array( $value ): bool {
+		return is_array( $value ) && self::array_all( $value, static fn( $item ) => is_scalar( $item ) );
+	}
+
+	/**
 	 * Get the unique truthy values of an array, reindexed.
 	 *
 	 * @since 11.3.0
