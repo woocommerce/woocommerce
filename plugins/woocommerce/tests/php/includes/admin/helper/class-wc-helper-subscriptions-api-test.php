@@ -238,4 +238,34 @@ class WC_Helper_Subscriptions_API_Test extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $response['data'] );
 		$this->assertStringContainsString( 'not supported', $response['data']['message'] );
 	}
+
+	/**
+	 * @testdox Should give install links only to users who can install plugins.
+	 *
+	 * @testWith ["shop_manager", false]
+	 *           ["administrator", true]
+	 *
+	 * @param string $role     Role of the current user.
+	 * @param bool   $expected Whether the user may request install links.
+	 */
+	public function test_install_url_requires_install_plugins( string $role, bool $expected ): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => $role ) ) );
+
+		$route   = rest_get_server()->get_routes()['/wc/v3/marketplace/subscriptions/install-url'][0];
+		$request = new WP_REST_Request( 'GET', '/wc/v3/marketplace/subscriptions/install-url' );
+
+		$this->assertSame( $expected, call_user_func( $route['permission_callback'], $request ) );
+	}
+
+	/**
+	 * @testdox Should refuse install link requests from a Shop Manager.
+	 */
+	public function test_install_url_refuses_shop_manager(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/marketplace/subscriptions/install-url' );
+		$request->set_param( 'product_key', 'any' );
+
+		$this->assertSame( 403, rest_get_server()->dispatch( $request )->get_status() );
+	}
 }

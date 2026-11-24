@@ -24,11 +24,145 @@ const row = ( fields: Partial< CheckRowData > ): CheckRowData => ( {
 const renderRow = ( data: CheckRowData ) =>
 	render(
 		<ul>
-			<CheckRow row={ data } />
+			<CheckRow row={ data } section="find" />
 		</ul>
 	);
 
 describe( 'CheckRow', () => {
+	it( 'keeps the badge with the title’s last word, so it never wraps onto a line of its own', () => {
+		const { container } = renderRow(
+			row( {
+				title: 'Publish your refund and returns policy page',
+				badge: { intent: 'low', text: 'Required' },
+			} )
+		);
+
+		const end = container.querySelector(
+			'.wc-sales-readiness-row__title-end'
+		);
+		expect( end ).toHaveTextContent( 'pageRequired' );
+		expect(
+			container.querySelector( '.wc-sales-readiness-row__title' )
+		).toHaveTextContent(
+			'Publish your refund and returns policy pageRequired'
+		);
+	} );
+
+	it.each( [
+		'Payments',
+		'返品ポリシーのページを公開する',
+		'AI に商品情報を読み取れるようにする',
+	] )(
+		'keeps the last character with the badge when the last word has no spaces, so a long one can still wrap: %s',
+		( title ) => {
+			const { container } = renderRow(
+				row( {
+					title,
+					badge: { intent: 'low', text: 'Required' },
+				} )
+			);
+
+			expect(
+				container.querySelector( '.wc-sales-readiness-row__title-end' )
+			).toHaveTextContent(
+				new RegExp( '^' + Array.from( title ).pop() + 'Required$' )
+			);
+			expect(
+				container.querySelector( '.wc-sales-readiness-row__title' )
+			).toHaveTextContent( title + 'Required' );
+		}
+	);
+
+	it( 'links the name of a tool in the found line, and keeps the text around it', () => {
+		const { container } = renderRow(
+			row( {
+				id: 'ucp_profile',
+				text: 'Test it in UCP Playground, or ask your hosting provider.',
+				text_link: {
+					href: 'https://ucpplayground.com/',
+					text: 'UCP Playground',
+				},
+			} )
+		);
+
+		expect(
+			screen.getByRole( 'link', { name: /UCP Playground/ } )
+		).toHaveAttribute( 'href', 'https://ucpplayground.com/' );
+		expect( container ).toHaveTextContent(
+			'Test it in UCP Playground, or ask your hosting provider.'
+		);
+	} );
+
+	it( 'links the name where the server says it starts, not where the same word appears first', () => {
+		const { container } = renderRow(
+			row( {
+				id: 'product_jsonld_present',
+				text: 'On the the page, the name, price, and stock aren’t in the page code.',
+				text_link: {
+					href: 'https://example.com/product/the/',
+					text: 'the',
+					at: 7,
+				},
+			} )
+		);
+
+		const link = screen.getByRole( 'link', { name: /the/ } );
+		expect( link.previousSibling?.textContent ).toBe( 'On the ' );
+		expect( container ).toHaveTextContent(
+			'On the the page, the name, price, and stock aren’t in the page code.'
+		);
+	} );
+
+	it( 'links the name at a UTF-16 offset when an emoji comes first', () => {
+		const { container } = renderRow(
+			row( {
+				id: 'product_jsonld_present',
+				text: '😀 On the the page, the name.',
+				text_link: {
+					href: 'https://example.com/product/the/',
+					text: 'the',
+					at: 10,
+				},
+			} )
+		);
+
+		const link = screen.getByRole( 'link', { name: /the/ } );
+		expect( link.previousSibling?.textContent ).toBe( '😀 On the ' );
+		expect( container ).toHaveTextContent(
+			'😀 On the the page, the name.'
+		);
+	} );
+
+	it( 'falls back to the first match when the position does not hold the name', () => {
+		renderRow(
+			row( {
+				text: 'Test it in UCP Playground, or ask your hosting provider.',
+				text_link: {
+					href: 'https://ucpplayground.com/',
+					text: 'UCP Playground',
+					at: 0,
+				},
+			} )
+		);
+
+		expect(
+			screen.getByRole( 'link', { name: /UCP Playground/ } )
+		).toBeInTheDocument();
+	} );
+
+	it( 'shows the text unlinked when the name is not in it', () => {
+		renderRow(
+			row( {
+				text_link: {
+					href: 'https://ucpplayground.com/',
+					text: 'Elsewhere',
+				},
+			} )
+		);
+
+		expect( screen.queryByRole( 'link' ) ).not.toBeInTheDocument();
+	} );
+
 	it( 'shows a failing check as what to do, what was found, and no fix line when there is none', () => {
 		const { container } = renderRow( row( {} ) );
 
@@ -79,7 +213,7 @@ describe( 'CheckRow', () => {
 			} )
 		);
 
-		expect( screen.getByText( "Couldn't check:" ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Not checked yet:' ) ).toBeInTheDocument();
 		expect(
 			screen.getByText( "This couldn't be checked. Try again later." )
 		).toBeInTheDocument();

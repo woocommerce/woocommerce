@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
-import { Badge, Card, Text } from '@wordpress/ui';
+import { Badge, Card, Link, Text } from '@wordpress/ui';
 
 /**
  * Internal dependencies
  */
+import { safeHref } from '../safe-href';
 import type { FixFirst as FixFirstData } from '../types';
+import { trackReadiness, type Surface } from '../tracks';
 import { Row, RowLink } from './check-row';
 
 type FixFirstItem = FixFirstData[ 'items' ][ number ];
@@ -35,13 +37,15 @@ function groupByTier( items: FixFirstData[ 'items' ] ): TierGroup[] {
 }
 
 /**
- * The Fix first items under a heading per tier: what each group of issues stops. A product item's
- * line starts with its share of sales.
+ * The Fix first items under a heading per tier: what each group of issues stops. An item's line
+ * starts with what it affects, in bold.
  */
 export const FixFirstList = ( {
 	items,
+	surface,
 }: {
 	items: FixFirstData[ 'items' ];
+	surface: Surface;
 } ) => (
 	<div className="wc-sales-readiness-fix-first-groups">
 		{ groupByTier( items ).map( ( group ) => (
@@ -65,15 +69,34 @@ export const FixFirstList = ( {
 							key={ item.id }
 							title={ item.title }
 							action={
-								item.link && <RowLink link={ item.link } />
+								item.link && (
+									<RowLink
+										link={ item.link }
+										onClick={ () =>
+											trackReadiness( 'link_clicked', {
+												surface,
+												area: 'fix_first',
+												check_id: item.id,
+												position:
+													items.indexOf( item ) + 1,
+											} )
+										}
+									/>
+								)
 							}
 							srState={ item.tier + ':' }
 						>
-							{ item.why && (
+							{ ( item.impact || item.why ) && (
 								<Text
 									variant="body-sm"
 									className="wc-sales-readiness__muted"
 								>
+									{ item.impact && (
+										<strong className="wc-sales-readiness__impact">
+											{ item.impact }
+										</strong>
+									) }
+									{ item.impact && item.why && ' ' }
 									{ item.why }
 								</Text>
 							) }
@@ -98,8 +121,16 @@ export const FixFirstCard = ( { fixFirst }: { fixFirst: FixFirstData } ) => (
 		<Card.Content>
 			<Text variant="body-md" className="wc-sales-readiness__muted">
 				{ fixFirst.ranking }
+				{ fixFirst.link && (
+					<>
+						{ ' ' }
+						<Link href={ safeHref( fixFirst.link.href ) }>
+							{ fixFirst.link.text }
+						</Link>
+					</>
+				) }
 			</Text>
-			<FixFirstList items={ fixFirst.items } />
+			<FixFirstList items={ fixFirst.items } surface="page" />
 		</Card.Content>
 	</Card.Root>
 );

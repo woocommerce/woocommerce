@@ -208,6 +208,76 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_create_attribute() strips markup from the attribute name before storing it.
+	 */
+	public function test_wc_create_attribute_strips_markup_from_name(): void {
+		$id = wc_create_attribute(
+			array(
+				'name' => 'Color<b>bold</b>',
+				'slug' => 'markup-color',
+			)
+		);
+		$this->assertIsInt( $id );
+
+		try {
+			$this->assertSame( 'Colorbold', $this->get_stored_attribute_label( $id ) );
+			$this->assertSame( 'Colorbold', wc_get_attribute( $id )->name );
+
+			$result = wc_update_attribute( $id, array( 'name' => '<em>Size</em>' ) );
+			$this->assertIsInt( $result );
+			$this->assertSame( 'Size', $this->get_stored_attribute_label( $id ) );
+			$this->assertSame( 'Size', wc_get_attribute( $id )->name );
+
+			$error = wc_create_attribute( array( 'name' => '<b></b>' ) );
+			$this->assertWPError( $error );
+			$this->assertSame( 'missing_attribute_name', $error->get_error_code() );
+		} finally {
+			wc_delete_attribute( $id );
+		}
+	}
+
+	/**
+	 * @testdox The default slug is derived from the name as given, so cleaning the label does not change it.
+	 */
+	public function test_wc_create_attribute_default_slug_ignores_label_cleanup(): void {
+		$id = wc_create_attribute( array( 'name' => 'Width <5cm' ) );
+		$this->assertIsInt( $id );
+
+		try {
+			$attribute = wc_get_attribute( $id );
+			$this->assertSame( 'pa_width', $attribute->slug );
+			$this->assertSame( 'Width &lt;5cm', $attribute->name );
+		} finally {
+			wc_delete_attribute( $id );
+		}
+	}
+
+	/**
+	 * @testdox Attribute rows stored with markup are read back as plain text and produce plain-text taxonomy labels and messages.
+	 */
+	public function test_stored_attribute_label_with_markup_is_normalized_on_read(): void {
+		$attribute_id = $this->insert_raw_attribute_row( 'Colour<b>bold</b>', 'rawcolour' );
+
+		try {
+			$this->assertSame( 'Colourbold', wc_get_attribute( $attribute_id )->name );
+
+			// register_taxonomies() is a no-op once product_type exists.
+			unregister_taxonomy( 'product_type' );
+			WC_Post_Types::register_taxonomies();
+
+			$labels = get_taxonomy( 'pa_rawcolour' )->labels;
+			$this->assertSame( 'Colourbold', $labels->singular_name );
+			$messages = WC_Post_Types::updated_term_messages( array() );
+			foreach ( array( $labels->add_new_item, $labels->edit_item, $messages['pa_rawcolour'][1] ) as $text ) {
+				$this->assertStringContainsString( 'Colourbold', $text );
+				$this->assertStringNotContainsString( '<', $text );
+			}
+		} finally {
+			$this->clean_up_attribute_test_state( array( $attribute_id ), 'pa_rawcolour' );
+		}
+	}
+
+	/**
 	 * Test wc_create_attribute() function.
 	 */
 	public function test_wc_create_attribute() {
@@ -808,6 +878,44 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	private function get_unique_attribute_slug( string $context ): string {
 		return 'runtime-' . $context . '-' . strtolower( wp_generate_password( 5, false, false ) );
+	}
+
+	/**
+	 * Insert an attribute row directly, bypassing wc_create_attribute(), and reset the attribute caches.
+	 *
+	 * @param string $label Raw label to store.
+	 * @param string $slug  Attribute slug (without the `pa_` prefix).
+	 * @return int Attribute ID.
+	 */
+	private function insert_raw_attribute_row( string $label, string $slug ): int {
+		global $wpdb;
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+			array(
+				'attribute_label'   => $label,
+				'attribute_name'    => $slug,
+				'attribute_type'    => 'select',
+				'attribute_orderby' => 'menu_order',
+				'attribute_public'  => 0,
+			)
+		);
+		delete_transient( 'wc_attribute_taxonomies' );
+		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+
+		return (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Read the attribute label straight from the table, bypassing the normalizing readers.
+	 *
+	 * @param int $attribute_id Attribute ID.
+	 * @return string|null
+	 */
+	private function get_stored_attribute_label( int $attribute_id ): ?string {
+		global $wpdb;
+
+		return $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = %d", $attribute_id ) );
 	}
 
 	/**

@@ -259,7 +259,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @since 11.2.0
 	 */
 	protected function normalize_global_unique_id( $global_unique_id ) {
-		return (string) preg_replace( '/[^0-9Xx\-]/', '', (string) $global_unique_id );
+		return (string) preg_replace( '/[^' . WC_Product::GLOBAL_UNIQUE_ID_CHARACTERS . ']/', '', (string) $global_unique_id );
 	}
 
 	/**
@@ -378,6 +378,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			if ( ProductType::VARIATION === $object->get_type() ) {
 				if ( isset( $data['status'] ) && -1 === $data['status'] ) {
 					$data['status'] = 0; // Variations cannot be drafts - set to private.
+				}
+				if ( isset( $data['description'] ) ) {
+					$data['description'] = wp_kses_post( $data['description'] );
 				}
 				$is_variation = true;
 			}

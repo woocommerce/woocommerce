@@ -13,6 +13,8 @@ use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\HTML_Tag_Processor;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Html2Text;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 
 /**
  * Class for replacing personalization tags with their values in the email content.
@@ -43,7 +45,7 @@ class Personalizer {
 
 	/**
 	 * Rendering context for plain-text content (e.g., email subject, preheader, plain-text body).
-	 * Tag values must be raw text without HTML entities or markup.
+	 * Text-typed tags return raw text; values of HTML-typed tags are converted to plain text.
 	 */
 	public const RENDERING_CONTEXT_TEXT = 'text';
 
@@ -169,7 +171,7 @@ class Personalizer {
 	/**
 	 * Set a callback intercepting each resolved personalization tag value before it is written.
 	 *
-	 * The interceptor receives the resolved value (after any context-driven escaping),
+	 * The interceptor receives the resolved value (after any context-driven escaping or plain-text conversion),
 	 * the raw source text being replaced (the trimmed tag token including arguments,
 	 * the raw data-link-href attribute value, or the tag token found inside a plain href),
 	 * and the rendering context of the replacement site — one of the RENDERING_CONTEXT_HTML,
@@ -235,6 +237,32 @@ class Personalizer {
 			$content = $this->personalize_text_link_targets( $content );
 		}
 
+		return $this->replace_tags( $content, $rendering_context, false );
+	}
+
+	/**
+	 * Personalize rich text, such as a subject or preheader edited in the editor, and return it as plain text.
+	 *
+	 * Tags get the text rendering context, and each value is escaped as it goes into the rich text, so the
+	 * field stays HTML until a single conversion to plain text at the end. Neither the author's text nor a
+	 * tag value is read as HTML twice. Unresolved tags and other comments are dropped.
+	 *
+	 * @param string $rich_text The rich text as stored by the editor.
+	 * @return string The personalized plain text.
+	 */
+	public function personalize_rich_text_as_plain_text( string $rich_text ): string {
+		return Html_Processing_Helper::get_plain_text( $this->replace_tags( $rich_text, self::RENDERING_CONTEXT_TEXT, true ) );
+	}
+
+	/**
+	 * Replace the personalization tags in the content with their values.
+	 *
+	 * @param string $content           The content to personalize.
+	 * @param string $rendering_context One of the RENDERING_CONTEXT_HTML or RENDERING_CONTEXT_TEXT constants.
+	 * @param bool   $escape_values     Whether to escape tag values for HTML as they are inserted.
+	 * @return string The personalized content.
+	 */
+	private function replace_tags( string $content, string $rendering_context, bool $escape_values ): string {
 		$content_processor = new HTML_Tag_Processor( $content );
 		while ( $content_processor->next_token() ) {
 			if ( $content_processor->get_token_type() === '#comment' ) {
@@ -257,9 +285,11 @@ class Personalizer {
 				$value = $this->get_tag_value( $tag, $rendering_context, $arguments );
 				if ( self::RENDERING_CONTEXT_HTML === $rendering_context && Personalization_Tag::VALUE_TYPE_TEXT === $tag->get_value_type() ) {
 					$value = esc_html( $value );
+				} elseif ( self::RENDERING_CONTEXT_TEXT === $rendering_context && Personalization_Tag::VALUE_TYPE_HTML === $tag->get_value_type() ) {
+					$value = $this->convert_html_value_to_text( $value );
 				}
 				$value = $this->intercept_value( (string) $value, trim( $modifiable_text ), $rendering_context );
-				$content_processor->replace_token( $value );
+				$content_processor->replace_token( $escape_values ? htmlspecialchars( $value, ENT_QUOTES, 'UTF-8' ) : $value );
 
 			} elseif ( $content_processor->get_token_type() === '#tag' && $content_processor->get_tag() === 'TITLE' ) {
 				// The title tag contains the subject of the email which should be personalized. HTML_Tag_Processor does parse the header tags.
@@ -323,6 +353,33 @@ class Personalizer {
 			},
 			$content
 		);
+	}
+
+	/**
+	 * Convert an HTML tag value to plain text the same way the Renderer converts the plain-text body.
+	 * Values without markup or entities are returned untouched, so a bare "&" or "<3" and the
+	 * value's own whitespace survive.
+	 *
+	 * @param string $value The tag value.
+	 * @return string The plain-text value.
+	 */
+	private function convert_html_value_to_text( string $value ): string {
+		if ( ! preg_match( '/<[a-z!\/]|&(?:#\d+|#x[0-9a-f]+|[a-z][a-z0-9]*);/i', $value ) ) {
+			return $value;
+		}
+		// Encode a "<" that does not start a tag, or older libxml versions drop the text after it.
+		$value = (string) preg_replace( '/<(?![a-z!\/])/i', '&lt;', $value );
+		$text  = Html2Text::convert( $value, array( 'ignore_errors' => true ) );
+
+		// Html2Text trims its output, so keep a space where the value started or ended with one,
+		// otherwise a separator such as "&nbsp;" between two tags disappears.
+		$space    = '(?:\s|&nbsp;|&#160;|&#xa0;)';
+		$leading  = preg_match( '/^' . $space . '/i', $value ) ? ' ' : '';
+		$trailing = preg_match( '/' . $space . '$/i', $value ) ? ' ' : '';
+		if ( '' === $text ) {
+			return ( '' !== $leading . $trailing ) ? ' ' : '';
+		}
+		return $leading . $text . $trailing;
 	}
 
 	/**

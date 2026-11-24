@@ -31,6 +31,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
@@ -41,6 +42,10 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Live contract repository with targeted cycle access.
+ *
+ * @internal Storage behind the `Api\` facades, not a supported extension surface. Arguments are
+ *           validated once, at the public boundary: owner slugs and other values arrive validated
+ *           and are not checked again here.
  */
 final class ContractRepository {
 
@@ -76,10 +81,10 @@ final class ContractRepository {
 	private const HOLDS_LOCK = 'lock_token = %s AND locked_until_gmt > UTC_TIMESTAMP()';
 
 	/**
-	 * SQL condition: the row's owner is exactly the bound slug. The binary cast makes the match
-	 * case-sensitive, as the engine's PHP comparisons of the owner are.
+	 * SQL condition: the row's owner is exactly the bound slug. The column's binary collation makes
+	 * the match case-sensitive, as the engine's PHP comparisons of the owner are.
 	 */
-	private const OWNER_MATCH = 'extension_slug = CAST(%s AS BINARY)';
+	private const OWNER_MATCH = 'extension_slug = %s';
 
 	/**
 	 * Contract columns a lock may be conditioned on ({@see self::acquire_lock()}), mapped to the
@@ -1143,7 +1148,7 @@ final class ContractRepository {
 	 * @throws \InvalidArgumentException If the label is not a valid slug.
 	 */
 	private static function assert_operation( string $operation ): void {
-		if ( 1 !== preg_match( '/^[a-z0-9_-]{1,64}$/D', $operation ) ) {
+		if ( ! ArgumentValidator::is_slug( $operation ) ) {
 			throw new \InvalidArgumentException( 'A lock operation label must be 1-64 lowercase letters, digits, underscores or hyphens.' );
 		}
 	}
@@ -1237,6 +1242,9 @@ final class ContractRepository {
 	 *     @type string|string[] $status Optional status filter: one status or a list of them
 	 *                                   ({@see ContractStatus}). Unregistered values are dropped;
 	 *                                   ignored when none remain.
+	 *     @type string $extension_slug Optional owner filter: only contracts of this extension
+	 *                                  (binary, case-sensitive match, as the lock and write
+	 *                                  guards use). Absent: every extension.
 	 * }
 	 * @return array<int, Contract> Contracts the customer owns, newest first.
 	 */
@@ -1260,14 +1268,21 @@ final class ContractRepository {
 		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$select = self::CONTRACT_SELECT;
 
-		// One query for both shapes: the optional status filter joins the WHERE, and
-		// every value is a placeholder (table names cannot be bound, so the table is
+		// One query for every shape: the optional status and owner filters join the WHERE,
+		// and every value is a placeholder (table names cannot be bound, so the table is
 		// interpolated).
 		$where  = 'customer_id = %d';
 		$params = array( $customer_id );
 		if ( array() !== $statuses ) {
 			$where .= ' AND status IN (' . implode( ', ', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
 			$params = array_merge( $params, $statuses );
+		}
+		// A present key always applies and never widens to every owner: the value binds as a
+		// string, so a non-scalar or false binds '' and matches nothing (no contract can own
+		// an empty slug), and any other scalar binds its string form as an exact owner.
+		if ( array_key_exists( 'extension_slug', $args ) ) {
+			$where   .= ' AND ' . self::OWNER_MATCH;
+			$params[] = Coercion::coerce_string( $args['extension_slug'] );
 		}
 		$params[] = $limit;
 		$params[] = $offset;

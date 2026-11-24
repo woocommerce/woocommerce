@@ -422,4 +422,150 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'It\'s 12" off', get_post( $coupon->get_id() )->post_excerpt );
 	}
+
+	/**
+	 * Create a published coupon with a per-user usage limit.
+	 *
+	 * @param string $code           Coupon code.
+	 * @param int    $limit_per_user Usage limit per user, 0 for none.
+	 * @return WC_Coupon
+	 */
+	private function create_limited_coupon( string $code, int $limit_per_user = 1 ): WC_Coupon {
+		WC_Helper_Coupon::create_coupon( $code, array( 'usage_limit_per_user' => $limit_per_user ? (string) $limit_per_user : '' ) );
+		return new WC_Coupon( $code );
+	}
+
+	/**
+	 * Get the `_used_by_email` rows of a coupon.
+	 *
+	 * @param WC_Coupon $coupon Coupon object.
+	 * @return string[]
+	 */
+	private function get_used_by_emails( WC_Coupon $coupon ): array {
+		$values = get_post_meta( $coupon->get_id(), '_used_by_email', false );
+		sort( $values );
+		return $values;
+	}
+
+	/**
+	 * @testdox A use counted under a user ID records the account email and the order billing email.
+	 */
+	public function test_increase_usage_count_records_account_and_billing_email_for_user(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'Account@Example.com' ) );
+		$coupon  = $this->create_limited_coupon( 'record_user_emails' );
+		$order   = WC_Helper_Order::create_order( $user_id );
+		$order->set_billing_email( 'billing@example.com' );
+		$order->save();
+
+		$coupon->increase_usage_count( (string) $user_id, $order );
+
+		$this->assertSame(
+			array( $user_id . ':account@example.com', $user_id . ':billing@example.com' ),
+			$this->get_used_by_emails( $coupon )
+		);
+	}
+
+	/**
+	 * @testdox No email record is written for guest uses or for coupons without a per-user limit.
+	 */
+	public function test_increase_usage_count_skips_email_record_for_guests_and_unlimited_coupons(): void {
+		$user_id   = $this->factory->user->create( array( 'user_email' => 'unlimited@example.com' ) );
+		$unlimited = $this->create_limited_coupon( 'no_per_user_limit', 0 );
+		$limited   = $this->create_limited_coupon( 'guest_use' );
+
+		$unlimited->increase_usage_count( (string) $user_id );
+		$limited->increase_usage_count( 'guest@example.com' );
+
+		$this->assertSame( array(), $this->get_used_by_emails( $unlimited ) );
+		$this->assertSame( array(), $this->get_used_by_emails( $limited ) );
+	}
+
+	/**
+	 * @testdox Repeated uses by the same user do not duplicate their email records.
+	 */
+	public function test_increase_usage_count_does_not_duplicate_email_records(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'repeat@example.com' ) );
+		$coupon  = $this->create_limited_coupon( 'repeat_user', 3 );
+
+		$coupon->increase_usage_count( (string) $user_id );
+		$coupon->increase_usage_count( (string) $user_id );
+
+		$this->assertSame( array( $user_id . ':repeat@example.com' ), $this->get_used_by_emails( $coupon ) );
+		$this->assertCount( 2, ( new WC_Coupon( 'repeat_user' ) )->get_used_by() );
+	}
+
+	/**
+	 * @testdox A user's email records are removed only when their last use of the coupon is removed.
+	 */
+	public function test_decrease_usage_count_removes_email_records_after_last_use(): void {
+		$user_id  = $this->factory->user->create( array( 'user_email' => 'release@example.com' ) );
+		$other_id = $this->factory->user->create( array( 'user_email' => 'other@example.com' ) );
+		$coupon   = $this->create_limited_coupon( 'release_user', 3 );
+
+		$coupon->increase_usage_count( (string) $user_id );
+		$coupon->increase_usage_count( (string) $user_id );
+		$coupon->increase_usage_count( (string) $other_id );
+
+		$coupon->decrease_usage_count( (string) $user_id );
+		$this->assertContains( $user_id . ':release@example.com', $this->get_used_by_emails( $coupon ), 'One use remains, so the record stays' );
+
+		$coupon->decrease_usage_count( (string) $user_id );
+		$this->assertSame( array( $other_id . ':other@example.com' ), $this->get_used_by_emails( $coupon ) );
+	}
+
+	/**
+	 * @testdox Recorded user IDs are added for matching emails on the same coupon only.
+	 */
+	public function test_add_recorded_user_ids_to_aliases_maps_emails_to_users(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'mapped@example.com' ) );
+		$coupon  = $this->create_limited_coupon( 'map_aliases' );
+		$other   = $this->create_limited_coupon( 'map_aliases_other' );
+		$coupon->increase_usage_count( (string) $user_id );
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'renamed@example.com',
+			)
+		);
+
+		$data_store = WC_Data_Store::load( 'coupon' );
+
+		$this->assertEqualsCanonicalizing(
+			array( 'Mapped@Example.com', $user_id ),
+			$data_store->add_recorded_user_ids_to_aliases( $coupon, array( 'Mapped@Example.com' ) )
+		);
+		$this->assertSame( array( 'mapped@example.com' ), $data_store->add_recorded_user_ids_to_aliases( $other, array( 'mapped@example.com' ) ) );
+		$this->assertSame( array( 'unrelated@example.com' ), $data_store->add_recorded_user_ids_to_aliases( $coupon, array( 'unrelated@example.com' ) ) );
+	}
+
+	/**
+	 * @testdox Usage by aliases counts each use once, including uses found through a recorded email and current holds.
+	 */
+	public function test_get_usage_by_aliases_counts_each_use_once(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'count@example.com' ) );
+		$coupon  = $this->create_limited_coupon( 'count_aliases', 5 );
+		$coupon->increase_usage_count( (string) $user_id );
+		$coupon->increase_usage_count( 'count@example.com' );
+
+		$data_store = WC_Data_Store::load( 'coupon' );
+
+		$this->assertSame( 2, $data_store->get_usage_by_aliases( $coupon, array( 'count@example.com' ) ) );
+		$this->assertSame( 2, $data_store->get_usage_by_aliases( $coupon, array( 'count@example.com', $user_id, (string) $user_id ) ) );
+
+		$data_store->check_and_hold_coupon_for_user( $coupon, array( 'count@example.com' ), 'count@example.com' );
+		$this->assertSame( 3, $data_store->get_usage_by_aliases( $coupon, array( 'count@example.com' ) ) );
+	}
+
+	/**
+	 * @testdox Email records are not exposed as coupon meta data.
+	 */
+	public function test_used_by_email_is_internal_meta(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'internal@example.com' ) );
+		$coupon  = $this->create_limited_coupon( 'internal_meta' );
+		$coupon->increase_usage_count( (string) $user_id );
+
+		$keys = wp_list_pluck( ( new WC_Coupon( 'internal_meta' ) )->get_meta_data(), 'key' );
+
+		$this->assertNotContains( '_used_by_email', $keys );
+	}
 }

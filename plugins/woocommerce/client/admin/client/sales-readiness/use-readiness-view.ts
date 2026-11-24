@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { ReadinessView } from './types';
+import { trackReadiness, viewedProps, type Surface } from './tracks';
 
 export const VIEW_PATH = '/wc/v3/agent-readiness/view';
 export const SCAN_PATH = '/wc/v3/agent-readiness/scan';
@@ -28,27 +29,45 @@ export const POLL_FOR_MS = 10 * 60 * 1000;
  * queuing it the view is read again for the pending message, and then every
  * POLL_MS while the check is pending, so the results replace it when it finishes.
  * A view that came with the page is used as is, without loading it again.
+ * Records one viewed event per mount, the Run check click, and failures.
  */
-export function useReadinessView( initialView: ReadinessView | null = null ) {
+export function useReadinessView(
+	surface: Surface,
+	initialView: ReadinessView | null = null
+) {
 	const [ view, setView ] = useState< ReadinessView | null >( initialView );
 	const [ error, setError ] = useState< string | null >( null );
+	// True when the results didn't load, so the page shows no Check again and offers Reload page.
+	const [ reload, setReload ] = useState( false );
 	const [ running, setRunning ] = useState( false );
+	const viewed = useRef( false );
 	const pendingSince = useRef< number | null >( null );
-	// True after a view has been shown: poll failures must not replace it or stop polling.
+	// True after a view has been shown: poll failures must not spam Tracks, replace the view or stop polling.
 	const hasView = useRef( initialView !== null );
+	const mounted = useRef( true );
 
 	const load = useCallback( async () => {
 		try {
 			const loaded = await apiFetch< ReadinessView >( {
 				path: VIEW_PATH,
 			} );
-			setView( loaded );
-			setError( null );
-			hasView.current = true;
-		} catch {
-			if ( hasView.current ) {
+			if ( ! mounted.current ) {
 				return;
 			}
+			setView( loaded );
+			setError( null );
+			setReload( false );
+			hasView.current = true;
+			if ( ! viewed.current ) {
+				viewed.current = true;
+				trackReadiness( 'viewed', viewedProps( loaded, surface ) );
+			}
+		} catch {
+			if ( ! mounted.current || hasView.current ) {
+				return;
+			}
+			trackReadiness( 'error', { surface, action: 'load' } );
+			setReload( true );
 			setError(
 				__(
 					'Your check results didn’t load. Reload the page to try again.',
@@ -56,14 +75,24 @@ export function useReadinessView( initialView: ReadinessView | null = null ) {
 				)
 			);
 		}
-	}, [] );
+	}, [ surface ] );
 
 	const preloaded = useRef( initialView );
 	useEffect( () => {
+		mounted.current = true;
 		if ( ! preloaded.current ) {
 			void load();
+		} else if ( ! viewed.current ) {
+			viewed.current = true;
+			trackReadiness(
+				'viewed',
+				viewedProps( preloaded.current, surface )
+			);
 		}
-	}, [ load ] );
+		return () => {
+			mounted.current = false;
+		};
+	}, [ load, surface ] );
 
 	useEffect( () => {
 		if ( ! view?.run.pending ) {
@@ -82,21 +111,26 @@ export function useReadinessView( initialView: ReadinessView | null = null ) {
 	}, [ view?.run.pending, load ] );
 
 	const runCheck = useCallback( async () => {
+		trackReadiness( 'run_check_clicked', {
+			surface,
+			first_check: !! view && ! view.checked,
+		} );
 		setRunning( true );
 		try {
 			await apiFetch( { path: SCAN_PATH, method: 'POST' } );
 			await load();
 		} catch {
+			trackReadiness( 'error', { surface, action: 'run' } );
 			setError(
 				__(
-					'The check didn’t start. Reload the page to try again.',
+					'The check didn’t start. Try again in a few minutes.',
 					'woocommerce'
 				)
 			);
 		} finally {
 			setRunning( false );
 		}
-	}, [ load ] );
+	}, [ load, surface, view?.checked ] );
 
-	return { view, error, running, runCheck };
+	return { view, error, reload, running, runCheck };
 }

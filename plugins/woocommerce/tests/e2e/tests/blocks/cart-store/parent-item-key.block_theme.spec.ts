@@ -141,8 +141,6 @@ const test = base.extend< {
 test.describe( 'ProductButton in-cart count', () => {
 	test( 'does not count a child cart line in the add to cart button', async ( {
 		page,
-		requestUtils,
-		cleanup,
 		addToCartWithOptionsPage,
 	} ) => {
 		await addToCartWithOptionsPage.createPostWithProductBlock(
@@ -150,19 +148,6 @@ test.describe( 'ProductButton in-cart count', () => {
 			'hoodie-blue-yes'
 		);
 		const postUrl = page.url();
-		const postId = Number(
-			( await page.locator( 'body' ).getAttribute( 'class' ) )?.match(
-				/\bpostid-(\d+)\b/
-			)?.[ 1 ]
-		);
-		expect( postId ).toBeGreaterThan( 0 );
-		cleanup( async () => {
-			await requestUtils.rest( {
-				method: 'DELETE',
-				path: `/wp/v2/posts/${ postId }`,
-				params: { force: true },
-			} );
-		} );
 
 		// All workers share the admin cart, so the cart steps run as a guest.
 		await page.context().clearCookies();

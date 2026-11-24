@@ -352,8 +352,8 @@ abstract class ActionableAbility extends Ability {
 	/**
 	 * Drop the object caches of the objects a rolled back save() touched. The
 	 * saves filled the caches with rows the rollback removed, so a read in the
-	 * same request would still see them. The `WC_Data` meta cache and the
-	 * product instance cache are separate from the post cache.
+	 * same request would still see them. The `WC_Data` meta cache, the product type cache, the
+	 * product instance cache and the price lookup cache are separate from the post cache.
 	 *
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects.
 	 * @param \WC_Data[]                                          $deleted The objects the call deleted.
@@ -367,16 +367,21 @@ abstract class ActionableAbility extends Ability {
 			}
 			if ( $id > 0 && $object instanceof \WC_Product ) {
 				clean_post_cache( $id );
+				wp_cache_delete( 'lookup_table', 'object_' . $id );
+				\WC_Cache_Helper::invalidate_cache_group( 'product_' . $id );
 				wc_delete_product_transients( $id );
 				$product_cache->remove( $id );
 				if ( $object->get_parent_id() > 0 ) {
 					clean_post_cache( $object->get_parent_id() );
+					wp_cache_delete( 'lookup_table', 'object_' . $object->get_parent_id() );
 					wc_delete_product_transients( $object->get_parent_id() );
 					$product_cache->remove( $object->get_parent_id() );
 				}
 			} elseif ( $id > 0 && $object instanceof \WC_Abstract_Order ) {
 				wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->remove( $id );
 				clean_post_cache( $id );
+			} elseif ( $id > 0 && $object instanceof \WC_Customer ) {
+				clean_user_cache( $id );
 			}
 		}
 	}
