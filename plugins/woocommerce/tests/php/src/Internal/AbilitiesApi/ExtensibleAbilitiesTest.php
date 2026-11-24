@@ -2305,13 +2305,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				'schema'       => array( 'type' => 'string' ),
 			),
 			array( 'set_callback' => '__return_null' ),
-			array( 'input_schema' => array( 'type' => 'string' ) ),
 			array(
 				'set_callback' => 'not_a_function',
 				'input_schema' => array( 'type' => 'string' ),
 			),
 			$read + array( 'set_callback' => '__return_null' ),
-			$read + array( 'input_schema' => array( 'type' => 'string' ) ),
 			$read + array(
 				'input_schema' => array( 'type' => 'string' ),
 				'set_callback' => 'not_a_function',
@@ -3510,8 +3508,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_sync(
 			'product',
 			'test-ext',
-			static function ( array $saved, ActionableAbility $ability ) use ( &$calls ) {
-				$calls[] = array( $ability->get_name(), array_map( 'get_class', $saved ), array_map( static fn( \WC_Data $saved_object ) => $saved_object->get_id(), $saved ) );
+			static function ( array $saved, array $context ) use ( &$calls ) {
+				$calls[] = array( $context['ability'], array_map( 'get_class', $saved ), array_map( static fn( \WC_Data $saved_object ) => $saved_object->get_id(), $saved ) );
 				$prices  = array();
 				foreach ( $saved as $object ) {
 					if ( $object instanceof \WC_Product_Variation ) {
@@ -3536,19 +3534,18 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should give a sync the deleted objects and the input of the call.
+	 * @testdox Should give a sync the deleted and the trashed objects of the call.
 	 */
-	public function test_a_sync_gets_the_deleted_objects_and_the_input(): void {
+	public function test_a_sync_gets_the_deleted_and_trashed_objects(): void {
 		$contexts = array();
 		$this->register_sync(
 			'product',
 			'test-ext',
-			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$contexts ) {
+			static function ( array $saved, array $context ) use ( &$contexts ) {
 				$contexts[] = array(
 					'saved'   => array_map( static fn( \WC_Data $item ) => $item->get_id(), $saved ),
 					'deleted' => array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] ),
 					'trashed' => array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['trashed'] ),
-					'input'   => $context['input'],
 				);
 				return null;
 			}
@@ -3585,7 +3582,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( array(), $contexts[0]['deleted'] );
 		$this->assertSame( array( $created['product']['id'] ), $contexts[1]['saved'] );
 		$this->assertSame( array( $created['product']['variation_ids'][1] ), $contexts[1]['deleted'] );
-		$this->assertSame( $input, $contexts[1]['input'] );
 		$this->assertSame( array( $created['product']['id'] ), $contexts[2]['saved'], 'A variation delete saves the parent.' );
 		$this->assertSame( array( $created['product']['variation_ids'][0] ), $contexts[2]['deleted'] );
 		$this->assertSame( array(), $contexts[3]['saved'] );
@@ -3593,6 +3589,146 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( array( $created['product']['id'] ), $contexts[3]['trashed'], 'A trash reports the parent as trashed.' );
 		$this->assertSame( array( $created['product']['id'] ), $contexts[4]['deleted'], 'A parent delete reports the parent; its variations were deleted before.' );
 		$this->assertSame( array(), $contexts[4]['trashed'] );
+	}
+
+	/**
+	 * Register `test-ext.vendor` on a resource: a writable field with no set_callback, as a field kept outside the object has.
+	 *
+	 * @param string $resource_name Resource.
+	 */
+	private function register_vendor_field( string $resource_name ): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => $resource_name,
+						'namespace'    => 'test-ext',
+						'field'        => 'vendor',
+						'input_schema' => self::nullable( array( 'type' => 'string' ) ),
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should give validators and syncs the sent fields of their own namespace for each object, with a sent null.
+	 */
+	public function test_validators_and_syncs_get_the_sent_fields_of_each_object(): void {
+		$seen   = array();
+		$record = static function ( string $step, array $objects, array $context ) use ( &$seen ) {
+			foreach ( $objects as $object ) {
+				$seen[ $step ][ $object->get_sku() ] = $context['fields'][ $object ];
+			}
+			$seen[ $step ]['other'] = $context['fields'][ new \WC_Product() ];
+			return null;
+		};
+		$this->register_validator( 'product', 'test-ext', static fn( \WC_Product $product, array $context ) => $record( 'validator', array( $product ), $context ) );
+		$this->register_sync( 'product', 'test-ext', static fn( array $saved, array $context ) => $record( 'sync', $saved, $context ) );
+		$this->register_vendor_field( 'product' );
+		$this->reset_registries();
+		$input                                = $this->get_shirt_input();
+		$input['sku']                         = 'shirt';
+		$input['extensions']                  = array(
+			'test-ext'  => array(
+				'color'  => 'blue',
+				'vendor' => 'acme',
+			),
+			'other_ext' => array( 'size' => 'small' ),
+		);
+		$input['variations'][0]['extensions'] = array( 'test-ext' => array( 'vendor' => null ) );
+
+		$this->run_ability( 'woocommerce/product-create', $input );
+
+		$expected = array(
+			'shirt'   => array(
+				'color'  => 'blue',
+				'vendor' => 'acme',
+			),
+			'other'   => array(),
+			'shirt-s' => array( 'vendor' => null ),
+			'shirt-m' => array(),
+		);
+		$this->assertEquals( $expected, $seen['validator'] );
+		$this->assertEquals( $expected, $seen['sync'] );
+	}
+
+	/**
+	 * @testdox Should leave a value that its set_callback refused out of the sent fields.
+	 */
+	public function test_a_refused_value_is_not_in_the_sent_fields(): void {
+		$seen = null;
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function ( \WC_Product $product, array $context ) use ( &$seen ) {
+				$seen = $context['fields'][ $product ];
+				return null;
+			}
+		);
+		$this->register_vendor_field( 'product' );
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array(
+					'test-ext' => array(
+						'color'  => 'reject',
+						'vendor' => 'acme',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( array( 'vendor' => 'acme' ), $seen );
+	}
+
+	/**
+	 * @testdox Should give a sync the saved objects of its own resource, and the whole call in the context.
+	 */
+	public function test_a_sync_gets_the_saved_objects_of_its_own_resource(): void {
+		$seen = array();
+		foreach ( array( 'product', 'order_item' ) as $resource_name ) {
+			$this->register_sync(
+				$resource_name,
+				'test-ext',
+				static function ( array $saved, array $context ) use ( &$seen, $resource_name ) {
+					$seen[ $resource_name ] = array(
+						'saved'   => array_map( 'get_class', $saved ),
+						'objects' => array_map( 'get_class', $context['objects'] ),
+						'primary' => get_class( $context['primary'] ),
+						'fields'  => array_map( static fn( \WC_Data $item ) => $context['fields'][ $item ], $context['objects'] ),
+					);
+					return null;
+				}
+			);
+		}
+		$this->register_vendor_field( 'order_item' );
+		$this->register_product_with_item_ability();
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		$this->run_ability(
+			'test-ext/product-with-item',
+			array(
+				'id'              => $product->get_id(),
+				'name'            => 'Pencil',
+				'item_extensions' => array( 'test-ext' => array( 'vendor' => 'acme' ) ),
+			)
+		);
+
+		$whole_call = array(
+			'objects' => array( 'WC_Product_Simple', 'WC_Order_Item_Product' ),
+			'primary' => 'WC_Product_Simple',
+			'fields'  => array( array(), array( 'vendor' => 'acme' ) ),
+		);
+		$this->assertSame( array( 'saved' => array( 'WC_Product_Simple' ) ) + $whole_call, $seen['product'] );
+		$this->assertSame( array( 'saved' => array( 'WC_Order_Item_Product' ) ) + $whole_call, $seen['order_item'] );
 	}
 
 	/**
@@ -3630,7 +3766,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'test-ext',
-			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen ) {
+			static function ( \WC_Product $product, array $context ) use ( &$seen ) {
 				if ( $product instanceof \WC_Product_Variation ) {
 					$seen[ $product->get_sku() ] = array_map( static fn( \WC_Product $item ) => $item->get_meta( '_test_color' ), $context['objects'] );
 				}
@@ -3771,7 +3907,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'test-ext',
-			static fn( \WC_Product $product, ActionableAbility $ability ) => 'woocommerce/product-delete' === $ability->get_name() && 'keep' === $product->get_sku()
+			static fn( \WC_Product $product, array $context ) => 'woocommerce/product-delete' === $context['ability'] && 'keep' === $product->get_sku()
 				? new \WP_Error( 'test_keep', 'Keep it.' )
 				: null
 		);
@@ -3809,7 +3945,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'test-ext',
-			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen ) {
+			static function ( \WC_Product $product, array $context ) use ( &$seen ) {
 				if ( $product instanceof \WC_Product_Variation ) {
 					$seen[] = array( $product->get_parent_id(), $context['primary']->get_name(), $context['deleting'] );
 				}
@@ -3839,7 +3975,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'test-ext',
-			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen, $kept ) {
+			static function ( \WC_Product $product, array $context ) use ( &$seen, $kept ) {
 				$seen[ $product->get_id() ] = $context['deleting'];
 				return $context['deleting'] && $kept === $product->get_id()
 					? new \WP_Error( 'test_keep', 'Keep it.' )
@@ -3897,8 +4033,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'test-ext',
-			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse ) {
-				unset( $ability );
+			static function ( \WC_Product $product, array $context ) use ( &$seen, &$refuse ) {
 				$seen[ $product->get_id() ] = $context['deleting'];
 				return $refuse && $context['deleting'] ? new \WP_Error( 'test_keep', 'Keep them.' ) : null;
 			}
@@ -3906,7 +4041,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_sync(
 			'product',
 			'test-ext',
-			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+			static function ( array $saved, array $context ) use ( &$deleted ) {
 				unset( $saved, $ability );
 				$deleted = array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] );
 				return null;
@@ -3945,8 +4080,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'test-ext',
-			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $kept ) {
-				$seen[ $product->get_id() ] = array( $ability->get_name(), $context['deleting'] );
+			static function ( \WC_Product $product, array $context ) use ( &$seen, &$refuse, $kept ) {
+				$seen[ $product->get_id() ] = array( $context['ability'], $context['deleting'] );
 				return $refuse && $kept === $product->get_id()
 					? new \WP_Error( 'test_keep', 'Keep it.' )
 					: null;
@@ -3986,16 +4121,15 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'order',
 			'test-ext',
-			static function ( \WC_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse ) {
-				$seen[] = array( $order->get_id(), $ability->get_name(), $context['deleting'] );
+			static function ( \WC_Order $order, array $context ) use ( &$seen, &$refuse ) {
+				$seen[] = array( $order->get_id(), $context['ability'], $context['deleting'] );
 				return $refuse ? new \WP_Error( 'test_cancel_first', 'Cancel it first.' ) : null;
 			}
 		);
 		$this->register_sync(
 			'order',
 			'test-ext',
-			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$synced ) {
-				unset( $ability );
+			static function ( array $saved, array $context ) use ( &$synced ) {
 				$synced[] = array(
 					count( $saved ),
 					array_map( static fn( \WC_Order $order ) => $order->get_id(), $context['trashed'] ),
@@ -4062,8 +4196,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'order',
 			'test-ext',
-			static function ( \WC_Abstract_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $refund_id ) {
-				unset( $ability );
+			static function ( \WC_Abstract_Order $order, array $context ) use ( &$seen, &$refuse, $refund_id ) {
 				$seen[ $order->get_id() ] = $context['deleting'];
 				return $refuse && $refund_id === $order->get_id() ? new \WP_Error( 'test_keep_refund', 'Keep the refund.' ) : null;
 			}
@@ -4071,7 +4204,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_sync(
 			'order',
 			'test-ext',
-			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+			static function ( array $saved, array $context ) use ( &$deleted ) {
 				unset( $saved, $ability );
 				$deleted = array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $context['deleted'] );
 			}
@@ -4123,8 +4256,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->register_validator(
 				'order',
 				'test-ext',
-				static function ( \WC_Abstract_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $grandchild_id ) {
-					unset( $ability );
+				static function ( \WC_Abstract_Order $order, array $context ) use ( &$seen, &$refuse, $grandchild_id ) {
 					$seen[ $order->get_id() ] = $context['deleting'];
 					return $refuse && $grandchild_id === $order->get_id() ? new \WP_Error( 'test_keep_child', 'Keep the refund of the child.' ) : null;
 				}
@@ -4132,7 +4264,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->register_sync(
 				'order',
 				'test-ext',
-				static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+				static function ( array $saved, array $context ) use ( &$deleted ) {
 					unset( $saved, $ability );
 					$deleted = array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $context['deleted'] );
 				}
@@ -4390,8 +4522,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->register_sync(
 				$resource_name,
 				'test-ext',
-				static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$synced, $resource_name ) {
-					unset( $saved, $ability );
+				static function ( array $saved, array $context ) use ( &$synced, $resource_name ) {
+					unset( $saved );
 					$synced[] = array( $resource_name, array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['trashed'] ) );
 					return null;
 				}
@@ -4508,8 +4640,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 						'input_schema'        => array(
 							'type'       => 'object',
 							'properties' => array(
-								'id'   => array( 'type' => 'integer' ),
-								'name' => array( 'type' => 'string' ),
+								'id'              => array( 'type' => 'integer' ),
+								'name'            => array( 'type' => 'string' ),
+								'item_extensions' => array( 'type' => 'object' ),
 							),
 						),
 						'output_schema'       => array( 'type' => 'object' ),
@@ -5258,7 +5391,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_sync(
 			'product',
 			'test-ext',
-			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted, &$refuse ) {
+			static function ( array $saved, array $context ) use ( &$deleted, &$refuse ) {
 				unset( $saved, $ability );
 				$deleted = array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] );
 				return $refuse ? new \WP_Error( 'test_refused', 'Refused.' ) : null;
@@ -6352,8 +6485,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'order',
 			'test-ext',
-			static function ( \WC_Order $subject, \WP_Ability $current ) use ( &$ability ) {
-				$ability = $current->get_name();
+			static function ( \WC_Order $subject, array $context ) use ( &$ability ) {
+				$ability = $context['ability'];
 				if ( 'yes' === $subject->get_meta( '_test_locked' ) && 'completed' === $subject->get_status() ) {
 					return new \WP_Error( 'test_locked', 'Use test-ext/order-unlock first.' );
 				}
@@ -6888,8 +7021,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'other_ext',
-			static function ( \WC_Product $subject, \WP_Ability $ability ) {
-				return 'test-ext/product-rename' === $ability->get_name()
+			static function ( \WC_Product $subject, array $context ) {
+				return 'test-ext/product-rename' === $context['ability']
 					? new \WP_Error( 'test_rename_refused', 'Rename refused.' )
 					: null;
 			}
