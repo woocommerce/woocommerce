@@ -442,6 +442,10 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'<!-- wp:paragraph {"style":"inline","fontSize":"large"} --><p class="string-style has-large-font-size">Book a call</p><!-- /wp:paragraph -->',
 				'font-size: 24px',
 			),
+			'string typography with a font size preset'  => array(
+				'<!-- wp:paragraph {"style":{"typography":"inline"},"fontSize":"large"} --><p class="string-style has-large-font-size">Book a call</p><!-- /wp:paragraph -->',
+				'font-size: 24px',
+			),
 			'paragraph in a quote (Quote_Preprocessor)'  => array(
 				'<!-- wp:quote {"style":{"typography":{"fontSize":"18px"}}} --><blockquote class="wp-block-quote" style="font-size:18px"><!-- wp:paragraph {"style":"inline"} --><p class="string-style">Book a call</p><!-- /wp:paragraph --></blockquote><!-- /wp:quote -->',
 				'font-size: 18px',

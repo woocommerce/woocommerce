@@ -106,6 +106,9 @@ class Typography_Preprocessor implements Preprocessor {
 			if ( isset( $block['attrs']['style'] ) && ! is_array( $block['attrs']['style'] ) ) {
 				$block['attrs']['style'] = array();
 			}
+			if ( isset( $block['attrs']['style']['typography'] ) && ! is_array( $block['attrs']['style']['typography'] ) ) {
+				$block['attrs']['style']['typography'] = array();
+			}
 			$block['attrs']['style']['typography']['fontSize'] = $this->settings_controller->translate_slug_to_font_size( $block['attrs']['fontSize'] );
 		}
 		// Pass font size to email_attrs.
