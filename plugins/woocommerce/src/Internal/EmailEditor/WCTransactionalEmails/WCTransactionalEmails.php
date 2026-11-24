@@ -23,6 +23,7 @@ class WCTransactionalEmails {
 	 */
 	public static $core_transactional_emails = array(
 		'admin_payment_gateway_enabled',
+		'admin_report_export_download',
 		'cancelled_order',
 		'customer_cancelled_order',
 		'customer_completed_order',

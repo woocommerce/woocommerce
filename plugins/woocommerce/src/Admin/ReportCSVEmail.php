@@ -55,10 +55,14 @@ class ReportCSVEmail extends \WC_Email {
 	public function __construct() {
 		$this->placeholders['{report_date_range}'] = '';
 
-		$this->id             = 'admin_report_export_download';
-		$this->template_base  = WC()->plugin_path() . '/includes/react-admin/emails/';
-		$this->template_html  = 'html-admin-report-export-download.php';
-		$this->template_plain = 'plain-admin-report-export-download.php';
+		$this->id                     = 'admin_report_export_download';
+		$this->title                  = __( 'Analytics report download', 'woocommerce' );
+		$this->description            = __( 'Sent to the person who exports an Analytics report, with a link to download it.', 'woocommerce' );
+		$this->supports_cc_bcc        = false;
+		$this->template_base          = WC()->plugin_path() . '/includes/react-admin/emails/';
+		$this->template_html          = 'html-admin-report-export-download.php';
+		$this->template_plain         = 'plain-admin-report-export-download.php';
+		$this->template_block_content = 'block-content-admin-report-export-download.php';
 
 		/**
 		 * Used to customise report email labels.
@@ -91,14 +95,23 @@ class ReportCSVEmail extends \WC_Email {
 	}
 
 	/**
-	 * This email has no user-facing settings.
+	 * Initialise settings form fields.
+	 *
+	 * The email is always sent when a report export finishes, so it has no on/off or format setting.
 	 */
-	public function init_form_fields() {}
+	public function init_form_fields() {
+		parent::init_form_fields();
+		unset( $this->form_fields['enabled'], $this->form_fields['email_type'] );
+	}
 
 	/**
-	 * This email has no user-facing settings.
+	 * The email is always sent when a merchant exports a report by email.
+	 *
+	 * @return bool
 	 */
-	public function init_settings() {}
+	public function is_enabled() {
+		return true;
+	}
 
 	/**
 	 * Return email type.
@@ -147,6 +160,28 @@ class ReportCSVEmail extends \WC_Email {
 				'date_range'    => $this->report_date_range,
 				'download_url'  => $this->download_url,
 				'email_heading' => $this->get_heading(),
+				'sent_to_admin' => true,
+				'plain_text'    => false,
+				'email'         => $this,
+				'retention'     => $this->get_retention_period(),
+			),
+			'',
+			$this->template_base
+		);
+	}
+
+	/**
+	 * Get block editor email template content.
+	 *
+	 * @return string
+	 */
+	public function get_block_editor_email_template_content() {
+		return wc_get_template_html(
+			$this->template_block_content,
+			array(
+				'report_name'   => $this->report_type,
+				'date_range'    => $this->report_date_range,
+				'download_url'  => $this->download_url,
 				'sent_to_admin' => true,
 				'plain_text'    => false,
 				'email'         => $this,

@@ -11,6 +11,11 @@ namespace Automattic\WooCommerce\Tests\Admin;
 
 use Automattic\WooCommerce\Admin\ReportCSVEmail;
 use Automattic\WooCommerce\Admin\ReportExporter;
+use Automattic\WooCommerce\EmailEditor\Bootstrap;
+use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
+use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
+use Automattic\WooCommerce\Internal\EmailEditor\Integration;
+use Automattic\WooCommerce\Internal\EmailEditor\Package;
 use WC_Unit_Test_Case;
 
 /**
@@ -172,5 +177,43 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 		$sent = end( $mailer->mock_sent );
 
 		return $sent ? $sent['subject'] : '';
+	}
+
+	/**
+	 * @testdox The email is listed with the other emails only when the block email editor is on.
+	 * @testWith ["yes", true]
+	 *           ["no", false]
+	 *
+	 * @param string $block_editor_enabled Value of the block email editor feature option.
+	 * @param bool   $expected_listed      Whether the email should be listed.
+	 */
+	public function test_email_is_listed_only_with_the_block_editor( string $block_editor_enabled, bool $expected_listed ): void {
+		update_option( 'woocommerce_feature_block_email_editor_enabled', $block_editor_enabled );
+
+		$emails = new \WC_Emails();
+
+		$this->assertSame( $expected_listed, isset( $emails->emails['WC_Email_Admin_Report_Export_Download'] ) );
+	}
+
+	/**
+	 * @testdox With the block email editor on, the email is sent in the block design with the download link, date range and retention period.
+	 */
+	public function test_email_is_sent_in_block_design(): void {
+		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
+		wc_get_container()->get( Package::class )->init();
+		wc_get_container()->get( Integration::class )->initialize();
+		Email_Editor_Container::container()->get( Bootstrap::class )->initialize();
+		if ( ! Email_Editor_Container::container()->get( Dependency_Check::class )->are_dependencies_met() ) {
+			$this->markTestSkipped( 'The test environment does not meet the block email editor requirements.' );
+		}
+
+		$content = $this->create_email( 'June 1, 2026 - June 30, 2026' )->get_content();
+
+		$this->assertStringContainsString( 'Your Report Download', $content );
+		$this->assertStringContainsString( 'Download your Orders Report', $content );
+		$this->assertStringContainsString( 'filename=wc-orders-report-export', $content );
+		$this->assertStringContainsString( 'Date range: June 1, 2026 - June 30, 2026', $content );
+		$this->assertStringContainsString( 'This link is available for ' . human_time_diff( 0, ReportExporter::EXPORT_RETENTION_PERIOD ) . '.', $content );
+		$this->assertStringContainsString( '. All Rights Reserved.', $content, 'Only the block email template renders this footer.' );
 	}
 }
