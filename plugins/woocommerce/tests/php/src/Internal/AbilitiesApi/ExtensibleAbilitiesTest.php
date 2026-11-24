@@ -6062,6 +6062,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should return from product-update what a sync stored on the product and its variations without the changed objects.
 	 */
 	public function test_product_update_returns_what_a_sync_stored(): void {
+		// register_test_fields() registers the test-ext.code field, read from _test_code, for products and variations.
 		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
 		$this->register_sync(
 			'product',
