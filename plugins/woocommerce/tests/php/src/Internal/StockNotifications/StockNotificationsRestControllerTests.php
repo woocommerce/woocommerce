@@ -212,6 +212,23 @@ class StockNotificationsRestControllerTests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A prepare filter that returns something other than a response is ignored.
+	 */
+	public function test_prepare_filter_invalid_return(): void {
+		$notification = $this->create_notification();
+		$filter       = fn() => new \WP_Error( 'broken', 'Broken.' );
+		add_filter( 'woocommerce_rest_prepare_stock_notification', $filter );
+
+		$item       = $this->server->dispatch( new WP_REST_Request( 'GET', self::ROUTE . '/' . $notification->get_id() ) );
+		$collection = $this->get_collection();
+		remove_filter( 'woocommerce_rest_prepare_stock_notification', $filter );
+
+		$this->assertSame( 200, $item->get_status() );
+		$this->assertSame( $notification->get_id(), $item->get_data()['id'] );
+		$this->assertSame( array( $notification->get_id() ), array_column( $collection->get_data(), 'id' ) );
+	}
+
+	/**
 	 * @testdox Collection requests paginate with the standard total headers, newest first.
 	 */
 	public function test_get_items_pagination(): void {
@@ -303,6 +320,55 @@ class StockNotificationsRestControllerTests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( array( $active->get_id() ), $ids( array( 'before' => '2026-01-15T00:00:00' ) ) );
 		$this->assertSame( array( $sent->get_id() ), $ids( array( 'notified_after' => '2026-01-24T00:00:00' ) ) );
 		$this->assertSame( array(), $ids( array( 'notified_before' => '2026-01-24T00:00:00' ) ) );
+	}
+
+	/**
+	 * @testdox Filtering by a variable product ID also matches sign-ups for its variations.
+	 */
+	public function test_get_items_variable_product_filter(): void {
+		$variable  = \WC_Helper_Product::create_variation_product();
+		$variation = $this->create_notification( array( 'product_id' => $variable->get_children()[0] ) );
+		$this->create_notification();
+
+		$ids = array_column( $this->get_collection( array( 'product_id' => $variable->get_id() ) )->get_data(), 'id' );
+
+		$this->assertSame( array( $variation->get_id() ), $ids );
+	}
+
+	/**
+	 * @testdox The orderby parameter sorts by the requested column.
+	 * @dataProvider provide_orderby_columns
+	 *
+	 * @param string $orderby The orderby value, which is also the date prop it sorts on.
+	 */
+	public function test_get_items_orderby( string $orderby ): void {
+		$later   = $this->create_notification( array( $orderby => '2026-01-20T00:00:00Z' ) );
+		$earlier = $this->create_notification( array( $orderby => '2026-01-10T00:00:00Z' ) );
+
+		$ids = array_column(
+			$this->get_collection(
+				array(
+					'orderby' => $orderby,
+					'order'   => 'asc',
+				)
+			)->get_data(),
+			'id'
+		);
+
+		$this->assertSame( array( $earlier->get_id(), $later->get_id() ), $ids );
+	}
+
+	/**
+	 * Data provider for test_get_items_orderby.
+	 *
+	 * @return array
+	 */
+	public function provide_orderby_columns(): array {
+		return array(
+			'date_created'  => array( 'date_created' ),
+			'date_modified' => array( 'date_modified' ),
+			'date_notified' => array( 'date_notified' ),
+		);
 	}
 
 	/**

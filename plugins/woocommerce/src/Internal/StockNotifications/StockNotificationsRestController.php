@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications;
 
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
@@ -107,7 +108,7 @@ class StockNotificationsRestController extends RestApiControllerBase {
 		$per_page = (int) $request['per_page'];
 		$page     = (int) $request['page'];
 		$offset   = $request['offset'] ? (int) $request['offset'] : ( $page - 1 ) * $per_page;
-		$order    = 'asc' === strtolower( (string) $request['order'] ) ? 'ASC' : 'DESC';
+		$order    = 'asc' === $request['order'] ? 'ASC' : 'DESC';
 		$orderby  = self::ORDERBY_COLUMNS[ $request['orderby'] ] ?? 'date_created_gmt';
 		$order_by = array( $orderby => $order );
 		// A second key keeps pages stable when several rows share the same sort value.
@@ -117,7 +118,7 @@ class StockNotificationsRestController extends RestApiControllerBase {
 
 		$query_args = array(
 			'status'              => (array) $request['status'],
-			'product_id'          => (array) $request['product_id'],
+			'product_id'          => $this->expand_variable_products( (array) $request['product_id'] ),
 			'user_id'             => (int) $request['user_id'],
 			'user_email'          => (string) $request['email'],
 			'start_date'          => $this->to_gmt_mysql_date( $request['after'], $dates_are_gmt ),
@@ -139,8 +140,10 @@ class StockNotificationsRestController extends RestApiControllerBase {
 			)
 		) : array();
 
-		// Load every product on the page in one query instead of one per item.
-		_prime_post_caches( array_unique( array_map( fn( $notification ) => $notification->get_product_id(), $notifications ) ) );
+		// Load every product on the page in one query instead of one per item, then the parents of any variations.
+		$product_ids = array_unique( array_map( fn( $notification ) => $notification->get_product_id(), $notifications ) );
+		_prime_post_caches( $product_ids );
+		_prime_post_caches( array_unique( array_filter( array_map( 'wp_get_post_parent_id', $product_ids ) ) ) );
 
 		$items = array();
 		foreach ( $notifications as $notification ) {
@@ -230,13 +233,15 @@ class StockNotificationsRestController extends RestApiControllerBase {
 		/**
 		 * Filter the response for a single stock notification.
 		 *
-		 * @since 11.4.0
+		 * @since 11.5.0
 		 *
 		 * @param WP_REST_Response $response     The response.
 		 * @param Notification     $notification The notification.
 		 * @param WP_REST_Request  $request      The request.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_stock_notification', $response, $notification, $request );
+		$filtered = apply_filters( 'woocommerce_rest_prepare_stock_notification', $response, $notification, $request );
+
+		return $filtered instanceof WP_REST_Response ? $filtered : $response;
 	}
 
 	/**
@@ -260,6 +265,24 @@ class StockNotificationsRestController extends RestApiControllerBase {
 		}
 
 		return $links;
+	}
+
+	/**
+	 * Add the variations of any variable product in the list, since sign-ups are stored against variations.
+	 *
+	 * @param array $product_ids Product or variation IDs.
+	 * @return int[]
+	 */
+	private function expand_variable_products( array $product_ids ): array {
+		$expanded = array_map( 'intval', $product_ids );
+		foreach ( $product_ids as $product_id ) {
+			$product = wc_get_product( $product_id );
+			if ( $product && $product->is_type( ProductType::VARIABLE ) ) {
+				$expanded = array_merge( $expanded, $product->get_children() );
+			}
+		}
+
+		return array_values( array_unique( $expanded ) );
 	}
 
 	/**
@@ -347,7 +370,7 @@ class StockNotificationsRestController extends RestApiControllerBase {
 				'default'     => array(),
 			),
 			'product_id'      => array(
-				'description' => __( 'Limit result set to notifications for one or more product or variation IDs.', 'woocommerce' ),
+				'description' => __( 'Limit result set to notifications for one or more product or variation IDs. A variable product ID also matches its variations.', 'woocommerce' ),
 				'type'        => 'array',
 				'items'       => array(
 					'type'    => 'integer',
@@ -366,7 +389,7 @@ class StockNotificationsRestController extends RestApiControllerBase {
 				'format'      => 'email',
 			),
 			'after'           => array(
-				'description' => __( 'Limit response to notifications created after a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone, unless dates_are_gmt is true.', 'woocommerce' ),
+				'description' => __( 'Limit response to notifications created on or after a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone, unless dates_are_gmt is true.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 			),
@@ -376,7 +399,7 @@ class StockNotificationsRestController extends RestApiControllerBase {
 				'format'      => 'date-time',
 			),
 			'notified_after'  => array(
-				'description' => __( 'Limit response to notifications sent after a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone, unless dates_are_gmt is true.', 'woocommerce' ),
+				'description' => __( 'Limit response to notifications sent on or after a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone, unless dates_are_gmt is true.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 			),
