@@ -2072,7 +2072,6 @@ class WC_Cart extends WC_Legacy_Cart {
 					}
 					// The larger count keeps a custom store's get_usage_by_email() override in effect.
 					if ( $uses_alias ) {
-						// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the coupon data store instance.)
 						$usage_count = max( $usage_count, (int) $coupon_data_store->get_usage_by_aliases( $coupon, $aliases ) );
 					}
 					if ( $coupon_data_store && $usage_count >= $coupon_usage_limit ) {

@@ -1856,7 +1856,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					$coupon_data_store = $coupon->get_data_store();
 					$coupon_aliases    = $user_ids_and_emails;
 					if ( $coupon_data_store instanceof WC_Data_Store && $coupon_data_store->has_callable( 'add_recorded_user_ids_to_aliases' ) ) {
-						// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the coupon data store instance.)
 						$coupon_aliases = $coupon_data_store->add_recorded_user_ids_to_aliases( $coupon, $user_ids_and_emails );
 					}
 					$held_key_for_user = $this->hold_coupon_for_users( $coupon, $coupon_aliases, $user_alias );
@@ -2398,7 +2397,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return true;
 		}
 
-		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
 		return $order_data_store->get_stored_recorded_coupon_usage_counts( $this );
 	}
 

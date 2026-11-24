@@ -1090,7 +1090,6 @@ function wc_update_coupon_usage_counts( $order_id ) {
 	if ( $is_invalid && $has_recorded ) {
 		$action = 'reduce';
 		if ( $data_store->has_callable( 'clear_recorded_coupon_usage_counts' ) ) {
-			// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
 			if ( ! $data_store->clear_recorded_coupon_usage_counts( $order ) ) {
 				// Another request already gave the uses back, or changed the order status since this order was loaded.
 				wc_release_coupons_for_order( $order );
@@ -1102,7 +1101,6 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 		if ( $data_store->has_callable( 'get_item_ids' ) ) {
 			try {
-				// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
 				$stored_item_ids = $data_store->get_item_ids( $order, 'coupon' );
 			} catch ( Exception $e ) {
 				// Give nothing back rather than risk giving a use back twice.
