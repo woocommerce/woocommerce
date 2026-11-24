@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use WC_Helper_Order;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -414,5 +415,6 @@ class OrderUpdateTest extends WC_Unit_Test_Case {
 	 */
 	private function set_feature( bool $enabled ): void {
 		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', $enabled ? 'yes' : 'no' );
+		AbilitiesLoader::init_extensions();
 	}
 }
