@@ -150,6 +150,7 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 		/** This action is documented in includes/admin/meta-boxes/class-wc-meta-box-order-actions.php */
 		do_action( 'woocommerce_before_resend_order_emails', $order, $email->id );
 
+		$failed = false;
 		add_action( 'woocommerce_email_sent', $capture, 10, 2 );
 		try {
 			if ( isset( $email_args['trigger_callback'] ) ) {
@@ -158,9 +159,19 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 				$email->trigger( $order->get_id(), $order );
 			}
 		} catch ( \Throwable $e ) {
+			$failed = true;
 			wc_get_logger()->error( sprintf( 'Sending the %1$s email of order %2$d failed: %3$s', $email_name, $order->get_id(), $e->getMessage() ), array( 'source' => 'extensible-abilities' ) );
 		} finally {
 			remove_action( 'woocommerce_email_sent', $capture, 10 );
+		}
+
+		if ( ! $sent && $failed ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_email_send_failed',
+				/* translators: %s: email name. */
+				sprintf( __( 'The %s email failed with an error before the site sent it. Ask the store owner to check the extensible-abilities log in WooCommerce > Status > Logs.', 'woocommerce' ), $email_name ),
+				array( 'status' => 500 )
+			);
 		}
 
 		if ( ! $sent ) {

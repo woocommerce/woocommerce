@@ -1480,6 +1480,39 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should point to the logs, not the mail setup, when the trigger callback of an order email throws.
+	 */
+	public function test_order_send_email_reports_a_throwing_trigger_callback(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'        => 'test-ext',
+						'email'            => 'broken',
+						'email_class'      => 'WC_Email_Customer_Note',
+						'description'      => 'Throws before it sends.',
+						'trigger_callback' => static function () {
+							throw new \RuntimeException( 'Broken template.' );
+						},
+					)
+				);
+			}
+		);
+
+		$result = $this->run_ability_response(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => \WC_Helper_Order::create_order()->get_id(),
+				'email' => 'test-ext:broken',
+			)
+		);
+
+		$this->assertSame( 'woocommerce_ability_order_email_send_failed', $result->get_data()['code'] );
+		$this->assertStringContainsString( 'WooCommerce > Status > Logs', $result->get_data()['message'] );
+	}
+
+	/**
 	 * @testdox Should refuse an order email that is already registered, and keep the first one.
 	 */
 	public function test_an_order_email_registered_twice_is_refused(): void {
