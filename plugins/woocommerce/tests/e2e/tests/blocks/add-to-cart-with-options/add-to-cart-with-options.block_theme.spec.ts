@@ -291,28 +291,78 @@ test.describe( 'Add to Cart + Options Block', () => {
 						.locator( '.wp-block-accordion-panel' )
 				: page.getByLabel( 'Additional Information', { exact: true } );
 
-		await test.step( 'follows the flow layout of its sibling blocks', async () => {
-			const [ previous, current, next ] = await page
+		await test.step( 'follows the flow layout of its parent', async () => {
+			const layout = await page
 				.locator(
 					'[data-block-name="woocommerce/add-to-cart-with-options"]'
 				)
-				.evaluate( ( block ) =>
-					[
-						block.previousElementSibling,
-						block,
-						block.nextElementSibling,
-					].map( ( element ) => {
-						const { x, top, bottom, width } = (
-							element as Element
-						 ).getBoundingClientRect();
-						return { x, top, bottom, width };
-					} )
-				);
+				.evaluate( ( block ) => {
+					const round = ( value: number ) =>
+						Math.round( value * 10 ) / 10;
+					const px = ( element: Element, property: string ) =>
+						parseFloat(
+							getComputedStyle( element ).getPropertyValue(
+								property
+							)
+						);
+					const box = block.getBoundingClientRect();
+					const parent = block.parentElement as Element;
+					const parentBox = parent.getBoundingClientRect();
+					const gaps = [];
+					// The space between the block and each sibling is only the
+					// collapsed margins of the two, with nothing from inside
+					// the block.
+					if ( block.previousElementSibling ) {
+						gaps.push( {
+							actual: round(
+								box.top -
+									block.previousElementSibling.getBoundingClientRect()
+										.bottom
+							),
+							expected: round(
+								Math.max(
+									px(
+										block.previousElementSibling,
+										'margin-block-end'
+									),
+									px( block, 'margin-block-start' )
+								)
+							),
+						} );
+					}
+					if ( block.nextElementSibling ) {
+						gaps.push( {
+							actual: round(
+								block.nextElementSibling.getBoundingClientRect()
+									.top - box.bottom
+							),
+							expected: round(
+								Math.max(
+									px( block, 'margin-block-end' ),
+									px(
+										block.nextElementSibling,
+										'margin-block-start'
+									)
+								)
+							),
+						} );
+					}
+					return {
+						width: round( box.width ),
+						parentContentWidth: round(
+							parentBox.width -
+								px( parent, 'padding-inline-start' ) -
+								px( parent, 'padding-inline-end' ) -
+								px( parent, 'border-inline-start-width' ) -
+								px( parent, 'border-inline-end-width' )
+						),
+						gaps,
+					};
+				} );
 
-			expect( current.x ).toBe( previous.x );
-			expect( current.width ).toBe( previous.width );
-			expect( current.top - previous.bottom ).toBeCloseTo(
-				next.top - current.bottom
+			expect( layout.width ).toBe( layout.parentContentWidth );
+			expect( layout.gaps.map( ( gap ) => gap.actual ) ).toEqual(
+				layout.gaps.map( ( gap ) => gap.expected )
 			);
 
 			// The first inner block gets no flow margin while no notice is shown.
