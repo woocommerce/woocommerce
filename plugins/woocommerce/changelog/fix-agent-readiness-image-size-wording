@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+AI shopping health no longer says "main image" for the image size check, which also checks variation images.
