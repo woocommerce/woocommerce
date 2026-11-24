@@ -620,6 +620,10 @@
 			"per_page": {
 				"type": "integer",
 				"description": "Maximum number of items requested per page."
+			},
+			"total": {
+				"type": "integer",
+				"description": "Total number of matching orders across all pages."
 			}
 		},
 		"additionalProperties": false

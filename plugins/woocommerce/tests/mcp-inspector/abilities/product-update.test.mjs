@@ -52,11 +52,64 @@ describe( ABILITY, () => {
 		assert.equal( product.stock_status, 'outofstock' );
 	} );
 
-	// The ability checks the product's own permission first, so an unknown ID reads as a permission error.
 	test( 'refuses an unknown product', () =>
 		refused(
 			ABILITY,
 			{ id: 999999999, name: 'MCP missing' },
-			/permission/i
+			/Product not found/
 		) );
+} );
+
+describe( `${ ABILITY } with a GTIN`, () => {
+	const SKUS = [ 'mcp-update-gtin', 'mcp-update-gtin-other' ];
+	const GTIN = '9990000000011';
+	let id;
+	let other;
+	before( async () => {
+		await seed( 'remove-products', { skus: SKUS } );
+		( { id } = await seed( 'product', { sku: SKUS[ 0 ] } ) );
+		( { id: other } = await seed( 'product', { sku: SKUS[ 1 ] } ) );
+	} );
+	after( () => seed( 'remove-products', { skus: SKUS } ) );
+
+	const findByGtin = async () =>
+		(
+			await execute( 'woocommerce/products-query', {
+				global_unique_id: [ GTIN ],
+			} )
+		).products.map( ( product ) => product.id );
+
+	test( 'sets a GTIN that products-query finds', async () => {
+		const { product } = await execute( ABILITY, {
+			id,
+			global_unique_id: GTIN,
+		} );
+
+		assert.equal( product.global_unique_id, GTIN );
+		assert.deepEqual( await findByGtin(), [ id ] );
+	} );
+
+	test( 'refuses a GTIN another product has', () =>
+		refused(
+			ABILITY,
+			{ id: other, global_unique_id: GTIN },
+			/duplicated GTIN/
+		) );
+
+	test( 'refuses a GTIN with letters', () =>
+		refused(
+			ABILITY,
+			{ id, global_unique_id: 'abc' },
+			/input\[global_unique_id\]/
+		) );
+
+	test( 'removes the GTIN with an empty string', async () => {
+		const { product } = await execute( ABILITY, {
+			id,
+			global_unique_id: '',
+		} );
+
+		assert.equal( product.global_unique_id, '' );
+		assert.deepEqual( await findByGtin(), [] );
+	} );
 } );

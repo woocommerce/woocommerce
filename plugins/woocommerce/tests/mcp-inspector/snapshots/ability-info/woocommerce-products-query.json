@@ -16,6 +16,16 @@
 				"type": "string",
 				"description": "Limit results to products with SKUs that partially match this string. Use * to match products with any non-empty SKU."
 			},
+			"global_unique_id": {
+				"type": "array",
+				"description": "Exact GTINs, UPCs, EANs or ISBNs. Matches any of them. Finds variations too, unless category, tag or brand is also sent.",
+				"maxItems": 100,
+				"items": {
+					"type": "string",
+					"minLength": 1,
+					"pattern": "^[0-9Xx\\-]*(?![\\s\\S])"
+				}
+			},
 			"status": {
 				"type": "string",
 				"enum": [
@@ -138,6 +148,9 @@
 							]
 						},
 						"sku": {
+							"type": "string"
+						},
+						"global_unique_id": {
 							"type": "string"
 						},
 						"currency": {
@@ -611,6 +624,10 @@
 			"per_page": {
 				"type": "integer",
 				"description": "Maximum number of items requested per page."
+			},
+			"total": {
+				"type": "integer",
+				"description": "Total number of matching products across all pages."
 			}
 		},
 		"additionalProperties": false

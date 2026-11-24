@@ -42,7 +42,7 @@
 		"annotations": {
 			"readonly": false,
 			"destructive": true,
-			"idempotent": true
+			"idempotent": false
 		},
 		"show_in_rest": true,
 		"mcp": {

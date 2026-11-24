@@ -11,7 +11,7 @@
 			},
 			"type": {
 				"type": "string",
-				"description": "Product type, from the product types that WooCommerce and extensions register. Fields each type takes. simple: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, virtual, downloadable, weight, dimensions, shipping_class, regular_price, sale_price, date_on_sale_from, date_on_sale_to, tax_status, manage_stock, stock_quantity, stock_status, sold_individually; grouped: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, grouped_products; external: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, regular_price, sale_price, date_on_sale_from, date_on_sale_to, tax_status, external_url, button_text; variable: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, attributes, variations, tax_status, sold_individually, weight, dimensions, shipping_class; variation: sku, description, status, virtual, downloadable, regular_price, sale_price, manage_stock, stock_quantity, stock_status.",
+				"description": "Product type, from the product types that WooCommerce and extensions register. Fields each type takes. simple: name, sku, global_unique_id, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, virtual, downloadable, weight, dimensions, shipping_class, regular_price, sale_price, date_on_sale_from, date_on_sale_to, tax_status, manage_stock, stock_quantity, stock_status, sold_individually; grouped: name, sku, global_unique_id, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, grouped_products; external: name, sku, global_unique_id, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, regular_price, sale_price, date_on_sale_from, date_on_sale_to, tax_status, external_url, button_text; variable: name, sku, global_unique_id, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, attributes, variations, tax_status, sold_individually, weight, dimensions, shipping_class, manage_stock, stock_quantity; variation: sku, global_unique_id, description, status, virtual, downloadable, regular_price, sale_price, manage_stock, stock_quantity, stock_status. Changing the type of a variable product deletes all its variations for good. Only a change between two variable types can keep them, when the extension that owns one of the types says so. A variation cannot change its type.",
 				"enum": [
 					"simple",
 					"grouped",
@@ -26,42 +26,63 @@
 			},
 			"attributes": {
 				"type": "array",
-				"description": "Attributes of the product, such as Size with the options S, M and L. Each variation picks one option of every attribute that is for variations. A name is an attribute of this product only, unless global is true or an id names a global attribute. The options of a global attribute are term names or slugs, and missing terms are created. Applies to: variable.",
+				"description": "On a variable product, the attributes with their options. On a variation, the option it picks for each attribute of its parent. Applies to: variable.",
 				"items": {
-					"type": "object",
-					"properties": {
-						"id": {
-							"type": "integer",
-							"description": "ID of a global attribute. 0 or absent for an attribute of this product only.",
-							"minimum": 0
-						},
-						"name": {
-							"type": "string"
-						},
-						"global": {
-							"type": "boolean",
-							"description": "Use the global attribute with this name. The input is refused when there is none. Defaults to false."
-						},
-						"options": {
-							"type": "array",
-							"items": {
-								"type": "string"
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer",
+									"description": "ID of a global attribute. 0 or absent for an attribute of this product only.",
+									"minimum": 0
+								},
+								"name": {
+									"type": "string"
+								},
+								"global": {
+									"type": "boolean",
+									"description": "Use the global attribute with this name. The input is refused when there is none. Defaults to false."
+								},
+								"options": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									},
+									"minItems": 1
+								},
+								"visible": {
+									"type": "boolean",
+									"description": "Whether the attribute shows on the product page. Defaults to true."
+								},
+								"variation": {
+									"type": "boolean",
+									"description": "Whether the variations pick an option of this attribute. Defaults to true. An attribute that is not for variations only shows on the product page."
+								}
 							},
-							"minItems": 1
+							"required": [
+								"options"
+							],
+							"additionalProperties": false
 						},
-						"visible": {
-							"type": "boolean",
-							"description": "Whether the attribute shows on the product page. Defaults to true."
-						},
-						"variation": {
-							"type": "boolean",
-							"description": "Whether the variations pick an option of this attribute. Defaults to true. An attribute that is not for variations only shows on the product page."
+						{
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer",
+									"description": "ID of a global attribute. 0 or absent for an attribute of this product only.",
+									"minimum": 0
+								},
+								"name": {
+									"type": "string"
+								},
+								"option": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
 						}
-					},
-					"required": [
-						"options"
-					],
-					"additionalProperties": false
+					]
 				}
 			},
 			"variations": {
@@ -104,6 +125,11 @@
 						"sku": {
 							"type": "string"
 						},
+						"global_unique_id": {
+							"type": "string",
+							"description": "GTIN, UPC, EAN or ISBN, unique in the store. Empty removes it.",
+							"pattern": "^[0-9Xx\\-]*(?![\\s\\S])"
+						},
 						"regular_price": {
 							"type": "string",
 							"description": "Decimal price as a string, without a currency symbol or thousand separators.",
@@ -134,7 +160,8 @@
 							"description": "Whether the product gives the customer files to download."
 						},
 						"manage_stock": {
-							"type": "boolean"
+							"type": "boolean",
+							"description": "Whether the product tracks its stock quantity. On a variable product, a variation that does not track its own stock uses the stock of the product."
 						},
 						"stock_quantity": {
 							"type": "integer",
@@ -155,6 +182,11 @@
 			},
 			"sku": {
 				"type": "string"
+			},
+			"global_unique_id": {
+				"type": "string",
+				"description": "GTIN, UPC, EAN or ISBN, unique in the store. Empty removes it.",
+				"pattern": "^[0-9Xx\\-]*(?![\\s\\S])"
 			},
 			"regular_price": {
 				"type": "string",
@@ -194,11 +226,11 @@
 			},
 			"manage_stock": {
 				"type": "boolean",
-				"description": "Applies to: simple, variation."
+				"description": "Whether the product tracks its stock quantity. On a variable product, a variation that does not track its own stock uses the stock of the product. Applies to: simple, variable, variation."
 			},
 			"stock_quantity": {
 				"type": "integer",
-				"description": "Available stock quantity when product-level stock management is used. Applies to: simple, variation."
+				"description": "Available stock quantity when product-level stock management is used. Applies to: simple, variable, variation."
 			},
 			"stock_status": {
 				"type": "string",
@@ -366,6 +398,9 @@
 						]
 					},
 					"sku": {
+						"type": "string"
+					},
+					"global_unique_id": {
 						"type": "string"
 					},
 					"currency": {
@@ -864,6 +899,9 @@
 							]
 						},
 						"sku": {
+							"type": "string"
+						},
+						"global_unique_id": {
 							"type": "string"
 						},
 						"currency": {

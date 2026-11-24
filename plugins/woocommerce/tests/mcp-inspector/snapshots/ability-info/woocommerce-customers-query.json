@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/customers-query",
 	"label": "Query customers",
-	"description": "Find registered customers by ID or role, with their order count and total spent. Names, usernames, emails, phone numbers and addresses are withheld. Guest customers are not included.",
+	"description": "Find registered and guest customers by ID, user ID, name or email, with their order count, total spent and activity dates, as WooCommerce Analytics counts them. A registered customer appears once Analytics has recorded them: when they register, order, or visit signed in, or the store imports historical data. Guest orders with the same email count as one guest. Core fields leave out names, usernames, emails, phone numbers and addresses.",
 	"input_schema": {
 		"type": "object",
 		"properties": {
@@ -22,28 +22,45 @@
 				},
 				"description": "Leave out these customer IDs."
 			},
-			"role": {
+			"user_id": {
+				"type": "integer",
+				"description": "Return only the registered customer with this WordPress user ID, such as the customer_id of an order.",
+				"minimum": 1
+			},
+			"search": {
 				"type": "string",
-				"description": "User role to list. Use all for every registered user. Defaults to customer.",
+				"description": "With search_by name, return only customers whose name contains this text. With search_by email, return only the customer with this exact email address.",
+				"minLength": 1,
+				"maxLength": 200
+			},
+			"search_by": {
+				"type": "string",
+				"enum": [
+					"name",
+					"email"
+				],
+				"default": "name"
+			},
+			"type": {
+				"type": "string",
 				"enum": [
 					"all",
-					"administrator",
-					"editor",
-					"author",
-					"contributor",
-					"subscriber",
-					"customer",
-					"shop_manager"
+					"registered",
+					"guest"
 				],
-				"default": "customer"
+				"default": "all"
 			},
 			"orderby": {
 				"type": "string",
 				"enum": [
+					"last_active",
+					"last_order",
 					"registered_date",
+					"order_count",
+					"total_spent",
 					"id"
 				],
-				"default": "registered_date"
+				"default": "last_active"
 			},
 			"order": {
 				"type": "string",
@@ -78,26 +95,33 @@
 					"type": "object",
 					"properties": {
 						"id": {
-							"type": "integer"
+							"type": "integer",
+							"description": "Analytics customer ID. Guests have one too."
+						},
+						"user_id": {
+							"type": "integer",
+							"description": "WordPress user ID. Only registered customers have one."
 						},
 						"role": {
 							"type": "string"
 						},
-						"is_paying_customer": {
-							"type": "boolean"
-						},
 						"order_count": {
-							"type": "integer"
+							"type": "integer",
+							"description": "Orders in the statuses that Analytics counts."
 						},
 						"total_spent": {
 							"type": "string",
-							"description": "Decimal amount in the store currency, from paid orders."
+							"description": "Decimal amount of those orders after refunds, in the store currency."
 						},
-						"date_created": {
+						"date_registered": {
 							"type": "string",
 							"format": "date-time"
 						},
-						"date_modified": {
+						"date_last_active": {
+							"type": "string",
+							"format": "date-time"
+						},
+						"date_last_order": {
 							"type": "string",
 							"format": "date-time"
 						}

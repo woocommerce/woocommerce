@@ -30,6 +30,13 @@ describe( ABILITY, () => {
 		);
 	} );
 
+	test( 'refuses to trash a product in the trash again', () =>
+		refused(
+			ABILITY,
+			{ id },
+			new RegExp( `Product ${ id } is already in the trash` )
+		) );
+
 	test( 'deletes it for good with force', async () => {
 		assert.deepEqual( await execute( ABILITY, { id, force: true } ), {
 			id,
@@ -43,7 +50,7 @@ describe( ABILITY, () => {
 	} );
 
 	test( 'refuses a product that is gone', () =>
-		refused( ABILITY, { id }, /permission/i ) );
+		refused( ABILITY, { id }, /Product not found/ ) );
 } );
 
 // Product saves write shared rows, such as a term count, so two at once can deadlock. The loser of the deadlock must

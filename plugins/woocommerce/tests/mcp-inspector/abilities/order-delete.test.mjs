@@ -29,12 +29,12 @@ describe( ABILITY, () => {
 		assert.equal( await statusOf( id ), 'trash' );
 	} );
 
-	test( 'trashes an order in the trash again', async () => {
-		assert.deepEqual( await execute( ABILITY, { id } ), {
-			id,
-			status: 'trash',
-		} );
-	} );
+	test( 'refuses to trash an order in the trash again', () =>
+		refused(
+			ABILITY,
+			{ id },
+			new RegExp( `Order ${ id } is already in the trash` )
+		) );
 
 	test( 'deletes it for good with force', async () => {
 		assert.deepEqual( await execute( ABILITY, { id, force: true } ), {

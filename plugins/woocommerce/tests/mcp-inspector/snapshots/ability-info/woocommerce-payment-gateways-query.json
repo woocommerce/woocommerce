@@ -60,6 +60,10 @@
 			"per_page": {
 				"type": "integer",
 				"description": "Maximum number of items requested per page."
+			},
+			"total": {
+				"type": "integer",
+				"description": "Total number of matching payment gateways."
 			}
 		},
 		"additionalProperties": false

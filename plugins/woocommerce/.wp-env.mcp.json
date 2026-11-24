@@ -3,7 +3,7 @@
 	"phpVersion": "8.1",
 	"testsEnvironment": false,
 	"port": 8087,
-	"plugins": [ ".", "https://downloads.wordpress.org/plugin/mcp-adapter.0.7.1.zip" ],
+	"plugins": [ ".", "https://downloads.wordpress.org/plugin/mcp-adapter.0.7.2.zip" ],
 	"mappings": {
 		"wp-content/mu-plugins/mcp-inspector-accept-mail.php": "./tests/mcp-inspector/env/accept-mail.php"
 	},
