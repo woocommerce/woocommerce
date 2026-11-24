@@ -2915,15 +2915,9 @@ importers:
 
   plugins/woocommerce-beta-tester:
     dependencies:
-      '@emotion/react':
-        specifier: ^11.11.1
-        version: 11.14.0(@types/react@18.3.28)(react@18.3.1)
       '@types/prop-types':
         specifier: ^15.7.11
         version: 15.7.15
-      '@woocommerce/components':
-        specifier: workspace:*
-        version: link:../../packages/js/components
       '@woocommerce/data':
         specifier: workspace:*
         version: link:../../packages/js/data
@@ -3274,9 +3268,6 @@ importers:
       downshift:
         specifier: ^9.0.8
         version: 9.3.2(react@18.3.1)
-      grapheme-splitter:
-        specifier: ^1.0.4
-        version: 1.0.4
       gridicons:
         specifier: ^3.4.2
         version: 3.4.2(react@18.3.1)
@@ -3491,6 +3482,9 @@ importers:
       jest-environment-node:
         specifier: catalog:tooling
         version: 29.5.0
+      jest-fixed-jsdom:
+        specifier: catalog:tooling
+        version: 0.0.10(jest-environment-jsdom@30.5.2)
       md5:
         specifier: ^2.3.0
         version: 2.3.0
@@ -3566,9 +3560,6 @@ importers:
       webpack-fix-style-only-entries:
         specifier: ^0.6.1
         version: 0.6.1
-      whatwg-fetch:
-        specifier: ^3.6.20
-        version: 3.6.20
 
   plugins/woocommerce/client/blocks:
     dependencies:
@@ -3668,9 +3659,6 @@ importers:
       fast-deep-equal:
         specifier: ^3.1.3
         version: 3.1.3
-      fast-sort:
-        specifier: ^3.4.0
-        version: 3.4.1
       html-react-parser:
         specifier: 3.0.4
         version: 3.0.4(react@18.3.1)
@@ -3692,9 +3680,6 @@ importers:
       use-debounce:
         specifier: 9.0.4
         version: 9.0.4(react@18.3.1)
-      usehooks-ts:
-        specifier: ^2.9.1
-        version: 2.16.0(react@18.3.1)
       wordpress-components:
         specifier: npm:@wordpress/components@14.2.0
         version: '@wordpress/components@14.2.0(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react-with-direction@1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(reakit-utils@0.15.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(redux@4.2.1)'
@@ -13990,9 +13975,6 @@ packages:
   fast-safe-stringify@2.1.1:
     resolution: {integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==}
 
-  fast-sort@3.4.1:
-    resolution: {integrity: sha512-76uvGPsF6So53sZAqenP9UVT3p5l7cyTHkLWVCMinh41Y8NDrK1IYXJgaBMfc1gk7nJiSRZp676kddFG2Aa5+A==}
-
   fast-uri@3.1.9:
     resolution: {integrity: sha512-hS/0Wt3Ya043oKXs0sIxrMpKQITXhMLIrVAKKXi4gozGC9v7YRWVnXIZzjNPTO02M9BdxLCWqK1yRXgNziVyJQ==}
 
@@ -14497,9 +14479,6 @@ packages:
   gradient-parser@1.1.1:
     resolution: {integrity: sha512-Hu0YfNU+38EsTmnUfLXUKFMXq9yz7htGYpF4x+dlbBhUCvIvzLt0yVLT/gJRmvLKFJdqNFrz4eKkIUjIXSr7Tw==}
     engines: {node: '>=0.10.0'}
-
-  grapheme-splitter@1.0.4:
-    resolution: {integrity: sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==}
 
   graphlib@2.1.8:
     resolution: {integrity: sha512-jcLLfkpoVGmH7/InMC/1hIvOPSUh38oJtGhvrOFGzioE1DZ+0YW16RgmOJhHiuWTvGiJQ9Z1Ik43JvkRPRvE+A==}
@@ -19925,12 +19904,6 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  usehooks-ts@2.16.0:
-    resolution: {integrity: sha512-bez95WqYujxp6hFdM/CpRDiVPirZPxlMzOH2QB8yopoKQMXpscyZoxOjpEdaxvV+CAWUDSM62cWnqHE0E/MZ7w==}
-    engines: {node: '>=16.15.0'}
-    peerDependencies:
-      react: ^16.8.0  || ^17 || ^18
-
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
@@ -20170,9 +20143,6 @@ packages:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
     deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
-
-  whatwg-fetch@3.6.20:
-    resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
 
   whatwg-mimetype@3.0.0:
     resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
@@ -36872,8 +36842,6 @@ snapshots:
 
   fast-safe-stringify@2.1.1: {}
 
-  fast-sort@3.4.1: {}
-
   fast-uri@3.1.9: {}
 
   fast-xml-builder@1.3.1:
@@ -37483,8 +37451,6 @@ snapshots:
   gradient-parser@1.0.2: {}
 
   gradient-parser@1.1.1: {}
-
-  grapheme-splitter@1.0.4: {}
 
   graphlib@2.1.8:
     dependencies:
@@ -44036,11 +44002,6 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  usehooks-ts@2.16.0(react@18.3.1):
-    dependencies:
-      lodash.debounce: 4.0.8
-      react: 18.3.1
-
   util-deprecate@1.0.2: {}
 
   utila@0.4.0: {}
@@ -44593,8 +44554,6 @@ snapshots:
   whatwg-encoding@3.1.1:
     dependencies:
       iconv-lite: 0.6.3
-
-  whatwg-fetch@3.6.20: {}
 
   whatwg-mimetype@3.0.0: {}
 

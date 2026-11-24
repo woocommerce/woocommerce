@@ -14,7 +14,6 @@
 		// Temporary for resolving the test data json, remove when moving to using the API
 		"resolveJsonModule": true,
 
-		"jsxImportSource": "@emotion/react",
 
 		// Enable strictest settings like strictNullChecks & noImplicitAny.
 		"strict": true,

@@ -59,6 +59,12 @@ class WC_Beta_Tester_Live_Branches {
 		);
 
 		wp_enqueue_script( 'woocommerce-beta-tester-live-branches' );
+		wp_enqueue_style(
+			'woocommerce-beta-tester-live-branches',
+			WC_Beta_Tester::instance()->plugin_url() . '/build/style-live-branches.css',
+			array(),
+			$script_asset['version']
+		);
 	}
 
 	/**

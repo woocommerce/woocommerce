@@ -50,6 +50,25 @@ describe( 'truncateRenderableHTML', () => {
 		);
 	} );
 
+	test( 'it still truncates in browsers without Intl.Segmenter', () => {
+		const segmenter = Intl.Segmenter;
+		Intl.Segmenter = undefined;
+
+		try {
+			expect( truncateRenderableHTML( '<div>abcdef</div>', 3 ) ).toBe(
+				'<div>abc</div>...'
+			);
+		} finally {
+			Intl.Segmenter = segmenter;
+		}
+	} );
+
+	test( 'it should keep a base letter and its combining mark together', () => {
+		expect( truncateRenderableHTML( '<div>e\u0301clair</div>', 1 ) ).toBe(
+			'<div>e\u0301</div>...'
+		);
+	} );
+
 	test( 'it should preserve whole words when truncated', () => {
 		const sample = '<div>this is a test sentence</div>';
 		// it should return 'this is a' (9 chars) when length 11 is given
@@ -82,7 +101,7 @@ describe( 'truncateRenderableHTML', () => {
 		);
 
 		expect( truncateRenderableHTML( hindiSample, 3 ) ).toBe(
-			'<div>अनुच्</div>...'
+			'<div>अनुच्छे</div>...'
 		);
 
 		const demonicSample = '<div>Z͑ͫ̓ͪ̂ͫ̽͏̴̙̤̞͉͚̯̞̠͍A̴̵̜̰͔ͫ͗͢L̠ͨͧͩ͘G̴̻͈͍͔̹̑͗̎̅͛́Ǫ̵̹̻̝̳͂̌̌͘!͖̬̰̙̗̿̋ͥͥ̂ͣ̐́́͜͞</div>';
