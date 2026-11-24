@@ -1,3 +1,4 @@
 Significance: patch
-Type: dev
-Comment: Replace small dependencies in the WooCommerce Blocks and Admin bundles.
+Type: tweak
+
+Keep letter clusters together when shortening inbox notes in browsers that support grapheme segmentation.
