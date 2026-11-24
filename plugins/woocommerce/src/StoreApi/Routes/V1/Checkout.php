@@ -612,6 +612,19 @@ class Checkout extends AbstractCartRoute {
 		wc_log_order_step( '[Store API #3] Updated customer data from request' );
 
 		/**
+		 * Fees and discounts can depend on the chosen payment method, so the session needs the posted one before totals
+		 * are calculated. An unavailable one is left for update_order_from_request() to reject, after the draft order is stored.
+		 */
+		try {
+			$payment_method = $this->get_request_payment_method( $request );
+		} catch ( RouteException $e ) {
+			$payment_method = null;
+		}
+		if ( null !== $payment_method ) {
+			WC()->session->set( 'chosen_payment_method', $payment_method->id );
+		}
+
+		/**
 		 * Before triggering validation, ensure totals are current and in turn, things such as shipping costs are present.
 		 * This is so plugins that validate other cart data (e.g. conditional shipping and payments) can access this data.
 		 */

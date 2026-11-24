@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Charge fees and discounts for the payment method a shopper picks when placing an order with the Checkout block.
