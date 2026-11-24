@@ -69,6 +69,7 @@ class WC_Email_Order_Withdrawal_Block_Email_Test extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'We received your withdrawal request', $content );
 		$this->assertStringContainsString( 'Please take back the blue mug.', $content );
 		$this->assertStringContainsString( 'Specific items only', $content );
+		$this->assertStringNotContainsString( 'email-order-details', $content );
 		$this->assertStringContainsString( '. All Rights Reserved.', $content, 'Only the block email template renders this footer.' );
 	}
 
