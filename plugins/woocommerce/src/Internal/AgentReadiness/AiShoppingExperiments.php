@@ -51,6 +51,15 @@ final class AiShoppingExperiments {
 	}
 
 	/**
+	 * The experiments' labels joined into one list, for example "A, B, and C".
+	 *
+	 * @param array<string, array{0:string,1:array<int,string>}>|null $experiments Experiments. Defaults to get_experiments().
+	 */
+	public static function get_list( ?array $experiments = null ): string {
+		return wp_sprintf( '%l', array_column( $experiments ?? self::get_experiments(), 0 ) );
+	}
+
+	/**
 	 * Build the feature description shown next to the checkbox on the Features page.
 	 *
 	 * @param array<string, array{0:string,1:array<int,string>}>|null $experiments Experiments to list. Defaults to get_experiments().
@@ -62,7 +71,7 @@ final class AiShoppingExperiments {
 		$description = sprintf(
 			/* translators: %s: list of experiments, for example "WebMCP on store forms, Markdown versions of pages, and AI training notices". */
 			__( 'Turn on newer ways for AI assistants to read and shop your store: %s.', 'woocommerce' ),
-			wp_sprintf( '%l', array_column( $experiments, 0 ) )
+			self::get_list( $experiments )
 		);
 
 		if ( isset( $experiments[ self::AI_TRAINING_NOTICES ] ) ) {

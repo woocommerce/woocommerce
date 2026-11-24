@@ -132,7 +132,7 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox While the feature is off, Extra details marks the items the experiments add and offers to add the missing ones.
+	 * @testdox While the feature is off and an item the experiments add is missing, Extra details offers them, naming all of them.
 	 */
 	public function test_declared_offers_missing_items_while_off(): void {
 		update_option( 'woocommerce_feature_ai_shopping_experiments_enabled', 'no' );
@@ -147,15 +147,14 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame(
-			array( 'ai-txt', 'sitemap-md', 'markdown-pages', 'tdmrep' ),
-			$this->experiment_names( $declared ),
-			'Mapped items are marked, wherever they are grouped; other items are not'
-		);
 		$this->assertFalse( $declared['experiments']['enabled'] );
-		$this->assertSame( 'Experiment', $declared['experiments']['tag'] );
-		$this->assertSame( 'WooCommerce can add 2 of these with AI shopping experiments.', $declared['experiments']['offer']['title'], 'Counts only mapped items that were not found' );
-		$this->assertSame( 'They’re marked below. These standards aren’t settled yet, and few AI assistants use them. You can turn them off at any time in Features.', $declared['experiments']['offer']['text'] );
+		$this->assertSame( 'Add newer ways for AI assistants to read and shop your store', $declared['experiments']['offer']['title'] );
+		$this->assertSame(
+			'AI shopping experiments add WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, a Markdown sitemap and AI catalog, and AI training notices. The standards aren’t settled, and few AI assistants use them yet. Turn them off at any time in Features.',
+			$declared['experiments']['offer']['text'],
+			'Every experiment is named, as on the Features page, even when only some of their items are missing'
+		);
+		$this->assertArrayNotHasKey( 'experiment', $declared['groups'][0]['items'][0], 'Items are not marked' );
 		$this->assertSame( 'Turn on AI shopping experiments', $declared['experiments']['offer']['button'] );
 		$this->assertSame( 'AI shopping experiments are on. Run the check again to see the new files.', $declared['experiments']['turned_on']['text'] );
 		$this->assertSame( 'Run check', $declared['experiments']['turned_on']['button'] );
@@ -195,7 +194,7 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A user who can't manage WooCommerce gets no notice and no Experiment marks.
+	 * @testdox A user who can't manage WooCommerce gets no notice.
 	 */
 	public function test_declared_hides_experiments_without_manage_woocommerce(): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
@@ -203,7 +202,6 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 		$declared = $this->declared_view( array( 'ai-txt' => false ) );
 
 		$this->assertNull( $declared['experiments'] );
-		$this->assertSame( array(), $this->experiment_names( $declared ) );
 	}
 
 	/**
@@ -232,23 +230,5 @@ class AiShoppingExperimentsTest extends WC_Unit_Test_Case {
 			)
 		);
 		return wc_get_container()->get( ReadinessCheckPage::class )->view()['declared'];
-	}
-
-	/**
-	 * Names of the items marked as added by the experiments, across groups.
-	 *
-	 * @param array<string, mixed> $declared The Extra details card.
-	 * @return array<int, string>
-	 */
-	private function experiment_names( array $declared ): array {
-		$names = array();
-		foreach ( $declared['groups'] as $group ) {
-			foreach ( $group['items'] as $item ) {
-				if ( $item['experiment'] ) {
-					$names[] = $item['name'];
-				}
-			}
-		}
-		return $names;
 	}
 }

@@ -1095,7 +1095,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * Whether the AI shopping experiments feature is on, or null for a user who can't manage
-	 * WooCommerce, who sees no offer to turn it on and no Experiment tags.
+	 * WooCommerce, who sees no offer to turn it on.
 	 */
 	private function experiments_enabled(): ?bool {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -1107,32 +1107,30 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	/**
 	 * Protocols and files the store serves to agents, as information, never pass or fail: how many were
 	 * found, then every item under where it lives. Items the scan couldn't read are under Not checked yet.
-	 * Items the AI shopping experiments add are marked, with the notice about them. Null with no items in the report.
+	 * Leads with the AI shopping experiments notice. Null with no items in the report.
 	 *
 	 * @param array     $items          Items from the report.
-	 * @param bool|null $experiments_on Whether AI shopping experiments are on; null leaves out the notice and the marks.
-	 * @return array{title:string,badge:array{intent:string,text:string},text:string,groups:array<int, array{title:string,items:array<int, array{name:string,found:bool|null,experiment:bool}>}>,experiments:array<string, mixed>|null}|null
+	 * @param bool|null $experiments_on Whether AI shopping experiments are on; null leaves out the notice.
+	 * @return array{title:string,badge:array{intent:string,text:string},text:string,groups:array<int, array{title:string,items:array<int, array{name:string,found:bool|null}>}>,experiments:array<string, mixed>|null}|null
 	 */
 	private static function declared( array $items, ?bool $experiments_on = null ): ?array {
 		$items = array_values( array_filter( $items, 'is_array' ) );
 		if ( array() === $items ) {
 			return null;
 		}
-		$titles         = array(
+		$titles = array(
 			'root'    => __( 'Files in your root folder', 'woocommerce' ),
 			'address' => __( 'Files at standard addresses', 'woocommerce' ),
 			'code'    => __( 'In your page code', 'woocommerce' ),
 			'unknown' => __( 'Not checked yet', 'woocommerce' ),
 		);
-		$experiment_ids = null === $experiments_on ? array() : AiShoppingExperiments::get_declared_item_ids();
-		$groups         = array();
+		$groups = array();
 		foreach ( $items as $item ) {
 			$found              = $item['found'] ?? null;
 			$group              = null === $found ? 'unknown' : DeclaredToAgents::group( (string) ( $item['id'] ?? '' ) );
 			$groups[ $group ][] = array(
-				'name'       => (string) ( $item['name'] ?? '' ),
-				'found'      => null === $found ? null : true === $found,
-				'experiment' => in_array( (string) ( $item['id'] ?? '' ), $experiment_ids, true ),
+				'name'  => (string) ( $item['name'] ?? '' ),
+				'found' => null === $found ? null : true === $found,
 			);
 		}
 		$found   = count( array_filter( $items, static fn( array $item ): bool => true === ( $item['found'] ?? null ) ) );
@@ -1171,36 +1169,34 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				),
 				array_keys( array_intersect_key( $titles, $groups ) )
 			),
-			'experiments' => null === $experiments_on ? null : self::experiments_notice( $items, $experiment_ids, $experiments_on ),
+			'experiments' => null === $experiments_on ? null : self::experiments_notice( $items, $experiments_on ),
 		);
 	}
 
 	/**
 	 * The AI shopping experiments notice at the top of Extra details. While the feature is off, it offers
-	 * to turn it on when any item the experiments add is not found. Once on, a line links to Features.
+	 * to turn it on when any item the experiments add is not found, naming every experiment as the
+	 * Features page does. Once on, a line links to Features.
 	 *
-	 * @param array<int, array<string, mixed>> $items          Items from the report.
-	 * @param array<int, string>               $experiment_ids Item ids the experiments add.
-	 * @param bool                             $enabled        Whether the feature is on.
+	 * @param array<int, array<string, mixed>> $items   Items from the report.
+	 * @param bool                             $enabled Whether the feature is on.
 	 * @return array<string, mixed>
 	 */
-	private static function experiments_notice( array $items, array $experiment_ids, bool $enabled ): array {
-		$missing = count(
-			array_filter(
-				$items,
-				static fn( array $item ): bool => false === ( $item['found'] ?? null ) && in_array( (string) ( $item['id'] ?? '' ), $experiment_ids, true )
-			)
+	private static function experiments_notice( array $items, bool $enabled ): array {
+		$experiment_ids = AiShoppingExperiments::get_declared_item_ids();
+		$missing        = array_filter(
+			$items,
+			static fn( array $item ): bool => false === ( $item['found'] ?? null ) && in_array( (string) ( $item['id'] ?? '' ), $experiment_ids, true )
 		);
 		return array(
 			'enabled'   => $enabled,
-			'tag'       => __( 'Experiment', 'woocommerce' ),
-			'offer'     => $enabled || 0 === $missing ? null : array(
-				'title'  => sprintf(
-					/* translators: %s: number of items not found that AI shopping experiments add. */
-					_n( 'WooCommerce can add %s of these with AI shopping experiments.', 'WooCommerce can add %s of these with AI shopping experiments.', $missing, 'woocommerce' ),
-					number_format_i18n( $missing )
+			'offer'     => $enabled || array() === $missing ? null : array(
+				'title'  => __( 'Add newer ways for AI assistants to read and shop your store', 'woocommerce' ),
+				'text'   => sprintf(
+					/* translators: %s: list of experiments, for example "WebMCP on store forms, Markdown versions of pages, and AI training notices". */
+					__( 'AI shopping experiments add %s. The standards aren’t settled, and few AI assistants use them yet. Turn them off at any time in Features.', 'woocommerce' ),
+					AiShoppingExperiments::get_list()
 				),
-				'text'   => __( 'They’re marked below. These standards aren’t settled yet, and few AI assistants use them. You can turn them off at any time in Features.', 'woocommerce' ),
 				'button' => __( 'Turn on AI shopping experiments', 'woocommerce' ),
 			),
 			'turned_on' => array(

@@ -172,10 +172,9 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 		overrides: Partial< DeclaredExperiments > = {}
 	): DeclaredExperiments => ( {
 		enabled: false,
-		tag: 'Experiment',
 		offer: {
-			title: 'WooCommerce can add 2 of these with AI shopping experiments.',
-			text: 'They’re marked below. These standards aren’t settled yet, and few AI assistants use them. You can turn them off at any time in Features.',
+			title: 'Add newer ways for AI assistants to read and shop your store',
+			text: 'AI shopping experiments add WebMCP on store forms, Markdown versions of pages, a full-content llms.txt, a Markdown sitemap and AI catalog, and AI training notices. The standards aren’t settled, and few AI assistants use them yet. Turn them off at any time in Features.',
 			button: 'Turn on AI shopping experiments',
 		},
 		turned_on: {
@@ -201,12 +200,8 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 			{
 				title: 'Files in your root folder',
 				items: [
-					{
-						name: 'ai.txt usage file',
-						found: false,
-						experiment: true,
-					},
-					{ name: 'AGENTS.md', found: false, experiment: false },
+					{ name: 'ai.txt usage file', found: false },
+					{ name: 'AGENTS.md', found: false },
 				],
 			},
 		],
@@ -228,7 +223,7 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 		mockApiFetch.mockReset();
 	} );
 
-	it( 'offers to turn the experiments on, and tags and highlights the items they add', async () => {
+	it( 'offers to turn the experiments on, naming them, above the card’s description', async () => {
 		const { container } = render(
 			<DeclaredCard
 				declared={ declared( experiments() ) }
@@ -237,29 +232,33 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 		);
 		await open();
 
-		expect(
-			screen.getByText(
-				'WooCommerce can add 2 of these with AI shopping experiments.'
-			)
-		).toBeInTheDocument();
+		const notice = container.querySelector(
+			'.wc-sales-readiness-experiments'
+		);
+		expect( notice ).toHaveTextContent(
+			'Add newer ways for AI assistants to read and shop your store'
+		);
+		expect( notice ).toHaveTextContent(
+			'AI shopping experiments add WebMCP on store forms, Markdown versions of pages'
+		);
 		expect(
 			screen.getByRole( 'button', {
 				name: 'Turn on AI shopping experiments',
 			} )
 		).toBeInTheDocument();
-		const highlighted = container.querySelectorAll(
-			'.wc-sales-readiness-declared__item--experiment'
-		);
-		expect( highlighted ).toHaveLength( 1 );
-		expect( highlighted[ 0 ] ).toHaveTextContent( 'ai.txt usage file' );
-		expect( highlighted[ 0 ] ).toHaveTextContent( 'Experiment' );
-		expect( screen.getAllByText( 'Experiment' ) ).toHaveLength( 1 );
+		expect(
+			notice?.compareDocumentPosition(
+				screen.getByText(
+					'These are other files and code that some AI assistants use to learn about your store.'
+				)
+			)
+		).toBe( window.Node.DOCUMENT_POSITION_FOLLOWING );
 	} );
 
 	it( 'turns the experiments on, asks to run the check, then shows they are on once it finishes', async () => {
 		mockApiFetch.mockResolvedValue( { enabled: true } );
 		const checks = run();
-		const { container, rerender } = render(
+		const { rerender } = render(
 			<DeclaredCard
 				declared={ declared( experiments() ) }
 				run={ checks }
@@ -282,11 +281,6 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 				'AI shopping experiments are on. Run the check again to see the new files.'
 			)
 		).toBeInTheDocument();
-		expect(
-			container.querySelector(
-				'.wc-sales-readiness-declared__item--experiment'
-			)
-		).toBeNull();
 
 		await userEvent.click(
 			screen.getByRole( 'button', { name: 'Run check' } )
@@ -351,7 +345,7 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'shows a line linking to Features once the experiments are on, without highlights', async () => {
+	it( 'shows a line linking to Features once the experiments are on', async () => {
 		const { container } = render(
 			<DeclaredCard
 				declared={ declared(
@@ -378,12 +372,6 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 				name: 'Turn on AI shopping experiments',
 			} )
 		).not.toBeInTheDocument();
-		expect(
-			container.querySelector(
-				'.wc-sales-readiness-declared__item--experiment'
-			)
-		).toBeNull();
-		expect( screen.getByText( 'Experiment' ) ).toBeInTheDocument();
 	} );
 
 	it( 'shows no notice when nothing the experiments add is missing', async () => {
@@ -405,13 +393,12 @@ describe( 'DeclaredCard AI shopping experiments', () => {
 		).not.toBeInTheDocument();
 	} );
 
-	it( 'shows no notice or tags to users who can’t manage WooCommerce', async () => {
+	it( 'shows no notice to users who can’t manage WooCommerce', async () => {
 		const { container } = render(
 			<DeclaredCard declared={ declared( null ) } run={ run() } />
 		);
 		await open();
 
-		expect( screen.queryByText( 'Experiment' ) ).not.toBeInTheDocument();
 		expect(
 			container.querySelector( '.wc-sales-readiness-experiments' )
 		).toBeNull();

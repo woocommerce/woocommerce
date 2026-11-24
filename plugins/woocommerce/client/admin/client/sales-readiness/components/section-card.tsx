@@ -269,7 +269,6 @@ export const DeclaredCard = ( {
 			setTurnedOn( false );
 		}
 	}, [ turnedOn, pending ] );
-	const highlight = !! experiments && ! experiments.enabled && ! turnedOn;
 
 	return (
 		<CollapsibleCard.Root
@@ -335,10 +334,7 @@ export const DeclaredCard = ( {
 											'wc-sales-readiness-declared__item' +
 											( item.found === true
 												? ''
-												: ' wc-sales-readiness__muted' ) +
-											( item.experiment && highlight
-												? ' wc-sales-readiness-declared__item--experiment'
-												: '' )
+												: ' wc-sales-readiness__muted' )
 										}
 									>
 										<Icon
@@ -366,14 +362,6 @@ export const DeclaredCard = ( {
 												</span>
 											) }
 										</Text>
-										{ item.experiment && experiments && (
-											<Badge
-												intent="informational"
-												className="wc-sales-readiness-declared__tag"
-											>
-												{ experiments.tag }
-											</Badge>
-										) }
 									</li>
 								) ) }
 							</ul>

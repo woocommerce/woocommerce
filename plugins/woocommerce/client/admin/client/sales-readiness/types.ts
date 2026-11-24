@@ -91,11 +91,8 @@ export interface Declared {
 	/** Items under where they live: root folder, standard addresses, page code, extra details, not checked yet. */
 	groups: {
 		title: string;
-		/**
-		 * `found` is null for an item the scan couldn't read. `experiment` marks an item AI shopping
-		 * experiments add; it's absent from views cached before it existed.
-		 */
-		items: { name: string; found: boolean | null; experiment?: boolean }[];
+		/** `found` is null for an item the scan couldn't read. */
+		items: { name: string; found: boolean | null }[];
 	}[];
 	/** The AI shopping experiments notice. Null for users who can't manage WooCommerce. */
 	experiments?: DeclaredExperiments | null;
@@ -103,8 +100,6 @@ export interface Declared {
 
 export interface DeclaredExperiments {
 	enabled: boolean;
-	/** The tag on each item the experiments add. */
-	tag: string;
 	/** The offer to turn the experiments on: null once they're on, or when nothing they add is missing. */
 	offer: { title: string; text: string; button: string } | null;
 	/** After the offer's button succeeds, until the next check finishes. */
