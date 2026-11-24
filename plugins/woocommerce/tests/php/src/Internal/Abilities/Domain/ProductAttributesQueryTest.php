@@ -54,7 +54,7 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		foreach ( array( 'resources', 'fields' ) as $name ) {
+		foreach ( array( 'resources', 'fields', 'primes' ) as $name ) {
 			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
 			$property->setAccessible( true );
 			$this->saved_state[ $name ] = $property->getValue();
