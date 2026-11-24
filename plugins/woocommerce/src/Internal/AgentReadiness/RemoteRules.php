@@ -28,8 +28,9 @@ defined( 'ABSPATH' ) || exit;
  * includes the site URL, as other WooCommerce.com polls do. A failed fetch
  * keeps the last good copy, and with no copy the bundled checks apply.
  * With marketplace suggestions turned off (woocommerce_show_marketplace_suggestions), the
- * WooCommerce.com file is not fetched, as for the other WooCommerce.com polls, and the stored
- * or bundled checks apply. A URL set by the filter is still fetched.
+ * WooCommerce.com file is not fetched, as for the other WooCommerce.com polls. A URL set by the
+ * filter is still fetched. With the fetch turned off, by that setting or an empty URL, a copy
+ * stored earlier is removed at the next scan and the bundled checks apply.
  *
  * The file is fetched from PUBLISHED_URL, the same host as the payment gateway
  * suggestions; the woocommerce_agent_readiness_rules_url filter changes it.
@@ -51,7 +52,7 @@ class RemoteRules {
 	/**
 	 * Fetch the rules file and store it when at least one check entry is valid
 	 * (see is_valid_check()) and, when known ids are given, is one of them.
-	 * Anything less keeps the last good copy.
+	 * Anything less keeps the last good copy. With the fetch turned off, the copy is removed.
 	 *
 	 * @param array<int, string>|null $known_ids Check ids the code can run; null accepts any id.
 	 * @return bool Whether a new copy was stored.
@@ -65,11 +66,11 @@ class RemoteRules {
 		 * @param string $url Rules file URL.
 		 */
 		$url = apply_filters( 'woocommerce_agent_readiness_rules_url', self::PUBLISHED_URL );
-		if ( ! is_string( $url ) || '' === $url ) {
-			return false;
-		}
 		// The opt-out is about reaching WooCommerce.com. A URL a developer set is still fetched.
-		if ( self::PUBLISHED_URL === $url && 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+		$opted_out = self::PUBLISHED_URL === $url && 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' );
+		if ( ! is_string( $url ) || '' === $url || $opted_out ) {
+			// A copy stored earlier could never update, and would hide checks added in later releases.
+			delete_option( self::OPTION );
 			return false;
 		}
 
