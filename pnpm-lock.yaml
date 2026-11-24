@@ -2973,6 +2973,9 @@ importers:
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
+      '@wordpress/env':
+        specifier: catalog:tooling
+        version: 12.0.0(@types/node@24.12.2)
       '@wordpress/scripts':
         specifier: catalog:tooling
         version: 35.0.0(@playwright/test@1.63.0)(@swc/core@1.15.24)(@types/eslint@9.6.1)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(@types/webpack@4.41.40)(@typescript-eslint/eslint-plugin@8.64.0(@typescript-eslint/parser@8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(@typescript-eslint/parser@8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(@wordpress/env@12.0.0(@types/node@24.12.2))(ajv@6.14.0)(babel-plugin-macros@3.1.0)(esbuild@0.28.2)(file-loader@6.2.0(webpack@5.112.2))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@7.4.0(stylelint@17.16.0(typescript@5.7.3)))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(uglify-js@3.19.3)(webpack-hot-middleware@2.26.1)(yauzl@2.10.0)
