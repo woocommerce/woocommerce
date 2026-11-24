@@ -932,6 +932,46 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() keeps a fee that a totals listener added during a sync when it rebuilds the fees a merchant edited.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $on_creation Whether the listener adds its fee on the sync that creates the order, or on a later one.
+	 */
+	public function test_update_order_from_cart_keeps_fees_a_totals_listener_added( bool $on_creation ): void {
+		$extension_fee = null;
+		$add_fee_once  = function ( $and_taxes, \WC_Abstract_Order $order ) use ( &$extension_fee ) {
+			unset( $and_taxes );
+			if ( null === $extension_fee ) {
+				$extension_fee = new \WC_Order_Item_Fee();
+				$extension_fee->set_name( 'Listener surcharge' );
+				$extension_fee->set_total( '2' );
+				$order->add_item( $extension_fee );
+			}
+		};
+		if ( $on_creation ) {
+			add_action( 'woocommerce_order_after_calculate_totals', $add_fee_once, 10, 2 );
+			$order = $this->create_retried_order_with_shipping_and_fee();
+		} else {
+			$order = $this->create_retried_order_with_shipping_and_fee();
+			add_action( 'woocommerce_order_after_calculate_totals', $add_fee_once, 10, 2 );
+			$order = $this->sync_order_in_a_new_request( $order );
+		}
+		remove_action( 'woocommerce_order_after_calculate_totals', $add_fee_once, 10 );
+		$this->assertGreaterThan( 0, $extension_fee->get_id(), 'The listener should have added its fee.' );
+
+		$cart_fee = current( array_diff_key( $order->get_fees(), array( $extension_fee->get_id() => true ) ) );
+		$cart_fee->set_total( '15' );
+		$cart_fee->save();
+		$order = $this->sync_order_in_a_new_request( $order );
+		$ids   = array_keys( $order->get_fees() );
+
+		$this->assertNotContains( $cart_fee->get_id(), $ids, 'The edited cart fee should be rebuilt.' );
+		$this->assertContains( $extension_fee->get_id(), $ids, "The listener's fee should be kept." );
+	}
+
+	/**
 	 * @testdox update_order_from_cart() still rebuilds a shipping line a merchant edited after a sync that didn't calculate shipping.
 	 */
 	public function test_update_order_from_cart_rebuilds_edited_shipping_after_a_sync_without_shipping(): void {
@@ -1077,7 +1117,7 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		$order = $this->sut->create_order_from_cart();
 		$order->update_status( OrderStatus::PENDING );
 		$this->assertCount( 1, $order->get_shipping_methods(), 'The order should have a shipping line.' );
-		$this->assertCount( 1, $order->get_fees(), 'The order should have a fee.' );
+		$this->assertCount( 1, array_filter( $order->get_fees(), fn( \WC_Order_Item_Fee $fee ) => 'Handling' === $fee->get_name() ), "The order should have the cart's fee." );
 
 		return $order;
 	}

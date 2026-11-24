@@ -159,6 +159,8 @@ class OrderController {
 
 		// Update the current order to match the current cart.
 		$this->update_line_items_from_cart( $order );
+		// Read before calculate_totals(), whose listeners can add their own items.
+		$items_after_cart_sync = $order->get_items( OrderItemFingerprint::CART_ITEM_TYPES );
 		$this->update_addresses_from_cart( $order );
 		$order->set_currency( get_woocommerce_currency() );
 		$order->set_prices_include_tax( wc_prices_include_tax() );
@@ -172,28 +174,36 @@ class OrderController {
 		$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( wc()->cart->get_customer()->get_is_vat_exempt() ) );
 		$order->calculate_totals();
 
-		$this->save_cart_order_items_snapshot( $order, $items_before_sync );
+		$this->save_cart_order_items_snapshot( $order, $items_before_sync, $items_after_cart_sync );
 	}
 
 	/**
-	 * Stores a fingerprint of each item the cart created: the items this sync added, and the kept ones the previous
-	 * snapshot listed, so items extensions added are left out. Without a previous snapshot, every kept item counts.
+	 * Stores a fingerprint of each item the cart created: the items the cart sync added, the tax lines, and the kept
+	 * items the previous snapshot listed, so items extensions added are left out. Without a previous snapshot, every
+	 * kept item counts.
 	 *
-	 * @param \WC_Order        $order             The synced order.
-	 * @param \WC_Order_Item[] $items_before_sync The order's items before the sync, keyed by ID.
+	 * @param \WC_Order        $order                 The synced order.
+	 * @param \WC_Order_Item[] $items_before_sync     The order's items before the sync, keyed by ID.
+	 * @param \WC_Order_Item[] $items_after_cart_sync The order's items once synced with the cart, before the totals.
 	 */
-	private function save_cart_order_items_snapshot( \WC_Order $order, array $items_before_sync ): void {
+	private function save_cart_order_items_snapshot( \WC_Order $order, array $items_before_sync, array $items_after_cart_sync ): void {
 		if ( ! $order->get_id() ) {
 			return;
 		}
 
 		$previous_snapshot = $this->get_cart_order_items_snapshot( $order );
 
+		// Matched by object, since the items the cart sync added had no ID until calculate_totals() saved them. Tax lines
+		// count as the cart's too, since calculate_totals() itself adds them.
+		$cart_synced_items = array_flip( array_map( 'spl_object_id', array_values( $items_after_cart_sync ) ) );
+
 		$snapshot = array_intersect_key( $previous_snapshot ?? [], array_flip( $this->changed_item_types_not_rebuilt ) );
 		foreach ( $order->get_items( array_diff( OrderItemFingerprint::CART_ITEM_TYPES, $this->changed_item_types_not_rebuilt ) ) as $item_id => $item ) {
-			$is_new_item   = ! isset( $items_before_sync[ $item_id ] );
-			$was_cart_item = null === $previous_snapshot || isset( $previous_snapshot[ $item->get_type() ][ $item_id ] );
-			if ( $is_new_item || $was_cart_item ) {
+			$is_new_cart_item = ! isset( $items_before_sync[ $item_id ] )
+				&& ( OrderItemType::TAX === $item->get_type() || isset( $cart_synced_items[ spl_object_id( $item ) ] ) );
+			$was_cart_item    = isset( $items_before_sync[ $item_id ] )
+				&& ( null === $previous_snapshot || isset( $previous_snapshot[ $item->get_type() ][ $item_id ] ) );
+			if ( $is_new_cart_item || $was_cart_item ) {
 				$snapshot[ $item->get_type() ][ $item_id ] = OrderItemFingerprint::get( $item, self::SNAPSHOT_IGNORED_ITEM_KEYS );
 			}
 		}
