@@ -100,6 +100,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $checks['canonical_url']['no_product'], 'No product, so the check waits for one' );
 		$this->assertNull( $checks['product_jsonld_present']['ok'] );
 		$this->assertTrue( $checks['product_jsonld_present']['no_product'], 'A JSON-LD check waits for a product too' );
+		$this->assertTrue( $checks['product_review_markup']['no_product'], 'So does the review markup check' );
 		$this->assertFalse( $checks['viewport_meta']['no_product'], 'A home page check does not need a product' );
 
 		$product = WC_Helper_Product::create_simple_product();
@@ -109,6 +110,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $checks['canonical_url']['no_product'], 'The product page timed out: that is couldn\'t check' );
 		$this->assertNull( $checks['product_jsonld_present']['ok'] );
 		$this->assertFalse( $checks['product_jsonld_present']['no_product'], 'A JSON-LD check on a page that timed out is couldn\'t check' );
+		$this->assertFalse( $checks['product_review_markup']['no_product'] );
 	}
 
 	/**

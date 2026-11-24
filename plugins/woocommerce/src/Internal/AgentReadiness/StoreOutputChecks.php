@@ -2270,6 +2270,10 @@ class StoreOutputChecks {
 	 */
 	private function reviews_marked_up( StoreResponses $responses ): ?bool {
 		// The passes below load no page. Without a product page the rest of the card couldn't run, so neither does this.
+		if ( null === $responses->product() ) {
+			$this->no_product_page = true;
+			return null;
+		}
 		if ( null === $responses->product_page() ) {
 			return null;
 		}
