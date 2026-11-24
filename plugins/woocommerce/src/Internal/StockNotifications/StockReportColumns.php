@@ -71,7 +71,7 @@ class StockReportColumns {
 	 * @param mixed $wp_query The stock report query.
 	 * @return mixed
 	 */
-	public function add_orderby_join( $clauses, $wp_query ) {
+	public function add_orderby_join( $clauses, $wp_query = null ) {
 		if ( ! is_array( $clauses ) || ! $this->is_sorted_by_signups( $wp_query ) ) {
 			return $clauses;
 		}
@@ -93,7 +93,7 @@ class StockReportColumns {
 	 * @param mixed $wp_query The stock report query.
 	 * @return mixed
 	 */
-	public function add_orderby_clauses( $clauses, $wp_query ) {
+	public function add_orderby_clauses( $clauses, $wp_query = null ) {
 		if ( ! is_array( $clauses ) || ! $this->is_sorted_by_signups( $wp_query ) ) {
 			return $clauses;
 		}

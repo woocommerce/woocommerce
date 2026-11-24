@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Stock;
 
 use Automattic\WooCommerce\Admin\API\Reports\Stock\Controller;
 use Automattic\WooCommerce\Enums\ProductStatus;
-use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\StockNotifications\StockReportColumns;
@@ -102,7 +101,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_notification_columns_absent_when_feature_disabled(): void {
 		$product = $this->create_product( ProductStatus::PUBLISH );
-		$this->insert_notification( $product->get_id(), NotificationStatus::ACTIVE, 3 );
+		$this->insert_notification( $product->get_id(), NotificationStatus::ACTIVE );
 
 		$request  = new WP_REST_Request( 'GET', self::ENDPOINT );
 		$response = $this->server->dispatch( $request );
@@ -119,30 +118,30 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should export the stock notification columns only when the feature is enabled.
+	 * The CSV export calls `get_items()` outside a REST request, so the counts must load there too.
+	 *
+	 * @testdox Should export active sign-up counts only when the feature is enabled.
 	 */
-	public function test_export_columns_follow_feature_flag(): void {
+	public function test_export_includes_active_signups_when_feature_enabled(): void {
 		$controller = new Controller();
-		$item       = array(
-			'name'           => 'Test product',
-			'sku'            => 'test-sku',
-			'stock_status'   => ProductStockStatus::OUT_OF_STOCK,
-			'stock_quantity' => 0,
-			'active_signups' => 2,
-		);
-
 		$this->assertArrayNotHasKey( 'active_signups', $controller->get_export_columns() );
-		$this->assertArrayNotHasKey( 'active_signups', $controller->prepare_item_for_export( $item ) );
 
 		$this->enable_stock_notification_columns();
-
+		$ids = $this->create_notification_fixture();
 		$this->assertArrayHasKey( 'active_signups', $controller->get_export_columns() );
 
-		$export_item = $controller->prepare_item_for_export( $item );
-		$this->assertSame( 2, $export_item['active_signups'] );
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT );
+		$request->set_default_params( wp_list_pluck( array_filter( $controller->get_collection_params(), fn( $param ) => isset( $param['default'] ) ), 'default' ) );
+		$request->set_param( 'include', array_values( $ids ) );
 
-		unset( $item['active_signups'] );
-		$this->assertSame( 0, $controller->prepare_item_for_export( $item )['active_signups'] );
+		$actual = array();
+		foreach ( $controller->get_items( $request )->get_data() as $item ) {
+			$actual[ $item['id'] ] = $controller->prepare_item_for_export( $item )['active_signups'];
+		}
+
+		$this->assertSame( 2, $actual[ $ids['simple_a'] ] );
+		$this->assertSame( 0, $actual[ $ids['none'] ] );
+		$this->assertSame( 3, $actual[ $ids['variation'] ] );
 	}
 
 	/**
@@ -184,8 +183,8 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_notification_columns_for_single_product_page(): void {
 		$this->enable_stock_notification_columns();
 		$product_id = $this->create_product( ProductStatus::PUBLISH )->get_id();
-		$this->insert_notification( $product_id, NotificationStatus::ACTIVE, 5 );
-		$this->insert_notification( $product_id, NotificationStatus::ACTIVE, 1 );
+		$this->insert_notification( $product_id, NotificationStatus::ACTIVE );
+		$this->insert_notification( $product_id, NotificationStatus::ACTIVE );
 
 		$request = new WP_REST_Request( 'GET', self::ENDPOINT );
 		$request->set_param( 'include', (string) $product_id );
@@ -241,9 +240,9 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( $ids['variation'], $this->get_sorted_ids( $ids, 'active_signups', 'desc' )[0] );
 
-		$this->insert_notification( $ids['simple_b'], NotificationStatus::ACTIVE, 1 );
-		$this->insert_notification( $ids['simple_b'], NotificationStatus::ACTIVE, 1 );
-		$this->insert_notification( $ids['simple_b'], NotificationStatus::ACTIVE, 1 );
+		$this->insert_notification( $ids['simple_b'], NotificationStatus::ACTIVE );
+		$this->insert_notification( $ids['simple_b'], NotificationStatus::ACTIVE );
+		$this->insert_notification( $ids['simple_b'], NotificationStatus::ACTIVE );
 
 		$this->assertSame( $ids['simple_b'], $this->get_sorted_ids( $ids, 'active_signups', 'desc' )[0] );
 	}
@@ -290,15 +289,15 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 			'variation' => $variation->get_id(),
 		);
 
-		$this->insert_notification( $ids['simple_a'], NotificationStatus::ACTIVE, 5 );
-		$this->insert_notification( $ids['simple_a'], NotificationStatus::ACTIVE, 1 );
-		$this->insert_notification( $ids['simple_a'], NotificationStatus::SENT, 30 );
-		$this->insert_notification( $ids['simple_b'], NotificationStatus::ACTIVE, 2 );
-		$this->insert_notification( $ids['simple_b'], NotificationStatus::PENDING, 40 );
-		$this->insert_notification( $ids['none'], NotificationStatus::CANCELLED, 10 );
-		$this->insert_notification( $ids['variation'], NotificationStatus::ACTIVE, 9 );
-		$this->insert_notification( $ids['variation'], NotificationStatus::ACTIVE, 4 );
-		$this->insert_notification( $ids['variation'], NotificationStatus::ACTIVE, 0 );
+		$this->insert_notification( $ids['simple_a'], NotificationStatus::ACTIVE );
+		$this->insert_notification( $ids['simple_a'], NotificationStatus::ACTIVE );
+		$this->insert_notification( $ids['simple_a'], NotificationStatus::SENT );
+		$this->insert_notification( $ids['simple_b'], NotificationStatus::ACTIVE );
+		$this->insert_notification( $ids['simple_b'], NotificationStatus::PENDING );
+		$this->insert_notification( $ids['none'], NotificationStatus::CANCELLED );
+		$this->insert_notification( $ids['variation'], NotificationStatus::ACTIVE );
+		$this->insert_notification( $ids['variation'], NotificationStatus::ACTIVE );
+		$this->insert_notification( $ids['variation'], NotificationStatus::ACTIVE );
 
 		return $ids;
 	}
@@ -308,9 +307,8 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 *
 	 * @param int    $product_id Product or variation ID.
 	 * @param string $status     Notification status.
-	 * @param int    $days_ago   How many whole days ago it was created, plus a minute so the elapsed day count is stable.
 	 */
-	private function insert_notification( int $product_id, string $status, int $days_ago ): void {
+	private function insert_notification( int $product_id, string $status ): void {
 		global $wpdb;
 
 		$wpdb->insert(
@@ -320,7 +318,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 				'user_id'          => 0,
 				'user_email'       => wp_generate_password( 8, false ) . '@example.com',
 				'status'           => $status,
-				'date_created_gmt' => gmdate( 'Y-m-d H:i:s', time() - $days_ago * DAY_IN_SECONDS - MINUTE_IN_SECONDS ),
+				'date_created_gmt' => gmdate( 'Y-m-d H:i:s' ),
 			)
 		);
 	}
