@@ -162,7 +162,6 @@
 				"eslint",
 				"jest",
 				"jest-circus",
-				"jest-cli",
 				"jest-environment-jsdom",
 				"jest-environment-node",
 				"jest-fixed-jsdom",

@@ -280,9 +280,6 @@ catalogs:
     jest-circus:
       specifier: 29.5.x
       version: 29.5.0
-    jest-cli:
-      specifier: 29.5.x
-      version: 29.5.0
     jest-environment-jsdom:
       specifier: 29.5.x
       version: 29.5.0
