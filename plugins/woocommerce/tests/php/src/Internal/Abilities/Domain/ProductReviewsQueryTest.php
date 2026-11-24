@@ -8,13 +8,15 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
-use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Tests\Internal\Abilities\ExtensibleAbilitiesTestTrait;
 
 /**
  * Tests review queries through the Abilities API.
  */
 class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
+
+	use ExtensibleAbilitiesTestTrait;
 
 	/**
 	 * The System Under Test.
@@ -361,75 +363,57 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 	 * @param string $error_code Expected error for a failing callback.
 	 */
 	public function test_extension_fields( string $behavior, string $error_code ): void {
-		$saved = array();
-		foreach ( array( 'resources', 'fields' ) as $name ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
-			$property->setAccessible( true );
-			$saved[ $name ] = $property->getValue();
-			$property->setValue( null, array() );
+		$this->isolate_extensible_abilities();
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
+		$product  = \WC_Helper_Product::create_simple_product()->get_id();
+		$ids      = array( $this->review( $product, 1 ), $this->review( $product, 5 ) );
+		$input    = array( 'include' => $ids );
+		$baseline = ProductReviewsQuery::execute( $input );
+		$schema   = ProductReviewsQuery::get_registration_args()['output_schema'];
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
+		$this->assertSame( $baseline, ProductReviewsQuery::execute( $input ) );
+		$this->assertSame( $schema, ProductReviewsQuery::get_registration_args()['output_schema'] );
+		$this->enable_extensible_abilities(
+			static function () use ( $behavior ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'product_review',
+						'namespace'     => 'test-ext',
+						'field'         => 'review_id',
+						'output_schema' => array( 'type' => 'integer' ),
+						'get_callback'  => static function ( \WP_Comment $comment ) use ( $behavior ) {
+							if ( 'throws' === $behavior ) {
+								throw new \RuntimeException( 'Private extension failure details' );
+							}
+							return 'invalid' === $behavior ? 'not an integer' : (int) $comment->comment_ID;
+						},
+					)
+				);
+			}
+		);
+		$ability = new \WP_Ability( ProductReviewsQuery::get_name(), ProductReviewsQuery::get_registration_args() );
+		if ( $error_code ) {
+			$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
 		}
-		try {
-			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
-			$product  = \WC_Helper_Product::create_simple_product()->get_id();
-			$ids      = array( $this->review( $product, 1 ), $this->review( $product, 5 ) );
-			$input    = array( 'include' => $ids );
-			$baseline = ProductReviewsQuery::execute( $input );
-			$schema   = ProductReviewsQuery::get_registration_args()['output_schema'];
-			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
-			$this->assertSame( $baseline, ProductReviewsQuery::execute( $input ) );
-			$this->assertSame( $schema, ProductReviewsQuery::get_registration_args()['output_schema'] );
-			add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
-			do_action( 'woocommerce_extensible_abilities_resources_init' );
-			add_action(
-				'woocommerce_extensible_abilities_init',
-				static function () use ( $behavior ) {
-					ExtensibleAbilities::register_field(
-						array(
-							'resource'      => 'product_review',
-							'namespace'     => 'test-ext',
-							'field'         => 'review_id',
-							'output_schema' => array( 'type' => 'integer' ),
-							'get_callback'  => static function ( \WP_Comment $comment ) use ( $behavior ) {
-								if ( 'throws' === $behavior ) {
-									throw new \RuntimeException( 'Private extension failure details' );
-								}
-								return 'invalid' === $behavior ? 'not an integer' : (int) $comment->comment_ID;
-							},
-						)
-					);
-				}
-			);
-			do_action( 'woocommerce_extensible_abilities_init' );
-			$ability = new \WP_Ability( ProductReviewsQuery::get_name(), ProductReviewsQuery::get_registration_args() );
-			if ( $error_code ) {
-				$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
-			}
-			$result = $ability->execute( $input );
-			if ( $error_code ) {
-				$this->assertWPError( $result );
-				$this->assertSame( $error_code, $result->get_error_code() );
-				$this->assertSame( 500, rest_convert_error_to_response( $result )->get_status() );
-				$this->assertStringNotContainsString( 'Private extension failure details', $result->get_error_message() );
-				return;
-			}
-			$this->assertIsArray( $result );
-			$this->assertCount( 2, $result['reviews'] );
-			foreach ( $result['reviews'] as $review ) {
-				$this->assertSame( $review['id'], $review['extensions']['test-ext']['review_id'] );
-				$this->assertArrayNotHasKey( 'reviewer', $review );
-				$this->assertArrayNotHasKey( 'reviewer_email', $review );
-			}
-			$this->assertSame( 'integer', $ability->get_output_schema()['properties']['reviews']['items']['properties']['extensions']['properties']['test-ext']['properties']['review_id']['type'] );
-			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
-			$this->assertSame( $baseline, ProductReviewsQuery::execute( $input ) );
-			$this->assertSame( $schema, ProductReviewsQuery::get_registration_args()['output_schema'] );
-		} finally {
-			foreach ( $saved as $name => $value ) {
-				$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
-				$property->setAccessible( true );
-				$property->setValue( null, $value );
-			}
+		$result = $ability->execute( $input );
+		if ( $error_code ) {
+			$this->assertWPError( $result );
+			$this->assertSame( $error_code, $result->get_error_code() );
+			$this->assertSame( 500, rest_convert_error_to_response( $result )->get_status() );
+			$this->assertStringNotContainsString( 'Private extension failure details', $result->get_error_message() );
+			return;
 		}
+		$this->assertIsArray( $result );
+		$this->assertCount( 2, $result['reviews'] );
+		foreach ( $result['reviews'] as $review ) {
+			$this->assertSame( $review['id'], $review['extensions']['test-ext']['review_id'] );
+			$this->assertArrayNotHasKey( 'reviewer', $review );
+			$this->assertArrayNotHasKey( 'reviewer_email', $review );
+		}
+		$this->assertSame( 'integer', $ability->get_output_schema()['properties']['reviews']['items']['properties']['extensions']['properties']['test-ext']['properties']['review_id']['type'] );
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
+		$this->assertSame( $baseline, ProductReviewsQuery::execute( $input ) );
+		$this->assertSame( $schema, ProductReviewsQuery::get_registration_args()['output_schema'] );
 	}
 	/**
 	 * @testdox Should include spam and trash only when requested and preserve totals beyond the last page.
