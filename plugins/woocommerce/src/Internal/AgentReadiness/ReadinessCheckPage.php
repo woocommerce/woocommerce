@@ -1231,8 +1231,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * couldn't run (its row says why), Couldn't check. Not checked yet while the checks wait for the merchant:
 	 * in coming soon mode, or with nothing to check, such as Store access while AI shopping is off.
 	 *
-	 * @param array<int, array{ok:bool|null}> $checks  The question's checks.
-	 * @param bool                            $waiting Whether the checks wait for the merchant, as in coming soon mode.
+	 * @param array<int, array{ok:bool|null,no_product?:bool}> $checks  The question's checks.
+	 * @param bool                                             $waiting Whether the checks wait for the merchant, as in coming soon mode.
 	 * @return array{0:string,1:string} Badge class and text.
 	 */
 	private static function group_badge( array $checks, bool $waiting = false ): array {

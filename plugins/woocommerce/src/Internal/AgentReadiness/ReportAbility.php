@@ -64,7 +64,7 @@ class ReportAbility implements AbilityDefinition {
 	 * The stored report with store checks as they stand now, whether a scan is pending, and whether it has stalled.
 	 *
 	 * @param array<string, mixed> $input Ability input; this ability takes none.
-	 * @return array{report?:array<string,mixed>,scan_pending:bool,scan_stalled:bool}
+	 * @return array<string, mixed> The report (left out before the first scan), scan_pending and scan_stalled.
 	 */
 	public static function execute( array $input ): array {
 		unset( $input );

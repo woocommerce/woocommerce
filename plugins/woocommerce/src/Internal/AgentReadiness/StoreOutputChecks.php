@@ -87,9 +87,8 @@ class StoreOutputChecks {
 				continue;
 			}
 			// The UCP checkout check waits until this WooCommerce serves UCP checkout; it is reported as pending, not failed.
-			$pending               = 'ucp_checkout' === $check['id'] && ! StoreConditions::serves_ucp_checkout();
-			$failed                = null;
-			$this->no_product_page = false;
+			$pending = 'ucp_checkout' === $check['id'] && ! StoreConditions::serves_ucp_checkout();
+			$failed  = null;
 			try {
 				$ok = $pending ? null : self::on_sample( $check['test'], $responses, $failed );
 			} catch ( \Throwable $e ) {
@@ -141,7 +140,7 @@ class StoreOutputChecks {
 				'pending'    => $pending,
 				'skipped'    => $skipped,
 				// Not checked rather than couldn't check: the check reads a product page and there was no product to open.
-				'no_product' => null === $ok && $this->no_product_page,
+				'no_product' => $this->take_no_product_page() && null === $ok,
 				'seen_at'    => $seen_at,
 				'source'     => $source,
 				// The product whose page failed, 0 when the check doesn't read product pages or didn't fail on one.
@@ -927,6 +926,15 @@ class StoreOutputChecks {
 		}
 		$page = $responses->product_page();
 		return null === $page ? null : (bool) $test( $page['body'] );
+	}
+
+	/**
+	 * Whether the check just run needed a product page with no product to open, then clear it for the next check.
+	 */
+	private function take_no_product_page(): bool {
+		$needed                = $this->no_product_page;
+		$this->no_product_page = false;
+		return $needed;
 	}
 
 	/**
