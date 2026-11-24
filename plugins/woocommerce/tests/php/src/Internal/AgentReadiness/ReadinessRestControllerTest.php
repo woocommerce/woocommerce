@@ -384,6 +384,33 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$text = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
 		$this->assertStringContainsString( "### Store checks ###\n\nYour store wasn’t live at the last check. These checks run at the next daily check, or you can run the check again now.", $text );
 		$this->assertStringNotContainsString( 'Your hosting setup blocked', $text );
+		$this->assertStringContainsString( 'Open Graph tags (open_graph_tags): Not checked yet. Your store wasn’t live at the last check.', $text, 'Each check says so too, as on the page' );
+		$this->assertStringContainsString( 'Shipping details (product_shipping_schema): Not available yet', $text, 'A check a coming update builds is still not available' );
+	}
+
+	/**
+	 * @testdox In the support report, a product page check with no product to open says Not checked yet and why; one that tried and couldn't says Couldn't check.
+	 */
+	public function test_support_report_product_page_check_without_a_product(): void {
+		$check = static fn( string $id, ?bool $ok, array $extra = array() ): array => $extra + array(
+			'id'      => $id,
+			'ok'      => $ok,
+			'blocks'  => 'discovery',
+			'name'    => $id,
+			'why'     => '',
+			'fix_url' => '',
+		);
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => '2026-11-18T10:42:00+00:00',
+				'store_checks' => array( $check( 'launched', true ), $check( 'canonical_url', null, array( 'no_product' => true ) ), $check( 'sitemap_lists_products', null ), $check( 'robots_txt', true ) ),
+			),
+			false
+		);
+		$text  = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
+		$this->assertStringContainsString( 'canonical_url (canonical_url): Not checked yet. This check needs a product page.', $text );
+		$this->assertStringContainsString( 'sitemap_lists_products (sitemap_lists_products): Couldn’t check', $text );
 	}
 
 	/**

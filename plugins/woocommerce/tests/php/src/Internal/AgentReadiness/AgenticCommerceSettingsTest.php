@@ -701,6 +701,47 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox After launch, a check left unchecked by a check in coming soon mode says Not checked yet, even when others in its question passed; a product page check with no product says it needs one.
+	 */
+	public function test_unchecked_row_follows_launch_and_products(): void {
+		StoreConditionsTest::make_store_ready( $this );
+		$check = static fn( string $id, ?bool $ok, array $extra = array() ): array => $extra + array(
+			'id'      => $id,
+			'group'   => 'find',
+			'ok'      => $ok,
+			'level'   => 'recommended',
+			'name'    => $id,
+			'fix_url' => '',
+		);
+		$rows  = function (): array {
+			$card = array_column( $this->view()['sections'], null, 'id' )['find'];
+			return array( $card['badge']['text'], array_column( $card['rows'], null, 'id' ) );
+		};
+
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $check( 'launched', false, array( 'group' => 'access' ) ), $check( 'sitemap_lists_products', null ), $check( 'robots_txt', true ) ) ), false );
+		list( $badge, $by_id ) = $rows();
+		$this->assertSame( 'Not checked yet', $badge );
+		$this->assertTrue( $by_id['sitemap_lists_products']['waiting'], 'Screen readers hear Not checked yet' );
+		$this->assertSame( 'Your store wasn’t live at the last check. This check runs at the next daily check, or you can run the check again now.', $by_id['sitemap_lists_products']['text'] );
+
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $check( 'launched', true, array( 'group' => 'access' ) ), $check( 'canonical_url', null, array( 'no_product' => true ) ), $check( 'robots_txt', true ) ) ), false );
+		list( $badge, $by_id ) = $rows();
+		$this->assertSame( 'Not checked yet', $badge, 'Waiting for a product, not a check that failed to run' );
+		$this->assertTrue( $by_id['canonical_url']['waiting'] );
+		$this->assertSame( 'This check needs a product page. It runs once you have a published product that AI assistants can see.', $by_id['canonical_url']['text'] );
+
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $check( 'launched', true, array( 'group' => 'access' ) ), $check( 'canonical_url', null, array( 'no_product' => true ) ), $check( 'sitemap_lists_products', null ), $check( 'robots_txt', true ) ) ), false );
+		list( $badge, $by_id ) = $rows();
+		$this->assertSame( 'Couldn’t check', $badge, 'Another check tried and couldn\'t' );
+		$this->assertFalse( $by_id['sitemap_lists_products']['waiting'] );
+
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $check( 'launched', true, array( 'group' => 'access' ) ), $check( 'canonical_url', null, array( 'no_product' => true ) ) ) ), false );
+		list( $badge, $by_id ) = $rows();
+		$this->assertSame( 'Not checked yet', $badge, 'Only a check waiting for a product: no hosting message' );
+		$this->assertArrayHasKey( 'canonical_url', $by_id );
+	}
+
+	/**
 	 * @testdox In coming soon mode, results from a check that ran while the store was live get a notice above Fix first; results from a check in coming soon mode don't.
 	 */
 	public function test_output_coming_soon_notice_over_live_results(): void {

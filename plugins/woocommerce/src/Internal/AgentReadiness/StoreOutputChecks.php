@@ -64,7 +64,7 @@ class StoreOutputChecks {
 	 * A likely conflict also names the address where it was seen. It doesn't name a plugin: any list of
 	 * plugins goes stale, and several can change the same output.
 	 *
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,seen_at:string,source:string,product:int}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,no_product:bool,seen_at:string,source:string,product:int}>
 	 */
 	public function all(): array {
 		return $this->all_for( $this->responses() );
@@ -76,7 +76,7 @@ class StoreOutputChecks {
 	 * @since 11.4.0
 	 *
 	 * @param StoreResponses $responses Responses of the scan.
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,seen_at:string,source:string,product:int}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,no_product:bool,seen_at:string,source:string,product:int}>
 	 */
 	public function all_for( StoreResponses $responses ): array {
 		// The home page first: when it can't be reached, no other request is made.
@@ -87,8 +87,9 @@ class StoreOutputChecks {
 				continue;
 			}
 			// The UCP checkout check waits until this WooCommerce serves UCP checkout; it is reported as pending, not failed.
-			$pending = 'ucp_checkout' === $check['id'] && ! StoreConditions::serves_ucp_checkout();
-			$failed  = null;
+			$pending               = 'ucp_checkout' === $check['id'] && ! StoreConditions::serves_ucp_checkout();
+			$failed                = null;
+			$this->no_product_page = false;
 			try {
 				$ok = $pending ? null : self::on_sample( $check['test'], $responses, $failed );
 			} catch ( \Throwable $e ) {
@@ -126,23 +127,25 @@ class StoreOutputChecks {
 				$seen_at = $this->broken_llms_link;
 			}
 			$results[] = array(
-				'id'       => $check['id'],
-				'ok'       => $ok,
-				'blocks'   => $check['blocks'],
-				'group'    => $check['group'],
-				'level'    => StoreConditions::LEVEL_RECOMMENDED,
-				'name'     => $check['name'],
-				'label'    => $check['label'],
-				'why'      => $check['why'],
-				'fix'      => ReadinessCopy::llms_txt_source( $source )['fix'] ?? $check['fix'],
-				'fix_url'  => $check['fix_url'],
-				'conflict' => $conflict,
-				'pending'  => $pending,
-				'skipped'  => $skipped,
-				'seen_at'  => $seen_at,
-				'source'   => $source,
+				'id'         => $check['id'],
+				'ok'         => $ok,
+				'blocks'     => $check['blocks'],
+				'group'      => $check['group'],
+				'level'      => StoreConditions::LEVEL_RECOMMENDED,
+				'name'       => $check['name'],
+				'label'      => $check['label'],
+				'why'        => $check['why'],
+				'fix'        => ReadinessCopy::llms_txt_source( $source )['fix'] ?? $check['fix'],
+				'fix_url'    => $check['fix_url'],
+				'conflict'   => $conflict,
+				'pending'    => $pending,
+				'skipped'    => $skipped,
+				// Not checked rather than couldn't check: the check reads a product page and there was no product to open.
+				'no_product' => null === $ok && $this->no_product_page,
+				'seen_at'    => $seen_at,
+				'source'     => $source,
 				// The product whose page failed, 0 when the check doesn't read product pages or didn't fail on one.
-				'product'  => null === $failed ? 0 : $failed->get_id(),
+				'product'    => null === $failed ? 0 : $failed->get_id(),
 			);
 			$responses->focus( null );
 		}
@@ -221,6 +224,13 @@ class StoreOutputChecks {
 	 * @var string
 	 */
 	private string $broken_llms_link = '';
+
+	/**
+	 * Whether the check being run needed a product page and the scan had no product to open.
+	 *
+	 * @var bool
+	 */
+	private bool $no_product_page = false;
 
 	/**
 	 * Organization and the subtypes stores use for themselves.
@@ -911,6 +921,10 @@ class StoreOutputChecks {
 	 * @param callable       $test      Test, given the HTML.
 	 */
 	private function on_product_page( StoreResponses $responses, callable $test ): ?bool {
+		if ( null === $responses->product() ) {
+			$this->no_product_page = true;
+			return null;
+		}
 		$page = $responses->product_page();
 		return null === $page ? null : (bool) $test( $page['body'] );
 	}

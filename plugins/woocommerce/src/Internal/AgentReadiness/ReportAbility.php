@@ -118,52 +118,56 @@ class ReportAbility implements AbilityDefinition {
 								'items' => array(
 									'type'       => 'object',
 									'properties' => array(
-										'id'       => array( 'type' => 'string' ),
-										'ok'       => self::nullable(
+										'id'         => array( 'type' => 'string' ),
+										'ok'         => self::nullable(
 											array(
 												'type' => 'boolean',
 												'description' => __( 'True when the store passes, false when it fails, null when the check could not run.', 'woocommerce' ),
 											)
 										),
-										'group'    => array(
+										'group'      => array(
 											'type'        => 'string',
 											'enum'        => array( 'access', 'find', 'understand', 'buy', '' ),
 											'description' => __( 'The question the check answers: access (can agents get in), find (can they find the store), understand (do they understand the products) or buy (can they buy). Empty in a report from before checks had a group.', 'woocommerce' ),
 										),
-										'blocks'   => array(
+										'blocks'     => array(
 											'type'        => 'string',
 											'description' => __( 'What a failure stops: listing (every product everywhere), discovery (harder for agents to find and read the store), ucp (agents using UCP) or checkout (agent orders).', 'woocommerce' ),
 										),
-										'level'    => array(
+										'level'      => array(
 											'type' => 'string',
 											'enum' => array( StoreConditions::LEVEL_REQUIRED, StoreConditions::LEVEL_RECOMMENDED ),
 										),
-										'name'     => array( 'type' => 'string' ),
-										'label'    => array( 'type' => 'string' ),
-										'why'      => array( 'type' => 'string' ),
-										'fix'      => array( 'type' => 'string' ),
-										'fix_url'  => array( 'type' => 'string' ),
-										'conflict' => array(
+										'name'       => array( 'type' => 'string' ),
+										'label'      => array( 'type' => 'string' ),
+										'why'        => array( 'type' => 'string' ),
+										'fix'        => array( 'type' => 'string' ),
+										'fix_url'    => array( 'type' => 'string' ),
+										'conflict'   => array(
 											'type'        => 'boolean',
 											'description' => __( 'On output checks: true only when the check failed and the store is set to send this, so something else is likely replacing it.', 'woocommerce' ),
 										),
-										'pending'  => array(
+										'pending'    => array(
 											'type'        => 'boolean',
 											'description' => __( 'On output checks: true for a check of output a coming WooCommerce update builds; it does not run yet.', 'woocommerce' ),
 										),
-										'skipped'  => array(
+										'skipped'    => array(
 											'type'        => 'boolean',
 											'description' => __( 'On output checks: true when none of the products checked has the detail, such as a barcode, so there was nothing to check.', 'woocommerce' ),
 										),
-										'seen_at'  => array(
+										'no_product' => array(
+											'type'        => 'boolean',
+											'description' => __( 'On output checks: true when the check reads a product page and the store had no product it could check, so it did not run.', 'woocommerce' ),
+										),
+										'seen_at'    => array(
 											'type'        => 'string',
 											'description' => __( 'On a likely conflict: the address where it was seen. On a broken llms.txt link: that link. On a UCP endpoint check that didn\'t pass: the catalog search address that answered.', 'woocommerce' ),
 										),
-										'source'   => array(
+										'source'     => array(
 											'type'        => 'string',
 											'description' => __( 'On a failed UCP version check: the version the store serves. On a UCP endpoint check that didn\'t pass: the status and content type catalog search answered with, such as 403 text/html. On the llms.txt check: woocommerce, file or other when served; disabled or not_reached when not. Otherwise empty.', 'woocommerce' ),
 										),
-										'product'  => array(
+										'product'    => array(
 											'type'        => 'integer',
 											'description' => __( 'On a failed check of product pages: the ID of the product whose page failed. The check reads up to five product pages, the best seller first, and stops at the first that fails. Otherwise 0.', 'woocommerce' ),
 										),
