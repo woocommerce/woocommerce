@@ -429,9 +429,10 @@ const { actions } = store< Store >(
 					( item ) => item.key === key
 				);
 
-				// The rendered line echoed with the new quantity, so REST
-				// filters see the same body as for any rendered line. A key with
-				// no rendered line is posted bare.
+				// Sends the whole rendered line, as before, in case a REST
+				// request filter reads more than `key` and `quantity`. The
+				// endpoint itself only reads those two. A key with no rendered
+				// line is posted bare.
 				const body = existingItem
 					? { ...existingItem, quantity }
 					: { key, quantity };
