@@ -27,6 +27,9 @@ defined( 'ABSPATH' ) || exit;
  * scan that is asked for. Only a GET is made; the request's user agent
  * includes the site URL, as other WooCommerce.com polls do. A failed fetch
  * keeps the last good copy, and with no copy the bundled checks apply.
+ * With marketplace suggestions turned off (woocommerce_show_marketplace_suggestions), the
+ * WooCommerce.com file is not fetched, as for the other WooCommerce.com polls, and the stored
+ * or bundled checks apply. A URL set by the filter is still fetched.
  *
  * The file is fetched from PUBLISHED_URL, the same host as the payment gateway
  * suggestions; the woocommerce_agent_readiness_rules_url filter changes it.
@@ -63,6 +66,10 @@ class RemoteRules {
 		 */
 		$url = apply_filters( 'woocommerce_agent_readiness_rules_url', self::PUBLISHED_URL );
 		if ( ! is_string( $url ) || '' === $url ) {
+			return false;
+		}
+		// The opt-out is about reaching WooCommerce.com. A URL a developer set is still fetched.
+		if ( self::PUBLISHED_URL === $url && 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
 			return false;
 		}
 

@@ -57,6 +57,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( RemoteRules::OPTION );
+		delete_option( 'woocommerce_show_marketplace_suggestions' );
 		parent::tearDown();
 	}
 
@@ -135,6 +136,34 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $this->requests );
 		$this->assertSame( array(), $this->sut->channel_rules() );
 		$this->assertArrayHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'With no file, the bundled checks run' );
+	}
+
+	/**
+	 * @testdox With marketplace suggestions turned off the WooCommerce.com file isn't fetched and the stored copy stays; a URL set by the filter is still fetched.
+	 */
+	public function test_suggestions_opt_out_skips_the_published_file(): void {
+		$brand = array(
+			'missing_brand' => array(
+				'google' => array(
+					'field'  => 'brand',
+					'effect' => 'not_listable',
+				),
+			),
+		);
+		$this->serve( $brand );
+		$this->assertTrue( $this->sut->refresh(), 'A copy is stored first' );
+		$stored = get_option( RemoteRules::OPTION );
+		remove_all_filters( 'woocommerce_agent_readiness_rules_url' );
+		$this->requests = array();
+		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
+
+		$this->assertFalse( $this->sut->refresh() );
+		$this->assertSame( array(), $this->requests, 'Nothing is fetched from WooCommerce.com' );
+		$this->assertSame( $stored, get_option( RemoteRules::OPTION ), 'The stored copy keeps running' );
+
+		$this->serve( $brand );
+		$this->assertTrue( $this->sut->refresh(), 'A URL set by the filter is still fetched' );
+		$this->assertCount( 1, $this->requests );
 	}
 
 	/**
