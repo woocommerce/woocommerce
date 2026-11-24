@@ -1776,6 +1776,11 @@ class WC_Checkout {
 
 			if ( is_wp_error( $customer_id ) ) {
 				if ( 'registration-error-email-exists' === $customer_id->get_error_code() ) {
+					$message = sprintf(
+						/* translators: %s: Lost password page URL. */
+						__( 'An account is already registered with your email address. <a href="#" class="showlogin">Please log in</a> or <a href="%s">get a link to set your password</a>.', 'woocommerce' ),
+						esc_url( wp_lostpassword_url() )
+					);
 					/**
 					 * Filter the notice shown when a customer tries to register with an existing email address.
 					 *
@@ -1783,7 +1788,7 @@ class WC_Checkout {
 					 * @param string $message The notice.
 					 * @param string $email   The email address.
 					 */
-					throw new Exception( apply_filters( 'woocommerce_registration_error_email_exists', __( 'An account is already registered with your email address. <a href="#" class="showlogin">Please log in.</a>', 'woocommerce' ), $data['billing_email'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+					throw new Exception( apply_filters( 'woocommerce_registration_error_email_exists', $message, $data['billing_email'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 				throw new Exception( $customer_id->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
