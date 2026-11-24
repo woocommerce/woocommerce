@@ -179,8 +179,11 @@ test.describe( 'Add to Cart + Options Block: Back in Stock form', () => {
 			await expect( bisTargetProductInput( page ) ).toHaveValue(
 				String( outOfStockVariationId )
 			);
+			// Rendered in the block's <form> and posted with the Back in Stock form.
 			await expect(
-				form.locator( 'input[name="attribute_pa_size"]' )
+				page.locator(
+					'.wp-block-add-to-cart-with-options input[name="attribute_pa_size"][form]'
+				)
 			).toHaveValue( 'large' );
 
 			await signUpOnProductPage( page, { email } );

@@ -49,16 +49,15 @@ store< BackInStockFormStore >(
 				);
 			},
 			/**
-			 * Selected value of the attribute in context. The variation
-			 * selector writes its selection next to `variationId`: in the
-			 * products context when there is one, in the state otherwise.
+			 * Selected value of the attribute in context, read from the
+			 * Add to Cart + Options block the input renders in.
 			 */
 			get selectedAttributeValue(): string {
 				const { attribute } = getContext< { attribute: string } >();
 				const { selectedAttributes = [] } =
 					getContext< { selectedAttributes?: SelectedAttributes[] } >(
-						'woocommerce/products'
-					) ?? productsState;
+						'woocommerce/add-to-cart-with-options'
+					) ?? {};
 
 				return (
 					selectedAttributes.find( ( selected ) =>

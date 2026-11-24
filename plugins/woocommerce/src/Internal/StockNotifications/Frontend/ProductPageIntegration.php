@@ -111,7 +111,7 @@ class ProductPageIntegration {
 		ob_start();
 		$this->maybe_render_product_form( $product, true );
 
-		return $block_content . $this->add_interactivity_to_form( (string) ob_get_clean(), $product );
+		return $this->add_interactivity_to_form( $block_content, (string) ob_get_clean(), $product );
 	}
 
 	/**
@@ -119,16 +119,17 @@ class ProductPageIntegration {
 	 *
 	 * The template is left untouched: the directives are added to its rendered markup.
 	 *
-	 * @param string     $form    The rendered form markup.
-	 * @param WC_Product $product Product object.
-	 * @return string
+	 * @param string     $block_content The Add to Cart + Options block content.
+	 * @param string     $form          The rendered form markup.
+	 * @param WC_Product $product       Product object.
+	 * @return string The block content followed by the form.
 	 */
-	private function add_interactivity_to_form( string $form, WC_Product $product ): string {
+	private function add_interactivity_to_form( string $block_content, string $form, WC_Product $product ): string {
 		$html = new \WP_HTML_Tag_Processor( $form );
 
 		// The form of a variable product starts hidden until an out of stock variation is chosen.
 		if ( ! $product instanceof \WC_Product_Variable || ! $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ) || null === $html->get_attribute( 'hidden' ) ) {
-			return $form;
+			return $block_content . $form;
 		}
 
 		wp_enqueue_script_module( self::SCRIPT_MODULE );
@@ -136,6 +137,11 @@ class ProductPageIntegration {
 		// The store namespace matches the script module ID.
 		$html->set_attribute( 'data-wp-interactive', self::SCRIPT_MODULE );
 		$html->set_attribute( 'data-wp-bind--hidden', '!state.isVisible' );
+
+		$form_id = wp_unique_id( 'wc-bis-form-' );
+		if ( $html->next_tag( array( 'tag_name' => 'form' ) ) ) {
+			$html->set_attribute( 'id', $form_id );
+		}
 
 		while ( $html->next_tag( array( 'tag_name' => 'input' ) ) ) {
 			if ( 'wc_bis_product_id' === $html->get_attribute( 'name' ) ) {
@@ -146,20 +152,27 @@ class ProductPageIntegration {
 
 		$form = $html->get_updated_html();
 
-		// Post the chosen values, so "any" attributes are kept like in the classic form.
+		// Post the chosen values, so "any" attributes are kept like in the classic form. The inputs sit inside
+		// the block's <form> to read its selected attributes, and the `form` attribute submits them with the BIS form.
 		$attribute_inputs = '';
 		foreach ( array_keys( $product->get_variation_attributes() ) as $attribute_name ) {
 			$attribute_name    = (string) $attribute_name;
 			$attribute_inputs .= sprintf(
-				'<input type="hidden" name="%s" %s data-wp-bind--value="state.selectedAttributeValue" />',
+				'<input type="hidden" name="%s" form="%s" data-wp-interactive="%s" %s data-wp-bind--value="state.selectedAttributeValue" />',
 				esc_attr( wc_variation_attribute_name( $attribute_name ) ),
+				esc_attr( $form_id ),
+				esc_attr( self::SCRIPT_MODULE ),
 				wp_interactivity_data_wp_context( array( 'attribute' => wc_attribute_label( $attribute_name ) ) )
 			);
 		}
 
-		$form_end = strrpos( $form, '</form>' );
+		// The block's own </form> comes first, as forms can't be nested.
+		$block_form_end = stripos( $block_content, '</form>' );
+		if ( false !== $block_form_end ) {
+			$block_content = substr_replace( $block_content, $attribute_inputs, $block_form_end, 0 );
+		}
 
-		return false === $form_end ? $form : substr_replace( $form, $attribute_inputs, $form_end, 0 );
+		return $block_content . $form;
 	}
 
 	/**

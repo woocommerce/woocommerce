@@ -138,17 +138,34 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		$this->assertSame( 1, substr_count( $markup, 'class="wc_bis_form"' ), 'The Back in Stock form should render once.' );
 		$this->assertGreaterThan( strpos( $markup, '</form>' ), strpos( $markup, 'class="wc_bis_form"' ), 'The Back in Stock form should render outside the block form.' );
 
+		// The attribute inputs sit inside the block form, to read its selected attributes.
+		$block_form = new \WP_HTML_Tag_Processor( substr( $markup, 0, strpos( $markup, '</form>' ) ) );
+		$this->assertTrue( $block_form->next_tag( array( 'class_name' => 'wc-block-add-to-cart-with-options' ) ), 'The block form should render.' );
+		$attribute_input = null;
+		while ( $block_form->next_tag( 'input' ) ) {
+			if ( 'attribute_pa_color' === $block_form->get_attribute( 'name' ) ) {
+				$attribute_input = array(
+					'form'  => $block_form->get_attribute( 'form' ),
+					'value' => $block_form->get_attribute( 'data-wp-bind--value' ),
+				);
+			}
+		}
+		$this->assertSame( 'state.selectedAttributeValue', $attribute_input['value'] ?? null, 'The block form should hold the chosen attributes.' );
+
 		$html = new \WP_HTML_Tag_Processor( $markup );
 		$html->next_tag( array( 'class_name' => 'wc_bis_form' ) );
 		$this->assertNotNull( $html->get_attribute( 'hidden' ), 'The form should stay hidden until an out of stock variation is chosen.' );
 		$this->assertSame( 'woocommerce/back-in-stock-form', $html->get_attribute( 'data-wp-interactive' ), 'The form should be driven by the Interactivity API.' );
+
+		$html->next_tag( 'form' );
+		$this->assertNotEmpty( $html->get_attribute( 'id' ), 'The Back in Stock form should have an ID.' );
+		$this->assertSame( $html->get_attribute( 'id' ), $attribute_input['form'] ?? null, 'The attribute inputs should be posted with the Back in Stock form.' );
 
 		$bound_inputs = array();
 		while ( $html->next_tag( 'input' ) ) {
 			$bound_inputs[ $html->get_attribute( 'name' ) ] = $html->get_attribute( 'data-wp-bind--value' );
 		}
 		$this->assertSame( 'woocommerce/products::state.productInContext.id', $bound_inputs['wc_bis_product_id'] ?? null, 'The form should target the chosen variation.' );
-		$this->assertSame( 'state.selectedAttributeValue', $bound_inputs['attribute_pa_color'] ?? null, 'The form should post the chosen attributes.' );
 	}
 
 	/**

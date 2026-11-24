@@ -8,14 +8,13 @@ import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
  */
 import type { BackInStockFormStore } from '../frontend';
 
-type ProductSelection = { selectedAttributes?: SelectedAttributes[] };
+type BlockContext = { selectedAttributes?: SelectedAttributes[] };
 
-let mockProductContext: ProductSelection | undefined;
+let mockBlockContext: BlockContext | undefined;
 let mockRegisteredStore: BackInStockFormStore;
 
 const mockProductsState = {
 	productVariationInContext: null as Record< string, unknown > | null,
-	selectedAttributes: undefined as SelectedAttributes[] | undefined,
 };
 
 jest.mock(
@@ -29,8 +28,8 @@ jest.mock(
 			return definition;
 		} ),
 		getContext: jest.fn( ( namespace?: string ) =>
-			namespace === 'woocommerce/products'
-				? mockProductContext
+			namespace === 'woocommerce/add-to-cart-with-options'
+				? mockBlockContext
 				: { attribute: 'Size' }
 		),
 	} ),
@@ -42,9 +41,8 @@ jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ) );
 describe( 'Back in Stock form store', () => {
 	beforeEach( () => {
 		jest.resetModules();
-		mockProductContext = undefined;
+		mockBlockContext = undefined;
 		mockProductsState.productVariationInContext = null;
-		mockProductsState.selectedAttributes = undefined;
 
 		return import( '../frontend' );
 	} );
@@ -72,32 +70,21 @@ describe( 'Back in Stock form store', () => {
 		}
 	);
 
-	it( 'reads the selected attribute value from the products state', () => {
+	it( 'reads the selected attribute value from the Add to Cart + Options context', () => {
 		expect( mockRegisteredStore.state.selectedAttributeValue ).toBe( '' );
 
-		mockProductsState.selectedAttributes = [
-			{ attribute: 'Color', value: 'blue' },
-			{ attribute: 'Size', value: 'large' },
-		];
+		mockBlockContext = {
+			selectedAttributes: [
+				{ attribute: 'Color', value: 'blue' },
+				{ attribute: 'size', value: 'large' },
+			],
+		};
 
 		expect( mockRegisteredStore.state.selectedAttributeValue ).toBe(
 			'large'
 		);
-	} );
 
-	it( 'prefers the products context over the state', () => {
-		mockProductsState.selectedAttributes = [
-			{ attribute: 'Size', value: 'large' },
-		];
-		mockProductContext = {
-			selectedAttributes: [ { attribute: 'size', value: 'small' } ],
-		};
-
-		expect( mockRegisteredStore.state.selectedAttributeValue ).toBe(
-			'small'
-		);
-
-		mockProductContext = {};
+		mockBlockContext = {};
 
 		expect( mockRegisteredStore.state.selectedAttributeValue ).toBe( '' );
 	} );
