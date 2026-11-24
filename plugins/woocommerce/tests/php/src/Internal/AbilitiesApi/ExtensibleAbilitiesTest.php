@@ -1418,6 +1418,130 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should list the order emails of extensions in order-send-email, send them in their statuses only, and refuse an unknown email naming the valid ones.
+	 */
+	public function test_order_send_email_sends_the_order_emails_of_extensions(): void {
+		$this->register_order_emails();
+		$on_hold_order = \WC_Helper_Order::create_order();
+		$on_hold_order->set_status( OrderStatus::ON_HOLD );
+		$on_hold_order->set_billing_email( 'customer@example.com' );
+		$on_hold_order->save();
+		$pending_order = \WC_Helper_Order::create_order();
+		$mails         = array();
+		$capture       = static function ( $short_circuit, $atts ) use ( &$mails ) {
+			$mails[] = $atts;
+			return true;
+		};
+		add_filter( 'pre_wp_mail', $capture, 10, 2 );
+
+		$schema   = $this->get_ability( 'woocommerce/order-send-email' )['input_schema']['properties']['email'];
+		$on_hold  = $this->run_ability(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => $on_hold_order->get_id(),
+				'email' => 'test-ext:on-hold',
+			)
+		);
+		$note     = $this->run_ability(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => $pending_order->get_id(),
+				'email' => 'test-ext:note',
+			)
+		);
+		$mismatch = $this->run_ability_response(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => $pending_order->get_id(),
+				'email' => 'test-ext:on-hold',
+			)
+		);
+		$unknown  = wp_get_ability( 'woocommerce/order-send-email' )->execute(
+			array(
+				'id'    => $pending_order->get_id(),
+				'email' => 'test-ext:missing',
+			)
+		);
+		remove_filter( 'pre_wp_mail', $capture );
+
+		$this->assertSame( array( 'invoice', 'processing', 'completed', 'test-ext:on-hold', 'test-ext:note' ), $schema['enum'] );
+		$this->assertStringContainsString( 'test-ext:on-hold: Tells the customer that the order is on hold. Statuses: on-hold, failed.', $schema['description'] );
+		$this->assertStringContainsString( 'test-ext:note: Sends a reminder note. Statuses: any.', $schema['description'] );
+		$this->assertSame( 'test-ext:on-hold', $on_hold['email'] );
+		$this->assertSame( 'test-ext:note', $note['email'] );
+		$this->assertCount( 2, $mails );
+		$this->assertSame( 'customer@example.com', $mails[0]['to'] );
+		$this->assertStringContainsString( 'Pay the second payment.', $mails[1]['message'] );
+		$this->assertSame( 'woocommerce_ability_order_email_status_mismatch', $mismatch->get_data()['code'] );
+		$this->assertStringContainsString( 'on-hold, failed', $mismatch->get_data()['message'] );
+		$this->assertSame( 'ability_invalid_input', $unknown->get_error_code() );
+		$this->assertStringContainsString( 'test-ext:on-hold', $unknown->get_error_message() );
+		$this->assertStringContainsString( 'test-ext:note', $unknown->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should refuse an order email that is already registered, and keep the first one.
+	 */
+	public function test_an_order_email_registered_twice_is_refused(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_order_email' );
+		$this->register_order_emails();
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'   => 'test-ext',
+						'email'       => 'on-hold',
+						'email_class' => 'WC_Email_Customer_Invoice',
+						'description' => 'Another email.',
+					)
+				);
+			}
+		);
+
+		$this->get_ability( 'woocommerce/order-send-email' );
+
+		$this->assertSame( 'WC_Email_Customer_On_Hold_Order', ExtensibleAbilities::get_order_emails()['test-ext:on-hold']['email_class'] );
+	}
+
+	/**
+	 * Register two order emails of an extension: one sent with the default trigger in two statuses,
+	 * and one whose trigger takes other arguments, sent in any status.
+	 */
+	private function register_order_emails(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'   => 'test-ext',
+						'email'       => 'on-hold',
+						'email_class' => 'WC_Email_Customer_On_Hold_Order',
+						'description' => 'Tells the customer that the order is on hold.',
+						'statuses'    => array( 'wc-on-hold', OrderStatus::FAILED ),
+					)
+				);
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'        => 'test-ext',
+						'email'            => 'note',
+						'email_class'      => 'WC_Email_Customer_Note',
+						'description'      => 'Sends a reminder note.',
+						'trigger_callback' => static function ( \WC_Email $email, \WC_Order $order ) {
+							$email->trigger(
+								array(
+									'order_id'      => $order->get_id(),
+									'customer_note' => 'Pay the second payment.',
+								)
+							);
+						},
+					)
+				);
+			}
+		);
+	}
+
+	/**
 	 * @testdox Should refuse a resource name made only of digits.
 	 */
 	public function test_a_resource_name_of_only_digits_is_refused(): void {
@@ -7612,7 +7736,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'validators', 'syncs', 'primes', 'filters' ) as $property ) {
+		foreach ( array( 'fields', 'validators', 'syncs', 'primes', 'filters', 'order_emails' ) as $property ) {
 			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );
