@@ -43,8 +43,8 @@ final class SessionConcurrencyGuard {
 		$baseline_hashes = self::get_baseline_hashes();
 
 		if ( ! $baseline_hashes->offsetExists( $session ) ) {
-    return false;
-}
+			return false;
+		}
 
 		if ( method_exists( $session, 'get_session_data_from_storage' ) ) {
 			$persisted_data = $session->get_session_data_from_storage();
