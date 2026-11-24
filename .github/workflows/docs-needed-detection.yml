@@ -23,6 +23,7 @@ jobs:
       pull-requests: read
     outputs:
       number: ${{ steps.find.outputs.number }}
+      labeled: ${{ steps.find.outputs.labeled }}
     steps:
       - name: 'Find Pull Request'
         id: find
@@ -39,12 +40,19 @@ jobs:
               console.log( `No pull request was merged as ${ context.sha }.` );
               return;
             }
+            if ( /^revert /i.test( pr.title ) ) {
+              console.log( `Skipping revert PR #${ pr.number }.` );
+              return;
+            }
             core.setOutput( 'number', String( pr.number ) );
+            // Read live: a person may have labeled it, or an earlier run did before Linear failed.
+            core.setOutput( 'labeled', String( pr.labels.some( ( label ) => label.name === 'needs: documentation' ) ) );
 
   analyze:
     name: 'Evaluate User-Facing Changes'
     needs: find-pr
-    if: needs.find-pr.outputs.number
+    # An existing label already answers the question, so a rerun doesn't call Claude again.
+    if: needs.find-pr.outputs.number && needs.find-pr.outputs.labeled != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # Reads an untrusted diff, so it gets no write access and no Linear token.
@@ -90,17 +98,6 @@ jobs:
             - needs_docs: true or false
             - confidence: "high", "medium", or "low"
             - reason: 1-2 sentence explanation
-
-            SKIP CONDITIONS (check these FIRST, before analyzing the diff)
-            1. Get the PR metadata:
-               gh pr view ${{ needs.find-pr.outputs.number }} --repo ${{ github.repository }} --json title,labels
-            2. If the PR title starts with "Revert " (case-insensitive), output
-               needs_docs=false, confidence="high", reason="Revert PR", then stop.
-            3. If the "needs: documentation" label is already present, do NOT stop: a
-               previous run may have failed after labeling, so a Linear issue must still
-               be ensured. Analyze the diff as described below and report its confidence
-               and reason, but output needs_docs=true even where the analysis would
-               otherwise output needs_docs=false.
 
             CLASSIFICATION CRITERIA
             Core question: "Would a non-technical store owner or site administrator
@@ -162,18 +159,17 @@ jobs:
             only developer-only changes.
 
             METHOD
-            1. Run skip condition checks (see SKIP CONDITIONS above).
-            2. Get the PR diff:
+            1. Get the PR diff:
                gh pr diff ${{ needs.find-pr.outputs.number }} --repo ${{ github.repository }}
                DO NOT use shell redirects (>, >>, |) - they are blocked.
                If the diff output is empty or contains fewer than 50 characters of
                meaningful changed lines (excluding file headers and blank lines),
                output needs_docs=false then stop.
-            3. Analyze the diff. For each changed file, classify it:
+            2. Analyze the diff. For each changed file, classify it:
                - Ignore files matching developer-only patterns listed above.
                - For remaining files, determine whether the change is user-facing
                  based on the classification criteria.
-            4. Make a final determination:
+            3. Make a final determination:
                - If ANY file contains a user-facing change with high or medium
                  confidence, set needs_docs=true with the highest confidence level found.
                - If ALL changes are developer-only or low confidence, set needs_docs=false.
@@ -181,7 +177,12 @@ jobs:
   flag-docs:
     name: 'Flag Documentation Needs'
     needs: [find-pr, analyze]
-    if: ${{ needs.analyze.outputs.verdict && fromJSON(needs.analyze.outputs.verdict).needs_docs }}
+    # Runs for an existing label even though 'analyze' was skipped, or for a verdict that needs docs.
+    if: >-
+      ${{ ! cancelled() && needs.find-pr.result == 'success' && needs.find-pr.outputs.number && (
+        needs.find-pr.outputs.labeled == 'true' ||
+        ( needs.analyze.result == 'success' && needs.analyze.outputs.verdict && fromJSON(needs.analyze.outputs.verdict).needs_docs )
+      ) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -198,6 +199,7 @@ jobs:
       # Label first so the docs signal survives a Linear outage. A failed Linear step
       # fails the job, and "Re-run failed jobs" retries only this job with the same verdict.
       - name: 'Apply Label'
+        if: needs.find-pr.outputs.labeled != 'true'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           PR_NUMBER: ${{ needs.find-pr.outputs.number }}
@@ -255,7 +257,8 @@ jobs:
                 labelId: process.env.LINEAR_LABEL_ID,
                 pr,
                 repoFullName: `${ context.repo.owner }/${ context.repo.repo }`,
-                verdict: JSON.parse( process.env.VERDICT ),
+                // No verdict when the existing label skipped the analysis.
+                verdict: process.env.VERDICT ? JSON.parse( process.env.VERDICT ) : null,
               } );
               console.log( `${ reused ? 'Reusing' : 'Created' } Linear issue: ${ issue.identifier } (${ issue.url })` );
             } catch ( error ) {
