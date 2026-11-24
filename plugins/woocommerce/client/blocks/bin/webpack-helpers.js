@@ -51,6 +51,8 @@ const getAlias = ( options = {} ) => {
 	let { pathPart } = options;
 	pathPart = pathPart ? `${ pathPart }/` : '';
 	return {
+		// Storefront filters need the component even when wp-components is absent.
+		'wc-bundled-wordpress-components$': '@wordpress/components',
 		'@woocommerce/product-elements': path.resolve(
 			__dirname,
 			`../assets/js/${ pathPart }blocks/product-elements-blocks`

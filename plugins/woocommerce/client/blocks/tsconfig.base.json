@@ -34,6 +34,9 @@
 			"jquery"
 		],
 		"paths": {
+			"wc-bundled-wordpress-components": [
+				"node_modules/@wordpress/components/build-types/index.d.ts"
+			],
 			"@woocommerce/product-elements": [
 				"assets/js/blocks/product-elements-blocks"
 			],

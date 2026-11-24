@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { FormTokenField as WPFormTokenField } from 'wordpress-components';
+import { FormTokenField as WPFormTokenField } from 'wc-bundled-wordpress-components';
 import clsx from 'clsx';
 
 /**
@@ -14,7 +14,9 @@ export interface Props {
 	disabled?: boolean;
 	displayTransform?: ( value: string ) => string;
 	label?: string;
-	messages?: Record< string, string >;
+	messages?: NonNullable<
+		React.ComponentProps< typeof WPFormTokenField >[ 'messages' ]
+	>;
 	multiple?: boolean;
 	onChange: ( value: string[] ) => void;
 	placeholder?: string;
@@ -32,9 +34,9 @@ const FormTokenField = ( {
 	multiple = true,
 	saveTransform = ( incompleteToken ) =>
 		incompleteToken.trim().replace( /\s/g, '-' ),
-	messages = {},
 	validateInput = ( token: string ) => suggestions.includes( token ),
 	label = '',
+	onChange,
 	...props
 }: Props ) => {
 	return (
@@ -54,9 +56,17 @@ const FormTokenField = ( {
 				__experimentalShowHowTo={ false }
 				__experimentalValidateInput={ validateInput }
 				saveTransform={ saveTransform }
-				maxLength={ multiple ? undefined : 1 }
+				{ ...( multiple ? {} : { maxLength: 1 } ) }
 				suggestions={ suggestions }
-				messages={ messages }
+				__nextHasNoMarginBottom
+				__next40pxDefaultSize
+				onChange={ ( tokens ) =>
+					onChange(
+						tokens.map( ( token ) =>
+							typeof token === 'string' ? token : token.value
+						)
+					)
+				}
 				{ ...props }
 			/>
 		</div>

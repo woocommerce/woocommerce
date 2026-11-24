@@ -419,6 +419,8 @@ const RatingFilterBlock = ( {
 									{},
 									label,
 									{
+										normalize: () => rawValue,
+										toString: () => rawValue,
 										toLocaleLowerCase: () => rawValue,
 										substring: (
 											start: number,

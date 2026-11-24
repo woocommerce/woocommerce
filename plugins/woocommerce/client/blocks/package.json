@@ -256,7 +256,6 @@
 		"react-transition-group": "^4.4.5",
 		"temporal-polyfill": "1.0.4",
 		"use-debounce": "9.0.4",
-		"wordpress-components": "npm:@wordpress/components@14.2.0",
 		"wordpress-components-slotfill": "npm:@wordpress/components@29.5.4"
 	},
 	"peerDependencies": {

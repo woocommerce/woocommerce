@@ -113,6 +113,7 @@ module.exports = {
 		'^@woocommerce/stores/woocommerce/shopper-lists$':
 			'assets/js/base/stores/shopper-lists',
 		'@woocommerce/stores/(.*)$': 'assets/js/base/stores/$1',
+		'^wc-bundled-wordpress-components$': '@wordpress/components',
 		'^react$': '<rootDir>/node_modules/react',
 		'^react-dom$': '<rootDir>/node_modules/react-dom',
 		// Catch-all for monorepo @woocommerce/* packages: route bare and
