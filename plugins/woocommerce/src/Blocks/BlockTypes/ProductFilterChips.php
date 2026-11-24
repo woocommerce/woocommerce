@@ -136,7 +136,7 @@ final class ProductFilterChips extends AbstractBlock {
 					foreach ( $visible_items as $item ) :
 						?>
 						<button
-							class="wc-block-product-filter-chips__item <?php echo esc_attr( $item_classes_and_styles['classnames'] ); ?>"
+							class="wc-block-product-filter-chips__item <?php echo esc_attr( $item_classes_and_styles['classnames'] ); ?><?php echo ! empty( $item['looksDisabled'] ) ? ' is-disabled' : ''; ?>"
 							<?php if ( $item_classes_and_styles['css'] ) : ?>
 								style="<?php echo esc_attr( $item_classes_and_styles['css'] ); ?>"
 							<?php endif; ?>
@@ -148,6 +148,8 @@ final class ProductFilterChips extends AbstractBlock {
 							<?php endif; ?>
 							<?php if ( $has_visual_swatches ) : ?>
 								title="<?php echo esc_attr( $item['label'] ); ?>"
+							<?php elseif ( ! empty( $item['title'] ) ) : ?>
+								title="<?php echo esc_attr( $item['title'] ); ?>"
 							<?php endif; ?>
 							value="<?php echo esc_attr( $item['value'] ); ?>"
 							aria-checked="<?php echo ! empty( $item['selected'] ) ? 'true' : 'false'; ?>"
@@ -155,6 +157,10 @@ final class ProductFilterChips extends AbstractBlock {
 							data-wp-each-child
 							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							data-wp-bind--aria-checked="context.item.selected"
+							<?php if ( ! $has_visual_swatches ) : ?>
+								data-wp-bind--title="context.item.title"
+							<?php endif; ?>
+							data-wp-class--is-disabled="context.item.looksDisabled"
 							data-wp-bind--disabled="context.item.disabled"
 							data-wp-bind--hidden="context.item.hidden"
 							data-wp-on--click="actions.toggle"
@@ -199,9 +205,12 @@ final class ProductFilterChips extends AbstractBlock {
 							data-wp-bind--aria-label="context.item.ariaLabel"
 							<?php if ( $has_visual_swatches ) : ?>
 								data-wp-bind--title="context.item.label"
+							<?php else : ?>
+								data-wp-bind--title="context.item.title"
 							<?php endif; ?>
 							data-wp-bind--value="context.item.value"
 							data-wp-bind--aria-checked="context.item.selected"
+							data-wp-class--is-disabled="context.item.looksDisabled"
 							data-wp-bind--disabled="context.item.disabled"
 							data-wp-bind--hidden="context.item.hidden"
 							data-wp-on--click="actions.toggle"

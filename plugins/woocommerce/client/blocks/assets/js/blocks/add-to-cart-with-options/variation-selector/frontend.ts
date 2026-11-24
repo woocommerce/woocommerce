@@ -55,21 +55,29 @@ const { state: productsState } = store< ProductsStore >(
 	{ lock: universalLock }
 );
 
-const isAttributeValueValid = ( {
-	attributeName,
-	attributeValue,
-	selectedAttributes,
-}: {
+type AttributeValueCheck = {
 	attributeName: string;
 	attributeValue: string;
 	selectedAttributes: SelectedAttributes[];
-} ) => {
+};
+
+/**
+ * Get the variations that match an attribute value, given the other
+ * attributes the shopper has already selected.
+ */
+const getMatchingVariations = ( {
+	attributeName,
+	attributeValue,
+	selectedAttributes,
+}: AttributeValueCheck ): NonNullable<
+	ProductResponseItem[ 'variations' ]
+> => {
 	if (
 		! attributeName ||
 		! attributeValue ||
 		! Array.isArray( selectedAttributes )
 	) {
-		return false;
+		return [];
 	}
 
 	// If the current attribute is selected, we require one less attribute to
@@ -88,12 +96,10 @@ const isAttributeValueValid = ( {
 	const { mainProductInContext: product } = productsState;
 
 	if ( ! product?.variations?.length ) {
-		return false;
+		return [];
 	}
 
-	// Check if there is at least one available variation matching the current
-	// selected attributes and the attribute value being checked.
-	return product.variations.some( ( variation ) => {
+	return product.variations.filter( ( variation ) => {
 		const variationAttrValue = getVariationAttributeValue(
 			variation,
 			attributeName
@@ -144,6 +150,26 @@ const isAttributeValueValid = ( {
 		return matchingAttributes >= attributesToMatch;
 	} );
 };
+
+/**
+ * Whether at least one variation matches the attribute value.
+ */
+const isAttributeValueValid = ( check: AttributeValueCheck ): boolean =>
+	getMatchingVariations( check ).length > 0;
+
+/**
+ * Whether all matching variations are out of stock. Variations without loaded
+ * data are not treated as out of stock.
+ */
+const areAllVariationsOutOfStock = (
+	matchingVariations: ReturnType< typeof getMatchingVariations >
+): boolean =>
+	matchingVariations.length > 0 &&
+	matchingVariations.every(
+		( variation ) =>
+			productsState.productVariations[ variation.id ]?.is_in_stock ===
+			false
+	);
 
 /**
  * Return the product attributes and options from Store API format.
@@ -230,17 +256,22 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				} = context;
 				const { selectedAttributes } = state;
 				const hideInvalid = disabledAttributesAction === 'hide';
+				const outOfStockTitle =
+					getConfig()?.variationOptionTitles?.outOfStock ?? '';
 
 				if ( ! Array.isArray( variationAttributeOptions ) ) {
 					return [];
 				}
 
 				return variationAttributeOptions.map( ( row, index ) => {
-					const disabled = ! isAttributeValueValid( {
+					const matchingVariations = getMatchingVariations( {
 						attributeName: name,
 						attributeValue: row.value,
 						selectedAttributes,
 					} );
+					const disabled = matchingVariations.length === 0;
+					const outOfStock =
+						areAllVariationsOutOfStock( matchingVariations );
 					const selected = selectedAttributes.some(
 						( attrObject ) =>
 							attributeNamesMatch( attrObject.attribute, name ) &&
@@ -255,6 +286,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						selected,
 						disabled,
 						hidden: hideInvalid && disabled,
+						looksDisabled: outOfStock,
+						title: outOfStock ? outOfStockTitle : undefined,
 						...( row.visual !== undefined && {
 							visual: row.visual,
 						} ),
