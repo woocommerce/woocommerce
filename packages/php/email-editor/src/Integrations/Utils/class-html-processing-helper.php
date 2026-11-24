@@ -761,7 +761,7 @@ class Html_Processing_Helper {
 	/**
 	 * Check whether HTML has anything an email shows: an element or non-whitespace text.
 	 *
-	 * Comments, doctypes, stray closers such as `</2>` or `</>`, and `<style>`/`<script>` elements
+	 * Comments, doctypes, stray closing tags such as `</div>` or `</2>`, and `<style>`/`<script>` elements
 	 * don't count, since the email doesn't show them.
 	 *
 	 * @param string $html HTML to check.
@@ -780,7 +780,8 @@ class Html_Processing_Helper {
 				}
 				continue;
 			}
-			if ( '#tag' === $token_type && in_array( $processor->get_tag(), array( 'STYLE', 'SCRIPT' ), true ) ) {
+			// A closer reached here has no opener before it, so the parser drops it.
+			if ( '#tag' === $token_type && ( $processor->is_tag_closer() || in_array( $processor->get_tag(), array( 'STYLE', 'SCRIPT' ), true ) ) ) {
 				continue;
 			}
 			return true;

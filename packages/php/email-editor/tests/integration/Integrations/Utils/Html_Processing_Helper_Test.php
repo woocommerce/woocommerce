@@ -337,6 +337,9 @@ class Html_Processing_Helper_Test extends \Email_Editor_Integration_Test_Case {
 			'script, comment and whitespace' => array( "\n<!-- note --><script>var a = 1;</script>\n", false ),
 			'doctype and stray closers'      => array( '<!DOCTYPE html></2></><style>p { color: red; }</style>', false ),
 			'text after a doctype'           => array( '<!DOCTYPE html>Hello', true ),
+			// Browsers turn a lone </p> into an empty <p>, but the CSS inliner's parser drops it like any other.
+			'stray closing tags'             => array( '</div></p></span>', false ),
+			'text after a stray closing tag' => array( '</div>Hello', true ),
 			'text'                           => array( '<style>p { margin: 0; }</style>Hello', true ),
 			'non-breaking space'             => array( '&nbsp;', true ),
 			'image'                          => array( '<img src="https://example.com/a.jpg" alt="">', true ),
