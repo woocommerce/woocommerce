@@ -1129,14 +1129,21 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 
 	/**
 	 * The gap between paragraphs that are not paragraph blocks follows the email's block gap setting.
+	 * Anything after the gap that would break out of its CSS rule is dropped, not added to the email.
+	 *
+	 * @testWith ["24px", "display: block; margin: 0; margin-top: 24px;"]
+	 *           ["16px; } p { display: none", "display: block; margin: 0; margin-top: 16px;"]
+	 *
+	 * @param string $block_gap      Block gap set in the email's theme.json.
+	 * @param string $expected_style Expected style of the second paragraph.
 	 */
-	public function testItSpacesParagraphsThatAreNotParagraphBlocksByTheBlockGap(): void {
-		$set_block_gap = static function ( \WP_Theme_JSON $theme ): \WP_Theme_JSON {
+	public function testItSpacesParagraphsThatAreNotParagraphBlocksByTheBlockGap( string $block_gap, string $expected_style ): void {
+		$set_block_gap = static function ( \WP_Theme_JSON $theme ) use ( $block_gap ): \WP_Theme_JSON {
 			$theme->merge(
 				new \WP_Theme_JSON(
 					array(
 						'version' => 3,
-						'styles'  => array( 'spacing' => array( 'blockGap' => '24px' ) ),
+						'styles'  => array( 'spacing' => array( 'blockGap' => $block_gap ) ),
 					)
 				)
 			);
@@ -1146,7 +1153,7 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 
 		$paragraphs = $this->render_paragraph_styles( '<!-- wp:html --><p>First</p><p>Second</p><!-- /wp:html -->' );
 
-		$this->assertStringEndsWith( 'margin-top: 24px;', $paragraphs['Second'] );
+		$this->assertSame( $expected_style, $paragraphs['Second'] );
 	}
 
 	/**

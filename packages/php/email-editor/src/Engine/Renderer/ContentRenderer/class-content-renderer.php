@@ -689,9 +689,11 @@ class Content_Renderer {
 
 		// Paragraph blocks are each wrapped in their own table, so this only reaches paragraphs
 		// in one chunk of HTML (Classic, Custom HTML, shortcodes), which content.css resets to margin 0.
+		// The gap is checked as a declaration because a stray "}" would close this rule and start another.
 		$block_gap = $this->theme_controller->get_styles()['spacing']['blockGap'] ?? null;
-		if ( is_string( $block_gap ) && '' !== $block_gap ) {
-			$styles .= sprintf( 'p + p { margin-top: %s; }', $block_gap );
+		$gap_style = is_string( $block_gap ) ? safecss_filter_attr( 'margin-top: ' . $block_gap ) : '';
+		if ( '' !== $gap_style ) {
+			$styles .= sprintf( 'p + p { %s; }', $gap_style );
 		}
 
 		// Get styles from theme.
