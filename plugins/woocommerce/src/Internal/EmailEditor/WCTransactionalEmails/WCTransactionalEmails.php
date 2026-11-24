@@ -71,6 +71,11 @@ class WCTransactionalEmails {
 			$emails             = array_merge( $emails, $fulfillment_emails );
 		}
 
+		if ( FeaturesUtil::feature_is_enabled( 'order_withdrawal' ) ) {
+			$emails[] = 'customer_order_withdrawal_requested';
+			$emails[] = 'order_withdrawal_requested';
+		}
+
 		return $emails;
 	}
 

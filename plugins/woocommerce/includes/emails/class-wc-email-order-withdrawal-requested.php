@@ -82,7 +82,8 @@ if ( ! class_exists( 'WC_Email_Order_Withdrawal_Requested', false ) ) :
 
 			parent::__construct();
 
-			$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
+			$this->recipient              = $this->get_option( 'recipient', get_option( 'admin_email' ) );
+			$this->template_block_content = 'emails/block/general-block-content-for-order-withdrawal-emails.php';
 		}
 
 		/**
@@ -201,6 +202,26 @@ if ( ! class_exists( 'WC_Email_Order_Withdrawal_Requested', false ) ) :
 					'email_heading'             => $this->get_heading(),
 					'additional_content'        => $this->get_additional_content(),
 					'withdrawal_data'           => $this->withdrawal_data,
+					'detail_rows'               => $this->formatter->get_detail_rows( $this->withdrawal_data, $this->submitted_at ),
+					'matched_order'             => $this->matched_order,
+					'outside_withdrawal_window' => $this->outside_withdrawal_window,
+					'withdrawal_window_warning' => $this->withdrawal_window_warning,
+					'sent_to_admin'             => true,
+					'plain_text'                => false,
+					'email'                     => $this,
+				)
+			);
+		}
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
 					'detail_rows'               => $this->formatter->get_detail_rows( $this->withdrawal_data, $this->submitted_at ),
 					'matched_order'             => $this->matched_order,
 					'outside_withdrawal_window' => $this->outside_withdrawal_window,
