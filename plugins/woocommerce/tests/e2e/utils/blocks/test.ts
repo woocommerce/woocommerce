@@ -15,6 +15,7 @@ import {
 	MiniCartUtils,
 	PageUtils,
 	PerformanceUtils,
+	PostCompiler,
 	RequestUtils,
 	ShippingUtils,
 	WPTemplate,
@@ -142,6 +143,10 @@ const test = base.extend<
 		createHiddenProduct: (
 			data: Record< string, unknown >
 		) => Promise< { id: number } >;
+		createPost: (
+			name: string,
+			data?: unknown
+		) => ReturnType< PostCompiler[ 'compile' ] >;
 	},
 	{
 		requestUtils: RequestUtils;
@@ -420,6 +425,22 @@ const test = base.extend<
 				console.warn( 'Test cleanup failed:', result.reason );
 			}
 		}
+	},
+	// Publishes a post from `content-templates/blocks/post_<name>.handlebars`
+	// and deletes it after the test.
+	createPost: async ( { requestUtils, cleanup }, use ) => {
+		await use( async ( name, data ) => {
+			const compiler = await requestUtils.createPostFromFile( name );
+			const post = await compiler.compile( data );
+			cleanup( () =>
+				requestUtils.rest( {
+					method: 'DELETE',
+					path: `/wp/v2/posts/${ post.id }`,
+					params: { force: true },
+				} )
+			);
+			return post;
+		} );
 	},
 	requestUtils: [
 		async ( {}, use, workerInfo ) => {

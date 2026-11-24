@@ -7,23 +7,19 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Tests\Internal\Abilities\ExtensibleAbilitiesTestTrait;
 
 /**
  * Tests product term reads through the registered ability.
  */
 class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 
-	/**
-	 * Process state restored after each test.
-	 *
-	 * @var array
-	 */
-	private $saved_state = array();
+	use ExtensibleAbilitiesTestTrait;
+
 
 	/**
 	 * An administrator that every test acts as.
@@ -46,26 +42,9 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		foreach ( array( 'resources', 'fields', 'filters' ) as $name ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
-			$property->setAccessible( true );
-			$this->saved_state[ $name ] = $property->getValue();
-			$property->setValue( null, array() );
-		}
+		$this->isolate_extensible_abilities();
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
 		wp_set_current_user( self::$administrator_id );
-	}
-
-	/**
-	 * Restore extension state.
-	 */
-	public function tearDown(): void {
-		foreach ( $this->saved_state as $name => $value ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
-			$property->setAccessible( true );
-			$property->setValue( null, $value );
-		}
-		parent::tearDown();
 	}
 
 	/**
@@ -559,10 +538,7 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
 		$this->assertSame( $baseline, ProductTermsQuery::execute( $input ) );
 		$this->assertSame( $schema, ProductTermsQuery::get_registration_args()['output_schema'] );
-		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
-		do_action( 'woocommerce_extensible_abilities_resources_init' );
-		add_action(
-			'woocommerce_extensible_abilities_init',
+		$this->enable_extensible_abilities(
 			static function () {
 				ExtensibleAbilities::register_field(
 					array(
@@ -580,7 +556,6 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 				);
 			}
 		);
-		do_action( 'woocommerce_extensible_abilities_init' );
 		$ability = new \WP_Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
 		$result  = $ability->execute( $input );
 		$this->assertIsArray( $result );
@@ -602,10 +577,7 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 		add_term_meta( $first, '_test_flag', '1' );
 		add_term_meta( $second, '_test_flag', '1' );
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
-		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
-		do_action( 'woocommerce_extensible_abilities_resources_init' );
-		add_action(
-			'woocommerce_extensible_abilities_init',
+		$this->enable_extensible_abilities(
 			static function () {
 				$filters = array(
 					'flagged' => static fn() => array(
@@ -633,7 +605,6 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 				}
 			}
 		);
-		do_action( 'woocommerce_extensible_abilities_init' );
 		$ability = new Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
 		$query   = static function ( array $filters, array $input = array() ) use ( $ability ) {
 			$result = $ability->execute(

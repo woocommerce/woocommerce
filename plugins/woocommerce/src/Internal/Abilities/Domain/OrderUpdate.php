@@ -51,7 +51,7 @@ class OrderUpdate extends ActionableAbility {
 		return array(
 			'label'               => __( 'Update order', 'woocommerce' ),
 			'description'         => __(
-				'Update the addresses, customer note, product lines and shipping lines of an order. Fields that are not sent keep their value. Changing lines recalculates the totals and needs an order status that allows editing. Use the woocommerce/order-update-status ability to change the status.',
+				'Update the addresses, customer note, payment method, product lines and shipping lines of an order. Setting the payment method charges nothing, and a later refund through the gateway goes to the new one. Fields that are not sent keep their value. Changing lines recalculates the totals and needs an order status that allows editing. Use the woocommerce/order-update-status ability to change the status.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
@@ -129,6 +129,11 @@ class OrderUpdate extends ActionableAbility {
 
 		if ( isset( $input['customer_note'] ) ) {
 			$subject->set_customer_note( sanitize_textarea_field( $input['customer_note'] ) );
+		}
+
+		$error = isset( $input['payment_method'] ) ? self::set_payment_method( $subject, $input['payment_method'] ) : null;
+		if ( is_wp_error( $error ) ) {
+			$refused->merge_from( $error );
 		}
 
 		if ( empty( $input['remove_items'] ) && empty( $input['shipping_lines'] ) && empty( $input['line_items'] ) ) {
@@ -357,6 +362,7 @@ class OrderUpdate extends ActionableAbility {
 				'billing'        => self::get_address_input_schema( array_merge( self::get_address_fields(), array( 'email' ) ) ),
 				'shipping'       => self::get_address_input_schema( self::get_address_fields() ),
 				'customer_note'  => array( 'type' => 'string' ),
+				'payment_method' => self::get_payment_method_input_schema(),
 				'line_items'     => array(
 					'type'        => 'array',
 					'description' => __( 'Send id and quantity to change a line, or product_id and quantity to add one. A variation uses its own ID as product_id.', 'woocommerce' ),

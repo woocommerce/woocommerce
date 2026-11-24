@@ -29,5 +29,15 @@
 		</properties>
 	</rule>
 
+	<!-- purple_block_attribute_string() JSON-encodes values for block
+	     comments the same way core serializes block attributes. -->
+	<rule ref="WordPress.Security.EscapeOutput">
+		<properties>
+			<property name="customEscapingFunctions" type="array">
+				<element value="purple_block_attribute_string"/>
+			</property>
+		</properties>
+	</rule>
+
 	<config name="minimum_wp_version" value="7.1"/>
 </ruleset>

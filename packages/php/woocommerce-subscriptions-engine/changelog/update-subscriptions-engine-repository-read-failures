@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Throw on failed reads in the unreleased subscriptions engine instead of returning empty results; no changelog entry needed.

@@ -214,7 +214,10 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 			setValues( ( current ) => ( { ...current, enabled: enable } ) );
 			setBusy( true );
 			try {
-				const response = await apiFetch< { enabled: boolean } >( {
+				const response = await apiFetch< {
+					enabled: boolean;
+					status?: string;
+				} >( {
 					path: ucp.path,
 					method: 'POST',
 					data: { enabled: enable },
@@ -223,17 +226,26 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 					...current,
 					enabled: response.enabled,
 				} ) );
-				const done = response.enabled ? ucp.turned_on : ucp.turned_off;
+				// On, but a required check failed (such as the UCP address not loading): no
+				// "can now shop" message; the page shows Needs attention and the step to fix.
+				let done = response.enabled ? ucp.turned_on : ucp.turned_off;
+				if ( response.status === 'needs_attention' ) {
+					done = '';
+				}
 				// The checklist and the other cards depend on the switch, so the page reloads,
 				// unless that would lose unsaved fields.
 				if ( dirtyRef.current ) {
-					showSnackbar( done );
+					if ( done ) {
+						showSnackbar( done );
+					}
 					say( ucp.unsaved );
 					setBusy( false );
 					return;
 				}
 				try {
-					window.sessionStorage.setItem( SNACKBAR_KEY, done );
+					if ( done ) {
+						window.sessionStorage.setItem( SNACKBAR_KEY, done );
+					}
 				} catch {}
 				// Not reload(): after Save, that would post the settings form again.
 				window.location.assign(

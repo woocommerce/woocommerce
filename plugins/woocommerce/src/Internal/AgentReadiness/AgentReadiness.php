@@ -686,6 +686,7 @@ class AgentReadiness {
 	/**
 	 * End a scan without storing a report. Removes failure rows it wrote for products the
 	 * previous report never covered, so the Products list stays aligned with that report.
+	 * Rows a save wrote while the scan ran stay, as when a scan finishes.
 	 * A scan whose report is already stored only finishes that cleanup.
 	 *
 	 * @param array{id?:string,ids?:array<int,int>,had_rows?:array<int,int>,tested?:array<int,int>,rows_as_of?:float} $state Scan progress.
@@ -700,9 +701,11 @@ class AgentReadiness {
 		}
 		$had_rows = array_map( 'intval', (array) ( $state['had_rows'] ?? array() ) );
 		$ids      = array_map( 'intval', (array) ( $state['ids'] ?? array() ) );
-		foreach ( array_diff( $ids, $had_rows ) as $product_id ) {
-			ProductFailures::forget( $product_id );
-		}
+		// Only products that have rows now: a scan can list thousands that never got any.
+		ProductFailures::forget_unless_written_since(
+			array_values( array_intersect( array_diff( $ids, $had_rows ), ProductFailures::stored_product_ids() ) ),
+			isset( $state['rows_as_of'] ) ? (float) $state['rows_as_of'] : null
+		);
 		delete_option( self::SCAN_OPTION );
 	}
 

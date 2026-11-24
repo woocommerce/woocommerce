@@ -12,7 +12,7 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"name":"Left-aligned text, image on the right","categories":["about","purple"],"patternName":"purple/about-left-aligned-text-right-image","description":"A section with an image on the right, description on the left."},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"backgroundColor":"theme-5","layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Left-aligned text, image on the right', 'Pattern title', 'purple' ) ); ?>,"categories":["about","purple"],"patternName":"purple/about-left-aligned-text-right-image","description":"A section with an image on the right, description on the left."},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"backgroundColor":"theme-5","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull has-theme-5-background-color has-background" style="margin-top:0;margin-bottom:0"><!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"left":"0"}}}} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"verticalAlignment":"center","width":"50%","layout":{"type":"default"}} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%"><!-- wp:group {"style":{"spacing":{"padding":{"right":"var:preset|spacing|50","left":"var:preset|spacing|50"},"blockGap":"var:preset|spacing|20"}},"layout":{"type":"constrained","justifyContent":"left"}} -->
@@ -32,7 +32,7 @@
 
 <!-- wp:column {"verticalAlignment":"center","width":"50%"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/green-sweater-hands.webp","alt":"<?php esc_attr_e( 'Hands touching a soft green knit sweater sleeve.', 'purple' ); ?>","dimRatio":0,"isUserOverlayColor":true,"isDark":false,"sizeSlug":"full","style":{"dimensions":{"aspectRatio":"4/3"}},"layout":{"type":"default"}} -->
-<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background size-full" alt="<?php esc_attr_e( 'Hands touching a soft green knit sweater sleeve.', 'purple' ); ?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/green-sweater-hands.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"placeholder":"Write title…","style":{"typography":{"textAlign":"center"}}} -->
+<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background size-full" alt="<?php esc_attr_e( 'Hands touching a soft green knit sweater sleeve.', 'purple' ); ?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/green-sweater-hands.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"placeholder":<?php echo purple_block_attribute_string( _x( 'Write title…', 'Block placeholder', 'purple' ) ); ?>,"style":{"typography":{"textAlign":"center"}}} -->
 <p class="has-text-align-center"></p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover --></div>
