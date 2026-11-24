@@ -177,6 +177,26 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	}
 
 	/**
+	 * The autoloader reads an exit before `plugins_loaded` as a failed boot and empties its cache.
+	 */
+	public function test_answering_keeps_the_jetpack_autoloader_cache(): void {
+		require_once __DIR__ . '/mocks/class-jetpack-autoloader-shutdown-handler.php';
+		$this->make_request( 'POST', '/wp-json/woocommerce-analytics/v1/track' );
+		update_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, 'yes' );
+		$autoloader_handler = new \Automattic\Jetpack\Autoloader\jp_test\al6_0_4\Shutdown_Handler();
+		$other_handler      = static function () {};
+		add_action( 'shutdown', $autoloader_handler );
+		add_action( 'shutdown', $other_handler );
+
+		$this->respond();
+
+		$this->assertFalse( has_action( 'shutdown', $autoloader_handler ) );
+		$this->assertSame( 10, has_action( 'shutdown', $other_handler ) );
+		remove_action( 'shutdown', $autoloader_handler );
+		remove_action( 'shutdown', $other_handler );
+	}
+
+	/**
 	 * Test that answering sends the pixels queued while handling the request.
 	 */
 	public function test_sends_the_queued_pixels_after_answering(): void {

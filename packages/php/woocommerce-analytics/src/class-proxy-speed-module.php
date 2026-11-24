@@ -120,7 +120,34 @@ class Proxy_Speed_Module {
 
 		echo wp_json_encode( $response['data'], JSON_UNESCAPED_SLASHES );
 
+		self::keep_autoloader_cache();
+
 		return true;
+	}
+
+	/**
+	 * Unhook the Jetpack autoloader's shutdown handler, which reads an exit before `plugins_loaded` as a failed boot.
+	 *
+	 * Left hooked, it empties the autoloader's plugin cache on every answered request, and the next page rebuilds it.
+	 *
+	 * @return void
+	 */
+	private static function keep_autoloader_cache() {
+		global $wp_filter;
+
+		if ( ! isset( $wp_filter['shutdown'] ) ) {
+			return;
+		}
+
+		foreach ( $wp_filter['shutdown']->callbacks as $priority => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				$function = $callback['function'];
+				// The autoloader generates its classes under a per-plugin, per-version namespace.
+				if ( is_object( $function ) && preg_match( '/^Automattic\\\\Jetpack\\\\Autoloader\\\\.+\\\\Shutdown_Handler$/', get_class( $function ) ) ) {
+					remove_action( 'shutdown', $function, $priority );
+				}
+			}
+		}
 	}
 
 	/**
