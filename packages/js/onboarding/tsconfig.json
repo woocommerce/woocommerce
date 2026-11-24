@@ -22,13 +22,7 @@
 	],
 	"references": [
 		{
-			"path": "../components"
-		},
-		{
 			"path": "../experimental"
-		},
-		{
-			"path": "../explat"
 		},
 		{
 			"path": "../tracks"

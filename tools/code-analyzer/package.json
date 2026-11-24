@@ -17,10 +17,10 @@
 	"dependencies": {
 		"@actions/core": "^2.0.3",
 		"@commander-js/extra-typings": "^10.0.3",
-		"@oclif/core": "^2.15.0",
+		"@oclif/core": "^4.13.5",
 		"@tsconfig/node16": "^1.0.4",
 		"@woocommerce/monorepo-utils": "workspace:*",
-		"commander": "^9.5.0",
+		"commander": "^10.0.1",
 		"dotenv": "^10.0.0",
 		"simple-git": "catalog:tooling"
 	},
@@ -28,7 +28,6 @@
 		"@types/jest": "catalog:tooling",
 		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-config": "workspace:*",
-		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
 		"ts-jest": "catalog:tooling",

@@ -59,19 +59,16 @@
 		"watch:build:project:esm": "node build.mjs --watch"
 	},
 	"dependencies": {
-		"@types/node": "^24.1.0",
-		"browser-filesaver": "^1.1.1"
+		"@types/node": "^24.1.0"
 	},
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
 		"@types/jest": "catalog:tooling",
 		"@woocommerce/eslint-config": "workspace:*",
-		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
-		"jest-cli": "catalog:tooling",
 		"jest-environment-jsdom": "catalog:tooling",
 		"rimraf": "catalog:tooling",
 		"ts-jest": "catalog:tooling",

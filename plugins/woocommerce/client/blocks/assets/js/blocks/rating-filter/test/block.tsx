@@ -47,13 +47,6 @@ afterEach( () => {
 	window.history.replaceState( {}, '', initialUrl );
 } );
 
-const acceptErrorWithDuplicatedKeys = () => {
-	// React throws an error about the duplicated `key` in the render tree.
-	// This is due to `FormTokenField` is forcefully used with incorrect children type,
-	// hence the error is acknowledged and consciously accepted.
-	expect( console ).toHaveErrored();
-};
-
 const stubCollectionData = (): WCStoreV1ProductsCollectionProps => ( {
 	price_range: null,
 	attribute_counts: null,
@@ -254,7 +247,6 @@ describe( 'Filter by Rating block', () => {
 				await act( async () => {
 					await userEvent.click( dropdown );
 				} );
-				acceptErrorWithDuplicatedKeys();
 			}
 
 			const rating4Suggestion = getRating4Suggestion();
@@ -289,7 +281,6 @@ describe( 'Filter by Rating block', () => {
 				await act( async () => {
 					await userEvent.click( removeRating4Button );
 				} );
-				acceptErrorWithDuplicatedKeys();
 			}
 
 			expect( getRating5Chips() ).toBeNull();
@@ -338,7 +329,6 @@ describe( 'Filter by Rating block', () => {
 				await act( async () => {
 					await userEvent.click( dropdown );
 				} );
-				acceptErrorWithDuplicatedKeys();
 			}
 
 			const rating4Suggestion = getRating4Suggestion();

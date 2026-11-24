@@ -46,8 +46,7 @@ module.exports = ( { config: storybookConfig } ) => {
 			require.resolve( './__mocks__/woocommerce-block-settings.js' ),
 		'@woocommerce/base-hooks':
 			require.resolve( './__mocks__/woocommerce-base-hooks.js' ),
-		'wordpress-components':
-			require.resolve( '../node_modules/wordpress-components' ),
+		'wc-bundled-wordpress-components$': '@wordpress/components',
 	};
 
 	// Resolve `@woocommerce/*` monorepo packages from source via the `wc-source`

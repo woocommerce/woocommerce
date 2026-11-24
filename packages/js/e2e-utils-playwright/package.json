@@ -75,12 +75,10 @@
 		"@types/jest": "catalog:tooling",
 		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-config": "workspace:*",
-		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
-		"jest-cli": "catalog:tooling",
 		"ts-jest": "catalog:tooling",
 		"typescript": "catalog:tooling"
 	},

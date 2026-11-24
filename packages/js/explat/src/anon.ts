@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import cookie from 'cookie';
-
-/**
  * Internal dependencies
  */
 import { canTrack } from './assignment';
@@ -16,7 +11,24 @@ const anonIdPollingIntervalMaxAttempts = 100; // 50 * 100 = 5000 = 5 seconds
  * Gather w.js anonymous cookie, tk_ai
  */
 export const readAnonCookie = (): string | null => {
-	return cookie.parse( document.cookie ).tk_ai || null;
+	for ( const pair of document.cookie.split( ';' ) ) {
+		const separator = pair.indexOf( '=' );
+		if ( separator < 0 || pair.slice( 0, separator ).trim() !== 'tk_ai' ) {
+			continue;
+		}
+
+		const value = pair
+			.slice( separator + 1 )
+			.trim()
+			.replace( /^"(.*)"$/, '$1' );
+		try {
+			return decodeURIComponent( value ) || null;
+		} catch {
+			return value || null;
+		}
+	}
+
+	return null;
 };
 
 /**

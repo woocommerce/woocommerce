@@ -33,10 +33,8 @@
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
 		"@woocommerce/eslint-config": "workspace:*",
-		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
-		"jest-cli": "catalog:tooling",
 		"rimraf": "catalog:tooling",
 		"ts-jest": "catalog:tooling",
 		"typescript": "catalog:tooling",

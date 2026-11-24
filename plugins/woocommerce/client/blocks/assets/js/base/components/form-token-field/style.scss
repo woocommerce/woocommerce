@@ -22,6 +22,10 @@
 		color: #000;
 		position: relative;
 
+		> .components-flex {
+			padding: 2px 4px;
+		}
+
 		input[type="text"].components-form-token-field__input {
 			min-height: 30px;
 		}
@@ -62,6 +66,11 @@
 	}
 
 	&.single-selection {
+		.components-flex-item {
+			margin-block: 2px;
+			width: 100%;
+		}
+
 		.components-form-token-field__token {
 			margin-right: 0;
 			position: relative;
@@ -79,12 +88,13 @@
 			width: 100%;
 		}
 
-		.components-form-token-field__token + input[type="text"].components-form-token-field__input {
+		.components-flex-item + input[type="text"].components-form-token-field__input {
 			position: absolute;
+			inline-size: 50px;
 		}
 
 		.is-active
-			.components-form-token-field__token + input[type="text"].components-form-token-field__input {
+			.components-flex-item + input[type="text"].components-form-token-field__input {
 			border: 1px solid $gray-600;
 			margin: 0 2px 4px;
 			padding: 0 5px;

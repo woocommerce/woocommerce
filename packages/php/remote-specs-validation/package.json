@@ -9,6 +9,6 @@
 	"dependencies": {
 		"js-yaml": "^4.3.1",
 		"json-refs": "^3.0.15",
-		"commander": "^5.1.0"
+		"commander": "^10.0.1"
 	}
 }

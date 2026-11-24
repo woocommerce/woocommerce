@@ -66,12 +66,9 @@
 		]
 	},
 	"dependencies": {
-		"@woocommerce/components": "workspace:*",
 		"@woocommerce/experimental": "workspace:*",
-		"@woocommerce/explat": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/components": "catalog:wp-min",
-		"@wordpress/compose": "catalog:wp-min",
 		"@wordpress/element": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
 		"clsx": "2.1.x",
@@ -86,7 +83,6 @@
 		"@types/react": "18.3.x",
 		"@types/string-similarity": "4.0.0",
 		"@woocommerce/eslint-config": "workspace:*",
-		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/browserslist-config": "next",
@@ -94,7 +90,6 @@
 		"eslint": "catalog:tooling",
 		"stylelint": "catalog:tooling",
 		"jest": "catalog:tooling",
-		"jest-cli": "catalog:tooling",
 		"jest-environment-jsdom": "catalog:tooling",
 		"postcss": "catalog:tooling",
 		"postcss-loader": "catalog:tooling",

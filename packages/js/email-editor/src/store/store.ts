@@ -5,6 +5,7 @@ import { createReduxStore, register, select, dispatch } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 
 import {
+	CurriedSelectorsOf,
 	ReduxStoreConfig,
 	StoreDescriptor as GenericStoreDescriptor,
 } from '@wordpress/data/build-types/types';
@@ -31,7 +32,16 @@ const getConfig = () =>
 
 export type EditorStoreConfig = ReturnType< typeof getConfig >;
 
-export const createStore = () => {
+type EditorStoreDescriptor = GenericStoreDescriptor<
+	ReduxStoreConfig<
+		EditorStoreConfig[ 'initialState' ],
+		EditorStoreConfig[ 'actions' ],
+		EditorStoreConfig[ 'selectors' ]
+	>
+>;
+
+export const createStore = ():
+	EditorStoreDescriptor | CurriedSelectorsOf< EditorStoreDescriptor > => {
 	// Check if store is already registered
 	const storeState = select( storeName );
 	if ( storeState !== undefined ) {

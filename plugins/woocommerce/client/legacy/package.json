@@ -23,6 +23,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "^24.1.0",
+		"@wordpress/browserslist-config": "next",
 		"@wordpress/scripts": "catalog:tooling",
 		"@wordpress/stylelint-config": "catalog:tooling",
 		"chokidar": "^3.6.0",
