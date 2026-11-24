@@ -29,8 +29,8 @@ trait ProductAttributeAbilityTrait {
 	}
 
 	/**
-	 * Format a global attribute and up to `$term_limit` of its terms, in the attribute's own term order.
-	 * Terms carry the same fields as in product-terms-query, extension fields included.
+	 * Format a global attribute and load up to `$term_limit` of its terms, in the attribute's own term order.
+	 * The terms stay `WP_Term` objects until format_product_attribute_terms() formats them.
 	 *
 	 * @param \stdClass $attribute  Row of wc_get_attribute_taxonomies().
 	 * @param int       $term_limit Most terms to return. Zero returns none.
@@ -80,16 +80,31 @@ trait ProductAttributeAbilityTrait {
 			return $terms;
 		}
 
-		ExtensibleAbilities::prime( 'product_term', $terms );
-		foreach ( $terms as $term ) {
-			$data = self::format_term( $term );
-			if ( is_wp_error( $data ) ) {
-				return $data;
-			}
-			$output['terms'][] = $data;
-		}
+		$output['terms'] = $terms;
 
 		return $output;
+	}
+
+	/**
+	 * Format the terms of a list of attributes. Terms carry the same fields as in product-terms-query,
+	 * extension fields included. The prime callbacks run once, with the terms of every attribute.
+	 *
+	 * @param array[] $attributes Attributes from format_product_attribute().
+	 * @return array[]|\WP_Error The error of an extension field that failed.
+	 */
+	private static function format_product_attribute_terms( array $attributes ) {
+		ExtensibleAbilities::prime( 'product_term', array_merge( ...array_column( $attributes, 'terms' ) ) );
+		foreach ( $attributes as $index => $attribute ) {
+			foreach ( $attribute['terms'] as $key => $term ) {
+				$data = self::format_term( $term );
+				if ( is_wp_error( $data ) ) {
+					return $data;
+				}
+				$attributes[ $index ]['terms'][ $key ] = $data;
+			}
+		}
+
+		return $attributes;
 	}
 
 	/**

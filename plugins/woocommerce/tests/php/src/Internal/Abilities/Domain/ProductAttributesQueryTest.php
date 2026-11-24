@@ -155,17 +155,28 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return the product_term extension fields on each term, as product-terms-query does.
+	 * @testdox Should return the product_term extension fields on each term, as product-terms-query does, and prime the terms of all attributes once.
 	 */
 	public function test_term_extension_fields(): void {
 		$attribute = WC_Helper_Product::create_attribute( 'Test Swatch', array( 'Red', 'Blue' ) );
-		$input     = array( 'include' => array( $attribute['attribute_id'] ) );
+		$second    = WC_Helper_Product::create_attribute( 'Test Finish', array( 'Matte' ) );
+		$input     = array( 'include' => array( $attribute['attribute_id'], $second['attribute_id'] ) );
+		$primed    = array();
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
 		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
 		do_action( 'woocommerce_extensible_abilities_resources_init' );
 		add_action(
 			'woocommerce_extensible_abilities_init',
-			static function () {
+			static function () use ( &$primed ) {
+				ExtensibleAbilities::register_prime(
+					array(
+						'resource'  => 'product_term',
+						'namespace' => 'test-ext',
+						'callback'  => static function ( array $terms ) use ( &$primed ) {
+							$primed[] = count( $terms );
+						},
+					)
+				);
 				ExtensibleAbilities::register_field(
 					array(
 						'resource'      => 'product_term',
@@ -188,8 +199,9 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 		$result = $ability->execute( $input );
 
 		$this->assertIsArray( $result );
-		$terms = $result['attributes'][0]['terms'];
-		$this->assertCount( 2, $terms );
+		$this->assertSame( array( 3 ), $primed, 'The prime callbacks run once, with the terms of both attributes.' );
+		$terms = array_merge( ...array_column( $result['attributes'], 'terms' ) );
+		$this->assertCount( 3, $terms );
 		foreach ( $terms as $term ) {
 			$this->assertSame( 'hex-' . $term['slug'], $term['extensions']['test-ext']['color'] );
 		}
