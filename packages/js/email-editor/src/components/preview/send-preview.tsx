@@ -22,11 +22,11 @@ export function SendPreview() {
 	);
 
 	if (
-		! applyFilters(
+		applyFilters(
 			'woocommerce_email_editor_send_preview_enabled',
 			true,
 			postType
-		)
+		) === false
 	) {
 		return null;
 	}

@@ -72,4 +72,21 @@ describe( 'SendPreview', () => {
 
 		expect( container ).toBeEmptyDOMElement();
 	} );
+
+	it.each( [ undefined, null, 0, '' ] )(
+		'keeps the menu item when the enabled filter returns %p instead of false',
+		( result ) => {
+			( applyFilters as jest.Mock ).mockImplementation(
+				( hook: string, value: unknown ) =>
+					hook === 'woocommerce_email_editor_send_preview_enabled'
+						? result
+						: value
+			);
+			render( <SendPreview /> );
+
+			expect(
+				screen.getByRole( 'button', { name: 'Send a test email' } )
+			).toBeInTheDocument();
+		}
+	);
 } );
