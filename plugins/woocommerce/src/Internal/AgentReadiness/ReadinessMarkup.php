@@ -58,7 +58,7 @@ trait ReadinessMarkup {
 		$policies = array(
 			'privacy_page'         => array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Publish your privacy policy page', 'woocommerce' ), __( 'Choose a privacy policy page', 'woocommerce' ), __( 'Shoppers can read how you handle their information before they buy.', 'woocommerce' ), __( 'Edit privacy policy', 'woocommerce' ), __( 'A privacy policy needs to be published for AI assistants to share it with shoppers.', 'woocommerce' ) ),
 			'terms_page'           => array( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Publish your terms and conditions page', 'woocommerce' ), __( 'Choose a terms and conditions page', 'woocommerce' ), __( 'Terms and conditions set out what shoppers agree to when they place an order.', 'woocommerce' ), __( 'Edit terms and conditions', 'woocommerce' ), __( 'Terms and conditions need to be published for AI assistants to share them with shoppers.', 'woocommerce' ) ),
-			'refund_returns_page'  => array( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Publish your refund and returns policy page', 'woocommerce' ), __( 'Choose a refund and returns policy page', 'woocommerce' ), __( 'Shoppers can check whether they can return an item before they buy.', 'woocommerce' ), __( 'Edit refund policy', 'woocommerce' ), __( 'A refund policy needs to be available for AI assistants to share with shoppers.', 'woocommerce' ) ),
+			'refund_returns_page'  => array( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Publish your refund and returns policy page', 'woocommerce' ), __( 'Choose a refund and returns policy page', 'woocommerce' ), __( 'Shoppers can check whether they can return an item before they buy.', 'woocommerce' ), __( 'Edit refund policy', 'woocommerce' ), __( 'A refund policy needs to be published for AI assistants to share it with shoppers.', 'woocommerce' ) ),
 			'shipping_policy_page' => array( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Publish your shipping policy page', 'woocommerce' ), __( 'Choose a shipping policy page', 'woocommerce' ), __( 'AI assistants share it so shoppers can check how and when you deliver before they buy.', 'woocommerce' ), __( 'Edit shipping policy', 'woocommerce' ), __( 'A shipping policy needs to be published for AI assistants to share it with shoppers.', 'woocommerce' ) ),
 		);
 		if ( isset( $policies[ $check['id'] ] ) ) {
@@ -81,5 +81,39 @@ trait ReadinessMarkup {
 		$action  = $actions[ $check['id'] ] ?? array( $check['label'] ?? '', $check['why'] );
 		// Site Health says how to move to HTTPS, and offers to do it where the host allows.
 		return array( $action[0], $action[1], 'https' === $check['id'] ? admin_url( 'site-health.php' ) : $check['fix_url'], '', $action[2] ?? '' );
+	}
+
+	/**
+	 * A setup step's button, as in the design: where it goes, or Review. Policy steps repeat the same
+	 * button, so screen readers also hear which policy it is for.
+	 *
+	 * @param string $id   Store condition ID.
+	 * @param string $link The link text check_action() gives when the URL alone doesn't say it, such as Change permalinks.
+	 * @return array{0:string,1:string} The button text, and the policy it is for, or ''.
+	 */
+	private static function step_button( string $id, string $link ): array {
+		// Policy buttons repeat, so each one's accessible name says which page it is for.
+		$policies = array(
+			'privacy_page'         => array( __( 'Choose a privacy policy page', 'woocommerce' ), __( 'Edit your privacy policy page', 'woocommerce' ) ),
+			'terms_page'           => array( __( 'Choose a terms and conditions page', 'woocommerce' ), __( 'Edit your terms and conditions page', 'woocommerce' ) ),
+			'refund_returns_page'  => array( __( 'Choose a refund and returns policy page', 'woocommerce' ), __( 'Edit your refund and returns policy page', 'woocommerce' ) ),
+			'shipping_policy_page' => array( __( 'Choose a shipping policy page', 'woocommerce' ), __( 'Edit your shipping policy page', 'woocommerce' ) ),
+		);
+		if ( isset( $policies[ $id ] ) ) {
+			// A policy page that is still a draft opens its editor.
+			return '' !== $link ? array( __( 'Edit page', 'woocommerce' ), $policies[ $id ][1] ) : array( __( 'Choose page', 'woocommerce' ), $policies[ $id ][0] );
+		}
+		$labels = array(
+			'https'          => __( 'View Site Health', 'woocommerce' ),
+			'launched'       => __( 'Change site visibility', 'woocommerce' ),
+			'guest_checkout' => __( 'View account settings', 'woocommerce' ),
+			'payment_method' => __( 'View payment settings', 'woocommerce' ),
+			'order_emails'   => __( 'View email settings', 'woocommerce' ),
+			'search_visible' => __( 'Change Reading settings', 'woocommerce' ),
+			// Change permalinks, and only when permalinks are one of the fixes.
+			'ucp_discovery'  => $link,
+		);
+		$label  = $labels[ $id ] ?? '';
+		return array( '' !== $label ? $label : __( 'Review', 'woocommerce' ), '' );
 	}
 }

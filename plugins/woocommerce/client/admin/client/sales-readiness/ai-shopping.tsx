@@ -10,25 +10,29 @@ import {
 } from '@wordpress/element';
 import type { RefObject } from 'react';
 import apiFetch from '@wordpress/api-fetch';
+import { dispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
 import { speak } from '@wordpress/a11y';
 import { __ } from '@wordpress/i18n';
 import { Page } from '@wordpress/admin-ui';
 import { DataForm } from '@wordpress/dataviews';
 import type { Field, Form, FormField } from '@wordpress/dataviews';
 /* eslint-disable @wordpress/use-recommended-components -- The design asks for these @wordpress/ui components; this chunk bundles the package. */
-import { Button, Link, Notice, Stack, Text } from '@wordpress/ui';
+import { Button, Link, Stack, Text } from '@wordpress/ui';
 /* eslint-enable @wordpress/use-recommended-components */
 
 /**
  * Internal dependencies
  */
 import { safeHref } from './safe-href';
+import { trackReadiness } from './tracks';
 import './sales-readiness.scss';
 import './ai-shopping.scss';
 import type { ShoppingView } from './types';
-import { asLink, ShoppingChecklist } from './components/shopping-checklist';
+import { ShoppingChecklist } from './components/shopping-checklist';
 import { ProductVisibility } from './components/product-visibility';
 import { ConnectionUrl } from './components/connection-url';
+import { ComingSoonNotice } from './components/coming-soon-notice';
 
 type Values = Record< string, string | boolean >;
 
@@ -140,6 +144,15 @@ const useHashTarget = (
 	}, [] );
 };
 
+// The switch reloads the page after it saves, so its snackbar is shown by the page that loads next.
+const SNACKBAR_KEY = 'wc-ai-shopping-snackbar';
+
+const showSnackbar = ( text: string ) => {
+	void dispatch( noticesStore ).createSuccessNotice( text, {
+		type: 'snackbar',
+	} );
+};
+
 /**
  * WooCommerce > Settings > AI tools > AI shopping. The switch saves on its own; Save posts the
  * settings form around this page, with the store policy fields as hidden inputs, so they save and
@@ -155,12 +168,23 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 	} ) );
 	const [ dirty, setDirty ] = useState( false );
 	const [ busy, setBusy ] = useState( false );
-	const [ message, setMessage ] = useState( ucp.message );
+	const [ message, setMessage ] = useState( '' );
 	const dirtyRef = useRef( false );
 	// Only clear the handler this page installed, so Save does not drop another unload listener.
 	const unloadHandler = useRef< ( () => string ) | null >( null );
 	const root = useRef< HTMLDivElement >( null );
 	useHashTarget( root, view );
+
+	useEffect( () => {
+		// Storage can be blocked; the switch's state still shows.
+		try {
+			const text = window.sessionStorage.getItem( SNACKBAR_KEY );
+			if ( text ) {
+				window.sessionStorage.removeItem( SNACKBAR_KEY );
+				showSnackbar( text );
+			}
+		} catch {}
+	}, [] );
 
 	useEffect( () => {
 		return () => {
@@ -190,7 +214,10 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 			setValues( ( current ) => ( { ...current, enabled: enable } ) );
 			setBusy( true );
 			try {
-				const response = await apiFetch< { enabled: boolean } >( {
+				const response = await apiFetch< {
+					enabled: boolean;
+					status?: string;
+				} >( {
 					path: ucp.path,
 					method: 'POST',
 					data: { enabled: enable },
@@ -199,13 +226,27 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 					...current,
 					enabled: response.enabled,
 				} ) );
+				// On, but a required check failed (such as the UCP address not loading): no
+				// "can now shop" message; the page shows Needs attention and the step to fix.
+				let done = response.enabled ? ucp.turned_on : ucp.turned_off;
+				if ( response.status === 'needs_attention' ) {
+					done = '';
+				}
 				// The checklist and the other cards depend on the switch, so the page reloads,
 				// unless that would lose unsaved fields.
 				if ( dirtyRef.current ) {
+					if ( done ) {
+						showSnackbar( done );
+					}
 					say( ucp.unsaved );
 					setBusy( false );
 					return;
 				}
+				try {
+					if ( done ) {
+						window.sessionStorage.setItem( SNACKBAR_KEY, done );
+					}
+				} catch {}
 				// Not reload(): after Save, that would post the settings form again.
 				window.location.assign(
 					window.location.href.split( '#' )[ 0 ]
@@ -264,6 +305,12 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 						<Link
 							href={ safeHref( ucp.learn_more.href ) }
 							openInNewTab
+							onClick={ () =>
+								trackReadiness( 'link_clicked', {
+									surface: 'shopping',
+									area: 'learn_more',
+								} )
+							}
 						>
 							{ ucp.learn_more.text }
 						</Link>
@@ -291,20 +338,10 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 				isVisible: () => view.coming_soon !== null,
 				render: () =>
 					view.coming_soon && (
-						<Notice.Root intent="warning">
-							<Notice.Description>
-								{ view.coming_soon.text }
-							</Notice.Description>
-							<Notice.Actions>
-								<Notice.ActionButton
-									variant="outline"
-									className="wc-ai-shopping__notice-action"
-									{ ...asLink( view.coming_soon.link.href ) }
-								>
-									{ view.coming_soon.link.text }
-								</Notice.ActionButton>
-							</Notice.Actions>
-						</Notice.Root>
+						<ComingSoonNotice
+							notice={ view.coming_soon }
+							surface="shopping"
+						/>
 					),
 			},
 			{
@@ -410,6 +447,7 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 				actions={
 					<Button
 						variant="solid"
+						className="wc-sales-readiness-ui-button"
 						type="submit"
 						form="mainform"
 						name="save"

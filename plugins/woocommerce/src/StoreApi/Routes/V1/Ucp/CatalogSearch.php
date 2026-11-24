@@ -197,45 +197,7 @@ class CatalogSearch extends AbstractCatalogRoute {
 			);
 		}
 
-		if ( ! $has_price ) {
-			return null;
-		}
-
-		$bounds = array();
-
-		foreach ( array( 'min', 'max' ) as $bound ) {
-			if ( ! isset( $filters['price'][ $bound ] ) ) {
-				continue;
-			}
-
-			$value = $filters['price'][ $bound ];
-
-			if ( ! is_numeric( $value ) || (float) $value < 0 ) {
-				return $this->ucp_error(
-					'VALIDATION_ERROR',
-					sprintf(
-						/* translators: %s: price filter bound name, `min` or `max`. */
-						__( 'filters.price.%s must be a non-negative amount in minor units.', 'woocommerce' ),
-						$bound
-					),
-					'recoverable',
-					400
-				);
-			}
-
-			$bounds[ $bound ] = (int) $value;
-		}
-
-		if ( isset( $bounds['min'], $bounds['max'] ) && $bounds['min'] > $bounds['max'] ) {
-			return $this->ucp_error(
-				'VALIDATION_ERROR',
-				__( 'filters.price.min must not exceed filters.price.max.', 'woocommerce' ),
-				'recoverable',
-				400
-			);
-		}
-
-		return null;
+		return $this->validate_price_filter( $filters );
 	}
 
 	/**

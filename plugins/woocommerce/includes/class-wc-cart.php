@@ -913,7 +913,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				continue;
 			}
 
-			// Check stock based on all items in the cart and consider any held stock within pending orders.
+			// Check stock based on all items in the cart and consider any stock held by other orders.
 			$held_stock     = wc_get_held_stock_quantity( $product, $current_session_order_id );
 			$required_stock = $product_qty_in_cart[ $product->get_stock_managed_by_id() ];
 
@@ -1577,13 +1577,17 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $cart_item_key contains the id of the cart item.
 	 * @param int    $quantity contains the quantity of the item.
 	 * @param bool   $refresh_totals whether or not to calculate totals after setting the new qty. Can be used to defer calculations if setting quantities in bulk.
-	 * @return bool
+	 * @return bool  False if the item is not in the cart, true otherwise.
 	 */
 	public function set_quantity( $cart_item_key, $quantity = 1, $refresh_totals = true ) {
 		if ( 0 === $quantity || $quantity < 0 ) {
 			wc_do_deprecated_action( 'woocommerce_before_cart_item_quantity_zero', array( $cart_item_key, $this ), '3.7.0', 'woocommerce_remove_cart_item' );
 			// If we're setting qty to 0 we're removing the item from the cart.
 			return $this->remove_cart_item( $cart_item_key );
+		}
+
+		if ( ! isset( $this->cart_contents[ $cart_item_key ] ) ) {
+			return false;
 		}
 
 		// Update qty.
@@ -1777,7 +1781,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			array(
 				array(
 					'contents'        => $this->get_items_needing_shipping(),
-					'contents_cost'   => array_sum( wp_list_pluck( $this->get_items_needing_shipping(), 'line_total' ) ),
+					'contents_cost'   => array_sum( array_column( $this->get_items_needing_shipping(), 'line_total' ) ),
 					'applied_coupons' => $this->get_applied_coupons(),
 					'user'            => array(
 						'ID' => get_current_user_id(),
@@ -2058,8 +2062,29 @@ class WC_Cart extends WC_Legacy_Cart {
 					// For guest, usage per user has not been enforced yet. Enforce it now.
 					$coupon_data_store = $coupon->get_data_store();
 					$billing_email     = strtolower( sanitize_email( $billing_email ) );
-					if ( $coupon_data_store && $coupon_data_store->get_usage_by_email( $coupon, $billing_email ) >= $coupon_usage_limit ) {
-						if ( $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( $billing_email ) ) ) {
+					// A use by the account that owns this email is recorded under its user ID, not the email.
+					$email_owner = $billing_email ? get_user_by( 'email', $billing_email ) : false;
+					$aliases     = array_filter( array( $billing_email, $email_owner ? $email_owner->ID : 0 ) );
+					$uses_alias  = $coupon_data_store instanceof WC_Data_Store && $coupon_data_store->has_callable( 'get_usage_by_aliases' );
+					$usage_count = 0;
+					if ( $coupon_data_store ) {
+						$usage_count = (int) $coupon_data_store->get_usage_by_email( $coupon, $billing_email );
+						if ( $email_owner ) {
+							// @phpstan-ignore-next-line method.notFound (Part of WC_Coupon_Data_Store_Interface, called via __call() on the coupon data store instance.)
+							$usage_count += (int) $coupon_data_store->get_usage_by_user_id( $coupon, $email_owner->ID );
+						}
+					}
+					// The larger count keeps a custom store's get_usage_by_email() override in effect.
+					if ( $uses_alias ) {
+						// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the coupon data store instance.)
+						$usage_count = max( $usage_count, (int) $coupon_data_store->get_usage_by_aliases( $coupon, $aliases ) );
+					}
+					if ( $coupon_data_store && $usage_count >= $coupon_usage_limit ) {
+						if ( $uses_alias ) {
+							// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the coupon data store instance.)
+							$aliases = $coupon_data_store->add_recorded_user_ids_to_aliases( $coupon, $aliases );
+						}
+						if ( $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), $aliases ) ) {
 							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST );
 						} else {
 							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );

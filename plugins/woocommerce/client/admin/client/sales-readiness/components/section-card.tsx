@@ -3,7 +3,16 @@
  */
 import { useState } from '@wordpress/element';
 import type { ReactNode } from 'react';
-import { Badge, Card, Collapsible, CollapsibleCard, Text } from '@wordpress/ui';
+import {
+	Badge,
+	Card,
+	Collapsible,
+	CollapsibleCard,
+	Icon,
+	Text,
+	VisuallyHidden,
+} from '@wordpress/ui';
+import { Path, SVG } from '@wordpress/primitives';
 import { Button } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
@@ -11,7 +20,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { Declared, Section } from '../types';
-import { CheckRow, Row, RowLink } from './check-row';
+import { CheckRow, RowLink } from './check-row';
 import { trackReadiness } from '../tracks';
 
 /**
@@ -198,6 +207,41 @@ export const SectionCard = ( { section }: { section: Section } ) => {
 	);
 };
 
+const declaredState = ( found: boolean | null, waiting?: boolean ) => {
+	if ( found === null ) {
+		return waiting
+			? __( 'Not checked yet:', 'woocommerce' )
+			: __( 'Couldn’t check:', 'woocommerce' );
+	}
+	return found
+		? __( 'Found:', 'woocommerce' )
+		: __( 'Not found:', 'woocommerce' );
+};
+
+// The design's marks for a declared item: a check when found, a dashed line otherwise.
+const foundIcon = (
+	<SVG
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+	>
+		<Path d="M7 12L10 15L17 8" />
+	</SVG>
+);
+const notFoundIcon = (
+	<SVG
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+	>
+		<Path d="M5 12H8M10.5 12H13.5M16 12H19" />
+	</SVG>
+);
+
 /**
  * Protocols and files the store serves to agents: information, never pass or fail, so the card
  * starts closed and opens on its header to list them.
@@ -231,20 +275,61 @@ export const DeclaredCard = ( { declared }: { declared: Declared } ) => (
 			>
 				{ declared.text }
 			</Text>
-			<ul className="wc-sales-readiness-list">
-				{ declared.items.map( ( item ) => (
-					<Row
-						key={ item.name }
-						done={ item.found }
-						title={ item.name }
-						srState={
-							item.found
-								? __( 'Found:', 'woocommerce' )
-								: __( 'Not found:', 'woocommerce' )
-						}
-					/>
+			<div className="wc-sales-readiness-declared">
+				{ declared.groups.map( ( group ) => (
+					<div
+						key={ group.title }
+						className="wc-sales-readiness-declared__group"
+					>
+						<Text
+							variant="body-sm"
+							className="wc-sales-readiness-declared__title"
+						>
+							{ group.title }
+						</Text>
+						<ul className="wc-sales-readiness-declared__list">
+							{ group.items.map( ( item ) => (
+								<li
+									key={ item.name }
+									className={
+										'wc-sales-readiness-declared__item' +
+										( item.found === true
+											? ''
+											: ' wc-sales-readiness__muted' )
+									}
+								>
+									<Icon
+										icon={
+											item.found === true
+												? foundIcon
+												: notFoundIcon
+										}
+										size={ 20 }
+									/>
+									<Text variant="body-sm">
+										<VisuallyHidden>
+											{ declaredState(
+												item.found,
+												declared.waiting
+											) }{ ' ' }
+										</VisuallyHidden>
+										{ item.name }
+										{ item.found === false && (
+											<span aria-hidden="true">
+												{ ' ' }
+												{ __(
+													'· not found',
+													'woocommerce'
+												) }
+											</span>
+										) }
+									</Text>
+								</li>
+							) ) }
+						</ul>
+					</div>
 				) ) }
-			</ul>
+			</div>
 		</CollapsibleCard.Content>
 	</CollapsibleCard.Root>
 );

@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
 use Automattic\WooCommerce\Internal\AgentReadiness\Telemetry;
 use WC_Unit_Test_Case;
 
@@ -24,17 +25,8 @@ class TelemetryTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		delete_option( AgentReadiness::REPORT_OPTION );
 		$this->sut = wc_get_container()->get( Telemetry::class );
-	}
-
-	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		delete_option( 'woocommerce_feature_agent_readiness_enabled' );
-		parent::tearDown();
 	}
 
 	/**
@@ -107,22 +99,6 @@ class TelemetryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With the feature off, the snapshot says so and reads nothing else.
-	 */
-	public function test_feature_off(): void {
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
-		$this->store_report();
-
-		$snapshot = $this->sut->snapshot();
-
-		$this->assertSame( 'no', $snapshot['feature_enabled'] );
-		$this->assertSame( '', $snapshot['last_scan'] );
-		$this->assertSame( 'no', $snapshot['truncated'] );
-		$this->assertSame( array(), $snapshot['store_checks'] );
-		$this->assertSame( array(), $snapshot['product_checks'] );
-	}
-
-	/**
 	 * @testdox Before the first scan, the snapshot has the setup steps but no scan date or product checks.
 	 */
 	public function test_before_the_first_scan(): void {
@@ -158,6 +134,26 @@ class TelemetryTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'http', str_replace( '"https"', '', $sent ), 'No URLs' );
 		$this->assertStringNotContainsString( 'Add a brand', $sent, 'No check text' );
 		$this->assertStringNotContainsString( 'product_ids', $sent, 'No product ids' );
+	}
+
+	/**
+	 * @testdox The snapshot sends the catalog search counts.
+	 */
+	public function test_catalog_search_counts(): void {
+		$counts = array(
+			'since'             => '2026-11-20',
+			'checks'            => 11,
+			'first_try_failed'  => 3,
+			'failed'            => 1,
+			'no_answer'         => 0,
+			'last_seen'         => '403 text/html',
+			'last_seen_on'      => '2026-11-18',
+			'last_recovered'    => '403 text/html',
+			'last_recovered_on' => '2026-11-19',
+		);
+		update_option( StoreOutputChecks::SEARCH_COUNTS_OPTION, $counts );
+
+		$this->assertSame( $counts, $this->sut->snapshot()['ucp_search'] );
 	}
 
 	/**

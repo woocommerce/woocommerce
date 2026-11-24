@@ -682,6 +682,68 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() rebuilds line items from a changed cart even when an extension set the order's cart hash to match it.
+	 */
+	public function test_update_order_from_cart_rebuilds_line_items_when_an_extension_set_the_cart_hash(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		CouponHelper::create_coupon(
+			'ten-percent',
+			'publish',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$order = $this->sut->create_order_from_cart();
+		$order->save();
+		$this->assertSame( 10.0, (float) $order->get_total(), 'The order should start at the undiscounted product price.' );
+
+		WC()->cart->apply_coupon( 'ten-percent' );
+		WC()->cart->calculate_totals();
+		// Subscriptions sets the cart hash of the renewal order it resumes on every cart load, before checkout syncs the order.
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
+
+		$this->sut->update_order_from_cart( $order );
+
+		$line_items = $order->get_items();
+		$this->assertSame( 9.0, (float) reset( $line_items )->get_total(), 'The line item should be rebuilt with the coupon discount.' );
+		$this->assertSame( 9.0, (float) $order->get_total(), 'The order total should include the coupon discount.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps unchanged line items, but still updates the cart hash when only the cart total changes.
+	 */
+	public function test_update_order_from_cart_keeps_line_items_and_updates_cart_hash_when_only_the_total_changes(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$order = $this->sut->create_order_from_cart();
+		$order->save();
+		$line_item_ids = array_keys( $order->get_items() );
+
+		$add_fee = static function ( \WC_Cart $cart ) {
+			$cart->add_fee( 'Handling', 5 );
+		};
+		add_action( 'woocommerce_cart_calculate_fees', $add_fee );
+
+		try {
+			$this->sut->update_order_from_cart( $order );
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_cart_calculate_fees', $add_fee );
+		}
+
+		$this->assertSame( $line_item_ids, array_keys( $order->get_items() ), 'Line items should be kept when the cart contents did not change.' );
+		$this->assertSame( 15.0, (float) $order->get_total(), 'The order total should include the new fee.' );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash should follow the cart total so checkout can resume the order.' );
+	}
+
+	/**
 	 * @testdox update_order_from_cart() keeps the shopper's session choice on the order even when the default payment method filter returns nothing.
 	 */
 	public function test_update_order_from_cart_keeps_the_session_payment_choice_with_a_callback(): void {
@@ -996,5 +1058,112 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		foreach ( $override_data as $key => $value ) {
 			$order->{"set_shipping_$key"}( $value );
 		}
+	}
+
+	/**
+	 * Build a saved order for a customer and billing email that carries a coupon, without recording its usage.
+	 *
+	 * @param int    $customer_id   Customer ID, 0 for a guest.
+	 * @param string $billing_email Billing email.
+	 * @param string $code          Coupon code.
+	 * @return \WC_Order
+	 */
+	private function create_order_with_coupon( int $customer_id, string $billing_email, string $code ): \WC_Order {
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_billing_email( $billing_email );
+		$this->set_shipping_address( $order );
+		$item = new \WC_Order_Item_Coupon();
+		$item->set_code( $code );
+		$order->add_item( $item );
+		$order->save();
+		return $order;
+	}
+
+	/**
+	 * Run payment validation and return the coupon error message, or null when the coupon was kept.
+	 *
+	 * @param \WC_Order $order Order to validate.
+	 * @return string|null
+	 */
+	private function get_coupon_error( \WC_Order $order ): ?string {
+		try {
+			$this->sut->validate_order_before_payment( $order );
+			return null;
+		} catch ( RouteException $e ) {
+			return $e->getMessage();
+		}
+	}
+
+	/**
+	 * @testdox A guest is refused a per-user coupon with the email of an account that used it, after that account changes its email.
+	 */
+	public function test_validate_coupon_usage_limit_after_account_email_change(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'vip-store@example.com' ) );
+		$coupon  = CouponHelper::create_coupon(
+			'vip-store',
+			'publish',
+			array(
+				'customer_email'       => array( 'vip-store@example.com' ),
+				'usage_limit_per_user' => 1,
+			)
+		);
+
+		$first_order = $this->create_order_with_coupon( $user_id, 'invoices@example.com', 'vip-store' );
+		$coupon->increase_usage_count( (string) $user_id, $first_order );
+
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'changed-store@example.com',
+			)
+		);
+
+		$error = $this->get_coupon_error( $this->create_order_with_coupon( 0, 'vip-store@example.com', 'vip-store' ) );
+
+		$this->assertStringContainsString( 'Usage limit for coupon', (string) $error );
+	}
+
+	/**
+	 * @testdox A second account is refused a per-user coupon billed to an email already used, after the first customer edits their saved billing email.
+	 */
+	public function test_validate_coupon_usage_limit_after_saved_billing_email_change(): void {
+		$first_id  = $this->factory->user->create( array( 'user_email' => 'first-store@example.com' ) );
+		$second_id = $this->factory->user->create( array( 'user_email' => 'second-store@example.com' ) );
+		$coupon    = CouponHelper::create_coupon( 'billing-store', 'publish', array( 'usage_limit_per_user' => 1 ) );
+
+		$first_order = $this->create_order_with_coupon( $first_id, 'shared-store@example.com', 'billing-store' );
+		$coupon->increase_usage_count( (string) $first_id, $first_order );
+		update_user_meta( $first_id, 'billing_email', 'moved-store@example.com' );
+
+		$second_error = $this->get_coupon_error( $this->create_order_with_coupon( $second_id, 'shared-store@example.com', 'billing-store' ) );
+		$guest_error  = $this->get_coupon_error( $this->create_order_with_coupon( 0, 'shared-store@example.com', 'billing-store' ) );
+
+		$this->assertStringContainsString( 'Usage limit for coupon', (string) $second_error );
+		$this->assertStringContainsString( 'Usage limit for coupon', (string) $guest_error );
+	}
+
+	/**
+	 * @testdox A per-user limit of two still accepts a second use by a guest with the email of an account that used it once.
+	 */
+	public function test_validate_coupon_usage_limit_allows_uses_up_to_limit(): void {
+		$user_id = $this->factory->user->create( array( 'user_email' => 'two-store@example.com' ) );
+		$coupon  = CouponHelper::create_coupon( 'two-store', 'publish', array( 'usage_limit_per_user' => 2 ) );
+		$coupon->increase_usage_count( (string) $user_id, $this->create_order_with_coupon( $user_id, 'two-store@example.com', 'two-store' ) );
+
+		$this->assertNull( $this->get_coupon_error( $this->create_order_with_coupon( 0, 'two-store@example.com', 'two-store' ) ) );
+	}
+
+	/**
+	 * @testdox A second account is refused a per-user coupon when it bills to the account email of a customer who used it.
+	 */
+	public function test_validate_coupon_usage_limit_second_account_billing_to_used_account_email(): void {
+		$first_id  = $this->factory->user->create( array( 'user_email' => 'owner-store@example.com' ) );
+		$second_id = $this->factory->user->create( array( 'user_email' => 'other-store@example.com' ) );
+		$coupon    = CouponHelper::create_coupon( 'owner-store', 'publish', array( 'usage_limit_per_user' => 1 ) );
+		$coupon->increase_usage_count( (string) $first_id, $this->create_order_with_coupon( $first_id, 'receipts-store@example.com', 'owner-store' ) );
+
+		$error = $this->get_coupon_error( $this->create_order_with_coupon( $second_id, 'owner-store@example.com', 'owner-store' ) );
+
+		$this->assertStringContainsString( 'Usage limit for coupon', (string) $error );
 	}
 }

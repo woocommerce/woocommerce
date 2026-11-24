@@ -230,6 +230,130 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Classic checkout enforces the merchant's account policy before creating a customer, order or payment.
+	 *
+	 * @testWith ["no", "no", false, false]
+	 *           ["no", "yes", false, true]
+	 *           ["yes", "no", false, true]
+	 *           ["yes", "yes", false, true]
+	 *           ["no", "no", true, true]
+	 *           ["no", "no", false, true, true, null]
+	 *           ["no", "no", false, true, null, false]
+	 *           ["yes", "no", false, false, false, null]
+	 *           ["no", "yes", false, false, null, true]
+	 *
+	 * @param string    $registration_enabled Whether checkout registration is enabled.
+	 * @param string    $guest_checkout_enabled Whether guest checkout is enabled.
+	 * @param bool      $logged_in Whether the customer is signed in.
+	 * @param bool      $allowed Whether checkout can reach customer, order and payment processing.
+	 * @param bool|null $filtered_registration_enabled Optional extension override for registration.
+	 * @param bool|null $filtered_registration_required Optional extension override for requiring registration.
+	 */
+	public function test_process_checkout_registration_policy( string $registration_enabled, string $guest_checkout_enabled, bool $logged_in, bool $allowed, ?bool $filtered_registration_enabled = null, ?bool $filtered_registration_required = null ): void {
+		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $registration_enabled );
+		update_option( 'woocommerce_enable_guest_checkout', $guest_checkout_enabled );
+		if ( null !== $filtered_registration_enabled ) {
+			add_filter( 'woocommerce_checkout_registration_enabled', $filtered_registration_enabled ? '__return_true' : '__return_false' );
+		}
+		if ( null !== $filtered_registration_required ) {
+			add_filter( 'woocommerce_checkout_registration_required', $filtered_registration_required ? '__return_true' : '__return_false' );
+		}
+		wp_set_current_user( $logged_in ? self::factory()->user->create( array( 'role' => 'customer' ) ) : 0 );
+		wc_clear_notices();
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+		$order = WC_Helper_Order::create_order();
+		$order->set_total( 10 );
+		$order->save();
+		$posted_data = array( 'payment_method' => 'test_gateway' );
+
+		// Isolate this checkout policy from address validation and payment-provider side effects.
+		$sut = $this->getMockBuilder( WC_Checkout::class )->onlyMethods(
+			array( 'get_posted_data', 'update_session', 'validate_checkout', 'process_customer', 'create_order', 'process_order_payment', 'process_order_without_payment', 'send_ajax_failure_response' )
+		)->getMock();
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'get_posted_data' )->willReturn( $posted_data );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'update_session' );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'validate_checkout' );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'process_customer' )->with( $posted_data );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'create_order' )->with( $posted_data )->willReturn( $order->get_id() );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'process_order_payment' )->with( $order->get_id(), 'test_gateway' );
+		$sut->expects( $this->never() )->method( 'process_order_without_payment' );
+
+		$before_process   = did_action( 'woocommerce_before_checkout_process' );
+		$process          = did_action( 'woocommerce_checkout_process' );
+		$original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve the test request.
+		$_REQUEST         = array( 'woocommerce-process-checkout-nonce' => wp_create_nonce( 'woocommerce-process_checkout' ) );
+		try {
+			$sut->process_checkout();
+		} finally {
+			$_REQUEST = $original_request;
+		}
+
+		$this->assertSame( $before_process + 1, did_action( 'woocommerce_before_checkout_process' ), 'Extensions must still see the checkout attempt.' );
+		$this->assertSame( $process + ( $allowed ? 1 : 0 ), did_action( 'woocommerce_checkout_process' ), 'Denied checkout must not dispatch processing hooks.' );
+		$this->assertSame( $allowed ? 0 : 1, wc_notice_count( 'error' ), 'Only a guest who cannot register or use guest checkout should be denied.' );
+		if ( ! $allowed ) {
+			$this->assertTrue( wc_has_notice( 'You must be logged in to checkout.', 'error' ), 'The customer should receive the account-policy error.' );
+		}
+	}
+
+	/**
+	 * @testdox Empty-cart requests fire the attempt hook, and forbidden ones get the account-policy error.
+	 * @testWith ["yes", true]
+	 *           ["no", false]
+	 * @param string $guest_checkout Whether guest checkout is enabled.
+	 * @param bool   $allowed Whether the account policy allows this request.
+	 */
+	public function test_empty_cart_preparation_hook_policy( string $guest_checkout, bool $allowed ): void {
+		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'no' );
+		update_option( 'woocommerce_enable_guest_checkout', $guest_checkout );
+		wp_set_current_user( 0 );
+		wc_clear_notices();
+		WC()->cart->empty_cart();
+		$sut = $this->getMockBuilder( WC_Checkout::class )->onlyMethods( array( 'get_posted_data', 'send_ajax_failure_response' ) )->getMock();
+		$sut->expects( $this->never() )->method( 'get_posted_data' );
+		$before_process   = did_action( 'woocommerce_before_checkout_process' );
+		$original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve the test request.
+		$_REQUEST         = array( 'woocommerce-process-checkout-nonce' => wp_create_nonce( 'woocommerce-process_checkout' ) );
+		try {
+			$sut->process_checkout();
+		} finally {
+			$_REQUEST = $original_request;
+		}
+		$this->assertSame( $before_process + 1, did_action( 'woocommerce_before_checkout_process' ) );
+		$this->assertSame( ! $allowed, wc_has_notice( 'You must be logged in to checkout.', 'error' ) );
+	}
+
+	/**
+	 * @testdox Posted createaccount cannot enable registration when the merchant has disabled it.
+	 *
+	 * @testWith ["no", 0]
+	 *           ["yes", 1]
+	 *
+	 * @param string $registration_enabled Whether checkout registration is enabled.
+	 * @param int    $expected_createaccount Expected sanitized account-creation choice.
+	 */
+	public function test_get_posted_data_honors_registration_setting( string $registration_enabled, int $expected_createaccount ): void {
+		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $registration_enabled );
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+		wp_set_current_user( 0 );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve the test request.
+		$_POST         = array( 'createaccount' => '1' );
+		try {
+			$posted_data = $this->sut->get_posted_data();
+		} finally {
+			$_POST = $original_post;
+		}
+
+		$this->assertSame( $expected_createaccount, $posted_data['createaccount'], 'Submitted form data must respect the effective registration setting.' );
+	}
+
+	/**
 	 * Register an extra checkout field in an arbitrary fieldset, the way checkout field editor plugins do.
 	 *
 	 * Can be called more than once per test.
@@ -356,6 +480,36 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$reloaded_order = wc_get_order( $order->get_id() );
 		$this->assertTrue( $reloaded_order->is_paid(), 'The intentionally payment-free order should be completed.' );
 		$this->assertNotNull( $reloaded_order->get_date_paid(), 'The intentionally payment-free order should have a paid date.' );
+	}
+
+	/**
+	 * @testdox A logged in customer's cart stays empty after a zero-total order instead of coming back from the saved cart.
+	 */
+	public function test_process_order_without_payment_clears_logged_in_customers_saved_cart(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+
+		$order = wc_create_order();
+		$order->save();
+
+		add_filter(
+			'woocommerce_checkout_no_payment_needed_redirect',
+			function () {
+				throw new RuntimeException( 'Stop the test before checkout sends its redirect.' );
+			}
+		);
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should reach its no-payment redirect.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertSame( 'Stop the test before checkout sends its redirect.', $exception->getMessage() );
+		}
+
+		// Load the cart the way the order received page does on the next request.
+		WC()->cart->get_cart_from_session();
+
+		$this->assertTrue( WC()->cart->is_empty(), 'The purchased items should not be restored from the saved cart.' );
 	}
 
 	/**
@@ -806,6 +960,210 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				"Shipping {$field} should use the {$expected_address_type} {$field} value."
 			);
 		}
+	}
+
+	/**
+	 * @testdox 'get_posted_data' converts posted state names to state codes.
+	 *
+	 * @testWith ["Hawaii", "HI"]
+	 *           ["hawaii", "HI"]
+	 *           ["California", "CA"]
+	 *           ["ıL", "IL"]
+	 *           ["HI", "HI"]
+	 *
+	 * @param string $posted_state   Posted state value.
+	 * @param string $expected_state Expected state code.
+	 */
+	public function test_get_posted_data_converts_state_names_to_codes( string $posted_state, string $expected_state ): void {
+		add_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'woocommerce-process-checkout-nonce' => 'test-nonce',
+			'billing_country'                    => 'US',
+			'billing_state'                      => $posted_state,
+			'ship_to_different_address'          => '1',
+			'shipping_country'                   => 'US',
+			'shipping_state'                     => $posted_state,
+		);
+
+		try {
+			$data = $this->sut->get_posted_data();
+		} finally {
+			$_POST = $original_post;
+			remove_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
+		}
+
+		$this->assertSame( $expected_state, $data['billing_state'], 'The billing state should be a state code before totals are calculated.' );
+		$this->assertSame( $expected_state, $data['shipping_state'], 'The shipping state should be a state code before totals are calculated.' );
+	}
+
+	/**
+	 * @testdox 'get_posted_data' leaves an unknown state to be refused by 'validate_posted_data'.
+	 */
+	public function test_get_posted_data_keeps_unknown_state_invalid(): void {
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'woocommerce-process-checkout-nonce' => 'test-nonce',
+			'billing_country'                    => 'US',
+			'billing_state'                      => 'Nowhere',
+		);
+
+		try {
+			$data = $this->sut->get_posted_data();
+		} finally {
+			$_POST = $original_post;
+		}
+
+		$errors = new WP_Error();
+		$this->sut->validate_posted_data( $data, $errors );
+
+		$this->assertNotEmpty( $errors->get_error_message( 'billing_state_validation' ), 'A value that is neither a state code nor a state name should still be refused.' );
+	}
+
+	/**
+	 * @testdox Checkout charges the state shipping zone rate when the state name is posted instead of its code.
+	 *
+	 * @testWith ["HI"]
+	 *           ["Hawaii"]
+	 *           ["hawaii"]
+	 *
+	 * @param string $posted_state Posted billing state.
+	 */
+	public function test_update_session_uses_state_shipping_zone_for_posted_state_name( string $posted_state ): void {
+		$shipping_was_enabled     = WC()->shipping()->enabled;
+		WC()->shipping()->enabled = true;
+		$zones                    = array();
+
+		try {
+			$zones[] = $this->create_flat_rate_zone( 1, 'US:HI', 'state', '60' );
+			$zones[] = $this->create_flat_rate_zone( 2, 'US', 'country', '5' );
+
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$data = $this->post_checkout_and_update_session( $posted_state );
+		} finally {
+			foreach ( $zones as $zone ) {
+				foreach ( $zone->get_shipping_methods() as $method ) {
+					delete_option( 'woocommerce_flat_rate_' . $method->get_instance_id() . '_settings' );
+				}
+				$zone->delete();
+			}
+			WC_Cache_Helper::get_transient_version( 'shipping', true );
+			WC()->shipping()->enabled = $shipping_was_enabled;
+		}
+
+		$this->assertSame( 'HI', $data['billing_state'], 'The order should be saved with the state code.' );
+		$this->assertSame( 60.0, (float) WC()->cart->get_shipping_total(), 'The Hawaii zone rate should be charged.' );
+	}
+
+	/**
+	 * @testdox Checkout charges the state tax rate when the state name is posted instead of its code.
+	 *
+	 * @testWith ["CA", "CA"]
+	 *           ["CA", "California"]
+	 *           ["IL", "IL"]
+	 *           ["IL", "Illinois"]
+	 *           ["IL", "ıL"]
+	 *
+	 * @param string $rate_state   State the tax rate is limited to.
+	 * @param string $posted_state Posted billing state.
+	 */
+	public function test_update_session_uses_state_tax_rate_for_posted_state_name( string $rate_state, string $posted_state ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC()->customer->set_is_vat_exempt( false );
+
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => $rate_state,
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'State tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$data = $this->post_checkout_and_update_session( $posted_state );
+		} finally {
+			WC_Tax::_delete_tax_rate( $tax_rate_id );
+		}
+
+		$this->assertSame( $rate_state, $data['billing_state'], 'The order should be saved with the state code.' );
+		$this->assertEqualsWithDelta( 1.0, (float) WC()->cart->get_cart_contents_tax(), 0.001, 'The state tax rate should be charged.' );
+	}
+
+	/**
+	 * Create a shipping zone with a single flat rate.
+	 *
+	 * @param int    $order    Zone order.
+	 * @param string $location Zone location code.
+	 * @param string $type     Zone location type.
+	 * @param string $cost     Flat rate cost.
+	 * @return WC_Shipping_Zone
+	 */
+	private function create_flat_rate_zone( int $order, string $location, string $type, string $cost ): WC_Shipping_Zone {
+		$zone = new WC_Shipping_Zone();
+		$zone->set_zone_name( $location );
+		$zone->set_zone_order( $order );
+		$zone->add_location( $location, $type );
+		$zone->save();
+
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+		update_option(
+			'woocommerce_flat_rate_' . $instance_id . '_settings',
+			array(
+				'enabled'    => 'yes',
+				'title'      => 'Flat rate',
+				'tax_status' => 'none',
+				'cost'       => $cost,
+			)
+		);
+
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping()->load_shipping_methods();
+
+		return $zone;
+	}
+
+	/**
+	 * Post a guest checkout with a US billing address and update the session from it, like 'process_checkout' does.
+	 *
+	 * @param string $posted_state Posted billing state.
+	 * @return array Posted data.
+	 */
+	private function post_checkout_and_update_session( string $posted_state ): array {
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'woocommerce-process-checkout-nonce' => 'test-nonce',
+			'billing_first_name'                 => 'Test',
+			'billing_last_name'                  => 'Shopper',
+			'billing_address_1'                  => '1 Main Street',
+			'billing_city'                       => 'Springfield',
+			'billing_postcode'                   => '12345',
+			'billing_country'                    => 'US',
+			'billing_state'                      => $posted_state,
+			'billing_phone'                      => '5555555555',
+			'billing_email'                      => 'shopper@example.com',
+			'payment_method'                     => 'cod',
+		);
+
+		try {
+			$data = $this->sut->get_posted_data();
+			$this->sut->update_session( $data );
+		} finally {
+			$_POST = $original_post;
+		}
+
+		return $data;
 	}
 
 	/**

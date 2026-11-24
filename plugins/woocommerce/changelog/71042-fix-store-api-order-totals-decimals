@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: format order endpoint totals with the store's number of decimals so they match `currency_minor_unit`.

@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
@@ -1131,6 +1132,25 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					return array( 'product_ids' => array( $product ) );
 				},
 			),
+			'order_refund'   => array(
+				'order_refund',
+				'woocommerce/order-refunds-query',
+				'refunds',
+				static function (): array {
+					$order = wc_create_order();
+					$order->set_total( '50' );
+					$order->save();
+					foreach ( array( 5, 7 ) as $amount ) {
+						wc_create_refund(
+							array(
+								'order_id' => $order->get_id(),
+								'amount'   => $amount,
+							)
+						);
+					}
+					return array( 'id' => $order->get_id() );
+				},
+			),
 		);
 	}
 
@@ -1395,9 +1415,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		ExtensibleAbilities::register_resource( 'late_resource' );
 
-		$resources = new \ReflectionProperty( AbilityExtensions::class, 'resources' );
-		$resources->setAccessible( true );
-		$this->assertSame( array( 'product', 'order', 'order_item', 'product_term', 'product_review', 'customer' ), array_keys( $resources->getValue() ) );
+		$this->assertFalse( AbilityExtensions::is_resource_registered( 'late_resource' ) );
 	}
 
 	/**
@@ -2817,6 +2835,109 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$note = wc_get_order_note( $result->get_error_data()['note_id'] );
 		$this->assertSame( $order->get_id(), (int) get_comment( $note->id )->comment_post_ID );
 		$this->assertSame( 'Packed.', $note->content );
+	}
+
+	/**
+	 * @testdox Should name the saved refund in the error when order-refund-create refunds and a refund field value then fails its schema.
+	 */
+	public function test_a_refund_that_saves_before_a_field_fails_names_the_saved_refund(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$this->register_invalid_field( 'order_refund', array( 'type' => 'integer' ), 'many' );
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$result = wp_get_ability( 'woocommerce/order-refund-create' )->execute(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '5',
+			)
+		);
+
+		$this->assert_field_output_invalid( $result, 'order_refund' );
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds );
+		$this->assertStringContainsString( 'do not send it again', $result->get_error_message() );
+		$this->assertTrue( $result->get_error_data()['saved'] );
+		$this->assertSame( $refunds[0]->get_id(), $result->get_error_data()['id'] );
+		$this->assertFalse( $result->get_error_data()['refunded_payment'] );
+	}
+
+	/**
+	 * @testdox Should name the saved refund and say the gateway refunded it when a refund field callback throws after a gateway refund.
+	 */
+	public function test_a_gateway_refund_whose_field_callback_throws_names_the_saved_refund(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'order_refund',
+						'namespace'     => 'invalid-ext',
+						'field'         => 'bad',
+						'output_schema' => array( 'type' => 'string' ),
+						'get_callback'  => static function () {
+							throw new \RuntimeException( 'Secret failure' );
+						},
+					)
+				);
+			}
+		);
+		$gateway           = new class() extends \WC_Payment_Gateway {
+			/**
+			 * Set the ID and the refund support.
+			 */
+			public function __construct() {
+				$this->id       = 'field_test_gateway';
+				$this->enabled  = 'yes';
+				$this->supports = array( 'products', 'refunds' );
+			}
+
+			/**
+			 * Refund the payment.
+			 *
+			 * @param int        $order_id Order ID.
+			 * @param float|null $amount   Amount.
+			 * @param string     $reason   Reason.
+			 * @return bool
+			 */
+			public function process_refund( $order_id, $amount = null, $reason = '' ) {
+				unset( $order_id, $amount, $reason );
+				return true;
+			}
+		};
+		$gateways          = WC()->payment_gateways();
+		$original_gateways = $gateways->payment_gateways;
+		$gateways->payment_gateways['field_test_gateway'] = $gateway;
+		$order = \WC_Helper_Order::create_order();
+		$order->set_payment_method( 'field_test_gateway' );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		try {
+			$result = wp_get_ability( 'woocommerce/order-refund-create' )->execute(
+				array(
+					'id'             => $order->get_id(),
+					'amount'         => '5',
+					'refund_payment' => true,
+				)
+			);
+		} finally {
+			$gateways->payment_gateways = $original_gateways;
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_extension_failed', $result->get_error_code(), $result->get_error_message() );
+		$this->assertStringNotContainsString( 'Secret failure', $result->get_error_message() );
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds );
+		$this->assertTrue( $refunds[0]->get_refunded_payment() );
+		$this->assertStringContainsString( 'do not send it again', $result->get_error_message() );
+		$this->assertSame( 500, $result->get_error_data()['status'] );
+		$this->assertTrue( $result->get_error_data()['saved'] );
+		$this->assertSame( $refunds[0]->get_id(), $result->get_error_data()['id'] );
+		$this->assertTrue( $result->get_error_data()['refunded_payment'] );
 	}
 
 	/**
@@ -4259,6 +4380,44 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
 
 		$this->assertSame( 0, $fired );
+	}
+
+	/**
+	 * @testdox Should refuse to trash a product or an order that is already in the trash, and run no sync.
+	 */
+	public function test_a_repeat_trash_is_refused_and_runs_no_sync(): void {
+		$synced = array();
+		foreach ( array( 'product', 'order' ) as $resource_name ) {
+			$this->register_sync(
+				$resource_name,
+				'test-ext',
+				static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$synced, $resource_name ) {
+					unset( $saved, $ability );
+					$synced[] = array( $resource_name, array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['trashed'] ) );
+					return null;
+				}
+			);
+		}
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = OrderHelper::create_order();
+
+		$this->run_ability( 'woocommerce/product-delete', array( 'id' => $product->get_id() ) );
+		$this->run_ability( 'woocommerce/order-delete', array( 'id' => $order->get_id() ) );
+		$product_again = $this->run_ability_response( 'woocommerce/product-delete', array( 'id' => $product->get_id() ) );
+		$order_again   = $this->run_ability_response( 'woocommerce/order-delete', array( 'id' => $order->get_id() ) );
+
+		$this->assertSame( 409, $product_again->get_status() );
+		$this->assertSame( 'woocommerce_ability_product_already_trashed', $product_again->get_data()['code'] );
+		$this->assertSame( 409, $order_again->get_status() );
+		$this->assertSame( 'woocommerce_ability_order_already_trashed', $order_again->get_data()['code'] );
+		$this->assertSame(
+			array(
+				array( 'product', array( $product->get_id() ) ),
+				array( 'order', array( $order->get_id() ) ),
+			),
+			$synced,
+			'Only the first trash of each object should run the syncs.'
+		);
 	}
 
 	/**

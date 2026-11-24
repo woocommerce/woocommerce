@@ -52,7 +52,7 @@ pnpm --filter=@woocommerce/theme-cli build <slug>
 
 The command creates the artifacts directory and moves the ZIP to `themes/<slug>/artifacts/<slug>.zip`. Builds include current working files, including uncommitted changes.
 
-Theme content checks belong to `validate`; `build` creates the ZIP with wp-scripts. ZIP generation does not publish a release.
+Theme content checks belong to `validate`; `build` creates the ZIP with wp-scripts. ZIP generation does not publish a release. Publishing Purple is documented in [themes/purple/README.md](../../themes/purple/README.md#releases).
 
 ## Adding a theme
 

@@ -10,14 +10,15 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
-use Automattic\WooCommerce\Internal\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CustomerUpdate;
+use Automattic\WooCommerce\Tests\Internal\Abilities\ExtensibleAbilitiesTestTrait;
 
 /**
  * Tests the customer-update ability.
  */
 class CustomerUpdateTest extends \WC_Unit_Test_Case {
+
+	use ExtensibleAbilitiesTestTrait;
 
 	/**
 	 * An administrator, who may edit users.
@@ -320,27 +321,8 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 	 * @param callable $test     Receives a CustomerUpdate built while they are registered.
 	 */
 	private function with_extensions( callable $register, callable $test ): void {
-		$saved = array();
-		foreach ( array( 'resources', 'fields', 'validators', 'filters', 'syncs' ) as $name ) {
-			$property = new \ReflectionProperty( AbilityExtensions::class, $name );
-			$property->setAccessible( true );
-			$saved[ $name ] = $property->getValue();
-			$property->setValue( null, array() );
-		}
-		try {
-			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
-			add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
-			do_action( 'woocommerce_extensible_abilities_resources_init' );
-			add_action( 'woocommerce_extensible_abilities_init', $register );
-			do_action( 'woocommerce_extensible_abilities_init' );
-			$test( new CustomerUpdate( CustomerUpdate::ABILITY_NAME, CustomerUpdate::get_registration_args() ) );
-		} finally {
-			foreach ( $saved as $name => $value ) {
-				$property = new \ReflectionProperty( AbilityExtensions::class, $name );
-				$property->setAccessible( true );
-				$property->setValue( null, $value );
-			}
-		}
+		$this->enable_extensible_abilities( $register );
+		$test( new CustomerUpdate( CustomerUpdate::ABILITY_NAME, CustomerUpdate::get_registration_args() ) );
 	}
 
 	/**

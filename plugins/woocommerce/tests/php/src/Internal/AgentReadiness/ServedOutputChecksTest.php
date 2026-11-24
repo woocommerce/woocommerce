@@ -181,6 +181,49 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failing Open Graph check records which page lacks the tags: the home page, the product page, which it names, or both.
+	 */
+	public function test_open_graph_names_the_page_without_tags(): void {
+		$store = $this->good_store();
+		$cases = array(
+			'home'    => array( self::page( '', '', false ), $store[ $this->product_path() ][1] ),
+			'product' => array( $store['/'][1], self::page( '', '', false ) ),
+			'both'    => array( self::page( '', '', false ), self::page( '', '', false ) ),
+		);
+		foreach ( $cases as $source => $pages ) {
+			$store['/']                     = array( 200, $pages[0] );
+			$store[ $this->product_path() ] = array( 200, $pages[1] );
+			$this->serve( $store );
+			$check = array_column( $this->sut->all(), null, 'id' )['open_graph_tags'];
+			$this->assertFalse( $check['ok'], $source );
+			$this->assertSame( $source, $check['source'], $source );
+			$this->assertSame( 'home' === $source ? 0 : $this->product->get_id(), $check['product'], 'The product is named when its page lacks the tags: ' . $source );
+		}
+	}
+
+	/**
+	 * @testdox A check that reads the home and product pages names the product only when its page failed; a failing home page isn't put on the product.
+	 */
+	public function test_page_check_names_the_product_only_when_its_page_failed(): void {
+		$store    = $this->good_store();
+		$viewport = '<meta name="viewport" content="width=device-width">';
+		$product  = '<h1>Blue &amp; Gold Mug</h1>';
+		$cases    = array(
+			'home'    => array( self::page(), self::page( $viewport, $product ), 0 ),
+			'product' => array( self::page( $viewport ), self::page( '', $product ), $this->product->get_id() ),
+			'both'    => array( self::page(), self::page( '', $product ), 0 ),
+		);
+		foreach ( $cases as $failed => $pages ) {
+			$store['/']                     = array( 200, $pages[0] );
+			$store[ $this->product_path() ] = array( 200, $pages[1] );
+			$this->serve( $store );
+			$check = array_column( $this->sut->all(), null, 'id' )['viewport_meta'];
+			$this->assertFalse( $check['ok'], $failed );
+			$this->assertSame( $pages[2], $check['product'], 'Named only when the product page alone failed: ' . $failed );
+		}
+	}
+
+	/**
 	 * @testdox llms.txt without a heading fails the format check; a broken store link fails, an unreachable or blocked one is couldn't check, and a blocked llms.txt is too.
 	 */
 	public function test_llms_txt(): void {
@@ -327,7 +370,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 
 		$not_reached = self::llms_present( self::with_llms_status( 'unknown', '## Agentic capabilities' ) );
 		$this->assertSame( 'not_reached', $not_reached['source'] );
-		$this->assertStringContainsString( 'Ask your host', $not_reached['fix'] );
+		$this->assertStringContainsString( 'Ask your hosting provider', $not_reached['fix'] );
 		$this->assertNotSame( $default['fix'], $not_reached['fix'] );
 		$this->assertSame( '', self::llms_present( self::with_llms_status( 'no_rewrite', '## Agentic capabilities' ) )['source'], 'A status it doesn\'t know claims no cause' );
 
@@ -514,9 +557,18 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$responses[ 'POST ' . $search ] = array( 403, '<html>Blocked</html>', array( 'content-type' => 'text/HTML; charset=UTF-8' ) );
 		$this->serve( $responses );
 		$this->assertSame( '403 text/html', array_column( $this->sut->all(), 'source', 'id' )['ucp_endpoints_live'], 'A failed check keeps what came back' );
+		$this->assertStringEndsWith( $search, array_column( $this->sut->all(), 'seen_at', 'id' )['ucp_endpoints_live'], 'A failed check keeps where it asked' );
+		$responses[ 'POST ' . $search ] = array( 503, '<html>Unavailable</html>', array( 'content-type' => 'text/html' ) );
+		$this->serve( $responses );
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertNull( $checks['ucp_endpoints_live']['ok'], 'A 5xx is couldn\'t check' );
+		$this->assertSame( '503 text/html', $checks['ucp_endpoints_live']['source'], 'Couldn\'t check keeps what came back too' );
+		$this->assertStringEndsWith( $search, $checks['ucp_endpoints_live']['seen_at'] );
+		$this->assertFalse( $checks['ucp_endpoints_live']['conflict'], 'The address is not a conflict, so the page doesn\'t link it' );
 		$responses[ 'POST ' . $search ] = null;
 		$this->serve( $responses );
 		$this->assertSame( '', array_column( $this->sut->all(), 'source', 'id' )['ucp_endpoints_live'], 'No answer leaves nothing to show' );
+		$this->assertSame( '', array_column( $this->sut->all(), 'seen_at', 'id' )['ucp_endpoints_live'] );
 
 		$responses[ $path ]             = array( 200, '{"namespace":"wc/ucp/v1","routes":{}}' );
 		$responses[ 'POST ' . $search ] = array( 404, '' );
@@ -551,6 +603,129 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 			3
 		);
 		$this->assertTrue( $this->results()['ucp_endpoints_live'], 'A refusal followed by the endpoint passes' );
+	}
+
+	/**
+	 * @testdox Each catalog search check adds to the running counts: first-try failures, failures after the retry, no answer, and what a failing one answered.
+	 */
+	public function test_catalog_search_counts(): void {
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+		delete_option( StoreOutputChecks::SEARCH_COUNTS_OPTION );
+		$search    = substr( rest_url( 'wc/ucp/v1' ), strlen( untrailingslashit( home_url() ) ) ) . '/catalog/search';
+		$responses = $this->good_store();
+		$run       = function ( ?array $answer ) use ( $responses, $search ): void {
+			$responses[ 'POST ' . $search ] = $answer;
+			$this->serve( $responses );
+			$this->sut->all();
+		};
+
+		$today = gmdate( 'Y-m-d' );
+		$run( array( 200, '{"ucp":{"status":"success"},"products":[]}' ) );
+		$counts = StoreOutputChecks::search_counts();
+		$this->assertSame( $today, $counts['since'] );
+		$this->assertSame( array( 1, 0, 0, 0, '', '', '', '' ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'], $counts['no_answer'], $counts['last_seen'], $counts['last_seen_on'], $counts['last_recovered'], $counts['last_recovered_on'] ), 'A pass counts only as a check' );
+
+		$run( array( 403, '<html>Blocked</html>', array( 'content-type' => 'text/html; charset=UTF-8' ) ) );
+		$run( null );
+		$counts = StoreOutputChecks::search_counts();
+		$this->assertSame( 3, $counts['checks'] );
+		$this->assertSame( 2, $counts['first_try_failed'] );
+		$this->assertSame( 1, $counts['failed'], 'A refusal fails after the retry' );
+		$this->assertSame( 1, $counts['no_answer'], 'A timeout is no answer, shown as couldn\'t check' );
+		$this->assertSame( '403 text/html', $counts['last_seen'], 'No answer leaves the last answer in place' );
+		$this->assertSame( $today, $counts['last_seen_on'] );
+		$this->assertSame( '', $counts['last_recovered'] );
+
+		$run( array( 503, '<html>Unavailable</html>', array( 'content-type' => 'text/html' ) ) );
+		$counts = StoreOutputChecks::search_counts();
+		$this->assertSame( array( 4, 3, 1, 2, '503 text/html', $today ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'], $counts['no_answer'], $counts['last_seen'], $counts['last_seen_on'] ), 'A 5xx is no answer and keeps what came back' );
+
+		$this->serve( $responses );
+		$answers = array( array( 403, '<html>Blocked</html>', array( 'content-type' => 'text/html' ) ), array( 200, '{"ucp":{"status":"success"},"products":[]}' ) );
+		add_filter(
+			'pre_http_request',
+			function ( $pre, $args, $url ) use ( $search, &$answers ) {
+				if ( 'POST' !== $args['method'] || substr( $url, strlen( untrailingslashit( home_url() ) ) ) !== $search || array() === $answers ) {
+					return $pre;
+				}
+				$answer = array_shift( $answers );
+				return array(
+					'headers'  => new \WpOrg\Requests\Utility\CaseInsensitiveDictionary( $answer[2] ?? array() ),
+					'body'     => $answer[1],
+					'response' => array(
+						'code'    => $answer[0],
+						'message' => '',
+					),
+					'cookies'  => array(),
+				);
+			},
+			20,
+			3
+		);
+		$this->sut->all();
+		$counts = StoreOutputChecks::search_counts();
+		$this->assertSame( array( 5, 4, 1 ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'] ), 'A refusal the retry gets past counts as a first-try failure only' );
+		$this->assertSame( '503 text/html', $counts['last_seen'], 'A recovery leaves the last failure in place' );
+		$this->assertSame( '403 text/html', $counts['last_recovered'], 'A recovery keeps what the first try answered' );
+		$this->assertSame( $today, $counts['last_recovered_on'] );
+
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		$this->serve( $responses );
+		$this->sut->all();
+		$this->assertNotContains( 'POST ' . $search, $this->requested );
+		$this->assertSame( array( 5, 4, 2 ), array( StoreOutputChecks::search_counts()['checks'], StoreOutputChecks::search_counts()['first_try_failed'], StoreOutputChecks::search_counts()['no_answer'] ), 'In coming soon mode nothing is asked, so nothing is counted' );
+		update_option( 'woocommerce_coming_soon', 'no' );
+
+		$unreachable      = $responses;
+		$unreachable['/'] = null;
+		$this->serve( $unreachable );
+		$this->sut->all();
+		$this->assertNotContains( 'POST ' . $search, $this->requested );
+		$this->assertSame( 5, StoreOutputChecks::search_counts()['checks'], 'A store that can\'t reach its home page sends nothing more, so nothing is counted' );
+
+		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+		$this->serve( $responses );
+		$this->sut->all();
+		$this->assertSame( 5, StoreOutputChecks::search_counts()['checks'], 'With UCP off, catalog search isn\'t checked or counted' );
+
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+		$this->serve( $responses );
+		$answers = array( array( 403, '<html>Blocked</html>', array( 'content-type' => 'text/html' ) ), null );
+		add_filter(
+			'pre_http_request',
+			function ( $pre, $args, $url ) use ( $search, &$answers ) {
+				if ( 'POST' !== $args['method'] || substr( $url, strlen( untrailingslashit( home_url() ) ) ) !== $search || array() === $answers ) {
+					return $pre;
+				}
+				$answer = array_shift( $answers );
+				if ( null === $answer ) {
+					return new \WP_Error( 'http_request_failed', 'Timed out' );
+				}
+				return array(
+					'headers'  => new \WpOrg\Requests\Utility\CaseInsensitiveDictionary( $answer[2] ?? array() ),
+					'body'     => $answer[1],
+					'response' => array(
+						'code'    => $answer[0],
+						'message' => '',
+					),
+					'cookies'  => array(),
+				);
+			},
+			20,
+			3
+		);
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$counts = StoreOutputChecks::search_counts();
+		$this->assertNull( $checks['ucp_endpoints_live']['ok'], 'A retry that times out is couldn\'t check' );
+		$this->assertSame( '403 text/html', $checks['ucp_endpoints_live']['source'], 'A retry that times out keeps the first answer' );
+		$this->assertSame( array( 6, 5, 1, 3, '403 text/html', $today ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'], $counts['no_answer'], $counts['last_seen'], $counts['last_seen_on'] ) );
+		$this->assertSame( '403 text/html', $counts['last_recovered'], 'A later failure leaves the last recovery in place' );
+
+		$run( array( 403, '<html>Blocked</html>', array( 'content-type' => 'https://store.example/cart' ) ) );
+		$counts = StoreOutputChecks::search_counts();
+		$this->assertSame( '403', $counts['last_seen'], 'An unknown content type is left out' );
+		$this->assertSame( $today, $counts['last_seen_on'] );
+		$this->assertSame( array( 7, 6, 2 ), array( $counts['checks'], $counts['first_try_failed'], $counts['failed'] ) );
 	}
 
 	/**

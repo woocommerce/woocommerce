@@ -7,17 +7,18 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Internal\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CustomersQuery;
+use Automattic\WooCommerce\Tests\Internal\Abilities\ExtensibleAbilitiesTestTrait;
 
 /**
  * Tests customer queries through the Abilities API.
  */
 class CustomersQueryTest extends \WC_Unit_Test_Case {
+
+	use ExtensibleAbilitiesTestTrait;
 
 	/**
 	 * The System Under Test.
@@ -416,74 +417,56 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	 * @testdox Should add extension fields and filters to registered customers only, and only while the extensible abilities feature is on.
 	 */
 	public function test_extension_fields_and_filters(): void {
-		$saved = array();
-		foreach ( array( 'resources', 'fields', 'filters' ) as $name ) {
-			$property = new \ReflectionProperty( AbilityExtensions::class, $name );
-			$property->setAccessible( true );
-			$saved[ $name ] = $property->getValue();
-			$property->setValue( null, array() );
-		}
-		try {
-			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
-			$registered = array( $this->registered_customer(), $this->registered_customer() );
-			$guest      = $this->guest_customers( 1 )[0];
-			$input      = array( 'include' => array( $registered[0][0], $registered[1][0], $guest ) );
-			$baseline   = CustomersQuery::execute( $input );
-			$schema     = CustomersQuery::get_registration_args()['output_schema'];
+		$this->isolate_extensible_abilities();
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
+		$registered = array( $this->registered_customer(), $this->registered_customer() );
+		$guest      = $this->guest_customers( 1 )[0];
+		$input      = array( 'include' => array( $registered[0][0], $registered[1][0], $guest ) );
+		$baseline   = CustomersQuery::execute( $input );
+		$schema     = CustomersQuery::get_registration_args()['output_schema'];
 
-			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
-			add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
-			do_action( 'woocommerce_extensible_abilities_resources_init' );
-			$member = $registered[1][1];
-			add_action(
-				'woocommerce_extensible_abilities_init',
-				static function () use ( $member ) {
-					ExtensibleAbilities::register_field(
-						array(
-							'resource'      => 'customer',
-							'namespace'     => 'test-ext',
-							'field'         => 'tier',
-							'output_schema' => array( 'type' => 'string' ),
-							'get_callback'  => static fn( \WC_Customer $customer ) => 'tier-' . $customer->get_id(),
-						)
-					);
-					ExtensibleAbilities::register_query_filter(
-						array(
-							'resource'  => 'customer',
-							'namespace' => 'test-ext',
-							'filter'    => 'members',
-							'schema'    => array( 'type' => 'boolean' ),
-							'callback'  => static fn( bool $members ) => $members ? array( 'include_ids' => array( $member ) ) : array( 'exclude_ids' => array( $member ) ),
-						)
-					);
-				}
-			);
-			do_action( 'woocommerce_extensible_abilities_init' );
-			$ability = new \WP_Ability( CustomersQuery::get_name(), CustomersQuery::get_registration_args() );
-
-			$result = $ability->execute( $input );
-			$items  = array_column( $result['customers'], null, 'id' );
-			$this->assertCount( 3, $items );
-			foreach ( $registered as list( $id, $user_id ) ) {
-				$this->assertSame( 'tier-' . $user_id, $items[ $id ]['extensions']['test-ext']['tier'] );
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
+		$member = $registered[1][1];
+		$this->enable_extensible_abilities(
+			static function () use ( $member ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'customer',
+						'namespace'     => 'test-ext',
+						'field'         => 'tier',
+						'output_schema' => array( 'type' => 'string' ),
+						'get_callback'  => static fn( \WC_Customer $customer ) => 'tier-' . $customer->get_id(),
+					)
+				);
+				ExtensibleAbilities::register_query_filter(
+					array(
+						'resource'  => 'customer',
+						'namespace' => 'test-ext',
+						'filter'    => 'members',
+						'schema'    => array( 'type' => 'boolean' ),
+						'callback'  => static fn( bool $members ) => $members ? array( 'include_ids' => array( $member ) ) : array( 'exclude_ids' => array( $member ) ),
+					)
+				);
 			}
-			$this->assertArrayNotHasKey( 'extensions', $items[ $guest ], 'A guest has no WC_Customer for extensions to read.' );
-			$this->assertSame( 'string', $ability->get_output_schema()['properties']['customers']['items']['properties']['extensions']['properties']['test-ext']['properties']['tier']['type'] );
+		);
+		$ability = new \WP_Ability( CustomersQuery::get_name(), CustomersQuery::get_registration_args() );
 
-			$members = static fn( bool $value ) => $input + array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'members' => $value ) ) ) );
-			$this->assertSame( array( $registered[1][0] ), array_column( $ability->execute( $members( true ) )['customers'], 'id' ), 'An extension filter narrows include instead of adding to it.' );
-			$this->assertSame( 'woocommerce_ability_extension_filter_failed', $ability->execute( $members( false ) )->get_error_code(), 'A customer filter can only include user IDs.' );
-
-			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
-			$this->assertSame( $baseline, CustomersQuery::execute( $input ) );
-			$this->assertSame( $schema, CustomersQuery::get_registration_args()['output_schema'] );
-		} finally {
-			foreach ( $saved as $name => $value ) {
-				$property = new \ReflectionProperty( AbilityExtensions::class, $name );
-				$property->setAccessible( true );
-				$property->setValue( null, $value );
-			}
+		$result = $ability->execute( $input );
+		$items  = array_column( $result['customers'], null, 'id' );
+		$this->assertCount( 3, $items );
+		foreach ( $registered as list( $id, $user_id ) ) {
+			$this->assertSame( 'tier-' . $user_id, $items[ $id ]['extensions']['test-ext']['tier'] );
 		}
+		$this->assertArrayNotHasKey( 'extensions', $items[ $guest ], 'A guest has no WC_Customer for extensions to read.' );
+		$this->assertSame( 'string', $ability->get_output_schema()['properties']['customers']['items']['properties']['extensions']['properties']['test-ext']['properties']['tier']['type'] );
+
+		$members = static fn( bool $value ) => $input + array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'members' => $value ) ) ) );
+		$this->assertSame( array( $registered[1][0] ), array_column( $ability->execute( $members( true ) )['customers'], 'id' ), 'An extension filter narrows include instead of adding to it.' );
+		$this->assertSame( 'woocommerce_ability_extension_filter_failed', $ability->execute( $members( false ) )->get_error_code(), 'A customer filter can only include user IDs.' );
+
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
+		$this->assertSame( $baseline, CustomersQuery::execute( $input ) );
+		$this->assertSame( $schema, CustomersQuery::get_registration_args()['output_schema'] );
 	}
 
 	/**

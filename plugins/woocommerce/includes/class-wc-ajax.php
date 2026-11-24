@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Products\ProductsOrderingMoveService;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -473,6 +474,17 @@ class WC_AJAX {
 			);
 		}
 
+		// Shipping zones and tax rates match on state codes, so convert posted state names (e.g. "Hawaii") to their codes.
+		$validation_utils = new ValidationUtils();
+
+		if ( isset( $_POST['state'] ) ) {
+			WC()->customer->set_billing_state( $validation_utils->format_state( WC()->customer->get_billing_state( 'edit' ), WC()->customer->get_billing_country( 'edit' ) ) );
+		}
+
+		if ( isset( $_POST[ wc_ship_to_billing_address_only() ? 'state' : 's_state' ] ) ) {
+			WC()->customer->set_shipping_state( $validation_utils->format_state( WC()->customer->get_shipping_state( 'edit' ), WC()->customer->get_shipping_country( 'edit' ) ) );
+		}
+
 		if ( isset( $_POST['has_full_address'] ) && wc_string_to_bool( wc_clean( wp_unslash( $_POST['has_full_address'] ) ) ) ) {
 			WC()->customer->set_calculated_shipping( true );
 		} else {
@@ -855,6 +867,29 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Check whether the current user can edit each variation.
+	 *
+	 * @param int[]    $variation_ids Variation IDs.
+	 * @param int|null $product_id Expected parent product ID, or null to allow any editable parent.
+	 * @return bool
+	 */
+	private static function can_edit_variations( $variation_ids, $product_id = null ) {
+		foreach ( $variation_ids as $variation_id ) {
+			$parent_id = wp_get_post_parent_id( $variation_id );
+
+			if ( null !== $product_id && $product_id !== $parent_id ) {
+				return false;
+			}
+
+			if ( ! current_user_can( 'edit_product', $parent_id ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Delete variations via ajax function.
 	 *
 	 * @return void
@@ -862,8 +897,13 @@ class WC_AJAX {
 	public static function remove_variations() {
 		check_ajax_referer( 'delete-variations', 'security' );
 
-		if ( current_user_can( 'edit_products' ) && isset( $_POST['variation_ids'] ) ) {
+		if ( isset( $_POST['variation_ids'] ) ) {
 			$variation_ids = array_map( 'absint', (array) wp_unslash( $_POST['variation_ids'] ) );
+
+			if ( ! self::can_edit_variations( $variation_ids ) ) {
+				// @phpstan-ignore argument.type (WordPress accepts integer -1 for AJAX responses, as used by other WooCommerce handlers.)
+				wp_die( -1 );
+			}
 
 			foreach ( $variation_ids as $variation_id ) {
 				if ( 'product_variation' === get_post_type( $variation_id ) ) {
@@ -884,7 +924,7 @@ class WC_AJAX {
 	public static function save_attributes() {
 		check_ajax_referer( 'save-attributes', 'security' );
 
-		if ( ! current_user_can( 'edit_products' ) || ! isset( $_POST['data'], $_POST['post_id'] ) ) {
+		if ( ! isset( $_POST['data'], $_POST['post_id'] ) || ! current_user_can( 'edit_product', absint( $_POST['post_id'] ) ) ) {
 			wp_die( -1 );
 		}
 
@@ -933,7 +973,7 @@ class WC_AJAX {
 	public static function add_attributes_and_variations() {
 		check_ajax_referer( 'add-attributes-and-variations', 'security' );
 
-		if ( ! current_user_can( 'edit_products' ) || ! isset( $_POST['data'], $_POST['post_id'] ) ) {
+		if ( ! isset( $_POST['data'], $_POST['post_id'] ) || ! current_user_can( 'edit_product', absint( $_POST['post_id'] ) ) ) {
 			wp_die( -1 );
 		}
 
@@ -994,7 +1034,7 @@ class WC_AJAX {
 	public static function add_variation() {
 		check_ajax_referer( 'add-variation', 'security' );
 
-		if ( ! current_user_can( 'edit_products' ) || ! isset( $_POST['post_id'], $_POST['loop'] ) ) {
+		if ( ! isset( $_POST['post_id'], $_POST['loop'] ) || ! current_user_can( 'edit_product', absint( $_POST['post_id'] ) ) ) {
 			wp_die( -1 );
 		}
 
@@ -1022,18 +1062,14 @@ class WC_AJAX {
 	public static function link_all_variations() {
 		check_ajax_referer( 'link-variations', 'security' );
 
-		if ( ! current_user_can( 'edit_products' ) ) {
+		$post_id = isset( $_POST['post_id'] ) ? intval( $_POST['post_id'] ) : 0;
+
+		if ( ! $post_id || ! current_user_can( 'edit_product', $post_id ) ) {
 			wp_die( -1 );
 		}
 
 		wc_maybe_define_constant( 'WC_MAX_LINKED_VARIATIONS', 50 );
 		wc_set_time_limit( 0 );
-
-		$post_id = isset( $_POST['post_id'] ) ? intval( $_POST['post_id'] ) : 0;
-
-		if ( ! $post_id ) {
-			wp_die();
-		}
 
 		$product        = wc_get_product( $post_id );
 		$number_created = self::create_all_product_variations( $product );
@@ -3208,7 +3244,7 @@ class WC_AJAX {
 
 		check_ajax_referer( 'load-variations', 'security' );
 
-		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['product_id'] ) ) {
+		if ( empty( $_POST['product_id'] ) || ! current_user_can( 'edit_product', absint( $_POST['product_id'] ) ) ) {
 			wp_die( -1 );
 		}
 
@@ -3258,12 +3294,22 @@ class WC_AJAX {
 
 		check_ajax_referer( 'save-variations', 'security' );
 
-		// Check permissions again and make sure we have what we need.
-		if ( ! current_user_can( 'edit_products' ) || empty( $_POST ) || empty( $_POST['product_id'] ) ) {
+		if ( empty( $_POST['product_id'] ) ) {
 			wp_die( -1 );
 		}
 
-		$product_id                           = absint( $_POST['product_id'] );
+		$product_id = absint( wp_unslash( $_POST['product_id'] ) );
+		if ( ! current_user_can( 'edit_product', $product_id ) ) {
+			// @phpstan-ignore argument.type (WordPress accepts integer -1 for AJAX responses, as used by other WooCommerce handlers.)
+			wp_die( -1 );
+		}
+
+		$variation_ids = isset( $_POST['variable_post_id'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['variable_post_id'] ) ) : array();
+		if ( ! self::can_edit_variations( $variation_ids, $product_id ) ) {
+			// @phpstan-ignore argument.type (WordPress accepts integer -1 for AJAX responses, as used by other WooCommerce handlers.)
+			wp_die( -1 );
+		}
+
 		WC_Admin_Meta_Boxes::$meta_box_errors = array();
 		WC_Meta_Box_Product_Data::save_variations( $product_id, get_post( $product_id ) );
 
@@ -3837,7 +3883,7 @@ class WC_AJAX {
 		check_ajax_referer( 'bulk-edit-variations', 'security' );
 
 		// Check permissions again and make sure we have what we need.
-		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['product_id'] ) || empty( $_POST['bulk_action'] ) ) {
+		if ( empty( $_POST['product_id'] ) || empty( $_POST['bulk_action'] ) || ! current_user_can( 'edit_product', absint( $_POST['product_id'] ) ) ) {
 			wp_die( -1 );
 		}
 

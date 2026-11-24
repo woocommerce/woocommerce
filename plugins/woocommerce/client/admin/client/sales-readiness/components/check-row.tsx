@@ -3,6 +3,7 @@
  */
 import { Badge, Icon, Link, Stack, Text, VisuallyHidden } from '@wordpress/ui';
 import { Button } from '@wordpress/components';
+import { useInstanceId } from '@wordpress/compose';
 import { Path, SVG } from '@wordpress/primitives';
 import { createInterpolateElement } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
@@ -12,8 +13,29 @@ import type { ReactNode } from 'react';
  * Internal dependencies
  */
 import { safeHref } from '../safe-href';
-import type { CheckRow as CheckRowData, ViewBadge, ViewLink } from '../types';
+import type {
+	CheckRow as CheckRowData,
+	TextLink,
+	ViewBadge,
+	ViewLink,
+} from '../types';
 import { trackReadiness, type Surface } from '../tracks';
+
+/**
+ * A shared button text such as "Edit page" keeps its accessible name, so voice control finds it by what
+ * it shows (WCAG 2.5.3); screen readers also hear which policy it is for, as its description.
+ *
+ * @param sr The button's full action, such as "Edit your refund and returns policy page", or none.
+ */
+export const useSrDescription = ( sr?: string ) => {
+	const id = useInstanceId( useSrDescription, 'wc-sales-readiness-sr' );
+	return sr
+		? {
+				props: { 'aria-describedby': id },
+				description: <VisuallyHidden id={ id }>{ sr }</VisuallyHidden>,
+			}
+		: { props: {}, description: null };
+};
 
 /**
  * Where to fix it: an outline button when it has a URL, plain text otherwise.
@@ -26,15 +48,20 @@ export const RowLink = ( {
 	onClick?: () => void;
 } ) => {
 	const href = safeHref( link.href );
+	const sr = useSrDescription( link.sr );
 	return href ? (
-		<Button
-			variant="secondary"
-			size="compact"
-			href={ href }
-			onClick={ onClick }
-		>
-			{ link.text }
-		</Button>
+		<>
+			<Button
+				variant="secondary"
+				size="compact"
+				href={ href }
+				onClick={ onClick }
+				{ ...sr.props }
+			>
+				{ link.text }
+			</Button>
+			{ sr.description }
+		</>
 	) : (
 		<Text variant="body-sm" className="wc-sales-readiness__muted">
 			{ link.text }
@@ -105,6 +132,39 @@ interface RowProps {
 	srState?: string;
 }
 
+/** Scripts that wrap between characters rather than at spaces: Chinese, Japanese and Korean. */
+const CJK = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\uf900-\ufaff]/;
+
+/**
+ * A title whose badge stays with its last word, so a long title wraps without leaving the badge on a
+ * line of its own.
+ */
+const TitleWithBadge = ( {
+	title,
+	badge,
+}: {
+	title: string;
+	badge: ViewBadge;
+} ) => {
+	// The last word stays with the badge. Text after the last space that has no spaces of its own, such
+	// as one word or Japanese, keeps only its last character there, so the rest can still wrap.
+	const afterSpace = title.lastIndexOf( ' ' ) + 1;
+	const lastChar = title.length - ( Array.from( title ).pop()?.length ?? 0 );
+	const split =
+		afterSpace && ! CJK.test( title.slice( afterSpace ) )
+			? afterSpace
+			: lastChar;
+	return (
+		<>
+			{ title.slice( 0, split ) }
+			<span className="wc-sales-readiness-row__title-end">
+				{ title.slice( split ) }
+				<Badge intent={ badge.intent }>{ badge.text }</Badge>
+			</span>
+		</>
+	);
+};
+
 /**
  * A row's frame: marker, title with its badge, whatever goes under the title, then the action.
  */
@@ -128,9 +188,10 @@ export const Row = ( {
 		<Stack direction="column" className="wc-sales-readiness-row__body">
 			<Text variant="body-md" className="wc-sales-readiness-row__title">
 				{ srState && <VisuallyHidden>{ srState } </VisuallyHidden> }
-				{ title }
-				{ badge && (
-					<Badge intent={ badge.intent }>{ badge.text }</Badge>
+				{ badge ? (
+					<TitleWithBadge title={ title } badge={ badge } />
+				) : (
+					title
 				) }
 			</Text>
 			{ children }
@@ -149,9 +210,16 @@ const TextWithLink = ( {
 	link,
 }: {
 	text: string;
-	link?: ViewLink | null;
+	link?: TextLink | null;
 } ) => {
-	const at = link?.text ? text.indexOf( link.text ) : -1;
+	// The server says where the name starts, so a name that also appears earlier isn't linked there.
+	let at = link?.text ? text.indexOf( link.text ) : -1;
+	if (
+		link?.at !== undefined &&
+		text.slice( link.at, link.at + link.text.length ) === link.text
+	) {
+		at = link.at;
+	}
 	if ( ! link || at < 0 ) {
 		return <>{ text }</>;
 	}
@@ -182,7 +250,9 @@ export const CheckRow = ( {
 	const states: Record< CheckRowData[ 'state' ], string > = {
 		open: __( 'Issue:', 'woocommerce' ),
 		required: __( 'Issue:', 'woocommerce' ),
-		unknown: __( "Couldn't check:", 'woocommerce' ),
+		unknown: row.waiting
+			? __( 'Not checked yet:', 'woocommerce' )
+			: __( 'Couldn’t check:', 'woocommerce' ),
 		pass: __( 'Passed:', 'woocommerce' ),
 	};
 	return (

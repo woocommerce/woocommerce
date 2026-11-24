@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Orders\OrderAttributionController;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CartMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
@@ -62,7 +63,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 * order, the Store API draft order of this session, and `continue_url` is its payment page.
 	 * Stock is held for the order first, as the Store API checkout does, because the payment
 	 * page trusts a pending order's stock to be held and checks nothing itself.
-	 * A cart with nothing to pay is refused: these routes complete no order, and the payment page takes no such order.
+	 * A cart with nothing to pay makes no order, which the payment page would not take: `continue_url` is the cart's own, and the buyer places the order on the store.
 	 * A checkout that is not ready yet is returned as it is, with messages naming what is missing.
 	 * So is one already handed off and unchanged since, with a warning: its order is not written to again.
 	 *
@@ -112,13 +113,24 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			return $this->checkout_response( $checkout_id, $this->checkout_state() ?? $state, 200, $cart );
 		}
 
-		if ( ! $this->cart_controller->get_cart_instance()->needs_payment() ) {
-			return $this->ucp_error( 'payment_not_required', __( 'This checkout has nothing to pay, so it cannot be handed off for payment. It must be made on the store itself.', 'woocommerce' ), 'unrecoverable', 200 );
-		}
-
 		// Handed off already and unchanged. The buyer may be paying this order now, so it is not written to again.
 		if ( ! empty( $state['order_id'] ) ) {
 			return $this->already_handed_off_response( $checkout_id, $cart );
+		}
+
+		// Below the return above, so the store is never handed a cart whose order is still payable.
+		if ( ! $this->cart_controller->get_cart_instance()->needs_payment() ) {
+			$state = array_merge(
+				$state,
+				array(
+					'status'       => CheckoutMapper::STATUS_REQUIRES_ESCALATION,
+					'continue_url' => ( new CartMapper() )->continue_url( $checkout_id ),
+					'fingerprint'  => $fingerprint,
+				)
+			);
+			$this->save_checkout_state( $state );
+
+			return $this->checkout_response( $checkout_id, $state, 200, $cart );
 		}
 
 		if ( $order ) {
@@ -260,7 +272,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 * @return string
 	 */
 	private function agent_profile_host( string $header ): string {
-		$profile = $this->quoted_header_parameter( $header, 'profile' );
+		$profile = Utils::quoted_header_parameter( $header, 'profile' );
 		$host    = strtolower( (string) wp_parse_url( $profile, PHP_URL_HOST ) );
 
 		if ( '' === $host ) {
@@ -270,49 +282,6 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		$valid = filter_var( $host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME );
 
 		return is_string( $valid ) ? $valid : 'ucp';
-	}
-
-	/**
-	 * Value of one double-quoted parameter, matched by its exact name.
-	 *
-	 * A match counts only outside quotes, at the start of the header or after whitespace or a semicolon.
-	 *
-	 * @param string $header Header value.
-	 * @param string $name   Parameter name.
-	 * @return string Empty when the parameter is absent.
-	 */
-	private function quoted_header_parameter( string $header, string $name ): string {
-		$prefix = $name . '="';
-		$offset = 0;
-		$length = strlen( $header );
-
-		while ( $offset < $length ) {
-			$start = strpos( $header, $prefix, $offset );
-			if ( false === $start ) {
-				return '';
-			}
-
-			// An even number of quotes before the name means it is outside a value.
-			$outside_quotes = 0 === ( substr_count( substr( $header, 0, $start ), '"' ) % 2 );
-			$is_parameter   = 0 === $start;
-			if ( ! $is_parameter ) {
-				$previous     = substr( $header, $start - 1, 1 );
-				$is_parameter = ' ' === $previous || "\t" === $previous || ';' === $previous;
-			}
-
-			if ( $outside_quotes && $is_parameter ) {
-				$value_start = $start + strlen( $prefix );
-				$end         = strpos( $header, '"', $value_start );
-				if ( false === $end ) {
-					return '';
-				}
-				return substr( $header, $value_start, $end - $value_start );
-			}
-
-			$offset = $start + strlen( $prefix );
-		}
-
-		return '';
 	}
 
 	/**

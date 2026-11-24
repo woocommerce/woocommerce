@@ -19,6 +19,7 @@ use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
+use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1192,6 +1193,20 @@ class WC_Checkout {
 			}
 		}
 
+		// Totals are calculated from this data before validate_posted_data() runs, and shipping zones and tax rates
+		// match on state codes, so convert state names (e.g. "Hawaii") to their codes here.
+		$validation_utils = new ValidationUtils();
+
+		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
+			foreach ( $fieldset as $key => $field ) {
+				if ( empty( $data[ $key ] ) || ! is_string( $data[ $key ] ) || ! in_array( 'state', (array) ( $field['validate'] ?? array() ), true ) ) {
+					continue;
+				}
+
+				$data[ $key ] = $validation_utils->format_state( $data[ $key ], $this->get_fieldset_country( $fieldset_key, $data ) );
+			}
+		}
+
 		// BW compatibility.
 		$this->legacy_posted_data = $data;
 
@@ -1877,6 +1892,17 @@ class WC_Checkout {
 
 			do_action( 'woocommerce_before_checkout_process' );
 
+			// Runs after the attempt hook, which extensions use to detect checkout requests, and before any processing or session work.
+			if ( ! is_user_logged_in() && ! $this->is_registration_enabled() && $this->is_registration_required() ) {
+				/**
+				 * This filter is documented in the Store API checkout route.
+				 *
+				 * @since 9.4.3
+				 */
+				$message = apply_filters( 'woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ) );
+				throw new Exception( esc_html( is_string( $message ) ? $message : __( 'You must be logged in to checkout.', 'woocommerce' ) ) );
+			}
+
 			if ( WC()->cart->is_empty() ) {
 				throw new Exception( $expiry_message );
 			}
@@ -1909,6 +1935,16 @@ class WC_Checkout {
 
 			// Validate posted data and cart items before proceeding.
 			$this->validate_checkout( $posted_data, $errors );
+
+			if ( ! is_user_logged_in() && ! $this->is_registration_enabled() && $this->is_registration_required() ) {
+				/**
+				 * This filter is documented in the Store API checkout route.
+				 *
+				 * @since 9.4.3
+				 */
+				$message = apply_filters( 'woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ) );
+				$errors->add( 'registration_disabled', esc_html( is_string( $message ) ? $message : __( 'You must be logged in to checkout.', 'woocommerce' ) ) );
+			}
 
 			if ( empty( $errors->errors ) ) {
 				wc_log_order_step( '[Shortcode #3] Checkout posted data validated', array( 'payment_method' => $posted_data['payment_method'] ) );

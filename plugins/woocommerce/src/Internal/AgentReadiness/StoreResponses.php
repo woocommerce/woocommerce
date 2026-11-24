@@ -193,15 +193,34 @@ class StoreResponses {
 	}
 
 	/**
+	 * Whether this scan sends a request to a URL: only while the store is live, only to the store,
+	 * and not once the home page couldn't be reached.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $url URL or path.
+	 */
+	public function can_request( string $url ): bool {
+		return $this->site_live && $this->reachable && $this->is_store_url( self::absolute( $url ) );
+	}
+
+	/**
 	 * The response to a POST of a JSON object, sent again instead of read from this scan's earlier answer.
+	 * A retry that gets no answer leaves the earlier one in place, so the scan can still say what came back.
 	 *
 	 * @param string               $url  URL or path.
 	 * @param array<string, mixed> $body JSON object.
 	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null Null when the store could not be reached.
 	 */
 	public function post_json_again( string $url, array $body ): ?array {
-		unset( $this->responses[ self::post_key( self::absolute( $url ), $body ) ] );
-		return $this->post_json( $url, $body );
+		$key      = self::post_key( self::absolute( $url ), $body );
+		$previous = $this->responses[ $key ] ?? null;
+		unset( $this->responses[ $key ] );
+		$again = $this->post_json( $url, $body );
+		if ( null === $again && null !== $previous ) {
+			$this->responses[ $key ] = $previous;
+		}
+		return $again;
 	}
 
 	/**

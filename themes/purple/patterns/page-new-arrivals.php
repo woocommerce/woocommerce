@@ -14,7 +14,7 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"name":"New arrivals with filters","categories":["woo-commerce","purple"],"patternName":"purple/page-new-arrivals","description":"A newest-first product grid with breadcrumbs, page title, sidebar filters, and pagination, for use on regular pages. Pairs with the Page no title template."},"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|90"}}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'New arrivals with filters', 'Pattern title', 'purple' ) ); ?>,"categories":["woo-commerce","purple"],"patternName":"purple/page-new-arrivals","description":"A newest-first product grid with breadcrumbs, page title, sidebar filters, and pagination, for use on regular pages. Pairs with the Page no title template."},"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|90"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--90)"><!-- wp:woocommerce/store-notices /-->
 
 <!-- wp:breadcrumbs {"align":"wide"} /-->

@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\UcpSwitch;
 use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
@@ -16,19 +17,17 @@ use WP_REST_Request;
 class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * Tests fire rest_api_init with the feature both on and off.
+	 * Each test gets a fresh REST server.
 	 *
 	 * @var bool
 	 */
 	protected static $reuse_rest_server = false;
 
 	/**
-	 * Enable the feature after parent::setUp(), so the filter stays out of the hook
-	 * snapshot WordPress takes in the first test. Routes register on first dispatch.
+	 * Keep the report tests offline, with no stored report or queued scan. Routes register on first dispatch.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		add_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
 		// Report tests stay offline: store output checks would load the test site's pages.
 		StoreOutputChecksTest::block_requests();
 		delete_option( AgentReadiness::REPORT_OPTION );
@@ -43,13 +42,6 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
 		parent::tearDown();
-	}
-
-	/**
-	 * The feature option's value while these tests run.
-	 */
-	public static function enabled(): string {
-		return 'yes';
 	}
 
 	/**
@@ -140,20 +132,372 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness' ) )->get_status() );
 		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/scan' ) )->get_status() );
 		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/view' ) )->get_status() );
+		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_status() );
 		$this->assertFalse( as_has_scheduled_action( ScheduledScan::RUN_NOW_HOOK ) );
 	}
 
 	/**
-	 * @testdox With the feature disabled the routes are not registered.
+	 * @testdox The support report before the first check has the header and says "Not checked yet", without queueing a check.
 	 */
-	public function test_routes_absent_when_feature_disabled(): void {
-		remove_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
-		global $wp_rest_server;
-		$wp_rest_server = new \WP_REST_Server();
-		do_action( 'rest_api_init', $wp_rest_server );
+	public function test_support_report_before_first_check(): void {
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) );
+		$data     = $response->get_data();
 
-		$this->assertSame( 404, $wp_rest_server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness' ) )->get_status() );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertMatchesRegularExpression( '/^AISalesReadiness_[a-z0-9.-]+_\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.txt$/', $data['filename'] );
+		$this->assertStringContainsString( 'Site: ' . home_url(), $data['text'] );
+		$this->assertStringContainsString( 'WooCommerce version: ' . WC_VERSION, $data['text'] );
+		$this->assertStringContainsString( 'Last checked: Not checked yet', $data['text'] );
+		$this->assertStringContainsString( "AI shopping: Off\nStore visibility: Live", $data['text'] );
+		$this->assertStringContainsString( "### Store checks ###\n\nNot checked yet", $data['text'] );
+		$this->assertStringContainsString( '(launched)', $data['text'], 'Setup steps are read now, so they show before the first check.' );
+		$this->assertStringNotContainsString( '### Product checks ###', $data['text'] );
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::RUN_NOW_HOOK ), 'The download must not queue a check.' );
+	}
+
+	/**
+	 * @testdox The support report lists each check with its status and what was found, product counts with their IDs, and hides a same-cause check.
+	 */
+	public function test_support_report_after_a_check(): void {
+		$cap    = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Red cap' ) );
+		$hoodie = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Blue hoodie' ) );
+		update_option( 'blog_public', '0' );
+		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at'        => '2026-11-18T10:42:00+00:00',
+				'truncated'           => true,
+				'products'            => 3,
+				'hidden_from_catalog' => 1,
+				'unsupported_types'   => 2,
+				'store_checks'        => array(
+					array(
+						'id'       => 'llms_txt_present',
+						'ok'       => false,
+						'blocks'   => 'discovery',
+						'name'     => 'llms.txt',
+						'why'      => 'Report why.',
+						'conflict' => false,
+						'source'   => '404 text/html',
+					),
+					array(
+						'id'       => 'open_graph_tags',
+						'ok'       => true,
+						'blocks'   => 'discovery',
+						'name'     => 'Open Graph tags',
+						'why'      => '',
+						'conflict' => false,
+					),
+					array(
+						'id'       => 'llms_txt_valid',
+						'ok'       => false,
+						'blocks'   => 'discovery',
+						'name'     => 'llms.txt starts with a heading',
+						'why'      => '',
+						'conflict' => false,
+					),
+					array(
+						'id'       => 'sitemap_lists_products',
+						'ok'       => null,
+						'blocks'   => 'discovery',
+						'name'     => 'Sitemap lists products',
+						'why'      => '',
+						'conflict' => false,
+					),
+					array(
+						'id'       => 'product_shipping_schema',
+						'ok'       => null,
+						'pending'  => true,
+						'blocks'   => 'discovery',
+						'name'     => 'Shipping details',
+						'why'      => '',
+						'conflict' => false,
+					),
+					array(
+						'id'       => 'ucp_profile',
+						'ok'       => false,
+						'blocks'   => 'ucp',
+						'name'     => 'UCP profile',
+						'why'      => '',
+						'conflict' => false,
+					),
+					array(
+						'id'       => 'ucp_endpoints_live',
+						'ok'       => null,
+						'blocks'   => 'ucp',
+						'name'     => 'UCP endpoint answers',
+						'why'      => '',
+						'conflict' => false,
+						'seen_at'  => home_url( '/wp-json/wc/ucp/v1/catalog/search' ),
+						'source'   => '503 text/html',
+					),
+					array(
+						'id'       => 'no_noindex_directives',
+						'ok'       => false,
+						'blocks'   => 'listing',
+						'name'     => 'No noindex',
+						'why'      => '',
+						'conflict' => false,
+					),
+				),
+				'channels'            => array(
+					'chatgpt' => array(
+						'name'         => 'ChatGPT',
+						'listable'     => 1,
+						'not_listable' => 2,
+						'with_gaps'    => 1,
+					),
+				),
+				'checks'              => array(
+					array(
+						'id'          => 'missing_brand',
+						'label'       => 'Products with no brand',
+						'count'       => 2,
+						'product_ids' => array( $cap->get_id(), $hoodie->get_id() ),
+					),
+					array(
+						'id'    => 'missing_images',
+						'label' => 'Products with no image',
+						'count' => 0,
+					),
+				),
+			),
+			false
+		);
+
+		// Only Cash on delivery is on: the step passes, and the report names it.
+		$gateways = WC()->payment_gateways()->payment_gateways();
+		$previous = array_map( static fn( $gateway ) => $gateway->enabled, $gateways );
+		foreach ( $gateways as $gateway ) {
+			$gateway->enabled = 'cod' === $gateway->id ? 'yes' : 'no';
+		}
+		try {
+			$text = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
+			foreach ( $gateways as $gateway ) {
+				$gateway->enabled = 'no';
+			}
+			$none = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
+		} finally {
+			foreach ( $gateways as $key => $gateway ) {
+				$gateway->enabled = $previous[ $key ];
+			}
+		}
+
+		$this->assertMatchesRegularExpression( '/^[^\n]*\(payment_method\): ✔\nEnabled payment methods: Cash on delivery$/m', $text );
+		$this->assertMatchesRegularExpression( '/^[^\n]*\(payment_method\): ❌[^\n]*\nEnabled payment methods: None$/m', $none );
+		$this->assertMatchesRegularExpression( '/^UCP endpoint answers \(ucp_endpoints_live\): Couldn’t check Request: POST \/wp-json\/wc\/ucp\/v1\/catalog\/search Store response: 503 text\/html( \(not shown on the page\))?$/m', $text, 'Couldn\'t check says what the store answered, and where.' );
+		$this->assertStringContainsString( 'Last checked: 2026-11-18T10:42:00+00:00', $text );
+		$this->assertStringContainsString( 'Check status: Finished', $text );
+		$this->assertStringContainsString( sprintf( "Check status: Finished\nChecked the %d products you changed most recently.", ProductScan::PRODUCT_LIMIT ), $text );
+		$this->assertStringContainsString( 'Products checked: 3', $text );
+		$this->assertStringContainsString( 'Hidden: 1', $text );
+		$this->assertStringContainsString( 'Not supported: 2', $text );
+		$this->assertMatchesRegularExpression( '/^[^\n]*\(search_visible\): ❌ AI assistants /m', $text, 'A failing setup step uses the page\'s words.' );
+		$this->assertStringNotContainsString( 'Your pages couldn’t be checked', $text, 'Some checks ran.' );
+		$this->assertMatchesRegularExpression( '/^[^\n]*\(ucp_on\): ❌ Some checks only run when AI shopping is on/m', $text );
+		$this->assertMatchesRegularExpression( '/^llms\.txt \(llms_txt_present\): ❌ \S[^\n]*Store response: 404 text\/html$/m', $text );
+		$this->assertMatchesRegularExpression( '/^Sitemap lists products \(sitemap_lists_products\): Couldn’t check( \(not shown on the page\))?$/m', $text );
+		$this->assertMatchesRegularExpression( '/^Shipping details \(product_shipping_schema\): Not available yet \(not shown on the page\)$/m', $text );
+		$this->assertMatchesRegularExpression( '/^Open Graph tags \(open_graph_tags\): ✔$/m', $text );
+		$this->assertMatchesRegularExpression( '/^No noindex \(no_noindex_directives\): ❌[^\n]*\(not shown on the page\)$/m', $text );
+		$this->assertMatchesRegularExpression( '/^llms\.txt starts with a heading \(llms_txt_valid\): ❌[^\n]*\(not shown on the page\)$/m', $text );
+		$this->assertMatchesRegularExpression( '/^UCP profile \(ucp_profile\): ❌[^\n]*\(not shown on the page\)$/m', $text );
+		$this->assertStringContainsString( 'ChatGPT (chatgpt): 1 can be listed, 2 can’t be listed, 1 listed with missing details', $text );
+		$this->assertStringContainsString( sprintf( 'Products with no brand (missing_brand): ❌ 2 products. Products: %d (Red cap), %d (Blue hoodie)', $cap->get_id(), $hoodie->get_id() ), $text );
+		$this->assertStringContainsString( 'Products with no image (missing_images): ✔', $text );
+	}
+
+	/**
+	 * @testdox When no store check could run, the support report says why once, as the page does.
+	 */
+	public function test_support_report_says_why_no_check_ran(): void {
+		$unchecked = array(
+			array(
+				'id'       => 'llms_txt_present',
+				'ok'       => null,
+				'blocks'   => 'discovery',
+				'name'     => 'llms.txt',
+				'why'      => '',
+				'conflict' => false,
+			),
+			array(
+				'id'       => 'product_shipping_schema',
+				'ok'       => null,
+				'pending'  => true,
+				'blocks'   => 'discovery',
+				'name'     => 'Shipping details',
+				'why'      => '',
+				'conflict' => false,
+			),
+			array(
+				'id'       => 'open_graph_tags',
+				'ok'       => null,
+				'blocks'   => 'discovery',
+				'name'     => 'Open Graph tags',
+				'why'      => '',
+				'conflict' => false,
+			),
+		);
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => '2026-11-18T10:42:00+00:00',
+				'store_checks' => array_merge(
+					array(
+						array(
+							'id'      => 'launched',
+							'ok'      => true,
+							'name'    => 'Store is launched',
+							'fix_url' => '',
+						),
+					),
+					$unchecked
+				),
+			),
+			false
+		);
+
+		$text = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
+
+		$this->assertStringContainsString( "### Store checks ###\n\nYour pages couldn’t be checked. Your hosting setup blocked the check from opening them.", $text );
+		$this->assertSame( 1, substr_count( $text, 'Your pages couldn’t be checked' ) );
+
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => '2026-11-18T10:42:00+00:00',
+				'store_checks' => array_merge(
+					array(
+						array(
+							'id'      => 'launched',
+							'ok'      => false,
+							'name'    => 'Store is launched',
+							'fix_url' => '',
+						),
+					),
+					$unchecked
+				),
+			),
+			false
+		);
+		$text = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
+		$this->assertStringContainsString( "### Store checks ###\n\nYour store wasn’t live at the last check. These checks run at the next daily check, or you can run the check again now.", $text );
+		$this->assertStringNotContainsString( 'Your hosting setup blocked', $text );
+		$this->assertStringContainsString( 'Open Graph tags (open_graph_tags): Not checked yet. Your store wasn’t live at the last check.', $text, 'Each check says so too, as on the page' );
+		$this->assertStringContainsString( 'Shipping details (product_shipping_schema): Not available yet', $text, 'A check a coming update builds is still not available' );
+	}
+
+	/**
+	 * @testdox In the support report, a product page check with no product to open says Not checked yet and why; one that tried and couldn't says Couldn't check.
+	 */
+	public function test_support_report_product_page_check_without_a_product(): void {
+		$check = static fn( string $id, ?bool $ok, array $extra = array() ): array => $extra + array(
+			'id'      => $id,
+			'ok'      => $ok,
+			'blocks'  => 'discovery',
+			'name'    => $id,
+			'why'     => '',
+			'fix_url' => '',
+		);
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => '2026-11-18T10:42:00+00:00',
+				'store_checks' => array( $check( 'launched', true ), $check( 'canonical_url', null, array( 'no_product' => true ) ), $check( 'sitemap_lists_products', null ), $check( 'robots_txt', true ) ),
+			),
+			false
+		);
+		$text  = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
+		$this->assertStringContainsString( 'canonical_url (canonical_url): Not checked yet. This check needs a product page.', $text );
+		$this->assertStringContainsString( 'sitemap_lists_products (sitemap_lists_products): Couldn’t check', $text );
+	}
+
+	/**
+	 * @testdox With no products, the support report marks the Product details checks as not shown, as the page shows a "no products" row instead.
+	 */
+	public function test_support_report_with_no_products_marks_product_details_not_shown(): void {
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => '2026-11-18T10:42:00+00:00',
+				'products'     => 0,
+				'store_checks' => array(
+					array(
+						'id'       => 'llms_txt_present',
+						'ok'       => false,
+						'group'    => 'find',
+						'blocks'   => 'discovery',
+						'name'     => 'llms.txt',
+						'why'      => '',
+						'conflict' => false,
+					),
+					array(
+						'id'       => 'images_have_alt',
+						'ok'       => false,
+						'group'    => 'understand',
+						'blocks'   => 'discovery',
+						'name'     => 'Images have alt text',
+						'why'      => '',
+						'conflict' => false,
+					),
+				),
+			),
+			false
+		);
+
+		$text  = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
+		$lines = array();
+		foreach ( explode( "\n", $text ) as $line ) {
+			if ( false !== strpos( $line, '(images_have_alt)' ) ) {
+				$lines['images_have_alt'] = $line;
+			} elseif ( false !== strpos( $line, '(llms_txt_present)' ) ) {
+				$lines['llms_txt_present'] = $line;
+			}
+		}
+
+		$this->assertArrayHasKey( 'images_have_alt', $lines );
+		$this->assertArrayHasKey( 'llms_txt_present', $lines );
+		$this->assertStringContainsString( '(not shown on the page)', $lines['images_have_alt'] );
+		$this->assertStringNotContainsString( 'not shown on the page', $lines['llms_txt_present'] );
+	}
+
+	/**
+	 * @testdox The support report holds no customer, order or account data, and no keys.
+	 */
+	public function test_support_report_has_no_personal_data_or_secrets(): void {
+		global $wpdb;
+		update_option( 'admin_email', 'owner-secret@example.com' );
+		update_option( 'woocommerce_email_from_address', 'from-secret@example.com' );
+		self::factory()->user->create(
+			array(
+				'role'       => 'customer',
+				'user_email' => 'shopper-secret@example.com',
+				'first_name' => 'Zebulon',
+			)
+		);
+		$order = wc_create_order();
+		$order->set_billing_email( 'billing-secret@example.com' );
+		$order->set_billing_address_1( '42 Secret Street' );
+		$order->save();
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array(
+				'user_id'         => get_current_user_id(),
+				'description'     => 'Support test',
+				'permissions'     => 'read_write',
+				'consumer_key'    => wc_api_hash( 'ck_secret_key_value' ),
+				'consumer_secret' => 'cs_secret_value',
+				'truncated_key'   => 'ecret_v',
+			)
+		);
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+
+		$text = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
+
+		foreach ( array( '42 Secret Street', 'secret', 'Zebulon', '@example.com', 'cs_', 'ck_' ) as $leak ) {
+			$this->assertStringNotContainsString( $leak, $text );
+		}
 	}
 
 	/**
@@ -247,6 +591,40 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
 			}
 		}
+	}
+
+	/**
+	 * @testdox When the discovery file can't be written as UCP turns on, POST ucp answers needs attention, not active.
+	 */
+	public function test_turning_ucp_on_reports_a_failed_discovery_write(): void {
+		if ( is_multisite() ) {
+			$this->markTestSkipped( 'Multisite never writes the discovery file.' );
+		}
+		global $wp_rewrite;
+		StoreConditionsTest::make_store_ready();
+		$wp_rewrite->set_permalink_structure( '' );
+		// A folder where the file goes: its parent is writable, so the switch is allowed, but the write fails.
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/ucp';
+		wp_mkdir_p( $path );
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- The failed write warns, as on a real server.
+		set_error_handler( static fn( int $severity ): bool => E_WARNING === $severity );
+
+		try {
+			$response = $this->dispatch_ucp( true );
+		} finally {
+			restore_error_handler();
+			foreach ( array( $path, dirname( $path ) ) as $dir ) {
+				if ( is_dir( $dir ) ) {
+					rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+				}
+			}
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['enabled'] );
+		$this->assertSame( UcpSwitch::STATUS_NEEDS_ATTENTION, $response->get_data()['status'] );
+		$this->assertContains( 'ucp_discovery', $response->get_data()['failing_checks'] );
 	}
 
 	/**
