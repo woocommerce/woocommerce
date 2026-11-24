@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Install the dependency used by sortable controls and drop unused npm dependencies.

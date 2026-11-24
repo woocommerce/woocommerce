@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Align the remote specs build CLI with the shared Commander version.

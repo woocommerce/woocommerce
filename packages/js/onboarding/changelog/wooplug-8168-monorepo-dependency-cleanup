@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Install only the npm packages used by the onboarding package.

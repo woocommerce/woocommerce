@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Read the anonymous experiment cookie without a separate npm package.
