@@ -753,6 +753,7 @@ final class ContractRepository {
 	 * @param int                $limit  Maximum rows to return (the batch size).
 	 * @param array<int, string> $owners Owner slugs whose contracts may be selected.
 	 * @return array<int, array{id: int, extension_slug: string, next_payment_gmt: string}> Due rows, least recently locked first, then oldest-due.
+	 * @throws \RuntimeException If the scan fails: a failed scan must not look like "nothing due".
 	 */
 	public function find_due( DateTimeImmutable $now, int $limit, array $owners ): array {
 		if ( $limit < 1 ) {
@@ -794,13 +795,8 @@ final class ContractRepository {
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
-		// A failed scan otherwise reads exactly like "nothing due" and dispatch stalls
-		// store-wide with no signal; the return stays empty either way.
 		if ( '' !== $wpdb->last_error ) {
-			wc_get_logger()->error(
-				sprintf( 'ContractRepository::find_due(): due-index scan failed - due dispatch may stall until this is fixed. %s', $wpdb->last_error ),
-				array( 'source' => self::LOG_SOURCE )
-			);
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read due contracts: %s', $wpdb->last_error ) ) );
 		}
 
 		$result = array();

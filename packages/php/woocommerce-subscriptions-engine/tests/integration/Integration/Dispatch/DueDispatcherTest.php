@@ -515,6 +515,37 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A failed due scan is logged and dispatches nothing; the next run scans again.
+	 */
+	public function test_a_failed_due_scan_is_logged_and_the_next_run_dispatches(): void {
+		$this->register_recording_handler();
+		$id = $this->create_due_contract();
+
+		$messages = array();
+		$capture  = static function ( $message, $level, $context ) use ( &$messages ) {
+			if ( 'error' === $level && is_string( $message ) && is_array( $context ) && 'woocommerce-subscriptions-engine' === ( $context['source'] ?? null ) ) {
+				$messages[] = $message;
+			}
+			return $message;
+		};
+		add_filter( 'woocommerce_logger_log_message', $capture, 10, 3 );
+		$this->fail_next_query( '/^\s*SELECT id, extension_slug, next_payment_gmt/' );
+		try {
+			$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
+		} finally {
+			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
+		}
+
+		$this->assertNotSame( array(), $messages );
+		$this->assertStringContainsString( 'due-index scan failed - due dispatch may stall until this is fixed', $messages[0] );
+		$this->assertStringContainsString( 'table_that_does_not_exist', $messages[0], 'The log carries the database error.' );
+		$this->assertSame( array(), $this->notified_ids() );
+
+		$this->assertSame( 1, $this->sut->run_batch( $this->now() ) );
+		$this->assertSame( array( $id ), $this->notified_ids() );
+	}
+
+	/**
 	 * @testdox An owner registered without a handler is not dispatched and its contracts stay untouched.
 	 */
 	public function test_an_owner_without_a_handler_is_not_dispatched(): void {

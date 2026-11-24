@@ -1070,6 +1070,18 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox find_due throws on a failed scan instead of reading as "nothing due".
+	 */
+	public function test_find_due_throws_on_a_failed_scan(): void {
+		$this->fail_next_query( '/^\s*SELECT id, extension_slug, next_payment_gmt/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read due contracts' );
+
+		$this->sut->find_due( new \DateTimeImmutable( '2026-08-01 00:00:00', new \DateTimeZone( 'UTC' ) ), 10, array( self::OWNER ) );
+	}
+
+	/**
 	 * @testdox find_due selects a due contract whose stored status is not registered.
 	 */
 	public function test_find_due_selects_a_contract_with_an_unregistered_stored_status(): void {
