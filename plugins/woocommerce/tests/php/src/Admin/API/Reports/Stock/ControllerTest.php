@@ -102,17 +102,13 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertNotEmpty( $response->get_data() );
 		$this->assertArrayNotHasKey( 'active_signups', $response->get_data()[0] );
-		$this->assertArrayNotHasKey( 'days_waiting', $response->get_data()[0] );
 
 		$schema = $this->server->dispatch( new WP_REST_Request( 'OPTIONS', self::ENDPOINT ) )->get_data()['schema']['properties'];
 		$this->assertArrayNotHasKey( 'active_signups', $schema );
-		$this->assertArrayNotHasKey( 'days_waiting', $schema );
 
-		foreach ( array( 'active_signups', 'days_waiting' ) as $orderby ) {
-			$request = new WP_REST_Request( 'GET', self::ENDPOINT );
-			$request->set_param( 'orderby', $orderby );
-			$this->assertSame( 400, $this->server->dispatch( $request )->get_status(), "Sorting by $orderby should be rejected." );
-		}
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT );
+		$request->set_param( 'orderby', 'active_signups' );
+		$this->assertSame( 400, $this->server->dispatch( $request )->get_status(), 'Sorting by active_signups should be rejected.' );
 	}
 
 	/**
@@ -126,32 +122,24 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 			'stock_status'   => ProductStockStatus::OUT_OF_STOCK,
 			'stock_quantity' => 0,
 			'active_signups' => 2,
-			'days_waiting'   => 5,
 		);
 
 		$this->assertArrayNotHasKey( 'active_signups', $controller->get_export_columns() );
-		$this->assertArrayNotHasKey( 'days_waiting', $controller->get_export_columns() );
 		$this->assertArrayNotHasKey( 'active_signups', $controller->prepare_item_for_export( $item ) );
-		$this->assertArrayNotHasKey( 'days_waiting', $controller->prepare_item_for_export( $item ) );
 
 		$this->enable_stock_notification_columns();
 
 		$this->assertArrayHasKey( 'active_signups', $controller->get_export_columns() );
-		$this->assertArrayHasKey( 'days_waiting', $controller->get_export_columns() );
 
 		$export_item = $controller->prepare_item_for_export( $item );
 		$this->assertSame( 2, $export_item['active_signups'] );
-		$this->assertSame( 5, $export_item['days_waiting'] );
 
-		$item['active_signups'] = 0;
-		$item['days_waiting']   = null;
-		$export_item            = $controller->prepare_item_for_export( $item );
-		$this->assertSame( 0, $export_item['active_signups'] );
-		$this->assertSame( '', $export_item['days_waiting'], 'A product without active sign-ups should export no days waiting.' );
+		unset( $item['active_signups'] );
+		$this->assertSame( 0, $controller->prepare_item_for_export( $item )['active_signups'] );
 	}
 
 	/**
-	 * @testdox Should report active sign-ups and days waiting per product and variation when the feature is enabled.
+	 * @testdox Should report active sign-ups per product and variation when the feature is enabled.
 	 */
 	public function test_notification_columns_report_active_signups(): void {
 		$this->enable_stock_notification_columns();
@@ -159,7 +147,6 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$schema = $this->server->dispatch( new WP_REST_Request( 'OPTIONS', self::ENDPOINT ) )->get_data()['schema']['properties'];
 		$this->assertArrayHasKey( 'active_signups', $schema );
-		$this->assertArrayHasKey( 'days_waiting', $schema );
 
 		$request = new WP_REST_Request( 'GET', self::ENDPOINT );
 		$request->set_param( 'include', implode( ',', $ids ) );
@@ -169,16 +156,16 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$actual = array();
 		foreach ( $response->get_data() as $item ) {
-			$actual[ $item['id'] ] = array( $item['active_signups'], $item['days_waiting'] );
+			$actual[ $item['id'] ] = $item['active_signups'];
 		}
 
 		$this->assertSame(
 			array(
-				$ids['simple_a']  => array( 2, 5 ),
-				$ids['simple_b']  => array( 1, 2 ),
-				$ids['none']      => array( 0, null ),
-				$ids['parent']    => array( 0, null ),
-				$ids['variation'] => array( 3, 9 ),
+				$ids['simple_a']  => 2,
+				$ids['simple_b']  => 1,
+				$ids['none']      => 0,
+				$ids['parent']    => 0,
+				$ids['variation'] => 3,
 			),
 			array_replace( array_fill_keys( $ids, null ), $actual )
 		);
@@ -200,7 +187,6 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertCount( 1, $response->get_data() );
 		$this->assertSame( 2, $response->get_data()[0]['active_signups'] );
-		$this->assertSame( 5, $response->get_data()[0]['days_waiting'] );
 	}
 
 	/**
@@ -256,23 +242,6 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should sort by days waiting in both orders, with products without sign-ups last.
-	 */
-	public function test_orderby_days_waiting(): void {
-		$this->enable_stock_notification_columns();
-		$ids     = $this->create_notification_fixture();
-		$without = array( $ids['none'], $ids['parent'] );
-
-		$desc = $this->get_sorted_ids( $ids, 'days_waiting', 'desc' );
-		$this->assertSame( array( $ids['variation'], $ids['simple_a'], $ids['simple_b'] ), array_slice( $desc, 0, 3 ) );
-		$this->assertEqualsCanonicalizing( $without, array_slice( $desc, 3 ) );
-
-		$asc = $this->get_sorted_ids( $ids, 'days_waiting', 'asc' );
-		$this->assertSame( array( $ids['simple_b'], $ids['simple_a'], $ids['variation'] ), array_slice( $asc, 0, 3 ) );
-		$this->assertEqualsCanonicalizing( $without, array_slice( $asc, 3 ) );
-	}
-
-	/**
 	 * @testdox Should attach the report columns when the feature's services are wired up.
 	 */
 	public function test_feature_wires_up_report_columns(): void {
@@ -281,7 +250,6 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$schema = $this->server->dispatch( new WP_REST_Request( 'OPTIONS', self::ENDPOINT ) )->get_data()['schema']['properties'];
 		$this->assertArrayHasKey( 'active_signups', $schema );
-		$this->assertArrayHasKey( 'days_waiting', $schema );
 	}
 
 	/**
