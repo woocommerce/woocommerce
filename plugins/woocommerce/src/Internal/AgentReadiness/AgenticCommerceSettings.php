@@ -3,21 +3,17 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Jetpack\JetpackConnection;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Adds the WooCommerce > Settings > AI tools tab while the
- * agent_readiness feature is enabled, and names the options it saves.
+ * Adds the WooCommerce > Settings > AI tools tab, and names the options it saves.
  *
  * @since 11.4.0
  */
 class AgenticCommerceSettings implements RegisterHooksInterface {
-
-	public const FEATURE_ID = 'agent_readiness';
 
 	public const TAB = 'agentic-commerce';
 
@@ -51,12 +47,6 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 */
 	public const WARRANTY_PAGE_OPTION = 'woocommerce_warranty_page_id';
 
-	/**
-	 * Features controller.
-	 *
-	 * @var FeaturesController
-	 */
-	private FeaturesController $features_controller;
 
 	/**
 	 * Store conditions.
@@ -84,16 +74,14 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param FeaturesController $features_controller Features controller.
 	 * @param StoreConditions    $store_conditions    Store conditions.
 	 * @param AgentReadiness     $agent_readiness     Readiness service.
 	 * @param ReadinessCheckPage $readiness_page      Sales readiness.
 	 */
-	final public function init( FeaturesController $features_controller, StoreConditions $store_conditions, AgentReadiness $agent_readiness, ReadinessCheckPage $readiness_page ): void {
-		$this->features_controller = $features_controller;
-		$this->store_conditions    = $store_conditions;
-		$this->agent_readiness     = $agent_readiness;
-		$this->readiness_page      = $readiness_page;
+	final public function init( StoreConditions $store_conditions, AgentReadiness $agent_readiness, ReadinessCheckPage $readiness_page ): void {
+		$this->store_conditions = $store_conditions;
+		$this->agent_readiness  = $agent_readiness;
+		$this->readiness_page   = $readiness_page;
 	}
 
 	/**
@@ -113,12 +101,12 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Add the settings page when the feature is enabled.
+	 * Add the settings page in the admin.
 	 *
 	 * @internal
 	 */
 	public function handle_init(): void {
-		if ( ! is_admin() || ! $this->features_controller->feature_is_enabled( self::FEATURE_ID ) ) {
+		if ( ! is_admin() ) {
 			return;
 		}
 		add_filter( 'woocommerce_get_settings_pages', array( $this, 'handle_woocommerce_get_settings_pages' ) );

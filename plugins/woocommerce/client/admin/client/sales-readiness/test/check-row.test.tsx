@@ -204,6 +204,20 @@ describe( 'CheckRow', () => {
 		).toHaveAttribute( 'href', '/wp-admin/visibility' );
 	} );
 
+	it( 'says Not checked yet when a check waits for the merchant, as in coming soon mode', () => {
+		renderRow(
+			row( {
+				state: 'unknown',
+				title: 'Your store is in coming soon mode',
+				text: 'These checks run once your store is live.',
+				waiting: true,
+			} )
+		);
+
+		expect( screen.getByText( 'Not checked yet:' ) ).toBeInTheDocument();
+		expect( screen.queryByText( 'Couldn’t check:' ) ).toBeNull();
+	} );
+
 	it( 'says when a check could not run, with what happened', () => {
 		renderRow(
 			row( {
@@ -213,7 +227,7 @@ describe( 'CheckRow', () => {
 			} )
 		);
 
-		expect( screen.getByText( 'Not checked yet:' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Couldn’t check:' ) ).toBeInTheDocument();
 		expect(
 			screen.getByText( "This couldn't be checked. Try again later." )
 		).toBeInTheDocument();
