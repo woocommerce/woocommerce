@@ -25,6 +25,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
@@ -932,7 +933,7 @@ final class Contract {
 	 * @param string $schedule_source Schedule source to check.
 	 */
 	private static function get_schedule_source_error( string $schedule_source ): ?InvalidInputException {
-		if ( 1 !== preg_match( '/^[a-z0-9_-]{1,64}$/D', $schedule_source ) ) {
+		if ( ! ArgumentValidator::is_slug( $schedule_source ) ) {
 			return new InvalidInputException(
 				ValidationErrorCode::INVALID_VALUE,
 				'schedule_source',

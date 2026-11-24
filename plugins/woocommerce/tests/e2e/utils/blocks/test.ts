@@ -139,14 +139,52 @@ const test = base.extend<
 			sourceProductSlug: string,
 			options?: { content?: string }
 		) => Promise< ProductTemplate >;
+		createHiddenProduct: (
+			data: Record< string, unknown >
+		) => Promise< { id: number } >;
 	},
 	{
 		requestUtils: RequestUtils;
 		wpCoreVersion: number;
 	}
 >( {
-	admin: async ( { page, pageUtils, editor, wpCoreVersion }, use ) => {
-		await use( new Admin( { page, pageUtils, editor, wpCoreVersion } ) );
+	// Deletes each post that `createNewPost` opens, drafts included, because
+	// `blocks-parallel` never resets the database. In `blocks-serial`, the
+	// delete runs before the database reset only when `page` is set up before
+	// `cleanup`; otherwise it fails with a 404 and only logs a warning.
+	admin: async (
+		{ page, pageUtils, editor, wpCoreVersion, requestUtils, cleanup },
+		use
+	) => {
+		const admin = new Admin( { page, pageUtils, editor, wpCoreVersion } );
+		const createNewPost = admin.createNewPost.bind( admin );
+		admin.createNewPost = async ( ...args ) => {
+			await createNewPost( ...args );
+			// `createNewPost` waits for `wp.data`, not for the editor to mount.
+			const { id, type } = await (
+				await page.waitForFunction( () => {
+					const editorStore = window.wp.data.select( 'core/editor' );
+					const postId = editorStore?.getCurrentPostId();
+					return (
+						postId && {
+							id: postId,
+							type: editorStore.getCurrentPostType(),
+						}
+					);
+				} )
+			).jsonValue();
+			cleanup( async () => {
+				const { rest_base: restBase } = await requestUtils.rest< {
+					rest_base: string;
+				} >( { path: `/wp/v2/types/${ type }` } );
+				await requestUtils.rest( {
+					method: 'DELETE',
+					path: `/wp/v2/${ restBase }/${ id }`,
+					params: { force: true },
+				} );
+			} );
+		};
+		await use( admin );
 	},
 	editor: async ( { page, wpCoreVersion }, use ) => {
 		await use( new Editor( { page, wpCoreVersion } ) );
@@ -322,6 +360,66 @@ const test = base.extend<
 				} )
 			)
 		);
+	},
+	// Creates a product for a test that places orders. Hidden from the catalog
+	// and dated in the past, it stays out of Best Sellers, New Arrivals and
+	// catalog counts. After the test, it deletes the orders for the product,
+	// including checkout drafts, then the product.
+	createHiddenProduct: async ( { requestUtils }, use ) => {
+		const productIds: number[] = [];
+
+		await use( async ( data ) => {
+			const product = await requestUtils.rest< { id: number } >( {
+				method: 'POST',
+				path: 'wc/v3/products',
+				data: {
+					catalog_visibility: 'hidden',
+					date_created: '2020-01-01T00:00:00',
+					...data,
+				},
+			} );
+			productIds.push( product.id );
+			return product;
+		} );
+
+		const results = await Promise.allSettled(
+			productIds.map( async ( productId ) => {
+				try {
+					// `any` leaves out checkout drafts.
+					const orders = await requestUtils.rest< { id: number }[] >(
+						{
+							path: 'wc/v3/orders',
+							params: {
+								product: productId,
+								status: 'pending,processing,on-hold,completed,cancelled,refunded,failed,checkout-draft',
+								per_page: 100,
+							},
+						}
+					);
+					await Promise.all(
+						orders.map( ( { id } ) =>
+							requestUtils.rest( {
+								method: 'DELETE',
+								path: `wc/v3/orders/${ id }`,
+								params: { force: true },
+							} )
+						)
+					);
+				} finally {
+					await requestUtils.rest( {
+						method: 'DELETE',
+						path: `wc/v3/products/${ productId }`,
+						params: { force: true },
+					} );
+				}
+			} )
+		);
+		for ( const result of results ) {
+			if ( result.status === 'rejected' ) {
+				// eslint-disable-next-line no-console
+				console.warn( 'Test cleanup failed:', result.reason );
+			}
+		}
 	},
 	requestUtils: [
 		async ( {}, use, workerInfo ) => {

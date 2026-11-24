@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: AI shopping health copy from the 19 Nov content review, behind the agent_readiness feature flag; nothing ships to merchants.
+

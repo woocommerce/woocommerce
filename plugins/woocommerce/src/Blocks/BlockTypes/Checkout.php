@@ -194,7 +194,7 @@ class Checkout extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_style() {
-		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
+		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style', 'wp-block-button' ] );
 	}
 
 	/**

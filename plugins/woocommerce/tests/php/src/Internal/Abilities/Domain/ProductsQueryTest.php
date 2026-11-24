@@ -208,6 +208,28 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should find products and variations whose GTIN equals any of the GTINs sent, and nothing for GTINs nobody has.
+	 */
+	public function test_filters_by_global_unique_id(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_global_unique_id( '4006381333931' );
+		$product->save();
+		$longer = WC_Helper_Product::create_simple_product();
+		$longer->set_global_unique_id( '40063813339310' );
+		$longer->save();
+		$variation = wc_get_product( WC_Helper_Product::create_variation_product()->get_children()[0] );
+		$variation->set_global_unique_id( '0012345678912' );
+		$variation->save();
+
+		$find = static fn( array $gtins ): array => array_column( ProductsQuery::execute( array( 'global_unique_id' => $gtins ) )['products'], 'id' );
+
+		$this->assertSame( array( $product->get_id() ), $find( array( '4006381333931' ) ), 'A GTIN that only shares a prefix should not match.' );
+		$this->assertEqualsCanonicalizing( array( $product->get_id(), $variation->get_id() ), $find( array( '4006381333931', '0012345678912' ) ) );
+		$this->assertSame( array( $variation->get_id() ), $find( array( '0012345678912', '9999999999999' ) ) );
+		$this->assertSame( array(), $find( array( '9999999999999' ) ) );
+	}
+
+	/**
 	 * @testdox Should return the exact total of matching products on partial, empty and out-of-range pages.
 	 */
 	public function test_returns_total_across_pages(): void {

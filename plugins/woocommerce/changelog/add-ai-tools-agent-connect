@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Connect to WordPress.com card on the AI tools Overview, behind the agent_readiness feature flag; nothing ships to merchants.
+
