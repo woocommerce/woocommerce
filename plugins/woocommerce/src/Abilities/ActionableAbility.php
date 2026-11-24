@@ -36,7 +36,8 @@ defined( 'ABSPATH' ) || exit;
  * more objects returns them from change(). These are the secondary objects. The field
  * writes of every object run first, then the validators of each object's own
  * resource, before the first save. The objects that get_objects_to_delete() lists get the
- * validators too.
+ * validators too. After the field writes and before the validators, finish_change()
+ * computes what depends on the written values, such as the totals of an order.
  *
  * Only save() saves, inside a database transaction. A WP_Error or an exception
  * from save() rolls back every row it wrote, so an ability that saves secondary
@@ -152,11 +153,13 @@ abstract class ActionableAbility extends Ability {
 
 	/**
 	 * The objects that save() deleted for good, for the syncs. An ability that
-	 * deletes objects collects them in save() and returns them here.
+	 * deletes objects collects them in save() and returns them here. An object
+	 * of another resource than get_resource(), such as a line of an order, is
+	 * listed as a pair of the object and the name of its resource.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @return \WC_Data[]
+	 * @return array<int, \WC_Data|array{0: \WC_Data, 1: string}>
 	 */
 	protected function get_deleted_objects(): array {
 		return array();
@@ -164,11 +167,12 @@ abstract class ActionableAbility extends Ability {
 
 	/**
 	 * The objects that save() moved to the trash, for the syncs. A trashed
-	 * object can be restored, so a sync keeps what a restore needs.
+	 * object can be restored, so a sync keeps what a restore needs. An object
+	 * of another resource is listed as get_deleted_objects() describes.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @return \WC_Data[]
+	 * @return array<int, \WC_Data|array{0: \WC_Data, 1: string}>
 	 */
 	protected function get_trashed_objects(): array {
 		return array();
@@ -178,14 +182,31 @@ abstract class ActionableAbility extends Ability {
 	 * The objects that save() will delete or trash, for the validators. Each one
 	 * goes through the validators of the resource before the first save, with
 	 * `deleting` in the context, also when no other object of the call has it.
-	 * Its value is read after change().
+	 * Its value is read after change(). An object of another resource is listed
+	 * as get_deleted_objects() describes, and gets the validators of that resource.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @return \WC_Data[]
+	 * @return array<int, \WC_Data|array{0: \WC_Data, 1: string}>
 	 */
 	protected function get_objects_to_delete(): array {
 		return array();
+	}
+
+	/**
+	 * Finish the change in memory, after the field writes and before the
+	 * validators. An ability computes here what depends on the values that the
+	 * `set_callback` of a field stored, such as the totals of an order whose
+	 * line got a new price. It does not run after change() refused.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param \WC_Data $subject Primary object, with the field writes applied.
+	 * @param array    $input   Ability input.
+	 * @return null|\WP_Error A WP_Error rejects the change, and nothing is saved.
+	 */
+	protected function finish_change( $subject, array $input ) {
+		return null;
 	}
 
 	/**
@@ -262,12 +283,23 @@ abstract class ActionableAbility extends Ability {
 			$this->apply_fields( $object, $fields, $sent, $refused );
 		}
 
-		$deleting = $core_refused ? array() : $this->get_objects_to_delete();
-		$staged   = array_column( $objects, 0 );
-		$to_check = $objects;
-		foreach ( $deleting as $object ) {
+		if ( ! $core_refused ) {
+			try {
+				$finished = $this->finish_change( $subject, $input );
+			} catch ( \WC_Data_Exception $e ) {
+				$finished = new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+			}
+			if ( is_wp_error( $finished ) ) {
+				$refused->merge_from( $finished );
+			}
+		}
+
+		list( $deleting, $deleting_resources ) = $this->split_listed( $core_refused ? array() : $this->get_objects_to_delete() );
+		$staged                                = array_column( $objects, 0 );
+		$to_check                              = $objects;
+		foreach ( $deleting as $index => $object ) {
 			if ( ! in_array( $object, $staged, true ) ) {
-				$to_check[] = array( $object, array(), $this->get_resource() );
+				$to_check[] = array( $object, array(), $deleting_resources[ $index ] );
 			}
 		}
 		foreach ( $enabled ? $to_check : array() as list( $object, , $resource_name ) ) {
@@ -297,11 +329,11 @@ abstract class ActionableAbility extends Ability {
 				}
 			);
 		} catch ( \Throwable $e ) {
-			self::forget_rolled_back_objects( $objects, array_merge( $this->get_deleted_objects(), $this->get_trashed_objects() ) );
+			self::forget_rolled_back_objects( $objects, $this->split_listed( array_merge( $this->get_deleted_objects(), $this->get_trashed_objects() ) )[0] );
 			throw $e;
 		}
 		if ( is_wp_error( $saved ) ) {
-			self::forget_rolled_back_objects( $objects, array_merge( $this->get_deleted_objects(), $this->get_trashed_objects() ) );
+			self::forget_rolled_back_objects( $objects, $this->split_listed( array_merge( $this->get_deleted_objects(), $this->get_trashed_objects() ) )[0] );
 			return $saved;
 		}
 
@@ -317,18 +349,19 @@ abstract class ActionableAbility extends Ability {
 	 * Run the syncs of each resource that the call saved or deleted, once,
 	 * after the last save and before the commit. A sync gets the saved objects
 	 * of its own resource. A deleted or trashed object is not in the saved
-	 * list, even when it was the primary object.
+	 * list, even when it was the primary object. Its resource gets its syncs too.
 	 *
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}>            $objects The primary object and the secondary objects, with their resources.
 	 * @param array<string, \SplObjectStorage<object, array<string, mixed>>> $sent    The sent field values of each namespace, from apply_fields().
 	 * @return \WP_Error|null A WP_Error when a sync refused, and then the call rolls back.
 	 */
 	private function sync( array $objects, array $sent ): ?\WP_Error {
-		$deleted = $this->get_deleted_objects();
-		$trashed = $this->get_trashed_objects();
-		$gone    = array_map( static fn( $item ) => get_class( $item ) . ':' . $item->get_id(), array_merge( $deleted, $trashed ) );
-		$saved   = array();
-		$own     = array();
+		list( $deleted, $deleted_resources ) = $this->split_listed( $this->get_deleted_objects() );
+		list( $trashed, $trashed_resources ) = $this->split_listed( $this->get_trashed_objects() );
+
+		$gone  = array_map( static fn( $item ) => get_class( $item ) . ':' . $item->get_id(), array_merge( $deleted, $trashed ) );
+		$saved = array();
+		$own   = array();
 		foreach ( $objects as list( $object, , $resource_name ) ) {
 			$own[ $resource_name ] ??= array();
 			if ( $object->get_id() > 0 && ! in_array( get_class( $object ) . ':' . $object->get_id(), $gone, true ) ) {
@@ -336,12 +369,15 @@ abstract class ActionableAbility extends Ability {
 				$own[ $resource_name ][] = $object;
 			}
 		}
+		foreach ( array_merge( $deleted_resources, $trashed_resources ) as $resource_name ) {
+			$own[ $resource_name ] ??= array();
+		}
 		$context = array(
 			'ability' => $this->get_name(),
 			'primary' => $objects[0][0],
 			'objects' => $saved,
-			'deleted' => array_values( $deleted ),
-			'trashed' => array_values( $trashed ),
+			'deleted' => $deleted,
+			'trashed' => $trashed,
 		);
 		foreach ( $own as $resource_name => $resource_saved ) {
 			foreach ( ExtensibleAbilities::get_syncs( $resource_name ) as $args ) {
@@ -353,6 +389,23 @@ abstract class ActionableAbility extends Ability {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Split a list of get_deleted_objects(), get_trashed_objects() or
+	 * get_objects_to_delete() into its objects and their resources.
+	 *
+	 * @param array<int|string, \WC_Data|array{0: \WC_Data, 1: string}> $listed The list.
+	 * @return array{0: \WC_Data[], 1: string[]} The objects, and the resource of each one at the same index.
+	 */
+	private function split_listed( array $listed ): array {
+		$objects   = array();
+		$resources = array();
+		foreach ( $listed as $entry ) {
+			$objects[]   = is_array( $entry ) ? $entry[0] : $entry;
+			$resources[] = is_array( $entry ) ? $entry[1] : $this->get_resource();
+		}
+		return array( $objects, $resources );
 	}
 
 	/**

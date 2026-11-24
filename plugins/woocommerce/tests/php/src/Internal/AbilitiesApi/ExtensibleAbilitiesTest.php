@@ -3732,6 +3732,172 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Register `test-ext.engraving` on order items: its set_callback stores the text on the line and adds 5 to the line total.
+	 */
+	private function register_engraving_field(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'order_item',
+						'namespace'    => 'test-ext',
+						'field'        => 'engraving',
+						'input_schema' => array( 'type' => 'string' ),
+						'set_callback' => static function ( \WC_Order_Item_Product $item, string $value ) {
+							$item->update_meta_data( '_engraving', $value );
+							$item->set_total( (string) ( (float) $item->get_total() + 5 ) );
+						},
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should write the fields of the product lines in order-update, total the order after them, and report a removed line as a deleted order item.
+	 */
+	public function test_order_update_writes_the_fields_of_its_product_lines(): void {
+		$seen = array( 'validated' => array() );
+		$this->register_engraving_field();
+		$this->register_validator(
+			'order_item',
+			'test-ext',
+			static function ( \WC_Order_Item $item, array $context ) use ( &$seen ) {
+				$seen['validated'][] = array( $item->get_id(), $context['deleting'], (float) $context['primary']->get_total() );
+				return null;
+			}
+		);
+		$this->register_sync(
+			'order_item',
+			'test-ext',
+			static function ( array $saved, array $context ) use ( &$seen ) {
+				$seen['saved']   = array_map( static fn( \WC_Order_Item $item ) => array( $item->get_id(), $context['fields'][ $item ] ), $saved );
+				$seen['deleted'] = array_map( static fn( \WC_Data $item ) => get_class( $item ) . ':' . $item->get_id(), $context['deleted'] );
+				return null;
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '7' ) );
+		$order   = \WC_Helper_Order::create_order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+		list( $kept, $removed ) = array_keys( $order->get_items() );
+
+		$this->run_ability(
+			'woocommerce/order-update',
+			array(
+				'id'           => $order->get_id(),
+				'remove_items' => array( $removed ),
+				'line_items'   => array(
+					array(
+						'id'         => $kept,
+						'extensions' => array( 'test-ext' => array( 'engraving' => 'A' ) ),
+					),
+					array(
+						'product_id' => $product->get_id(),
+						'extensions' => array( 'test-ext' => array( 'engraving' => 'B' ) ),
+					),
+				),
+			)
+		);
+
+		$stored = wc_get_order( $order->get_id() );
+		$items  = $stored->get_items();
+		$added  = array_key_last( $items );
+		$this->assertSame( array( $kept, $added ), array_keys( $items ) );
+		$this->assertSame( 'A', $items[ $kept ]->get_meta( '_engraving' ) );
+		$this->assertSame( 'B', $items[ $added ]->get_meta( '_engraving' ) );
+		$this->assertSame( 67.0, (float) $stored->get_total(), 'The total should include what the set_callback added to each line: 45 + 12 + 10 of shipping.' );
+		$this->assertSame(
+			array(
+				array( $kept, false, 67.0 ),
+				array( 0, false, 67.0 ),
+				array( $removed, true, 67.0 ),
+			),
+			$seen['validated'],
+			'The order item validators should see each line of the call, with the new totals of the order.'
+		);
+		$this->assertSame(
+			array(
+				array( $kept, array( 'engraving' => 'A' ) ),
+				array( $added, array( 'engraving' => 'B' ) ),
+			),
+			$seen['saved']
+		);
+		$this->assertSame( array( 'WC_Order_Item_Product:' . $removed ), $seen['deleted'] );
+	}
+
+	/**
+	 * @testdox Should write the fields of the product lines in order-create and total the order after them.
+	 */
+	public function test_order_create_writes_the_fields_of_its_product_lines(): void {
+		$this->register_engraving_field();
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '7' ) );
+
+		$result = $this->run_ability(
+			'woocommerce/order-create',
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 2,
+						'extensions' => array( 'test-ext' => array( 'engraving' => 'A' ) ),
+					),
+				),
+			)
+		);
+
+		$stored = wc_get_order( $result['order']['id'] );
+		$this->assertSame( 'A', current( $stored->get_items() )->get_meta( '_engraving' ) );
+		$this->assertSame( 19.0, (float) $stored->get_total() );
+	}
+
+	/**
+	 * @testdox Should name the line and the bad extension field when a product line sends a field it cannot take.
+	 */
+	public function test_order_line_names_its_bad_extension_fields(): void {
+		$this->register_engraving_field();
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'order_item',
+						'namespace'    => 'test-ext',
+						'field'        => 'carrier',
+						'object_types' => array( 'shipping' ),
+						'input_schema' => array( 'type' => 'string' ),
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$response = $this->run_ability_response(
+			'woocommerce/order-create',
+			array(
+				'line_items' => array(
+					array( 'product_id' => $product->get_id() ),
+					array(
+						'product_id' => $product->get_id(),
+						'extensions' => array( 'test-ext' => array( 'carrier' => 'acme' ) ),
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_ability_invalid_fields', $response->get_data()['code'] );
+		$this->assertSame(
+			'line_items[1]: The extension namespace "test-ext" has no field "carrier". The fields you can write in this namespace are: engraving. Use one of them, or remove "test-ext.carrier" from the input.',
+			$response->get_data()['message']
+		);
+	}
+
+	/**
 	 * @testdox Should give a sync the parent that a variation update saves.
 	 */
 	public function test_a_sync_gets_the_parent_of_an_updated_variation(): void {
