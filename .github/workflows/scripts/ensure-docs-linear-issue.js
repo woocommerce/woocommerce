@@ -1,4 +1,22 @@
 /**
+ * Describes what Linear reported for a failed call: the error type and GraphQL messages.
+ *
+ * @param {Error} error Error thrown by the Linear SDK.
+ * @return {string} A sentence to append to the failure message, or an empty string.
+ */
+const linearErrorDetails = ( error ) => {
+	const details = [
+		error?.type,
+		...( error?.errors?.map( ( graphqlError ) => graphqlError.message ) ??
+			[] ),
+	].filter( Boolean );
+	if ( ! details.length && error?.message ) {
+		details.push( error.message );
+	}
+	return details.length ? ` Linear reported: ${ details.join( '; ' ) }` : '';
+};
+
+/**
  * Finds or creates the documentation issue for a pull request.
  *
  * @param {Object} options              Workflow inputs.
@@ -38,10 +56,10 @@ module.exports = async ( {
 				team = teams.nodes[ 0 ];
 			}
 		}
-	} catch {
-		// SDK errors can contain request details. Report the configuration to check, not its value.
+	} catch ( error ) {
 		throw new Error(
-			'Cannot read the configured Linear team. Check LINEAR_DOCS_TEAM_ID and that LINEAR_OAUTH_TOKEN can access that team in the same workspace.'
+			'Cannot read the configured Linear team. Check LINEAR_DOCS_TEAM_ID and that LINEAR_OAUTH_TOKEN can access that team in the same workspace.' +
+				linearErrorDetails( error )
 		);
 	}
 	if ( ! team?.id ) {
@@ -80,9 +98,10 @@ module.exports = async ( {
 			}
 			existingIssues = await existingIssues.fetchNext();
 		}
-	} catch {
+	} catch ( error ) {
 		throw new Error(
-			'Cannot check for an existing Linear documentation issue. No issue was created; verify read access before retrying.'
+			'Cannot check for an existing Linear documentation issue. No issue was created; verify read access before retrying.' +
+				linearErrorDetails( error )
 		);
 	}
 
@@ -100,9 +119,10 @@ module.exports = async ( {
 		) {
 			usableLabelTeamIds.add( current.id );
 		}
-	} catch {
+	} catch ( error ) {
 		throw new Error(
-			"Cannot read the documentation label. Check LINEAR_DOCS_AUTO_LABEL and the token's access to that label."
+			"Cannot read the documentation label. Check LINEAR_DOCS_AUTO_LABEL and the token's access to that label." +
+				linearErrorDetails( error )
 		);
 	}
 	if (
@@ -133,9 +153,10 @@ module.exports = async ( {
 			labelIds: [ label.id ],
 		} );
 		issue = await result.issue;
-	} catch {
+	} catch ( error ) {
 		throw new Error(
-			'Linear issue creation did not complete successfully. Check create-issue permissions before retrying; the next run will check for an existing issue first.'
+			'Linear issue creation did not complete successfully. Check create-issue permissions before retrying; the next run will check for an existing issue first.' +
+				linearErrorDetails( error )
 		);
 	}
 	if ( ! result.success || ! issue?.id || ! issue.url ) {

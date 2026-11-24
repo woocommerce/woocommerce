@@ -105,6 +105,21 @@ for ( const nodes of [ [], [ { id: teamId }, { id: 'other-team' } ] ] ) {
 	} );
 }
 
+test( 'keeps what Linear reported when a call fails', async () => {
+	const { options } = fixture( {
+		team: async () => {
+			throw Object.assign( new Error( 'GraphQL request failed' ), {
+				type: 'InvalidInput',
+				errors: [ { message: 'Entity not found: Team' } ],
+			} );
+		},
+	} );
+	await assert.rejects(
+		ensureDocsIssue( options ),
+		/Check LINEAR_DOCS_TEAM_ID.*Linear reported: InvalidInput; Entity not found: Team/
+	);
+} );
+
 test( 'reuses an existing issue even if the PR title has changed', async () => {
 	const { created, options } = fixture( {
 		issues: async () => page( [ issue ] ),
