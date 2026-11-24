@@ -285,7 +285,7 @@ class Content_Renderer {
 
 		return array(
 			'html'   => $rendered_html,
-			'styles' => $this->collect_styles( $post, $template ),
+			'styles' => $this->collect_styles( $post ),
 		);
 	}
 
@@ -661,11 +661,10 @@ class Content_Renderer {
 	/**
 	 * Collects CSS for the rendered content without inlining it.
 	 *
-	 * @param WP_Post                $post Post object.
-	 * @param WP_Block_Template|null $template Block template.
+	 * @param WP_Post $post Post object.
 	 * @return string The collected CSS string (without <style> wrapper).
 	 */
-	private function collect_styles( WP_Post $post, $template = null ): string {
+	private function collect_styles( WP_Post $post ): string {
 		$styles  = (string) file_get_contents( __DIR__ . '/' . self::CONTENT_STYLES_FILE );
 		$styles .= (string) file_get_contents( __DIR__ . '/../../content-shared.css' );
 
@@ -689,7 +688,7 @@ class Content_Renderer {
 		);
 
 		// Get styles from theme.
-		$styles              .= $this->theme_controller->get_stylesheet_for_rendering( $post, $template );
+		$styles              .= $this->theme_controller->get_stylesheet_for_rendering();
 		$block_support_styles = $this->theme_controller->get_stylesheet_from_context( 'block-supports', array() );
 		// Get styles from block-supports stylesheet. This includes rules such as layout (contentWidth) that some blocks use.
 		// @see https://github.com/WordPress/WordPress/blob/3c5da9c74344aaf5bf8097f2e2c6a1a781600e03/wp-includes/script-loader.php#L3134
