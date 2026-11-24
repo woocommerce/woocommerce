@@ -431,7 +431,7 @@ function wc_check_invalid_utf8( $var ) {
 	if ( is_array( $var ) ) {
 		return array_map( 'wc_check_invalid_utf8', $var );
 	} else {
-		return wp_scrub_utf8( $var );
+		return wp_scrub_utf8( (string) $var );
 	}
 }
 

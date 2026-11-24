@@ -138,7 +138,24 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 			}
 		}
 
-		return wp_scrub_utf8( $data );
+		return self::latin1_to_utf8( $data );
+	}
+
+	/**
+	 * Convert ISO-8859-1 data to UTF-8 without the mbstring extension.
+	 *
+	 * @param string $data ISO-8859-1 data.
+	 * @return string
+	 */
+	private static function latin1_to_utf8( string $data ): string {
+		return (string) preg_replace_callback(
+			'/[\x80-\xFF]/',
+			static function ( $match ) {
+				$byte = ord( $match[0] );
+				return chr( 0xC0 | ( $byte >> 6 ) ) . chr( 0x80 | ( $byte & 0x3F ) );
+			},
+			$data
+		);
 	}
 
 	/**

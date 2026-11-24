@@ -205,4 +205,15 @@ class WC_Tests_Base_Order_Item extends WC_Unit_Test_Case {
 		$this->assertEquals( 12.34, $filter_received_value );
 		$this->assertSame( $this->sut, $filter_received_item );
 	}
+
+	/**
+	 * @testdox Should store an empty name when the name is set to null, and replace invalid UTF-8 bytes otherwise.
+	 */
+	public function test_set_name_handles_null_and_invalid_utf8(): void {
+		$this->sut->set_name( null );
+		$this->assertSame( '', $this->sut->get_name( 'edit' ), 'A null name should be stored as an empty string.' );
+
+		$this->sut->set_name( "Caf\xE9" );
+		$this->assertSame( "Caf\u{FFFD}", $this->sut->get_name( 'edit' ), 'Invalid UTF-8 bytes should become U+FFFD.' );
+	}
 }
