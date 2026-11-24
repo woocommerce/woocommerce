@@ -23,8 +23,9 @@
 	}
 
 	.wc-block-components-checkout-place-order-button__text {
-		display: flex;
+		display: inline-flex;
 		align-items: center;
+		vertical-align: top;
 	}
 
 	.wc-block-components-checkout-place-order-button__separator {

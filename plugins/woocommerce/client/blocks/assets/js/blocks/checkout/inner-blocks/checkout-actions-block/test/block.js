@@ -29,17 +29,24 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 
 const mockUseSelect = jest.fn();
 jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
 	useSelect: () => mockUseSelect(),
 } ) );
 
 jest.mock( '@woocommerce/block-data', () => ( {
+	...jest.requireActual( '@woocommerce/block-data' ),
 	paymentStore: 'wc/store/payment',
 } ) );
 
 let mockCheckoutShowTerms = true;
 jest.mock( '@woocommerce/settings', () => ( {
+	...jest.requireActual( '@woocommerce/settings' ),
 	getSetting: jest.fn( ( key, fallback ) =>
-		key === 'checkoutShowTerms' ? mockCheckoutShowTerms : fallback
+		key === 'checkoutShowTerms'
+			? mockCheckoutShowTerms
+			: jest
+					.requireActual( '@woocommerce/settings' )
+					.getSetting( key, fallback )
 	),
 } ) );
 
@@ -58,6 +65,7 @@ jest.mock( '@woocommerce/blocks-checkout', () => ( {
 } ) );
 
 jest.mock( '@woocommerce/block-settings', () => ( {
+	...jest.requireActual( '@woocommerce/block-settings' ),
 	CART_URL: '/cart',
 } ) );
 
@@ -103,6 +111,39 @@ describe( 'Checkout Actions Block', () => {
 			paymentMethodPlaceOrderButton: undefined,
 		} );
 		mockUseSelect.mockReturnValue( null );
+	} );
+
+	it( 'passes block styles to the Place Order button, not the terms or return link', () => {
+		const { container } = render(
+			<Block
+				{ ...defaultProps }
+				showReturnToCart
+				showTerms
+				termsText="Terms and Conditions"
+				backgroundColor="primary"
+				style={ JSON.stringify( {
+					color: { text: '#123456' },
+					spacing: { padding: { top: '20px' } },
+				} ) }
+			/>
+		);
+
+		expect( mockPlaceOrderButton ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				buttonStyleProps: expect.objectContaining( {
+					className: expect.stringContaining(
+						'has-primary-background-color'
+					),
+					style: expect.objectContaining( {
+						color: '#123456',
+						paddingTop: '20px',
+					} ),
+				} ),
+			} )
+		);
+		expect( container.firstChild ).not.toHaveAttribute( 'style' );
+		expect( screen.getByTestId( 'terms' ) ).not.toHaveAttribute( 'style' );
+		expect( screen.getByRole( 'link' ) ).not.toHaveAttribute( 'style' );
 	} );
 
 	it( 'does not pass CustomButtonComponent to PlaceOrderButton when a saved token is active', () => {

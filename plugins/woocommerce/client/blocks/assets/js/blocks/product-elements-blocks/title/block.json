@@ -36,6 +36,7 @@
 		"wc-blocks-style",
 		"file:../product-title.css"
 	],
+	"viewScript": "file:../product-title-frontend.js",
 	"textdomain": "woocommerce",
 	"attributes": {
 		"headingLevel": {

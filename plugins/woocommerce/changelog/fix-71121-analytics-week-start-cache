@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Refresh Analytics reports as soon as Week Starts On or the excluded order statuses change, instead of showing cached results.

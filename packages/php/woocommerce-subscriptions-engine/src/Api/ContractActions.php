@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Rest\ContractActionRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentFilter;
 
@@ -41,7 +42,7 @@ final class ContractActions {
 	 * An invalid or duplicate registration raises a `_doing_it_wrong()` notice and is not
 	 * registered (the first registration is kept). Unknown keys raise a notice and are ignored.
 	 *
-	 * @param string               $extension_slug Owning extension slug; matches the contracts' `extension_slug`.
+	 * @param string               $extension_slug Owning extension slug (1-64 of `[a-z0-9_-]`); matches the contracts' `extension_slug`.
 	 * @param string               $action         Action slug: lowercase letters, numbers, hyphens and underscores.
 	 * @param array<string, mixed> $args           `callback` (required): `callable( ContractView $contract, array $action_args ): ContractView|WP_Error`.
 	 *                                             `permission` (required): a capability, checked as `current_user_can( $permission, $contract )`
@@ -60,8 +61,8 @@ final class ContractActions {
 		$action_args   = $filtered_args['args'] ?? array();
 		$is_available  = $filtered_args['is_available'] ?? null;
 
-		if ( '' === trim( $extension_slug ) ) {
-			self::reject( 'The extension slug must not be empty.' );
+		if ( ! ArgumentValidator::is_slug( $extension_slug ) ) {
+			self::reject( sprintf( 'The extension slug "%s" must be 1-64 lowercase letters, digits, hyphens or underscores.', $extension_slug ) );
 			return;
 		}
 

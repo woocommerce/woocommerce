@@ -5,7 +5,7 @@ import type { CartItem } from '@woocommerce/types';
 import type {
 	OptimisticCartItem,
 	SelectedAttributes,
-} from '@woocommerce/stores/woocommerce/cart';
+} from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies

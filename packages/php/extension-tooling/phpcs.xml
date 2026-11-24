@@ -15,4 +15,9 @@
 	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
 		<exclude-pattern>*/tests/ChangelogFormatterTest.php</exclude-pattern>
 	</rule>
+
+	<!-- The fixture follows WooCommerce's legacy test framework path. -->
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>*/tests/fixtures/wc-test-framework/includes/wp-http-testcase.php</exclude-pattern>
+	</rule>
 </ruleset>

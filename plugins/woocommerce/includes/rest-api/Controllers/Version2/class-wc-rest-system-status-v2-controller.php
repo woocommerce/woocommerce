@@ -1505,65 +1505,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				);
 			}
 
-			/**
-			 * Scan the theme directory for all WC templates to see if our theme
-			 * overrides any of them.
-			 */
-			$override_files     = array();
-			$outdated_templates = false;
-			$scan_files         = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates/' );
-
-			// Include *-product_<cat|tag> templates for backwards compatibility.
-			$scan_files[] = 'content-product_cat.php';
-			$scan_files[] = 'taxonomy-product_cat.php';
-			$scan_files[] = 'taxonomy-product_tag.php';
-
-			$wc_templates_dir = WC()->plugin_path() . '/templates/';
-
-			foreach ( $scan_files as $file ) {
-				$located = wc_locate_template( $file, WC()->template_path(), $wc_templates_dir );
-
-				/**
-				 * Allow 3rd party plugins to filter the template file location.
-				 *
-				 * @param string $located       The located template path.
-				 * @param string $file          The template file name.
-				 * @param array  $args          Template arguments.
-				 * @param string $template_path The template path.
-				 * @param string $default_path  The default path.
-				 *
-				 * @since 2.1.0
-				 */
-				$located = apply_filters( 'wc_get_template', $located, $file, array(), WC()->template_path(), $wc_templates_dir );
-
-				// Check if the template is overridden (located outside WC core templates dir).
-				$override_file = false;
-				if ( 0 !== strpos( $located, $wc_templates_dir ) && file_exists( $located ) ) {
-					$override_file = $located;
-				}
-
-				if ( ! empty( $override_file ) ) {
-					$core_file = $file;
-
-					// Update *-product_<cat|tag> template name before searching in core.
-					if ( false !== strpos( $core_file, '-product_cat' ) || false !== strpos( $core_file, '-product_tag' ) ) {
-						$core_file = str_replace( '_', '-', $core_file );
-					}
-
-					$core_version     = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $core_file );
-					$override_version = WC_Admin_Status::get_file_version( $override_file );
-					if ( $core_version && '' !== $override_version && version_compare( $override_version, $core_version, '<' ) ) {
-						if ( ! $outdated_templates ) {
-							$outdated_templates = true;
-						}
-					}
-					$override_files[] = array(
-						'file'         => str_replace( ABSPATH, '', $override_file ),
-						'version'      => $override_version,
-						'core_version' => $core_version,
-					);
-				}
-			}
+			$templates = $this->get_template_overrides();
 
 			$active_theme_info = array(
 				'name'                    => $active_theme->name,
@@ -1574,8 +1516,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				'is_block_theme'          => wp_is_block_theme(),
 				'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),
 				'has_woocommerce_file'    => ( file_exists( get_stylesheet_directory() . '/woocommerce.php' ) || file_exists( get_template_directory() . '/woocommerce.php' ) ),
-				'has_outdated_templates'  => $outdated_templates,
-				'overrides'               => $override_files,
+				'has_outdated_templates'  => $templates['has_outdated_templates'],
+				'overrides'               => $templates['overrides'],
 			);
 
 			$theme_info = array_merge( $active_theme_info, $parent_theme_info );
@@ -1583,6 +1525,79 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		return $theme_info;
+	}
+
+	/**
+	 * Scan the template files WooCommerce would load, after the template filters, for theme overrides.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return array{overrides: array<int, array<string, string>>, has_outdated_templates: bool}
+	 */
+	public function get_template_overrides(): array {
+		$override_files     = array();
+		$outdated_templates = false;
+		$scan_files         = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates/' );
+
+		// Include *-product_<cat|tag> templates for backwards compatibility.
+		$scan_files[] = 'content-product_cat.php';
+		$scan_files[] = 'taxonomy-product_cat.php';
+		$scan_files[] = 'taxonomy-product_tag.php';
+
+		$wc_templates_dir = WC()->plugin_path() . '/templates/';
+
+		foreach ( $scan_files as $file ) {
+			$located = wc_locate_template( $file, WC()->template_path(), $wc_templates_dir );
+
+			/**
+			 * Allow 3rd party plugins to filter the template file location.
+			 *
+			 * @param string $located       The located template path.
+			 * @param string $file          The template file name.
+			 * @param array  $args          Template arguments.
+			 * @param string $template_path The template path.
+			 * @param string $default_path  The default path.
+			 *
+			 * @since 2.1.0
+			 */
+			$located = apply_filters( 'wc_get_template', $located, $file, array(), WC()->template_path(), $wc_templates_dir );
+			if ( ! is_string( $located ) || '' === $located ) {
+				continue;
+			}
+
+			// Check if the template is overridden (located outside WC core templates dir).
+			$override_file = false;
+			if ( 0 !== strpos( $located, $wc_templates_dir ) && file_exists( $located ) ) {
+				$override_file = $located;
+			}
+
+			if ( ! empty( $override_file ) ) {
+				$core_file = $file;
+
+				// Update *-product_<cat|tag> template name before searching in core.
+				if ( false !== strpos( $core_file, '-product_cat' ) || false !== strpos( $core_file, '-product_tag' ) ) {
+					$core_file = str_replace( '_', '-', $core_file );
+				}
+
+				$core_version     = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $core_file );
+				$override_version = WC_Admin_Status::get_file_version( $override_file );
+				if ( $core_version && '' !== $override_version && version_compare( $override_version, $core_version, '<' ) ) {
+					if ( ! $outdated_templates ) {
+						$outdated_templates = true;
+					}
+				}
+				$override_files[] = array(
+					'file'         => str_replace( ABSPATH, '', $override_file ),
+					'version'      => $override_version,
+					'core_version' => $core_version,
+				);
+			}
+		}
+
+		return array(
+			'overrides'              => $override_files,
+			'has_outdated_templates' => $outdated_templates,
+		);
 	}
 
 	/**

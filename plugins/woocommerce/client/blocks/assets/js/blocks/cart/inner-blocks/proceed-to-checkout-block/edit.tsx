@@ -8,17 +8,20 @@ import EditableButton from '@woocommerce/editor-components/editable-button';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import PageSelector from '@woocommerce/editor-components/page-selector';
 import { CART_PAGE_ID } from '@woocommerce/block-settings';
+import { useStyleProps } from '@woocommerce/base-hooks';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
 import { defaultButtonLabel } from './constants';
+import type { ButtonStyleAttributes } from '../../../cart-checkout-shared/types';
 
 export const Edit = ( {
 	attributes,
 	setAttributes,
 }: {
-	attributes: {
+	attributes: ButtonStyleAttributes & {
 		checkoutPageId: number;
 		className: string;
 		buttonLabel: string;
@@ -26,6 +29,7 @@ export const Edit = ( {
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
 	const blockProps = useBlockProps();
+	const buttonStyleProps = useStyleProps( attributes );
 	const { checkoutPageId = 0, buttonLabel } = attributes;
 	const { current: savedCheckoutPageId } = useRef( checkoutPageId );
 
@@ -65,7 +69,11 @@ export const Edit = ( {
 				) }
 			</InspectorControls>
 			<EditableButton
-				className="wc-block-cart__submit-button"
+				className={ clsx(
+					'wc-block-cart__submit-button',
+					buttonStyleProps.className
+				) }
+				style={ buttonStyleProps.style }
 				value={ buttonLabel }
 				placeholder={ defaultButtonLabel }
 				onChange={ ( content ) => {

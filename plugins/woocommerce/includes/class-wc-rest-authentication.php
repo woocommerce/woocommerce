@@ -77,9 +77,15 @@ class WC_REST_Authentication {
 			return false;
 		}
 
+		$uri_route      = $this->route_from_request_uri();
 		$resolved_route = $this->resolved_route();
-		$is_wc_route    = $this->is_wc_namespace( $this->route_from_request_uri() )
+		$is_wc_route    = $this->is_wc_namespace( $uri_route )
 			|| ( null !== $resolved_route && $this->is_wc_namespace( $resolved_route ) );
+
+		// API keys are for the admin REST API. Store API requests are left to cookie or Cart-Token auth.
+		if ( $this->is_store_api_route( $uri_route ) || ( null !== $resolved_route && $this->is_store_api_route( $resolved_route ) ) ) {
+			$is_wc_route = false;
+		}
 
 		/**
 		 * Filters whether the current request is a request to the WooCommerce REST API.
@@ -101,6 +107,22 @@ class WC_REST_Authentication {
 	 */
 	private function is_wc_namespace( string $route ): bool {
 		return str_starts_with( $route, 'wc/' ) || str_starts_with( $route, 'wc-' );
+	}
+
+	/**
+	 * Whether a route is in the Store API namespace, which API keys may not authenticate.
+	 *
+	 * WordPress matches routes case-insensitively and decodes the route it dispatches, so this does too.
+	 *
+	 * @since 11.3.1
+	 *
+	 * @param string $route Route without the REST prefix.
+	 * @return bool
+	 */
+	private function is_store_api_route( string $route ): bool {
+		$route = strtolower( trim( urldecode( $route ), '/' ) );
+
+		return 'wc/store' === $route || str_starts_with( $route, 'wc/store/' );
 	}
 
 	/**
@@ -305,7 +327,7 @@ class WC_REST_Authentication {
 	 *
 	 * @since 11.1.0
 	 *
-	 * @return bool False only when the resolved route is not ours and the request URI never named it.
+	 * @return bool False when the resolved route is the Store API, or is not ours and the request URI never named it.
 	 */
 	private function is_resolved_route_in_scope() {
 		// Has WordPress picked a route yet? If not, there is nothing to compare.
@@ -315,7 +337,12 @@ class WC_REST_Authentication {
 			return true;
 		}
 
-		// Our own namespaces are always in scope for a WooCommerce key. The read/write permission
+		// The Store API is never in scope, even when the request URI named another route.
+		if ( $this->is_store_api_route( $resolved_route ) ) {
+			return false;
+		}
+
+		// Our other namespaces are always in scope for a WooCommerce key. The read/write permission
 		// check in check_user_permissions() still bounds what the key can do there.
 		if ( $this->is_wc_namespace( $resolved_route ) ) {
 			return true;
@@ -611,7 +638,7 @@ class WC_REST_Authentication {
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
 		$secret         = $user->consumer_secret . '&';
-		$signature      = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret, true ) );
+		$signature      = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret, true ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- OAuth 1.0a signatures are base64-encoded HMACs, not obfuscation.
 
 		if ( ! hash_equals( $signature, $consumer_signature ) ) { // @codingStandardsIgnoreLine
 			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid signature - provided signature does not match.', 'woocommerce' ), array( 'status' => 401 ) );
