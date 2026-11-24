@@ -39,7 +39,7 @@ class Universal_Test extends BaseTestCase {
 	 */
 	public function test_get_additional_blocks_on_page( string $page, bool $has_extra_blocks, array $expected ): void {
 		$content = sprintf(
-			'<!-- wp:woocommerce/%1$s --><!-- wp:core/buttons /--><!-- /wp:woocommerce/%1$s --><!-- wp:core/shortcode /-->',
+			'<!-- wp:woocommerce/%1$s --><!-- wp:core/buttons /--><!-- /wp:woocommerce/%1$s --><!-- wp:core/shortcode /--><!-- wp:woocommerce/classic-shortcode /-->',
 			$page
 		);
 
