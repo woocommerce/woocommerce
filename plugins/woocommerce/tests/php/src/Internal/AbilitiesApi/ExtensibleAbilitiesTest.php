@@ -1019,6 +1019,72 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return order item fields on shipping, fee and coupon lines, and list a field with object_types only on its kind of line.
+	 */
+	public function test_order_item_fields_are_returned_on_every_kind_of_line(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'order_item',
+						'namespace'     => 'test-ext',
+						'field'         => 'fee_reason',
+						'output_schema' => array( 'type' => 'string' ),
+						'object_types'  => array( 'fee' ),
+						'get_callback'  => static fn() => 'packaging',
+					)
+				);
+			}
+		);
+		$order    = \WC_Helper_Order::create_order();
+		$fee      = new \WC_Order_Item_Fee();
+		$shipping = new \WC_Order_Item_Shipping();
+		$coupon   = new \WC_Order_Item_Coupon();
+		$fee->set_props(
+			array(
+				'name'  => 'Packaging',
+				'total' => '2',
+			)
+		);
+		$shipping->set_method_title( 'Courier' );
+		$coupon->set_code( 'save5' );
+		foreach ( array( $fee, $shipping, $coupon ) as $item ) {
+			$order->add_item( $item );
+		}
+		$order->save();
+
+		$listed = $this->run_ability(
+			'woocommerce/orders-query',
+			array(
+				'id'                 => $order->get_id(),
+				'include_line_items' => true,
+				'include_lines'      => true,
+			)
+		)['orders'][0];
+		$schema = $this->get_output_schema( 'woocommerce/orders-query' )['properties']['orders']['items']['properties'];
+
+		$this->assertSame(
+			array(
+				'test-ext' => array(
+					'gift'       => 'item-' . $fee->get_id(),
+					'fee_reason' => 'packaging',
+				),
+			),
+			$listed['fee_lines'][0]['extensions']
+		);
+		$shipping_line = current( wp_list_filter( $listed['shipping_lines'], array( 'id' => $shipping->get_id() ) ) );
+		$this->assertSame( array( 'test-ext' => array( 'gift' => 'item-' . $shipping->get_id() ) ), $shipping_line['extensions'] );
+		$this->assertSame( array( 'test-ext' => array( 'gift' => 'item-' . $coupon->get_id() ) ), $listed['coupon_lines'][0]['extensions'] );
+		$this->assertArrayNotHasKey( 'fee_reason', $listed['line_items'][0]['extensions']['test-ext'] );
+		$this->assertArrayHasKey( 'fee_reason', $schema['fee_lines']['items']['properties']['extensions']['properties']['test-ext']['properties'] );
+		foreach ( array( 'line_items', 'shipping_lines', 'coupon_lines' ) as $key ) {
+			$this->assertArrayNotHasKey( 'fee_reason', $schema[ $key ]['items']['properties']['extensions']['properties']['test-ext']['properties'], $key );
+			$this->assertArrayHasKey( 'gift', $schema[ $key ]['items']['properties']['extensions']['properties']['test-ext']['properties'], $key );
+		}
+	}
+
+	/**
 	 * @testdox Should call the $resource_name prime callbacks of each extension once with the full list, in registration order.
 	 * @dataProvider provide_list_abilities
 	 *
