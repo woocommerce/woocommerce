@@ -189,7 +189,7 @@ describe( 'product filter chips interactivity store', () => {
 				description: 'Out of stock',
 			} );
 
-			expect( state.itemTitle ).toBe( 'Blue (Out of stock)' );
+			expect( state.swatchTitle ).toBe( 'Blue (Out of stock)' );
 			expect( state.descriptionId ).toBe( 'color-blue-description' );
 		} );
 
@@ -201,10 +201,22 @@ describe( 'product filter chips interactivity store', () => {
 		} );
 
 		it( 'keeps the label tooltip on swatches without a description', () => {
-			const state = getState( swatchItem );
+			expect( getState( swatchItem ).swatchTitle ).toBe( 'Blue' );
+		} );
 
-			expect( state.itemTitle ).toBe( 'Blue' );
-			expect( state.descriptionId ).toBeUndefined();
+		it( 'keeps the label tooltip on swatch items without visual data', () => {
+			expect( getState( textItem ).swatchTitle ).toBe( 'S' );
+		} );
+
+		it( 'uses the aria label as swatch tooltip when the label is not text', () => {
+			const state = getState( {
+				...swatchItem,
+				label: { type: 'span' },
+				ariaLabel: 'Blue',
+				description: 'Out of stock',
+			} );
+
+			expect( state.swatchTitle ).toBe( 'Blue (Out of stock)' );
 		} );
 	} );
 
