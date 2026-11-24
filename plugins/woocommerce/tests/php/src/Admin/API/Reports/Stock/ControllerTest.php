@@ -31,6 +31,13 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	const ENDPOINT = '/wc-analytics/reports/stock';
 
 	/**
+	 * Build routes per test: the orderby enum depends on whether the feature's columns are attached.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * Set up.
 	 */
 	public function setUp(): void {
