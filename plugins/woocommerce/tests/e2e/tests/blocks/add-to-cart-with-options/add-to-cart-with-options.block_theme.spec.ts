@@ -294,11 +294,30 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await test.step( 'displays an error when attributes are not selected', async () => {
 			await addToCartButton.click();
 
-			await expect(
-				page.getByText(
-					'Please select product attributes before adding to cart.'
-				)
-			).toBeVisible();
+			const notice = addToCartBlock.getByRole( 'alert' );
+			await expect( notice ).toHaveText(
+				'Please select product attributes before adding to cart.'
+			);
+			await expect( notice ).toHaveClass( /\bis-error\b/ );
+			await expect( notice.locator( 'svg' ).first() ).toBeVisible();
+
+			const noticeBox = await notice.boundingBox();
+			const colorBox = await addToCartBlock
+				.getByRole( 'radiogroup', { name: 'Color' } )
+				.boundingBox();
+			expect( noticeBox?.y ).toBeLessThan( colorBox?.y ?? 0 );
+
+			// Submitting the invalid form again replaces the notice instead of
+			// adding a second one.
+			await addToCartButton.click();
+			await expect( notice ).toHaveCount( 1 );
+
+			// Dismissing the notice doesn't submit the form, which would
+			// show the notice again.
+			await notice
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.click();
+			await expect( notice ).toHaveCount( 0 );
 		} );
 
 		await test.step( 'updates blocks rendering variation data when attributes are selected', async () => {
@@ -577,6 +596,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/product/logo-collection' );
 
+		const addToCartBlock = page.locator(
+			'[data-block-name="woocommerce/add-to-cart-with-options"]'
+		);
 		const addToCartButton = page
 			.getByRole( 'button', { name: 'Add to cart' } )
 			.first();
@@ -588,11 +610,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 			// stores have been loaded.
 			await expect( async () => {
 				await addToCartButton.click();
-				await expect(
-					page.getByText(
-						'Please select some products to add to the cart.'
-					)
-				).toBeVisible();
+				await expect( addToCartBlock.getByRole( 'alert' ) ).toHaveText(
+					'Please select some products to add to the cart.'
+				);
 			} ).toPass();
 		} );
 
@@ -725,9 +745,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 			// Verify error message is displayed.
 			await expect(
-				page.getByText(
-					'The quantity of "Hoodie with Logo" cannot be changed'
-				)
+				addToCartBlock
+					.getByRole( 'alert' )
+					.getByText(
+						'The quantity of "Hoodie with Logo" cannot be changed'
+					)
 			).toBeVisible();
 			// Verify optimistic updates were applied, so the product that was
 			// successfully added to cart is counted.
@@ -1389,6 +1411,52 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect(
 			page.getByRole( 'button', { name: 'Added to cart', exact: true } )
 		).toBeVisible();
+	} );
+
+	test( 'shows Add to wishlist errors inside the block', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await wpCLI( 'option set woocommerce_product_wishlist_enabled yes' );
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		const errorMessage = 'The product could not be saved to your wishlist.';
+		await page.route( /shopper-lists/, ( route ) =>
+			route.request().method() === 'POST'
+				? route.fulfill( {
+						status: 500,
+						json: {
+							code: 'woocommerce_rest_wishlist_error',
+							message: errorMessage,
+							data: { status: 500 },
+						},
+					} )
+				: route.continue()
+		);
+
+		await page.goto( '/product/beanie/' );
+
+		const addToCartBlock = page.locator(
+			'[data-block-name="woocommerce/add-to-cart-with-options"]'
+		);
+
+		// There is the chance the button might be clicked before the iAPI
+		// stores have been loaded.
+		await expect( async () => {
+			await addToCartBlock
+				.getByRole( 'button', { name: 'Add to wishlist' } )
+				.click();
+			await expect( addToCartBlock.getByRole( 'alert' ) ).toHaveText(
+				errorMessage,
+				{ timeout: 1_000 }
+			);
+		} ).toPass();
 	} );
 
 	test( 'allows updating the Product Image Gallery block to the Product Gallery block', async ( {
