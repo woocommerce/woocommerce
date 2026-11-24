@@ -100,7 +100,7 @@ CREATE TABLE $table_name (
 	KEY product_status_attempt (product_id, status, date_last_attempt_gmt, id),
 	KEY user_lookup (user_id, product_id, status),
 	KEY email_lookup (user_email, product_id, status),
-	KEY date_created (date_created_gmt, status, product_id, user_email),
+	KEY date_created (date_created_gmt),
 	KEY date_notified (date_notified_gmt)
 ) $collate;
 CREATE TABLE $meta_table_name (
