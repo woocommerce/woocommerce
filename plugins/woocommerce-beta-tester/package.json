@@ -11,12 +11,10 @@
 	"version": "4.0.0",
 	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
 	"devDependencies": {
-		"@types/prop-types": "catalog:types",
 		"@types/react": "catalog:types",
 		"@types/react-dom": "catalog:types",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-config": "workspace:*",
-		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/env": "catalog:tooling",
 		"@wordpress/scripts": "catalog:tooling",
 		"eslint": "catalog:tooling",

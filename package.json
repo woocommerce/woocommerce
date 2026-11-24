@@ -55,7 +55,6 @@
 		"@babel/runtime": "catalog:tooling",
 		"@types/node": "catalog:types",
 		"@woocommerce/eslint-config": "workspace:*",
-		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/monorepo-utils": "workspace:*",
 		"@wordpress/prettier-config": "catalog:tooling",
 		"@wordpress/stylelint-config": "catalog:tooling",
@@ -74,7 +73,6 @@
 		"node-stream-zip": "^1.15.0",
 		"postcss-loader": "catalog:tooling",
 		"prettier": "catalog:tooling",
-		"regenerator-runtime": "^0.13.11",
 		"rimraf": "catalog:tooling",
 		"sass": "catalog:tooling",
 		"sass-loader": "catalog:tooling",
@@ -86,7 +84,6 @@
 	"dependencies": {
 		"@babel/core": "catalog:tooling",
 		"@wordpress/babel-preset-default": "next",
-		"lodash": "^4.18.1",
-		"wp-textdomain": "1.0.1"
+		"lodash": "^4.18.1"
 	}
 }
