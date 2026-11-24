@@ -29,7 +29,6 @@ class ReadinessCheckPageTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		StoreOutputChecksTest::block_requests();
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		delete_option( AgentReadiness::REPORT_OPTION );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		$this->sut = wc_get_container()->get( ReadinessCheckPage::class );
@@ -40,7 +39,6 @@ class ReadinessCheckPageTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
-		delete_option( 'woocommerce_feature_agent_readiness_enabled' );
 		parent::tearDown();
 	}
 

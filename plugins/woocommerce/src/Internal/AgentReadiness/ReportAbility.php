@@ -9,7 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Ability that reads the readiness report, for AbilitiesLoader.
- * No name while the feature is disabled, so the loader skips it.
  *
  * @since 11.4.0
  */
@@ -20,12 +19,12 @@ class ReportAbility implements AbilityDefinition {
 	public const NAME = 'woocommerce/get-agent-readiness';
 
 	/**
-	 * Ability name, or an empty string while the feature is disabled.
+	 * Ability name.
 	 *
 	 * @return string
 	 */
 	public static function get_name(): string {
-		return self::name_when_enabled( self::NAME );
+		return self::NAME;
 	}
 
 	/**
@@ -40,9 +39,8 @@ class ReportAbility implements AbilityDefinition {
 			'category'            => 'woocommerce',
 			'input_schema'        => array(
 				'type'                 => 'object',
-				'properties'           => array(),
-				'additionalProperties' => false,
 				'default'              => array(),
+				'additionalProperties' => false,
 			),
 			'output_schema'       => self::output_schema(),
 			'execute_callback'    => array( self::class, 'execute' ),
@@ -66,17 +64,19 @@ class ReportAbility implements AbilityDefinition {
 	 * The stored report with store checks as they stand now, whether a scan is pending, and whether it has stalled.
 	 *
 	 * @param array<string, mixed> $input Ability input; this ability takes none.
-	 * @return array{report:array<string,mixed>|null,scan_pending:bool,scan_stalled:bool}
+	 * @return array<string, mixed> The report (left out before the first scan), scan_pending and scan_stalled.
 	 */
 	public static function execute( array $input ): array {
 		unset( $input );
 		$readiness = wc_get_container()->get( AgentReadiness::class );
 		$scan      = wc_get_container()->get( ScheduledScan::class );
 		$pending   = $scan->is_pending();
-		return array(
-			'report'       => $readiness->get_served_report(),
-			'scan_pending' => $pending,
-			'scan_stalled' => $pending && $scan->is_stalled(),
+		return self::without_nulls(
+			array(
+				'report'       => $readiness->get_served_report(),
+				'scan_pending' => $pending,
+				'scan_stalled' => $pending && $scan->is_stalled(),
+			)
 		);
 	}
 
@@ -91,8 +91,8 @@ class ReportAbility implements AbilityDefinition {
 			'type'       => 'object',
 			'properties' => array(
 				'report'       => array(
-					'type'        => array( 'object', 'null' ),
-					'description' => __( 'The last agent readiness check, or null before the first one.', 'woocommerce' ),
+					'type'        => 'object',
+					'description' => __( 'The last agent readiness check. Left out before the first one.', 'woocommerce' ),
 					'properties'  => array(
 						'generated_at'        => array(
 							'type'   => 'string',
@@ -119,50 +119,54 @@ class ReportAbility implements AbilityDefinition {
 							'items' => array(
 								'type'       => 'object',
 								'properties' => array(
-									'id'       => array( 'type' => 'string' ),
-									'ok'       => array(
-										'type'        => array( 'boolean', 'null' ),
-										'description' => __( 'True when the store passes, false when it fails, null when the check could not run.', 'woocommerce' ),
+									'id'         => array( 'type' => 'string' ),
+									'ok'         => array(
+										'type'        => 'boolean',
+										'description' => __( 'True when the store passes, false when it fails. Left out when the check could not run.', 'woocommerce' ),
 									),
-									'group'    => array(
+									'group'      => array(
 										'type'        => 'string',
 										'enum'        => array( 'access', 'find', 'understand', 'buy', '' ),
 										'description' => __( 'The question the check answers: access (can agents get in), find (can they find the store), understand (do they understand the products) or buy (can they buy). Empty in a report from before checks had a group.', 'woocommerce' ),
 									),
-									'blocks'   => array(
+									'blocks'     => array(
 										'type'        => 'string',
 										'description' => __( 'What a failure stops: listing (every product everywhere), discovery (harder for agents to find and read the store), ucp (agents using UCP) or checkout (agent orders).', 'woocommerce' ),
 									),
-									'level'    => array(
+									'level'      => array(
 										'type' => 'string',
 										'enum' => array( StoreConditions::LEVEL_REQUIRED, StoreConditions::LEVEL_RECOMMENDED ),
 									),
-									'name'     => array( 'type' => 'string' ),
-									'label'    => array( 'type' => 'string' ),
-									'why'      => array( 'type' => 'string' ),
-									'fix'      => array( 'type' => 'string' ),
-									'fix_url'  => array( 'type' => 'string' ),
-									'conflict' => array(
+									'name'       => array( 'type' => 'string' ),
+									'label'      => array( 'type' => 'string' ),
+									'why'        => array( 'type' => 'string' ),
+									'fix'        => array( 'type' => 'string' ),
+									'fix_url'    => array( 'type' => 'string' ),
+									'conflict'   => array(
 										'type'        => 'boolean',
 										'description' => __( 'On output checks: true only when the check failed and the store is set to send this, so something else is likely replacing it.', 'woocommerce' ),
 									),
-									'pending'  => array(
+									'pending'    => array(
 										'type'        => 'boolean',
 										'description' => __( 'On output checks: true for a check of output a coming WooCommerce update builds; it does not run yet.', 'woocommerce' ),
 									),
-									'skipped'  => array(
+									'skipped'    => array(
 										'type'        => 'boolean',
 										'description' => __( 'On output checks: true when none of the products checked has the detail, such as a barcode, so there was nothing to check.', 'woocommerce' ),
 									),
-									'seen_at'  => array(
+									'no_product' => array(
+										'type'        => 'boolean',
+										'description' => __( 'On output checks: true when the check reads a product page and the store had no product it could check, so it did not run.', 'woocommerce' ),
+									),
+									'seen_at'    => array(
 										'type'        => 'string',
 										'description' => __( 'On a likely conflict: the address where it was seen. On a broken llms.txt link: that link. On a UCP endpoint check that didn\'t pass: the catalog search address that answered.', 'woocommerce' ),
 									),
-									'source'   => array(
+									'source'     => array(
 										'type'        => 'string',
 										'description' => __( 'On a failed UCP version check: the version the store serves. On a UCP endpoint check that didn\'t pass: the status and content type catalog search answered with, such as 403 text/html. On the llms.txt check: woocommerce, file or other when served; disabled or not_reached when not. Otherwise empty.', 'woocommerce' ),
 									),
-									'product'  => array(
+									'product'    => array(
 										'type'        => 'integer',
 										'description' => __( 'On a failed check of product pages: the ID of the product whose page failed. The check reads up to five product pages, the best seller first, and stops at the first that fails. Otherwise 0.', 'woocommerce' ),
 									),
@@ -199,8 +203,8 @@ class ReportAbility implements AbilityDefinition {
 										'items'       => array( 'type' => 'integer' ),
 									),
 									'sales_share' => array(
-										'type'        => array( 'number', 'null' ),
-										'description' => __( 'Share of the store\'s net sales, from 0 to 1, on the products that fail this check, over the period in sales. Null when Analytics is off or the period has fewer than 20 orders, too few to rank by.', 'woocommerce' ),
+										'type'        => 'number',
+										'description' => __( 'Share of the store\'s net sales, from 0 to 1, on the products that fail this check, over the period in sales. Left out when Analytics is off or the period has fewer than 20 orders, too few to rank by.', 'woocommerce' ),
 									),
 									'fix_url'     => array( 'type' => 'string' ),
 								),
@@ -214,7 +218,10 @@ class ReportAbility implements AbilityDefinition {
 								'properties' => array(
 									'id'    => array( 'type' => 'string' ),
 									'name'  => array( 'type' => 'string' ),
-									'found' => array( 'type' => array( 'boolean', 'null' ) ),
+									'found' => array(
+										'type'        => 'boolean',
+										'description' => __( 'Whether the store declares it. Left out when it could not be checked.', 'woocommerce' ),
+									),
 								),
 							),
 						),
@@ -224,8 +231,8 @@ class ReportAbility implements AbilityDefinition {
 							'description' => __( 'Whether the up to five product pages the page checks read start with the best seller. False when they start with the newest product.', 'woocommerce' ),
 						),
 						'sales'               => array(
-							'type'        => array( 'object', 'null' ),
-							'description' => __( 'The sales the shares compare: the last days, from Analytics, how many orders, and whether Analytics has imported the store\'s orders for that period. Null while Analytics is off.', 'woocommerce' ),
+							'type'        => 'object',
+							'description' => __( 'The sales the shares compare: the last days, from Analytics, how many orders, and whether Analytics has imported the store\'s orders for that period. Left out while Analytics is off.', 'woocommerce' ),
 							'properties'  => array(
 								'days'     => array( 'type' => 'integer' ),
 								'orders'   => array( 'type' => 'integer' ),
