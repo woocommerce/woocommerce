@@ -687,6 +687,13 @@ class Content_Renderer {
 			$layout['wideSize'] ?? $layout['contentSize']
 		);
 
+		// Paragraph blocks are each wrapped in their own table, so this only reaches paragraphs
+		// in one chunk of HTML (Classic, Custom HTML, shortcodes), which content.css resets to margin 0.
+		$block_gap = $this->theme_controller->get_styles()['spacing']['blockGap'] ?? null;
+		if ( is_string( $block_gap ) && '' !== $block_gap ) {
+			$styles .= sprintf( 'p + p { margin-top: %s; }', $block_gap );
+		}
+
 		// Get styles from theme.
 		$styles              .= $this->theme_controller->get_stylesheet_for_rendering();
 		$block_support_styles = $this->theme_controller->get_stylesheet_from_context( 'block-supports', array() );
