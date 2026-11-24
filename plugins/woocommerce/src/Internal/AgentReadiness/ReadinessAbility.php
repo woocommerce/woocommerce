@@ -42,18 +42,20 @@ trait ReadinessAbility {
 	}
 
 	/**
-	 * A value that may be null: the non-null schema, or null. Prefer this over a list of types
-	 * so each branch has one type name (MCP and the Core ability schema checks).
+	 * The output with every null field left out, at any depth, since Core ability output types are never nullable.
+	 * Items of a list stay where they are.
 	 *
-	 * @param array<string, mixed> $schema Schema of the non-null value (must include type).
-	 * @return array{anyOf: list<array<string, mixed>>}
+	 * @param array<mixed> $output Ability output.
+	 * @return array<mixed>
 	 */
-	protected static function nullable( array $schema ): array {
-		return array(
-			'anyOf' => array(
-				$schema,
-				array( 'type' => 'null' ),
-			),
-		);
+	protected static function without_nulls( array $output ): array {
+		foreach ( $output as $key => $value ) {
+			if ( null === $value && is_string( $key ) ) {
+				unset( $output[ $key ] );
+			} elseif ( is_array( $value ) ) {
+				$output[ $key ] = self::without_nulls( $value );
+			}
+		}
+		return $output;
 	}
 }

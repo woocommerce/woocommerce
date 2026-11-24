@@ -200,7 +200,7 @@ The scan walks published simple and variable products not set to Hidden in batch
 
 `AbilitiesLoader` registers these abilities in the WordPress Abilities API with the `Ability` class, which converts their input to the schema types. Each definition class in this directory owns its arguments. They show in REST and to MCP clients, for users with `manage_woocommerce`:
 
-- `woocommerce/get-agent-readiness` and `GET wc/v3/agent-readiness` both return `{ report, scan_pending, scan_stalled }` from `AgentReadiness::get_served_report()`: settings changed since the scan show their current state, and store output checks come from the stored report.
+- `woocommerce/get-agent-readiness` and `GET wc/v3/agent-readiness` both return `{ report, scan_pending, scan_stalled }` from `AgentReadiness::get_served_report()`: settings changed since the scan show their current state, and store output checks come from the stored report. The abilities leave out every field that would be null, as Core abilities do: `report` before the first scan, `ok` on a check that couldn't run, `sales_share` and `sales` without sales to compare, and `report_generated_at`.
 - `woocommerce/run-agent-readiness-check` with `product_id` checks that product now (`check_product()`) and returns its failing checks with label and fix, and its status per channel. Without one it queues the background scan, like `POST wc/v3/agent-readiness/scan`, and returns `scan_pending`, `scan_stalled` and `report_generated_at`, so the agent knows when to read the report again, or that it won't change until scheduled actions run.
 
 ## AI tools and Sales readiness

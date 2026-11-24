@@ -81,10 +81,12 @@ class RunCheckAbility implements AbilityDefinition {
 			$report       = wc_get_container()->get( AgentReadiness::class )->get_cached_report();
 			$pending      = $scan->is_pending();
 			$generated_at = is_array( $report ) ? ( $report['generated_at'] ?? null ) : null;
-			return array(
-				'scan_pending'        => $pending,
-				'scan_stalled'        => $pending && $scan->is_stalled(),
-				'report_generated_at' => is_string( $generated_at ) ? $generated_at : null,
+			return self::without_nulls(
+				array(
+					'scan_pending'        => $pending,
+					'scan_stalled'        => $pending && $scan->is_stalled(),
+					'report_generated_at' => is_string( $generated_at ) ? $generated_at : null,
+				)
 			);
 		}
 
@@ -135,11 +137,9 @@ class RunCheckAbility implements AbilityDefinition {
 					'type'        => 'boolean',
 					'description' => __( 'Whole store: whether the queued check has not started because scheduled actions are not running on the store. It runs once they do; until then the report does not change.', 'woocommerce' ),
 				),
-				'report_generated_at' => self::nullable(
-					array(
-						'type'        => 'string',
-						'description' => __( 'Whole store: when the report agents can read now was made; it changes when the queued check finishes.', 'woocommerce' ),
-					)
+				'report_generated_at' => array(
+					'type'        => 'string',
+					'description' => __( 'Whole store: when the report agents can read now was made; it changes when the queued check finishes. Left out before the first check.', 'woocommerce' ),
 				),
 				'product'             => array(
 					'type'       => 'object',

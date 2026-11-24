@@ -4306,10 +4306,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$check = function ( array $schema ) use ( &$check ): void {
 			if ( isset( $schema['type'] ) ) {
 				$this->assertIsString( $schema['type'] );
-				// A {"type":"null"} anyOf/oneOf branch is how a nullable value is declared; stop here.
-				if ( 'null' === $schema['type'] ) {
-					return;
-				}
+				$this->assertNotSame( 'null', $schema['type'] );
 			}
 			$this->assertNotContains( null, $schema['enum'] ?? array() );
 			foreach ( $schema['properties'] ?? array() as $name => $property ) {
