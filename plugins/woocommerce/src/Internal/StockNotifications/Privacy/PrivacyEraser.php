@@ -208,8 +208,9 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	/**
 	 * Erase customer stock notification data for a given email address and the account it belongs to.
 	 *
-	 * This method anonymizes the user email and cancels Active and Pending notifications with the
-	 * 'privacy' cancellation source. Sent and already Cancelled notifications keep their status.
+	 * Pending (unconfirmed) notifications are deleted. The rest get an anonymized email, shared by all of
+	 * this customer's rows but unique to this erasure, and Active ones are cancelled with the 'privacy'
+	 * cancellation source. Sent and already Cancelled notifications keep their status.
 	 *
 	 * @param string $email_address The email address to erase data for.
 	 *
@@ -224,8 +225,10 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 		);
 
 		$customer      = self::get_customer( $email_address );
-		$email_address = EmailNormalizer::normalize( $email_address );
 		$notifications = empty( $customer ) ? array() : NotificationQuery::get_notifications( array( 'customer' => $customer ) );
+
+		// Random rather than derived from the email, so it can't be traced back to the shopper.
+		$anonymous_email = 'deleted-' . strtolower( wp_generate_password( 12, false ) ) . '@site.invalid';
 
 		foreach ( $notifications as $notification_id ) {
 			$notification = Factory::get_notification( (int) $notification_id );
@@ -236,11 +239,11 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			/**
 			 * Action: woocommerce_privacy_before_remove_stock_notification_personal_data
 			 *
-			 * Fires before a stock notification is anonymized by the privacy eraser, while it still
-			 * holds the original email and user ID. The save that follows fires
-			 * `woocommerce_update_stock_notification` with the anonymized row, plus
-			 * `woocommerce_stock_notification_status_changed` only when an active or pending
-			 * notification is cancelled. Neither can identify the shopper any more.
+			 * Fires before the privacy eraser removes a stock notification's personal data, while it still
+			 * holds the original email and user ID. A pending notification is then deleted, which fires
+			 * `woocommerce_delete_stock_notification`. Any other is anonymized and saved, which fires
+			 * `woocommerce_update_stock_notification`, plus `woocommerce_stock_notification_status_changed`
+			 * when an active notification is cancelled. Neither of the last two can identify the shopper.
 			 *
 			 * @since 11.3.0
 			 *
@@ -250,18 +253,22 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			 */
 			do_action( 'woocommerce_privacy_before_remove_stock_notification_personal_data', $notification->get_id(), $notification->get_user_email(), $notification );
 
-			$anonymous_email = wp_privacy_anonymize_data( 'email', $email_address );
-			$notification->set_user_email( $anonymous_email );
-			$notification->set_user_id( 0 );
-			if ( in_array( $notification->get_status(), array( NotificationStatus::ACTIVE, NotificationStatus::PENDING ), true ) ) {
-				$notification->set_status( NotificationStatus::CANCELLED );
-				$notification->set_cancellation_source( NotificationCancellationSource::PRIVACY );
-				$notification->set_date_cancelled( time() );
+			if ( NotificationStatus::PENDING === $notification->get_status() ) {
+				// An unconfirmed sign-up was never a subscription, so there is nothing to keep.
+				$notification->delete();
+			} else {
+				$notification->set_user_email( $anonymous_email );
+				$notification->set_user_id( 0 );
+				if ( NotificationStatus::ACTIVE === $notification->get_status() ) {
+					$notification->set_status( NotificationStatus::CANCELLED );
+					$notification->set_cancellation_source( NotificationCancellationSource::PRIVACY );
+					$notification->set_date_cancelled( time() );
+				}
+				$notification->update_meta_data( '_anonymized', 'yes' );
+				$notification->update_meta_data( 'verification_action_key', '' );
+				$notification->update_meta_data( 'unsubscribe_action_key', '' );
+				$notification->save();
 			}
-			$notification->update_meta_data( '_anonymized', 'yes' );
-			$notification->update_meta_data( 'verification_action_key', '' );
-			$notification->update_meta_data( 'unsubscribe_action_key', '' );
-			$notification->save();
 			$response['messages'][] = sprintf(
 			/* translators: %d the numeric product ID */
 				__( 'Removed back-in-stock notification for product id: %d', 'woocommerce' ),
