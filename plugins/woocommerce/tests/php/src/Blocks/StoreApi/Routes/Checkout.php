@@ -6719,6 +6719,17 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertArrayHasKey( 'payment_result', $data );
 		$this->assertSame( 'success', $data['payment_result']['payment_status'] );
 		$this->assertSame( 0, wc_notice_count( 'error' ), 'The gateway notice should not stay queued for a later page.' );
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $data['order_id'] ) ), 'content' );
+		$this->assertNotEmpty(
+			array_filter(
+				$notes,
+				function ( $note ) {
+					return false !== strpos( $note, 'The bacs payment method returned no result.' );
+				}
+			),
+			'The order note should name the gateway that returned no result.'
+		);
 	}
 
 	/**

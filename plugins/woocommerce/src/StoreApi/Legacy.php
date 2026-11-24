@@ -62,12 +62,20 @@ class Legacy {
 
 		// Legacy gateways add an error notice and return nothing when they bail out early, so treat that as a failed payment.
 		if ( ! is_array( $gateway_result ) ) {
-			// A gateway that moved the order on before returning nothing did take payment. Hand it to the checkout's recovery, which reports success.
+			// A gateway that moved the order past payment before returning nothing must not be reported as failed. Hand it to the checkout's recovery, which reports success.
 			$order = wc_get_order( $order_id );
 			if ( $order instanceof \WC_Order && PaymentRecovery::order_moved_past_payment( $order ) ) {
 				// Notices are not shown from the API, so clear them as the normal path below does.
 				wc_clear_notices();
-				throw new RouteException( 'woocommerce_rest_invalid_payment_result', esc_html__( 'The payment method returned no result after taking payment.', 'woocommerce' ), 500 );
+				throw new RouteException(
+					'woocommerce_rest_invalid_payment_result',
+					sprintf(
+						/* translators: %s: payment gateway ID. */
+						esc_html__( 'The %s payment method returned no result.', 'woocommerce' ),
+						esc_html( $payment_method_object->id )
+					),
+					500
+				);
 			}
 
 			$gateway_result = array( 'result' => 'failure' );
