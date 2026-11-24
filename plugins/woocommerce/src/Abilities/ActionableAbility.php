@@ -617,7 +617,7 @@ abstract class ActionableAbility extends Ability {
 			 */
 			#[\ReturnTypeWillChange]
 			public function offsetGet( $subject ) {
-				return $this->contains( $subject ) ? parent::offsetGet( $subject ) : array();
+				return parent::offsetExists( $subject ) ? parent::offsetGet( $subject ) : array();
 			}
 		};
 		return $sent[ $extension ];
