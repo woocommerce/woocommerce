@@ -432,4 +432,28 @@ class Constants {
 	 * @since 10.5.0
 	 */
 	public const PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN = '_paypal_shipping_callback_token';
+
+	/**
+	 * Address policy and priced destination for the current PayPal attempt.
+	 *
+	 * @since 11.4.0
+	 * @var string
+	 */
+	public const PAYPAL_ORDER_META_ADDRESS_CONTEXT = '_paypal_address_context';
+
+	/**
+	 * Whether the PayPal destination requires merchant review.
+	 *
+	 * @since 11.4.0
+	 * @var string
+	 */
+	public const PAYPAL_ORDER_META_ADDRESS_REVIEW = '_paypal_address_review';
+
+	/**
+	 * Whether an automatic capture hold awaits address confirmation.
+	 *
+	 * @since 11.4.0
+	 * @var string
+	 */
+	public const PAYPAL_ORDER_META_CAPTURE_AWAITING_ADDRESS = '_paypal_capture_awaiting_address';
 }

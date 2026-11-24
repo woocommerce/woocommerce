@@ -8,6 +8,7 @@ import { Notice } from '@wordpress/ui';
 /**
  * Internal dependencies
  */
+import { trackReadiness, type Surface } from '../tracks';
 import type { ViewLink } from '../types';
 import { asLink } from './as-link';
 
@@ -17,8 +18,10 @@ import { asLink } from './as-link';
  */
 export const ComingSoonNotice = ( {
 	notice,
+	surface,
 }: {
 	notice: { text: string; link: ViewLink };
+	surface: Surface;
 } ) => (
 	<Notice.Root intent="warning">
 		<Notice.Description>{ notice.text }</Notice.Description>
@@ -26,7 +29,12 @@ export const ComingSoonNotice = ( {
 			<Notice.ActionButton
 				variant="outline"
 				className="wc-ai-shopping__notice-action wc-sales-readiness-ui-button"
-				{ ...asLink( notice.link.href ) }
+				{ ...asLink( notice.link.href, () =>
+					trackReadiness( 'link_clicked', {
+						surface,
+						area: 'coming_soon',
+					} )
+				) }
 			>
 				{ notice.link.text }
 			</Notice.ActionButton>

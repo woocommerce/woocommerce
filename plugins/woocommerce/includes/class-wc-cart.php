@@ -913,7 +913,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				continue;
 			}
 
-			// Check stock based on all items in the cart and consider any held stock within pending orders.
+			// Check stock based on all items in the cart and consider any stock held by other orders.
 			$held_stock     = wc_get_held_stock_quantity( $product, $current_session_order_id );
 			$required_stock = $product_qty_in_cart[ $product->get_stock_managed_by_id() ];
 

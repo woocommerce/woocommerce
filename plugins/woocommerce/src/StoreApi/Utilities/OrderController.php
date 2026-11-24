@@ -567,12 +567,16 @@ class OrderController {
 	 * Checks whether two locations match a different shipping zone or tax rate.
 	 *
 	 * Shipping zones and tax rates ignore case and postcode spacing, so a change in only those does not count.
+	 * Shared with DraftOrderTrait so both re-pricing guards agree on what counts as a destination change.
+	 *
+	 * @since 11.3.0
+	 * @since 11.3.1 Made public.
 	 *
 	 * @param array $old_location Location before the change.
 	 * @param array $new_location Location after the change.
 	 * @return bool
 	 */
-	private static function locations_differ( array $old_location, array $new_location ): bool {
+	public static function locations_differ( array $old_location, array $new_location ): bool {
 		foreach ( self::LOCATION_FIELDS as $field ) {
 			if ( self::normalize_location_field( $field, $old_location ) !== self::normalize_location_field( $field, $new_location ) ) {
 				return true;
@@ -1263,7 +1267,7 @@ class OrderController {
 							continue;
 						}
 
-						// Check stock based on all items in the cart and consider any held stock within pending orders.
+						// Check stock based on all items in the cart and consider any stock held by other orders.
 						$held_stock     = wc_get_held_stock_quantity( $product, $order->get_id() );
 						$required_stock = $quantities[ $product->get_stock_managed_by_id() ];
 
@@ -1311,8 +1315,15 @@ class OrderController {
 		$cart            = $cart_controller->get_cart_instance();
 		$cart_hashes     = $cart_controller->get_cart_hashes();
 
-		if ( $order->get_cart_hash() !== $cart_hashes['line_items'] ) {
-			$order->set_cart_hash( $cart_hashes['line_items'] );
+		// The cart hash covers the cart total too, and checkout only resumes an order whose cart hash matches the cart.
+		$order->set_cart_hash( $cart_hashes['line_items'] );
+
+		// Extensions such as Subscriptions also set the cart hash so checkout resumes their order, so it can't tell whether
+		// the line items were built from this cart. Hash the cart contents for that, like classic checkout does.
+		$line_items_hash = md5( (string) wp_json_encode( $cart->get_cart_for_session() ) );
+
+		if ( $order->get_meta( '_line_items_hash' ) !== $line_items_hash ) {
+			$order->update_meta_data( '_line_items_hash', $line_items_hash );
 			$order->remove_order_items( OrderItemType::LINE_ITEM );
 			wc()->checkout->create_order_line_items( $order, $cart );
 		}

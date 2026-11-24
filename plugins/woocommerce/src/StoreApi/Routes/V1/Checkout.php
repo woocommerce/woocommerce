@@ -673,8 +673,10 @@ class Checkout extends AbstractCartRoute {
 		 * Via the block based checkout and Store API we already have a draft order, but when POSTing to the /checkout
 		 * endpoint we do the same; reserve stock for the order to allow time to process payment.
 		 *
-		 * Note, stock is only "held" while the order has the status wc-checkout-draft or pending. Stock is freed when
-		 * the order changes status, or there is an exception.
+		 * Note, stock stays "held" while the order is in one of the statuses counted by the reserved stock
+		 * query (see the woocommerce_reserved_stock_order_statuses filter) and until the hold expires or is
+		 * released. The hold is released once the order's stock is reduced, on cancellation or failure, or
+		 * on an exception.
 		 *
 		 * @see ReserveStock::get_query_for_reserved_stock()
 		 *
