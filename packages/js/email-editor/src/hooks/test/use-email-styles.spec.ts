@@ -79,7 +79,7 @@ describe( 'email style helpers', () => {
 					elements: { link: { color: {} } },
 					blocks: [],
 				} )
-			).toEqual( { color: { text: '#000' } } );
+			).toStrictEqual( { color: { text: '#000' } } );
 		} );
 
 		it( 'keeps zero, false and other numbers set by the user', () => {
@@ -89,7 +89,7 @@ describe( 'email style helpers', () => {
 					border: { radius: 0 },
 					custom: { enabled: false },
 				} )
-			).toEqual( {
+			).toStrictEqual( {
 				typography: { lineHeight: 1.5, letterSpacing: 0 },
 				border: { radius: 0 },
 				custom: { enabled: false },
