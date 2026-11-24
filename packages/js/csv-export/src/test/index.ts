@@ -104,11 +104,15 @@ describe( 'generateCSVFileName', () => {
 describe( 'downloadCSVFile', () => {
 	it( 'downloads UTF-8 CSV with the requested filename and releases the object URL', async () => {
 		const originalURL = window.URL;
-		const createObjectURL = jest.fn< string, [ Blob ] >( () => 'blob:test' );
+		const createObjectURL = jest.fn< string, [ Blob ] >(
+			() => 'blob:test'
+		);
 		const revokeObjectURL = jest.fn();
 		const click = jest
-			.spyOn( HTMLAnchorElement.prototype, 'click' )
-			.mockImplementation( function ( this: HTMLAnchorElement ) {
+			.spyOn( window.HTMLAnchorElement.prototype, 'click' )
+			.mockImplementation( function (
+				this: InstanceType< typeof window.HTMLAnchorElement >
+			) {
 				expect( this.download ).toBe( 'test.csv' );
 				expect( this.href ).toBe( 'blob:test' );
 			} );
@@ -129,7 +133,7 @@ describe( 'downloadCSVFile', () => {
 
 			const bytes = await new Promise< Uint8Array >(
 				( resolve, reject ) => {
-					const reader = new FileReader();
+					const reader = new window.FileReader();
 					reader.onload = () =>
 						resolve(
 							new Uint8Array( reader.result as ArrayBuffer )
