@@ -11,6 +11,12 @@
 	display: none;
 }
 
+// The shared notices styles set `display: block`, which overrides `hidden` and
+// leaves an empty box whose margins can show where no flow layout resets them.
+.wc-block-add-to-cart-with-options__notices[hidden] {
+	display: none;
+}
+
 // The notices list is the form's first child, so the flow layout's first-child
 // margin reset doesn't reach the first inner block. Reset it while no notice is shown.
 .wc-block-add-to-cart-with-options__notices[hidden] + * {
