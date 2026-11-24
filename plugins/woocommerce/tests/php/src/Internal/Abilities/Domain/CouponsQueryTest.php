@@ -681,7 +681,7 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 							'filter'    => 'has_credit',
 							'schema'    => array( 'type' => 'boolean' ),
 							'callback'  => static fn( bool $value ) => array(
-								'meta_query' => array(
+								'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 									array(
 										'key'     => 'test_credit',
 										'compare' => $value ? 'EXISTS' : 'NOT EXISTS',
