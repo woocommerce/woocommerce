@@ -237,6 +237,7 @@ class AddToCartWithOptions extends \WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'action="https://example.com"', $markup, 'The form has an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter.' );
 		$this->assertStringNotContainsString( 'data-wp-on--submit', $markup, 'The form doesn\'t have an on submit event when redirect after add is enabled.' );
+		$this->assertStringNotContainsString( 'woocommerce/store-notices', $markup, 'The HTML form has no store notices context nor notices list.' );
 
 		// Test when cart redirect is disabled.
 		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
@@ -263,6 +264,75 @@ class AddToCartWithOptions extends \WC_Unit_Test_Case {
 
 		$this->assertStringNotContainsString( 'action="https://example.com"', $markup, 'The form doesn\'t have an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter when an extension hooks into the form but not adding a form element.' );
 		$this->assertStringContainsString( 'data-wp-on--submit', $markup, 'The form has an on submit event when an extension hooks into the form but not adding a form element.' );
+	}
+
+	/**
+	 * @testdox The interactive form holds the store notices context and its notices list, with no element enclosing it for a $product_type product.
+	 *
+	 * @dataProvider provider_interactive_product_types
+	 *
+	 * @param string $product_type Product type under test.
+	 */
+	public function test_interactive_form_holds_store_notices_context( string $product_type ): void {
+		global $product;
+
+		$previous_product = $product;
+		switch ( $product_type ) {
+			case 'variable':
+				$product = \WC_Helper_Product::create_variation_product();
+				break;
+			case 'grouped':
+				$product = \WC_Helper_Product::create_grouped_product();
+				break;
+			case 'external':
+				$product = \WC_Helper_Product::create_external_product();
+				break;
+			default:
+				$product = \WC_Helper_Product::create_simple_product();
+		}
+
+		try {
+			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/add-to-cart-with-options /--></div><!-- /wp:woocommerce/single-product -->' );
+		} finally {
+			$product = $previous_product;
+		}
+
+		$dom = new \DOMDocument();
+		libxml_use_internal_errors( true );
+		$dom->loadHTML( '<?xml encoding="utf-8"?>' . $markup );
+		libxml_clear_errors();
+		$xpath = new \DOMXPath( $dom );
+
+		$form = $xpath->query( '//form[contains(concat(" ", @class, " "), " wc-block-add-to-cart-with-options ")]' )->item( 0 );
+		$this->assertInstanceOf( \DOMElement::class, $form, 'The block renders its form.' );
+
+		$this->assertSame( 0, $xpath->query( 'ancestor::*[@data-wp-interactive="woocommerce/store-notices"]', $form )->length, 'No element encloses the form to provide the store notices context.' );
+
+		$this->assertTrue( $form->hasAttribute( 'data-wp-context' ), 'The form keeps its own context.' );
+		$this->assertSame( 'woocommerce/store-notices::{"notices":[]}', $form->getAttribute( 'data-wp-context---notices' ), 'The form carries an empty store notices context.' );
+
+		$notices_list = $xpath->query( '*', $form )->item( 0 );
+		$this->assertInstanceOf( \DOMElement::class, $notices_list, 'The form has child elements.' );
+		$this->assertSame( 'woocommerce/store-notices', $notices_list->getAttribute( 'data-wp-interactive' ), 'The notices list is the first child of the form.' );
+		$this->assertStringContainsString( 'wc-block-components-notices', $notices_list->getAttribute( 'class' ), 'The notices list uses the store notices styles.' );
+
+		$dismiss_button = $xpath->query( './/button[@data-wp-on--click="actions.removeNotice"]', $notices_list )->item( 0 );
+		$this->assertInstanceOf( \DOMElement::class, $dismiss_button, 'Each notice has a dismiss button.' );
+		$this->assertSame( 'button', $dismiss_button->getAttribute( 'type' ), 'The dismiss button does not submit the form.' );
+	}
+
+	/**
+	 * Data provider for the product types rendered with the interactive form.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function provider_interactive_product_types(): array {
+		return array(
+			'simple product'   => array( 'simple' ),
+			'variable product' => array( 'variable' ),
+			'grouped product'  => array( 'grouped' ),
+			'external product' => array( 'external' ),
+		);
 	}
 
 	/**

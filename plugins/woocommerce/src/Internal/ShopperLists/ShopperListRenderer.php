@@ -224,9 +224,9 @@ final class ShopperListRenderer {
 	}
 
 	/**
-	 * Render the iAPI store-notices region used by the row-level error
-	 * banners. Mirrors `AddToCartWithOptions::render_interactivity_notices_region()`
-	 * — keep in sync if the shape changes.
+	 * Render the iAPI store-notices list shared by the blocks that keep their
+	 * notices in a `woocommerce/store-notices` context on their own wrapper
+	 * (shopper lists, Add to Cart + Options). The list declares no context.
 	 *
 	 * @param string $wrapper_class Class attribute for the outer `<div>`.
 	 * @return string
