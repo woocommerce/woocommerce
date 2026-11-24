@@ -29,6 +29,25 @@ class OrderController {
 	private const LOCATION_FIELDS = [ 'country', 'state', 'postcode', 'city' ];
 
 	/**
+	 * Order item types that update_line_items_from_cart() creates from the cart.
+	 *
+	 * @var string[]
+	 */
+	private const CART_ORDER_ITEM_TYPES = [
+		OrderItemType::LINE_ITEM,
+		OrderItemType::FEE,
+		OrderItemType::SHIPPING,
+		OrderItemType::TAX,
+		OrderItemType::COUPON,
+	];
+
+	/**
+	 * Order meta that stores a fingerprint of each item the cart created, by item type and ID, so the next sync can
+	 * rebuild the types a merchant edited in the meantime.
+	 */
+	private const CART_ORDER_ITEMS_SNAPSHOT_META_KEY = '_store_api_cart_order_items_snapshot';
+
+	/**
 	 * Prefix of the option name used as a self-expiring mutex around an order. The order ID is appended.
 	 *
 	 * The row holds the lock's release time (a microtime float); its mere existence is the lock. It lives in the
@@ -131,6 +150,8 @@ class OrderController {
 			wc()->cart->calculate_totals();
 		}
 
+		$items_before_sync = $order->get_items( self::CART_ORDER_ITEM_TYPES );
+
 		// Update the current order to match the current cart.
 		$this->update_line_items_from_cart( $order );
 		$this->update_addresses_from_cart( $order );
@@ -145,6 +166,81 @@ class OrderController {
 		$order->set_payment_method( $payment_method );
 		$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( wc()->cart->get_customer()->get_is_vat_exempt() ) );
 		$order->calculate_totals();
+
+		$this->save_cart_order_items_snapshot( $order, $items_before_sync );
+	}
+
+	/**
+	 * Stores a fingerprint of each item the cart created, read after calculate_totals() saved the order.
+	 *
+	 * Those are the items this sync added, and the ones it kept that the previous snapshot listed. Items an extension
+	 * added are left out, so they can't make a type look changed. An order without a snapshot, such as one placed before
+	 * the snapshot existed, counts all the items it had as created by the cart.
+	 *
+	 * @param \WC_Order        $order             The synced order.
+	 * @param \WC_Order_Item[] $items_before_sync The order's items before the sync, keyed by ID.
+	 */
+	private function save_cart_order_items_snapshot( \WC_Order $order, array $items_before_sync ): void {
+		if ( ! $order->get_id() ) {
+			return;
+		}
+
+		$previous_snapshot = $this->get_cart_order_items_snapshot( $order );
+		$previous_item_ids = null === $previous_snapshot
+			? array_keys( $items_before_sync )
+			: array_merge( ...array_values( array_map( 'array_keys', $previous_snapshot ) ) );
+
+		$snapshot = [];
+		foreach ( $order->get_items( self::CART_ORDER_ITEM_TYPES ) as $item_id => $item ) {
+			if ( ! isset( $items_before_sync[ $item_id ] ) || in_array( $item_id, $previous_item_ids, true ) ) {
+				$snapshot[ $item->get_type() ][ $item_id ] = wc()->checkout()->get_order_item_fingerprint( $item );
+			}
+		}
+
+		$order->update_meta_data( self::CART_ORDER_ITEMS_SNAPSHOT_META_KEY, $snapshot );
+		$order->save_meta_data();
+	}
+
+	/**
+	 * Reads the snapshot save_cart_order_items_snapshot() stored.
+	 *
+	 * @param \WC_Order $order The order.
+	 * @return array<string, array<int, string>>|null Fingerprints by item type and ID, or null when there is no snapshot.
+	 */
+	private function get_cart_order_items_snapshot( \WC_Order $order ): ?array {
+		$snapshot = $order->get_meta( self::CART_ORDER_ITEMS_SNAPSHOT_META_KEY );
+		if ( ! is_array( $snapshot ) ) {
+			return null;
+		}
+
+		return array_filter( array_map( fn( $items ) => is_array( $items ) ? $items : [], $snapshot ) );
+	}
+
+	/**
+	 * Returns the item types where an item the cart created was removed or changed since the last sync, for example
+	 * by a merchant editing a pending order. Items added since are allowed, as extensions add their own.
+	 *
+	 * @param \WC_Order $order The order.
+	 * @return string[] The changed item types.
+	 */
+	private function get_order_item_types_changed_since_snapshot( \WC_Order $order ): array {
+		$snapshot = $this->get_cart_order_items_snapshot( $order );
+		if ( null === $snapshot ) {
+			return [];
+		}
+
+		$changed_types = [];
+		foreach ( $snapshot as $item_type => $fingerprints ) {
+			$order_items = $order->get_items( $item_type );
+			foreach ( $fingerprints as $item_id => $fingerprint ) {
+				if ( ! isset( $order_items[ $item_id ] ) || wc()->checkout()->get_order_item_fingerprint( $order_items[ $item_id ] ) !== (string) $fingerprint ) {
+					$changed_types[] = $item_type;
+					break;
+				}
+			}
+		}
+
+		return $changed_types;
 	}
 
 	/**
@@ -1314,6 +1410,8 @@ class OrderController {
 		$cart_controller = new CartController();
 		$cart            = $cart_controller->get_cart_instance();
 		$cart_hashes     = $cart_controller->get_cart_hashes();
+		// The section hashes don't change when a merchant edits the order's items, so those types are rebuilt too.
+		$changed_types = $this->get_order_item_types_changed_since_snapshot( $order );
 
 		// The cart hash covers the cart total too, and checkout only resumes an order whose cart hash matches the cart.
 		$order->set_cart_hash( $cart_hashes['line_items'] );
@@ -1322,7 +1420,7 @@ class OrderController {
 		// the line items were built from this cart. Hash the cart contents for that, like classic checkout does.
 		$line_items_hash = md5( (string) wp_json_encode( $cart->get_cart_for_session() ) );
 
-		if ( $order->get_meta( '_line_items_hash' ) !== $line_items_hash ) {
+		if ( $order->get_meta( '_line_items_hash' ) !== $line_items_hash || in_array( OrderItemType::LINE_ITEM, $changed_types, true ) ) {
 			$order->update_meta_data( '_line_items_hash', $line_items_hash );
 			$order->remove_order_items( OrderItemType::LINE_ITEM );
 			wc()->checkout->create_order_line_items( $order, $cart );
@@ -1332,25 +1430,25 @@ class OrderController {
 		// A non-null methods value means evaluation ran; it may still be an empty array.
 		$shipping_evaluated = $cart->has_calculated_shipping() || ( ! $cart->needs_shipping() && null !== $cart->get_shipping_methods() );
 
-		if ( $shipping_evaluated && $order->get_meta( '_shipping_hash' ) !== $cart_hashes['shipping'] ) {
+		if ( $shipping_evaluated && ( $order->get_meta( '_shipping_hash' ) !== $cart_hashes['shipping'] || in_array( OrderItemType::SHIPPING, $changed_types, true ) ) ) {
 			$order->remove_order_items( OrderItemType::SHIPPING );
 			wc()->checkout->create_order_shipping_lines( $order, wc()->session->get( 'chosen_shipping_methods' ), wc()->shipping()->get_packages() );
 			$order->update_meta_data( '_shipping_hash', $cart_hashes['shipping'] );
 		}
 
-		if ( $order->get_meta( '_coupons_hash' ) !== $cart_hashes['coupons'] ) {
+		if ( $order->get_meta( '_coupons_hash' ) !== $cart_hashes['coupons'] || in_array( OrderItemType::COUPON, $changed_types, true ) ) {
 			$order->remove_order_items( OrderItemType::COUPON );
 			$order->update_meta_data( '_coupons_hash', $cart_hashes['coupons'] );
 			wc()->checkout->create_order_coupon_lines( $order, $cart );
 		}
 
-		if ( $order->get_meta( '_fees_hash' ) !== $cart_hashes['fees'] ) {
+		if ( $order->get_meta( '_fees_hash' ) !== $cart_hashes['fees'] || in_array( OrderItemType::FEE, $changed_types, true ) ) {
 			$order->update_meta_data( '_fees_hash', $cart_hashes['fees'] );
 			$order->remove_order_items( OrderItemType::FEE );
 			wc()->checkout->create_order_fee_lines( $order, $cart );
 		}
 
-		if ( $order->get_meta( '_taxes_hash' ) !== $cart_hashes['taxes'] ) {
+		if ( $order->get_meta( '_taxes_hash' ) !== $cart_hashes['taxes'] || in_array( OrderItemType::TAX, $changed_types, true ) ) {
 			$order->update_meta_data( '_taxes_hash', $cart_hashes['taxes'] );
 			$order->remove_order_items( OrderItemType::TAX );
 			wc()->checkout->create_order_tax_lines( $order, $cart );

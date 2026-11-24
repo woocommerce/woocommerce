@@ -786,12 +786,16 @@ class WC_Checkout {
 
 	/**
 	 * Hashes an item's stored amounts and properties. Names and meta are left out, so renaming an item or adding meta
-	 * to it, as gateways do, doesn't count as a change.
+	 * to it, as gateways do, doesn't count as a change. The Store API uses it to detect edits to a retried order too.
+	 *
+	 * @internal
+	 *
+	 * @since 11.5.0
 	 *
 	 * @param WC_Order_Item $item The order item.
 	 * @return string
 	 */
-	private function get_order_item_fingerprint( WC_Order_Item $item ): string {
+	public function get_order_item_fingerprint( WC_Order_Item $item ): string {
 		// Include unsaved changes, so an item can be compared before and after it's saved.
 		$data = array_replace_recursive( $item->get_data(), $item->get_changes() );
 		unset( $data['id'], $data['order_id'], $data['name'], $data['meta_data'] );
