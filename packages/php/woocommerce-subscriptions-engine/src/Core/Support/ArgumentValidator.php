@@ -31,8 +31,8 @@ final class ArgumentValidator {
 
 	/**
 	 * Format of an engine slug, in JSON-schema syntax: 1-64 lowercase letters, digits, hyphens or
-	 * underscores. Extension slugs (the owner), schedule sources and lock operation labels share it;
-	 * 64 is the width of their columns.
+	 * underscores. Extension slugs (the owner), schedule sources, lock operation labels and history
+	 * entry types share it; 64 is the width of their columns.
 	 */
 	public const SLUG_PATTERN = '^[a-z0-9_-]{1,64}$';
 
@@ -118,6 +118,21 @@ final class ArgumentValidator {
 	public function get_extension_slug( string $key, $value ): ?string {
 		try {
 			return self::validate_extension_slug( $key, $value );
+		} catch ( InvalidInputException $e ) {
+			$this->add( $e );
+			return null;
+		}
+	}
+
+	/**
+	 * Collecting {@see self::validate_slug()}: the slug, or null when refused.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 */
+	public function get_slug( string $key, $value ): ?string {
+		try {
+			return self::validate_slug( $key, $value );
 		} catch ( InvalidInputException $e ) {
 			$this->add( $e );
 			return null;
@@ -351,12 +366,45 @@ final class ArgumentValidator {
 	 * @throws InvalidInputException If the value is missing, empty, not a string or not a valid slug.
 	 */
 	public static function validate_extension_slug( string $key, $value ): string {
+		return self::validate_slug( $key, $value );
+	}
+
+	/**
+	 * Validate and return a slug: a non-empty string matching {@see self::SLUG_PATTERN}, not
+	 * trimmed or case folded.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @throws InvalidInputException If the value is missing, empty, not a string or not a valid slug.
+	 */
+	public static function validate_slug( string $key, $value ): string {
 		$slug = self::validate_non_empty_string( $key, $value );
 		if ( ! self::is_slug( $slug ) ) {
 			throw self::get_invalid_input( ValidationErrorCode::INVALID_PATTERN, $key, 'must be 1-64 lowercase letters, digits, hyphens or underscores', array( 'pattern' => self::SLUG_PATTERN ) );
 		}
 
 		return $slug;
+	}
+
+	/**
+	 * Validate and return a creation key, or null: a string of 1-100 characters. The caller trims
+	 * it first, because the binary key columns ignore trailing spaces when comparing.
+	 *
+	 * @param mixed $value Caller value.
+	 * @throws InvalidInputException If the value is not null or a string of 1-100 characters.
+	 */
+	public static function validate_creation_key( $value ): ?string {
+		if ( null === $value ) {
+			return null;
+		}
+		if ( ! is_string( $value ) ) {
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_TYPE, 'creation_key', 'must be a string', array( 'type' => 'string' ) );
+		}
+		if ( '' === $value || mb_strlen( $value ) > 100 ) {
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_VALUE, 'creation_key', 'must be 1-100 characters' );
+		}
+
+		return $value;
 	}
 
 	/**
