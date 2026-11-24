@@ -211,7 +211,8 @@ class OrderController {
 
 	/**
 	 * Returns the item types where an item the cart created was removed or changed since the last sync, for example
-	 * by a merchant editing a pending order. Items added since are allowed, as extensions add their own.
+	 * by a merchant editing a pending order. Added products and coupons count as a change too, since only the cart
+	 * adds them. Added fees and shipping lines are allowed, as extensions add their own.
 	 *
 	 * @param \WC_Order $order The order.
 	 * @return string[] The changed item types.
@@ -222,13 +223,18 @@ class OrderController {
 			return [];
 		}
 
-		return array_keys(
-			array_filter(
-				$snapshot,
-				fn( array $fingerprints, string $item_type ) => ! OrderItemFingerprint::items_match( $order->get_items( $item_type ), $fingerprints ),
-				ARRAY_FILTER_USE_BOTH
-			)
-		);
+		$changed_types = [];
+		foreach ( OrderItemFingerprint::CART_ITEM_TYPES as $item_type ) {
+			$order_items  = $order->get_items( $item_type );
+			$fingerprints = $snapshot[ $item_type ] ?? [];
+			$has_added    = in_array( $item_type, [ OrderItemType::LINE_ITEM, OrderItemType::COUPON ], true ) && array_diff_key( $order_items, $fingerprints );
+
+			if ( $has_added || ! OrderItemFingerprint::items_match( $order_items, $fingerprints ) ) {
+				$changed_types[] = $item_type;
+			}
+		}
+
+		return $changed_types;
 	}
 
 	/**

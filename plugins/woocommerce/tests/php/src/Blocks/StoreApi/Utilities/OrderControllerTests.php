@@ -861,6 +861,34 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() removes a product or coupon a merchant added to a retried order, so the order total matches the cart.
+	 *
+	 * @testWith ["line_item"]
+	 *           ["coupon"]
+	 *
+	 * @param string $item_type The type of item the merchant adds.
+	 */
+	public function test_update_order_from_cart_removes_products_and_coupons_a_merchant_added( string $item_type ): void {
+		$order = $this->create_retried_order_with_shipping_and_fee();
+		if ( 'line_item' === $item_type ) {
+			$item_id = $order->add_product( WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '7' ) ) );
+		} else {
+			$coupon = new \WC_Order_Item_Coupon();
+			$coupon->set_code( 'merchant-added' );
+			$coupon->set_discount( '3' );
+			$coupon->set_order_id( $order->get_id() );
+			$item_id = $coupon->save();
+		}
+		$order->save();
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertNotContains( $item_id, array_keys( $order->get_items( $item_type ) ), "The {$item_type} the merchant added should be removed." );
+		$this->assertCount( 'line_item' === $item_type ? 1 : 0, $order->get_items( $item_type ), "Only the cart's {$item_type} lines should be on the order." );
+		$this->assertSame( 25.0, (float) $order->get_total(), 'The order should be charged the cart total.' );
+	}
+
+	/**
 	 * @testdox update_order_from_cart() keeps repaired items, and items an extension added, on the next unchanged sync.
 	 */
 	public function test_update_order_from_cart_keeps_repaired_and_extension_items_on_the_next_sync(): void {
