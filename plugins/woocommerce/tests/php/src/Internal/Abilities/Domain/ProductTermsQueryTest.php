@@ -46,7 +46,7 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		foreach ( array( 'resources', 'fields' ) as $name ) {
+		foreach ( array( 'resources', 'fields', 'filters' ) as $name ) {
 			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
 			$property->setAccessible( true );
 			$this->saved_state[ $name ] = $property->getValue();
@@ -592,6 +592,74 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
 		$this->assertSame( $baseline, ProductTermsQuery::execute( $input ) );
 		$this->assertSame( $schema, ProductTermsQuery::get_registration_args()['output_schema'] );
+	}
+
+	/**
+	 * @testdox Should apply the term meta, include and exclude clauses of extension filters to the terms and the total.
+	 */
+	public function test_extension_filters(): void {
+		list( $first, $second, $third ) = self::factory()->term->create_many( 3, array( 'taxonomy' => 'product_tag' ) );
+		add_term_meta( $first, '_test_flag', '1' );
+		add_term_meta( $second, '_test_flag', '1' );
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
+		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
+		do_action( 'woocommerce_extensible_abilities_resources_init' );
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				$filters = array(
+					'flagged' => static fn() => array(
+						'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- The filter under test returns a term meta clause.
+							'key'     => '_test_flag',
+							'compare' => 'EXISTS',
+						),
+					),
+					'only'    => static fn( array $ids ) => array( 'include_ids' => $ids ),
+					'not'     => static fn( array $ids ) => array( 'exclude_ids' => $ids ),
+				);
+				foreach ( $filters as $filter => $callback ) {
+					ExtensibleAbilities::register_query_filter(
+						array(
+							'resource'  => 'product_term',
+							'namespace' => 'test-ext',
+							'filter'    => $filter,
+							'schema'    => 'flagged' === $filter ? array( 'type' => 'boolean' ) : array(
+								'type'  => 'array',
+								'items' => array( 'type' => 'integer' ),
+							),
+							'callback'  => $callback,
+						)
+					);
+				}
+			}
+		);
+		do_action( 'woocommerce_extensible_abilities_init' );
+		$ability = new Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+		$query   = static function ( array $filters, array $input = array() ) use ( $ability ) {
+			$result = $ability->execute(
+				array_merge(
+					array(
+						'taxonomy' => 'product_tag',
+						'orderby'  => 'id',
+						'filters'  => array( 'extensions' => array( 'test-ext' => $filters ) ),
+					),
+					$input
+				)
+			);
+			return array( array_column( $result['terms'], 'id' ), $result['total'] );
+		};
+
+		$this->assertSame(
+			array( array( $first ), 1 ),
+			$query(
+				array(
+					'flagged' => true,
+					'not'     => array( $second ),
+				)
+			)
+		);
+		$this->assertSame( array( array( $third ), 1 ), $query( array( 'only' => array( $second, $third ) ), array( 'include' => array( $first, $third ) ) ) );
+		$this->assertSame( array( array(), 0 ), $query( array( 'not' => array( $first ) ), array( 'include' => array( $first ) ) ) );
 	}
 
 	/**

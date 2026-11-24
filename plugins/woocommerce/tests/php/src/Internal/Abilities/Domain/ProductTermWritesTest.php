@@ -56,7 +56,7 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		foreach ( array( 'resources', 'fields' ) as $name ) {
+		foreach ( array( 'resources', 'fields', 'validators', 'syncs' ) as $name ) {
 			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
 			$property->setAccessible( true );
 			$this->saved_state[ $name ] = $property->getValue();
@@ -694,13 +694,115 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should write a sent extension field of a new and of an existing term in a sync, and save nothing when a validator or a sync refuses.
+	 */
+	public function test_writes_extension_fields(): void {
+		$id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_tag',
+				'name'     => 'Existing',
+			)
+		);
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
+		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
+		do_action( 'woocommerce_extensible_abilities_resources_init' );
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'product_term',
+						'namespace'     => 'test-ext',
+						'field'         => 'label',
+						'output_schema' => array( 'type' => 'string' ),
+						'input_schema'  => array( 'type' => 'string' ),
+						'get_callback'  => static function ( \WP_Term $term ) {
+							$label = get_term_meta( $term->term_id, '_test_label', true );
+							return '' === $label ? null : $label;
+						},
+					)
+				);
+				ExtensibleAbilities::register_validator(
+					array(
+						'resource'  => 'product_term',
+						'namespace' => 'test-ext',
+						'callback'  => static fn( \WP_Term $term ) => 'Refused' === $term->name ? new \WP_Error( 'refused', 'This name is refused.' ) : null,
+					)
+				);
+				ExtensibleAbilities::register_sync(
+					array(
+						'resource'  => 'product_term',
+						'namespace' => 'test-ext',
+						'callback'  => static function ( array $saved, array $context ) {
+							foreach ( $saved as $term ) {
+								$label = $context['fields'][ $term ]['label'] ?? null;
+								if ( 'fail' === $label ) {
+									return new \WP_Error( 'sync_failed', 'The sync failed.' );
+								}
+								if ( null !== $label ) {
+									update_term_meta( $term->term_id, '_test_label', $label );
+								}
+							}
+							return null;
+						},
+					)
+				);
+			}
+		);
+		do_action( 'woocommerce_extensible_abilities_init' );
+		$extensions = static fn( string $label ) => array( 'test-ext' => array( 'label' => $label ) );
+
+		$created     = $this->create(
+			array(
+				'taxonomy'   => 'product_tag',
+				'name'       => 'Sale',
+				'extensions' => $extensions( 'new' ),
+			)
+		);
+		$updated     = $this->update(
+			array(
+				'taxonomy'   => 'product_tag',
+				'id'         => $id,
+				'extensions' => $extensions( 'changed' ),
+			)
+		);
+		$refused     = $this->update(
+			array(
+				'taxonomy'   => 'product_tag',
+				'id'         => $id,
+				'name'       => 'Refused',
+				'extensions' => $extensions( 'lost' ),
+			)
+		);
+		$rolled_back = $this->create(
+			array(
+				'taxonomy'   => 'product_tag',
+				'name'       => 'Rolled back',
+				'extensions' => $extensions( 'fail' ),
+			)
+		);
+
+		$this->assertSame( 'new', $created['term']['extensions']['test-ext']['label'] );
+		$this->assertSame( 'new', get_term_meta( $created['term']['id'], '_test_label', true ) );
+		$this->assertSame( 'changed', $updated['term']['extensions']['test-ext']['label'] );
+		$this->assertSame( 'Existing', $updated['term']['name'] );
+		$this->assertWPError( $refused );
+		$this->assertSame( 'test-ext:refused', $refused->get_error_code() );
+		$this->assertSame( 'Existing', get_term( $id, 'product_tag' )->name );
+		$this->assertSame( 'changed', get_term_meta( $id, '_test_label', true ) );
+		$this->assertWPError( $rolled_back );
+		$this->assertSame( 'sync_failed', $rolled_back->get_error_code() );
+		$this->assertFalse( get_term_by( 'name', 'Rolled back', 'product_tag' ) );
+	}
+
+	/**
 	 * Run the create ability.
 	 *
 	 * @param array $input Ability input.
 	 * @return mixed
 	 */
 	private function create( array $input ) {
-		return ( new Ability( ProductTermCreate::get_name(), ProductTermCreate::get_registration_args() ) )->execute( $input );
+		return ( new ProductTermCreate( ProductTermCreate::ABILITY_NAME, ProductTermCreate::get_registration_args() ) )->execute( $input );
 	}
 
 	/**
@@ -710,6 +812,6 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 	 * @return mixed
 	 */
 	private function update( array $input ) {
-		return ( new Ability( ProductTermUpdate::get_name(), ProductTermUpdate::get_registration_args() ) )->execute( $input );
+		return ( new ProductTermUpdate( ProductTermUpdate::ABILITY_NAME, ProductTermUpdate::get_registration_args() ) )->execute( $input );
 	}
 }
