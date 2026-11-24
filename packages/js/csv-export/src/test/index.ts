@@ -104,7 +104,7 @@ describe( 'generateCSVFileName', () => {
 describe( 'downloadCSVFile', () => {
 	it( 'downloads UTF-8 CSV with the requested filename and releases the object URL', async () => {
 		const originalURL = window.URL;
-		const createObjectURL = jest.fn( ( blob: Blob ) => 'blob:test' );
+		const createObjectURL = jest.fn< string, [ Blob ] >( () => 'blob:test' );
 		const revokeObjectURL = jest.fn();
 		const click = jest
 			.spyOn( HTMLAnchorElement.prototype, 'click' )
@@ -120,7 +120,8 @@ describe( 'downloadCSVFile', () => {
 		} );
 
 		try {
-			downloadCSVFile( 'test.csv', mockCSVData );
+			const data = 'Product,Price\n商品 🛒 Café,19.99';
+			downloadCSVFile( 'test.csv', data );
 
 			expect( click ).toHaveBeenCalledTimes( 1 );
 			const [ blob ] = createObjectURL.mock.calls[ 0 ];
@@ -140,7 +141,7 @@ describe( 'downloadCSVFile', () => {
 			expect( Array.from( bytes.slice( 0, 3 ) ) ).toEqual( [
 				239, 187, 191,
 			] );
-			expect( new TextDecoder().decode( bytes ) ).toBe( mockCSVData );
+			expect( new TextDecoder().decode( bytes ) ).toBe( data );
 
 			expect( revokeObjectURL ).not.toHaveBeenCalled();
 			jest.runOnlyPendingTimers();
