@@ -994,6 +994,18 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertSame( '4', (string) $item->get_meta( '_reduced_stock', true ), 'Restoring should keep the item marked as reduced' );
 		$this->assertStringStartsWith( 'Unable to restore stock for item', $notes[0]->content, 'Restoring should add an error note' );
 
+		$note_count = count( $notes );
+		wc_restock_refunded_items( $order, array( $item->get_id() => array( 'qty' => 1 ) ) );
+		$item  = current( $order->get_items() );
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertSame( '4', (string) $item->get_meta( '_reduced_stock', true ), 'Restocking a refund should keep the item marked as reduced' );
+		$this->assertSame( '', $item->get_meta( '_restock_refunded_items', true ), 'Restocking a refund should not count the item as restocked' );
+		$this->assertCount( $note_count + 1, $notes, 'Restocking a refund should add one note' );
+		$this->assertStringStartsWith( 'Unable to restore stock for item', $notes[0]->content, 'Restocking a refund should add an error note' );
+
+		$this->assertFalse( wc_maybe_adjust_line_item_product_stock( $item, 6 ), 'Adjusting the line item stock should report no change' );
+		$this->assertSame( '4', (string) $item->get_meta( '_reduced_stock', true ), 'Adjusting the line item stock should keep the reduced quantity' );
+
 		remove_filter( 'woocommerce_order_item_product', $return_variation );
 		$this->assertSame( '10', get_post_meta( $parent->get_id(), '_stock', true ), 'The parent stock should not change' );
 	}

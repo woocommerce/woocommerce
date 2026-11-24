@@ -862,6 +862,12 @@ function wc_restock_refunded_items( $order, $refunded_line_items ) {
 		$old_stock = $product->get_stock_quantity();
 		$new_stock = wc_update_product_stock( $product, $qty_to_refund, 'increase' );
 
+		if ( is_wp_error( $new_stock ) || false === $new_stock ) {
+			/* translators: %s item name. */
+			$order->add_order_note( sprintf( __( 'Unable to restore stock for item %s.', 'woocommerce' ), $item->get_name() ), 0, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
+			continue;
+		}
+
 		// Update _reduced_stock meta to track changes.
 		$item_stock_reduced = $item_stock_reduced - $qty_to_refund;
 
