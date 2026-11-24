@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Tests\Blocks\Utils\WC_Product_Custom;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
@@ -278,13 +279,13 @@ class AddToCartWithOptions extends \WC_Unit_Test_Case {
 
 		$previous_product = $product;
 		switch ( $product_type ) {
-			case 'variable':
+			case ProductType::VARIABLE:
 				$product = \WC_Helper_Product::create_variation_product();
 				break;
-			case 'grouped':
+			case ProductType::GROUPED:
 				$product = \WC_Helper_Product::create_grouped_product();
 				break;
-			case 'external':
+			case ProductType::EXTERNAL:
 				$product = \WC_Helper_Product::create_external_product();
 				break;
 			default:
@@ -332,10 +333,10 @@ class AddToCartWithOptions extends \WC_Unit_Test_Case {
 	 */
 	public static function provider_interactive_product_types(): array {
 		return array(
-			'simple product'   => array( 'simple' ),
-			'variable product' => array( 'variable' ),
-			'grouped product'  => array( 'grouped' ),
-			'external product' => array( 'external' ),
+			'simple product'   => array( ProductType::SIMPLE ),
+			'variable product' => array( ProductType::VARIABLE ),
+			'grouped product'  => array( ProductType::GROUPED ),
+			'external product' => array( ProductType::EXTERNAL ),
 		);
 	}
 
