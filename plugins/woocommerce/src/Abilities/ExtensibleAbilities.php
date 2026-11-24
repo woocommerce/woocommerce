@@ -166,9 +166,10 @@ class ExtensibleAbilities {
 	 *     @type callable $get_callback Optional. Receives the object and the entry that the prime callback of the
 	 *                                  same namespace returned for it, and returns the value. The entry is null
 	 *                                  when no list was loaded for the object, or when the prime callback failed
-	 *                                  or returned no array.
-	 *                                  The callback then loads the data of that one object itself. A callback
-	 *                                  that needs no entry can take only the object. A field without it
+	 *                                  or returned no array. The callback then loads the data of that one
+	 *                                  object itself. A callback that needs no entry can take only the object.
+	 *                                  A second parameter always receives the entry, so the callback must not
+	 *                                  use it for another value with a default. A field without it
 	 *                                  is not in the output. Required with `output_schema`. Return null when the
 	 *                                  object has no value, and the field is left out with no error. Any other
 	 *                                  value that `output_schema` does not allow fails the call with
