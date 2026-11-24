@@ -75,6 +75,36 @@ on `FEATURE`, cherry-pick onto **both** scratch branches (the head config must
 stay byte-identical to the base config), run `gh local-ci run --push` on the
 child again (new head → new receipts), and re-check.
 
+## 4b. PHP cells (opt-in)
+
+PHP unit cells are `unit:php` jobs for `@woocommerce/plugin-woocommerce`;
+the rule in `.github/local-ci.json` is opt-in and hands each cell to
+`bin/test-php-ci.sh`. On the child:
+
+```sh
+printf '\n// live receipt test marker\n' >> plugins/woocommerce/tests/php/includes/wc-core-functions-test.php
+git commit -am "Touch a core PHP test for the live receipt test" --no-verify
+gh local-ci plan --include=unit:php   # the 4 core cells with `bash bin/test-php-ci.sh --cell …` commands, plus the JavaScript jobs from §2
+gh local-ci run --include=unit:php --push
+```
+
+Cells run one after another (about 25 min; the first run builds a wp-env
+instance per cell, on ports 92xx, in the tool's worktree). Then, for each
+`PHP: … [unit:php]` job on the PR run: conclusion `success`, about 10 s,
+with `Install Monorepo`, both `Start Test Environment` steps and
+`Run tests (unit:php)` skipped, and the `substituted=true` line in the log.
+Check the step conclusions, not just the log line; a dropped guard on the
+`increase max-download-attempts` step leaves the job green but slower:
+
+```sh
+gh api repos/woocommerce/woocommerce/actions/jobs/<job id> --jq '.steps[] | "\(.conclusion)\t\(.name)"'
+```
+
+A cell that failed locally gets a failure receipt and the job runs in full
+with `reason=newest receipt … is not a success` in the log.
+Stop any cells you started yourself with `pnpm test:php:ci` first; they share
+Docker memory with the worktree's.
+
 ## 5. Kill switch
 
 Set the repository variable to `1`, then trigger a **new** run (a re-run

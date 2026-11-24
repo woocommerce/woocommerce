@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop logging spurious database errors when several requests try to run a WooCommerce update at the same time.

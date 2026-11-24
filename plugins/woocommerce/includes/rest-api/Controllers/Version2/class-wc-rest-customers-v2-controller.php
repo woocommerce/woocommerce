@@ -132,12 +132,38 @@ class WC_REST_Customers_V2_Controller extends WC_REST_Customers_V1_Controller {
 
 		// Meta data.
 		if ( isset( $request['meta_data'] ) ) {
+			$is_writable_key = fn( $key ) => ! is_protected_meta( $key, 'user' ) && ! $this->is_sensitive_meta_key( $key );
+			$existing_keys   = wp_list_pluck( $customer->get_meta_data(), 'key', 'id' );
+
+			// An entry with the ID of an existing row renames or deletes that row, so check the row's current key too.
 			$meta_data = array_filter(
 				MetaDataUtil::normalize( $request['meta_data'] ),
-				fn( $meta ) => ! is_protected_meta( $meta['key'], 'user' )
+				fn( $meta ) => $is_writable_key( $meta['key'] )
+					&& ( ! is_int( $meta['id'] ) || ! isset( $existing_keys[ $meta['id'] ] ) || $is_writable_key( $existing_keys[ $meta['id'] ] ) )
 			);
 			MetaDataUtil::update( $meta_data, $customer );
 		}
+	}
+
+	/**
+	 * Check whether a meta key stores user roles, user levels, or authentication sessions.
+	 *
+	 * The key is trimmed and compared case-insensitively as a precaution, since MySQL's default collation matches keys that way.
+	 *
+	 * @param mixed $meta_key Meta key from the request.
+	 * @return bool
+	 */
+	private function is_sensitive_meta_key( $meta_key ): bool {
+		global $wpdb;
+
+		if ( ! is_scalar( $meta_key ) ) {
+			return false;
+		}
+
+		$meta_key = trim( (string) $meta_key );
+
+		return 0 === strcasecmp( 'session_tokens', $meta_key )
+			|| 1 === preg_match( '/^' . preg_quote( $wpdb->base_prefix, '/' ) . '(\d+_)?(capabilities|user_level)$/i', $meta_key );
 	}
 
 	/**

@@ -69,7 +69,6 @@
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/api-fetch": "catalog:wp-min",
 		"@wordpress/compose": "catalog:wp-min",
-		"@wordpress/core-data": "catalog:wp-min",
 		"@wordpress/data-controls": "catalog:wp-min",
 		"@wordpress/deprecated": "catalog:wp-min",
 		"@wordpress/element": "catalog:wp-min",
@@ -111,14 +110,13 @@
 		"jest-environment-jsdom": "catalog:tooling",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
-		"redux": "^4.2.1",
 		"rimraf": "catalog:tooling",
 		"ts-jest": "catalog:tooling",
 		"typescript": "catalog:tooling"
 	},
 	"peerDependencies": {
 		"@wordpress/data": "^10.19.0",
-		"@wordpress/core-data": "^7.19.0",
+		"@wordpress/core-data": "catalog:wp-min",
 		"moment": "^2.18.1",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"

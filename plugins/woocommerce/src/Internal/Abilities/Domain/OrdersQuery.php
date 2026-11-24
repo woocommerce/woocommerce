@@ -49,7 +49,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_collection_output_schema( 'orders', self::get_order_output_schema() ),
+			'output_schema'       => self::get_output_schema(),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_query_orders' ),
 			'meta'                => array(
@@ -76,7 +76,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function execute( array $input ) {
-		$include_line_items = $input['include_line_items'] ?? false;
+		$includes = array_keys(
+			array_filter(
+				array(
+					'line_items' => $input['include_line_items'] ?? false,
+					'lines'      => $input['include_lines'] ?? false,
+				)
+			)
+		);
 
 		if ( ! empty( $input['id'] ) && ! empty( $input['filters'] ) ) {
 			return new \WP_Error(
@@ -94,6 +101,25 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
+		if ( ! empty( $input['id'] ) && isset( $input['search'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_search_with_id',
+				__( 'Send either an id or search, not both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Cleaned as wc_order_search() does, which also drops %-encoded octets such as "%ab", so both storages search the same term.
+		// The order queries skip an empty() `s`, which includes "0".
+		$search = isset( $input['search'] ) ? trim( str_replace( 'Order #', '', sanitize_text_field( $input['search'] ) ) ) : null;
+		if ( '' === $search || '0' === $search ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_search_empty',
+				__( 'Send search with text to match, or leave it out to list all orders. A search of only "0" is not supported.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		if ( ! empty( $input['id'] ) ) {
 			$order = self::get_order_from_input( $input );
 
@@ -101,13 +127,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				return $order;
 			}
 
-			$orders = self::format_orders_for_response( array( $order ), $include_line_items );
+			$orders = self::format_orders_for_response( array( $order ), $includes );
 			if ( is_wp_error( $orders ) ) {
 				return $orders;
 			}
 
 			return array(
 				'orders'      => $orders,
+				'total'       => 1,
 				'total_pages' => 1,
 				'page'        => 1,
 				'per_page'    => 1,
@@ -125,10 +152,8 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'type'     => self::get_order_type_from_input( $input ),
 		);
 
-		foreach ( array( 'billing_email', 'order' ) as $field ) {
-			if ( ! empty( $input[ $field ] ) ) {
-				$args[ $field ] = $input[ $field ];
-			}
+		if ( ! empty( $input['billing_email'] ) ) {
+			$args['billing_email'] = $input['billing_email'];
 		}
 
 		$args['status'] = $input['status'] ?? array();
@@ -139,9 +164,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		$args['status'] = array_map( array( __CLASS__, 'prepare_status_arg' ), (array) $args['status'] );
 
-		if ( ! empty( $input['orderby'] ) ) {
-			$args['orderby'] = self::prepare_orderby_arg( $input['orderby'] );
-		}
+		$args = array_merge( $args, self::prepare_orderby_args( $input['orderby'] ?? 'date', $input['order'] ?? 'desc' ) );
 
 		foreach ( array( 'customer_id', 'parent' ) as $field ) {
 			if ( isset( $input[ $field ] ) ) {
@@ -172,18 +195,30 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['exclude'] = array_merge( (array) ( $args['exclude'] ?? array() ), $extension_args['post__not_in'] );
 			unset( $extension_args['post__not_in'] );
 		}
+
+		$hpos = OrderUtil::custom_orders_table_usage_is_enabled();
+
 		// Both stores merge extension args recursively, which would add the extension IDs to include instead of intersecting them.
 		$include = empty( $input['include'] ) ? null : $input['include'];
 		if ( isset( $extension_args['post__in'] ) ) {
 			$include = null === $include ? $extension_args['post__in'] : array_intersect( $include, $extension_args['post__in'] );
 			unset( $extension_args['post__in'] );
 		}
+		if ( null !== $search ) {
+			if ( $hpos ) {
+				$args['s'] = $search;
+			} else {
+				// Posts storage matches `s` against post title and content only, which orders leave empty.
+				$matches = wc_order_search( $search );
+				$include = null === $include ? $matches : array_intersect( $include, $matches );
+			}
+		}
 		if ( null !== $include ) {
 			$include          = array_values( array_diff( $include, (array) ( $args['exclude'] ?? array() ) ) );
 			$args['post__in'] = empty( $include ) ? array( 0 ) : $include;
 		}
 
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		if ( $hpos ) {
 			$args = array_merge_recursive( $args, $extension_args );
 		} else {
 			$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
@@ -191,7 +226,23 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		$results = wc_get_orders( $args );
 		$orders  = is_object( $results ) && isset( $results->orders ) ? $results->orders : array();
-		$orders  = array_values(
+		$total   = is_object( $results ) && isset( $results->total ) ? (int) $results->total : count( $orders );
+		$pages   = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : (int) ceil( $total / $per_page );
+
+		// Queries skip their count when the requested page has no rows.
+		if ( 0 === $total && empty( $orders ) && $page > 1 ) {
+			$count_args = array_merge(
+				$args,
+				array(
+					'page'   => 1,
+					'return' => 'ids',
+				)
+			);
+			$count      = wc_get_orders( $count_args );
+			$total      = is_object( $count ) && isset( $count->total ) ? (int) $count->total : 0;
+			$pages      = is_object( $count ) && isset( $count->max_num_pages ) ? (int) $count->max_num_pages : (int) ceil( $total / $per_page );
+		}
+		$orders = array_values(
 			array_filter(
 				$orders,
 				static function ( $order ): bool {
@@ -199,15 +250,15 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				}
 			)
 		);
-		$pages   = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $orders ) > 0 ? 1 : 0 );
 
-		$orders = self::format_orders_for_response( $orders, $include_line_items );
+		$orders = self::format_orders_for_response( $orders, $includes );
 		if ( is_wp_error( $orders ) ) {
 			return $orders;
 		}
 
 		return array(
 			'orders'      => $orders,
+			'total'       => $total,
 			'total_pages' => $pages,
 			'page'        => $page,
 			'per_page'    => $per_page,
@@ -231,7 +282,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		$type = self::get_order_type_from_input( $input );
 
-		return wc_rest_check_post_permissions( $type, 'read' );
+		return (bool) wc_rest_check_post_permissions( $type, 'read' );
 	}
 
 	/**
@@ -242,6 +293,21 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 */
 	private static function get_order_type_from_input( array $input ): string {
 		return $input['type'] ?? 'shop_order';
+	}
+
+	/**
+	 * Get the ability output schema.
+	 *
+	 * @return array
+	 */
+	private static function get_output_schema(): array {
+		$schema                        = self::get_collection_output_schema( 'orders', self::get_order_output_schema() );
+		$schema['properties']['total'] = array(
+			'type'        => 'integer',
+			'description' => __( 'Total number of matching orders across all pages.', 'woocommerce' ),
+		);
+
+		return $schema;
 	}
 
 	/**
@@ -279,6 +345,10 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				'billing_email'      => array(
 					'type'   => 'string',
 					'format' => 'email',
+				),
+				'search'             => array(
+					'type'        => 'string',
+					'description' => __( 'Find orders by order number, or whose billing or shipping details (name, email, phone, address) or item names (products, shipping methods, fees, coupons) contain this text. With HPOS it also matches the transaction ID, and with the HPOS full-text index on it matches only the start of a word. A short term such as "Free" can match many orders, so add customer_id or other filters to narrow the results.', 'woocommerce' ),
 				),
 				'parent'             => array(
 					'type'        => 'integer',
@@ -334,9 +404,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				'include_line_items' => array(
 					'type'        => 'boolean',
 					'description' => __(
-						'Whether to include order line items and shipping lines in each returned order. Defaults to false.',
+						'Whether to include order line items in each returned order. Defaults to false.',
 						'woocommerce'
 					),
+					'default'     => false,
+				),
+				'include_lines'      => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whether to include the shipping, fee, coupon and tax lines in each returned order. Defaults to false.', 'woocommerce' ),
 					'default'     => false,
 				),
 				'page'               => array(
@@ -485,23 +560,41 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	}
 
 	/**
-	 * Prepare orderby values for wc_get_orders across HPOS and legacy storage.
-	 *
-	 * Values not present in the map are already accepted by wc_get_orders for
-	 * both storage engines and pass through unchanged.
+	 * Sort args for wc_get_orders that end on the order ID, so orders that tie on the
+	 * sort field keep one order across pages. Posts storage sorts the total only when
+	 * orderby is the plain string, so the total needs its meta key here.
 	 *
 	 * @param string $orderby Input orderby value.
-	 * @return string
+	 * @param string $order   Input sort direction.
+	 * @return array<string, mixed>
 	 */
-	private static function prepare_orderby_arg( string $orderby ): string {
-		$orderby_map = array(
-			'id' => 'ID',
-		);
+	private static function prepare_orderby_args( string $orderby, string $order ): array {
+		$order = strtoupper( $order );
 
-		if ( 'date_modified' === $orderby ) {
-			return OrderUtil::custom_orders_table_usage_is_enabled() ? 'date_modified' : 'post_modified';
+		if ( 'id' === $orderby ) {
+			return array( 'orderby' => array( 'ID' => $order ) );
 		}
 
-		return $orderby_map[ $orderby ] ?? $orderby;
+		$hpos = OrderUtil::custom_orders_table_usage_is_enabled();
+		if ( 'total' === $orderby && ! $hpos ) {
+			return array(
+				'orderby'  => array(
+					'meta_value_num' => $order,
+					'ID'             => $order,
+				),
+				'meta_key' => '_order_total', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The same join the data store uses for its own total sort.
+			);
+		}
+
+		if ( 'date_modified' === $orderby && ! $hpos ) {
+			$orderby = 'post_modified';
+		}
+
+		return array(
+			'orderby' => array(
+				$orderby => $order,
+				'ID'     => $order,
+			),
+		);
 	}
 }

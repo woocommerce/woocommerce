@@ -70,10 +70,6 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_action( 'woocommerce_new_order', array( $this->trigger, 'on_new_order' ) );
-		remove_action( 'woocommerce_order_status_changed', array( $this->trigger, 'on_order_status_changed' ) );
-		remove_action( 'shutdown', array( $this->store, 'dispatch_all' ) );
-
 		$this->reset_container_replacements();
 		wc_get_container()->reset_all_resolved();
 

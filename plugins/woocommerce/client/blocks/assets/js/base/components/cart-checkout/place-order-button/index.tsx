@@ -16,6 +16,7 @@ import {
 import { useValidateCheckout } from '@woocommerce/blocks-checkout';
 import type { CustomPlaceOrderButtonComponent } from '@woocommerce/types';
 import { useEditorContext } from '@woocommerce/base-context';
+import type { StyleProps } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -27,6 +28,7 @@ interface PlaceOrderButtonProps {
 	fullWidth?: boolean;
 	showPrice?: boolean;
 	priceSeparator?: string;
+	buttonStyleProps?: StyleProps;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	CustomButtonComponent?: CustomPlaceOrderButtonComponent;
 }
@@ -37,6 +39,7 @@ const PlaceOrderButton = ( {
 	showPrice = false,
 	priceSeparator = '·',
 	CustomButtonComponent,
+	buttonStyleProps,
 }: PlaceOrderButtonProps ): JSX.Element => {
 	const {
 		onSubmit,
@@ -77,6 +80,7 @@ const PlaceOrderButton = ( {
 		<Button
 			className={ clsx(
 				'wc-block-components-checkout-place-order-button',
+				buttonStyleProps?.className,
 				{
 					'wc-block-components-checkout-place-order-button--full-width':
 						fullWidth,
@@ -86,6 +90,7 @@ const PlaceOrderButton = ( {
 						waitingForProcessing || waitingForRedirect,
 				}
 			) }
+			style={ buttonStyleProps?.style }
 			onClick={ onSubmit }
 			disabled={
 				isCalculating ||

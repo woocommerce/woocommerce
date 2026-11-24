@@ -4221,6 +4221,14 @@ table {
 	}
 }
 
+// Keep the WordPress responsive table widths in charge on small screens.
+:where(td.wc-shipping-zone-sort),
+:where(td.wc-shipping-zone-method-sort),
+:where(td.wc-shipping-zone-worldwide),
+:where(td.wc-shipping-zone-method-enabled) {
+	width: 1%;
+}
+
 table.wc-shipping-zones,
 table.wc-shipping-zone-methods,
 table.wc-shipping-classes {
@@ -9726,5 +9734,45 @@ body.woocommerce-settings-payments-section_legacy {
 			height: 100%;
 			object-fit: cover;
 		}
+	}
+}
+
+// Settings > AI tools.
+// A light grey panel under a grey tab strip.
+body.woocommerce_page_wc-settings.woocommerce-settings-agentic-commerce-tab {
+
+	.nav-tab-wrapper {
+		background-color: #f0f0f1;
+	}
+
+	#wpcontent {
+		display: flex;
+		flex-direction: column;
+	}
+
+	// Light grey under the cards, like the Sales readiness page.
+	#wpbody,
+	#mainform {
+		background-color: #fcfcfc;
+	}
+
+	// No admin footer here (AgenticCommerceSettings empties its text), and nothing under the last card
+	// but the page's own 24px: the form's submit row keeps only its nonce.
+	#wpfooter {
+		display: none;
+	}
+
+	#wpbody-content,
+	#mainform {
+		padding-block-end: 0;
+	}
+
+	#mainform > p.submit {
+		margin: 0;
+		padding: 0;
+	}
+
+	#wpbody {
+		flex: 1;
 	}
 }

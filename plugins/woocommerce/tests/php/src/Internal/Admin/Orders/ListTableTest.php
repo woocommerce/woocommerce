@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -32,12 +33,14 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		parent::setUpBeforeClass();
 
 		self::$hpos_prev_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		OrderHelper::create_order_custom_table_if_not_exist();
 
+		// Only around the storage switch: a hook added here stays for the whole run when this class runs first.
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		if ( ! self::$hpos_prev_state ) {
 			OrderHelper::toggle_cot_feature_and_usage( true );
 		}
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 	}
 
 	/**
@@ -46,10 +49,10 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	public static function tearDownAfterClass(): void {
 		self::clear_hpos_orders();
 
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() !== self::$hpos_prev_state ) {
 			OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
 		}
-
 		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 
 		parent::tearDownAfterClass();
@@ -133,6 +136,34 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The oldest month is still found when an order has no creation date.
+	 */
+	public function test_get_months_filter_options_ignores_null_creation_date(): void {
+		global $wpdb;
+
+		$order = wc_create_order();
+		$order->set_date_created( new \WC_DateTime( '2025-01-02 00:00:00' ) );
+		$order->save();
+
+		$order = wc_create_order();
+		$order->set_date_created( new \WC_DateTime( '2025-03-02 00:00:00' ) );
+		$order->save();
+
+		// The data store always sets a creation date, so only a direct write can leave it NULL.
+		$undated_order = wc_create_order();
+		$wpdb->update(
+			OrdersTableDataStore::get_orders_table_name(),
+			array( 'date_created_gmt' => null ),
+			array( 'id' => $undated_order->get_id() )
+		);
+
+		$year_months = $this->call_get_months_filter_options( $this->sut );
+
+		$this->assertEquals( 2025, end( $year_months )->year, 'The oldest dated order should set the first year' );
+		$this->assertEquals( 1, end( $year_months )->month, 'The oldest dated order should set the first month' );
+	}
+
+	/**
 	 * @testdox The months filter options works as expected with only one month.
 	 */
 	public function test_get_months_filter_options_single_month() {
@@ -160,8 +191,6 @@ class ListTableTest extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( 2024, end( $year_months )->year );
 		$this->assertEquals( 12, end( $year_months )->month );
-
-		delete_option( 'gmt_offset' );
 	}
 
 	/**

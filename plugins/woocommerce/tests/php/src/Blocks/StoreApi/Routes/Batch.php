@@ -17,6 +17,9 @@ class Batch extends ControllerTestCase {
 	 * Setup test product data. Called before every test.
 	 */
 	protected function setUp(): void {
+		parent::setUp();
+
+		// Allow GET in batches, then build the routes again: the parent registered them before the filter.
 		add_filter(
 			'__experimental_woocommerce_store_api_batch_request_methods',
 			function ( $methods ) {
@@ -24,7 +27,7 @@ class Batch extends ControllerTestCase {
 				return $methods;
 			}
 		);
-		parent::setUp();
+		$this->initialize_store_api_server();
 
 		$fixtures = new FixtureData();
 
@@ -161,6 +164,7 @@ class Batch extends ControllerTestCase {
 		add_filter( 'woocommerce_get_cart_item_from_session', $session_failure_callback );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
+		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body_params(
 			array(
 				'requests' => array(
@@ -407,5 +411,120 @@ class Batch extends ControllerTestCase {
 
 		$this->assertEquals( 400, $response->get_status(), 'Batch should be rejected when any sub-request path is invalid' );
 		$this->assertEquals( 'woocommerce_rest_invalid_path', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Should only trust a sub-request nonce when the batch was sent as JSON or with its own Nonce header.
+	 * @testWith ["/wc/store/v1/batch", "", false, "Nonce", 401]
+	 *           ["/WC/Store/v1/Batch", "", false, "nonce", 401]
+	 *           ["/wc/store/batch", "", false, "Nonce", 401]
+	 *           ["/wc/store/v1/batch\n", "", false, "Nonce", 401]
+	 *           ["/wc/store/v1/batch", "application/x-www-form-urlencoded", false, "NONCE", 401]
+	 *           ["/wc/store/v1/batch", "text/plain; x=\"a, application/json;\"", false, "Nonce", 401]
+	 *           ["/wc/store/v1/batch", "application/json; charset=utf-8", false, "Nonce", 201]
+	 *           ["/wc/store/v1/batch", "", true, "Nonce", 201]
+	 *
+	 * @param string $route           Batch route.
+	 * @param string $content_type    Content type of the batch request, or empty for none.
+	 * @param bool   $batch_nonce     Whether the batch request has its own Nonce header.
+	 * @param string $header_name     Name of the sub-request's nonce header.
+	 * @param int    $expected_status Expected sub-request status.
+	 */
+	public function test_batch_sub_request_nonce( string $route, string $content_type, bool $batch_nonce, string $header_name, int $expected_status ): void {
+		$request = new \WP_REST_Request( 'POST', $route );
+		if ( '' !== $content_type ) {
+			$request->set_header( 'Content-Type', $content_type );
+		}
+		if ( $batch_nonce ) {
+			$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		}
+		$request->set_body_params(
+			array(
+				'requests' => array(
+					array(
+						'method'  => 'POST',
+						'path'    => '/wc/store/v1/cart/add-item',
+						'body'    => array(
+							'id'       => $this->products[0]->get_id(),
+							'quantity' => 1,
+						),
+						'headers' => array( $header_name => wp_create_nonce( 'wc_store_api' ) ),
+					),
+				),
+			)
+		);
+
+		$sub_response = rest_get_server()->dispatch( $request )->get_data()['responses'][0];
+
+		$this->assertSame( $expected_status, $sub_response['status'] );
+	}
+
+	/**
+	 * @testdox Should refuse Store API requests sent through core's batch endpoint.
+	 * @testWith ["/batch/v1", "", "/wc/store/v1/cart/add-item"]
+	 *           ["/batch/v1", "application/json", "/wc/store/v1/cart/add-item"]
+	 *           ["/BATCH/v1", "application/json", "/WC/Store/v1/cart/add-item"]
+	 *           ["/batch/v1\n", "application/json", "/wc/store/cart/add-item?x=1"]
+	 *
+	 * @param string $route        Batch route.
+	 * @param string $content_type Content type of the batch request, or empty for none.
+	 * @param string $path         Sub-request path.
+	 */
+	public function test_core_batch_refuses_store_api_requests( string $route, string $content_type, string $path ): void {
+		$request = new \WP_REST_Request( 'POST', $route );
+		if ( '' !== $content_type ) {
+			$request->set_header( 'Content-Type', $content_type );
+		}
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'requests' => array(
+					array(
+						'method'  => 'POST',
+						'path'    => $path,
+						'body'    => array(
+							'id'       => $this->products[0]->get_id(),
+							'quantity' => 1,
+						),
+						'headers' => array( 'Nonce' => wp_create_nonce( 'wc_store_api' ) ),
+					),
+				),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_path', $response->get_data()['code'] );
+		$this->assertTrue( WC()->cart->is_empty(), 'No sub-request should run.' );
+	}
+
+	/**
+	 * @testdox Should leave core's batch endpoint working for routes outside the Store API.
+	 * @testWith ["wc-test/v1"]
+	 *           ["wc/storefront/v1"]
+	 *
+	 * @param string $route_namespace REST namespace of the route.
+	 */
+	public function test_core_batch_allows_other_routes( string $route_namespace ): void {
+		register_rest_route(
+			$route_namespace,
+			'/echo',
+			array(
+				'methods'             => 'POST',
+				'callback'            => static function () {
+					return array( 'ok' => true );
+				},
+				'permission_callback' => '__return_true',
+				'allow_batch'         => array( 'v1' => true ),
+			)
+		);
+		$request = new \WP_REST_Request( 'POST', '/batch/v1' );
+		$request->set_body_params( array( 'requests' => array( array( 'path' => "/{$route_namespace}/echo" ) ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 207, $response->get_status() );
+		$this->assertSame( 200, $response->get_data()['responses'][0]['status'] );
 	}
 }

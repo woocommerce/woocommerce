@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\ProductFeed\Mapping\UcpProductMapper;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Ucp\UcpProductSchema;
@@ -61,7 +63,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	}
 
 	/**
-	 * Refuse a non-JSON payload before the handler reads anything.
+	 * Refuse an unsupported version or a non-JSON payload before the handler reads anything.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -70,7 +72,9 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		return Utils::refuse_non_json_payload( $request, $this->get_capability() ) ?? parent::get_response( $request );
+		return Utils::refuse_unsupported_version( $request, $this->get_capability() )
+			?? Utils::refuse_non_json_payload( $request, $this->get_capability() )
+			?? parent::get_response( $request );
 	}
 
 	/**
@@ -85,6 +89,73 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 				'type'        => 'object',
 			),
 		);
+	}
+
+	/**
+	 * Validate `filters.price`, refusing values that would silently degrade to something meaningless.
+	 *
+	 * @param array $filters Request filters.
+	 * @return \WP_REST_Response|null Error response, or null when the input is acceptable.
+	 */
+	protected function validate_price_filter( array $filters ) {
+		if ( isset( $filters['price'] ) && ! is_array( $filters['price'] ) ) {
+			return $this->ucp_error( 'VALIDATION_ERROR', __( 'filters.price must be an object.', 'woocommerce' ), 'recoverable', 400 );
+		}
+
+		$bounds = array();
+
+		foreach ( array( 'min', 'max' ) as $bound ) {
+			if ( ! isset( $filters['price'][ $bound ] ) ) {
+				continue;
+			}
+
+			$value = $filters['price'][ $bound ];
+
+			// A fractional or out-of-range bound would be changed by the integer cast below.
+			if ( ! is_numeric( $value ) || (float) $value < 0 || (float) $value >= PHP_INT_MAX || floor( (float) $value ) !== (float) $value ) {
+				return $this->ucp_error(
+					'VALIDATION_ERROR',
+					sprintf(
+						/* translators: %s: price filter bound name, `min` or `max`. */
+						__( 'filters.price.%s must be a non-negative integer amount in minor units.', 'woocommerce' ),
+						$bound
+					),
+					'recoverable',
+					400
+				);
+			}
+
+			$bounds[ $bound ] = (int) $value;
+		}
+
+		if ( isset( $bounds['min'], $bounds['max'] ) && $bounds['min'] > $bounds['max'] ) {
+			return $this->ucp_error(
+				'VALIDATION_ERROR',
+				__( 'filters.price.min must not exceed filters.price.max.', 'woocommerce' ),
+				'recoverable',
+				400
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Read the validated `filters.price` bounds, in minor units.
+	 *
+	 * @param array $filters Request filters.
+	 * @return array Optional `min` and `max` keys.
+	 */
+	protected function price_bounds( array $filters ): array {
+		$bounds = array();
+
+		foreach ( array( 'min', 'max' ) as $bound ) {
+			if ( is_array( $filters['price'] ?? null ) && isset( $filters['price'][ $bound ] ) ) {
+				$bounds[ $bound ] = (int) $filters['price'][ $bound ];
+			}
+		}
+
+		return $bounds;
 	}
 
 	/**
@@ -178,9 +249,9 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 			$product      = wc_get_product( $product->get_parent_id() );
 		}
 
-		// Catalog visibility as the storefront applies it: published, not hidden
-		// from the catalog, and in stock when the store hides out-of-stock items.
-		if ( ! $product instanceof \WC_Product || ! $product->is_visible() ) {
+		// Visibility as catalog search applies it: published, not "Hidden", and in
+		// stock when the store hides out-of-stock items.
+		if ( ! $product instanceof \WC_Product || ! self::is_reachable( $product ) ) {
 			return null;
 		}
 
@@ -199,6 +270,42 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 			'product'      => $product,
 			'variation_id' => $variation_id,
 		);
+	}
+
+	/**
+	 * Whether an agent can open the product by its ID. is_visible() accepts "Search results
+	 * only" products only on a storefront search page, but catalog search returns them, so
+	 * they are checked as if shown everywhere, keeping the other rules and the filter. The
+	 * filter gets the ID, so a callback that reloads the product sees its saved setting.
+	 *
+	 * Does not call set_catalog_visibility(): an extension can remove `visible` from
+	 * woocommerce_product_visibility_options, and that setter would throw on the temporary value.
+	 *
+	 * @param \WC_Product $product Product, not a variation.
+	 * @return bool
+	 */
+	private static function is_reachable( \WC_Product $product ): bool {
+		if ( CatalogVisibility::SEARCH !== $product->get_catalog_visibility() ) {
+			return $product->is_visible();
+		}
+		// is_viewable() is true for trash when the current user can edit the product.
+		// A catalog lookup is a public read, so an unpublished product is never reachable.
+		if ( ProductStatus::PUBLISH !== $product->get_status() ) {
+			return false;
+		}
+		// Same core rules as a Shop and search results product, then the public visibility filter.
+		$visible = $product->is_viewable();
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $product->is_in_stock() ) {
+			$visible = false;
+		}
+		/**
+		 * Filters the product visibility for catalog lookup (same hook as WC_Product::is_visible).
+		 *
+		 * @since 2.1.0 Filter introduced on WC_Product::is_visible.
+		 * @param bool $visible    Whether the product is considered visible.
+		 * @param int  $product_id Product ID.
+		 */
+		return (bool) apply_filters( 'woocommerce_product_is_visible', $visible, $product->get_id() );
 	}
 
 	/**

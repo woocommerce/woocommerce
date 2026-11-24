@@ -3,7 +3,7 @@
  *
  * Request grouping, state reconciliation and the per-cycle cross-cutting
  * effects are covered by Jest unit tests in
- * `client/blocks/assets/js/base/stores/woocommerce/test/`. What is left here
+ * `client/blocks/assets/js/base/stores/woocommerce/cart/test/`. What is left here
  * is the one behaviour those cannot reach: a real Interactivity API rollback
  * repainting rendered block markup after a whole batch fails.
  */
@@ -38,6 +38,19 @@ test.describe( 'Mutation Batcher', () => {
 		// Click to add one item — this request goes through normally.
 		await button.click();
 		await expect( button ).toHaveText( '1 in cart' );
+
+		// "1 in cart" is optimistic. Wait for the first cycle to settle, or
+		// the failing clicks join it and commit its successful response
+		// instead of rolling back.
+		await page.evaluate( async () => {
+			const { store } = await import( '@wordpress/interactivity' );
+			const unlockKey =
+				'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+			await import( '@woocommerce/stores/woocommerce' );
+			const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
+			await actions.waitForIdle();
+		} );
 
 		// Intercept batch requests with a delay so we can observe
 		// the optimistic state before the failure triggers rollback.

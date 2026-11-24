@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * ProductRatingCounter class.
  */
 class ProductRatingCounter extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -28,15 +29,6 @@ class ProductRatingCounter extends AbstractBlock {
 	 * phase because we want to load assets only if the block has the content.
 	 */
 	protected function register_block_type_assets() {
-		return null;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
 		return null;
 	}
 

@@ -41,21 +41,13 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	private $email_manager;
 
 	/**
-	 * The remote address seen before the test replaced it.
-	 *
-	 * @var string|null
-	 */
-	private $original_remote_addr;
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->enable_stock_notifications_feature();
 
-		$this->original_remote_addr = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : null;
-		$_SERVER['REMOTE_ADDR']     = '192.0.2.10';
+		$_SERVER['REMOTE_ADDR'] = '192.0.2.10';
 
 		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
 
@@ -75,12 +67,6 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		if ( null === $this->original_remote_addr ) {
-			unset( $_SERVER['REMOTE_ADDR'] );
-		} else {
-			$_SERVER['REMOTE_ADDR'] = $this->original_remote_addr;
-		}
-
 		delete_option( 'woocommerce_customer_stock_notifications_allow_signups' );
 		delete_option( 'woocommerce_customer_stock_notifications_require_double_opt_in' );
 		delete_option( 'woocommerce_customer_stock_notifications_create_account_on_signup' );

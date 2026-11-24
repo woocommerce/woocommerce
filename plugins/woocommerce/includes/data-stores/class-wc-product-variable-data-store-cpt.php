@@ -994,12 +994,104 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @since 3.0.0
 	 */
 	public function sync_stock_status( &$product ) {
-		// Performance note: direct DB fetch would be faster, but child_is_in_stock/child_is_on_backorder are overridable — keep delegation.
+		// child_is_in_stock()/child_is_on_backorder() are overridable hence keep delegation. The custom-status branch queries
+		// directly: it needs "do all children agree", which child_has_stock_status() (first-match) cannot answer.
 		if ( $product->child_is_in_stock() ) {
 			$product->set_stock_status( ProductStockStatus::IN_STOCK );
 		} elseif ( $product->child_is_on_backorder() ) {
 			$product->set_stock_status( ProductStockStatus::ON_BACKORDER );
 		} else {
+			$this->set_custom_or_out_of_stock_status( $product, $this->get_unanimous_custom_child_stock_status( $product ) );
+		}
+	}
+
+	/**
+	 * Get the registered custom stock status every child shares, or out of stock when they don't all share one.
+	 *
+	 * @param WC_Product_Variable $product Product object.
+	 * @return string
+	 */
+	private function get_unanimous_custom_child_stock_status( $product ): string {
+		$custom_statuses = $this->get_custom_stock_status_options();
+		if ( $custom_statuses ) {
+			$child_ids           = array_values( array_unique( array_filter( array_map( 'absint', (array) $product->get_children() ) ) ) );
+			$shared_stock_status = $child_ids ? $this->get_shared_stock_status( $child_ids, $this->read_child_stock_statuses( $child_ids ) ) : null;
+			if ( null !== $shared_stock_status && array_key_exists( $shared_stock_status, $custom_statuses ) ) {
+				return $shared_stock_status;
+			}
+		}
+
+		return ProductStockStatus::OUT_OF_STOCK;
+	}
+
+	/**
+	 * Get the registered stock status options, excluding the three core statuses.
+	 *
+	 * @return array<string, string>
+	 */
+	private function get_custom_stock_status_options(): array {
+		$core_stock_statuses = array(
+			ProductStockStatus::IN_STOCK     => true,
+			ProductStockStatus::OUT_OF_STOCK => true,
+			ProductStockStatus::ON_BACKORDER => true,
+		);
+
+		return array_diff_key( wc_get_product_stock_status_options(), $core_stock_statuses );
+	}
+
+	/**
+	 * Read the stored stock status rows of the given children, from postmeta while the lookup table is regenerating.
+	 *
+	 * @param int[] $child_ids Child product IDs.
+	 * @return array<int, array{child_id: string, stock_status: string|null}>
+	 */
+	private function read_child_stock_statuses( array $child_ids ): array {
+		global $wpdb;
+
+		$placeholders = implode( ', ', array_fill( 0, count( $child_ids ), '%d' ) );
+		if ( get_option( 'woocommerce_product_lookup_table_is_generating' ) ) {
+			$query = "SELECT post_id AS child_id, meta_value AS stock_status FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND post_id IN ( {$placeholders} )";
+		} else {
+			$query = "SELECT product_id AS child_id, stock_status FROM {$wpdb->wc_product_meta_lookup} WHERE product_id IN ( {$placeholders} )";
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows = $wpdb->get_results( $wpdb->prepare( $query, ...$child_ids ), ARRAY_A );
+
+		return is_array( $rows ) ? $rows : array();
+	}
+
+	/**
+	 * Get the stock status shared by all children, or null when a child has no row, several rows, a NULL status or a different status.
+	 *
+	 * @param int[]                                                          $child_ids Child product IDs.
+	 * @param array<int, array{child_id: string, stock_status: string|null}> $rows      Stored stock status rows of those children.
+	 * @return string|null
+	 */
+	private function get_shared_stock_status( array $child_ids, array $rows ): ?string {
+		$child_statuses = array_filter( array_column( $rows, 'stock_status', 'child_id' ) );
+		$children_count = count( $child_ids );
+		if ( count( $child_statuses ) === $children_count && count( $rows ) === $children_count ) {
+			$unique = array_values( array_unique( $child_statuses ) );
+			if ( 1 === count( $unique ) ) {
+				return $unique[0];
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Apply a derived custom stock status, falling back to out of stock if the setter rejects it.
+	 *
+	 * The setter replaces a status it does not recognize with in stock, which is never right when no child is in stock.
+	 *
+	 * @param WC_Product_Variable $product      Product object.
+	 * @param string              $stock_status Custom stock status, or out of stock.
+	 */
+	private function set_custom_or_out_of_stock_status( $product, string $stock_status ): void {
+		$product->set_stock_status( $stock_status );
+		if ( $stock_status !== $product->get_stock_status( 'edit' ) ) {
 			$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		}
 	}

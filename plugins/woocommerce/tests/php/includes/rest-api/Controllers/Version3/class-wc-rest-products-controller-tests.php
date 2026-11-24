@@ -1,6 +1,7 @@
 <?php
 
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
@@ -42,20 +43,12 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	protected static $fixture_user;
 
 	/**
-	 * Saves the `woocommerce_hide_out_of_stock_items` option value for restoration after tests that modify it.
-	 * @var mixed
-	 */
-	protected $original_hid_out_of_stock_value;
-
-	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->clear_rest_server();
 		unset( $this->server, $this->endpoint );
-		$this->disable_cogs_feature();
-		update_option( 'woocommerce_hide_out_of_stock_items', $this->original_hid_out_of_stock_value );
 	}
 
 	/**
@@ -138,6 +131,119 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create products whose sortable properties have independent orders.
+	 *
+	 * @return array{first: WC_Product_Simple, second: WC_Product_Simple, third: WC_Product_Simple, fourth: WC_Product_Simple, pending: WC_Product_Simple, variable: WC_Product_Variable} Products keyed by creation order.
+	 */
+	private function create_ordering_products(): array {
+		$definitions = array(
+			'first'   => array(
+				'name'           => 'Ordering Delta',
+				'slug'           => 'ordering-charlie',
+				'date_created'   => '2024-01-03 12:00:00',
+				'price'          => '40',
+				'total_sales'    => 3,
+				'average_rating' => 4.0,
+				'rating_counts'  => array( 4 => 3 ),
+			),
+			'second'  => array(
+				'name'           => 'Ordering Alpha',
+				'slug'           => 'ordering-bravo',
+				'date_created'   => '2024-01-01 12:00:00',
+				'price'          => '20',
+				'total_sales'    => 2,
+				'average_rating' => 2.0,
+				'rating_counts'  => array( 2 => 2 ),
+			),
+			'third'   => array(
+				'name'           => 'Ordering Charlie',
+				'slug'           => 'ordering-delta',
+				'date_created'   => '2024-01-06 12:00:00',
+				'price'          => '10',
+				'total_sales'    => 1,
+				'average_rating' => 3.0,
+				'rating_counts'  => array( 3 => 1 ),
+			),
+			'fourth'  => array(
+				'name'           => 'Ordering Bravo',
+				'slug'           => 'ordering-alpha',
+				'date_created'   => '2024-01-02 12:00:00',
+				'price'          => '30',
+				'total_sales'    => 4,
+				'average_rating' => 1.0,
+				'rating_counts'  => array( 1 => 4 ),
+			),
+			'pending' => array(
+				'name'           => 'Ordering Echo',
+				'date_created'   => '2024-01-04 12:00:00',
+				'price'          => '25',
+				'total_sales'    => 5,
+				'average_rating' => 0.0,
+				'rating_counts'  => array(),
+				'status'         => ProductStatus::PENDING,
+			),
+		);
+		$products    = array();
+
+		foreach ( $definitions as $key => $definition ) {
+			$props = array(
+				'name'          => $definition['name'],
+				'regular_price' => $definition['price'],
+				'price'         => $definition['price'],
+			);
+			if ( isset( $definition['slug'] ) ) {
+				$props['slug'] = $definition['slug'];
+			}
+			if ( isset( $definition['status'] ) ) {
+				$props['status'] = $definition['status'];
+			}
+			$product = WC_Helper_Product::create_simple_product( false, $props );
+			$product->set_date_created( $definition['date_created'] );
+			$product->set_total_sales( $definition['total_sales'] );
+			$product->set_average_rating( $definition['average_rating'] );
+			$product->set_rating_counts( $definition['rating_counts'] );
+			$product->set_review_count( array_sum( $definition['rating_counts'] ) );
+			$product->save();
+			$products[ $key ] = $product;
+		}
+
+		$variable = new WC_Product_Variable();
+		$variable->set_name( 'Ordering Foxtrot' );
+		$variable->set_slug( 'ordering-echo' );
+		$variable->set_date_created( '2024-01-05 12:00:00' );
+		$variable->set_total_sales( 6 );
+		$variable->set_average_rating( 5.0 );
+		$variable->set_rating_counts( array( 5 => 6 ) );
+		$variable->set_review_count( 6 );
+		$variable->save();
+		WC_Helper_Product::create_product_variation_object( $variable->get_id(), 'ORDERING LOW', 5, array() );
+		WC_Helper_Product::create_product_variation_object( $variable->get_id(), 'ORDERING HIGH', 50, array() );
+		WC_Product_Variable::sync( $variable->get_id() );
+		$products['variable'] = wc_get_product( $variable->get_id() );
+
+		return $products;
+	}
+
+	/**
+	 * Dispatch a product collection request and assert exact IDs.
+	 *
+	 * @param array<string,mixed> $query_params Query parameters for the collection request.
+	 * @param int[]               $expected_ids Product IDs in the expected response order.
+	 * @param string              $description  Assertion context.
+	 * @return WP_REST_Response
+	 */
+	private function assert_product_collection( array $query_params, array $expected_ids, string $description ): WP_REST_Response {
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), "$description should return HTTP 200." );
+		$this->assertSame( $expected_ids, array_map( 'absint', wp_list_pluck( $response->get_data(), 'id' ) ), "$description should return the exact expected product IDs." );
+
+		return $response;
+	}
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -149,8 +255,6 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		);
 		$this->user     = self::$fixture_user;
 		wp_set_current_user( $this->user );
-
-		$this->original_hid_out_of_stock_value = get_option( 'woocommerce_hide_out_of_stock_items' );
 	}
 
 	/**
@@ -509,8 +613,6 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( $response_products[0]['sku'], 'pancake-2' );
 		$this->assertEquals( $response_products[1]['name'], 'Waffle 3' );
 		$this->assertEquals( $response_products[1]['sku'], 'waffle-3' );
-
-		remove_filter( 'wc_product_sku_enabled', '__return_false' );
 	}
 
 	/**
@@ -686,6 +788,286 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
 
 		$this->assertIsArray( $decoded_data_object[0]->meta_data );
+	}
+
+	/**
+	 * @testdox Product collection ordering returns exact core-field orders through the V3 route.
+	 */
+	public function test_collection_orderby_core_fields(): void {
+		$products = $this->create_ordering_products();
+		$first    = $products['first']->get_id();
+		$second   = $products['second']->get_id();
+		$third    = $products['third']->get_id();
+		$fourth   = $products['fourth']->get_id();
+		$pending  = $products['pending']->get_id();
+		$variable = $products['variable']->get_id();
+		$all      = array( $first, $second, $third, $fourth, $pending, $variable );
+
+		$base_query = array(
+			'include'  => $all,
+			'per_page' => count( $all ),
+		);
+		$ascending  = $base_query + array( 'order' => 'asc' );
+		$descending = $base_query + array( 'order' => 'desc' );
+
+		$this->assert_product_collection( $base_query, array( $third, $variable, $pending, $first, $fourth, $second ), 'Default date DESC ordering' );
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'date' ), array( $second, $fourth, $first, $pending, $variable, $third ), 'Date ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'date' ), array( $third, $variable, $pending, $first, $fourth, $second ), 'Date DESC ordering' );
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'id' ), array( $first, $second, $third, $fourth, $pending, $variable ), 'ID ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'id' ), array( $variable, $pending, $fourth, $third, $second, $first ), 'ID DESC ordering' );
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'title' ), array( $second, $fourth, $third, $first, $pending, $variable ), 'Title ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'title' ), array( $variable, $pending, $first, $third, $fourth, $second ), 'Title DESC ordering' );
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'slug' ), array( $pending, $fourth, $second, $first, $third, $variable ), 'Slug ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'slug' ), array( $variable, $third, $first, $second, $fourth, $pending ), 'Slug DESC ordering' );
+	}
+
+	/**
+	 * @testdox Product collection ordering returns exact lookup-field orders through the V3 route.
+	 */
+	public function test_collection_orderby_lookup_fields(): void {
+		$products = $this->create_ordering_products();
+		$first    = $products['first']->get_id();
+		$second   = $products['second']->get_id();
+		$third    = $products['third']->get_id();
+		$fourth   = $products['fourth']->get_id();
+		$pending  = $products['pending']->get_id();
+		$variable = $products['variable']->get_id();
+		$all      = array( $first, $second, $third, $fourth, $pending, $variable );
+
+		$base_query = array(
+			'include'  => $all,
+			'per_page' => count( $all ),
+		);
+		$ascending  = $base_query + array( 'order' => 'asc' );
+		$descending = $base_query + array( 'order' => 'desc' );
+
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'price' ), array( $variable, $third, $second, $pending, $fourth, $first ), 'Price ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'price' ), array( $variable, $first, $fourth, $pending, $second, $third ), 'Price DESC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'rating' ), array( $variable, $first, $third, $second, $fourth, $pending ), 'Rating DESC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'popularity' ), array( $variable, $pending, $fourth, $first, $second, $third ), 'Popularity DESC ordering' );
+	}
+
+	/**
+	 * @testdox Product collection include ordering preserves request order regardless of the order parameter.
+	 */
+	public function test_collection_orderby_include_order(): void {
+		$products     = $this->create_ordering_products();
+		$included_ids = array(
+			$products['pending']->get_id(),
+			$products['fourth']->get_id(),
+			$products['first']->get_id(),
+			$products['variable']->get_id(),
+			$products['third']->get_id(),
+			$products['second']->get_id(),
+		);
+
+		$base_query = array(
+			'include'  => $included_ids,
+			'per_page' => count( $included_ids ),
+			'orderby'  => 'include',
+		);
+
+		$this->assert_product_collection( $base_query + array( 'order' => 'asc' ), $included_ids, 'Include ASC ordering' );
+		$this->assert_product_collection( $base_query + array( 'order' => 'desc' ), $included_ids, 'Include DESC ordering' );
+	}
+
+	/**
+	 * @testdox Product collection pagination returns exact pages, totals, and offset precedence through the V3 route.
+	 */
+	public function test_collection_pagination_contract(): void {
+		$product_ids = array();
+		foreach ( range( 1, 11 ) as $index ) {
+			$product_ids[] = WC_Helper_Product::create_simple_product( true, array( 'name' => "Pagination {$index}" ) )->get_id();
+		}
+
+		$base_query = array(
+			'include' => $product_ids,
+			'orderby' => 'id',
+			'order'   => 'asc',
+		);
+		$paged      = function ( int $page, ?int $offset = null ) use ( $base_query ): array {
+			$query = array_merge(
+				$base_query,
+				array(
+					'per_page' => 4,
+					'page'     => $page,
+				)
+			);
+			if ( null !== $offset ) {
+				$query['offset'] = $offset;
+			}
+			return $query;
+		};
+
+		$response = $this->assert_product_collection( $base_query, array_slice( $product_ids, 0, 10 ), 'Default pagination' );
+		$this->assertSame( '11', (string) $response->get_headers()['X-WP-Total'], 'The default total header should count all eleven fixtures.' );
+		$this->assertSame( '2', (string) $response->get_headers()['X-WP-TotalPages'], 'The default total-pages header should reflect the ten-item default.' );
+
+		$this->assert_product_collection( $paged( 1 ), array_slice( $product_ids, 0, 4 ), 'Pagination page one' );
+		$this->assert_product_collection( $paged( 2 ), array_slice( $product_ids, 4, 4 ), 'Pagination page two' );
+		$this->assert_product_collection( $paged( 2, 5 ), array_slice( $product_ids, 5, 4 ), 'Pagination with an explicit offset' );
+		$this->assert_product_collection( $paged( 3 ), array_slice( $product_ids, 8 ), 'Pagination final page' );
+
+		$response = $this->assert_product_collection( $paged( 4 ), array(), 'Pagination beyond the result set' );
+		$this->assertSame( '11', (string) $response->get_headers()['X-WP-Total'], 'An empty later page should retain the total header.' );
+		$this->assertSame( '3', (string) $response->get_headers()['X-WP-TotalPages'], 'An empty later page should retain the total-pages header.' );
+	}
+
+	/**
+	 * @testdox Product collection identity filters return exact products through the V3 route.
+	 */
+	public function test_collection_identity_filters(): void {
+		$target = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'slug' => 'identity-target',
+				'sku'  => 'identity-target-sku',
+			)
+		);
+		$other  = WC_Helper_Product::create_simple_product( true, array( 'sku' => 'identity-other-sku' ) );
+		$parent = WC_Helper_Product::create_simple_product( true, array( 'sku' => 'identity-parent-sku' ) );
+		$child  = WC_Helper_Product::create_simple_product( true, array( 'sku' => 'identity-child-sku' ) );
+		$child->set_parent_id( $parent->get_id() );
+		$child->save();
+
+		$all        = array( $target->get_id(), $other->get_id(), $parent->get_id(), $child->get_id() );
+		$base_query = array(
+			'include'  => $all,
+			'per_page' => count( $all ),
+			'orderby'  => 'id',
+			'order'    => 'asc',
+		);
+
+		$included = array( $target->get_id(), $child->get_id() );
+		$this->assert_product_collection( array_merge( $base_query, array( 'include' => $included ) ), $included, 'Include filtering' );
+
+		// Exclude only applies without include, so constrain the cohort by SKU instead.
+		$excluded      = array( $other->get_id(), $parent->get_id() );
+		$exclude_query = array_merge(
+			$base_query,
+			array(
+				'exclude' => $excluded,
+				'sku'     => 'identity-target-sku,identity-other-sku,identity-parent-sku,identity-child-sku',
+			)
+		);
+		unset( $exclude_query['include'] );
+		$this->assert_product_collection( $exclude_query, array_values( array_diff( $all, $excluded ) ), 'Exclude filtering' );
+
+		$this->assert_product_collection( array_merge( $base_query, array( 'slug' => 'identity-target' ) ), array( $target->get_id() ), 'Slug filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'slug' => 'identity-missing' ) ), array(), 'Unmatched slug filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'sku' => 'identity-other-sku' ) ), array( $other->get_id() ), 'SKU filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'sku' => 'identity-missing-sku' ) ), array(), 'Unmatched SKU filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'parent' => array( $parent->get_id() ) ) ), array( $child->get_id() ), 'Parent filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'parent_exclude' => array( $parent->get_id() ) ) ), array_values( array_diff( $all, array( $child->get_id() ) ) ), 'Parent exclusion filtering' );
+	}
+
+	/**
+	 * @testdox Product collection state filters return exact sale, price, pending, and stock-state matches through the V3 route.
+	 */
+	public function test_collection_product_state_filters(): void {
+		$simple = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'State filter simple',
+				'regular_price' => '10',
+				'price'         => '10',
+			)
+		);
+
+		$external = new WC_Product_External();
+		$external->set_name( 'State filter external' );
+		$external->set_regular_price( '20' );
+		$external->set_sale_price( '15' );
+		$external->set_price( '15' );
+		$external->save();
+
+		$out_of_stock = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '60',
+				'price'         => '60',
+				'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
+			)
+		);
+		$backorder    = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '50',
+				'price'         => '50',
+				'stock_status'  => ProductStockStatus::ON_BACKORDER,
+			)
+		);
+		$pending      = WC_Helper_Product::create_simple_product( true, array( 'status' => ProductStatus::PENDING ) );
+
+		$variable = new WC_Product_Variable();
+		$variable->set_name( 'Variable price range' );
+		$variable->save();
+		WC_Helper_Product::create_product_variation_object( $variable->get_id(), 'STATE LOW', 30, array() );
+		WC_Helper_Product::create_product_variation_object( $variable->get_id(), 'STATE HIGH', 40, array() );
+		WC_Product_Variable::sync( $variable->get_id() );
+
+		$all        = array( $simple->get_id(), $external->get_id(), $out_of_stock->get_id(), $backorder->get_id(), $pending->get_id(), $variable->get_id() );
+		$base_query = array(
+			'include'  => $all,
+			'per_page' => count( $all ),
+			'orderby'  => 'id',
+			'order'    => 'asc',
+			'status'   => ProductStatus::PUBLISH,
+		);
+
+		// The on_sale filter merges its IDs into include rather than intersecting, so constrain by search instead.
+		$sale_query = array(
+			'search'  => 'State filter',
+			'orderby' => 'id',
+			'order'   => 'asc',
+			'status'  => ProductStatus::PUBLISH,
+		);
+		$this->assert_product_collection( array_merge( $sale_query, array( 'on_sale' => true ) ), array( $external->get_id() ), 'On-sale product filtering' );
+		$this->assert_product_collection( array_merge( $sale_query, array( 'on_sale' => false ) ), array( $simple->get_id() ), 'Non-sale product filtering' );
+
+		$this->assert_product_collection(
+			array_merge(
+				$base_query,
+				array(
+					'min_price' => '15',
+					'max_price' => '30',
+				)
+			),
+			array( $external->get_id(), $variable->get_id() ),
+			'Inclusive price filtering'
+		);
+
+		$this->assert_product_collection( array_merge( $base_query, array( 'status' => ProductStatus::PENDING ) ), array( $pending->get_id() ), 'Pending status filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'stock_status' => ProductStockStatus::OUT_OF_STOCK ) ), array( $out_of_stock->get_id() ), 'Out-of-stock filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'stock_status' => ProductStockStatus::ON_BACKORDER ) ), array( $backorder->get_id() ), 'On-backorder filtering' );
+	}
+
+	/**
+	 * @testdox Product collection category filtering includes descendant categories and tax class filtering matches exactly through the V3 route.
+	 */
+	public function test_collection_taxonomy_filters(): void {
+		$parent_category  = wp_insert_term( 'Taxonomy parent', 'product_cat' )['term_id'];
+		$child_category   = wp_insert_term( 'Taxonomy child', 'product_cat', array( 'parent' => $parent_category ) )['term_id'];
+		$sibling_category = wp_insert_term( 'Taxonomy sibling', 'product_cat' )['term_id'];
+		$tax_class_slug   = WC_Tax::create_tax_class( 'Taxonomy tax' )['slug'];
+
+		$in_child   = WC_Helper_Product::create_simple_product( true, array( 'category_ids' => array( $child_category ) ) );
+		$in_sibling = WC_Helper_Product::create_simple_product( true, array( 'category_ids' => array( $sibling_category ) ) );
+		$taxed      = WC_Helper_Product::create_simple_product( true, array( 'tax_class' => $tax_class_slug ) );
+		$untouched  = WC_Helper_Product::create_simple_product();
+
+		$all        = array( $in_child->get_id(), $in_sibling->get_id(), $taxed->get_id(), $untouched->get_id() );
+		$base_query = array(
+			'include'  => $all,
+			'per_page' => count( $all ),
+			'orderby'  => 'id',
+			'order'    => 'asc',
+		);
+
+		$this->assert_product_collection( array_merge( $base_query, array( 'category' => (string) $parent_category ) ), array( $in_child->get_id() ), 'Parent category descendant filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'category' => (string) $child_category ) ), array( $in_child->get_id() ), 'Child category filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'category' => (string) $sibling_category ) ), array( $in_sibling->get_id() ), 'Sibling category filtering' );
+		$this->assert_product_collection( array_merge( $base_query, array( 'tax_class' => $tax_class_slug ) ), array( $taxed->get_id() ), 'Tax class filtering' );
 	}
 
 	/**
@@ -2919,5 +3301,49 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 			wp_list_pluck( $response->get_data()['images'], 'id' ),
 			'The featured image should be listed first and only once.'
 		);
+	}
+
+	/**
+	 * @testdox Creating and updating a product keeps backslashes and quotes in its name and descriptions.
+	 */
+	public function test_create_and_update_product_keep_backslashes_in_post_fields(): void {
+		$fields         = array(
+			'name'              => 'Cable 1\\2" it\'s',
+			'description'       => 'Path C:\\temp',
+			'short_description' => 'Short C:\\temp',
+		);
+		$updated_fields = array(
+			'name'              => 'Cable 3\\4" it\'s',
+			'description'       => 'Path D:\\temp',
+			'short_description' => 'Short D:\\temp',
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params( $fields );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assert_post_fields_keep_backslashes( $response->get_data(), $fields );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $response->get_data()['id'] );
+		$request->set_body_params( $updated_fields );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assert_post_fields_keep_backslashes( $response->get_data(), $updated_fields );
+	}
+
+	/**
+	 * Assert a product response and its stored post keep the given name and descriptions.
+	 *
+	 * @param array $data   Product response data.
+	 * @param array $fields Expected name, description and short description.
+	 */
+	private function assert_post_fields_keep_backslashes( array $data, array $fields ): void {
+		$post = get_post( $data['id'] );
+		$this->assertSame( $fields['name'], $data['name'], 'The response name should keep its backslash and quotes.' );
+		$this->assertSame( $fields['name'], $post->post_title, 'The stored name should keep its backslash and quotes.' );
+		$this->assertSame( $fields['description'], $post->post_content, 'The stored description should keep its backslash.' );
+		$this->assertSame( $fields['short_description'], $post->post_excerpt, 'The stored short description should keep its backslash.' );
 	}
 }

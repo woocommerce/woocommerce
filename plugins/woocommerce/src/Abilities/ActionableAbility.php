@@ -45,7 +45,9 @@ defined( 'ABSPATH' ) || exit;
  * adds write what the saved objects imply elsewhere, such as the price range a
  * variable parent derives from its variations, or a row in a table of the
  * extension. A sync also sees the objects the call deleted and the input of
- * the call. A refusal there rolls the call back too. A rollback drops the
+ * the call. A refusal there rolls the call back too. When a query hits a
+ * deadlock, a lock wait timeout or a snapshot conflict with a parallel call, the call rolls
+ * back and fails with a WP_Error instead of reporting the write. A rollback drops the
  * object caches of the objects the call saved or deleted. It does not undo what a sync
  * did outside the database, such as an HTTP request, and it does nothing on a
  * table engine without transactions. The other steps must not save, send email
@@ -350,8 +352,8 @@ abstract class ActionableAbility extends Ability {
 	/**
 	 * Drop the object caches of the objects a rolled back save() touched. The
 	 * saves filled the caches with rows the rollback removed, so a read in the
-	 * same request would still see them. The `WC_Data` meta cache and the
-	 * product instance cache are separate from the post cache.
+	 * same request would still see them. The `WC_Data` meta cache, the product type cache, the
+	 * product instance cache and the price lookup cache are separate from the post cache.
 	 *
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects.
 	 * @param \WC_Data[]                                          $deleted The objects the call deleted.
@@ -365,16 +367,21 @@ abstract class ActionableAbility extends Ability {
 			}
 			if ( $id > 0 && $object instanceof \WC_Product ) {
 				clean_post_cache( $id );
+				wp_cache_delete( 'lookup_table', 'object_' . $id );
+				\WC_Cache_Helper::invalidate_cache_group( 'product_' . $id );
 				wc_delete_product_transients( $id );
 				$product_cache->remove( $id );
 				if ( $object->get_parent_id() > 0 ) {
 					clean_post_cache( $object->get_parent_id() );
+					wp_cache_delete( 'lookup_table', 'object_' . $object->get_parent_id() );
 					wc_delete_product_transients( $object->get_parent_id() );
 					$product_cache->remove( $object->get_parent_id() );
 				}
 			} elseif ( $id > 0 && $object instanceof \WC_Abstract_Order ) {
 				wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->remove( $id );
 				clean_post_cache( $id );
+			} elseif ( $id > 0 && $object instanceof \WC_Customer ) {
+				clean_user_cache( $id );
 			}
 		}
 	}

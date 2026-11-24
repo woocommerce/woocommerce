@@ -246,6 +246,45 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A multilingual plugin can filter `locale` per request, which moves get_locale() and the
+	 * wc_switch_to_site_locale() window away from the configured site locale. The Default base is
+	 * initialized and compared in the configured site locale, so the screen must keep reporting
+	 * Default for the base wc_get_permalink_structure() persisted.
+	 *
+	 * @testdox Should keep "Default" checked when a locale filter changes the request locale.
+	 */
+	public function test_default_structure_stays_checked_when_a_locale_filter_changes_the_request_locale(): void {
+		$this->ensure_shop_page();
+		$this->activate_french_product_slug_translation();
+		add_filter( 'locale', static fn() => 'fr_FR' );
+		$this->assertSame( 'fr_FR', determine_locale(), 'The request locale should follow the locale filter.' );
+
+		delete_option( 'woocommerce_permalinks' );
+		wc_get_permalink_structure();
+		$html = $this->render_settings();
+
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'The Default base should be initialized in the site locale.' );
+		$this->assert_only_radio_checked( $html, 'default' );
+	}
+
+	/**
+	 * @testdox An unchanged save keeps a bare base shown as Custom.
+	 */
+	public function test_unchanged_save_keeps_a_bare_custom_base(): void {
+		$this->ensure_shop_page();
+		update_option( 'woocommerce_permalinks', array( 'product_base' => 'waren' ) );
+
+		$html  = $this->render_settings();
+		$xpath = $this->get_xpath( $html );
+		$this->assert_only_radio_checked( $html, 'custom' );
+		$this->save_and_render(
+			$xpath->query( '//input[@name="product_permalink"][@checked]' )->item( 0 )->getAttribute( 'value' ),
+			$xpath->query( '//input[@name="product_permalink_structure"]' )->item( 0 )->getAttribute( 'value' )
+		);
+		$this->assertSame( 'waren', get_option( 'woocommerce_permalinks' )['product_base'] );
+	}
+
+	/**
 	 * The Default radio keeps posting an empty value, so the payload stays byte-identical to what
 	 * every earlier version submitted; the resolved structure moves to a data attribute that only
 	 * the Custom-base field reads.
@@ -424,15 +463,6 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A custom base carrying no usable characters sanitizes down to the empty string, and an empty
-	 * product_base never survives: wc_get_permalink_structure() drops it and refills the option
-	 * from the request locale, outside any locale window, then writes it back. An administrator
-	 * browsing in their own language therefore persisted that language's slug. Resolving to the
-	 * site-locale default at save time keeps the stored value deterministic.
-	 *
-	 * The locales have to diverge for this to be observable: when they agree, the refill produces
-	 * the same slug the fix stores and nothing looks wrong.
-	 *
 	 * @testdox Should store the site-locale Default base when the posted custom structure sanitizes to nothing.
 	 *
 	 * @testWith [""]
@@ -450,18 +480,11 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 
 		$html = $this->save_and_render( 'custom', $posted_structure );
 
-		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'An empty base must never reach the option, where the request locale would refill it.' );
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'] );
 		$this->assert_only_radio_checked( $html, 'default' );
 	}
 
 	/**
-	 * Both permalink fields are free-form request input; an array reaching trim() or
-	 * wc_sanitize_permalink() is a fatal, since both are declared to take a string. The custom
-	 * branch has its own path: a scalar 'custom' radio with an array structure field used to store
-	 * '/', which wc_sanitize_permalink() collapses to '', leaving wc_get_permalink_structure() to
-	 * refill the option in the next request's locale. Both now resolve to the default base
-	 * directly, in the site locale.
-	 *
 	 * @testdox Should fall back to the Default base when a posted permalink field is not a string.
 	 *
 	 * @testWith [["custom"], ["widgets"]]
