@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Charge the checkout total when a shopper retries an order in the Checkout block after a merchant edited its items.
+Stop charging a merchant's edits to an order's items, or products and coupons they added, when a shopper retries it in the Checkout block.
