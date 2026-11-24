@@ -1978,6 +1978,59 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should name the full path of an unknown nested key, also under a nullable anyOf and in a list.
+	 * @testWith [{"metal":{"gold":1}}, "extensions.probe.dims.metal.gold"]
+	 *           [{"wood":{"oak":1}}, "extensions.probe.dims.wood.oak"]
+	 *           [{"stones":[{"name":"ruby"},{"carat":2}]}, "extensions.probe.dims.stones[1].carat"]
+	 *
+	 * @param array  $dims Value of the field.
+	 * @param string $path Expected path of the unknown key.
+	 */
+	public function test_an_unknown_nested_key_is_refused_with_its_full_path( array $dims, string $path ): void {
+		$strict = static fn( array $properties ): array => array(
+			'type'                 => 'object',
+			'properties'           => $properties,
+			'additionalProperties' => false,
+		);
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $strict ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'probe',
+						'field'        => 'dims',
+						'input_schema' => $strict(
+							array(
+								'metal'  => $strict( array( 'iron' => array( 'type' => 'integer' ) ) ),
+								'wood'   => array( 'anyOf' => array( $strict( array( 'pine' => array( 'type' => 'integer' ) ) ), array( 'type' => 'null' ) ) ),
+								'stones' => array(
+									'type'  => 'array',
+									'items' => $strict( array( 'name' => array( 'type' => 'string' ) ) ),
+								),
+							)
+						),
+						'set_callback' => '__return_null',
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'probe' => array( 'dims' => $dims ) ),
+			)
+		);
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( $path . ' is not a valid property of Object.', $refused->get_data()['message'] );
+	}
+
+	/**
 	 * @testdox Should register a field whose input schema is an anyOf of single types, publish it as declared and pass null or a typed value to the set_callback.
 	 */
 	public function test_an_any_of_input_schema_takes_null_and_a_typed_value(): void {

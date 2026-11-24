@@ -462,12 +462,87 @@ abstract class ActionableAbility extends Ability {
 					$param = 'extensions.' . $namespace . '.' . $field;
 					$valid = rest_validate_value_from_schema( $value, $args['input_schema'], $param );
 					if ( is_wp_error( $valid ) ) {
-						$refusals[] = ( isset( $args['input_schema']['anyOf'] ) ? self::describe_any_of_refusal( $value, $args['input_schema']['anyOf'], $param ) : null ) ?? $valid->get_error_message();
+						$refusals[] = self::describe_value_refusal( $valid, $value, $args['input_schema'], $param );
 					}
 				}
 			}
 		}
 		return $refusals;
+	}
+
+	/**
+	 * Say what is wrong with a value that the input schema of its field refused. WordPress
+	 * names an unknown nested key without its path, and names no type when a value matches
+	 * no `anyOf` branch, so those two refusals get a path or the types. Others keep the WordPress message.
+	 *
+	 * @param \WP_Error $error  Refusal from rest_validate_value_from_schema().
+	 * @param mixed     $value  Value from the input.
+	 * @param array     $schema Input schema of the field.
+	 * @param string    $param  Path of the field in the input.
+	 * @return string
+	 */
+	private static function describe_value_refusal( \WP_Error $error, $value, array $schema, string $param ): string {
+		$unknown_key = in_array( $error->get_error_code(), array( 'rest_additional_properties_forbidden', 'rest_no_matching_schema' ), true ) ? self::find_unknown_key( $value, $schema, $param ) : null;
+		if ( null !== $unknown_key ) {
+			/* translators: %s: Path of the key in the input, such as extensions.my_ext.size.unit. */
+			return sprintf( __( '%s is not a valid property of Object.', 'woocommerce' ), $unknown_key );
+		}
+		return ( isset( $schema['anyOf'] ) ? self::describe_any_of_refusal( $value, $schema['anyOf'], $param ) : null ) ?? $error->get_error_message();
+	}
+
+	/**
+	 * Follow the first refusal of rest_validate_value_from_schema() down the value, and
+	 * return the path of the key when that refusal is a key the schema does not allow.
+	 * Like WordPress, it follows an `anyOf` or `oneOf` only when one branch has the type of the value.
+	 *
+	 * @param mixed  $value  Value from the input.
+	 * @param array  $schema Schema of the value.
+	 * @param string $path   Path of the value in the input.
+	 * @return string|null Path of the key, such as `extensions.my_ext.size.unit`, or null when the first refusal is another one.
+	 */
+	private static function find_unknown_key( $value, array $schema, string $path ): ?string {
+		foreach ( array( 'anyOf', 'oneOf' ) as $keyword ) {
+			if ( ! is_array( $schema[ $keyword ] ?? null ) ) {
+				continue;
+			}
+			$refused_by = array();
+			foreach ( $schema[ $keyword ] as $branch ) {
+				$valid = is_array( $branch ) ? rest_validate_value_from_schema( $value, $branch, $path ) : true;
+				if ( ! is_wp_error( $valid ) ) {
+					continue 2;
+				}
+				if ( 'rest_invalid_type' !== $valid->get_error_code() || ( $valid->get_error_data()['param'] ?? $path ) !== $path ) {
+					$refused_by[] = $branch;
+				}
+			}
+			return 1 === count( $refused_by ) ? self::find_unknown_key( $value, $refused_by[0], $path ) : null;
+		}
+		if ( ! is_array( $value ) ) {
+			return null;
+		}
+		$children = array();
+		if ( is_array( $schema['items'] ?? null ) && wp_is_numeric_array( $value ) ) {
+			foreach ( $value as $index => $item ) {
+				$children[] = array( $item, $schema['items'], $path . '[' . $index . ']' );
+			}
+		} else {
+			$additional = $schema['additionalProperties'] ?? null;
+			foreach ( $value as $key => $child ) {
+				$child_schema = $schema['properties'][ $key ] ?? rest_find_matching_pattern_property_schema( (string) $key, $schema ) ?? ( is_array( $additional ) ? $additional : null );
+				if ( is_array( $child_schema ) || false === $additional ) {
+					$children[] = array( $child, $child_schema, $path . '.' . $key );
+				}
+			}
+		}
+		foreach ( $children as list( $child, $child_schema, $child_path ) ) {
+			if ( null === $child_schema ) {
+				return $child_path;
+			}
+			if ( is_wp_error( rest_validate_value_from_schema( $child, $child_schema, $child_path ) ) ) {
+				return self::find_unknown_key( $child, $child_schema, $child_path );
+			}
+		}
+		return null;
 	}
 
 	/**
