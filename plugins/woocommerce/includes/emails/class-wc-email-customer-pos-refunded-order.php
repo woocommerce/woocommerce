@@ -132,7 +132,11 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			 * @param WC_Email_Customer_POS_Refunded_Order $email Email object.
 			 * @since 3.7.0
 			 */
-			return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
+			$subject = apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
+			if ( $this->block_email_editor_enabled ) {
+				$subject = $this->personalizer->personalize_transactional_rich_text_as_plain_text( $subject, $this );
+			}
+			return $subject;
 		}
 
 		/**

@@ -125,7 +125,7 @@ export default function SalesReadinessOverview( {
 						{ view.overview.based_on &&
 							' ' + view.overview.based_on }
 					</Text>
-					{ view.intro ? (
+					{ ! view.checked ? (
 						<>
 							<Text
 								variant="body-sm"

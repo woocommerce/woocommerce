@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { safeHref } from '../safe-href';
+import { trackReadiness } from '../tracks';
 import type { ShoppingView } from '../types';
 
 /**
@@ -71,7 +72,16 @@ export const ProductVisibility = ( {
 							{ count.count }
 						</Text>
 						<Text variant="body-sm">
-							<Link href={ safeHref( count.link.href ) }>
+							<Link
+								href={ safeHref( count.link.href ) }
+								onClick={ () =>
+									trackReadiness( 'link_clicked', {
+										surface: 'shopping',
+										area: 'product_visibility',
+										count_id: count.id,
+									} )
+								}
+							>
 								{ count.link.text }
 							</Link>
 						</Text>

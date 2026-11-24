@@ -127,6 +127,92 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Add a product to the cart and apply a 50% coupon while coupons are enabled.
+	 *
+	 * @return WC_Coupon The applied coupon.
+	 */
+	private function apply_percent_coupon_to_cart(): WC_Coupon {
+		update_option( 'woocommerce_enable_coupons', 'yes' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->set_virtual( true );
+		$product->save();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'half' . wp_generate_password( 6, false, false ),
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '50',
+			)
+		);
+		$this->assertTrue( WC()->cart->apply_coupon( $coupon->get_code() ), 'The coupon applies while coupons are enabled.' );
+
+		return $coupon;
+	}
+
+	/**
+	 * @testdox is_coupon_valid rejects a coupon already applied to the cart once coupons are disabled.
+	 */
+	public function test_is_coupon_valid_rejects_applied_coupon_when_coupons_are_disabled(): void {
+		$coupon = $this->apply_percent_coupon_to_cart();
+
+		update_option( 'woocommerce_enable_coupons', 'no' );
+
+		$result = ( new WC_Discounts( WC()->cart ) )->is_coupon_valid( $coupon );
+		$this->assertWPError( $result, 'Coupons are disabled, so the applied coupon should be invalid.' );
+		$this->assertSame( 'Coupons are disabled.', $result->get_error_message(), 'The error should say coupons are disabled.' );
+	}
+
+	/**
+	 * @testdox Cart totals and cart checks drop an applied coupon once coupons are disabled.
+	 */
+	public function test_cart_drops_applied_coupon_when_coupons_are_disabled(): void {
+		$coupon = $this->apply_percent_coupon_to_cart();
+		WC()->cart->calculate_totals();
+		$this->assertEquals( 5, WC()->cart->get_discount_total(), 'The coupon discounts the cart while coupons are enabled.' );
+
+		update_option( 'woocommerce_enable_coupons', 'no' );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( 0, WC()->cart->get_discount_total(), 'No discount should be applied once coupons are disabled.' );
+		$this->assertEquals( 10, WC()->cart->get_total( 'edit' ), 'The cart total should be the full price.' );
+
+		WC()->cart->check_cart_coupons();
+		$this->assertNotContains( $coupon->get_code(), WC()->cart->get_applied_coupons(), 'The coupon should be removed from the cart.' );
+	}
+
+	/**
+	 * @testdox is_coupon_valid keeps an applied coupon valid when the coupons filter overrides the setting.
+	 * @testWith ["no", true]
+	 *           ["yes", false]
+	 *
+	 * @param string $option_value  Value of the woocommerce_enable_coupons option.
+	 * @param bool   $filter_result Value returned from the woocommerce_coupons_enabled filter.
+	 */
+	public function test_is_coupon_valid_follows_coupons_enabled_filter( string $option_value, bool $filter_result ): void {
+		$coupon = $this->apply_percent_coupon_to_cart();
+
+		update_option( 'woocommerce_enable_coupons', $option_value );
+		add_filter( 'woocommerce_coupons_enabled', $filter_result ? '__return_true' : '__return_false' );
+
+		$this->assertTrue( ( new WC_Discounts( WC()->cart ) )->is_coupon_valid( $coupon ), 'The applied coupon should stay valid.' );
+	}
+
+	/**
+	 * @testdox is_coupon_valid for an order is unaffected by the coupons setting.
+	 */
+	public function test_is_coupon_valid_for_order_ignores_coupons_setting(): void {
+		$coupon = WC_Helper_Coupon::create_coupon( 'order' . wp_generate_password( 6, false, false ) );
+		$order  = WC_Helper_Order::create_order();
+
+		update_option( 'woocommerce_enable_coupons', 'no' );
+
+		$this->assertTrue( ( new WC_Discounts( $order ) )->is_coupon_valid( $coupon ), 'Order coupons are validated without the store-wide setting.' );
+	}
+
+	/**
 	 * @testdox is_coupon_valid rejects a coupon when the cart subtotal is below its minimum spend.
 	 */
 	public function test_is_coupon_valid_rejects_below_minimum_spend() {
@@ -529,5 +615,33 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$result = $discounts->is_coupon_valid( $unmatched_coupon );
 		$this->assertWPError( $result, 'Returning false should reject even when no excluded category is in the cart.' );
 		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'With no matched categories the generic message is used.' );
+	}
+
+	/**
+	 * @testdox A fixed cart coupon larger than the item stops at the item price when the price ends in half a cent.
+	 */
+	public function test_fixed_cart_coupon_stops_at_half_cent_item_price(): void {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 9.995,
+				'price'         => 9.995,
+			)
+		);
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'fixed-cart-25',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '25',
+			)
+		);
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$discounts = new WC_Discounts( WC()->cart );
+		$discounts->apply_coupon( $coupon );
+
+		$this->assertEquals( 1000, $discounts->get_discounts_by_coupon( true )[ $coupon->get_code() ], 'The discount should stop at the rounded item price' );
+		$this->assertSame( 0, $discounts->get_discounted_price_in_cents( current( $discounts->get_items() ) ), 'A used-up item should have nothing left to discount' );
 	}
 }

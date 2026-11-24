@@ -203,11 +203,11 @@ describe( 'RunStatus', () => {
 
 	it( 'shows no spinner while a check runs, only its message for screen readers', () => {
 		const { container } = render(
-			<RunStatus run={ run( true, false, 'Checking your store.' ) } />
+			<RunStatus run={ run( true, false, 'Checking your store' ) } />
 		);
 		expect( container.querySelector( '.components-spinner' ) ).toBeNull();
 		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
-			'Checking your store.'
+			'Checking your store'
 		);
 		expect(
 			container.querySelector( '.wc-sales-readiness__muted' )

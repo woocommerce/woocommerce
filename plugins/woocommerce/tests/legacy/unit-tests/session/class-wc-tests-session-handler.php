@@ -187,6 +187,34 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An expired session for a logged-in customer should reset the loaded cart but keep their saved cart, so the cart can be rebuilt.
+	 */
+	public function test_destroy_session_cookie_expired_keeps_logged_in_customers_saved_cart(): void {
+		$customer_id = WC_Helper_Customer::create_customer()->get_id();
+		wp_set_current_user( $customer_id );
+		$cart_item_key = WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+
+		$handler = $this
+			->getMockBuilder( WC_Session_Handler::class )
+			->setMethods( array( 'get_session_cookie' ) )
+			->getMock();
+
+		$handler
+			->method( 'get_session_cookie' )
+			->willReturn( array( (string) $customer_id, time() - 10000, time() - 1000, '' ) );
+
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$handler->init_session_cookie();
+
+		remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$saved_cart = get_user_meta( $customer_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+		$this->assertArrayHasKey( $cart_item_key, $saved_cart['cart'] ?? array(), 'The saved cart should survive the session reset.' );
+		$this->assertTrue( WC()->cart->is_empty(), 'The loaded cart should be reset with the session.' );
+	}
+
+	/**
 	 * @testdox Test that session from cookie is destroyed if user is logged out.
 	 */
 	public function test_destroy_session_user_logged_out() {
@@ -587,6 +615,59 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 
 		// Verify the DB and cache cleanup results.
 		$this->assertSame( array( array( 'customer' ) ), $wpdb->get_results( $wpdb->prepare( "SELECT session_key FROM %i WHERE session_key IN ('guest', 'customer')", "{$wpdb->prefix}woocommerce_sessions" ), ARRAY_N ) );
+	}
+
+	/**
+	 * Session tokens that can be passed in the `session` query arg.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provide_session_query_tokens(): array {
+		return array(
+			'cart link token' => array( 'cart-link' ),
+			'cart token'      => array( 'store-api' ),
+		);
+	}
+
+	/**
+	 * @testdox A $token_type in the session query arg copies the guest's cart without their customer details.
+	 * @dataProvider provide_session_query_tokens
+	 *
+	 * @param string $token_type Token issuer.
+	 */
+	public function test_session_query_arg_copies_guest_cart_without_customer( string $token_type ) {
+		global $wpdb;
+
+		$guest_session_id = 't_' . wc_rand_hash( '', 30 );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_sessions',
+			array(
+				'session_key'    => $guest_session_id,
+				'session_value'  => maybe_serialize(
+					array(
+						'cart'     => 'shared cart',
+						'customer' => array( 'email' => 'guest@example.org' ),
+					)
+				),
+				'session_expiry' => time() + 50000,
+			),
+			array( '%s', '%s', '%d' )
+		);
+
+		wp_set_current_user( 0 );
+		$_GET['session'] = 'cart-link' === $token_type ? CartTokenUtils::get_cart_link_token( $guest_session_id ) : CartTokenUtils::get_cart_token( $guest_session_id );
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$handler = new WC_Session_Handler();
+		$handler->init();
+
+		remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+		unset( $_GET['session'] );
+
+		$this->assertNotSame( $guest_session_id, $handler->get_customer_id(), 'The visitor should get a new session.' );
+		$this->assertSame( 'shared cart', $handler->get( 'cart' ), 'The cart should be copied.' );
+		$this->assertNull( $handler->get( 'customer' ), 'Customer details should not be copied.' );
 	}
 
 	/**

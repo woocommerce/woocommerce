@@ -93,6 +93,63 @@ describe( 'CheckRow', () => {
 		);
 	} );
 
+	it( 'links the name where the server says it starts, not where the same word appears first', () => {
+		const { container } = renderRow(
+			row( {
+				id: 'product_jsonld_present',
+				text: 'On the the page, the name, price, and stock aren’t in the page code.',
+				text_link: {
+					href: 'https://example.com/product/the/',
+					text: 'the',
+					at: 7,
+				},
+			} )
+		);
+
+		const link = screen.getByRole( 'link', { name: /the/ } );
+		expect( link.previousSibling?.textContent ).toBe( 'On the ' );
+		expect( container ).toHaveTextContent(
+			'On the the page, the name, price, and stock aren’t in the page code.'
+		);
+	} );
+
+	it( 'links the name at a UTF-16 offset when an emoji comes first', () => {
+		const { container } = renderRow(
+			row( {
+				id: 'product_jsonld_present',
+				text: '😀 On the the page, the name.',
+				text_link: {
+					href: 'https://example.com/product/the/',
+					text: 'the',
+					at: 10,
+				},
+			} )
+		);
+
+		const link = screen.getByRole( 'link', { name: /the/ } );
+		expect( link.previousSibling?.textContent ).toBe( '😀 On the ' );
+		expect( container ).toHaveTextContent(
+			'😀 On the the page, the name.'
+		);
+	} );
+
+	it( 'falls back to the first match when the position does not hold the name', () => {
+		renderRow(
+			row( {
+				text: 'Test it in UCP Playground, or ask your hosting provider.',
+				text_link: {
+					href: 'https://ucpplayground.com/',
+					text: 'UCP Playground',
+					at: 0,
+				},
+			} )
+		);
+
+		expect(
+			screen.getByRole( 'link', { name: /UCP Playground/ } )
+		).toBeInTheDocument();
+	} );
+
 	it( 'shows the text unlinked when the name is not in it', () => {
 		renderRow(
 			row( {
@@ -156,7 +213,7 @@ describe( 'CheckRow', () => {
 			} )
 		);
 
-		expect( screen.getByText( "Couldn't check:" ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Not checked yet:' ) ).toBeInTheDocument();
 		expect(
 			screen.getByText( "This couldn't be checked. Try again later." )
 		).toBeInTheDocument();
