@@ -20,6 +20,11 @@ defined( 'ABSPATH' ) || exit;
 class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
+	 * Meta key for the backordered quantity on an order item.
+	 */
+	const BACKORDER_META_KEY = 'Backordered';
+
+	/**
 	 * Legacy values.
 	 *
 	 * @deprecated 4.4.0 For legacy actions.
@@ -275,7 +280,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function set_backorder_meta() {
 		$product = $this->get_product();
 		if ( $product && $product->backorders_require_notification() && $product->is_on_backorder( $this->get_quantity() ) ) {
-			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $this ), $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
+			$this->add_meta_data( self::BACKORDER_META_KEY, $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
 		}
 	}
 
@@ -530,21 +535,36 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$order = $this->get_order();
 
 		if ( $order && $order->has_status( OrderStatus::COMPLETED ) ) {
-			/**
-			 * Filter the backorder meta key.
-			 * Make sure to use the same filter as used in set_backorder_meta().
-			 *
-			 * @param string $backorder_meta_key The backorder meta key.
-			 * @param WC_Order_Item_Product $item The order item product.
-			 * @since 9.9.0
-			 * @return string
-			 */
-			$backorder_meta_key = apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $this );
+			// Older orders may have stored this note under the site's translated word for "Backordered" at the time.
+			$legacy_backorder_meta_key = apply_filters_deprecated(
+				'woocommerce_backordered_item_meta_name',
+				array( __( 'Backordered', 'woocommerce' ), $this ),
+				'11.5.0',
+				'',
+				'This filter no longer sets the stored backorder meta key.'
+			);
 
 			foreach ( $formatted_meta as $meta_id => $meta ) {
-				if ( isset( $meta->key ) && $meta->key === $backorder_meta_key ) {
+				if ( isset( $meta->key ) && ( self::BACKORDER_META_KEY === $meta->key || $legacy_backorder_meta_key === $meta->key ) ) {
 					unset( $formatted_meta[ $meta_id ] );
+					break;
 				}
+			}
+
+			return $formatted_meta;
+		}
+
+		foreach ( $formatted_meta as $meta ) {
+			/** @var \stdClass $meta */
+			if ( isset( $meta->key ) && self::BACKORDER_META_KEY === $meta->key ) {
+				$meta->display_key = apply_filters_deprecated(
+					'woocommerce_backordered_item_meta_name',
+					array( __( 'Backordered', 'woocommerce' ), $this ),
+					'11.5.0',
+					'',
+					'This filter no longer sets the stored backorder meta key.'
+				);
+				break;
 			}
 		}
 
