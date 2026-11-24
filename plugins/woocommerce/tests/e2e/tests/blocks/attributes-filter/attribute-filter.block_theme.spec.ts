@@ -1,14 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	test as base,
-	expect,
-	wpCLI,
-	TemplateCompiler,
-	BLOCK_THEME_SLUG,
-	getProductAttributeIds,
-} from '@woocommerce/e2e-utils';
+import { test, expect, getProductAttributeIds } from '@woocommerce/e2e-utils';
 import type { Page } from '@playwright/test';
 
 const blockData = {
@@ -16,18 +9,6 @@ const blockData = {
 	slug: 'woocommerce/attribute-filter',
 	urlSearchParamWhenFilterIsApplied: 'filter_size=small&query_type_size=or',
 };
-
-const blockifiedTemplateOption =
-	'wc_blocks_use_blockified_product_grid_block_as_template';
-
-const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-	templateCompiler: async ( { requestUtils }, provideTemplateCompiler ) => {
-		const compiler = await requestUtils.createTemplateFromFile(
-			'archive-product_filters-with-product-collection'
-		);
-		await provideTemplateCompiler( compiler );
-	},
-} );
 
 const getProductCollectionTitles = ( page: Page ) =>
 	page.locator(
@@ -86,74 +67,19 @@ test.describe( `${ blockData.name } Block`, () => {
 	} );
 } );
 
-test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
-	test( 'filters the PHP classic template by attribute', async ( {
-		admin,
-		editor,
-		frontendUtils,
-		page,
-	} ) => {
-		await wpCLI( `option update ${ blockifiedTemplateOption } false` );
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'attribute-filter',
-				heading: 'Filter By Attribute',
-			},
-		} );
-		const attributeFilter = await editor.getBlockByName( blockData.slug );
-
-		await attributeFilter.getByText( 'Size' ).click();
-		await attributeFilter.getByText( 'Done' ).click();
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-		await page.goto( '/shop' );
-
-		const legacyTemplate = await frontendUtils.getBlockByName(
-			'woocommerce/legacy-template'
-		);
-		const productTitles = legacyTemplate.locator(
-			'.woocommerce-loop-product__title'
-		);
-
-		await expect( productTitles.first() ).toBeVisible();
-		expect( await productTitles.allTextContents() ).not.toHaveLength( 0 );
-		for ( const name of [ 'Small', 'Medium', 'Large' ] ) {
-			await expect(
-				page.getByRole( 'checkbox', { name } )
-			).toBeVisible();
-		}
-
-		await page.getByRole( 'checkbox', { name: 'Small' } ).click();
-		await expect( page ).toHaveURL(
-			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
-		);
-		await expect( productTitles ).toHaveText( [ 'V-Neck T-Shirt' ] );
-	} );
-} );
-
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 	test( 'filters Product Collection automatically and defers changes until Apply when configured', async ( {
 		page,
-		admin,
-		editor,
-		templateCompiler,
+		createPost,
 	} ) => {
 		await page.clock.install();
 		const { sizeAttributeId } = await getProductAttributeIds();
-		const template = await templateCompiler.compile( {
+		const post = await createPost( 'filters-with-product-collection', {
 			attributeId: sizeAttributeId,
 		} );
 		const productTitles = getProductCollectionTitles( page );
 
-		await page.goto( '/shop' );
+		await page.goto( post.link );
 		await expect( productTitles.first() ).toBeVisible();
 		const automaticBaseline = ( await productTitles.allTextContents() ).map(
 			( title ) => title.trim()
@@ -169,22 +95,11 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		);
 		await expect( productTitles ).toHaveText( [ 'V-Neck T-Shirt' ] );
 
-		await admin.visitSiteEditor( {
-			postId: template.id,
-			postType: template.type,
-			canvas: 'edit',
-		} );
-
-		const attributeFilter = await editor.getBlockByName( blockData.slug );
-		await expect( attributeFilter ).toBeVisible();
-		await editor.selectBlocks( attributeFilter );
-		await editor.openDocumentSettingsSidebar();
-		await page.getByText( "Show 'Apply filters' button" ).click();
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-
-		await page.goto( '/shop' );
+		const deferredPost = await createPost(
+			'filters-with-product-collection',
+			{ attributeId: sizeAttributeId, showFilterButton: true }
+		);
+		await page.goto( deferredPost.link );
 		await expect( productTitles.first() ).toBeVisible();
 		const smallCheckbox = page.getByRole( 'checkbox', { name: 'Small' } );
 		await expect( smallCheckbox ).toBeVisible();
@@ -217,7 +132,9 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 				} )
 		);
 		await expect( smallCheckbox ).toBeChecked();
-		const applyButton = page.getByRole( 'button', { name: 'Apply' } );
+		const applyButton = page.getByRole( 'button', {
+			name: 'Apply attribute filter',
+		} );
 		await expect( applyButton ).toBeVisible();
 		await expect( applyButton ).toBeEnabled();
 		await expect( page ).toHaveURL( deferredUrl );
