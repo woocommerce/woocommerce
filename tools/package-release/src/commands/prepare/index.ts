@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Args, Command, Flags, ux } from '@oclif/core';
-import { writeFileSync } from 'fs';
+import { existsSync, writeFileSync } from 'fs';
 import { execSync } from 'child_process';
 
 /**
@@ -165,6 +165,16 @@ export default class PackagePrepare extends Command {
 				jsonFilepath,
 				JSON.stringify( json, null, '\t' ) + '\n'
 			);
+
+			if (
+				packageType === 'php' &&
+				existsSync( `${ filepath }/composer.lock` )
+			) {
+				execSync(
+					'composer update --lock --no-install --no-scripts --no-plugins --no-interaction',
+					{ cwd: filepath, stdio: 'inherit' }
+				);
+			}
 
 			// if preparing a php package and the package is used in the woocommerce plugin
 			// also update the version in the plugin's composer.json and composer.lock

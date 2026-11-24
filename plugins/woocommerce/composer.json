@@ -16,7 +16,10 @@
 			"type": "path",
 			"url": "../../packages/php/monorepo-plugin",
 			"options": {
-				"symlink": false
+				"symlink": false,
+				"versions": {
+					"woocommerce/monorepo-plugin": "dev-trunk"
+				}
 			}
 		},
 		{
