@@ -775,9 +775,17 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return the error of a filter that refuses its value, or that returns arguments Core does not support.
+	 * @testdox Should return the error of a filter that refuses its value, or log and refuse arguments the list ability does not accept.
 	 */
 	public function test_a_filter_that_refuses_or_fails_returns_an_error(): void {
+		$logged = array();
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->method( 'error' )->willReturnCallback(
+			static function ( string $message ) use ( &$logged ) {
+				$logged[] = $message;
+			}
+		);
+		add_filter( 'woocommerce_logging_class', static fn() => $logger );
 		add_action(
 			'woocommerce_extensible_abilities_init',
 			static function () {
@@ -809,6 +817,15 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'woocommerce_ability_extension_filter_failed', $failed->get_data()['code'] );
 		$this->assertSame( 'woocommerce_ability_extension_filter_failed', $taxed->get_data()['code'] );
 		$this->assertSame( 'woocommerce_ability_extension_filter_failed', $scalar->get_data()['code'] );
+		$this->assertSame( 'The "test-ext.taxed" filter failed. Call again without it, and ask the store owner to check the extensible-abilities log in WooCommerce > Status > Logs.', $taxed->get_data()['message'] );
+		$this->assertSame(
+			array(
+				'Ability filter "test-ext.broken" of "order" returned the clause "post__in". This list ability accepts: meta_query, include_ids, exclude_ids.',
+				'Ability filter "test-ext.taxed" of "order" returned the clause "tax_query". This list ability accepts: meta_query, include_ids, exclude_ids.',
+				'Ability filter "test-ext.scalar" of "product" must return an array of clause arrays.',
+			),
+			$logged
+		);
 	}
 
 	/**

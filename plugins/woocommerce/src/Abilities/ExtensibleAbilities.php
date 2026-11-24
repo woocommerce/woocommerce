@@ -360,7 +360,8 @@ class ExtensibleAbilities {
 	 *     @type callable $callback  Receives the value, sanitized with the schema, and returns query clauses,
 	 *                               such as a `meta_query`, `include_ids` or `exclude_ids`. The list ability adds
 	 *                               each one to the query with AND. Return a WP_Error to refuse the value. A clause
-	 *                               that the list ability does not accept fails the call.
+	 *                               that the list ability does not accept, or a value that is not an array of
+	 *                               clause arrays, fails the call and is logged.
 	 *                               `include_ids` and `exclude_ids` are lists of object IDs. Use them for
 	 *                               data that is not meta, such as order items or a table of the extension:
 	 *                               query that data and return the IDs that match. Core keeps the IDs that
@@ -482,7 +483,6 @@ class ExtensibleAbilities {
 	 * @return array<string, array>|\WP_Error The error of a value that fails its schema, or of a filter that refused its value or failed.
 	 */
 	public static function get_query_args( string $resource_name, array $input, array $clauses = self::DEFAULT_QUERY_CLAUSES ) {
-		$allowed    = array_flip( $clauses );
 		$query_args = array();
 		$include    = null;
 		$exclude    = array();
@@ -505,25 +505,22 @@ class ExtensibleAbilities {
 					$filter_clauses = call_user_func( $args['callback'], $value );
 				} catch ( \Throwable $e ) {
 					self::log_error( sprintf( 'Ability filter "%s.%s" of "%s" failed: %s', $namespace, $filter, $resource_name, $e->getMessage() ) );
-					$filter_clauses = null;
+					return self::get_filter_failed_error( $namespace . '.' . $filter );
 				}
 				if ( is_wp_error( $filter_clauses ) ) {
 					return $filter_clauses;
 				}
-				if (
-					! is_array( $filter_clauses )
-					|| ! empty( array_diff_key( $filter_clauses, $allowed ) )
-					|| in_array( false, array_map( 'is_array', $filter_clauses ), true )
-				) {
-					return new \WP_Error(
-						'woocommerce_ability_extension_filter_failed',
-						/* translators: %s: filter name, such as subscriptions.subscribable. */
-						sprintf( __( 'The "%s" filter failed.', 'woocommerce' ), $namespace . '.' . $filter ),
-						array( 'status' => 500 )
-					);
+				if ( ! is_array( $filter_clauses ) || in_array( false, array_map( 'is_array', $filter_clauses ), true ) ) {
+					self::log_error( sprintf( 'Ability filter "%s.%s" of "%s" must return an array of clause arrays.', $namespace, $filter, $resource_name ) );
+					return self::get_filter_failed_error( $namespace . '.' . $filter );
+				}
+				$refused = array_diff( array_keys( $filter_clauses ), $clauses );
+				if ( ! empty( $refused ) ) {
+					self::log_error( sprintf( 'Ability filter "%s.%s" of "%s" returned the clause "%s". This list ability accepts: %s.', $namespace, $filter, $resource_name, implode( '", "', $refused ), implode( ', ', $clauses ) ) );
+					return self::get_filter_failed_error( $namespace . '.' . $filter );
 				}
 				if ( isset( $filter_clauses['include_ids'] ) ) {
-					$filter_ids = self::get_filter_ids( $filter_clauses['include_ids'], $namespace . '.' . $filter );
+					$filter_ids = self::get_filter_ids( $filter_clauses['include_ids'], $namespace . '.' . $filter, $resource_name );
 					if ( is_wp_error( $filter_ids ) ) {
 						return $filter_ids;
 					}
@@ -531,7 +528,7 @@ class ExtensibleAbilities {
 					unset( $filter_clauses['include_ids'] );
 				}
 				if ( isset( $filter_clauses['exclude_ids'] ) ) {
-					$filter_ids = self::get_filter_ids( $filter_clauses['exclude_ids'], $namespace . '.' . $filter );
+					$filter_ids = self::get_filter_ids( $filter_clauses['exclude_ids'], $namespace . '.' . $filter, $resource_name );
 					if ( is_wp_error( $filter_ids ) ) {
 						return $filter_ids;
 					}
@@ -558,11 +555,12 @@ class ExtensibleAbilities {
 	/**
 	 * The IDs that a filter returned, as integers.
 	 *
-	 * @param array  $ids    IDs from the filter callback.
-	 * @param string $filter Filter name, such as `subscriptions.related_to`.
+	 * @param array  $ids           IDs from the filter callback.
+	 * @param string $filter        Filter name, such as `subscriptions.related_to`.
+	 * @param string $resource_name Resource.
 	 * @return int[]|\WP_Error An error when an ID is not a positive integer.
 	 */
-	private static function get_filter_ids( array $ids, string $filter ) {
+	private static function get_filter_ids( array $ids, string $filter, string $resource_name ) {
 		$valid = array_filter(
 			array_map(
 				static fn( $id ) => filter_var( $id, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ),
@@ -570,14 +568,28 @@ class ExtensibleAbilities {
 			)
 		);
 		if ( count( $valid ) !== count( $ids ) ) {
-			return new \WP_Error(
-				'woocommerce_ability_extension_filter_failed',
-				/* translators: %s: filter name, such as subscriptions.subscribable. */
-				sprintf( __( 'The "%s" filter failed.', 'woocommerce' ), $filter ),
-				array( 'status' => 500 )
-			);
+			self::log_error( sprintf( 'Ability filter "%s" of "%s" must return IDs that are positive integers.', $filter, $resource_name ) );
+			return self::get_filter_failed_error( $filter );
 		}
 		return array_values( array_unique( $valid ) );
+	}
+
+	/**
+	 * The error of a query filter that failed. The log names the cause for the extension developer.
+	 *
+	 * @param string $filter Filter name, such as `subscriptions.related_to`.
+	 * @return \WP_Error
+	 */
+	private static function get_filter_failed_error( string $filter ): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_ability_extension_filter_failed',
+			sprintf(
+				/* translators: %s: filter name, such as subscriptions.subscribable. */
+				__( 'The "%s" filter failed. Call again without it, and ask the store owner to check the extensible-abilities log in WooCommerce > Status > Logs.', 'woocommerce' ),
+				$filter
+			),
+			array( 'status' => 500 )
+		);
 	}
 
 	/**
