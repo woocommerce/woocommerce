@@ -369,8 +369,10 @@ abstract class ActionableAbility extends Ability {
 	 *
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects.
 	 * @param \WC_Data[]                                          $deleted The objects the call deleted.
+	 *
+	 * @since 11.5.0
 	 */
-	private static function forget_rolled_back_objects( array $objects, array $deleted = array() ): void {
+	protected static function forget_rolled_back_objects( array $objects, array $deleted = array() ): void {
 		$product_cache = wc_get_container()->get( ProductCache::class );
 		foreach ( array_merge( $objects, array_map( static fn( $item ) => array( $item ), $deleted ) ) as list( $object ) ) {
 			$id = $object->get_id();

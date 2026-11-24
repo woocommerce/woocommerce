@@ -406,8 +406,11 @@ class OrderRefundCreate extends ActionableAbility {
 				);
 			}
 
-			$response = $enabled ? DatabaseTransaction::run( fn() => $this->sync( array( array( $result, $updates, $this->get_resource() ) ), $input ) ) : null;
-			if ( ! is_wp_error( $response ) ) {
+			$objects  = array( array( $result, $updates, $this->get_resource() ) );
+			$response = $enabled ? DatabaseTransaction::run( fn() => $this->sync( $objects, $input ) ) : null;
+			if ( is_wp_error( $response ) ) {
+				self::forget_rolled_back_objects( $objects );
+			} else {
 				$response = $this->prepare_response( $result );
 			}
 			if ( is_wp_error( $response ) ) {

@@ -3277,8 +3277,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_sync(
 			'order_refund',
 			'test-ext',
-			static function () {
+			static function ( array $saved ) {
 				update_option( 'test_refund_sync', 'written' );
+				$saved[0]->update_meta_data( '_test_sync', 'written' );
+				$saved[0]->save();
 				return new \WP_Error( 'sync_failed', 'The return could not be recorded.' );
 			}
 		);
@@ -3301,6 +3303,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( $refunds[0]->get_id(), $result->get_error_data()['id'] );
 		$this->assertTrue( $result->get_error_data()['refunded_payment'] );
 		$this->assertNull( $wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name = 'test_refund_sync'" ), 'The sync write should be rolled back.' );
+		$this->assertSame( '', wc_get_order( $refunds[0]->get_id() )->get_meta( '_test_sync' ), 'The rollback should drop the cache of the refund that the sync saved.' );
 	}
 
 	/**
