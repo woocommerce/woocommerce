@@ -308,11 +308,20 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$message = __( 'Checking your store', 'woocommerce' );
 		}
 		$truncated = null;
+		$by_sales  = false;
 		if ( null !== $report && ! empty( $report['truncated'] ) ) {
 			$available = (int) ( $report['available'] ?? 0 );
+			$by_sales  = $available > ProductScan::PRODUCT_LIMIT && ! empty( $report['bestsellers_first'] );
 			$truncated = $available > ProductScan::PRODUCT_LIMIT
-				/* translators: 1: number of products checked, 2: number of products in the store. */
-				? sprintf( __( 'Product checks covered the %1$s products you updated most recently, out of %2$s. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ), number_format_i18n( $available ) )
+				? sprintf(
+					$by_sales
+						/* translators: 1: number of products checked, 2: number of products in the store. */
+						? __( 'Product checks covered %1$s of your %2$s products: your bestsellers first, then the ones you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' )
+						/* translators: 1: number of products checked, 2: number of products in the store. */
+						: __( 'Product checks covered the %1$s products you updated most recently, out of %2$s. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ),
+					number_format_i18n( ProductScan::PRODUCT_LIMIT ),
+					number_format_i18n( $available )
+				)
 				/* translators: %s: number of products checked. Reports from before the total was stored. */
 				: sprintf( __( 'Product checks covered the %s products you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
 		}
@@ -343,8 +352,11 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'shopping' => $this->shopping_card( $checks ),
 				// After the description, when the last check stopped at the product limit.
 				'based_on' => null === $truncated ? null : sprintf(
-					/* translators: %s: number of products checked. */
-					__( 'Based on your %s most recently changed products.', 'woocommerce' ),
+					$by_sales
+						/* translators: %s: number of products checked. */
+						? __( 'Based on %s products: your bestsellers first, then the ones you changed most recently.', 'woocommerce' )
+						/* translators: %s: number of products checked. */
+						: __( 'Based on your %s most recently changed products.', 'woocommerce' ),
 					number_format_i18n( ProductScan::PRODUCT_LIMIT )
 				),
 				'view_all' => array(

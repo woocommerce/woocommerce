@@ -199,7 +199,7 @@ class ReportAbility implements AbilityDefinition {
 									'count'       => array( 'type' => 'integer' ),
 									'product_ids' => array(
 										'type'        => 'array',
-										'description' => __( 'Up to 10 failing products, most recently modified first.', 'woocommerce' ),
+										'description' => __( 'Up to 10 failing products, in the order they were checked.', 'woocommerce' ),
 										'items'       => array( 'type' => 'integer' ),
 									),
 									'sales_share' => array(
@@ -226,6 +226,10 @@ class ReportAbility implements AbilityDefinition {
 							),
 						),
 						'truncated'           => array( 'type' => 'boolean' ),
+						'bestsellers_first'   => array(
+							'type'        => 'boolean',
+							'description' => __( 'On a truncated check: whether the products checked start with the best sellers of the sales period, then the most recently modified. False when they are the most recently modified only.', 'woocommerce' ),
+						),
 						'pages_best_seller'   => array(
 							'type'        => 'boolean',
 							'description' => __( 'Whether the up to five product pages the page checks read start with the best seller. False when they start with the newest product.', 'woocommerce' ),

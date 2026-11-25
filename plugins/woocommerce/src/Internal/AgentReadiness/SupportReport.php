@@ -146,7 +146,9 @@ class SupportReport {
 			'Check status: ' . $state,
 		);
 		if ( null !== $report && ! empty( $report['truncated'] ) ) {
-			$lines[] = sprintf( 'Checked the %s products you changed most recently.', ProductScan::PRODUCT_LIMIT );
+			$lines[] = ! empty( $report['bestsellers_first'] )
+				? sprintf( 'Checked %s products: bestsellers first, then the most recently changed.', ProductScan::PRODUCT_LIMIT )
+				: sprintf( 'Checked the %s products you changed most recently.', ProductScan::PRODUCT_LIMIT );
 		}
 		return $lines;
 	}

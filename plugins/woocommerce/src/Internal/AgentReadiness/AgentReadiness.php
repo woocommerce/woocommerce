@@ -229,7 +229,7 @@ class AgentReadiness {
 	/**
 	 * Run every check over the catalog, in this request, without storing anything.
 	 *
-	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,pages_best_seller?:bool,sales:array{days:int,orders:int,imported:bool}|null}
+	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,bestsellers_first:bool,pages_best_seller?:bool,sales:array{days:int,orders:int,imported:bool}|null}
 	 */
 	public function get_report(): array {
 		$scan  = $this->start_scan();
@@ -246,37 +246,36 @@ class AgentReadiness {
 	 * Start a scan: the rules, the sales period and the products to test, before any is tested.
 	 * Each later step runs from what this returns, so a scan can go on in another request.
 	 *
-	 * @return array{ids:array<int,int>,position:int,sales:array{days:int,since:string,orders:int,imported:bool,total:float}|null,ranked:bool,best_seller:int,scan:array<string,mixed>}
+	 * @return array{ids:array<int,int>,position:int,sales:array{days:int,since:string,orders:int,imported:bool,total:float}|null,ranked:bool,best_seller:int,bestsellers_first:bool,scan:array<string,mixed>}
 	 */
 	private function start_scan(): array {
 		// Rebuild the rules for each scan: a long-running process may have fetched a new rules file since.
 		$this->active_rules = null;
 		$this->product_scan = null;
 		$sales              = $this->product_sales->last_days();
-		$product_scan       = new ProductScan();
-		$ids                = $product_scan->start();
 		$ranked             = null !== $sales && $sales['imported'] && $sales['orders'] >= ProductSales::MIN_ORDERS && $sales['total'] > 0;
-		// Keep only the best seller id for page checks at finish; the full sales map is not stored between batches.
-		$best_seller = 0;
-		if ( $ranked ) {
-			$by_product = array_filter( $sales['by_product'], static fn( $amount ): bool => $amount > 0 );
-			arsort( $by_product );
-			$best_seller = (int) ( array_key_first( $by_product ) ?? 0 );
-		}
+		// Best sellers first, most sales first. Without sales to rank by, the scan goes by last change only.
+		$best_sellers = $ranked ? $sales['top'] : array();
+		$product_scan = new ProductScan();
+		$ids          = $product_scan->start( $best_sellers );
+		// Only the best seller's id is kept, for the page checks at finish.
+		$best_seller = (int) ( $best_sellers[0] ?? 0 );
 		return array(
-			'ids'         => $ids,
-			'position'    => 0,
+			'ids'               => $ids,
+			'position'          => 0,
 			// The period and totals only: each batch reads its own products' sales, so the whole store's are never kept.
-			'sales'       => null === $sales ? null : array(
+			'sales'             => null === $sales ? null : array(
 				'days'     => $sales['days'],
 				'since'    => $sales['since'],
 				'orders'   => $sales['orders'],
 				'imported' => $sales['imported'],
 				'total'    => $sales['total'],
 			),
-			'ranked'      => $ranked,
-			'best_seller' => $best_seller,
-			'scan'        => $product_scan->state(),
+			'ranked'            => $ranked,
+			'best_seller'       => $best_seller,
+			// Whether a catalog over the limit was listed with its bestsellers first.
+			'bestsellers_first' => $product_scan->best_sellers_first(),
+			'scan'              => $product_scan->state(),
 		);
 	}
 
@@ -307,7 +306,7 @@ class AgentReadiness {
 	 * Build the report once every batch is tested. The store output checks request the store's own pages, so they run here, once.
 	 *
 	 * @param array<string, mixed> $scan The scan after its last batch.
-	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,pages_best_seller:bool,sales:array{days:int,orders:int,imported:bool}|null,shared_gtins?:array<int,string>}
+	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,bestsellers_first:bool,pages_best_seller:bool,sales:array{days:int,orders:int,imported:bool}|null,shared_gtins?:array<int,string>}
 	 */
 	private function finish_scan( array $scan ): array {
 		$active       = $this->get_active_rules();
@@ -351,6 +350,8 @@ class AgentReadiness {
 			'channels'            => $product_scan->channel_totals(),
 			'checks'              => $checks,
 			'truncated'           => $product_scan->truncated(),
+			// On a scan that stopped at the limit: whether it took the store's bestsellers first, then newest changes.
+			'bestsellers_first'   => ! empty( $scan['bestsellers_first'] ),
 			// How sales shares were measured: null while Analytics is off.
 			'sales'               => null === $sales ? null : array(
 				'days'     => $sales['days'],
