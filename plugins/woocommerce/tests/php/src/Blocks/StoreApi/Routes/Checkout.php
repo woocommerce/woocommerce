@@ -7316,4 +7316,114 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertArrayHasKey( 'payment_result', $data );
 		$this->assertSame( 'success', $data['payment_result']['payment_status'], 'Recovery must still report success on the result the response uses.' );
 	}
+
+	/**
+	 * @testdox A legacy gateway that adds an error notice and returns nothing shows that notice to the shopper.
+	 */
+	public function test_legacy_gateway_returning_nothing_shows_its_error_notice() {
+		$this->use_bacs_gateway_returning_nothing( 'The test gateway declined the card.' );
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status(), 'Unexpected response: ' . print_r( $data, true ) );
+		$this->assertSame( 'woocommerce_rest_checkout_process_payment_error', $data['code'] );
+		$this->assertSame( 'The test gateway declined the card.', $data['message'] );
+	}
+
+	/**
+	 * @testdox A legacy gateway that returns nothing without a notice ends the checkout as a failed payment.
+	 */
+	public function test_legacy_gateway_returning_nothing_without_a_notice_fails_the_payment() {
+		$this->use_bacs_gateway_returning_nothing( null );
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status(), 'Unexpected response: ' . print_r( $data, true ) );
+		$this->assertArrayHasKey( 'payment_result', $data );
+		$this->assertSame( 'failure', $data['payment_result']['payment_status'] );
+	}
+
+	/**
+	 * @testdox A legacy gateway that takes payment and then returns nothing still completes the checkout.
+	 */
+	public function test_legacy_gateway_returning_nothing_after_taking_payment_completes_the_checkout() {
+		$this->use_bacs_gateway_returning_nothing( 'An error the paid shopper should not see later.', true );
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), 'Unexpected response: ' . print_r( $data, true ) );
+		$this->assertArrayHasKey( 'payment_result', $data );
+		$this->assertSame( 'success', $data['payment_result']['payment_status'] );
+		$this->assertSame( 0, wc_notice_count( 'error' ), 'The gateway notice should not stay queued for a later page.' );
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $data['order_id'] ) ), 'content' );
+		$this->assertNotEmpty(
+			array_filter(
+				$notes,
+				function ( $note ) {
+					return false !== strpos( $note, 'The bacs payment method returned no result.' );
+				}
+			),
+			'The order note should name the gateway that returned no result.'
+		);
+	}
+
+	/**
+	 * Replaces BACS with a gateway whose process_payment() returns nothing, as legacy gateways do when they bail out early.
+	 *
+	 * @param string|null $notice           Error notice the gateway adds before returning, or null for none.
+	 * @param bool        $complete_payment Whether the gateway marks the order paid before returning.
+	 */
+	private function use_bacs_gateway_returning_nothing( ?string $notice, bool $complete_payment = false ): void {
+		$gateway = new class( $notice, $complete_payment ) extends WC_Gateway_BACS {
+			/**
+			 * Error notice to add, or null for none.
+			 *
+			 * @var string|null
+			 */
+			private $notice;
+
+			/**
+			 * Whether to mark the order paid before returning.
+			 *
+			 * @var bool
+			 */
+			private $complete_payment;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param string|null $notice           Error notice to add, or null for none.
+			 * @param bool        $complete_payment Whether to mark the order paid before returning.
+			 */
+			public function __construct( ?string $notice, bool $complete_payment ) {
+				parent::__construct();
+				$this->notice           = $notice;
+				$this->complete_payment = $complete_payment;
+			}
+
+			/**
+			 * Marks the order paid and adds the error notice when asked, then returns nothing.
+			 *
+			 * @param int $order_id Order ID.
+			 */
+			public function process_payment( $order_id ) {
+				if ( $this->complete_payment ) {
+					wc_get_order( $order_id )->payment_complete();
+				}
+				if ( null !== $this->notice ) {
+					wc_add_notice( $this->notice, 'error' );
+				}
+			}
+		};
+
+		foreach ( WC()->payment_gateways()->payment_gateways as $key => $existing ) {
+			if ( WC_Gateway_BACS::ID === $existing->id ) {
+				WC()->payment_gateways()->payment_gateways[ $key ] = $gateway;
+			}
+		}
+	}
 }

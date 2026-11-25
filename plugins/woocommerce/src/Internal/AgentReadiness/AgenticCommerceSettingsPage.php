@@ -12,8 +12,8 @@ defined( 'ABSPATH' ) || exit;
  * card, the AI shopping card and the Sales readiness card; Manage opens AI shopping, a React view with the UCP switch, Product visibility, the
  * Setup checklist, the store policy fields and the connection URL. settings-embed mounts both, from data
  * this class builds. The UCP switch saves on its own through wc/v3/agent-readiness/ucp; the store policy
- * fields save with Save, which posts this settings form. Only created by AgenticCommerceSettings while the
- * agent_readiness feature is enabled, after WC_Settings_Page has loaded.
+ * fields save with Save, which posts this settings form. Only created by AgenticCommerceSettings,
+ * after WC_Settings_Page has loaded.
  *
  * @since 11.4.0
  */

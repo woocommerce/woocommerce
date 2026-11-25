@@ -140,6 +140,7 @@ final class PlanRepository {
 	 *
 	 * @param array<string, mixed> $args Query args.
 	 * @return array<int, Plan>
+	 * @throws \RuntimeException If the read fails: a failed read must not look like no plans.
 	 */
 	public function query( array $args = array() ): array {
 		global $wpdb;
@@ -159,6 +160,9 @@ final class PlanRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table}{$where_sql} {$order} LIMIT %d OFFSET %d", $params ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( sprintf( 'Failed to read plans: %s', esc_html( $wpdb->last_error ) ) );
+		}
 		if ( ! is_array( $rows ) ) {
 			return array();
 		}
@@ -180,6 +184,7 @@ final class PlanRepository {
 	 * Supported args are the filter args accepted by query().
 	 *
 	 * @param array<string, mixed> $args Query args.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a zero count.
 	 */
 	public function count( array $args = array() ): int {
 		global $wpdb;
@@ -198,6 +203,9 @@ final class PlanRepository {
 		} else {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 			$result = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table}{$where_sql}", $where_params ) );
+		}
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( sprintf( 'Failed to count plans: %s', esc_html( $wpdb->last_error ) ) );
 		}
 
 		return (int) $result;
@@ -550,6 +558,7 @@ final class PlanRepository {
 	 * @param bool   $single  With a key: return the first value only.
 	 * @return mixed Empty key: `array<string, array<int, mixed>>` of all keys. Key + `$single`:
 	 *               the first value, or '' when absent. Key only: the list of values (`[]` when absent).
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public function get_meta( int $plan_id, string $key = '', bool $single = false ) {
 		if ( '' === $key ) {
@@ -780,6 +789,7 @@ final class PlanRepository {
 	 * @param int    $plan_id Plan id.
 	 * @param string $key     Meta key.
 	 * @return array<int, mixed>
+	 * @throws \RuntimeException If the read fails.
 	 */
 	private function find_meta_values( int $plan_id, string $key ): array {
 		$values = array();
@@ -796,6 +806,7 @@ final class PlanRepository {
 	 * @param int         $plan_id Plan id.
 	 * @param string|null $key     Meta key, or null for every key.
 	 * @return array<int, array{meta_key: string, meta_value: string}>
+	 * @throws \RuntimeException If the read fails: a failed read must not look like an absent key.
 	 */
 	private function find_meta_rows( int $plan_id, ?string $key ): array {
 		global $wpdb;
@@ -810,6 +821,9 @@ final class PlanRepository {
 			// slow-meta-query heuristic does not apply.
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE plan_id = %d AND meta_key = %s ORDER BY id ASC", $plan_id, $key ), ARRAY_A );
+		}
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( sprintf( 'Failed to read plan meta for plan %d: %s', (int) $plan_id, esc_html( $wpdb->last_error ) ) );
 		}
 
 		$result = array();

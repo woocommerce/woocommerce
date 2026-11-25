@@ -17,19 +17,17 @@ use WP_REST_Request;
 class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * Tests fire rest_api_init with the feature both on and off.
+	 * Each test gets a fresh REST server.
 	 *
 	 * @var bool
 	 */
 	protected static $reuse_rest_server = false;
 
 	/**
-	 * Enable the feature after parent::setUp(), so the filter stays out of the hook
-	 * snapshot WordPress takes in the first test. Routes register on first dispatch.
+	 * Keep the report tests offline, with no stored report or queued scan. Routes register on first dispatch.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		add_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
 		// Report tests stay offline: store output checks would load the test site's pages.
 		StoreOutputChecksTest::block_requests();
 		delete_option( AgentReadiness::REPORT_OPTION );
@@ -44,13 +42,6 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
 		parent::tearDown();
-	}
-
-	/**
-	 * The feature option's value while these tests run.
-	 */
-	public static function enabled(): string {
-		return 'yes';
 	}
 
 	/**
@@ -143,20 +134,6 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/view' ) )->get_status() );
 		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_status() );
 		$this->assertFalse( as_has_scheduled_action( ScheduledScan::RUN_NOW_HOOK ) );
-	}
-
-	/**
-	 * @testdox With the feature disabled the routes are not registered.
-	 */
-	public function test_routes_absent_when_feature_disabled(): void {
-		remove_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
-		global $wp_rest_server;
-		$wp_rest_server = new \WP_REST_Server();
-		do_action( 'rest_api_init', $wp_rest_server );
-
-		$this->assertSame( 404, $wp_rest_server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness' ) )->get_status() );
-		$this->assertSame( 404, $wp_rest_server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_status() );
 	}
 
 	/**
@@ -335,36 +312,47 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox When no store check could run, the support report says why once, as the page does.
 	 */
 	public function test_support_report_says_why_no_check_ran(): void {
+		$unchecked = array(
+			array(
+				'id'       => 'llms_txt_present',
+				'ok'       => null,
+				'blocks'   => 'discovery',
+				'name'     => 'llms.txt',
+				'why'      => '',
+				'conflict' => false,
+			),
+			array(
+				'id'       => 'product_shipping_schema',
+				'ok'       => null,
+				'pending'  => true,
+				'blocks'   => 'discovery',
+				'name'     => 'Shipping details',
+				'why'      => '',
+				'conflict' => false,
+			),
+			array(
+				'id'       => 'open_graph_tags',
+				'ok'       => null,
+				'blocks'   => 'discovery',
+				'name'     => 'Open Graph tags',
+				'why'      => '',
+				'conflict' => false,
+			),
+		);
 		update_option(
 			AgentReadiness::REPORT_OPTION,
 			array(
 				'generated_at' => '2026-11-18T10:42:00+00:00',
-				'store_checks' => array(
+				'store_checks' => array_merge(
 					array(
-						'id'       => 'llms_txt_present',
-						'ok'       => null,
-						'blocks'   => 'discovery',
-						'name'     => 'llms.txt',
-						'why'      => '',
-						'conflict' => false,
+						array(
+							'id'      => 'launched',
+							'ok'      => true,
+							'name'    => 'Store is launched',
+							'fix_url' => '',
+						),
 					),
-					array(
-						'id'       => 'product_shipping_schema',
-						'ok'       => null,
-						'pending'  => true,
-						'blocks'   => 'discovery',
-						'name'     => 'Shipping details',
-						'why'      => '',
-						'conflict' => false,
-					),
-					array(
-						'id'       => 'open_graph_tags',
-						'ok'       => null,
-						'blocks'   => 'discovery',
-						'name'     => 'Open Graph tags',
-						'why'      => '',
-						'conflict' => false,
-					),
+					$unchecked
 				),
 			),
 			false
@@ -374,6 +362,55 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertStringContainsString( "### Store checks ###\n\nYour pages couldn’t be checked. Your hosting setup blocked the check from opening them.", $text );
 		$this->assertSame( 1, substr_count( $text, 'Your pages couldn’t be checked' ) );
+
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => '2026-11-18T10:42:00+00:00',
+				'store_checks' => array_merge(
+					array(
+						array(
+							'id'      => 'launched',
+							'ok'      => false,
+							'name'    => 'Store is launched',
+							'fix_url' => '',
+						),
+					),
+					$unchecked
+				),
+			),
+			false
+		);
+		$text = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
+		$this->assertStringContainsString( "### Store checks ###\n\nYour store wasn’t live at the last check. These checks run at the next daily check, or you can run the check again now.", $text );
+		$this->assertStringNotContainsString( 'Your hosting setup blocked', $text );
+		$this->assertStringContainsString( 'Open Graph tags (open_graph_tags): Not checked yet. Your store wasn’t live at the last check.', $text, 'Each check says so too, as on the page' );
+		$this->assertStringContainsString( 'Shipping details (product_shipping_schema): Not available yet', $text, 'A check a coming update builds is still not available' );
+	}
+
+	/**
+	 * @testdox In the support report, a product page check with no product to open says Not checked yet and why; one that tried and couldn't says Couldn't check.
+	 */
+	public function test_support_report_product_page_check_without_a_product(): void {
+		$check = static fn( string $id, ?bool $ok, array $extra = array() ): array => $extra + array(
+			'id'      => $id,
+			'ok'      => $ok,
+			'blocks'  => 'discovery',
+			'name'    => $id,
+			'why'     => '',
+			'fix_url' => '',
+		);
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => '2026-11-18T10:42:00+00:00',
+				'store_checks' => array( $check( 'launched', true ), $check( 'canonical_url', null, array( 'no_product' => true ) ), $check( 'sitemap_lists_products', null ), $check( 'robots_txt', true ) ),
+			),
+			false
+		);
+		$text  = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
+		$this->assertStringContainsString( 'canonical_url (canonical_url): Not checked yet. This check needs a product page.', $text );
+		$this->assertStringContainsString( 'sitemap_lists_products (sitemap_lists_products): Couldn’t check', $text );
 	}
 
 	/**
@@ -554,6 +591,40 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
 			}
 		}
+	}
+
+	/**
+	 * @testdox When the discovery file can't be written as UCP turns on, POST ucp answers needs attention, not active.
+	 */
+	public function test_turning_ucp_on_reports_a_failed_discovery_write(): void {
+		if ( is_multisite() ) {
+			$this->markTestSkipped( 'Multisite never writes the discovery file.' );
+		}
+		global $wp_rewrite;
+		StoreConditionsTest::make_store_ready();
+		$wp_rewrite->set_permalink_structure( '' );
+		// A folder where the file goes: its parent is writable, so the switch is allowed, but the write fails.
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/ucp';
+		wp_mkdir_p( $path );
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- The failed write warns, as on a real server.
+		set_error_handler( static fn( int $severity ): bool => E_WARNING === $severity );
+
+		try {
+			$response = $this->dispatch_ucp( true );
+		} finally {
+			restore_error_handler();
+			foreach ( array( $path, dirname( $path ) ) as $dir ) {
+				if ( is_dir( $dir ) ) {
+					rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+				}
+			}
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['enabled'] );
+		$this->assertSame( UcpSwitch::STATUS_NEEDS_ATTENTION, $response->get_data()['status'] );
+		$this->assertContains( 'ucp_discovery', $response->get_data()['failing_checks'] );
 	}
 
 	/**

@@ -5,6 +5,7 @@ import {
 	BlockControls,
 	InnerBlocks,
 	InspectorControls,
+	store as blockEditorStore,
 	useBlockProps,
 } from '@wordpress/block-editor';
 import { createBlock } from '@wordpress/blocks';
@@ -18,8 +19,8 @@ import {
 	withSpokenMessages,
 } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
-import { withDispatch, withSelect } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { useDispatch, withDispatch, withSelect } from '@wordpress/data';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, grid } from '@wordpress/icons';
 import { getBlockMap } from '@woocommerce/utils/get-block-map';
@@ -47,19 +48,50 @@ import {
 import { getBlockClassName } from '../utils';
 import Block from './block';
 import metadata from './block.json';
+import defaults from './defaults';
 import './editor.scss';
 
 const blockMap = getBlockMap( 'woocommerce/all-products' );
 
 const blockIcon = <Icon icon={ grid } />;
 
+/**
+ * Returns the default settings this block has not saved yet.
+ *
+ * The defaults depend on the theme, so they can't live in block.json.
+ * save() writes every attribute to the page, so they have to be saved.
+ *
+ * @param {Object} attributes Block attributes.
+ * @return {Object} Defaults for the attributes that are not set.
+ */
+const getMissingDefaults = ( attributes ) =>
+	Object.fromEntries(
+		Object.entries( defaults ).filter(
+			( [ key ] ) => typeof attributes[ key ] === 'undefined'
+		)
+	);
+
 const Edit = ( {
 	block,
-	attributes,
+	clientId,
+	attributes: savedAttributes,
 	setAttributes,
 	debouncedSpeak,
 	replaceInnerBlocks,
 } ) => {
+	const missingDefaults = getMissingDefaults( savedAttributes );
+	const attributes = { ...savedAttributes, ...missingDefaults };
+	const { updateBlockAttributes } = useDispatch( blockEditorStore );
+
+	useEffect( () => {
+		if ( Object.keys( missingDefaults ).length ) {
+			// Not setAttributes(): it writes to every selected block.
+			updateBlockAttributes( clientId, missingDefaults );
+		}
+		// Only on mount, like the editor filter this replaces.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
+
 	const [ isEditing, setIsEditing ] = useState( false );
 	const [ innerBlocks, setInnerBlocks ] = useState( [] );
 
