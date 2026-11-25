@@ -101,9 +101,10 @@ test.describe(
 				.getByRole( 'button', { name: 'Save', exact: true } )
 				.click();
 
-			// Wait for the save to complete
-			// eslint-disable-next-line playwright/no-wait-for-timeout -- wait for content to be saved
-			await page.waitForTimeout( 1000 );
+			// The Save button is disabled again once nothing is left to save.
+			await expect(
+				page.getByRole( 'button', { name: 'Save', exact: true } )
+			).toBeDisabled();
 
 			// Verify the customization is present
 			await expect( editorFrame.getByText( uniqueText ) ).toBeVisible();
@@ -145,26 +146,19 @@ test.describe(
 				.getByRole( 'button', { name: 'Reset', exact: true } )
 				.click();
 
-			// Wait for the reset operation to complete
-			// eslint-disable-next-line playwright/no-wait-for-timeout -- wait for reset to complete
-			await page.waitForTimeout( 2000 );
+			// The reset is done once the template is no longer custom, which
+			// disables the Actions button. Check this first, so the checks
+			// below see the reset template and not one still loading.
+			await expect(
+				page.getByRole( 'button', { name: 'Actions' } )
+			).toBeDisabled();
 
 			// Verify the custom content is gone (template is reset)
-			const editorFrameAfterReset = page
-				.frameLocator( 'iframe[name="editor-canvas"]' )
-				.first();
-			await expect(
-				editorFrameAfterReset.getByText( uniqueText )
-			).toBeHidden();
+			await expect( editorFrame.getByText( uniqueText ) ).toBeHidden();
 
 			// Verify Save button is disabled (no changes to save)
 			await expect(
 				page.getByRole( 'button', { name: 'Save', exact: true } )
-			).toBeDisabled();
-
-			// Verify Actions button is disabled (template is no longer custom)
-			await expect(
-				page.getByRole( 'button', { name: 'Actions' } )
 			).toBeDisabled();
 		} );
 	}

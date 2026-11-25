@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Wait for the editor state instead of fixed delays in the email template reset E2E test; tests only.
