@@ -158,7 +158,6 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 		$second    = WC_Helper_Product::create_attribute( 'Test Finish', array( 'Matte' ) );
 		$input     = array( 'include' => array( $attribute['attribute_id'], $second['attribute_id'] ) );
 		$primed    = array();
-		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
 		$this->enable_extensible_abilities(
 			static function () use ( &$primed ) {
 				ExtensibleAbilities::register_prime(
