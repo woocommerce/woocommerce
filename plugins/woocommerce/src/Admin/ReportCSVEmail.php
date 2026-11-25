@@ -110,7 +110,15 @@ class ReportCSVEmail extends \WC_Email {
 	 * @return bool
 	 */
 	public function is_enabled() {
-		/** This filter is documented in includes/emails/class-wc-email.php */
+		/**
+		 * Filters whether the email is enabled and will be sent.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param bool      $enabled Whether the email is enabled.
+		 * @param mixed     $object  The object the email is about.
+		 * @param \WC_Email $email   The email.
+		 */
 		return apply_filters( 'woocommerce_email_enabled_' . $this->id, true, $this->object, $this );
 	}
 
