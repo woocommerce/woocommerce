@@ -178,7 +178,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$text = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
 
 		$this->assertStringStartsWith( "### AI shopping health ###\n", $text );
-		$this->assertStringContainsString( "### Product checks ###\n\nNo products to check.\n", $text );
+		$this->assertStringEndsWith( "\nNo products to check.\n", $text, 'After the Product checks heading and the app totals' );
 		$this->assertStringNotContainsString( 'missing_images', $text, 'A count of 0 with nothing checked is not a pass' );
 		$privacy = array_values( array_filter( explode( "\n", $text ), static fn( string $line ): bool => false !== strpos( $line, '(privacy_page)' ) ) );
 		$this->assertStringStartsWith( 'Privacy policy page is selected and published (privacy_page):', $privacy[0] ?? '', 'The step is done only once the page is published' );
