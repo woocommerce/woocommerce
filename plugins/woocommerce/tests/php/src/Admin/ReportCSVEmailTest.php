@@ -232,6 +232,20 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The email reports itself enabled, and extensions can still change that through the woocommerce_email_enabled_ filter.
+	 */
+	public function test_is_enabled_runs_the_email_enabled_filter(): void {
+		$email = new ReportCSVEmail();
+		$this->assertTrue( $email->is_enabled() );
+
+		add_filter( 'woocommerce_email_enabled_admin_report_export_download', '__return_false' );
+		$enabled = $email->is_enabled();
+		remove_filter( 'woocommerce_email_enabled_admin_report_export_download', '__return_false' );
+
+		$this->assertFalse( $enabled );
+	}
+
+	/**
 	 * @testdox The email preview shows a sample Orders report instead of an empty report name.
 	 */
 	public function test_preview_shows_a_sample_report(): void {
