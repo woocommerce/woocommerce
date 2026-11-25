@@ -1978,11 +1978,12 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should name the full path of an unknown nested key, with the keys its object accepts when the object names them, also under a nullable anyOf or oneOf, in a list and in a map, and keep the WordPress message when a required key is missing.
-	 * @testWith [{"metal":{"gold":1}}, "\"extensions.probe.dims.metal.gold\" is not a key of this field. Remove it from the input. \"extensions.probe.dims.metal\" accepts: iron."]
-	 *           [{"wood":{"pine":1,"oak":1}}, "\"extensions.probe.dims.wood.oak\" is not a key of this field. Remove it from the input. \"extensions.probe.dims.wood\" accepts: pine."]
-	 *           [{"stones":[{"name":"ruby"},{"carat":2}]}, "\"extensions.probe.dims.stones[1].carat\" is not a key of this field. Remove it from the input. \"extensions.probe.dims.stones[1]\" accepts: name."]
-	 *           [{"gems":{"ruby":{"size_mm":2,"cut":1}}}, "\"extensions.probe.dims.gems.ruby.cut\" is not a key of this field. Remove it from the input."]
+	 * @testdox Should name the full path of an unknown nested key and the keys its object accepts.
+	 * @testWith [{"metal":{"gold":1}}, "\"extensions.probe.dims[metal][gold]\" is not a key of this field. Remove it from the input. \"extensions.probe.dims[metal]\" accepts: iron."]
+	 *           [{"wood":{"pine":1,"oak":1}}, "\"extensions.probe.dims[wood][oak]\" is not a key of this field. Remove it from the input. \"extensions.probe.dims[wood]\" accepts: pine."]
+	 *           [{"stones":[{"name":"ruby"},{"carat":2}]}, "\"extensions.probe.dims[stones][1][carat]\" is not a key of this field. Remove it from the input. \"extensions.probe.dims[stones][1]\" accepts: name."]
+	 *           [{"gems":{"ruby":{"size_mm":2,"cut":1}}}, "\"extensions.probe.dims[gems][ruby][cut]\" is not a key of this field. Remove it from the input."]
+	 *           [{"bead":{"name":"jade","size_mm":2,"cut":1}}, "\"extensions.probe.dims[bead][cut]\" is not a key of this field. Remove it from the input."]
 	 *           [{"wood":{"oak":1}}, "extensions.probe.dims[wood] does not match the expected format. Reason: pine is a required property of extensions.probe.dims[wood]."]
 	 *
 	 * @param array  $dims    Value of the field.
@@ -2011,6 +2012,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 									'type'  => 'array',
 									'items' => $strict( array( 'name' => array( 'type' => 'string' ) ) ),
 								),
+								'bead'   => array( 'patternProperties' => array( '^size_' => array( 'type' => 'integer' ) ) ) + $strict( array( 'name' => array( 'type' => 'string' ) ) ),
 								'gems'   => array(
 									'oneOf' => array(
 										array(

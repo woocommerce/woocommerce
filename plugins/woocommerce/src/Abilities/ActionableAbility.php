@@ -491,7 +491,7 @@ abstract class ActionableAbility extends Ability {
 		$unknown_key = in_array( $error->get_error_code(), self::UNKNOWN_KEY_ERROR_CODES, true ) ? self::find_unknown_key( $value, $schema, $param ) : null;
 		if ( null !== $unknown_key ) {
 			list( $key_path, $object_path, $accepted ) = $unknown_key;
-			/* translators: %s: Path of the key in the input, such as extensions.my_ext.size.unit. */
+			/* translators: %s: Path of the key in the input, such as extensions.my_ext.size[unit]. */
 			$message = sprintf( __( '"%s" is not a key of this field. Remove it from the input.', 'woocommerce' ), $key_path );
 			if ( empty( $accepted ) ) {
 				return $message;
@@ -505,12 +505,12 @@ abstract class ActionableAbility extends Ability {
 	/**
 	 * Follow the first refusal of rest_validate_value_from_schema() down the value, and
 	 * describe the key when that refusal is a key the schema does not allow.
-	 * Like WordPress, it follows an `anyOf` or `oneOf` only when one branch has the type of the value.
+	 * It follows an `anyOf` or `oneOf` only when exactly one branch refuses the value for a reason other than its type.
 	 *
 	 * @param mixed  $value  Value from the input.
 	 * @param array  $schema Schema of the value.
 	 * @param string $path   Path of the value in the input.
-	 * @return array{0: string, 1: string, 2: array<int|string>}|null Path of the key, such as `extensions.my_ext.size.unit`, path of its object and the keys named in the `properties` of that object, or null when the first refusal is another one.
+	 * @return array{0: string, 1: string, 2: array<int|string>}|null Path of the key, such as `extensions.my_ext.size[unit]`, path of its object and the keys named in the `properties` of that object (none when it also has `patternProperties`), or null when the first refusal is another one.
 	 */
 	private static function find_unknown_key( $value, array $schema, string $path ): ?array {
 		foreach ( array( 'anyOf', 'oneOf' ) as $keyword ) {
@@ -547,13 +547,13 @@ abstract class ActionableAbility extends Ability {
 			foreach ( $value as $key => $child ) {
 				$child_schema = $schema['properties'][ $key ] ?? rest_find_matching_pattern_property_schema( (string) $key, $schema ) ?? ( is_array( $additional ) ? $additional : null );
 				if ( is_array( $child_schema ) || false === $additional ) {
-					$children[] = array( $child, $child_schema, $path . '.' . $key );
+					$children[] = array( $child, $child_schema, $path . '[' . $key . ']' );
 				}
 			}
 		}
 		foreach ( $children as list( $child, $child_schema, $child_path ) ) {
 			if ( null === $child_schema ) {
-				return array( $child_path, $path, array_keys( is_array( $schema['properties'] ?? null ) ? $schema['properties'] : array() ) );
+				return array( $child_path, $path, isset( $schema['patternProperties'] ) || ! is_array( $schema['properties'] ?? null ) ? array() : array_keys( $schema['properties'] ) );
 			}
 			$valid = rest_validate_value_from_schema( $child, $child_schema, $child_path );
 			if ( is_wp_error( $valid ) ) {
