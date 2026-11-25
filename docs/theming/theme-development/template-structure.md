@@ -42,9 +42,9 @@ Let's take a look at [/wp-content/plugins/woocommerce/templates/emails/admin-new
 do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
 ```
 
-The code above outputs the block highlighted in red in the image below, which is the New Order email a shop manager receives following a successful order on their site:
+The `woocommerce_email_order_details` hook runs where WooCommerce renders the **Order summary** in the **New order** email. The preview below shows the order number, line items, and totals.
 
-![image](https://woocommerce.com/wp-content/uploads/2020/05/templating-using-hooks.webp)
+![Order summary in the New order email preview showing the order number, products, quantities, prices, and totals.](/img/doc_images/woocommerce-new-order-email-order-summary-2x.png)
 
 The code below can be used as a starting point to build out desired functionality. It can then be added to a code snippets plugin to modify the output at that particular location in the template, without having to edit the template itself. The same goes for other hooks, wherever in the templates they may appear.
 
