@@ -359,7 +359,7 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should link registered recipients to account management and preserve guest unsubscribe links.
+	 * @testdox Should link recipients to account management, falling back to unsubscribe links when the account can't be reached.
 	 * @testWith [false, false, "stock-notifications"]
 	 *           [true, false, "stock-notifications"]
 	 *           [false, false, "restock-alerts"]
@@ -380,14 +380,22 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 *           [true, false, "", true]
 	 *           [false, true, "", true]
 	 *           [true, true, "", true]
+	 *           [false, true, "stock-notifications", false, true]
+	 *           [true, true, "stock-notifications", false, true]
+	 *           [false, true, "stock-notifications", true, true]
+	 *           [true, true, "stock-notifications", true, true]
+	 *           [false, true, "", false, true]
+	 *           [true, true, "", true, true]
 	 *
 	 * @param bool   $verified Whether to render the confirmation email.
 	 * @param bool   $guest Whether the signup belongs to a guest.
 	 * @param string $endpoint The configured account endpoint.
 	 * @param bool   $plain_text Whether to render the plain-text email instead of HTML.
+	 * @param bool   $registration Whether customers can create an account on the My Account page.
 	 */
-	public function test_email_footer_links( bool $verified, bool $guest, string $endpoint, bool $plain_text = false ): void {
+	public function test_email_footer_links( bool $verified, bool $guest, string $endpoint, bool $plain_text = false, bool $registration = false ): void {
 		update_option( MyAccountEndpoint::ENDPOINT_OPTION, $endpoint );
+		update_option( 'woocommerce_enable_myaccount_registration', $registration ? 'yes' : 'no' );
 		new MyAccountEndpoint();
 		WC()->query->init_query_vars();
 		$notification = $this->build_notification();
@@ -408,18 +416,24 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 'back-in-stock-notifications', $query['utm_source'] );
 		$this->assertSame( 'email', $query['utm_medium'] );
-		if ( $guest || '' === $endpoint ) {
+		if ( ( $guest && ! $registration ) || '' === $endpoint ) {
 			$this->assertSame( 'unsubscribe', $query['email_link_action'] );
 			$this->assertTrue( ( new Notification( $notification->get_id() ) )->check_unsubscribe_key( $query['email_link_action_key'] ), 'The unsubscribe link must contain the persisted unsubscribe key.' );
 			$this->assertSame( (string) $notification->get_id(), $query['notification_id'] );
 			$this->assertStringContainsString( 'To stop receiving these messages,', $content );
-			$this->assertStringNotContainsString( 'To manage your notifications,', $content );
+			$this->assertStringNotContainsString( 'Manage notifications', $content );
 		} else {
 			$this->assertSame( wc_get_account_endpoint_url( $endpoint ), remove_query_arg( array( 'utm_source', 'utm_medium' ), $link ) );
 			$this->assertArrayNotHasKey( 'email_link_action', $query );
 			$this->assertArrayNotHasKey( 'email_link_action_key', $query );
-			$this->assertStringContainsString( 'To manage your notifications,', $content );
+			$this->assertStringContainsString( 'Manage notifications', $content );
 			$this->assertStringNotContainsString( 'To stop receiving these messages,', $content );
+			$prompt = 'Create an account or log in with this email address to manage your notifications.';
+			if ( $guest ) {
+				$this->assertStringContainsString( $prompt, $content );
+			} else {
+				$this->assertStringNotContainsString( $prompt, $content );
+			}
 		}
 	}
 

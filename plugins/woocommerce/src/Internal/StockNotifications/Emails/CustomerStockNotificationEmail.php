@@ -181,7 +181,9 @@ class CustomerStockNotificationEmail extends WC_Email {
 		$user         = $notification instanceof Notification && $notification->get_user_id() ? get_user_by( 'id', $notification->get_user_id() ) : false;
 		$is_guest     = ! is_a( $user, 'WP_User' );
 		$account_link = '';
-		if ( ! $is_guest && '' !== MyAccountEndpoint::get_endpoint_slug() ) {
+		// Guests can only manage sign-ups after creating an account, so skip the link when registration is off.
+		$can_reach_account = ! $is_guest || 'yes' === get_option( 'woocommerce_enable_myaccount_registration' );
+		if ( $can_reach_account && '' !== MyAccountEndpoint::get_endpoint_slug() ) {
 			$account_link = UtmHelper::add_email_utm_params( MyAccountEndpoint::get_endpoint_url() );
 		}
 

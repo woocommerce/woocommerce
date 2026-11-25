@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 11.4.0
+ * @version 11.5.0
  */
 
 // Exit if accessed directly.
@@ -37,9 +37,12 @@ echo "\n\n----------------------------------------\n\n";
 do_action( 'woocommerce_email_stock_notification_product', $product, $notification, true, $email );
 
 echo "\n\n";
-if ( ! $is_guest && $account_link ) {
+if ( $account_link ) {
+	if ( $is_guest ) {
+		echo esc_html__( 'Create an account or log in with this email address to manage your notifications.', 'woocommerce' ) . "\n";
+	}
 	// translators: %s: Account management URL.
-	printf( esc_html__( 'To manage your notifications, log in to your account: %s', 'woocommerce' ), esc_url( $account_link ) );
+	printf( esc_html__( 'Manage notifications: %s', 'woocommerce' ), esc_url( $account_link ) );
 } else {
 	// translators: %s: Unsubscribe URL.
 	printf( esc_html__( 'To stop receiving these messages, unsubscribe: %s', 'woocommerce' ), esc_url( $unsubscribe_link ) );
