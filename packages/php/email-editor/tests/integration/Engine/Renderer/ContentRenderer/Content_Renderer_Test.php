@@ -1133,6 +1133,7 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 *
 	 * @testWith ["24px", "display: block; margin: 0; margin-top: 24px;"]
 	 *           ["1.5rem", "display: block; margin: 0; margin-top: 1.5rem;"]
+	 *           [".5rem", "display: block; margin: 0; margin-top: .5rem;"]
 	 *           ["var:preset|spacing|20", "display: block; margin: 0; margin-top: 24px;"]
 	 *           ["16px; font-size: 0", "display: block; margin: 0;"]
 	 *           ["16px } p { display: none", "display: block; margin: 0;"]
