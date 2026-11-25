@@ -20269,12 +20269,6 @@ parameters:
 			path: includes/legacy/abstract-wc-legacy-order.php
 
 		-
-			message: '#^Call to an undefined method object\:\:add_meta_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/legacy/abstract-wc-legacy-order.php
-
-		-
 			message: '#^Call to an undefined method object\:\:get_id\(\)\.$#'
 			identifier: method.notFound
 			count: 10
