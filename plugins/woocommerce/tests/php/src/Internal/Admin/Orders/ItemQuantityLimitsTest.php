@@ -225,11 +225,11 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$items = array_values( $order->get_items() );
 
-		$this->assertSame( '1', $this->sut->get_quantity_input_step( $items[0] ) );
+		$this->assertSame( 1.0, $this->sut->get_quantity_input_step( $items[0] ) );
 	}
 
 	/**
-	 * @testdox get_quantity_input_step returns any by default on stores that allow decimal quantities, even for integer quantity items.
+	 * @testdox get_quantity_input_step returns null (no step) by default on stores that allow decimal quantities, even for integer quantity items.
 	 */
 	public function test_step_is_any_by_default_on_decimal_stores_even_for_integer_quantity_item(): void {
 		remove_filter( 'woocommerce_stock_amount', 'intval' );
@@ -238,7 +238,7 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$items = array_values( $order->get_items() );
 
-		$this->assertSame( 'any', $this->sut->get_quantity_input_step( $items[0] ) );
+		$this->assertNull( $this->sut->get_quantity_input_step( $items[0] ) );
 	}
 
 	/**
@@ -256,11 +256,11 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$items = array_values( $order->get_items() );
 
-		$this->assertSame( '0.5', $this->sut->get_quantity_input_step( $items[0] ) );
+		$this->assertSame( 0.5, $this->sut->get_quantity_input_step( $items[0] ) );
 	}
 
 	/**
-	 * @testdox get_quantity_input_step defaults to any when the stored quantity does not align with the step.
+	 * @testdox get_quantity_input_step returns null (no step) when the stored quantity does not align with the step.
 	 */
 	public function test_step_defaults_to_any_for_stored_decimal_quantity(): void {
 		remove_filter( 'woocommerce_stock_amount', 'intval' );
@@ -272,11 +272,11 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 		$item->set_quantity( 2.5 );
 		$item->save();
 
-		$this->assertSame( 'any', $this->sut->get_quantity_input_step( $item ) );
+		$this->assertNull( $this->sut->get_quantity_input_step( $item ) );
 	}
 
 	/**
-	 * @testdox get_quantity_input_step defaults to any on integer stores when the stored quantity does not align with the step.
+	 * @testdox get_quantity_input_step returns null (no step) on integer stores when the stored quantity does not align with the step.
 	 */
 	public function test_step_defaults_to_any_for_stored_decimal_quantity_on_integer_stores(): void {
 		$order = WC_Helper_Order::create_order();
@@ -291,7 +291,7 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_stock_amount', 'intval' );
 
 		$this->assertTrue( wc_is_stock_amount_integer() );
-		$this->assertSame( 'any', $this->sut->get_quantity_input_step( $item ) );
+		$this->assertNull( $this->sut->get_quantity_input_step( $item ) );
 	}
 
 	/**
@@ -306,7 +306,7 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_quantity_input_step_admin', $callback );
 
-		$this->assertSame( '0.5', $this->sut->get_quantity_input_step( $items[0] ) );
+		$this->assertSame( 0.5, $this->sut->get_quantity_input_step( $items[0] ) );
 	}
 
 	/**
@@ -321,7 +321,7 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_quantity_input_step_admin', $callback );
 
-		$this->assertSame( '1', $this->sut->get_quantity_input_step( $items[0] ) );
+		$this->assertSame( 1.0, $this->sut->get_quantity_input_step( $items[0] ) );
 	}
 
 	/**
@@ -531,7 +531,7 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 
 		$this->assertIsNumeric( $captured_step );
 		$this->assertEquals( 1.0, $captured_step );
-		$this->assertSame( '2', $step );
+		$this->assertSame( 2.0, $step );
 	}
 
 	/**
@@ -562,7 +562,7 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 		$item  = end( $items );
 
 		// Step is rendered as the custom step on decimal stores.
-		$this->assertSame( '0.5', $this->sut->get_quantity_input_step( $item, $product ) );
+		$this->assertSame( 0.5, $this->sut->get_quantity_input_step( $item, $product ) );
 
 		// Adding matching step quantity succeeds.
 		$this->sut->validate_new_item_quantity( 1.5, $product );
@@ -617,7 +617,7 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Existing non-conforming quantity on custom-step product returns any to keep order editable.
+	 * @testdox Existing non-conforming quantity on custom-step product returns null (no step) to keep the order editable.
 	 */
 	public function test_custom_product_step_non_conforming_stored_qty_falls_back_to_any(): void {
 		remove_filter( 'woocommerce_stock_amount', 'intval' );
@@ -643,6 +643,6 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 		$items = array_values( $order->get_items() );
 		$item  = end( $items );
 
-		$this->assertSame( 'any', $this->sut->get_quantity_input_step( $item, $product ) );
+		$this->assertNull( $this->sut->get_quantity_input_step( $item, $product ) );
 	}
 }

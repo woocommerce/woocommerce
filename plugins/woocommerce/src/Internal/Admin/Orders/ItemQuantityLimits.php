@@ -69,9 +69,9 @@ class ItemQuantityLimits {
 	 *                                      resolved it; null to resolve it here.
 	 * @param float|null           $min     The item's minimum quantity when the caller already
 	 *                                      resolved it; null to resolve it here.
-	 * @return string Numeric string or 'any', filtered through 'woocommerce_quantity_input_step_admin'.
+	 * @return float|null Step for the quantity input, or null when it accepts any quantity. Filtered through 'woocommerce_quantity_input_step_admin'.
 	 */
-	public function get_quantity_input_step( WC_Order_Item $item, $product = null, ?float $min = null ): string {
+	public function get_quantity_input_step( WC_Order_Item $item, $product = null, ?float $min = null ): ?float {
 		if ( null === $product ) {
 			$product = $item instanceof WC_Order_Item_Product ? $item->get_product() : false;
 		}
@@ -93,16 +93,16 @@ class ItemQuantityLimits {
 		$step_num = $this->resolve_step( $filtered_step, $base_step );
 
 		if ( null === $step_num ) {
-			return 'any';
+			return null;
 		}
 
-		// If the stored quantity does not align with the step, fall back to 'any'
+		// If the stored quantity does not align with the step, accept any quantity
 		// so existing orders remain editable and do not block the admin form submission.
 		if ( ! $this->is_step_aligned( $stored_qty, $min_val, $step_num ) ) {
-			return 'any';
+			return null;
 		}
 
-		return (string) $step_num;
+		return $step_num;
 	}
 
 	/**
@@ -239,12 +239,9 @@ class ItemQuantityLimits {
 
 			$step = $this->get_quantity_input_step( $item, $product, $min );
 
-			if ( 'any' !== $step ) {
-				$step_num = (float) $step;
-				if ( ! $this->is_step_aligned( $qty, $min, $step_num ) ) {
-					// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- step_mismatch_exception() strips and decodes the message for a JS alert.
-					throw $this->step_mismatch_exception( $item->get_name(), $step_num );
-				}
+			if ( null !== $step && ! $this->is_step_aligned( $qty, $min, $step ) ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- step_mismatch_exception() strips and decodes the message for a JS alert.
+				throw $this->step_mismatch_exception( $item->get_name(), $step );
 			}
 		}
 	}
