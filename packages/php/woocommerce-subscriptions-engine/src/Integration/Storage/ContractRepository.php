@@ -2213,10 +2213,10 @@ final class ContractRepository {
 	 *
 	 * @param int          $contract_id Contract id.
 	 * @param ContractLock $lock        The caller's lock on this contract.
-	 * @return int The number of entries deleted; 0 when the contract has none.
+	 * @return int The number of entries deleted; 0 only once the lock is confirmed held and the contract has none.
 	 * @throws \InvalidArgumentException If the lock is for another contract.
 	 * @throws ContractLockedException If the lock was lost.
-	 * @throws \RuntimeException If the delete fails.
+	 * @throws \RuntimeException If the delete, or the lock check after an empty delete, fails.
 	 */
 	public function delete_history( int $contract_id, ContractLock $lock ): int {
 		global $wpdb;
@@ -2235,7 +2235,10 @@ final class ContractRepository {
 		}
 		// No row deleted: an empty history, or a lock lost since the fence, which must not read as empty.
 		if ( 0 === (int) $deleted ) {
-			$this->throw_if_lock_lost( $lock );
+			$holder = $this->find_lost_lock_holder( $lock );
+			if ( null !== $holder ) {
+				throw self::locked_exception( $contract_id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
+			}
 		}
 
 		return (int) $deleted;
@@ -2316,31 +2319,47 @@ final class ContractRepository {
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
-	 * After a failed child insert or a lock-fenced delete that matched no row, report a lost lock:
-	 * throws when `$lock` is no longer held. Returns when it is held, or the check fails, so the
-	 * caller goes on with its own result or error.
+	 * After a failed child insert, report a lost lock: throws when `$lock` is no longer held.
+	 * Returns when it is held, or the check fails, so the caller goes on with its own error.
 	 *
 	 * @param ContractLock $lock The caller's lock.
 	 * @throws ContractLockedException If the lock was lost.
 	 */
 	private function throw_if_lock_lost( ContractLock $lock ): void {
+		try {
+			$holder = $this->find_lost_lock_holder( $lock );
+		} catch ( \RuntimeException $e ) {
+			return;
+		}
+
+		if ( null !== $holder ) {
+			throw self::locked_exception( $lock->get_contract_id(), $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
+		}
+	}
+
+	/**
+	 * The lock holder when `$lock` is no longer held on an existing contract, read on the database
+	 * clock; null when it is held or the contract is gone.
+	 *
+	 * @param ContractLock $lock The caller's lock.
+	 * @return array{exists: bool, operation: ?string}|null
+	 * @throws \RuntimeException If a read fails.
+	 */
+	private function find_lost_lock_holder( ContractLock $lock ): ?array {
 		global $wpdb;
 
 		$contract_id = $lock->get_contract_id();
 		$contracts   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$holds_lock  = self::HOLDS_LOCK;
-		try {
-			$holder = $this->get_lock_holder( $contract_id );
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-			$held = $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$contracts} WHERE id = %d AND {$holds_lock}", $contract_id, $lock->get_state()->get_token() ) );
-		} catch ( \RuntimeException $e ) {
-			return;
+
+		$holder = $this->get_lock_holder( $contract_id );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$held = $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$contracts} WHERE id = %d AND {$holds_lock}", $contract_id, $lock->get_state()->get_token() ) );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to check the lock on contract %d: %s', $contract_id, $wpdb->last_error ) ) );
 		}
 
-		if ( '' !== $wpdb->last_error || ! $holder['exists'] || null !== $held ) {
-			return;
-		}
-		throw self::locked_exception( $contract_id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
+		return ( $holder['exists'] && null === $held ) ? $holder : null;
 	}
 
 	/**

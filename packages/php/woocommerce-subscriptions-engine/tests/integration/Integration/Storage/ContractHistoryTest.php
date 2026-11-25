@@ -521,6 +521,41 @@ class ContractHistoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * A delete that matched no row is reported as empty only after its lock check succeeds.
+	 *
+	 * @dataProvider provide_lock_check_reads
+	 * @testdox delete_history() of an empty history throws RuntimeException when the $read read of its lock check fails, instead of returning 0.
+	 *
+	 * @param string $read    Which read fails.
+	 * @param string $pattern The failing query's pattern.
+	 */
+	public function test_delete_history_propagates_a_failed_lock_check( string $read, string $pattern ): void {
+		unset( $read );
+		$lock = $this->take_lock( $this->id, 'erase' );
+
+		$this->fail_next_query( $pattern );
+		try {
+			$this->sut->delete_history( $this->id, $lock );
+			$this->fail( 'Expected the failed lock check to throw.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertNotInstanceOf( ContractLockedException::class, $e );
+			$this->assertStringContainsString( "lock on contract {$this->id}", $e->getMessage() );
+		}
+	}
+
+	/**
+	 * The two reads of the lock check after an empty delete.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function provide_lock_check_reads(): array {
+		return array(
+			'holder' => array( 'holder', '/AS live, lock_operation FROM \S*contracts/' ),
+			'held'   => array( 'held', '/^SELECT 1 FROM \S*contracts WHERE id = \d+ AND lock_token/' ),
+		);
+	}
+
+	/**
 	 * @testdox After delete_history(), new entries are written and paged, and a freed creation key can be written again.
 	 */
 	public function test_a_deleted_history_takes_new_entries_and_frees_creation_keys(): void {
