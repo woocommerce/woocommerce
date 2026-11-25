@@ -2011,19 +2011,22 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @testdox Should only hide users from the REST API key owner search for a shop manager tagging the request with the API Keys context.
 	 * @param string $current_role Role of the user performing the search.
 	 * @param bool   $with_context Whether the request is tagged with the API Keys search context.
-	 * @param string $target_role Role of the user being searched for.
+	 * @param string $target_role Role of the user being searched for, or "self" to search for the current user.
 	 * @param bool   $expect_visible Whether the target user should appear in the results.
 	 * @testWith ["administrator", true, "shop_manager", true]
 	 *           ["administrator", false, "shop_manager", true]
 	 *           ["shop_manager", true, "customer", true]
 	 *           ["shop_manager", true, "shop_manager", false]
 	 *           ["shop_manager", false, "shop_manager", true]
+	 *           ["shop_manager", true, "administrator", false]
+	 *           ["shop_manager", true, "subscriber", false]
+	 *           ["shop_manager", true, "self", true]
 	 */
 	public function test_json_search_api_key_users_filters_by_role_and_context( string $current_role, bool $with_context, string $target_role, bool $expect_visible ): void {
 		$current_user_id = self::factory()->user->create( array( 'role' => $current_role ) );
 		$target_id       = 'customer' === $target_role
 			? WC_Helper_Customer::create_customer( 'api-key-target', 'pass1', 'api-key-target@example.com' )->get_id()
-			: self::factory()->user->create( array( 'role' => $target_role ) );
+			: ( 'self' === $target_role ? $current_user_id : self::factory()->user->create( array( 'role' => $target_role ) ) );
 
 		try {
 			wp_set_current_user( $current_user_id );
