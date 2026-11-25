@@ -135,6 +135,77 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox $handler() tells the customer once to try again when its form is posted with an invalid nonce.
+	 *
+	 * @testWith ["process_login", {"login": "Log in", "username": "customer", "password": "password", "woocommerce-login-nonce": "invalid"}]
+	 *           ["process_registration", {"register": "Register", "email": "invalid-nonce@example.com", "woocommerce-register-nonce": "invalid"}]
+	 *           ["process_lost_password", {"wc_reset_password": "true", "user_login": "customer", "woocommerce-lost-password-nonce": "invalid"}]
+	 *           ["process_reset_password", {"wc_reset_password": "true", "password_1": "new-password", "password_2": "new-password", "reset_key": "key", "reset_login": "customer", "woocommerce-reset-password-nonce": "invalid"}]
+	 *
+	 * @param string               $handler WC_Form_Handler method that processes the form.
+	 * @param array<string,string> $fields  Posted form fields.
+	 */
+	public function test_my_account_form_with_invalid_nonce_adds_one_error_notice( string $handler, array $fields ): void {
+		$_POST    = $fields;
+		$_REQUEST = $fields;
+
+		WC_Form_Handler::$handler();
+		WC_Form_Handler::$handler();
+
+		$this->assertSame(
+			array( 'Your session has expired. Please try again.' ),
+			wp_list_pluck( wc_get_notices( 'error' ), 'notice' ),
+			"{$handler}() should explain once why the form was not processed, instead of silently reloading the page."
+		);
+	}
+
+	/**
+	 * @testdox $handler() adds no notice for a request without its own nonce field: $scenario.
+	 *
+	 * @testWith ["process_login", "no form posted", {}]
+	 *           ["process_login", "another plugin's login form", {"login": "Log in", "username": "customer", "password": "password", "_wpnonce": "other-plugin"}]
+	 *           ["process_registration", "another plugin's registration form", {"register": "Register", "email": "other-plugin@example.com", "_wpnonce": "other-plugin"}]
+	 *           ["process_lost_password", "reset password form that also posts user_login", {"wc_reset_password": "true", "user_login": "customer", "reset_key": "key", "reset_login": "customer", "woocommerce-reset-password-nonce": "invalid"}]
+	 *           ["process_reset_password", "lost password form", {"wc_reset_password": "true", "user_login": "customer", "woocommerce-lost-password-nonce": "invalid"}]
+	 *           ["process_reset_password", "reset nonce field without the form's submit field, as in a link", {"woocommerce-reset-password-nonce": "invalid"}]
+	 *
+	 * @param string               $handler  WC_Form_Handler method that processes the form.
+	 * @param string               $scenario Scenario description.
+	 * @param array<string,string> $fields   Posted form fields.
+	 */
+	public function test_my_account_form_handler_ignores_requests_without_its_nonce_field( string $handler, string $scenario, array $fields ): void {
+		$_POST    = $fields;
+		$_REQUEST = $fields;
+
+		WC_Form_Handler::$handler();
+
+		$this->assertSame( 0, wc_notice_count(), "{$handler}() runs on every request and must stay silent for {$scenario}." );
+	}
+
+	/**
+	 * @testdox $handler() posted with an invalid nonce by a logged-in customer adds $expected_notices error notice(s).
+	 *
+	 * @testWith ["process_login", {"login": "Log in", "username": "customer", "password": "password", "woocommerce-login-nonce": "invalid"}, 0]
+	 *           ["process_registration", {"register": "Register", "email": "invalid-nonce@example.com", "woocommerce-register-nonce": "invalid"}, 0]
+	 *           ["process_lost_password", {"wc_reset_password": "true", "user_login": "customer", "woocommerce-lost-password-nonce": "invalid"}, 1]
+	 *           ["process_reset_password", {"wc_reset_password": "true", "password_1": "new-password", "password_2": "new-password", "reset_key": "key", "reset_login": "customer", "woocommerce-reset-password-nonce": "invalid"}, 1]
+	 *
+	 * @param string               $handler          WC_Form_Handler method that processes the form.
+	 * @param array<string,string> $fields           Posted form fields.
+	 * @param int                  $expected_notices Expected number of error notices.
+	 */
+	public function test_my_account_form_with_invalid_nonce_for_logged_in_customer( string $handler, array $fields, int $expected_notices ): void {
+		// A login or registration form loaded before logging in, for example in another tab, is no longer needed; password forms still are.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+		$_POST    = $fields;
+		$_REQUEST = $fields;
+
+		WC_Form_Handler::$handler();
+
+		$this->assertSame( $expected_notices, wc_notice_count( 'error' ), "{$handler}() should only warn a logged-in customer about a form they still need." );
+	}
+
+	/**
 	 * Order statuses when the pay form is posted, and whether pay_action() should take each one on.
 	 *
 	 * @return array<string, array{0: string, 1: bool}>
