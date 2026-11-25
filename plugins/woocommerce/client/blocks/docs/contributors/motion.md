@@ -112,11 +112,11 @@ Real layout means the element's height, padding, and margins change, so theme bo
 
 ## Test motion
 
-Unit tests cannot show motion, because Jest has no Web Animations API, layout, or paint. Test motion in a real browser, on pages that use the blocks that you changed. Test at desktop width and phone width, in Chrome first. For motion that JavaScript runs, also test Safari and Firefox.
+Automated tests cannot show how motion looks: Jest has no Web Animations API, layout, or paint, and end-to-end tests depend on timing. Check motion by hand in a real browser, on pages that use the blocks that you changed. Check at desktop width and phone width, in Chrome first. For motion that JavaScript runs, also check Safari and Firefox.
 
 To see the motion, slow it down with the Animations panel in DevTools, or record the screen and look at each frame.
 
-Do these tests for each change, also with reduced motion:
+Do these checks by hand for each change, also with reduced motion:
 
 - **Change and reverse.** Do the change, then do the reverse. The content below moves in one direction each time, and nothing jumps.
 - **Interruption.** Reverse the change 80–150ms after it starts. The motion turns around from its current position.
