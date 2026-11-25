@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep product links in customer order details when "Hide out of stock items from the catalog" is on and the product is out of stock.
