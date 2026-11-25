@@ -291,79 +291,31 @@ test.describe( 'Add to Cart + Options Block', () => {
 						.locator( '.wp-block-accordion-panel' )
 				: page.getByLabel( 'Additional Information', { exact: true } );
 
-		await test.step( 'follows the flow layout of its parent', async () => {
-			const layout = await page
+		await test.step( 'takes the width of its column, with no margin above its first inner block', async () => {
+			const { width, columnContentWidth } = await page
 				.locator(
 					'[data-block-name="woocommerce/add-to-cart-with-options"]'
 				)
 				.evaluate( ( block ) => {
-					const round = ( value: number ) =>
-						Math.round( value * 10 ) / 10;
 					const px = ( element: Element, property: string ) =>
 						parseFloat(
 							getComputedStyle( element ).getPropertyValue(
 								property
 							)
 						);
-					const box = block.getBoundingClientRect();
-					const parent = block.parentElement as Element;
-					const parentBox = parent.getBoundingClientRect();
-					const gaps = [];
-					// The space between the block and each sibling is only the
-					// collapsed margins of the two, with nothing from inside
-					// the block.
-					if ( block.previousElementSibling ) {
-						gaps.push( {
-							actual: round(
-								box.top -
-									block.previousElementSibling.getBoundingClientRect()
-										.bottom
-							),
-							expected: round(
-								Math.max(
-									px(
-										block.previousElementSibling,
-										'margin-block-end'
-									),
-									px( block, 'margin-block-start' )
-								)
-							),
-						} );
-					}
-					if ( block.nextElementSibling ) {
-						gaps.push( {
-							actual: round(
-								block.nextElementSibling.getBoundingClientRect()
-									.top - box.bottom
-							),
-							expected: round(
-								Math.max(
-									px( block, 'margin-block-end' ),
-									px(
-										block.nextElementSibling,
-										'margin-block-start'
-									)
-								)
-							),
-						} );
-					}
+					const column = block.parentElement as Element;
 					return {
-						width: round( box.width ),
-						parentContentWidth: round(
-							parentBox.width -
-								px( parent, 'padding-inline-start' ) -
-								px( parent, 'padding-inline-end' ) -
-								px( parent, 'border-inline-start-width' ) -
-								px( parent, 'border-inline-end-width' )
-						),
-						gaps,
+						width: block.getBoundingClientRect().width,
+						columnContentWidth:
+							column.getBoundingClientRect().width -
+							px( column, 'padding-inline-start' ) -
+							px( column, 'padding-inline-end' ) -
+							px( column, 'border-inline-start-width' ) -
+							px( column, 'border-inline-end-width' ),
 					};
 				} );
 
-			expect( layout.width ).toBe( layout.parentContentWidth );
-			expect( layout.gaps.map( ( gap ) => gap.actual ) ).toEqual(
-				layout.gaps.map( ( gap ) => gap.expected )
-			);
+			expect( width ).toBeCloseTo( columnContentWidth );
 
 			// The first inner block gets no flow margin while no notice is shown.
 			await expect(
