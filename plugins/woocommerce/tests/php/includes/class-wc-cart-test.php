@@ -3207,6 +3207,20 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox set_quantity() returns false and leaves the cart unchanged when the item key is not in the cart.
+	 */
+	public function test_set_quantity_returns_false_for_unknown_cart_item_key(): void {
+		$product  = WC_Helper_Product::create_simple_product();
+		$item_key = WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$result = WC()->cart->set_quantity( 'not-a-cart-item-key', 2 );
+
+		$this->assertFalse( $result, 'set_quantity() should return false for an unknown cart item key.' );
+		$this->assertSame( array( $item_key ), array_keys( WC()->cart->get_cart_contents() ), 'No cart entry should be added for an unknown key.' );
+		$this->assertSame( 1, WC()->cart->get_cart_item( $item_key )['quantity'], 'The existing item quantity should not change.' );
+	}
+
+	/**
 	 * Run the classic checkout's per-user check for a guest and return the error notices it added.
 	 *
 	 * @param string $code          Coupon code.
@@ -3304,5 +3318,20 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertStringContainsString( 'Usage limit for coupon', implode( ' ', $this->get_guest_coupon_check_errors( 'cart_email_change', 'cart-before@example.com' ) ), 'The use is found through the email recorded with it' );
+	}
+
+	/**
+	 * @testdox get_shipping_packages() sums the line totals that exist and reads no missing line_total.
+	 */
+	public function test_get_shipping_packages_contents_cost_skips_lines_without_line_total(): void {
+		$cart      = WC()->cart;
+		$first_key = $cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+		$new_key   = $cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id(), 2 );
+		// A line added during the totals calculation has no line_total until the calculation sets it.
+		unset( $cart->cart_contents[ $new_key ]['line_total'] );
+
+		$packages = $cart->get_shipping_packages();
+
+		$this->assertEquals( $cart->cart_contents[ $first_key ]['line_total'], $packages[0]['contents_cost'] );
 	}
 }

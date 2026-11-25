@@ -33,6 +33,18 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	private array $requests = array();
 
 	/**
+	 * A rules file that names one check, so every other bundled check is left out.
+	 */
+	private const BRAND_ONLY = array(
+		'missing_brand' => array(
+			'google' => array(
+				'field'  => 'brand',
+				'effect' => 'not_listable',
+			),
+		),
+	);
+
+	/**
 	 * Body and status the next request answers with.
 	 *
 	 * @var array{body:string,code:int}
@@ -57,6 +69,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( RemoteRules::OPTION );
+		delete_option( 'woocommerce_show_marketplace_suggestions' );
 		parent::tearDown();
 	}
 
@@ -127,14 +140,55 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With no URL set nothing is fetched and the bundled rules apply.
+	 * @testdox With no URL set nothing is fetched, a copy stored earlier is removed and the bundled rules apply.
 	 */
 	public function test_no_url_makes_no_request(): void {
+		$this->serve( self::BRAND_ONLY );
+		$this->assertTrue( $this->sut->refresh(), 'A copy is stored first' );
+		$this->assertArrayNotHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'The stored file is the list' );
+		$this->requests = array();
+		remove_all_filters( 'woocommerce_agent_readiness_rules_url' );
 		add_filter( 'woocommerce_agent_readiness_rules_url', '__return_empty_string' );
+
 		$this->assertFalse( $this->sut->refresh() );
 		$this->assertSame( array(), $this->requests );
 		$this->assertSame( array(), $this->sut->channel_rules() );
 		$this->assertArrayHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'With no file, the bundled checks run' );
+	}
+
+	/**
+	 * @testdox With marketplace suggestions turned off the WooCommerce.com file isn't fetched, and a copy stored earlier is removed so the bundled checks run; a URL set by the filter is still fetched.
+	 */
+	public function test_suggestions_opt_out_skips_the_published_file(): void {
+		$this->serve( self::BRAND_ONLY );
+		$this->assertTrue( $this->sut->refresh(), 'A copy is stored first' );
+		$this->assertArrayNotHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'The stored file is the list' );
+		remove_all_filters( 'woocommerce_agent_readiness_rules_url' );
+		$this->requests = array();
+		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
+
+		$this->assertFalse( $this->sut->refresh() );
+		$this->assertSame( array(), $this->requests, 'Nothing is fetched from WooCommerce.com' );
+		$this->assertFalse( $this->sut->has_stored_file(), 'The stored copy is removed' );
+		$this->assertSame( '', $this->sut->version() );
+		$this->assertArrayHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'A bundled check the old file left out runs again' );
+
+		$this->serve( self::BRAND_ONLY );
+		$this->assertTrue( $this->sut->refresh(), 'A URL set by the filter is still fetched' );
+		$this->assertCount( 1, $this->requests );
+	}
+
+	/**
+	 * @testdox A file from a URL set by the filter stays stored with marketplace suggestions turned off.
+	 */
+	public function test_suggestions_opt_out_keeps_a_file_from_a_filtered_url(): void {
+		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
+		$this->serve( self::BRAND_ONLY );
+		$this->assertTrue( $this->sut->refresh() );
+		$this->answer['code'] = 500;
+
+		$this->assertFalse( $this->sut->refresh(), 'The fetch fails' );
+		$this->assertTrue( $this->sut->has_stored_file(), 'The last good copy stays' );
 	}
 
 	/**

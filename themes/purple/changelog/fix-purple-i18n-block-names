@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make block names in patterns translatable and remove English-only block names from templates

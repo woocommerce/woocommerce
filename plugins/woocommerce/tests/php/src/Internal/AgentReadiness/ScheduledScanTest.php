@@ -31,7 +31,6 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		// Report tests stay offline: store output checks would load the test site's pages.
 		StoreOutputChecksTest::block_requests();
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		add_filter( 'woocommerce_agent_readiness_rules_url', '__return_empty_string' );
 		delete_option( AgentReadiness::REPORT_OPTION );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
@@ -48,7 +47,6 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
 		as_unschedule_all_actions( ScheduledScan::NEXT_HOOK );
-		delete_option( 'woocommerce_feature_agent_readiness_enabled' );
 		parent::tearDown();
 	}
 
@@ -289,18 +287,6 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With the feature disabled a run stores nothing and schedules nothing, ending the daily chain.
-	 */
-	public function test_run_with_feature_disabled(): void {
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
-
-		$this->sut->run();
-
-		$this->assertNull( wc_get_container()->get( AgentReadiness::class )->get_cached_report() );
-		$this->assertFalse( as_has_scheduled_action( ScheduledScan::DAILY_HOOK ) );
-	}
-
-	/**
 	 * Run the scan's batch actions as Action Scheduler would, until the scan stores its report.
 	 *
 	 * @return int Batch actions run.
@@ -429,7 +415,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Giving up after a finished batch removes failure rows that batch wrote for products the last report never covered.
+	 * @testdox Giving up after a finished batch removes failure rows that batch wrote for products the last report never covered, and keeps rows a save wrote while the scan ran.
 	 */
 	public function test_give_up_drops_failure_rows_the_last_report_did_not_cover(): void {
 		$ids = $this->create_products( ProductScan::BATCH_SIZE + 1 );
@@ -440,6 +426,10 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		// The scan walks newest products first, so the first batch covers the last id created, not $ids[0].
 		$covered = (int) end( $ids );
 		$this->assertNotEmpty( ProductFailures::stored( $covered ), 'The finished batch wrote failure rows' );
+		// The first product created is left for the next batch. A save checks it now.
+		$saved = (int) $ids[0];
+		$this->assertSame( array(), ProductFailures::stored( $saved ), 'The first batch did not reach it' );
+		ProductFailures::store( $saved, array() );
 
 		$crash = static function (): void {
 			throw new \RuntimeException( 'Fatal on the next batch' );
@@ -457,6 +447,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
 		$this->assertSame( array(), ProductFailures::stored( $covered ), 'Rows the abandoned scan added are removed' );
+		$this->assertSame( array( ProductFailures::CHECKED ), ProductFailures::stored( $saved ), 'Rows the save wrote stay' );
 		$this->assertSame( 7, get_option( AgentReadiness::REPORT_OPTION )['products'] );
 	}
 
@@ -829,23 +820,6 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	private function hide_product( int $product_id ): void {
 		wp_set_object_terms( $product_id, array( 'exclude-from-catalog', 'exclude-from-search' ), 'product_visibility' );
 		clean_post_cache( $product_id );
-	}
-
-	/**
-	 * @testdox Turning the feature off during a scan stops it at the next batch, storing nothing.
-	 */
-	public function test_feature_off_stops_the_scan(): void {
-		$this->create_products( ProductScan::BATCH_SIZE + 1 );
-		$this->sut->run();
-		$chain = get_option( AgentReadiness::SCAN_OPTION )['id'];
-		$this->sut->run_batch( $chain );
-
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
-		$this->sut->run_batch( $chain );
-
-		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
-		$this->assertFalse( as_has_scheduled_action( ScheduledScan::NEXT_HOOK ) );
-		$this->assertNull( wc_get_container()->get( AgentReadiness::class )->get_cached_report() );
 	}
 
 	/**

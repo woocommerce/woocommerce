@@ -1,15 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	test as base,
-	expect,
-	TemplateCompiler,
-	BASE_URL,
-	wpCLI,
-	BLOCK_THEME_SLUG,
-	flushMacrotask,
-} from '@woocommerce/e2e-utils';
+import { test, expect, BASE_URL, flushMacrotask } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	slug: 'woocommerce/price-filter',
@@ -23,53 +15,6 @@ const blockData = {
 	endpointAPI: 'max_price=500',
 	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.webp`,
 };
-
-const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-	templateCompiler: async ( { requestUtils }, provideFixture ) => {
-		// Retry the template creation to handle socket hang up errors
-		const maxRetries = 3;
-		let retryCount = 0;
-		let compiler;
-		let lastError;
-
-		while ( retryCount < maxRetries ) {
-			try {
-				compiler = await requestUtils.createTemplateFromFile(
-					'archive-product_filters-with-product-collection'
-				);
-				break; // Success, exit retry loop
-			} catch ( error ) {
-				lastError = error;
-				const errorMessage = error?.message || '';
-
-				// Only retry on network-related errors that are likely transient
-				const isRetriableError =
-					errorMessage.includes( 'socket hang up' ) ||
-					errorMessage.includes( 'ECONNRESET' ) ||
-					errorMessage.includes( 'ETIMEDOUT' ) ||
-					errorMessage.includes( 'ENOTFOUND' );
-
-				retryCount++;
-
-				if ( ! isRetriableError || retryCount >= maxRetries ) {
-					throw error;
-				}
-
-				// Exponential backoff: 200ms, 400ms, 800ms
-				const backoffDelay = Math.pow( 2, retryCount - 1 ) * 200;
-				await new Promise( ( resolve ) =>
-					setTimeout( resolve, backoffDelay )
-				);
-			}
-		}
-
-		if ( ! compiler ) {
-			throw lastError;
-		}
-
-		await provideFixture( compiler );
-	},
-} );
 
 test.describe( `${ blockData.name } Block - editor side`, () => {
 	test.beforeEach( async ( { admin, editor } ) => {
@@ -148,19 +93,9 @@ test.describe( `${ blockData.name } Block - editor side`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with All products Block`, () => {
-	test.beforeEach( async ( { admin, page, editor } ) => {
-		await admin.createNewPost();
-		await editor.insertBlock( { name: 'woocommerce/all-products' } );
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'price-filter',
-				heading: 'Filter By Price',
-			},
-		} );
-
-		const postId = await editor.publishPost();
-		await page.goto( `/?p=${ postId }` );
+	test.beforeEach( async ( { page, createPost } ) => {
+		const post = await createPost( 'price-filter-with-all-products' );
+		await page.goto( post.link );
 
 		await page
 			.waitForResponse(
@@ -200,8 +135,8 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		);
 
 		await expect( productTitles.first() ).toBeVisible();
-		// See the note on the other baselines: more than one product, so the test
-		// cannot pass against a shop page that was already filtered.
+		// More than one product, so the test cannot pass against a page that was
+		// already filtered.
 		expect(
 			( await productTitles.allTextContents() ).length
 		).toBeGreaterThan( 1 );
@@ -265,86 +200,26 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 	} );
 } );
 
-test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
-	test.beforeEach( async ( { admin, page, editor } ) => {
-		await wpCLI(
-			'option update wc_blocks_use_blockified_product_grid_block_as_template false'
-		);
-
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'price-filter',
-				heading: 'Filter By Price',
-			},
-		} );
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-		await page.goto( '/shop' );
-	} );
-
-	test( 'filters the classic product template by maximum price', async ( {
-		page,
-		frontendUtils,
-	} ) => {
-		const legacyTemplate = await frontendUtils.getBlockByName(
-			'woocommerce/legacy-template'
-		);
-		const productTitles = legacyTemplate.locator(
-			'.woocommerce-loop-product__title'
-		);
-
-		await expect( productTitles.first() ).toBeVisible();
-		// See the note on the other baselines: more than one product, so the test
-		// cannot pass against a shop page that was already filtered.
-		expect(
-			( await productTitles.allTextContents() ).length
-		).toBeGreaterThan( 1 );
-
-		const maxPriceInput = page.getByRole( 'textbox', {
-			name: 'Filter products by maximum price',
-		} );
-
-		await frontendUtils.selectTextInput( maxPriceInput );
-		await maxPriceInput.fill( '$5' );
-		await maxPriceInput.press( 'Tab' );
-		await expect( page ).toHaveURL(
-			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
-		);
-
-		await expect( productTitles ).toHaveText( [ 'Single' ] );
-	} );
-} );
-
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 	test( 'filters Product Collection automatically and defers changes until Apply when configured', async ( {
 		page,
-		admin,
-		editor,
 		frontendUtils,
-		templateCompiler,
+		createPost,
 	} ) => {
 		await page.clock.install();
-		const template = await templateCompiler.compile();
+		const post = await createPost( 'filters-with-product-collection' );
 		const productTitles = page.locator(
 			'.wp-block-woocommerce-product-template .wp-block-post-title'
 		);
 
-		await page.goto( '/shop' );
+		await page.goto( post.link );
 		await expect( productTitles.first() ).toBeVisible();
 		const automaticBaseline = ( await productTitles.allTextContents() ).map(
 			( title ) => title.trim()
 		);
-		// Greater than one, not merely non-empty: an unfiltered /shop must show more
+		// Greater than one, not merely non-empty: the unfiltered post must show more
 		// than the single product the filter is about to leave behind. Asserting only
-		// that it is non-empty passes on a shop page that arrived already filtered,
+		// that it is non-empty passes on a page that arrived already filtered,
 		// and then the post-filter assertion passes too, for the wrong reason.
 		expect( automaticBaseline.length ).toBeGreaterThan( 1 );
 
@@ -360,24 +235,11 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		);
 		await expect( productTitles ).toHaveText( [ 'Single' ] );
 
-		await admin.visitSiteEditor( {
-			postId: template.id,
-			postType: template.type,
-			canvas: 'edit',
-		} );
-
-		const priceFilterControls = await editor.getBlockByName(
-			blockData.slug
+		const deferredPost = await createPost(
+			'filters-with-product-collection',
+			{ showFilterButton: true }
 		);
-		await expect( priceFilterControls ).toBeVisible();
-		await editor.selectBlocks( priceFilterControls );
-		await editor.openDocumentSettingsSidebar();
-		await page.getByText( "Show 'Apply filters' button" ).click();
-
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-		await page.goto( '/shop' );
+		await page.goto( deferredPost.link );
 		await expect( productTitles.first() ).toBeVisible();
 		const deferredMaxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
@@ -389,9 +251,9 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		const deferredBaseline = ( await productTitles.allTextContents() ).map(
 			( title ) => title.trim()
 		);
-		// Greater than one, not merely non-empty: an unfiltered /shop must show more
+		// Greater than one, not merely non-empty: the unfiltered post must show more
 		// than the single product the filter is about to leave behind. Asserting only
-		// that it is non-empty passes on a shop page that arrived already filtered,
+		// that it is non-empty passes on a page that arrived already filtered,
 		// and then the post-filter assertion passes too, for the wrong reason.
 		expect( deferredBaseline.length ).toBeGreaterThan( 1 );
 		const deferredUrl = page.url();

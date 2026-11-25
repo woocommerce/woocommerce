@@ -277,6 +277,7 @@ final class Plans {
 	 * @param bool   $single  With a key: return the first value only.
 	 * @return mixed Empty key: values grouped by key. Key + `$single`: the first value, or ''
 	 *               when absent. Key only: the list of values (`[]` when absent).
+	 * @throws RuntimeException If the read fails.
 	 */
 	public static function get_meta( int $plan_id, string $key = '', bool $single = false ) {
 		return ( new PlanRepository() )->get_meta( $plan_id, $key, $single );
@@ -295,6 +296,7 @@ final class Plans {
 		return null === $plan ? null : PlanView::from_plan( $plan );
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * List plans, oldest id first. Without args: every extension's plans in every status.
 	 *
@@ -319,6 +321,7 @@ final class Plans {
 	 *                             or non-string slug or status, a slug that is not a valid extension
 	 *                             slug (1-64 of `[a-z0-9_-]`), `any` as a slug, a non-positive or
 	 *                             non-integer id or limit, a negative or non-integer offset.
+	 * @throws RuntimeException If the read fails.
 	 */
 	public static function list( array $args = array() ): array {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::LIST_KEYS );
@@ -375,6 +378,7 @@ final class Plans {
 			( new PlanRepository() )->query( $query )
 		);
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Check the positional scope arguments of a meta write, the expected owner and the key,
