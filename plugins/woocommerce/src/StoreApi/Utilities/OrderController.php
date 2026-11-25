@@ -193,9 +193,13 @@ class OrderController {
 
 		$previous_snapshot = $this->get_cart_order_items_snapshot( $order );
 
-		// Matched by object, since the items the cart sync added had no ID until calculate_totals() saved them. Tax lines
-		// count as the cart's too, since calculate_totals() itself adds them.
-		$cart_synced_items = array_flip( array_map( 'spl_object_id', array_values( $items_after_cart_sync ) ) );
+		// Matched by object, since the items the cart sync added had no ID until calculate_totals() saved them, and items
+		// added before the sync may not have had one either. Tax lines count as the cart's too, since calculate_totals()
+		// itself adds them.
+		$cart_synced_items = array_diff_key(
+			array_flip( array_map( 'spl_object_id', array_values( $items_after_cart_sync ) ) ),
+			array_flip( array_map( 'spl_object_id', array_values( $items_before_sync ) ) )
+		);
 
 		$snapshot = array_intersect_key( $previous_snapshot ?? [], array_flip( $this->changed_item_types_not_rebuilt ) );
 		foreach ( $order->get_items( array_diff( OrderItemFingerprint::CART_ITEM_TYPES, $this->changed_item_types_not_rebuilt ) ) as $item_id => $item ) {

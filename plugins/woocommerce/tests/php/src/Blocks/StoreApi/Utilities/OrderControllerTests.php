@@ -972,6 +972,29 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() keeps a fee an extension added without saving before a sync when it rebuilds the fees a merchant edited.
+	 */
+	public function test_update_order_from_cart_keeps_unsaved_extension_fees(): void {
+		$order         = $this->create_retried_order_with_shipping_and_fee();
+		$order         = wc_get_order( $order->get_id() );
+		$extension_fee = new \WC_Order_Item_Fee();
+		$extension_fee->set_name( 'Extension surcharge' );
+		$extension_fee->set_total( '2' );
+		$order->add_item( $extension_fee );
+		$this->sut->update_order_from_cart( $order );
+		$this->assertGreaterThan( 0, $extension_fee->get_id(), 'The sync should have saved the extension fee.' );
+
+		$cart_fee = current( array_diff_key( $order->get_fees(), array( $extension_fee->get_id() => true ) ) );
+		$cart_fee->set_total( '15' );
+		$cart_fee->save();
+		$order = $this->sync_order_in_a_new_request( $order );
+		$ids   = array_keys( $order->get_fees() );
+
+		$this->assertNotContains( $cart_fee->get_id(), $ids, 'The edited cart fee should be rebuilt.' );
+		$this->assertContains( $extension_fee->get_id(), $ids, 'The extension fee should be kept.' );
+	}
+
+	/**
 	 * @testdox update_order_from_cart() still rebuilds a shipping line a merchant edited after a sync that didn't calculate shipping.
 	 */
 	public function test_update_order_from_cart_rebuilds_edited_shipping_after_a_sync_without_shipping(): void {
