@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: update
 
-Remove unused npm dependencies from the published package.
+Remove unused dependencies. If your code imports a removed package directly, add it to your own dependencies. `@woocommerce/data` still needs its `@wordpress/core-data` peer, so install it explicitly if your package manager skips peers.

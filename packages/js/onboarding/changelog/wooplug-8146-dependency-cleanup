@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: update
 
-Remove unused npm dependencies from the published package.
+Remove the unused `@woocommerce/components`, `@woocommerce/explat`, and `@wordpress/compose` dependencies. If your code imports one directly, add it to your own dependencies.
