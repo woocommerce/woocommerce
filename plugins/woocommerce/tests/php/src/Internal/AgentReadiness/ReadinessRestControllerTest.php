@@ -144,7 +144,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertSame( 200, $response->get_status() );
-		$this->assertMatchesRegularExpression( '/^AISalesReadiness_[a-z0-9.-]+_\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.txt$/', $data['filename'] );
+		$this->assertMatchesRegularExpression( '/^AIShoppingHealth_[a-z0-9.-]+_\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.txt$/', $data['filename'] );
 		$this->assertStringContainsString( 'Site: ' . home_url(), $data['text'] );
 		$this->assertStringContainsString( 'WooCommerce version: ' . WC_VERSION, $data['text'] );
 		$this->assertStringContainsString( 'Last checked: Not checked yet', $data['text'] );
@@ -153,6 +153,35 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertStringContainsString( '(launched)', $data['text'], 'Setup steps are read now, so they show before the first check.' );
 		$this->assertStringNotContainsString( '### Product checks ###', $data['text'] );
 		$this->assertFalse( as_has_scheduled_action( ScheduledScan::RUN_NOW_HOOK ), 'The download must not queue a check.' );
+	}
+
+	/**
+	 * @testdox The support report is named after the page, and with no products checked it says so instead of marking every product check passed.
+	 */
+	public function test_support_report_with_no_products(): void {
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => '2026-11-18T10:42:00+00:00',
+				'products'     => 0,
+				'store_checks' => array(),
+				'checks'       => array(
+					array(
+						'id'    => 'missing_images',
+						'label' => 'Products with no main image',
+						'count' => 0,
+					),
+				),
+			),
+			false
+		);
+		$text = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
+
+		$this->assertStringStartsWith( "### AI shopping health ###\n", $text );
+		$this->assertStringContainsString( "### Product checks ###\n\nNo products to check.\n", $text );
+		$this->assertStringNotContainsString( 'missing_images', $text, 'A count of 0 with nothing checked is not a pass' );
+		$privacy = array_values( array_filter( explode( "\n", $text ), static fn( string $line ): bool => false !== strpos( $line, '(privacy_page)' ) ) );
+		$this->assertStringStartsWith( 'Privacy policy page is selected and published (privacy_page):', $privacy[0] ?? '', 'The step is done only once the page is published' );
 	}
 
 	/**

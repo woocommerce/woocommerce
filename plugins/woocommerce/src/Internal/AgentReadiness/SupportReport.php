@@ -91,11 +91,11 @@ class SupportReport {
 	}
 
 	/**
-	 * File name for the download, like the System Status Report's: AISalesReadiness_<site host>_<date and time>.txt.
+	 * File name for the download, like the System Status Report's: AIShoppingHealth_<site host>_<date and time>.txt.
 	 */
 	public function filename(): string {
 		$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
-		return sanitize_file_name( 'AISalesReadiness_' . ( '' !== $host ? $host : 'site' ) . '_' . gmdate( 'Y-m-d\TH-i-s' ) . '.txt' );
+		return sanitize_file_name( 'AIShoppingHealth_' . ( '' !== $host ? $host : 'site' ) . '_' . gmdate( 'Y-m-d\TH-i-s' ) . '.txt' );
 	}
 
 	/**
@@ -137,7 +137,7 @@ class SupportReport {
 			$state = null === $report ? 'Not checked yet' : 'Finished';
 		}
 		$lines = array(
-			'### AI sales readiness ###',
+			'### AI shopping health ###',
 			'',
 			'Site: ' . home_url(),
 			'WooCommerce version: ' . (string) Constants::get_constant( 'WC_VERSION' ),
@@ -299,6 +299,11 @@ class SupportReport {
 			);
 		}
 		$lines[] = '';
+		// With nothing checked, a count of 0 is not a pass; the page says there are no products too.
+		if ( isset( $report['products'] ) && 0 === (int) $report['products'] ) {
+			$lines[] = 'No products to check.';
+			return $lines;
+		}
 		foreach ( is_array( $report['checks'] ?? null ) ? $report['checks'] : array() as $check ) {
 			if ( ! is_array( $check ) || ! isset( $check['id'] ) ) {
 				continue;
