@@ -338,16 +338,18 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
 			// Setup steps live in the Setup checklist and, while one blocks sales, in Fix first; the cards hold what the scan read.
 			'sections'     => null === $report ? array() : $this->sections( array_values( array_filter( $visible, static fn( array $check ): bool => ! self::is_setup_step( $check ) ) ), $launched, $report ),
-			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array(), $this->experiments_enabled() ),
+			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ),
 			'overview'     => array(
-				'shopping' => $this->shopping_card( $checks ),
+				'shopping'    => $this->shopping_card( $checks ),
+				// Last on the Overview, after the AI shopping health card.
+				'experiments' => $this->experiments_card(),
 				// After the description, when the last check stopped at the product limit.
-				'based_on' => null === $truncated ? null : sprintf(
+				'based_on'    => null === $truncated ? null : sprintf(
 					/* translators: %s: number of products checked. */
 					__( 'Based on your %s most recently changed products.', 'woocommerce' ),
 					number_format_i18n( ProductScan::PRODUCT_LIMIT )
 				),
-				'view_all' => array(
+				'view_all'    => array(
 					'href' => self::url(),
 					'text' => __( 'View all checks', 'woocommerce' ),
 				),
@@ -394,6 +396,31 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'href' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ),
 				'text' => $button,
 			),
+		);
+	}
+
+	/**
+	 * The Overview's AI assistant experiments card: a button to turn them on, or once they're on, a line
+	 * linking to the Features page to turn them off. Null for a user who can't manage WooCommerce.
+	 *
+	 * @return array{title:string,badge:array{intent:string,text:string},text:string,enabled:bool,button:string,on:array{text:string,href:string},error:string}|null
+	 */
+	private function experiments_card(): ?array {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return null;
+		}
+		return array(
+			'title'   => __( 'AI assistant experiments', 'woocommerce' ),
+			'badge'   => self::badge_data( array( 'off', __( 'Experimental', 'woocommerce' ) ) ),
+			'text'    => __( 'Try newer standards for AI assistants before they settle, such as WebMCP and Markdown versions of your pages.', 'woocommerce' ),
+			'enabled' => $this->features_controller->feature_is_enabled( AiAssistantExperiments::FEATURE_NAME ),
+			'button'  => __( 'Turn on', 'woocommerce' ),
+			'on'      => array(
+				/* translators: <link> and </link> wrap the path to the Features page. */
+				'text' => __( 'They’re on. You can turn them off in <link>Settings > Advanced > Features</link>.', 'woocommerce' ),
+				'href' => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ),
+			),
+			'error'   => __( 'We couldn’t turn on AI assistant experiments. Try again.', 'woocommerce' ),
 		);
 	}
 
@@ -1094,26 +1121,14 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Whether the AI assistant experiments feature is on, or null for a user who can't manage
-	 * WooCommerce, who sees no offer to turn it on.
-	 */
-	private function experiments_enabled(): ?bool {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return null;
-		}
-		return $this->features_controller->feature_is_enabled( AiAssistantExperiments::FEATURE_NAME );
-	}
-
-	/**
 	 * Protocols and files the store serves to agents, as information, never pass or fail: how many were
 	 * found, then every item under where it lives. Items the scan couldn't read are under Not checked yet.
-	 * Leads with the AI assistant experiments notice. Null with no items in the report.
+	 * Null with no items in the report.
 	 *
-	 * @param array     $items          Items from the report.
-	 * @param bool|null $experiments_on Whether AI assistant experiments are on; null leaves out the notice.
-	 * @return array{title:string,badge:array{intent:string,text:string},text:string,groups:array<int, array{title:string,items:array<int, array{name:string,found:bool|null}>}>,experiments:array<string, mixed>|null}|null
+	 * @param array $items Items from the report.
+	 * @return array{title:string,badge:array{intent:string,text:string},text:string,groups:array<int, array{title:string,items:array<int, array{name:string,found:bool|null}>}>}|null
 	 */
-	private static function declared( array $items, ?bool $experiments_on = null ): ?array {
+	private static function declared( array $items ): ?array {
 		$items = array_values( array_filter( $items, 'is_array' ) );
 		if ( array() === $items ) {
 			return null;
@@ -1158,56 +1173,17 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			}
 		}
 		return array(
-			'title'       => __( 'Extra details for AI assistants', 'woocommerce' ),
-			'badge'       => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
-			'text'        => $text,
+			'title'  => __( 'Extra details for AI assistants', 'woocommerce' ),
+			'badge'  => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
+			'text'   => $text,
 			// In the order of $titles, leaving out the groups with no items.
-			'groups'      => array_map(
+			'groups' => array_map(
 				static fn( string $key ): array => array(
 					'title' => $titles[ $key ],
 					'items' => $groups[ $key ],
 				),
 				array_keys( array_intersect_key( $titles, $groups ) )
 			),
-			'experiments' => null === $experiments_on ? null : self::experiments_notice( $items, $experiments_on ),
-		);
-	}
-
-	/**
-	 * The AI assistant experiments notice at the top of Extra details. While the feature is off, it offers
-	 * to turn it on when any item the experiments add is not found, linking to the Features page that
-	 * lists every experiment. Once on, a line under the card's description links there to turn them off.
-	 *
-	 * @param array<int, array<string, mixed>> $items   Items from the report.
-	 * @param bool                             $enabled Whether the feature is on.
-	 * @return array<string, mixed>
-	 */
-	private static function experiments_notice( array $items, bool $enabled ): array {
-		$features_url   = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
-		$experiment_ids = AiAssistantExperiments::get_declared_item_ids();
-		$missing        = array_filter(
-			$items,
-			static fn( array $item ): bool => false === ( $item['found'] ?? null ) && in_array( (string) ( $item['id'] ?? '' ), $experiment_ids, true )
-		);
-		return array(
-			'enabled'   => $enabled,
-			'offer'     => $enabled || array() === $missing ? null : array(
-				'title'  => __( 'Add newer ways for AI assistants to read your store', 'woocommerce' ),
-				/* translators: <link> and </link> wrap the path to the Features page, where every experiment is listed. */
-				'text'   => __( 'These add files and page code from newer AI standards, which few AI assistants use yet. Turn them off at any time in <link>Settings > Advanced > Features</link>.', 'woocommerce' ),
-				'href'   => $features_url,
-				'button' => __( 'Turn on AI assistant experiments', 'woocommerce' ),
-			),
-			'turned_on' => array(
-				'text'   => __( 'AI assistant experiments are on. Run the check again to see the new files.', 'woocommerce' ),
-				'button' => __( 'Check again', 'woocommerce' ),
-			),
-			'on'        => array(
-				/* translators: <link> and </link> wrap the path to the Features page. */
-				'text' => __( 'AI assistant experiments are on. You can turn them off in <link>Settings > Advanced > Features</link>.', 'woocommerce' ),
-				'href' => $features_url,
-			),
-			'error'     => __( 'We couldn’t turn on AI assistant experiments. Try again.', 'woocommerce' ),
 		);
 	}
 

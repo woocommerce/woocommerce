@@ -14,6 +14,7 @@ import type { ReadinessView } from './types';
 import { useReadinessView } from './use-readiness-view';
 import { FixFirstList } from './components/fix-first';
 import { AgentConnect, type ConnectView } from './components/agent-connect';
+import { ExperimentsCard } from './components/experiments-card';
 import { ErrorNotice } from './components/error-notice';
 import { RunStatus } from './components/run-status';
 import { trackReadiness } from './tracks';
@@ -32,7 +33,7 @@ function everyCheckPassed( view: ReadinessView ): boolean {
 
 /**
  * WooCommerce > Settings > AI tools, the Overview: the WordPress.com connection card, the AI shopping
- * card, then the Sales readiness card with Fix first and a link to every check.
+ * card, the Sales readiness card with Fix first and a link to every check, then AI assistant experiments.
  */
 export default function SalesReadinessOverview( {
 	initialView = null,
@@ -58,7 +59,7 @@ export default function SalesReadinessOverview( {
 			</div>
 		);
 	}
-	const { shopping, view_all: viewAll } = view.overview;
+	const { shopping, experiments, view_all: viewAll } = view.overview;
 	// A rejected URL is not a link: the button stays, disabled, and does not record a click.
 	const linkProps = ( href: string | undefined, area: string ) =>
 		href
@@ -182,6 +183,7 @@ export default function SalesReadinessOverview( {
 					) }
 				</Card.Content>
 			</Card.Root>
+			{ experiments && <ExperimentsCard card={ experiments } /> }
 		</div>
 	);
 }

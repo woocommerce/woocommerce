@@ -70,8 +70,8 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 	public function test_description_joins_two_experiments_with_and(): void {
 		$description = AiAssistantExperiments::get_description(
 			array(
-				'first'  => array( 'First', array() ),
-				'second' => array( 'Second', array() ),
+				'first'  => 'First',
+				'second' => 'Second',
 			)
 		);
 
@@ -122,112 +122,81 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The experiments add the ten Extra details items the card marks.
+	 * @testdox While the feature is off, the AI tools Overview card offers to turn it on.
 	 */
-	public function test_declared_item_ids(): void {
-		$this->assertSame(
-			array( 'webmcp-forms-schema', 'markdown-pages', 'markdown-alternate-link', 'markdown-frontmatter', 'llms-full', 'sitemap-md', 'ai-catalog', 'ard-manifest', 'ai-txt', 'tdmrep' ),
-			AiAssistantExperiments::get_declared_item_ids()
-		);
-	}
-
-	/**
-	 * @testdox While the feature is off and an item the experiments add is missing, Extra details offers them and links to Features.
-	 */
-	public function test_declared_offers_missing_items_while_off(): void {
+	public function test_overview_card_offers_to_turn_on_while_off(): void {
 		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
 
-		$declared = $this->declared_view(
-			array(
-				'ai-txt'         => false,
-				'tdmrep'         => null,
-				'sitemap-md'     => true,
-				'markdown-pages' => false,
-				'agents-md'      => false,
-			)
-		);
+		$card = $this->overview_card();
 
-		$this->assertFalse( $declared['experiments']['enabled'] );
-		$this->assertSame( 'Add newer ways for AI assistants to read your store', $declared['experiments']['offer']['title'] );
+		$this->assertSame( 'AI assistant experiments', $card['title'] );
 		$this->assertSame(
-			'These add files and page code from newer AI standards, which few AI assistants use yet. Turn them off at any time in <link>Settings > Advanced > Features</link>.',
-			$declared['experiments']['offer']['text']
-		);
-		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ), $declared['experiments']['offer']['href'] );
-		$this->assertArrayNotHasKey( 'experiment', $declared['groups'][0]['items'][0], 'Items are not marked' );
-		$this->assertSame( 'Turn on AI assistant experiments', $declared['experiments']['offer']['button'] );
-		$this->assertSame( 'AI assistant experiments are on. Run the check again to see the new files.', $declared['experiments']['turned_on']['text'] );
-		$this->assertSame( 'Check again', $declared['experiments']['turned_on']['button'] );
-		$this->assertSame( 'We couldn’t turn on AI assistant experiments. Try again.', $declared['experiments']['error'] );
-	}
-
-	/**
-	 * @testdox There is no offer when every item the experiments add is found or not checked.
-	 */
-	public function test_declared_has_no_offer_when_nothing_is_missing(): void {
-		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
-
-		$declared = $this->declared_view(
 			array(
-				'ai-txt'    => true,
-				'tdmrep'    => null,
-				'agents-md' => false,
-			)
+				'intent' => 'none',
+				'text'   => 'Experimental',
+			),
+			$card['badge']
 		);
-
-		$this->assertNull( $declared['experiments']['offer'] );
+		$this->assertSame( 'Try newer standards for AI assistants before they settle, such as WebMCP and Markdown versions of your pages.', $card['text'] );
+		$this->assertFalse( $card['enabled'] );
+		$this->assertSame( 'Turn on', $card['button'] );
+		$this->assertSame( 'They’re on. You can turn them off in <link>Settings > Advanced > Features</link>.', $card['on']['text'] );
+		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ), $card['on']['href'] );
+		$this->assertSame( 'We couldn’t turn on AI assistant experiments. Try again.', $card['error'] );
 	}
 
 	/**
-	 * @testdox Once the feature is on, Extra details says so under its description and links to Features instead of offering it.
+	 * @testdox Once the feature is on, the Overview card says so.
 	 */
-	public function test_declared_links_to_features_when_on(): void {
+	public function test_overview_card_is_on_when_feature_is_on(): void {
 		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'yes' );
 
-		$declared = $this->declared_view( array( 'ai-txt' => false ) );
-
-		$this->assertTrue( $declared['experiments']['enabled'] );
-		$this->assertNull( $declared['experiments']['offer'] );
-		$this->assertSame( 'AI assistant experiments are on. You can turn them off in <link>Settings > Advanced > Features</link>.', $declared['experiments']['on']['text'] );
-		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ), $declared['experiments']['on']['href'] );
+		$this->assertTrue( $this->overview_card()['enabled'] );
 	}
 
 	/**
-	 * @testdox A user who can't manage WooCommerce gets no notice.
+	 * @testdox A user who can't manage WooCommerce gets no card.
 	 */
-	public function test_declared_hides_experiments_without_manage_woocommerce(): void {
+	public function test_overview_card_hidden_without_manage_woocommerce(): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
 
-		$declared = $this->declared_view( array( 'ai-txt' => false ) );
-
-		$this->assertNull( $declared['experiments'] );
+		$this->assertNull( $this->overview_card() );
 	}
 
 	/**
-	 * The Extra details card from the view, for a stored report with these items.
-	 *
-	 * @param array<string, bool|null> $found Whether each item, by id, was found.
-	 * @return array<string, mixed>
+	 * @testdox AI shopping health's Extra details card doesn't mention the experiments.
 	 */
-	private function declared_view( array $found ): array {
+	public function test_declared_card_has_no_experiments(): void {
 		StoreOutputChecksTest::block_requests();
 		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
-		$items = array();
-		foreach ( $found as $id => $value ) {
-			$items[] = array(
-				'id'    => $id,
-				'name'  => $id,
-				'found' => $value,
-			);
-		}
 		update_option(
 			AgentReadiness::REPORT_OPTION,
 			array(
 				'generated_at' => gmdate( 'c' ),
 				'store_checks' => array(),
-				'declared'     => $items,
+				'declared'     => array(
+					array(
+						'id'    => 'ai-txt',
+						'name'  => 'ai.txt usage file',
+						'found' => false,
+					),
+				),
 			)
 		);
-		return wc_get_container()->get( ReadinessCheckPage::class )->view()['declared'];
+
+		$declared = wc_get_container()->get( ReadinessCheckPage::class )->view()['declared'];
+
+		$this->assertArrayNotHasKey( 'experiments', $declared );
+	}
+
+	/**
+	 * The AI assistant experiments card from the AI tools Overview.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	private function overview_card(): ?array {
+		StoreOutputChecksTest::block_requests();
+		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
+		return wc_get_container()->get( ReadinessCheckPage::class )->view()['overview']['experiments'];
 	}
 }

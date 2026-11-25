@@ -94,23 +94,16 @@ export interface Declared {
 		/** `found` is null for an item the scan couldn't read. */
 		items: { name: string; found: boolean | null }[];
 	}[];
-	/** The AI assistant experiments notice. Null for users who can't manage WooCommerce. */
-	experiments?: DeclaredExperiments | null;
 }
 
-export interface DeclaredExperiments {
+/** The AI assistant experiments card on the AI tools Overview. */
+export interface ExperimentsCardView {
+	title: string;
+	badge: ViewBadge;
+	text: string;
 	enabled: boolean;
-	/** The offer to turn the experiments on: null once they're on, or when nothing they add is missing. */
-	offer: {
-		title: string;
-		/** Wraps the path to the Features page in <link></link>. */
-		text: string;
-		/** The Features page. */
-		href: string;
-		button: string;
-	} | null;
-	/** After the offer's button succeeds, until the next check finishes. */
-	turned_on: { text: string; button: string };
+	/** Turns them on. */
+	button: string;
 	/** Once they're on: wraps the path to the Features page in <link></link>. */
 	on: { text: string; href: string };
 	error: string;
@@ -148,6 +141,8 @@ export interface ReadinessView {
 	declared: Declared | null;
 	overview: {
 		shopping: ShoppingCard;
+		/** Null for users who can't manage WooCommerce. */
+		experiments?: ExperimentsCardView | null;
 		view_all: ViewLink;
 		/** "Based on your 5,000 most recently changed products.", when the check stopped at the limit. */
 		based_on: string | null;

@@ -462,22 +462,14 @@ body:has(.wc-sales-readiness) {
 	cursor: pointer;
 }
 
-// Once AI assistant experiments are on, the line reads as part of the description: close under it,
-// with the description's usual space before the list.
-.wc-sales-readiness-card__description:has(+ .wc-sales-readiness-experiments-on) {
-	margin-block-end: var(--wpds-dimension-gap-sm);
-}
-
-.wc-sales-readiness-experiments-on {
-	display: block;
-	margin-block-end: var(--wpds-dimension-gap-xl);
-}
-
-// The AI assistant experiments notice, above the card's description.
+// AI assistant experiments on the Overview: the "on" line and an error sit where the button does.
 .wc-sales-readiness-experiments {
-	margin-block-end: 12px;
+	&__on {
+		display: block;
+		margin-block-start: var(--wpds-dimension-gap-md);
+	}
 
 	.components-notice {
-		margin: 0 0 12px;
+		margin: var(--wpds-dimension-gap-md) 0 0;
 	}
 }

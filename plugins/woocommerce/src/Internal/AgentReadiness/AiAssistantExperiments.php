@@ -24,45 +24,33 @@ final class AiAssistantExperiments {
 	public const AI_TRAINING_NOTICES = 'ai_training_notices';
 
 	/**
-	 * The experiments the switch covers, in display order, with the "Extra details for AI assistants"
-	 * items (DeclaredToAgents ids) each one adds.
+	 * The experiments the switch covers, in display order.
 	 *
-	 * @return array<string, array{0:string,1:array<int,string>}> Label and item ids, keyed by experiment slug.
+	 * @return array<string, string> Labels, keyed by experiment slug.
 	 */
 	public static function get_experiments(): array {
 		return array(
-			'webmcp'                  => array( __( 'WebMCP on store forms', 'woocommerce' ), array( 'webmcp-forms-schema' ) ),
-			'markdown_pages'          => array( __( 'Markdown versions of pages', 'woocommerce' ), array( 'markdown-pages', 'markdown-alternate-link', 'markdown-frontmatter' ) ),
-			'llms_full_txt'           => array( __( 'a full-content llms.txt', 'woocommerce' ), array( 'llms-full' ) ),
-			'markdown_sitemap'        => array( __( 'a Markdown sitemap and AI catalog', 'woocommerce' ), array( 'sitemap-md', 'ai-catalog', 'ard-manifest' ) ),
-			self::AI_TRAINING_NOTICES => array( __( 'AI training notices', 'woocommerce' ), array( 'ai-txt', 'tdmrep' ) ),
+			'webmcp'                  => __( 'WebMCP on store forms', 'woocommerce' ),
+			'markdown_pages'          => __( 'Markdown versions of pages', 'woocommerce' ),
+			'llms_full_txt'           => __( 'a full-content llms.txt', 'woocommerce' ),
+			'markdown_sitemap'        => __( 'a Markdown sitemap and AI catalog', 'woocommerce' ),
+			self::AI_TRAINING_NOTICES => __( 'AI training notices', 'woocommerce' ),
 		);
-	}
-
-	/**
-	 * The "Extra details for AI assistants" item ids that the experiments add.
-	 *
-	 * @param array<string, array{0:string,1:array<int,string>}>|null $experiments Experiments. Defaults to get_experiments().
-	 * @return array<int, string>
-	 */
-	public static function get_declared_item_ids( ?array $experiments = null ): array {
-		$experiments = $experiments ?? self::get_experiments();
-		return array_values( array_unique( array_merge( array(), ...array_values( array_column( $experiments, 1 ) ) ) ) );
 	}
 
 	/**
 	 * The experiments' labels joined into one list, for example "A, B, and C".
 	 *
-	 * @param array<string, array{0:string,1:array<int,string>}>|null $experiments Experiments. Defaults to get_experiments().
+	 * @param array<string, string>|null $experiments Experiments. Defaults to get_experiments().
 	 */
 	public static function get_list( ?array $experiments = null ): string {
-		return wp_sprintf( '%l', array_column( $experiments ?? self::get_experiments(), 0 ) );
+		return wp_sprintf( '%l', array_values( $experiments ?? self::get_experiments() ) );
 	}
 
 	/**
 	 * Build the feature description shown next to the checkbox on the Features page.
 	 *
-	 * @param array<string, array{0:string,1:array<int,string>}>|null $experiments Experiments to list. Defaults to get_experiments().
+	 * @param array<string, string>|null $experiments Experiments to list. Defaults to get_experiments().
 	 * @return string Description HTML.
 	 */
 	public static function get_description( ?array $experiments = null ): string {

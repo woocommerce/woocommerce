@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import type { ReactNode } from 'react';
 import {
 	Badge,
@@ -21,7 +21,6 @@ import { __, _n, sprintf } from '@wordpress/i18n';
  */
 import type { Declared, Section } from '../types';
 import { CheckRow, RowLink } from './check-row';
-import { ExperimentsNotice, ExperimentsOn } from './experiments-notice';
 import { trackReadiness } from '../tracks';
 
 /**
@@ -245,132 +244,89 @@ const notFoundIcon = (
  * Protocols and files the store serves to agents: information, never pass or fail, so the card
  * starts closed and opens on its header to list them.
  */
-export const DeclaredCard = ( {
-	declared,
-	run,
-}: {
-	declared: Declared;
-	/** The page's check: runs it, and whether it is starting or running. */
-	run?: { onRun: () => void; running: boolean; pending: boolean };
-} ) => {
-	const experiments = declared.experiments ?? null;
-	// After AI assistant experiments are turned on here, until the next check finishes.
-	const [ turnedOn, setTurnedOn ] = useState( false );
-	const sawPending = useRef( false );
-	const pending = !! run?.pending;
-	useEffect( () => {
-		if ( ! turnedOn ) {
-			return;
+export const DeclaredCard = ( { declared }: { declared: Declared } ) => (
+	<CollapsibleCard.Root
+		className="wc-sales-readiness-card"
+		id="wc-sales-readiness-declared"
+		onOpenChange={ ( open: boolean ) =>
+			trackReadiness( 'fold_toggle', {
+				surface: 'page',
+				section: 'declared',
+				open,
+			} )
 		}
-		if ( pending ) {
-			sawPending.current = true;
-		} else if ( sawPending.current ) {
-			sawPending.current = false;
-			setTurnedOn( false );
-		}
-	}, [ turnedOn, pending ] );
-	const showOn = !! experiments?.enabled && ! turnedOn;
-
-	return (
-		<CollapsibleCard.Root
-			className="wc-sales-readiness-card"
-			id="wc-sales-readiness-declared"
-			onOpenChange={ ( open: boolean ) =>
-				trackReadiness( 'fold_toggle', {
-					surface: 'page',
-					section: 'declared',
-					open,
-				} )
-			}
-		>
-			<CollapsibleCard.Header>
-				<div className="wc-sales-readiness-card__head">
-					<Card.Title className="wc-sales-readiness-card__title">
-						{ declared.title }
-					</Card.Title>
-					<Badge intent={ declared.badge.intent }>
-						{ declared.badge.text }
-					</Badge>
-				</div>
-			</CollapsibleCard.Header>
-			<CollapsibleCard.Content>
-				{ experiments && ! showOn && (
-					<div className="wc-sales-readiness-experiments">
-						<ExperimentsNotice
-							experiments={ experiments }
-							turnedOn={ turnedOn }
-							onTurnedOn={ () => setTurnedOn( true ) }
-							run={
-								run && {
-									onRun: run.onRun,
-									busy: run.running || run.pending,
-								}
-							}
-						/>
-					</div>
-				) }
-				<Text
-					variant="body-md"
-					className="wc-sales-readiness__muted wc-sales-readiness-card__description"
-				>
-					{ declared.text }
-				</Text>
-				{ showOn && <ExperimentsOn experiments={ experiments } /> }
-				<div className="wc-sales-readiness-declared">
-					{ declared.groups.map( ( group ) => (
-						<div
-							key={ group.title }
-							className="wc-sales-readiness-declared__group"
+	>
+		<CollapsibleCard.Header>
+			<div className="wc-sales-readiness-card__head">
+				<Card.Title className="wc-sales-readiness-card__title">
+					{ declared.title }
+				</Card.Title>
+				<Badge intent={ declared.badge.intent }>
+					{ declared.badge.text }
+				</Badge>
+			</div>
+		</CollapsibleCard.Header>
+		<CollapsibleCard.Content>
+			<Text
+				variant="body-md"
+				className="wc-sales-readiness__muted wc-sales-readiness-card__description"
+			>
+				{ declared.text }
+			</Text>
+			<div className="wc-sales-readiness-declared">
+				{ declared.groups.map( ( group ) => (
+					<div
+						key={ group.title }
+						className="wc-sales-readiness-declared__group"
+					>
+						<Text
+							variant="body-sm"
+							className="wc-sales-readiness-declared__title"
 						>
-							<Text
-								variant="body-sm"
-								className="wc-sales-readiness-declared__title"
-							>
-								{ group.title }
-							</Text>
-							<ul className="wc-sales-readiness-declared__list">
-								{ group.items.map( ( item ) => (
-									<li
-										key={ item.name }
-										className={
-											'wc-sales-readiness-declared__item' +
-											( item.found === true
-												? ''
-												: ' wc-sales-readiness__muted' )
+							{ group.title }
+						</Text>
+						<ul className="wc-sales-readiness-declared__list">
+							{ group.items.map( ( item ) => (
+								<li
+									key={ item.name }
+									className={
+										'wc-sales-readiness-declared__item' +
+										( item.found === true
+											? ''
+											: ' wc-sales-readiness__muted' )
+									}
+								>
+									<Icon
+										icon={
+											item.found === true
+												? foundIcon
+												: notFoundIcon
 										}
-									>
-										<Icon
-											icon={
-												item.found === true
-													? foundIcon
-													: notFoundIcon
-											}
-											size={ 20 }
-										/>
-										<Text variant="body-sm">
-											<VisuallyHidden>
-												{ declaredState(
-													item.found
-												) }{ ' ' }
-											</VisuallyHidden>
-											{ item.name }
-											{ item.found === false && (
-												<span aria-hidden="true">
-													{ ' ' }
-													{ __(
-														'· not found',
-														'woocommerce'
-													) }
-												</span>
-											) }
-										</Text>
-									</li>
-								) ) }
-							</ul>
-						</div>
-					) ) }
-				</div>
-			</CollapsibleCard.Content>
-		</CollapsibleCard.Root>
-	);
-};
+										size={ 20 }
+									/>
+									<Text variant="body-sm">
+										<VisuallyHidden>
+											{ declaredState(
+												item.found
+											) }{ ' ' }
+										</VisuallyHidden>
+										{ item.name }
+										{ item.found === false && (
+											<span aria-hidden="true">
+												{ ' ' }
+												{ __(
+													'· not found',
+													'woocommerce'
+												) }
+											</span>
+										) }
+									</Text>
+								</li>
+							) ) }
+						</ul>
+					</div>
+				) ) }
+			</div>
+		</CollapsibleCard.Content>
+	</CollapsibleCard.Root>
+);
