@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix RTL layout styling in the payment gateway list on the Payments settings page.
