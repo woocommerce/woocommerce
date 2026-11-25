@@ -219,4 +219,98 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 			)
 		);
 	}
+
+	/**
+	 * @testdox get_quantity_input_step_attribute keeps a step the stored quantity matches and returns any otherwise, on a store with whole quantities.
+	 *
+	 * @testWith [1, 2, "0", "1"]
+	 *           [1, 2.5, "0", "any"]
+	 *           [2, 4, "0", "2"]
+	 *           [2, 3, "0", "any"]
+	 *           [2, 3, "1", "2"]
+	 *           [1, -5, "-5", "1"]
+	 *           ["0.5", 1.5, "0", "0.5"]
+	 *           [0.5, 1.3, "0", "any"]
+	 *           ["any", 2, "0", "any"]
+	 *           ["ANY", 2, "0", "any"]
+	 *           [0, 2, "0", "1"]
+	 *           ["not a step", 2, "0", "1"]
+	 *           [["not a step"], 2, "0", "1"]
+	 *
+	 * @param mixed  $step     Step returned by the step filter.
+	 * @param float  $quantity Stored quantity.
+	 * @param string $min      Min attribute.
+	 * @param string $expected Expected step attribute.
+	 */
+	public function test_step_attribute_on_integer_store( $step, float $quantity, string $min, string $expected ): void {
+		$this->assertSame( $expected, $this->sut->get_quantity_input_step_attribute( $step, $quantity, $min ) );
+	}
+
+	/**
+	 * @testdox get_quantity_input_step_attribute drops the default step of 1 and keeps other steps, on a store with decimal quantities.
+	 *
+	 * @testWith [1, 2, "0", "any"]
+	 *           [1.0, 2.5, "0", "any"]
+	 *           [0.5, 1.5, "0", "0.5"]
+	 *           [0.5, 1.3, "0", "any"]
+	 *           [2, 4, "0", "2"]
+	 *
+	 * @param mixed  $step     Step returned by the step filter.
+	 * @param float  $quantity Stored quantity.
+	 * @param string $min      Min attribute.
+	 * @param string $expected Expected step attribute.
+	 */
+	public function test_step_attribute_on_decimal_store( $step, float $quantity, string $min, string $expected ): void {
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		$this->assertSame( $expected, $this->sut->get_quantity_input_step_attribute( $step, $quantity, $min ) );
+	}
+
+	/**
+	 * @testdox The order item template renders a quantity input the stored quantity is valid for.
+	 *
+	 * @testWith [false, null, 4, "1"]
+	 *           [true, null, 2.5, "any"]
+	 *           [false, 2, 4, "2"]
+	 *           [false, 2, 3, "any"]
+	 *
+	 * @param bool           $decimal_store Whether the store allows decimal quantities.
+	 * @param int|float|null $filtered_step Step returned by the admin step filter, or null to leave it alone.
+	 * @param float          $quantity      Stored quantity.
+	 * @param string         $expected      Expected step attribute.
+	 */
+	public function test_order_item_template_renders_step_the_stored_quantity_matches( bool $decimal_store, $filtered_step, float $quantity, string $expected ): void {
+		if ( $decimal_store ) {
+			remove_filter( 'woocommerce_stock_amount', 'intval' );
+			add_filter( 'woocommerce_stock_amount', 'floatval' );
+		}
+		if ( null !== $filtered_step ) {
+			add_filter(
+				'woocommerce_quantity_input_step_admin',
+				function () use ( $filtered_step ) {
+					return $filtered_step;
+				}
+			);
+		}
+
+		$order = wc_create_order();
+		$order->add_product( \WC_Helper_Product::create_simple_product(), $quantity );
+		$order->save();
+		$items = array_values( $order->get_items() );
+		$item  = $items[0];
+
+		$item_id     = $item->get_id();
+		$order_taxes = array();
+		ob_start();
+		include WC_ABSPATH . 'includes/admin/meta-boxes/views/html-order-item.php';
+		$html = ob_get_clean();
+
+		$this->assertSame(
+			1,
+			preg_match( '/<input type="number" step="([^"]*)"[^>]*name="order_item_qty\[' . $item_id . '\]"/', $html, $matches ),
+			'The quantity input should be rendered.'
+		);
+		$this->assertSame( $expected, $matches[1] );
+	}
 }

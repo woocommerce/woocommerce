@@ -13,9 +13,10 @@ use WC_Product;
  *
  * The admin order editor renders quantity inputs with a minimum of 0, so
  * merchants cannot enter negative quantities. Orders created through the
- * REST API or by extensions may already contain negative quantities, so for
- * existing items the minimum is floored at the stored quantity to keep those
- * orders editable.
+ * REST API or by extensions may already contain negative quantities, or
+ * quantities that do not match the product's step. For existing items the
+ * minimum is floored at the stored quantity and the step is dropped when the
+ * stored quantity does not match it, to keep those orders editable.
  *
  * Covers product line items only: fee and shipping lines have no quantity
  * input in the admin editor, and posted quantities for them are ignored.
@@ -47,6 +48,41 @@ class ItemQuantityLimits {
 
 		// A callback can return anything; fall back to the default on non-numeric values.
 		return is_numeric( $min ) ? (string) $min : $default;
+	}
+
+	/**
+	 * Get the step attribute for an existing order item's quantity input in the admin editor.
+	 *
+	 * The input is hidden until the line is edited, so a stored quantity that does not
+	 * match the step would make the browser block the whole order form. Such an input,
+	 * and one with the default step of 1 on a store that allows decimal quantities,
+	 * accepts any quantity.
+	 *
+	 * @since 11.5.0
+	 * @param mixed  $step     The step returned by 'woocommerce_quantity_input_step_admin'.
+	 * @param float  $quantity The item's stored quantity.
+	 * @param string $min      The input's min attribute. Browsers count steps from it.
+	 * @return string The step as a numeric string, or 'any'.
+	 */
+	public function get_quantity_input_step_attribute( $step, float $quantity, string $min ): string {
+		if ( is_string( $step ) && 'any' === strtolower( trim( $step ) ) ) {
+			return 'any';
+		}
+
+		// A callback can return anything; browsers read a non-numeric or non-positive step as 1.
+		$step = is_numeric( $step ) && (float) $step > 0 ? (float) $step : 1.0;
+
+		if ( abs( $step - 1.0 ) < 0.000001 && ! wc_is_stock_amount_integer() ) {
+			return 'any';
+		}
+
+		$steps_from_min = ( $quantity - (float) $min ) / $step;
+
+		if ( abs( $steps_from_min - round( $steps_from_min ) ) > 0.000001 ) {
+			return 'any';
+		}
+
+		return (string) $step;
 	}
 
 	/**
