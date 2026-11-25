@@ -12,6 +12,7 @@ describe( 'readAnonCookie', () => {
 		[ 'other=1; tk_ai=one%3Dtwo=value; last=2', 'one=two=value' ],
 		[ 'tk_ai=bad%2; other=2', 'bad%2' ],
 		[ 'tk_ai="one%3Dtwo"', 'one=two' ],
+		[ 'tk_ai="', null ],
 	] )( 'reads the anonymous ID from %s', ( cookies, expected ) => {
 		jest.spyOn( document, 'cookie', 'get' ).mockReturnValue( cookies );
 

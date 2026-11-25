@@ -1870,6 +1870,9 @@ importers:
       '@wordpress/hooks':
         specifier: catalog:wp-min
         version: 4.33.1
+      cookie:
+        specifier: ^0.7.2
+        version: 0.7.2
       qs:
         specifier: ^6.11.2
         version: 6.16.2
@@ -1877,6 +1880,9 @@ importers:
       '@babel/core':
         specifier: catalog:tooling
         version: 7.29.7
+      '@types/cookie':
+        specifier: ^0.6.0
+        version: 0.6.0
       '@types/jest':
         specifier: catalog:tooling
         version: 29.5.14
