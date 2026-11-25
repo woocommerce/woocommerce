@@ -64,7 +64,7 @@ class StoreOutputChecks {
 	 * A likely conflict also names the address where it was seen. It doesn't name a plugin: any list of
 	 * plugins goes stale, and several can change the same output.
 	 *
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,seen_at:string,source:string,product:int}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,no_product:bool,seen_at:string,source:string,product:int}>
 	 */
 	public function all(): array {
 		return $this->all_for( $this->responses() );
@@ -76,7 +76,7 @@ class StoreOutputChecks {
 	 * @since 11.4.0
 	 *
 	 * @param StoreResponses $responses Responses of the scan.
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,seen_at:string,source:string,product:int}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,no_product:bool,seen_at:string,source:string,product:int}>
 	 */
 	public function all_for( StoreResponses $responses ): array {
 		// The home page first: when it can't be reached, no other request is made.
@@ -126,23 +126,25 @@ class StoreOutputChecks {
 				$seen_at = $this->broken_llms_link;
 			}
 			$results[] = array(
-				'id'       => $check['id'],
-				'ok'       => $ok,
-				'blocks'   => $check['blocks'],
-				'group'    => $check['group'],
-				'level'    => StoreConditions::LEVEL_RECOMMENDED,
-				'name'     => $check['name'],
-				'label'    => $check['label'],
-				'why'      => $check['why'],
-				'fix'      => ReadinessCopy::llms_txt_source( $source )['fix'] ?? $check['fix'],
-				'fix_url'  => $check['fix_url'],
-				'conflict' => $conflict,
-				'pending'  => $pending,
-				'skipped'  => $skipped,
-				'seen_at'  => $seen_at,
-				'source'   => $source,
+				'id'         => $check['id'],
+				'ok'         => $ok,
+				'blocks'     => $check['blocks'],
+				'group'      => $check['group'],
+				'level'      => StoreConditions::LEVEL_RECOMMENDED,
+				'name'       => $check['name'],
+				'label'      => $check['label'],
+				'why'        => $check['why'],
+				'fix'        => ReadinessCopy::llms_txt_source( $source )['fix'] ?? $check['fix'],
+				'fix_url'    => $check['fix_url'],
+				'conflict'   => $conflict,
+				'pending'    => $pending,
+				'skipped'    => $skipped,
+				// Not checked rather than couldn't check: the check reads a product page and there was no product to open.
+				'no_product' => $this->take_no_product_page() && null === $ok,
+				'seen_at'    => $seen_at,
+				'source'     => $source,
 				// The product whose page failed, 0 when the check doesn't read product pages or didn't fail on one.
-				'product'  => null === $failed ? 0 : $failed->get_id(),
+				'product'    => null === $failed ? 0 : $failed->get_id(),
 			);
 			$responses->focus( null );
 		}
@@ -221,6 +223,13 @@ class StoreOutputChecks {
 	 * @var string
 	 */
 	private string $broken_llms_link = '';
+
+	/**
+	 * Whether the check being run needed a product page and the scan had no product to open.
+	 *
+	 * @var bool
+	 */
+	private bool $no_product_page = false;
 
 	/**
 	 * Organization and the subtypes stores use for themselves.
@@ -844,6 +853,9 @@ class StoreOutputChecks {
 	 * @param callable       $test      Test, given the Product items.
 	 */
 	private function with_products( StoreResponses $responses, callable $test ): ?bool {
+		if ( $this->without_product( $responses ) ) {
+			return null;
+		}
 		$page = $responses->product_page();
 		if ( null === $page ) {
 			return null;
@@ -911,8 +923,34 @@ class StoreOutputChecks {
 	 * @param callable       $test      Test, given the HTML.
 	 */
 	private function on_product_page( StoreResponses $responses, callable $test ): ?bool {
+		if ( $this->without_product( $responses ) ) {
+			return null;
+		}
 		$page = $responses->product_page();
 		return null === $page ? null : (bool) $test( $page['body'] );
+	}
+
+	/**
+	 * Whether the scan has no product to open. If so, marks the check being run as waiting for one
+	 * (Not checked yet) rather than couldn't check. Every check that reads the product page calls this first.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private function without_product( StoreResponses $responses ): bool {
+		if ( null !== $responses->product() ) {
+			return false;
+		}
+		$this->no_product_page = true;
+		return true;
+	}
+
+	/**
+	 * Whether the check just run needed a product page with no product to open, then clear it for the next check.
+	 */
+	private function take_no_product_page(): bool {
+		$needed                = $this->no_product_page;
+		$this->no_product_page = false;
+		return $needed;
 	}
 
 	/**
@@ -1419,7 +1457,8 @@ class StoreOutputChecks {
 	/**
 	 * Whether a Product item, a variant or one of their offers has a BuyAction potentialAction.
 	 * Null without one when WooCommerce wouldn't print it: it links only a simple product, or a chosen
-	 * variation, that can be bought now (the conditions of WC_Structured_Data::get_product_checkout_url()).
+	 * variation, that can be bought now (the conditions of WC_Structured_Data::get_product_checkout_url()),
+	 * and prints no offer at all for a product without a price.
 	 *
 	 * @param array<int, array<string, mixed>> $products Product items.
 	 * @param \WC_Product|null                 $scanned  The scanned product.
@@ -1435,7 +1474,7 @@ class StoreOutputChecks {
 				}
 			}
 		}
-		if ( null !== $scanned && ( ! $scanned->is_type( ProductType::SIMPLE ) || ( ! $scanned->is_visible() && CatalogVisibility::SEARCH !== $scanned->get_catalog_visibility() ) || ! $scanned->is_publicly_viewable() || ! $scanned->is_purchasable() || ! $scanned->is_in_stock() || ! $scanned->has_enough_stock( 1 ) ) ) {
+		if ( null !== $scanned && ( '' === $scanned->get_price() || ! $scanned->is_type( ProductType::SIMPLE ) || ( ! $scanned->is_visible() && CatalogVisibility::SEARCH !== $scanned->get_catalog_visibility() ) || ! $scanned->is_publicly_viewable() || ! $scanned->is_purchasable() || ! $scanned->is_in_stock() || ! $scanned->has_enough_stock( 1 ) ) ) {
 			return null;
 		}
 		return false;
@@ -2243,6 +2282,9 @@ class StoreOutputChecks {
 	 */
 	private function reviews_marked_up( StoreResponses $responses ): ?bool {
 		// The passes below load no page. Without a product page the rest of the card couldn't run, so neither does this.
+		if ( $this->without_product( $responses ) ) {
+			return null;
+		}
 		if ( null === $responses->product_page() ) {
 			return null;
 		}

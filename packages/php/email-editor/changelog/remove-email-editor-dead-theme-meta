@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Stop applying element styles from the legacy `woocommerce_email_theme` post meta, and deprecate `Email_Editor::extend_email_theme_styles()` and `Email_Editor::WOOCOMMERCE_EMAIL_META_THEME_TYPE`.

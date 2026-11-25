@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use WP_REST_Request;
 
@@ -19,18 +18,10 @@ defined( 'ABSPATH' ) || exit;
  * the AI tools Overview what they show, and GET wc/v3/agent-readiness/support-report
  * gives the text file a merchant sends to support.
  *
- * Registered only while the agent_readiness feature is enabled.
- *
  * @since 11.4.0
  */
 class ReadinessRestController extends RestApiControllerBase {
 
-	/**
-	 * Features controller.
-	 *
-	 * @var FeaturesController
-	 */
-	private FeaturesController $features_controller;
 
 	/**
 	 * Readiness service.
@@ -72,20 +63,18 @@ class ReadinessRestController extends RestApiControllerBase {
 	 *
 	 * @internal
 	 *
-	 * @param FeaturesController $features_controller Features controller.
 	 * @param AgentReadiness     $agent_readiness     Readiness service.
 	 * @param ScheduledScan      $scheduled_scan      Background scan.
 	 * @param UcpSwitch          $ucp_switch          UCP switch.
 	 * @param ReadinessCheckPage $readiness_page      Sales readiness.
 	 * @param SupportReport|null $support_report      Text report for support; resolved from the container when omitted.
 	 */
-	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness, ScheduledScan $scheduled_scan, UcpSwitch $ucp_switch, ReadinessCheckPage $readiness_page, ?SupportReport $support_report = null ): void {
-		$this->features_controller = $features_controller;
-		$this->agent_readiness     = $agent_readiness;
-		$this->scheduled_scan      = $scheduled_scan;
-		$this->ucp_switch          = $ucp_switch;
-		$this->readiness_page      = $readiness_page;
-		$this->support_report      = $support_report ?? wc_get_container()->get( SupportReport::class );
+	final public function init( AgentReadiness $agent_readiness, ScheduledScan $scheduled_scan, UcpSwitch $ucp_switch, ReadinessCheckPage $readiness_page, ?SupportReport $support_report = null ): void {
+		$this->agent_readiness = $agent_readiness;
+		$this->scheduled_scan  = $scheduled_scan;
+		$this->ucp_switch      = $ucp_switch;
+		$this->readiness_page  = $readiness_page;
+		$this->support_report  = $support_report ?? wc_get_container()->get( SupportReport::class );
 	}
 
 	/**
@@ -99,9 +88,6 @@ class ReadinessRestController extends RestApiControllerBase {
 	 * Register the routes.
 	 */
 	public function register_routes(): void {
-		if ( ! $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ) {
-			return;
-		}
 		register_rest_route(
 			$this->route_namespace,
 			'/agent-readiness',

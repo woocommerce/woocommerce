@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * and saves them in one call. Register it with a subclass as the
  * `ability_class`. The execute callback loads the primary object, checks the
  * `extensions` input against the field input schemas, changes the objects in memory,
- * writes the fields with their `set_callback`, runs the validators that
+ * writes the fields that have a `set_callback`, runs the validators that
  * ExtensibleAbilities::register_validator() adds, saves, and then prepares the
  * response. A rejection before the save saves nothing. When prepare_response()
  * returns a WP_Error, the change is already saved, so the error message names
@@ -44,8 +44,8 @@ defined( 'ABSPATH' ) || exit;
  * still inside the transaction, the syncs that ExtensibleAbilities::register_sync()
  * adds write what the saved objects imply elsewhere, such as the price range a
  * variable parent derives from its variations, or a row in a table of the
- * extension. A sync also sees the objects the call deleted and the input of
- * the call. A refusal there rolls the call back too. When a query hits a
+ * extension. A sync also sees the objects the call deleted and the field
+ * values the call sent. A refusal there rolls the call back too. When a query hits a
  * deadlock, a lock wait timeout or a snapshot conflict with a parallel call, the call rolls
  * back and fails with a WP_Error instead of reporting the write. A rollback drops the
  * object caches of the objects the call saved or deleted. It does not undo what a sync
@@ -258,8 +258,9 @@ abstract class ActionableAbility extends Ability {
 			$objects[] = array( $secondary[0], $fields, $resource_name );
 		}
 
+		$sent = array();
 		foreach ( $objects as list( $object, $fields ) ) {
-			$this->apply_fields( $object, $fields, $refused );
+			$this->apply_fields( $object, $fields, $sent, $refused );
 		}
 
 		$deleting = $core_refused ? array() : $this->get_objects_to_delete();
@@ -275,11 +276,13 @@ abstract class ActionableAbility extends Ability {
 				$object,
 				$resource_name,
 				array(
+					'ability'           => $this->get_name(),
 					'primary'           => $subject,
 					'deleting'          => in_array( $object, $deleting, true ),
 					'objects'           => $staged,
 					'objects_to_delete' => $deleting,
 				),
+				$sent,
 				$refused
 			);
 		}
@@ -289,9 +292,9 @@ abstract class ActionableAbility extends Ability {
 
 		try {
 			$saved = DatabaseTransaction::run(
-				function () use ( $subject, $objects, $input, $enabled ) {
+				function () use ( $subject, $objects, $sent, $enabled ) {
 					$saved = $this->save( $subject );
-					return ! is_wp_error( $saved ) && $enabled ? $this->sync( $objects, $input ) : $saved;
+					return ! is_wp_error( $saved ) && $enabled ? $this->sync( $objects, $sent ) : $saved;
 				}
 			);
 		} catch ( \Throwable $e ) {
@@ -313,35 +316,38 @@ abstract class ActionableAbility extends Ability {
 
 	/**
 	 * Run the syncs of each resource that the call saved or deleted, once,
-	 * after the last save and before the commit. A deleted or trashed object
-	 * is not in the saved list, even when it was the primary object.
+	 * after the last save and before the commit. A sync gets the saved objects
+	 * of its own resource. A deleted or trashed object is not in the saved
+	 * list, even when it was the primary object.
 	 *
-	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects, with their resources.
-	 * @param array                                               $input   Ability input.
+	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}>            $objects The primary object and the secondary objects, with their resources.
+	 * @param array<string, \SplObjectStorage<object, array<string, mixed>>> $sent    The sent field values of each namespace, from apply_fields().
 	 * @return \WP_Error|null A WP_Error when a sync refused, and then the call rolls back.
 	 */
-	private function sync( array $objects, array $input ): ?\WP_Error {
-		$deleted   = $this->get_deleted_objects();
-		$trashed   = $this->get_trashed_objects();
-		$gone      = array_map( static fn( $item ) => get_class( $item ) . ':' . $item->get_id(), array_merge( $deleted, $trashed ) );
-		$saved     = array_values(
-			array_filter(
-				array_column( $objects, 0 ),
-				static fn( $item ) => $item->get_id() > 0 && ! in_array( get_class( $item ) . ':' . $item->get_id(), $gone, true )
-			)
-		);
-		$resources = array_column( $objects, 2 );
-		if ( ! empty( $deleted ) || ! empty( $trashed ) ) {
-			$resources[] = $this->get_resource();
+	private function sync( array $objects, array $sent ): ?\WP_Error {
+		$deleted = $this->get_deleted_objects();
+		$trashed = $this->get_trashed_objects();
+		$gone    = array_map( static fn( $item ) => get_class( $item ) . ':' . $item->get_id(), array_merge( $deleted, $trashed ) );
+		$saved   = array();
+		$own     = array();
+		foreach ( $objects as list( $object, , $resource_name ) ) {
+			$own[ $resource_name ] ??= array();
+			if ( $object->get_id() > 0 && ! in_array( get_class( $object ) . ':' . $object->get_id(), $gone, true ) ) {
+				$saved[]                 = $object;
+				$own[ $resource_name ][] = $object;
+			}
 		}
 		$context = array(
+			'ability' => $this->get_name(),
+			'primary' => $objects[0][0],
+			'objects' => $saved,
 			'deleted' => array_values( $deleted ),
 			'trashed' => array_values( $trashed ),
-			'input'   => $input,
 		);
-		foreach ( array_unique( $resources ) as $resource_name ) {
+		foreach ( $own as $resource_name => $resource_saved ) {
 			foreach ( ExtensibleAbilities::get_syncs( $resource_name ) as $args ) {
-				$rejected = self::run_callback( $args['callback'], array( $saved, $this, $context ), array( 'namespace' => $args['namespace'] ) );
+				$context['fields'] = self::get_sent_fields( $sent, $args['namespace'] );
+				$rejected          = self::run_callback( $args['callback'], array( $resource_saved, $context ), array( 'namespace' => $args['namespace'] ) );
 				if ( null !== $rejected ) {
 					return $rejected;
 				}
@@ -450,7 +456,7 @@ abstract class ActionableAbility extends Ability {
 				$args = $candidates[ $field ] ?? null;
 				if ( null === $args ) {
 					$refusals[] = self::describe_unknown_field( $candidates, (string) $namespace, (string) $field );
-				} elseif ( ! isset( $args['set_callback'] ) ) {
+				} elseif ( ! isset( $args['input_schema'] ) ) {
 					/* translators: 1: Extension namespace. 2: Field name. */
 					$refusals[] = sprintf( __( 'The extension field "%1$s.%2$s" is read-only. Remove it from the input.', 'woocommerce' ), $namespace, $field );
 				} else {
@@ -492,7 +498,7 @@ abstract class ActionableAbility extends Ability {
 	 * @return string
 	 */
 	private static function describe_unknown_field( array $fields, string $extension_namespace, string $field ): string {
-		$writable = array_keys( array_filter( $fields, static fn( array $args ): bool => isset( $args['set_callback'] ) ) );
+		$writable = array_keys( array_filter( $fields, static fn( array $args ): bool => isset( $args['input_schema'] ) ) );
 		if ( empty( $writable ) ) {
 			/* translators: 1: Extension namespace. 2: Field name. */
 			return sprintf( __( 'The extension namespace "%1$s" has no field "%2$s", and it has no fields you can write. Remove "%1$s.%2$s" from the input.', 'woocommerce' ), $extension_namespace, $field );
@@ -531,7 +537,7 @@ abstract class ActionableAbility extends Ability {
 		foreach ( $values as $namespace => $fields ) {
 			foreach ( (array) $fields as $field => $value ) {
 				$args = $registered[ $namespace ][ $field ] ?? array();
-				if ( ! isset( $args['set_callback'] ) ) {
+				if ( ! isset( $args['input_schema'] ) ) {
 					return new \WP_Error(
 						'woocommerce_ability_field_not_writable',
 						/* translators: 1: Extension namespace. 2: Field name. */
@@ -556,14 +562,16 @@ abstract class ActionableAbility extends Ability {
 
 	/**
 	 * Write the checked values to the object in memory with the set_callback
-	 * of each field, also after one rejects its value. Each rejection goes into
-	 * the given errors, as add_refusal() describes.
+	 * of each field that has one, also after one rejects its value. Each
+	 * rejection goes into the given errors, as add_refusal() describes. Each
+	 * value that was not rejected goes into the sent values of its namespace.
 	 *
-	 * @param \WC_Data  $subject Object to change.
-	 * @param array     $updates Pairs of field arguments and value from prepare_fields().
-	 * @param \WP_Error $refused Collects the refusals, including a field that does not apply to the object.
+	 * @param \WC_Data                                                       $subject Object to change.
+	 * @param array                                                          $updates Pairs of field arguments and value from prepare_fields().
+	 * @param array<string, \SplObjectStorage<object, array<string, mixed>>> $sent    Collects the sent values, as get_sent_fields() describes.
+	 * @param \WP_Error                                                      $refused Collects the refusals, including a field that does not apply to the object.
 	 */
-	private function apply_fields( $subject, array $updates, \WP_Error $refused ): void {
+	private function apply_fields( $subject, array $updates, array &$sent, \WP_Error $refused ): void {
 		foreach ( $updates as $param => list( $args, $value ) ) {
 			if ( ! ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
 				$rejected = new \WP_Error(
@@ -578,26 +586,58 @@ abstract class ActionableAbility extends Ability {
 					array( 'status' => 400 )
 				);
 			} else {
-				$rejected = self::run_callback( $args['set_callback'], array( $subject, $value ), array( 'field' => $param ) );
+				$rejected = isset( $args['set_callback'] ) ? self::run_callback( $args['set_callback'], array( $subject, $value ), array( 'field' => $param ) ) : null;
 			}
+			list( , $namespace, $field ) = explode( '.', $param, 3 );
 			if ( null !== $rejected ) {
-				self::add_refusal( $rejected, explode( '.', $param )[1], $refused );
+				self::add_refusal( $rejected, $namespace, $refused );
+			} else {
+				$fields             = self::get_sent_fields( $sent, $namespace );
+				$fields[ $subject ] = $fields[ $subject ] + array( $field => $value );
 			}
 		}
+	}
+
+	/**
+	 * The `fields` context of one namespace: a map from each object of the call
+	 * to the `field => value` pairs that the call sent for it in that namespace.
+	 * It gives an empty array for any other object. PHP 7.4 has no WeakMap, so
+	 * the map is an SplObjectStorage.
+	 *
+	 * @param array<string, \SplObjectStorage<object, array<string, mixed>>> $sent      The maps of the call, keyed by namespace. A missing one is added.
+	 * @param string                                                         $extension Namespace of the field or callback.
+	 * @return \SplObjectStorage<object, array<string, mixed>>
+	 */
+	private static function get_sent_fields( array &$sent, string $extension ): \SplObjectStorage {
+		$sent[ $extension ] ??= new class() extends \SplObjectStorage {
+			/**
+			 * The sent fields of an object, or an empty array.
+			 *
+			 * @param object $subject Object.
+			 * @return array
+			 */
+			#[\ReturnTypeWillChange]
+			public function offsetGet( $subject ) {
+				return parent::offsetExists( $subject ) ? parent::offsetGet( $subject ) : array();
+			}
+		};
+		return $sent[ $extension ];
 	}
 
 	/**
 	 * Run every validator of a resource on the changed object, also after a
 	 * field or another validator refuses.
 	 *
-	 * @param \WC_Data  $subject       Changed object.
-	 * @param string    $resource_name Resource of the object.
-	 * @param array     $context       The primary object of the call, whether the call deletes or trashes the object, the objects the call saves, and the objects it deletes or trashes.
-	 * @param \WP_Error $refused       Collects the refusals.
+	 * @param \WC_Data                                                       $subject       Changed object.
+	 * @param string                                                         $resource_name Resource of the object.
+	 * @param array                                                          $context       The name of the ability, the primary object of the call, whether the call deletes or trashes the object, the objects the call saves, and the objects it deletes or trashes.
+	 * @param array<string, \SplObjectStorage<object, array<string, mixed>>> $sent          The sent field values of each namespace, from apply_fields().
+	 * @param \WP_Error                                                      $refused       Collects the refusals.
 	 */
-	private function validate( $subject, string $resource_name, array $context, \WP_Error $refused ): void {
+	private function validate( $subject, string $resource_name, array $context, array $sent, \WP_Error $refused ): void {
 		foreach ( ExtensibleAbilities::get_validators( $resource_name ) as $args ) {
-			$rejected = self::run_callback( $args['callback'], array( $subject, $this, $context ), array( 'namespace' => $args['namespace'] ) );
+			$context['fields'] = self::get_sent_fields( $sent, $args['namespace'] );
+			$rejected          = self::run_callback( $args['callback'], array( $subject, $context ), array( 'namespace' => $args['namespace'] ) );
 			if ( null !== $rejected ) {
 				self::add_refusal( $rejected, $args['namespace'], $refused );
 			}

@@ -146,7 +146,12 @@ class SupportReport {
 			'Check status: ' . $state,
 		);
 		if ( null !== $report && ! empty( $report['truncated'] ) ) {
-			$lines[] = sprintf( 'Checked the %s products you changed most recently.', ProductScan::PRODUCT_LIMIT );
+			$count   = (int) ( $report['bestsellers_count'] ?? 0 );
+			$lines[] = $count >= ProductScan::PRODUCT_LIMIT
+				? sprintf( 'Checked %s bestsellers.', ProductScan::PRODUCT_LIMIT )
+				: ( ! empty( $report['bestsellers_first'] )
+					? sprintf( 'Checked %s products: bestsellers first, then the most recently changed.', ProductScan::PRODUCT_LIMIT )
+					: sprintf( 'Checked the %s products you changed most recently.', ProductScan::PRODUCT_LIMIT ) );
 		}
 		return $lines;
 	}
@@ -211,14 +216,16 @@ class SupportReport {
 			$lines[] = 'Not checked yet';
 			return $lines;
 		}
-		$shown = $this->readiness_page->shown_check_ids( $report, $live );
+		$shown    = $this->readiness_page->shown_check_ids( $report, $live );
+		$launched = (bool) ( array_column( $live, 'ok', 'id' )['launched'] ?? true );
+		$was_live = ReadinessCheckPage::checked_while_live( $report );
 		if ( ReadinessCheckPage::none_ran( array_values( array_filter( $scanned, static fn( array $check ): bool => in_array( $check['id'], $shown, true ) ) ) ) ) {
-			$copy    = ReadinessCheckPage::cant_check_copy( (bool) ( array_column( $live, 'ok', 'id' )['launched'] ?? true ) );
+			$copy    = ReadinessCheckPage::cant_check_copy( $launched, $was_live );
 			$lines[] = $copy[0] . '. ' . $copy[1];
 			$lines[] = '';
 		}
 		foreach ( $scanned as $check ) {
-			$line = self::check_line( $check, ReadinessCheckPage::failing_text( $check ) );
+			$line = self::check_line( $check, ReadinessCheckPage::failing_text( $check ), $launched, $was_live );
 			if ( ! in_array( $check['id'], $shown, true ) ) {
 				$line .= ' (not shown on the page)';
 			}
@@ -230,12 +237,19 @@ class SupportReport {
 	/**
 	 * One check: status, name and id, then what was found when it fails, where it was seen and what the store answered.
 	 *
-	 * @param array<string, mixed> $check Store check.
-	 * @param string               $found What was found, shown when it fails.
+	 * A scanned check with no result says Not checked yet, and why, when the page shows it that way.
+	 *
+	 * @param array<string, mixed> $check    Store check.
+	 * @param string               $found    What was found, shown when it fails.
+	 * @param bool                 $launched Whether the store is launched now; a scanned check's status depends on it.
+	 * @param bool|null            $was_live Whether the store was live when it was checked; null for setup steps.
 	 */
-	private static function check_line( array $check, string $found ): string {
+	private static function check_line( array $check, string $found, bool $launched = true, ?bool $was_live = true ): string {
+		$unchecked = null === $check['ok'] && empty( $check['pending'] ) ? ReadinessCheckPage::unchecked_copy( $check, $launched, $was_live ) : array( false, '' );
 		if ( ! empty( $check['pending'] ) ) {
 			$status = 'Not available yet';
+		} elseif ( $unchecked[0] ) {
+			$status = 'Not checked yet. ' . $unchecked[1];
 		} elseif ( null === $check['ok'] ) {
 			$status = 'Couldn’t check';
 		} else {
@@ -304,7 +318,7 @@ class SupportReport {
 				$line .= ' ' . sprintf( 1 === $count ? '%s product' : '%s products', $count );
 				if ( array() !== $ids ) {
 					_prime_post_caches( $ids, false, false );
-					$named = array_map( static fn( int $id ): string => sprintf( '%d (%s)', $id, wp_strip_all_tags( get_the_title( $id ) ) ), $ids );
+					$named = array_map( static fn( int $id ): string => sprintf( '%d (%s)', $id, ReadinessCheckPage::product_name( $id ) ), $ids );
 					$line .= '. Products: ' . implode( ', ', $named );
 				}
 			}

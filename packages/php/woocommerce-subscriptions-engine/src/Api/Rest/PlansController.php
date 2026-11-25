@@ -247,8 +247,12 @@ final class PlansController extends WP_REST_Controller {
 			}
 		}
 
-		$plans = $this->plan_repository->query( $args );
-		$total = $this->plan_repository->count( $args );
+		try {
+			$plans = $this->plan_repository->query( $args );
+			$total = $this->plan_repository->count( $args );
+		} catch ( RuntimeException $e ) {
+			return $this->read_failed_error( $e );
+		}
 
 		$response = new WP_REST_Response(
 			array_map(

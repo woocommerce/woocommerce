@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Abilities;
 
 use Automattic\WooCommerce\Internal\Utilities\StagedMethod;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -21,10 +22,11 @@ defined( 'ABSPATH' ) || exit;
  * object of that resource returns the field values under
  * `extensions.<namespace>.<field>`, and lists the fields in its output schema.
  * An ActionableAbility writes the same `extensions` input to the fields that
- * have a `set_callback`, runs the validators of the resource, and saves
+ * have an `input_schema`, runs the validators of the resource, and saves
  * the object one time.
  * An extension also registers a query filter, which the list ability of the
  * resource accepts under `filters.extensions.<namespace>.<filter>`.
+ * And it registers an order email that the order-send-email ability can send.
  *
  * The API is experimental while the `extensible_abilities` feature exists.
  *
@@ -76,6 +78,13 @@ class ExtensibleAbilities {
 	 * @var array<string, \SplObjectStorage<object, array<string, mixed>>>
 	 */
 	private static array $primed = array();
+
+	/**
+	 * Order emails that the order-send-email ability can send, keyed by email name.
+	 *
+	 * @var array<string, array{email_class: string, description: string, statuses: array<int, string>, trigger_callback: callable|null}>
+	 */
+	private static array $order_emails = array();
 
 	/**
 	 * Whether the store enabled the experimental feature.
@@ -136,8 +145,13 @@ class ExtensibleAbilities {
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_init` action. A call after that action is refused.
 	 * The resource must be registered with `register_resource()` in the earlier `woocommerce_extensible_abilities_resources_init` action.
-	 * A field declares `get_callback` and `output_schema`, `set_callback` and `input_schema`, or both pairs. The
-	 * first pair makes it readable and the second makes it writable. An incomplete pair is refused.
+	 * A field declares `get_callback` and `output_schema` to be readable, and `input_schema` to be writable.
+	 * A `set_callback` is optional on a writable field, and it is refused without `input_schema`.
+	 *
+	 * There are two kinds of writable field. A field kept on the object, such as a meta value, has a
+	 * `set_callback` that stages the value, and Core saves it with the object. A field kept elsewhere, such
+	 * as a row in a table of the extension, has no `set_callback`: a sync that register_sync() adds writes
+	 * the value from `$context['fields']`.
 	 *
 	 * @since 11.3.0
 	 *
@@ -160,9 +174,12 @@ class ExtensibleAbilities {
 	 *                                  WooCommerce also reads, because some clients refuse it.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
-	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
-	 *                                  The abilities leave the field out of the other objects and refuse a write
-	 *                                  to them. Omit it for every type.
+	 *                                  `line_item`, `shipping`, `fee` and `coupon` for an order item. The object
+	 *                                  must have a `get_type()` method.
+	 *                                  The abilities leave the field out of the other objects, and an ability
+	 *                                  that writes the resource refuses a write to them. Omit it for every type:
+	 *                                  an `order_item` field without it is then read on product, shipping, fee
+	 *                                  and coupon lines, so its `get_callback` must accept each of them.
 	 *     @type callable $get_callback Optional. Receives the object and the entry that the prime callback of the
 	 *                                  same namespace returned for it, and returns the value. The entry is null
 	 *                                  when no list was loaded for the object, or when the prime callback failed
@@ -182,18 +199,21 @@ class ExtensibleAbilities {
 	 *                                  callback must not return a list for an `object` or a `date-time` without
 	 *                                  a UTC offset: the schema check accepts them, and a strict client refuses
 	 *                                  the whole result.
-	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. It needs
+	 *     @type array    $input_schema Optional. JSON schema of the value that the client sends. It makes the
+	 *                                  field writable. It needs
 	 *                                  one `type` name, or an `anyOf` where each branch has one `type` name. A
 	 *                                  list of types is refused, at the top level and in every nested schema under
 	 *                                  the keywords listed for `output_schema`, because some clients refuse it: a
 	 *                                  nullable value uses `[{"type":"string"},{"type":"null"}]` as its `anyOf`.
 	 *                                  Core publishes it as declared. A value can be null only where it declares
-	 *                                  null. Required with `set_callback`.
+	 *                                  null.
 	 *     @type callable $set_callback Optional. Receives the object and the value, and changes the object
 	 *                                  in memory, when an ability creates or updates the object. It returns a
 	 *                                  WP_Error to reject the value, and then nothing is saved. It also runs
-	 *                                  after Core refuses another value of the primary object. A field without
-	 *                                  it cannot be written. Required with `input_schema`. Rules:
+	 *                                  after Core refuses another value of the primary object. It needs
+	 *                                  `input_schema`. Without it, Core only checks the value against
+	 *                                  `input_schema`, and validators and syncs read it from
+	 *                                  `$context['fields']`. Rules:
 	 *                                  1. It only sets values in memory. It does not save, send email
 	 *                                     or make HTTP requests.
 	 *                                  2. It receives the value already cast to `input_schema`.
@@ -243,7 +263,7 @@ class ExtensibleAbilities {
 		$readable = isset( $args['get_callback'] ) || isset( $args['output_schema'] );
 		$writable = isset( $args['set_callback'] ) || isset( $args['input_schema'] );
 		if ( ! $readable && ! $writable ) {
-			wc_doing_it_wrong( __METHOD__, 'A field needs "get_callback" and "output_schema", "set_callback" and "input_schema", or both pairs.', '11.4.0' );
+			wc_doing_it_wrong( __METHOD__, 'A field needs "get_callback" and "output_schema", "input_schema", or both.', '11.4.0' );
 			return;
 		}
 		if ( $readable ) {
@@ -261,12 +281,12 @@ class ExtensibleAbilities {
 			}
 		}
 		if ( $writable ) {
-			if ( ! is_callable( $args['set_callback'] ?? null ) ) {
-				wc_doing_it_wrong( __METHOD__, 'The "set_callback" argument must be callable, and a field with an "input_schema" needs it.', '11.4.0' );
+			if ( isset( $args['set_callback'] ) && ! is_callable( $args['set_callback'] ) ) {
+				wc_doing_it_wrong( __METHOD__, 'The "set_callback" argument must be callable.', '11.4.0' );
 				return;
 			}
 			if ( ! is_array( $args['input_schema'] ?? null ) || ! self::input_schema_has_type( $args['input_schema'] ) ) {
-				wc_doing_it_wrong( __METHOD__, 'The "input_schema" argument must be an array with one "type" name, or with an "anyOf" where each branch has one "type" name. For a nullable field, use an "anyOf" with a {"type":"null"} branch instead of a list of types.', '11.4.0' );
+				wc_doing_it_wrong( __METHOD__, 'A field with a "set_callback" needs an "input_schema". The "input_schema" argument must be an array with one "type" name, or with an "anyOf" where each branch has one "type" name. For a nullable field, use an "anyOf" with a {"type":"null"} branch instead of a list of types.', '11.4.0' );
 				return;
 			}
 		}
@@ -644,9 +664,10 @@ class ExtensibleAbilities {
 	 *
 	 *     @type string   $resource  Resource that an ActionableAbility changes, such as `product`.
 	 *     @type string   $namespace Slug of the extension that owns the validator, such as `subscriptions`.
-	 *     @type callable $callback  Receives the changed object, the ability and `array $context`, after Core's
-	 *                               changes and the field callbacks, before the one save. A callback that only
-	 *                               needs the object or the ability can take fewer arguments.
+	 *     @type callable $callback  Receives the changed object and `array $context`, after Core's changes and
+	 *                               the field callbacks, before the one save.
+	 *                               `$context['ability']` is the name of the ability, such as
+	 *                               `woocommerce/product-update`.
 	 *                               `$context['primary']` is the primary object of the call. It differs from the
 	 *                               changed object when the object is a variation that the call saves through
 	 *                               its parent. On product-create that parent is not saved yet, so the variation
@@ -657,7 +678,11 @@ class ExtensibleAbilities {
 	 *                               the primary object first, with the field writes of all of them applied, so
 	 *                               a rule can compare a variation with the other variations of the same call.
 	 *                               `$context['objects_to_delete']` is every object the call deletes or
-	 *                               trashes. It returns a WP_Error to refuse the change, and then nothing is
+	 *                               trashes. `$context['fields']` is keyed by object: `$context['fields'][ $object ]`
+	 *                               is the `field => value` pairs that the call sent for that object, as
+	 *                               register_sync() describes. Read it for a value that no `set_callback`
+	 *                               stores on the object. A validator checks the final state of the object,
+	 *                               also when the call sent none of its fields. It returns a WP_Error to refuse the change, and then nothing is
 	 *                               saved. The other validators still run, and the client gets every refusal in
 	 *                               one error. The client sees the code prefixed with the namespace, as
 	 *                               `<namespace>:<code>`. A code that another validator in the same namespace
@@ -670,8 +695,6 @@ class ExtensibleAbilities {
 	 *                               their old values. Rules:
 	 *                               1. It only reads. It does not change the object, save, send email or
 	 *                                  make HTTP requests.
-	 *                               2. It checks the ability name when the extension's own abilities
-	 *                                  change the same resource.
 	 * }
 	 */
 	public static function register_validator( array $args ): void {
@@ -694,8 +717,8 @@ class ExtensibleAbilities {
 	 *
 	 * A sync registered for a resource runs only when an object of that resource
 	 * was saved, deleted or trashed in the call. It runs once per call, not once per
-	 * object. The saved objects can belong to more than one resource, so a sync
-	 * reads the objects it owns and ignores the rest.
+	 * object. It can run with no saved objects when a call only deletes, and then
+	 * it reads the deleted objects from the context.
 	 *
 	 * @since 11.4.0
 	 *
@@ -704,15 +727,29 @@ class ExtensibleAbilities {
 	 *
 	 *     @type string   $resource  Resource that an ActionableAbility saves, such as `product`.
 	 *     @type string   $namespace Slug of the extension that owns the sync, such as `subscriptions`.
-	 *     @type callable $callback  Receives `\WC_Data[] $saved`, the ActionableAbility and `array $context`.
-	 *                               `$saved` is every saved object of the call, the primary object first
-	 *                               unless the call deleted it.
+	 *     @type callable $callback  Receives `\WC_Data[] $saved` and `array $context`.
+	 *                               `$saved` is every saved object of the sync's own resource. The context
+	 *                               describes the whole call.
+	 *                               `$context['ability']` is the name of the ability, such as
+	 *                               `woocommerce/product-update`.
+	 *                               `$context['primary']` is the primary object of the call, also when it
+	 *                               belongs to another resource or the call deleted it.
+	 *                               `$context['objects']` is every saved object of the call, of every
+	 *                               resource, the primary object first unless the call deleted it.
 	 *                               `$context['deleted']` is every object the call deleted for good, as it
 	 *                               was before the delete, with its ID. `$context['trashed']` is every object
 	 *                               the call moved to the trash; it can be restored, so a sync keeps what a
-	 *                               restore needs. And
-	 *                               `$context['input']` is the input of the call, so a sync can skip work
-	 *                               when the call did not write its fields. It returns a WP_Error to
+	 *                               restore needs.
+	 *                               `$context['fields']` is keyed by object: `$context['fields'][ $object ]`
+	 *                               is the `field => value` pairs that the call sent for that object. It
+	 *                               holds only the fields of the callback's own namespace. Each value is the
+	 *                               sent value, cast to `input_schema` as the `set_callback` receives it, and
+	 *                               not what the `set_callback` stored. A sent null is kept, so use
+	 *                               `array_key_exists()` to tell "clear the value" from "not sent". A value
+	 *                               that was refused is left out. An object that got no fields, or is not in
+	 *                               the call, gives an empty array. A sync writes the data kept outside the
+	 *                               object from here, for every saved object and not only the first.
+	 *                               It returns a WP_Error to
 	 *                               refuse, and then every save of the call is undone. A thrown exception
 	 *                               refuses it too. The error gets the namespace in its data, and the 400
 	 *                               status when it has no status, as a validator's error does. A sync must not
@@ -842,6 +879,85 @@ class ExtensibleAbilities {
 			return (int) $subject->get_id();
 		}
 		return (int) ( $subject->term_id ?? $subject->comment_ID ?? $subject->ID ?? 0 );
+	}
+
+	/**
+	 * Register an order email that the `woocommerce/order-send-email` ability can send.
+	 *
+	 * Call it inside the `woocommerce_extensible_abilities_init` action. The ability accepts the email
+	 * as `<namespace>:<email>` only when the `extensible_abilities` feature is on. It lists the email
+	 * with its description and statuses in its input schema, so an agent can choose it.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param array $args {
+	 *     Order email arguments.
+	 *
+	 *     @type string   $namespace        Slug of the extension that owns the email, such as `deposits`.
+	 *     @type string   $email            Slug of the email inside the namespace, such as `payment-reminder`.
+	 *     @type string   $email_class      Key of the email in WC()->mailer()->get_emails(), usually its class name.
+	 *     @type string   $description      One sentence on what the email says and who gets it, for agents.
+	 *     @type string[] $statuses         Optional. Order statuses in which the email can be sent, without the
+	 *                                      `wc-` prefix. The ability refuses the email for an order with another
+	 *                                      status. Leave it out when the email can be sent in any status.
+	 *     @type callable $trigger_callback Optional. Receives the WC_Email and the order, and sends the email.
+	 *                                      Leave it out when `$email->trigger( $order_id, $order )` sends it.
+	 *                                      The ability checks that the email was sent through the
+	 *                                      `woocommerce_email_sent` action of that WC_Email.
+	 * }
+	 */
+	public static function register_order_email( array $args ): void {
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, 'Register an order email inside the woocommerce_extensible_abilities_init action, before the abilities build their schemas.', '11.5.0' );
+			return;
+		}
+		foreach ( array( 'namespace', 'email' ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', $key ), '11.5.0' );
+				return;
+			}
+		}
+		foreach ( array( 'email_class', 'description' ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === trim( $args[ $key ] ) ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" argument must be a non-empty string.', $key ), '11.5.0' );
+				return;
+			}
+		}
+		$statuses = $args['statuses'] ?? array();
+		if ( ! is_array( $statuses ) || count( array_filter( $statuses, 'is_string' ) ) !== count( $statuses ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "statuses" argument must be a list of order statuses.', '11.5.0' );
+			return;
+		}
+		if ( isset( $args['trigger_callback'] ) && ! is_callable( $args['trigger_callback'] ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "trigger_callback" argument must be callable.', '11.5.0' );
+			return;
+		}
+
+		$name = $args['namespace'] . ':' . $args['email'];
+		if ( isset( self::$order_emails[ $name ] ) ) {
+			wc_doing_it_wrong( __METHOD__, sprintf( 'The order email "%s" is already registered.', $name ), '11.5.0' );
+			return;
+		}
+
+		self::$order_emails[ $name ] = array(
+			'email_class'      => $args['email_class'],
+			'description'      => $args['description'],
+			'statuses'         => array_values( array_unique( array_map( array( OrderUtil::class, 'remove_status_prefix' ), $statuses ) ) ),
+			'trigger_callback' => $args['trigger_callback'] ?? null,
+		);
+	}
+
+	/**
+	 * Order emails that extensions registered, keyed by `<namespace>:<email>`. Empty when the feature is off.
+	 *
+	 * @internal
+	 *
+	 * @since 11.5.0
+	 *
+	 * @return array<string, array{email_class: string, description: string, statuses: array<int, string>, trigger_callback: callable|null}>
+	 */
+	public static function get_order_emails(): array {
+		return self::is_enabled() ? self::$order_emails : array();
 	}
 
 	/**
@@ -1030,7 +1146,7 @@ class ExtensibleAbilities {
 
 	/**
 	 * The schema of the `extensions` input of a resource. It lists the fields
-	 * that have a set_callback, each with its input schema as declared, and says
+	 * that have an input schema, each as declared, and says
 	 * which object types a field with `object_types` applies to. ActionableAbility adds it to the input schema of every
 	 * ability. An ability that writes other objects of the resource in the same
 	 * call, such as the variations of a product, adds it to their input too.
@@ -1051,7 +1167,7 @@ class ExtensibleAbilities {
 			$writable = array_filter(
 				null === $field_filter ? $fields : array_filter( $fields, $field_filter ),
 				static function ( array $args ): bool {
-					return isset( $args['set_callback'] );
+					return isset( $args['input_schema'] );
 				}
 			);
 			if ( empty( $writable ) ) {
