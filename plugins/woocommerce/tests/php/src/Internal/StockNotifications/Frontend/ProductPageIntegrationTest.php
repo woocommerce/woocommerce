@@ -199,6 +199,49 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render a visible form for the parent product when no variation can be bought, as the block shows no variation selector.
+	 */
+	public function test_form_is_rendered_for_parent_when_no_variation_can_be_bought(): void {
+		$fixtures         = new FixtureData();
+		$variable_product = $fixtures->get_variable_product(
+			array(),
+			array( $fixtures->get_product_attribute( 'color', array( 'red', 'blue' ) ) )
+		);
+		$product_id       = $variable_product->get_id();
+		foreach ( array( 'red-slug', 'blue-slug' ) as $color ) {
+			$fixtures->get_variation_product(
+				$product_id,
+				array( 'pa_color' => $color ),
+				array(
+					'regular_price' => 10,
+					'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
+				)
+			);
+		}
+		\WC_Product_Variable::sync( $product_id );
+		$this->go_to( get_permalink( $product_id ) );
+		$GLOBALS['product'] = wc_get_product( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertSame( 1, substr_count( $markup, 'class="wc_bis_form"' ), 'The Back in Stock form should render once.' );
+		$this->assertStringNotContainsString( 'form="wc-bis-form-', $markup, 'Without a variation selector there are no attributes to post.' );
+
+		$html = new \WP_HTML_Tag_Processor( $markup );
+		$html->next_tag( array( 'class_name' => 'wc_bis_form' ) );
+		$this->assertNull( $html->get_attribute( 'hidden' ), 'The form should be visible.' );
+		$this->assertNull( $html->get_attribute( 'data-wp-interactive' ), 'The form needs no Interactivity API store.' );
+
+		$posted_product_id = null;
+		while ( $html->next_tag( 'input' ) ) {
+			if ( 'wc_bis_product_id' === $html->get_attribute( 'name' ) ) {
+				$posted_product_id = $html->get_attribute( 'value' );
+			}
+		}
+		$this->assertSame( (string) $product_id, $posted_product_id, 'The sign-up should be for the parent product.' );
+	}
+
+	/**
 	 * @testdox Should not render the form for an Add to Cart + Options block of another product than the one being viewed.
 	 */
 	public function test_form_is_not_rendered_for_add_to_cart_with_options_block_of_another_product(): void {

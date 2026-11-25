@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Frontend;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
@@ -130,6 +131,13 @@ class ProductPageIntegration {
 		// The form of a variable product starts hidden until an out of stock variation is chosen.
 		if ( ! $product instanceof \WC_Product_Variable || ! $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ) || null === $html->get_attribute( 'hidden' ) ) {
 			return $block_content . $form;
+		}
+
+		// The block renders no variation selector when the product can't be bought, so offer sign-ups for the parent.
+		if ( AddToCartWithOptionsUtils::is_not_purchasable_product( $product ) ) {
+			$html->remove_attribute( 'hidden' );
+
+			return $block_content . $html->get_updated_html();
 		}
 
 		wp_enqueue_script_module( self::SCRIPT_MODULE );
