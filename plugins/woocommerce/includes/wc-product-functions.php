@@ -740,8 +740,7 @@ function wc_handle_product_start_scheduled_sale( $product_id ): void {
 		return;
 	}
 
-	// Compare the stored `_price`: the loaded price is already corrected for the sale dates when the product is read.
-	if ( (float) get_post_meta( $product->get_id(), '_price', true ) === (float) $product->get_sale_price( 'edit' ) ) {
+	if ( (float) $product->get_price( 'edit' ) === (float) $product->get_sale_price( 'edit' ) ) {
 		return;
 	}
 
@@ -776,8 +775,7 @@ function wc_handle_product_end_scheduled_sale( $product_id ): void {
 		return;
 	}
 
-	// Compare the stored `_price`: the loaded price is already corrected for the sale dates when the product is read.
-	if ( (float) get_post_meta( $product->get_id(), '_price', true ) === (float) $product->get_regular_price( 'edit' ) ) {
+	if ( (float) $product->get_price( 'edit' ) === (float) $product->get_regular_price( 'edit' ) ) {
 		return;
 	}
 
