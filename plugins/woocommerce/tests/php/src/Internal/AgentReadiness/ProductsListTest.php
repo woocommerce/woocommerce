@@ -338,7 +338,7 @@ class ProductsListTest extends WC_Unit_Test_Case {
 
 			$_GET[ ProductsList::FILTER_PARAM ] = 'missing_images';
 			$html                               = $notice();
-			$this->assertStringContainsString( 'Showing products from AI shopping health.', $html );
+			$this->assertStringContainsString( 'Showing only products from AI shopping health.', $html );
 			$this->assertStringContainsString( 'Show all products</a>', $html );
 			$this->assertStringContainsString( 'href="' . esc_url( admin_url( 'edit.php?post_type=product' ) ) . '"', $html, 'The link drops the filter' );
 
