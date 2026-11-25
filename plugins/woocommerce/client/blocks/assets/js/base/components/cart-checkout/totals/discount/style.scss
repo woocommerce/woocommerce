@@ -3,3 +3,9 @@
 	margin: $gap-smallest 0 0;
 	padding: 0;
 }
+
+// The mask only dims the coupons while one is removed. Its minimum height, which makes room for a spinner, would make
+// the row grow a little before it collapses.
+.wc-block-components-totals-discount .wc-block-components-loading-mask {
+	min-height: 0;
+}
