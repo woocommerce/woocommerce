@@ -1984,6 +1984,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 *           [{"stones":[{"name":"ruby"},{"carat":2}]}, "\"extensions.probe.dims[stones][1][carat]\" is not a key of this field. Remove it from the input. \"extensions.probe.dims[stones][1]\" accepts: name."]
 	 *           [{"gems":{"ruby":{"size_mm":2,"cut":1}}}, "\"extensions.probe.dims[gems][ruby][cut]\" is not a key of this field. Remove it from the input."]
 	 *           [{"bead":{"name":"jade","size_mm":2,"cut":1}}, "\"extensions.probe.dims[bead][cut]\" is not a key of this field. Remove it from the input."]
+	 *           [{"tier":{"b":1}}, "\"extensions.probe.dims[tier][b]\" is not a key of this field. Remove it from the input. \"extensions.probe.dims[tier]\" accepts: a."]
 	 *           [{"wood":{"oak":1}}, "extensions.probe.dims[wood] does not match the expected format. Reason: pine is a required property of extensions.probe.dims[wood]."]
 	 *
 	 * @param array  $dims    Value of the field.
@@ -2013,6 +2014,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 									'items' => $strict( array( 'name' => array( 'type' => 'string' ) ) ),
 								),
 								'bead'   => array( 'patternProperties' => array( '^size_' => array( 'type' => 'integer' ) ) ) + $strict( array( 'name' => array( 'type' => 'string' ) ) ),
+								'tier'   => array( 'anyOf' => array( array( 'anyOf' => array( $strict( array( 'a' => array( 'type' => 'integer' ) ) ) ) ), array( 'type' => 'null' ) ) ),
 								'gems'   => array(
 									'oneOf' => array(
 										array(

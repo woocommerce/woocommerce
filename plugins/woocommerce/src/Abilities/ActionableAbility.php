@@ -519,9 +519,9 @@ abstract class ActionableAbility extends Ability {
 			}
 			$refused_by = array();
 			foreach ( $schema[ $keyword ] as $branch ) {
-				// WordPress gives a branch without a type the type of its parent, and warns when there is none.
+				// Validating a branch with no type and no anyOf or oneOf would repeat the WordPress warnings about the missing type.
 				$branch = is_array( $branch ) ? $branch + array_intersect_key( $schema, array( 'type' => true ) ) : array();
-				if ( ! isset( $branch['type'] ) ) {
+				if ( ! isset( $branch['type'] ) && ! isset( $branch['anyOf'] ) && ! isset( $branch['oneOf'] ) ) {
 					return null;
 				}
 				$valid = rest_validate_value_from_schema( $value, $branch, $path );
