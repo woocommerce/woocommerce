@@ -13,6 +13,7 @@ import { trackReadiness, viewedProps, type Surface } from './tracks';
 
 export const VIEW_PATH = '/wc/v3/agent-readiness/view';
 export const SCAN_PATH = '/wc/v3/agent-readiness/scan';
+export const DAILY_CHECKS_PATH = '/wc/v3/agent-readiness/daily-checks';
 
 /**
  * How often the view is read again while a check is pending, so its results show once it finishes.
@@ -40,6 +41,8 @@ export function useReadinessView(
 	// True when the results didn't load, so the page shows no Check again and offers Reload page.
 	const [ reload, setReload ] = useState( false );
 	const [ running, setRunning ] = useState( false );
+	// True while the daily check switch is being saved, so a second click can't race the first.
+	const [ savingDailyChecks, setSavingDailyChecks ] = useState( false );
 	const viewed = useRef( false );
 	const pendingSince = useRef< number | null >( null );
 	// True after a view has been shown: poll failures must not spam Tracks, replace the view or stop polling.
@@ -132,5 +135,51 @@ export function useReadinessView(
 		}
 	}, [ load, surface, view?.checked ] );
 
-	return { view, error, reload, running, runCheck };
+	// Shows the switch in its new position at once, then reads the view again: some rows say when checks run next.
+	const setDailyChecks = useCallback(
+		async ( enabled: boolean ) => {
+			setView(
+				( current ) => current && { ...current, daily_checks: enabled }
+			);
+			setSavingDailyChecks( true );
+			try {
+				await apiFetch( {
+					path: DAILY_CHECKS_PATH,
+					method: 'POST',
+					data: { enabled },
+				} );
+				await load();
+			} catch {
+				if ( ! mounted.current ) {
+					return;
+				}
+				trackReadiness( 'error', { surface, action: 'daily_checks' } );
+				setView(
+					( current ) =>
+						current && { ...current, daily_checks: ! enabled }
+				);
+				setError(
+					__(
+						'Your change wasn’t saved. Try again in a few minutes.',
+						'woocommerce'
+					)
+				);
+			} finally {
+				if ( mounted.current ) {
+					setSavingDailyChecks( false );
+				}
+			}
+		},
+		[ load, surface ]
+	);
+
+	return {
+		view,
+		error,
+		reload,
+		running,
+		runCheck,
+		setDailyChecks,
+		savingDailyChecks,
+	};
 }

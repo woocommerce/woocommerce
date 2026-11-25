@@ -13,7 +13,8 @@ defined( 'ABSPATH' ) || exit;
  * and keeps the stored report fresh with one run a day.
  *
  * Each run schedules the next one for the coming night, on the store's clock
- * (next_daily_run()), so nothing is queued until a
+ * (next_daily_run()), unless the merchant turned daily checks off (DAILY_OPTION),
+ * so nothing is queued until a
  * merchant or the REST API asks for the first scan, and no request pays for a
  * scheduling check. The next run is scheduled before the scan, so a scan that
  * fails or times out does not end the chain. Cancelling the scheduled actions
@@ -45,6 +46,11 @@ class ScheduledScan implements RegisterHooksInterface {
 	public const RETRY_AFTER = 10 * MINUTE_IN_SECONDS;
 
 	public const GROUP = 'woocommerce-agent-readiness';
+
+	/**
+	 * Option that holds whether the store is checked every day: 'no' when the merchant turned it off.
+	 */
+	public const DAILY_OPTION = 'woocommerce_agent_readiness_daily_scan';
 
 	/**
 	 * Hours of the night, on the store's clock, between which the daily scan is scheduled.
@@ -180,11 +186,38 @@ class ScheduledScan implements RegisterHooksInterface {
 	 */
 	public function run(): void {
 		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
-		as_schedule_single_action( self::next_daily_run(), self::DAILY_HOOK, array(), self::GROUP );
+		if ( self::daily_enabled() ) {
+			as_schedule_single_action( self::next_daily_run(), self::DAILY_HOOK, array(), self::GROUP );
+		}
 
 		$this->remote_rules->refresh( array_keys( $this->agent_readiness->get_default_rules() ) );
 		as_unschedule_all_actions( self::NEXT_HOOK );
 		as_schedule_single_action( time(), self::NEXT_HOOK, array( $this->agent_readiness->start_refresh() ), self::GROUP );
+	}
+
+	/**
+	 * Whether the store is checked every day. On unless the merchant turned it off.
+	 *
+	 * @since 11.4.0
+	 */
+	public static function daily_enabled(): bool {
+		return 'no' !== get_option( self::DAILY_OPTION, 'yes' );
+	}
+
+	/**
+	 * Turn the daily scan on or off. Off removes the scheduled run, and checks only run on request.
+	 * On schedules the next run once the store has been checked: before the first check nothing is queued.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param bool $enable Whether to check the store every day.
+	 */
+	public function set_daily_enabled( bool $enable ): void {
+		update_option( self::DAILY_OPTION, $enable ? 'yes' : 'no', false );
+		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
+		if ( $enable && null !== $this->agent_readiness->get_cached_report() ) {
+			as_schedule_single_action( self::next_daily_run(), self::DAILY_HOOK, array(), self::GROUP );
+		}
 	}
 
 	/**

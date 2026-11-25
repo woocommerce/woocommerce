@@ -11,6 +11,7 @@ import {
 	POLL_FOR_MS,
 	POLL_MS,
 	SCAN_PATH,
+	DAILY_CHECKS_PATH,
 	useReadinessView,
 } from '../use-readiness-view';
 import { RunStatus } from '../components/run-status';
@@ -188,6 +189,31 @@ describe( 'useReadinessView', () => {
 		expect( recordEvent ).not.toHaveBeenCalledWith(
 			'sales_readiness_viewed',
 			expect.anything()
+		);
+	} );
+
+	it( 'saves the daily check switch and reads the view again; a failed save puts the switch back', async () => {
+		mockFetch
+			.mockResolvedValueOnce( { ...view( false ), daily_checks: true } )
+			.mockResolvedValueOnce( { enabled: false } )
+			.mockResolvedValueOnce( { ...view( false ), daily_checks: false } )
+			.mockRejectedValueOnce( new Error( 'offline' ) );
+		const { result } = renderHook( () => useReadinessView( 'page' ) );
+		await act( async () => jest.advanceTimersByTime( 0 ) );
+
+		await act( async () => result.current.setDailyChecks( false ) );
+		expect( mockFetch ).toHaveBeenCalledWith( {
+			path: DAILY_CHECKS_PATH,
+			method: 'POST',
+			data: { enabled: false },
+		} );
+		expect( result.current.view?.daily_checks ).toBe( false );
+		expect( result.current.error ).toBeNull();
+
+		await act( async () => result.current.setDailyChecks( true ) );
+		expect( result.current.view?.daily_checks ).toBe( false );
+		expect( result.current.error ).toBe(
+			'Your change wasn’t saved. Try again in a few minutes.'
 		);
 	} );
 } );

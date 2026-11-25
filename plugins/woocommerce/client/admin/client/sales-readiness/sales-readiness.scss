@@ -436,6 +436,12 @@ body:has(.wc-sales-readiness) {
 		gap: 2px;
 	}
 
+	+ .wc-sales-readiness-checked__daily {
+		margin-top: var(--wpds-dimension-gap-lg);
+		padding-top: var(--wpds-dimension-gap-lg);
+		border-top: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+	}
+
 	> .wc-sales-readiness-checked__running {
 		flex-direction: row;
 		align-items: center;

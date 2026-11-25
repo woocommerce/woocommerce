@@ -640,6 +640,54 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox POST daily-checks turns the daily check off, which removes the scheduled run, and on again, which schedules it for a checked store.
+	 */
+	public function test_daily_checks_switch(): void {
+		\WC_Helper_Product::create_simple_product();
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+		$scheduled = wc_get_container()->get( ScheduledScan::class );
+		$scheduled->set_daily_enabled( true );
+		$this->assertIsInt( as_next_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+
+		$response = $this->dispatch_daily_checks( false );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertFalse( $response->get_data()['enabled'] );
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+
+		$scheduled->run();
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ), 'A check run by hand does not bring the daily one back' );
+
+		$response = $this->dispatch_daily_checks( true );
+		$this->assertTrue( $response->get_data()['enabled'] );
+		$this->assertSame( ScheduledScan::next_daily_run(), as_next_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+	}
+
+	/**
+	 * @testdox Before the first check, turning daily checks on queues nothing, and a user without manage_woocommerce can't change the setting.
+	 */
+	public function test_daily_checks_switch_before_first_check_and_permission(): void {
+		delete_option( AgentReadiness::REPORT_OPTION );
+
+		$this->assertTrue( $this->dispatch_daily_checks( true )->get_data()['enabled'] );
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+		$this->assertSame( 403, $this->dispatch_daily_checks( false )->get_status() );
+		$this->assertTrue( ScheduledScan::daily_enabled() );
+	}
+
+	/**
+	 * Send POST wc/v3/agent-readiness/daily-checks.
+	 *
+	 * @param bool $enabled Whether to check the store every day.
+	 */
+	private function dispatch_daily_checks( bool $enabled ): \WP_REST_Response {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/daily-checks' );
+		$request->set_param( 'enabled', $enabled );
+		return $this->server->dispatch( $request );
+	}
+
+	/**
 	 * Send POST wc/v3/agent-readiness/ucp.
 	 *
 	 * @param bool $enabled Whether to turn UCP on.
