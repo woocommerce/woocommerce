@@ -101,6 +101,9 @@ class Proxy_Speed_Module {
 
 			$response = self::handle_events( (string) file_get_contents( 'php://input' ) );
 			WC_Analytics_Tracking::send_batched_pixels();
+
+			// Only on success: after an error, the handler empties a cache that may have caused it.
+			self::keep_autoloader_cache();
 		} catch ( \Throwable $e ) {
 			error_log( 'WooCommerce Analytics Proxy Speed Module: Uncaught error while handling the request: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			$response = array(
@@ -119,8 +122,6 @@ class Proxy_Speed_Module {
 		}
 
 		echo wp_json_encode( $response['data'], JSON_UNESCAPED_SLASHES );
-
-		self::keep_autoloader_cache();
 
 		return true;
 	}
