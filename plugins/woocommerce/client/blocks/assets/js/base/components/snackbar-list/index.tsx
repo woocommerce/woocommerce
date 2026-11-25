@@ -3,7 +3,12 @@
  */
 import clsx from 'clsx';
 import type { NoticeType } from '@woocommerce/types';
-import { createRef, useRef, type RefObject } from '@wordpress/element';
+import {
+	cloneElement,
+	createRef,
+	useRef,
+	type RefObject,
+} from '@wordpress/element';
 import { whenAnimationsEnd } from '@woocommerce/base-utils';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
@@ -36,6 +41,9 @@ const SnackbarList = ( {
 		new Map< string, RefObject< HTMLDivElement > >()
 	);
 
+	// A snackbar that the shopper dismisses goes at once. Only the timeout plays the exit.
+	const dismissed = useRef( new WeakSet< RefObject< HTMLDivElement > >() );
+
 	const removeNotice = ( notice: NoticeType ) => () =>
 		onRemove( notice?.id || '' );
 
@@ -48,7 +56,14 @@ const SnackbarList = ( {
 			tabIndex={ -1 }
 			ref={ listRef }
 		>
-			<TransitionGroup>
+			<TransitionGroup
+				// Applies to the snackbars that leave too, which keep the props of their last render.
+				childFactory={ ( child ) =>
+					cloneElement( child, {
+						exit: ! dismissed.current.has( child.props.nodeRef ),
+					} )
+				}
+			>
 				{ notices.map( ( notice ) => {
 					const { content, ...restNotice } = notice;
 					const snackbarRef =
@@ -72,6 +87,9 @@ const SnackbarList = ( {
 							<Snackbar
 								{ ...restNotice }
 								onRemove={ removeNotice( notice ) }
+								onDismiss={ () =>
+									dismissed.current.add( snackbarRef )
+								}
 								listRef={ listRef }
 								containerRef={ snackbarRef }
 							>
