@@ -650,4 +650,40 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 'ZZ', $sut->get_customs_country_of_origin( 'edit' ), 'An invalid stored country should be read without throwing.' );
 		$this->assertSame( $description, $sut->get_customs_description( 'edit' ), 'An over-long stored description should be read without throwing.' );
 	}
+
+	/**
+	 * @testdox Deleting a product that was never saved returns false.
+	 */
+	public function test_delete_returns_false_for_unsaved_product(): void {
+		$product = new WC_Product_Simple();
+
+		$this->assertFalse( $product->delete(), 'Trashing an unsaved product should report failure.' );
+		$this->assertFalse( $product->delete( true ), 'Permanently deleting an unsaved product should report failure.' );
+	}
+
+	/**
+	 * @testdox Permanently deleting a product through the object that trashed it returns false and leaves the product in the trash.
+	 */
+	public function test_force_delete_after_trash_returns_false(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$id      = $product->get_id();
+
+		$this->assertTrue( $product->delete(), 'Trashing should succeed.' );
+		$this->assertSame( 0, $product->get_id(), 'Trashing should clear the object ID.' );
+
+		$this->assertFalse( $product->delete( true ), 'Deleting through an object without an ID should report failure.' );
+		$this->assertSame( ProductStatus::TRASH, get_post_status( $id ), 'The product should stay in the trash.' );
+	}
+
+	/**
+	 * @testdox A trashed product can be permanently deleted after loading it again.
+	 */
+	public function test_force_delete_after_trash_with_reloaded_product(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$id      = $product->get_id();
+		$product->delete();
+
+		$this->assertTrue( wc_get_product( $id )->delete( true ), 'Permanently deleting the reloaded product should succeed.' );
+		$this->assertNull( get_post( $id ), 'The product should no longer exist.' );
+	}
 }

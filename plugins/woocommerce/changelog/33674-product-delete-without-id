@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return false when deleting a product object that has no ID, such as one already moved to the trash, instead of true.
