@@ -11,16 +11,17 @@
 	display: none;
 }
 
-// The shared notices styles set `display: block`, which overrides `hidden` and
-// leaves an empty box whose margins can show where no flow layout resets them.
 .wc-block-add-to-cart-with-options__notices[hidden] {
+	// The shared notices styles set `display: block`, which overrides `hidden`. In
+	// themes without a block gap, such as those that set `spacing.blockGap: null`,
+	// the empty list's margins would then show above the block.
 	display: none;
-}
 
-// The notices list is the form's first child, so the flow layout's first-child
-// margin reset doesn't reach the first inner block. Reset it while no notice is shown.
-.wc-block-add-to-cart-with-options__notices[hidden] + * {
-	margin-block-start: 0;
+	// The list is the form's first child, so the flow layout's first-child margin
+	// reset doesn't reach the first inner block.
+	+ * {
+		margin-block-start: 0;
+	}
 }
 
 // Set the height to 100% so when the quantity selector is inside a flex
