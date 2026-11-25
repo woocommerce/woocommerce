@@ -207,6 +207,101 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The daily run is scheduled for the store's night slot: within a day, between 1:00 and 5:00 on the store's clock, at the same minute each time.
+	 */
+	public function test_daily_run_is_scheduled_at_night_in_site_time(): void {
+		try {
+			update_option( 'timezone_string', 'Pacific/Auckland' );
+
+			$this->sut->run();
+			$next = as_next_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP );
+
+			$this->assertIsInt( $next );
+			$this->assertSame( ScheduledScan::next_daily_run(), $next );
+			foreach ( array( '2026-11-25 10:00', '2026-11-25 23:30', '2026-11-26 00:30', '2026-11-26 04:59' ) as $local ) {
+				$now  = ( new \DateTimeImmutable( $local, wp_timezone() ) )->getTimestamp();
+				$slot = ScheduledScan::next_daily_run( $now );
+				$hour = (int) wp_date( 'G', $slot );
+				$this->assertGreaterThanOrEqual( ScheduledScan::NIGHT_FROM, $hour, $local );
+				$this->assertLessThan( ScheduledScan::NIGHT_TO, $hour, $local );
+				$this->assertGreaterThanOrEqual( $now + ScheduledScan::MIN_GAP, $slot, 'A check late at night is not followed by another within hours: ' . $local );
+				$this->assertLessThanOrEqual( $now + DAY_IN_SECONDS + ScheduledScan::MIN_GAP, $slot, $local );
+				$this->assertSame( wp_date( 'H:i', ScheduledScan::next_daily_run() ), wp_date( 'H:i', $slot ), 'The same minute each night' );
+			}
+		} finally {
+			delete_option( 'timezone_string' );
+		}
+	}
+
+	/**
+	 * @testdox A catalog over the limit lists its best sellers first, most sales first, then the newest changes; one that fits keeps the newest change first.
+	 */
+	public function test_catalog_over_the_limit_lists_best_sellers_first(): void {
+		$ids    = $this->create_products( 3 );
+		$hidden = WC_Helper_Product::create_simple_product();
+		$hidden->set_catalog_visibility( 'hidden' );
+		$hidden->save();
+		$by_change = ( new ProductScan() )->start();
+		$sellers   = array( $ids[1], $hidden->get_id(), $ids[0] );
+
+		$this->assertSame( $by_change, ( new ProductScan() )->start_best_sellers_first( $sellers ), 'Every product is checked, so the order stays' );
+
+		$recent = range( 900001, 900001 + ProductScan::PRODUCT_LIMIT );
+		$many   = static function ( $posts, $query ) use ( $recent ) {
+			return ProductScan::PRODUCT_LIMIT + 1 === (int) $query->get( 'posts_per_page' ) ? $recent : $posts;
+		};
+		add_filter( 'posts_pre_query', $many, 10, 2 );
+		try {
+			$scan   = new ProductScan();
+			$listed = $scan->start_best_sellers_first( $sellers );
+			$plain  = ( new ProductScan() )->start();
+			$unseen = new ProductScan();
+			$unseen->start_best_sellers_first( array( $hidden->get_id() ) );
+		} finally {
+			remove_filter( 'posts_pre_query', $many, 10 );
+		}
+
+		$this->assertTrue( $scan->truncated() );
+		$this->assertTrue( $scan->best_sellers_first() );
+		$this->assertSame( 2, $scan->bestsellers_count() );
+		$this->assertCount( ProductScan::PRODUCT_LIMIT, $listed );
+		$this->assertSame( array( $ids[1], $ids[0], 900001 ), array_slice( $listed, 0, 3 ), 'Best sellers in sales order, without the hidden one, then the newest changes' );
+		$this->assertSame( array_slice( $recent, 0, ProductScan::PRODUCT_LIMIT ), $plain, 'Without sales to rank by, the newest changes only' );
+		$this->assertFalse( $unseen->best_sellers_first(), 'No best seller the scan checks, so the list is the newest changes' );
+		$this->assertSame( 0, $unseen->bestsellers_count() );
+	}
+
+	/**
+	 * @testdox A full page of sellers the scan cannot check is followed by the next page, which then leads the list.
+	 */
+	public function test_next_seller_page_leads_when_the_first_page_is_ineligible(): void {
+		$seller = WC_Helper_Product::create_simple_product();
+		$recent = range( 900001, 900001 + ProductScan::PRODUCT_LIMIT );
+		$first  = range( 8000001, 8000001 + ProductScan::PRODUCT_LIMIT - 1 );
+		$many   = static function ( $posts, $query ) use ( $recent ) {
+			return ProductScan::PRODUCT_LIMIT + 1 === (int) $query->get( 'posts_per_page' ) ? $recent : $posts;
+		};
+		$offset = 0;
+		$more   = static function ( int $next_offset, int $limit ) use ( $seller, &$offset ): array {
+			unset( $limit );
+			$offset = $next_offset;
+			return array( $seller->get_id() );
+		};
+		add_filter( 'posts_pre_query', $many, 10, 2 );
+		try {
+			$scan   = new ProductScan();
+			$listed = $scan->start_best_sellers_first( $first, $more );
+		} finally {
+			remove_filter( 'posts_pre_query', $many, 10 );
+		}
+
+		$this->assertSame( ProductScan::PRODUCT_LIMIT, $offset );
+		$this->assertTrue( $scan->best_sellers_first() );
+		$this->assertSame( 1, $scan->bestsellers_count() );
+		$this->assertSame( array( $seller->get_id(), 900001 ), array_slice( $listed, 0, 2 ) );
+	}
+
+	/**
 	 * @testdox A run fetches the rules file before scanning, so the new rules shape the report.
 	 */
 	public function test_run_fetches_rules_before_scanning(): void {
