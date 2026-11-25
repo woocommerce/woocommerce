@@ -51,38 +51,38 @@ class ItemQuantityLimits {
 	}
 
 	/**
-	 * Get the step attribute for an existing order item's quantity input in the admin editor.
+	 * Get the step for an existing order item's quantity input in the admin editor.
 	 *
 	 * The input is hidden until the line is edited, so a stored quantity that does not
 	 * match the step would make the browser block the whole order form. Such an input,
 	 * and one with the default step of 1 on a store that allows decimal quantities,
-	 * accepts any quantity.
+	 * has no step, so it accepts any quantity.
 	 *
 	 * @since 11.5.0
 	 * @param mixed  $step     The step returned by 'woocommerce_quantity_input_step_admin'.
 	 * @param float  $quantity The item's stored quantity.
 	 * @param string $min      The input's min attribute. Browsers count steps from it.
-	 * @return string The step as a numeric string, or 'any'.
+	 * @return float|null The step, or null when the input accepts any quantity.
 	 */
-	public function get_quantity_input_step_attribute( $step, float $quantity, string $min ): string {
+	public function get_quantity_input_step( $step, float $quantity, string $min ): ?float {
 		if ( is_string( $step ) && 'any' === strtolower( trim( $step ) ) ) {
-			return 'any';
+			return null;
 		}
 
 		// A callback can return anything; browsers read a non-numeric or non-positive step as 1.
 		$step = is_numeric( $step ) && (float) $step > 0 ? (float) $step : 1.0;
 
 		if ( abs( $step - 1.0 ) < 0.000001 && ! wc_is_stock_amount_integer() ) {
-			return 'any';
+			return null;
 		}
 
 		$steps_from_min = ( $quantity - (float) $min ) / $step;
 
 		if ( abs( $steps_from_min - round( $steps_from_min ) ) > 0.000001 ) {
-			return 'any';
+			return null;
 		}
 
-		return (string) $step;
+		return $step;
 	}
 
 	/**

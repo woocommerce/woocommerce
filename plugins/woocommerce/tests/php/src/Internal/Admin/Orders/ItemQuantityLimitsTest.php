@@ -221,50 +221,50 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_quantity_input_step_attribute keeps a step the stored quantity matches and returns any otherwise, on a store with whole quantities.
+	 * @testdox get_quantity_input_step keeps a step the stored quantity matches and returns null otherwise, on a store with whole quantities.
 	 *
-	 * @testWith [1, 2, "0", "1"]
-	 *           [1, 2.5, "0", "any"]
-	 *           [2, 4, "0", "2"]
-	 *           [2, 3, "0", "any"]
-	 *           [2, 3, "1", "2"]
-	 *           [1, -5, "-5", "1"]
-	 *           ["0.5", 1.5, "0", "0.5"]
-	 *           [0.5, 1.3, "0", "any"]
-	 *           ["any", 2, "0", "any"]
-	 *           ["ANY", 2, "0", "any"]
-	 *           [0, 2, "0", "1"]
-	 *           ["not a step", 2, "0", "1"]
-	 *           [["not a step"], 2, "0", "1"]
+	 * @testWith [1, 2, "0", 1.0]
+	 *           [1, 2.5, "0", null]
+	 *           [2, 4, "0", 2.0]
+	 *           [2, 3, "0", null]
+	 *           [2, 3, "1", 2.0]
+	 *           [1, -5, "-5", 1.0]
+	 *           ["0.5", 1.5, "0", 0.5]
+	 *           [0.5, 1.3, "0", null]
+	 *           ["any", 2, "0", null]
+	 *           ["ANY", 2, "0", null]
+	 *           [0, 2, "0", 1.0]
+	 *           ["not a step", 2, "0", 1.0]
+	 *           [["not a step"], 2, "0", 1.0]
 	 *
-	 * @param mixed  $step     Step returned by the step filter.
-	 * @param float  $quantity Stored quantity.
-	 * @param string $min      Min attribute.
-	 * @param string $expected Expected step attribute.
+	 * @param mixed      $step     Step returned by the step filter.
+	 * @param float      $quantity Stored quantity.
+	 * @param string     $min      Min attribute.
+	 * @param float|null $expected Expected step.
 	 */
-	public function test_step_attribute_on_integer_store( $step, float $quantity, string $min, string $expected ): void {
-		$this->assertSame( $expected, $this->sut->get_quantity_input_step_attribute( $step, $quantity, $min ) );
+	public function test_step_on_integer_store( $step, float $quantity, string $min, ?float $expected ): void {
+		$this->assertSame( $expected, $this->sut->get_quantity_input_step( $step, $quantity, $min ) );
 	}
 
 	/**
-	 * @testdox get_quantity_input_step_attribute drops the default step of 1 and keeps other steps, on a store with decimal quantities.
+	 * @testdox get_quantity_input_step drops the default step of 1 and keeps other steps, on a store with decimal quantities.
 	 *
-	 * @testWith [1, 2, "0", "any"]
-	 *           [1.0, 2.5, "0", "any"]
-	 *           [0.5, 1.5, "0", "0.5"]
-	 *           [0.5, 1.3, "0", "any"]
-	 *           [2, 4, "0", "2"]
+	 * @testWith [1, 2, "0", null]
+	 *           [1.0, 2.5, "0", null]
+	 *           [0.5, 1.5, "0", 0.5]
+	 *           [0.5, 1.3, "0", null]
+	 *           [2, 4, "0", 2.0]
 	 *
-	 * @param mixed  $step     Step returned by the step filter.
-	 * @param float  $quantity Stored quantity.
-	 * @param string $min      Min attribute.
-	 * @param string $expected Expected step attribute.
+	 * @param mixed      $step     Step returned by the step filter.
+	 * @param float      $quantity Stored quantity.
+	 * @param string     $min      Min attribute.
+	 * @param float|null $expected Expected step.
 	 */
-	public function test_step_attribute_on_decimal_store( $step, float $quantity, string $min, string $expected ): void {
+	public function test_step_on_decimal_store( $step, float $quantity, string $min, ?float $expected ): void {
 		remove_filter( 'woocommerce_stock_amount', 'intval' );
 		add_filter( 'woocommerce_stock_amount', 'floatval' );
 
-		$this->assertSame( $expected, $this->sut->get_quantity_input_step_attribute( $step, $quantity, $min ) );
+		$this->assertSame( $expected, $this->sut->get_quantity_input_step( $step, $quantity, $min ) );
 	}
 
 	/**
