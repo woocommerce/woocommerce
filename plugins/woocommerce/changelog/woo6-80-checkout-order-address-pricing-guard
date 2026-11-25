@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Store API: reject an address change on the pay-for-order checkout endpoint when it would alter the order's shipping cost or tax.

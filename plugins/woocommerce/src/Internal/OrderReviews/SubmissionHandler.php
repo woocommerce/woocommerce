@@ -15,8 +15,10 @@ use WC_Order;
  * Handles the AJAX submission of the Review Order form.
  *
  * One comment per rated row, with per-row outcome reported back so a single
- * row's failure cannot block the rest. Guests submit with the order key;
- * logged-in customers must own the order.
+ * row's failure cannot block the rest. A guest order is submitted with the
+ * order key; an order that belongs to a registered customer needs that
+ * customer's session, and the store's `comment_registration` setting is
+ * honoured here because `wp_new_comment()` does not apply it.
  *
  * @internal Just for internal use.
  *
@@ -48,6 +50,23 @@ class SubmissionHandler {
 	private const AUTO_REJECTED_META_KEY = '_wc_auto_rejected';
 
 	/**
+	 * Marks a review held by someone other than this handler, so a later edit cannot
+	 * approve it. An untagged hold came from the moderation checks and an edit may lift it.
+	 *
+	 * @since 11.4.0
+	 */
+	private const MODERATOR_HELD_META_KEY = '_wc_moderator_held';
+
+	/**
+	 * The review whose status this handler is changing, so the transition it causes is not
+	 * mistaken for a moderator's. Zero when idle. Scoped to one id so a callback that holds
+	 * a different review during the same call is still recorded.
+	 *
+	 * @var int
+	 */
+	private static int $changing_status_for = 0;
+
+	/**
 	 * Wire the AJAX endpoints.
 	 *
 	 * Auto-called by the WC dependency container after instantiation.
@@ -58,6 +77,7 @@ class SubmissionHandler {
 		add_action( 'wp_ajax_' . self::ACTION, array( $this, 'handle' ) );
 		add_action( 'wp_ajax_nopriv_' . self::ACTION, array( $this, 'handle' ) );
 		add_action( 'transition_comment_status', array( $this, 'clear_auto_rejected_flag' ), 10, 3 );
+		add_action( 'transition_comment_status', array( $this, 'record_moderator_hold' ), 10, 3 );
 	}
 
 	/**
@@ -79,6 +99,41 @@ class SubmissionHandler {
 		}
 		if ( get_comment_meta( (int) $comment->comment_ID, self::AUTO_REJECTED_META_KEY, true ) ) {
 			delete_comment_meta( (int) $comment->comment_ID, self::AUTO_REJECTED_META_KEY );
+		}
+	}
+
+	/**
+	 * Record a hold this handler did not apply, so a resubmission cannot approve it.
+	 *
+	 * Approving a pending review is a staff action. Holds the moderation checks applied
+	 * carry no tag and an edit may still lift them, which also leaves reviews held before
+	 * this tag existed working as they did.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int|string  $new_status New comment status.
+	 * @param int|string  $old_status Old comment status.
+	 * @param \WP_Comment $comment    The comment whose status changed.
+	 */
+	public function record_moderator_hold( $new_status, $old_status, $comment ): void {
+		unset( $old_status );
+		if ( ! $comment instanceof \WP_Comment || 'review' !== $comment->comment_type ) {
+			return;
+		}
+
+		$comment_id = (int) $comment->comment_ID;
+		if ( self::$changing_status_for > 0 && $comment_id === self::$changing_status_for ) {
+			return;
+		}
+
+		if ( 'unapproved' === $new_status ) {
+			update_comment_meta( $comment_id, self::MODERATOR_HELD_META_KEY, 1 );
+			return;
+		}
+
+		// Guarded like the sibling method: delete_metadata() queries even on a cache hit.
+		if ( get_comment_meta( $comment_id, self::MODERATOR_HELD_META_KEY, true ) ) {
+			delete_comment_meta( $comment_id, self::MODERATOR_HELD_META_KEY );
 		}
 	}
 
@@ -109,9 +164,9 @@ class SubmissionHandler {
 			wp_send_json_error( array( 'message' => __( 'Order not found.', 'woocommerce' ) ), 404 );
 		}
 
-		// Logged-in user must own the order. Guests with the right key still pass.
+		// Signed in as somebody else: say so, the way the page does.
 		if ( $order->get_customer_id() && is_user_logged_in() && get_current_user_id() !== $order->get_customer_id() ) {
-			wp_send_json_error( array( 'message' => __( 'Order not found.', 'woocommerce' ) ), 404 );
+			wp_send_json_error( array( 'message' => __( 'This order belongs to a different account, so you cannot review it.', 'woocommerce' ) ), 403 );
 		}
 
 		// Reuse the same eligibility filter the page-load endpoint uses so the
@@ -125,6 +180,17 @@ class SubmissionHandler {
 
 		if ( ! in_array( $order->get_status(), $eligible_statuses, true ) ) {
 			wp_send_json_error( array( 'message' => __( 'Order not found.', 'woocommerce' ) ), 404 );
+		}
+
+		// Below the status check, matching `Endpoint::is_authorised()`: an order
+		// the page would 404 has to answer the same way here rather than reply
+		// that a sign-in would help.
+		if ( Endpoint::requires_owner_login( $order ) ) {
+			wp_send_json_error( array( 'message' => __( 'Please log in to your account to review this order.', 'woocommerce' ) ), 403 );
+		}
+
+		if ( Endpoint::requires_registered_account() ) {
+			wp_send_json_error( array( 'message' => __( 'You must be logged in to post a review.', 'woocommerce' ) ), 403 );
 		}
 
 		$results = $this->process_rows( $order, $rows_in );
@@ -348,7 +414,7 @@ class SubmissionHandler {
 
 			// Core recounts an approved comment before writing its meta, so recount once the rating is stored.
 			if ( 'approved' === $comment_status ) {
-				WC_Comments::clear_transients( $review_post_id );
+				\WC_Comments::maybe_update_product_average_rating( $review_post_id );
 			}
 
 			$result['comment_id'] = (int) $comment_id;
@@ -386,16 +452,35 @@ class SubmissionHandler {
 			? $existing->comment_approved
 			: self::moderate_edited_review( $existing, $content, $ip, $agent );
 
-		$update_ok = wp_update_comment(
-			wp_slash(
-				array(
-					'comment_ID'      => $existing_id,
-					'comment_content' => $content,
-					// Stored by core before it recounts the product's ratings.
-					'comment_meta'    => array( 'rating' => $rating ),
+		// Core re-filters the stored address on every update and encodes `&`, drifting it one
+		// step per write. Put it back for this row only, since callbacks inside
+		// wp_update_comment() can update other comments. No sanitize_email() as the insert path
+		// uses: that strips the `;` from an address an earlier write already encoded. No
+		// wp_slash() either: wp_update_comment_data receives unslashed data.
+		$stored_email   = (string) $existing->comment_author_email;
+		$keep_raw_email = function ( $data, $comment ) use ( $existing_id, $stored_email ) {
+			// A callback may short-circuit the update by returning WP_Error instead of data.
+			if ( is_array( $data ) && (int) ( $comment['comment_ID'] ?? 0 ) === $existing_id ) {
+				$data['comment_author_email'] = $stored_email;
+			}
+
+			return $data;
+		};
+		add_filter( 'wp_update_comment_data', $keep_raw_email, PHP_INT_MAX, 2 );
+		try {
+			$update_ok = wp_update_comment(
+				wp_slash(
+					array(
+						'comment_ID'      => $existing_id,
+						'comment_content' => $content,
+						// Stored by core before it recounts the product's ratings.
+						'comment_meta'    => array( 'rating' => $rating ),
+					)
 				)
-			)
-		);
+			);
+		} finally {
+			remove_filter( 'wp_update_comment_data', $keep_raw_email, PHP_INT_MAX );
+		}
 		if ( false === $update_ok || is_wp_error( $update_ok ) ) {
 			return array( 'error' => 'update_failed' );
 		}
@@ -416,8 +501,22 @@ class SubmissionHandler {
 			'trash'      => 'trash',
 		);
 		$current_status = $status_vocab[ wp_get_comment_status( $existing_id ) ] ?? '';
+
+		// Hold back only the approval: a spam or trash verdict from the checks must still
+		// apply. The tag outlives those, so a rejected edit cannot launder the hold away
+		// and let the next clean one approve the row. Any staff action clears the tag.
+		if ( 'approve' === $target && get_comment_meta( $existing_id, self::MODERATOR_HELD_META_KEY, true ) ) {
+			$target = 'hold';
+		}
+
 		if ( $target !== $current_status ) {
-			wp_set_comment_status( $existing_id, $target );
+			$previously_changing       = self::$changing_status_for;
+			self::$changing_status_for = $existing_id;
+			try {
+				wp_set_comment_status( $existing_id, $target );
+			} finally {
+				self::$changing_status_for = $previously_changing;
+			}
 		}
 
 		if ( in_array( $approved, array( 'spam', 'trash' ), true ) ) {
@@ -479,8 +578,8 @@ class SubmissionHandler {
 	 */
 	private static function insert_review( array $comment_data ) {
 		// Sanitize the address as core's pre_comment_author_email chain would, but
-		// keep it un-encoded (sanitize_email preserves `&`) so the eligibility
-		// lookups still match the order's billing email.
+		// keep it un-encoded (sanitize_email preserves `&`): WordPress matches this
+		// column exactly elsewhere, the privacy exporter and eraser included.
 		$raw_email      = wp_slash( sanitize_email( (string) $comment_data['comment_author_email'] ) );
 		$keep_raw_email = function () use ( $raw_email ) {
 			return $raw_email;
@@ -519,19 +618,13 @@ class SubmissionHandler {
 	 * @return bool
 	 */
 	private static function has_rejected_review( WC_Order $order, int $product_id, int $variation_id ): bool {
-		$email = $order->get_billing_email();
-		if ( '' === $email ) {
-			return false;
-		}
-
 		$comments = get_comments(
 			array(
-				'post_id'      => $product_id,
-				'author_email' => $email,
-				'type'         => 'review',
-				'status'       => array( 'spam', 'trash' ),
-				'number'       => 1,
-				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post_id + author_email.
+				'post_id'    => $product_id,
+				'type'       => 'review',
+				'status'     => array( 'spam', 'trash' ),
+				'number'     => 1,
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post_id + the order meta.
 					'relation' => 'AND',
 					array(
 						'key'   => ItemEligibility::ORDER_META_KEY,
@@ -572,21 +665,15 @@ class SubmissionHandler {
 	 * @return \WP_Comment|null
 	 */
 	private static function find_auto_rejected_review( WC_Order $order, int $product_id, int $variation_id ): ?\WP_Comment {
-		$email = $order->get_billing_email();
-		if ( '' === $email ) {
-			return null;
-		}
-
 		$comments = get_comments(
 			array(
-				'post_id'      => $product_id,
-				'author_email' => $email,
-				'type'         => 'review',
-				'status'       => array( 'spam', 'trash' ),
-				'number'       => 1,
-				'orderby'      => 'comment_date_gmt',
-				'order'        => 'DESC',
-				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post_id + author_email.
+				'post_id'    => $product_id,
+				'type'       => 'review',
+				'status'     => array( 'spam', 'trash' ),
+				'number'     => 1,
+				'orderby'    => 'comment_date_gmt',
+				'order'      => 'DESC',
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post_id + the order meta.
 					'relation' => 'AND',
 					array(
 						'key'   => ItemEligibility::ORDER_META_KEY,
@@ -632,11 +719,6 @@ class SubmissionHandler {
 			return;
 		}
 
-		$customer_email = $order->get_billing_email();
-		if ( '' === $customer_email ) {
-			return;
-		}
-
 		// Build the same eligible-row set the page uses, then collect the
 		// distinct (parent product, variation) slots that need a review.
 		// Counting by slot rather than per-line-item means a double-submit of
@@ -674,12 +756,11 @@ class SubmissionHandler {
 		// reviewable items.
 		$comments = get_comments(
 			array(
-				'post__in'     => array_values( $product_ids ),
-				'author_email' => $customer_email,
-				'type'         => 'review',
-				'status'       => array( 'approve', 'hold' ),
-				'number'       => 0,
-				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post__in + author_email.
+				'post__in'   => array_values( $product_ids ),
+				'type'       => 'review',
+				'status'     => array( 'approve', 'hold' ),
+				'number'     => 0,
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post__in + the order meta.
 					array(
 						'key'   => ItemEligibility::ORDER_META_KEY,
 						'value' => (string) $order->get_id(),

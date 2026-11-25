@@ -30,6 +30,7 @@ The following terms have been used in this post to mean:
     - Users who don't connect Jetpack
     - Users who don't upgrade WooCommerce
     - WordPress.com Notification Control Center preferences
+    - Stale token cleanup
 
 ## Goals
 
@@ -237,3 +238,15 @@ These users won't receive push notifications - this is the same as the existing 
 ### WordPress.com Notification Control Center preferences
 
 - These will still be respected for all WooCommerce notifications, as it is part of our duplicate notification avoidance strategy
+
+### Stale token cleanup
+
+- From 25.8, the iOS and Android apps check in with every visible store at most once a day while the app is used (on iOS, only when it is opened). Each check-in re-registers the token, which moves its `post_modified_gmt` forward and records `metadata.app_version`.
+- A daily Action Scheduler job (`wc_push_notification_stale_token_cleanup`) deletes:
+    - tokens last registered by a WooCommerce app at 25.8 or later that have not checked in for 90 days
+    - any other token, such as one from an older app version, that has not re-registered for 180 days
+- Older app versions are kept for longer because they do not check in daily, so a quiet token is not a sign the install is gone.
+- Creation time and send attempts are not used as a sign of activity: Woo attempts a send to every token and cannot tell which deliveries succeeded.
+- While push notifications are off (feature disabled, Jetpack disconnected or WooCommerce deactivated) the job is unscheduled, because the apps cannot re-register. Once they are back on, silence from before that moment does not count: the 90-day rule waits 90 days and the 180-day rule waits 180 days.
+- Each run deletes at most 100 tokens, oldest first, and attempts at most 500. It writes one `info` summary line to the `push_notifications` log, even when step logging is off; a log threshold above `info` drops it.
+- Return false from the `woocommerce_push_notification_stale_token_cleanup_enabled` filter to keep every token.

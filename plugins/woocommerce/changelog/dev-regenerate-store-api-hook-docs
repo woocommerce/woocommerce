@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Regenerate the Store API hooks reference after new UCP hook docblocks; docs only.
+

@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidStockLevelsInCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
@@ -91,6 +92,46 @@ class CheckoutOrder extends AbstractCartRoute {
 	}
 
 	/**
+	 * Process an order as a request to its order-pay endpoint.
+	 *
+	 * Gateways decide whether they can pay an order from the order-pay endpoint, e.g. the shipping
+	 * method restrictions of offline gateways, and fall back to the cart otherwise. This request
+	 * pays an order and not the cart, so the endpoint is set for the order while it is processed.
+	 * It is restored afterwards because batched requests share it.
+	 *
+	 * @throws RouteException On error.
+	 * @throws InvalidStockLevelsInCartException On error.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	protected function get_route_post_response( \WP_REST_Request $request ) {
+		global $wp, $wp_query;
+
+		$order_id      = absint( $request['id'] );
+		$wp_query_vars = $wp->query_vars;
+		$had_query_var = isset( $wp_query->query_vars['order-pay'] );
+		$old_query_var = $had_query_var ? $wp_query->query_vars['order-pay'] : null;
+
+		// is_wc_endpoint_url() looks the endpoint up under its configured slug, get_query_var() under 'order-pay'.
+		$wp->query_vars[ WC()->query->get_query_vars()['order-pay'] ?? 'order-pay' ] = $order_id;
+		$wp->query_vars['order-pay'] = $order_id;
+		set_query_var( 'order-pay', $order_id );
+
+		try {
+			return $this->pay_for_order( $request );
+		} finally {
+			$wp->query_vars = $wp_query_vars;
+			if ( $had_query_var ) {
+				set_query_var( 'order-pay', $old_query_var );
+			} else {
+				unset( $wp_query->query_vars['order-pay'] );
+			}
+		}
+	}
+
+	/**
 	 * Process an order.
 	 *
 	 * 1. Process Request
@@ -102,17 +143,19 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @throws InvalidStockLevelsInCartException On error.
 	 *
 	 * @param \WP_REST_Request $request Request object.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
-	protected function get_route_post_response( \WP_REST_Request $request ) {
+	private function pay_for_order( \WP_REST_Request $request ) {
 		$order_id = absint( $request['id'] );
 		$order    = wc_get_order( $order_id );
 
-		if ( ! $order instanceof \WC_Order || ! $order->needs_payment() ) {
+		if ( ! $order instanceof \WC_Order || ! $order->needs_payment() || $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
 			return new \WP_Error(
 				'invalid_order_update_status',
-				__( 'This order cannot be paid for.', 'woocommerce' )
+				__( 'This order cannot be paid for.', 'woocommerce' ),
+				array( 'status' => 400 )
 			);
 		}
 		$this->order = $order;
@@ -165,8 +208,12 @@ class CheckoutOrder extends AbstractCartRoute {
 		 * Process the payment and return the results.
 		 */
 		$payment_result = new PaymentResult();
+		$needs_payment  = $this->order->needs_payment();
 
-		if ( $this->order->needs_payment() ) {
+		// Callbacks on the action above, or on the needs_payment() filters, may have saved the order.
+		$this->validate_order_was_saved();
+
+		if ( $needs_payment ) {
 			$this->process_payment( $request, $payment_result );
 		} else {
 			$this->process_without_payment( $request, $payment_result );
@@ -235,6 +282,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		$customer->save();
 		$this->order->save();
 		$this->order->calculate_totals();
+		$this->validate_order_was_saved();
 	}
 
 	/**

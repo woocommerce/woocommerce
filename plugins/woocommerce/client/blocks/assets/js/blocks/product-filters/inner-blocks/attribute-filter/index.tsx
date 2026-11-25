@@ -11,25 +11,17 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import metadata from './block.json';
+import deprecated from './deprecated';
 import Edit from './edit';
 import Save from './save';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
-const defaultAttribute = getSetting< AttributeSetting >(
-	'defaultProductFilterAttribute'
-);
 
 registerBlockType( metadata, {
 	edit: Edit,
 	icon: productFilterAttribute,
-	attributes: {
-		...metadata.attributes,
-		attributeId: {
-			...metadata.attributes.attributeId,
-			default: parseInt( defaultAttribute.attribute_id, 10 ),
-		},
-	},
 	save: Save,
+	deprecated,
 	variations: ATTRIBUTES.map( ( attribute, index ) => {
 		return {
 			name: `product-filter-attribute-${ attribute.attribute_name }`,

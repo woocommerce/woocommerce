@@ -469,7 +469,7 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 function wc_downloadable_product_permissions( $order_id, $force = false ) {
 	$order = wc_get_order( $order_id );
 
-	if ( ! $order || ( $order->get_data_store()->get_download_permissions_granted( $order ) && ! $force ) ) {
+	if ( ! $order instanceof WC_Order || ( $order->get_data_store()->get_download_permissions_granted( $order ) && ! $force ) ) {
 		return;
 	}
 
@@ -477,9 +477,20 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 		return;
 	}
 
+	$refunded_item_ids = array();
+	foreach ( $order->get_refunds() as $refund ) {
+		foreach ( $refund->get_items() as $refund_item ) {
+			$refunded_item_ids[] = absint( $refund_item->get_meta( '_refunded_item_id' ) );
+		}
+	}
+
 	$line_items = $order->get_items();
 	if ( count( $line_items ) > 0 ) {
 		foreach ( $line_items as $item ) {
+			if ( in_array( $item->get_id(), $refunded_item_ids, true ) ) {
+				continue;
+			}
+
 			$product = $item->get_product();
 
 			if ( $product && $product->exists() && $product->is_downloadable() ) {
@@ -629,15 +640,25 @@ function wc_create_refund( $args = array() ) {
 				// later to be used for revoking download permission.
 				// checking if the item is a product, as we only need to revoke download permission for products.
 				if ( $item->is_type( 'line_item' ) ) {
+					$product_id = $item->get_product_id();
+					if ( $item instanceof WC_Order_Item_Product && $item->get_variation_id() ) {
+						$product_id = $item->get_variation_id();
+					}
 					$refunded_order_and_products[ $item_id ] = array(
 						'order_id'   => $order->get_id(),
-						'product_id' => $item->get_product_id(),
+						'product_id' => $product_id,
 					);
 				}
 
 				$class         = get_class( $item );
 				$refunded_item = new $class( $item );
 				$refunded_item->set_id( 0 );
+
+				// Copied metadata needs new IDs so refund changes cannot update or delete the original item's metadata.
+				foreach ( $refunded_item->get_meta_data() as $meta ) {
+					$meta->id = 0;
+				}
+
 				$refunded_item->add_meta_data( '_refunded_item_id', $item_id, true );
 				$refunded_item->set_total( wc_format_refund_total( $refund_total ) );
 				$refunded_item->set_taxes(
@@ -1059,9 +1080,36 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 	$is_invalid = $order->has_status( $invalid_statuses );
 
+	$stored_coupon_codes = null;
 	if ( $is_invalid && $has_recorded ) {
 		$action = 'reduce';
-		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
+		if ( $data_store->has_callable( 'clear_recorded_coupon_usage_counts' ) ) {
+			// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
+			if ( ! $data_store->clear_recorded_coupon_usage_counts( $order ) ) {
+				// Another request already gave the uses back, or changed the order status since this order was loaded.
+				wc_release_coupons_for_order( $order );
+				return;
+			}
+		} else {
+			$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
+		}
+
+		if ( $data_store->has_callable( 'get_item_ids' ) ) {
+			try {
+				// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
+				$stored_item_ids = $data_store->get_item_ids( $order, 'coupon' );
+			} catch ( Exception $e ) {
+				// Give nothing back rather than risk giving a use back twice.
+				$stored_item_ids = array();
+			}
+
+			$stored_coupon_codes = array();
+			foreach ( $order->get_items( 'coupon' ) as $coupon_item ) {
+				if ( $coupon_item instanceof WC_Order_Item_Coupon && in_array( $coupon_item->get_id(), $stored_item_ids, true ) ) {
+					$stored_coupon_codes[] = $coupon_item->get_code();
+				}
+			}
+		}
 	} elseif ( ! $is_invalid && $coupon_codes && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
@@ -1086,7 +1134,10 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 			switch ( $action ) {
 				case 'reduce':
-					$coupon->decrease_usage_count( $identities[ $coupon->get_id() ] ?? $used_by );
+					// A coupon removed from the order after it was loaded here already gave its use back.
+					if ( null === $stored_coupon_codes || in_array( $code, $stored_coupon_codes, true ) ) {
+						$coupon->decrease_usage_count( $identities[ $coupon->get_id() ] ?? $used_by );
+					}
 					break;
 				case 'increase':
 					$coupon->increase_usage_count( $used_by, $order );
@@ -1147,8 +1198,9 @@ function wc_cancel_unpaid_orders() {
 	}
 
 	// Schedule the next event using Action Scheduler if available, otherwise fall back to WordPress cron.
+	// Not unique: this runs inside the action itself, and a unique check would see the in-progress run and schedule nothing.
 	if ( function_exists( 'as_schedule_single_action' ) ) {
-		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', false );
+		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
 	} else {
 		wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 	}
@@ -1236,6 +1288,7 @@ function wc_get_order_note( $data ) {
  * Get order notes.
  *
  * @since  3.2.0
+ * @since  11.5.0 Return an empty array when order_id or post_id is explicitly provided as 0 or empty without order__in/post__in.
  * @param  array $args Query arguments {
  *     Array of query parameters.
  *
@@ -1262,6 +1315,8 @@ function wc_get_order_note( $data ) {
  * @return stdClass[]              Array of stdClass objects with order notes details.
  */
 function wc_get_order_notes( $args ) {
+	$has_null_order_id = is_array( $args ) && array_key_exists( 'order_id', $args ) && null === $args['order_id'];
+
 	$key_mapping = array(
 		'limit'         => 'number',
 		'page'          => 'paged',
@@ -1274,6 +1329,17 @@ function wc_get_order_notes( $args ) {
 		if ( isset( $args[ $query_key ] ) ) {
 			$args[ $db_key ] = $args[ $query_key ];
 			unset( $args[ $query_key ] );
+		}
+	}
+
+	// WP_Comment_Query treats post_id = 0/empty as "no filter" and returns notes across all orders.
+	if ( is_array( $args ) && empty( $args['post__in'] ) ) {
+		if ( array_key_exists( 'post_id', $args ) ) {
+			if ( ! is_numeric( $args['post_id'] ) || (int) $args['post_id'] <= 0 ) {
+				return array();
+			}
+		} elseif ( $has_null_order_id ) {
+			return array();
 		}
 	}
 

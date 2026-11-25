@@ -8,6 +8,7 @@
 declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine;
 
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Css_Selector_Normalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use WP_Block_Template;
@@ -196,11 +197,11 @@ class Theme_Controller {
 	/**
 	 * Get stylesheet for rendering.
 	 *
-	 * @param WP_Post|null           $post Post object.
-	 * @param WP_Block_Template|null $template Template object.
+	 * @param WP_Post|null           $post Unused. Kept for backward compatibility.
+	 * @param WP_Block_Template|null $template Unused. Kept for backward compatibility.
 	 * @return string
 	 */
-	public function get_stylesheet_for_rendering( ?WP_Post $post = null, $template = null ): string {
+	public function get_stylesheet_for_rendering( ?WP_Post $post = null, $template = null ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Unused parameters kept for backward compatibility.
 		$email_theme_settings = $this->get_settings();
 
 		$css_presets = '';
@@ -226,27 +227,10 @@ class Theme_Controller {
 		foreach ( $blocks as $block_metadata ) {
 			$css_blocks .= $this->get_theme()->get_styles_for_block( $block_metadata );
 		}
-
-		// Remove `:root :where(...)` selectors since they are not supported in the CSS inliner.
-		$css_blocks = preg_replace( '/:root\s:where\((.*?)\)/', '$1', $css_blocks );
+		$css_blocks = Css_Selector_Normalizer::normalize( $css_blocks );
 
 		// Element specific styles.
 		$elements_styles = $this->get_theme()->get_raw_data()['styles']['elements'] ?? array();
-
-		// Because the section styles is not a part of the output the `get_styles_block_nodes` method, we need to get it separately.
-		if ( $template && $template->wp_id ) {
-			$template_theme    = (array) get_post_meta( $template->wp_id, Email_Editor::WOOCOMMERCE_EMAIL_META_THEME_TYPE, true );
-			$template_styles   = (array) ( $template_theme['styles'] ?? array() );
-			$template_elements = $template_styles['elements'] ?? array();
-			$elements_styles   = array_replace_recursive( (array) $elements_styles, (array) $template_elements );
-		}
-
-		if ( $post ) {
-			$post_theme      = (array) get_post_meta( $post->ID, 'woocommerce_email_theme', true );
-			$post_styles     = (array) ( $post_theme['styles'] ?? array() );
-			$post_elements   = $post_styles['elements'] ?? array();
-			$elements_styles = array_replace_recursive( (array) $elements_styles, (array) $post_elements );
-		}
 
 		$css_elements = '';
 		foreach ( $elements_styles as $key => $elements_style ) {
@@ -266,6 +250,10 @@ class Theme_Controller {
 					break;
 				case 'link':
 					$selector = 'a:not(.button-link)';
+					break;
+				case 'caption':
+					// Captions render as elements carrying core's caption class, never as a `<caption>` tag.
+					$selector = '.wp-element-caption';
 					break;
 			}
 

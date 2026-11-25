@@ -90,7 +90,7 @@ public function render(
 **Returns:** An array containing:
 
 -   `html`: The complete HTML email content
--   `text`: The plain text version of the email
+-   `text`: The plain text version of the email. Personalization tag tokens, including those of tags not registered yet, stay in it as comments, and links whose URL is a tag keep the tag as their target. Bold text is marked as `*text*`. Personalize it with `Personalizer::RENDERING_CONTEXT_TEXT`.
 
 **Example Usage:**
 

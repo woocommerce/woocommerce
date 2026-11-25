@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+UCP catalog: send each variant's GTIN as a barcode.

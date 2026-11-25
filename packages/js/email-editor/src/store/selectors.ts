@@ -135,8 +135,7 @@ export const hasEmptyContent = createRegistrySelector(
 		}
 
 		// @ts-expect-error Missing property in type
-		const { content } = post;
-		return ! content.raw;
+		return ! post.content?.raw;
 	}
 );
 
@@ -402,7 +401,7 @@ export const getEmailTemplates = createRegistrySelector( ( select ) => {
 				// ignoring the post_type filter in the query
 				?.filter( ( template ) =>
 					// @ts-expect-error Missing property in type
-					template.post_types.includes( postType )
+					template.post_types?.includes( postType )
 				),
 		() => [
 			select( coreDataStore ).getEntityRecords(

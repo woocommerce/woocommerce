@@ -37,4 +37,19 @@ class UcpProductSchema extends ProductSchema {
 	protected function prepare_html_response( $response ) {
 		return $response;
 	}
+
+	/**
+	 * Skip term lookups for variations: catalog terms belong to the parent product.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @param string      $taxonomy Taxonomy name.
+	 * @return array Array of terms (id, name, slug).
+	 */
+	protected function get_term_list( \WC_Product $product, $taxonomy = '' ) {
+		if ( $product instanceof \WC_Product_Variation ) {
+			return array();
+		}
+
+		return parent::get_term_list( $product, $taxonomy );
+	}
 }

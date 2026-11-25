@@ -89,7 +89,8 @@ class WC_Product_Download implements ArrayAccess {
 	 * @return string
 	 */
 	public function get_file_type() {
-		$type = wp_check_filetype( strtok( $this->get_file(), '?' ), $this->get_allowed_mime_types() );
+		// Cut the query string and fragment, as WC_Download_Handler::parse_file_path() does before it opens a local file.
+		$type = wp_check_filetype( strtok( $this->get_file(), '?#' ), $this->get_allowed_mime_types() );
 		return $type['type'];
 	}
 
@@ -160,7 +161,7 @@ class WC_Product_Download implements ArrayAccess {
 
 		// Shortcodes are allowed, validations should be done by the shortcode provider in this case.
 		if ( 'shortcode' === $file_path_type ) {
-			return true;
+			return 0 === validate_file( $file_path );
 		}
 
 		// Remote paths are allowed.
@@ -170,8 +171,9 @@ class WC_Product_Download implements ArrayAccess {
 
 		// On windows system, local files ending with `.` are not allowed.
 		// @link https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file?redirectedfrom=MSDN#naming-conventions.
+		// Also check the path the download handler opens, which drops a query string or fragment after the period.
 		if ( $is_file_on_server && ! $this->get_file_extension() && 'WIN' === strtoupper( substr( Constants::get_constant( 'PHP_OS' ), 0, 3 ) ) ) {
-			if ( '.' === substr( $file_path, -1 ) ) {
+			if ( '.' === substr( $file_path, -1 ) || '.' === substr( (string) $parsed_file_path['file_path'], -1 ) ) {
 				return false;
 			}
 		}

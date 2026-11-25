@@ -2374,7 +2374,7 @@ function wc_update_500_fix_product_review_count() {
 		$current_review_count = intval( $product_data['meta_value'] );
 
 		if ( intval( $actual_review_counts[ $product_id ] ) !== $current_review_count ) {
-			WC_Comments::clear_transients( $product_id );
+			WC_Comments::maybe_update_product_average_rating( $product_id );
 		}
 	}
 
@@ -4032,6 +4032,113 @@ function wc_update_1130_set_legacy_variation_price_hash_option() {
 }
 
 /**
+ * Remove customer passwords from previously stored deferred email actions.
+ *
+ * Scan 100 actions per run, including completed and failed actions.
+ *
+ * @since 11.3.1
+ * @return bool True when another batch remains.
+ */
+function wc_update_1131_redact_deferred_customer_passwords() {
+	global $wpdb;
+
+	$table          = $wpdb->prefix . 'actionscheduler_actions';
+	$last_id_option = 'woocommerce_update_1131_last_deferred_email_action_id';
+	$batch_size     = 100;
+	$hook           = 'woocommerce_send_queued_transactional_email';
+
+	$redact_args = static function ( array &$args ) use ( &$redact_args ): bool {
+		$changed = false;
+		foreach ( $args as $key => $value ) {
+			if ( 'user_pass' === $key ) {
+				unset( $args[ $key ] );
+				$changed = true;
+			} elseif ( is_array( $value ) ) {
+				$changed = $redact_args( $args[ $key ] ) || $changed;
+			}
+		}
+		return $changed;
+	};
+
+	$redact_row = static function ( $row ) use ( $wpdb, $table, $hook, $redact_args ): bool {
+		$stored_args = ! empty( $row->extended_args ) ? $row->extended_args : $row->args;
+		$args        = json_decode( $stored_args, true );
+		if ( ! is_array( $args ) ) {
+			return false;
+		}
+		if ( ! $redact_args( $args ) ) {
+			return true;
+		}
+
+		$encoded = wp_json_encode( $args );
+		if ( false === $encoded ) {
+			return false;
+		}
+
+		// Action Scheduler stores long arguments in extended_args and their hash in args.
+		$data = strlen( $encoded ) <= 191
+			? array(
+				'args'          => $encoded,
+				'extended_args' => null,
+			)
+			: array(
+				'args'          => md5( $encoded ),
+				'extended_args' => $encoded,
+			);
+
+		for ( $attempt = 0; $attempt < 3; ++$attempt ) {
+			$updated = $wpdb->update(
+				$table,
+				$data,
+				array(
+					'action_id' => $row->action_id,
+					'hook'      => $hook,
+				)
+			);
+
+			if ( false !== $updated ) {
+				return true;
+			}
+		}
+
+		return false;
+	};
+
+	$rows = $wpdb->get_results(
+		$wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name uses the current site's trusted prefix.
+			"SELECT action_id, args, extended_args FROM {$table} WHERE hook = %s AND action_id > %d ORDER BY action_id ASC LIMIT %d",
+			$hook,
+			(int) get_option( $last_id_option, 0 ),
+			$batch_size
+		)
+	);
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error( sprintf( 'Stopped redacting deferred email passwords: %s', $wpdb->last_error ), array( 'source' => 'wc-updater' ) );
+		return false;
+	}
+
+	foreach ( $rows as $row ) {
+		if ( ! $redact_row( $row ) ) {
+			wc_get_logger()->error( sprintf( 'Could not redact deferred email password from action #%d.', (int) $row->action_id ), array( 'source' => 'wc-updater' ) );
+		}
+	}
+
+	if ( count( $rows ) === $batch_size ) {
+		$last_id = (int) end( $rows )->action_id;
+		if ( (int) get_option( $last_id_option, 0 ) >= $last_id || update_option( $last_id_option, $last_id, false ) ) {
+			return true;
+		}
+		wc_get_logger()->error( 'Stopped redacting deferred email passwords: the progress cursor could not be saved.', array( 'source' => 'wc-updater' ) );
+		return false;
+	}
+
+	delete_option( $last_id_option );
+	return false;
+}
+
+/**
  * Delete the product attributes lookup rows of variations that are not published.
  *
  * Disabled variations (status 'private') used to keep their lookup rows, so attribute filters offered and
@@ -4227,7 +4334,7 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 }
 
 /**
- * Re-enable autoloading for options whose settings definitions reverted it on save after the 10.5.0 migration.
+ * Autoload frequently read options that existing stores may still have as autoload off.
  *
  * @since 11.4.0
  */
@@ -4241,6 +4348,11 @@ function wc_update_1140_re_enable_autoload_options(): void {
 			'woocommerce_show_marketplace_suggestions'    => true,
 			'woocommerce_enable_delayed_account_creation' => true,
 			'woocommerce_logs_logging_enabled'            => true,
+			'woocommerce_catalog_columns'                 => true,
+			'woocommerce_catalog_rows'                    => true,
+			'woocommerce_default_catalog_orderby'         => true,
+			'woocommerce_custom_orders_table_data_sync_enabled' => true,
+			'woocommerce_custom_orders_table_background_sync_mode' => true,
 		)
 	);
 }
@@ -4260,4 +4372,97 @@ function wc_update_1140_add_mpn_to_product_lookup_table(): void {
 	if ( ! $wpdb->get_var( "SHOW INDEX FROM {$wpdb->wc_product_meta_lookup} WHERE Key_name = 'mpn'" ) ) {
 		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD INDEX mpn (mpn(50))" );
 	}
+}
+
+/**
+ * Remove PHP objects from product default attributes, where WooCommerce only stores strings.
+ *
+ * Rows are decoded without allowing classes and written directly, so a stored object is never created. A row holding an object that
+ * can't be decoded is deleted; that product's default form values need to be set again.
+ *
+ * @since 11.2.2
+ */
+function wc_update_1122_remove_objects_from_default_attributes(): void {
+	global $wpdb;
+
+	// Objects serialize as O: or C:, so only matching rows are decoded. Each one is checked again below. LIKE rather than REGEXP, because
+	// MySQL 5.7's REGEXP stops reading at a NUL byte, which a custom default value can contain.
+	$meta_ids = $wpdb->get_col( "SELECT meta_id FROM {$wpdb->postmeta} WHERE meta_key = '_default_attributes' AND ( meta_value LIKE '%O:%' OR meta_value LIKE '%C:%' )" );
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Could not check product default attributes for PHP objects: %s', $wpdb->last_error ),
+			array( 'source' => 'wc-updater' )
+		);
+		return;
+	}
+
+	$product_ids = array();
+
+	foreach ( array_chunk( array_map( 'intval', $meta_ids ), 500 ) as $chunk ) {
+		$rows = $wpdb->get_results( "SELECT meta_id, post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_id IN (" . implode( ',', $chunk ) . ')' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Integer IDs.
+
+		foreach ( $rows as $row ) {
+			$raw   = trim( $row->meta_value );
+			$value = @unserialize( $raw, array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- Same as maybe_unserialize(), without objects.
+
+			// WooCommerce stores a flat array of strings here. An object, an array holding non-scalars, or a row that can't be decoded is cleaned
+			// when it contains object notation: the LIKE above also matches text such as "Info:" on case-insensitive collations, and the decoded
+			// value isn't walked because it can reference itself. Object text inside the strings of a flat array is plain text, and stays.
+			$may_hold_object = is_object( $value ) || false === $value || ( is_array( $value ) && array_filter( $value, 'is_scalar' ) !== $value );
+			if ( ! $may_hold_object || ! preg_match( '/[OC]:\d+:"/', $raw ) ) {
+				continue;
+			}
+
+			// Matched on the value read as well, so a row saved again in the meantime is left to that save.
+			$where = array(
+				'meta_id'    => $row->meta_id,
+				'meta_value' => $row->meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Matches the row by its primary key.
+			);
+			$done  = is_array( $value )
+				? $wpdb->update( $wpdb->postmeta, array( 'meta_value' => serialize( array_filter( $value, 'is_scalar' ) ) ), $where ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value, WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Update data, stored in the same format WordPress uses.
+				: $wpdb->delete( $wpdb->postmeta, $where );
+
+			if ( false === $done ) {
+				wc_get_logger()->error(
+					sprintf( 'Could not remove PHP objects from the default attributes of product %d: %s', $row->post_id, $wpdb->last_error ),
+					array( 'source' => 'wc-updater' )
+				);
+				continue;
+			}
+
+			// Nothing matched: the row was saved again after it was read.
+			if ( ! $done ) {
+				continue;
+			}
+
+			wp_cache_delete( (int) $row->post_id, 'post_meta' );
+			$product_ids[] = (int) $row->post_id;
+		}
+	}
+
+	if ( $product_ids ) {
+		wc_get_logger()->warning(
+			sprintf(
+				'Removed PHP objects or other non-string values from the default attributes of these products. WooCommerce only stores strings there, so check these products\' default form values: %s',
+				implode( ', ', array_unique( $product_ids ) )
+			),
+			array( 'source' => 'wc-updater' )
+		);
+	}
+}
+
+/**
+ * Clear cached shipping zone and tax rate matches, so ZIP+4 postcodes cached before 11.3.1
+ * are matched again against rules for their 5-digit ZIP code.
+ *
+ * The shipping transient version is bumped too, so shipping rates stored in a cart session
+ * before the update are calculated again.
+ *
+ * @since 11.3.1
+ */
+function wc_update_1131_invalidate_postcode_match_caches(): void {
+	WC_Cache_Helper::invalidate_cache_group( 'shipping_zones' );
+	WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+	WC_Cache_Helper::get_transient_version( 'shipping', true );
 }

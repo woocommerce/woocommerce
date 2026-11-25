@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import TYPES from './action-types';
@@ -42,8 +37,8 @@ export type ProductState = {
 	};
 };
 
-const reducer: Reducer< ProductState, Actions > = (
-	state = {
+const reducer = (
+	state: ProductState = {
 		products: {},
 		productsCount: {},
 		errors: {},
@@ -51,8 +46,8 @@ const reducer: Reducer< ProductState, Actions > = (
 		pending: {},
 		suggestedProducts: {},
 	},
-	payload
-) => {
+	payload: Actions
+): ProductState => {
 	if ( payload && 'type' in payload ) {
 		switch ( payload.type ) {
 			case TYPES.CREATE_PRODUCT_START:

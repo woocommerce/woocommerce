@@ -30,6 +30,16 @@ class WC_Privacy_Erasers {
 
 		$user = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
 
+		$coupon_data_store = WC_Data_Store::load( 'coupon' );
+		if ( $coupon_data_store->has_callable( 'remove_used_by_email_records' ) ) {
+			// @phpstan-ignore-next-line method.notFound (WC_Data_Store forwards the call to the coupon data store.)
+			$removed = $coupon_data_store->remove_used_by_email_records( (string) $email_address, $user instanceof WP_User ? $user->ID : 0 );
+			if ( $removed ) {
+				$response['messages'][]    = __( 'Removed customer email from coupon usage records', 'woocommerce' );
+				$response['items_removed'] = true;
+			}
+		}
+
 		if ( ! $user instanceof WP_User ) {
 			return $response;
 		}
@@ -191,10 +201,9 @@ class WC_Privacy_Erasers {
 
 		// Revoke download permissions.
 		if ( apply_filters( 'woocommerce_privacy_erase_download_personal_data', $erasure_enabled, $email_address ) ) {
+			$result = $customer_download_data_store->delete_by_user_email( $email_address );
 			if ( $user instanceof WP_User ) {
-				$result = $customer_download_data_store->delete_by_user_id( (int) $user->ID );
-			} else {
-				$result = $customer_download_data_store->delete_by_user_email( $email_address );
+				$result = $customer_download_data_store->delete_by_user_id( (int) $user->ID ) || $result;
 			}
 			if ( $result ) {
 				$response['messages'][]    = __( 'Removed access to downloadable files.', 'woocommerce' );

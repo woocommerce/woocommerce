@@ -48,34 +48,6 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	private array $original_post = array();
 
 	/**
-	 * Original REQUEST_METHOD value.
-	 *
-	 * @var string|null
-	 */
-	private ?string $original_request_method = null;
-
-	/**
-	 * Whether REQUEST_METHOD existed before the test.
-	 *
-	 * @var bool
-	 */
-	private bool $had_request_method = false;
-
-	/**
-	 * Original REMOTE_ADDR value.
-	 *
-	 * @var string|null
-	 */
-	private ?string $original_remote_addr = null;
-
-	/**
-	 * Whether REMOTE_ADDR existed before the test.
-	 *
-	 * @var bool
-	 */
-	private bool $had_remote_addr = false;
-
-	/**
 	 * Original WooCommerce session.
 	 *
 	 * @var \WC_Session|null
@@ -122,10 +94,6 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 		$this->sut                         = new OrderWithdrawalFormProcessor();
 		$this->original_post               = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$this->had_request_method          = filter_has_var( INPUT_SERVER, 'REQUEST_METHOD' );
-		$this->original_request_method     = $this->had_request_method ? filter_input( INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) : null;
-		$this->had_remote_addr             = array_key_exists( 'REMOTE_ADDR', $_SERVER );
-		$this->original_remote_addr        = $this->had_remote_addr ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : null;
 		$this->original_session            = WC()->session;
 		$this->original_feature_option     = get_option( self::FEATURE_OPTION, self::MISSING_OPTION_MARK );
 		$this->original_endpoint_option    = get_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION, self::MISSING_OPTION_MARK );
@@ -151,22 +119,9 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$_POST = $this->original_post;
 
-		if ( $this->had_request_method ) {
-			$_SERVER['REQUEST_METHOD'] = (string) $this->original_request_method;
-		} else {
-			unset( $_SERVER['REQUEST_METHOD'] );
-		}
-
-		if ( $this->had_remote_addr ) {
-			$_SERVER['REMOTE_ADDR'] = (string) $this->original_remote_addr;
-		} else {
-			unset( $_SERVER['REMOTE_ADDR'] );
-		}
-
 		$this->restore_option( self::FEATURE_OPTION, $this->original_feature_option );
 		$this->restore_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION, $this->original_endpoint_option );
 		$this->restore_option( self::FLUSH_QUEUE_OPTION, $this->original_flush_queue_option );
-		wc_clear_notices();
 		$this->clear_order_withdrawal_rate_limits();
 		$this->delete_created_inbox_notes();
 		$this->delete_created_orders();
@@ -686,27 +641,13 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$notification->init( $endpoint );
 		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification, $email_preview, $endpoint );
 
-		try {
-			$controller->register();
-			$controller->register_feature_hooks();
+		$controller->register();
+		$controller->register_feature_hooks();
 
-			$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
-			$this->assertNotFalse( has_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
-			$this->assertNotFalse( has_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ) ) );
-			$this->assertFalse( has_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ) ) );
-		} finally {
-			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
-			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
-			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ), 10 );
-			remove_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ), 10 );
-			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
-			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
-			remove_filter( 'woocommerce_settings_pages', array( $controller, 'add_endpoint_setting' ), 10 );
-			remove_action( 'woocommerce_account_order-withdrawal_endpoint', array( $controller, 'render_view' ), 10 );
-			remove_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
-			remove_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
-			remove_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
-		}
+		$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
+		$this->assertNotFalse( has_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
+		$this->assertNotFalse( has_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ) ) );
+		$this->assertFalse( has_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ) ) );
 	}
 
 	/**
@@ -769,17 +710,8 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertFalse( has_action( 'update_option_woocommerce_coming_soon', array( $notification, 'maybe_add_note_when_store_goes_live' ) ), 'The feature highlight notification should not listen for coming-soon changes when the feature is enabled.' );
 			$this->assertFalse( has_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ) ), 'The feature highlight notification should not run daily when the feature is enabled.' );
 		} finally {
-			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ), 10 );
-			remove_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ), 10 );
-			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
-			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
-			remove_filter( 'woocommerce_settings_pages', array( $controller, 'add_endpoint_setting' ), 10 );
-			remove_action( 'woocommerce_account_order-withdrawal_endpoint', array( $controller, 'render_view' ), 10 );
-			remove_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
-			remove_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
-			remove_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
 		}
 	}
 
@@ -804,28 +736,17 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$endpoint
 		);
 
-		try {
-			$controller->register();
-			$controller->register_feature_hooks();
+		$controller->register();
+		$controller->register_feature_hooks();
 
-			$this->assertFalse( has_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ) ), 'The endpoint query var should not be registered while the feature is disabled.' );
-			$this->assertFalse( has_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ) ), 'The endpoint title should not be registered while the feature is disabled.' );
-			$this->assertFalse( has_filter( 'woocommerce_settings_pages', array( $controller, 'add_endpoint_setting' ) ), 'The endpoint setting should not be registered while the feature is disabled.' );
-			$this->assertFalse( has_action( 'woocommerce_account_order-withdrawal_endpoint', array( $controller, 'render_view' ) ), 'The endpoint renderer should not be registered while the feature is disabled.' );
-			$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ), 'HPOS order cleanup should stay registered while the feature is disabled.' );
-			$this->assertNotFalse( has_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ), 'Legacy order cleanup should stay registered while the feature is disabled.' );
-			$this->assertNotFalse( has_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ), 'Privacy erasure cleanup should stay registered while the feature is disabled.' );
-			$this->assertNotFalse( has_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ) ), 'The feature highlight notification should run while the feature is disabled.' );
-		} finally {
-			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
-			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
-			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ), 10 );
-			remove_action( 'update_option_woocommerce_coming_soon', array( $notification, 'maybe_add_note_when_store_goes_live' ), 10 );
-			remove_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ), 10 );
-			remove_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
-			remove_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
-			remove_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
-		}
+		$this->assertFalse( has_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ) ), 'The endpoint query var should not be registered while the feature is disabled.' );
+		$this->assertFalse( has_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ) ), 'The endpoint title should not be registered while the feature is disabled.' );
+		$this->assertFalse( has_filter( 'woocommerce_settings_pages', array( $controller, 'add_endpoint_setting' ) ), 'The endpoint setting should not be registered while the feature is disabled.' );
+		$this->assertFalse( has_action( 'woocommerce_account_order-withdrawal_endpoint', array( $controller, 'render_view' ) ), 'The endpoint renderer should not be registered while the feature is disabled.' );
+		$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ), 'HPOS order cleanup should stay registered while the feature is disabled.' );
+		$this->assertNotFalse( has_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ), 'Legacy order cleanup should stay registered while the feature is disabled.' );
+		$this->assertNotFalse( has_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ), 'Privacy erasure cleanup should stay registered while the feature is disabled.' );
+		$this->assertNotFalse( has_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ) ), 'The feature highlight notification should run while the feature is disabled.' );
 	}
 
 	/**

@@ -1,0 +1,866 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Internal\AgentReadiness;
+
+use Automattic\WooCommerce\Internal\AgentReadiness\Checks\AbstractReadinessCheck;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * One pass over the published catalog for the readiness checks.
+ *
+ * Walks published simple and variable products in batches, most recently
+ * modified first (best sellers first on a catalog over PRODUCT_LIMIT), tests each against every rule once and tallies product
+ * statuses per channel. Stops after PRODUCT_LIMIT products so the scan stays
+ * inside one request. Products set to Hidden are the merchant's choice and
+ * agents can't buy other product types through UCP yet, so both are counted,
+ * not checked. "Search results only" products are checked: agents find them
+ * by search.
+ *
+ * @since 11.4.0
+ */
+class ProductScan {
+
+	public const BATCH_SIZE = 200;
+
+	public const PRODUCT_LIMIT = 5000;
+
+	/**
+	 * Sales pages read when earlier pages are products the scan does not check.
+	 * Each page repeats the aggregation, so a catalog of other product types stays bounded.
+	 */
+	private const SELLER_PAGES = 10;
+
+	public const SUPPORTED_TYPES = array( 'simple', 'variable' );
+
+	/**
+	 * Published products of a supported type that shoppers can find in the catalog: the ones agents see.
+	 */
+	public const COUNT_AVAILABLE = 'available';
+
+	/**
+	 * Published products of a supported type with Catalog visibility set to Hidden.
+	 */
+	public const COUNT_HIDDEN = 'hidden';
+
+	/**
+	 * Published products of a type agents can't sell yet.
+	 */
+	public const COUNT_UNSUPPORTED = 'unsupported';
+
+	public const NOT_LISTABLE = 'not_listable';
+	public const WITH_GAPS    = 'with_gaps';
+	public const COMPLETE     = 'complete';
+
+	/**
+	 * Count, product ids and the failing products' sales per rule id.
+	 *
+	 * @var array<string, array{count:int,product_ids:array<int,int>,sales:float}>
+	 */
+	private array $results = array();
+
+	/**
+	 * Net sales by product id, from ProductSales, or empty when none were given.
+	 *
+	 * @var array<int, float>
+	 */
+	private array $sales = array();
+
+	/**
+	 * Net sales by variation id, from ProductSales.
+	 *
+	 * @var array<int, float>
+	 */
+	private array $variation_sales = array();
+
+	/**
+	 * Products tested.
+	 *
+	 * @var int
+	 */
+	private int $products = 0;
+
+	/**
+	 * Published products of a supported type set to Hidden.
+	 *
+	 * @var int
+	 */
+	private int $hidden_from_catalog = 0;
+
+	/**
+	 * Published products agents can see, the scan's catalog. More than it checks when it stops at PRODUCT_LIMIT.
+	 *
+	 * @var int
+	 */
+	private int $available = 0;
+
+	/**
+	 * Published products of a type agents don't support yet.
+	 *
+	 * @var int
+	 */
+	private int $unsupported_types = 0;
+
+	/**
+	 * Product statuses by channel id.
+	 *
+	 * @var array<string, array<string, int>>
+	 */
+	private array $statuses = array();
+
+	/**
+	 * Most shared GTINs the stored report keeps.
+	 */
+	public const SHARED_GTINS_LIMIT = 5000;
+
+	/**
+	 * Normalised GTIN keys carried by more than one published product.
+	 *
+	 * @var array<string, true>|null
+	 */
+	private ?array $shared_gtins = null;
+
+	/**
+	 * Whether the catalog has more products than PRODUCT_LIMIT.
+	 *
+	 * @var bool
+	 */
+	private bool $truncated = false;
+
+	/**
+	 * Whether start() put best sellers ahead of the newest changes.
+	 *
+	 * @var bool
+	 */
+	private bool $best_sellers_first = false;
+
+	/**
+	 * How many of the products start() returns are bestsellers it checked.
+	 *
+	 * @var int
+	 */
+	private int $bestsellers_count = 0;
+
+	/**
+	 * Called with each product id and its failures during test(). Cleared when that batch ends.
+	 *
+	 * @var callable|null
+	 */
+	private $tested_callback = null;
+
+	/**
+	 * Whether the readiness checks test this product.
+	 *
+	 * @param \WC_Product $product Product.
+	 */
+	public static function covers( \WC_Product $product ): bool {
+		return 'publish' === $product->get_status()
+			&& ! $product instanceof \WC_Product_Variation
+			&& in_array( self::stored_type( $product ), self::SUPPORTED_TYPES, true )
+			&& 'hidden' !== $product->get_catalog_visibility();
+	}
+
+	/**
+	 * The product type as stored, which the scan query reads. A product whose
+	 * type's plugin is inactive loads as simple, but keeps its stored type.
+	 *
+	 * @param \WC_Product $product Product.
+	 */
+	private static function stored_type( \WC_Product $product ): string {
+		$type = \WC_Product_Factory::get_product_type( $product->get_id() );
+		return is_string( $type ) && '' !== $type ? $type : 'simple';
+	}
+
+	/**
+	 * Clear the totals, count the catalog and list the products to test: newest change first,
+	 * up to PRODUCT_LIMIT. The list is read once, so a scan in batches tests the same products
+	 * a single pass would, even when products change between batches.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return array<int, int> Product ids.
+	 *
+	 * @throws \RuntimeException When the product list query fails.
+	 */
+	public function start(): array {
+		return $this->start_best_sellers_first( array() );
+	}
+
+	/**
+	 * Same list as start(), with bestsellers ahead of the newest changes when the catalog is over the limit.
+	 * A saved product is checked again on save; one nobody edits would never be.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array<int, int> $best_sellers       Product ids with the most sales first, or none to go by last change only.
+	 * @param callable|null   $more_best_sellers Next page `(int $offset, int $limit): array<int, int>`, when that list may continue.
+	 * @return array<int, int> Product ids.
+	 *
+	 * @throws \RuntimeException When the product list query fails.
+	 */
+	public function start_best_sellers_first( array $best_sellers, ?callable $more_best_sellers = null ): array {
+		$this->results             = array();
+		$this->products            = 0;
+		$this->statuses            = array();
+		$this->hidden_from_catalog = self::count_published( self::count_query( self::COUNT_HIDDEN ) );
+		$this->available           = self::count_published( self::count_query( self::COUNT_AVAILABLE ) );
+		$this->unsupported_types   = self::count_published( self::count_query( self::COUNT_UNSUPPORTED ) );
+
+		// One more than the limit, to tell a catalog cut short from one that fits.
+		$product_ids              = self::list_products(
+			array(
+				'posts_per_page' => self::PRODUCT_LIMIT + 1,
+				'orderby'        => array(
+					'modified' => 'DESC',
+					'ID'       => 'DESC',
+				),
+			)
+		);
+		$this->truncated          = count( $product_ids ) > self::PRODUCT_LIMIT;
+		$this->best_sellers_first = false;
+		$this->bestsellers_count  = 0;
+		$eligible                 = $this->truncated ? $this->eligible_sellers( $best_sellers, $more_best_sellers ) : array();
+		if ( array() !== $eligible ) {
+			$this->best_sellers_first = true;
+			$this->bestsellers_count  = count( $eligible );
+			$product_ids              = array_values( array_unique( array_merge( $eligible, $product_ids ) ) );
+		}
+		return array_slice( $product_ids, 0, self::PRODUCT_LIMIT );
+	}
+
+	/**
+	 * Bestsellers the scan checks, most sales first, reading further pages while earlier ones
+	 * are hidden, unpublished or another type. Stops at PRODUCT_LIMIT.
+	 *
+	 * @param array<int, int> $best_sellers       First page, most sales first.
+	 * @param callable|null   $more_best_sellers Next page, or null when $best_sellers is the whole list.
+	 * @return array<int, int>
+	 *
+	 * @throws \RuntimeException When a product list query fails.
+	 */
+	private function eligible_sellers( array $best_sellers, ?callable $more_best_sellers ): array {
+		$eligible = array();
+		$seen     = array();
+		$page     = self::positive_ids( $best_sellers );
+		$offset   = 0;
+		$pages    = 0;
+		$room     = self::PRODUCT_LIMIT;
+		while ( array() !== $page && $pages < self::SELLER_PAGES && $room > 0 ) {
+			++$pages;
+			$page    = array_slice( $page, 0, self::PRODUCT_LIMIT );
+			$offset += count( $page );
+			foreach ( self::eligible_ids( $page ) as $id ) {
+				if ( isset( $seen[ $id ] ) ) {
+					continue;
+				}
+				$seen[ $id ] = true;
+				$eligible[]  = $id;
+				--$room;
+				if ( 0 === $room ) {
+					break;
+				}
+			}
+			if ( 0 === $room || count( $page ) < self::PRODUCT_LIMIT || ! is_callable( $more_best_sellers ) ) {
+				break;
+			}
+			$next = $more_best_sellers( $offset, self::PRODUCT_LIMIT );
+			$page = self::positive_ids( is_array( $next ) ? $next : array() );
+		}
+		return $eligible;
+	}
+
+	/**
+	 * Ids from a sales page that the scan checks, in that page's order.
+	 *
+	 * @param array<int, int> $ids Product ids, most sales first.
+	 * @return array<int, int>
+	 *
+	 * @throws \RuntimeException When the product list query fails.
+	 */
+	private static function eligible_ids( array $ids ): array {
+		if ( array() === $ids ) {
+			return array();
+		}
+		// The same query as the catalog list, so a hidden, unpublished or other type is left out.
+		return self::list_products(
+			array(
+				'posts_per_page' => count( $ids ),
+				'post__in'       => $ids,
+				'orderby'        => 'post__in',
+			)
+		);
+	}
+
+	/**
+	 * Product ids, dropping empties. A sales row can name a product id of 0.
+	 *
+	 * @param array<mixed> $ids Ids from the sales query or its next page.
+	 * @return array<int, int>
+	 */
+	private static function positive_ids( array $ids ): array {
+		return array_values( array_filter( array_map( 'intval', $ids ) ) );
+	}
+
+	/**
+	 * Ids of published products the scan checks, for start().
+	 *
+	 * @param array<string, mixed> $args Which of them, and in what order.
+	 * @return array<int, int>
+	 *
+	 * @throws \RuntimeException When the query fails.
+	 */
+	private static function list_products( array $args ): array {
+		global $wpdb;
+		// An ids query returns before posts_results runs, so read the error the query left instead.
+		$wpdb->last_error = '';
+		$query            = new \WP_Query(
+			$args + array(
+				'post_type'     => 'product',
+				'post_status'   => 'publish',
+				'fields'        => 'ids',
+				'no_found_rows' => true,
+				// A failed query would be cached as an empty list, and the next scan would read it without an error.
+				'cache_results' => false,
+				'tax_query'     => self::count_query( self::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			)
+		);
+		// Only a database error is a failed list, whatever the counts say: they read 0 when their own queries fail.
+		// An empty success publishes a scan of what is left.
+		if ( '' !== self::db_error() ) {
+			throw new \RuntimeException( 'Agent readiness could not list products to scan.' );
+		}
+		return array_map(
+			static function ( $post ): int {
+				return $post instanceof \WP_Post ? $post->ID : (int) $post;
+			},
+			is_array( $query->posts ) ? $query->posts : array()
+		);
+	}
+
+	/**
+	 * Test one batch of products from start() and add them to the totals.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array<int, int>                                                 $product_ids         Product ids, at most BATCH_SIZE.
+	 * @param array<string, ReadinessRule>                                    $rules               Rules by id.
+	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules       Channel map by rule id.
+	 * @param int                                                             $ids_limit           Product ids kept per rule.
+	 * @param callable|null                                                   $on_tested           Called with each product id and its failures.
+	 * @param bool                                                            $skip_unloadable     When true, products that fail to load are skipped instead of failing the batch (last scan attempt).
+	 * @param array<int, int>                                                 $skipped_unloadable  Filled with ids skipped when $skip_unloadable is true.
+	 *
+	 * @throws \RuntimeException When a selected product still exists but cannot be loaded, and $skip_unloadable is false.
+	 */
+	public function test( array $product_ids, array $rules, array $channel_rules, int $ids_limit, ?callable $on_tested = null, bool $skip_unloadable = false, array &$skipped_unloadable = array() ): void {
+		/**
+		 * Fires after one batch of product ids has been read, before those products are tested.
+		 * A product created here is not in this batch, so the scan does not replace its rows.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param int[] $product_ids Product ids in this batch.
+		 */
+		do_action( 'woocommerce_agent_readiness_scan_batch', $product_ids );
+		self::prime_related( $product_ids );
+		$this->tested_callback = $on_tested;
+		try {
+			foreach ( $product_ids as $product_id ) {
+				$product = wc_get_product( $product_id );
+				if ( $product instanceof \WC_Product ) {
+					// Skip products that left the eligible set between start() and this batch.
+					if ( self::covers( $product ) ) {
+						$this->record( $product, $rules, $channel_rules, $ids_limit );
+					}
+					continue;
+				}
+				// Factory returned false. A missing post is gone; a product post that still
+				// exists failed to load. Retry the batch unless this is the last attempt.
+				if ( 'product' === get_post_type( $product_id ) ) {
+					if ( $skip_unloadable ) {
+						$skipped_unloadable[] = (int) $product_id;
+						continue;
+					}
+					throw new \RuntimeException(
+						sprintf( 'Agent readiness could not load product %d to scan.', (int) $product_id )
+					);
+				}
+			}
+		} finally {
+			$this->tested_callback = null;
+		}
+
+		// A full-catalog read would otherwise keep every product's post, meta and terms in the request's object cache.
+		if ( wp_cache_supports( 'flush_runtime' ) ) {
+			wp_cache_flush_runtime();
+		}
+	}
+
+	/**
+	 * The totals so far, to carry a scan in batches from one background action to the next.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function state(): array {
+		return array(
+			'results'             => $this->results,
+			'products'            => $this->products,
+			'statuses'            => $this->statuses,
+			'available'           => $this->available,
+			'hidden_from_catalog' => $this->hidden_from_catalog,
+			'unsupported_types'   => $this->unsupported_types,
+			'truncated'           => $this->truncated,
+			// Read once per scan; past the limit, each batch reads them again rather than storing them all.
+			'shared_gtins'        => null === $this->shared_gtins ? null : $this->shared_gtins(),
+		);
+	}
+
+	/**
+	 * A scan that goes on from state().
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array<string, mixed> $state Totals from state().
+	 */
+	public static function from_state( array $state ): self {
+		$scan                      = new self();
+		$scan->results             = (array) ( $state['results'] ?? array() );
+		$scan->products            = (int) ( $state['products'] ?? 0 );
+		$scan->statuses            = (array) ( $state['statuses'] ?? array() );
+		$scan->available           = (int) ( $state['available'] ?? 0 );
+		$scan->hidden_from_catalog = (int) ( $state['hidden_from_catalog'] ?? 0 );
+		$scan->unsupported_types   = (int) ( $state['unsupported_types'] ?? 0 );
+		$scan->truncated           = ! empty( $state['truncated'] );
+		if ( is_array( $state['shared_gtins'] ?? null ) ) {
+			$scan->use_shared_gtins( $state['shared_gtins'] );
+		}
+		return $scan;
+	}
+
+	/**
+	 * The tax query behind a product count, so the Products list a count links to shows the same products.
+	 *
+	 * @param string $count COUNT_AVAILABLE, COUNT_HIDDEN or COUNT_UNSUPPORTED.
+	 * @return array<int, array<string|int, mixed>>
+	 */
+	public static function count_query( string $count ): array {
+		if ( self::COUNT_UNSUPPORTED === $count ) {
+			return array(
+				array(
+					'taxonomy' => 'product_type',
+					'field'    => 'slug',
+					'terms'    => self::SUPPORTED_TYPES,
+					'operator' => 'NOT IN',
+				),
+				array(
+					'taxonomy' => 'product_type',
+					'operator' => 'EXISTS',
+				),
+			);
+		}
+		return array( self::supported_type_query(), self::catalog_query( self::COUNT_HIDDEN === $count ) );
+	}
+
+	/**
+	 * Tax query for a supported type. A product with no type term loads as simple.
+	 *
+	 * @return array<string|int, mixed>
+	 */
+	private static function supported_type_query(): array {
+		return array(
+			'relation' => 'OR',
+			array(
+				'taxonomy' => 'product_type',
+				'field'    => 'slug',
+				'terms'    => self::SUPPORTED_TYPES,
+			),
+			array(
+				'taxonomy' => 'product_type',
+				'operator' => 'NOT EXISTS',
+			),
+		);
+	}
+
+	/**
+	 * Tax query on catalog visibility. Only "Hidden" carries both the
+	 * exclude-from-catalog and exclude-from-search terms.
+	 *
+	 * @param bool $hidden True for Hidden products, false for the rest.
+	 * @return array<string|int, mixed>
+	 */
+	private static function catalog_query( bool $hidden ): array {
+		$term = static fn( string $name ): array => array(
+			'taxonomy' => 'product_visibility',
+			'field'    => 'name',
+			'terms'    => array( $name ),
+			'operator' => $hidden ? 'IN' : 'NOT IN',
+		);
+		return array(
+			'relation' => $hidden ? 'AND' : 'OR',
+			$term( 'exclude-from-catalog' ),
+			$term( 'exclude-from-search' ),
+		);
+	}
+
+	/**
+	 * Count published products matching a tax query.
+	 *
+	 * @param array<int, array<string|int, mixed>> $tax_query Tax query clauses.
+	 */
+	private static function count_published( array $tax_query ): int {
+		$query = new \WP_Query(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'tax_query'      => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			)
+		);
+		return (int) $query->found_posts;
+	}
+
+	/**
+	 * Load the products with their meta and terms, then the featured images
+	 * and variations the checks read, one query each instead of one per product.
+	 *
+	 * @param array<int, int|string> $product_ids Product ids.
+	 */
+	public static function prime_related( array $product_ids ): void {
+		global $wpdb;
+		if ( empty( $product_ids ) ) {
+			return;
+		}
+
+		_prime_post_caches( array_map( 'intval', $product_ids ), true, true );
+
+		_prime_post_caches(
+			array_filter(
+				array_map(
+					static function ( $product_id ): int {
+						return (int) get_post_meta( (int) $product_id, '_thumbnail_id', true );
+					},
+					$product_ids
+				)
+			),
+			false,
+			true
+		);
+		$placeholders  = implode( ',', array_fill( 0, count( $product_ids ), '%d' ) );
+		$variation_ids = array_map(
+			'intval',
+			$wpdb->get_col(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- One %d placeholder per product.
+					"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product_variation' AND post_parent IN ({$placeholders})",
+					array_map( 'intval', $product_ids )
+				)
+			)
+		);
+		_prime_post_caches( $variation_ids, true, true );
+
+		// The variations' own images, which a variable product with no image of its own is listed with.
+		_prime_post_caches(
+			array_filter(
+				array_map(
+					static fn( int $variation_id ): int => (int) get_post_meta( $variation_id, '_thumbnail_id', true ),
+					$variation_ids
+				)
+			),
+			false,
+			true
+		);
+	}
+
+	/**
+	 * Count, product ids and the failing products' sales for one rule.
+	 *
+	 * @param string $rule_id Rule id.
+	 * @return array{count:int,product_ids:array<int,int>,sales:float}
+	 */
+	public function result( string $rule_id ): array {
+		return $this->results[ $rule_id ] ?? array(
+			'count'       => 0,
+			'product_ids' => array(),
+			'sales'       => 0.0,
+		);
+	}
+
+	/**
+	 * Sales to add up per rule over the next test(): each failing product adds its own, or
+	 * only its failing variations' when the check names them.
+	 *
+	 * @param array<int, float> $by_product   Net sales by product id.
+	 * @param array<int, float> $by_variation Net sales by variation id.
+	 */
+	public function use_sales( array $by_product, array $by_variation = array() ): void {
+		$this->sales           = $by_product;
+		$this->variation_sales = $by_variation;
+	}
+
+	/**
+	 * Products tested.
+	 */
+	public function products(): int {
+		return $this->products;
+	}
+
+	/**
+	 * Published products agents can see, including any past PRODUCT_LIMIT.
+	 */
+	public function available(): int {
+		return $this->available;
+	}
+
+	/**
+	 * Published products of a supported type set to Hidden, not checked.
+	 */
+	public function hidden_from_catalog(): int {
+		return $this->hidden_from_catalog;
+	}
+
+	/**
+	 * Published products of a type agents don't support yet, not checked.
+	 */
+	public function unsupported_types(): int {
+		return $this->unsupported_types;
+	}
+
+	/**
+	 * Per channel, how many products can't be listed there, list with gaps, or list complete.
+	 *
+	 * @return array<string, array{name:string,spec:string,url:string,listable:int,not_listable:int,with_gaps:int,complete:int}>
+	 */
+	public function channel_totals(): array {
+		$channels = array();
+		foreach ( FeedChannels::all() as $id => $channel ) {
+			$counts          = array_merge( array_fill_keys( array( self::NOT_LISTABLE, self::WITH_GAPS, self::COMPLETE ), 0 ), $this->statuses[ $id ] ?? array() );
+			$channels[ $id ] = array_merge(
+				$channel,
+				array(
+					'listable'     => $this->products - $counts[ self::NOT_LISTABLE ],
+					'not_listable' => $counts[ self::NOT_LISTABLE ],
+					'with_gaps'    => $counts[ self::WITH_GAPS ],
+					'complete'     => $counts[ self::COMPLETE ],
+				)
+			);
+		}
+		return $channels;
+	}
+
+	/**
+	 * A product's status on each channel from the channel maps of the rules it
+	 * fails: not_listable when a failed rule's field is required there,
+	 * with_gaps when only gaps apply there, complete otherwise.
+	 *
+	 * @param array<int, array<string, array{field:string,effect:string}>> $failed_channels Channel map of each failed rule, for this product.
+	 * @return array<string, string> Status by channel id.
+	 */
+	public static function statuses( array $failed_channels ): array {
+		$statuses = array_fill_keys( array_keys( FeedChannels::all() ), self::COMPLETE );
+		foreach ( $failed_channels as $channels ) {
+			foreach ( $channels as $channel => $spec ) {
+				if ( ! isset( $statuses[ $channel ] ) ) {
+					continue;
+				}
+				if ( ReadinessRule::EFFECT_NOT_LISTABLE === $spec['effect'] ) {
+					$statuses[ $channel ] = self::NOT_LISTABLE;
+				} elseif ( self::COMPLETE === $statuses[ $channel ] ) {
+					$statuses[ $channel ] = self::WITH_GAPS;
+				}
+			}
+		}
+		return $statuses;
+	}
+
+	/**
+	 * Whether the scan stopped at PRODUCT_LIMIT with products left.
+	 */
+	public function truncated(): bool {
+		return $this->truncated;
+	}
+
+	/**
+	 * Whether start() put best sellers ahead of the newest changes: only on a catalog over
+	 * PRODUCT_LIMIT, and only when at least one best seller is a product the scan checks.
+	 *
+	 * @since 11.4.0
+	 */
+	public function best_sellers_first(): bool {
+		return $this->best_sellers_first;
+	}
+
+	/**
+	 * How many leading products are bestsellers the scan checks. PRODUCT_LIMIT when they fill the list.
+	 *
+	 * @since 11.4.0
+	 */
+	public function bestsellers_count(): int {
+		return $this->bestsellers_count;
+	}
+
+	/**
+	 * Whether more than one published product carries this GTIN, counting a
+	 * variable product and its variations once. GTINs compare without leading zeros.
+	 *
+	 * @param string $gtin Normalised GTIN.
+	 */
+	public function is_shared_gtin( string $gtin ): bool {
+		return isset( $this->shared_gtin_keys()[ ProductFields::gtin_key( $gtin ) ] );
+	}
+
+	/**
+	 * The GTIN keys more than one published product carries, for the scan to store.
+	 * Null past SHARED_GTINS_LIMIT, so the stored report stays small; checking one product then reads the catalog.
+	 *
+	 * @return array<int, string>|null
+	 */
+	public function shared_gtins(): ?array {
+		$keys = $this->shared_gtin_keys();
+		return count( $keys ) > self::SHARED_GTINS_LIMIT ? null : array_map( 'strval', array_keys( $keys ) );
+	}
+
+	/**
+	 * Use the shared GTIN keys a stored scan found, instead of reading every published product.
+	 *
+	 * @param array<int, mixed> $keys GTIN keys.
+	 */
+	public function use_shared_gtins( array $keys ): void {
+		$this->shared_gtins = array_fill_keys( array_map( 'strval', array_filter( $keys, 'is_scalar' ) ), true );
+	}
+
+	/**
+	 * Shared GTIN keys, read from the catalog the first time they're needed.
+	 *
+	 * @return array<string, bool>
+	 */
+	private function shared_gtin_keys(): array {
+		if ( null === $this->shared_gtins ) {
+			global $wpdb;
+
+			// Read from postmeta, not wc_product_meta_lookup: imports and direct
+			// meta writes skip both the lookup table and core's uniqueness check.
+			// Only shared GTINs come back, so memory follows the duplicates.
+			// The separators go in as hex literals: a non-ASCII query sends
+			// wpdb into its per-table charset checks.
+			$normalised = 'pm.meta_value';
+			foreach ( ProductFields::GTIN_SEPARATORS as $separator ) {
+				$normalised = "REPLACE( {$normalised}, _utf8mb4 X'" . bin2hex( $separator ) . "', '' )";
+			}
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $normalised is built from constant hex literals.
+			$gtins = (array) $wpdb->get_col(
+				$wpdb->prepare(
+					"
+					SELECT owned.gtin
+					FROM (
+						SELECT DISTINCT IF( p.post_type = %s, p.post_parent, p.ID ) AS owner_id,
+							TRIM( LEADING '0' FROM {$normalised} ) AS gtin
+						FROM {$wpdb->postmeta} pm
+						INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+						INNER JOIN {$wpdb->posts} owner ON owner.ID = IF( p.post_type = %s, p.post_parent, p.ID )
+						WHERE pm.meta_key = %s
+							AND pm.meta_value != ''
+							AND p.post_type IN ( %s, %s )
+							AND p.post_status = %s
+							AND owner.post_status = %s
+					) owned
+					GROUP BY owned.gtin
+					HAVING COUNT(*) > 1
+					",
+					'product_variation',
+					'product_variation',
+					'_global_unique_id',
+					'product',
+					'product_variation',
+					'publish',
+					'publish'
+				)
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+			$this->shared_gtins = array_fill_keys( array_map( 'strval', $gtins ), true );
+		}
+		return $this->shared_gtins;
+	}
+
+	/**
+	 * The rules a product fails, with the channels each failure applies to for this product.
+	 * A rule that applies to none of the product's channels is left out.
+	 *
+	 * @param \WC_Product                                                     $product       Product.
+	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
+	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
+	 * @return array<string, array<string, array{field:string,effect:string}>>
+	 */
+	public function failures( \WC_Product $product, array $rules, array $channel_rules ): array {
+		$failed = array();
+		foreach ( $rules as $id => $rule ) {
+			if ( ! $rule->fails( $product, $this ) ) {
+				continue;
+			}
+			$channels = $rule->channels_for( $product, $channel_rules[ $id ] ?? array() );
+			// A check with no channel (about the product page, not a feed) still counts the product.
+			if ( ! empty( $channels ) || empty( $channel_rules[ $id ] ?? array() ) ) {
+				$failed[ (string) $id ] = $channels;
+			}
+		}
+		return $failed;
+	}
+
+	/**
+	 * The sales a rule puts at stake on one failing product: its failing variations' when the rule
+	 * names them, else the whole product's.
+	 *
+	 * @param \WC_Product   $product Product that fails the rule.
+	 * @param ReadinessRule $rule    Rule.
+	 */
+	private function sales_failing( \WC_Product $product, ReadinessRule $rule ): float {
+		$variations = array() !== $this->sales && $rule instanceof AbstractReadinessCheck ? $rule->failing_variations( $product, $this ) : null;
+		if ( null === $variations ) {
+			return $this->sales[ $product->get_id() ] ?? 0.0;
+		}
+		return array_sum( array_intersect_key( $this->variation_sales, array_flip( $variations ) ) );
+	}
+
+	/**
+	 * Test one product and add it to the results and totals.
+	 *
+	 * @param \WC_Product                                                     $product       Product.
+	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
+	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
+	 * @param int                                                             $ids_limit     Product ids kept per rule.
+	 */
+	private function record( \WC_Product $product, array $rules, array $channel_rules, int $ids_limit ): void {
+		$failures = $this->failures( $product, $rules, $channel_rules );
+		if ( null !== $this->tested_callback ) {
+			( $this->tested_callback )( $product->get_id(), $failures );
+		}
+		foreach ( array_keys( $failures ) as $id ) {
+			$result = $this->result( $id );
+			++$result['count'];
+			$result['sales'] += $this->sales_failing( $product, $rules[ $id ] );
+			if ( count( $result['product_ids'] ) < $ids_limit ) {
+				$result['product_ids'][] = $product->get_id();
+			}
+			$this->results[ $id ] = $result;
+		}
+
+		++$this->products;
+		foreach ( self::statuses( array_values( $failures ) ) as $channel => $status ) {
+			$this->statuses[ $channel ][ $status ] = ( $this->statuses[ $channel ][ $status ] ?? 0 ) + 1;
+		}
+	}
+
+	/**
+	 * The last database error, read fresh after a query.
+	 *
+	 * @phpstan-impure
+	 */
+	private static function db_error(): string {
+		global $wpdb;
+		return is_string( $wpdb->last_error ) ? $wpdb->last_error : '';
+	}
+}

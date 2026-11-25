@@ -38,23 +38,23 @@
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/sanitize#readme",
 	"dependencies": {
-		"dompurify": "3.4.14"
+		"dompurify": "3.4.17"
 	},
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
 		"@types/dompurify": "^2.0.4",
-		"@types/jest": "29.5.x",
+		"@types/jest": "catalog:tooling",
 		"@types/trusted-types": "^2.0.7",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"eslint": "^10.0.0",
-		"jest": "29.5.x",
-		"jest-cli": "29.5.x",
-		"jest-environment-jsdom": "29.5.x",
-		"rimraf": "5.0.5",
-		"ts-jest": "29.1.x",
-		"typescript": "5.7.x"
+		"eslint": "catalog:tooling",
+		"jest": "catalog:tooling",
+		"jest-cli": "catalog:tooling",
+		"jest-environment-jsdom": "catalog:tooling",
+		"rimraf": "catalog:tooling",
+		"ts-jest": "catalog:tooling",
+		"typescript": "catalog:tooling"
 	},
 	"peerDependencies": {},
 	"publishConfig": {

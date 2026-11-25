@@ -20,6 +20,13 @@ use WP_REST_Request;
 class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Tests register their own controller's routes, which a reused server would keep serving from the first test.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * @var Controller
 	 */
 	private Controller $controller;
@@ -152,9 +159,6 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'rest_shipping_disabled', $result->get_error_code() );
 		$this->assertEquals( WP_Http::SERVICE_UNAVAILABLE, $result->get_error_data()['status'] );
-
-		// Re-enable shipping.
-		remove_filter( 'wc_shipping_enabled', '__return_false' );
 	}
 
 	/**

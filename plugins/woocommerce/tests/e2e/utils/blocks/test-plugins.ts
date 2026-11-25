@@ -15,12 +15,14 @@ import { BASE_URL } from './constants';
  */
 export const COOKIE_GATED_TEST_PLUGINS = [
 	'additional-checkout-fields',
+	'cart-extensions-test-helper',
+	'custom-add-to-cart-button-text',
+	'custom-place-order-button-test',
+	'extension-cart-update',
 	'item-data-display',
-	'item-data-display-hidden',
-	'item-data-display-malformed',
-	'item-data-display-mixed',
 	'locale-hide-country',
 	'product-collection-compatibility-layer',
+	'register-product-collection',
 	'single-product-template-compatibility-layer',
 	'update-price',
 ] as const;

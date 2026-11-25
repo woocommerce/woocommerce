@@ -239,7 +239,7 @@ class WCEmailTemplateAutoApplier {
 			return;
 		}
 
-		as_enqueue_async_action( self::AUTO_APPLY_AS_HOOK, array(), self::AUTO_APPLY_AS_GROUP );
+		ActionSchedulerUtil::enqueue_async( self::AUTO_APPLY_AS_HOOK, array(), self::AUTO_APPLY_AS_GROUP );
 	}
 
 	/**

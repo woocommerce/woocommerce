@@ -5,20 +5,6 @@
 @import "fonts";
 @import "variables";
 
-/**
-* Layout
-*/
-.woocommerce-cart,
-.woocommerce-account,
-.woocommerce-checkout {
-
-	.wp-block-post-title,
-	main .woocommerce {
-		// Allow Cart/Checkout/Account pages more space to breathe.
-		max-width: 1000px;
-	}
-}
-
 .clear {
 	clear: both;
 }
@@ -236,7 +222,6 @@ a.added_to_cart {
 */
 .woocommerce-page {
 	// Ensure text input fields aren't too small.
-	select,
 	.input-text,
 	.select2-container {
 		font-size: var(--wp--preset--font-size--small);
@@ -245,6 +230,10 @@ a.added_to_cart {
 	label {
 		margin-bottom: 0.7em;
 	}
+}
+
+:where(.woocommerce-page select) {
+	font-size: var(--wp--preset--font-size--small);
 }
 
 .woocommerce {
@@ -530,6 +519,27 @@ a.added_to_cart {
 			padding: 0.5rem 1.1rem;
 		}
 	}
+}
+
+/**
+* Customer emails
+*/
+// Block themes print customer emails in <address> so wptexturize() leaves them unchanged. Show them like the text they replace.
+.woocommerce-message address,
+.wc-block-components-notice-banner address {
+	display: inline;
+	margin: 0;
+	font-style: normal;
+}
+
+.woocommerce-order-withdrawal-content__review-row address {
+	margin: 0;
+	font-style: normal;
+}
+
+address.woocommerce-order-withdrawal-content__note {
+	margin-block: 1em;
+	font-style: normal;
 }
 
 /**

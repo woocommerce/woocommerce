@@ -24,13 +24,6 @@ class ExtensionsWithoutSubscriptionTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Filter standing in for WooCommerce.com, removed on tear down.
-	 *
-	 * @var callable|null
-	 */
-	private $http_filter;
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -49,9 +42,6 @@ class ExtensionsWithoutSubscriptionTest extends WC_Unit_Test_Case {
 			unset( $_GET['page'], $_GET['wc-helper-status'] );
 			WC_Helper::flush_local_woo_products_cache();
 			$this->reset_current_page();
-			if ( $this->http_filter ) {
-				remove_filter( 'pre_http_request', $this->http_filter );
-			}
 		} finally {
 			parent::tearDown();
 		}
@@ -372,7 +362,7 @@ class ExtensionsWithoutSubscriptionTest extends WC_Unit_Test_Case {
 	private function mock_subscription_requests(): object {
 		$requests = (object) array( 'count' => 0 );
 
-		$this->http_filter = static function ( $preempt, $args, $url ) use ( $requests ) {
+		$http_filter = static function ( $preempt, $args, $url ) use ( $requests ) {
 			if ( false === strpos( $url, '/subscriptions' ) ) {
 				return $preempt;
 			}
@@ -386,7 +376,7 @@ class ExtensionsWithoutSubscriptionTest extends WC_Unit_Test_Case {
 				'body'     => '[]',
 			);
 		};
-		add_filter( 'pre_http_request', $this->http_filter, 10, 3 );
+		add_filter( 'pre_http_request', $http_filter, 10, 3 );
 
 		return $requests;
 	}

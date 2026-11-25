@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * ProductSaleBadge class.
  */
 class ProductSaleBadge extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.

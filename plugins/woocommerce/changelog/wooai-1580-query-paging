@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop products, orders and product terms from repeating or going missing across pages of the query abilities.

@@ -85,6 +85,25 @@ class ProductReviews extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Reviewer avatar URLs are neither declared nor returned when avatars are disabled.
+	 */
+	public function test_reviewer_avatar_urls_are_omitted_when_avatars_are_disabled(): void {
+		update_option( 'show_avatars', '0' );
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' ) );
+		$data     = $response->get_data();
+		$schema   = rest_get_server()->dispatch( new \WP_REST_Request( 'OPTIONS', '/wc/store/v1/products/reviews' ) )->get_data()['schema'];
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 2, $data );
+		$this->assertArrayNotHasKey( 'reviewer_avatar_urls', $schema['properties'] );
+		foreach ( $data as $review ) {
+			$this->assertArrayNotHasKey( 'reviewer_avatar_urls', $review );
+		}
+		$this->assertStringNotContainsString( hash( 'sha256', 'woo@woo.local' ), wp_json_encode( $data ) );
+	}
+
+	/**
 	 * @testdox Reviews are only returned for published products.
 	 */
 	public function test_reviews_are_limited_to_published_products() {

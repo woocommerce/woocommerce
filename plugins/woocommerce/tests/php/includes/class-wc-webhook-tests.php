@@ -847,8 +847,316 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 			wc_get_webhook( $webhook->get_id() )->get_failure_count(),
 			'Failure tracking must still run when delivery logging is disabled.'
 		);
-
-		remove_filter( 'woocommerce_logger_log_message', $log_spy, 10 );
 	}
 
+	/**
+	 * @testdox customer.deleted accepts users of any role, and rejects user IDs that don't exist.
+	 */
+	public function test_is_valid_user_action_accepts_any_role(): void {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$customer_id   = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$webhook  = new WC_Webhook();
+		$is_valid = function ( $arg ) {
+			return $this->is_valid_user_action( $arg );
+		};
+
+		$this->assertTrue( $is_valid->call( $webhook, $subscriber_id ) );
+		$this->assertTrue( $is_valid->call( $webhook, $customer_id ) );
+		$this->assertTrue( $is_valid->call( $webhook, (string) $subscriber_id ) );
+		$this->assertFalse( $is_valid->call( $webhook, -$subscriber_id ) );
+		$this->assertFalse( $is_valid->call( $webhook, (string) -$subscriber_id ) );
+		$this->assertFalse( $is_valid->call( $webhook, $subscriber_id + 0.5 ) );
+		$this->assertFalse( $is_valid->call( $webhook, PHP_INT_MAX ) );
+	}
+
+	/**
+	 * @testdox customer.deleted listens to users being removed from a site, which is how multisite deletes users.
+	 */
+	public function test_customer_deleted_topic_includes_remove_user_from_blog(): void {
+		$topic_hooks = WC_Webhook::get_default_topic_hooks();
+
+		$this->assertContains( 'remove_user_from_blog', $topic_hooks['customer.deleted'] );
+	}
+
+	/**
+	 * @testdox customer.deleted skips users deleted from or removed from a site other than the webhook's own.
+	 */
+	public function test_is_valid_user_action_rejects_other_sites(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$webhook = $this->create_active_webhook( 'customer.deleted' );
+		$webhook->enqueue();
+
+		$is_valid = function ( $arg ) {
+			return $this->is_valid_user_action( $arg );
+		};
+		$this->assertTrue( $is_valid->call( $webhook, $user_id ) );
+
+		$set_blog_id = function ( int $blog_id ) {
+			$this->enqueued_blog_id = $blog_id;
+		};
+		$set_blog_id->call( $webhook, get_current_blog_id() + 1 );
+		$this->assertFalse( $is_valid->call( $webhook, $user_id ) );
+	}
+
+	/**
+	 * @testdox Deleting a subscriber delivers customer.deleted exactly once, even on multisite where both user hooks fire.
+	 */
+	public function test_deleting_a_user_delivers_customer_deleted_once(): void {
+		$user_id       = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$delivered_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'customer.deleted' ), $delivered_ids );
+
+		wp_delete_user( $user_id );
+
+		$this->assertSame( array( $user_id ), $delivered_ids );
+	}
+
+	/**
+	 * @testdox Removing a site member directly only delivers customer.deleted to that site's webhook.
+	 */
+	public function test_removing_a_user_from_a_site_delivers_customer_deleted(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Requires multisite.' );
+		}
+
+		$site_id       = get_current_blog_id();
+		$other_site_id = $this->factory->blog->create();
+		$user_id       = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$non_member_id = $this->factory->user->create( array( 'role' => '' ) );
+		remove_user_from_blog( $non_member_id, $site_id );
+		$this->assertFalse( is_user_member_of_blog( $non_member_id, $site_id ) );
+		add_user_to_blog( $other_site_id, $user_id, 'subscriber' );
+
+		$other_deliveries = array();
+		switch_to_blog( $other_site_id );
+		try {
+			$this->record_deliveries( $this->create_active_webhook( 'customer.deleted' ), $other_deliveries );
+		} finally {
+			restore_current_blog();
+		}
+
+		$deliveries = array();
+		$this->record_deliveries( $this->create_active_webhook( 'customer.deleted' ), $deliveries );
+
+		remove_user_from_blog( -$user_id, $site_id );
+		remove_user_from_blog( $non_member_id, $site_id );
+		$this->assertSame( array(), $deliveries, 'Invalid IDs and non-members must not trigger delivery.' );
+
+		$this->assertTrue( remove_user_from_blog( $user_id, $site_id ) );
+		$this->assertSame( array( $user_id ), $deliveries );
+		$this->assertSame( array(), $other_deliveries, 'A webhook registered on another site must not deliver.' );
+		$this->assertTrue( is_user_member_of_blog( $user_id, $other_site_id ) );
+	}
+
+	/**
+	 * @testdox A class that overrides the saving delivery methods keeps working through them, and the stage methods refuse it.
+	 */
+	public function test_stage_delivery_methods_refuse_a_class_that_has_not_adopted_them() {
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$webhook = new class() extends WC_Webhook {
+			public function log_delivery( $delivery_id, $request, $response, $duration ) {
+				parent::log_delivery( $delivery_id, $request, $response, $duration );
+			}
+			public function deliver_ping() {
+				return parent::deliver_ping();
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 0 );
+		$webhook->save();
+
+		// Saving an active webhook with a pending delivery pings its URL; answer locally.
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
+
+		$response = array(
+			'response' => array(
+				'code'    => 500,
+				'message' => 'Internal Server Error',
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+		$request  = array(
+			'method'     => 'POST',
+			'headers'    => array(),
+			'body'       => '',
+			'user-agent' => 'test',
+		);
+		$webhook->log_delivery( 'delivery', $request, $response, 0.1 );
+		$this->assertSame( 1, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$http = static fn() => array(
+			'response' => array(
+				'code'    => 200,
+				'message' => 'OK',
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+		add_filter( 'pre_http_request', $http );
+		$this->assertTrue( $webhook->deliver_ping() );
+		remove_filter( 'pre_http_request', $http );
+
+		$calls = array(
+			'stage_delivery_result' => array( 500 ),
+			'stage_delivery_ping'   => array(),
+		);
+		foreach ( $calls as $stage_method => $args ) {
+			try {
+				$webhook->$stage_method( ...$args );
+				$this->fail( $stage_method . ' did not refuse the class.' );
+			} catch ( WC_Data_Exception $e ) {
+				$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode() );
+				$this->assertStringContainsString( $stage_method . '()', $e->getMessage() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox stage_delivery_result() counts a failure in memory, and the next save writes it.
+	 */
+	public function test_stage_delivery_result_changes_the_webhook_in_memory_only() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 0 );
+		$webhook->save();
+
+		// Saving an active webhook with a pending delivery pings its URL; answer locally.
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
+
+		$webhook->stage_delivery_result( 500 );
+		$this->assertSame( 1, $webhook->get_failure_count() );
+		$this->assertSame( 0, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$webhook->save();
+		$this->assertSame( 1, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$webhook->stage_delivery_result( 200 );
+		$webhook->save();
+		$this->assertSame( 0, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+	}
+
+	/**
+	 * @testdox stage_delivery_result() leaves the disabled action to the next save, which fires it after the write.
+	 */
+	public function test_stage_delivery_result_fires_the_disabled_action_after_the_write() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 6 );
+		$webhook->save();
+
+		$statuses = array();
+		$listener = static function ( $webhook_id ) use ( &$statuses ) {
+			$statuses[] = wc_get_webhook( $webhook_id )->get_status();
+		};
+		add_action( 'woocommerce_webhook_disabled_due_delivery_failures', $listener );
+
+		$webhook->stage_delivery_result( 500 );
+		$this->assertSame( 'disabled', $webhook->get_status() );
+		$this->assertSame( array(), $statuses );
+
+		$webhook->save();
+		$webhook->save();
+
+		remove_action( 'woocommerce_webhook_disabled_due_delivery_failures', $listener );
+		$this->assertSame( array( 'disabled' ), $statuses );
+	}
+
+	/**
+	 * @testdox log_delivery() after a staged disable fires the disabled action once.
+	 */
+	public function test_log_delivery_after_a_staged_disable_fires_the_disabled_action_once() {
+		$webhook = $this->create_failing_webhook();
+		$fired   = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$webhook->stage_delivery_result( 500 );
+		$webhook->log_delivery( 1, $this->delivery_request(), new WP_Error( 'http_request_failed', 'Failed' ), 0.1 );
+		$webhook->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+	}
+
+	/**
+	 * @testdox save() does not fire the disabled action when a status change replaced the staged disable.
+	 */
+	public function test_save_skips_the_disabled_action_when_the_webhook_is_active_again() {
+		$webhook = $this->create_failing_webhook();
+		$fired   = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
+
+		$webhook->stage_delivery_result( 500 );
+		$webhook->set_status( 'active' );
+		$webhook->save();
+
+		$this->assertSame( 0, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+	}
+
+	/**
+	 * Create a saved, active webhook that the next failed delivery disables.
+	 *
+	 * @return WC_Webhook
+	 */
+	private function create_failing_webhook(): WC_Webhook {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 6 );
+		$webhook->save();
+
+		return $webhook;
+	}
+
+	/**
+	 * Build the request array that log_delivery() reads.
+	 *
+	 * @return array
+	 */
+	private function delivery_request(): array {
+		return array(
+			'method'     => 'POST',
+			'user-agent' => 'WooCommerce',
+			'headers'    => array(),
+			'body'       => '',
+		);
+	}
+
+	/**
+	 * @testdox log_delivery() fires the disabled action right away, before it saves.
+	 */
+	public function test_log_delivery_fires_the_disabled_action_once() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 6 );
+		$webhook->save();
+		$fired = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$request = array(
+			'method'     => 'POST',
+			'user-agent' => 'WooCommerce',
+			'headers'    => array(),
+			'body'       => '',
+		);
+		$webhook->log_delivery( 1, $request, new WP_Error( 'http_request_failed', 'Failed' ), 0.1 );
+		$webhook->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+		$this->assertSame( 'disabled', wc_get_webhook( $webhook->get_id() )->get_status() );
+	}
 }

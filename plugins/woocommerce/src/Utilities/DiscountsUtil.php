@@ -28,8 +28,8 @@ class DiscountsUtil {
 
 			// Go through the allowed emails and return true if the email matches a wildcard.
 			foreach ( $restrictions as $restriction ) {
-				// Convert to PHP-regex syntax.
-				$regex = '/^' . str_replace( '*', '(.+)?', $restriction ) . '$/';
+				// Convert to PHP-regex syntax. Only the asterisk is a wildcard, everything else is matched literally.
+				$regex = '/^' . str_replace( '\*', '(.+)?', preg_quote( $restriction, '/' ) ) . '$/';
 				preg_match( $regex, $check_email, $match );
 				if ( ! empty( $match ) ) {
 					return true;

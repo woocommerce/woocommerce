@@ -26,6 +26,47 @@ class Universal_Test extends BaseTestCase {
 	}
 
 	/**
+	 * @testdox Collects additional blocks outside the main WooCommerce block.
+	 *
+	 * @param string   $page             Page to scan.
+	 * @param bool     $has_extra_blocks Whether the page has additional blocks.
+	 * @param string[] $expected         Expected block names in document order.
+	 *
+	 * @testWith ["cart", false, []]
+	 *           ["checkout", false, []]
+	 *           ["cart", true, ["core/group", "core/paragraph", "core/spacer"]]
+	 *           ["checkout", true, ["core/group", "core/paragraph", "core/spacer"]]
+	 */
+	public function test_get_additional_blocks_on_page( string $page, bool $has_extra_blocks, array $expected ): void {
+		$content = sprintf(
+			'<!-- wp:woocommerce/%1$s --><!-- wp:core/buttons /--><!-- /wp:woocommerce/%1$s --><!-- wp:core/shortcode /--><!-- wp:woocommerce/classic-shortcode /-->',
+			$page
+		);
+
+		if ( $has_extra_blocks ) {
+			$content .= '<!-- wp:group --><div><!-- wp:paragraph --><p>Hello</p><!-- /wp:paragraph --></div><!-- /wp:group --><!-- wp:spacer /-->';
+		}
+
+		$sut = new class( $page, $content ) extends Universal {
+			/**
+			 * Set the content source for the page under test.
+			 *
+			 * @param string $page    Page to scan.
+			 * @param string $content Page block markup.
+			 */
+			public function __construct( string $page, string $content ) {
+				if ( 'cart' === $page ) {
+					$this->cart_content_source = $content;
+				} else {
+					$this->checkout_content_source = $content;
+				}
+			}
+		};
+
+		$this->assertSame( $expected, $sut->get_additional_blocks_on_page( $page ), 'The scan should report only blocks outside the ignored blocks.' );
+	}
+
+	/**
 	 * Test that order_process calls wc_get_order with an integer order ID.
 	 */
 	public function test_order_process_handles_integer_order_id(): void {

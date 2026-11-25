@@ -1,3 +1,7 @@
+html:has(body.woocommerce-admin-page__home) {
+	scrollbar-gutter: stable;
+}
+
 .woocommerce-admin-page__home #wpcontent,
 .woocommerce-admin-page__home.woocommerce_page_wc-admin #wpbody-content,
 .woocommerce-admin-page__extensions #wpcontent,

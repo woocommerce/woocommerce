@@ -37,16 +37,6 @@ class COTRedirectionControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Remove our redirect listener.
-	 *
-	 * @return void
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		remove_filter( 'wp_redirect', array( $this, 'watch_and_annul_redirects' ) );
-	}
-
-	/**
 	 * Captures the attempted redirect location, and stops the redirect from taking place.
 	 *
 	 * @param string $url Redirect location.
@@ -67,6 +57,71 @@ class COTRedirectionControllerTest extends \WC_Unit_Test_Case {
 		$return              = $this->redirected_to;
 		$this->redirected_to = '';
 		return $return;
+	}
+
+	/**
+	 * @testdox Redirects HPOS requests from both missing-page and access-denied hooks, leaving unrelated requests unchanged.
+	 *
+	 * @dataProvider provide_admin_request_redirects
+	 * @param string $hook The admin request hook.
+	 * @param array  $query_params The request query parameters.
+	 * @param string $expected_path The expected redirect path, or an empty string for no redirect.
+	 */
+	public function test_redirects_from_admin_request_hooks( string $hook, array $query_params, string $expected_path ): void {
+		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve the request while simulating admin hooks.
+		$_GET         = $query_params;
+
+		try {
+			do_action( $hook );
+
+			$this->assertSame(
+				'' === $expected_path ? '' : get_admin_url( null, $expected_path ),
+				$this->get_redirect_attempt(),
+				'Admin request hooks should redirect only HPOS order requests to the equivalent posts screens.'
+			);
+		} finally {
+			$_GET = $original_get;
+		}
+	}
+
+	/**
+	 * Provides requests for both current and legacy WordPress admin hooks.
+	 *
+	 * @return array
+	 */
+	public function provide_admin_request_redirects(): array {
+		$requests = array(
+			'order list'   => array(
+				array( 'page' => 'wc-orders' ),
+				'edit.php?post_type=shop_order',
+			),
+			'order editor' => array(
+				array(
+					'page'   => 'wc-orders',
+					'action' => 'edit',
+					'id'     => '123',
+				),
+				'post.php?action=edit&post=123',
+			),
+			'new order'    => array(
+				array(
+					'page'   => 'wc-orders',
+					'action' => 'new',
+				),
+				'post-new.php?post_type=shop_order',
+			),
+			'other page'   => array( array( 'page' => 'foo' ), '' ),
+			'no page'      => array( array(), '' ),
+		);
+		$cases    = array();
+
+		foreach ( array( 'admin_page_access_denied', 'wp_admin_page_not_found' ) as $hook ) {
+			foreach ( $requests as $name => $request ) {
+				$cases[ $hook . ': ' . $name ] = array( $hook, $request[0], $request[1] );
+			}
+		}
+
+		return $cases;
 	}
 
 	/**

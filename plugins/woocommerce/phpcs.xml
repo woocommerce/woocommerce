@@ -26,6 +26,8 @@
 	<exclude-pattern>tests/e2e/bin/</exclude-pattern>
 	<!-- Custom PHPCS sniffs and their fixtures follow PHPCS naming/structure, not the WooCommerce ruleset. -->
 	<exclude-pattern>tests/Tools/phpcs/</exclude-pattern>
+	<!-- Fixture classes that the PHPStan rule tests analyse. -->
+	<exclude-pattern>tests/Tools/phpstan/data/</exclude-pattern>
 
 	<!-- Only check PHP files. -->
 	<arg name="extensions" value="php" />

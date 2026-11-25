@@ -61,13 +61,16 @@ class ProductTemplate extends AbstractBlock {
 
 		$classnames = '';
 		if ( isset( $block->context['displayLayout'] ) && isset( $block->context['query'] ) ) {
-			$classnames = 'is-product-collection-layout-' . $block->context['displayLayout']['type'] . ' ';
+			$type    = $block->context['displayLayout']['type'] ?? '';
+			$columns = $block->context['displayLayout']['columns'] ?? null;
 
-			if ( isset( $block->context['displayLayout']['type'] ) && 'flex' === $block->context['displayLayout']['type'] ) {
+			$classnames = 'is-product-collection-layout-' . $type . ' ';
+
+			if ( 'flex' === $type && ! empty( $columns ) ) {
 				if ( isset( $block->context['displayLayout']['shrinkColumns'] ) && $block->context['displayLayout']['shrinkColumns'] ) {
-					$classnames = "wc-block-product-template__responsive columns-{$block->context['displayLayout']['columns']}";
+					$classnames = "wc-block-product-template__responsive columns-{$columns}";
 				} else {
-					$classnames = "is-flex-container columns-{$block->context['displayLayout']['columns']}";
+					$classnames = "is-flex-container columns-{$columns}";
 				}
 			}
 		}

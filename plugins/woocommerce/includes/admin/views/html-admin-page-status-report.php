@@ -53,6 +53,8 @@ $store_base_country_display = isset( $countries[ $store_base_country ] ) ? $stor
 $states                     = WC()->countries->get_states( $store_base_country );
 $store_base_state           = $settings['store_base_state'] ?? '';
 $store_base_state_display   = is_array( $states ) && isset( $states[ $store_base_state ] ) ? $states[ $store_base_state ] . ' (' . $store_base_state . ')' : $store_base_state;
+$store_base_postcode        = $settings['store_base_postcode'] ?? '';
+$store_base_city            = $settings['store_base_city'] ?? '';
 
 $tax_based_on_labels  = array(
 	TaxBasedOn::SHIPPING => __( 'Customer shipping address', 'woocommerce' ),
@@ -153,20 +155,50 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="Action Scheduler Version"><?php esc_html_e( 'Action Scheduler package', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Action Scheduler package running on your site.', 'woocommerce' ) ); ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The Action Scheduler package running on your site and where it is loaded from. Other plugins may bundle a different version.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
-				if ( class_exists( 'ActionScheduler_Versions' ) && class_exists( 'ActionScheduler' ) ) {
-					$version = ActionScheduler_Versions::instance()->latest_version();
-					$path    = ActionScheduler::plugin_path( '' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-				} else {
-					$version = null;
-				}
+				$action_scheduler = $environment['action_scheduler'] ?? array();
+				$as_version       = $action_scheduler['loaded_version'] ?? null;
 
-				if ( ! is_null( $version ) ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $path ) . '</code></mark> ';
-				} else {
+				if ( is_null( $as_version ) ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the Action Scheduler package.', 'woocommerce' ) . '</mark>';
+				} else {
+					if ( ! empty( $action_scheduler['is_risky'] ) ) {
+						/* Translators: %s: Action Scheduler version. */
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%s - This version of Action Scheduler lacks features WooCommerce relies on. Update the plugin or theme it is loaded from.', 'woocommerce' ), esc_html( $as_version ) ) . '</mark>';
+					} else {
+						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $as_version ) . '</mark>';
+					}
+
+					$as_source_name = (string) ( $action_scheduler['source_name'] ?? '' );
+					$as_source_type = (string) ( $action_scheduler['source_type'] ?? '' );
+					switch ( $as_source_type ) {
+						case 'woocommerce':
+						case 'plugin':
+							/* Translators: %s: Plugin name. */
+							$as_source_text = sprintf( __( 'Loaded from the "%s" plugin.', 'woocommerce' ), $as_source_name );
+							break;
+						case 'mu-plugin':
+							/* Translators: %s: Must-use plugin name. */
+							$as_source_text = sprintf( __( 'Loaded from the "%s" must-use plugin.', 'woocommerce' ), $as_source_name );
+							break;
+						case 'theme':
+							/* Translators: %s: Theme name. */
+							$as_source_text = sprintf( __( 'Loaded from the "%s" theme.', 'woocommerce' ), $as_source_name );
+							break;
+						default:
+							$as_source_text = __( 'Loaded from an unknown location.', 'woocommerce' );
+					}
+					echo ' ' . esc_html( $as_source_text );
+
+					$as_registered_version = $action_scheduler['registered_version'] ?? null;
+					if ( is_string( $as_registered_version ) && version_compare( $as_registered_version, $as_version, '>' ) ) {
+						/* Translators: %s: Action Scheduler version. */
+						echo ' ' . sprintf( esc_html__( '%s is also installed but not in use.', 'woocommerce' ), esc_html( $as_registered_version ) );
+					}
+
+					echo ' <code class="private">' . esc_html( (string) ( $action_scheduler['source_path'] ?? '' ) ) . '</code>';
 				}
 				?>
 			</td>
@@ -907,6 +939,16 @@ if ( 0 < $mu_plugins_count ) :
 			<td data-export-label="Store base state"><?php esc_html_e( 'Store base state', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The state or region configured as the store base location.', 'woocommerce' ) ); ?></td>
 			<td><?php echo $store_base_state_display ? esc_html( $store_base_state_display ) : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Store base postcode"><?php esc_html_e( 'Store base postcode', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The postcode configured as the store base location, used to estimate tax before a customer enters an address.', 'woocommerce' ) ); ?></td>
+			<td><?php echo $store_base_postcode ? esc_html( $store_base_postcode ) : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Store base city"><?php esc_html_e( 'Store base city', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The city configured as the store base location, used to estimate tax before a customer enters an address.', 'woocommerce' ) ); ?></td>
+			<td><?php echo $store_base_city ? esc_html( $store_base_city ) : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Default customer location"><?php esc_html_e( 'Default customer location', 'woocommerce' ); ?>:</td>

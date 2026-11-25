@@ -60,6 +60,8 @@
 		}
 	},
 	"keywords": [ "WooCommerce" ],
+	"style": "file:../product-sku.css",
+	"viewScript": "file:../product-sku-frontend.js",
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

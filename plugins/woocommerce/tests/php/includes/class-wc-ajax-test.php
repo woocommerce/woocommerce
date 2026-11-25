@@ -1944,6 +1944,44 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Customer search escapes HTML in customer names.
+	 *
+	 * @throws Automattic\WooCommerce\Internal\DependencyManagement\ContainerException If the LegacyProxy cannot be retrieved.
+	 */
+	public function test_json_search_customers_escapes_html_in_names(): void {
+		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+
+		try {
+			$legacy_proxy->reset();
+			$legacy_proxy->register_function_mocks(
+				array(
+					'check_ajax_referer' => fn () => true,
+				)
+			);
+
+			$customer = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
+			$customer->set_first_name( 'Test' );
+			$customer->set_last_name( '<img src=x onerror=alert(1)>' );
+			$customer->save();
+
+			wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+			$_GET['term'] = $customer->get_id();
+
+			$response = $this->do_ajax( 'woocommerce_json_search_customers' );
+		} finally {
+			unset( $_GET['term'] );
+			wp_set_current_user( 0 );
+			$legacy_proxy->reset();
+		}
+
+		$this->assertSame(
+			sprintf( 'Test &lt;img src=x onerror=alert(1)&gt; (#%1$d &ndash; test1@example.com)', $customer->get_id() ),
+			$response[ $customer->get_id() ],
+			'Customer search results should contain escaped names.'
+		);
+	}
+
+	/**
 	 * Describe JSON search, particularly as it relates to handling searches for users in a
 	 * multisite context (it should generally not be possible to retrieve information about
 	 * users who have not been added to the current blog).
@@ -2807,7 +2845,6 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['refund_reason'], $_POST['line_item_qtys'], $_POST['line_item_totals'], $_POST['line_item_tax_totals'], $_POST['api_refund'] );
 		WC_Tax::_delete_tax_rate( $rate_id );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
@@ -3491,7 +3528,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Percentage order fees use the stored discount total, not a filtered one.
+	 * @testdox Percentage order fees ignore a filtered discount total.
 	 */
 	public function test_add_order_fee_percentage_ignores_filtered_discount_total(): void {
 		$order = $this->create_order_with_20_percent_tax();
@@ -3500,8 +3537,69 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
 
-		// The stored discount is 10, so the base stays 90 even though the filter reports 0.
-		$this->assertEquals( 9.0, (float) $fee->get_total(), 'Percentage fee should use the stored discount total.' );
+		// The line items total 90 after the coupon, so the base stays 90 even though the filter reports no discount.
+		$this->assertEquals( 9.0, (float) $fee->get_total(), 'Percentage fee should ignore a filtered discount total.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees ignore a filtered order subtotal.
+	 */
+	public function test_add_order_fee_percentage_ignores_filtered_subtotal(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		add_filter( 'woocommerce_order_get_subtotal', '__return_zero' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The line items total 100, so the fee stays 10 even though the filter reports a subtotal of 0.
+		$this->assertEquals( 10.0, (float) $fee->get_total(), 'Percentage fee should ignore a filtered subtotal.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees ignore a filtered line item total.
+	 */
+	public function test_add_order_fee_percentage_ignores_filtered_item_total(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		add_filter( 'woocommerce_order_item_get_total', '__return_zero' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The stored line total is 100, so the fee stays 10. The filter also zeroes the fee when read in view context.
+		$this->assertEquals( 10.0, (float) $fee->get_total( 'edit' ), 'Percentage fee should ignore a filtered line item total.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees round the line items the same way as the order subtotal.
+	 *
+	 * @testWith ["no", 24.99, 14.99]
+	 *           ["yes", 25.0, 15.0]
+	 *
+	 * @param string $round_at_subtotal Value of the "Round tax at subtotal level" option.
+	 * @param float  $expected_subtotal Expected order items subtotal.
+	 * @param float  $expected_fee      Expected fee line total.
+	 */
+	public function test_add_order_fee_percentage_rounds_line_items_like_the_subtotal( string $round_at_subtotal, float $expected_subtotal, float $expected_fee ): void {
+		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal );
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = new WC_Order();
+		for ( $i = 0; $i < 3; $i++ ) {
+			// 8.333333 is the net line total stored for a 10.00 price that includes 20% tax.
+			$order->add_product(
+				$product,
+				1,
+				array(
+					'subtotal' => 8.333333,
+					'total'    => 8.333333,
+				)
+			);
+		}
+		$order->calculate_totals( false );
+		$order->save();
+		$this->assertEquals( $expected_subtotal, (float) $order->get_subtotal(), 'Fixture order should show the expected items subtotal.' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '60%' );
+
+		// Rounding each line gives 8.33 × 3 = 24.99, so 60% is 14.99; without it the base is 24.999999 and 60% is 15.00.
+		$this->assertEquals( $expected_fee, (float) $fee->get_total(), 'Percentage fee should be taken from the items subtotal the order shows.' );
 	}
 
 	/**
@@ -3733,10 +3831,12 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 */
 	public function test_update_order_review_skips_reload_without_session(): void {
 		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+		$original_cookies = $_COOKIE;
 		$original_session = WC()->session;
 
 		try {
 			wp_set_current_user( 0 );
+			$_COOKIE      = array();
 			WC()->session = new WC_Session_Handler();
 			WC()->session->init_session_cookie();
 
@@ -3755,6 +3855,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		} finally {
 			WC()->session = $original_session;
 			$_POST        = $original_post;
+			$_COOKIE      = $original_cookies;
 		}
 	}
 
@@ -3779,6 +3880,43 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		} finally {
 			unset( WC()->session->reload_checkout_for_nonce );
 			$_POST = $original_post;
+		}
+	}
+
+	/**
+	 * @testdox A checkout update converts posted state names to state codes before calculating totals.
+	 */
+	public function test_update_order_review_converts_state_names_to_codes(): void {
+		$original_post     = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the AJAX fixture.
+		$original_customer = clone WC()->customer;
+		$product           = null;
+
+		try {
+			WC()->cart->empty_cart();
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$_POST = array(
+				'security'  => wp_create_nonce( 'update-order-review' ),
+				'post_data' => '',
+				'country'   => 'US',
+				'state'     => 'Hawaii',
+				's_country' => 'US',
+				's_state'   => 'ıL',
+			);
+
+			$this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertSame( 'HI', WC()->customer->get_billing_state(), 'The billing state name should be stored as its code.' );
+			$this->assertSame( 'IL', WC()->customer->get_shipping_state(), 'The shipping state spelling should be stored as its code.' );
+		} finally {
+			wc_clear_notices();
+			WC()->cart->empty_cart();
+			if ( $product instanceof WC_Product ) {
+				$product->delete( true );
+			}
+			WC()->customer = $original_customer;
+			$_POST         = $original_post;
 		}
 	}
 

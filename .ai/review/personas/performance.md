@@ -39,9 +39,10 @@ This controls false positives. Follow it strictly.
   term_taxonomy_id IN (...))`.
 - **N queries in a loop** varying one parameter (status, term, attribute) collapse into one
   `GROUP BY` query.
-- **`OR` across two differently indexed columns** forces an index_merge sort_union. When one branch
-  is strictly more selective (a resolved `customer_id` vs `billing_email`), evaluate it first in PHP
-  and build the `OR` fallback only when it is unavailable.
+- **`OR` across two differently indexed columns** typically runs as an index_merge sort_union. When
+  one branch alone can answer the question, evaluate it first in PHP and build the `OR` only when it
+  cannot. Don't flag an `OR` the result needs: a known `customer_id` does not cover guest orders
+  matched by `billing_email`.
 - **`meta_key IN (...) AND meta_value IN (...)`** cross-products keys and values: it matches invalid
   pairs and range-scans the `meta_key` index. Split into per-key `(meta_key = X AND meta_value = Y)`
   branches. When a postmeta result drives a join into a second fan-out table (order_items →
@@ -54,12 +55,23 @@ This controls false positives. Follow it strictly.
   `woocommerce_attribute_lookup_enabled` must be `'yes'` to use the attributes table. Code that builds
   or regenerates the lookup tables must read the source tables. Removing or inverting a gate is a
   correctness regression (mid-regeneration reads return incomplete rows).
-- **`SELECT MIN(col), MAX(col)`** over a large table scans every matching row. When `WHERE` and the
-  column share a composite index (equality or bounded-range leading keys, target column trailing),
-  rewrite as `UNION ALL` of two `ORDER BY col ASC|DESC LIMIT 1` seeks. This is only safe when the
-  column is `NOT NULL` or both branches add `AND col IS NOT NULL`: `MIN`/`MAX` skip NULLs, while
-  `ORDER BY ASC` returns them first. A rewrite on a nullable column without those guards silently
-  changes results: a correctness regression.
+- **`SELECT MIN(col), MAX(col)`** over a large table scans every matching row. The exemption and
+  the rewrite below cover one shape only: a single-table query without `GROUP BY`. For any other
+  shape, judge the plan on its own. Exempt: no `WHERE` and an index that starts with the column, or
+  a `WHERE` that contains only equalities that pin every leading column of an index to one constant
+  value (`a = 1 AND b = 'x'`), with the column next in that index. The database answers those forms
+  from the index ends, so don't flag them. Otherwise, when an index returns rows sorted by the
+  column (it starts with the column, or every earlier column is pinned to one constant value) and
+  few rows at its ends fail the `WHERE`, the fix is `MIN`/`MAX` over a `UNION ALL` of two
+  `ORDER BY col ASC|DESC LIMIT 1` seeks, which keeps the one-row result.
+  Anything that leaves an earlier index column with more than one value breaks that order: a range,
+  `IN (...)`, `OR`, `!=` or a comparison with another column. Such an index cannot serve the seek,
+  so don't suggest the rewrite on it. An index that stores only a prefix of a column, such as
+  `meta_key_value (meta_key(50), meta_value(20))` on the HPOS order meta table, serves neither the
+  exemption nor the seek. The rewrite is only safe when the column is `NOT NULL` or both branches
+  add `AND col IS NOT NULL`: `MIN`/`MAX` skip NULLs, while `ORDER BY ASC` returns them first. A
+  rewrite on a nullable column without those guards silently changes results: a correctness
+  regression.
 - **Dynamic `IN (...)` lists** must guard against empty input (`IN ()` is a SQL syntax error) and
   sanitize members (`array_map( 'absint', ... )` for IDs, `$wpdb->prepare` placeholders for strings).
   These are correctness and security findings, not performance ones.
@@ -70,16 +82,25 @@ This controls false positives. Follow it strictly.
   resolves to `get_post()` per raw ID, with no preceding `_prime_post_caches( $ids )` or native
   batching argument (e.g. `get_comments( [ 'update_comment_post_cache' => true ] )`), runs per-item
   queries instead of two batched ones. Flag the introduction. Flag REMOVAL of effective priming as a
-  straight regression.
+  straight regression. `_prime_post_caches()` does not load HPOS orders: for `wc_get_order()` loops
+  the fix is `WC_Order_Factory::get_orders()`. It is not a drop-in replacement: it returns a list in
+  input order (input keys are dropped), returns a duplicate ID once, and does not return `false` for
+  a missing ID (it throws on post-based order storage and leaves a non-order entry in the list under
+  HPOS; `$skip_invalid` fixes neither). A suggested fix must keep the behavior the caller relies on.
 - Exempt: product and variation loads reached through order `get_items()`. The order data store's
-  batch prime and the lazy `get_items()` path already warm those caches.
+  batch prime and the lazy `get_items()` path already warm those caches. Not exempt: the parent of a
+  variation (the lazy path primes the variation only) and items added through the
+  `woocommerce_order_get_items` filter.
 - Priming that is dead or wrong is a finding the other way (and removing it is the fix, not a
   finding):
-    - after a WP_Query that loaded full post objects (no `fields` argument): it already primed post,
-    meta, and term caches, and `_prime_post_caches()` silently intvals its `WP_Post[]` to `1`. A
-    `'fields' => 'ids'` query primes nothing, so priming its IDs afterward is CORRECT; don't flag it;
-    - on product or variation IDs collected from order `get_items()`
-    (`prime_product_post_caches_for_order_items` and the lazy path already primed them);
+    - after a WP_Query that loaded full post objects (no `fields` argument, cache flags left at
+    their defaults): it already primed post, meta, and term caches, and `_prime_post_caches()`
+    expects IDs, not `WP_Post[]`. A `'fields' => 'ids'` query primes nothing, and a query with
+    `update_post_meta_cache`, `update_post_term_cache` or `cache_results` set to `false` leaves
+    that cache cold, so priming those IDs afterward is CORRECT; don't flag it;
+    - on product or variation IDs that order `get_items()` already warmed
+    (`prime_product_post_caches_for_order_items` and the lazy path). Priming the "Not exempt" IDs
+    above is correct, not dead;
     - on IDs an object-cache layer (e.g. OrderCache) already resolved; prime only the uncached rest.
 - Rendering a product or variation collection with images needs the attachment prime too. For
   variations this is two-phase: prime variation posts, then collect `_thumbnail_id` and
@@ -87,7 +108,7 @@ This controls false positives. Follow it strictly.
   `Automattic\WooCommerce\Internal\Utilities\ProductUtil::prime_image_caches()` does this (featured
   and gallery IDs, dedup, empty guard) and is the preferred form. Only flag when the render path
   actually reads attachment posts; code returning raw gallery IDs needs no attachment prime.
-- `is_callable( '_prime_post_caches' )` guards are dead code (WP 4.1+, below WC's minimum). Same for
+- `is_callable( '_prime_post_caches' )` guards are dead code (WP 3.4+, below WC's minimum). Same for
   guarding `wp_prime_option_caches` (WP 6.4+).
 
 ## Option and transient priming
@@ -97,13 +118,14 @@ This controls false positives. Follow it strictly.
   patterns, or keys pulled from a settings or registry structure).
 - **Autoload guard** (the false-positive control for this subsection): options saved through the WC
   settings API autoload by default (`WC_Admin_Settings::save_fields`, `WC_Settings_API`). Endpoint
-  options, feature toggles, and general store settings come from `alloptions` at boot, so a
+  options, settings toggles, and general store settings come from `alloptions` at boot, so a
   missing-priming finding on autoloaded, already-saved options is a no-op. DO NOT flag it. Priming
   such keys is justified only for options that may never have been saved (e.g. fresh-install email,
-  gateway, or shipping `*_settings` loops).
+  gateway, or shipping `*_settings` loops, and `woocommerce_feature_*_enabled` keys).
 - Transient-prefixed names (`_transient_*`, `_transient_timeout_*`, `_site_transient_*`) passed to
-  `wp_prime_option_caches()` without a `! wp_using_ext_object_cache()` guard: on persistent-object-cache
-  sites those rows never exist in `wp_options`, so every call grows the `notoptions` cache for good. A
+  `wp_prime_option_caches()` without a `! wp_using_ext_object_cache() && ! wp_installing()` guard: on
+  persistent-object-cache sites and during installation transients are not read from `wp_options`,
+  so every new name grows the `notoptions` cache. A
   mixed list must be SPLIT (regular names primed always, transient names under the guard), never
   wrapped whole. Check the guard's direction.
 

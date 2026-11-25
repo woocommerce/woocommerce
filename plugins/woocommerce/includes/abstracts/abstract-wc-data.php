@@ -10,6 +10,8 @@
  * @package     WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Internal\Utilities\StagedMethod;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -24,6 +26,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package  WooCommerce\Abstracts
  */
 abstract class WC_Data {
+
+	/**
+	 * Whether a stage_*() method runs for its saving method, so it saves and writes at the same points as the
+	 * saving method always did. write_through() sets it.
+	 *
+	 * @since 11.4.0
+	 * @var bool
+	 */
+	protected $writing_through = false;
 
 	/**
 	 * Clone mode constant: Duplicate mode clears meta IDs (default, for backward compatibility).
@@ -151,6 +162,43 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Run a stage_*() method for its saving method. While it runs, the stage method saves and writes at the
+	 * same points, and fires its hooks in the same order, as the saving method always did. It also does not
+	 * refuse the object, so a class that has not adopted the stage method keeps working.
+	 *
+	 * @since 11.4.0
+	 * @param callable $stage Callback that calls the stage method.
+	 * @return mixed What the stage method returns.
+	 */
+	protected function write_through( callable $stage ) {
+		$writing_through       = $this->writing_through;
+		$this->writing_through = true;
+		try {
+			return $stage();
+		} finally {
+			$this->writing_through = $writing_through;
+		}
+	}
+
+	/**
+	 * Refuse a direct call of a stage_*() method when a class overrides its saving method without overriding the
+	 * stage method too. Staging would skip the rules of that override. A saving method that runs its stage method
+	 * through write_through() is not refused, so a class that has not adopted the stage method keeps working.
+	 *
+	 * @since 11.4.0
+	 * @param string $method       Saving method, for example add_product.
+	 * @param string $stage_method Stage method, for example stage_product_item.
+	 * @throws WC_Data_Exception When a class has not adopted the stage method.
+	 */
+	protected function refuse_unstaged_override( string $method, string $stage_method ): void {
+		if ( $this->writing_through ) {
+			return;
+		}
+
+		StagedMethod::refuse_unstaged( $this, $method, $stage_method );
+	}
+
+	/**
 	 * Only store the object ID to avoid serializing the data object instance.
 	 *
 	 * @return array
@@ -180,6 +228,9 @@ abstract class WC_Data {
 	 * - CLONE_MODE_DUPLICATE (default): Forces reading of Meta and clears meta IDs for duplication (backward compatible).
 	 * - CLONE_MODE_CACHE: Preserves meta IDs for caching purposes.
 	 *
+	 * The clone also gets its own date objects, because DateTime::modify() changes the object in place.
+	 * The clone is not fully isolated: an object stored as a meta value stays shared with the original.
+	 *
 	 * @since 3.0.2
 	 */
 	public function __clone() {
@@ -193,6 +244,13 @@ abstract class WC_Data {
 				// Only clear meta IDs in duplicate mode (maintains backward compatibility).
 				if ( self::CLONE_MODE_DUPLICATE === $this->clone_mode && ! empty( $meta->id ) ) {
 					$this->meta_data[ $array_key ]->id = null;
+				}
+			}
+		}
+		foreach ( array( 'data', 'changes' ) as $set ) {
+			foreach ( $this->{$set} as $prop => $value ) {
+				if ( $value instanceof DateTime ) {
+					$this->{$set}[ $prop ] = clone $value;
 				}
 			}
 		}

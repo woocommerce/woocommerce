@@ -8,7 +8,6 @@
 namespace Automattic\WooCommerce\Admin;
 
 use ActionScheduler;
-use ActionScheduler_DBStore;
 use ActionScheduler_QueueRunner;
 use Automatic_Upgrader_Skin;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger;
@@ -756,12 +755,11 @@ class PluginsHelper {
 		$data = array();
 
 		foreach ( $actions as $action_id => $action ) {
-			$store  = new ActionScheduler_DBStore();
 			$args   = $action->get_args();
 			$data[] = array(
 				'job_id'  => $args[1],
 				'plugins' => $args[0],
-				'status'  => $store->get_status( $action_id ),
+				'status'  => ActionScheduler::store()->get_status( $action_id ),
 			);
 		}
 

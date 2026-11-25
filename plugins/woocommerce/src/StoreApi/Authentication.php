@@ -14,6 +14,16 @@ class Authentication {
 	 * Hook into WP lifecycle events. This is hooked by the StoreAPI class on `rest_api_init`.
 	 */
 	public function init() {
+		// Core's /batch/v1 also reaches Store API routes, so this runs for every REST request.
+		add_filter( 'rest_request_before_callbacks', array( $this, 'sanitize_batch_request' ), 10, 3 );
+
+		// UCP routes get rate limiting only: the other filters below assume a browser client with a nonce.
+		if ( 0 === stripos( $GLOBALS['wp']->query_vars['rest_route'] ?? '', '/wc/ucp/' ) ) {
+			add_filter( 'rest_authentication_errors', array( $this, 'rate_limit_ucp_request' ) );
+			add_filter( 'rest_authentication_errors', array( $this, 'opt_in_checkout_endpoint' ), 9, 1 );
+			return;
+		}
+
 		if ( ! $this->is_request_to_store_api() ) {
 			return;
 		}
@@ -26,6 +36,59 @@ class Authentication {
 
 		// Remove the default CORS headers--we will add our own.
 		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+	}
+
+	/**
+	 * Stop batch requests from passing untrusted nonces to Store API routes.
+	 *
+	 * Core's /batch/v1 can't run Store API requests. The Store API batch keeps sub-request nonces, which come from
+	 * request data, only when it was sent as JSON or with its own Nonce header. A link or cross-site form can't do either.
+	 *
+	 * @since 11.4.0
+	 * @param mixed            $result  Response to replace the requested version with.
+	 * @param array            $handler Route handler used for the request.
+	 * @param \WP_REST_Request $request Request used to generate the response.
+	 * @phpstan-param mixed            $handler
+	 * @phpstan-param mixed            $request
+	 * @return mixed
+	 */
+	public function sanitize_batch_request( $result, $handler, $request ) {
+		$callback = is_array( $handler ) ? ( $handler['callback'] ?? null ) : null;
+		$requests = $request instanceof \WP_REST_Request ? $request->get_param( 'requests' ) : null;
+
+		if ( ! is_array( $callback ) || ! is_array( $requests ) ) {
+			return $result;
+		}
+
+		if ( $callback[0] instanceof \WP_REST_Server && 'serve_batch_request_v1' === ( $callback[1] ?? '' ) ) {
+			foreach ( $requests as $sub_request ) {
+				$path = isset( $sub_request['path'] ) && is_string( $sub_request['path'] ) ? wp_parse_url( $sub_request['path'], PHP_URL_PATH ) : null;
+
+				if ( is_string( $path ) && 0 === stripos( $path, '/wc/store/' ) ) {
+					return new \WP_Error( 'woocommerce_rest_invalid_path', __( 'Store API requests must use the Store API batch endpoint.', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+			}
+
+			return $result;
+		}
+
+		$content_type = $request->get_content_type();
+
+		if ( ! $callback[0] instanceof Routes\V1\Batch || $request->get_header( 'Nonce' ) || 'application/json' === trim( $content_type['value'] ?? '' ) ) {
+			return $result;
+		}
+
+		foreach ( $requests as $index => $sub_request ) {
+			foreach ( array_keys( (array) ( $sub_request['headers'] ?? array() ) ) as $name ) {
+				if ( 'nonce' === \WP_REST_Request::canonicalize_header_name( (string) $name ) ) {
+					unset( $requests[ $index ]['headers'][ $name ] );
+				}
+			}
+		}
+
+		$request->set_param( 'requests', $requests );
+
+		return $result;
 	}
 
 	/**
@@ -80,7 +143,7 @@ class Authentication {
 	 * Allowed origins can be changed using the WordPress `allowed_http_origins` or `allowed_http_origin` filters if
 	 * access needs to be granted to other domains.
 	 *
-	 * Users of valid Cart Tokens are also allowed access from any origin.
+	 * Users of valid Cart Tokens are also allowed access from any origin, without browser credentials unless the origin is allowed.
 	 *
 	 * @param bool              $served Whether the request has already been served.
 	 * @param \WP_REST_Response $result The response object.
@@ -94,15 +157,18 @@ class Authentication {
 		if ( 'null' !== $origin ) {
 			$origin = esc_url_raw( $origin );
 		}
+		$allowed_origin = is_allowed_http_origin( $origin );
 
 		// Send standard CORS headers.
 		$server->send_header( 'Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE' );
-		$server->send_header( 'Access-Control-Allow-Credentials', 'true' );
+		if ( $allowed_origin ) {
+			$server->send_header( 'Access-Control-Allow-Credentials', 'true' );
+		}
 		$server->send_header( 'Vary', 'Origin', false );
 
 		// Allow preflight requests, certain http origins, and any origin if a cart token is present. Preflight requests
 		// are allowed because we'll be unable to validate cart token headers at that point.
-		if ( $this->is_preflight() || CartTokenUtils::validate_cart_token( $this->get_cart_token( $request ) ) || is_allowed_http_origin( $origin ) ) {
+		if ( $this->is_preflight() || CartTokenUtils::validate_cart_token( $this->get_cart_token( $request ) ) || $allowed_origin ) {
 			$server->send_header( 'Access-Control-Allow-Origin', $origin );
 		}
 
@@ -129,7 +195,7 @@ class Authentication {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
 		$rest_route = rawurldecode( esc_url_raw( wp_unslash( $_GET['rest_route'] ) ) );
-		return 0 === strpos( $rest_route, '/wc/store/' );
+		return 0 === stripos( $rest_route, '/wc/store/' );
 	}
 
 	/**
@@ -168,6 +234,17 @@ class Authentication {
 	}
 
 	/**
+	 * Applies Store API rate limiting to a UCP request, passing any other authentication result through unchanged.
+	 *
+	 * @since 11.4.0
+	 * @param \WP_Error|mixed $result Error from another authentication handler, null if we should handle it, or another value if not.
+	 * @return \WP_Error|mixed
+	 */
+	public function rate_limit_ucp_request( $result ) {
+		return current_user_can( 'edit_posts' ) ? $result : $this->apply_rate_limiting( $result );
+	}
+
+	/**
 	 * When the login cookies are set, they are not available until the next page reload. For the Store API, specifically
 	 * for returning updated nonces, we need this to be available immediately.
 	 *
@@ -187,10 +264,15 @@ class Authentication {
 	 * @return \WP_Error|null|bool
 	 */
 	public function opt_in_checkout_endpoint( $result ) {
+		$route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
+
+		// Of the UCP checkout routes only complete places an order, so only it is matched.
+		$is_checkout = ( $this->is_request_to_store_api() && preg_match( '#/wc/store(?:/v\d+)?/checkout#i', $route ) )
+			|| preg_match( '#^/wc/ucp/v\d+/checkout-sessions/[^/]+/complete/?$#i', $route );
+
 		if (
 			FeaturesUtil::feature_is_enabled( 'rate_limit_checkout' )
-			&& $this->is_request_to_store_api()
-			&& preg_match( '#/wc/store(?:/v\d+)?/checkout#', $GLOBALS['wp']->query_vars['rest_route'] )
+			&& $is_checkout
 			&& $this->is_only_post_request()
 		) {
 			add_filter(
@@ -297,7 +379,7 @@ class Authentication {
 		if ( empty( $GLOBALS['wp']->query_vars['rest_route'] ) ) {
 			return false;
 		}
-		return 0 === strpos( $GLOBALS['wp']->query_vars['rest_route'], '/wc/store/' );
+		return 0 === stripos( $GLOBALS['wp']->query_vars['rest_route'], '/wc/store/' );
 	}
 
 	/**

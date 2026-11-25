@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useContext } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
@@ -76,7 +76,31 @@ function ProductCardFooter( props: { product: Product } ) {
 		return currencyFormats[ currencyCode ] || '%s';
 	};
 
+	// The trial replaces only a paid price, so free and freemium cards keep their label. Anything but a positive day count means no trial.
+	const freeTrialDays = product.freeTrialLengthDays;
+	const freeTrialLabel =
+		product.price > 0 &&
+		product.freemium_type !== 'primary' &&
+		typeof freeTrialDays === 'number' &&
+		Number.isInteger( freeTrialDays ) &&
+		freeTrialDays > 0
+			? sprintf(
+					/* translators: %d: free trial length in days. English uses the same form for singular and plural. */
+					_n(
+						'%d day free trial',
+						'%d day free trial',
+						freeTrialDays,
+						'woocommerce'
+					),
+					freeTrialDays
+				)
+			: '';
+
 	function getPriceLabel(): string {
+		if ( freeTrialLabel ) {
+			return freeTrialLabel;
+		}
+
 		if ( product.price === 0 ) {
 			return __( 'Free download', 'woocommerce' );
 		}
@@ -134,7 +158,7 @@ function ProductCardFooter( props: { product: Product } ) {
 	}
 
 	function getBillingText(): string {
-		if ( product.freemium_type === 'primary' ) {
+		if ( freeTrialLabel || product.freemium_type === 'primary' ) {
 			return '';
 		}
 
@@ -146,6 +170,10 @@ function ProductCardFooter( props: { product: Product } ) {
 	}
 
 	const getReaderPriceLabel = () => {
+		if ( freeTrialLabel ) {
+			return freeTrialLabel;
+		}
+
 		if ( product.isOnSale ) {
 			return sprintf(
 				//translators: %1$s is the sale price of the product, %2$s is the regular price of the product, %3$s is the billing period
@@ -212,7 +240,7 @@ function ProductCardFooter( props: { product: Product } ) {
 					<span aria-hidden>{ getPriceLabel() }</span>
 				</span>
 
-				{ product.isOnSale && (
+				{ product.isOnSale && ! freeTrialLabel && (
 					<span
 						className="woocommerce-marketplace__product-card__on-sale"
 						aria-hidden

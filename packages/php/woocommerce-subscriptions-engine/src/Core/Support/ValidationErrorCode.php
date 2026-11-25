@@ -47,6 +47,12 @@ final class ValidationErrorCode {
 	public const INVALID_VALUE = 'invalid_value';
 
 	/**
+	 * A string does not match its required format. Params: `pattern`, the format as a
+	 * regular expression in JSON-schema syntax.
+	 */
+	public const INVALID_PATTERN = 'invalid_pattern';
+
+	/**
 	 * A status is not registered. Params: `value` (the refused status).
 	 */
 	public const NOT_REGISTERED = 'not_registered';
