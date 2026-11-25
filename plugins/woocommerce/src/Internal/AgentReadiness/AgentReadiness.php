@@ -254,10 +254,10 @@ class AgentReadiness {
 		$this->product_scan = null;
 		$sales              = $this->product_sales->last_days();
 		$ranked             = null !== $sales && $sales['imported'] && $sales['orders'] >= ProductSales::MIN_ORDERS && $sales['total'] > 0;
-		// Best sellers first, most sales first. Without sales to rank by, the scan goes by last change only.
-		$best_sellers = $ranked ? $sales['top'] : array();
+		$since              = null === $sales ? '' : $sales['since'];
+		// The seller ids are a second query, so a store the scan will not rank never groups its sales.
+		$best_sellers = $ranked ? $this->product_sales->more_top_products( $since, 0, ProductSales::TOP_PRODUCTS ) : array();
 		$product_scan = new ProductScan();
-		$since        = null === $sales ? '' : $sales['since'];
 		$more         = $ranked && count( $best_sellers ) >= ProductScan::PRODUCT_LIMIT
 			? function ( int $offset, int $limit ) use ( $since ): array {
 				return $this->product_sales->more_top_products( $since, $offset, $limit );

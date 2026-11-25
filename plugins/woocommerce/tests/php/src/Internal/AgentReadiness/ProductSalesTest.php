@@ -54,7 +54,8 @@ class ProductSalesTest extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $sales['orders'], 'Only the completed order in the period counts' );
 		$this->assertGreaterThan( 0.0, (float) $variant->get_price(), 'The variation has a price, so its sales show' );
 		$this->assertEqualsWithDelta( 20.0 + (float) $variant->get_price(), $sales['total'], 0.01 );
-		$this->assertEqualsCanonicalizing( array( $mug->get_id(), $variable->get_id() ), $sales['top'], 'A variation counts toward its parent; cancelled and older orders are left out' );
+		$this->assertArrayNotHasKey( 'top', $sales, 'The totals do not list best sellers; the scan asks for them only when it ranks' );
+		$this->assertEqualsCanonicalizing( array( $mug->get_id(), $variable->get_id() ), $this->sut->more_top_products( $sales['since'], 0, ProductSales::TOP_PRODUCTS ), 'A variation counts toward its parent; cancelled and older orders are left out' );
 
 		$some = $this->sut->for_products( array( $mug->get_id(), $variable->get_id(), $vase->get_id() ), $sales['since'] );
 
@@ -99,8 +100,9 @@ class ProductSalesTest extends WC_Unit_Test_Case {
 
 		$sales = $this->sut->last_days();
 
-		$this->assertSame( array( $vase->get_id(), $mug->get_id() ), $sales['top'], 'Vase 60, mug 20; the lamp nets to nothing and one product never sold' );
-		$this->assertNotContains( $unsold->get_id(), $sales['top'] );
+		$top = $this->sut->more_top_products( $sales['since'], 0, ProductSales::TOP_PRODUCTS );
+		$this->assertSame( array( $vase->get_id(), $mug->get_id() ), $top, 'Vase 60, mug 20; the lamp nets to nothing and one product never sold' );
+		$this->assertNotContains( $unsold->get_id(), $top );
 		$this->assertEqualsWithDelta( 80.0, $sales['total'], 0.01 );
 		$this->assertSame( array( $mug->get_id() ), $this->sut->more_top_products( $sales['since'], 1, 1 ) );
 	}
@@ -118,7 +120,7 @@ class ProductSalesTest extends WC_Unit_Test_Case {
 
 		$sales = $this->sut->last_days();
 
-		$this->assertSame( array( $mug->get_id() ), $sales['top'] );
+		$this->assertSame( array( $mug->get_id() ), $this->sut->more_top_products( $sales['since'], 0, ProductSales::TOP_PRODUCTS ) );
 		$this->assertEqualsWithDelta( 50.0, $sales['total'], 0.01, 'The deleted product\'s revenue still counts' );
 	}
 

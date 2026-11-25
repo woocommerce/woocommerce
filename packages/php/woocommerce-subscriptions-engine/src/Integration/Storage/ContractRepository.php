@@ -6,15 +6,17 @@
  * The contract is the live source of truth. A chain is NOT a stored entity: it is
  * the pair `(contract_id, kind)`, with its head and counters derived from the cycle
  * rows. The entity never carries a cycle graph in memory, so cycles are reached
- * through purpose-built reads ({@see self::find_cycle_history()}, etc.), appended one at a
+ * through purpose-built reads ({@see self::find_cycles()}, etc.), appended one at a
  * time ({@see self::append_cycle()}) and changed only through compare-and-set writes
  * ({@see self::transition_cycle()}). Cycle snapshot ids are stored as given and their
  * value objects attached on read. Meta is read and written only through the meta methods.
  *
  * Every update, meta write, cycle write and child write runs under the per-contract lock
  * ({@see ContractLock}): the caller's, or an internal one taken for an update or meta write made
- * without one; each child-table write fences its lock itself. The exception is {@see self::delete()},
- * the discard of a contract its creator still holds locked. No transactions, no object cache.
+ * without one; each child-table write fences its lock itself. Two exceptions: {@see self::delete()},
+ * the discard of a contract its creator still holds locked, and a history entry added without a
+ * lock ({@see self::add_history_entry()}), a single owner-scoped insert no held lock refuses. No
+ * transactions, no object cache.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage
  */
@@ -31,6 +33,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\HistoryEntry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
@@ -978,7 +981,7 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Fence a child-table write (cycles, meta, items, addresses) made with `$lock`; within 60 s
+	 * Fence a child-table write (cycles, meta, items, addresses, history) made with `$lock`; within 60 s
 	 * of the lock's last database stamp it costs no query. Past that, the lock is extended once when
 	 * the local estimate gives 120 s or less left; otherwise it is re-verified on the database clock
 	 * and trusted for up to 60 s more, extended once with 60 s or less left, and refused once the
@@ -1351,7 +1354,7 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Delete a contract and its child, cycle and snapshot rows. Takes no lock: it is the
+	 * Delete a contract and its child, cycle, snapshot and history rows. Takes no lock: it is the
 	 * engine-internal discard of a contract its creator still holds locked.
 	 *
 	 * @param int $id Contract id.
@@ -1366,6 +1369,7 @@ final class ContractRepository {
 			SchemaInstaller::TABLE_CONTRACT_ITEMS,
 			SchemaInstaller::TABLE_CONTRACT_ADDRESSES,
 			SchemaInstaller::TABLE_CONTRACT_META,
+			SchemaInstaller::TABLE_CONTRACT_HISTORY,
 		) as $child ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->delete( SchemaInstaller::get_table_name( $child ), array( 'contract_id' => $id ) );
@@ -1955,8 +1959,7 @@ final class ContractRepository {
 	}
 
 	/**
-	 * A window of a chain's cycle history, newest first - the paginated read for
-	 * history screens.
+	 * A window of a chain's cycles, newest first - the paginated cycle read.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
@@ -1965,7 +1968,7 @@ final class ContractRepository {
 	 * @return array<int, Cycle> Cycles newest first.
 	 * @throws \RuntimeException If the read fails: a failed read must not look like an empty chain.
 	 */
-	public function find_cycle_history( int $contract_id, string $kind = Cycle::KIND_BILLING, int $limit = 20, int $offset = 0 ): array {
+	public function find_cycles( int $contract_id, string $kind = Cycle::KIND_BILLING, int $limit = 20, int $offset = 0 ): array {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
@@ -1984,6 +1987,169 @@ final class ContractRepository {
 		}
 
 		return $cycles;
+	}
+
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
+	/**
+	 * Add a history entry to a contract of `$extension_slug` in one `INSERT ... SELECT`. With `$lock`
+	 * the insert is fenced by it; without one it is scoped by the owner and takes no lock, so no held
+	 * lock refuses it (an append-only insert has nothing to read-modify-write). A cycle must be one of
+	 * the contract's, checked in the same statement. A taken `creation_key` returns null.
+	 *
+	 * @param HistoryEntry      $entry          The new entry.
+	 * @param string            $extension_slug The expected owning extension.
+	 * @param ContractLock|null $lock           The caller's lock on this contract, or null.
+	 * @return HistoryEntry|null The stored entry with its id and creation time; null when the key is taken.
+	 * @throws \InvalidArgumentException If no contract of that extension has the id, the cycle is not one
+	 *                                   of its cycles, or the lock is for another contract or extension.
+	 * @throws ContractLockedException If `$lock` was lost.
+	 * @throws \RuntimeException If the insert fails.
+	 */
+	public function add_history_entry( HistoryEntry $entry, string $extension_slug, ?ContractLock $lock = null ): ?HistoryEntry {
+		global $wpdb;
+
+		$contract_id = $entry->get_contract_id();
+		$cycle_id    = $entry->get_cycle_id();
+		if ( null !== $lock ) {
+			self::assert_lock_owner( $lock, $extension_slug );
+			$this->fence_child_write( $lock, $contract_id );
+		}
+
+		$history   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_HISTORY );
+		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$cycles    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$columns   = $entry->to_storage();
+		$now       = current_time( 'mysql', true );
+		// HistoryEntry::create() refused a payload that cannot be encoded, so this encode succeeds.
+		$payload = null === $columns['payload'] ? null : wp_json_encode( $columns['payload'] );
+
+		$select = array( 'c.id', null === $cycle_id ? 'NULL' : 'y.id', '%s' );
+		$values = array( $columns['type'] );
+		foreach ( array( $columns['creation_key'], $payload ) as $value ) {
+			$select[] = null === $value ? 'NULL' : '%s';
+			if ( null !== $value ) {
+				$values[] = $value;
+			}
+		}
+		$select[] = '%s';
+		$values[] = $now;
+
+		$join = '';
+		if ( null !== $cycle_id ) {
+			$join     = " JOIN {$cycles} y ON y.id = %d AND y.contract_id = c.id";
+			$values[] = $cycle_id;
+		}
+		$where    = 'c.id = %d';
+		$values[] = $contract_id;
+		if ( null === $lock ) {
+			$where   .= ' AND c.' . self::OWNER_MATCH;
+			$values[] = $extension_slug;
+		}
+		$select_list = implode( ', ', $select );
+
+		// A duplicate creation key is an expected outcome, so `$wpdb` must not print or log it;
+		// every failure is still read from `last_error` and thrown below.
+		$suppressed = $wpdb->suppress_errors( true );
+		try {
+			// Table names and the select list are built here, never from input; every value is a placeholder.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$inserted = $wpdb->query( $wpdb->prepare( "INSERT INTO {$history} ( contract_id, cycle_id, type, creation_key, payload, date_created_gmt ) SELECT {$select_list} FROM {$contracts} c{$join} WHERE {$where}", $values ) );
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+		}
+
+		if ( false === $inserted ) {
+			$db_error  = $wpdb->last_error;
+			$duplicate = self::get_duplicate_key_result();
+			if ( null === $duplicate && null !== $columns['creation_key'] ) {
+				$duplicate = $this->has_history_creation_key( $contract_id, $columns['creation_key'] );
+			}
+			// The only UNIQUE index an entry can hit is `creation`, and only with a key.
+			if ( true === $duplicate && null !== $columns['creation_key'] ) {
+				return null;
+			}
+			if ( null !== $lock ) {
+				$this->throw_if_lock_lost( $lock );
+			}
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to add a history entry to contract %d: %s', $contract_id, $db_error ) ) );
+		}
+		if ( 1 !== (int) $inserted ) {
+			self::throw_history_target_not_found( $contract_id, $extension_slug, $cycle_id );
+		}
+
+		$columns['id']               = (int) $wpdb->insert_id;
+		$columns['date_created_gmt'] = $now;
+		// Hydrate from the stored JSON, so the returned entry matches a fresh read.
+		$columns['payload'] = $payload;
+
+		return HistoryEntry::from_storage( $columns );
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * Whether the contract already has a history entry with this creation key: the fallback when
+	 * the driver gives no error number. A failed read reads as false, so the caller reports its
+	 * own insert failure.
+	 *
+	 * @param int    $contract_id  Contract id.
+	 * @param string $creation_key Creation key.
+	 */
+	private function has_history_creation_key( int $contract_id, string $creation_key ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_HISTORY );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$found = $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$table} WHERE contract_id = %d AND creation_key = %s LIMIT 1", $contract_id, $creation_key ) );
+
+		return null !== $found;
+	}
+
+	/**
+	 * Refuse a history insert that selected no row: the contract of that extension is missing or,
+	 * when a cycle is named, the cycle may not be one of its cycles.
+	 *
+	 * @param int      $contract_id    Contract id.
+	 * @param string   $extension_slug The expected owning extension.
+	 * @param int|null $cycle_id       The entry's cycle id, or null.
+	 * @return never
+	 * @throws \InvalidArgumentException Always.
+	 */
+	private static function throw_history_target_not_found( int $contract_id, string $extension_slug, ?int $cycle_id ): void {
+		if ( null === $cycle_id ) {
+			self::throw_not_found( $contract_id, $extension_slug );
+		}
+		throw new \InvalidArgumentException( esc_html( sprintf( 'No contract of extension "%s" has id %d, or cycle %d is not one of its cycles.', $extension_slug, $contract_id, $cycle_id ) ) );
+	}
+
+	/**
+	 * A window of a contract's history, newest first (insertion order).
+	 *
+	 * @param int $contract_id Contract id.
+	 * @param int $limit       Maximum entries to return.
+	 * @param int $offset      Entries to skip (for paging).
+	 * @return array<int, HistoryEntry> Entries newest first; empty for an unknown contract.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like an empty history.
+	 */
+	public function find_history( int $contract_id, int $limit = 20, int $offset = 0 ): array {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_HISTORY );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d ORDER BY id DESC LIMIT %d OFFSET %d", $contract_id, $limit, $offset ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the history of contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
+
+		$entries = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			if ( is_array( $row ) ) {
+				$entries[] = HistoryEntry::from_storage( Coercion::coerce_string_keyed( $row ) );
+			}
+		}
+
+		return $entries;
 	}
 
 	/**
