@@ -203,7 +203,10 @@ class ProductImage extends AbstractBlock {
 		}
 
 		$aspect_ratio = $this->resolve_aspect_ratio( $attributes );
-		if ( $aspect_ratio ) {
+		// Don't write "auto" (Original) inline: it would hide the shape the browser reads from the image's
+		// width and height. WordPress lays out lazy images before they load, and without that shape
+		// it falls back to a 1500px tall placeholder box.
+		if ( $aspect_ratio && 'auto' !== $aspect_ratio ) {
 			$image_style .= sprintf( 'aspect-ratio:%s;', $aspect_ratio );
 		}
 
