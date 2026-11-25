@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Abilities;
 
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Caches\ProductCache;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 
 defined( 'ABSPATH' ) || exit;
@@ -365,7 +366,8 @@ abstract class ActionableAbility extends Ability {
 	 * Drop the object caches of the objects a rolled back save() touched. The
 	 * saves filled the caches with rows the rollback removed, so a read in the
 	 * same request would still see them. The `WC_Data` meta cache, the product type cache, the
-	 * product instance cache and the price lookup cache are separate from the post cache.
+	 * product instance cache, the price lookup cache and the HPOS order data and meta caches are
+	 * separate from the post cache.
 	 *
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects.
 	 * @param \WC_Data[]                                          $deleted The objects the call deleted.
@@ -393,6 +395,7 @@ abstract class ActionableAbility extends Ability {
 				}
 			} elseif ( $id > 0 && $object instanceof \WC_Abstract_Order ) {
 				wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->remove( $id );
+				wc_get_container()->get( OrdersTableDataStore::class )->clear_cached_data( array( $id ) );
 				clean_post_cache( $id );
 			} elseif ( $id > 0 && $object instanceof \WC_Customer ) {
 				clean_user_cache( $id );

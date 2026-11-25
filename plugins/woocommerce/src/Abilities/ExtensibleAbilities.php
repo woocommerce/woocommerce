@@ -641,7 +641,8 @@ class ExtensibleAbilities {
 	 * the ability refuses that class while the feature is on. See
 	 * WC_Data::refuse_unstaged_override(). order-refund-create runs the
 	 * `order_refund` validators on the refund that wc_create_refund() built, before
-	 * the payment gateway is called, so a refusal leaves no refund and moves no money.
+	 * the payment gateway is called, so a refusal moves no money. wc_create_refund()
+	 * has saved the refund by then, and deletes it after the refusal.
 	 *
 	 * @since 11.3.0
 	 *
@@ -706,10 +707,14 @@ class ExtensibleAbilities {
 	 * object. It can run with no saved objects when a call only deletes, and then
 	 * it reads the deleted objects from the context.
 	 *
-	 * order-refund-create runs the `order_refund` syncs, and the `order` syncs with
-	 * the parent order that wc_create_refund() saved, after it returns, because a
+	 * order-refund-create runs the `order_refund` syncs, and the `order` syncs when
+	 * wc_create_refund() saved the parent order, after it returns, because a
 	 * rollback cannot undo a payment gateway refund. A refusal there undoes only
 	 * the writes of the syncs: the refund stays, and the call fails with `saved` set to true and the refund ID in the error data.
+	 *
+	 * An undo drops the caches of the objects the call saved, but not other
+	 * caches, so a value that a sync wrote elsewhere, such as an option, can stay
+	 * readable in the same request after the undo removed it.
 	 *
 	 * @since 11.4.0
 	 *
