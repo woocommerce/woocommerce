@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show a payment gateway's own error in the Checkout block when it stops early, instead of an internal server error.

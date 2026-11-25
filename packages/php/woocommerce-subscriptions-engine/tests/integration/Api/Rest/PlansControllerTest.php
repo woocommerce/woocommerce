@@ -1516,6 +1516,48 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertStringNotContainsString( 'table_that_does_not_exist', (string) wp_json_encode( $response->get_data() ), 'Database details stay out of the response.' );
 	}
 
+	/**
+	 * @dataProvider provide_failing_list_reads
+	 *
+	 * @param string $pattern Regex of the read to break.
+	 */
+	public function test_get_items_answers_a_failed_read_with_a_logged_500( string $pattern ): void {
+		wp_set_current_user( $this->admin_id );
+		$this->create_plan( 'Stored' );
+
+		$errors  = array();
+		$capture = static function ( $message, $level, $context ) use ( &$errors ) {
+			if ( 'error' === $level && is_string( $message ) && is_array( $context ) && 'woocommerce-subscriptions-engine' === ( $context['source'] ?? null ) ) {
+				$errors[] = $message;
+			}
+			return $message;
+		};
+		add_filter( 'woocommerce_logger_log_message', $capture, 10, 3 );
+		$this->fail_next_query( $pattern );
+
+		try {
+			$response = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		} finally {
+			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_plan_read_failed', $this->response_data( $response )['code'] );
+		$this->assertStringNotContainsString( 'table_that_does_not_exist', (string) wp_json_encode( $response->get_data() ), 'Database details stay out of the response.' );
+		$this->assertNotEmpty( $errors, 'A failed read is logged.' );
+		$this->assertStringContainsString( 'table_that_does_not_exist', $errors[0], 'The log carries the database error.' );
+	}
+
+	/**
+	 * @return array<string, array{0: string}>
+	 */
+	public function provide_failing_list_reads(): array {
+		return array(
+			'list'  => array( '/^\s*SELECT \* FROM \S*selling_plans\b.* LIMIT /s' ),
+			'count' => array( '/^\s*SELECT COUNT\(\*\) FROM \S*selling_plans\b/' ),
+		);
+	}
+
 	public function test_single_plan_routes_404_a_plan_of_another_extension_slug_or_an_unknown_id(): void {
 		wp_set_current_user( $this->admin_id );
 
