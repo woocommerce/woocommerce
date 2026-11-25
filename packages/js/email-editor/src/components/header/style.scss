@@ -11,6 +11,14 @@
 	}
 }
 
+// From WordPress 7.2 "Preferences" is the last item of the Options menu, after a separator.
+.editor-more-menu__popup > * {
+	> [role="menuitem"]:last-child,
+	> [role="separator"]:has(+ [role="menuitem"]:last-child) {
+		display: none;
+	}
+}
+
 .woocommerce-email-editor__view-mode-toggle {
 	view-transition-name: toggle;
 	top: 0;
@@ -87,7 +95,8 @@
 	}
 }
 
-// Hide core's Styles sidebar controls
-.components-button[aria-controls="edit-site:global-styles"] {
+// Hide core's Styles sidebar controls. They edit the site's Global Styles, not the email.
+// Not tied to an element, because WordPress 7.2 renders the menu item as a div.
+[aria-controls="edit-site:global-styles"] {
 	display: none !important;
 }

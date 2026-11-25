@@ -25,4 +25,14 @@
 	> .components-panel__body:has(.components-button .block-editor-block-icon) {
 		display: none;
 	}
+
+	// From WordPress 7.2 core always renders its "Template: ..." panel last. Its "Create new"
+	// adds a site template, and its "Edit" skips the email editor's warning. Core has no
+	// opt-out and no class on the panel, so match the last panel without a class of its own.
+	> .components-panel__body:is(
+			[class="components-panel__body"],
+			[class="components-panel__body is-opened"]
+		):last-child {
+		display: none;
+	}
 }
