@@ -791,6 +791,15 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertNull( $result( $bare, 'product_buy_action_schema' ), 'Hidden by a visibility filter: WooCommerce prints no BuyAction' );
 		remove_filter( 'woocommerce_product_is_visible', '__return_false' );
 
+		$price = $this->product->get_regular_price();
+		$this->product->set_regular_price( '' );
+		$this->product->save();
+		add_filter( 'woocommerce_is_purchasable', '__return_true' );
+		$this->assertNull( $result( $bare, 'product_buy_action_schema' ), 'No price, made purchasable by an extension: WooCommerce prints no offer' );
+		remove_filter( 'woocommerce_is_purchasable', '__return_true' );
+		$this->product->set_regular_price( $price );
+		$this->product->save();
+
 		$this->product->set_stock_status( 'outofstock' );
 		$this->product->save();
 		$this->assertNull( $result( $bare, 'product_buy_action_schema' ), 'WooCommerce links only a product in stock to checkout' );
