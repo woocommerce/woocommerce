@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Hide the site’s Styles panel, the Preferences item and core’s Template panel in the email editor on WordPress 7.2.
+In the email editor on WordPress 7.2, hide the site’s Styles panel, the Preferences item and the template panel’s Edit and Create new buttons.
