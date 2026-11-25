@@ -107,10 +107,9 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			/**
 			 * Filter to change the product quantity stepping in the order editor of the admin area.
 			 *
-			 * In the 'edit' context the default is the product purchase quantity step,
-			 * falling back to 'any' when the item's current quantity does not align with
-			 * it (so orders created with decimal quantities via extensions or the API
-			 * remain editable).
+			 * In the 'edit' context the default is the product purchase quantity step.
+			 * An item whose stored quantity does not match the step stays editable:
+			 * the step applies once its quantity changes.
 			 *
 			 * @since 5.8.0
 			 * @since 11.5.0 The filter also runs with the 'add' context when products are added to an order.
@@ -135,10 +134,14 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			 */
 			$min_refund = apply_filters( 'woocommerce_quantity_input_min_admin', '0', $product, 'refund' );
 			$min_edit   = wc_get_container()->get( ItemQuantityLimits::class )->get_quantity_input_min( $item, $product );
-			$step_edit  = wc_get_container()->get( ItemQuantityLimits::class )->get_quantity_input_step( $item, $product, (float) $min_edit );
+			$step_edit  = wc_get_container()->get( ItemQuantityLimits::class )->get_quantity_input_step( $item, $product );
+
+			// A stored quantity that does not match the step would make this hidden input invalid and block the
+			// order form. Such an input takes any value until its quantity changes; data-step carries the step.
+			$is_off_step = ! wc_get_container()->get( ItemQuantityLimits::class )->is_step_aligned( (float) $item->get_quantity(), (float) $min_edit, $step_edit );
 		?>
 		<div class="edit" style="display: none;">
-			<input type="number" step="<?php echo esc_attr( null === $step_edit ? 'any' : (string) $step_edit ); ?>" min="<?php echo esc_attr( $min_edit ); ?>" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo esc_attr( $item->get_quantity() ); ?>" data-qty="<?php echo esc_attr( $item->get_quantity() ); ?>" size="4" class="quantity" />
+			<input type="number" step="<?php echo esc_attr( null === $step_edit || $is_off_step ? 'any' : (string) $step_edit ); ?>" <?php echo $is_off_step ? 'data-step="' . esc_attr( (string) $step_edit ) . '" ' : ''; ?>min="<?php echo esc_attr( $min_edit ); ?>" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo esc_attr( $item->get_quantity() ); ?>" data-qty="<?php echo esc_attr( $item->get_quantity() ); ?>" size="4" class="quantity" />
 		</div>
 		<div class="refund" style="display: none;">
 			<input type="number" step="<?php echo esc_attr( $step_refund ); ?>" min="<?php echo esc_attr( $min_refund ); ?>" max="<?php echo esc_attr( (string) max( 0, NumberUtil::round( abs( $item->get_quantity() ) - abs( $refunded_qty ), WC_ROUNDING_PRECISION ) ) ); ?>" autocomplete="off" name="refund_order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="refund_order_item_qty" />

@@ -15,8 +15,9 @@ use WC_Product;
  * stepping of 1 by default, so merchants cannot enter negative quantities
  * or invalid quantity increments. Orders created through the REST API or
  * by extensions may already contain negative or fractional quantities, so
- * for existing items the minimum is floored at the stored quantity and
- * stepping defaults to 'any' when non-conforming, to keep those orders editable.
+ * for existing items the minimum is floored at the stored quantity and a
+ * stored quantity that does not match the step is accepted until it changes,
+ * to keep those orders editable.
  *
  * Covers product line items only: fee and shipping lines have no quantity
  * input in the admin editor, and posted quantities for them are ignored.
@@ -51,27 +52,19 @@ class ItemQuantityLimits {
 	}
 
 	/**
-	 * Get the quantity stepping accepted for an existing order item in the admin editor.
+	 * Get the quantity step for an existing order item in the admin editor.
 	 *
-	 * When the store supports decimal quantities (e.g. via the woocommerce_stock_amount
-	 * filter set to floatval), stepping defaults to 'any' for products with the default step (1)
-	 * so merchants can enter decimals freely, while preserving custom steps (e.g. 0.5) when
-	 * defined by the product or filter. On integer stores, stepping defaults to 1 (or the
-	 * product's step), falling back to 'any' when an existing item has a stored quantity that
-	 * does not align with the product's step (e.g. decimal quantities placed through the REST API
-	 * or extensions) to keep those orders editable.
-	 *
-	 * Plugins can still narrow or modify the step with 'woocommerce_quantity_input_step_admin'.
+	 * The step is the product's purchase step, filtered through
+	 * 'woocommerce_quantity_input_step_admin'. On stores that allow decimal quantities,
+	 * a product with the default step (1) has no step.
 	 *
 	 * @since 11.5.0
 	 * @param WC_Order_Item        $item    Line item being edited.
 	 * @param WC_Product|bool|null $product The item's product when the caller already
 	 *                                      resolved it; null to resolve it here.
-	 * @param float|null           $min     The item's minimum quantity when the caller already
-	 *                                      resolved it; null to resolve it here.
-	 * @return float|null Step for the quantity input, or null when it accepts any quantity. Filtered through 'woocommerce_quantity_input_step_admin'.
+	 * @return float|null The step, or null when the item accepts any quantity.
 	 */
-	public function get_quantity_input_step( WC_Order_Item $item, $product = null, ?float $min = null ): ?float {
+	public function get_quantity_input_step( WC_Order_Item $item, $product = null ): ?float {
 		if ( null === $product ) {
 			$product = $item instanceof WC_Order_Item_Product ? $item->get_product() : false;
 		}
@@ -80,9 +73,6 @@ class ItemQuantityLimits {
 		$base_step   = $product_obj ? $product_obj->get_purchase_quantity_step() : 1;
 		$base_step   = is_numeric( $base_step ) && (float) $base_step > 0 ? (float) $base_step : 1.0;
 
-		$stored_qty = (float) $item->get_quantity();
-		$min_val    = null !== $min ? $min : (float) $this->get_quantity_input_min( $item, $product );
-
 		/**
 		 * This filter is documented in includes/admin/meta-boxes/views/html-order-item.php
 		 *
@@ -90,19 +80,7 @@ class ItemQuantityLimits {
 		 */
 		$filtered_step = apply_filters( 'woocommerce_quantity_input_step_admin', $base_step, $product, 'edit' );
 
-		$step_num = $this->resolve_step( $filtered_step, $base_step );
-
-		if ( null === $step_num ) {
-			return null;
-		}
-
-		// If the stored quantity does not align with the step, accept any quantity
-		// so existing orders remain editable and do not block the admin form submission.
-		if ( ! $this->is_step_aligned( $stored_qty, $min_val, $step_num ) ) {
-			return null;
-		}
-
-		return $step_num;
+		return $this->resolve_step( $filtered_step, $base_step );
 	}
 
 	/**
@@ -174,12 +152,17 @@ class ItemQuantityLimits {
 	/**
 	 * Whether a quantity is a whole multiple of the step, counted from the minimum.
 	 *
-	 * @param float $qty  Quantity.
-	 * @param float $min  Minimum quantity.
-	 * @param float $step Step (greater than zero).
+	 * @since 11.5.0
+	 * @param float      $qty  Quantity.
+	 * @param float      $min  Minimum quantity.
+	 * @param float|null $step Step (greater than zero), or null when any quantity is accepted.
 	 * @return bool
 	 */
-	private function is_step_aligned( float $qty, float $min, float $step ): bool {
+	public function is_step_aligned( float $qty, float $min, ?float $step ): bool {
+		if ( null === $step ) {
+			return true;
+		}
+
 		$division = ( $qty - $min ) / $step;
 
 		return abs( $division - round( $division ) ) <= 0.000001;
@@ -237,9 +220,12 @@ class ItemQuantityLimits {
 				throw $this->below_min_exception( $item->get_name(), $min );
 			}
 
-			$step = $this->get_quantity_input_step( $item, $product, $min );
+			// A quantity left as stored is accepted even when it does not match the step, so orders
+			// holding such quantities stay editable. A changed quantity must match the step.
+			$step      = $this->get_quantity_input_step( $item, $product );
+			$unchanged = abs( $qty - (float) $item->get_quantity() ) < 0.000001;
 
-			if ( null !== $step && ! $this->is_step_aligned( $qty, $min, $step ) ) {
+			if ( null !== $step && ! $unchanged && ! $this->is_step_aligned( $qty, $min, $step ) ) {
 				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- step_mismatch_exception() strips and decodes the message for a JS alert.
 				throw $this->step_mismatch_exception( $item->get_name(), $step );
 			}

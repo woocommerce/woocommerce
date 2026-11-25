@@ -260,7 +260,7 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_quantity_input_step returns null (no step) when the stored quantity does not align with the step.
+	 * @testdox get_quantity_input_step returns null (no step) for a decimal quantity item on decimal stores with the default step.
 	 */
 	public function test_step_defaults_to_any_for_stored_decimal_quantity(): void {
 		remove_filter( 'woocommerce_stock_amount', 'intval' );
@@ -276,9 +276,9 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_quantity_input_step returns null (no step) on integer stores when the stored quantity does not align with the step.
+	 * @testdox get_quantity_input_step returns the step on integer stores when the stored quantity does not match it.
 	 */
-	public function test_step_defaults_to_any_for_stored_decimal_quantity_on_integer_stores(): void {
+	public function test_step_is_kept_for_stored_decimal_quantity_on_integer_stores(): void {
 		$order = WC_Helper_Order::create_order();
 		$items = array_values( $order->get_items() );
 		$item  = $items[0];
@@ -291,7 +291,8 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_stock_amount', 'intval' );
 
 		$this->assertTrue( wc_is_stock_amount_integer() );
-		$this->assertNull( $this->sut->get_quantity_input_step( $item ) );
+		$this->assertSame( 1.0, $this->sut->get_quantity_input_step( $item ) );
+		$this->assertFalse( $this->sut->is_step_aligned( 2.5, 0.0, 1.0 ) );
 	}
 
 	/**
@@ -617,9 +618,77 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Existing non-conforming quantity on custom-step product returns null (no step) to keep the order editable.
+	 * @testdox get_quantity_input_step returns the product step when the stored quantity does not match it.
 	 */
-	public function test_custom_product_step_non_conforming_stored_qty_falls_back_to_any(): void {
+	public function test_step_is_kept_for_a_stored_quantity_that_does_not_match_it(): void {
+		list( , $item ) = $this->create_order_with_off_step_item();
+
+		$this->assertSame( 0.5, $this->sut->get_quantity_input_step( $item ) );
+		$this->assertFalse( $this->sut->is_step_aligned( (float) $item->get_quantity(), 0.0, 0.5 ) );
+	}
+
+	/**
+	 * @testdox is_step_aligned accepts any quantity when there is no step.
+	 */
+	public function test_is_step_aligned_accepts_any_quantity_without_a_step(): void {
+		$this->assertTrue( $this->sut->is_step_aligned( 1.3, 0.0, null ) );
+	}
+
+	/**
+	 * @testdox validate_posted_item_quantities accepts a stored quantity that does not match the step when it is posted unchanged.
+	 */
+	public function test_validate_posted_accepts_unchanged_quantity_that_does_not_match_step(): void {
+		$this->expectNotToPerformAssertions();
+
+		list( $order, $item ) = $this->create_order_with_off_step_item();
+
+		$this->sut->validate_posted_item_quantities(
+			$order,
+			array(
+				'order_item_qty' => array( $item->get_id() => '1.3' ),
+			)
+		);
+	}
+
+	/**
+	 * @testdox validate_posted_item_quantities rejects a changed quantity that does not match the step, on an item stored off-step.
+	 */
+	public function test_validate_posted_rejects_changed_quantity_that_does_not_match_step(): void {
+		list( $order, $item ) = $this->create_order_with_off_step_item();
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'must be a multiple of 0.5' );
+
+		$this->sut->validate_posted_item_quantities(
+			$order,
+			array(
+				'order_item_qty' => array( $item->get_id() => '1.7' ),
+			)
+		);
+	}
+
+	/**
+	 * @testdox validate_posted_item_quantities accepts a changed quantity that matches the step, on an item stored off-step.
+	 */
+	public function test_validate_posted_accepts_changed_quantity_that_matches_step(): void {
+		$this->expectNotToPerformAssertions();
+
+		list( $order, $item ) = $this->create_order_with_off_step_item();
+
+		$this->sut->validate_posted_item_quantities(
+			$order,
+			array(
+				'order_item_qty' => array( $item->get_id() => '1.5' ),
+			)
+		);
+	}
+
+	/**
+	 * Create an order on a decimal store with one item of a step-0.5 product stored at 1.3.
+	 *
+	 * @return array{0: \WC_Order, 1: \WC_Order_Item_Product} The order and the item.
+	 */
+	private function create_order_with_off_step_item(): array {
 		remove_filter( 'woocommerce_stock_amount', 'intval' );
 		add_filter( 'woocommerce_stock_amount', 'floatval' );
 
@@ -641,8 +710,7 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 		$order->add_product( $product, 1.3 );
 		$order->save();
 		$items = array_values( $order->get_items() );
-		$item  = end( $items );
 
-		$this->assertNull( $this->sut->get_quantity_input_step( $item, $product ) );
+		return array( $order, end( $items ) );
 	}
 }

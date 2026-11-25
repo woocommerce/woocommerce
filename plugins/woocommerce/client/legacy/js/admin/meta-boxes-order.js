@@ -510,6 +510,8 @@ jQuery( function ( $ ) {
 			var line_total    = $( 'input.line_total', $row );
 			var line_subtotal = $( 'input.line_subtotal', $row );
 
+			wc_meta_boxes_order_items.sync_quantity_step( this );
+
 			// Totals
 			var unit_total = accounting.unformat( line_total.attr( 'data-total' ), woocommerce_admin.mon_decimal_point ) / o_qty;
 			line_total.val(
@@ -803,6 +805,21 @@ jQuery( function ( $ ) {
 		},
 
 		/**
+		 * Set the step of a quantity input whose stored quantity does not match its step.
+		 * Such an input carries the step in data-step and accepts any value while it holds
+		 * the stored quantity (data-qty); the step applies once the quantity differs from it.
+		 *
+		 * @param {HTMLInputElement} input Quantity input.
+		 */
+		sync_quantity_step: function( input ) {
+			if ( ! input.dataset.step ) {
+				return;
+			}
+
+			input.step = parseFloat( input.value ) === parseFloat( input.dataset.qty ) ? 'any' : input.dataset.step;
+		},
+
+		/**
 		 * Return the first of the given inputs whose value violates its min
 		 * or step attribute, or null when none does.
 		 *
@@ -822,9 +839,11 @@ jQuery( function ( $ ) {
 		 * @return {boolean} True when every quantity input is valid.
 		 */
 		validate_quantity_inputs: function() {
-			var input = wc_meta_boxes_order_items.find_input_with_qty_below_min(
-				document.querySelectorAll( '#woocommerce-order-items input.quantity' )
-			);
+			var inputs = document.querySelectorAll( '#woocommerce-order-items input.quantity' );
+
+			Array.prototype.forEach.call( inputs, wc_meta_boxes_order_items.sync_quantity_step );
+
+			var input = wc_meta_boxes_order_items.find_input_with_qty_below_min( inputs );
 
 			if ( ! input ) {
 				return true;
