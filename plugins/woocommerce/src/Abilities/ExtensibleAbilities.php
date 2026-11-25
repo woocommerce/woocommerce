@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Abilities;
 
 use Automattic\WooCommerce\Internal\Utilities\StagedMethod;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -25,6 +26,7 @@ defined( 'ABSPATH' ) || exit;
  * the object one time.
  * An extension also registers a query filter, which the list ability of the
  * resource accepts under `filters.extensions.<namespace>.<filter>`.
+ * And it registers an order email that the order-send-email ability can send.
  *
  * The API is experimental while the `extensible_abilities` feature exists.
  *
@@ -68,6 +70,13 @@ class ExtensibleAbilities {
 	 * @var array<string, array<int, array<string, mixed>>>
 	 */
 	private static array $primes = array();
+
+	/**
+	 * Order emails that the order-send-email ability can send, keyed by email name.
+	 *
+	 * @var array<string, array{email_class: string, description: string, statuses: array<int, string>, trigger_callback: callable|null}>
+	 */
+	private static array $order_emails = array();
 
 	/**
 	 * Whether the store enabled the experimental feature.
@@ -802,6 +811,85 @@ class ExtensibleAbilities {
 				self::log_error( sprintf( 'Ability prime callback of "%s" for "%s" failed: %s', $args['namespace'], $resource_name, $e->getMessage() ) );
 			}
 		}
+	}
+
+	/**
+	 * Register an order email that the `woocommerce/order-send-email` ability can send.
+	 *
+	 * Call it inside the `woocommerce_extensible_abilities_init` action. The ability accepts the email
+	 * as `<namespace>:<email>` only when the `extensible_abilities` feature is on. It lists the email
+	 * with its description and statuses in its input schema, so an agent can choose it.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param array $args {
+	 *     Order email arguments.
+	 *
+	 *     @type string   $namespace        Slug of the extension that owns the email, such as `deposits`.
+	 *     @type string   $email            Slug of the email inside the namespace, such as `payment-reminder`.
+	 *     @type string   $email_class      Key of the email in WC()->mailer()->get_emails(), usually its class name.
+	 *     @type string   $description      One sentence on what the email says and who gets it, for agents.
+	 *     @type string[] $statuses         Optional. Order statuses in which the email can be sent, without the
+	 *                                      `wc-` prefix. The ability refuses the email for an order with another
+	 *                                      status. Leave it out when the email can be sent in any status.
+	 *     @type callable $trigger_callback Optional. Receives the WC_Email and the order, and sends the email.
+	 *                                      Leave it out when `$email->trigger( $order_id, $order )` sends it.
+	 *                                      The ability checks that the email was sent through the
+	 *                                      `woocommerce_email_sent` action of that WC_Email.
+	 * }
+	 */
+	public static function register_order_email( array $args ): void {
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, 'Register an order email inside the woocommerce_extensible_abilities_init action, before the abilities build their schemas.', '11.5.0' );
+			return;
+		}
+		foreach ( array( 'namespace', 'email' ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', $key ), '11.5.0' );
+				return;
+			}
+		}
+		foreach ( array( 'email_class', 'description' ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === trim( $args[ $key ] ) ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" argument must be a non-empty string.', $key ), '11.5.0' );
+				return;
+			}
+		}
+		$statuses = $args['statuses'] ?? array();
+		if ( ! is_array( $statuses ) || count( array_filter( $statuses, 'is_string' ) ) !== count( $statuses ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "statuses" argument must be a list of order statuses.', '11.5.0' );
+			return;
+		}
+		if ( isset( $args['trigger_callback'] ) && ! is_callable( $args['trigger_callback'] ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "trigger_callback" argument must be callable.', '11.5.0' );
+			return;
+		}
+
+		$name = $args['namespace'] . ':' . $args['email'];
+		if ( isset( self::$order_emails[ $name ] ) ) {
+			wc_doing_it_wrong( __METHOD__, sprintf( 'The order email "%s" is already registered.', $name ), '11.5.0' );
+			return;
+		}
+
+		self::$order_emails[ $name ] = array(
+			'email_class'      => $args['email_class'],
+			'description'      => $args['description'],
+			'statuses'         => array_values( array_unique( array_map( array( OrderUtil::class, 'remove_status_prefix' ), $statuses ) ) ),
+			'trigger_callback' => $args['trigger_callback'] ?? null,
+		);
+	}
+
+	/**
+	 * Order emails that extensions registered, keyed by `<namespace>:<email>`. Empty when the feature is off.
+	 *
+	 * @internal
+	 *
+	 * @since 11.5.0
+	 *
+	 * @return array<string, array{email_class: string, description: string, statuses: array<int, string>, trigger_callback: callable|null}>
+	 */
+	public static function get_order_emails(): array {
+		return self::is_enabled() ? self::$order_emails : array();
 	}
 
 	/**
