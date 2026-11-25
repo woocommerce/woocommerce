@@ -46148,12 +46148,6 @@ parameters:
 			path: src/Admin/ReportCSVEmail.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\ReportCSVEmail\:\:init_settings\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/ReportCSVEmail.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\ReportCSVEmail\:\:trigger\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
