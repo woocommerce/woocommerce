@@ -130,37 +130,58 @@ class ProductSales {
 	}
 
 	/**
-	 * Ids of the products with the most net sales since a date, highest first, up to TOP_PRODUCTS.
-	 * A variation counts toward its parent. Products whose sales net to nothing or less are left out.
+	 * The next published products by net sales after the first page from last_days().
+	 * A deleted or unpublished product is left out here; its revenue still counts in the total.
 	 *
-	 * @param string             $since    Period start, in the site's time zone.
-	 * @param array<int, string> $excluded Order statuses Analytics leaves out.
+	 * @since 11.4.0
+	 *
+	 * @param string $since  Period start from last_days().
+	 * @param int    $offset How many leading products to skip.
+	 * @param int    $limit  How many to return.
 	 * @return array<int, int>
 	 *
 	 * @throws \RuntimeException When the sales query fails.
 	 */
-	private static function top_products( string $since, array $excluded ): array {
+	public function more_top_products( string $since, int $offset, int $limit ): array {
+		if ( $offset < 0 || $limit < 1 ) {
+			return array();
+		}
+		return self::top_products( $since, self::excluded_statuses(), $offset, $limit );
+	}
+
+	/**
+	 * Ids of the published products with the most net sales since a date, highest first.
+	 * A variation counts toward its parent. Products whose sales net to nothing or less are left out.
+	 *
+	 * @param string             $since    Period start, in the site's time zone.
+	 * @param array<int, string> $excluded Order statuses Analytics leaves out.
+	 * @param int                $offset   How many leading products to skip.
+	 * @param int                $limit    How many to return.
+	 * @return array<int, int>
+	 *
+	 * @throws \RuntimeException When the sales query fails.
+	 */
+	private static function top_products( string $since, array $excluded, int $offset = 0, int $limit = self::TOP_PRODUCTS ): array {
 		global $wpdb;
 
 		$lookup = $wpdb->prefix . 'wc_order_product_lookup';
 		$stats  = $wpdb->prefix . 'wc_order_stats';
 		$not_in = self::not_in( $excluded );
 
-		$limit = self::TOP_PRODUCTS;
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table names from $wpdb and a class constant, placeholders built for the statuses; the scan reads this once, in the background.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Table names from $wpdb, placeholders built for the statuses, limit and offset; the scan reads this in the background.
 		$wpdb->last_error = '';
 		$ids              = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT lookup.product_id
 				FROM {$lookup} AS lookup
+				INNER JOIN {$wpdb->posts} AS posts ON posts.ID = lookup.product_id AND posts.post_type = 'product' AND posts.post_status = 'publish'
 				INNER JOIN {$stats} AS stats ON stats.order_id = lookup.order_id
 				WHERE lookup.date_created >= %s {$not_in}
 				GROUP BY lookup.product_id
 				HAVING SUM( lookup.product_net_revenue ) > 0
 				ORDER BY SUM( lookup.product_net_revenue ) DESC, lookup.product_id ASC
-				LIMIT {$limit}",
-				array_merge( array( $since ), $excluded )
+				LIMIT %d OFFSET %d",
+				array_merge( array( $since ), $excluded, array( $limit, $offset ) )
 			)
 		);
 		// phpcs:enable

@@ -263,10 +263,42 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $scan->truncated() );
 		$this->assertTrue( $scan->best_sellers_first() );
+		$this->assertSame( 2, $scan->bestsellers_count() );
 		$this->assertCount( ProductScan::PRODUCT_LIMIT, $listed );
 		$this->assertSame( array( $ids[1], $ids[0], 900001 ), array_slice( $listed, 0, 3 ), 'Best sellers in sales order, without the hidden one, then the newest changes' );
 		$this->assertSame( array_slice( $recent, 0, ProductScan::PRODUCT_LIMIT ), $plain, 'Without sales to rank by, the newest changes only' );
 		$this->assertFalse( $unseen->best_sellers_first(), 'No best seller the scan checks, so the list is the newest changes' );
+		$this->assertSame( 0, $unseen->bestsellers_count() );
+	}
+
+	/**
+	 * @testdox A full page of sellers the scan cannot check is followed by the next page, which then leads the list.
+	 */
+	public function test_next_seller_page_leads_when_the_first_page_is_ineligible(): void {
+		$seller = WC_Helper_Product::create_simple_product();
+		$recent = range( 900001, 900001 + ProductScan::PRODUCT_LIMIT );
+		$first  = range( 8000001, 8000001 + ProductScan::PRODUCT_LIMIT - 1 );
+		$many   = static function ( $posts, $query ) use ( $recent ) {
+			return ProductScan::PRODUCT_LIMIT + 1 === (int) $query->get( 'posts_per_page' ) ? $recent : $posts;
+		};
+		$offset = 0;
+		$more   = static function ( int $next_offset, int $limit ) use ( $seller, &$offset ): array {
+			unset( $limit );
+			$offset = $next_offset;
+			return array( $seller->get_id() );
+		};
+		add_filter( 'posts_pre_query', $many, 10, 2 );
+		try {
+			$scan   = new ProductScan();
+			$listed = $scan->start( $first, $more );
+		} finally {
+			remove_filter( 'posts_pre_query', $many, 10 );
+		}
+
+		$this->assertSame( ProductScan::PRODUCT_LIMIT, $offset );
+		$this->assertTrue( $scan->best_sellers_first() );
+		$this->assertSame( 1, $scan->bestsellers_count() );
+		$this->assertSame( array( $seller->get_id(), 900001 ), array_slice( $listed, 0, 2 ) );
 	}
 
 	/**

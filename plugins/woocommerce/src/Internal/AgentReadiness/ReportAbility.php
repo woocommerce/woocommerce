@@ -228,7 +228,11 @@ class ReportAbility implements AbilityDefinition {
 						'truncated'           => array( 'type' => 'boolean' ),
 						'bestsellers_first'   => array(
 							'type'        => 'boolean',
-							'description' => __( 'On a truncated check: whether the products checked start with the best sellers of the sales period, then the most recently modified. False when they are the most recently modified only.', 'woocommerce' ),
+							'description' => __( 'On a truncated check: whether the products checked start with bestsellers. False when they are the most recently modified only.', 'woocommerce' ),
+						),
+						'bestsellers_count'   => array(
+							'type'        => 'integer',
+							'description' => __( 'How many of the checked products are bestsellers placed ahead of the most recently modified. Equal to the check limit when those bestsellers fill it. Zero when the check is the most recently modified only.', 'woocommerce' ),
 						),
 						'pages_best_seller'   => array(
 							'type'        => 'boolean',

@@ -307,23 +307,19 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		} elseif ( $pending ) {
 			$message = __( 'Checking your store', 'woocommerce' );
 		}
-		$truncated = null;
-		$by_sales  = false;
+		$truncated   = null;
+		$sample_note = null;
 		if ( null !== $report && ! empty( $report['truncated'] ) ) {
-			$available = (int) ( $report['available'] ?? 0 );
-			$by_sales  = $available > ProductScan::PRODUCT_LIMIT && ! empty( $report['bestsellers_first'] );
-			$truncated = $available > ProductScan::PRODUCT_LIMIT
-				? sprintf(
-					$by_sales
-						/* translators: 1: number of products checked, 2: number of products in the store. */
-						? __( 'Product checks covered %1$s of your %2$s products: your bestsellers first, then the ones you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' )
-						/* translators: 1: number of products checked, 2: number of products in the store. */
-						: __( 'Product checks covered the %1$s products you updated most recently, out of %2$s. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ),
-					number_format_i18n( ProductScan::PRODUCT_LIMIT ),
-					number_format_i18n( $available )
-				)
-				/* translators: %s: number of products checked. Reports from before the total was stored. */
-				: sprintf( __( 'Product checks covered the %s products you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
+			$available   = (int) ( $report['available'] ?? 0 );
+			$with_total  = $available > ProductScan::PRODUCT_LIMIT;
+			$sample_note = self::truncated_copy(
+				$with_total,
+				$with_total && (int) ( $report['bestsellers_count'] ?? 0 ) >= ProductScan::PRODUCT_LIMIT,
+				$with_total && ! empty( $report['bestsellers_first'] )
+			);
+			$truncated   = $with_total
+				? sprintf( $sample_note['checked'], number_format_i18n( ProductScan::PRODUCT_LIMIT ), number_format_i18n( $available ) )
+				: sprintf( $sample_note['checked'], number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
 		}
 		return array(
 			'title'        => __( 'AI shopping health', 'woocommerce' ),
@@ -351,19 +347,54 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'overview'     => array(
 				'shopping' => $this->shopping_card( $checks ),
 				// After the description, when the last check stopped at the product limit.
-				'based_on' => null === $truncated ? null : sprintf(
-					$by_sales
-						/* translators: %s: number of products checked. */
-						? __( 'Based on %s products: your bestsellers first, then the ones you changed most recently.', 'woocommerce' )
-						/* translators: %s: number of products checked. */
-						: __( 'Based on your %s most recently changed products.', 'woocommerce' ),
-					number_format_i18n( ProductScan::PRODUCT_LIMIT )
-				),
+				'based_on' => null === $sample_note ? null : sprintf( $sample_note['based_on'], number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
 				'view_all' => array(
 					'href' => self::url(),
 					'text' => __( 'View all checks', 'woocommerce' ),
 				),
 			),
+		);
+	}
+
+	/**
+	 * The checked note and the "based on" line when a scan stopped at the product limit.
+	 * Bestsellers fill the note on their own when they take every slot.
+	 *
+	 * @param bool $with_total  Whether the report stored how many products the store has.
+	 * @param bool $only_sellers Whether bestsellers fill every checked slot.
+	 * @param bool $then_recent  Whether bestsellers lead and recently changed products follow.
+	 * @return array{checked:string,based_on:string}
+	 */
+	private static function truncated_copy( bool $with_total, bool $only_sellers, bool $then_recent ): array {
+		if ( ! $with_total ) {
+			return array(
+				/* translators: %s: number of products checked. Reports from before the total was stored. */
+				'checked'  => __( 'Product checks covered the %s products you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ),
+				/* translators: %s: number of products checked. */
+				'based_on' => __( 'Based on your %s most recently changed products.', 'woocommerce' ),
+			);
+		}
+		if ( $only_sellers ) {
+			return array(
+				/* translators: 1: number of products checked, 2: number of products in the store. */
+				'checked'  => __( 'Product checks covered %1$s of your %2$s products: your bestsellers. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ),
+				/* translators: %s: number of products checked. */
+				'based_on' => __( 'Based on your %s bestsellers.', 'woocommerce' ),
+			);
+		}
+		if ( $then_recent ) {
+			return array(
+				/* translators: 1: number of products checked, 2: number of products in the store. */
+				'checked'  => __( 'Product checks covered %1$s of your %2$s products: your bestsellers first, then the ones you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ),
+				/* translators: %s: number of products checked. */
+				'based_on' => __( 'Based on %s products: your bestsellers first, then the ones you changed most recently.', 'woocommerce' ),
+			);
+		}
+		return array(
+			/* translators: 1: number of products checked, 2: number of products in the store. */
+			'checked'  => __( 'Product checks covered the %1$s products you updated most recently, out of %2$s. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ),
+			/* translators: %s: number of products checked. */
+			'based_on' => __( 'Based on your %s most recently changed products.', 'woocommerce' ),
 		);
 	}
 

@@ -102,6 +102,24 @@ class ProductSalesTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( $vase->get_id(), $mug->get_id() ), $sales['top'], 'Vase 60, mug 20; the lamp nets to nothing and one product never sold' );
 		$this->assertNotContains( $unsold->get_id(), $sales['top'] );
 		$this->assertEqualsWithDelta( 80.0, $sales['total'], 0.01 );
+		$this->assertSame( array( $mug->get_id() ), $this->sut->more_top_products( $sales['since'], 1, 1 ) );
+	}
+
+	/**
+	 * @testdox A deleted product keeps its revenue in the total and drops out of the best sellers.
+	 */
+	public function test_top_products_skip_a_deleted_product(): void {
+		$mug  = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$lamp = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 40 ) );
+
+		$this->order( array( array( $mug, 1 ) ), OrderStatus::COMPLETED );
+		$this->order( array( array( $lamp, 1 ) ), OrderStatus::COMPLETED );
+		$lamp->delete( true );
+
+		$sales = $this->sut->last_days();
+
+		$this->assertSame( array( $mug->get_id() ), $sales['top'] );
+		$this->assertEqualsWithDelta( 50.0, $sales['total'], 0.01, 'The deleted product\'s revenue still counts' );
 	}
 
 	/**
