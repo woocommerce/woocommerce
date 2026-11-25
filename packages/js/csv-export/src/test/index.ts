@@ -156,4 +156,32 @@ describe( 'downloadCSVFile', () => {
 			jest.useRealTimers();
 		}
 	} );
+
+	it( 'falls back to a default filename when none is given', () => {
+		const originalURL = window.URL;
+		let download: string | undefined;
+		const click = jest
+			.spyOn( window.HTMLAnchorElement.prototype, 'click' )
+			.mockImplementation( function (
+				this: InstanceType< typeof window.HTMLAnchorElement >
+			) {
+				download = this.download;
+			} );
+
+		jest.useFakeTimers();
+		window.URL = Object.assign( class extends originalURL {}, {
+			createObjectURL: () => 'blob:test',
+			revokeObjectURL: jest.fn(),
+		} );
+
+		try {
+			downloadCSVFile( '', 'Product,Price' );
+
+			expect( download ).toBe( 'download' );
+		} finally {
+			window.URL = originalURL;
+			click.mockRestore();
+			jest.useRealTimers();
+		}
+	} );
 } );

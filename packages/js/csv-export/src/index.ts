@@ -139,7 +139,7 @@ export function downloadCSVFile( fileName: string, content: BlobPart ) {
 	const url = URL.createObjectURL( blob );
 	const link = document.createElement( 'a' );
 	link.href = url;
-	link.download = fileName;
+	link.download = fileName || 'download';
 	link.click();
 
 	// Browsers can begin reading the URL after the click handler has returned.
