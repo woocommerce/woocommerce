@@ -213,7 +213,13 @@ describe( 'useReadinessView', () => {
 		await act( async () => result.current.setDailyChecks( true ) );
 		expect( result.current.view?.daily_checks ).toBe( false );
 		expect( result.current.error ).toBe(
-			'Your change wasn’t saved. Try again in a few minutes.'
+			'Automatic daily checks weren’t turned on. Try again in a few minutes.'
+		);
+
+		mockFetch.mockRejectedValueOnce( new Error( 'offline' ) );
+		await act( async () => result.current.setDailyChecks( false ) );
+		expect( result.current.error ).toBe(
+			'Automatic daily checks weren’t turned off. Try again in a few minutes.'
 		);
 	} );
 

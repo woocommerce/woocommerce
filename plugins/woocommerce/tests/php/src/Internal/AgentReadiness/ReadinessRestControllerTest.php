@@ -382,7 +382,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 			false
 		);
 		$text = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
-		$this->assertStringContainsString( "### Store checks ###\n\nYour store wasn’t live at the last check. These checks run at the next daily check, or you can run the check again now.", $text );
+		$this->assertStringContainsString( "### Store checks ###\n\nYour store wasn’t live at the last check. If your store is live now, these checks run at the next daily check. To run them now, select Check again.", $text );
 		$this->assertStringNotContainsString( 'Your hosting setup blocked', $text );
 		$this->assertStringContainsString( 'Open Graph tags (open_graph_tags): Not checked yet. Your store wasn’t live at the last check.', $text, 'Each check says so too, as on the page' );
 		$this->assertStringContainsString( 'Shipping details (product_shipping_schema): Not available yet', $text, 'A check a coming update builds is still not available' );

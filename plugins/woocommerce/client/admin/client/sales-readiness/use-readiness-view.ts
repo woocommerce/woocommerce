@@ -170,10 +170,15 @@ export function useReadinessView(
 						current && { ...current, daily_checks: ! enabled }
 				);
 				setError(
-					__(
-						'Your change wasn’t saved. Try again in a few minutes.',
-						'woocommerce'
-					)
+					enabled
+						? __(
+								'Automatic daily checks weren’t turned on. Try again in a few minutes.',
+								'woocommerce'
+							)
+						: __(
+								'Automatic daily checks weren’t turned off. Try again in a few minutes.',
+								'woocommerce'
+							)
 				);
 			} finally {
 				if ( mounted.current ) {
