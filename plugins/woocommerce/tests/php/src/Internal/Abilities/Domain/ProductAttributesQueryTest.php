@@ -107,6 +107,23 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the terms as a list when a get_terms filter drops one.
+	 */
+	public function test_terms_stay_a_list_after_a_filter_drops_one(): void {
+		$attribute = WC_Helper_Product::create_attribute( 'Test Fabric', array( 'Wool', 'Silk' ) );
+		add_filter(
+			'get_terms',
+			static function ( $terms ) {
+				return is_array( $terms ) ? array_slice( $terms, 1, null, true ) : $terms;
+			}
+		);
+
+		$result = $this->sut->execute( array( 'include' => array( $attribute['attribute_id'] ) ) );
+
+		$this->assertSame( array( 0 ), array_keys( $result['attributes'][0]['terms'] ), 'The remaining term keeps key 0, so the terms serialize as a JSON list.' );
+	}
+
+	/**
 	 * @testdox Should filter by search and page through the attributes with a total.
 	 */
 	public function test_search_and_pagination(): void {

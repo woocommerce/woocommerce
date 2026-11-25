@@ -80,7 +80,7 @@ trait ProductAttributeAbilityTrait {
 			return $terms;
 		}
 
-		$output['terms'] = $terms;
+		$output['terms'] = array_values( $terms );
 
 		return $output;
 	}
