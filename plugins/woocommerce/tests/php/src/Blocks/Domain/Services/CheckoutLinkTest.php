@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutLink;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 
 /**
  * Unit tests for CheckoutLink.
@@ -95,7 +96,7 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Adds legacy products, quantities, SKUs, variations, additional data, and a coupon from a checkout link.
 	 */
-	public function test_products_and_coupon_are_added_and_token_in_url(): void {
+	public function test_products_and_coupon_are_added(): void {
 		$legacy_product      = \WC_Helper_Product::create_simple_product();
 		$quantity_product    = \WC_Helper_Product::create_simple_product();
 		$sku_product         = \WC_Helper_Product::create_simple_product();
@@ -156,7 +157,31 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'alpha,beta;gamma:delta', $cart_by_product[ $variable_product->get_id() ]['note'], 'Escaped delimiters should be retained in additional product data.' );
 		$this->assertArrayNotHasKey( 'nyp', $cart_by_product[ $variable_product->get_id() ]['variation'], 'Additional product data should not be treated as variation data.' );
 		$this->assertSame( [ 'test-coupon' ], WC()->cart->get_applied_coupons(), 'The checkout-link coupon should be applied.' );
-		$this->assertStringContainsString( 'session=', $url, 'Guest checkout links should include a cart session token.' );
+		$this->assert_url_has_cart_link_token( $url );
+	}
+
+	/**
+	 * @testdox Replaces an incoming session token with the guest's own cart link token.
+	 */
+	public function test_incoming_session_token_is_replaced(): void {
+		$product                 = \WC_Helper_Product::create_simple_product();
+		$original_query          = $_SERVER['QUERY_STRING'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Saved only to restore it after the test.
+		$_GET['products']        = (string) $product->get_id();
+		$_SERVER['QUERY_STRING'] = 'products=' . $product->get_id() . '&session=example-token&utm_source=newsletter';
+
+		try {
+			$url = $this->get_checkout_link_service()->get_checkout_link_test();
+		} finally {
+			if ( null === $original_query ) {
+				unset( $_SERVER['QUERY_STRING'] );
+			} else {
+				$_SERVER['QUERY_STRING'] = $original_query;
+			}
+		}
+
+		$this->assertStringNotContainsString( 'example-token', $url, 'An incoming session token should not be forwarded to the checkout URL.' );
+		$this->assert_url_has_cart_link_token( $url );
+		$this->assertStringContainsString( 'utm_source=newsletter', $url, 'Other query args should still be forwarded.' );
 	}
 
 	/**
@@ -254,7 +279,7 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 		$this->assertSame( [ $simple_product->get_id() ], array_values( wp_list_pluck( WC()->cart->get_cart(), 'product_id' ) ), 'Only the resolvable product should be added to the cart.' );
 		$this->assertStringStartsWith( $variable_product->get_permalink(), $url, 'The shopper should be sent to the first product that needs options.' );
 		$this->assertStringContainsString( 'attribute_pa_colour=blue', $url, 'Attributes of the first product that needs options should be preselected.' );
-		$this->assertStringContainsString( 'session=', $url, 'Guests should keep the cart through the session token.' );
+		$this->assert_url_has_cart_link_token( $url );
 
 		$notices = wc_get_notices( 'error' );
 
@@ -296,7 +321,74 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
 
 		$this->assertStringNotContainsString( 'attribute_pa_size', $url, 'An unpublished product page should not be used as the redirect.' );
-		$this->assertStringContainsString( 'Missing variation data', $query['wc_error'] ?? '', 'The add to cart error should still be shown.' );
+		$this->assertSame( 'This item is not available for purchase.', $query['wc_error'], 'The add to cart error should not name the unpublished product or its attributes.' );
+	}
+
+	/**
+	 * Assert the URL carries a cart link token for the current session, not a Store API cart token.
+	 *
+	 * @param string $url The checkout link redirect URL.
+	 */
+	private function assert_url_has_cart_link_token( string $url ): void {
+		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+
+		$token = (string) ( $query['session'] ?? '' );
+
+		$this->assertNotSame( '', $token, 'Guest checkout links should include a session token so the cart can move to another browser.' );
+		$this->assertSame( (string) WC()->session->get_customer_id(), CartTokenUtils::get_cart_link_customer_id( $token ), 'The token should name the guest session.' );
+		$this->assertFalse( CartTokenUtils::validate_cart_token( $token ), 'The token should not be usable as a Store API Cart-Token.' );
+	}
+
+	/**
+	 * @testdox Strips cart item data for sold-individually products and variations by default, restores it only where the override filter allows, and still blocks a later plain add.
+	 */
+	public function test_cart_item_data_does_not_bypass_sold_individually(): void {
+		$default_product = \WC_Helper_Product::create_simple_product();
+		$default_product->set_sold_individually( true );
+		$default_product->save();
+
+		$overridden_product = \WC_Helper_Product::create_simple_product();
+		$overridden_product->set_sold_individually( true );
+		$overridden_product->save();
+
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		$variable_product->set_sold_individually( true );
+		$variable_product->save();
+
+		$variation_id = wc_get_product_id_by_sku( 'DUMMY SKU VARIABLE SMALL' );
+
+		add_filter(
+			'woocommerce_checkout_link_sold_individually_cart_item_data',
+			function ( $cart_item_data, $raw_cart_item_data, $product ) use ( $overridden_product ) {
+				return $product->get_id() === $overridden_product->get_id() ? $raw_cart_item_data : $cart_item_data;
+			},
+			10,
+			3
+		);
+
+		$_GET['products'] = implode(
+			',',
+			[
+				$default_product->get_id() . ':1::note=a',
+				$default_product->get_id() . ':1::note=b',
+				$overridden_product->get_id() . ':1::nyp=120',
+				$variation_id . ':1:pa_colour=red;pa_number=0:note=a',
+			]
+		);
+
+		$this->get_checkout_link_service()->get_checkout_link_test();
+
+		$cart_items = array_column( WC()->cart->get_cart(), null, 'product_id' );
+
+		$this->assertCount( 3, $cart_items, 'Each sold-individually product and variation should only be added to the cart once.' );
+		$this->assertSame( 1, $cart_items[ $default_product->get_id() ]['quantity'], 'A sold-individually product should keep a quantity of one.' );
+		$this->assertArrayNotHasKey( 'note', $cart_items[ $default_product->get_id() ], 'Cart item data should be dropped by default, even across several entries.' );
+		$this->assertSame( WC()->cart->generate_cart_id( $default_product->get_id() ), $cart_items[ $default_product->get_id() ]['key'], 'A sold-individually product should keep its plain cart item key.' );
+		$this->assertSame( '120', $cart_items[ $overridden_product->get_id() ]['nyp'] ?? null, 'The override filter should restore data only for the product it targets.' );
+		$this->assertArrayNotHasKey( 'note', $cart_items[ $variable_product->get_id() ], 'Cart item data should be dropped for a variation whose parent is sold individually.' );
+
+		$this->assertFalse( WC()->cart->add_to_cart( $default_product->get_id() ), 'A later plain add should not bypass the sold-individually limit either.' );
+		$this->assertCount( 3, WC()->cart->get_cart(), 'The cart should still only contain one line per product.' );
 	}
 
 	/**

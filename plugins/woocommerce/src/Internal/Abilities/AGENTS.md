@@ -24,3 +24,19 @@ Keep:
 ## Omit unavailable output fields
 
 Core ability output types are never nullable. Omit an unavailable field instead of returning `null`. Declare date fields as `string` with the `date-time` format.
+
+## Mark abilities that do not write as read-only
+
+Set `'readonly' => true` in the `annotations` meta of every ability that does not write. `Ability::validate_output()` adds a hint to an invalid output error that the ability may already have saved changes. It leaves out the hint only when `readonly` is `true`.
+
+Do not use `destructive` for this. An ability with `destructive: false`, such as a create or an email send, still changes the store.
+
+## Use `ExtensibleAbilitiesTestTrait` in tests
+
+A test that needs the `extensible_abilities` feature on uses `Automattic\WooCommerce\Tests\Internal\Abilities\ExtensibleAbilitiesTestTrait`. Do not turn the feature on with `update_option()` alone, fire the init actions by hand, or reach into the registries of `ExtensibleAbilities` with reflection.
+
+- Call `enable_extensible_abilities()` to turn the feature on with Core's resources registered. Pass a callback to register the fields, validators, syncs or filters of the test.
+- Call `isolate_extensible_abilities()` when the test needs empty registries while the feature is off.
+- Do not restore anything by hand. The trait restores the registries after each test.
+
+Turning only the option on is not enough. When an earlier test built the abilities registry while the feature was off, Core's resources are not registered, and an ability that saves a secondary object refuses the call.

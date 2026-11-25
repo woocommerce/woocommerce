@@ -102,6 +102,13 @@ class Typography_Preprocessor implements Preprocessor {
 		// In case the fontSize is set via a slug (small, medium, large, etc.) we translate it to a number
 		// The font size slug is set in $block['attrs']['fontSize'] and value in $block['attrs']['style']['typography']['fontSize'].
 		if ( isset( $block['attrs']['fontSize'] ) && is_string( $block['attrs']['fontSize'] ) ) {
+			// A string style (e.g. Calendly's "style":"inline") is not a style object, so treat it as absent.
+			if ( isset( $block['attrs']['style'] ) && ! is_array( $block['attrs']['style'] ) ) {
+				$block['attrs']['style'] = array();
+			}
+			if ( isset( $block['attrs']['style']['typography'] ) && ! is_array( $block['attrs']['style']['typography'] ) ) {
+				$block['attrs']['style']['typography'] = array();
+			}
 			$block['attrs']['style']['typography']['fontSize'] = $this->settings_controller->translate_slug_to_font_size( $block['attrs']['fontSize'] );
 		}
 		// Pass font size to email_attrs.

@@ -65,11 +65,44 @@ class StoreResponses {
 	private array $redirects = array();
 
 	/**
-	 * The product whose page checks read, false when there is none, null until looked up.
-	 *
-	 * @var \WC_Product|false|null
+	 * Most product pages a page check reads. It stops at the first page that fails.
 	 */
-	private $product = null;
+	public const PRODUCT_SAMPLE_SIZE = 5;
+
+	/**
+	 * The product pages page checks read, in order, null until looked up.
+	 *
+	 * @var \WC_Product[]|null
+	 */
+	private ?array $sample = null;
+
+	/**
+	 * The product page checks read now: one of the sample, or null for the first one.
+	 *
+	 * @var \WC_Product|null
+	 */
+	private ?\WC_Product $focus = null;
+
+	/**
+	 * Whether product() and product_page() answer null, to test a check on its other pages.
+	 *
+	 * @var bool
+	 */
+	private bool $without_product = false;
+
+	/**
+	 * Whether a check asked for the product or its page since forget_product_read().
+	 *
+	 * @var bool
+	 */
+	private bool $product_read = false;
+
+	/**
+	 * The product with the most net sales, 0 when sales aren't known.
+	 *
+	 * @var int
+	 */
+	private int $best_seller = 0;
 
 	/**
 	 * The category page's URL once looked up; '' when there is none.
@@ -160,15 +193,34 @@ class StoreResponses {
 	}
 
 	/**
+	 * Whether this scan sends a request to a URL: only while the store is live, only to the store,
+	 * and not once the home page couldn't be reached.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $url URL or path.
+	 */
+	public function can_request( string $url ): bool {
+		return $this->site_live && $this->reachable && $this->is_store_url( self::absolute( $url ) );
+	}
+
+	/**
 	 * The response to a POST of a JSON object, sent again instead of read from this scan's earlier answer.
+	 * A retry that gets no answer leaves the earlier one in place, so the scan can still say what came back.
 	 *
 	 * @param string               $url  URL or path.
 	 * @param array<string, mixed> $body JSON object.
 	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null Null when the store could not be reached.
 	 */
 	public function post_json_again( string $url, array $body ): ?array {
-		unset( $this->responses[ self::post_key( self::absolute( $url ), $body ) ] );
-		return $this->post_json( $url, $body );
+		$key      = self::post_key( self::absolute( $url ), $body );
+		$previous = $this->responses[ $key ] ?? null;
+		unset( $this->responses[ $key ] );
+		$again = $this->post_json( $url, $body );
+		if ( null === $again && null !== $previous ) {
+			$this->responses[ $key ] = $previous;
+		}
+		return $again;
 	}
 
 	/**
@@ -222,40 +274,117 @@ class StoreResponses {
 	}
 
 	/**
-	 * The newest product the scan checks (ProductScan::count_query()), or null when there is none.
-	 * Password protected products are left out, since their page shows a form instead of the product. A product with
-	 * a price comes first, so one unfinished product doesn't decide a check for the whole store; only the five newest
-	 * of the others are looked at.
+	 * Use the store's sales to read the best-selling product's page first.
+	 *
+	 * @param array<int, float> $by_product Net sales by product id.
 	 */
-	public function product(): ?\WC_Product {
-		if ( null === $this->product ) {
-			$this->product = false;
-			$ids           = get_posts(
-				array(
-					'post_type'      => 'product',
-					'post_status'    => ProductStatus::PUBLISH,
-					'has_password'   => false,
-					'tax_query'      => ProductScan::count_query( ProductScan::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Five rows, once per background scan.
-					'posts_per_page' => 5,
-					'fields'         => 'ids',
-					'orderby'        => 'date',
-					'order'          => 'DESC',
+	public function use_sales( array $by_product ): void {
+		$by_product = array_filter( $by_product, static fn( $sales ): bool => $sales > 0 );
+		arsort( $by_product );
+		$this->best_seller = (int) ( array_key_first( $by_product ) ?? 0 );
+		$this->sample      = null;
+	}
+
+	/**
+	 * The product pages page checks read, up to PRODUCT_SAMPLE_SIZE: the best seller when sales are
+	 * known, the newest product, then products picked the same way on every scan of this store.
+	 * Only products the scan checks (ProductScan::count_query()) without a password count, since a
+	 * password protected page shows a form. Products with a price come first, so an unfinished
+	 * product doesn't decide a check for the whole store.
+	 *
+	 * @return \WC_Product[]
+	 */
+	public function products(): array {
+		if ( null === $this->sample ) {
+			$query = array(
+				'post_type'    => 'product',
+				'post_status'  => ProductStatus::PUBLISH,
+				'has_password' => false,
+				'tax_query'    => ProductScan::count_query( ProductScan::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- A few rows, once per background scan.
+				'fields'       => 'ids',
+			);
+			$ids   = array_merge(
+				$this->best_seller > 0 ? get_posts( $query + array( 'post__in' => array( $this->best_seller ) ) ) : array(),
+				get_posts(
+					$query + array(
+						'posts_per_page' => 1,
+						'orderby'        => 'date',
+						'order'          => 'DESC',
+					)
+				),
+				// A seed from the store's address keeps the same products on every scan.
+				get_posts(
+					$query + array(
+						'posts_per_page' => 2 * self::PRODUCT_SAMPLE_SIZE,
+						'orderby'        => 'RAND(' . absint( crc32( home_url() ) ) . ')',
+					)
 				)
 			);
-			foreach ( array_map( 'wc_get_product', $ids ) as $product ) {
-				if ( ! $product instanceof \WC_Product ) {
-					continue;
-				}
-				if ( false === $this->product ) {
-					$this->product = $product;
-				}
-				if ( '' !== $product->get_price() ) {
-					$this->product = $product;
-					break;
+			$priced   = array();
+			$unpriced = array();
+			foreach ( array_unique( array_map( 'intval', $ids ) ) as $id ) {
+				$product = wc_get_product( $id );
+				if ( $product instanceof \WC_Product ) {
+					if ( '' !== $product->get_price() ) {
+						$priced[] = $product;
+					} else {
+						$unpriced[] = $product;
+					}
 				}
 			}
+			$this->sample = array_slice( array() === $priced ? $unpriced : $priced, 0, self::PRODUCT_SAMPLE_SIZE );
 		}
-		return $this->product ? $this->product : null;
+		return $this->sample;
+	}
+
+	/**
+	 * Whether the sample starts with the best seller. It doesn't without sales, or when the best
+	 * seller can't be checked, such as one without a price.
+	 */
+	public function starts_with_best_seller(): bool {
+		$first = $this->products()[0] ?? null;
+		return $this->best_seller > 0 && null !== $first && $first->get_id() === $this->best_seller;
+	}
+
+	/**
+	 * The product whose page checks read: the one set by focus(), else the first of products().
+	 * Null when there is none.
+	 */
+	public function product(): ?\WC_Product {
+		$this->product_read = true;
+		return $this->without_product ? null : ( $this->focus ?? ( $this->products()[0] ?? null ) );
+	}
+
+	/**
+	 * Make product() and product_page() answer null, or answer again.
+	 *
+	 * @param bool $without Whether to leave the product out.
+	 */
+	public function without_product( bool $without ): void {
+		$this->without_product = $without;
+	}
+
+	/**
+	 * Make product() and product_page() answer for one product of the sample, or for the first one with null.
+	 *
+	 * @param \WC_Product|null $product Product of products(), or null.
+	 */
+	public function focus( ?\WC_Product $product ): void {
+		$this->focus = $product;
+	}
+
+	/**
+	 * Start watching whether a check reads the product or its page.
+	 */
+	public function forget_product_read(): void {
+		$this->product_read = false;
+	}
+
+	/**
+	 * Whether a check read the product or its page since forget_product_read().
+	 */
+	public function product_was_read(): bool {
+		return $this->product_read;
 	}
 
 	/**
@@ -371,7 +500,7 @@ class StoreResponses {
 			return null;
 		}
 		$headers = array();
-		foreach ( array( 'location', 'x-robots-tag', 'content-type', 'vary', 'link' ) as $name ) {
+		foreach ( array( 'location', 'x-robots-tag', 'content-type', 'vary', 'link', 'x-woocommerce-llms-txt' ) as $name ) {
 			$value = wp_remote_retrieve_header( $response, $name );
 			$value = is_array( $value ) ? implode( ', ', $value ) : (string) $value;
 			if ( '' !== $value ) {

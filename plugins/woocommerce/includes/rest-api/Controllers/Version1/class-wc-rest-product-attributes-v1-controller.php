@@ -339,7 +339,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 			$id,
 			array(
 				'name'         => $request['name'],
-				'slug'         => wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ),
+				'slug'         => isset( $request['slug'] ) ? wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ) : null,
 				'type'         => $request['type'],
 				'order_by'     => $request['order_by'],
 				'has_archives' => $request['has_archives'],
@@ -591,6 +591,8 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 		if ( is_wp_error( $attribute ) || is_null( $attribute ) ) {
 			return new WP_Error( 'woocommerce_rest_attribute_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
+
+		$attribute->attribute_label = sanitize_text_field( (string) $attribute->attribute_label );
 
 		return $attribute;
 	}

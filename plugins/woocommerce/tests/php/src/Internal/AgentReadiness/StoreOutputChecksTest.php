@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\AgentReadiness\JsonLd;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreResponses;
 use WC_Helper_Product;
 use WC_Structured_Data;
 use WC_Unit_Test_Case;
@@ -53,7 +54,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	/**
 	 * Answer requests by path from the home URL; a null response fails like a timeout, and any other path is a 404.
 	 *
-	 * @param array<string, array{0:int,1:string}|null> $responses Status and body by path.
+	 * @param array<string, array{0:int,1:string,2?:array<string,string>}|null> $responses Status, body and headers by path.
 	 */
 	private function serve( array $responses ): void {
 		add_filter(
@@ -66,7 +67,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 				}
 				$response = $responses[ $path ] ?? array( 404, '' );
 				return array(
-					'headers'  => array(),
+					'headers'  => new \WpOrg\Requests\Utility\CaseInsensitiveDictionary( $response[2] ?? array() ),
 					'body'     => $response[1],
 					'response' => array(
 						'code'    => $response[0],
@@ -87,6 +88,31 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	 */
 	private function results(): array {
 		return array_column( $this->sut->all(), 'ok', 'id' );
+	}
+
+	/**
+	 * @testdox A product page check, page HTML or JSON-LD, with no product to open is marked no_product; one whose product page didn't load, or a home page check, is not.
+	 */
+	public function test_product_page_check_without_a_product_is_no_product(): void {
+		$this->serve( array( '/' => array( 200, '<html><head><meta name="viewport" content="width=device-width"></head><body></body></html>' ) ) );
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertNull( $checks['canonical_url']['ok'] );
+		$this->assertTrue( $checks['canonical_url']['no_product'], 'No product, so the check waits for one' );
+		$this->assertNull( $checks['product_jsonld_present']['ok'] );
+		$this->assertTrue( $checks['product_jsonld_present']['no_product'], 'A JSON-LD check waits for a product too' );
+		$this->assertNull( $checks['product_review_markup']['ok'] );
+		$this->assertTrue( $checks['product_review_markup']['no_product'], 'So does the review markup check' );
+		$this->assertFalse( $checks['viewport_meta']['no_product'], 'A home page check does not need a product' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$this->serve( array( self::path_of( $product ) => null ) );
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertNull( $checks['canonical_url']['ok'] );
+		$this->assertFalse( $checks['canonical_url']['no_product'], 'The product page timed out: that is couldn\'t check' );
+		$this->assertNull( $checks['product_jsonld_present']['ok'] );
+		$this->assertFalse( $checks['product_jsonld_present']['no_product'], 'A JSON-LD check on a page that timed out is couldn\'t check' );
+		$this->assertNull( $checks['product_review_markup']['ok'] );
+		$this->assertFalse( $checks['product_review_markup']['no_product'] );
 	}
 
 	/**
@@ -114,6 +140,182 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertTrue( $this->results()['sitemap_lists_products'] );
+	}
+
+	/**
+	 * @testdox With plain permalinks, /robots.txt answers with a page and the sitemap is at /?sitemap=index: both checks still run.
+	 */
+	public function test_plain_permalinks(): void {
+		$this->set_permalink_structure( '' );
+		// The shop page redirects to the product archive only when the product type has one.
+		$product_type = get_post_type_object( 'product' );
+		$had_archive  = $product_type ? $product_type->has_archive : false;
+		if ( $product_type ) {
+			$product_type->has_archive = true;
+		}
+		try {
+			$product = \WC_Helper_Product::create_simple_product();
+			$shop    = wp_insert_post(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_title'  => 'Shop',
+				)
+			);
+			update_option( 'woocommerce_shop_page_id', $shop );
+			$page = array( 200, '<!doctype html><title>Shop</title>' );
+			$this->serve(
+				array(
+					'/robots.txt'             => $page,
+					'/'                       => $page,
+					'/?post_type=product'     => $page,
+					self::path_of( $product ) => $page,
+					'/?sitemap=index'         => array( 200, '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=posts&amp;sitemap-subtype=product_cat&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ),
+					'/?sitemap=posts&sitemap-subtype=product_cat&paged=1' => array( 200, '<urlset><url><loc>' . home_url( '/?product=beanie' ) . '</loc><lastmod>2026-11-01</lastmod></url></urlset>' ),
+					"/?page_id=$shop"         => array( 302, '', array( 'location' => home_url( '/?post_type=product' ) ) ),
+				)
+			);
+
+			$results = $this->results();
+			$this->assertTrue( $results['sitemap_lists_products'] );
+			$this->assertTrue( $results['sitemap_lastmod'] );
+			$this->assertTrue( $results['pages_public'] );
+
+			$this->assertFalse( $this->names_products_in( '<urlset><url><loc>' . home_url( '/?product_cat=hats' ) . '</loc></url></urlset>' ) );
+			$this->assertTrue( $this->names_products_in( '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=posts&amp;sitemap-subtype=product&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ) );
+			$this->assertFalse( $this->names_products_in( '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=taxonomies&amp;sitemap-subtype=product_brand&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ) );
+			$this->assertTrue( $this->names_products_in( '<urlset><url><loc>' . home_url( '/?product=beanie&amp;lang=fr' ) . '</loc></url></urlset>' ) );
+		} finally {
+			if ( $product_type ) {
+				$product_type->has_archive = $had_archive;
+			}
+		}
+	}
+
+	/**
+	 * @testdox With plain permalinks, a page at /robots.txt counts as no robots file, so a missing sitemap fails.
+	 */
+	public function test_plain_permalinks_html_robots_is_no_file(): void {
+		$this->set_permalink_structure( '' );
+		$this->serve( array( '/robots.txt' => array( 200, '<!doctype html><title>Home</title>' ) ) );
+
+		$this->assertFalse( $this->results()['sitemap_lists_products'] );
+	}
+
+	/**
+	 * @testdox With plain permalinks and no product archive, the shop page itself is what gets checked.
+	 */
+	public function test_plain_permalinks_shop_without_archive(): void {
+		$this->set_permalink_structure( '' );
+		$product_type = get_post_type_object( 'product' );
+		$had_archive  = $product_type ? $product_type->has_archive : false;
+		try {
+			$shop = wp_insert_post(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_title'  => 'Shop',
+				)
+			);
+			update_option( 'woocommerce_shop_page_id', $shop );
+			// A block theme registers a product archive. This case is the shop page with that archive off.
+			if ( $product_type ) {
+				$product_type->has_archive = false;
+			}
+			$this->serve(
+				array(
+					'/'                   => array( 200, '<!doctype html><title>Home</title>' ),
+					"/?page_id=$shop"     => array( 302, '', array( 'location' => site_url( '/wp-login.php' ) ) ),
+					'/wp-login.php'       => array( 200, '<html>Log in</html>' ),
+					'/?post_type=product' => array( 200, '<!doctype html><title>Shop</title>' ),
+				)
+			);
+
+			$this->assertFalse( $this->results()['pages_public'] );
+		} finally {
+			if ( $product_type ) {
+				$product_type->has_archive = $had_archive;
+			}
+		}
+	}
+
+	/**
+	 * @testdox With plain permalinks, the shop as the front page is not replaced by the product archive.
+	 */
+	public function test_plain_permalinks_front_page_shop(): void {
+		$this->set_permalink_structure( '' );
+		$product_type = get_post_type_object( 'product' );
+		$had_archive  = $product_type ? $product_type->has_archive : false;
+		if ( $product_type ) {
+			$product_type->has_archive = true;
+		}
+		try {
+			$shop = wp_insert_post(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_title'  => 'Shop',
+				)
+			);
+			update_option( 'woocommerce_shop_page_id', $shop );
+			update_option( 'show_on_front', 'page' );
+			update_option( 'page_on_front', $shop );
+			$this->serve(
+				array(
+					'/'                   => array( 200, '<!doctype html><title>Home</title>' ),
+					'/?post_type=product' => array( 302, '', array( 'location' => site_url( '/wp-login.php' ) ) ),
+					'/wp-login.php'       => array( 200, '<html>Log in</html>' ),
+				)
+			);
+
+			$this->assertTrue( $this->results()['pages_public'] );
+		} finally {
+			if ( $product_type ) {
+				$product_type->has_archive = $had_archive;
+			}
+		}
+	}
+
+	/**
+	 * @testdox With plain permalinks, a custom shop permalink is the page that is checked.
+	 */
+	public function test_plain_permalinks_custom_shop_permalink(): void {
+		$this->set_permalink_structure( '' );
+		$shop = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Shop',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop );
+		add_filter(
+			'woocommerce_get_shop_page_permalink',
+			static function () {
+				return home_url( '/?custom-shop=1' );
+			}
+		);
+		$this->serve(
+			array(
+				'/'                   => array( 200, '<!doctype html><title>Home</title>' ),
+				'/?custom-shop=1'     => array( 302, '', array( 'location' => site_url( '/wp-login.php' ) ) ),
+				'/wp-login.php'       => array( 200, '<html>Log in</html>' ),
+				'/?post_type=product' => array( 200, '<!doctype html><title>Shop</title>' ),
+			)
+		);
+
+		$this->assertFalse( $this->results()['pages_public'] );
+	}
+
+	/**
+	 * Whether the sitemap check passes when /?sitemap=index serves this XML and nothing else answers.
+	 *
+	 * @param string $xml Sitemap XML.
+	 */
+	private function names_products_in( string $xml ): bool {
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( '/?sitemap=index' => array( 200, $xml ) ) );
+		return true === $this->results()['sitemap_lists_products'];
 	}
 
 	/**
@@ -494,6 +696,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	public function test_product_checks_sample_checked_products(): void {
 		$shop_only = WC_Helper_Product::create_simple_product();
 		$shop_only->set_catalog_visibility( 'catalog' );
+		$shop_only->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'shop.jpg' ) ) );
 		$shop_only->set_date_created( time() - 2 * HOUR_IN_SECONDS );
 		$shop_only->save();
 		$search_only = WC_Helper_Product::create_simple_product();
@@ -505,15 +708,323 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$hidden      = WC_Helper_Product::create_simple_product();
 		$hidden->set_catalog_visibility( 'hidden' );
 		$hidden->save();
+		$shop_only = wc_get_product( $shop_only->get_id() );
 		$this->serve(
 			array(
-				self::path_of( $shop_only )   => array( 200, self::page_with( array() ) ),
+				self::path_of( $shop_only )   => array( 200, self::page_with( array( self::core_product_jsonld( $shop_only ) ) ) ),
 				self::path_of( $search_only ) => array( 200, self::page_with( array( self::core_product_jsonld( $search_only ) ) ) ),
 				self::path_of( $hidden )      => array( 200, self::page_with( array() ) ),
 			)
 		);
 
-		$this->assertSame( array( true, true, true ), $this->product_results() );
+		$this->assertSame( array( true, true, true ), $this->product_results(), 'The Hidden product\'s page, without JSON-LD, is not read' );
+		$sampled = array_map( static fn( \WC_Product $product ): int => $product->get_id(), $this->sut->responses()->products() );
+		$this->assertSame( array( $search_only->get_id(), $shop_only->get_id() ), $sampled, 'The newest checked product first' );
+	}
+
+	/**
+	 * @testdox A page check reads more than the newest product page, and names the product whose page failed.
+	 */
+	public function test_page_checks_find_a_failure_past_the_newest_product(): void {
+		$older = WC_Helper_Product::create_simple_product();
+		$older->set_date_created( time() - DAY_IN_SECONDS );
+		$older->save();
+		$newest = wc_get_product( WC_Helper_Product::create_simple_product()->get_id() );
+		$this->serve(
+			array(
+				self::path_of( $newest ) => array( 200, self::page_with( array( self::core_product_jsonld( $newest ) ) ) ),
+				self::path_of( $older )  => array( 200, self::page_with( array() ) ),
+			)
+		);
+
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertFalse( $checks['product_jsonld_present']['ok'] );
+		$this->assertSame( $older->get_id(), $checks['product_jsonld_present']['product'] );
+		$this->assertSame( 0, $checks['llms_txt_present']['product'], 'A check that reads no product page names none' );
+	}
+
+	/**
+	 * @testdox With sales, the best seller's page is read first, and a check that fails there names it.
+	 */
+	public function test_page_checks_read_the_best_seller_first_and_stop_at_a_failure(): void {
+		$best = WC_Helper_Product::create_simple_product();
+		$best->set_date_created( time() - DAY_IN_SECONDS );
+		$best->save();
+		$newest    = WC_Helper_Product::create_simple_product();
+		$requested = array();
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args, $url ) use ( &$requested ) {
+				$requested[] = $url;
+				return $pre;
+			},
+			1,
+			3
+		);
+		$this->serve(
+			array(
+				self::path_of( $best )   => array( 200, self::page_with( array() ) ),
+				self::path_of( $newest ) => array( 200, self::page_with( array() ) ),
+			)
+		);
+
+		$responses = $this->sut->responses();
+		$responses->use_sales(
+			array(
+				$newest->get_id() => 10.0,
+				$best->get_id()   => 250.0,
+			)
+		);
+		$checks = array_column( $this->sut->all_for( $responses ), null, 'id' );
+
+		$this->assertFalse( $checks['product_jsonld_present']['ok'] );
+		$this->assertSame( $best->get_id(), $checks['product_jsonld_present']['product'], 'The best seller is read first' );
+		$product_pages = array_values( array_intersect( $requested, array( (string) $best->get_permalink(), (string) $newest->get_permalink() ) ) );
+		$this->assertSame( (string) $best->get_permalink(), $product_pages[0] ?? '', 'The best seller\'s page is loaded before the newest' );
+	}
+
+	/**
+	 * @testdox A check of the home and product pages names the product only when its page failed, not when the home page did.
+	 */
+	public function test_failure_on_the_home_page_names_no_product(): void {
+		$older = WC_Helper_Product::create_simple_product();
+		$older->set_date_created( time() - DAY_IN_SECONDS );
+		$older->save();
+		$newest   = WC_Helper_Product::create_simple_product();
+		$viewport = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>';
+		$bare     = '<!doctype html><html lang="en"><head><meta charset="utf-8"></head><body></body></html>';
+		$this->serve(
+			array(
+				'/'                      => array( 200, $viewport ),
+				self::path_of( $newest ) => array( 200, $viewport ),
+				self::path_of( $older )  => array( 200, $bare ),
+			)
+		);
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertFalse( $checks['viewport_meta']['ok'], 'A product page past the newest is read' );
+		$this->assertSame( $older->get_id(), $checks['viewport_meta']['product'] );
+		$this->assertTrue( $checks['html_lang_and_charset']['ok'] );
+
+		remove_all_filters( 'pre_http_request' );
+		$this->serve(
+			array(
+				'/'                      => array( 200, $bare ),
+				self::path_of( $newest ) => array( 200, $viewport ),
+				self::path_of( $older )  => array( 200, $viewport ),
+			)
+		);
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertFalse( $checks['viewport_meta']['ok'] );
+		$this->assertSame( 0, $checks['viewport_meta']['product'], 'The home page failed, so no product is named' );
+	}
+
+	/**
+	 * @testdox A page check stops at the first product page that fails: the next sampled product is not read.
+	 */
+	public function test_page_check_stops_at_the_first_failure(): void {
+		for ( $i = 0; $i < 3; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_date_created( time() - ( $i + 1 ) * HOUR_IN_SECONDS );
+			$product->save();
+		}
+		$responses = $this->sut->responses();
+		$sample    = array_map( static fn( \WC_Product $product ): int => $product->get_id(), $responses->products() );
+		$read      = array();
+		$test      = static function ( StoreResponses $responses ) use ( &$read, $sample ): ?bool {
+			$product = $responses->product();
+			$read[]  = null === $product ? 0 : $product->get_id();
+			// The second sampled product's page fails; without a product page the check passes.
+			return null === $product || $product->get_id() !== $sample[1];
+		};
+		$on_sample = new \ReflectionMethod( StoreOutputChecks::class, 'on_sample' );
+		$on_sample->setAccessible( true );
+		$failed = null;
+		$ok     = $on_sample->invokeArgs( null, array( $test, $responses, &$failed ) );
+
+		$this->assertFalse( $ok );
+		$this->assertSame( $sample[1], $failed->get_id() );
+		$this->assertSame( array( $sample[0], $sample[1], 0 ), $read, 'The first two pages, then once without a product page; the third is never read' );
+	}
+
+	/**
+	 * @testdox On a larger store the sample is the newest product, then products picked the same way on every scan, not only the newest ones.
+	 */
+	public function test_sample_is_the_newest_product_then_steady_picks(): void {
+		$ids = array();
+		for ( $i = 0; $i < 30; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_date_created( time() - ( $i + 1 ) * HOUR_IN_SECONDS );
+			$product->save();
+			$ids[] = $product->get_id();
+		}
+		$sampled = array_map( static fn( \WC_Product $product ): int => $product->get_id(), $this->sut->responses()->products() );
+
+		$this->assertCount( StoreResponses::PRODUCT_SAMPLE_SIZE, $sampled );
+		$this->assertSame( $ids[0], $sampled[0], 'The newest product first' );
+		$this->assertSame( $sampled, array_map( static fn( \WC_Product $product ): int => $product->get_id(), $this->sut->responses()->products() ), 'The same picks on the next scan' );
+		$this->assertNotSame( array_slice( $ids, 0, StoreResponses::PRODUCT_SAMPLE_SIZE ), $sampled, 'Not only the five newest' );
+	}
+
+	/**
+	 * @testdox The barcode and brand checks are skipped, not couldn't check, when no sampled product has a barcode or brand; one that has it is checked.
+	 */
+	public function test_identifier_checks_skip_when_no_sampled_product_has_one(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product = wc_get_product( $product->get_id() );
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertNull( $checks['product_gtin_jsonld']['ok'] );
+		$this->assertTrue( $checks['product_gtin_jsonld']['skipped'], 'No barcode to look for' );
+		$this->assertTrue( $checks['product_brand_jsonld']['skipped'], 'No brand to look for' );
+		$this->assertFalse( $checks['product_jsonld_present']['skipped'], 'Other checks are never skipped' );
+
+		$product->set_global_unique_id( '4006381333931' );
+		$product->save();
+		$plugin = array(
+			'@type' => 'Product',
+			'name'  => $product->get_name(),
+		);
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( $plugin ) ) ) ) );
+
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertFalse( $checks['product_gtin_jsonld']['ok'], 'The barcode is missing from the page' );
+		$this->assertFalse( $checks['product_gtin_jsonld']['skipped'] );
+	}
+
+	/**
+	 * @testdox The reviews check reads the sampled products that have ratings, the best seller first, and names the one whose page leaves its rating out.
+	 */
+	public function test_reviews_check_reads_the_rated_products_of_the_sample(): void {
+		update_option( 'woocommerce_enable_reviews', 'yes' );
+		update_option( 'woocommerce_enable_review_rating', 'yes' );
+		$best = WC_Helper_Product::create_simple_product();
+		$best->set_date_created( time() - DAY_IN_SECONDS );
+		$best->save();
+		update_post_meta( $best->get_id(), '_wc_average_rating', '4.50' );
+		update_post_meta( $best->get_id(), '_wc_review_count', 2 );
+		$newest = WC_Helper_Product::create_simple_product();
+		$this->serve(
+			array(
+				self::path_of( $best )   => array(
+					200,
+					self::page_with(
+						array(
+							array(
+								'@type' => 'Product',
+								'name'  => $best->get_name(),
+							),
+						)
+					),
+				),
+				self::path_of( $newest ) => array(
+					200,
+					self::page_with(
+						array(
+							array(
+								'@type' => 'Product',
+								'name'  => $newest->get_name(),
+							),
+						)
+					),
+				),
+			)
+		);
+		$responses = $this->sut->responses();
+		$responses->use_sales( array( $best->get_id() => 90.0 ) );
+		$checks = array_column( $this->sut->all_for( $responses ), null, 'id' );
+
+		$this->assertFalse( $checks['product_review_markup']['ok'] );
+		$this->assertSame( $best->get_id(), $checks['product_review_markup']['product'] );
+		$this->assertTrue( $responses->starts_with_best_seller() );
+	}
+
+	/**
+	 * @testdox WooCommerce's own output passes the shipping and buy action checks. Products it gives no link or shipping details are skipped, not failed.
+	 */
+	public function test_shipping_and_buy_action_follow_woocommerce_output(): void {
+		update_option( 'woocommerce_allowed_countries', 'all' );
+		update_option( 'woocommerce_ship_to_countries', '' );
+		$zone = new \WC_Shipping_Zone();
+		$zone->set_zone_name( 'United States' );
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$zone->add_shipping_method( 'flat_rate' );
+		$product = wc_get_product( WC_Helper_Product::create_simple_product()->get_id() );
+		$result  = function () use ( $product ): array {
+			remove_all_filters( 'pre_http_request' );
+			$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+			$checks = array_column( $this->sut->all(), 'ok', 'id' );
+			return array( $checks['product_shipping_schema'], $checks['product_buy_action_schema'] );
+		};
+
+		$this->assertSame( array( true, true ), $result() );
+
+		remove_all_filters( 'pre_http_request' );
+		$this->serve(
+			array(
+				self::path_of( $product ) => array(
+					200,
+					self::page_with(
+						array(
+							array(
+								'@type'  => 'Product',
+								'name'   => $product->get_name(),
+								'offers' => array(
+									'@type'        => 'Offer',
+									'price'        => '10',
+									'availability' => 'https://schema.org/InStock',
+								),
+							),
+						)
+					),
+				),
+			)
+		);
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertFalse( $checks['product_shipping_schema']['ok'], 'Product details from elsewhere, without shipping' );
+		$this->assertFalse( $checks['product_buy_action_schema']['ok'] );
+		$this->assertSame( $product->get_id(), $checks['product_buy_action_schema']['product'] );
+
+		$product->set_stock_status( 'outofstock' );
+		$product->save();
+		$this->assertNull( $result()[1], 'WooCommerce gives an out of stock product no link' );
+
+		update_option( 'woocommerce_ship_to_countries', 'disabled' );
+		$this->assertNull( $result()[0], 'Shipping off: there are no shipping details to give' );
+		$zone->delete();
+	}
+
+	/**
+	 * @testdox The shipping check skips a variable product, which WooCommerce gives shipping details only for a selected variation.
+	 */
+	public function test_shipping_check_skips_variable_products(): void {
+		$variable = wc_get_product( WC_Helper_Product::create_variation_product()->get_id() );
+		$this->serve( array( self::path_of( $variable ) => array( 200, self::page_with( array( self::core_product_jsonld( $variable ) ) ) ) ) );
+
+		$this->assertNull( array_column( $this->sut->all(), 'ok', 'id' )['product_shipping_schema'] );
+	}
+
+	/**
+	 * @testdox The sample holds at most five products, each once, with priced products first.
+	 */
+	public function test_product_sample_is_small_and_prefers_priced_products(): void {
+		$unpriced = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '' ) );
+		$unpriced->set_price( '' );
+		$unpriced->save();
+		for ( $i = 0; $i < 7; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_date_created( time() - ( $i + 1 ) * HOUR_IN_SECONDS );
+			$product->save();
+		}
+		$responses = $this->sut->responses();
+		$responses->use_sales( array( $unpriced->get_id() => 99.0 ) );
+		$ids = array_map( static fn( \WC_Product $product ): int => $product->get_id(), $responses->products() );
+
+		$this->assertCount( StoreResponses::PRODUCT_SAMPLE_SIZE, $ids );
+		$this->assertSame( $ids, array_values( array_unique( $ids ) ) );
+		$this->assertNotContains( $unpriced->get_id(), $ids, 'Priced products fill the sample before one without a price, even a best seller' );
 	}
 
 	/**
@@ -787,7 +1298,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 		unset( $group['hasVariant'][0]['offers'] );
 		$this->serve( array( $path => array( 200, self::page_with( array( $group ) ) ) ) );
-		$this->assertSame( array( true, false, false ), $this->product_results() );
+		$this->assertSame( array( true, true, false ), $this->product_results(), 'A missing offer fails only the price and stock check' );
 	}
 
 	/**

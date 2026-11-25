@@ -11,7 +11,6 @@ import {
 /**
  * Internal dependencies
  */
-import { REGULAR_PRICED_PRODUCT_NAME } from './constants';
 import { CheckoutPage } from './checkout.page';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
@@ -35,9 +34,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		test( 'Shopper can see an error message when a required field is not filled in the checkout form', async ( {
 			checkoutPageObject,
 			frontendUtils,
+			page,
+			createHiddenProduct,
 		} ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			const { id: productId } = await createHiddenProduct( {
+				name: 'Additional fields product',
+				regular_price: '20',
+			} );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			await checkoutPageObject.editShippingDetails();
@@ -125,9 +129,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		test( 'Shopper can fill in the checkout form with additional fields and can have different value for same field in shipping and billing address', async ( {
 			checkoutPageObject,
 			frontendUtils,
+			page,
+			createHiddenProduct,
 		} ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			const { id: productId } = await createHiddenProduct( {
+				name: 'Additional fields product',
+				regular_price: '20',
+			} );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			await checkoutPageObject.unsyncBillingWithShipping();
@@ -212,8 +221,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			).toBe( true );
 
 			await frontendUtils.emptyCart();
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			await checkoutPageObject.editShippingDetails();
@@ -306,9 +314,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		test( 'Fields with JSON schema validation show appropriate error messages', async ( {
 			checkoutPageObject,
 			frontendUtils,
+			page,
+			createHiddenProduct,
 		} ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			const { id: productId } = await createHiddenProduct( {
+				name: 'Additional fields product',
+				regular_price: '20',
+			} );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			await checkoutPageObject.editShippingDetails();
@@ -374,9 +387,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		test( 'Conditional fields are shown/hidden based on cart state', async ( {
 			checkoutPageObject,
 			frontendUtils,
+			page,
+			createHiddenProduct,
 		} ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			const { id: productId } = await createHiddenProduct( {
+				name: 'Additional fields product',
+				regular_price: '20',
+			} );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			// The shipping insurance field should be hidden by default (cart total < 2000)
@@ -384,8 +402,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				checkoutPageObject.page.getByLabel( 'Add shipping insurance' )
 			).toBeHidden();
 
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await page.goto( `/?add-to-cart=${ productId }` );
 			await frontendUtils.goToCheckout();
 
 			// The shipping insurance field should now be visible (cart total > 2000)

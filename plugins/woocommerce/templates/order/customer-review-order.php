@@ -6,7 +6,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.3.0
+ * @version 11.4.0
  *
  * @var WC_Order $order Order being reviewed.
  */
@@ -90,11 +90,13 @@ if ( ! $has_unreviewed_row ) {
 
 $order_key       = (string) $order->get_order_key();
 $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
+// Block themes texturize the whole page, but skip address elements, so the email goes in one there.
+$meta_tag = wp_is_block_theme() ? 'address' : 'p';
 ?>
 <div class="woocommerce-review-order">
-	<p class="woocommerce-breadcrumb woocommerce-review-order__meta">
+	<<?php echo tag_escape( $meta_tag ); ?> class="woocommerce-breadcrumb woocommerce-review-order__meta">
 		<?php echo esc_html( $meta_line ); ?>
-	</p>
+	</<?php echo tag_escape( $meta_tag ); ?>>
 
 	<?php // Focusable so dismissing the notice can hand focus back. ?>
 	<h1 class="woocommerce-review-order__title" tabindex="-1">

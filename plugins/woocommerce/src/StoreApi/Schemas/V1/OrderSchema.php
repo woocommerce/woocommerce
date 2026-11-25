@@ -337,14 +337,16 @@ class OrderSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_totals( $order ) {
+		$decimals = wc_get_price_decimals();
+
 		return [
-			'subtotal'           => $this->prepare_money_response( $order->get_subtotal() ),
-			'total_discount'     => $this->prepare_money_response( $order->get_total_discount() ),
-			'total_shipping'     => $this->prepare_money_response( $order->get_total_shipping() ),
-			'total_fees'         => $this->prepare_money_response( $order->get_total_fees() ),
-			'total_tax'          => $this->prepare_money_response( $order->get_total_tax() ),
-			'total_refund'       => $this->prepare_money_response( $order->get_total_refunded() ),
-			'total_price'        => $this->prepare_money_response( $order->get_total() ),
+			'subtotal'           => $this->prepare_money_response( $order->get_subtotal(), $decimals ),
+			'total_discount'     => $this->prepare_money_response( $order->get_total_discount(), $decimals ),
+			'total_shipping'     => $this->prepare_money_response( $order->get_total_shipping(), $decimals ),
+			'total_fees'         => $this->prepare_money_response( $order->get_total_fees(), $decimals ),
+			'total_tax'          => $this->prepare_money_response( $order->get_total_tax(), $decimals ),
+			'total_refund'       => $this->prepare_money_response( $order->get_total_refunded(), $decimals ),
+			'total_price'        => $this->prepare_money_response( $order->get_total(), $decimals ),
 			'total_items'        => $this->prepare_money_response(
 				array_sum(
 					array_map(
@@ -353,7 +355,8 @@ class OrderSchema extends AbstractSchema {
 						},
 						array_values( $order->get_items( OrderItemType::LINE_ITEM ) )
 					)
-				)
+				),
+				$decimals
 			),
 			'total_items_tax'    => $this->prepare_money_response(
 				array_sum(
@@ -363,7 +366,8 @@ class OrderSchema extends AbstractSchema {
 						},
 						array_values( $order->get_items( OrderItemType::TAX ) )
 					)
-				)
+				),
+				$decimals
 			),
 			'total_fees_tax'     => $this->prepare_money_response(
 				array_sum(
@@ -373,15 +377,16 @@ class OrderSchema extends AbstractSchema {
 						},
 						array_values( $order->get_items( OrderItemType::FEE ) )
 					)
-				)
+				),
+				$decimals
 			),
-			'total_discount_tax' => $this->prepare_money_response( $order->get_discount_tax() ),
-			'total_shipping_tax' => $this->prepare_money_response( $order->get_shipping_tax() ),
+			'total_discount_tax' => $this->prepare_money_response( $order->get_discount_tax(), $decimals ),
+			'total_shipping_tax' => $this->prepare_money_response( $order->get_shipping_tax(), $decimals ),
 			'tax_lines'          => array_map(
-				function( $item ) {
+				function ( $item ) use ( $decimals ) {
 					return [
 						'name'  => $item->get_label(),
-						'price' => $this->prepare_money_response( $item->get_tax_total() ),
+						'price' => $this->prepare_money_response( $item->get_tax_total(), $decimals ),
 						'rate'  => strval( $item->get_rate_percent() ),
 					];
 				},

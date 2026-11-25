@@ -3,6 +3,7 @@
  */
 import { Badge, Icon, Link, Stack, Text, VisuallyHidden } from '@wordpress/ui';
 import { Button } from '@wordpress/components';
+import { useInstanceId } from '@wordpress/compose';
 import { Path, SVG } from '@wordpress/primitives';
 import { createInterpolateElement } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
@@ -11,7 +12,30 @@ import type { ReactNode } from 'react';
 /**
  * Internal dependencies
  */
-import type { CheckRow as CheckRowData, ViewBadge, ViewLink } from '../types';
+import { safeHref } from '../safe-href';
+import type {
+	CheckRow as CheckRowData,
+	TextLink,
+	ViewBadge,
+	ViewLink,
+} from '../types';
+import { trackReadiness, type Surface } from '../tracks';
+
+/**
+ * A shared button text such as "Edit page" keeps its accessible name, so voice control finds it by what
+ * it shows (WCAG 2.5.3); screen readers also hear which policy it is for, as its description.
+ *
+ * @param sr The button's full action, such as "Edit your refund and returns policy page", or none.
+ */
+export const useSrDescription = ( sr?: string ) => {
+	const id = useInstanceId( useSrDescription, 'wc-sales-readiness-sr' );
+	return sr
+		? {
+				props: { 'aria-describedby': id },
+				description: <VisuallyHidden id={ id }>{ sr }</VisuallyHidden>,
+			}
+		: { props: {}, description: null };
+};
 
 /**
  * Where to fix it: an outline button when it has a URL, plain text otherwise.
@@ -22,21 +46,28 @@ export const RowLink = ( {
 }: {
 	link: ViewLink;
 	onClick?: () => void;
-} ) =>
-	link.href ? (
-		<Button
-			variant="secondary"
-			size="compact"
-			href={ link.href }
-			onClick={ onClick }
-		>
-			{ link.text }
-		</Button>
+} ) => {
+	const href = safeHref( link.href );
+	const sr = useSrDescription( link.sr );
+	return href ? (
+		<>
+			<Button
+				variant="secondary"
+				size="compact"
+				href={ href }
+				onClick={ onClick }
+				{ ...sr.props }
+			>
+				{ link.text }
+			</Button>
+			{ sr.description }
+		</>
 	) : (
 		<Text variant="body-sm" className="wc-sales-readiness__muted">
 			{ link.text }
 		</Text>
 	);
+};
 
 // The swatch icon, a dashed circle, from the WordPress icons package from version 18 on.
 // This package pins an older version that doesn't have it.
@@ -101,6 +132,39 @@ interface RowProps {
 	srState?: string;
 }
 
+/** Scripts that wrap between characters rather than at spaces: Chinese, Japanese and Korean. */
+const CJK = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\uf900-\ufaff]/;
+
+/**
+ * A title whose badge stays with its last word, so a long title wraps without leaving the badge on a
+ * line of its own.
+ */
+const TitleWithBadge = ( {
+	title,
+	badge,
+}: {
+	title: string;
+	badge: ViewBadge;
+} ) => {
+	// The last word stays with the badge. Text after the last space that has no spaces of its own, such
+	// as one word or Japanese, keeps only its last character there, so the rest can still wrap.
+	const afterSpace = title.lastIndexOf( ' ' ) + 1;
+	const lastChar = title.length - ( Array.from( title ).pop()?.length ?? 0 );
+	const split =
+		afterSpace && ! CJK.test( title.slice( afterSpace ) )
+			? afterSpace
+			: lastChar;
+	return (
+		<>
+			{ title.slice( 0, split ) }
+			<span className="wc-sales-readiness-row__title-end">
+				{ title.slice( split ) }
+				<Badge intent={ badge.intent }>{ badge.text }</Badge>
+			</span>
+		</>
+	);
+};
+
 /**
  * A row's frame: marker, title with its badge, whatever goes under the title, then the action.
  */
@@ -124,9 +188,10 @@ export const Row = ( {
 		<Stack direction="column" className="wc-sales-readiness-row__body">
 			<Text variant="body-md" className="wc-sales-readiness-row__title">
 				{ srState && <VisuallyHidden>{ srState } </VisuallyHidden> }
-				{ title }
-				{ badge && (
-					<Badge intent={ badge.intent }>{ badge.text }</Badge>
+				{ badge ? (
+					<TitleWithBadge title={ title } badge={ badge } />
+				) : (
+					title
 				) }
 			</Text>
 			{ children }
@@ -138,14 +203,56 @@ export const Row = ( {
 );
 
 /**
+ * The text, with the link's name in it turned into the link.
+ */
+const TextWithLink = ( {
+	text,
+	link,
+}: {
+	text: string;
+	link?: TextLink | null;
+} ) => {
+	// The server says where the name starts, so a name that also appears earlier isn't linked there.
+	let at = link?.text ? text.indexOf( link.text ) : -1;
+	if (
+		link?.at !== undefined &&
+		text.slice( link.at, link.at + link.text.length ) === link.text
+	) {
+		at = link.at;
+	}
+	if ( ! link || at < 0 ) {
+		return <>{ text }</>;
+	}
+	return (
+		<>
+			{ text.slice( 0, at ) }
+			<Link href={ safeHref( link.href ) } openInNewTab>
+				{ link.text }
+			</Link>
+			{ text.slice( at + link.text.length ) }
+		</>
+	);
+};
+
+/**
  * One check. Failing: what to do, why it matters and what was found, the fix line when there is
  * one, and where to fix it. Passed: its title and why it matters.
  */
-export const CheckRow = ( { row }: { row: CheckRowData } ) => {
+export const CheckRow = ( {
+	row,
+	section,
+	surface = 'page',
+}: {
+	row: CheckRowData;
+	section: string;
+	surface?: Surface;
+} ) => {
 	const states: Record< CheckRowData[ 'state' ], string > = {
 		open: __( 'Issue:', 'woocommerce' ),
 		required: __( 'Issue:', 'woocommerce' ),
-		unknown: __( "Couldn't check:", 'woocommerce' ),
+		unknown: row.waiting
+			? __( 'Not checked yet:', 'woocommerce' )
+			: __( 'Couldn’t check:', 'woocommerce' ),
 		pass: __( 'Passed:', 'woocommerce' ),
 	};
 	return (
@@ -155,11 +262,26 @@ export const CheckRow = ( { row }: { row: CheckRowData } ) => {
 			title={ row.title }
 			srState={ states[ row.state ] }
 			badge={ row.badge }
-			action={ row.link && <RowLink link={ row.link } /> }
+			action={
+				row.link && (
+					<RowLink
+						link={ row.link }
+						onClick={ () =>
+							trackReadiness( 'link_clicked', {
+								surface,
+								area: 'section',
+								section,
+								check_id: row.id,
+								state: row.state,
+							} )
+						}
+					/>
+				)
+			}
 		>
 			{ row.text && (
 				<Text variant="body-sm" className="wc-sales-readiness__muted">
-					{ row.text }
+					<TextWithLink text={ row.text } link={ row.text_link } />
 				</Text>
 			) }
 			{ row.fix && (
@@ -176,7 +298,9 @@ export const CheckRow = ( { row }: { row: CheckRowData } ) => {
 							row.seen_at.text
 						),
 						{
-							link: <Link href={ row.seen_at.href } />,
+							link: (
+								<Link href={ safeHref( row.seen_at.href ) } />
+							),
 						}
 					) }
 				</Text>

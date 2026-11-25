@@ -328,6 +328,103 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A visitor holding only the order key is not shown the customer's name or billing email.
+	 */
+	public function test_meta_line_hides_billing_details_from_key_only_visitor(): void {
+		$order = OrderHelper::create_order();
+		$order->set_customer_id( 0 );
+		$order->set_billing_first_name( 'Gina' );
+		$order->set_billing_last_name( 'Guest' );
+		$order->set_billing_email( 'gina.guest@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringNotContainsString(
+			'gina.guest@example.test',
+			$html,
+			'The billing email is the second proof the order routes ask for on top of the key.'
+		);
+		$this->assertStringNotContainsString( 'Gina Guest', $html );
+		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html );
+	}
+
+	/**
+	 * @testdox The signed-in customer the order belongs to still sees their name and billing email.
+	 */
+	public function test_meta_line_shows_billing_details_to_signed_in_owner(): void {
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+
+		$order = OrderHelper::create_order();
+		$order->set_customer_id( $customer_id );
+		$order->set_billing_first_name( 'Carl' );
+		$order->set_billing_last_name( 'Customer' );
+		$order->set_billing_email( 'carl.customer@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		wp_set_current_user( $customer_id );
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'carl.customer@example.test', $html );
+		$this->assertStringContainsString( 'Carl Customer', $html );
+	}
+
+	/**
+	 * @testdox A logged-out visitor with the key is not shown a registered customer's billing email when the sign-in requirement is waived.
+	 */
+	public function test_meta_line_hides_billing_details_from_logged_out_visitor_on_a_customer_order(): void {
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+
+		$order = OrderHelper::create_order();
+		$order->set_customer_id( $customer_id );
+		$order->set_billing_first_name( 'Carl' );
+		$order->set_billing_last_name( 'Customer' );
+		$order->set_billing_email( 'carl.customer@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		wp_set_current_user( 0 );
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		add_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
+		$html = $this->render( $order->get_id() );
+		remove_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
+
+		$this->assertStringNotContainsString(
+			'carl.customer@example.test',
+			$html,
+			'Owning the key is not the same as being signed in as the customer.'
+		);
+		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html );
+	}
+
+	/**
+	 * @testdox A signed-in visitor who is not the customer is not shown a guest order's billing email.
+	 */
+	public function test_meta_line_hides_guest_billing_details_from_a_signed_in_stranger(): void {
+		$stranger_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+
+		$order = OrderHelper::create_order();
+		$order->set_customer_id( 0 );
+		$order->set_billing_email( 'gina.guest@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		wp_set_current_user( $stranger_id );
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringNotContainsString( 'gina.guest@example.test', $html );
+		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html );
+	}
+
+	/**
 	 * @testdox render_shortcode() only renders on the managed page with a matching order key.
 	 */
 	public function test_render_shortcode_requires_managed_page_and_key(): void {
@@ -726,6 +823,11 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html );
 		$this->assertStringContainsString( 'Thank you for your reviews', $html );
 		$this->assertStringContainsString( 'Your feedback helps', $html );
+		$this->assertStringNotContainsString(
+			'thanks@example.test',
+			$html,
+			'The empty-state template withholds the billing email too.'
+		);
 	}
 
 	/**

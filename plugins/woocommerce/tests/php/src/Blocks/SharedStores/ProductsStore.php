@@ -433,6 +433,49 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The woocommerce store's products and productVariations return the record a loader loaded under each ID.
+	 */
+	public function test_woocommerce_store_reads_loaded_product_data_by_id(): void {
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+
+		$loaded_product    = TestedProductsStore::load_product( $this->consent, $product->get_id() );
+		$loaded_variations = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+
+		$state = wp_interactivity_state( 'woocommerce' );
+
+		$this->assertTrue( isset( $state['products'][ $product->get_id() ] ) );
+		$this->assertSame( $loaded_product['name'], $state['products'][ $product->get_id() ]['name'] ?? null );
+		$this->assertTrue( isset( $state['productVariations'][ $variation_id ] ) );
+		$this->assertSame( $loaded_variations[ $variation_id ]['sku'], $state['productVariations'][ $variation_id ]['sku'] ?? null );
+		$this->assertNull( $state['products'][999999] ?? null, 'An ID no loader loaded should read as null.' );
+		$this->assertFalse( isset( $state['productVariations'][999999] ) );
+	}
+
+	/**
+	 * @testdox Directives bound to the woocommerce store's product data render the loaded values on the server.
+	 */
+	public function test_woocommerce_store_product_data_renders_in_directives(): void {
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+
+		TestedProductsStore::load_product( $this->consent, $product->get_id() );
+		TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+
+		$html = wp_interactivity_process_directives(
+			sprintf(
+				'<div data-wp-interactive="woocommerce"><span id="product" data-wp-text="state.products.%d.name"></span><span id="variation" data-wp-text="state.productVariations.%d.sku"></span><span id="absent" data-wp-text="state.products.999999.name"></span></div>',
+				$product->get_id(),
+				$variation_id
+			)
+		);
+
+		$this->assertStringContainsString( '<span id="product" data-wp-text="state.products.' . $product->get_id() . '.name">' . $product->get_name() . '</span>', $html );
+		$this->assertStringContainsString( '>' . wc_get_product( $variation_id )->get_sku() . '</span>', $html );
+		$this->assertStringContainsString( '<span id="absent" data-wp-text="state.products.999999.name"></span>', $html );
+	}
+
+	/**
 	 * Create an anonymous Hydration stand-in that counts how many times
 	 * get_rest_api_response_data was called and returns a canned response.
 	 *
