@@ -101,10 +101,18 @@ test.describe(
 				.getByRole( 'button', { name: 'Save', exact: true } )
 				.click();
 
-			// The Save button is disabled again once nothing is left to save.
-			await expect(
-				page.getByRole( 'button', { name: 'Save', exact: true } )
-			).toBeDisabled();
+			// Wait until the save has finished and nothing is left to save.
+			await expect
+				.poll( () =>
+					page.evaluate( () => {
+						const editor = window.wp.data.select( 'core/editor' );
+						return (
+							! editor.isSavingPost() &&
+							! editor.isEditedPostDirty()
+						);
+					} )
+				)
+				.toBe( true );
 
 			// Verify the customization is present
 			await expect( editorFrame.getByText( uniqueText ) ).toBeVisible();
