@@ -4217,9 +4217,6 @@ importers:
       '@tsconfig/node16':
         specifier: ^1.0.4
         version: 1.0.4
-      '@types/node':
-        specifier: ^24.1.0
-        version: 24.12.2
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
@@ -4235,6 +4232,10 @@ importers:
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)
+    devDependencies:
+      '@types/node':
+        specifier: ^24.1.0
+        version: 24.12.2
 
   tools/eslint-config:
     dependencies:
