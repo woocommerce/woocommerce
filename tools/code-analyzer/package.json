@@ -16,11 +16,11 @@
 	},
 	"dependencies": {
 		"@actions/core": "^2.0.3",
-		"@commander-js/extra-typings": "^10.0.3",
-		"@oclif/core": "^4.13.5",
+		"@commander-js/extra-typings": "catalog:tooling",
+		"@oclif/core": "catalog:tooling",
 		"@tsconfig/node16": "^1.0.4",
 		"@woocommerce/monorepo-utils": "workspace:*",
-		"commander": "^10.0.1",
+		"commander": "catalog:tooling",
 		"dotenv": "^10.0.0",
 		"simple-git": "catalog:tooling"
 	},

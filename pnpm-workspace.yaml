@@ -76,8 +76,10 @@ catalogs:
         '@babel/preset-react': 7.25.7
         '@babel/preset-typescript': 7.25.7
         '@babel/runtime': 7.25.7
+        '@commander-js/extra-typings': ^10.0.3
         # Keep direct Jest packages on 29.5.x; WordPress scripts manages its own test runner.
         '@jest/globals': 29.5.x
+        '@oclif/core': ^4.13.5
         '@types/jest': 29.5.x
         '@wordpress/build': 0.24.0
         '@wordpress/env': 12.0.0
@@ -85,9 +87,11 @@ catalogs:
         '@wordpress/postcss-plugins-preset': 5.56.0
         '@wordpress/scripts': 35.0.0
         '@wordpress/stylelint-config': ^23.14.0
+        axios: ^1.18.0
         babel-jest: 29.5.x
         babel-loader: 9.2.x
         babel-plugin-transform-react-remove-prop-types: 0.4.24
+        commander: ^10.0.1
         copy-webpack-plugin: 14.0.x
         css-loader: 6.11.x
         eslint: ^10.0.0

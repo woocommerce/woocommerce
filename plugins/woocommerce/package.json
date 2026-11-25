@@ -1559,7 +1559,7 @@
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "catalog:wp-min",
 		"@wordpress/env": "catalog:tooling",
-		"axios": "^1.18.0",
+		"axios": "catalog:tooling",
 		"config": "3.3.7",
 		"dotenv": "^10.0.0",
 		"eslint": "catalog:tooling",

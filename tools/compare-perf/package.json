@@ -14,7 +14,7 @@
 		"@tsconfig/node16": "^1.0.4",
 		"@types/node": "^24.1.0",
 		"chalk": "^4.1.2",
-		"commander": "^10.0.1",
+		"commander": "catalog:tooling",
 		"inquirer": "^7.1.0",
 		"simple-git": "catalog:tooling",
 		"ts-node": "^10.9.2"

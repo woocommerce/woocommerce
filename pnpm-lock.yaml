@@ -220,9 +220,15 @@ catalogs:
     '@babel/runtime':
       specifier: 7.25.7
       version: 7.25.7
+    '@commander-js/extra-typings':
+      specifier: ^10.0.3
+      version: 10.0.3
     '@jest/globals':
       specifier: 29.5.x
       version: 29.5.0
+    '@oclif/core':
+      specifier: ^4.13.5
+      version: 4.13.5
     '@types/jest':
       specifier: 29.5.x
       version: 29.5.14
@@ -244,6 +250,9 @@ catalogs:
     '@wordpress/stylelint-config':
       specifier: ^23.14.0
       version: 23.42.0
+    axios:
+      specifier: ^1.18.0
+      version: 1.21.0
     babel-jest:
       specifier: 29.5.x
       version: 29.5.0
@@ -253,6 +262,9 @@ catalogs:
     babel-plugin-transform-react-remove-prop-types:
       specifier: 0.4.24
       version: 0.4.24
+    commander:
+      specifier: ^10.0.1
+      version: 10.0.1
     copy-webpack-plugin:
       specifier: 14.0.x
       version: 14.0.0
@@ -1453,7 +1465,7 @@ importers:
   packages/js/e2e-utils-playwright:
     dependencies:
       axios:
-        specifier: ^1.18.0
+        specifier: catalog:tooling
         version: 1.21.0
       oauth-1.0a:
         specifier: ^2.2.6
@@ -2737,7 +2749,7 @@ importers:
   packages/php/remote-specs-validation:
     dependencies:
       commander:
-        specifier: ^10.0.1
+        specifier: catalog:tooling
         version: 10.0.1
       js-yaml:
         specifier: ^4.3.1
@@ -2865,7 +2877,7 @@ importers:
         specifier: catalog:tooling
         version: 12.0.0(@types/node@24.12.2)
       axios:
-        specifier: ^1.18.0
+        specifier: catalog:tooling
         version: 1.21.0
       config:
         specifier: 3.3.7
@@ -4148,10 +4160,10 @@ importers:
         specifier: ^2.0.3
         version: 2.0.3
       '@commander-js/extra-typings':
-        specifier: ^10.0.3
+        specifier: catalog:tooling
         version: 10.0.3(commander@10.0.1)
       '@oclif/core':
-        specifier: ^4.13.5
+        specifier: catalog:tooling
         version: 4.13.5
       '@tsconfig/node16':
         specifier: ^1.0.4
@@ -4160,7 +4172,7 @@ importers:
         specifier: workspace:*
         version: link:../monorepo-utils
       commander:
-        specifier: ^10.0.1
+        specifier: catalog:tooling
         version: 10.0.1
       dotenv:
         specifier: ^10.0.0
@@ -4212,7 +4224,7 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2
       commander:
-        specifier: ^10.0.1
+        specifier: catalog:tooling
         version: 10.0.1
       inquirer:
         specifier: ^7.1.0
@@ -4249,7 +4261,7 @@ importers:
         specifier: ^2.0.3
         version: 2.0.3
       '@commander-js/extra-typings':
-        specifier: ^10.0.3
+        specifier: catalog:tooling
         version: 10.0.3(commander@10.0.1)
       '@octokit/graphql':
         specifier: 4.8.0
@@ -4273,7 +4285,7 @@ importers:
         specifier: ^0.3.11
         version: 0.3.11
       commander:
-        specifier: ^10.0.1
+        specifier: catalog:tooling
         version: 10.0.1
       dotenv:
         specifier: ^10.0.0
@@ -4352,7 +4364,7 @@ importers:
   tools/package-release:
     dependencies:
       '@oclif/core':
-        specifier: ^4.13.5
+        specifier: catalog:tooling
         version: 4.13.5
       '@oclif/plugin-help':
         specifier: ^6.2.58
@@ -4398,7 +4410,7 @@ importers:
   tools/release-posts:
     dependencies:
       '@commander-js/extra-typings':
-        specifier: ^10.0.3
+        specifier: catalog:tooling
         version: 10.0.3(commander@10.0.1)
       '@octokit/rest':
         specifier: ^19.0.13
@@ -4407,7 +4419,7 @@ importers:
         specifier: workspace:*
         version: link:../monorepo-utils
       commander:
-        specifier: ^10.0.1
+        specifier: catalog:tooling
         version: 10.0.1
       dotenv:
         specifier: ^15.0.1
