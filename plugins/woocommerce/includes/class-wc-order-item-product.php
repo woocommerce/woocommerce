@@ -538,6 +538,10 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function get_formatted_meta_data( $hideprefix = '_', $include_all = false ) {
 		$formatted_meta = parent::get_formatted_meta_data( $hideprefix, $include_all );
 
+		if ( ! is_array( $formatted_meta ) ) {
+			return $formatted_meta;
+		}
+
 		$order = $this->get_order();
 
 		if ( $order && $order->has_status( OrderStatus::COMPLETED ) ) {
