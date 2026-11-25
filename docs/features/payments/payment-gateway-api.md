@@ -237,6 +237,8 @@ $order->save();
 
 When an order is saved with another payment method ID, WooCommerce clears its mode, so a mode from a failed attempt doesn't carry over to a retry with another gateway. A mode set on the same order object before the switch is kept. If your gateway changes the order's payment method ID in a later request, such as a redirect return or a webhook, call `set_payment_mode()` again in that request before saving.
 
+The mode describes one charge, so it shouldn't move to another order. Plugins that create orders by copying another order's meta, such as subscription renewals, should skip the `_wc_payment_mode` meta key. The gateway that charges the new order records its own mode.
+
 ## Notes on Direct Gateways
 
 If you are creating an advanced, direct gateway (i.e., one that takes payment on the actual checkout page), there are additional steps involved. First, you need to set has_fields to true in the gateway constructor:
