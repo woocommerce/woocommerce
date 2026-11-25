@@ -1,0 +1,8 @@
+{
+	"name": "docs-linear-issue-deps",
+	"private": true,
+	"description": "Pinned dependencies for the docs Linear issue step in docs-needed-detection.yml.",
+	"dependencies": {
+		"@linear/sdk": "71.0.0"
+	}
+}

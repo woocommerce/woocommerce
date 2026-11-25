@@ -1019,6 +1019,73 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return order item fields on shipping, fee and coupon lines, and list a field with object_types only on its kind of line.
+	 */
+	public function test_order_item_fields_are_returned_on_every_kind_of_line(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'order_item',
+						'namespace'     => 'test-ext',
+						'field'         => 'fee_reason',
+						'output_schema' => array( 'type' => 'string' ),
+						'object_types'  => array( 'fee' ),
+						'get_callback'  => static fn() => 'packaging',
+					)
+				);
+			}
+		);
+		$order    = \WC_Helper_Order::create_order();
+		$fee      = new \WC_Order_Item_Fee();
+		$shipping = new \WC_Order_Item_Shipping();
+		$coupon   = new \WC_Order_Item_Coupon();
+		$fee->set_props(
+			array(
+				'name'  => 'Packaging',
+				'total' => '2',
+			)
+		);
+		$shipping->set_method_title( 'Courier' );
+		$coupon->set_code( 'save5' );
+		foreach ( array( $fee, $shipping, $coupon ) as $item ) {
+			$order->add_item( $item );
+		}
+		$order->save();
+
+		$listed = $this->run_ability(
+			'woocommerce/orders-query',
+			array(
+				'id'                 => $order->get_id(),
+				'include_line_items' => true,
+				'include_lines'      => true,
+			)
+		)['orders'][0];
+		$schema = $this->get_output_schema( 'woocommerce/orders-query' )['properties']['orders']['items']['properties'];
+
+		$this->assertSame(
+			array(
+				'test-ext' => array(
+					'gift'       => 'item-' . $fee->get_id(),
+					'fee_reason' => 'packaging',
+				),
+			),
+			$listed['fee_lines'][0]['extensions']
+		);
+		$shipping_line = current( wp_list_filter( $listed['shipping_lines'], array( 'id' => $shipping->get_id() ) ) );
+		$this->assertSame( array( 'test-ext' => array( 'gift' => 'item-' . $shipping->get_id() ) ), $shipping_line['extensions'] );
+		$this->assertSame( array( 'test-ext' => array( 'gift' => 'item-' . $coupon->get_id() ) ), $listed['coupon_lines'][0]['extensions'] );
+		$this->assertArrayNotHasKey( 'fee_reason', $listed['line_items'][0]['extensions']['test-ext'] );
+		$this->assertArrayHasKey( 'fee_reason', $schema['fee_lines']['items']['properties']['extensions']['properties']['test-ext']['properties'] );
+		foreach ( array( 'line_items', 'shipping_lines', 'coupon_lines' ) as $key ) {
+			$this->assertArrayNotHasKey( 'fee_reason', $schema[ $key ]['items']['properties']['extensions']['properties']['test-ext']['properties'], $key );
+			$this->assertArrayHasKey( 'gift', $schema[ $key ]['items']['properties']['extensions']['properties']['test-ext']['properties'], $key );
+		}
+		$this->assertArrayNotHasKey( 'extensions', $schema['tax_lines']['items']['properties'], 'Tax lines have no extension fields.' );
+	}
+
+	/**
 	 * @testdox Should call the $resource_name prime callbacks of each extension once with the full list, in registration order.
 	 * @dataProvider provide_list_abilities
 	 *
@@ -1183,15 +1250,32 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should call the order and order item prime callbacks once with every order and every product line.
+	 * @testdox Should call the order and order item prime callbacks once with every order and every product, shipping, fee and coupon line, including a fee a filter adds.
 	 */
 	public function test_prime_callbacks_get_orders_and_line_items(): void {
 		$product = \WC_Helper_Product::create_simple_product();
 		$orders  = array( wc_create_order(), wc_create_order() );
 		foreach ( $orders as $order ) {
 			$order->add_product( $product );
+			$order->add_item( new \WC_Order_Item_Fee() );
+			$order->add_item( new \WC_Order_Item_Shipping() );
+			$order->add_item( new \WC_Order_Item_Coupon() );
+			$order->add_item( new \WC_Order_Item_Tax() );
 			$order->save();
 		}
+		$added_fee = new \WC_Order_Item_Fee();
+		$added_fee->save();
+		$this->add_test_filter(
+			'woocommerce_order_get_items',
+			static function ( $items, $order, $types ) use ( $added_fee, $orders ) {
+				if ( array( 'fee' ) === $types && $order->get_id() === $orders[0]->get_id() ) {
+					$items[ $added_fee->get_id() ] = $added_fee;
+				}
+				return $items;
+			},
+			10,
+			3
+		);
 		$calls = array();
 		foreach ( array( 'order', 'order_item' ) as $resource_name ) {
 			$this->register_prime(
@@ -1208,11 +1292,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			array(
 				'per_page'           => 2,
 				'include_line_items' => true,
+				'include_lines'      => true,
 			)
 		);
 
-		$item_ids = array_merge( ...array_map( static fn( \WC_Order $order ) => array_keys( $order->get_items() ), $orders ) );
-		$this->assertCount( 2, $item_ids );
+		$item_ids   = array_merge( ...array_map( static fn( \WC_Order $order ) => array_keys( $order->get_items( array( 'line_item', 'shipping', 'fee', 'coupon' ) ) ), $orders ) );
+		$item_ids[] = $added_fee->get_id();
+		$this->assertCount( 9, $item_ids );
 		$this->assertCount( 1, $calls['order'] );
 		$this->assertEqualsCanonicalizing( array_map( static fn( \WC_Order $order ) => $order->get_id(), $orders ), $calls['order'][0] );
 		$this->assertCount( 1, $calls['order_item'] );
@@ -1415,6 +1501,182 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		ExtensibleAbilities::register_resource( 'late_resource' );
 
 		$this->assertFalse( ExtensibleAbilities::is_resource_registered( 'late_resource' ) );
+	}
+
+	/**
+	 * @testdox Should list the order emails of extensions in order-send-email, send them in their statuses only, send a store email without a billing email, and refuse an unknown email naming the valid ones.
+	 */
+	public function test_order_send_email_sends_the_order_emails_of_extensions(): void {
+		$this->register_order_emails();
+		$on_hold_order = \WC_Helper_Order::create_order();
+		$on_hold_order->set_status( OrderStatus::ON_HOLD );
+		$on_hold_order->set_billing_email( 'customer@example.com' );
+		$on_hold_order->save();
+		$pending_order = \WC_Helper_Order::create_order();
+		$mails         = array();
+		$capture       = static function ( $short_circuit, $atts ) use ( &$mails ) {
+			$mails[] = $atts;
+			return true;
+		};
+		add_filter( 'pre_wp_mail', $capture, 10, 2 );
+
+		$schema  = $this->get_ability( 'woocommerce/order-send-email' )['input_schema']['properties']['email'];
+		$on_hold = $this->run_ability(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => $on_hold_order->get_id(),
+				'email' => 'test-ext:on-hold',
+			)
+		);
+		$note    = $this->run_ability(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => $pending_order->get_id(),
+				'email' => 'test-ext:note',
+			)
+		);
+		add_filter( 'woocommerce_order_get_billing_email', '__return_empty_string' );
+		$new_order = $this->run_ability(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => $pending_order->get_id(),
+				'email' => 'test-ext:new-order',
+			)
+		);
+		remove_filter( 'woocommerce_order_get_billing_email', '__return_empty_string' );
+		$mismatch = $this->run_ability_response(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => $pending_order->get_id(),
+				'email' => 'test-ext:on-hold',
+			)
+		);
+		$unknown  = wp_get_ability( 'woocommerce/order-send-email' )->execute(
+			array(
+				'id'    => $pending_order->get_id(),
+				'email' => 'test-ext:missing',
+			)
+		);
+		remove_filter( 'pre_wp_mail', $capture );
+
+		$this->assertSame( array( 'invoice', 'processing', 'completed', 'test-ext:on-hold', 'test-ext:note', 'test-ext:new-order' ), $schema['enum'] );
+		$this->assertStringContainsString( 'test-ext:on-hold: Tells the customer that the order is on hold. Statuses: on-hold, failed.', $schema['description'] );
+		$this->assertStringContainsString( 'test-ext:note: Sends a reminder note. Statuses: any.', $schema['description'] );
+		$this->assertSame( 'test-ext:on-hold', $on_hold['email'] );
+		$this->assertSame( 'test-ext:note', $note['email'] );
+		$this->assertSame( 'test-ext:new-order', $new_order['email'] );
+		$this->assertCount( 3, $mails );
+		$this->assertSame( 'customer@example.com', $mails[0]['to'] );
+		$this->assertStringContainsString( 'Pay the second payment.', $mails[1]['message'] );
+		$this->assertSame( get_option( 'admin_email' ), $mails[2]['to'] );
+		$this->assertSame( 'woocommerce_ability_order_email_status_mismatch', $mismatch->get_data()['code'] );
+		$this->assertStringContainsString( 'on-hold, failed', $mismatch->get_data()['message'] );
+		$this->assertSame( 'ability_invalid_input', $unknown->get_error_code() );
+		$this->assertStringContainsString( 'test-ext:on-hold', $unknown->get_error_message() );
+		$this->assertStringContainsString( 'test-ext:note', $unknown->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should point to the logs, not the mail setup, when the trigger callback of an order email throws.
+	 */
+	public function test_order_send_email_reports_a_throwing_trigger_callback(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'        => 'test-ext',
+						'email'            => 'broken',
+						'email_class'      => 'WC_Email_Customer_Note',
+						'description'      => 'Throws before it sends.',
+						'trigger_callback' => static function () {
+							throw new \RuntimeException( 'Broken template.' );
+						},
+					)
+				);
+			}
+		);
+
+		$result = $this->run_ability_response(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => \WC_Helper_Order::create_order()->get_id(),
+				'email' => 'test-ext:broken',
+			)
+		);
+
+		$this->assertSame( 'woocommerce_ability_order_email_send_failed', $result->get_data()['code'] );
+		$this->assertStringContainsString( 'WooCommerce > Status > Logs', $result->get_data()['message'] );
+	}
+
+	/**
+	 * @testdox Should refuse an order email that is already registered, and keep the first one.
+	 */
+	public function test_an_order_email_registered_twice_is_refused(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_order_email' );
+		$this->register_order_emails();
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'   => 'test-ext',
+						'email'       => 'on-hold',
+						'email_class' => 'WC_Email_Customer_Invoice',
+						'description' => 'Another email.',
+					)
+				);
+			}
+		);
+
+		$this->get_ability( 'woocommerce/order-send-email' );
+
+		$this->assertSame( 'WC_Email_Customer_On_Hold_Order', ExtensibleAbilities::get_order_emails()['test-ext:on-hold']['email_class'] );
+	}
+
+	/**
+	 * Register three order emails of an extension: one sent with the default trigger in two statuses,
+	 * one whose trigger takes other arguments, sent in any status, and a store email sent in any status.
+	 */
+	private function register_order_emails(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'   => 'test-ext',
+						'email'       => 'on-hold',
+						'email_class' => 'WC_Email_Customer_On_Hold_Order',
+						'description' => 'Tells the customer that the order is on hold.',
+						'statuses'    => array( 'wc-on-hold', OrderStatus::FAILED ),
+					)
+				);
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'        => 'test-ext',
+						'email'            => 'note',
+						'email_class'      => 'WC_Email_Customer_Note',
+						'description'      => 'Sends a reminder note.',
+						'trigger_callback' => static function ( \WC_Email $email, \WC_Order $order ) {
+							$email->trigger(
+								array(
+									'order_id'      => $order->get_id(),
+									'customer_note' => 'Pay the second payment.',
+								)
+							);
+						},
+					)
+				);
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'   => 'test-ext',
+						'email'       => 'new-order',
+						'email_class' => 'WC_Email_New_Order',
+						'description' => 'Tells the store about the order.',
+					)
+				);
+			}
+		);
 	}
 
 	/**
@@ -2306,13 +2568,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				'schema'       => array( 'type' => 'string' ),
 			),
 			array( 'set_callback' => '__return_null' ),
-			array( 'input_schema' => array( 'type' => 'string' ) ),
 			array(
 				'set_callback' => 'not_a_function',
 				'input_schema' => array( 'type' => 'string' ),
 			),
 			$read + array( 'set_callback' => '__return_null' ),
-			$read + array( 'input_schema' => array( 'type' => 'string' ) ),
 			$read + array(
 				'input_schema' => array( 'type' => 'string' ),
 				'set_callback' => 'not_a_function',
@@ -3511,8 +3771,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_sync(
 			'product',
 			'test-ext',
-			static function ( array $saved, ActionableAbility $ability ) use ( &$calls ) {
-				$calls[] = array( $ability->get_name(), array_map( 'get_class', $saved ), array_map( static fn( \WC_Data $saved_object ) => $saved_object->get_id(), $saved ) );
+			static function ( array $saved, array $context ) use ( &$calls ) {
+				$calls[] = array( $context['ability'], array_map( 'get_class', $saved ), array_map( static fn( \WC_Data $saved_object ) => $saved_object->get_id(), $saved ) );
 				$prices  = array();
 				foreach ( $saved as $object ) {
 					if ( $object instanceof \WC_Product_Variation ) {
@@ -3537,19 +3797,18 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should give a sync the deleted objects and the input of the call.
+	 * @testdox Should give a sync the deleted and the trashed objects of the call.
 	 */
-	public function test_a_sync_gets_the_deleted_objects_and_the_input(): void {
+	public function test_a_sync_gets_the_deleted_and_trashed_objects(): void {
 		$contexts = array();
 		$this->register_sync(
 			'product',
 			'test-ext',
-			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$contexts ) {
+			static function ( array $saved, array $context ) use ( &$contexts ) {
 				$contexts[] = array(
 					'saved'   => array_map( static fn( \WC_Data $item ) => $item->get_id(), $saved ),
 					'deleted' => array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] ),
 					'trashed' => array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['trashed'] ),
-					'input'   => $context['input'],
 				);
 				return null;
 			}
@@ -3586,7 +3845,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( array(), $contexts[0]['deleted'] );
 		$this->assertSame( array( $created['product']['id'] ), $contexts[1]['saved'] );
 		$this->assertSame( array( $created['product']['variation_ids'][1] ), $contexts[1]['deleted'] );
-		$this->assertSame( $input, $contexts[1]['input'] );
 		$this->assertSame( array( $created['product']['id'] ), $contexts[2]['saved'], 'A variation delete saves the parent.' );
 		$this->assertSame( array( $created['product']['variation_ids'][0] ), $contexts[2]['deleted'] );
 		$this->assertSame( array(), $contexts[3]['saved'] );
@@ -3594,6 +3852,148 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( array( $created['product']['id'] ), $contexts[3]['trashed'], 'A trash reports the parent as trashed.' );
 		$this->assertSame( array( $created['product']['id'] ), $contexts[4]['deleted'], 'A parent delete reports the parent; its variations were deleted before.' );
 		$this->assertSame( array(), $contexts[4]['trashed'] );
+	}
+
+	/**
+	 * Register `test-ext.vendor` on a resource: a writable field with no set_callback, as a field kept outside the object has.
+	 *
+	 * @param string $resource_name Resource.
+	 */
+	private function register_vendor_field( string $resource_name ): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => $resource_name,
+						'namespace'    => 'test-ext',
+						'field'        => 'vendor',
+						'input_schema' => self::nullable( array( 'type' => 'string' ) ),
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should give validators and syncs the sent fields of their own namespace for each object, with a sent null.
+	 */
+	public function test_validators_and_syncs_get_the_sent_fields_of_each_object(): void {
+		$seen   = array();
+		$record = static function ( string $step, array $objects, array $context ) use ( &$seen ) {
+			foreach ( $objects as $object ) {
+				$seen[ $step ][ $object->get_sku() ] = $context['fields'][ $object ];
+			}
+			$seen[ $step ]['other'] = $context['fields'][ new \WC_Product() ];
+			return null;
+		};
+		$this->register_validator( 'product', 'test-ext', static fn( \WC_Product $product, array $context ) => $record( 'validator', array( $product ), $context ) );
+		$this->register_sync( 'product', 'test-ext', static fn( array $saved, array $context ) => $record( 'sync', $saved, $context ) );
+		$this->register_vendor_field( 'product' );
+		$this->reset_registries();
+		$input                                = $this->get_shirt_input();
+		$input['sku']                         = 'shirt';
+		$input['extensions']                  = array(
+			'test-ext'  => array(
+				'color'  => 'blue',
+				'vendor' => 'acme',
+			),
+			'other_ext' => array( 'size' => 'small' ),
+		);
+		$input['variations'][0]['extensions'] = array( 'test-ext' => array( 'vendor' => null ) );
+
+		$this->run_ability( 'woocommerce/product-create', $input );
+
+		$expected = array(
+			'shirt'   => array(
+				'color'  => 'blue',
+				'vendor' => 'acme',
+			),
+			'other'   => array(),
+			'shirt-s' => array( 'vendor' => null ),
+			'shirt-m' => array(),
+		);
+		$this->assertEquals( $expected, $seen['validator'] );
+		$this->assertEquals( $expected, $seen['sync'] );
+		$this->assertNull( $seen['validator']['shirt-s']['vendor'] );
+		$this->assertNull( $seen['sync']['shirt-s']['vendor'] );
+	}
+
+	/**
+	 * @testdox Should leave a value that its set_callback refused out of the sent fields.
+	 */
+	public function test_a_refused_value_is_not_in_the_sent_fields(): void {
+		$seen = null;
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function ( \WC_Product $product, array $context ) use ( &$seen ) {
+				$seen = $context['fields'][ $product ];
+				return null;
+			}
+		);
+		$this->register_vendor_field( 'product' );
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array(
+					'test-ext' => array(
+						'color'  => 'reject',
+						'vendor' => 'acme',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( array( 'vendor' => 'acme' ), $seen );
+	}
+
+	/**
+	 * @testdox Should give a sync the saved objects of its own resource, and the whole call in the context.
+	 */
+	public function test_a_sync_gets_the_saved_objects_of_its_own_resource(): void {
+		$seen = array();
+		foreach ( array( 'product', 'order_item' ) as $resource_name ) {
+			$this->register_sync(
+				$resource_name,
+				'test-ext',
+				static function ( array $saved, array $context ) use ( &$seen, $resource_name ) {
+					$seen[ $resource_name ] = array(
+						'saved'   => array_map( 'get_class', $saved ),
+						'objects' => array_map( 'get_class', $context['objects'] ),
+						'primary' => get_class( $context['primary'] ),
+						'fields'  => array_map( static fn( \WC_Data $item ) => $context['fields'][ $item ], $context['objects'] ),
+					);
+					return null;
+				}
+			);
+		}
+		$this->register_vendor_field( 'order_item' );
+		$this->register_product_with_item_ability();
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		$this->run_ability(
+			'test-ext/product-with-item',
+			array(
+				'id'              => $product->get_id(),
+				'name'            => 'Pencil',
+				'item_extensions' => array( 'test-ext' => array( 'vendor' => 'acme' ) ),
+			)
+		);
+
+		$whole_call = array(
+			'objects' => array( 'WC_Product_Simple', 'WC_Order_Item_Product' ),
+			'primary' => 'WC_Product_Simple',
+			'fields'  => array( array(), array( 'vendor' => 'acme' ) ),
+		);
+		$this->assertSame( array( 'saved' => array( 'WC_Product_Simple' ) ) + $whole_call, $seen['product'] );
+		$this->assertSame( array( 'saved' => array( 'WC_Order_Item_Product' ) ) + $whole_call, $seen['order_item'] );
 	}
 
 	/**
@@ -3631,7 +4031,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'test-ext',
-			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen ) {
+			static function ( \WC_Product $product, array $context ) use ( &$seen ) {
 				if ( $product instanceof \WC_Product_Variation ) {
 					$seen[ $product->get_sku() ] = array_map( static fn( \WC_Product $item ) => $item->get_meta( '_test_color' ), $context['objects'] );
 				}
@@ -3772,7 +4172,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'test-ext',
-			static fn( \WC_Product $product, ActionableAbility $ability ) => 'woocommerce/product-delete' === $ability->get_name() && 'keep' === $product->get_sku()
+			static fn( \WC_Product $product, array $context ) => 'woocommerce/product-delete' === $context['ability'] && 'keep' === $product->get_sku()
 				? new \WP_Error( 'test_keep', 'Keep it.' )
 				: null
 		);
@@ -3810,7 +4210,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'test-ext',
-			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen ) {
+			static function ( \WC_Product $product, array $context ) use ( &$seen ) {
 				if ( $product instanceof \WC_Product_Variation ) {
 					$seen[] = array( $product->get_parent_id(), $context['primary']->get_name(), $context['deleting'] );
 				}
@@ -3840,7 +4240,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'test-ext',
-			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen, $kept ) {
+			static function ( \WC_Product $product, array $context ) use ( &$seen, $kept ) {
 				$seen[ $product->get_id() ] = $context['deleting'];
 				return $context['deleting'] && $kept === $product->get_id()
 					? new \WP_Error( 'test_keep', 'Keep it.' )
@@ -3898,8 +4298,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'test-ext',
-			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse ) {
-				unset( $ability );
+			static function ( \WC_Product $product, array $context ) use ( &$seen, &$refuse ) {
 				$seen[ $product->get_id() ] = $context['deleting'];
 				return $refuse && $context['deleting'] ? new \WP_Error( 'test_keep', 'Keep them.' ) : null;
 			}
@@ -3907,7 +4306,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_sync(
 			'product',
 			'test-ext',
-			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+			static function ( array $saved, array $context ) use ( &$deleted ) {
 				unset( $saved, $ability );
 				$deleted = array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] );
 				return null;
@@ -3946,8 +4345,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'test-ext',
-			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $kept ) {
-				$seen[ $product->get_id() ] = array( $ability->get_name(), $context['deleting'] );
+			static function ( \WC_Product $product, array $context ) use ( &$seen, &$refuse, $kept ) {
+				$seen[ $product->get_id() ] = array( $context['ability'], $context['deleting'] );
 				return $refuse && $kept === $product->get_id()
 					? new \WP_Error( 'test_keep', 'Keep it.' )
 					: null;
@@ -3987,16 +4386,15 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'order',
 			'test-ext',
-			static function ( \WC_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse ) {
-				$seen[] = array( $order->get_id(), $ability->get_name(), $context['deleting'] );
+			static function ( \WC_Order $order, array $context ) use ( &$seen, &$refuse ) {
+				$seen[] = array( $order->get_id(), $context['ability'], $context['deleting'] );
 				return $refuse ? new \WP_Error( 'test_cancel_first', 'Cancel it first.' ) : null;
 			}
 		);
 		$this->register_sync(
 			'order',
 			'test-ext',
-			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$synced ) {
-				unset( $ability );
+			static function ( array $saved, array $context ) use ( &$synced ) {
 				$synced[] = array(
 					count( $saved ),
 					array_map( static fn( \WC_Order $order ) => $order->get_id(), $context['trashed'] ),
@@ -4063,8 +4461,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'order',
 			'test-ext',
-			static function ( \WC_Abstract_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $refund_id ) {
-				unset( $ability );
+			static function ( \WC_Abstract_Order $order, array $context ) use ( &$seen, &$refuse, $refund_id ) {
 				$seen[ $order->get_id() ] = $context['deleting'];
 				return $refuse && $refund_id === $order->get_id() ? new \WP_Error( 'test_keep_refund', 'Keep the refund.' ) : null;
 			}
@@ -4072,7 +4469,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_sync(
 			'order',
 			'test-ext',
-			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+			static function ( array $saved, array $context ) use ( &$deleted ) {
 				unset( $saved, $ability );
 				$deleted = array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $context['deleted'] );
 			}
@@ -4124,8 +4521,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->register_validator(
 				'order',
 				'test-ext',
-				static function ( \WC_Abstract_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $grandchild_id ) {
-					unset( $ability );
+				static function ( \WC_Abstract_Order $order, array $context ) use ( &$seen, &$refuse, $grandchild_id ) {
 					$seen[ $order->get_id() ] = $context['deleting'];
 					return $refuse && $grandchild_id === $order->get_id() ? new \WP_Error( 'test_keep_child', 'Keep the refund of the child.' ) : null;
 				}
@@ -4133,7 +4529,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->register_sync(
 				'order',
 				'test-ext',
-				static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+				static function ( array $saved, array $context ) use ( &$deleted ) {
 					unset( $saved, $ability );
 					$deleted = array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $context['deleted'] );
 				}
@@ -4391,8 +4787,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->register_sync(
 				$resource_name,
 				'test-ext',
-				static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$synced, $resource_name ) {
-					unset( $saved, $ability );
+				static function ( array $saved, array $context ) use ( &$synced, $resource_name ) {
+					unset( $saved );
 					$synced[] = array( $resource_name, array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['trashed'] ) );
 					return null;
 				}
@@ -4509,8 +4905,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 						'input_schema'        => array(
 							'type'       => 'object',
 							'properties' => array(
-								'id'   => array( 'type' => 'integer' ),
-								'name' => array( 'type' => 'string' ),
+								'id'              => array( 'type' => 'integer' ),
+								'name'            => array( 'type' => 'string' ),
+								'item_extensions' => array( 'type' => 'object' ),
 							),
 						),
 						'output_schema'       => array( 'type' => 'object' ),
@@ -5361,7 +5758,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_sync(
 			'product',
 			'test-ext',
-			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted, &$refuse ) {
+			static function ( array $saved, array $context ) use ( &$deleted, &$refuse ) {
 				unset( $saved, $ability );
 				$deleted = array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] );
 				return $refuse ? new \WP_Error( 'test_refused', 'Refused.' ) : null;
@@ -6455,8 +6852,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'order',
 			'test-ext',
-			static function ( \WC_Order $subject, \WP_Ability $current ) use ( &$ability ) {
-				$ability = $current->get_name();
+			static function ( \WC_Order $subject, array $context ) use ( &$ability ) {
+				$ability = $context['ability'];
 				if ( 'yes' === $subject->get_meta( '_test_locked' ) && 'completed' === $subject->get_status() ) {
 					return new \WP_Error( 'test_locked', 'Use test-ext/order-unlock first.' );
 				}
@@ -6991,8 +7388,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'other_ext',
-			static function ( \WC_Product $subject, \WP_Ability $ability ) {
-				return 'test-ext/product-rename' === $ability->get_name()
+			static function ( \WC_Product $subject, array $context ) {
+				return 'test-ext/product-rename' === $context['ability']
 					? new \WP_Error( 'test_rename_refused', 'Rename refused.' )
 					: null;
 			}
@@ -7580,7 +7977,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'validators', 'syncs', 'primes', 'filters' ) as $property ) {
+		foreach ( array( 'fields', 'validators', 'syncs', 'primes', 'filters', 'order_emails' ) as $property ) {
 			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );

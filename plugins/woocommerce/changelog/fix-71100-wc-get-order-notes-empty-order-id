@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent wc_get_order_notes() from returning notes for all orders when order_id or post_id is empty or zero, such as during email preview rendering.

@@ -12,9 +12,10 @@
  *
  * One lock per contract ({@see self::lock()}): every write runs under a lock, the caller's or,
  * for an update or meta write made without one, an internal one the engine takes for that call.
- * Every contract write is owner-scoped where its lock is taken, and no write path skips the lock.
- * Cycle writes require the caller's lock. A write is refused with {@see ContractLockedException}
- * while another operation holds the lock.
+ * Every contract write is owner-scoped where its lock is taken. Cycle writes require the caller's
+ * lock. A write is refused with {@see ContractLockedException} while another operation holds the
+ * lock. One exception: a history entry ({@see self::add_history_entry()}) is fenced by the caller's
+ * lock when one is passed, and is otherwise a plain owner-scoped insert that no held lock refuses.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */
@@ -26,8 +27,10 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\HistoryEntryView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\HistoryEntry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
@@ -133,6 +136,30 @@ final class Contracts {
 		'to_status'      => true,
 		'order_id'       => true,
 		'reason'         => true,
+	);
+
+	/**
+	 * Keys accepted by {@see self::add_history_entry()}, as a key map: the `extension_slug` that
+	 * scopes the write (not an entry field) and the entry fields.
+	 *
+	 * @var array<string, true>
+	 */
+	private const HISTORY_ENTRY_KEYS = array(
+		'extension_slug' => true,
+		'type'           => true,
+		'cycle_id'       => true,
+		'payload'        => true,
+		'creation_key'   => true,
+	);
+
+	/**
+	 * Keys accepted by {@see self::get_history()}, as a key map.
+	 *
+	 * @var array<string, true>
+	 */
+	private const HISTORY_READ_KEYS = array(
+		'limit'  => true,
+		'offset' => true,
 	);
 
 	/**
@@ -243,6 +270,7 @@ final class Contracts {
 	 * @throws ValidationException If `extension_slug` is missing or a value is invalid, with every invalid value reported.
 	 * @throws InvalidArgumentException If the lock is for another contract or another extension.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
+	 * @throws \RuntimeException If the contract read fails.
 	 */
 	public static function update( int $contract_id, array $args, ?ContractLock $lock = null ): ?ContractView {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
@@ -453,6 +481,7 @@ final class Contracts {
 	 *
 	 * @param int $order_id Order id.
 	 * @return array<int, CycleView>
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public static function find_cycles_by_order( int $order_id ): array {
 		return self::cycle_views( ( new ContractRepository() )->find_cycles_by_order_id( $order_id ) );
@@ -534,6 +563,7 @@ final class Contracts {
 	 * @param bool   $single      With a key: return the first value only.
 	 * @return mixed Empty key: values grouped by key. Key + `$single`: the first value, or ''
 	 *               when absent. Key only: the list of values (`[]` when absent).
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public static function get_meta( int $contract_id, string $key = '', bool $single = false ) {
 		return ( new ContractRepository() )->get_meta( $contract_id, $key, $single );
@@ -544,6 +574,7 @@ final class Contracts {
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return ContractView|null The contract, or null when none exists.
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public static function get( int $contract_id ): ?ContractView {
 		return self::view( ( new ContractRepository() )->find( $contract_id ), true );
@@ -554,6 +585,7 @@ final class Contracts {
 	 *
 	 * @param int $order_id Origin order id.
 	 * @return array<int, ContractView>
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public static function find_by_origin_order( int $order_id ): array {
 		return self::views( ( new ContractRepository() )->find_by_origin_order( $order_id ) );
@@ -576,6 +608,7 @@ final class Contracts {
 	 *     @type string $search  Numeric term matches contract id or origin order id; text term matches the owning customer.
 	 * }
 	 * @return array<int, ContractView> Contracts in the requested order (children not loaded).
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public static function list( array $args = array() ): array {
 		return self::views( ( new ContractRepository() )->query( $args ) );
@@ -587,6 +620,7 @@ final class Contracts {
 	 * is the caller's `array_sum()`. Independent of any search or paging.
 	 *
 	 * @return array<string, int> Status => count, every known status present.
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public static function count_by_status(): array {
 		return ( new ContractRepository() )->count_by_status();
@@ -599,6 +633,7 @@ final class Contracts {
 	 *
 	 * @param array<string, mixed> $args Query args (only `status` and `search` are read).
 	 * @return int The matching contract count.
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public static function count( array $args = array() ): int {
 		return ( new ContractRepository() )->count( $args );
@@ -612,11 +647,13 @@ final class Contracts {
 	 *
 	 * @param array<int, int> $contract_ids Contract ids to count items for.
 	 * @return array<int, int> Contract id => line-item count, one entry per requested id.
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public static function item_counts( array $contract_ids ): array {
 		return ( new ContractRepository() )->count_items_by_contract( $contract_ids );
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * List a single customer's contracts, newest first - the customer
 	 * portal's owner-scoped list read.
@@ -643,6 +680,7 @@ final class Contracts {
 	 * }
 	 * @return array<int, ContractView> The customer's contracts, newest first.
 	 * @throws ValidationException If `extension_slug` is empty, not a string, not a valid extension slug, or `any`.
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public static function list_for_customer( int $customer_id, int $limit = 20, int $offset = 0, array $args = array() ): array {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::LIST_FOR_CUSTOMER_KEYS );
@@ -674,6 +712,7 @@ final class Contracts {
 
 		return self::views( ( new ContractRepository() )->find_by_customer_id( $customer_id, $query ) );
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Fetch a contract a customer owns - the customer portal's ownership-checked read.
@@ -688,12 +727,14 @@ final class Contracts {
 	 * @param int $contract_id Contract id.
 	 * @param int $customer_id Customer that must own the contract.
 	 * @return ContractView|null The contract when owned by `$customer_id`, else null.
+	 * @throws \RuntimeException If the read fails.
 	 * @phpstan-impure
 	 */
 	public static function get_for_customer( int $contract_id, int $customer_id ): ?ContractView {
 		return self::view( ( new ContractRepository() )->find_for_customer( $contract_id, $customer_id ), true );
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Fetch a window of the contract's billing cycles, newest first. A negative `$limit` or
 	 * `$offset` throws a {@see ValidationException}.
@@ -703,6 +744,7 @@ final class Contracts {
 	 * @param int $offset      Cycles to skip (for paging).
 	 * @return array<int, CycleView> Cycles newest first.
 	 * @throws ValidationException If `$limit` or `$offset` is negative, with both reported.
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public static function get_cycles( int $contract_id, int $limit = 20, int $offset = 0 ): array {
 		$validator = new ArgumentValidator();
@@ -714,8 +756,92 @@ final class Contracts {
 			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
 		}
 
-		return self::cycle_views( ( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit, $offset ) );
+		return self::cycle_views( ( new ContractRepository() )->find_cycles( $contract_id, Cycle::KIND_BILLING, $limit, $offset ) );
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
+	/**
+	 * Add an entry to a contract's history: a record the owning extension writes on its own command.
+	 * The engine writes no entries itself and gives types and payloads no meaning; the history table
+	 * is its generic per-contract record store, history being its first use. With `$lock` the write is
+	 * fenced by it; without one it is a plain owner-scoped insert that no held lock refuses. A taken
+	 * `creation_key` is a lost race and returns null. Unknown keys get `_doing_it_wrong()`.
+	 *
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $args        `extension_slug` (required, the expected owner), `type`
+	 *                                          (required, 1-64 of `[a-z0-9_-]`), `cycle_id` (a cycle of
+	 *                                          this contract), `payload` (array, stored as JSON) and
+	 *                                          `creation_key` (1-100 characters, trimmed, unique per contract).
+	 * @param ContractLock|null    $lock        The caller's lock on this contract, or null for an unlocked insert.
+	 * @return HistoryEntryView|null The new entry; null when the creation key is taken.
+	 * @throws ValidationException      If a required key is missing or a value is invalid, every error reported.
+	 * @throws InvalidArgumentException If no contract of that extension has the id, the cycle is not one of
+	 *                                  this contract's, or the lock is for another contract or extension.
+	 * @throws ContractLockedException  If `$lock` was passed and has been lost.
+	 * @throws \RuntimeException        If the write fails.
+	 */
+	public static function add_history_entry( int $contract_id, array $args, ?ContractLock $lock = null ): ?HistoryEntryView {
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::HISTORY_ENTRY_KEYS );
+
+		$validator      = new ArgumentValidator();
+		$extension_slug = (string) $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		$entry_args     = array(
+			'contract_id'  => $contract_id,
+			'type'         => $validator->get_slug( 'type', $filtered_args['type'] ?? null ),
+			'cycle_id'     => $validator->get_nullable_id( 'cycle_id', $filtered_args['cycle_id'] ?? null ),
+			'payload'      => $validator->get_nullable_array( 'payload', $filtered_args['payload'] ?? null ),
+			'creation_key' => $validator->get_nullable_string( 'creation_key', $filtered_args['creation_key'] ?? null ),
+		);
+		try {
+			$validator->throw_errors();
+			$entry = HistoryEntry::create( $entry_args );
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+		}
+
+		$stored = ( new ContractRepository() )->add_history_entry( $entry, $extension_slug, $lock );
+		if ( null === $stored ) {
+			return null;
+		}
+
+		return HistoryEntryView::from_entry( $stored );
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
+	/**
+	 * A window of a contract's history, newest first. Reads work across extensions. Unknown keys
+	 * get `_doing_it_wrong()`.
+	 *
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $args        `limit` (default 20) and `offset` (default 0), non-negative.
+	 * @return array<int, HistoryEntryView> Entries newest first; empty for an unknown contract.
+	 * @throws ValidationException If `limit` or `offset` is invalid, both reported.
+	 * @throws \RuntimeException   If the read fails.
+	 */
+	public static function get_history( int $contract_id, array $args = array() ): array {
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::HISTORY_READ_KEYS );
+
+		$validator = new ArgumentValidator();
+		$limit     = (int) $validator->get_non_negative_int( 'limit', $filtered_args['limit'] ?? 20 );
+		$offset    = (int) $validator->get_non_negative_int( 'offset', $filtered_args['offset'] ?? 0 );
+		try {
+			$validator->throw_errors();
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+		}
+
+		$entries = ( new ContractRepository() )->find_history( $contract_id, $limit, $offset );
+
+		return array_map(
+			static function ( HistoryEntry $entry ): HistoryEntryView {
+				return HistoryEntryView::from_entry( $entry );
+			},
+			$entries
+		);
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Check the positional scope arguments of a write: the expected owner and, for a meta write,

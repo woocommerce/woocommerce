@@ -48,6 +48,18 @@
 /plugins/woocommerce/src/StoreApi/Utilities/ProductQuery.php @woocommerce/kirigami
 /plugins/woocommerce/src/StoreApi/Utilities/ProductQueryFilters.php @woocommerce/kirigami
 
+# Store API UCP routes, schemas, and utilities
+/plugins/woocommerce/src/StoreApi/Routes/V1/Ucp/ @woocommerce/big-ocean
+/plugins/woocommerce/src/StoreApi/Schemas/V1/Ucp/ @woocommerce/big-ocean
+/plugins/woocommerce/src/StoreApi/Utilities/Ucp/ @woocommerce/big-ocean
+/plugins/woocommerce/src/StoreApi/Utilities/UcpUtils.php @woocommerce/big-ocean
+
+# UCP and Abilities
+/plugins/woocommerce/src/Internal/Ucp/ @woocommerce/big-ocean
+/plugins/woocommerce/src/Abilities/ @woocommerce/big-ocean
+/plugins/woocommerce/src/Internal/Abilities/ @woocommerce/big-ocean
+/plugins/woocommerce/src/Internal/AbilitiesApi/ @woocommerce/big-ocean
+
 # Legacy REST API order controllers
 /plugins/woocommerce/includes/rest-api/Controllers/Version*/class-wc-rest-order*.php @woocommerce/rubik
 /plugins/woocommerce/includes/rest-api/Controllers/Version*/class-wc-rest-network-orders*.php @woocommerce/rubik

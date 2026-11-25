@@ -3,21 +3,17 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Jetpack\JetpackConnection;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Adds the WooCommerce > Settings > AI tools tab while the
- * agent_readiness feature is enabled, and names the options it saves.
+ * Adds the WooCommerce > Settings > AI tools tab, and names the options it saves.
  *
  * @since 11.4.0
  */
 class AgenticCommerceSettings implements RegisterHooksInterface {
-
-	public const FEATURE_ID = 'agent_readiness';
 
 	public const TAB = 'agentic-commerce';
 
@@ -51,12 +47,6 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 */
 	public const WARRANTY_PAGE_OPTION = 'woocommerce_warranty_page_id';
 
-	/**
-	 * Features controller.
-	 *
-	 * @var FeaturesController
-	 */
-	private FeaturesController $features_controller;
 
 	/**
 	 * Store conditions.
@@ -84,16 +74,14 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param FeaturesController $features_controller Features controller.
 	 * @param StoreConditions    $store_conditions    Store conditions.
 	 * @param AgentReadiness     $agent_readiness     Readiness service.
 	 * @param ReadinessCheckPage $readiness_page      Sales readiness.
 	 */
-	final public function init( FeaturesController $features_controller, StoreConditions $store_conditions, AgentReadiness $agent_readiness, ReadinessCheckPage $readiness_page ): void {
-		$this->features_controller = $features_controller;
-		$this->store_conditions    = $store_conditions;
-		$this->agent_readiness     = $agent_readiness;
-		$this->readiness_page      = $readiness_page;
+	final public function init( StoreConditions $store_conditions, AgentReadiness $agent_readiness, ReadinessCheckPage $readiness_page ): void {
+		$this->store_conditions = $store_conditions;
+		$this->agent_readiness  = $agent_readiness;
+		$this->readiness_page   = $readiness_page;
 	}
 
 	/**
@@ -113,12 +101,12 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Add the settings page when the feature is enabled.
+	 * Add the settings page in the admin.
 	 *
 	 * @internal
 	 */
 	public function handle_init(): void {
-		if ( ! is_admin() || ! $this->features_controller->feature_is_enabled( self::FEATURE_ID ) ) {
+		if ( ! is_admin() ) {
 			return;
 		}
 		add_filter( 'woocommerce_get_settings_pages', array( $this, 'handle_woocommerce_get_settings_pages' ) );
@@ -142,7 +130,7 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 			wp_die( esc_html__( 'Sorry, you are not allowed to connect this store.', 'woocommerce' ), 403 );
 		}
 		check_admin_referer( self::CONNECT_ACTION );
-		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- wordpress_com_https_url() allows only https on wordpress.com.
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- wordpress_com_https_url() allows only https on wordpress.com and jetpack.wordpress.com.
 		wp_redirect( self::connect_redirect() );
 		exit;
 	}
@@ -175,7 +163,8 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	}
 
 	/**
-	 * An https WordPress.com URL with a lowercased scheme, or an empty string.
+	 * An https URL on wordpress.com or jetpack.wordpress.com, the hosts Jetpack sends users to for the
+	 * connection, with a lowercased scheme, or an empty string.
 	 *
 	 * @since 11.4.0
 	 *
@@ -183,6 +172,10 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 * @return string
 	 */
 	public static function wordpress_com_https_url( string $url ): string {
+		// Browsers read a backslash as a slash, so a host PHP parses as on wordpress.com could lead elsewhere.
+		if ( 1 === preg_match( '/[\\\\\s]/', $url ) ) {
+			return '';
+		}
 		$parts = wp_parse_url( $url );
 		if ( ! is_array( $parts ) || isset( $parts['user'] ) || isset( $parts['pass'] ) ) {
 			return '';
@@ -190,9 +183,7 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 		$raw_scheme = isset( $parts['scheme'] ) ? $parts['scheme'] : '';
 		$scheme     = strtolower( $raw_scheme );
 		$host       = strtolower( (string) ( $parts['host'] ?? '' ) );
-		$suffix     = '.wordpress.com';
-		$on_wp      = 'wordpress.com' === $host || ( strlen( $host ) > strlen( $suffix ) && substr( $host, -strlen( $suffix ) ) === $suffix );
-		if ( 'https' !== $scheme || ! $on_wp ) {
+		if ( 'https' !== $scheme || ! in_array( $host, array( 'wordpress.com', 'jetpack.wordpress.com' ), true ) ) {
 			return '';
 		}
 		return 'https' . substr( $url, strlen( $raw_scheme ) );

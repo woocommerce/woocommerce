@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 
@@ -13,11 +12,12 @@ defined( 'ABSPATH' ) || exit;
  * Runs the readiness scan in Action Scheduler instead of the page request,
  * and keeps the stored report fresh with one run a day.
  *
- * Each run schedules the next one a day later, so nothing is queued until a
+ * Each run schedules the next one for the coming night, on the store's clock
+ * (next_daily_run()), so nothing is queued until a
  * merchant or the REST API asks for the first scan, and no request pays for a
  * scheduling check. The next run is scheduled before the scan, so a scan that
- * fails or times out does not end the chain; a run that finds the feature
- * disabled does.
+ * fails or times out does not end the chain. Cancelling the scheduled actions
+ * under Tools > Scheduled Actions stops the chain until the next manual check.
  *
  * A requested scan that has not started 10 minutes after it was due, while no
  * other scheduled action has finished either, is taken as stalled (Action
@@ -46,6 +46,18 @@ class ScheduledScan implements RegisterHooksInterface {
 
 	public const GROUP = 'woocommerce-agent-readiness';
 
+	/**
+	 * Hours of the night, on the store's clock, between which the daily scan is scheduled.
+	 */
+	public const NIGHT_FROM = 1;
+
+	public const NIGHT_TO = 5;
+
+	/**
+	 * The least time between a run and the daily run it schedules.
+	 */
+	public const MIN_GAP = 6 * HOUR_IN_SECONDS;
+
 	public const STALLED_AFTER = 10 * MINUTE_IN_SECONDS;
 
 	/**
@@ -55,12 +67,6 @@ class ScheduledScan implements RegisterHooksInterface {
 	 */
 	public const RUNNING_FOR = 10 * MINUTE_IN_SECONDS;
 
-	/**
-	 * Features controller.
-	 *
-	 * @var FeaturesController
-	 */
-	private FeaturesController $features_controller;
 
 	/**
 	 * Readiness service.
@@ -81,14 +87,12 @@ class ScheduledScan implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param FeaturesController $features_controller Features controller.
-	 * @param AgentReadiness     $agent_readiness     Readiness service.
-	 * @param RemoteRules        $remote_rules        Rules from the published rules file.
+	 * @param AgentReadiness $agent_readiness     Readiness service.
+	 * @param RemoteRules    $remote_rules        Rules from the published rules file.
 	 */
-	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness, RemoteRules $remote_rules ): void {
-		$this->features_controller = $features_controller;
-		$this->agent_readiness     = $agent_readiness;
-		$this->remote_rules        = $remote_rules;
+	final public function init( AgentReadiness $agent_readiness, RemoteRules $remote_rules ): void {
+		$this->agent_readiness = $agent_readiness;
+		$this->remote_rules    = $remote_rules;
 	}
 
 	/**
@@ -175,15 +179,34 @@ class ScheduledScan implements RegisterHooksInterface {
 	 * @internal
 	 */
 	public function run(): void {
-		if ( ! $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ) {
-			return;
-		}
 		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
-		as_schedule_single_action( time() + DAY_IN_SECONDS, self::DAILY_HOOK, array(), self::GROUP );
+		as_schedule_single_action( self::next_daily_run(), self::DAILY_HOOK, array(), self::GROUP );
 
 		$this->remote_rules->refresh( array_keys( $this->agent_readiness->get_default_rules() ) );
 		as_unschedule_all_actions( self::NEXT_HOOK );
 		as_schedule_single_action( time(), self::NEXT_HOOK, array( $this->agent_readiness->start_refresh() ), self::GROUP );
+	}
+
+	/**
+	 * When the next daily scan is due: the next time the store's clock shows its night slot.
+	 * The slot is a minute between NIGHT_FROM and NIGHT_TO, fixed per store by its address,
+	 * so stores on one host don't all start together. A run that starts late doesn't move it.
+	 * A slot less than MIN_GAP away is left for the night after, so a check started late in
+	 * the evening or at night isn't followed by a second one within hours.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int|null $time The current time, or null for now.
+	 */
+	public static function next_daily_run( ?int $time = null ): int {
+		$now    = ( new \DateTimeImmutable( '@' . ( $time ?? time() ) ) )->setTimezone( wp_timezone() );
+		$minute = self::NIGHT_FROM * 60 + absint( crc32( home_url() ) ) % ( ( self::NIGHT_TO - self::NIGHT_FROM ) * 60 );
+		$slot   = $now->setTime( intdiv( $minute, 60 ), $minute % 60 );
+		// Twice at most: tonight's slot may be past, and tomorrow's may still be too close.
+		while ( $slot->getTimestamp() - $now->getTimestamp() < self::MIN_GAP ) {
+			$slot = $slot->modify( '+1 day' );
+		}
+		return $slot->getTimestamp();
 	}
 
 	/**
@@ -195,11 +218,6 @@ class ScheduledScan implements RegisterHooksInterface {
 	 */
 	public function run_batch( $chain = '' ): void {
 		$chain = is_string( $chain ) ? $chain : '';
-		if ( ! $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ) {
-			$this->agent_readiness->cancel_refresh();
-			as_unschedule_all_actions( self::NEXT_HOOK );
-			return;
-		}
 		// Runs only if this action ends early, as on a timeout, and goes on from the last finished batch.
 		as_schedule_single_action( time() + self::RETRY_AFTER, self::NEXT_HOOK, array( $chain ), self::GROUP );
 		$more = $this->agent_readiness->continue_refresh( $chain );

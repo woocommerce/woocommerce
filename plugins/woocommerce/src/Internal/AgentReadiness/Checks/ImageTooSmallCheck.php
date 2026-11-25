@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The main image is under MIN_PIXELS on either side. An image with no recorded
+ * The main image, or a variation's, is under MIN_PIXELS on either side. An image with no recorded
  * size is not flagged. Google requires 500 x 500 from January 31, 2027; before
  * that it is a gap.
  *
@@ -51,21 +51,21 @@ class ImageTooSmallCheck extends AbstractReadinessCheck {
 	 * Merchant-facing label.
 	 */
 	public function label(): string {
-		return __( 'Products whose main image is under 500 x 500 pixels', 'woocommerce' );
+		return __( 'Products with an image under 500 x 500 pixels', 'woocommerce' );
 	}
 
 	/**
 	 * Why it matters.
 	 */
 	public function why(): string {
-		return __( 'Google\'s spec requires a main image of at least 500 x 500 pixels from January 31, 2027; a smaller one won\'t appear on Google then.', 'woocommerce' );
+		return __( 'Google\'s spec requires an image of at least 500 x 500 pixels from January 31, 2027; a smaller one won\'t appear on Google then.', 'woocommerce' );
 	}
 
 	/**
 	 * What to do about it.
 	 */
 	public function fix(): string {
-		return __( 'Upload a main image at least 500 x 500 pixels.', 'woocommerce' );
+		return __( 'Upload product and variation images at least 500 x 500 pixels.', 'woocommerce' );
 	}
 
 	/**

@@ -51,7 +51,6 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			// On multisite only a super admin can choose the privacy policy page, as a single site's administrator can.
 			grant_super_admin( get_current_user_id() );
 		}
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		delete_option( 'woocommerce_feature_ucp_enabled' );
 		$this->sut = wc_get_container()->get( AgenticCommerceSettings::class );
 	}
@@ -71,15 +70,10 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The tab is added only while the agent_readiness feature is enabled.
+	 * @testdox The AI tools tab is added in the admin.
 	 */
-	public function test_tab_only_with_feature_enabled(): void {
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
+	public function test_tab_added(): void {
 		remove_all_filters( 'woocommerce_get_settings_pages' );
-		$this->sut->handle_init();
-		$this->assertFalse( has_filter( 'woocommerce_get_settings_pages' ), 'No tab with the feature off' );
-
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
 		$this->sut->handle_init();
 		$pages = apply_filters( 'woocommerce_get_settings_pages', array() );
@@ -107,16 +101,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Sales readiness is added only while the agent_readiness feature is enabled, as a WooCommerce Admin page under WooCommerce, before Settings.
+	 * @testdox Sales readiness is added as a WooCommerce Admin page under WooCommerce, before Settings.
 	 */
-	public function test_readiness_page_only_with_feature_enabled(): void {
+	public function test_readiness_page_added(): void {
 		$page = wc_get_container()->get( ReadinessCheckPage::class );
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
 		remove_all_actions( 'admin_menu' );
-		$page->handle_init();
-		$this->assertFalse( has_action( 'admin_menu', array( $page, 'handle_admin_menu' ) ), 'No page with the feature off' );
-
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		$page->handle_init();
 		$this->assertSame( ReadinessCheckPage::MENU_PRIORITY, has_action( 'admin_menu', array( $page, 'handle_admin_menu' ) ), 'After Reports (20), before Settings (50)' );
 
@@ -232,7 +221,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Only an https WordPress.com URL can be the connection redirect, and its scheme is lowercased.
+	 * @testdox Only an https URL on wordpress.com or jetpack.wordpress.com can be the connection redirect, and its scheme is lowercased.
 	 *
 	 * @testWith ["https://jetpack.wordpress.com/jetpack.authorize/1/?x=1", "https://jetpack.wordpress.com/jetpack.authorize/1/?x=1"]
 	 *           ["HTTPS://jetpack.wordpress.com/path", "https://jetpack.wordpress.com/path"]
@@ -241,6 +230,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 *           ["https://evil.example/phish", ""]
 	 *           ["https://wordpress.com.evil.example/", ""]
 	 *           ["https://user@jetpack.wordpress.com/path", ""]
+	 *           ["https://someone.wordpress.com/", ""]
+	 *           ["https://evil.example\\.jetpack.wordpress.com/", ""]
+	 *           ["https://jetpack.wordpress.com/a b", ""]
 	 *           ["", ""]
 	 *
 	 * @param string $url      Candidate redirect.
@@ -656,11 +648,19 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A check that couldn't run says why on its row; a card none of whose checks ran says why once, for coming soon mode or a host that blocks the store's own pages.
+	 * @testdox A check that couldn't run says why on its row; a card none of whose checks ran says why once, for coming soon mode, a check from before launch, or a host that blocks the store's own pages.
 	 */
 	public function test_output_couldnt_check_message_follows_coming_soon(): void {
 		StoreConditionsTest::make_store_ready( $this );
-		$sitemap = array(
+		$launched = static fn( bool $ok ): array => array(
+			'id'      => 'launched',
+			'group'   => 'access',
+			'ok'      => $ok,
+			'level'   => 'required',
+			'name'    => 'Store is launched',
+			'fix_url' => '',
+		);
+		$sitemap  = array(
 			'id'      => 'sitemap_lists_products',
 			'group'   => 'find',
 			'ok'      => null,
@@ -668,7 +668,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'name'    => 'Sitemap lists your products',
 			'fix_url' => '',
 		);
-		$robots  = array(
+		$robots   = array(
 			'id'      => 'robots_txt',
 			'group'   => 'find',
 			'ok'      => true,
@@ -676,19 +676,72 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'name'    => 'Robots file allows AI assistants',
 			'fix_url' => '',
 		);
-		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $sitemap, $robots ) ), false );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( true ), $sitemap, $robots ) ), false );
 		$this->assertSame( 'This check couldn’t run. It runs again each day, or you can run the check again now.', $this->row( 'Add a sitemap that lists your products' )['text'], 'Titled by what the check looks for, not as if it passed' );
 
-		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $sitemap, array( 'ok' => null ) + $robots ) ), false );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( true ), $sitemap, array( 'ok' => null ) + $robots ) ), false );
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
-		$this->assertSame( 'Not checked yet', $card['badge']['text'] );
+		$this->assertSame( 'Couldn’t check', $card['badge']['text'], 'The store is live, so the check tried and couldn\'t' );
 		$this->assertSame( array( 'Your pages couldn’t be checked' ), array_column( $card['rows'], 'title' ), 'One row for the card, not one per check' );
+		$this->assertFalse( $card['rows'][0]['waiting'], 'Screen readers hear Couldn\'t check' );
 		$this->assertSame( 'Your hosting setup blocked the check from opening them. Checks run again each day. If this keeps happening, contact your hosting provider.', $card['rows'][0]['text'] );
 
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
 		$this->assertSame( 'Your store is in coming soon mode', $card['rows'][0]['title'] );
 		$this->assertSame( 'These checks run once your store is live.', $card['rows'][0]['text'] );
+		$this->assertSame( 'Not checked yet', $card['badge']['text'], 'In coming soon mode the checks wait for the store to go live' );
+		$this->assertTrue( $card['rows'][0]['waiting'], 'Screen readers hear Not checked yet' );
+
+		// Checked while coming soon, then launched: wait for the next check, don't blame hosting.
+		update_option( 'woocommerce_coming_soon', 'no' );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( false ), $sitemap, array( 'ok' => null ) + $robots ) ), false );
+		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
+		$this->assertSame( 'Your store wasn’t live at the last check', $card['rows'][0]['title'] );
+		$this->assertSame( 'These checks run at the next daily check, or you can run the check again now.', $card['rows'][0]['text'] );
+		$this->assertSame( 'Not checked yet', $card['badge']['text'], 'The checks wait for the next run after launch' );
+		$this->assertTrue( $card['rows'][0]['waiting'], 'Screen readers hear Not checked yet' );
+	}
+
+	/**
+	 * @testdox After launch, a check left unchecked by a check in coming soon mode says Not checked yet, even when others in its question passed; a product page check with no product says it needs one.
+	 */
+	public function test_unchecked_row_follows_launch_and_products(): void {
+		StoreConditionsTest::make_store_ready( $this );
+		$check = static fn( string $id, ?bool $ok, array $extra = array() ): array => $extra + array(
+			'id'      => $id,
+			'group'   => 'find',
+			'ok'      => $ok,
+			'level'   => 'recommended',
+			'name'    => $id,
+			'fix_url' => '',
+		);
+		$rows  = function (): array {
+			$card = array_column( $this->view()['sections'], null, 'id' )['find'];
+			return array( $card['badge']['text'], array_column( $card['rows'], null, 'id' ) );
+		};
+
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $check( 'launched', false, array( 'group' => 'access' ) ), $check( 'sitemap_lists_products', null ), $check( 'robots_txt', true ) ) ), false );
+		list( $badge, $by_id ) = $rows();
+		$this->assertSame( 'Not checked yet', $badge );
+		$this->assertTrue( $by_id['sitemap_lists_products']['waiting'], 'Screen readers hear Not checked yet' );
+		$this->assertSame( 'Your store wasn’t live at the last check. This check runs at the next daily check, or you can run the check again now.', $by_id['sitemap_lists_products']['text'] );
+
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $check( 'launched', true, array( 'group' => 'access' ) ), $check( 'canonical_url', null, array( 'no_product' => true ) ), $check( 'robots_txt', true ) ) ), false );
+		list( $badge, $by_id ) = $rows();
+		$this->assertSame( 'Not checked yet', $badge, 'Waiting for a product, not a check that failed to run' );
+		$this->assertTrue( $by_id['canonical_url']['waiting'] );
+		$this->assertSame( 'This check needs a product page. It runs once you have a published product that AI assistants can see.', $by_id['canonical_url']['text'] );
+
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $check( 'launched', true, array( 'group' => 'access' ) ), $check( 'canonical_url', null, array( 'no_product' => true ) ), $check( 'sitemap_lists_products', null ), $check( 'robots_txt', true ) ) ), false );
+		list( $badge, $by_id ) = $rows();
+		$this->assertSame( 'Couldn’t check', $badge, 'Another check tried and couldn\'t' );
+		$this->assertFalse( $by_id['sitemap_lists_products']['waiting'] );
+
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $check( 'launched', true, array( 'group' => 'access' ) ), $check( 'canonical_url', null, array( 'no_product' => true ) ) ) ), false );
+		list( $badge, $by_id ) = $rows();
+		$this->assertSame( 'Not checked yet', $badge, 'Only a check waiting for a product: no hosting message' );
+		$this->assertArrayHasKey( 'canonical_url', $by_id );
 	}
 
 	/**
@@ -803,7 +856,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			array_column( $view['sections'], 'title' ),
 			'Listings come before Buying through AI assistants'
 		);
-		$this->assertSame( 'Some checks only run when AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', $sections['access']['note'], 'UCP is off in this test' );
+		$this->assertNull( $sections['access']['note'], 'UCP is off and Store access has nothing else to check, so the card says what turning it on checks instead' );
+		$this->assertSame( 'These checks run once AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', $sections['access']['empty']['title'] );
+		$this->assertSame( 'Turn on AI shopping', $sections['access']['empty']['link']['text'] );
+		$this->assertSame( AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ), $sections['access']['empty']['link']['href'], 'The button opens the page with the AI shopping switch' );
+		$this->assertSame( 'Not checked yet', $sections['access']['badge']['text'] );
 		$this->assertSame(
 			array(
 				'intent' => 'low',
@@ -913,14 +970,15 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 				'Files in your root folder'   => array( 'ai.txt usage file', 'AGENTS.md' ),
 				'Files at standard addresses' => array( 'API catalog' ),
 				'In your page code'           => array( 'sameAs links', 'Markdown pages' ),
-				'Not checked yet'             => array( 'TDMRep' ),
+				'Couldn’t check'              => array( 'TDMRep' ),
 			),
 			array_column( array_map( static fn( array $group ): array => array( $group['title'], array_column( $group['items'], 'name' ) ), $view['declared']['groups'] ), 1, 0 ),
-			'Every item, found or not, under where it lives; an item the scan couldn\'t read is under Not checked yet'
+			'Every item, found or not, under where it lives; an item the scan couldn\'t read on a live store is under Couldn\'t check'
 		);
 		$groups = array_column( $view['declared']['groups'], 'items', 'title' );
 		$this->assertSame( array( true, false ), array_column( $groups['Files in your root folder'], 'found' ) );
-		$this->assertNull( $groups['Not checked yet'][0]['found'], 'Not checked is neither found nor missing' );
+		$this->assertNull( $groups['Couldn’t check'][0]['found'], 'Not read is neither found nor missing' );
+		$this->assertFalse( $view['declared']['waiting'], 'The store is live, so an unread item couldn\'t be checked' );
 
 		$report             = get_option( 'woocommerce_agent_readiness_report' );
 		$report['declared'] = array(
@@ -1462,20 +1520,21 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A question's badge counts its issues; when nothing failed but a check couldn't run, it says Not checked yet.
+	 * @testdox A question's badge counts its issues; when nothing failed but a check couldn't run, it says Couldn't check, or Not checked yet while the checks wait for the merchant.
 	 */
 	public function test_group_badge(): void {
 		$badge = new \ReflectionMethod( ReadinessCheckPage::class, 'group_badge' );
 		$badge->setAccessible( true );
-		$text = static fn( array $checks ): string => $badge->invoke( null, $checks )[1];
+		$text = static fn( array $checks, bool $waiting = false ): string => $badge->invoke( null, $checks, $waiting )[1];
 		$row  = static fn( ?bool $ok ): array => array( 'ok' => $ok );
 
 		$this->assertSame( '2 issues', $text( array( $row( false ), $row( false ), $row( true ) ) ) );
 		$this->assertSame( '1 issue', $text( array( $row( false ), $row( null ) ) ) );
 		$this->assertSame( 'All passed', $text( array( $row( true ), $row( true ) ) ) );
-		$this->assertSame( 'Not checked yet', $text( array( $row( true ), $row( null ) ) ), 'A check that could not run is not an issue, nor a pass' );
-		$this->assertSame( 'Not checked yet', $text( array( $row( null ), $row( null ) ) ), 'Nothing ran, so nothing is shown as passed' );
-		$this->assertSame( 'Not checked yet', $text( array() ) );
+		$this->assertSame( 'Couldn’t check', $text( array( $row( true ), $row( null ) ) ), 'A check that could not run is not an issue, nor a pass' );
+		$this->assertSame( 'Couldn’t check', $text( array( $row( null ), $row( null ) ) ), 'Nothing ran, so nothing is shown as passed' );
+		$this->assertSame( 'Not checked yet', $text( array( $row( true ), $row( null ) ), true ), 'In coming soon mode the checks wait for the store to go live' );
+		$this->assertSame( 'Not checked yet', $text( array() ), 'Nothing to check, as Store access while AI shopping is off' );
 
 		$map = new \ReflectionMethod( ReadinessCheckPage::class, 'badge_data' );
 		$map->setAccessible( true );
@@ -1513,6 +1572,55 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'agent_readiness=', $this->row( 'Add a brand to 4 products' )['link']['href'], 'Several products open the Products list filtered to them' );
 		$counted = array_filter( (array) $this->view()['fix_first']['items'], static fn( array $item ): bool => false !== strpos( $item['title'], ' 4 products' ) );
 		$this->assertNotEmpty( $counted, 'Fix first has a product fix that counts the products' );
+	}
+
+	/**
+	 * @testdox With AI shopping off, Store access with checks to show keeps them and the note, and no Turn on AI shopping button.
+	 */
+	public function test_store_access_with_checks_keeps_the_ucp_off_note(): void {
+		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+		$row    = static fn( string $id ): array => array(
+			'id'      => $id,
+			'ok'      => true,
+			'blocks'  => 'listing',
+			'group'   => 'access',
+			'level'   => 'required',
+			'name'    => $id,
+			'why'     => $id . ' why',
+			'fix'     => $id . ' fix',
+			'fix_url' => '',
+		);
+		update_option(
+			'woocommerce_agent_readiness_report',
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array( $row( 'no_noindex_directives' ), $row( 'pages_public' ) ),
+			)
+		);
+		$access = array_column( $this->view()['sections'], null, 'id' )['access'];
+		$this->assertSame( 'Some checks only run when AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', $access['note'] );
+		$this->assertNull( $access['empty'] );
+		$this->assertCount( 2, $access['folded'], 'The passed checks stay, as in the design' );
+	}
+
+	/**
+	 * @testdox A named product keeps its whole saved name, angle brackets and ampersand included, and ignores markup that title filters add.
+	 */
+	public function test_output_product_fix_keeps_the_whole_name(): void {
+		kses_remove_filters(); // An administrator can save a name with angle brackets.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( "Baker's <Dozen> & Co" );
+		$product->save();
+		kses_init_filters();
+		$wrap = static fn( $title ) => '<span class="badge">' . $title . '</span>';
+		add_filter( 'the_title', $wrap );
+		try {
+			wc_get_container()->get( AgentReadiness::class )->refresh_report();
+			$brand = $this->row( "Add a brand to Baker's <Dozen> & Co" );
+			$this->assertSame( 'View product', $brand['link']['text'], 'The row names the product exactly as saved' );
+		} finally {
+			remove_filter( 'the_title', $wrap );
+		}
 	}
 
 	/**
@@ -1579,6 +1687,30 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			sprintf( 'Based on your %s most recently changed products.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
 			$this->view()['overview']['based_on'],
 			'The AI tools card says it after its description'
+		);
+
+		$stored['bestsellers_first'] = true;
+		update_option( AgentReadiness::REPORT_OPTION, $stored );
+		$this->assertSame(
+			sprintf( 'Product checks covered %s of your 8,400 products: your bestsellers first, then the ones you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['checked_note'],
+			'A scan that took bestsellers first says so'
+		);
+		$this->assertSame(
+			sprintf( 'Based on %s products: your bestsellers first, then the ones you changed most recently.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['overview']['based_on']
+		);
+
+		$stored['bestsellers_count'] = ProductScan::PRODUCT_LIMIT;
+		update_option( AgentReadiness::REPORT_OPTION, $stored );
+		$this->assertSame(
+			sprintf( 'Product checks covered %s of your 8,400 products: your bestsellers. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['checked_note'],
+			'A scan filled by bestsellers does not claim recently changed products were checked'
+		);
+		$this->assertSame(
+			sprintf( 'Based on your %s bestsellers.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['overview']['based_on']
 		);
 	}
 
@@ -2361,7 +2493,6 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 * A fresh settings page.
 	 */
 	private function page(): AgenticCommerceSettingsPage {
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		delete_option( 'woocommerce_feature_ucp_enabled' );
 		$this->sut->handle_init();
 		$pages = $this->sut->handle_woocommerce_get_settings_pages( array() );
