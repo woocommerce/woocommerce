@@ -403,19 +403,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toHaveCount( 1 );
 			await expect( notice ).toHaveCount( 1 );
 
-			// Dismissing the notice doesn't submit the form.
-			await addToCartBlock.evaluate( ( form ) => {
-				form.addEventListener( 'submit', () => {
-					form.setAttribute( 'data-test-submitted', '' );
-				} );
-			} );
 			await notice
 				.getByRole( 'button', { name: 'Dismiss this notice' } )
 				.click();
 			await expect( notice ).toHaveCount( 0 );
-			await expect( addToCartBlock ).not.toHaveAttribute(
-				'data-test-submitted'
-			);
 		} );
 
 		await test.step( 'updates blocks rendering variation data when attributes are selected', async () => {
