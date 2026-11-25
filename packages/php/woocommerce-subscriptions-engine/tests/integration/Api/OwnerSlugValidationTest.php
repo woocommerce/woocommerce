@@ -135,6 +135,16 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 		if ( 'Plans::delete_meta' === $entry ) {
 			Plans::add_meta( $this->plan_id, self::OWNER, 'note', 'x' );
 		}
+		if ( 'Contracts::delete_history' === $entry ) {
+			Contracts::add_history_entry(
+				$this->contract_id,
+				array(
+					'extension_slug' => self::OWNER,
+					'type'           => 'note',
+				),
+				$this->lock
+			);
+		}
 
 		$result = $this->call( $entry, self::OWNER );
 
@@ -164,6 +174,9 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 			case 'Contracts::add_history_entry':
 				$this->assertInstanceOf( HistoryEntryView::class, $result );
 				$this->assertSame( $this->contract_id, $result->get_contract_id() );
+				return;
+			case 'Contracts::delete_history':
+				$this->assertSame( 1, $result );
 				return;
 			case 'Contracts::list_for_customer':
 				$this->assertSame( array( $this->contract_id ), self::get_ids( $result ) );
@@ -203,6 +216,7 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 			'Contracts::update_meta',
 			'Contracts::delete_meta',
 			'Contracts::add_history_entry',
+			'Contracts::delete_history',
 			'Contracts::list_for_customer',
 			'Plans::create',
 			'Plans::update',
@@ -301,6 +315,8 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 					),
 					$this->lock
 				);
+			case 'Contracts::delete_history':
+				return Contracts::delete_history( $this->contract_id, array( 'extension_slug' => $slug ), $this->lock );
 			case 'Contracts::list_for_customer':
 				return Contracts::list_for_customer( self::CUSTOMER_ID, 20, 0, array( 'extension_slug' => $slug ) );
 			case 'Plans::create':

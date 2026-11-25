@@ -2152,6 +2152,35 @@ final class ContractRepository {
 		return $entries;
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
+	/**
+	 * Delete every history entry of a contract in one statement, fenced by the caller's lock like the
+	 * other child writes. The lock is the contract's existence and owner check.
+	 *
+	 * @param int          $contract_id Contract id.
+	 * @param ContractLock $lock        The caller's lock on this contract.
+	 * @return int The number of entries deleted; 0 when the contract has none.
+	 * @throws \InvalidArgumentException If the lock is for another contract.
+	 * @throws ContractLockedException If the lock was lost.
+	 * @throws \RuntimeException If the delete fails.
+	 */
+	public function delete_history( int $contract_id, ContractLock $lock ): int {
+		global $wpdb;
+
+		$this->fence_child_write( $lock, $contract_id );
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_HISTORY );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$deleted = $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE contract_id = %d", $contract_id ) );
+		if ( false === $deleted ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to delete the history of contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
+
+		return (int) $deleted;
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
 	/**
 	 * All cycles linked to `$order_id`, across kinds and contracts. `order_id` is a
 	 * non-1:1 reference (an aggregate order may serve many cycles), so this returns

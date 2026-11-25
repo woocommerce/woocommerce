@@ -396,6 +396,119 @@ class ContractHistoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox delete_history() deletes every entry of the contract in one statement and returns the count; other contracts keep theirs.
+	 */
+	public function test_delete_history_deletes_the_contracts_entries(): void {
+		$other = $this->insert_released( Contract::create( array( 'extension_slug' => self::OWNER ) ) );
+		foreach ( array( 'a', 'b', 'c' ) as $type ) {
+			$this->sut->add_history_entry( $this->entry( array( 'type' => $type ) ), self::OWNER );
+		}
+		$this->sut->add_history_entry( $this->entry( array( 'contract_id' => $other ) ), self::OWNER );
+		$lock = $this->take_lock( $this->id, 'erase' );
+
+		$deleted    = null;
+		$statements = $this->statements_during(
+			function () use ( &$deleted, $lock ): void {
+				$deleted = $this->sut->delete_history( $this->id, $lock );
+			}
+		);
+
+		$this->assertSame( 3, $deleted );
+		$this->assertSame( array(), $this->sut->find_history( $this->id ) );
+		$this->assertCount( 1, $this->sut->find_history( $other ) );
+		$this->assertCount( 1, $statements, 'A trusted lock costs no query, so the delete is the only statement.' );
+		$this->assertMatchesRegularExpression( '/^DELETE FROM \S*contract_history WHERE contract_id = ' . $this->id . '$/', $statements[0] );
+	}
+
+	/**
+	 * @testdox delete_history() returns 0 for a contract with no entries.
+	 */
+	public function test_delete_history_of_an_empty_history_returns_zero(): void {
+		$this->assertSame( 0, $this->sut->delete_history( $this->id, $this->take_lock( $this->id, 'erase' ) ) );
+	}
+
+	/**
+	 * @testdox delete_history() refuses a lock for another contract and deletes nothing.
+	 */
+	public function test_delete_history_refuses_a_lock_for_another_contract(): void {
+		$other = $this->insert_released( Contract::create( array( 'extension_slug' => self::OWNER ) ) );
+		$this->sut->add_history_entry( $this->entry(), self::OWNER );
+
+		try {
+			$this->sut->delete_history( $this->id, $this->take_lock( $other, 'erase' ) );
+			$this->fail( 'Expected the lock for another contract to be refused.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertStringContainsString( "not contract {$this->id}", $e->getMessage() );
+		}
+
+		$this->assertCount( 1, $this->sut->find_history( $this->id ) );
+	}
+
+	/**
+	 * @testdox delete_history() with a lost lock throws ContractLockedException and deletes nothing.
+	 */
+	public function test_delete_history_with_a_lost_lock_deletes_nothing(): void {
+		$this->sut->add_history_entry( $this->entry(), self::OWNER );
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$old = $this->sut->acquire_lock( $this->id, self::OWNER, 'erase' );
+		$this->assertInstanceOf( ContractLock::class, $old );
+
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $this->id, self::OWNER, 'cancel' ) );
+		$this->age_lock_trust( $old );
+
+		try {
+			$this->sut->delete_history( $this->id, $old );
+			$this->fail( 'Expected the lost lock to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'cancel', $e->get_operation() );
+		}
+
+		$this->assertCount( 1, $this->sut->find_history( $this->id ) );
+	}
+
+	/**
+	 * @testdox delete_history() throws RuntimeException on a failed delete, opens no transaction and deletes nothing.
+	 */
+	public function test_delete_history_throws_on_a_failed_delete(): void {
+		$this->sut->add_history_entry( $this->entry(), self::OWNER );
+		$lock = $this->take_lock( $this->id, 'erase' );
+
+		$this->fail_next_query( '/^DELETE FROM \S*contract_history/' );
+		$statements = $this->statements_during(
+			function () use ( $lock ): void {
+				try {
+					$this->sut->delete_history( $this->id, $lock );
+					$this->fail( 'Expected the failed delete to throw.' );
+				} catch ( RuntimeException $e ) {
+					$this->assertStringContainsString( "Failed to delete the history of contract {$this->id}", $e->getMessage() );
+				}
+			}
+		);
+
+		foreach ( $statements as $statement ) {
+			$this->assertSame( 0, preg_match( '/^\s*(START TRANSACTION|BEGIN|COMMIT|ROLLBACK)\b/i', $statement ), 'The delete opens no transaction.' );
+		}
+		$this->assertCount( 1, $this->sut->find_history( $this->id ) );
+	}
+
+	/**
+	 * @testdox After delete_history(), new entries are written and paged, and a freed creation key can be written again.
+	 */
+	public function test_a_deleted_history_takes_new_entries_and_frees_creation_keys(): void {
+		$this->sut->add_history_entry( $this->entry( array( 'creation_key' => 'renewal-paid-7' ) ), self::OWNER );
+		$lock = $this->take_lock( $this->id, 'erase' );
+		$this->assertSame( 1, $this->sut->delete_history( $this->id, $lock ) );
+
+		$this->assertInstanceOf( HistoryEntry::class, $this->sut->add_history_entry( $this->entry( array( 'type' => 'personal-data-removed' ) ), self::OWNER, $lock ) );
+		$this->assertInstanceOf( HistoryEntry::class, $this->sut->add_history_entry( $this->entry( array( 'creation_key' => 'renewal-paid-7' ) ), self::OWNER ) );
+
+		$this->assertSame( array( 'held', 'personal-data-removed' ), $this->types( $this->sut->find_history( $this->id ) ) );
+		$this->assertSame( array( 'held' ), $this->types( $this->sut->find_history( $this->id, 1, 0 ) ) );
+		$this->assertSame( array( 'personal-data-removed' ), $this->types( $this->sut->find_history( $this->id, 1, 1 ) ) );
+	}
+
+	/**
 	 * A new entry on the fixture contract.
 	 *
 	 * @param array<string, mixed> $overrides Entry attributes to replace.
