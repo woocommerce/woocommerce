@@ -9,7 +9,7 @@
 		"security": {
 			"file": ".ai/review/personas/security.md",
 			"engine": "codex",
-			"model": "gpt-6-astra",
+			"model": "gpt-6.2-astra",
 			"triggers": [
 				"**/*.php",
 				"**/*.js",

@@ -87,8 +87,7 @@ download directories.
 Use `wp_safe_remote_get()` / `wp_safe_remote_post()` or `reject_unsafe_urls`.
 
 **Sensitive data.** Payment tokens, API keys, order keys, and customer PII must not land in logs
-(`wc_get_logger()`), error messages, or responses that don't need them. Report the location and kind,
-never the value.
+(`wc_get_logger()`), error messages, or responses that don't need them.
 
 ## Not findings
 
