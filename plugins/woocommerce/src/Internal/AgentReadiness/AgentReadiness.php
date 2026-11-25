@@ -263,7 +263,7 @@ class AgentReadiness {
 				return $this->product_sales->more_top_products( $since, $offset, $limit );
 			}
 			: null;
-		$ids          = $product_scan->start( $best_sellers, $more );
+		$ids          = $product_scan->start_best_sellers_first( $best_sellers, $more );
 		// Only the best seller's id is kept, for the page checks at finish.
 		$best_seller = (int) ( $best_sellers[0] ?? 0 );
 		return array(

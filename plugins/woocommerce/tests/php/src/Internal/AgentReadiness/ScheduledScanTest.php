@@ -244,7 +244,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		$by_change = ( new ProductScan() )->start();
 		$sellers   = array( $ids[1], $hidden->get_id(), $ids[0] );
 
-		$this->assertSame( $by_change, ( new ProductScan() )->start( $sellers ), 'Every product is checked, so the order stays' );
+		$this->assertSame( $by_change, ( new ProductScan() )->start_best_sellers_first( $sellers ), 'Every product is checked, so the order stays' );
 
 		$recent = range( 900001, 900001 + ProductScan::PRODUCT_LIMIT );
 		$many   = static function ( $posts, $query ) use ( $recent ) {
@@ -253,10 +253,10 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		add_filter( 'posts_pre_query', $many, 10, 2 );
 		try {
 			$scan   = new ProductScan();
-			$listed = $scan->start( $sellers );
+			$listed = $scan->start_best_sellers_first( $sellers );
 			$plain  = ( new ProductScan() )->start();
 			$unseen = new ProductScan();
-			$unseen->start( array( $hidden->get_id() ) );
+			$unseen->start_best_sellers_first( array( $hidden->get_id() ) );
 		} finally {
 			remove_filter( 'posts_pre_query', $many, 10 );
 		}
@@ -290,7 +290,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		add_filter( 'posts_pre_query', $many, 10, 2 );
 		try {
 			$scan   = new ProductScan();
-			$listed = $scan->start( $first, $more );
+			$listed = $scan->start_best_sellers_first( $first, $more );
 		} finally {
 			remove_filter( 'posts_pre_query', $many, 10 );
 		}

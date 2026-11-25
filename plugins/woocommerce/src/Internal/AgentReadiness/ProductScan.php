@@ -173,10 +173,23 @@ class ProductScan {
 	}
 
 	/**
-	 * Clear the totals, count the catalog and list the products to test, up to PRODUCT_LIMIT: newest
-	 * change first. A catalog over the limit starts with $best_sellers, since a saved product is checked
-	 * again on save and one nobody edits would never be. The list is read once, so a scan in batches
-	 * tests the same products a single pass would, even when products change between batches.
+	 * Clear the totals, count the catalog and list the products to test: newest change first,
+	 * up to PRODUCT_LIMIT. The list is read once, so a scan in batches tests the same products
+	 * a single pass would, even when products change between batches.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return array<int, int> Product ids.
+	 *
+	 * @throws \RuntimeException When the product list query fails.
+	 */
+	public function start(): array {
+		return $this->start_best_sellers_first( array() );
+	}
+
+	/**
+	 * Same list as start(), with bestsellers ahead of the newest changes when the catalog is over the limit.
+	 * A saved product is checked again on save; one nobody edits would never be.
 	 *
 	 * @since 11.4.0
 	 *
@@ -186,7 +199,7 @@ class ProductScan {
 	 *
 	 * @throws \RuntimeException When the product list query fails.
 	 */
-	public function start( array $best_sellers = array(), ?callable $more_best_sellers = null ): array {
+	public function start_best_sellers_first( array $best_sellers, ?callable $more_best_sellers = null ): array {
 		$this->results             = array();
 		$this->products            = 0;
 		$this->statuses            = array();
