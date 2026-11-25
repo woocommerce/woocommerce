@@ -625,6 +625,8 @@ class AddToCartWithOptions extends AbstractBlock {
 										// Add the `is-layout-flow` class so inner elements automatically get the
 										// default vertical margin from the theme. That's especially useful for
 										// elements added by extensions like express payment method buttons.
+										// phpcs:ignore Generic.Commenting.Todo.TaskFound
+										// @todo Now that the form is the block wrapper, use `supports.layout` in block.json instead.
 										'is-layout-flow',
 									)
 								)
