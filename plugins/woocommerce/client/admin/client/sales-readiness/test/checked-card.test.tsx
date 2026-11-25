@@ -132,11 +132,27 @@ describe( 'CheckedCard', () => {
 			/>
 		);
 		const toggle = screen.getByRole( 'checkbox', {
-			name: 'Check your store every day',
+			name: 'Automatically run checks daily',
 		} );
 		expect( toggle ).toBeChecked();
+		expect( screen.queryByText( /select Check again above/ ) ).toBeNull();
 		fireEvent.click( toggle );
 		expect( onDailyChecks ).toHaveBeenCalledWith( false );
+
+		rerender(
+			<CheckedCard
+				view={ { ...checked, daily_checks: false } }
+				running={ false }
+				onRun={ jest.fn() }
+				onDownloadError={ jest.fn() }
+				onDailyChecks={ onDailyChecks }
+			/>
+		);
+		expect(
+			screen.getByText(
+				'For an updated report on how well AI assistants can find and shop your store, select Check again above.'
+			)
+		).toBeInTheDocument();
 
 		rerender(
 			<CheckedCard
@@ -150,7 +166,7 @@ describe( 'CheckedCard', () => {
 		);
 		expect(
 			screen.getByRole( 'checkbox', {
-				name: 'Check your store every day',
+				name: 'Automatically run checks daily',
 			} )
 		).toBeDisabled();
 
@@ -165,7 +181,7 @@ describe( 'CheckedCard', () => {
 		);
 		expect(
 			screen.queryByRole( 'checkbox', {
-				name: 'Check your store every day',
+				name: 'Automatically run checks daily',
 			} )
 		).toBeNull();
 	} );

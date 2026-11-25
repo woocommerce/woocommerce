@@ -111,9 +111,17 @@ export const CheckedCard = ( {
 						<ToggleControl
 							__nextHasNoMarginBottom
 							label={ __(
-								'Check your store every day',
+								'Automatically run checks daily',
 								'woocommerce'
 							) }
+							help={
+								view.daily_checks
+									? undefined
+									: __(
+											'For an updated report on how well AI assistants can find and shop your store, select Check again above.',
+											'woocommerce'
+										)
+							}
 							checked={ view.daily_checks }
 							disabled={ savingDailyChecks }
 							onChange={ onDailyChecks }
