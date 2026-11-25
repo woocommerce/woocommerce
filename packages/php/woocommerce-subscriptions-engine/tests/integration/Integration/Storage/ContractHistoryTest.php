@@ -158,26 +158,31 @@ class ContractHistoryTest extends EngineIntegrationTestCase {
 	 * @testdox With a lock, a lock for another contract or another extension is refused and nothing is written.
 	 */
 	public function test_a_lock_for_another_contract_or_extension_is_refused(): void {
-		$other      = $this->insert_released( Contract::create( array( 'extension_slug' => 'another-extension' ) ) );
-		$other_lock = $this->sut->acquire_lock( $other, 'another-extension', 'hold' );
-		$this->assertInstanceOf( ContractLock::class, $other_lock );
+		$sibling      = $this->insert_released( Contract::create( array( 'extension_slug' => self::OWNER ) ) );
+		$sibling_lock = $this->sut->acquire_lock( $sibling, self::OWNER, 'hold' );
+		$this->assertInstanceOf( ContractLock::class, $sibling_lock );
 
 		try {
-			$this->sut->add_history_entry( $this->entry(), self::OWNER, $other_lock );
+			$this->sut->add_history_entry( $this->entry(), self::OWNER, $sibling_lock );
 			$this->fail( 'Expected a lock for another contract to be refused.' );
 		} catch ( InvalidArgumentException $e ) {
-			$this->assertStringContainsString( "The lock belongs to contract {$other}, not contract {$this->id}.", $e->getMessage() );
+			$this->assertStringContainsString( "The lock belongs to contract {$sibling}, not contract {$this->id}.", $e->getMessage() );
 		}
 
+		$foreign      = $this->insert_released( Contract::create( array( 'extension_slug' => 'another-extension' ) ) );
+		$foreign_lock = $this->sut->acquire_lock( $foreign, 'another-extension', 'hold' );
+		$this->assertInstanceOf( ContractLock::class, $foreign_lock );
+
 		try {
-			$this->sut->add_history_entry( $this->entry( array( 'contract_id' => $other ) ), self::OWNER, $other_lock );
+			$this->sut->add_history_entry( $this->entry( array( 'contract_id' => $foreign ) ), self::OWNER, $foreign_lock );
 			$this->fail( 'Expected a lock for a contract of another extension to be refused.' );
 		} catch ( InvalidArgumentException $e ) {
 			$this->assertStringContainsString( 'another extension', $e->getMessage() );
 		}
 
 		$this->assertSame( array(), $this->sut->find_history( $this->id ) );
-		$this->assertSame( array(), $this->sut->find_history( $other ) );
+		$this->assertSame( array(), $this->sut->find_history( $sibling ) );
+		$this->assertSame( array(), $this->sut->find_history( $foreign ) );
 	}
 
 	/**
@@ -262,14 +267,78 @@ class ContractHistoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A failed insert throws RuntimeException.
+	 * @testdox A failed insert throws RuntimeException and stores nothing ($mode).
+	 * @dataProvider provide_failed_insert_modes
+	 *
+	 * @param string $mode     Case name.
+	 * @param bool   $locked   Whether the insert is made with the caller's lock.
+	 * @param bool   $with_key Whether the entry carries a creation key.
 	 */
-	public function test_a_failed_insert_throws(): void {
-		$this->fail_next_query( '/^INSERT INTO \S*contract_history/' );
+	public function test_a_failed_insert_throws( string $mode, bool $locked, bool $with_key ): void {
+		$lock = null;
+		if ( $locked ) {
+			$lock = $this->sut->acquire_lock( $this->id, self::OWNER, 'renew' );
+			$this->assertInstanceOf( ContractLock::class, $lock );
+		}
+		$entry = $this->entry( $with_key ? array( 'creation_key' => 'renewal-paid-9' ) : array() );
 
-		$this->expectException( RuntimeException::class );
-		$this->expectExceptionMessage( "Failed to add a history entry to contract {$this->id}" );
-		$this->sut->add_history_entry( $this->entry(), self::OWNER );
+		$this->fail_next_query( '/^INSERT INTO \S*contract_history/' );
+		try {
+			$this->sut->add_history_entry( $entry, self::OWNER, $lock );
+			$this->fail( "Expected the failed insert to throw ({$mode})." );
+		} catch ( ContractLockedException $e ) {
+			$this->fail( "The lock is still held, so the failure is not a lock conflict ({$mode})." );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( "Failed to add a history entry to contract {$this->id}", $e->getMessage() );
+		}
+
+		$this->assertSame( array(), $this->sut->find_history( $this->id ) );
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: bool, 2: bool}>
+	 */
+	public function provide_failed_insert_modes(): array {
+		return array(
+			'unlocked, no key' => array( 'unlocked, no key', false, false ),
+			'unlocked, keyed'  => array( 'unlocked, keyed', false, true ),
+			'locked, no key'   => array( 'locked, no key', true, false ),
+			'locked, keyed'    => array( 'locked, keyed', true, true ),
+		);
+	}
+
+	/**
+	 * @testdox A failed insert made with a lock lost meanwhile throws ContractLockedException.
+	 */
+	public function test_a_failed_insert_with_a_lost_lock_is_a_lock_conflict(): void {
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$old = $this->sut->acquire_lock( $this->id, self::OWNER, 'renew' );
+		$this->assertInstanceOf( ContractLock::class, $old );
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $this->id, self::OWNER, 'cancel' ) );
+
+		// The old lock is still inside its trusted window, so the fence lets the insert run.
+		$this->fail_next_query( '/^INSERT INTO \S*contract_history/' );
+		try {
+			$this->sut->add_history_entry( $this->entry(), self::OWNER, $old );
+			$this->fail( 'Expected the lost lock to be reported.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'cancel', $e->get_operation() );
+		}
+
+		$this->assertSame( array(), $this->sut->find_history( $this->id ) );
+	}
+
+	/**
+	 * @testdox The creation-key fallback read finds a key only on its own contract and matches it exactly.
+	 */
+	public function test_creation_key_fallback_read(): void {
+		$other = $this->insert_released( Contract::create( array( 'extension_slug' => self::OWNER ) ) );
+		$this->sut->add_history_entry( $this->entry( array( 'creation_key' => 'renewal-paid-7' ) ), self::OWNER );
+
+		$this->assertTrue( $this->call_private( $this->sut, 'has_history_creation_key', $this->id, 'renewal-paid-7' ) );
+		$this->assertFalse( $this->call_private( $this->sut, 'has_history_creation_key', $this->id, 'RENEWAL-PAID-7' ) );
+		$this->assertFalse( $this->call_private( $this->sut, 'has_history_creation_key', $other, 'renewal-paid-7' ) );
 	}
 
 	/**

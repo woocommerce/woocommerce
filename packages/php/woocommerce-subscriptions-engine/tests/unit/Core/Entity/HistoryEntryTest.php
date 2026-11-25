@@ -45,7 +45,7 @@ class HistoryEntryTest extends TestCase {
 		$this->assertSame( 7, $entry->get_contract_id() );
 		$this->assertSame( 3, $entry->get_cycle_id() );
 		$this->assertSame( 'renewal-paid', $entry->get_type() );
-		$this->assertSame( 'renewal-paid-3', $entry->get_creation_key() );
+		$this->assertSame( 'renewal-paid-3', $entry->to_storage()['creation_key'] );
 		$this->assertSame( array( 'actor' => array( 'role' => 'system' ) ), $entry->get_payload() );
 	}
 
@@ -154,11 +154,11 @@ class HistoryEntryTest extends TestCase {
 			)
 		);
 
-		$this->assertSame( 'created', $entry->get_creation_key() );
+		$this->assertSame( 'created', $entry->to_storage()['creation_key'] );
 	}
 
 	/**
-	 * @testdox The payload is stored as JSON and decoded on hydration.
+	 * @testdox The payload leaves to_storage() as an array and is decoded from JSON on hydration.
 	 */
 	public function test_payload_round_trips_through_storage(): void {
 		$payload = array(
@@ -174,8 +174,9 @@ class HistoryEntryTest extends TestCase {
 		);
 
 		$stored = $entry->to_storage();
-		$this->assertIsString( $stored['payload'] );
+		$this->assertSame( $payload, $stored['payload'] );
 
+		$stored['payload']          = json_encode( $payload ); // phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 		$stored['id']               = 5;
 		$stored['date_created_gmt'] = '2026-01-01 00:00:00';
 		$hydrated                   = HistoryEntry::from_storage( $stored );

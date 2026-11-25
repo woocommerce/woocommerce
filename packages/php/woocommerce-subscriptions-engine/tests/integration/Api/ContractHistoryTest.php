@@ -221,7 +221,7 @@ class ContractHistoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox get_history() pages newest first with limit and offset, across extensions.
+	 * @testdox get_history() pages newest first with limit and offset.
 	 */
 	public function test_get_history_pages_newest_first(): void {
 		foreach ( array( 'a', 'b', 'c' ) as $type ) {
@@ -244,6 +244,30 @@ class ContractHistoryTest extends EngineIntegrationTestCase {
 		);
 		$this->assertSame( array( 'b' ), $this->types( $page ) );
 		$this->assertSame( array(), Contracts::get_history( 999999 ) );
+	}
+
+	/**
+	 * @testdox get_history() takes no owner: any caller reads the history of another extension's contract.
+	 */
+	public function test_get_history_reads_another_extensions_contract(): void {
+		$other = $this->create_released( array( 'extension_slug' => 'another-extension' ) )->get_id();
+		Contracts::add_history_entry(
+			$other,
+			array(
+				'extension_slug' => 'another-extension',
+				'type'           => 'note',
+			)
+		);
+		Contracts::add_history_entry(
+			$this->id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'type'           => 'held',
+			)
+		);
+
+		$this->assertSame( array( 'note' ), $this->types( Contracts::get_history( $other ) ) );
+		$this->assertSame( array( 'held' ), $this->types( Contracts::get_history( $this->id ) ), 'Each contract reads only its own entries.' );
 	}
 
 	/**

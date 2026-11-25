@@ -2011,9 +2011,8 @@ final class ContractRepository {
 		$contract_id = $entry->get_contract_id();
 		$cycle_id    = $entry->get_cycle_id();
 		if ( null !== $lock ) {
-			self::assert_lock_for( $lock, $contract_id );
 			self::assert_lock_owner( $lock, $extension_slug );
-			$this->fence_children( $lock );
+			$this->fence_child_write( $lock, $contract_id );
 		}
 
 		$history   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_HISTORY );
@@ -2021,13 +2020,15 @@ final class ContractRepository {
 		$cycles    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 		$columns   = $entry->to_storage();
 		$now       = current_time( 'mysql', true );
+		// HistoryEntry::create() refused a payload that cannot be encoded, so this encode succeeds.
+		$payload = null === $columns['payload'] ? null : wp_json_encode( $columns['payload'] );
 
 		$select = array( 'c.id', null === $cycle_id ? 'NULL' : 'y.id', '%s' );
 		$values = array( $columns['type'] );
-		foreach ( array( 'creation_key', 'payload' ) as $column ) {
-			$select[] = null === $columns[ $column ] ? 'NULL' : '%s';
-			if ( null !== $columns[ $column ] ) {
-				$values[] = $columns[ $column ];
+		foreach ( array( $columns['creation_key'], $payload ) as $value ) {
+			$select[] = null === $value ? 'NULL' : '%s';
+			if ( null !== $value ) {
+				$values[] = $value;
 			}
 		}
 		$select[] = '%s';
@@ -2073,7 +2074,7 @@ final class ContractRepository {
 			throw new \RuntimeException( esc_html( sprintf( 'Failed to add a history entry to contract %d: %s', $contract_id, $db_error ) ) );
 		}
 		if ( 1 !== (int) $inserted ) {
-			self::throw_history_target_not_found( $contract_id, $extension_slug, $cycle_id, null !== $lock );
+			self::throw_history_target_not_found( $contract_id, $extension_slug, $cycle_id );
 		}
 
 		$columns['id']               = (int) $wpdb->insert_id;
@@ -2103,22 +2104,18 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Refuse a history insert that selected no row. With a lock the contract exists (the lock is its
-	 * existence check), so the cycle is not one of its cycles; without one, either may be missing.
+	 * Refuse a history insert that selected no row: the contract of that extension is missing or,
+	 * when a cycle is named, the cycle may not be one of its cycles.
 	 *
 	 * @param int      $contract_id    Contract id.
 	 * @param string   $extension_slug The expected owning extension.
 	 * @param int|null $cycle_id       The entry's cycle id, or null.
-	 * @param bool     $locked         Whether the insert was made with the caller's lock.
 	 * @return never
 	 * @throws \InvalidArgumentException Always.
 	 */
-	private static function throw_history_target_not_found( int $contract_id, string $extension_slug, ?int $cycle_id, bool $locked ): void {
+	private static function throw_history_target_not_found( int $contract_id, string $extension_slug, ?int $cycle_id ): void {
 		if ( null === $cycle_id ) {
 			self::throw_not_found( $contract_id, $extension_slug );
-		}
-		if ( $locked ) {
-			throw new \InvalidArgumentException( esc_html( sprintf( 'Cycle %d is not a cycle of contract %d.', $cycle_id, $contract_id ) ) );
 		}
 		throw new \InvalidArgumentException( esc_html( sprintf( 'No contract of extension "%s" has id %d, or cycle %d is not one of its cycles.', $extension_slug, $contract_id, $cycle_id ) ) );
 	}

@@ -168,13 +168,6 @@ final class HistoryEntry {
 	}
 
 	/**
-	 * Creation key, or null.
-	 */
-	public function get_creation_key(): ?string {
-		return $this->creation_key;
-	}
-
-	/**
 	 * Payload, or null.
 	 *
 	 * @return array<int|string, mixed>|null
@@ -191,20 +184,18 @@ final class HistoryEntry {
 	}
 
 	/**
-	 * The stored columns, the payload encoded as JSON (null stays null).
+	 * The stored columns. The payload stays an array: the repository encodes it as JSON.
 	 *
-	 * @return array{id: int|null, contract_id: int, cycle_id: int|null, type: string, creation_key: string|null, payload: string|null, date_created_gmt: string|null}
+	 * @return array{id: int|null, contract_id: int, cycle_id: int|null, type: string, creation_key: string|null, payload: array<int|string, mixed>|null, date_created_gmt: string|null}
 	 */
 	public function to_storage(): array {
-		$payload = null === $this->payload ? null : self::encode_payload( $this->payload );
-
 		return array(
 			'id'               => $this->id,
 			'contract_id'      => $this->contract_id,
 			'cycle_id'         => $this->cycle_id,
 			'type'             => $this->type,
 			'creation_key'     => $this->creation_key,
-			'payload'          => false === $payload ? null : $payload,
+			'payload'          => $this->payload,
 			'date_created_gmt' => $this->date_created_gmt,
 		);
 	}
@@ -251,21 +242,11 @@ final class HistoryEntry {
 		if ( ! is_array( $payload ) ) {
 			return new InvalidInputException( ValidationErrorCode::INVALID_TYPE, 'payload', 'HistoryEntry: payload must be null or an array.', array( 'type' => 'object' ) );
 		}
-		if ( false === self::encode_payload( $payload ) ) {
+		// Core is WordPress-free, so PHP's encoder checks it, not wp_json_encode().
+		if ( false === json_encode( $payload ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 			return new InvalidInputException( ValidationErrorCode::INVALID_VALUE, 'payload', 'HistoryEntry: payload cannot be encoded as JSON.' );
 		}
 
 		return null;
-	}
-
-	/**
-	 * Encode a payload as JSON, or false when it cannot be encoded.
-	 *
-	 * @param array<int|string, mixed> $payload Payload.
-	 * @return string|false
-	 */
-	private static function encode_payload( array $payload ) {
-		// Core is WordPress-free, so PHP's encoder, not wp_json_encode().
-		return json_encode( $payload ); // phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 	}
 }
