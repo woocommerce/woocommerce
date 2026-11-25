@@ -26,6 +26,12 @@ class ProductScan {
 
 	public const PRODUCT_LIMIT = 5000;
 
+	/**
+	 * Sales pages read when earlier pages are products the scan does not check.
+	 * Each page repeats the aggregation, so a catalog of other product types stays bounded.
+	 */
+	private const SELLER_PAGES = 10;
+
 	public const SUPPORTED_TYPES = array( 'simple', 'variable' );
 
 	/**
@@ -130,6 +136,13 @@ class ProductScan {
 	private bool $best_sellers_first = false;
 
 	/**
+	 * How many of the products start() returns are bestsellers it checked.
+	 *
+	 * @var int
+	 */
+	private int $bestsellers_count = 0;
+
+	/**
 	 * Called with each product id and its failures during test(). Cleared when that batch ends.
 	 *
 	 * @var callable|null
@@ -160,19 +173,33 @@ class ProductScan {
 	}
 
 	/**
-	 * Clear the totals, count the catalog and list the products to test, up to PRODUCT_LIMIT: newest
-	 * change first. A catalog over the limit starts with $best_sellers, since a saved product is checked
-	 * again on save and one nobody edits would never be. The list is read once, so a scan in batches
-	 * tests the same products a single pass would, even when products change between batches.
+	 * Clear the totals, count the catalog and list the products to test: newest change first,
+	 * up to PRODUCT_LIMIT. The list is read once, so a scan in batches tests the same products
+	 * a single pass would, even when products change between batches.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param array<int, int> $best_sellers Product ids with the most sales first, or none to go by last change only.
 	 * @return array<int, int> Product ids.
 	 *
 	 * @throws \RuntimeException When the product list query fails.
 	 */
-	public function start( array $best_sellers = array() ): array {
+	public function start(): array {
+		return $this->start_best_sellers_first( array() );
+	}
+
+	/**
+	 * Same list as start(), with bestsellers ahead of the newest changes when the catalog is over the limit.
+	 * A saved product is checked again on save; one nobody edits would never be.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array<int, int> $best_sellers       Product ids with the most sales first, or none to go by last change only.
+	 * @param callable|null   $more_best_sellers Next page `(int $offset, int $limit): array<int, int>`, when that list may continue.
+	 * @return array<int, int> Product ids.
+	 *
+	 * @throws \RuntimeException When the product list query fails.
+	 */
+	public function start_best_sellers_first( array $best_sellers, ?callable $more_best_sellers = null ): array {
 		$this->results             = array();
 		$this->products            = 0;
 		$this->statuses            = array();
@@ -192,20 +219,87 @@ class ProductScan {
 		);
 		$this->truncated          = count( $product_ids ) > self::PRODUCT_LIMIT;
 		$this->best_sellers_first = false;
-		$best_sellers             = array_slice( array_values( array_filter( array_map( 'intval', $best_sellers ) ) ), 0, self::PRODUCT_LIMIT );
-		if ( $this->truncated && array() !== $best_sellers ) {
-			// The same query, so a best seller that is hidden, unpublished or of another type is left out.
-			$listed                   = self::list_products(
-				array(
-					'posts_per_page' => count( $best_sellers ),
-					'post__in'       => $best_sellers,
-					'orderby'        => 'post__in',
-				)
-			);
-			$this->best_sellers_first = array() !== $listed;
-			$product_ids              = array_values( array_unique( array_merge( $listed, $product_ids ) ) );
+		$this->bestsellers_count  = 0;
+		$eligible                 = $this->truncated ? $this->eligible_sellers( $best_sellers, $more_best_sellers ) : array();
+		if ( array() !== $eligible ) {
+			$this->best_sellers_first = true;
+			$this->bestsellers_count  = count( $eligible );
+			$product_ids              = array_values( array_unique( array_merge( $eligible, $product_ids ) ) );
 		}
 		return array_slice( $product_ids, 0, self::PRODUCT_LIMIT );
+	}
+
+	/**
+	 * Bestsellers the scan checks, most sales first, reading further pages while earlier ones
+	 * are hidden, unpublished or another type. Stops at PRODUCT_LIMIT.
+	 *
+	 * @param array<int, int> $best_sellers       First page, most sales first.
+	 * @param callable|null   $more_best_sellers Next page, or null when $best_sellers is the whole list.
+	 * @return array<int, int>
+	 *
+	 * @throws \RuntimeException When a product list query fails.
+	 */
+	private function eligible_sellers( array $best_sellers, ?callable $more_best_sellers ): array {
+		$eligible = array();
+		$seen     = array();
+		$page     = self::positive_ids( $best_sellers );
+		$offset   = 0;
+		$pages    = 0;
+		$room     = self::PRODUCT_LIMIT;
+		while ( array() !== $page && $pages < self::SELLER_PAGES && $room > 0 ) {
+			++$pages;
+			$page    = array_slice( $page, 0, self::PRODUCT_LIMIT );
+			$offset += count( $page );
+			foreach ( self::eligible_ids( $page ) as $id ) {
+				if ( isset( $seen[ $id ] ) ) {
+					continue;
+				}
+				$seen[ $id ] = true;
+				$eligible[]  = $id;
+				--$room;
+				if ( 0 === $room ) {
+					break;
+				}
+			}
+			if ( 0 === $room || count( $page ) < self::PRODUCT_LIMIT || ! is_callable( $more_best_sellers ) ) {
+				break;
+			}
+			$next = $more_best_sellers( $offset, self::PRODUCT_LIMIT );
+			$page = self::positive_ids( is_array( $next ) ? $next : array() );
+		}
+		return $eligible;
+	}
+
+	/**
+	 * Ids from a sales page that the scan checks, in that page's order.
+	 *
+	 * @param array<int, int> $ids Product ids, most sales first.
+	 * @return array<int, int>
+	 *
+	 * @throws \RuntimeException When the product list query fails.
+	 */
+	private static function eligible_ids( array $ids ): array {
+		if ( array() === $ids ) {
+			return array();
+		}
+		// The same query as the catalog list, so a hidden, unpublished or other type is left out.
+		return self::list_products(
+			array(
+				'posts_per_page' => count( $ids ),
+				'post__in'       => $ids,
+				'orderby'        => 'post__in',
+			)
+		);
+	}
+
+	/**
+	 * Product ids, dropping empties. A sales row can name a product id of 0.
+	 *
+	 * @param array<mixed> $ids Ids from the sales query or its next page.
+	 * @return array<int, int>
+	 */
+	private static function positive_ids( array $ids ): array {
+		return array_values( array_filter( array_map( 'intval', $ids ) ) );
 	}
 
 	/**
@@ -597,6 +691,15 @@ class ProductScan {
 	 */
 	public function best_sellers_first(): bool {
 		return $this->best_sellers_first;
+	}
+
+	/**
+	 * How many leading products are bestsellers the scan checks. PRODUCT_LIMIT when they fill the list.
+	 *
+	 * @since 11.4.0
+	 */
+	public function bestsellers_count(): int {
+		return $this->bestsellers_count;
 	}
 
 	/**

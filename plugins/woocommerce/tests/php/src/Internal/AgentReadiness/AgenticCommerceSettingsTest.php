@@ -1718,6 +1718,18 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			sprintf( 'Based on %s products: your bestsellers first, then the ones you changed most recently.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
 			$this->view()['overview']['based_on']
 		);
+
+		$stored['bestsellers_count'] = ProductScan::PRODUCT_LIMIT;
+		update_option( AgentReadiness::REPORT_OPTION, $stored );
+		$this->assertSame(
+			sprintf( 'Product checks covered %s of your 8,400 products: your bestsellers. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['checked_note'],
+			'A scan filled by bestsellers does not claim recently changed products were checked'
+		);
+		$this->assertSame(
+			sprintf( 'Based on your %s bestsellers.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['overview']['based_on']
+		);
 	}
 
 	/**
