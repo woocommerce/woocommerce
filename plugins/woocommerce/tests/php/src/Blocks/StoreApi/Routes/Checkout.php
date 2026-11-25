@@ -190,8 +190,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 */
 	protected function tearDown(): void {
 		try {
-			// wc_log_order_step()'s static state is request-scoped in production; PHPUnit keeps one process
-			// alive across tests, so end the session explicitly here to avoid bleeding into the next test.
+			// Resets wc_log_order_step()'s static state between tests.
 			wc_log_order_step( 'Test cleanup', null, true );
 
 			$this->remove_inserted_tax_rates();
@@ -7074,8 +7073,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * Failures the gateway can raise while taking payment, and whether the place-order debug
-	 * log trail should survive them for investigation or be cleared as routine.
+	 * Checkout failures and whether the debug log should survive each one.
 	 *
 	 * @return array<string, array{\Throwable, int, string, bool}>
 	 */
