@@ -1019,6 +1019,73 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return order item fields on shipping, fee and coupon lines, and list a field with object_types only on its kind of line.
+	 */
+	public function test_order_item_fields_are_returned_on_every_kind_of_line(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'order_item',
+						'namespace'     => 'test-ext',
+						'field'         => 'fee_reason',
+						'output_schema' => array( 'type' => 'string' ),
+						'object_types'  => array( 'fee' ),
+						'get_callback'  => static fn() => 'packaging',
+					)
+				);
+			}
+		);
+		$order    = \WC_Helper_Order::create_order();
+		$fee      = new \WC_Order_Item_Fee();
+		$shipping = new \WC_Order_Item_Shipping();
+		$coupon   = new \WC_Order_Item_Coupon();
+		$fee->set_props(
+			array(
+				'name'  => 'Packaging',
+				'total' => '2',
+			)
+		);
+		$shipping->set_method_title( 'Courier' );
+		$coupon->set_code( 'save5' );
+		foreach ( array( $fee, $shipping, $coupon ) as $item ) {
+			$order->add_item( $item );
+		}
+		$order->save();
+
+		$listed = $this->run_ability(
+			'woocommerce/orders-query',
+			array(
+				'id'                 => $order->get_id(),
+				'include_line_items' => true,
+				'include_lines'      => true,
+			)
+		)['orders'][0];
+		$schema = $this->get_output_schema( 'woocommerce/orders-query' )['properties']['orders']['items']['properties'];
+
+		$this->assertSame(
+			array(
+				'test-ext' => array(
+					'gift'       => 'item-' . $fee->get_id(),
+					'fee_reason' => 'packaging',
+				),
+			),
+			$listed['fee_lines'][0]['extensions']
+		);
+		$shipping_line = current( wp_list_filter( $listed['shipping_lines'], array( 'id' => $shipping->get_id() ) ) );
+		$this->assertSame( array( 'test-ext' => array( 'gift' => 'item-' . $shipping->get_id() ) ), $shipping_line['extensions'] );
+		$this->assertSame( array( 'test-ext' => array( 'gift' => 'item-' . $coupon->get_id() ) ), $listed['coupon_lines'][0]['extensions'] );
+		$this->assertArrayNotHasKey( 'fee_reason', $listed['line_items'][0]['extensions']['test-ext'] );
+		$this->assertArrayHasKey( 'fee_reason', $schema['fee_lines']['items']['properties']['extensions']['properties']['test-ext']['properties'] );
+		foreach ( array( 'line_items', 'shipping_lines', 'coupon_lines' ) as $key ) {
+			$this->assertArrayNotHasKey( 'fee_reason', $schema[ $key ]['items']['properties']['extensions']['properties']['test-ext']['properties'], $key );
+			$this->assertArrayHasKey( 'gift', $schema[ $key ]['items']['properties']['extensions']['properties']['test-ext']['properties'], $key );
+		}
+		$this->assertArrayNotHasKey( 'extensions', $schema['tax_lines']['items']['properties'], 'Tax lines have no extension fields.' );
+	}
+
+	/**
 	 * @testdox Should call the $resource_name prime callbacks of each extension once with the full list, in registration order.
 	 * @dataProvider provide_list_abilities
 	 *
@@ -1183,15 +1250,32 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should call the order and order item prime callbacks once with every order and every product line.
+	 * @testdox Should call the order and order item prime callbacks once with every order and every product, shipping, fee and coupon line, including a fee a filter adds.
 	 */
 	public function test_prime_callbacks_get_orders_and_line_items(): void {
 		$product = \WC_Helper_Product::create_simple_product();
 		$orders  = array( wc_create_order(), wc_create_order() );
 		foreach ( $orders as $order ) {
 			$order->add_product( $product );
+			$order->add_item( new \WC_Order_Item_Fee() );
+			$order->add_item( new \WC_Order_Item_Shipping() );
+			$order->add_item( new \WC_Order_Item_Coupon() );
+			$order->add_item( new \WC_Order_Item_Tax() );
 			$order->save();
 		}
+		$added_fee = new \WC_Order_Item_Fee();
+		$added_fee->save();
+		$this->add_test_filter(
+			'woocommerce_order_get_items',
+			static function ( $items, $order, $types ) use ( $added_fee, $orders ) {
+				if ( array( 'fee' ) === $types && $order->get_id() === $orders[0]->get_id() ) {
+					$items[ $added_fee->get_id() ] = $added_fee;
+				}
+				return $items;
+			},
+			10,
+			3
+		);
 		$calls = array();
 		foreach ( array( 'order', 'order_item' ) as $resource_name ) {
 			$this->register_prime(
@@ -1208,11 +1292,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			array(
 				'per_page'           => 2,
 				'include_line_items' => true,
+				'include_lines'      => true,
 			)
 		);
 
-		$item_ids = array_merge( ...array_map( static fn( \WC_Order $order ) => array_keys( $order->get_items() ), $orders ) );
-		$this->assertCount( 2, $item_ids );
+		$item_ids   = array_merge( ...array_map( static fn( \WC_Order $order ) => array_keys( $order->get_items( array( 'line_item', 'shipping', 'fee', 'coupon' ) ) ), $orders ) );
+		$item_ids[] = $added_fee->get_id();
+		$this->assertCount( 9, $item_ids );
 		$this->assertCount( 1, $calls['order'] );
 		$this->assertEqualsCanonicalizing( array_map( static fn( \WC_Order $order ) => $order->get_id(), $orders ), $calls['order'][0] );
 		$this->assertCount( 1, $calls['order_item'] );

@@ -157,9 +157,12 @@ class ExtensibleAbilities {
 	 *                                  WooCommerce also reads, because some clients refuse it.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
-	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
-	 *                                  The abilities leave the field out of the other objects and refuse a write
-	 *                                  to them. Omit it for every type.
+	 *                                  `line_item`, `shipping`, `fee` and `coupon` for an order item. The object
+	 *                                  must have a `get_type()` method.
+	 *                                  The abilities leave the field out of the other objects, and an ability
+	 *                                  that writes the resource refuses a write to them. Omit it for every type:
+	 *                                  an `order_item` field without it is then read on product, shipping, fee
+	 *                                  and coupon lines, so its `get_callback` must accept each of them.
 	 *     @type callable $get_callback Optional. Receives the object and returns the value. A field without it
 	 *                                  is not in the output. Required with `output_schema`. Return null when the
 	 *                                  object has no value, and the field is left out with no error. Any other
