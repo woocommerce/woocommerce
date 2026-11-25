@@ -373,10 +373,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$class  = new ReflectionClass( WC_Product_CSV_Importer_Controller::class );
-		$method = $class->getMethod( 'release_stranded_cleanup_claims' );
-		$method->setAccessible( true );
-		$method->invoke( null );
+		( new \Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ImportPlaceholders() )->release_stranded_cleanup_claims();
 
 		// The importer only treats the placeholder status as absent, so the row has to read that way again.
 		$this->assertSame( 'importing', get_post_status( $stranded_id ) );
@@ -539,29 +536,40 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A cleanup request should delete placeholders and finish the import.
+	 */
+	public function test_cleanup_request_deletes_placeholders_and_finishes(): void {
+		$placeholder = new WC_Product_Simple();
+		$placeholder->set_status( 'importing' );
+		$placeholder->save();
+
+		$response = $this->dispatch_import_request( 'cleanup:0' );
+
+		$this->assertSame( 'done', $response['data']['position'] );
+		$this->assertArrayHasKey( 'url', $response['data'] );
+		$this->assertNull( get_post( $placeholder->get_id() ) );
+	}
+
+	/**
 	 * @testdox A resumed request should leave the markers of the run in progress alone.
 	 */
 	public function test_resumed_request_keeps_the_markers_of_the_run_in_progress(): void {
 		add_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
 
-		try {
-			$response = $this->dispatch_import_request( '0' );
+		$response = $this->dispatch_import_request( '0' );
 
-			// A batch size of one leaves the second row for a resumed request.
-			$this->assertIsNumeric( $response['data']['position'] );
+		// A batch size of one leaves the second row for a resumed request.
+		$this->assertIsNumeric( $response['data']['position'] );
 
-			$parent_id = wc_get_product_id_by_sku( 'marker-parent' );
-			$this->assertSame( 1, $response['data']['imported'] );
-			$this->assertSame( '4242', get_post_meta( $parent_id, '_original_id', true ) );
+		$parent_id = wc_get_product_id_by_sku( 'marker-parent' );
+		$this->assertSame( 1, $response['data']['imported'] );
+		$this->assertSame( '4242', get_post_meta( $parent_id, '_original_id', true ) );
 
-			$response     = $this->dispatch_import_request( (string) $response['data']['position'] );
-			$variation_id = wc_get_product_id_by_sku( 'marker-variation' );
+		$response     = $this->dispatch_import_request( (string) $response['data']['position'] );
+		$variation_id = wc_get_product_id_by_sku( 'marker-variation' );
 
-			$this->assertSame( 1, $response['data']['imported_variations'] );
-			$this->assertSame( $parent_id, wp_get_post_parent_id( $variation_id ) );
-		} finally {
-			remove_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
-		}
+		$this->assertSame( 1, $response['data']['imported_variations'] );
+		$this->assertSame( $parent_id, wp_get_post_parent_id( $variation_id ) );
 	}
 
 	/**
@@ -729,11 +737,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	 * @return int|null ID to resume from, or null once no placeholders are left.
 	 */
 	private function invoke_cleanup_after_import( int $cursor = 0 ): ?int {
-		$class  = new ReflectionClass( WC_Product_CSV_Importer_Controller::class );
-		$method = $class->getMethod( 'cleanup_after_import' );
-		$method->setAccessible( true );
-
-		return $method->invoke( null, $cursor );
+		return ( new \Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ImportPlaceholders() )->cleanup_after_import( $cursor );
 	}
 
 	/**

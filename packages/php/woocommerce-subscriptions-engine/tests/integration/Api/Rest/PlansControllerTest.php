@@ -1296,11 +1296,14 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		foreach ( array( 'any,' . self::EXTENSION_SLUG, self::EXTENSION_SLUG . ',', ',' . self::EXTENSION_SLUG, 'lite,,test' ) as $extension_slug ) {
 			$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => $extension_slug ) );
 
-			$this->assert_invalid_param( $list, 'extension_slug', 'invalid_value' );
+			$this->assert_invalid_param( $list, 'extension_slug', 'invalid_value', sprintf( 'extension_slug "%s"', $extension_slug ) );
 		}
 
+		$empty = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => '' ) );
+		$this->assert_invalid_param( $empty, 'extension_slug', 'required' );
+
 		$blank = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => ' ' ) );
-		$this->assert_invalid_param( $blank, 'extension_slug', 'required' );
+		$this->assert_invalid_param( $blank, 'extension_slug', 'invalid_pattern', 'Whitespace is refused, not trimmed away.' );
 	}
 
 	public function test_list_with_any_extension_slug_returns_all_plans(): void {
@@ -1453,6 +1456,106 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				)->get_status()
 			);
 		}
+	}
+
+	public function test_extension_slugs_outside_the_slug_format_are_refused_with_invalid_pattern(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$id = $this->create_plan( 'Scoped' );
+
+		foreach ( array( 'LITE', 'li te', ' ' . self::EXTENSION_SLUG . ' ', str_repeat( 'a', 65 ) ) as $extension_slug ) {
+			$this->assert_invalid_param( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => $extension_slug ) ), 'extension_slug', 'invalid_pattern', sprintf( 'GET item, "%s"', $extension_slug ) );
+			$this->assert_invalid_param( $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => $extension_slug ) ), 'extension_slug', 'invalid_pattern', sprintf( 'GET list, "%s"', $extension_slug ) );
+			// Inside a comma list, spaces next to a comma are list formatting, so only unpadded slugs are refused there.
+			if ( trim( $extension_slug ) === $extension_slug ) {
+				$this->assert_invalid_param( $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG . ',' . $extension_slug . ',woocommerce-subscriptions-test' ) ), 'extension_slug', 'invalid_pattern', sprintf( 'GET list item, "%s"', $extension_slug ) );
+			}
+			$this->assert_invalid_param(
+				$this->request(
+					'POST',
+					self::BASE,
+					array(
+						'extension_slug' => $extension_slug,
+						'name'           => 'Invalid owner',
+					)
+				),
+				'extension_slug',
+				'invalid_pattern',
+				sprintf( 'POST, "%s"', $extension_slug )
+			);
+			$this->assert_invalid_param(
+				$this->request(
+					'PATCH',
+					self::BASE . '/' . $id,
+					array(
+						'extension_slug' => $extension_slug,
+						'name'           => 'Invalid owner',
+					)
+				),
+				'extension_slug',
+				'invalid_pattern',
+				sprintf( 'PATCH, "%s"', $extension_slug )
+			);
+		}
+
+		$stored = Plans::get( $id );
+		$this->assertNotNull( $stored );
+		$this->assertSame( 'Scoped', $stored->get_name(), 'A refused PATCH writes nothing.' );
+	}
+
+	public function test_get_item_answers_a_failed_plan_read_with_a_500(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$id = $this->create_plan( 'Stored' );
+		$this->fail_next_query( '/^\s*SELECT \* FROM \S*selling_plans WHERE id/' );
+
+		$response = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_plan_read_failed', $this->response_data( $response )['code'] );
+		$this->assertStringNotContainsString( 'table_that_does_not_exist', (string) wp_json_encode( $response->get_data() ), 'Database details stay out of the response.' );
+	}
+
+	/**
+	 * @dataProvider provide_failing_list_reads
+	 *
+	 * @param string $pattern Regex of the read to break.
+	 */
+	public function test_get_items_answers_a_failed_read_with_a_logged_500( string $pattern ): void {
+		wp_set_current_user( $this->admin_id );
+		$this->create_plan( 'Stored' );
+
+		$errors  = array();
+		$capture = static function ( $message, $level, $context ) use ( &$errors ) {
+			if ( 'error' === $level && is_string( $message ) && is_array( $context ) && 'woocommerce-subscriptions-engine' === ( $context['source'] ?? null ) ) {
+				$errors[] = $message;
+			}
+			return $message;
+		};
+		add_filter( 'woocommerce_logger_log_message', $capture, 10, 3 );
+		$this->fail_next_query( $pattern );
+
+		try {
+			$response = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		} finally {
+			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_plan_read_failed', $this->response_data( $response )['code'] );
+		$this->assertStringNotContainsString( 'table_that_does_not_exist', (string) wp_json_encode( $response->get_data() ), 'Database details stay out of the response.' );
+		$this->assertNotEmpty( $errors, 'A failed read is logged.' );
+		$this->assertStringContainsString( 'table_that_does_not_exist', $errors[0], 'The log carries the database error.' );
+	}
+
+	/**
+	 * @return array<string, array{0: string}>
+	 */
+	public function provide_failing_list_reads(): array {
+		return array(
+			'list'  => array( '/^\s*SELECT \* FROM \S*selling_plans\b.* LIMIT /s' ),
+			'count' => array( '/^\s*SELECT COUNT\(\*\) FROM \S*selling_plans\b/' ),
+		);
 	}
 
 	public function test_single_plan_routes_404_a_plan_of_another_extension_slug_or_an_unknown_id(): void {
@@ -1656,15 +1759,16 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	 * @param WP_REST_Response $response Response.
 	 * @param string           $arg      Top-level arg.
 	 * @param string           $code     Expected detail error code.
+	 * @param string           $message  Failure message naming the case.
 	 * @return array<array-key, mixed> The response data.
 	 */
-	private function assert_invalid_param( WP_REST_Response $response, string $arg, string $code ): array {
-		$this->assertSame( 400, $response->get_status() );
+	private function assert_invalid_param( WP_REST_Response $response, string $arg, string $code, string $message = '' ): array {
+		$this->assertSame( 400, $response->get_status(), $message );
 		$data = $this->response_data( $response );
 		$this->assertSame( 'rest_invalid_param', $data['code'] );
 		$this->assertIsString( $this->nested( $data, array( 'data', 'params', $arg ) ) );
 		$this->assertNotSame( '', $this->nested( $data, array( 'data', 'params', $arg ) ) );
-		$this->assertSame( $code, $this->nested( $data, array( 'data', 'details', $arg, 'code' ) ) );
+		$this->assertSame( $code, $this->nested( $data, array( 'data', 'details', $arg, 'code' ) ), $message );
 
 		return $data;
 	}

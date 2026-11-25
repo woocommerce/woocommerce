@@ -7,8 +7,13 @@ use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
+use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
+use Automattic\WooCommerce\StoreApi\Utilities\SessionConcurrencyGuard;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractAddressSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\BillingAddressSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\ShippingAddressSchema;
 use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 
 /**
@@ -160,6 +165,7 @@ class Checkout extends AbstractCartRoute {
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
+	 * @throws RouteException If the persisted session changed after this request loaded it.
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
@@ -180,6 +186,10 @@ class Checkout extends AbstractCartRoute {
 
 		if ( ! $response ) {
 			try {
+				// Every method of this route reads and writes the draft order, so take it before anything reads it.
+				$this->lock_order_or_throw( absint( $this->get_draft_order_id() ) );
+				// The session was loaded before the lock. Refuse externally persisted changes rather than overwrite a newer draft and potentially complete the wrong total.
+				$this->throw_if_persisted_session_changed();
 				$response = $this->get_response_by_request_method( $request );
 			} catch ( InvalidCartException $error ) {
 				$response = $this->get_route_error_response_from_object( $error->getError(), $error->getCode(), $error->getAdditionalData() );
@@ -664,8 +674,10 @@ class Checkout extends AbstractCartRoute {
 		 * Via the block based checkout and Store API we already have a draft order, but when POSTing to the /checkout
 		 * endpoint we do the same; reserve stock for the order to allow time to process payment.
 		 *
-		 * Note, stock is only "held" while the order has the status wc-checkout-draft or pending. Stock is freed when
-		 * the order changes status, or there is an exception.
+		 * Note, stock stays "held" while the order is in one of the statuses counted by the reserved stock
+		 * query (see the woocommerce_reserved_stock_order_statuses filter) and until the hold expires or is
+		 * released. The hold is released once the order's stock is reduced, on cancellation or failure, or
+		 * on an exception.
 		 *
 		 * @see ReserveStock::get_query_for_reserved_stock()
 		 *
@@ -702,6 +714,16 @@ class Checkout extends AbstractCartRoute {
 			'woocommerce_store_api_checkout_order_processed',
 			'This action was deprecated in WooCommerce Blocks version 7.2.0. Please use woocommerce_store_api_checkout_order_processed instead.'
 		);
+
+		// The order is placed from here on as it was validated above, so make sure no other request could have written
+		// to it in the meantime. This also takes the lock for an order that was only created by this request.
+		if ( ! OrderController::lock_order( $this->order->get_id() ) ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_order_locked',
+				esc_html( OrderController::get_order_lock_error_message() ),
+				409
+			);
+		}
 
 		// Set initial status to 'pending'; woocommerce_store_api_checkout_order_processed (fired below) can override it.
 		// Custom statuses are preserved when no payment is needed; payment gateway statuses take precedence otherwise.
@@ -993,16 +1015,28 @@ class Checkout extends AbstractCartRoute {
 			],
 		];
 
+		// Validate both addresses before persisting either, so a rejected request leaves the session untouched.
+		$posted_addresses    = [ 'billing_address' => (array) ( $request['billing_address'] ?? [] ) ];
+		$validated_addresses = [ 'billing_address' => $this->get_validated_address( $request, 'billing_address', $posted_addresses['billing_address'], $customer->get_billing( 'edit' ) ) ];
+
+		// Like the classic checkout, stores that ship to the billing address only ignore the request's shipping address.
+		if ( WC()->cart->needs_shipping() && ! wc_ship_to_billing_address_only() ) {
+			$posted_addresses['shipping_address']    = (array) ( $request['shipping_address'] ?? $request['billing_address'] ?? [] );
+			$validated_addresses['shipping_address'] = $this->get_validated_address( $request, 'shipping_address', $posted_addresses['shipping_address'], $customer->get_shipping( 'edit' ) );
+		} else {
+			// Ships to billing: use the whole billing address so no shipping value left in the session reaches the order.
+			$posted_addresses['shipping_address']    = $this->get_full_billing_address( $customer, $request );
+			$validated_addresses['shipping_address'] = $validated_addresses['billing_address'];
+		}
+
 		foreach ( $additional_field_contexts as $context => $context_data ) {
 
 			$document_object = $this->get_document_object_from_rest_request( $request );
 			$document_object->set_context( $context );
 			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 
-			if ( 'shipping_address' === $context_data['param'] ) {
-				$field_values = WC()->cart->needs_shipping()
-					? (array) ( $request['shipping_address'] ?? $request['billing_address'] ?? [] )
-					: (array) ( $request['billing_address'] ?? [] );
+			if ( isset( $posted_addresses[ $context ] ) ) {
+				$field_values = array_merge( $posted_addresses[ $context ], $validated_addresses[ $context ] );
 			} else {
 				$field_values = (array) $request[ $context_data['param'] ] ?? [];
 			}
@@ -1032,6 +1066,66 @@ class Checkout extends AbstractCartRoute {
 		do_action( 'woocommerce_store_api_checkout_update_customer_from_request', $customer, $request );
 
 		$customer->save();
+	}
+
+	/**
+	 * Gets the country, state and postcode the address will end up with, then sanitizes and validates them.
+	 *
+	 * A partial address can leave out any of the three, so the ones it leaves out come from the session and all of them
+	 * are checked together, against the final country. Other fields keep the request's own validation.
+	 *
+	 * @throws RouteException When the state or postcode is not valid for the country.
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @param string           $param   Request parameter the address came from: billing_address or shipping_address.
+	 * @param array            $posted  Address fields from the request.
+	 * @param array            $stored  Address the session customer holds.
+	 * @return array The country, state and postcode, sanitized.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 */
+	private function get_validated_address( \WP_REST_Request $request, string $param, array $posted, array $stored ): array {
+		/** @var AbstractAddressSchema $schema */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$schema     = $this->schema_controller->get( 'billing_address' === $param ? BillingAddressSchema::IDENTIFIER : ShippingAddressSchema::IDENTIFIER );
+		$location   = array_flip( [ 'country', 'state', 'postcode' ] );
+		$address    = wp_parse_args( array_intersect_key( $posted, $location ), array_intersect_key( $stored, $location ) );
+		$validation = $schema->validate_callback( $address, $request, $param );
+
+		if ( is_wp_error( $validation ) ) {
+			// The Checkout block builds its notices from details, as returned by validate_callback() and cart/update-customer.
+			$error_data = array(
+				'params'  => array( $param => implode( ' ', $validation->get_error_messages() ) ),
+				'details' => array( $param => rest_convert_error_to_response( $validation )->get_data() ),
+			);
+
+			throw new RouteException(
+				'rest_invalid_param',
+				/* translators: %s: List of invalid parameters. */
+				esc_html( sprintf( __( 'Invalid parameter(s): %s', 'woocommerce' ), $param ) ),
+				400,
+				$error_data // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Error data for the REST response, not output.
+			);
+		}
+
+		return $schema->sanitize_callback( $address, $request, $param );
+	}
+
+	/**
+	 * Gets the customer's billing address with the request's billing address applied on top.
+	 *
+	 * Used as the shipping address when the order ships to billing, so no shipping value left in the session reaches the order.
+	 *
+	 * @param \WC_Customer     $customer Customer object.
+	 * @param \WP_REST_Request $request  Full details about the request.
+	 * @return array
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 */
+	private function get_full_billing_address( \WC_Customer $customer, \WP_REST_Request $request ): array {
+		return array_merge(
+			(array) $customer->get_billing( 'edit' ),
+			$this->additional_fields_controller->get_all_fields_from_object( $customer, 'billing' ),
+			(array) ( $request['billing_address'] ?? [] )
+		);
 	}
 
 	/**
@@ -1192,6 +1286,44 @@ class Checkout extends AbstractCartRoute {
 				'actual_total'   => absint( $actual_total ),
 			]
 		);
+	}
+
+	/**
+	 * Refuse to use a session that another request changed after this request loaded it.
+	 *
+	 * Mutations made by this request are allowed because the session handler compares the latest persisted data with
+	 * the persisted data that initialized this request, not with its current in-memory data.
+	 *
+	 * @throws RouteException If another request changed the persisted session.
+	 */
+	private function throw_if_persisted_session_changed(): void {
+		if ( WC()->session && SessionConcurrencyGuard::has_changed( WC()->session ) ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_session_changed',
+				esc_html__( 'Your cart changed during checkout. Please review it and try again.', 'woocommerce' ),
+				409
+			);
+		}
+	}
+
+	/**
+	 * Give this request exclusive use of an order, or confirm that it still has it, and refuse the request otherwise.
+	 *
+	 * Checkout and other order writers must hold the same lock so an order cannot change between validation and placement.
+	 *
+	 * @see OrderController::lock_order()
+	 *
+	 * @throws RouteException If another request is using the order. Returns HTTP 409 with the cart so the client can refresh.
+	 * @param int $order_id Order ID.
+	 */
+	private function lock_order_or_throw( int $order_id ): void {
+		if ( ! OrderController::lock_order( $order_id ) ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_order_locked',
+				esc_html( OrderController::get_order_lock_error_message() ),
+				409
+			);
+		}
 	}
 
 	/**

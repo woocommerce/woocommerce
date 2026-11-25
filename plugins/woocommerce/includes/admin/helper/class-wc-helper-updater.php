@@ -38,7 +38,12 @@ class WC_Helper_Updater {
 		add_action( 'pre_set_site_transient_update_themes', array( __CLASS__, 'transient_update_themes' ), 21, 1 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'upgrader_process_complete' ) );
 		add_action( 'upgrader_pre_download', array( __CLASS__, 'block_expired_updates' ), 10, 2 );
+		// Runs first, so a callback that serves the package can't install the update before this check.
+		add_filter( 'upgrader_pre_download', array( __CLASS__, 'block_update_needing_newer_wp' ), 1, 4 );
 		add_action( 'admin_init', array( __CLASS__, 'add_hook_for_modifying_update_notices' ) );
+		// Late, so another callback can't switch the update back on.
+		add_filter( 'auto_update_plugin', array( __CLASS__, 'skip_auto_update_needing_newer_wp' ), PHP_INT_MAX, 2 );
+		add_filter( 'auto_update_theme', array( __CLASS__, 'skip_auto_update_needing_newer_wp' ), PHP_INT_MAX, 2 );
 	}
 
 	/**
@@ -48,6 +53,7 @@ class WC_Helper_Updater {
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() || ! WC_Helper::is_site_connected() ) {
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_update_plugins_messages' ), 11 );
 		}
+		add_action( 'load-plugins.php', array( __CLASS__, 'setup_message_for_updates_needing_newer_wp' ), 11 );
 		if ( WC_Helper::is_site_connected() ) {
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_message_for_expired_and_expiring_subscriptions' ), 11 );
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_message_for_plugins_without_subscription' ), 11 );
@@ -64,6 +70,18 @@ class WC_Helper_Updater {
 	public static function setup_message_for_expired_and_expiring_subscriptions() {
 		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
 			add_action( 'in_plugin_update_message-' . $plugin['_filename'], array( __CLASS__, 'display_notice_for_expired_and_expiring_subscriptions' ), 10, 2 );
+		}
+	}
+
+	/**
+	 * Add the hook for modifying default WPCore update notices on the plugins management page.
+	 * This is for updates that need a newer WordPress than the site runs.
+	 *
+	 * @since 11.4.0
+	 */
+	public static function setup_message_for_updates_needing_newer_wp(): void {
+		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
+			add_action( 'in_plugin_update_message-' . $plugin['_filename'], array( __CLASS__, 'display_notice_for_update_needing_newer_wp' ), 10, 2 );
 		}
 	}
 
@@ -123,6 +141,11 @@ class WC_Helper_Updater {
 
 			if ( isset( $data['requires_php'] ) ) {
 				$item['requires_php'] = $data['requires_php'];
+			}
+
+			$requires = self::get_required_wp_version( $data );
+			if ( '' !== $requires ) {
+				$item['requires'] = $requires;
 			}
 
 			if ( isset( $data['tested'] ) ) {
@@ -193,6 +216,12 @@ class WC_Helper_Updater {
 				$item['requires_php'] = $data['requires_php'];
 			}
 
+			// Core's theme update row and Updates screen read this and withhold the update.
+			$requires = self::get_required_wp_version( $data );
+			if ( '' !== $requires ) {
+				$item['requires'] = $requires;
+			}
+
 			if ( self::is_autoupdate_forced( $data, $item ) ) {
 				$item['autoupdate'] = true;
 			}
@@ -238,6 +267,139 @@ class WC_Helper_Updater {
 		}
 
 		return 0 !== strpos( $item['package'], 'woocommerce-com-expired-' );
+	}
+
+	/**
+	 * Gets the minimum WordPress version an update needs, from an update-check product or an update offer.
+	 *
+	 * The value arrives from a remote response or from a filtered update offer, so anything that
+	 * isn't a version number, optionally with a pre-release suffix such as -RC1, is treated as no requirement.
+	 *
+	 * @since 11.4.0
+	 * @param array $data Update-check product data, or an update offer cast to an array.
+	 * @return string The version, or an empty string when there is none.
+	 */
+	private static function get_required_wp_version( $data ): string {
+		$requires = is_array( $data ) ? ( $data['requires'] ?? null ) : null;
+
+		if ( ! is_string( $requires ) && ! is_int( $requires ) && ! is_float( $requires ) ) {
+			return '';
+		}
+
+		$requires = trim( (string) $requires );
+
+		return 1 === preg_match( '/^\d+(\.\d+){0,3}(-[0-9A-Za-z.]+)?$/', $requires ) ? $requires : '';
+	}
+
+	/**
+	 * Gets the WordPress version an update offer needs, when the site runs an older one.
+	 *
+	 * @since 11.4.0
+	 * @param mixed $offer The update offer: an object for plugins, an array for themes.
+	 * @return string The version the site doesn't meet, or an empty string when it meets the requirement or there is none.
+	 */
+	private static function get_unmet_wp_requirement( $offer ): string {
+		$requires = self::get_required_wp_version( is_object( $offer ) ? get_object_vars( $offer ) : $offer );
+
+		return is_wp_version_compatible( $requires ) ? '' : $requires;
+	}
+
+	/**
+	 * Skips an automatic update to a WooCommerce.com extension version that needs a newer WordPress.
+	 *
+	 * Core's auto-updater checks only the PHP requirement, and the single-item upgrade it runs skips
+	 * the requirement check a manual update gets. Without this, an auto-update or a forced update
+	 * installs a version the site can't run, and leaves it active.
+	 *
+	 * @since 11.4.0
+	 * @param bool|null $update Whether to update the item.
+	 * @param mixed     $item   The update offer.
+	 * @return bool|null False when the update needs a newer WordPress, otherwise $update unchanged.
+	 */
+	public static function skip_auto_update_needing_newer_wp( $update, $item ) {
+		// Only turn an update off, so a null "not decided" stays null for core's settings screens.
+		if ( ! $update || ! is_object( $item ) ) {
+			return $update;
+		}
+
+		if ( '' === self::get_unmet_wp_requirement( $item ) ) {
+			return $update;
+		}
+
+		return self::is_woo_update_offer( $item ) ? false : $update;
+	}
+
+	/**
+	 * Checks whether an update offer is for a locally installed WooCommerce.com extension.
+	 *
+	 * @since 11.4.0
+	 * @param object $item The update offer.
+	 * @return bool
+	 */
+	private static function is_woo_update_offer( $item ): bool {
+		if ( isset( $item->plugin ) && is_string( $item->plugin ) ) {
+			return array_key_exists( $item->plugin, WC_Helper::get_local_woo_plugins() );
+		}
+
+		if ( isset( $item->theme ) && is_string( $item->theme ) ) {
+			return in_array( $item->theme, wp_list_pluck( WC_Helper::get_local_woo_themes(), '_stylesheet' ), true );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Runs on in_plugin_update_message-{file-name}, explains that an update needs a newer WordPress.
+	 *
+	 * Core's plugin update row only reads the PHP requirement, so it offers "update now" for a
+	 * version that will fail to install.
+	 *
+	 * @since 11.4.0
+	 * @param array  $plugin_data An array of plugin metadata.
+	 * @param object $response    An object of metadata about the available plugin update.
+	 * @return void
+	 */
+	public static function display_notice_for_update_needing_newer_wp( $plugin_data, $response ) {
+		$requires = self::get_unmet_wp_requirement( $response );
+		if ( '' === $requires ) {
+			return;
+		}
+
+		self::print_update_row_message( self::get_wp_requirement_notice( $requires ) );
+	}
+
+	/**
+	 * Message saying an update needs a newer WordPress, telling users who can update it to do so first.
+	 *
+	 * The HTML version links to the WordPress Updates screen. The plain-text version is for errors,
+	 * which callers may show as text.
+	 *
+	 * @since 11.4.0
+	 * @param string $requires The minimum WordPress version the update needs.
+	 * @param bool   $as_html  Whether to return HTML with a link, or plain text.
+	 * @return string
+	 */
+	private static function get_wp_requirement_notice( string $requires, bool $as_html = true ): string {
+		$notice = sprintf(
+			/* translators: 1: WordPress version the update needs, 2: WordPress version the site runs. */
+			__( 'This update needs WordPress %1$s or later, and this site runs WordPress %2$s.', 'woocommerce' ),
+			$as_html ? esc_html( $requires ) : $requires,
+			$as_html ? esc_html( wp_get_wp_version() ) : wp_get_wp_version()
+		);
+
+		if ( ! current_user_can( 'update_core' ) ) {
+			return $notice;
+		}
+
+		if ( ! $as_html ) {
+			return $notice . ' ' . __( 'Update WordPress first.', 'woocommerce' );
+		}
+
+		return $notice . ' ' . sprintf(
+			/* translators: %s: URL of the WordPress Updates screen. */
+			__( '<a href="%s">Update WordPress</a> first.', 'woocommerce' ),
+			esc_url( self_admin_url( 'update-core.php' ) )
+		);
 	}
 
 	/**
@@ -1453,6 +1615,46 @@ class WC_Helper_Updater {
 				esc_url( admin_url( 'admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions' ) )
 			)
 		);
+	}
+
+	/**
+	 * Runs on upgrader_pre_download, stops an update to a WooCommerce.com extension version that needs a newer WordPress.
+	 *
+	 * Core checks the requirement only in bulk updates. The single-item upgrade behind the "update now"
+	 * link's URL skips it, and would install a version WordPress then refuses to activate.
+	 *
+	 * @since 11.4.0
+	 * @param bool|WP_Error $reply      Whether to bail without returning the package, or an error already set.
+	 * @param string        $package    The package file name or URL.
+	 * @param WP_Upgrader   $upgrader   The upgrader instance.
+	 * @param array         $hook_extra Extra arguments, naming the plugin or theme being updated.
+	 * @return bool|WP_Error An error when the update needs a newer WordPress, otherwise $reply unchanged.
+	 */
+	public static function block_update_needing_newer_wp( $reply, $package = '', $upgrader = null, $hook_extra = array() ) {
+		unset( $package, $upgrader ); // Avoid parameter not used PHPCS errors.
+
+		if ( false !== $reply || ! is_array( $hook_extra ) ) {
+			return $reply;
+		}
+
+		if ( isset( $hook_extra['plugin'] ) && is_string( $hook_extra['plugin'] ) ) {
+			$transient = get_site_transient( 'update_plugins' );
+			$item      = (object) array( 'plugin' => $hook_extra['plugin'] );
+			$offer     = is_object( $transient ) ? ( $transient->response[ $hook_extra['plugin'] ] ?? null ) : null;
+		} elseif ( isset( $hook_extra['theme'] ) && is_string( $hook_extra['theme'] ) ) {
+			$transient = get_site_transient( 'update_themes' );
+			$item      = (object) array( 'theme' => $hook_extra['theme'] );
+			$offer     = is_object( $transient ) ? ( $transient->response[ $hook_extra['theme'] ] ?? null ) : null;
+		} else {
+			return $reply;
+		}
+
+		$requires = self::get_unmet_wp_requirement( $offer );
+		if ( '' === $requires || ! self::is_woo_update_offer( $item ) ) {
+			return $reply;
+		}
+
+		return new WP_Error( 'woocommerce_update_needs_newer_wp', self::get_wp_requirement_notice( $requires, false ) );
 	}
 }
 

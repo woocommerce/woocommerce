@@ -21,11 +21,11 @@ use InvalidArgumentException;
  *   `register_getters()`.
  *
  * The derived getters are mirrored in the JS store
- * (client/blocks/assets/js/base/stores/woocommerce/products.ts) so that
+ * (client/blocks/assets/js/base/stores/products.ts) so that
  * directive bindings like `state.productInContext.sku` resolve during
  * server-side rendering as well as on the client.
  *
- * See client/blocks/assets/js/base/stores/woocommerce/README.md for the
+ * See client/blocks/assets/js/base/stores/README.md for the
  * full model and consumer examples.
  *
  * This is an experimental API and may change in future versions.
@@ -93,12 +93,15 @@ class ProductsStore {
 	 * Register the derived-state getters once.
 	 *
 	 * These closures mirror the JS getters in
-	 * client/blocks/assets/js/base/stores/woocommerce/products.ts so that
+	 * client/blocks/assets/js/base/stores/products.ts so that
 	 * directives referencing state.mainProductInContext /
 	 * state.productVariationInContext / state.productInContext resolve
 	 * during SSR. Because they read from
 	 * wp_interactivity_state() at call time, they only need to be
 	 * registered once regardless of how many products are added.
+	 *
+	 * It also makes the raw data readable from the `woocommerce` store as
+	 * `state.products` and `state.productVariations`, without a copy.
 	 *
 	 * @return void
 	 */
@@ -108,6 +111,16 @@ class ProductsStore {
 		}
 
 		self::$getters_registered = true;
+
+		// Temporary: until every block reads product data from `woocommerce`,
+		// that store reads it from `woocommerce/products` through these views.
+		wp_interactivity_state(
+			'woocommerce',
+			array(
+				'products'          => new ProductDataView( 'products' ),
+				'productVariations' => new ProductDataView( 'productVariations' ),
+			)
+		);
 
 		wp_interactivity_state(
 			self::$store_namespace,
@@ -157,6 +170,19 @@ class ProductsStore {
 	}
 
 	/**
+	 * Omit image metadata from client state; product galleries hydrate their own image data.
+	 *
+	 * @param array $products Products or variations keyed by ID.
+	 * @return array Product data without images.
+	 */
+	private static function remove_images( array $products ): array {
+		return array_map(
+			static fn( array $product ): array => array_diff_key( $product, array( 'images' => true ) ),
+			$products
+		);
+	}
+
+	/**
 	 * Load a product into state.
 	 *
 	 * @param string $consent_statement The consent statement string.
@@ -178,7 +204,7 @@ class ProductsStore {
 		self::register_getters();
 		wp_interactivity_state(
 			self::$store_namespace,
-			array( 'products' => array( $product_id => self::$products[ $product_id ] ) )
+			array( 'products' => self::remove_images( array( $product_id => self::$products[ $product_id ] ) ) )
 		);
 
 		return self::$products[ $product_id ];
@@ -235,7 +261,7 @@ class ProductsStore {
 		self::register_getters();
 		wp_interactivity_state(
 			self::$store_namespace,
-			array( 'products' => $keyed_products )
+			array( 'products' => self::remove_images( $keyed_products ) )
 		);
 
 		return $keyed_products;
@@ -275,7 +301,7 @@ class ProductsStore {
 		self::register_getters();
 		wp_interactivity_state(
 			self::$store_namespace,
-			array( 'productVariations' => $keyed_variations )
+			array( 'productVariations' => self::remove_images( $keyed_variations ) )
 		);
 
 		return $keyed_variations;

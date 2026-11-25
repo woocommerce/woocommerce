@@ -61,7 +61,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		$this->disable_cogs_feature();
 		parent::tearDown();
 	}
@@ -336,6 +335,9 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order->delete();
 		$this->assertEquals( OrderStatus::TRASH, $order->get_status(), 'The order was successfully trashed.' );
 
+		// Without transactional emails the notification count below stays 0 whatever untrash() does.
+		$this->enable_transactional_emails();
+
 		$status_action_count       = 0;
 		$status_notification_count = 0;
 		$status_action             = function ( $id ) use ( $order_id, &$status_action_count ) {
@@ -371,6 +373,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testdox Restoring an order only suppresses transactional email dispatch for the restored order.
 	 */
 	public function test_untrash_does_not_suppress_email_dispatch_for_other_orders(): void {
+		$this->enable_transactional_emails();
 		$restored_order = WC_Helper_Order::create_order();
 		$restored_order->set_status( OrderStatus::COMPLETED );
 		$restored_order->save();
@@ -435,6 +438,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function test_untrash_preserves_email_hook_callback_order(): void {
 		global $wp_filter;
 
+		$this->enable_transactional_emails();
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
@@ -686,8 +690,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->assertEquals( 0, $new_count );
-
-		remove_action( 'woocommerce_new_order', $callback );
 	}
 
 	/**
@@ -729,8 +731,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 				'Failed to trigger new order hook changing status: ' . $current_status . ' -> ' . $status
 			);
 		}
-
-		remove_action( 'woocommerce_new_order', $callback );
 	}
 
 	/**
@@ -756,8 +756,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order_data_store_cpt->update( $order );
 
 		$this->assertEquals( 1, $new_count );
-
-		remove_action( 'woocommerce_new_order', $callback );
 	}
 
 	/**
@@ -861,9 +859,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testdox An order with missing tax-mode metadata uses the filtered setting without writing during the read.
 	 */
 	public function test_reading_order_without_prices_include_tax_metadata_uses_effective_setting(): void {
-		$previous_tax_mode    = get_option( 'woocommerce_prices_include_tax' );
-		$previous_tax_enabled = get_option( 'woocommerce_calc_taxes' );
-		$order                = null;
+		$order = null;
 
 		try {
 			update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -886,8 +882,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			if ( $order ) {
 				$order->delete( true );
 			}
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
-			update_option( 'woocommerce_calc_taxes', $previous_tax_enabled );
 		}
 	}
 
@@ -900,9 +894,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param string $post_status Post status when WooCommerce first loads the order.
 	 */
 	public function test_native_draft_loads_and_persists_store_defaults( string $tax_mode, bool $expected, string $post_status ): void {
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$previous_currency = get_option( 'woocommerce_currency' );
-		$order_id          = 0;
+		$order_id = 0;
 
 		try {
 			update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -945,8 +937,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			if ( $order_id ) {
 				wp_delete_post( $order_id, true );
 			}
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
-			update_option( 'woocommerce_currency', $previous_currency );
 		}
 	}
 
@@ -973,8 +963,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param string $status      Order status.
 	 */
 	public function test_reading_order_preserves_persisted_tax_mode( string $tax_mode, bool $saved_value, string $status ): void {
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$order             = new WC_Order();
+		$order = new WC_Order();
 
 		try {
 			update_option( 'woocommerce_prices_include_tax', $tax_mode );
@@ -990,7 +979,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			if ( $order->get_id() ) {
 				$order->delete( true );
 			}
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
 		}
 	}
 
@@ -2135,5 +2123,66 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( WC_Order_Data_Store_CPT::class . '::query', $messages, 'Unsupported arguments should raise a notice.' );
 		$this->assertStringStartsWith( $expected_message, $messages[ WC_Order_Data_Store_CPT::class . '::query' ], 'The notice should use the English wording for the argument count.' );
+	}
+
+	/**
+	 * @testdox clear_recorded_coupon_usage_counts() clears a set flag once, and only while the stored status matches the order object.
+	 */
+	public function test_clear_recorded_coupon_usage_counts(): void {
+		$sut         = new WC_Order_Data_Store_CPT();
+		$order       = $this->create_cancelled_order_with_counted_coupon_usage( $sut );
+		$other_order = $this->create_cancelled_order_with_counted_coupon_usage( $sut );
+
+		$copy_with_other_status = clone $order;
+		$copy_with_other_status->set_status( OrderStatus::FAILED );
+		$this->assertFalse( $sut->clear_recorded_coupon_usage_counts( $copy_with_other_status ), 'The flag should not be cleared when the stored status differs' );
+		$this->assertTrue( $sut->get_recorded_coupon_usage_counts( $order->get_id() ), 'The flag should stay set' );
+
+		$this->assertTrue( $sut->clear_recorded_coupon_usage_counts( $order ), 'A set flag should be cleared' );
+		$this->assertFalse( $sut->get_recorded_coupon_usage_counts( $order->get_id() ), 'The flag should read as cleared' );
+		$this->assertFalse( $order->get_recorded_coupon_usage_counts(), 'The order object should be updated' );
+		$this->assertTrue( $sut->get_recorded_coupon_usage_counts( $other_order->get_id() ), 'Other orders should keep their flag' );
+
+		$this->assertFalse( $sut->clear_recorded_coupon_usage_counts( $order ), 'A cleared flag should not be cleared again' );
+	}
+
+	/**
+	 * @testdox get_stored_recorded_coupon_usage_counts() reads the flag from the database, not from the cache.
+	 */
+	public function test_get_stored_recorded_coupon_usage_counts(): void {
+		global $wpdb;
+
+		$sut   = new WC_Order_Data_Store_CPT();
+		$order = $this->create_cancelled_order_with_counted_coupon_usage( $sut );
+		$this->assertFalse( $sut->get_stored_recorded_coupon_usage_counts( WC_Helper_Order::create_order() ), 'An order without the flag should read as not counted' );
+		$this->assertTrue( $sut->get_stored_recorded_coupon_usage_counts( $order ), 'A set flag should read as counted' );
+
+		$this->assertTrue( $sut->get_recorded_coupon_usage_counts( $order ), 'The cached read should see the set flag' );
+		$wpdb->update(
+			$wpdb->postmeta,
+			array( 'meta_value' => 'no' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			array(
+				'post_id'  => $order->get_id(),
+				'meta_key' => '_recorded_coupon_usage_counts', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			)
+		);
+
+		$this->assertTrue( $sut->get_recorded_coupon_usage_counts( $order ), 'The cached read should still see the old value' );
+		$this->assertFalse( $sut->get_stored_recorded_coupon_usage_counts( $order ), 'The stored read should see the cleared flag' );
+	}
+
+	/**
+	 * Create a cancelled order marked as having its coupon usage counted.
+	 *
+	 * @param WC_Order_Data_Store_CPT $data_store Data store to mark the order with.
+	 * @return WC_Order
+	 */
+	private function create_cancelled_order_with_counted_coupon_usage( WC_Order_Data_Store_CPT $data_store ): WC_Order {
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::CANCELLED );
+		$order->save();
+		$data_store->set_recorded_coupon_usage_counts( $order, true );
+
+		return $order;
 	}
 }

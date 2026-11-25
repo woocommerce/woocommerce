@@ -9,7 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Ability that checks a product again or queues a store check, for AbilitiesLoader.
- * No name while the feature is disabled, so the loader skips it.
  *
  * @since 11.4.0
  */
@@ -20,12 +19,12 @@ class RunCheckAbility implements AbilityDefinition {
 	public const NAME = 'woocommerce/run-agent-readiness-check';
 
 	/**
-	 * Ability name, or an empty string while the feature is disabled.
+	 * Ability name.
 	 *
 	 * @return string
 	 */
 	public static function get_name(): string {
-		return self::name_when_enabled( self::NAME );
+		return self::NAME;
 	}
 
 	/**
@@ -82,10 +81,12 @@ class RunCheckAbility implements AbilityDefinition {
 			$report       = wc_get_container()->get( AgentReadiness::class )->get_cached_report();
 			$pending      = $scan->is_pending();
 			$generated_at = is_array( $report ) ? ( $report['generated_at'] ?? null ) : null;
-			return array(
-				'scan_pending'        => $pending,
-				'scan_stalled'        => $pending && $scan->is_stalled(),
-				'report_generated_at' => is_string( $generated_at ) ? $generated_at : null,
+			return self::without_nulls(
+				array(
+					'scan_pending'        => $pending,
+					'scan_stalled'        => $pending && $scan->is_stalled(),
+					'report_generated_at' => is_string( $generated_at ) ? $generated_at : null,
+				)
 			);
 		}
 
@@ -96,7 +97,7 @@ class RunCheckAbility implements AbilityDefinition {
 		}
 		$result = $readiness->check_product( $product );
 		if ( null === $result ) {
-			return new \WP_Error( 'woocommerce_agent_readiness_product_not_checked', __( 'Only published simple and variable products shown in the shop catalog are checked.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_agent_readiness_product_not_checked', __( 'Only published simple and variable products not set to Hidden are checked.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$rules  = $readiness->get_default_rules();
@@ -137,8 +138,8 @@ class RunCheckAbility implements AbilityDefinition {
 					'description' => __( 'Whole store: whether the queued check has not started because scheduled actions are not running on the store. It runs once they do; until then the report does not change.', 'woocommerce' ),
 				),
 				'report_generated_at' => array(
-					'type'        => array( 'string', 'null' ),
-					'description' => __( 'Whole store: when the report agents can read now was made; it changes when the queued check finishes.', 'woocommerce' ),
+					'type'        => 'string',
+					'description' => __( 'Whole store: when the report agents can read now was made; it changes when the queued check finishes. Left out before the first check.', 'woocommerce' ),
 				),
 				'product'             => array(
 					'type'       => 'object',

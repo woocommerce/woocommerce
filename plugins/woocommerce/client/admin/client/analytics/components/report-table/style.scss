@@ -23,7 +23,7 @@
 	.components-card__header {
 		display: grid;
 		grid-gap: $gap-small;
-		grid-template-columns: min-content 1fr min-content;
+		grid-template-columns: auto 1fr min-content;
 	}
 
 	.woocommerce-table__compare.components-button {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Charge the discounted total when a coupon is applied before reloading the Checkout block for an existing unpaid order.

@@ -378,7 +378,7 @@ Allow customers proceed to Checkout.
 - **Name:** woocommerce/proceed-to-checkout-block
 - **Category:** woocommerce
 - **Parent:** woocommerce/cart-totals-block
-- **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+- **Supports:** color (background, gradients, text, ~~link~~), spacing (padding), typography (fontSize, lineHeight, textAlign), ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
 ## Cart Link - woocommerce/cart-link
@@ -433,7 +433,7 @@ Place order button, with optional Terms and Conditions and Return to Cart links.
 - **Name:** woocommerce/checkout-actions-block
 - **Category:** woocommerce
 - **Parent:** woocommerce/checkout-fields-block
-- **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+- **Supports:** color (background, gradients, text, ~~link~~), spacing (padding), typography (fontSize, lineHeight, textAlign), ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** cartPageId, className, lock, priceSeparator, showReturnToCart, showTerms, termsCheckbox, termsText
 
 ## Additional information - woocommerce/checkout-additional-information-block
@@ -1078,7 +1078,7 @@ The contents of this block will display when there are no products found.
 - **Name:** woocommerce/product-collection-no-results
 - **Category:** woocommerce
 - **Ancestor:** woocommerce/product-collection
-- **Supports:** align, color (background, gradients, link, text), email, interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
+- **Supports:** align, color (background, gradients, link, text), email, interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
 
 ## Product Description - woocommerce/product-description
 

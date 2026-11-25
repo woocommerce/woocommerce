@@ -1,31 +1,19 @@
 /**
  * External dependencies
  */
-import {
-	TemplateCompiler,
-	getProductAttributeIds,
-	test as base,
-	expect,
-} from '@woocommerce/e2e-utils';
-
-const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-	templateCompiler: async ( { requestUtils }, provideTemplate ) => {
-		const compiler = await requestUtils.createTemplateFromFile(
-			'archive-product_attribute-filter'
-		);
-		await provideTemplate( compiler );
-	},
-} );
+import { getProductAttributeIds, test, expect } from '@woocommerce/e2e-utils';
 
 test.describe( 'woocommerce/product-filters - Frontend', () => {
 	test.describe( 'Overlay', () => {
-		test.beforeEach( async ( { templateCompiler, page } ) => {
+		let postLink: string;
+
+		test.beforeEach( async ( { createPost, page } ) => {
 			const { colorAttributeId } = await getProductAttributeIds();
-			await templateCompiler.compile( {
+			( { link: postLink } = await createPost( 'attribute-filter', {
 				attributes: {
 					attributeId: colorAttributeId,
 				},
-			} );
+			} ) );
 
 			await page.addInitScript( () => {
 				// Mock the wc global variable.
@@ -45,7 +33,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			page,
 		} ) => {
 			await page.setViewportSize( { width: 400, height: 600 } );
-			await page.goto( '/shop' );
+			await page.goto( postLink );
 
 			const openOverlayButton = page.getByRole( 'button', {
 				name: 'Filter products',
@@ -137,7 +125,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 
 		test.skip( 'filter is working inside overlay', async ( { page } ) => {
 			await page.setViewportSize( { width: 400, height: 600 } );
-			await page.goto( '/shop' );
+			await page.goto( postLink );
 
 			await page
 				.getByRole( 'button', {
@@ -154,7 +142,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 				.click();
 
 			// wait for navigation
-			await page.waitForURL( /.*filter_color=gray.*/ );
+			await page.waitForURL( /.*wcp-1-filter_color=gray.*/ );
 
 			const products = page.locator( '.wc-block-product' );
 
@@ -165,7 +153,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 	test.describe( 'Multiple instances', () => {
 		test( 'syncs active filters between Product Filters blocks', async ( {
 			page,
-			requestUtils,
+			createPost,
 		} ) => {
 			await page.addInitScript( () => {
 				// Mock the wc global variable.
@@ -180,18 +168,14 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 				}
 			} );
 
-			const templateCompiler = await requestUtils.createTemplateFromFile(
-				'archive-product_multiple-product-filters'
-			);
 			const { colorAttributeId } = await getProductAttributeIds();
-
-			await templateCompiler.compile( {
+			const { link } = await createPost( 'multiple-product-filters', {
 				attributes: {
 					attributeId: colorAttributeId,
 				},
 			} );
 
-			await page.goto( '/shop' );
+			await page.goto( link );
 
 			const productFilters = page.locator(
 				'.wp-block-woocommerce-product-filters'
@@ -212,7 +196,8 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 
 			await grayCheckbox.click();
 			await page.waitForURL(
-				( url ) => url.searchParams.get( 'filter_color' ) === 'gray'
+				( url ) =>
+					url.searchParams.get( 'wcp-1-filter_color' ) === 'gray'
 			);
 
 			await expect( grayActiveFilter ).toBeVisible();
@@ -224,7 +209,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 				} )
 				.click();
 			await page.waitForURL(
-				( url ) => ! url.searchParams.has( 'filter_color' )
+				( url ) => ! url.searchParams.has( 'wcp-1-filter_color' )
 			);
 
 			await expect( grayActiveFilter ).toBeHidden();

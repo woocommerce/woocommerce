@@ -59,14 +59,10 @@ class PaymentRecoveryTest extends WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_valid_order_statuses_for_payment', $declare_on_hold_payable );
 
-		try {
-			$this->assertFalse(
-				PaymentRecovery::order_moved_past_payment( $order ),
-				'A status the site declares payable is still awaiting payment.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_valid_order_statuses_for_payment', $declare_on_hold_payable );
-		}
+		$this->assertFalse(
+			PaymentRecovery::order_moved_past_payment( $order ),
+			'A status the site declares payable is still awaiting payment.'
+		);
 	}
 
 	/**
@@ -158,6 +154,22 @@ class PaymentRecoveryTest extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
 
 		$this->assertNull( PaymentRecovery::get_session_order_moved_past_payment(), 'A changed cart is a new purchase, not a repeat of the old one.' );
+	}
+
+	/**
+	 * @testdox Should still find the order sent to the gateway after a price change, so a resubmit doesn't place it twice.
+	 */
+	public function test_session_order_moved_past_payment_ignores_a_price_change(): void {
+		$order = $this->order_for_the_current_cart( OrderStatus::ON_HOLD );
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+
+		$cart_item = current( WC()->cart->get_cart() );
+		$cart_item['data']->set_price( 25 );
+		WC()->cart->calculate_totals();
+
+		$this->assertFalse( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The new price changes the cart hash.' );
+		$found = PaymentRecovery::get_session_order_moved_past_payment();
+		$this->assertSame( $order->get_id(), $found ? $found->get_id() : null, 'The same items are a repeat of the order, whatever they cost now.' );
 	}
 
 	/**

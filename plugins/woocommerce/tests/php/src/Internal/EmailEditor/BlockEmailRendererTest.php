@@ -129,6 +129,25 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The plain-text preheader is passed to the renderer escaped, so tag-shaped text in it stays visible.
+	 */
+	public function testItEscapesThePlainTextPreheader(): void {
+		$this->skip_if_unsupported_environment();
+
+		$wc_mail_mock     = $this->createMock( \WC_Email::class );
+		$wc_mail_mock->id = 'test_email';
+		$wc_mail_mock->method( 'get_recipient' )->willReturn( 'customer@test.com' );
+		$wc_mail_mock->method( 'get_subject' )->willReturn( 'Test Woo Email' );
+		$wc_mail_mock->method( 'get_preheader' )->willReturn( 'Big <em>Sale</em> & more &lt;3' );
+		$wc_mail_mock->method( 'get_content_html' )->willReturn( 'Test Woo Content' );
+		$wc_mail_mock->method( 'get_block_editor_email_template_content' )->willReturn( 'Test Woo Content' );
+
+		$rendered_email = $this->block_email_renderer->maybe_render_block_email( $wc_mail_mock );
+
+		$this->assertStringContainsString( 'Big &lt;em&gt;Sale&lt;/em&gt; &amp; more &amp;lt;3', $rendered_email );
+	}
+
+	/**
 	 * @testdox Should render non-null HTML from the file template when no post mapping exists.
 	 */
 	public function testItRendersFromFileTemplateWhenNoPostMappingExists(): void {
@@ -204,14 +223,10 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 		// sending must hand back null so the classic pipeline takes over.
 		add_filter( 'woocommerce_email_block_template_html', '__return_empty_string' );
 
-		try {
-			$this->assertNull(
-				$this->block_email_renderer->maybe_render_block_email( $wc_mail_mock ),
-				'An empty file template must yield null, not an empty-bodied email'
-			);
-		} finally {
-			remove_filter( 'woocommerce_email_block_template_html', '__return_empty_string' );
-		}
+		$this->assertNull(
+			$this->block_email_renderer->maybe_render_block_email( $wc_mail_mock ),
+			'An empty file template must yield null, not an empty-bodied email'
+		);
 	}
 
 	/**
@@ -418,9 +433,7 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		remove_filter( 'woocommerce_transactional_emails_for_block_editor', array( $this, 'register_fake_block_editor_email_ids' ) );
 		WCTransactionalEmailPostsManager::get_instance()->clear_caches();
-		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 	}
 
 	/**

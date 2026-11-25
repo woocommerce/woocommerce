@@ -13,8 +13,8 @@ use Automattic\WooCommerce\Internal\Utilities\Users;
  * short-lived, single-use verification key carried by the emailed verify-link, together
  * with the helpers consumed by the rest of the email-verification feature.
  *
- * The verify-link is only ever *completed* by a request authenticated as the link's target
- * user (see {@see VerificationController::handle_confirm_submission()}), so the key needs no
+ * The verify-link is only ever *completed* with the target user's password (see
+ * {@see VerificationController::handle_confirm_form()}), so the key needs no
  * brute-force protection: it is high-entropy ({@see self::KEY_LENGTH} chars), single-use, and
  * expires after {@see self::KEY_TTL}.
  *

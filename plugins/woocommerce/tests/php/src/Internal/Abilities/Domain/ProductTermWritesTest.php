@@ -8,25 +8,21 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
-use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributeCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermUpdate;
 use WC_Unit_Test_Case;
+use Automattic\WooCommerce\Tests\Internal\Abilities\ExtensibleAbilitiesTestTrait;
 
 /**
  * Tests product term writes through the registered abilities.
  */
 class ProductTermWritesTest extends WC_Unit_Test_Case {
 
-	/**
-	 * Extension state restored after each test.
-	 *
-	 * @var array
-	 */
-	private array $saved_state = array();
+	use ExtensibleAbilitiesTestTrait;
+
 
 	/**
 	 * Taxonomies registered before the test, so the ones it registers can be removed.
@@ -36,19 +32,30 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 	private array $taxonomies_before;
 
 	/**
+	 * An administrator that every test acts as.
+	 *
+	 * @var int
+	 */
+	private static $administrator_id;
+
+	/**
+	 * Create the fixtures that no test changes beyond its own transaction.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$administrator_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
 	 * Set up an administrator with extension fields switched off.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		foreach ( array( 'resources', 'fields' ) as $name ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
-			$property->setAccessible( true );
-			$this->saved_state[ $name ] = $property->getValue();
-			$property->setValue( null, array() );
-		}
+		$this->isolate_extensible_abilities();
 		$this->taxonomies_before = get_taxonomies();
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::$administrator_id );
 	}
 
 	/**
@@ -57,11 +64,6 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wc_product_attributes;
 		try {
-			foreach ( $this->saved_state as $name => $value ) {
-				$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
-				$property->setAccessible( true );
-				$property->setValue( null, $value );
-			}
 			foreach ( array_diff( get_taxonomies(), $this->taxonomies_before ) as $taxonomy ) {
 				unregister_taxonomy( $taxonomy );
 				unset( $wc_product_attributes[ $taxonomy ] );
@@ -576,10 +578,7 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 		$schema = ProductTermCreate::get_registration_args()['output_schema'];
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
 		$this->assertSame( $schema, ProductTermCreate::get_registration_args()['output_schema'] );
-		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
-		do_action( 'woocommerce_extensible_abilities_resources_init' );
-		add_action(
-			'woocommerce_extensible_abilities_init',
+		$this->enable_extensible_abilities(
 			static function () {
 				ExtensibleAbilities::register_field(
 					array(
@@ -592,7 +591,6 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 				);
 			}
 		);
-		do_action( 'woocommerce_extensible_abilities_init' );
 
 		$created = $this->create(
 			array(
@@ -629,10 +627,7 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
 		$id = self::factory()->term->create( array( 'taxonomy' => 'product_tag' ) );
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
-		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
-		do_action( 'woocommerce_extensible_abilities_resources_init' );
-		add_action(
-			'woocommerce_extensible_abilities_init',
+		$this->enable_extensible_abilities(
 			static function () {
 				ExtensibleAbilities::register_field(
 					array(
@@ -645,7 +640,6 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 				);
 			}
 		);
-		do_action( 'woocommerce_extensible_abilities_init' );
 
 		$created = $this->create(
 			array(

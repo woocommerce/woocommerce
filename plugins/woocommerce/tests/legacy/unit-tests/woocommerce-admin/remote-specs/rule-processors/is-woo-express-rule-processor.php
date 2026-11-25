@@ -33,14 +33,6 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_IsWooExpressRuleProcessor extend
 	}
 
 	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		remove_all_filters( 'test_wc_calypso_bridge_is_woo_express_plan' );
-	}
-
-	/**
 	 * Get the is_woo_express rule.
 	 *
 	 * @return object The rule.

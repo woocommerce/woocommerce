@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Return matching result totals from product, order, and payment gateway query abilities.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Wrap personalization tag categories onto more rows in the Personalization Tags modal so none are hidden.

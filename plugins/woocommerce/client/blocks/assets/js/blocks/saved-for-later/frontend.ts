@@ -9,7 +9,7 @@ import {
 	type AsyncAction,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/shopper-lists';
-import '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce';
 import type {
 	RawShopperListItem,
 	Store as ShopperListsStore,
@@ -17,7 +17,7 @@ import type {
 import type {
 	AddCartItemOutcome,
 	Store as WooCommerce,
-} from '@woocommerce/stores/woocommerce/cart';
+} from '@woocommerce/stores/woocommerce';
 /**
  * Internal dependencies
  */

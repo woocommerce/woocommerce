@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 
 /**
  * Shortcode checkout class.
@@ -129,8 +130,8 @@ class WC_Shortcode_Checkout {
 					throw new Exception( __( 'This order cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ) );
 				}
 
-				// Does not need payment.
-				if ( ! $order->needs_payment() ) {
+				// Does not need payment, or is a checkout-draft that has not passed checkout validation.
+				if ( ! $order->needs_payment() || $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
 					/* translators: %s: order status */
 					throw new Exception( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ) );
 				}
@@ -171,7 +172,7 @@ class WC_Shortcode_Checkout {
 									continue;
 								}
 
-								// Check stock based on all items in the cart and consider any held stock within pending orders.
+								// Check stock based on all items in the cart and consider any stock held by other orders.
 								$held_stock     = wc_get_held_stock_quantity( $product, $order->get_id() );
 								$required_stock = $quantities[ $product->get_stock_managed_by_id() ];
 
@@ -245,6 +246,7 @@ class WC_Shortcode_Checkout {
 					array(
 						'order'              => $order,
 						'available_gateways' => $available_gateways,
+						'has_chosen_gateway' => PaymentUtils::has_chosen_gateway( $available_gateways ),
 						'order_button_text'  => $order_button_text,
 					)
 				);
@@ -258,9 +260,9 @@ class WC_Shortcode_Checkout {
 			$order_key = isset( $_GET['key'] ) && is_string( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flow selectors are cleaned; order access verifies key/ownership.
 			$order     = wc_get_order( $order_id );
 
-			if ( $order && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
+			if ( $order instanceof WC_Order && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
 
-				if ( $order->needs_payment() ) {
+				if ( $order->needs_payment() && ! $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
 
 					wc_get_template( 'checkout/order-receipt.php', array( 'order' => $order ) );
 
@@ -340,9 +342,6 @@ class WC_Shortcode_Checkout {
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->save();
 		}
-
-		// Empty current cart.
-		wc_empty_cart();
 
 		// If the specified order ID was invalid, we still render the default order received page (which will simply
 		// state that the order was received, but will not output any other details: this makes it harder to probe for
@@ -438,12 +437,13 @@ class WC_Shortcode_Checkout {
 	 */
 	private static function guest_should_verify_email( WC_Order $order, string $context ): bool {
 		// If we cannot match the order with the current user, ask that they verify their email address.
-		$nonce_is_valid = wp_verify_nonce( filter_input( INPUT_POST, 'check_submission' ), 'wc_verify_email' );
+		$nonce          = is_string( $_POST['check_submission'] ?? null ) ? sanitize_text_field( wp_unslash( $_POST['check_submission'] ) ) : '';
+		$nonce_is_valid = wp_verify_nonce( $nonce, 'wc_verify_email' );
 		$supplied_email = null;
 		$order_id       = $order->get_id();
 
-		if ( $nonce_is_valid ) {
-			$supplied_email = sanitize_email( wp_unslash( filter_input( INPUT_POST, 'email' ) ) );
+		if ( $nonce_is_valid && is_string( $_POST['email'] ?? null ) ) {
+			$supplied_email = sanitize_email( wp_unslash( $_POST['email'] ) );
 		}
 
 		return Users::should_user_verify_order_email( $order_id, $supplied_email, $context );

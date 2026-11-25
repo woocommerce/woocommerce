@@ -372,10 +372,6 @@ class ProductQuery extends \WP_UnitTestCase {
 			),
 			$merged_query['tax_query']
 		);
-		remove_filter(
-			'pre_option_woocommerce_hide_out_of_stock_items',
-			$fn
-		);
 	}
 
 	/**

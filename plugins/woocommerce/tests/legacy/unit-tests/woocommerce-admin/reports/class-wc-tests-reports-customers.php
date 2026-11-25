@@ -6,11 +6,179 @@
  */
 
 use Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\DataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 
 /**
  * Class WC_Admin_Tests_Reports_Customers
  */
 class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
+
+	/**
+	 * @testdox Should preserve registered customer data when importing guest orders with the same email.
+	 */
+	public function test_guest_import_preserves_registered_customer_data(): void {
+		WC_Helper_Reports::reset_stats_dbs();
+		$customer = WC_Helper_Customer::create_customer();
+		CustomersDataStore::update_registered_customer( $customer->get_id() );
+		$customer_id       = CustomersDataStore::get_customer_id_by_user_id( $customer->get_id() );
+		$original_row      = $this->get_customer_record( $customer_id );
+		$updated_customers = array();
+		add_action(
+			'woocommerce_analytics_update_customer',
+			static function ( $updated_customer_id ) use ( &$updated_customers ) {
+				$updated_customers[] = $updated_customer_id;
+			}
+		);
+
+		$order = new WC_Order();
+		$order->set_billing_email( $customer->get_email() );
+		$order->set_billing_first_name( 'Guest' );
+		$order->set_billing_last_name( 'Customer' );
+		$order->set_billing_city( 'Boston' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		OrdersScheduler::import( $order->get_id() );
+
+		$this->assertEquals( $original_row, $this->get_customer_record( $customer_id ), 'A guest import must preserve the entire registered lookup row.' );
+		$this->assertSame( $customer_id, (int) CustomersDataStore::get_existing_customer_id_from_order( $order ), 'Historical email attribution should remain unchanged.' );
+		$this->assertSame( array(), $updated_customers, 'A blocked update must not emit a customer-update notification.' );
+	}
+
+	/**
+	 * @testdox Should protect registered customer data on repeated guest imports after the billing email changes.
+	 */
+	public function test_guest_reimport_preserves_registered_customer_data(): void {
+		WC_Helper_Reports::reset_stats_dbs();
+		$customer = WC_Helper_Customer::create_customer();
+		CustomersDataStore::update_registered_customer( $customer->get_id() );
+		$customer_id  = CustomersDataStore::get_customer_id_by_user_id( $customer->get_id() );
+		$original_row = $this->get_customer_record( $customer_id );
+
+		$order = new WC_Order();
+		$order->set_billing_email( $customer->get_email() );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+
+		$order->set_billing_email( 'updated-guest@example.com' );
+		$order->set_billing_first_name( 'Updated Guest' );
+		$order->set_billing_city( 'Boston' );
+		$order->save();
+		OrdersScheduler::import( $order->get_id() );
+		OrdersScheduler::import( $order->get_id() );
+
+		$this->assertEquals( $original_row, $this->get_customer_record( $customer_id ), 'A stale order statistics association must not authorize a registered customer update.' );
+		$this->assertSame( $customer_id, (int) CustomersDataStore::get_existing_customer_id_from_order( $order ), 'The existing order statistics association should remain unchanged.' );
+		$this->assertFalse( CustomersDataStore::sync_order_customer( $order->get_id() ), 'A guest order must not report updating a registered lookup row.' );
+	}
+
+	/**
+	 * @testdox Should update customer data when the order and lookup row have matching user identities.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $registered Whether to use a registered customer or a guest.
+	 */
+	public function test_sync_order_customer_with_matching_identity( bool $registered ): void {
+		WC_Helper_Reports::reset_stats_dbs();
+		$customer = $registered ? WC_Helper_Customer::create_customer() : null;
+		if ( $customer ) {
+			CustomersDataStore::update_registered_customer( $customer->get_id() );
+		}
+
+		$order = new WC_Order();
+		$order->set_customer_id( $customer ? $customer->get_id() : 0 );
+		$order->set_billing_email( $customer ? $customer->get_email() : 'guest@example.com' );
+		$order->set_billing_city( 'Boston' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+		$customer_id = (int) CustomersDataStore::get_existing_customer_id_from_order( $order );
+
+		$order->set_billing_city( 'Chicago' );
+		$order->save();
+		$updated_customers = array();
+		add_action(
+			'woocommerce_analytics_update_customer',
+			static function ( $updated_customer_id ) use ( &$updated_customers ) {
+				$updated_customers[] = (int) $updated_customer_id;
+			}
+		);
+
+		$this->assertTrue( CustomersDataStore::sync_order_customer( $order->get_id() ), 'Matching identities should permit an update.' );
+		$row = $this->get_customer_record( $customer_id )[0];
+		$this->assertSame( 'Chicago', $row->city, 'The lookup row should receive the latest order location.' );
+		$this->assertSame( $customer ? (string) $customer->get_id() : null, $row->user_id, 'Synchronizing must preserve the registered or guest identity.' );
+		$this->assertSame( array( $customer_id ), $updated_customers, 'An actual update should emit one customer-update notification.' );
+		$this->assertFalse( CustomersDataStore::sync_order_customer( $order->get_id() ), 'An unchanged lookup row should report no update.' );
+		$this->assertSame( array( $customer_id ), $updated_customers, 'A no-op synchronization should not emit another notification.' );
+	}
+
+	/**
+	 * @testdox Removing a guest order preserves a registered lookup row attributed by email.
+	 * @testWith ["delete"]
+	 *           ["erase"]
+	 * @param string $operation Order operation.
+	 */
+	public function test_guest_removal_preserves_registered_identity( string $operation ): void {
+		WC_Helper_Reports::reset_stats_dbs();
+		$customer = WC_Helper_Customer::create_customer();
+		CustomersDataStore::update_registered_customer( $customer->get_id() );
+		$customer_id = CustomersDataStore::get_customer_id_by_user_id( $customer->get_id() );
+		$order       = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $customer->get_email() );
+		$order->save();
+		OrdersScheduler::import( $order->get_id() );
+		$before = $this->get_customer_record( $customer_id );
+
+		if ( 'delete' === $operation ) {
+			$order->delete( true );
+		} else {
+			WC_Privacy_Erasers::remove_order_personal_data( $order );
+		}
+
+		$this->assertEquals( $before, $this->get_customer_record( $customer_id ), 'Guest order cleanup must preserve the registered customer profile.' );
+	}
+
+	/**
+	 * @testdox Erasing an order anonymizes its own guest or registered Analytics identity.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $registered Whether the order belongs to a registered customer.
+	 */
+	public function test_order_erasure_preserves_authorized_anonymization( bool $registered ): void {
+		WC_Helper_Reports::reset_stats_dbs();
+		$customer = $registered ? WC_Helper_Customer::create_customer() : null;
+		$order    = WC_Helper_Order::create_order( $customer ? $customer->get_id() : 0 );
+		$order->set_billing_email( $customer ? $customer->get_email() : 'erase-guest@example.com' );
+		$order->save();
+		OrdersScheduler::import( $order->get_id() );
+		$customer_id = CustomersDataStore::get_existing_customer_id_from_order( $order );
+
+		WC_Privacy_Erasers::remove_order_personal_data( $order );
+
+		$row = $this->get_customer_record( $customer_id )[0];
+		$this->assertNull( $row->user_id, 'Authorized erasure must remove the Analytics account association.' );
+		$this->assertSame( 'deleted@site.invalid', $row->email, 'Authorized erasure must remove the Analytics email.' );
+	}
+
+	/**
+	 * @testdox Deleting the last guest order removes its guest Analytics row.
+	 */
+	public function test_last_guest_order_deletion_cleans_lookup(): void {
+		WC_Helper_Reports::reset_stats_dbs();
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( 'delete-guest@example.com' );
+		$order->save();
+		OrdersScheduler::import( $order->get_id() );
+		$customer_id = CustomersDataStore::get_existing_customer_id_from_order( $order );
+
+		$order->delete( true );
+
+		$this->assertCount( 0, $this->get_customer_record( $customer_id ), 'Unused guest rows should still be removed.' );
+	}
 
 	/**
 	 * Test order count calculation for customer.
@@ -53,13 +221,13 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test customer lookup tables are cleaned after deleting an order.
+	 * Test registered customer lookup rows survive order deletion.
 	 *
-	 * A customer record should only be deleted if the customer has no other orders.
+	 * Registered profiles remain until account or privacy operations remove them.
 	 *
 	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::sync_on_order_delete
 	 */
-	public function test_order_deletion_removes_customer() {
+	public function test_order_deletion_preserves_registered_customer() {
 		WC_Helper_Reports::reset_stats_dbs();
 
 		// Create a customer.
@@ -95,9 +263,9 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 		$order1->delete( true );
 		$this->assertCount( 1, $this->get_customer_record( $customer_id ), 'customer remains' );
 
-		// Customer should be removed in lookup table after both orders are deleted.
+		// Registered profiles remain available after their last order is deleted.
 		$order2->delete( true );
-		$this->assertCount( 0, $this->get_customer_record( $customer_id ), 'customer removed' );
+		$this->assertCount( 1, $this->get_customer_record( $customer_id ), 'registered customer remains' );
 	}
 
 	/**
