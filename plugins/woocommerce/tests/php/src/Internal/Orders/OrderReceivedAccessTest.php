@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Orders;
 use Automattic\WooCommerce\Internal\Orders\OrderReceivedAccess;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Customer;
-use WC_Helper_Order;
 use WC_Order;
 use WC_Unit_Test_Case;
 
@@ -44,13 +43,28 @@ class OrderReceivedAccessTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a saved order with a billing email. The data store gives it an order key.
+	 *
+	 * @param int $customer_id Customer ID, or 0 for a guest order.
+	 * @return WC_Order
+	 */
+	private function create_order( int $customer_id = 0 ): WC_Order {
+		$order = new WC_Order();
+		$order->set_customer_id( $customer_id );
+		$order->set_billing_email( 'buyer@example.com' );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
 	 * Create an order placed an hour ago, after the grace period.
 	 *
 	 * @param int $customer_id Customer ID, or 0 for a guest order.
 	 * @return WC_Order
 	 */
 	private function create_old_order( int $customer_id = 0 ): WC_Order {
-		$order = WC_Helper_Order::create_order( $customer_id );
+		$order = $this->create_order( $customer_id );
 		$order->set_date_created( time() - HOUR_IN_SECONDS );
 		$order->save();
 
@@ -62,7 +76,7 @@ class OrderReceivedAccessTest extends WC_Unit_Test_Case {
 	 */
 	public function test_wrong_order_key_gives_no_access(): void {
 		$customer = WC_Helper_Customer::create_customer();
-		$order    = WC_Helper_Order::create_order( $customer->get_id() );
+		$order    = $this->create_order( $customer->get_id() );
 		wp_set_current_user( $customer->get_id() );
 
 		$this->assertFalse( $this->sut->current_user_can_view_order( $order, 'wrong' ) );
@@ -102,7 +116,7 @@ class OrderReceivedAccessTest extends WC_Unit_Test_Case {
 	 * @testdox A guest sees a guest order during the grace period, and must unlock it with the email address after it.
 	 */
 	public function test_guest_order_grace_period_then_unlock(): void {
-		$new_order = WC_Helper_Order::create_order( 0 );
+		$new_order = $this->create_order();
 		$old_order = $this->create_old_order();
 
 		$this->assertTrue( $this->sut->current_user_can_view_order( $new_order, $new_order->get_order_key() ), 'A new order is within the grace period.' );
@@ -158,7 +172,7 @@ class OrderReceivedAccessTest extends WC_Unit_Test_Case {
 	 * @testdox woocommerce_order_email_verification_grace_period can remove the grace period.
 	 */
 	public function test_grace_period_filter(): void {
-		$order = WC_Helper_Order::create_order( 0 );
+		$order = $this->create_order();
 		add_filter(
 			'woocommerce_order_email_verification_grace_period',
 			static function () {
@@ -193,7 +207,7 @@ class OrderReceivedAccessTest extends WC_Unit_Test_Case {
 	 * @testdox Only the billing email address unlocks the order, in any letter case.
 	 */
 	public function test_email_unlocks_order(): void {
-		$order = WC_Helper_Order::create_order( 0 );
+		$order = $this->create_order();
 
 		$this->assertTrue( $this->sut->email_unlocks_order( $order, strtoupper( $order->get_billing_email() ) ) );
 		$this->assertFalse( $this->sut->email_unlocks_order( $order, 'someone-else@example.com' ) );
