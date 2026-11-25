@@ -8,10 +8,10 @@ export const compareStrings = (
 	a: string | null | undefined,
 	b: string | null | undefined
 ): number => {
-	if ( a == null ) {
-		return b == null ? 0 : 1;
+	if ( a === null || a === undefined ) {
+		return b === null || b === undefined ? 0 : 1;
 	}
-	if ( b == null ) {
+	if ( b === null || b === undefined ) {
 		return -1;
 	}
 	return a < b ? -1 : Number( a > b );
