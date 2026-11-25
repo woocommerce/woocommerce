@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Screen readers no longer read each product gallery image twice; the thumbnail strip under the main image is now hidden from them.
