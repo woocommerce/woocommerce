@@ -707,12 +707,27 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$controller->register_feature_hooks();
 
 			$this->assertNotFalse( has_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ) ), 'The controller should initialize email previews when the feature is enabled.' );
+			$this->assertNotFalse( has_filter( 'woocommerce_endpoint_order-withdrawal_is_valid_request', array( OrderWithdrawalController::class, 'handle_endpoint_is_valid_request' ) ), 'The controller should validate endpoint values when the feature is enabled.' );
 			$this->assertFalse( has_action( 'update_option_woocommerce_coming_soon', array( $notification, 'maybe_add_note_when_store_goes_live' ) ), 'The feature highlight notification should not listen for coming-soon changes when the feature is enabled.' );
 			$this->assertFalse( has_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ) ), 'The feature highlight notification should not run daily when the feature is enabled.' );
 		} finally {
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ), 10 );
 		}
+	}
+
+	/**
+	 * @testdox Should only accept an empty order withdrawal endpoint value.
+	 *
+	 * @testWith ["", true]
+	 *           ["invalid", false]
+	 *           ["0", false]
+	 *
+	 * @param string $value    Requested endpoint value.
+	 * @param bool   $is_valid Whether the value should be accepted.
+	 */
+	public function test_controller_validates_endpoint_value( string $value, bool $is_valid ): void {
+		$this->assertSame( $is_valid, OrderWithdrawalController::handle_endpoint_is_valid_request( true, $value ), 'Only the bare withdrawal endpoint should be accepted.' );
 	}
 
 	/**
@@ -741,6 +756,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( has_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ) ), 'The endpoint query var should not be registered while the feature is disabled.' );
 		$this->assertFalse( has_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ) ), 'The endpoint title should not be registered while the feature is disabled.' );
+		$this->assertFalse( has_filter( 'woocommerce_endpoint_order-withdrawal_is_valid_request', array( OrderWithdrawalController::class, 'handle_endpoint_is_valid_request' ) ), 'The endpoint validator should not be registered while the feature is disabled.' );
 		$this->assertFalse( has_filter( 'woocommerce_settings_pages', array( $controller, 'add_endpoint_setting' ) ), 'The endpoint setting should not be registered while the feature is disabled.' );
 		$this->assertFalse( has_action( 'woocommerce_account_order-withdrawal_endpoint', array( $controller, 'render_view' ) ), 'The endpoint renderer should not be registered while the feature is disabled.' );
 		$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ), 'HPOS order cleanup should stay registered while the feature is disabled.' );

@@ -100,6 +100,7 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 
 		add_filter( 'woocommerce_get_query_vars', array( $this, 'add_query_var' ), 10, 1 );
 		add_filter( 'woocommerce_endpoint_' . OrderWithdrawalEndpoint::ENDPOINT_KEY . '_title', array( $this, 'get_endpoint_title' ), 10, 1 );
+		add_filter( 'woocommerce_endpoint_' . OrderWithdrawalEndpoint::ENDPOINT_KEY . '_is_valid_request', array( self::class, 'handle_endpoint_is_valid_request' ), 10, 2 );
 		add_filter( 'woocommerce_settings_pages', array( $this, 'add_endpoint_setting' ), 10, 1 );
 		add_action( 'woocommerce_account_' . OrderWithdrawalEndpoint::ENDPOINT_KEY . '_endpoint', array( $this, 'render_view' ) );
 
@@ -126,6 +127,21 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		return $this->is_enabled()
 			&& isset( $wp->query_vars[ OrderWithdrawalEndpoint::ENDPOINT_KEY ] )
 			&& OrderWithdrawalEndpoint::ENDPOINT_KEY === WC()->query->get_current_endpoint();
+	}
+
+	/**
+	 * Only accept the withdrawal endpoint without a trailing value.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $is_valid Whether previous validators accepted the value.
+	 * @param mixed $value    Requested endpoint value.
+	 * @return bool
+	 *
+	 * @since 11.4.0
+	 */
+	public static function handle_endpoint_is_valid_request( $is_valid, $value ): bool {
+		return true === $is_valid && '' === $value;
 	}
 
 	/**

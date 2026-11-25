@@ -59,6 +59,7 @@ class WC_Query {
 			add_action( 'wp_loaded', array( $this, 'get_errors' ), 20 );
 			add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 			add_action( 'parse_request', array( $this, 'parse_request' ), 0 );
+			add_filter( 'pre_handle_404', array( $this, 'handle_pre_handle_404' ), 10, 2 );
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_filter( 'get_pagenum_link', array( $this, 'remove_add_to_cart_pagination' ), 10, 1 );
 		}
@@ -274,6 +275,117 @@ class WC_Query {
 			}
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
+	 * Reject invalid endpoint values before endpoint actions or templates run.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $preempt Whether another filter has handled the response status.
+	 * @param mixed $query   The main WordPress query.
+	 * @return mixed Whether to skip WordPress's default status handling.
+	 *
+	 * @since 11.4.0
+	 */
+	public function handle_pre_handle_404( $preempt, $query ) {
+		global $wp;
+
+		if ( false !== $preempt || ! $query instanceof WP_Query || ! $wp instanceof WP || is_admin() ) {
+			return $preempt;
+		}
+
+		$endpoints = $this->get_query_vars();
+		if ( ! is_array( $endpoints ) ) {
+			return $preempt;
+		}
+
+		// Query-string and POST parameters can override the rewrite capture before parse_request runs.
+		parse_str( $wp->matched_query, $matched_query_vars );
+
+		foreach ( $endpoints as $key => $slug ) {
+			if ( ! is_string( $key ) || ! is_string( $slug ) || '' === $slug || ! has_filter( 'woocommerce_endpoint_' . $key . '_is_valid_request' ) ) {
+				continue;
+			}
+
+			foreach ( $this->get_endpoint_values( $key, $slug, $wp, $matched_query_vars ) as $value ) {
+				/**
+				 * Filters whether a requested endpoint value is valid.
+				 *
+				 * Runs separately for rewrite captures, query vars, and request parameters.
+				 * Endpoints without a validator retain their existing behavior.
+				 *
+				 * @param bool  $is_valid Whether the value is valid.
+				 * @param mixed $value    The endpoint value, before sanitization for request parameters.
+				 *
+				 * @since 11.4.0
+				 */
+				$is_valid = apply_filters( 'woocommerce_endpoint_' . $key . '_is_valid_request', true, $value );
+
+				if ( true !== $is_valid ) {
+					$this->set_endpoint_404( $wp, $query, $endpoints );
+					return true;
+				}
+			}
+		}
+
+		return $preempt;
+	}
+
+	/**
+	 * Collect endpoint values without letting one request source hide another.
+	 *
+	 * @param string                 $key                Internal endpoint key.
+	 * @param string                 $slug               Configured endpoint slug.
+	 * @param WP                     $wp                 Current WordPress environment.
+	 * @param array<array-key,mixed> $matched_query_vars Query vars captured by the rewrite rule.
+	 * @return mixed[] Endpoint values to validate.
+	 */
+	private function get_endpoint_values( string $key, string $slug, WP $wp, array $matched_query_vars ): array {
+		$values = array();
+
+		foreach ( array_unique( array( $key, $slug ) ) as $var ) {
+			if ( isset( $matched_query_vars[ $var ] ) ) {
+				$values[] = $matched_query_vars[ $var ];
+			}
+			if ( isset( $wp->query_vars[ $var ] ) ) {
+				$values[] = $wp->query_vars[ $var ];
+			}
+
+			// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only route validation must inspect values before sanitization can discard invalid input.
+			if ( isset( $_GET[ $var ] ) ) {
+				$values[] = wp_unslash( $_GET[ $var ] );
+			}
+			if ( isset( $_POST[ $var ] ) ) {
+				$values[] = wp_unslash( $_POST[ $var ] );
+			}
+			// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		}
+
+		return $values;
+	}
+
+	/**
+	 * Set a normal WordPress 404 and prevent further endpoint dispatch.
+	 *
+	 * @param WP                  $wp        Current WordPress environment.
+	 * @param WP_Query            $query     The main WordPress query.
+	 * @param array<string,mixed> $endpoints Registered endpoint keys and slugs.
+	 */
+	private function set_endpoint_404( WP $wp, WP_Query $query, array $endpoints ): void {
+		foreach ( $endpoints as $key => $slug ) {
+			if ( is_string( $key ) && is_string( $slug ) ) {
+				unset( $wp->query_vars[ $key ], $wp->query_vars[ $slug ], $query->query_vars[ $key ], $query->query_vars[ $slug ] );
+			}
+		}
+
+		$wp->query_vars['error'] = '404';
+		$query->set_404();
+		status_header( 404 );
+		nocache_headers();
+
+		// Canonical redirects can otherwise turn rejected endpoints into successful page requests.
+		add_filter( 'redirect_canonical', '__return_false' );
 	}
 
 	/**
