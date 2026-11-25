@@ -114,7 +114,7 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			 *
 			 * @since 5.8.0
 			 * @since 11.5.0 The filter also runs with the 'add' context when products are added to an order.
-			 * @param string|float $step    The current step amount to be used in the quantity editor.
+			 * @param int|float    $step    The current step amount to be used in the quantity editor.
 			 * @param WC_Product   $product The product that is being edited.
 			 * @param string       $context The context in which the quantity editor is shown, 'edit', 'refund' or 'add'.
 			 */
@@ -129,7 +129,7 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			 *
 			 * @since 5.8.0
 			 * @since 11.2.0 The filter also runs with the 'add' context when products are added to an order.
-			 * @param string|float $min     The current minimum amount to be used in the quantity editor.
+			 * @param string       $min     The current minimum amount to be used in the quantity editor.
 			 * @param WC_Product   $product The product that is being edited.
 			 * @param string       $context The context in which the quantity editor is shown, 'edit', 'refund' or 'add'.
 			 */
