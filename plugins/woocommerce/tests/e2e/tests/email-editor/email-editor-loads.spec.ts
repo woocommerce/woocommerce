@@ -116,6 +116,48 @@ test.describe(
 			).toContainText( `New order: #[woocommerce/order-number]` );
 		} );
 
+		test( 'Hides core UI that edits the site instead of the email', async ( {
+			page,
+		} ) => {
+			await accessAndTrackEmailPost( page );
+
+			// The core Template panel would let a merchant create site templates.
+			// Each hidden item is checked next to a visible one, so a menu or panel
+			// that failed to open can't pass as hidden.
+			await expect(
+				page.locator( '.woocommerce-email-editor__settings-panel' )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'button', { name: /^Template:/ } )
+			).toBeHidden();
+
+			await page.getByRole( 'button', { name: 'Options' } ).click();
+			await expect(
+				page.getByRole( 'menuitem', { name: 'Keyboard shortcuts' } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'menuitem', { name: 'Preferences' } )
+			).toBeHidden();
+
+			// WP 7.2 moved the panels into a "Panels" submenu that opens on hover.
+			// Before 7.2 "Panels" is the label of a group in the menu itself.
+			await page
+				.getByRole( 'menuitem', { name: 'Panels' } )
+				.or( page.getByText( 'Panels', { exact: true } ) )
+				.first()
+				.hover();
+			await expect(
+				page.getByRole( 'menuitemcheckbox', { name: 'Email styles' } )
+			).toBeVisible();
+			// The site's Global Styles, which would change the storefront.
+			await expect(
+				page.getByRole( 'menuitemcheckbox', {
+					name: 'Styles',
+					exact: true,
+				} )
+			).toBeHidden();
+		} );
+
 		test( 'Can preview in new tab', async ( { page } ) => {
 			await accessAndTrackEmailPost( page );
 			await page
