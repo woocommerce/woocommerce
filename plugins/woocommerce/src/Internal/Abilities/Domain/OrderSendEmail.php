@@ -71,7 +71,7 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 		return array(
 			'label'               => __( 'Send order email', 'woocommerce' ),
 			'description'         => __(
-				'Send an order email to the customer again.',
+				'Send an order email again. A customer email goes to the billing email of the order, and a store email goes to the recipients set in the email settings.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
@@ -117,14 +117,6 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 			return $refusal;
 		}
 
-		if ( ! is_email( $order->get_billing_email() ) ) {
-			return new \WP_Error(
-				'woocommerce_ability_order_email_no_recipient',
-				__( 'The order has no valid billing email. Set billing.email with the woocommerce/order-update ability, then send the email again.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
 		WC()->payment_gateways();
 		WC()->shipping();
 
@@ -135,6 +127,14 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 				'woocommerce_ability_order_email_disabled',
 				/* translators: %s: email name. */
 				sprintf( __( 'The %s email is turned off on this store. Ask the store owner to turn it on in WooCommerce > Settings > Emails.', 'woocommerce' ), $email_name ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( $email->is_customer_email() && ! is_email( $order->get_billing_email() ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_email_no_recipient',
+				__( 'The order has no valid billing email. Set billing.email with the woocommerce/order-update ability, then send the email again.', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -195,7 +195,7 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 
 	/**
 	 * Refuse an email when the order does not have one of the statuses of the
-	 * email. The email would tell the customer something that is not true.
+	 * email. The email would say something about the order that is not true.
 	 *
 	 * @param \WC_Order          $order      Order.
 	 * @param string             $email_name Email name from the input.

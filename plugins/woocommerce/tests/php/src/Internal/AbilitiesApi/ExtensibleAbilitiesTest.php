@@ -1418,7 +1418,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should list the order emails of extensions in order-send-email, send them in their statuses only, and refuse an unknown email naming the valid ones.
+	 * @testdox Should list the order emails of extensions in order-send-email, send them in their statuses only, send a store email without a billing email, and refuse an unknown email naming the valid ones.
 	 */
 	public function test_order_send_email_sends_the_order_emails_of_extensions(): void {
 		$this->register_order_emails();
@@ -1434,21 +1434,30 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		};
 		add_filter( 'pre_wp_mail', $capture, 10, 2 );
 
-		$schema   = $this->get_ability( 'woocommerce/order-send-email' )['input_schema']['properties']['email'];
-		$on_hold  = $this->run_ability(
+		$schema  = $this->get_ability( 'woocommerce/order-send-email' )['input_schema']['properties']['email'];
+		$on_hold = $this->run_ability(
 			'woocommerce/order-send-email',
 			array(
 				'id'    => $on_hold_order->get_id(),
 				'email' => 'test-ext:on-hold',
 			)
 		);
-		$note     = $this->run_ability(
+		$note    = $this->run_ability(
 			'woocommerce/order-send-email',
 			array(
 				'id'    => $pending_order->get_id(),
 				'email' => 'test-ext:note',
 			)
 		);
+		add_filter( 'woocommerce_order_get_billing_email', '__return_empty_string' );
+		$new_order = $this->run_ability(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => $pending_order->get_id(),
+				'email' => 'test-ext:new-order',
+			)
+		);
+		remove_filter( 'woocommerce_order_get_billing_email', '__return_empty_string' );
 		$mismatch = $this->run_ability_response(
 			'woocommerce/order-send-email',
 			array(
@@ -1464,14 +1473,16 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 		remove_filter( 'pre_wp_mail', $capture );
 
-		$this->assertSame( array( 'invoice', 'processing', 'completed', 'test-ext:on-hold', 'test-ext:note' ), $schema['enum'] );
+		$this->assertSame( array( 'invoice', 'processing', 'completed', 'test-ext:on-hold', 'test-ext:note', 'test-ext:new-order' ), $schema['enum'] );
 		$this->assertStringContainsString( 'test-ext:on-hold: Tells the customer that the order is on hold. Statuses: on-hold, failed.', $schema['description'] );
 		$this->assertStringContainsString( 'test-ext:note: Sends a reminder note. Statuses: any.', $schema['description'] );
 		$this->assertSame( 'test-ext:on-hold', $on_hold['email'] );
 		$this->assertSame( 'test-ext:note', $note['email'] );
-		$this->assertCount( 2, $mails );
+		$this->assertSame( 'test-ext:new-order', $new_order['email'] );
+		$this->assertCount( 3, $mails );
 		$this->assertSame( 'customer@example.com', $mails[0]['to'] );
 		$this->assertStringContainsString( 'Pay the second payment.', $mails[1]['message'] );
+		$this->assertSame( get_option( 'admin_email' ), $mails[2]['to'] );
 		$this->assertSame( 'woocommerce_ability_order_email_status_mismatch', $mismatch->get_data()['code'] );
 		$this->assertStringContainsString( 'on-hold, failed', $mismatch->get_data()['message'] );
 		$this->assertSame( 'ability_invalid_input', $unknown->get_error_code() );
@@ -1538,8 +1549,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Register two order emails of an extension: one sent with the default trigger in two statuses,
-	 * and one whose trigger takes other arguments, sent in any status.
+	 * Register three order emails of an extension: one sent with the default trigger in two statuses,
+	 * one whose trigger takes other arguments, sent in any status, and a store email sent in any status.
 	 */
 	private function register_order_emails(): void {
 		$this->add_test_action(
@@ -1568,6 +1579,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 								)
 							);
 						},
+					)
+				);
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'   => 'test-ext',
+						'email'       => 'new-order',
+						'email_class' => 'WC_Email_New_Order',
+						'description' => 'Tells the store about the order.',
 					)
 				);
 			}

@@ -811,7 +811,7 @@ class ExtensibleAbilities {
 	}
 
 	/**
-	 * Register an order email that the `woocommerce/order-send-email` ability can send to the customer.
+	 * Register an order email that the `woocommerce/order-send-email` ability can send.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_init` action. The ability accepts the email
 	 * as `<namespace>:<email>` only when the `extensible_abilities` feature is on. It lists the email
@@ -825,7 +825,7 @@ class ExtensibleAbilities {
 	 *     @type string   $namespace        Slug of the extension that owns the email, such as `deposits`.
 	 *     @type string   $email            Slug of the email inside the namespace, such as `payment-reminder`.
 	 *     @type string   $email_class      Key of the email in WC()->mailer()->get_emails(), usually its class name.
-	 *     @type string   $description      One sentence on what the email tells the customer, for agents.
+	 *     @type string   $description      One sentence on what the email says and who gets it, for agents.
 	 *     @type string[] $statuses         Optional. Order statuses in which the email can be sent, without the
 	 *                                      `wc-` prefix. The ability refuses the email for an order with another
 	 *                                      status. Leave it out when the email can be sent in any status.
