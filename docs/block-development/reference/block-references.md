@@ -1078,7 +1078,7 @@ The contents of this block will display when there are no products found.
 - **Name:** woocommerce/product-collection-no-results
 - **Category:** woocommerce
 - **Ancestor:** woocommerce/product-collection
-- **Supports:** align, color (background, gradients, link, text), email, interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
+- **Supports:** align, color (background, gradients, link, text), email, interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
 
 ## Product Description - woocommerce/product-description
 

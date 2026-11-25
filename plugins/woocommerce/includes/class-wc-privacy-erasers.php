@@ -201,10 +201,9 @@ class WC_Privacy_Erasers {
 
 		// Revoke download permissions.
 		if ( apply_filters( 'woocommerce_privacy_erase_download_personal_data', $erasure_enabled, $email_address ) ) {
+			$result = $customer_download_data_store->delete_by_user_email( $email_address );
 			if ( $user instanceof WP_User ) {
-				$result = $customer_download_data_store->delete_by_user_id( (int) $user->ID );
-			} else {
-				$result = $customer_download_data_store->delete_by_user_email( $email_address );
+				$result = $customer_download_data_store->delete_by_user_id( (int) $user->ID ) || $result;
 			}
 			if ( $result ) {
 				$response['messages'][]    = __( 'Removed access to downloadable files.', 'woocommerce' );
