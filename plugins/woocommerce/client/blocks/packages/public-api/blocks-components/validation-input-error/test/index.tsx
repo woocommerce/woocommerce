@@ -28,8 +28,6 @@ describe( 'ValidationInputError', () => {
 		Element.prototype.getAnimations = () => [
 			animation as unknown as Animation,
 		];
-		// The shopper's last input was a pointer, so changes animate.
-		fireEvent.pointerDown( document );
 	} );
 
 	afterEach( () => {
@@ -113,16 +111,18 @@ describe( 'ValidationInputError', () => {
 		expect( alert ).not.toHaveAttribute( 'inert' );
 	} );
 
-	it( 'removes the message at once after a key press', () => {
+	it( 'collapses the message after a key press too', async () => {
 		const { rerender } = render(
 			<ValidationInputError errorMessage="Enter a postcode" />
 		);
+		const alert = screen.getByRole( 'alert' );
 
 		fireEvent.keyDown( document, { key: 'a' } );
 		rerender( <ValidationInputError errorMessage="" /> );
+		expect( alert ).toHaveTextContent( 'Enter a postcode' );
+		expect( alert ).toHaveAttribute( 'aria-hidden', 'true' );
 
-		expect(
-			screen.queryByText( 'Enter a postcode' )
-		).not.toBeInTheDocument();
+		await act( async () => finish() );
+		expect( alert ).not.toBeInTheDocument();
 	} );
 } );
