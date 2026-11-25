@@ -3250,7 +3250,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave no refund and not call the payment gateway when a refund validator refuses.
+	 * @testdox Should never save the refund and not call the payment gateway when a refund validator refuses.
 	 */
 	public function test_order_refund_create_refused_by_a_validator_leaves_no_refund_and_does_not_call_the_gateway(): void {
 		$this->register_refund_rma_field();
@@ -3261,6 +3261,15 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				return '' === $refund->get_meta( '_test_rma' ) ? new \WP_Error( 'rma_required', 'Send the RMA of the return.' ) : null;
 			}
 		);
+		$refund_saves = 0;
+		$this->add_test_action(
+			'woocommerce_before_order_refund_object_save',
+			static function () use ( &$refund_saves ) {
+				++$refund_saves;
+			}
+		);
+		add_filter( 'woocommerce_pre_delete_order_refund', '__return_false' );
+
 		list( $order_id, $result, $gateway_refunds ) = $this->refund_through_gateway(
 			array(
 				'amount'         => '5',
@@ -3273,7 +3282,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'Send the RMA of the return.', $result->get_error_message() );
 		$this->assertSame( 400, $result->get_error_data()['status'] );
 		$this->assertSame( 0, $gateway_refunds );
-		$this->assertCount( 0, wc_get_order( $order_id )->get_refunds() );
+		$this->assertSame( 0, $refund_saves, 'No refund save hook should see the refused refund.' );
+		$this->assertCount( 0, wc_get_order( $order_id )->get_refunds(), 'The refused refund should never be saved, so a blocked delete leaves nothing behind.' );
 	}
 
 	/**

@@ -681,6 +681,18 @@ function wc_create_refund( $args = array() ) {
 			}
 		}
 
+		/**
+		 * Fires when the refund is built and before it is first saved. The refund is unsaved and has ID 0. Its
+		 * amount, reason, parent and items are set, but its taxes and totals are not computed yet. A callback that
+		 * throws an exception stops the refund before anything is saved, and wc_create_refund() returns a WP_Error.
+		 *
+		 * @since 11.5.0
+		 *
+		 * @param WC_Order_Refund $refund The refund.
+		 * @param array           $args   The arguments of wc_create_refund().
+		 */
+		do_action( 'woocommerce_create_refund_before_totals', $refund, $args );
+
 		$refund->update_taxes();
 		$refund->calculate_totals( false );
 		$refund->set_total( $args['amount'] * -1 );

@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: dev
-Comment: Experimental extensible abilities: order-refund-create takes extension fields, validators and syncs; feature is off by default.
 
+Add the woocommerce_create_refund_before_totals action, which fires before wc_create_refund() first saves the refund.
