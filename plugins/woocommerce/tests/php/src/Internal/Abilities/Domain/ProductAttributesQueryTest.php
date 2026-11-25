@@ -203,6 +203,30 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return no terms for an attribute whose terms the user cannot read.
+	 */
+	public function test_hides_terms_the_user_cannot_read(): void {
+		$denied  = WC_Helper_Product::create_attribute( 'Test Denied', array( 'Red', 'Blue' ) );
+		$allowed = WC_Helper_Product::create_attribute( 'Test Allowed', array( 'Matte' ) );
+		add_filter(
+			'woocommerce_rest_check_permissions',
+			static function ( $permission, $context, $object_id, $type ) use ( $denied ) {
+				return $denied['attribute_taxonomy'] === $type ? false : $permission;
+			},
+			10,
+			4
+		);
+
+		$result = $this->sut->execute( array( 'include' => array( $denied['attribute_id'], $allowed['attribute_id'] ) ) );
+
+		$this->assertIsArray( $result );
+		$attributes = array_column( $result['attributes'], null, 'slug' );
+		$this->assertSame( array(), $attributes[ $denied['attribute_taxonomy'] ]['terms'] );
+		$this->assertSame( 2, $attributes[ $denied['attribute_taxonomy'] ]['term_count'] );
+		$this->assertSame( array( 'Matte' ), wp_list_pluck( $attributes[ $allowed['attribute_taxonomy'] ]['terms'], 'name' ) );
+	}
+
+	/**
 	 * @testdox Should accept a call without input.
 	 */
 	public function test_accepts_no_input(): void {

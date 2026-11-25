@@ -31,6 +31,7 @@ trait ProductAttributeAbilityTrait {
 	/**
 	 * Format a global attribute and load up to `$term_limit` of its terms, in the attribute's own term order.
 	 * The terms stay `WP_Term` objects until format_product_attribute_terms() formats them.
+	 * An attribute whose terms the user cannot read, as product-terms-query checks it, gets no terms.
 	 *
 	 * @param \stdClass $attribute  Row of wc_get_attribute_taxonomies().
 	 * @param int       $term_limit Most terms to return. Zero returns none.
@@ -65,7 +66,7 @@ trait ProductAttributeAbilityTrait {
 		}
 		$output['term_count'] = (int) $count;
 
-		if ( 0 === $term_limit || 0 === $output['term_count'] ) {
+		if ( 0 === $term_limit || 0 === $output['term_count'] || ! self::can_manage_product_terms( $taxonomy, 'read' ) ) {
 			return $output;
 		}
 
