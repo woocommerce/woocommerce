@@ -15,10 +15,25 @@ import {
 } from './helpers/enable-email-editor-feature';
 import { accessTheEmailEditor, openEmailPostInEditor } from '../../utils/email';
 import { setOption } from '../../utils/options';
-import { getInstalledWordPressVersion } from '../../utils/wordpress';
 
 // WP 7.2 renamed "Preview in new tab" to "Preview" with an "(opens in a new tab)" icon label.
 const PREVIEW_IN_NEW_TAB = /^Preview (in new tab|\(opens in a new tab\))$/;
+
+// Reads the version from the admin body class of the site under test, for example
+// `branch-7-2`. `getInstalledWordPressVersion()` asks the local wp-env container,
+// which doesn't exist when the suite runs against a remote site.
+const isWordPressAtLeast = async (
+	page: Page,
+	major: number,
+	minor: number
+) => {
+	const branch = await page.evaluate( () =>
+		document.body.className.match( /\bbranch-(\d+)-(\d+)\b/ )?.slice( 1 )
+	);
+	expect( branch ).toBeDefined();
+	const [ siteMajor, siteMinor ] = ( branch ?? [] ).map( Number );
+	return siteMajor > major || ( siteMajor === major && siteMinor >= minor );
+};
 
 test.describe(
 	'WooCommerce Email Editor Core',
@@ -155,11 +170,11 @@ test.describe(
 		test( 'Core Template panel edits the email template only', async ( {
 			page,
 		} ) => {
+			await accessAndTrackEmailPost( page );
 			test.skip(
-				( await getInstalledWordPressVersion() ) < 7.2,
+				! ( await isWordPressAtLeast( page, 7, 2 ) ),
 				'Core renders the Template panel from WordPress 7.2.'
 			);
-			await accessAndTrackEmailPost( page );
 
 			const templatePanelToggle = page.getByRole( 'button', {
 				name: /^Template:/,
