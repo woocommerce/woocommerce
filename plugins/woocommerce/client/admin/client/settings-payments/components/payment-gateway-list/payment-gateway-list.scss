@@ -49,7 +49,7 @@
 		}
 
 		&-before {
-			margin-right: $gap;
+			margin-inline-end: $gap;
 			align-items: center;
 
 			.drag-handle {
@@ -57,7 +57,7 @@
 			}
 
 			@media screen and ( max-width: $break-medium ) {
-				margin-right: 0;
+				margin-inline-end: 0;
 
 				.drag-handle {
 					min-height: 25px;
@@ -93,10 +93,10 @@
 		}
 
 		&-text {
-			margin-right: $gap;
+			margin-inline-end: $gap;
 
 			@media screen and ( max-width: $break-medium ) {
-				margin-right: 0;
+				margin-inline-end: 0;
 			}
 		}
 
@@ -124,14 +124,14 @@
 
 		&-buttons {
 			display: inline-flex;
-			margin-left: auto;
+			margin-inline-start: auto;
 			min-height: 48px;
 
 			@media screen and ( max-width: $break-medium ) {
 				order: 4; /* Position the column in the 4th spot to ensure the buttons appear on a new row */
 				grid-column: 2; /* Start below the 2nd column */
 				grid-row: 2; /* Move to the second row */
-				margin-left: 0;
+				margin-inline-start: 0;
 				margin-top: $gap;
 				min-height: 0;
 			}
@@ -154,7 +154,7 @@
 		}
 
 		&-after {
-			margin-left: $gap;
+			margin-inline-start: $gap;
 			min-height: 48px;
 
 			@media screen and ( max-width: $break-medium ) {
@@ -183,7 +183,7 @@
 		}
 
 		&-after.no-buttons {
-			margin-left: auto;
+			margin-inline-start: auto;
 		}
 	}
 }
@@ -214,46 +214,11 @@
 html[dir="rtl"] {
 	.settings-payment-gateways__list {
 		.woocommerce-list__item {
-			&-before {
-				margin-right: 0;
-				margin-left: $gap;
-
-				@media screen and ( max-width: $break-medium ) {
-					margin-left: 0;
-				}
-			}
-
-			&-text {
-				margin-right: 0;
-				margin-left: $gap;
-
-				@media screen and ( max-width: $break-medium ) {
-					margin-left: 0;
-				}
-			}
-
 			&-buttons {
-				margin-left: 0;
-				margin-right: auto;
-
-				@media screen and ( max-width: $break-medium ) {
-					margin-right: 0;
-				}
-
 				&__actions {
 					@media screen and ( min-width: $break-medium ) and ( max-width: $break-xlarge ) {
 						justify-content: flex-start;
 					}
-				}
-			}
-
-			&-after {
-				margin-left: 0;
-				margin-right: $gap;
-
-				&.no-buttons {
-					margin-left: 0;
-					margin-right: auto;
 				}
 			}
 		}
