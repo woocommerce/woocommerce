@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the available tax classes when a tax rate query uses an unknown class.
