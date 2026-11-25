@@ -78,7 +78,13 @@ describe( 'generateCSVDataFromTable', () => {
 } );
 
 describe( 'generateCSVFileName', () => {
-	jest.useFakeTimers().setSystemTime( new Date( '2024-12-23' ) );
+	beforeEach( () => {
+		jest.useFakeTimers().setSystemTime( new Date( '2024-12-23' ) );
+	} );
+
+	afterEach( () => {
+		jest.useRealTimers();
+	} );
 
 	it( 'should generate a file name with the date when no params are provided', () => {
 		const fileName = generateCSVFileName();
