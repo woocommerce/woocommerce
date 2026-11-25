@@ -7,7 +7,6 @@
 	"license": "GPL-2.0-or-later",
 	"repository": "woocommerce/woocommerce",
 	"private": true,
-	"types": "dist/index.d.ts",
 	"scripts": {
 		"analyzer": "node -r ts-node/register ./src/commands/analyzer/index.ts",
 		"lint": "eslint .",
@@ -17,7 +16,6 @@
 	"dependencies": {
 		"@actions/core": "^2.0.3",
 		"@commander-js/extra-typings": "catalog:tooling",
-		"@oclif/core": "catalog:tooling",
 		"@tsconfig/node16": "^1.0.4",
 		"@woocommerce/monorepo-utils": "workspace:*",
 		"commander": "catalog:tooling",

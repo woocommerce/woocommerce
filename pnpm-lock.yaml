@@ -4162,9 +4162,6 @@ importers:
       '@commander-js/extra-typings':
         specifier: catalog:tooling
         version: 10.0.3(commander@10.0.1)
-      '@oclif/core':
-        specifier: catalog:tooling
-        version: 4.13.5
       '@tsconfig/node16':
         specifier: ^1.0.4
         version: 1.0.4
