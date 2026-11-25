@@ -150,6 +150,69 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should warn only when the shared permalink prefix leaves the sampled category URL without an archive rule.
+	 * @testWith ["/%postname%/", "collections", "/collections/%product_cat%", true]
+	 *           ["/%postname%/", "collections", "catalog/collections/%product_cat%", true]
+	 *           ["/%postname%/", "product-category", "/collections/%product_cat%", false]
+	 *           ["/index.php/%postname%/", "collections", "catalog/collections/%product_cat%", false]
+	 *           ["/%postname%/", "collections", "/collections/%product_cat%", false, "index.php?product_cat=$matches[1]"]
+	 *           ["/%postname%/", "collections", "/collections/%product_cat%", false, "index.php?taxonomy=product_cat&term=$matches[1]"]
+	 *           ["/%postname%/", "collections", "/collections/%product_cat%", false, null, "category-archive"]
+	 *           ["", "collections", "/collections/%product_cat%", false]
+	 * @param string      $structure       WordPress permalink structure.
+	 * @param string      $category_base   WooCommerce category base.
+	 * @param string      $product_base    WooCommerce product base.
+	 * @param bool        $expect_warning  Whether the settings show the warning.
+	 * @param string|null $alternate_query Rewrite target for an extension's replacement archive rules.
+	 * @param string|null $link_base       Base used when an extension supplies alternate category URLs.
+	 */
+	public function test_category_permalink_warning_reads_generated_rules( string $structure, string $category_base, string $product_base, bool $expect_warning, ?string $alternate_query = null, ?string $link_base = null ): void {
+		global $wp_rewrite;
+
+		self::factory()->term->create( array( 'taxonomy' => 'product_cat' ) );
+		update_option( 'home', home_url( '/store' ) );
+		update_option( 'permalink_structure', $structure );
+		update_option(
+			'woocommerce_permalinks',
+			array(
+				'category_base' => $category_base,
+				'product_base'  => $product_base,
+			)
+		);
+
+		if ( null !== $link_base ) {
+			add_filter(
+				'term_link',
+				static fn ( $link, $term, $taxonomy ) => 'product_cat' === $taxonomy ? home_url( '/' . $link_base . '/' . $term->slug . '/' ) : $link,
+				10,
+				3
+			);
+		}
+
+		if ( null !== $alternate_query ) {
+			add_filter(
+				'rewrite_rules_array',
+				static fn ( $rules ) => array( $category_base . '/([^/]+)/?$' => $alternate_query ) + $rules,
+				99
+			);
+		}
+
+		$original_rewrite = $wp_rewrite;
+		$wp_rewrite       = new WP_Rewrite(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Isolate the generated rules for this test.
+		try {
+			$wp_rewrite->add_rewrite_tag( '%product_cat%', '(.+?)', 'product_cat=' );
+			$wp_rewrite->add_rewrite_tag( '%product%', '([^/]+)', 'product=' );
+			$wp_rewrite->add_permastruct( 'product_cat', $category_base . '/%product_cat%', array( 'with_front' => false ) );
+			$wp_rewrite->add_permastruct( 'product', $product_base . '/%product%', array( 'with_front' => false ) );
+			$wp_rewrite->rewrite_rules();
+
+			$this->assertSame( $expect_warning, str_contains( $this->render_settings(), 'id="woocommerce-product-category-permalink-warning"' ) );
+		} finally {
+			$wp_rewrite = $original_rewrite; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the original rewrite object.
+		}
+	}
+
+	/**
 	 * Parse rendered settings HTML into an XPath query object.
 	 *
 	 * @param string $html Rendered settings HTML.

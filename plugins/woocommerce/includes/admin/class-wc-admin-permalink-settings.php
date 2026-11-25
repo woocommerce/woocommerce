@@ -190,9 +190,95 @@ class WC_Admin_Permalink_Settings {
 	}
 
 	/**
+	 * Warn when the shared product prefix leaves a sampled category URL without an archive rule.
+	 */
+	private function show_category_permalink_warning(): void {
+		global $wp_rewrite;
+
+		if (
+			! $wp_rewrite instanceof WP_Rewrite ||
+			empty( $wp_rewrite->rules ) ||
+			false === has_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' ) ||
+			! preg_match( '~/(.+)/%product_cat%~', $this->permalinks['product_rewrite_slug'], $matches )
+		) {
+			return;
+		}
+
+		// Use the registered structure so WordPress's rewrite root is already included.
+		$structure = $wp_rewrite->get_extra_permastruct( 'product_cat' );
+		$prefix    = $matches[1] . '/';
+		$taxonomy  = get_taxonomy( 'product_cat' );
+		if ( ! is_string( $structure ) || ltrim( $structure, '/' ) !== $prefix . '%product_cat%' || ! $taxonomy || 'product_cat' !== $taxonomy->query_var ) {
+			return;
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'parent'     => 0,
+				'hide_empty' => false,
+				'number'     => 1,
+			)
+		);
+		if ( ! is_array( $terms ) || ! isset( $terms[0] ) || ! $terms[0] instanceof WP_Term ) {
+			return;
+		}
+
+		$url = get_term_link( $terms[0] );
+		if ( ! is_string( $url ) ) {
+			return;
+		}
+
+		$archive = wp_parse_url( $url );
+		$home    = wp_parse_url( home_url( '/' ) );
+		if ( empty( $archive['path'] ) || empty( $archive['host'] ) || ( $home['host'] ?? '' ) !== $archive['host'] || isset( $archive['query'] ) ) {
+			return;
+		}
+
+		$home_path = trailingslashit( $home['path'] ?? '' );
+		if ( 0 !== strpos( $archive['path'], $home_path ) ) {
+			return;
+		}
+
+		$path         = trim( substr( $archive['path'], strlen( $home_path ) ), '/' );
+		$decoded_path = urldecode( $path );
+		if ( ! str_starts_with( $path, $prefix ) && ! str_starts_with( $decoded_path, $prefix ) ) {
+			return;
+		}
+
+		// Check the final rules so replacements added by other plugins count.
+		foreach ( $wp_rewrite->rules as $pattern => $target ) {
+			if ( ! str_contains( $target, 'product_cat' ) || ( ! preg_match( "#^$pattern#", $path ) && ! preg_match( "#^$pattern#", $decoded_path ) ) ) {
+				continue;
+			}
+
+			parse_str( (string) wp_parse_url( $target, PHP_URL_QUERY ), $query );
+			$is_category = isset( $query['product_cat'] ) || ( 'product_cat' === ( $query['taxonomy'] ?? '' ) && isset( $query['term'] ) );
+			if ( $is_category && ! isset( $query['product'] ) ) {
+				return;
+			}
+		}
+
+		wp_admin_notice(
+			sprintf(
+				/* translators: %s: A link to the product category archive. */
+				esc_html__( 'The product category archive at %s may be unavailable. Use different bases for product categories and product permalinks.', 'woocommerce' ),
+				'<a href="' . esc_url( $url ) . '">' . esc_html( $url ) . '</a>'
+			),
+			array(
+				'type'               => 'warning',
+				'id'                 => 'woocommerce-product-category-permalink-warning',
+				'additional_classes' => array( 'inline' ),
+			)
+		);
+	}
+
+	/**
 	 * Show the settings.
 	 */
 	public function settings() {
+		$this->show_category_permalink_warning();
+
 		/* translators: %s: Home URL */
 		echo wp_kses_post( wpautop( sprintf( __( 'If you like, you may enter custom structures for your product URLs here. For example, using <code>shop</code> would make your product links like <code>%sshop/sample-product/</code>. This setting affects product URLs only, not things such as product categories.', 'woocommerce' ), esc_url( home_url( '/' ) ) ) ) );
 
