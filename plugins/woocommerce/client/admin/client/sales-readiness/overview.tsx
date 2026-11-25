@@ -33,7 +33,7 @@ function everyCheckPassed( view: ReadinessView ): boolean {
 
 /**
  * WooCommerce > Settings > AI tools, the Overview: the WordPress.com connection card, the AI shopping
- * card, the Sales readiness card with Fix first and a link to every check, then AI assistant experiments.
+ * card, the Sales readiness card with Fix first and a link to every check, then Features for AI assistants.
  */
 export default function SalesReadinessOverview( {
 	initialView = null,

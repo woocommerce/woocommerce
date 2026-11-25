@@ -677,7 +677,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			AiAssistantExperiments::FEATURE_NAME   => array(
-				'name'                         => __( 'AI assistant experiments', 'woocommerce' ),
+				'name'                         => __( 'Features for AI assistants', 'woocommerce' ),
 				'description'                  => AiAssistantExperiments::get_description(),
 				'enabled_by_default'           => false,
 				// First among the experimental features, where the AI shopping health page sends merchants.

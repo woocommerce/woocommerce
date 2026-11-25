@@ -96,7 +96,7 @@ export interface Declared {
 	}[];
 }
 
-/** The AI assistant experiments card on the AI tools Overview. */
+/** The Features for AI assistants card on the AI tools Overview. */
 export interface ExperimentsCardView {
 	title: string;
 	badge: ViewBadge;

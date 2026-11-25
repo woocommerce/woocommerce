@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Internal\AgentReadiness;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The "AI assistant experiments" feature: one switch on the Features page for a
+ * The "Features for AI assistants" feature: one switch on the Features page for a
  * bundle of experimental ways for AI assistants to read the store.
  *
  * @since 11.5.0

@@ -22,7 +22,7 @@ const FEATURES =
 const card = (
 	overrides: Partial< ExperimentsCardView > = {}
 ): ExperimentsCardView => ( {
-	title: 'AI assistant experiments',
+	title: 'Features for AI assistants',
 	badge: { intent: 'none', text: 'Experimental' },
 	text: 'Try newer standards for AI assistants before they settle, such as WebMCP and Markdown versions of your pages.',
 	enabled: false,
@@ -31,7 +31,7 @@ const card = (
 		text: 'They’re on. You can turn them off in <link>Settings > Advanced > Features</link>.',
 		href: FEATURES,
 	},
-	error: 'We couldn’t turn on AI assistant experiments. Try again.',
+	error: 'We couldn’t turn on features for AI assistants. Try again.',
 	...overrides,
 } );
 
@@ -44,7 +44,7 @@ describe( 'ExperimentsCard', () => {
 		render( <ExperimentsCard card={ card() } /> );
 
 		expect(
-			screen.getByText( 'AI assistant experiments' )
+			screen.getByText( 'Features for AI assistants' )
 		).toBeInTheDocument();
 		expect( screen.getByText( 'Experimental' ) ).toBeInTheDocument();
 		expect(
@@ -90,7 +90,7 @@ describe( 'ExperimentsCard', () => {
 
 		expect(
 			await screen.findByText(
-				'We couldn’t turn on AI assistant experiments. Try again.',
+				'We couldn’t turn on features for AI assistants. Try again.',
 				{ selector: '.components-notice__content' }
 			)
 		).toBeInTheDocument();
@@ -109,7 +109,7 @@ describe( 'ExperimentsCard', () => {
 
 		expect(
 			await screen.findByText(
-				'We couldn’t turn on AI assistant experiments. Try again.',
+				'We couldn’t turn on features for AI assistants. Try again.',
 				{ selector: '.components-notice__content' }
 			)
 		).toBeInTheDocument();

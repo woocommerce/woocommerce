@@ -269,7 +269,7 @@ class ReadinessRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Turn the AI assistant experiments feature on. Turning it off is left to the Features page.
+	 * Turn the Features for AI assistants feature on. Turning it off is left to the Features page.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
@@ -282,7 +282,7 @@ class ReadinessRestController extends RestApiControllerBase {
 		if ( ! $this->features_controller->feature_is_enabled( AiAssistantExperiments::FEATURE_NAME ) ) {
 			return new \WP_Error(
 				'woocommerce_ai_assistant_experiments_not_enabled',
-				__( 'We couldn’t turn on AI assistant experiments. Try again.', 'woocommerce' ),
+				__( 'We couldn’t turn on features for AI assistants. Try again.', 'woocommerce' ),
 				array( 'status' => 500 )
 			);
 		}

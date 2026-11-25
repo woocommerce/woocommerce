@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Utilities\PluginUtil;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the AI assistant experiments feature and its Features page row.
+ * Tests for the Features for AI assistants feature and its Features page row.
  */
 class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 
@@ -85,7 +85,7 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 		$definition = $this->sut->get_feature_definition( AiAssistantExperiments::FEATURE_NAME );
 
 		$this->assertNotNull( $definition, 'The feature should be registered.' );
-		$this->assertSame( 'AI assistant experiments', $definition['name'] );
+		$this->assertSame( 'Features for AI assistants', $definition['name'] );
 		$this->assertFalse( $definition['enabled_by_default'], 'The feature should be off by default.' );
 		$this->assertTrue( $definition['is_experimental'], 'The feature should be experimental.' );
 		$this->assertTrue( $this->sut->should_skip_compatibility_checks( AiAssistantExperiments::FEATURE_NAME ), 'Plugin compatibility checks should be skipped.' );
@@ -114,7 +114,7 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 
 		$this->assertCount( $expected_rows, $rows );
 		if ( $expected_rows ) {
-			$this->assertSame( 'AI assistant experiments', $rows[0]['title'] );
+			$this->assertSame( 'Features for AI assistants', $rows[0]['title'] );
 			$this->assertSame( 'checkbox', $rows[0]['type'] );
 			$this->assertSame( 'no', $rows[0]['default'], 'The row should default to off.' );
 			$this->assertSame( AiAssistantExperiments::get_description(), $rows[0]['desc'] );
@@ -129,7 +129,7 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 
 		$card = $this->overview_card();
 
-		$this->assertSame( 'AI assistant experiments', $card['title'] );
+		$this->assertSame( 'Features for AI assistants', $card['title'] );
 		$this->assertSame(
 			array(
 				'intent' => 'none',
@@ -142,7 +142,7 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Turn on', $card['button'] );
 		$this->assertSame( 'They’re on. You can turn them off in <link>Settings > Advanced > Features</link>.', $card['on']['text'] );
 		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ), $card['on']['href'] );
-		$this->assertSame( 'We couldn’t turn on AI assistant experiments. Try again.', $card['error'] );
+		$this->assertSame( 'We couldn’t turn on features for AI assistants. Try again.', $card['error'] );
 	}
 
 	/**
@@ -190,7 +190,7 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The AI assistant experiments card from the AI tools Overview.
+	 * The Features for AI assistants card from the AI tools Overview.
 	 *
 	 * @return array<string, mixed>|null
 	 */

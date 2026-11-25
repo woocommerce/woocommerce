@@ -18,8 +18,9 @@ export const EXPERIMENTS_PATH =
 	'/wc/v3/agent-readiness/ai-assistant-experiments';
 
 /**
- * The AI tools Overview card for AI assistant experiments: a button in the header to turn them on,
- * then a line linking to the Features page, where they're turned off.
+ * The AI tools Overview card for Features for AI assistants, laid out like a checklist row: the title
+ * and description, with a button to turn them on beside them, then a line linking to the Features page,
+ * where they're turned off.
  */
 export const ExperimentsCard = ( { card }: { card: ExperimentsCardView } ) => {
 	const [ enabled, setEnabled ] = useState( card.enabled );
@@ -48,15 +49,37 @@ export const ExperimentsCard = ( { card }: { card: ExperimentsCardView } ) => {
 
 	return (
 		<Card.Root className="wc-sales-readiness-card wc-sales-readiness-experiments">
-			<Card.Header>
-				<div className="wc-sales-readiness-card__head">
-					<div className="wc-sales-readiness-experiments__title">
-						<Card.Title className="wc-sales-readiness-card__title">
-							{ card.title }
-						</Card.Title>
-						<Badge intent={ card.badge.intent }>
-							{ card.badge.text }
-						</Badge>
+			<Card.Content>
+				<div className="wc-sales-readiness-experiments__row">
+					<div className="wc-sales-readiness-experiments__body">
+						<div className="wc-sales-readiness-experiments__title">
+							<Card.Title className="wc-sales-readiness-card__title">
+								{ card.title }
+							</Card.Title>
+							<Badge intent={ card.badge.intent }>
+								{ card.badge.text }
+							</Badge>
+						</div>
+						<Text
+							variant="body-md"
+							className="wc-sales-readiness__muted"
+						>
+							{ card.text }
+						</Text>
+						{ enabled && (
+							<Text
+								variant="body-md"
+								className="wc-sales-readiness__muted wc-sales-readiness-experiments__on"
+							>
+								{ createInterpolateElement( card.on.text, {
+									link: featuresHref ? (
+										<Link href={ featuresHref } />
+									) : (
+										<span />
+									),
+								} ) }
+							</Text>
+						) }
 					</div>
 					{ ! enabled && (
 						<Button
@@ -70,27 +93,8 @@ export const ExperimentsCard = ( { card }: { card: ExperimentsCardView } ) => {
 						</Button>
 					) }
 				</div>
-			</Card.Header>
-			<Card.Content>
-				<Text variant="body-md" className="wc-sales-readiness__muted">
-					{ card.text }
-				</Text>
 				{ failed && (
 					<ErrorNotice message={ card.error } reload={ false } />
-				) }
-				{ enabled && (
-					<Text
-						variant="body-md"
-						className="wc-sales-readiness__muted wc-sales-readiness-experiments__on"
-					>
-						{ createInterpolateElement( card.on.text, {
-							link: featuresHref ? (
-								<Link href={ featuresHref } />
-							) : (
-								<span />
-							),
-						} ) }
-					</Text>
 				) }
 			</Card.Content>
 		</Card.Root>

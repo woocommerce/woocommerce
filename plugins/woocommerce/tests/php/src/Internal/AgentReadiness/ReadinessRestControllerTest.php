@@ -569,7 +569,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox POST ai-assistant-experiments turns the AI assistant experiments feature on, and succeeds when it's already on.
+	 * @testdox POST ai-assistant-experiments turns the Features for AI assistants feature on, and succeeds when it's already on.
 	 */
 	public function test_ai_assistant_experiments_turned_on(): void {
 		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
@@ -585,7 +585,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox When the AI assistant experiments option can't be saved, POST ai-assistant-experiments answers with an error.
+	 * @testdox When the Features for AI assistants option can't be saved, POST ai-assistant-experiments answers with an error.
 	 */
 	public function test_ai_assistant_experiments_failed_save(): void {
 		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
@@ -599,7 +599,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A user without manage_woocommerce can't turn AI assistant experiments on.
+	 * @testdox A user without manage_woocommerce can't turn Features for AI assistants on.
 	 */
 	public function test_ai_assistant_experiments_requires_manage_woocommerce(): void {
 		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
