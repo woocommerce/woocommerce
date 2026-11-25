@@ -37,22 +37,34 @@ test.describe( 'Shopper → Checkout Form Errors (guest user)', () => {
 
 		// Verify that all required fields show the correct warning.
 		await expect(
-			page.getByText( 'Please enter a valid email address' )
+			page.getByText( 'Please enter a valid value for Email address', {
+				exact: true,
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Please enter a valid first name' )
+			page.getByText( 'Please enter a valid value for First name', {
+				exact: true,
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Please enter a valid last name' )
+			page.getByText( 'Please enter a valid value for Last name', {
+				exact: true,
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Please enter a valid address' )
+			page.getByText( 'Please enter a valid value for Address', {
+				exact: true,
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Please enter a valid city' )
+			page.getByText( 'Please enter a valid value for City', {
+				exact: true,
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Please enter a valid zip code' )
+			page.getByText( 'Please enter a valid value for ZIP Code', {
+				exact: true,
+			} )
 		).toBeVisible();
 	} );
 } );

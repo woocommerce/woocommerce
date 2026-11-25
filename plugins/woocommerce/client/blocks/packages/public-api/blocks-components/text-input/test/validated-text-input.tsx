@@ -247,7 +247,7 @@ describe( 'ValidatedTextInput', () => {
 
 		// Non-empty invalid fields SHOULD show validation errors on blur
 		expect(
-			screen.queryByText( 'Please enter a valid test input' )
+			screen.queryByText( 'Please enter a valid value for Test Input' )
 		).toBeInTheDocument();
 	} );
 	it( 'Shows validation error for pattern mismatch on blur', async () => {
@@ -306,7 +306,7 @@ describe( 'ValidatedTextInput', () => {
 		// Empty fields don't show validation errors on blur - they stay hidden
 		// until form submission (showAllValidationErrors is called)
 		expect(
-			screen.queryByText( 'Please enter a valid test input' )
+			screen.queryByText( 'Please enter a valid value for Test Input' )
 		).not.toBeInTheDocument();
 
 		// Add whitespace only to verify this also doesn't trigger validation error on blur.
@@ -317,7 +317,7 @@ describe( 'ValidatedTextInput', () => {
 
 		// Empty fields, even whitespace don't show validation errors on blur.
 		expect(
-			screen.queryByText( 'Please enter a valid test input' )
+			screen.queryByText( 'Please enter a valid value for Test Input' )
 		).not.toBeInTheDocument();
 
 		// Simulate form submission which reveals all hidden validation errors
@@ -326,7 +326,7 @@ describe( 'ValidatedTextInput', () => {
 		);
 
 		expect(
-			screen.queryByText( 'Please enter a valid test input' )
+			screen.queryByText( 'Please enter a valid value for Test Input' )
 		).toBeInTheDocument();
 
 		// After submission, blurring the empty field should NOT hide the error
@@ -336,7 +336,7 @@ describe( 'ValidatedTextInput', () => {
 		} );
 
 		expect(
-			screen.queryByText( 'Please enter a valid test input' )
+			screen.queryByText( 'Please enter a valid value for Test Input' )
 		).toBeInTheDocument();
 	} );
 
@@ -378,7 +378,7 @@ describe( 'ValidatedTextInput', () => {
 			await expect( textInputElement ).toHaveFocus();
 			await expect( setValidationErrors ).toHaveBeenCalledWith( {
 				'test-input': {
-					message: 'Please enter a valid test input',
+					message: 'Please enter a valid value for Test Input',
 					hidden: true,
 				},
 			} );

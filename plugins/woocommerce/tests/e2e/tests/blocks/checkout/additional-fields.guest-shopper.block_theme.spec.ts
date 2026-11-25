@@ -121,7 +121,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await expect(
 				checkoutPageObject.page.getByText(
-					'Please enter a valid government id'
+					'Please enter a valid value for Government ID',
+					{ exact: true }
 				)
 			).toBeVisible();
 		} );
