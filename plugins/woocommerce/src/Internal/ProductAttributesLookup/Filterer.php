@@ -159,12 +159,17 @@ class Filterer {
 	public function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
 		global $wpdb;
 
-		$tax_query  = \WC_Query::get_main_tax_query();
-		$meta_query = \WC_Query::get_main_meta_query();
+		$tax_query        = \WC_Query::get_main_tax_query();
+		$meta_query       = \WC_Query::get_main_meta_query();
+		$use_lookup_table = $this->filtering_via_lookup_table_is_active();
 		if ( 'or' === $query_type ) {
-			foreach ( $tax_query as $key => $query ) {
-				if ( is_array( $query ) && $taxonomy === $query['taxonomy'] ) {
-					unset( $tax_query[ $key ] );
+			$main_query = \WC_Query::get_main_query();
+			// The lookup table applies widget selections separately, so keep the archive's taxonomy clauses.
+			if ( ! $use_lookup_table || ! $main_query || ! $main_query->is_tax() ) {
+				foreach ( $tax_query as $key => $query ) {
+					if ( is_array( $query ) && $taxonomy === $query['taxonomy'] ) {
+						unset( $tax_query[ $key ] );
+					}
 				}
 			}
 		}
@@ -172,7 +177,7 @@ class Filterer {
 		$meta_query = new \WP_Meta_Query( $meta_query );
 		$tax_query  = new TaxQuery( $tax_query );
 
-		if ( $this->filtering_via_lookup_table_is_active() ) {
+		if ( $use_lookup_table ) {
 			$query = $this->get_product_counts_query_using_lookup_table( $tax_query, $meta_query, $taxonomy, $term_ids, $query_type );
 		} else {
 			$query = $this->get_product_counts_query_not_using_lookup_table( $tax_query, $meta_query, $term_ids );
