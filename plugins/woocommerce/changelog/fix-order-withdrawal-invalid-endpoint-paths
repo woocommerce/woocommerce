@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Return a 404 for order withdrawal URLs with unexpected trailing paths.
