@@ -120,6 +120,7 @@
 				"@babel/runtime",
 				"@jest/globals",
 				"@types/jest",
+				"@wordpress/browserslist-config",
 				"@wordpress/env",
 				"@wordpress/postcss-plugins-preset",
 				"@wordpress/prettier-config",
@@ -373,7 +374,6 @@
 			"dependencies": [
 				"@wordpress/babel-plugin-import-jsx-pragma",
 				"@wordpress/babel-preset-default",
-				"@wordpress/browserslist-config",
 				"@wordpress/dependency-extraction-webpack-plugin",
 				"@wordpress/jest-preset-default",
 				"@wordpress/postcss-themes"

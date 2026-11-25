@@ -226,6 +226,9 @@ catalogs:
     '@types/jest':
       specifier: 29.5.x
       version: 29.5.14
+    '@wordpress/browserslist-config':
+      specifier: next
+      version: 6.43.1-next.v.202604091042.0
     '@wordpress/build':
       specifier: 0.24.0
       version: 0.24.0
@@ -911,7 +914,7 @@ importers:
         specifier: next
         version: 8.43.1-next.v.202604091042.0
       '@wordpress/browserslist-config':
-        specifier: next
+        specifier: catalog:tooling
         version: 6.43.1-next.v.202604091042.0
       css-loader:
         specifier: catalog:tooling
@@ -1159,7 +1162,7 @@ importers:
         specifier: workspace:*
         version: link:../tracks
       '@wordpress/browserslist-config':
-        specifier: next
+        specifier: catalog:tooling
         version: 6.43.1-next.v.202604091042.0
       css-loader:
         specifier: catalog:tooling
@@ -1662,7 +1665,7 @@ importers:
         specifier: workspace:*
         version: link:../internal-js-tests
       '@wordpress/browserslist-config':
-        specifier: next
+        specifier: catalog:tooling
         version: 6.43.1-next.v.202604091042.0
       eslint:
         specifier: catalog:tooling
@@ -1814,7 +1817,7 @@ importers:
         specifier: workspace:*
         version: link:../internal-js-tests
       '@wordpress/browserslist-config':
-        specifier: next
+        specifier: catalog:tooling
         version: 6.43.1-next.v.202604091042.0
       css-loader:
         specifier: catalog:tooling
@@ -2434,7 +2437,7 @@ importers:
         specifier: workspace:*
         version: link:../internal-js-tests
       '@wordpress/browserslist-config':
-        specifier: next
+        specifier: catalog:tooling
         version: 6.43.1-next.v.202604091042.0
       css-loader:
         specifier: catalog:tooling
@@ -2774,7 +2777,7 @@ importers:
         specifier: 3.5.33
         version: 3.5.33
       '@wordpress/browserslist-config':
-        specifier: next
+        specifier: catalog:tooling
         version: 6.43.1-next.v.202604091042.0
       '@wordpress/dependency-extraction-webpack-plugin':
         specifier: next
@@ -3086,7 +3089,7 @@ importers:
         specifier: workspace:*
         version: link:../../../packages/js/internal-js-tests
       '@wordpress/browserslist-config':
-        specifier: next
+        specifier: catalog:tooling
         version: 6.43.1-next.v.202604091042.0
       '@wordpress/build':
         specifier: catalog:tooling
@@ -3468,7 +3471,7 @@ importers:
         specifier: catalog:wp-min
         version: 15.6.9(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/browserslist-config':
-        specifier: next
+        specifier: catalog:tooling
         version: 6.43.1-next.v.202604091042.0
       '@wordpress/jest-preset-default':
         specifier: next
@@ -3877,7 +3880,7 @@ importers:
         specifier: catalog:wp-min
         version: 15.6.3(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/browserslist-config':
-        specifier: next
+        specifier: catalog:tooling
         version: 6.43.1-next.v.202604091042.0
       '@wordpress/components':
         specifier: catalog:wp-min
@@ -4142,7 +4145,7 @@ importers:
         specifier: ^24.1.0
         version: 24.12.2
       '@wordpress/browserslist-config':
-        specifier: next
+        specifier: catalog:tooling
         version: 6.43.1-next.v.202604091042.0
       '@wordpress/scripts':
         specifier: catalog:tooling

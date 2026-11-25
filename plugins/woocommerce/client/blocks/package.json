@@ -128,7 +128,7 @@
 		"@wordpress/block-editor": "catalog:wp-min",
 		"@wordpress/block-library": "catalog:wp-min",
 		"@wordpress/blocks": "catalog:wp-min",
-		"@wordpress/browserslist-config": "next",
+		"@wordpress/browserslist-config": "catalog:tooling",
 		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/core-data": "catalog:wp-min",
 		"@wordpress/data-controls": "catalog:wp-min",

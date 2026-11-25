@@ -38,7 +38,7 @@
 		"@jest/globals": "catalog:tooling",
 		"@types/jest": "catalog:tooling",
 		"@types/jquery": "3.5.33",
-		"@wordpress/browserslist-config": "next",
+		"@wordpress/browserslist-config": "catalog:tooling",
 		"@wordpress/dependency-extraction-webpack-plugin": "next",
 		"babel-loader": "catalog:tooling",
 		"jest": "catalog:tooling",
