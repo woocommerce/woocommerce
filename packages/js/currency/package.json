@@ -85,7 +85,7 @@
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
 		"@types/jest": "catalog:tooling",
-		"@types/react": "18.3.x",
+		"@types/react": "catalog:types",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",

@@ -22,7 +22,7 @@
 		"test:js": "wp-scripts test-unit-js --config jest.config.json"
 	},
 	"devDependencies": {
-		"@types/node": "^24.1.0",
+		"@types/node": "catalog:types",
 		"@wordpress/browserslist-config": "catalog:tooling",
 		"@wordpress/scripts": "catalog:tooling",
 		"@wordpress/stylelint-config": "catalog:tooling",

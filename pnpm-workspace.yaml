@@ -115,6 +115,20 @@ catalogs:
         webpack: 5.112.2
         webpack-cli: 5.1.x
 
+    # Type declaration packages shared across workspace packages. `@types/jest` stays with Jest in `tooling`,
+    # and `@types/wordpress__*` stay in `wp-min`.
+    types:
+        '@types/debug': ^4.1.12
+        '@types/lodash': ^4.14.202
+        '@types/node': ^24.1.0
+        '@types/prop-types': ^15.7.11
+        '@types/qs': ^6.9.10
+        # The `@types/react` override below decides the resolved version; keep both in sync.
+        '@types/react': 18.3.x
+        '@types/react-dom': 18.3.x
+        '@types/react-transition-group': ^4.4.10
+        '@types/semver': ^7.5.6
+
 packages:
     - 'packages/js/*'
     - 'packages/php/*'

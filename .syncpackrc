@@ -26,13 +26,36 @@
 			"isBanned": true
 		},
 		{
+			"label": "block-library pins @types/lodash 4.14.182 until its remaining lodash use is removed",
 			"dependencies": [
-				"@types/node"
+				"@types/lodash"
+			],
+			"packages": [
+				"@woocommerce/block-library"
+			],
+			"isIgnored": true
+		},
+		{
+			"label": "Shared type declarations",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
+			"dependencies": [
+				"@types/debug",
+				"@types/lodash",
+				"@types/node",
+				"@types/prop-types",
+				"@types/qs",
+				"@types/react",
+				"@types/react-dom",
+				"@types/react-transition-group",
+				"@types/semver"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^24.1.0"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [

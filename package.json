@@ -53,7 +53,7 @@
 	"devDependencies": {
 		"@babel/preset-env": "catalog:tooling",
 		"@babel/runtime": "catalog:tooling",
-		"@types/node": "^24.1.0",
+		"@types/node": "catalog:types",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/monorepo-utils": "workspace:*",
