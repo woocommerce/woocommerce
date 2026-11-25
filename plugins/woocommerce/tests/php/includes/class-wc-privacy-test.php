@@ -124,4 +124,75 @@ class WC_Privacy_Test extends WC_Unit_Test_Case {
 		$this->assertContains( 'Removed customer email from coupon usage records', $response['messages'] );
 		$this->assertSame( array( '777:owner@example.com' ), get_post_meta( $coupon_id, '_used_by_email', false ) );
 	}
+
+	/**
+	 * @testdox Erasing a customer with order and download removal enabled removes their download logs.
+	 * @dataProvider customer_type_provider
+	 *
+	 * @param bool $registered Whether the erased customer has an account.
+	 * @return void
+	 */
+	public function test_erasers_remove_download_logs_of_anonymized_orders( bool $registered ): void {
+		update_option( 'woocommerce_erasure_request_removes_order_data', 'yes' );
+		update_option( 'woocommerce_erasure_request_removes_download_data', 'yes' );
+
+		wc_get_container()->get( Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->add_approved_directory( 'https://always.trusted' );
+		$product  = WC_Helper_Product::create_downloadable_product(
+			array(
+				array(
+					'name' => 'File',
+					'file' => 'https://always.trusted/file.pdf',
+				),
+			)
+		);
+		$customer = $registered ? WC_Helper_Customer::create_customer( 'eraseme', 'password', 'eraseme@example.com' )->get_id() : 0;
+		$erased   = $this->create_downloaded_order( $product, 'eraseme@example.com', $customer );
+		$retained = $this->create_downloaded_order( $product, 'other@example.com', 0 );
+
+		foreach ( apply_filters( 'wp_privacy_personal_data_erasers', array() ) as $eraser ) {
+			call_user_func( $eraser['callback'], 'eraseme@example.com', 1 );
+		}
+
+		$data_store = WC_Data_Store::load( 'customer-download-log' );
+		$this->assertEmpty( $data_store->get_download_logs_for_permission( $erased ), 'The erased customer has no download logs left.' );
+		$this->assertCount( 1, $data_store->get_download_logs_for_permission( $retained ), 'Other customers keep their download logs.' );
+	}
+
+	/**
+	 * Erased customer types.
+	 *
+	 * @return array<string, array<bool>>
+	 */
+	public function customer_type_provider(): array {
+		return array(
+			'guest'      => array( false ),
+			'registered' => array( true ),
+		);
+	}
+
+	/**
+	 * Create a completed order for a downloadable product, with one logged download.
+	 *
+	 * @param WC_Product $product     The downloadable product.
+	 * @param string     $email       The billing email.
+	 * @param int        $customer_id The customer ID, 0 for a guest.
+	 * @return int The download permission ID.
+	 */
+	private function create_downloaded_order( WC_Product $product, string $email, int $customer_id ): int {
+		$order = WC_Helper_Order::create_order( $customer_id, $product );
+		$order->set_billing_email( $email );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$downloads     = WC_Data_Store::load( 'customer-download' )->get_downloads( array( 'order_id' => $order->get_id() ) );
+		$permission_id = $downloads[0]->get_id();
+
+		$log = new WC_Customer_Download_Log();
+		$log->set_permission_id( $permission_id );
+		$log->set_user_id( $customer_id );
+		$log->set_user_ip_address( '1.2.3.4' );
+		$log->save();
+
+		return $permission_id;
+	}
 }
