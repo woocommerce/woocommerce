@@ -15,21 +15,10 @@ import {
 } from './helpers/enable-email-editor-feature';
 import { accessTheEmailEditor, openEmailPostInEditor } from '../../utils/email';
 import { setOption } from '../../utils/options';
+import { getInstalledWordPressVersion } from '../../utils/wordpress';
 
 // WP 7.2 renamed "Preview in new tab" to "Preview" with an "(opens in a new tab)" icon label.
 const PREVIEW_IN_NEW_TAB = /^Preview (in new tab|\(opens in a new tab\))$/;
-
-// WordPress adds its version to the admin body class, for example `branch-7-2`.
-const isWordPress72OrNewer = async ( page: Page ) => {
-	const branch = await page.evaluate( () =>
-		document.body.className.match( /\bbranch-(\d+)-(\d+)\b/ )
-	);
-	if ( ! branch ) {
-		return false;
-	}
-	const [ major, minor ] = [ Number( branch[ 1 ] ), Number( branch[ 2 ] ) ];
-	return major > 7 || ( major === 7 && minor >= 2 );
-};
 
 test.describe(
 	'WooCommerce Email Editor Core',
@@ -166,11 +155,11 @@ test.describe(
 		test( 'Core Template panel has no template actions', async ( {
 			page,
 		} ) => {
-			await accessAndTrackEmailPost( page );
 			test.skip(
-				! ( await isWordPress72OrNewer( page ) ),
+				( await getInstalledWordPressVersion() ) < 7.2,
 				'Core renders the Template panel from WordPress 7.2.'
 			);
+			await accessAndTrackEmailPost( page );
 
 			// "Create new" would add a site template, and "Edit" would skip the
 			// email editor's warning that the template is shared by other emails.
