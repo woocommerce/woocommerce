@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Fix flaky cart-line identity e2e test for variation adds; tests only, no production change.
+
