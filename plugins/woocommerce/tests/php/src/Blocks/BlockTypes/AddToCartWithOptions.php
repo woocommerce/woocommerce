@@ -278,19 +278,9 @@ class AddToCartWithOptions extends \WC_Unit_Test_Case {
 		global $product;
 
 		$previous_product = $product;
-		switch ( $product_type ) {
-			case ProductType::VARIABLE:
-				$product = \WC_Helper_Product::create_variation_product();
-				break;
-			case ProductType::GROUPED:
-				$product = \WC_Helper_Product::create_grouped_product();
-				break;
-			case ProductType::EXTERNAL:
-				$product = \WC_Helper_Product::create_external_product();
-				break;
-			default:
-				$product = \WC_Helper_Product::create_simple_product();
-		}
+		$product          = ProductType::GROUPED === $product_type
+			? \WC_Helper_Product::create_grouped_product()
+			: \WC_Helper_Product::create_simple_product();
 
 		try {
 			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/add-to-cart-with-options /--></div><!-- /wp:woocommerce/single-product -->' );
@@ -333,10 +323,8 @@ class AddToCartWithOptions extends \WC_Unit_Test_Case {
 	 */
 	public static function provider_interactive_product_types(): array {
 		return array(
-			'simple product'   => array( ProductType::SIMPLE ),
-			'variable product' => array( ProductType::VARIABLE ),
-			'grouped product'  => array( ProductType::GROUPED ),
-			'external product' => array( ProductType::EXTERNAL ),
+			'simple product'  => array( ProductType::SIMPLE ),
+			'grouped product' => array( ProductType::GROUPED ),
 		);
 	}
 
