@@ -709,6 +709,10 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
 		$this->assertSame( 'Your store wasn’t live at the last check', $card['rows'][0]['title'] );
 		$this->assertSame( 'These checks run at the next daily check, or you can run the check again now.', $card['rows'][0]['text'] );
+		update_option( ScheduledScan::DAILY_OPTION, 'no' );
+		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
+		$this->assertSame( 'These checks run the next time you check your store, or you can run the check again now.', $card['rows'][0]['text'], 'With daily checks off, the line still says the merchant can run the check' );
+		delete_option( ScheduledScan::DAILY_OPTION );
 		$this->assertSame( 'Not checked yet', $card['badge']['text'], 'The checks wait for the next run after launch' );
 		$this->assertTrue( $card['rows'][0]['waiting'], 'Screen readers hear Not checked yet' );
 	}
@@ -736,6 +740,10 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Not checked yet', $badge );
 		$this->assertTrue( $by_id['sitemap_lists_products']['waiting'], 'Screen readers hear Not checked yet' );
 		$this->assertSame( 'Your store wasn’t live at the last check. This check runs at the next daily check, or you can run the check again now.', $by_id['sitemap_lists_products']['text'] );
+		update_option( ScheduledScan::DAILY_OPTION, 'no' );
+		$by_id = $rows()[1];
+		$this->assertSame( 'Your store wasn’t live at the last check. This check runs the next time you check your store, or you can run the check again now.', $by_id['sitemap_lists_products']['text'] );
+		delete_option( ScheduledScan::DAILY_OPTION );
 
 		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $check( 'launched', true, array( 'group' => 'access' ) ), $check( 'canonical_url', null, array( 'no_product' => true ) ), $check( 'robots_txt', true ) ) ), false );
 		list( $badge, $by_id ) = $rows();

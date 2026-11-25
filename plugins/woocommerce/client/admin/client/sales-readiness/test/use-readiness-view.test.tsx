@@ -216,6 +216,35 @@ describe( 'useReadinessView', () => {
 			'Your change wasn’t saved. Try again in a few minutes.'
 		);
 	} );
+
+	it( 'keeps the saved daily check when an older view read returns later', async () => {
+		let finishStale: ( value: unknown ) => void = () => {};
+		mockFetch
+			.mockResolvedValueOnce( { ...view( true ), daily_checks: true } )
+			.mockImplementationOnce(
+				() =>
+					new Promise( ( resolve ) => {
+						finishStale = resolve;
+					} )
+			)
+			.mockResolvedValueOnce( { enabled: false } )
+			.mockResolvedValueOnce( {
+				...view( false ),
+				daily_checks: false,
+			} );
+		const { result } = renderHook( () => useReadinessView( 'page' ) );
+		await act( async () => jest.advanceTimersByTime( 0 ) );
+
+		await act( async () => jest.advanceTimersByTime( POLL_MS ) );
+		await act( async () => result.current.setDailyChecks( false ) );
+		expect( result.current.view?.daily_checks ).toBe( false );
+
+		await act( async () => {
+			finishStale( { ...view( false ), daily_checks: true } );
+		} );
+		expect( result.current.view?.daily_checks ).toBe( false );
+		expect( result.current.error ).toBeNull();
+	} );
 } );
 
 describe( 'RunStatus', () => {

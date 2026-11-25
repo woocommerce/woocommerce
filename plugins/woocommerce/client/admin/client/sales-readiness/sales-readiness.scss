@@ -436,12 +436,6 @@ body:has(.wc-sales-readiness) {
 		gap: 2px;
 	}
 
-	+ .wc-sales-readiness-checked__daily {
-		margin-top: var(--wpds-dimension-gap-lg);
-		padding-top: var(--wpds-dimension-gap-lg);
-		border-top: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
-	}
-
 	> .wc-sales-readiness-checked__running {
 		flex-direction: row;
 		align-items: center;
@@ -456,6 +450,12 @@ body:has(.wc-sales-readiness) {
 		flex-shrink: 0;
 		white-space: nowrap;
 	}
+}
+
+.wc-sales-readiness-checked__daily {
+	margin-block-start: var(--wpds-dimension-gap-lg);
+	padding-block-start: var(--wpds-dimension-gap-lg);
+	border-block-start: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
 }
 
 // Download your results: a button styled like the contact support link.

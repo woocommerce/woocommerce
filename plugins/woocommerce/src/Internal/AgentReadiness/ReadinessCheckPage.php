@@ -810,7 +810,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				__( 'Your store wasn’t live at the last check', 'woocommerce' ),
 				ScheduledScan::daily_enabled()
 					? __( 'These checks run at the next daily check, or you can run the check again now.', 'woocommerce' )
-					: __( 'These checks run the next time you check your store.', 'woocommerce' ),
+					: __( 'These checks run the next time you check your store, or you can run the check again now.', 'woocommerce' ),
 			);
 		}
 		return array(
@@ -849,7 +849,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				true,
 				ScheduledScan::daily_enabled()
 					? __( 'Your store wasn’t live at the last check. This check runs at the next daily check, or you can run the check again now.', 'woocommerce' )
-					: __( 'Your store wasn’t live at the last check. This check runs the next time you check your store.', 'woocommerce' ),
+					: __( 'Your store wasn’t live at the last check. This check runs the next time you check your store, or you can run the check again now.', 'woocommerce' ),
 			);
 		}
 		if ( ! empty( $check['no_product'] ) ) {

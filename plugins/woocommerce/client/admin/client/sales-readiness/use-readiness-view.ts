@@ -48,13 +48,16 @@ export function useReadinessView(
 	// True after a view has been shown: poll failures must not spam Tracks, replace the view or stop polling.
 	const hasView = useRef( initialView !== null );
 	const mounted = useRef( true );
+	// The latest view read wins, so a poll that started before a save can't put the switch back.
+	const viewRead = useRef( 0 );
 
 	const load = useCallback( async () => {
+		const read = ++viewRead.current;
 		try {
 			const loaded = await apiFetch< ReadinessView >( {
 				path: VIEW_PATH,
 			} );
-			if ( ! mounted.current ) {
+			if ( ! mounted.current || read !== viewRead.current ) {
 				return;
 			}
 			setView( loaded );
@@ -66,7 +69,11 @@ export function useReadinessView(
 				trackReadiness( 'viewed', viewedProps( loaded, surface ) );
 			}
 		} catch {
-			if ( ! mounted.current || hasView.current ) {
+			if (
+				! mounted.current ||
+				read !== viewRead.current ||
+				hasView.current
+			) {
 				return;
 			}
 			trackReadiness( 'error', { surface, action: 'load' } );
@@ -138,6 +145,8 @@ export function useReadinessView(
 	// Shows the switch in its new position at once, then reads the view again: some rows say when checks run next.
 	const setDailyChecks = useCallback(
 		async ( enabled: boolean ) => {
+			// Drop a view read already in flight. It still has the switch's old position.
+			++viewRead.current;
 			setView(
 				( current ) => current && { ...current, daily_checks: enabled }
 			);
@@ -153,6 +162,8 @@ export function useReadinessView(
 				if ( ! mounted.current ) {
 					return;
 				}
+				// A poll that started during the save must not clear this error.
+				++viewRead.current;
 				trackReadiness( 'error', { surface, action: 'daily_checks' } );
 				setView(
 					( current ) =>

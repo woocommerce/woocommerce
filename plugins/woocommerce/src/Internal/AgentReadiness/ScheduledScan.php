@@ -179,16 +179,13 @@ class ScheduledScan implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Schedule the next daily run, fetch the rules file, then start the scan, replacing one in progress.
+	 * When daily checks are on, schedule the next one, then fetch the rules file and start the scan, replacing one in progress.
 	 * Each batch of products runs in its own action, then the last stores the report.
 	 *
 	 * @internal
 	 */
 	public function run(): void {
-		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
-		if ( self::daily_enabled() ) {
-			as_schedule_single_action( self::next_daily_run(), self::DAILY_HOOK, array(), self::GROUP );
-		}
+		$this->sync_daily_run();
 
 		$this->remote_rules->refresh( array_keys( $this->agent_readiness->get_default_rules() ) );
 		as_unschedule_all_actions( self::NEXT_HOOK );
@@ -214,9 +211,25 @@ class ScheduledScan implements RegisterHooksInterface {
 	 */
 	public function set_daily_enabled( bool $enable ): void {
 		update_option( self::DAILY_OPTION, $enable ? 'yes' : 'no', false );
+		if ( $enable && null === $this->agent_readiness->get_cached_report() ) {
+			as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
+			return;
+		}
+		$this->sync_daily_run();
+	}
+
+	/**
+	 * Queue the next nightly run when daily checks are on, and remove it when they are off.
+	 * The option is read again after scheduling, so turning the switch off while this runs drops the queued run.
+	 */
+	private function sync_daily_run(): void {
 		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
-		if ( $enable && null !== $this->agent_readiness->get_cached_report() ) {
-			as_schedule_single_action( self::next_daily_run(), self::DAILY_HOOK, array(), self::GROUP );
+		if ( ! self::daily_enabled() ) {
+			return;
+		}
+		as_schedule_single_action( self::next_daily_run(), self::DAILY_HOOK, array(), self::GROUP );
+		if ( ! self::daily_enabled() ) {
+			as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
 		}
 	}
 
