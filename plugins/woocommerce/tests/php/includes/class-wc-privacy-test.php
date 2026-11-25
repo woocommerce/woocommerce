@@ -159,6 +159,34 @@ class WC_Privacy_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Erasing a registered customer also removes download logs of guest orders placed with their email.
+	 *
+	 * @return void
+	 */
+	public function test_erasers_remove_download_logs_of_guest_orders_of_registered_customer(): void {
+		update_option( 'woocommerce_erasure_request_removes_order_data', 'yes' );
+		update_option( 'woocommerce_erasure_request_removes_download_data', 'yes' );
+
+		wc_get_container()->get( Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->add_approved_directory( 'https://always.trusted' );
+		$product = WC_Helper_Product::create_downloadable_product(
+			array(
+				array(
+					'name' => 'File',
+					'file' => 'https://always.trusted/file.pdf',
+				),
+			)
+		);
+		$guest   = $this->create_downloaded_order( $product, 'eraseme@example.com', 0 );
+		WC_Helper_Customer::create_customer( 'eraseme', 'password', 'eraseme@example.com' );
+
+		foreach ( apply_filters( 'wp_privacy_personal_data_erasers', array() ) as $eraser ) {
+			call_user_func( $eraser['callback'], 'eraseme@example.com', 1 );
+		}
+
+		$this->assertEmpty( WC_Data_Store::load( 'customer-download-log' )->get_download_logs_for_permission( $guest ), 'The guest order has no download logs left.' );
+	}
+
+	/**
 	 * Erased customer types.
 	 *
 	 * @return array<string, array<bool>>
