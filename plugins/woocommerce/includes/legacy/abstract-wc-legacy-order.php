@@ -166,7 +166,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		// Handle qty if set.
 		if ( isset( $args['qty'] ) ) {
 			if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
-				/** @var WC_Order_Item_Product $item */
+				/** @var WC_Order_Item $item */
 				$legacy_backorder_meta_key = OrderUtil::get_legacy_backorder_meta_key( $item );
 				if ( WC_Order_Item_Product::BACKORDER_META_KEY !== $legacy_backorder_meta_key ) {
 					$item->delete_meta_data( $legacy_backorder_meta_key );

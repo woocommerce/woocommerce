@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
 use WC_Order;
-use WC_Order_Item_Product;
+use WC_Order_Item;
 use WP_Post;
 
 /**
@@ -304,22 +304,26 @@ final class OrderUtil {
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
 	 * @since 11.5.0
-	 * @param WC_Order_Item_Product $item Order item.
+	 * @param WC_Order_Item $item Order item.
 	 * @return string
 	 */
-	public static function get_legacy_backorder_meta_key( WC_Order_Item_Product $item ): string {
+	public static function get_legacy_backorder_meta_key( $item ): string {
+		$default_label = __( 'Backordered', 'woocommerce' );
+
 		/**
 		 * Filter the label shown for the backordered item meta.
 		 *
 		 * @since 9.9.0
 		 * @deprecated 11.5.0 This filter no longer sets the stored backorder meta key; it only customizes the displayed label.
 		 */
-		return apply_filters_deprecated(
+		$filtered_label = apply_filters_deprecated(
 			'woocommerce_backordered_item_meta_name',
-			array( __( 'Backordered', 'woocommerce' ), $item ),
+			array( $default_label, $item ),
 			'11.5.0',
 			'',
 			'This filter no longer sets the stored backorder meta key.'
 		);
+
+		return is_string( $filtered_label ) ? $filtered_label : $default_label;
 	}
 }

@@ -293,6 +293,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		);
 	}
 
+
 	/**
 	 * @testdox get_formatted_meta_data keeps a variation attribute whose value only appears in the parent product name.
 	 */
