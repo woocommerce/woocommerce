@@ -288,8 +288,12 @@ jQuery( function( $ ) {
 		}, args );
 
 		$target.flexslider( options );
-		// Thumbnails repeat the slides and can't take keyboard focus, so screen readers skip them.
-		$target.find( '.flex-control-thumbs' ).attr( 'aria-hidden', 'true' );
+		// Thumbnails that FlexSlider builds repeat the slides and can't take keyboard focus, so screen readers skip them.
+		// Lists that other code passes in as manualControls may hold links, so they are left alone.
+		const slider = $target.data( 'flexslider' );
+		if ( slider && slider.controlNavScaffold && 'thumbnails' === slider.vars.controlNav ) {
+			slider.controlNavScaffold.attr( 'aria-hidden', 'true' );
+		}
 		gallery.initVideoThumbnailPreviews();
 		$target
 			.off( 'click.wcProductGalleryVideoThumbs', '.flex-control-thumbs img' )
