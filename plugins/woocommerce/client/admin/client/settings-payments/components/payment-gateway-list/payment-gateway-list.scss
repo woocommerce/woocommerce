@@ -49,7 +49,7 @@
 		}
 
 		&-before {
-			margin-inline-end: $gap;
+			margin-right: $gap;
 			align-items: center;
 
 			.drag-handle {
@@ -57,7 +57,7 @@
 			}
 
 			@media screen and ( max-width: $break-medium ) {
-				margin-inline-end: 0;
+				margin-right: 0;
 
 				.drag-handle {
 					min-height: 25px;
@@ -93,10 +93,10 @@
 		}
 
 		&-text {
-			margin-inline-end: $gap;
+			margin-right: $gap;
 
 			@media screen and ( max-width: $break-medium ) {
-				margin-inline-end: 0;
+				margin-right: 0;
 			}
 		}
 
@@ -124,14 +124,14 @@
 
 		&-buttons {
 			display: inline-flex;
-			margin-inline-start: auto;
+			margin-left: auto;
 			min-height: 48px;
 
 			@media screen and ( max-width: $break-medium ) {
 				order: 4; /* Position the column in the 4th spot to ensure the buttons appear on a new row */
 				grid-column: 2; /* Start below the 2nd column */
 				grid-row: 2; /* Move to the second row */
-				margin-inline-start: 0;
+				margin-left: 0;
 				margin-top: $gap;
 				min-height: 0;
 			}
@@ -154,7 +154,7 @@
 		}
 
 		&-after {
-			margin-inline-start: $gap;
+			margin-left: $gap;
 			min-height: 48px;
 
 			@media screen and ( max-width: $break-medium ) {
@@ -183,7 +183,7 @@
 		}
 
 		&-after.no-buttons {
-			margin-inline-start: auto;
+			margin-left: auto;
 		}
 	}
 }
@@ -205,20 +205,6 @@
 				&-image,
 				img {
 					display: none;
-				}
-			}
-		}
-	}
-}
-
-html[dir="rtl"] {
-	.settings-payment-gateways__list {
-		.woocommerce-list__item {
-			&-buttons {
-				&__actions {
-					@media screen and ( min-width: $break-medium ) and ( max-width: $break-xlarge ) {
-						justify-content: flex-start;
-					}
 				}
 			}
 		}
