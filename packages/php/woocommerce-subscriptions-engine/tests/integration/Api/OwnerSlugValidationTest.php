@@ -42,6 +42,11 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 	private const CUSTOMER_ID = 41;
 
 	/**
+	 * Address email looked up by the address email read.
+	 */
+	private const EMAIL = 'ada@example.com';
+
+	/**
 	 * Id of a contract of {@see self::OWNER}.
 	 *
 	 * @var int
@@ -135,6 +140,16 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 		if ( 'Plans::delete_meta' === $entry ) {
 			Plans::add_meta( $this->plan_id, self::OWNER, 'note', 'x' );
 		}
+		if ( 'Contracts::list_for_address_email' === $entry ) {
+			Contracts::update(
+				$this->contract_id,
+				array(
+					'extension_slug' => self::OWNER,
+					'addresses'      => array( 'billing' => array( 'email' => self::EMAIL ) ),
+				),
+				$this->lock
+			);
+		}
 		if ( 'Contracts::delete_history' === $entry ) {
 			Contracts::add_history_entry(
 				$this->contract_id,
@@ -179,6 +194,7 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 				$this->assertSame( 1, $result );
 				return;
 			case 'Contracts::list_for_customer':
+			case 'Contracts::list_for_address_email':
 				$this->assertSame( array( $this->contract_id ), self::get_ids( $result ) );
 				return;
 			case 'Plans::create':
@@ -218,6 +234,7 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 			'Contracts::add_history_entry',
 			'Contracts::delete_history',
 			'Contracts::list_for_customer',
+			'Contracts::list_for_address_email',
 			'Plans::create',
 			'Plans::update',
 			'Plans::add_meta',
@@ -319,6 +336,8 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 				return Contracts::delete_history( $this->contract_id, array( 'extension_slug' => $slug ), $this->lock );
 			case 'Contracts::list_for_customer':
 				return Contracts::list_for_customer( self::CUSTOMER_ID, 20, 0, array( 'extension_slug' => $slug ) );
+			case 'Contracts::list_for_address_email':
+				return Contracts::list_for_address_email( self::EMAIL, 20, 0, array( 'extension_slug' => $slug ) );
 			case 'Plans::create':
 				return Plans::create(
 					array(

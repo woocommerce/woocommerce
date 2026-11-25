@@ -1331,6 +1331,53 @@ final class ContractRepository {
 	}
 
 	/**
+	 * Contracts of `$extension_slug` with a billing or shipping address whose email equals `$email`,
+	 * newest first, each once. The match uses the addresses table's collation (case-insensitive on
+	 * default installs) through its `email` index. Row-only reads, plan terms batch-hydrated.
+	 *
+	 * @param string $email          The address email to match.
+	 * @param string $extension_slug The owning extension.
+	 * @param int    $limit          Maximum contracts to return.
+	 * @param int    $offset         Contracts to skip (for paging).
+	 * @return array<int, Contract> Contracts newest first.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like no contracts.
+	 */
+	public function find_by_address_email( string $email, string $extension_slug, int $limit, int $offset ): array {
+		global $wpdb;
+
+		$contracts   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$addresses   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES );
+		$select      = self::CONTRACT_SELECT;
+		$owner_match = self::OWNER_MATCH;
+
+		// A subquery, not a join: a contract with the email on both addresses is returned once. The
+		// owner placeholder comes from OWNER_MATCH, so the sniff cannot count it.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT {$select}
+				FROM {$contracts}
+				WHERE {$owner_match}
+				AND id IN ( SELECT contract_id FROM {$addresses} WHERE email = %s )
+				ORDER BY id DESC
+				LIMIT %d OFFSET %d",
+				$extension_slug,
+				$email,
+				$limit,
+				$offset
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		if ( '' !== $wpdb->last_error ) {
+			// The message leaves the email out: exception messages end up in logs.
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the contracts of extension "%s" by address email: %s', $extension_slug, $wpdb->last_error ) ) );
+		}
+
+		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
+	}
+
+	/**
 	 * Contracts whose `origin_order_id` is `$order_id`, oldest first. Row-only reads
 	 * (no items / addresses) with their frozen plan terms batch-hydrated.
 	 *

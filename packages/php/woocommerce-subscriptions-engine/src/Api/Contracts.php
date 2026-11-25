@@ -182,6 +182,20 @@ final class Contracts {
 	);
 
 	/**
+	 * Keys accepted by {@see self::list_for_address_email()}, as a key map.
+	 *
+	 * @var array<string, true>
+	 */
+	private const LIST_FOR_ADDRESS_EMAIL_KEYS = array(
+		'extension_slug' => true,
+	);
+
+	/**
+	 * Width of the stored address email column, the longest email {@see self::list_for_address_email()} can match.
+	 */
+	private const ADDRESS_EMAIL_MAX_LENGTH = 320;
+
+	/**
 	 * Take the contract's lock for `$operation`, for the synchronous section of this request.
 	 * Pass the lock to every write of the operation and release it when done; an unreleased
 	 * lock expires after {@see ContractLock::TTL_SECONDS}. An expired lock is taken over. A lock
@@ -720,6 +734,49 @@ final class Contracts {
 		}
 
 		return self::views( ( new ContractRepository() )->find_by_customer_id( $customer_id, $query ) );
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
+	/**
+	 * List an extension's contracts with a billing or shipping address whose email equals `$email`,
+	 * newest first, each once. Owner-scoped: `extension_slug` is required, so one extension never
+	 * reads another's contracts by email. The match follows the database collation (case-insensitive
+	 * on default installs). Views carry no items or addresses. Unknown keys get `_doing_it_wrong()`.
+	 *
+	 * @param string               $email  The address email to match (1-320 characters, as stored; no format check).
+	 * @param int                  $limit  Maximum contracts to return.
+	 * @param int                  $offset Contracts to skip (for paging).
+	 * @param array<string, mixed> $args   `extension_slug` (required, the owning extension; `any` is refused).
+	 * @return array<int, ContractView> The matching contracts, newest first.
+	 * @throws ValidationException If `$email` is empty or too long, `$limit` or `$offset` is negative, or
+	 *                             `extension_slug` is missing, invalid or `any`, with every error reported.
+	 * @throws \RuntimeException   If the read fails.
+	 */
+	public static function list_for_address_email( string $email, int $limit = 20, int $offset = 0, array $args = array() ): array {
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::LIST_FOR_ADDRESS_EMAIL_KEYS );
+
+		$validator      = new ArgumentValidator();
+		$email          = (string) $validator->get_bounded_string( 'email', $email, self::ADDRESS_EMAIL_MAX_LENGTH );
+		$limit          = (int) $validator->get_non_negative_int( 'limit', $limit );
+		$offset         = (int) $validator->get_non_negative_int( 'offset', $offset );
+		$extension_slug = (string) $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		if ( 'any' === $extension_slug ) {
+			$validator->add(
+				new InvalidInputException(
+					ValidationErrorCode::INVALID_VALUE,
+					'extension_slug',
+					'"extension_slug" must not be "any": name the owning extension.'
+				)
+			);
+		}
+		try {
+			$validator->throw_errors();
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+		}
+
+		return self::views( ( new ContractRepository() )->find_by_address_email( $email, $extension_slug, $limit, $offset ) );
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
