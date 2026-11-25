@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep field labels such as "CEP" as displayed in Checkout block errors, and use wording translators can match to any field.
