@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Remove an unused public staging check from the experimental extensible abilities API; no store change.
+

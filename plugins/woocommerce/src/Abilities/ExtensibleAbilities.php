@@ -7,7 +7,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
-use Automattic\WooCommerce\Internal\Utilities\StagedMethod;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -602,24 +601,6 @@ class ExtensibleAbilities {
 			);
 		}
 		return array_values( array_unique( $valid ) );
-	}
-
-	/**
-	 * Refuse a direct call of a stage method when a class overrides its saving
-	 * method without overriding the stage method too, because staging would skip
-	 * the rules of that override. WC_Data classes use
-	 * WC_Data::refuse_unstaged_override(). Another class calls this method at the
-	 * start of its stage method, unless its saving method runs the stage method.
-	 *
-	 * @since 11.4.0
-	 *
-	 * @param object $subject      Object that gets the change.
-	 * @param string $method       Saving method, for example add_tracking_item.
-	 * @param string $stage_method Stage method, for example stage_tracking_item.
-	 * @throws \WC_Data_Exception When a class has not adopted the stage method.
-	 */
-	public static function refuse_unstaged_override( object $subject, string $method, string $stage_method ): void {
-		StagedMethod::refuse_unstaged( $subject, $method, $stage_method );
 	}
 
 	/**
