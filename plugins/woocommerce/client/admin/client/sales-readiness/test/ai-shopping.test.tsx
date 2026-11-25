@@ -452,6 +452,54 @@ describe( 'AiShopping', () => {
 		expect( mockCreateSuccessNotice ).not.toHaveBeenCalled();
 	} );
 
+	it( 'does not say AI assistants can shop the store when it turns on but needs attention', async () => {
+		mockedFetch.mockResolvedValue( {
+			enabled: true,
+			status: 'needs_attention',
+		} );
+		renderPage( view( { ucp: { ...view().ucp, blocked: false } } ) );
+
+		fireEvent.click( toggle() );
+		await waitFor( () => expect( mockedFetch ).toHaveBeenCalled() );
+		await screen.findByRole( 'checkbox', { name: /Allow AI assistants/ } );
+
+		expect( window.location.assign ).toHaveBeenCalledWith(
+			'https://example.com/wp-admin/admin.php?page=wc-settings'
+		);
+		expect(
+			window.sessionStorage.getItem( 'wc-ai-shopping-snackbar' )
+		).toBeNull();
+		expect( mockCreateSuccessNotice ).not.toHaveBeenCalled();
+	} );
+
+	it( 'with unsaved fields, does not say AI assistants can shop the store when it turns on but needs attention, and says to save', async () => {
+		mockedFetch.mockResolvedValue( {
+			enabled: true,
+			status: 'needs_attention',
+		} );
+		renderPage( view( { ucp: { ...view().ucp, blocked: false } } ) );
+		fireEvent.change(
+			screen.getByRole( 'combobox', {
+				name: 'Refund and returns policy',
+			} ),
+			{ target: { value: '12' } }
+		);
+
+		fireEvent.click( toggle() );
+		await waitFor( () => expect( mockedFetch ).toHaveBeenCalled() );
+		await screen.findByRole( 'checkbox', { name: /Allow AI assistants/ } );
+
+		expect( window.location.assign ).not.toHaveBeenCalled();
+		expect( toggle() ).toBeChecked();
+		expect( mockCreateSuccessNotice ).not.toHaveBeenCalled();
+		expect(
+			window.sessionStorage.getItem( 'wc-ai-shopping-snackbar' )
+		).toBeNull();
+		expect(
+			screen.getByText( 'Save your changes to see the updated status.' )
+		).toBeInTheDocument();
+	} );
+
 	it( 'shows the switch’s snackbar on the page that loads after it saves, once', () => {
 		window.sessionStorage.setItem(
 			'wc-ai-shopping-snackbar',

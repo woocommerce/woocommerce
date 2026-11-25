@@ -220,9 +220,12 @@ class Styles_Helper {
 			)
 		);
 
+		$block_style = $block_attributes['style'] ?? array();
+
+		// Some third-party blocks store a string here (e.g. Calendly's "style":"inline"), which is not a style object.
 		return array_replace_recursive(
 			$normalized_colors,
-			$block_attributes['style'] ?? array()
+			is_array( $block_style ) ? $block_style : array()
 		);
 	}
 

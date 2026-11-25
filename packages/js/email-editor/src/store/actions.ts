@@ -4,6 +4,7 @@
 import { select } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
 import { apiFetch } from '@wordpress/data-controls';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -117,9 +118,21 @@ export function* requestSendingNewsletterPreview( email: string ) {
 	} as const;
 	try {
 		const postId = select( storeName ).getEmailPostId();
+		const postType = select( storeName ).getEmailPostType();
+
+		const defaultPath = '/woocommerce-email-editor/v1/send_preview_email';
+		const filteredPath = applyFilters(
+			'woocommerce_email_editor_send_preview_api_path',
+			defaultPath,
+			postType,
+			postId
+		);
 
 		yield apiFetch( {
-			path: '/woocommerce-email-editor/v1/send_preview_email',
+			path:
+				typeof filteredPath === 'string' && filteredPath
+					? filteredPath
+					: defaultPath,
 			method: 'POST',
 			data: {
 				email,
@@ -137,14 +150,21 @@ export function* requestSendingNewsletterPreview( email: string ) {
 		recordEvent( 'sent_preview_email', { postId, email } );
 	} catch ( errorResponse ) {
 		recordEvent( 'sent_preview_email_error', { email } );
+		// The package endpoint returns `error`; a standard WP REST error has `message`.
+		const { error, message } = ( errorResponse ?? {} ) as {
+			error?: unknown;
+			message?: unknown;
+		};
+		const detail = error ?? message;
 		yield {
 			type: 'CHANGE_PREVIEW_STATE',
 			state: {
 				sendingPreviewStatus: SendingPreviewStatus.ERROR,
 				isSendingPreviewEmail: false,
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				errorMessage: JSON.stringify( errorResponse?.error ),
+				errorMessage:
+					typeof detail === 'string'
+						? detail
+						: JSON.stringify( detail ),
 			},
 		};
 	}

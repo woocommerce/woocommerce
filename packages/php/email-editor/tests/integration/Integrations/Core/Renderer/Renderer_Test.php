@@ -408,6 +408,56 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * A block can carry a string `style` attribute instead of a style object (Calendly saves "style":"inline").
+	 * The renderer treats it as absent, so the email renders instead of throwing and falling back to the legacy design.
+	 *
+	 * @dataProvider string_style_attribute_provider
+	 *
+	 * @param string $post_content Block markup with a paragraph that has a string `style` attribute.
+	 * @param string $expected_style A declaration the paragraph still gets from its other attributes.
+	 */
+	public function testItRendersAParagraphWithAStringStyleAttribute( string $post_content, string $expected_style ): void {
+		$email_post_id = $this->factory->post->create( array( 'post_content' => $post_content ) );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+
+		$this->assertStringContainsString( $expected_style, $this->extractBlockStyle( $rendered['html'], 'string-style', 'td' ) );
+	}
+
+	/**
+	 * One case per reader that merges or writes to the block's style.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function string_style_attribute_provider(): array {
+		return array(
+			'text color (Styles_Helper)'                 => array(
+				'<!-- wp:paragraph {"style":"inline","textColor":"luminous-vivid-orange"} --><p class="string-style has-luminous-vivid-orange-color has-text-color">Book a call</p><!-- /wp:paragraph -->',
+				'color: #ff6900',
+			),
+			'font size preset (Typography_Preprocessor)' => array(
+				'<!-- wp:paragraph {"style":"inline","fontSize":"large"} --><p class="string-style has-large-font-size">Book a call</p><!-- /wp:paragraph -->',
+				'font-size: 24px',
+			),
+			'string typography with a font size preset'  => array(
+				'<!-- wp:paragraph {"style":{"typography":"inline"},"fontSize":"large"} --><p class="string-style has-large-font-size">Book a call</p><!-- /wp:paragraph -->',
+				'font-size: 24px',
+			),
+			'quote with string typography'               => array(
+				'<!-- wp:quote {"style":{"typography":"inline"}} --><blockquote class="wp-block-quote"><!-- wp:paragraph {"fontSize":"large"} --><p class="string-style has-large-font-size">Book a call</p><!-- /wp:paragraph --></blockquote><!-- /wp:quote -->',
+				'font-size: 24px',
+			),
+			'paragraph in a quote (Quote_Preprocessor)'  => array(
+				'<!-- wp:quote {"style":{"typography":{"fontSize":"18px"}}} --><blockquote class="wp-block-quote" style="font-size:18px"><!-- wp:paragraph {"style":"inline"} --><p class="string-style">Book a call</p><!-- /wp:paragraph --></blockquote><!-- /wp:quote -->',
+				'font-size: 18px',
+			),
+		);
+	}
+
+	/**
 	 * Extracts the HTML of a block
 	 *
 	 * @param string $html HTML content.

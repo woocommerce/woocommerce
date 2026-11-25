@@ -42,7 +42,7 @@ final class SessionConcurrencyGuard {
 	public static function has_changed( WC_Session $session ): bool {
 		$baseline_hashes = self::get_baseline_hashes();
 
-		if ( ! $baseline_hashes->contains( $session ) ) {
+		if ( ! $baseline_hashes->offsetExists( $session ) ) {
 			return false;
 		}
 

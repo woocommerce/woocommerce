@@ -155,7 +155,7 @@ wc_admin_connect_page(
 	)
 );
 
-if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+if ( OrderUtil::custom_orders_table_usage_is_enabled() && function_exists( 'wc_get_page_screen_id' ) ) {
 	// WooCommerce > Orders (COT).
 	wc_admin_connect_page(
 		array(

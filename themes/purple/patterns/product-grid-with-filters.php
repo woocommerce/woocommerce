@@ -13,7 +13,7 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"name":"Product grid with filters","categories":["woo-commerce","purple"],"patternName":"purple/product-grid-with-filters","description":"A product catalog grid with sidebar filters, sorting, and pagination."},"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|70","bottom":"0"}},"@tablet":{"spacing":{"margin":{"top":"0"}}},"@mobile":{"spacing":{"margin":{"top":"0"}}}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Product grid with filters', 'Pattern title', 'purple' ) ); ?>,"categories":["woo-commerce","purple"],"patternName":"purple/product-grid-with-filters","description":"A product catalog grid with sidebar filters, sorting, and pagination."},"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|70","bottom":"0"}},"@tablet":{"spacing":{"margin":{"top":"0"}}},"@mobile":{"spacing":{"margin":{"top":"0"}}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--70);margin-bottom:0">
 <!-- wp:columns {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|50","bottom":"0"}}}} -->
 <div class="wp-block-columns alignwide" style="margin-top:var(--wp--preset--spacing--50);margin-bottom:0"><!-- wp:column {"width":"22%","style":{"@mobile":{"spacing":{"blockGap":"0"}},"@tablet":{"spacing":{"blockGap":"0"}}}} -->
@@ -177,13 +177,11 @@
 <!-- /wp:query-pagination --></div>
 <!-- /wp:group -->
 
-<!-- wp:woocommerce/product-collection-no-results -->
-<!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"left","flexWrap":"wrap"}} -->
-<div class="wp-block-group"><!-- wp:paragraph -->
+<!-- wp:woocommerce/product-collection-no-results {"style":{"spacing":{"padding":{"top":"var:preset|spacing|10"}}}} -->
+<!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element, 3. is the start of a 'a' HTML element, 4. is the end of a 'a' HTML element */
 printf( esc_html__( 'No results found. You can try %1$sclearing any filters%2$s or head to our %3$sstore\'s home.%4$s', 'purple' ), '<a class="wc-link-clear-any-filters" href="' . esc_url( '#' ) . '">', '</a>', '<a class="wc-link-stores-home" href="' . esc_url( '#' ) . '">', '</a>' ); ?></p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
+<!-- /wp:paragraph -->
 <!-- /wp:woocommerce/product-collection-no-results --></div>
 <!-- /wp:woocommerce/product-collection --></div>
 <!-- /wp:column --></div>
