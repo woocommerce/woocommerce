@@ -1,4 +1,3 @@
-
 <?php
 /**
  * WC_Report_Low_In_Stock.
@@ -66,12 +65,13 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 			)
 		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-$this->max_items = $wpdb->get_var(
-    $wpdb->prepare(
-        "SELECT COUNT(%d) FROM (
-            SELECT posts.ID as id, posts.post_parent as parent {$query_from}
-        ) AS low_stock_results",
-        1
-    )
-); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->max_items = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(%d) FROM (
+					SELECT posts.ID as id, posts.post_parent as parent {$query_from}
+				) AS low_stock_results",
+				1
+			)
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
 }
