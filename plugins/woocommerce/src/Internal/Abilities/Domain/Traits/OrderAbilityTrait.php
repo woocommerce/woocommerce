@@ -419,7 +419,7 @@ trait OrderAbilityTrait {
 
 	/**
 	 * Format an order after a save, retaining the saved object if reloading fails.
-	 * The reload picks up what the syncs wrote to the storage without the saved object.
+	 * The reload picks up what the syncs wrote to storage, which the saved object does not reflect.
 	 *
 	 * @param \WC_Order $order    Saved order object.
 	 * @param string[]  $includes Optional parts, as for format_order_for_response().
