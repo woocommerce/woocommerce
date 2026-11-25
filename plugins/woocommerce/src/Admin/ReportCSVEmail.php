@@ -59,6 +59,7 @@ class ReportCSVEmail extends \WC_Email {
 		$this->title                  = __( 'Analytics report download', 'woocommerce' );
 		$this->description            = __( 'Sent to the person who exports an Analytics report, with a link to download it.', 'woocommerce' );
 		$this->supports_cc_bcc        = false;
+		$this->manual                 = true;
 		$this->template_base          = WC()->plugin_path() . '/includes/react-admin/emails/';
 		$this->template_html          = 'html-admin-report-export-download.php';
 		$this->template_plain         = 'plain-admin-report-export-download.php';

@@ -75,7 +75,7 @@ class EmailApiController {
 		}
 
 		$form_fields = $email->get_form_fields();
-		$enabled     = array_key_exists( 'enabled', $form_fields ) ? $email->get_option( 'enabled' ) : null;
+		$enabled     = $email->get_option( 'enabled' );
 		return array(
 			'enabled'                => is_null( $enabled ) ? $email->is_enabled() : 'yes' === $enabled,
 			'is_manual'              => $email->is_manual(),
@@ -132,7 +132,7 @@ class EmailApiController {
 			$email->update_option( 'preheader', $data['preheader'] );
 		}
 
-		if ( array_key_exists( 'enabled', $data ) && array_key_exists( 'enabled', $email->get_form_fields() ) ) {
+		if ( array_key_exists( 'enabled', $data ) ) {
 			$email->update_option( 'enabled', $data['enabled'] ? 'yes' : 'no' );
 		}
 		if ( array_key_exists( 'recipient', $data ) ) {

@@ -246,6 +246,13 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The email is manual, so the email list and the editor show it as "Manual" without an on/off control.
+	 */
+	public function test_email_is_manual(): void {
+		$this->assertTrue( ( new ReportCSVEmail() )->is_manual() );
+	}
+
+	/**
 	 * @testdox The email preview shows a sample Orders report instead of an empty report name.
 	 */
 	public function test_preview_shows_a_sample_report(): void {
