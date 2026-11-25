@@ -28,13 +28,13 @@ class WC_Admin_API_Keys {
 	 *
 	 * @internal Public only because it is used as a hook callback.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 * @param  array $found_customers Map of user ID to display text.
 	 * @return array
 	 */
 	public function restrict_api_key_user_search( $found_customers ) {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce already verified by the handler.
-		if ( ! doing_action( 'wp_ajax_woocommerce_json_search_customers' ) || ! isset( $_GET['context'] ) || 'admin_rest_api_keys' !== $_GET['context'] ) {
+		if ( ! is_array( $found_customers ) || ! doing_action( 'wp_ajax_woocommerce_json_search_customers' ) || ! isset( $_GET['context'] ) || 'admin_rest_api_keys' !== $_GET['context'] ) {
 			return $found_customers;
 		}
 
