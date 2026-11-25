@@ -20,18 +20,22 @@ import { setOption } from '../../utils/options';
 const PREVIEW_IN_NEW_TAB = /^Preview (in new tab|\(opens in a new tab\))$/;
 
 // Reads the version from the admin body class of the site under test, for example
-// `branch-7-2`. `getInstalledWordPressVersion()` asks the local wp-env container,
-// which doesn't exist when the suite runs against a remote site.
+// `branch-7-2`, or `branch-7` for 7.0. `getInstalledWordPressVersion()` asks the
+// local wp-env container, which doesn't exist when the suite runs against a remote site.
 const isWordPressAtLeast = async (
 	page: Page,
 	major: number,
 	minor: number
 ) => {
 	const branch = await page.evaluate( () =>
-		document.body.className.match( /\bbranch-(\d+)-(\d+)\b/ )?.slice( 1 )
+		document.body.className
+			.match( /\bbranch-(\d+)(?:-(\d+))?\b/ )
+			?.slice( 1 )
 	);
 	expect( branch ).toBeDefined();
-	const [ siteMajor, siteMinor ] = ( branch ?? [] ).map( Number );
+	const [ siteMajor, siteMinor ] = ( branch ?? [] ).map( ( part ) =>
+		Number( part ?? 0 )
+	);
 	return siteMajor > major || ( siteMajor === major && siteMinor >= minor );
 };
 
