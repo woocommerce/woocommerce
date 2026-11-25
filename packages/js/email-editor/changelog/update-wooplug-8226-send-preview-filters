@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add filters to hide or redirect “Send a test email” and add help to its error; remove the MailPoet defaults from that error.
