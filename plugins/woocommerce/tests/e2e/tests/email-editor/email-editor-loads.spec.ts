@@ -19,6 +19,18 @@ import { setOption } from '../../utils/options';
 // WP 7.2 renamed "Preview in new tab" to "Preview" with an "(opens in a new tab)" icon label.
 const PREVIEW_IN_NEW_TAB = /^Preview (in new tab|\(opens in a new tab\))$/;
 
+// WordPress adds its version to the admin body class, for example `branch-7-2`.
+const isWordPress72OrNewer = async ( page: Page ) => {
+	const branch = await page.evaluate( () =>
+		document.body.className.match( /\bbranch-(\d+)-(\d+)\b/ )
+	);
+	if ( ! branch ) {
+		return false;
+	}
+	const [ major, minor ] = [ Number( branch[ 1 ] ), Number( branch[ 2 ] ) ];
+	return major > 7 || ( major === 7 && minor >= 2 );
+};
+
 test.describe(
 	'WooCommerce Email Editor Core',
 	{ lock: locks.EMAIL_FEATURE_FLAGS },
@@ -116,21 +128,13 @@ test.describe(
 			).toContainText( `New order: #[woocommerce/order-number]` );
 		} );
 
-		test( 'Hides core UI that edits the site instead of the email', async ( {
+		test( 'Hides core menu items that change the site', async ( {
 			page,
 		} ) => {
 			await accessAndTrackEmailPost( page );
 
-			// The core Template panel would let a merchant create site templates.
-			// Each hidden item is checked next to a visible one, so a menu or panel
-			// that failed to open can't pass as hidden.
-			await expect(
-				page.locator( '.woocommerce-email-editor__settings-panel' )
-			).toBeVisible();
-			await expect(
-				page.getByRole( 'button', { name: /^Template:/ } )
-			).toBeHidden();
-
+			// Each hidden item is checked after a visible item of the same menu, so a
+			// menu that failed to open can't pass as hidden.
 			await page.getByRole( 'button', { name: 'Options' } ).click();
 			await expect(
 				page.getByRole( 'menuitem', { name: 'Keyboard shortcuts' } )
@@ -149,10 +153,45 @@ test.describe(
 			await expect(
 				page.getByRole( 'menuitemcheckbox', { name: 'Email styles' } )
 			).toBeVisible();
-			// The site's Global Styles, which would change the storefront.
+			// The site's Global Styles, which would change the storefront. Core only
+			// adds the item for block themes.
 			await expect(
 				page.getByRole( 'menuitemcheckbox', {
 					name: 'Styles',
+					exact: true,
+				} )
+			).toBeHidden();
+		} );
+
+		test( 'Core Template panel has no template actions', async ( {
+			page,
+		} ) => {
+			await accessAndTrackEmailPost( page );
+			test.skip(
+				! ( await isWordPress72OrNewer( page ) ),
+				'Core renders the Template panel from WordPress 7.2.'
+			);
+
+			// "Create new" would add a site template, and "Edit" would skip the
+			// email editor's warning that the template is shared by other emails.
+			const templatePanelToggle = page.getByRole( 'button', {
+				name: /^Template:/,
+			} );
+			await templatePanelToggle.click();
+			const templatePanel = page
+				.locator( '.components-panel__body' )
+				.filter( { has: templatePanelToggle } );
+			await expect(
+				templatePanel.locator(
+					'.editor-template-actions-panel__preview'
+				)
+			).toBeVisible();
+			await expect(
+				templatePanel.getByRole( 'button', { name: 'Create new' } )
+			).toBeHidden();
+			await expect(
+				templatePanel.getByRole( 'button', {
+					name: 'Edit',
 					exact: true,
 				} )
 			).toBeHidden();
