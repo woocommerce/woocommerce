@@ -5250,10 +5250,35 @@ class Checkout extends \WP_Test_REST_TestCase {
 			$this->assertEmpty( $orders[0]->get_meta( '_debug_log_source' ), 'The debug log trail must be cleared for an ordinary client error.' );
 			$this->assertStringStartsWith( 'place-order-debug-', $orders[0]->get_meta( '_debug_log_source_pending_deletion' ), 'The debug log must be scheduled for deletion on an ordinary client error.' );
 		}
+	}
 
-		// wc_log_order_step()'s static state is request-scoped in production; PHPUnit keeps one process
-		// alive across tests, so end the session explicitly here to avoid bleeding into the next test.
-		wc_log_order_step( 'Test cleanup', null, true );
+	/**
+	 * @testdox The place-order debug log is kept when a gateway reports an error without throwing.
+	 */
+	public function test_debug_log_kept_when_gateway_reports_error_without_throwing() {
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context, &$payment_result ) {
+				$payment_result->set_status( 'error' );
+			},
+			998,
+			2
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertSame( 500, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$this->assertCount( 1, $orders, 'Exactly one order should exist.' );
+
+		$this->assertStringStartsWith( 'place-order-debug-', $orders[0]->get_meta( '_debug_log_source' ), 'The debug log trail must be kept when a gateway reports an error, not cleared.' );
+		$this->assertEmpty( $orders[0]->get_meta( '_debug_log_source_pending_deletion' ), 'The debug log must not be scheduled for deletion when a gateway reports an error.' );
 	}
 
 	/**
