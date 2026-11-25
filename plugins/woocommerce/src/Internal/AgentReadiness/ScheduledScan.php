@@ -228,6 +228,7 @@ class ScheduledScan implements RegisterHooksInterface {
 			return;
 		}
 		as_schedule_single_action( self::next_daily_run(), self::DAILY_HOOK, array(), self::GROUP );
+		// @phpstan-ignore booleanNot.alwaysFalse (another request can change the option while this one schedules)
 		if ( ! self::daily_enabled() ) {
 			as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
 		}
