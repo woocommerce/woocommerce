@@ -84,6 +84,11 @@ final class ContractRepository {
 	private const HOLDS_LOCK = 'lock_token = %s AND locked_until_gmt > UTC_TIMESTAMP()';
 
 	/**
+	 * {@see self::HOLDS_LOCK} on a contract row joined as `c`.
+	 */
+	private const C_HOLDS_LOCK = 'c.lock_token = %s AND c.locked_until_gmt > UTC_TIMESTAMP()';
+
+	/**
 	 * SQL condition: the row's owner is exactly the bound slug. The column's binary collation makes
 	 * the match case-sensitive, as the engine's PHP comparisons of the owner are.
 	 */
@@ -2201,9 +2206,10 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Delete every history entry of a contract in one statement, fenced by the caller's lock like the
-	 * other child writes: the fence checks that the lock is for this contract and still live. The
-	 * facade checks the lock's owner ({@see self::assert_lock_owner()}) before calling this.
+	 * Delete every history entry of a contract in one statement that deletes only while the caller's
+	 * lock is held on the database clock, so a caller that lost its lock after the fence cannot delete
+	 * entries a later holder wrote. The fence still refuses a lock for another contract or one already
+	 * known lost before any delete runs. The facade checks the lock's owner ({@see self::assert_lock_owner()}).
 	 *
 	 * @param int          $contract_id Contract id.
 	 * @param ContractLock $lock        The caller's lock on this contract.
@@ -2217,12 +2223,19 @@ final class ContractRepository {
 
 		$this->fence_child_write( $lock, $contract_id );
 
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_HISTORY );
+		$history    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_HISTORY );
+		$contracts  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$holds_lock = self::C_HOLDS_LOCK;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$deleted = $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE contract_id = %d", $contract_id ) );
+		// Table names and the lock predicate are constants; every value is a placeholder.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$deleted = $wpdb->query( $wpdb->prepare( "DELETE h FROM {$history} h JOIN {$contracts} c ON c.id = h.contract_id WHERE h.contract_id = %d AND {$holds_lock}", $contract_id, $lock->get_state()->get_token() ) );
 		if ( false === $deleted ) {
 			throw new \RuntimeException( esc_html( sprintf( 'Failed to delete the history of contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
+		// No row deleted: an empty history, or a lock lost since the fence, which must not read as empty.
+		if ( 0 === (int) $deleted ) {
+			$this->throw_if_lock_lost( $lock );
 		}
 
 		return (int) $deleted;
@@ -2303,9 +2316,9 @@ final class ContractRepository {
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
-	 * After a failed child insert, report a lost lock instead of the database error: throws when
-	 * `$lock` is no longer held. Returns when it is held, or the check fails, so the caller
-	 * throws its own error.
+	 * After a failed child insert or a lock-fenced delete that matched no row, report a lost lock:
+	 * throws when `$lock` is no longer held. Returns when it is held, or the check fails, so the
+	 * caller goes on with its own result or error.
 	 *
 	 * @param ContractLock $lock The caller's lock.
 	 * @throws ContractLockedException If the lock was lost.
