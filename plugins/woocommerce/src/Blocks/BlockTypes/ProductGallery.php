@@ -67,6 +67,11 @@ class ProductGallery extends AbstractBlock {
 								src="<?php echo esc_url( $media['src'] ); ?>"
 								srcset="<?php echo esc_attr( $media['srcset'] ); ?>"
 								sizes="<?php echo esc_attr( $media['sizes'] ); ?>"
+								<?php if ( ! empty( $media['width'] ) && ! empty( $media['height'] ) ) : ?>
+								width="<?php echo esc_attr( $media['width'] ); ?>"
+								height="<?php echo esc_attr( $media['height'] ); ?>"
+								<?php endif; ?>
+								loading="lazy"
 								decoding="async"
 								alt="<?php echo esc_attr( $media['alt'] ); ?>" />
 						<?php endif; ?>

@@ -325,6 +325,69 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Dialog images should lazy-load and carry intrinsic dimensions so a closed
+	 * dialog downloads nothing on page load and still opens on the selected image.
+	 */
+	public function test_product_gallery_dialog_images_lazy_load_with_dimensions(): void {
+		$data = $this->create_product_with_gallery( 3 );
+
+		$image_ids = array_merge( array( $data['main_image_id'] ), $data['gallery_image_ids'] );
+		foreach ( $image_ids as $image_id ) {
+			$file = 'gallery-' . $image_id . '.jpg';
+			update_post_meta( $image_id, '_wp_attached_file', $file );
+			wp_update_attachment_metadata(
+				$image_id,
+				array(
+					'file'   => $file,
+					'width'  => 1600,
+					'height' => 1200,
+				)
+			);
+		}
+
+		$markup = $this->render_product_gallery( $data['product']->get_id() );
+
+		// Isolate the dialog markup, since the large image carries the same
+		// data-wp-watch attribute but is loaded eagerly as the visible image.
+		$dialog_start = strpos( $markup, '<dialog' );
+		$dialog_end   = strpos( $markup, '</dialog>', (int) $dialog_start );
+		$this->assertNotFalse( $dialog_start, 'Expected the gallery to render a dialog.' );
+		$this->assertNotFalse( $dialog_end, 'Expected the dialog to be closed.' );
+		$dialog_markup = substr( $markup, $dialog_start, $dialog_end - $dialog_start );
+
+		$processor    = new \WP_HTML_Tag_Processor( $dialog_markup );
+		$dialog_count = 0;
+
+		while ( $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
+			if ( 'callbacks.toggleImageVisibility' !== $processor->get_attribute( 'data-wp-watch' ) ) {
+				continue;
+			}
+
+			++$dialog_count;
+
+			$this->assertSame(
+				'lazy',
+				$processor->get_attribute( 'loading' ),
+				'Each dialog image should be lazy-loaded.'
+			);
+			$this->assertMatchesRegularExpression(
+				'/^[1-9][0-9]*$/',
+				(string) $processor->get_attribute( 'width' ),
+				'Each dialog image should expose a positive intrinsic width so the browser reserves space.'
+			);
+			$this->assertMatchesRegularExpression(
+				'/^[1-9][0-9]*$/',
+				(string) $processor->get_attribute( 'height' ),
+				'Each dialog image should expose a positive intrinsic height so the browser reserves space.'
+			);
+		}
+
+		$this->assertGreaterThan( 0, $dialog_count, 'Expected the dialog to render image tags.' );
+
+		$this->cleanup_product_data( $data );
+	}
+
+	/**
 	 * Test that the ProductGallery block handles products without images correctly.
 	 */
 	public function test_product_gallery_render_without_images() {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Lazy-load the Product Gallery fullscreen dialog images so a closed dialog no longer downloads them on page load.
