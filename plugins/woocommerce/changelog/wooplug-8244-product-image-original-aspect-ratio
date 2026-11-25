@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Product Image blocks set to the "Original" aspect ratio now keep each image's shape, instead of showing 1500px-tall boxes.
+Product Image blocks set to the "Original" aspect ratio now keep each image's ratio, instead of showing 1500px-tall boxes.
