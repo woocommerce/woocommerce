@@ -2,7 +2,6 @@
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Enums\PaymentMode;
-use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -119,27 +118,22 @@ class WC_Order_Test extends WC_Unit_Test_Case {
 	 * @param string $expected_mode     The payment mode expected in the backup copy after the switch.
 	 */
 	public function test_payment_mode_gateway_switch_reaches_synced_copy( bool $set_before_switch, string $expected_mode ): void {
-		$sync_option_filter = 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
-		add_filter( $sync_option_filter, array( $this, 'return_yes' ) );
+		$this->enable_cot_sync();
 
-		try {
-			$order = wc_create_order();
-			$order->set_payment_method( WC_Gateway_BACS::ID );
+		$order = wc_create_order();
+		$order->set_payment_method( WC_Gateway_BACS::ID );
+		$order->set_payment_mode( PaymentMode::TEST );
+		$order->save();
+		$this->assertSame( PaymentMode::TEST, $this->get_synced_payment_mode( $order->get_id() ), 'The backup copy should receive the payment mode' );
+
+		$order = wc_get_order( $order->get_id() );
+		if ( $set_before_switch ) {
 			$order->set_payment_mode( PaymentMode::TEST );
-			$order->save();
-			$this->assertSame( PaymentMode::TEST, $this->get_synced_payment_mode( $order->get_id() ), 'The backup copy should receive the payment mode' );
-
-			$order = wc_get_order( $order->get_id() );
-			if ( $set_before_switch ) {
-				$order->set_payment_mode( PaymentMode::TEST );
-			}
-			$order->set_payment_method( WC_Gateway_COD::ID );
-			$order->save();
-
-			$this->assertSame( $expected_mode, $this->get_synced_payment_mode( $order->get_id() ), 'The backup copy should match the authoritative payment mode' );
-		} finally {
-			remove_filter( $sync_option_filter, array( $this, 'return_yes' ) );
 		}
+		$order->set_payment_method( WC_Gateway_COD::ID );
+		$order->save();
+
+		$this->assertSame( $expected_mode, $this->get_synced_payment_mode( $order->get_id() ), 'The backup copy should match the authoritative payment mode' );
 	}
 
 	/**
@@ -162,15 +156,6 @@ class WC_Order_Test extends WC_Unit_Test_Case {
 				$order_id
 			)
 		);
-	}
-
-	/**
-	 * Filter callback that returns 'yes'.
-	 *
-	 * @return string
-	 */
-	public function return_yes(): string {
-		return 'yes';
 	}
 
 	/**
