@@ -267,6 +267,21 @@ class ContractHistoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox The returned entry's payload matches a fresh read: a nested object comes back as an array, and null stays null.
+	 */
+	public function test_the_returned_payload_matches_a_fresh_read(): void {
+		$with_object = $this->sut->add_history_entry( $this->entry( array( 'payload' => array( 'actor' => (object) array( 'role' => 'system' ) ) ) ), self::OWNER );
+		$without     = $this->sut->add_history_entry( $this->entry(), self::OWNER );
+		$this->assertNotNull( $with_object );
+		$this->assertNotNull( $without );
+
+		$this->assertSame( array( 'actor' => array( 'role' => 'system' ) ), $with_object->get_payload() );
+		$this->assertNull( $without->get_payload() );
+		$entries = $this->sut->find_history( $this->id );
+		$this->assertSame( $entries[1]->get_payload(), $with_object->get_payload() );
+	}
+
+	/**
 	 * @testdox A failed insert throws RuntimeException and stores nothing ($mode).
 	 * @dataProvider provide_failed_insert_modes
 	 *

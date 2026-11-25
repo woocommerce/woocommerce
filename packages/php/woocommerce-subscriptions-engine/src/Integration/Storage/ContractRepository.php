@@ -2079,6 +2079,8 @@ final class ContractRepository {
 
 		$columns['id']               = (int) $wpdb->insert_id;
 		$columns['date_created_gmt'] = $now;
+		// Hydrate from the stored JSON, so the returned entry matches a fresh read.
+		$columns['payload'] = $payload;
 
 		return HistoryEntry::from_storage( $columns );
 	}
