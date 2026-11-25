@@ -674,7 +674,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'fix_url' => '',
 		);
 		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( true ), $sitemap, $robots ) ), false );
-		$this->assertSame( 'This check couldn’t run. It runs again each day, or you can run the check again now.', $this->row( 'Add a sitemap that lists your products' )['text'], 'Titled by what the check looks for, not as if it passed' );
+		$this->assertSame( 'This check couldn’t run. It runs again each day, or select Check again to run it now.', $this->row( 'Add a sitemap that lists your products' )['text'], 'Titled by what the check looks for, not as if it passed' );
 
 		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( true ), $sitemap, array( 'ok' => null ) + $robots ) ), false );
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
@@ -682,6 +682,16 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( 'Your pages couldn’t be checked' ), array_column( $card['rows'], 'title' ), 'One row for the card, not one per check' );
 		$this->assertFalse( $card['rows'][0]['waiting'], 'Screen readers hear Couldn\'t check' );
 		$this->assertSame( 'Your hosting setup blocked the check from opening them. Checks run again each day. If this keeps happening, contact your hosting provider.', $card['rows'][0]['text'] );
+		$this->assertTrue( $this->view()['daily_checks'] );
+
+		update_option( ScheduledScan::DAILY_OPTION, 'no' );
+		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
+		$this->assertSame( 'Your hosting setup blocked the check from opening them. Select Check again to try again later. If this keeps happening, contact your hosting provider.', $card['rows'][0]['text'], 'With daily checks off, no line says they run each day' );
+		$this->assertFalse( $this->view()['daily_checks'] );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( true ), $sitemap, $robots ) ), false );
+		$this->assertSame( 'This check couldn’t run. Select Check again to try again.', $this->row( 'Add a sitemap that lists your products' )['text'] );
+		delete_option( ScheduledScan::DAILY_OPTION );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( true ), $sitemap, array( 'ok' => null ) + $robots ) ), false );
 
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
@@ -695,7 +705,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( false ), $sitemap, array( 'ok' => null ) + $robots ) ), false );
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
 		$this->assertSame( 'Your store wasn’t live at the last check', $card['rows'][0]['title'] );
-		$this->assertSame( 'These checks run at the next daily check, or you can run the check again now.', $card['rows'][0]['text'] );
+		$this->assertSame( 'If your store is live now, these checks run at the next daily check. To run them now, select Check again.', $card['rows'][0]['text'] );
+		update_option( ScheduledScan::DAILY_OPTION, 'no' );
+		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
+		$this->assertSame( 'If your store is live now, select Check again to run these checks.', $card['rows'][0]['text'], 'With daily checks off, the line still says the merchant can run the check' );
+		delete_option( ScheduledScan::DAILY_OPTION );
 		$this->assertSame( 'Not checked yet', $card['badge']['text'], 'The checks wait for the next run after launch' );
 		$this->assertTrue( $card['rows'][0]['waiting'], 'Screen readers hear Not checked yet' );
 	}
@@ -722,7 +736,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		list( $badge, $by_id ) = $rows();
 		$this->assertSame( 'Not checked yet', $badge );
 		$this->assertTrue( $by_id['sitemap_lists_products']['waiting'], 'Screen readers hear Not checked yet' );
-		$this->assertSame( 'Your store wasn’t live at the last check. This check runs at the next daily check, or you can run the check again now.', $by_id['sitemap_lists_products']['text'] );
+		$this->assertSame( 'Your store wasn’t live at the last check. If it’s live now, this check runs at the next daily check, or select Check again to run it now.', $by_id['sitemap_lists_products']['text'] );
+		update_option( ScheduledScan::DAILY_OPTION, 'no' );
+		$by_id = $rows()[1];
+		$this->assertSame( 'Your store wasn’t live at the last check. If it’s live now, select Check again to run this check.', $by_id['sitemap_lists_products']['text'] );
+		delete_option( ScheduledScan::DAILY_OPTION );
 
 		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $check( 'launched', true, array( 'group' => 'access' ) ), $check( 'canonical_url', null, array( 'no_product' => true ) ), $check( 'robots_txt', true ) ) ), false );
 		list( $badge, $by_id ) = $rows();
@@ -1652,7 +1670,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( 'date_format', 'F j, Y' );
 		update_option( 'time_format', 'g:i a' );
 		update_option( 'timezone_string', 'UTC' );
-		$this->assertSame( 'Last checked November 18, 2026 at 9:14 am. Checks run each day.', $last->invoke( null, array( 'generated_at' => '2026-11-18T09:14:00+00:00' ) ), 'An earlier day reads as a date, then at and the time' );
+		$this->assertSame( 'Last checked November 18, 2026 at 9:14 am.', $last->invoke( null, array( 'generated_at' => '2026-11-18T09:14:00+00:00' ) ), 'An earlier day reads as a date, then at and the time' );
 		$this->assertNotNull( $view['fix_first'], 'When it last ran, Fix first, then a card per question' );
 		$brand = $this->row( 'Add a brand to ' . $product->get_name() );
 		$this->assertSame( 'ChatGPT only lists products that have a brand. In Google and Copilot, a brand makes products easier to find.', $brand['text'], 'One failing product is named in the title; the text says why a brand matters' );
