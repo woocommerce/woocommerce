@@ -2202,7 +2202,8 @@ final class ContractRepository {
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Delete every history entry of a contract in one statement, fenced by the caller's lock like the
-	 * other child writes. The lock is the contract's existence and owner check.
+	 * other child writes: the fence checks that the lock is for this contract and still live. The
+	 * facade checks the lock's owner ({@see self::assert_lock_owner()}) before calling this.
 	 *
 	 * @param int          $contract_id Contract id.
 	 * @param ContractLock $lock        The caller's lock on this contract.

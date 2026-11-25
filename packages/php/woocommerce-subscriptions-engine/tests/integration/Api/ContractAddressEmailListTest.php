@@ -84,6 +84,24 @@ class ContractAddressEmailListTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox list_for_address_email() refuses a blank email as required, so it cannot match stored empty emails.
+	 */
+	public function test_refuses_a_blank_email(): void {
+		$this->seed( array( 'billing' => '' ) );
+
+		foreach ( array( ' ', "\t \n" ) as $email ) {
+			$this->assert_validation_errors(
+				static function () use ( $email ): void {
+					Contracts::list_for_address_email( $email, 20, 0, array( 'extension_slug' => self::EXTENSION_SLUG ) );
+				},
+				array(
+					array( ValidationErrorCode::REQUIRED, 'email' ),
+				)
+			);
+		}
+	}
+
+	/**
 	 * @testdox list_for_address_email() refuses an email longer than the 320-character column and accepts one at the limit.
 	 */
 	public function test_refuses_an_email_longer_than_the_column(): void {

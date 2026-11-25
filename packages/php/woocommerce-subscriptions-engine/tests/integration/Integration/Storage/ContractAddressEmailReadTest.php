@@ -81,6 +81,19 @@ class ContractAddressEmailReadTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox The email is an exact match: a prefix, or a value with `%` or `_`, matches nothing.
+	 */
+	public function test_is_an_exact_match(): void {
+		$id = $this->seed( array( 'billing' => 'ada_b@example.com' ) );
+
+		$this->assertSame( array( $id ), $this->ids( $this->sut->find_by_address_email( 'ada_b@example.com', self::OWNER, 20, 0 ) ) );
+		$this->assertSame( array(), $this->sut->find_by_address_email( 'ada_b@example.co', self::OWNER, 20, 0 ), 'A prefix does not match.' );
+		$this->assertSame( array(), $this->sut->find_by_address_email( 'ada%@example.com', self::OWNER, 20, 0 ), '% is not a wildcard.' );
+		$this->assertSame( array(), $this->sut->find_by_address_email( 'ada_c@example.com', self::OWNER, 20, 0 ), 'A different character does not match.' );
+		$this->assertSame( array(), $this->sut->find_by_address_email( 'ad__b@example.com', self::OWNER, 20, 0 ), '_ is not a wildcard.' );
+	}
+
+	/**
 	 * @testdox Pages with limit and offset over the de-duplicated set.
 	 */
 	public function test_pages_with_limit_and_offset(): void {

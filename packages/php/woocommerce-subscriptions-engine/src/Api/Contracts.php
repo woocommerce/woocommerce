@@ -744,20 +744,24 @@ final class Contracts {
 	 * reads another's contracts by email. The match follows the database collation (case-insensitive
 	 * on default installs). Views carry no items or addresses. Unknown keys get `_doing_it_wrong()`.
 	 *
-	 * @param string               $email  The address email to match (1-320 characters, as stored; no format check).
+	 * @param string               $email  The address email to match (1-320 characters, not blank, as stored; no format check).
 	 * @param int                  $limit  Maximum contracts to return.
 	 * @param int                  $offset Contracts to skip (for paging).
 	 * @param array<string, mixed> $args   `extension_slug` (required, the owning extension; `any` is refused).
 	 * @return array<int, ContractView> The matching contracts, newest first.
-	 * @throws ValidationException If `$email` is empty or too long, `$limit` or `$offset` is negative, or
+	 * @throws ValidationException If `$email` is empty, blank or too long, `$limit` or `$offset` is negative, or
 	 *                             `extension_slug` is missing, invalid or `any`, with every error reported.
 	 * @throws \RuntimeException   If the read fails.
 	 */
 	public static function list_for_address_email( string $email, int $limit = 20, int $offset = 0, array $args = array() ): array {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::LIST_FOR_ADDRESS_EMAIL_KEYS );
 
-		$validator      = new ArgumentValidator();
-		$email          = (string) $validator->get_bounded_string( 'email', $email, self::ADDRESS_EMAIL_MAX_LENGTH );
+		$validator = new ArgumentValidator();
+		$email     = $validator->get_bounded_string( 'email', $email, self::ADDRESS_EMAIL_MAX_LENGTH );
+		// The default collations ignore trailing spaces, so a blank email would match stored empty ones.
+		if ( null !== $email && '' === trim( $email ) ) {
+			$validator->add( new InvalidInputException( ValidationErrorCode::REQUIRED, 'email', '"email" must not be blank.' ) );
+		}
 		$limit          = (int) $validator->get_non_negative_int( 'limit', $limit );
 		$offset         = (int) $validator->get_non_negative_int( 'offset', $offset );
 		$extension_slug = (string) $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] ?? null );
@@ -776,7 +780,7 @@ final class Contracts {
 			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
 		}
 
-		return self::views( ( new ContractRepository() )->find_by_address_email( $email, $extension_slug, $limit, $offset ) );
+		return self::views( ( new ContractRepository() )->find_by_address_email( (string) $email, $extension_slug, $limit, $offset ) );
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
