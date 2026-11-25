@@ -18,8 +18,8 @@ export const EXPERIMENTS_PATH =
 	'/wc/v3/agent-readiness/ai-assistant-experiments';
 
 /**
- * The AI tools Overview card for AI assistant experiments: a button to turn them on, then a line
- * linking to the Features page, where they're turned off.
+ * The AI tools Overview card for AI assistant experiments: a button in the header to turn them on,
+ * then a line linking to the Features page, where they're turned off.
  */
 export const ExperimentsCard = ( { card }: { card: ExperimentsCardView } ) => {
 	const [ enabled, setEnabled ] = useState( card.enabled );
@@ -50,12 +50,25 @@ export const ExperimentsCard = ( { card }: { card: ExperimentsCardView } ) => {
 		<Card.Root className="wc-sales-readiness-card wc-sales-readiness-experiments">
 			<Card.Header>
 				<div className="wc-sales-readiness-card__head">
-					<Card.Title className="wc-sales-readiness-card__title">
-						{ card.title }
-					</Card.Title>
-					<Badge intent={ card.badge.intent }>
-						{ card.badge.text }
-					</Badge>
+					<div className="wc-sales-readiness-experiments__title">
+						<Card.Title className="wc-sales-readiness-card__title">
+							{ card.title }
+						</Card.Title>
+						<Badge intent={ card.badge.intent }>
+							{ card.badge.text }
+						</Badge>
+					</div>
+					{ ! enabled && (
+						<Button
+							variant="secondary"
+							size="compact"
+							disabled={ saving }
+							isBusy={ saving }
+							onClick={ () => void turnOn() }
+						>
+							{ card.button }
+						</Button>
+					) }
 				</div>
 			</Card.Header>
 			<Card.Content>
@@ -65,7 +78,7 @@ export const ExperimentsCard = ( { card }: { card: ExperimentsCardView } ) => {
 				{ failed && (
 					<ErrorNotice message={ card.error } reload={ false } />
 				) }
-				{ enabled ? (
+				{ enabled && (
 					<Text
 						variant="body-md"
 						className="wc-sales-readiness__muted wc-sales-readiness-experiments__on"
@@ -78,18 +91,6 @@ export const ExperimentsCard = ( { card }: { card: ExperimentsCardView } ) => {
 							),
 						} ) }
 					</Text>
-				) : (
-					<div className="wc-sales-readiness-card__actions">
-						<Button
-							variant="secondary"
-							size="compact"
-							disabled={ saving }
-							isBusy={ saving }
-							onClick={ () => void turnOn() }
-						>
-							{ card.button }
-						</Button>
-					</div>
 				) }
 			</Card.Content>
 		</Card.Root>

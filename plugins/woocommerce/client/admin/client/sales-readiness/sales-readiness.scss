@@ -462,8 +462,15 @@ body:has(.wc-sales-readiness) {
 	cursor: pointer;
 }
 
-// AI assistant experiments on the Overview: the "on" line and an error sit where the button does.
+// AI assistant experiments on the Overview: the badge right after the title, the button on the right
+// of the header like the buttons in the cards above, and the "on" line under the description.
 .wc-sales-readiness-experiments {
+	&__title {
+		display: flex;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-sm);
+	}
+
 	&__on {
 		display: block;
 		margin-block-start: var(--wpds-dimension-gap-md);
