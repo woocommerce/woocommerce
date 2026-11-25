@@ -179,15 +179,7 @@ const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 	{ lock: true }
 );
 
-// Getters cannot access `state` during hydration if it is not declared
-// beforehand. This will be removed once the iAPI allows this case.
 const { state } = store< MiniCart >(
-	'woocommerce/mini-cart',
-	{},
-	{ lock: universalLock }
-);
-
-store< MiniCart >(
 	'woocommerce/mini-cart',
 	{
 		state: {
@@ -228,11 +220,11 @@ store< MiniCart >(
 				return !! woocommerceState.isCartUpdating;
 			},
 
-			get drawerRole() {
+			get drawerRole(): string | null {
 				return state.isOpen ? 'dialog' : null;
 			},
 
-			get drawerTabIndex() {
+			get drawerTabIndex(): string | null {
 				return state.isOpen ? '-1' : null;
 			},
 
@@ -443,19 +435,9 @@ const { state: cartItemState } = store(
 	'woocommerce/mini-cart-products-table-block',
 	{
 		state: {
-			// As a workaround for a bug in context of wp-each we use state to
-			// find the cart item. Where we need reactivity for the wp-each, use
-			// state.cartItem to get the cart item.
 			get cartItem() {
-				const {
-					cartItem: { id, key, variation },
-				} = getContext< CartItemContext >( 'woocommerce' );
-
-				const cartItem = ( woocommerceState.findItemInCart( {
-					id,
-					key,
-					variation,
-				} ) || {} ) as CartItem;
+				const { cartItem } =
+					getContext< CartItemContext >( 'woocommerce' );
 
 				cartItem.variation = cartItem.variation || [];
 				cartItem.item_data = cartItem.item_data || [];

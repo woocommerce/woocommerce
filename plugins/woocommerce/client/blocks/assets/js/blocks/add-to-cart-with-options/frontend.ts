@@ -85,12 +85,7 @@ type MergedAddToCartWithOptionsStores = AddToCartWithOptionsStore &
 	Partial< GroupedProductAddToCartWithOptionsStore > &
 	Partial< VariableProductAddToCartWithOptionsStore >;
 
-const { state } = store< MergedAddToCartWithOptionsStores >(
-	'woocommerce/add-to-cart-with-options',
-	{},
-	{ lock: universalLock }
-);
-const { actions } = store< MergedAddToCartWithOptionsStores >(
+const { state, actions } = store< MergedAddToCartWithOptionsStores >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
