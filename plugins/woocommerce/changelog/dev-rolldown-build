@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Build the blocks and admin scripts with Rolldown instead of webpack; PHP loads the same handles and globals.
+

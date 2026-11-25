@@ -1,0 +1,24 @@
+{
+	"name": "@woocommerce/rolldown-build",
+	"version": "1.0.0",
+	"description": "Rolldown build for the WooCommerce blocks and admin scripts: classic scripts, .asset.php files, lazy chunks and styles.",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^24.15.0"
+	},
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./classic": "./lib/classic.mjs",
+		"./css": "./lib/css.mjs",
+		"./shared": "./lib/shared.mjs",
+		"./analyze": "./lib/analyze.mjs",
+		"./storybook": "./lib/storybook.mjs"
+	},
+	"dependencies": {
+		"@jridgewell/remapping": "^2.3.5",
+		"magic-string": "^0.30.21",
+		"rolldown": "1.2.19"
+	}
+}

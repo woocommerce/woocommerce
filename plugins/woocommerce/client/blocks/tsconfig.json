@@ -17,7 +17,6 @@
 	"exclude": [
 		"./storybook/build",
 		"./storybook/dist",
-		"./storybook/webpack.config.js",
 		"./storybook/preview.js",
 		"./bin"
 	],

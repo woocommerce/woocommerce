@@ -1,6 +1,6 @@
 # Claude Code Documentation for WooCommerce Admin Client
 
-**Scope**: React/TypeScript development, Jest testing, Webpack builds
+**Scope**: React/TypeScript development, Jest testing, Rolldown builds
 **Location**: `plugins/woocommerce/client/admin`
 
 **See also:**
@@ -54,7 +54,7 @@ It includes:
 - React 18.3.x
 - TypeScript 5.7.x
 - Jest for testing
-- Webpack 5 for bundling
+- Rolldown for bundling
 - WordPress packages (Components, Data, etc.)
 
 ## Running Tests
@@ -216,9 +216,9 @@ pnpm run build:project:feature-config
 
 **Build Configuration:**
 
-- **Tool**: Webpack 5.x
-- **Config**: `webpack.config.js`
-- **Output**: `build/` directory
+- **Tool**: Rolldown, through `packages/js/rolldown-build`
+- **Config**: `bin/rolldown/config.mjs`
+- **Output**: `../../assets/client/admin/`
 - **Source files**: `client/**/*.{js,jsx,ts,tsx,scss}`
 
 ### Development/Watch Mode
@@ -383,14 +383,14 @@ client/admin/
 │   └── features/             # Feature documentation
 ├── build/                     # Build output (generated)
 ├── client/jest.config.js     # Jest configuration
-├── webpack.config.js         # Webpack configuration
+├── bin/rolldown/             # Build configuration
 ├── tsconfig.json             # TypeScript configuration
 └── package.json              # Package configuration
 ```
 
 ### Key Files
 
-- **`webpack.config.js`**: Webpack build configuration
+- **`bin/rolldown/config.mjs`**: build configuration
 - **`tsconfig.json`**: TypeScript configuration
 - **`client/jest.config.js`**: Jest test configuration
 - **`.eslintrc.js`** or **`eslint.config.js`**: ESLint configuration
@@ -443,7 +443,7 @@ Coverage reports help identify untested code paths.
 
 - Clean build directory: `rm -rf build/`
 - Rebuild dependencies: `pnpm install`
-- Check webpack config for errors
+- Check `bin/rolldown/config.mjs` for errors
 
 **Linting errors:**
 
@@ -474,8 +474,7 @@ Coverage reports help identify untested code paths.
 **Speed up builds:**
 
 - Use watch mode instead of rebuilding manually
-- Ensure webpack cache is enabled (default)
-- Consider using webpack-bundle-analyzer to identify large bundles
+- Run `ANALYZE=1 pnpm build` to write `bundle-report.html` and find large bundles
 
 ## Additional Resources
 
@@ -528,7 +527,7 @@ The package includes CI configuration in `config.ci`:
 - Command: `test:js`
 - Triggers on changes to:
     - `jest.config.js`
-    - `webpack.config.js`
+    - `bin/rolldown/**`
     - `babel.config.js`
     - `tsconfig.json`
     - `client/**/*.{js,jsx,ts,tsx,scss,json}`

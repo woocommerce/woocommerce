@@ -3,7 +3,7 @@
  */
 import { Card, CardBody } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
-import { StoryFn } from '@storybook/react-webpack5';
+import { StoryFn } from '@storybook/react-vite';
 
 /**
  * Internal dependencies

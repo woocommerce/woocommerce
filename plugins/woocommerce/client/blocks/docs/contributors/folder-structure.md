@@ -29,8 +29,10 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 ├── global.d.ts
 ├── tsconfig.base.json
 ├── tsconfig.json
-├── webpack.config.js
-│ Transpilation and bundling config files.
+│ Transpilation config files.
+│
+├── bin/rolldown/
+│ Bundling config and build scripts.
 │
 ├── phpcs.xml
 │ Config file for the PHP Coding Standards.

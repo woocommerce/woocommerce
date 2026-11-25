@@ -3,9 +3,9 @@
  */
 const { omit } = require( 'lodash' );
 const glob = require( 'glob' );
-const { scriptModuleEntries } = require( './webpack-interactivity-entries' );
+const { scriptModuleEntries } = require( './interactivity-entries' );
 
-// List of blocks that should be used as webpack entry points. They are expected
+// List of blocks that should be used as build entry points. They are expected
 // to be in `/assets/js/blocks/[BLOCK_NAME]`. If they are not, their relative
 // path should be defined in the `customDir` property. The scripts below will
 // take care of looking for `index.js`, `frontend.js` and `*.scss` files in each
@@ -287,8 +287,8 @@ const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
 	);
 };
 
-// Script module blocks scripts and styles are handled in
-// webpack-config-interactivity-blocks-frontend.js.
+// Script module blocks scripts and styles are built by
+// bin/rolldown/modules.mjs.
 const frontendScriptModuleBlocksToSkip = Object.keys( scriptModuleEntries );
 
 const frontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {

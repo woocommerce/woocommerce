@@ -24,8 +24,6 @@ if [[ -z $changedFiles ]]; then
     exit 0
 fi
 
-# A changed client/blocks file is linted with that package's own flat config,
-# whose import/webpack resolver loads its webpack.config.js. That config only
-# exports an iterable when WP_EXPERIMENTAL_MODULES is set, matching its lint:js.
+# A changed client/blocks file is linted with that package's own flat config.
 # shellcheck disable=SC2086
-WP_EXPERIMENTAL_MODULES=true pnpm eslint $changedFiles
+pnpm eslint $changedFiles

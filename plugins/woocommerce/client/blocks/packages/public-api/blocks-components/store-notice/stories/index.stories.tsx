@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { StoryFn, Meta } from '@storybook/react-webpack5';
+import type { StoryFn, Meta } from '@storybook/react-vite';
 import { NoticeBannerProps } from '@woocommerce/base-components/notice-banner';
 /**
  * Internal dependencies

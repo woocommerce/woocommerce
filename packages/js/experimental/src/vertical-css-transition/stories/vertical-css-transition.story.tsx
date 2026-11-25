@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, Fragment, useState } from '@wordpress/element';
-import { Meta, StoryFn } from '@storybook/react-webpack5';
+import { Meta, StoryFn } from '@storybook/react-vite';
 
 /**
  * Internal dependencies

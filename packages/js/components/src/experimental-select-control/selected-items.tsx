@@ -25,9 +25,10 @@ type SelectedItemsProps< ItemType > = {
 	items: ItemType[];
 	getItemLabel: getItemLabelType< ItemType >;
 	getItemValue: getItemValueType< ItemType >;
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore These are the types provided by Downshift.
-	getSelectedItemProps: ( { selectedItem: any, index: any } ) => {
+	getSelectedItemProps: ( args: {
+		selectedItem: ItemType;
+		index: number;
+	} ) => {
 		[ key: string ]: string;
 	};
 	onRemove: ( item: ItemType ) => void;

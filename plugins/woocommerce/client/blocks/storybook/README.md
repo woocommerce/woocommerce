@@ -38,7 +38,7 @@ Let's see the code in detail.
 This is the minimal scaffold you need for your new Story:
 
 ```tsx
-import type { StoryFn, Meta } from '@storybook/react-webpack5';
+import type { StoryFn, Meta } from '@storybook/react-vite';
 import MyComponent, { MyComponentProps } from '..';
 
 export default {
