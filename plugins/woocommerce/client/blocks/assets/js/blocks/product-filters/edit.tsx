@@ -106,9 +106,9 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 				label: style.label || style.name,
 			} ) ),
 	];
-	// Core's Button block does the same. A style from another theme keeps its
-	// saved value, but the button looks like the default style, so the default
-	// tile shows as selected.
+	// A style from another theme keeps its saved value, but the button looks
+	// like the default style. So the default tile shows as selected, the same
+	// as in core's Button block.
 	const activeButtonStyle = buttonStyleOptions.some(
 		( option ) => option.value === overlayButtonStyle
 	)

@@ -176,7 +176,7 @@ CSS;
 	 * class name also means plain. Keep in sync with getOverlayButtonStyle() in JS.
 	 *
 	 * @param array $attributes Block attributes.
-	 * @return string Button style: plain or a core Button style name.
+	 * @return string Plain or a core Button style name.
 	 */
 	private function get_overlay_button_style( $attributes ) {
 		$button_style = $attributes['overlayButtonStyle'] ?? null;
@@ -277,8 +277,8 @@ CSS;
 
 	/**
 	 * Render the open button as a core Button block, so the theme's Button
-	 * style applies, then attach the overlay directives.
-	 * Matches the editor markup in edit.tsx.
+	 * style applies. Then add the overlay directives. The markup matches
+	 * the editor markup in edit.tsx.
 	 *
 	 * @param string $button_style Core Button style name.
 	 * @return string Button markup.
