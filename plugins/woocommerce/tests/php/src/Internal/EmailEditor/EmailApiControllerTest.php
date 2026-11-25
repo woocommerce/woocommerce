@@ -219,6 +219,34 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox save_email_data() does not store an on/off value for an email without an on/off setting.
+	 */
+	public function test_save_email_data_ignores_enabled_when_the_email_has_no_switch(): void {
+		$email      = new class() extends EmailStub {
+			/**
+			 * Remove the on/off setting.
+			 */
+			public function init_form_fields() {
+				parent::init_form_fields();
+				unset( $this->form_fields['enabled'] );
+			}
+		};
+		$controller = $this->create_controller_with_email( $email );
+
+		$controller->save_email_data(
+			array(
+				'subject' => 'Updated Subject',
+				'enabled' => false,
+			),
+			$this->email_post
+		);
+
+		$option = get_option( 'woocommerce_' . $this->email_type . '_settings' );
+		$this->assertSame( 'Updated Subject', $option['subject'] );
+		$this->assertNotSame( 'no', $option['enabled'] ?? null );
+	}
+
+	/**
 	 * @testdox save_email_data() ignores Cc/Bcc when the email does not support them.
 	 */
 	public function test_save_email_data_ignores_cc_bcc_when_unsupported(): void {

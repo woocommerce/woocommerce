@@ -132,7 +132,7 @@ class EmailApiController {
 			$email->update_option( 'preheader', $data['preheader'] );
 		}
 
-		if ( array_key_exists( 'enabled', $data ) ) {
+		if ( array_key_exists( 'enabled', $data ) && array_key_exists( 'enabled', $email->get_form_fields() ) ) {
 			$email->update_option( 'enabled', $data['enabled'] ? 'yes' : 'no' );
 		}
 		if ( array_key_exists( 'recipient', $data ) ) {
