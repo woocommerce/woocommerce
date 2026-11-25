@@ -9,8 +9,6 @@ use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
-use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupService;
-use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 use WC_Product;
@@ -46,23 +44,14 @@ class ProductPageIntegration {
 	private EligibilityService $eligibility_service;
 
 	/**
-	 * The signup service instance.
-	 *
-	 * @var SignupService
-	 */
-	private SignupService $signup_service;
-
-	/**
 	 * Init.
 	 *
 	 * @internal
 	 *
 	 * @param EligibilityService $eligibility_service The eligibility service instance.
-	 * @param SignupService      $signup_service The signup service instance.
 	 */
-	final public function init( EligibilityService $eligibility_service, SignupService $signup_service ): void {
+	final public function init( EligibilityService $eligibility_service ): void {
 		$this->eligibility_service = $eligibility_service;
-		$this->signup_service      = $signup_service;
 	}
 
 	/**
@@ -261,7 +250,7 @@ class ProductPageIntegration {
 		}
 
 		if ( $this->is_visible_on_load( $product ) ) {
-			$notification = $this->get_current_user_signup( $product );
+			$notification = $this->get_current_user_signups( array( $product->get_id() ) )[ $product->get_id() ] ?? null;
 			if ( $notification instanceof Notification ) {
 				$this->display_already_signed_up( $product, $notification );
 				return;
@@ -286,68 +275,57 @@ class ProductPageIntegration {
 	/**
 	 * Get the logged-in shopper's active sign-ups for a variable product's variations, keyed by variation ID.
 	 *
-	 * Matches get_current_user_signup() for each variation, with one query for all of them. In stock variations
-	 * and those with 'any' attributes are skipped: a sign-up for 'any' attributes also stores the chosen values,
-	 * which aren't known until the shopper picks them.
+	 * In stock variations and those with 'any' attributes are skipped: a sign-up for 'any' attributes also
+	 * stores the chosen values, which aren't known until the shopper picks them.
 	 *
 	 * @param WC_Product $product Variable product.
 	 * @return array<int, Notification>
 	 */
 	private function get_current_user_variation_signups( WC_Product $product ): array {
-		$variation_ids = $product->get_children();
-		if ( ! $variation_ids || ! is_user_logged_in() || ! self::is_personalization_enabled() ) {
-			return array();
-		}
-
-		$notification_ids = NotificationQuery::get_notifications(
-			array(
-				'status'     => NotificationStatus::ACTIVE,
-				'product_id' => $variation_ids,
-				'user_id'    => get_current_user_id(),
-			)
-		);
-
 		$signups = array();
-		foreach ( $notification_ids as $notification_id ) {
-			$notification = Factory::get_notification( (int) $notification_id );
-			$variation    = $notification instanceof Notification ? wc_get_product( $notification->get_product_id() ) : null;
+		foreach ( $this->get_current_user_signups( $product->get_children() ) as $variation_id => $notification ) {
+			$variation = wc_get_product( $variation_id );
 			if (
-				! $variation instanceof WC_Product_Variation
-				|| isset( $signups[ $variation->get_id() ] )
-				|| $this->eligibility_service->is_stock_status_eligible( $variation->get_stock_status() )
-				|| in_array( '', $variation->get_variation_attributes(), true )
+				$variation instanceof WC_Product_Variation
+				&& ! $this->eligibility_service->is_stock_status_eligible( $variation->get_stock_status() )
+				&& ! in_array( '', $variation->get_variation_attributes(), true )
 			) {
-				continue;
+				$signups[ $variation_id ] = $notification;
 			}
-
-			$signups[ $variation->get_id() ] = $notification;
 		}
 
 		return $signups;
 	}
 
 	/**
-	 * Get the logged-in shopper's active sign-up for a product, when personalization is enabled.
+	 * Get the logged-in shopper's active sign-ups for products, keyed by product ID, when personalization is enabled.
 	 *
-	 * A pending sign-up, or one made as a guest with the same email, keeps the form: submitting it activates
-	 * the sign-up or resends its verification e-mail, and only the shopper's own sign-ups are listed in My Account.
+	 * Like My Account, only sign-ups made while logged in count. A pending sign-up, or one made as a guest with the
+	 * same email, keeps the form: submitting it activates the sign-up or resends its verification e-mail.
 	 *
-	 * @param WC_Product $product Product object.
-	 * @return Notification|null
+	 * @param int[] $product_ids Product IDs.
+	 * @return array<int, Notification>
 	 */
-	private function get_current_user_signup( WC_Product $product ): ?Notification {
-		if ( ! is_user_logged_in() || ! self::is_personalization_enabled() ) {
-			return null;
+	private function get_current_user_signups( array $product_ids ): array {
+		if ( ! $product_ids || ! is_user_logged_in() || ! self::is_personalization_enabled() ) {
+			return array();
 		}
 
-		$user         = wp_get_current_user();
-		$notification = $this->signup_service->is_already_signed_up( $product->get_id(), $user->ID, $user->user_email );
+		$notifications = NotificationQuery::get_notifications(
+			array(
+				'status'     => NotificationStatus::ACTIVE,
+				'product_id' => $product_ids,
+				'user_id'    => get_current_user_id(),
+				'return'     => 'objects',
+			)
+		);
 
-		if ( ! $notification instanceof Notification || NotificationStatus::ACTIVE !== $notification->get_status() || $user->ID !== (int) $notification->get_user_id() ) {
-			return null;
+		$signups = array();
+		foreach ( $notifications as $notification ) {
+			$signups[ $notification->get_product_id() ] ??= $notification;
 		}
 
-		return $notification;
+		return $signups;
 	}
 
 	/**

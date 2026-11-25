@@ -393,6 +393,26 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the form for a logged-in customer who joined as a guest with the same email.
+	 */
+	public function test_form_is_rendered_for_customer_with_guest_signup(): void {
+		$product_id = $this->create_and_visit_out_of_stock_simple_product();
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'customer' ) ) );
+
+		$notification = new Notification();
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->set_product_id( $product_id );
+		$notification->set_user_email( wp_get_current_user()->user_email );
+		$notification->save();
+
+		ob_start();
+		do_action( 'woocommerce_simple_add_to_cart' );
+		$markup = ob_get_clean();
+
+		$this->assertStringContainsString( 'wc_bis_form', $markup, 'A guest sign-up should keep the form, as My Account only lists the customer\'s own sign-ups.' );
+	}
+
+	/**
 	 * Render a variable product's form and get the variations listed on it as joined.
 	 *
 	 * @param string|null $markup Set to the rendered markup.
