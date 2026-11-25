@@ -1978,6 +1978,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$view  = $this->view();
 		$items = array_column( $view['fix_first']['items'], 'tier', 'id' );
 		$this->assertSame( 'Required for AI shopping', $items['ucp_profile'] );
+		$this->assertStringStartsNotWith( 'Finish', $view['fix_first']['ranking'], 'A required check the scan read is not a setup step, so the card keeps its ranking line' );
 		$this->assertArrayNotHasKey( 'ucp_endpoints_live', $items, 'Catalog search can fail now and then with nothing changed, so it is not Required' );
 		$this->assertArrayNotHasKey( 'ucp_profile_version', $items, 'A different version is likely another plugin, not a blocker' );
 		$rows = array_column( array_column( $view['sections'], null, 'id' )['access']['rows'], null, 'id' );
