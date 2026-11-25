@@ -6080,14 +6080,15 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		AbilitiesLoader::init_extensions();
 		$variation_id = $created['product']['variation_ids'][0];
 
+		// Writing a field loads each object's meta, so a response from the changed objects would miss the sync's values.
 		$output = $this->run_ability(
 			'woocommerce/product-update',
 			array(
 				'id'         => $created['product']['id'],
+				'extensions' => array( 'test-ext' => array( 'color' => 'red' ) ),
 				'variations' => array(
 					array(
 						'id'         => $variation_id,
-						// Writing a field loads the variation's meta, so a response from the changed object would miss the sync's value.
 						'extensions' => array( 'test-ext' => array( 'color' => 'red' ) ),
 					),
 				),
