@@ -63,8 +63,7 @@ class ItemQuantityLimits {
 	 *
 	 * Plugins can still narrow or modify the step with 'woocommerce_quantity_input_step_admin'.
 	 *
-	 * @since 11.2.0
-	 * @since 11.4.0 Decimal stores preserve custom product steps; the filter always receives a numeric step.
+	 * @since 11.5.0
 	 * @param WC_Order_Item        $item    Line item being edited.
 	 * @param WC_Product|bool|null $product The item's product when the caller already
 	 *                                      resolved it; null to resolve it here.
@@ -110,7 +109,7 @@ class ItemQuantityLimits {
 	 * Validate the quantity requested for a product being added to an order.
 	 *
 	 * @since 11.2.0
-	 * @since 11.4.0 Decimal stores preserve custom product steps; the filter always receives a numeric step.
+	 * @since 11.5.0 Also rejects quantities that do not match the product step, filtered through 'woocommerce_quantity_input_step_admin'.
 	 * @param float      $qty     Requested quantity.
 	 * @param WC_Product $product Product being added.
 	 * @return void
