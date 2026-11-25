@@ -37,6 +37,7 @@ class OrderReceivedAccessTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		WC()->session->set( 'store_api_draft_order', null );
+		WC()->session->set( 'customer', null );
 		delete_option( 'woocommerce_enable_guest_checkout' );
 		wp_set_current_user( 0 );
 		parent::tearDown();
