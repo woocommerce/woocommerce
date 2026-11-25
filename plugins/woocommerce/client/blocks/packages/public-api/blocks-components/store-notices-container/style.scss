@@ -1,6 +1,9 @@
 .wc-block-components-notices {
 	display: block;
 	margin: 1.5em 0;
+	&[hidden] {
+		display: none;
+	}
 	&:first-child {
 		margin-top: 0;
 	}
