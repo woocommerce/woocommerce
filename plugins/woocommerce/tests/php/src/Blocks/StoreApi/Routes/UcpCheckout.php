@@ -1338,6 +1338,31 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Complete sends unset attribution fields as (none), as the classic checkout does, and stores nothing for them.
+	 */
+	public function test_complete_sends_unset_attribution_fields_as_none(): void {
+		$created  = $this->create_ready_checkout();
+		$received = array();
+		$listener = static function ( $order, $data ) use ( &$received ) {
+			unset( $order ); // Avoid parameter not used PHPCS errors.
+			$received = $data;
+		};
+		add_action( 'woocommerce_order_save_attribution_data', $listener, 20, 2 );
+
+		try {
+			$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+		} finally {
+			remove_action( 'woocommerce_order_save_attribution_data', $listener, 20 );
+		}
+
+		$this->assertArrayHasKey( 'utm_campaign', $received );
+		$this->assertSame( '(none)', $received['utm_campaign'] );
+		$this->assertSame( 'ucp', $received['utm_medium'] );
+		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertSame( '', $order->get_meta( '_wc_order_attribution_utm_campaign' ) );
+	}
+
+	/**
 	 * @testdox Complete keeps attribution the order already has.
 	 */
 	public function test_complete_keeps_existing_attribution(): void {
