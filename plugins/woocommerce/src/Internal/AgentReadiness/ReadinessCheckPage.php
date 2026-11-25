@@ -974,12 +974,24 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'link'   => $item['link'],
 			);
 		}
+		// Only setup steps: nothing is ranked, so the card says what the Setup checklist says.
+		$setup_only = array() === array_filter( $items, static fn( array $item ): bool => 0 !== $item['tier'] );
 		return array(
 			'title'   => __( 'Fix first', 'woocommerce' ),
-			'ranking' => self::ranking_text( $report, $items ),
-			'link'    => self::ranking_link( $report ),
+			'ranking' => $setup_only ? self::required_steps_summary( count( $items ) ) : self::ranking_text( $report, $items ),
+			'link'    => $setup_only ? null : self::ranking_link( $report ),
 			'items'   => $list,
 		);
+	}
+
+	/**
+	 * How many required setup steps are left, as the Setup checklist and a Fix first card with only setup steps say it.
+	 *
+	 * @param int $required Number of failing required setup steps.
+	 */
+	public static function required_steps_summary( int $required ): string {
+		/* translators: %d: number of failing required setup steps. */
+		return sprintf( _n( 'Finish %d required step to get your store ready for AI shopping.', 'Finish %d required steps to get your store ready for AI shopping.', $required, 'woocommerce' ), $required );
 	}
 
 	/**
@@ -1407,7 +1419,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'id'       => $id,
 				'title'    => $group[0],
 				'badge'    => self::badge_data( $cant && array() === $rows ? ( $waiting ? self::waiting_badge() : self::cant_check_badge() ) : self::group_badge( $checks, $waiting ) ),
-				'note'     => $ucp_off && ! $ucp_only ? self::ucp_off_note() : ( 'understand' === $id ? self::sample_note( $report ) : null ),
+				// In coming soon mode the row says why nothing ran; the AI shopping note waits until the store is live.
+				'note'     => $ucp_off && ! $ucp_only && $launched ? self::ucp_off_note() : ( 'understand' === $id ? self::sample_note( $report ) : null ),
 				'channels' => array(),
 				'rows'     => $cant ? array_merge( $rows, array( self::cant_check_row( $launched, $was_live ) ) ) : $rows,
 				'folded'   => self::check_rows( array_values( $folded ), $launched, $was_live ),

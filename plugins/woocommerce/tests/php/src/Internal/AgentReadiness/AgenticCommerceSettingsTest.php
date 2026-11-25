@@ -1601,6 +1601,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Some checks only run when AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', $access['note'] );
 		$this->assertNull( $access['empty'] );
 		$this->assertCount( 2, $access['folded'], 'The passed checks stay, as in the design' );
+
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		$this->assertNull( array_column( $this->view()['sections'], null, 'id' )['access']['note'], 'In coming soon mode the store has to go live first, so the AI shopping note waits' );
 	}
 
 	/**
@@ -1825,10 +1828,14 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Required for AI shopping', $items['payment_method']['tier'] );
 		$this->assertSame( 'Required for AI shopping', $items['order_emails']['tier'] );
 		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'None blocks the switch' );
+		$fix_first = $this->view()['fix_first'];
+		$this->assertSame( 'Finish 3 required steps to get your store ready for AI shopping.', $fix_first['ranking'], 'With only setup steps nothing is ranked, so the card counts them as the Setup checklist does' );
+		$this->assertNull( $fix_first['link'], 'and offers no way to rank by sales' );
 
 		update_option( 'woocommerce_enable_guest_checkout', 'no' );
 		$shopping = $this->shopping();
 		$this->assertStringStartsWith( 'Finish 3 required steps', $shopping['checklist']['summary'] );
+		$this->assertSame( '3 steps left', $shopping['checklist']['badge']['text'], 'The badge counts the required steps, as the summary does, not the optional one too' );
 		$this->assertSame( array( 'payment_method', 'search_visible', 'order_emails', 'guest_checkout' ), array_column( $shopping['checklist']['steps'], 'id' ), 'They come before the optional guest checkout step' );
 		$this->assertSame( array( 'required', 'required', 'required', 'open' ), array_column( $shopping['checklist']['steps'], 'state' ), 'All three stay Required (WOOAI-1681)' );
 		foreach ( array(

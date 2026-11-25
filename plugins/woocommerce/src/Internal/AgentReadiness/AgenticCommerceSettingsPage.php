@@ -408,8 +408,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$open     = ReadinessCheckPage::open_steps( $checks );
 		$required = count( array_filter( $open, array( StoreConditions::class, 'shows_required' ) ) );
 		if ( $required > 0 ) {
-			/* translators: %d: number of failing required setup steps. */
-			$summary = sprintf( _n( 'Finish %d required step to get your store ready for AI shopping.', 'Finish %d required steps to get your store ready for AI shopping.', $required, 'woocommerce' ), $required );
+			$summary = ReadinessCheckPage::required_steps_summary( $required );
 		} elseif ( array() !== $open ) {
 			/* translators: %d: number of open setup steps. */
 			$summary = sprintf( _n( 'Your store is ready for AI shopping. You have %d optional step left.', 'Your store is ready for AI shopping. You have %d optional steps left.', count( $open ), 'woocommerce' ), count( $open ) );
@@ -452,6 +451,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			);
 		}
 
+		// The badge counts what the summary counts: the required steps while any is left, then the optional ones.
+		$left = $required > 0 ? $required : count( $open );
 		return array(
 			'title'     => __( 'Setup checklist', 'woocommerce' ),
 			// As in the design: the steps left, or All steps done in green once none are.
@@ -461,7 +462,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			) : array(
 				'intent' => 'none',
 				/* translators: %d: number of setup steps left. */
-				'text'   => sprintf( _n( '%d step left', '%d steps left', count( $open ), 'woocommerce' ), count( $open ) ),
+				'text'   => sprintf( _n( '%d step left', '%d steps left', $left, 'woocommerce' ), $left ),
 			),
 			'summary'   => $summary,
 			'steps'     => $steps,
