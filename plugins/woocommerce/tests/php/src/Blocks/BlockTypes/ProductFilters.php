@@ -253,6 +253,79 @@ class ProductFilters extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The overlay button keeps the plain look unless the block stores a core Button style name.
+	 *
+	 * @return void
+	 */
+	public function test_overlay_button_classes_follow_the_stored_style(): void {
+		$cases = array(
+			'no stored style' => array(
+				'attributes' => array(),
+				'expected'   => 'wc-block-product-filters__open-overlay',
+				'styled'     => false,
+			),
+			'unsafe value'    => array(
+				'attributes' => array( 'overlayButtonStyle' => 'a"><b' ),
+				'expected'   => 'wc-block-product-filters__open-overlay',
+				'styled'     => false,
+			),
+			'non-string'      => array(
+				'attributes' => array( 'overlayButtonStyle' => 3 ),
+				'expected'   => 'wc-block-product-filters__open-overlay',
+				'styled'     => false,
+			),
+			'theme style'     => array(
+				'attributes' => array( 'overlayButtonStyle' => 'button-contrast' ),
+				'expected'   => 'wp-block-button__link wp-element-button wc-block-product-filters__open-overlay',
+				'wrapper'    => 'is-style-button-contrast',
+				'styled'     => true,
+			),
+			'plain'           => array(
+				'attributes' => array( 'overlayButtonStyle' => 'plain' ),
+				'expected'   => 'wc-block-product-filters__open-overlay',
+				'styled'     => false,
+			),
+			'outline'         => array(
+				'attributes' => array( 'overlayButtonStyle' => 'outline' ),
+				'expected'   => 'wp-block-button__link wp-element-button wc-block-product-filters__open-overlay',
+				'wrapper'    => 'is-style-outline',
+				'styled'     => true,
+			),
+			'fill'            => array(
+				'attributes' => array( 'overlayButtonStyle' => 'fill' ),
+				'expected'   => 'wp-block-button__link wp-element-button wc-block-product-filters__open-overlay',
+				'wrapper'    => 'is-style-fill',
+				'styled'     => true,
+			),
+		);
+
+		foreach ( $cases as $label => $case ) {
+			$parsed_block = array(
+				'blockName'    => 'woocommerce/product-filters',
+				'attrs'        => $case['attributes'],
+				'innerBlocks'  => array(),
+				'innerHTML'    => '',
+				'innerContent' => array(),
+			);
+			$output       = (string) $this->render_method->invoke( $this->product_filters, $case['attributes'], '', new \WP_Block( $parsed_block, array() ) );
+
+			$processor = new \WP_HTML_Tag_Processor( $output );
+			$this->assertTrue( $processor->next_tag(), "Wrapper is rendered: {$label}" );
+			$this->assertSame( $case['styled'], $processor->has_class( 'has-styled-overlay-button' ), "Wrapper full-width class: {$label}" );
+			$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wc-block-product-filters__open-overlay' ) ), "Open button is rendered: {$label}" );
+			$this->assertSame( $case['expected'], $processor->get_attribute( 'class' ), "Open button classes: {$label}" );
+
+			$core_wrapper = new \WP_HTML_Tag_Processor( $output );
+			$has_wrapper  = $core_wrapper->next_tag( array( 'class_name' => 'wc-block-product-filters__open-overlay-wrapper' ) );
+			$this->assertTrue( $has_wrapper, "Open button wrapper: {$label}" );
+			$this->assertSame( isset( $case['wrapper'] ), (bool) $core_wrapper->has_class( 'wp-block-button' ), "Core Button wrapper class: {$label}" );
+			if ( isset( $case['wrapper'] ) ) {
+				$this->assertTrue( $core_wrapper->has_class( $case['wrapper'] ), "Core Button style class: {$label}" );
+			}
+		}
+	}
+
+	/**
 	 * @testdox A wrapper with no participating filters is not marked empty.
 	 *
 	 * @return void

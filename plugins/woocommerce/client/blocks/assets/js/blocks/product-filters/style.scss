@@ -8,13 +8,8 @@
 
 	.wc-block-product-filters__open-overlay,
 	.wc-block-product-filters__close-overlay {
-		color: inherit;
-		background: transparent;
-		border: transparent;
 		display: flex;
 		align-items: center;
-		font-size: inherit;
-		padding: 0;
 		svg {
 			fill: currentColor;
 		}
@@ -23,10 +18,44 @@
 		}
 	}
 
+	// Reset the plain button. Other styles use the theme's Button styles.
+	// `:where()` keeps theme overrides of the plain button working.
+	.wc-block-product-filters__open-overlay:where(:not(.wp-element-button)),
+	.wc-block-product-filters__close-overlay {
+		color: inherit;
+		background: transparent;
+		border: transparent;
+		font-size: inherit;
+		padding: 0;
+	}
+
 	.wc-block-product-filters__open-overlay {
+		position: relative;
 		svg {
 			width: var(--wc-product-filters-overlay-icon-size, 1.5em);
 			height: var(--wc-product-filters-overlay-icon-size, 1.5em);
+		}
+		// Make the tap area at least 24px tall without changing the look.
+		&::after {
+			content: "";
+			position: absolute;
+			inset-inline: 0;
+			inset-block: min(0px, calc((100% - 24px) / 2));
+		}
+	}
+
+	// Styled buttons fill narrow containers, such as a phone screen or a
+	// sidebar. Plain blocks keep today's layout.
+	&.has-styled-overlay-button {
+		width: 100%;
+		container-type: inline-size;
+	}
+
+	@container (width < 480px) {
+		.wc-block-product-filters__open-overlay-wrapper,
+		.wc-block-product-filters__open-overlay.wp-element-button {
+			width: 100%;
+			justify-content: center;
 		}
 	}
 

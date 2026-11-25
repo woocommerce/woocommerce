@@ -51,6 +51,11 @@ class ProductFilters extends AbstractBlock {
 		);
 
 		if ( is_admin() ) {
+			// Only the editor needs this. On the frontend, core prints these styles.
+			$editor_style_handle = BlockEditorUnifiedAssets::is_enabled()
+				? 'wc-block-library-style'
+				: generate_block_asset_handle( $this->get_full_block_name(), 'editorStyle' );
+			wp_add_inline_style( $editor_style_handle, $this->get_editor_button_variation_styles() );
 			$this->asset_data_registry->add( 'globalStylesColors', StyleAttributesUtils::get_global_styles( array( 'color' ) ) );
 		}
 
@@ -162,6 +167,157 @@ CSS;
 	}
 
 	/**
+	 * Resolve the style of the button that opens the overlay.
+	 *
+	 * Any value other than plain is the name of a core Button style, such as
+	 * fill, outline or a style the theme adds. Blocks saved before the style
+	 * setting existed have no value. They keep the plain button, so updating
+	 * WooCommerce doesn't change how stores look. A value that is not a safe
+	 * class name also means plain. Keep in sync with getOverlayButtonStyle() in JS.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return string Plain or a core Button style name.
+	 */
+	private function get_overlay_button_style( $attributes ) {
+		$button_style = $attributes['overlayButtonStyle'] ?? null;
+
+		if ( ! is_string( $button_style ) || '' === $button_style || sanitize_html_class( $button_style ) !== $button_style ) {
+			return 'plain';
+		}
+
+		return $button_style;
+	}
+
+	/**
+	 * Build the theme's core Button styles, such as Outline or a style the
+	 * theme adds, for the open button in the editor. The editor only applies
+	 * them to real Button blocks. On the frontend, core adds them to the block
+	 * from render_core_button(). Fill has no style data, because it is the
+	 * theme's base button.
+	 *
+	 * The editor prints the theme's base button style later, so these rules
+	 * start with `:root body` to beat its 0,1,1 specificity. Block Button
+	 * colors, at 0,2,0, still win.
+	 *
+	 * @return string CSS.
+	 */
+	private function get_editor_button_variation_styles() {
+		$variations = wp_get_global_styles( array( 'blocks', 'core/button', 'variations' ) );
+		if ( empty( $variations ) || ! is_array( $variations ) ) {
+			return '';
+		}
+
+		$css = '';
+		foreach ( $variations as $name => $styles ) {
+			if ( ! is_string( $name ) || sanitize_html_class( $name ) !== $name || empty( $styles ) || ! is_array( $styles ) ) {
+				continue;
+			}
+
+			$selector = ".wc-block-product-filters__open-overlay-wrapper.is-style-{$name} .wp-block-button__link";
+			$options  = array( 'selector' => ":root body :where({$selector})" );
+
+			// The gradient prints as the `background` shorthand. Print it in an
+			// earlier rule, like core does, so it doesn't reset the background color.
+			if ( isset( $styles['color']['gradient'] ) ) {
+				$gradient_rules = wp_style_engine_get_styles( array( 'color' => array( 'gradient' => $styles['color']['gradient'] ) ), $options );
+				$css           .= $gradient_rules['css'] ?? '';
+				unset( $styles['color']['gradient'] );
+			}
+
+			$rules = wp_style_engine_get_styles( $styles, $options );
+			$css  .= $rules['css'] ?? '';
+
+			if ( ! empty( $styles['css'] ) && is_string( $styles['css'] ) ) {
+				$css .= $this->scope_custom_css( $styles['css'], $selector );
+			}
+		}
+
+		return $css;
+	}
+
+	/**
+	 * Scope a style variation's custom CSS to a selector, the same way core
+	 * does for Button blocks. `&:hover` targets the selector, `& .icon` targets
+	 * its children, and declarations with no selector apply to the selector.
+	 *
+	 * @param string $css      Custom CSS from theme.json.
+	 * @param string $selector Selector to scope to.
+	 * @return string CSS.
+	 */
+	private function scope_custom_css( $css, $selector ) {
+		$scoped = '';
+
+		foreach ( explode( '&', $css ) as $part ) {
+			if ( '' === trim( $part ) ) {
+				continue;
+			}
+
+			if ( ! str_contains( $part, '{' ) ) {
+				$scoped .= ":root body :where({$selector}){" . trim( $part ) . '}';
+				continue;
+			}
+
+			$rule = explode( '{', str_replace( '}', '', $part ) );
+			if ( 2 !== count( $rule ) ) {
+				continue;
+			}
+
+			list( $nested, $declarations ) = $rule;
+
+			// Keep pseudo elements such as ::before outside `:where()`.
+			$pseudo = preg_match( '/([>+~\s]*::[a-zA-Z-]+)/', $nested, $matches ) ? $matches[1] : '';
+			$nested = '' === $pseudo ? $nested : str_replace( $pseudo, '', $nested );
+
+			$part_selector = str_starts_with( $nested, ' ' ) ? $selector . ' ' . trim( $nested ) : $selector . trim( $nested );
+			$scoped       .= ":root body :where({$part_selector}){$pseudo}{" . trim( $declarations ) . '}';
+		}
+
+		return $scoped;
+	}
+
+	/**
+	 * Render the open button as a core Button block, so the theme's Button
+	 * style applies. Then add the overlay directives. The markup matches
+	 * the editor markup in edit.tsx.
+	 *
+	 * @param string $button_style Core Button style name.
+	 * @return string Button markup.
+	 */
+	private function render_core_button( $button_style ) {
+		$style_class = 'is-style-' . $button_style;
+		$icon        = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10 17.5H14V16H10V17.5ZM6 6V7.5H18V6H6ZM8 12.5H16V11H8V12.5Z" fill="currentColor"/></svg>';
+		$inner       = sprintf(
+			'<div class="wp-block-button %1$s"><button type="button" class="wp-block-button__link wp-element-button">%2$s<span>%3$s</span></button></div>',
+			esc_attr( $style_class ),
+			$icon,
+			esc_html__( 'Filter products', 'woocommerce' )
+		);
+		$html        = render_block(
+			array(
+				'blockName'    => 'core/button',
+				'attrs'        => array(
+					'tagName'   => 'button',
+					'className' => $style_class,
+				),
+				'innerBlocks'  => array(),
+				'innerHTML'    => $inner,
+				'innerContent' => array( $inner ),
+			)
+		);
+
+		$p = new \WP_HTML_Tag_Processor( $html );
+		if ( $p->next_tag( array( 'class_name' => 'wp-block-button' ) ) ) {
+			$p->add_class( 'wc-block-product-filters__open-overlay-wrapper' );
+		}
+		if ( $p->next_tag( array( 'tag_name' => 'BUTTON' ) ) ) {
+			$p->add_class( 'wc-block-product-filters__open-overlay' );
+			$p->set_attribute( 'data-wp-init', 'callbacks.initOverlay' );
+			$p->set_attribute( 'data-wp-on--click', 'actions.openOverlay' );
+		}
+		return $p->get_updated_html();
+	}
+
+	/**
 	 * Include and render the block.
 	 *
 	 * @param array    $attributes Block attributes. Default empty array.
@@ -234,6 +390,7 @@ CSS;
 		$overlay_mode     = $this->get_overlay_mode( $attributes );
 		$has_overlay      = 'off' !== $overlay_mode;
 		$overlay_position = isset( $attributes['overlayPosition'] ) && 'right' === $attributes['overlayPosition'] ? 'right' : 'left';
+		$button_style     = $this->get_overlay_button_style( $attributes );
 
 		$state               = wp_interactivity_state( 'woocommerce/product-filters' );
 		$filter_empty_states = $state['filterEmptyStates'][ $product_filters_key ] ?? array();
@@ -249,6 +406,9 @@ CSS;
 		}
 		if ( $has_overlay && 'right' === $overlay_position ) {
 			$wrapper_classes[] = 'is-overlay-right';
+		}
+		if ( $has_overlay && 'plain' !== $button_style ) {
+			$wrapper_classes[] = 'has-styled-overlay-button';
 		}
 
 		$wrapper_attributes = array(
@@ -270,17 +430,23 @@ CSS;
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<?php if ( $has_overlay ) : ?>
-				<button
-					type="button"
-					class="wc-block-product-filters__open-overlay"
-					data-wp-init="callbacks.initOverlay"
-					data-wp-on--click="actions.openOverlay"
-				>
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M10 17.5H14V16H10V17.5ZM6 6V7.5H18V6H6ZM8 12.5H16V11H8V12.5Z" fill="currentColor"/>
-					</svg>
-					<span><?php echo esc_html__( 'Filter products', 'woocommerce' ); ?></span>
-				</button>
+				<?php if ( 'plain' === $button_style ) : ?>
+				<div class="wc-block-product-filters__open-overlay-wrapper">
+					<button
+						type="button"
+						class="wc-block-product-filters__open-overlay"
+						data-wp-init="callbacks.initOverlay"
+						data-wp-on--click="actions.openOverlay"
+					>
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M10 17.5H14V16H10V17.5ZM6 6V7.5H18V6H6ZM8 12.5H16V11H8V12.5Z" fill="currentColor"/>
+						</svg>
+						<span><?php echo esc_html__( 'Filter products', 'woocommerce' ); ?></span>
+					</button>
+				</div>
+				<?php else : ?>
+					<?php echo $this->render_core_button( $button_style ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php endif; ?>
 				<div class="wc-block-product-filters__overlay">
 					<div class="wc-block-product-filters__overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop">
 						<section
