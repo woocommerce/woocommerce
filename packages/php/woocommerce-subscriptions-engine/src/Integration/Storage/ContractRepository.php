@@ -2319,8 +2319,9 @@ final class ContractRepository {
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
-	 * After a failed child insert, report a lost lock: throws when `$lock` is no longer held.
-	 * Returns when it is held, or the check fails, so the caller goes on with its own error.
+	 * After a failed child insert, report a lost lock: throws when `$lock` is no longer held on an
+	 * existing contract. Returns when it is held, the contract is gone, or the check fails, so the
+	 * caller goes on with its own error.
 	 *
 	 * @param ContractLock $lock The caller's lock.
 	 * @throws ContractLockedException If the lock was lost.
@@ -2332,14 +2333,14 @@ final class ContractRepository {
 			return;
 		}
 
-		if ( null !== $holder ) {
+		if ( null !== $holder && $holder['exists'] ) {
 			throw self::locked_exception( $lock->get_contract_id(), $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
 		}
 	}
 
 	/**
-	 * The lock holder when `$lock` is no longer held on an existing contract, read on the database
-	 * clock; null when it is held or the contract is gone.
+	 * The lock holder when `$lock` is no longer held, read on the database clock; null only when it
+	 * is held. A contract that is gone reads as not held, with `exists` false.
 	 *
 	 * @param ContractLock $lock The caller's lock.
 	 * @return array{exists: bool, operation: ?string}|null
@@ -2359,7 +2360,7 @@ final class ContractRepository {
 			throw new \RuntimeException( esc_html( sprintf( 'Failed to check the lock on contract %d: %s', $contract_id, $wpdb->last_error ) ) );
 		}
 
-		return ( $holder['exists'] && null === $held ) ? $holder : null;
+		return null === $held ? $holder : null;
 	}
 
 	/**

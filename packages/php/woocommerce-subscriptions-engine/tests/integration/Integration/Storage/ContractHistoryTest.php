@@ -544,6 +544,23 @@ class ContractHistoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox delete_history() with a still-trusted lock on a contract removed after the fence throws ContractLockedException, instead of returning 0.
+	 */
+	public function test_delete_history_of_a_removed_contract_throws(): void {
+		global $wpdb;
+
+		$lock = $this->take_lock( $this->id, 'erase' );
+		$wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'id' => $this->id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		try {
+			$this->sut->delete_history( $this->id, $lock );
+			$this->fail( 'Expected the removed contract to read as a lost lock.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertNull( $e->get_operation() );
+		}
+	}
+
+	/**
 	 * The two reads of the lock check after an empty delete.
 	 *
 	 * @return array<string, array{string, string}>
