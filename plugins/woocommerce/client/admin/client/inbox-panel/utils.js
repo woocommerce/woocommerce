@@ -4,17 +4,6 @@
 import { filter } from 'lodash';
 import GraphemeSplitter from 'grapheme-splitter';
 
-let segmenter;
-let fallbackSplitter;
-const splitGraphemes = ( text ) => {
-	if ( typeof Intl.Segmenter !== 'function' ) {
-		fallbackSplitter ??= new GraphemeSplitter();
-		return fallbackSplitter.splitGraphemes( text );
-	}
-	segmenter ??= new Intl.Segmenter( undefined, { granularity: 'grapheme' } );
-	return Array.from( segmenter.segment( text ), ( { segment } ) => segment );
-};
-
 /**
  * Get the count of the unread notes from the received list.
  *
@@ -84,12 +73,13 @@ export const truncate = ( letters, limit, separator = ' ' ) => {
 const truncateElement = ( element, limit ) => {
 	const truncatedNode = document.createElement( 'div' );
 	const childNodes = Array.from( element.childNodes );
+	const splitter = new GraphemeSplitter();
 	let truncatedTextLength = 0;
 
 	for ( let i = 0; i < childNodes.length; i++ ) {
 		// Deep clone.
 		let clone = childNodes[ i ].cloneNode( true );
-		const cloneNodeLetters = splitGraphemes( clone.textContent );
+		const cloneNodeLetters = splitter.splitGraphemes( clone.textContent );
 
 		if ( truncatedTextLength + cloneNodeLetters.length <= limit ) {
 			// No problem including a whole child node, no need to consider truncating at all.
@@ -122,9 +112,10 @@ const truncateElement = ( element, limit ) => {
  */
 export const truncateRenderableHTML = ( originalHTML, limit ) => {
 	const tempNode = document.createElement( 'div' );
+	const splitter = new GraphemeSplitter();
 
 	tempNode.innerHTML = originalHTML;
-	if ( splitGraphemes( tempNode.textContent ).length > limit ) {
+	if ( splitter.splitGraphemes( tempNode.textContent ).length > limit ) {
 		return truncateElement( tempNode, limit ).innerHTML + '...';
 	}
 	return originalHTML;

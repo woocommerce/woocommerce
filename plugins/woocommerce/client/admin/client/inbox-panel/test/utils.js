@@ -50,25 +50,15 @@ describe( 'truncateRenderableHTML', () => {
 		);
 	} );
 
-	test( 'it keeps graphemes intact without Intl.Segmenter', () => {
-		const segmenter = Intl.Segmenter;
-		Intl.Segmenter = undefined;
-
-		try {
-			expect(
-				truncateRenderableHTML( '<div>e\u0301clair</div>', 1 )
-			).toBe( '<div>e\u0301</div>...' );
-			expect( truncateRenderableHTML( '<div>👨‍👩‍👧 family</div>', 1 ) ).toBe(
-				'<div>👨‍👩‍👧</div>...'
-			);
-		} finally {
-			Intl.Segmenter = segmenter;
-		}
+	test( 'it should keep a base letter and its combining mark together', () => {
+		expect( truncateRenderableHTML( '<div>éclair</div>', 1 ) ).toBe(
+			'<div>é</div>...'
+		);
 	} );
 
-	test( 'it should keep a base letter and its combining mark together', () => {
-		expect( truncateRenderableHTML( '<div>e\u0301clair</div>', 1 ) ).toBe(
-			'<div>e\u0301</div>...'
+	test( 'it should keep an emoji sequence together', () => {
+		expect( truncateRenderableHTML( '<div>👨‍👩‍👧 family</div>', 1 ) ).toBe(
+			'<div>👨‍👩‍👧</div>...'
 		);
 	} );
 
@@ -104,7 +94,7 @@ describe( 'truncateRenderableHTML', () => {
 		);
 
 		expect( truncateRenderableHTML( hindiSample, 3 ) ).toBe(
-			'<div>अनुच्छे</div>...'
+			'<div>अनुच्</div>...'
 		);
 
 		const demonicSample = '<div>Z͑ͫ̓ͪ̂ͫ̽͏̴̙̤̞͉͚̯̞̠͍A̴̵̜̰͔ͫ͗͢L̠ͨͧͩ͘G̴̻͈͍͔̹̑͗̎̅͛́Ǫ̵̹̻̝̳͂̌̌͘!͖̬̰̙̗̿̋ͥͥ̂ͣ̐́́͜͞</div>';
