@@ -214,8 +214,18 @@ CSS;
 			}
 
 			$selector = ".wc-block-product-filters__open-overlay-wrapper.is-style-{$name} .wp-block-button__link";
-			$rules    = wp_style_engine_get_styles( $styles, array( 'selector' => ":root body :where({$selector})" ) );
-			$css     .= $rules['css'] ?? '';
+			$options  = array( 'selector' => ":root body :where({$selector})" );
+
+			// The gradient prints as the `background` shorthand. Print it in an
+			// earlier rule, like core does, so it doesn't reset the background color.
+			if ( isset( $styles['color']['gradient'] ) ) {
+				$gradient_rules = wp_style_engine_get_styles( array( 'color' => array( 'gradient' => $styles['color']['gradient'] ) ), $options );
+				$css           .= $gradient_rules['css'] ?? '';
+				unset( $styles['color']['gradient'] );
+			}
+
+			$rules = wp_style_engine_get_styles( $styles, $options );
+			$css  .= $rules['css'] ?? '';
 
 			if ( ! empty( $styles['css'] ) && is_string( $styles['css'] ) ) {
 				$css .= $this->scope_custom_css( $styles['css'], $selector );
