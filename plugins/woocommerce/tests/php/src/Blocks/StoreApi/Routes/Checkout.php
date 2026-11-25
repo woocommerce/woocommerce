@@ -181,6 +181,10 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 */
 	protected function tearDown(): void {
 		try {
+			// wc_log_order_step()'s static state is request-scoped in production; PHPUnit keeps one process
+			// alive across tests, so end the session explicitly here to avoid bleeding into the next test.
+			wc_log_order_step( 'Test cleanup', null, true );
+
 			$this->remove_inserted_tax_rates();
 
 			remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
