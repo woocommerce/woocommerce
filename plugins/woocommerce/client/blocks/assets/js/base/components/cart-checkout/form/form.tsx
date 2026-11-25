@@ -46,6 +46,7 @@ import {
 	createCheckboxFieldProps,
 	createFieldProps,
 	getFieldData,
+	hasSchemaRules,
 } from './utils';
 import validateCountry from './validate-country';
 import { validateState } from './validate-state';
@@ -85,6 +86,8 @@ const Form = <
 	const previousFormFields = usePrevious( formFields );
 	const previousIsEditing = usePrevious( isEditing );
 	const previousValues = usePrevious( values );
+	const displayedFieldKeys = useRef( new Set< string >() );
+	const valuesHiddenBeforeDisplay = useRef< Record< string, unknown > >( {} );
 
 	// Stores refs for rendered inputs so we can access them later.
 	const inputsRef = useRef<
@@ -193,23 +196,48 @@ const Form = <
 		previousIsEditing,
 	] );
 
-	// Clear values for hidden fields when fields change.
+	// Clear values for hidden fields when fields change. A field hidden by conditional rules before
+	// its first display keeps its initial value (such as a filtered default) aside and gets it back
+	// the first time it is shown. After that, hiding a field clears it for good.
 	useEffect( () => {
 		if ( fastDeepEqual( previousFormFields, formFields ) ) {
 			return;
 		}
-		const newValues = {
-			...values,
-			...Object.fromEntries(
-				formFields
-					.filter( ( field ) => field.hidden )
-					.map( ( field ) => [ field.key, '' ] )
-			),
-		};
+		const updatedValues: Record< string, unknown > = {};
+
+		formFields.forEach( ( { key, hidden } ) => {
+			const value = values[ key as keyof T ];
+
+			if ( ! hidden ) {
+				if (
+					key in valuesHiddenBeforeDisplay.current &&
+					( value === '' || value === undefined )
+				) {
+					updatedValues[ key ] =
+						valuesHiddenBeforeDisplay.current[ key ];
+				}
+				delete valuesHiddenBeforeDisplay.current[ key ];
+				displayedFieldKeys.current.add( key );
+				return;
+			}
+
+			if (
+				! displayedFieldKeys.current.has( key ) &&
+				! ( key in valuesHiddenBeforeDisplay.current ) &&
+				value !== '' &&
+				value !== undefined &&
+				hasSchemaRules( defaultFields[ key ] ?? {}, 'hidden' )
+			) {
+				valuesHiddenBeforeDisplay.current[ key ] = value;
+			}
+			updatedValues[ key ] = '';
+		} );
+
+		const newValues = { ...values, ...updatedValues };
 		if ( ! isShallowEqual( values, newValues ) ) {
 			onChange( newValues );
 		}
-	}, [ onChange, formFields, previousFormFields, values ] );
+	}, [ onChange, formFields, previousFormFields, values, defaultFields ] );
 
 	// Maybe validate country and state when other fields change so user is notified that they're required.
 	useEffect( () => {

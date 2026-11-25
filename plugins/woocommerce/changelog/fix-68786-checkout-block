@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the default value of a conditional Checkout block field the first time it appears, instead of an empty field.
