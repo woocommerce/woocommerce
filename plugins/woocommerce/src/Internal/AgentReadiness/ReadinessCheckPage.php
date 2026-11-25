@@ -322,6 +322,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'last_checked' => self::last_checked( $report ),
 			'checked_note' => $truncated,
 			'checked'      => null !== $report,
+			// Whether the store is checked every day; the merchant can turn it off on the page.
+			'daily_checks' => ScheduledScan::daily_enabled(),
 			'run'          => array(
 				'label'   => null === $report ? __( 'Check your store', 'woocommerce' ) : __( 'Check again', 'woocommerce' ),
 				'pending' => $pending,
@@ -568,10 +570,10 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		}
 		if ( wp_date( 'Y-m-d', $time ) === wp_date( 'Y-m-d' ) ) {
 			/* translators: %s: time of day, such as 10:42 am. */
-			return sprintf( __( 'Last checked today at %s. Checks run each day.', 'woocommerce' ), wp_date( (string) get_option( 'time_format' ), $time ) );
+			return sprintf( __( 'Last checked today at %s.', 'woocommerce' ), wp_date( (string) get_option( 'time_format' ), $time ) );
 		}
 		/* translators: 1: date, such as November 3, 2026. 2: time of day, such as 10:42 am. */
-		return sprintf( __( 'Last checked %1$s at %2$s. Checks run each day.', 'woocommerce' ), wp_date( (string) get_option( 'date_format' ), $time ), wp_date( (string) get_option( 'time_format' ), $time ) );
+		return sprintf( __( 'Last checked %1$s at %2$s.', 'woocommerce' ), wp_date( (string) get_option( 'date_format' ), $time ), wp_date( (string) get_option( 'time_format' ), $time ) );
 	}
 
 
@@ -792,9 +794,19 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		}
 		// Checked in coming soon mode, then the store went live: nothing was blocked; the checks haven't run since.
 		if ( false === $was_live ) {
-			return array( __( 'Your store wasn’t live at the last check', 'woocommerce' ), __( 'These checks run at the next daily check, or you can run the check again now.', 'woocommerce' ) );
+			return array(
+				__( 'Your store wasn’t live at the last check', 'woocommerce' ),
+				ScheduledScan::daily_enabled()
+					? __( 'If your store is live now, these checks run at the next daily check. To run them now, select Check again.', 'woocommerce' )
+					: __( 'If your store is live now, select Check again to run these checks.', 'woocommerce' ),
+			);
 		}
-		return array( __( 'Your pages couldn’t be checked', 'woocommerce' ), __( 'Your hosting setup blocked the check from opening them. Checks run again each day. If this keeps happening, contact your hosting provider.', 'woocommerce' ) );
+		return array(
+			__( 'Your pages couldn’t be checked', 'woocommerce' ),
+			ScheduledScan::daily_enabled()
+				? __( 'Your hosting setup blocked the check from opening them. Checks run again each day. If this keeps happening, contact your hosting provider.', 'woocommerce' )
+				: __( 'Your hosting setup blocked the check from opening them. Select Check again to try again later. If this keeps happening, contact your hosting provider.', 'woocommerce' ),
+		);
 	}
 
 	/**
@@ -821,12 +833,22 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			return array( true, __( 'Launch your store to run this check.', 'woocommerce' ) );
 		}
 		if ( false === $was_live ) {
-			return array( true, __( 'Your store wasn’t live at the last check. This check runs at the next daily check, or you can run the check again now.', 'woocommerce' ) );
+			return array(
+				true,
+				ScheduledScan::daily_enabled()
+					? __( 'Your store wasn’t live at the last check. If it’s live now, this check runs at the next daily check, or select Check again to run it now.', 'woocommerce' )
+					: __( 'Your store wasn’t live at the last check. If it’s live now, select Check again to run this check.', 'woocommerce' ),
+			);
 		}
 		if ( ! empty( $check['no_product'] ) ) {
 			return array( true, __( 'This check needs a product page. It runs once you have a published product that AI assistants can see.', 'woocommerce' ) );
 		}
-		return array( false, __( 'This check couldn’t run. It runs again each day, or you can run the check again now.', 'woocommerce' ) );
+		return array(
+			false,
+			ScheduledScan::daily_enabled()
+				? __( 'This check couldn’t run. It runs again each day, or select Check again to run it now.', 'woocommerce' )
+				: __( 'This check couldn’t run. Select Check again to try again.', 'woocommerce' ),
+		);
 	}
 
 	/**

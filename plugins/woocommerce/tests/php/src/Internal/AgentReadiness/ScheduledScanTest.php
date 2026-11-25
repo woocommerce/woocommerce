@@ -287,6 +287,122 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A daily run does not scan when the saved switch is off, even while this request still has the old value cached.
+	 */
+	public function test_daily_run_skips_when_the_saved_switch_is_off(): void {
+		update_option( ScheduledScan::DAILY_OPTION, 'no', false );
+		$this->cache_daily_checks_as_on();
+		$this->assertTrue( ScheduledScan::daily_enabled(), 'This request still has daily checks cached as on' );
+
+		$this->run_daily_hook();
+
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::NEXT_HOOK, null, ScheduledScan::GROUP ) );
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+		$this->assertNull( wc_get_container()->get( AgentReadiness::class )->get_cached_report() );
+	}
+
+	/**
+	 * @testdox The daily run still scans when the switch is on.
+	 */
+	public function test_daily_run_scans_when_the_switch_is_on(): void {
+		WC_Helper_Product::create_simple_product();
+
+		$this->run_daily_hook();
+
+		$this->assertTrue( $this->sut->is_pending() );
+		$this->assertCount( 1, $this->pending( ScheduledScan::DAILY_HOOK ) );
+	}
+
+	/**
+	 * @testdox A next run queued as the switch is turned off is dropped, even when this request cached the old value during the queue.
+	 */
+	public function test_daily_run_queued_as_the_switch_turns_off_is_dropped(): void {
+		update_option( ScheduledScan::DAILY_OPTION, 'yes', false );
+		WC_Helper_Product::create_simple_product();
+		$flipped = false;
+		$flip    = function ( $action_id ) use ( &$flipped ) {
+			if ( $flipped ) {
+				return;
+			}
+			$action = \ActionScheduler::store()->fetch_action( (int) $action_id );
+			if ( ScheduledScan::DAILY_HOOK !== $action->get_hook() ) {
+				return;
+			}
+			$flipped = true;
+			update_option( ScheduledScan::DAILY_OPTION, 'no', false );
+			$this->cache_daily_checks_as_on();
+		};
+		add_action( 'action_scheduler_stored_action', $flip );
+
+		try {
+			$this->sut->run();
+		} finally {
+			remove_action( 'action_scheduler_stored_action', $flip );
+		}
+
+		$this->assertTrue( $flipped, 'The switch turned off while the next run was queued' );
+		$this->assertTrue( ScheduledScan::daily_enabled(), 'This request still has daily checks cached as on' );
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+	}
+
+	/**
+	 * @testdox Turning daily checks on while the first check is running keeps the next run that check already queued.
+	 */
+	public function test_enabling_daily_checks_during_the_first_scan_keeps_its_next_run(): void {
+		delete_option( AgentReadiness::REPORT_OPTION );
+		WC_Helper_Product::create_simple_product();
+
+		$this->sut->run();
+		$queued = as_next_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP );
+
+		$this->assertNull( wc_get_container()->get( AgentReadiness::class )->get_cached_report() );
+		$this->assertTrue( $this->sut->is_pending() );
+		$this->assertIsInt( $queued );
+		$this->sut->set_daily_enabled( true );
+
+		$this->assertSame( $queued, as_next_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+	}
+
+	/**
+	 * Run the daily scan the way Action Scheduler does, so the callback can tell it from a check run by hand.
+	 */
+	private function run_daily_hook(): void {
+		$callback = array( $this->sut, 'run' );
+		$added    = false === has_action( ScheduledScan::DAILY_HOOK, $callback );
+		if ( $added ) {
+			add_action( ScheduledScan::DAILY_HOOK, $callback );
+		}
+		try {
+			do_action( ScheduledScan::DAILY_HOOK );
+		} finally {
+			if ( $added ) {
+				remove_action( ScheduledScan::DAILY_HOOK, $callback );
+			}
+		}
+	}
+
+	/**
+	 * Leave this request's option caches saying daily checks are on, whatever the database row says.
+	 */
+	private function cache_daily_checks_as_on(): void {
+		wp_cache_set( ScheduledScan::DAILY_OPTION, 'yes', 'options' );
+
+		$alloptions = wp_cache_get( 'alloptions', 'options' );
+		if ( ! is_array( $alloptions ) ) {
+			$alloptions = array();
+		}
+		$alloptions[ ScheduledScan::DAILY_OPTION ] = 'yes';
+		wp_cache_set( 'alloptions', $alloptions, 'options' );
+
+		$notoptions = wp_cache_get( 'notoptions', 'options' );
+		if ( ! is_array( $notoptions ) ) {
+			$notoptions = array();
+		}
+		$notoptions[ ScheduledScan::DAILY_OPTION ] = true;
+		wp_cache_set( 'notoptions', $notoptions, 'options' );
+	}
+
+	/**
 	 * Run the scan's batch actions as Action Scheduler would, until the scan stores its report.
 	 *
 	 * @return int Batch actions run.
