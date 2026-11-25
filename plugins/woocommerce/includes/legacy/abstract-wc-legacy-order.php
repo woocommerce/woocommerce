@@ -2,6 +2,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -165,7 +166,13 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		// Handle qty if set.
 		if ( isset( $args['qty'] ) ) {
 			if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
-				$item->add_meta_data( WC_Order_Item_Product::BACKORDER_META_KEY, $args['qty'] - max( 0, $product->get_stock_quantity() ), true );
+				/** @var WC_Order_Item_Product $item */
+				$legacy_backorder_meta_key = OrderUtil::get_legacy_backorder_meta_key( $item );
+				if ( WC_Order_Item_Product::BACKORDER_META_KEY !== $legacy_backorder_meta_key ) {
+					$item->delete_meta_data( $legacy_backorder_meta_key );
+				}
+
+				$item->add_meta_data( WC_Order_Item_Product::BACKORDER_META_KEY, (string) ( $args['qty'] - max( 0, $product->get_stock_quantity() ) ), true );
 			}
 			$args['subtotal'] = $args['subtotal'] ? $args['subtotal'] : wc_get_price_excluding_tax( $product, array( 'qty' => $args['qty'] ) );
 			$args['total']	= $args['total'] ? $args['total'] : wc_get_price_excluding_tax( $product, array( 'qty' => $args['qty'] ) );

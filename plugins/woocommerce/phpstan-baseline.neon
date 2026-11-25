@@ -12337,12 +12337,6 @@ parameters:
 			path: includes/class-wc-order-item-product.php
 
 		-
-			message: '#^Parameter \#2 \$value of method WC_Data\:\:add_meta_data\(\) expects array\|string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
 			message: '#^Method WC_Order_Item_Shipping\:\:set_instance_id\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
