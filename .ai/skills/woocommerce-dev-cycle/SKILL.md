@@ -1,6 +1,6 @@
 ---
 name: woocommerce-dev-cycle
-description: Run tests, linting, and quality checks for WooCommerce development. Use when running tests, fixing code style, or following the development workflow.
+description: Run tests, linting, and quality checks for WooCommerce development. Use when running tests, fixing code style, following the development workflow, or checking that a change behaves the same across supported PHP and MySQL/MariaDB versions.
 ---
 
 # WooCommerce Development Cycle
@@ -16,6 +16,7 @@ Follow these guidelines for WooCommerce development workflow:
 3. **PHP linting patterns**: See [php-linting-patterns.md](php-linting-patterns.md) for common PHP linting issues and fixes
 4. **JS/TS i18n patterns**: See [js-i18n-patterns.md](js-i18n-patterns.md) for translatable string patterns and placeholder usage
 5. **Markdown linting**: See [markdown-linting.md](markdown-linting.md) for markdown file linting and formatting
+6. **Compatibility testing**: See [compatibility-testing.md](compatibility-testing.md) for checking changes across supported PHP versions and MySQL/MariaDB versions, and the known engine differences
 
 ## Development Workflow
 
