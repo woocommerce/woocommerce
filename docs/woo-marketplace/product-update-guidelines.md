@@ -178,13 +178,13 @@ Below is an example of this response:
 
 ### Maximize compatibility and reliability via custom E2E tests
 
-We strongly encourage contributing E2E tests for your extensions built on top of the QIT's [custom E2E testing framework](https://qit.woo.com/docs/custom-tests/introduction). By sharing these tests with us, you play a crucial role in ensuring true compatibility across different WordPress and WooCommerce versions, various PHP environments, and alongside other popular extensions.
+We strongly encourage contributing E2E tests for your extensions built on top of the QIT's [custom E2E testing framework](https://qit.woo.com/docs/test-packages/). By sharing these tests with us, you play a crucial role in ensuring true compatibility across different WordPress and WooCommerce versions, various PHP environments, and alongside other popular extensions.
 
 Our custom E2E testing framework — equipped with a Dockerized development environment and simple-to-use command tools — empowers you to design and execute comprehensive tests using [Playwright](https://playwright.dev/) that are tailored to your extension's unique functionalities.
 
 Not only does this initiative help mitigate potential compatibility issues before they affect users, but it also enhances the overall reliability of the products within our marketplace. Participating in this process not only contributes to a robust ecosystem but also elevates your extension's reputation for quality and reliability.
 
-Review our [QIT custom test documentation](https://qit.woo.com/docs/custom-tests/introduction) to begin leveraging the power of custom tests to guarantee your extension works seamlessly in real-world scenarios and stands out in the competitive Marketplace.
+Review our [QIT custom test documentation](https://qit.woo.com/docs/test-packages/) to begin leveraging the power of custom tests to guarantee your extension works seamlessly in real-world scenarios and stands out in the competitive Marketplace.
 
 ## Need help?
 
