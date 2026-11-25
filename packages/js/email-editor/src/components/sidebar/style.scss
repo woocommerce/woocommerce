@@ -27,9 +27,9 @@
 	}
 }
 
-// From WordPress 7.2 core always renders its "Template: ..." panel. Keep its preview, but hide
-// "Create new", which adds a site template, and "Edit", which skips the email editor's warning.
-// The email's own Template menu in the Settings panel still offers "Edit template".
-.components-flex:has(> .editor-template-actions-panel__action) {
+// From WordPress 7.2 core renders its "Template: ..." panel with "Edit" and "Create new".
+// Hide "Create new", which adds a site template instead of an email template.
+.editor-template-actions-panel__action
+	+ .editor-template-actions-panel__action {
 	display: none;
 }
