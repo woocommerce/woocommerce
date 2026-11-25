@@ -252,9 +252,9 @@ class AgentReadiness {
 		// Rebuild the rules for each scan: a long-running process may have fetched a new rules file since.
 		$this->active_rules = null;
 		$this->product_scan = null;
-		$sales = $this->product_sales->last_days();
-		$ranked = null !== $sales && $sales['imported'] && $sales['orders'] >= ProductSales::MIN_ORDERS && $sales['total'] > 0;
-		$since = null === $sales ? '' : $sales['since'];
+		$sales              = $this->product_sales->last_days();
+		$ranked             = null !== $sales && $sales['imported'] && $sales['orders'] >= ProductSales::MIN_ORDERS && $sales['total'] > 0;
+		$since              = null === $sales ? '' : $sales['since'];
 		// The seller ids are a second query, so a store the scan will not rank never groups its sales.
 		$best_sellers = $ranked ? $this->product_sales->more_top_products( $since, 0, ProductSales::TOP_PRODUCTS ) : array();
 		$product_scan = new ProductScan();
