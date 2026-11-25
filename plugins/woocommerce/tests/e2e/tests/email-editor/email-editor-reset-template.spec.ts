@@ -12,7 +12,7 @@ import {
 	disableEmailEditor,
 	resetWCTransactionalEmail,
 } from './helpers/enable-email-editor-feature';
-import { accessTheEmailEditor } from '../../utils/email';
+import { accessTheEmailEditor, waitForEditorSaved } from '../../utils/email';
 import { locks } from '../../fixtures/fixtures';
 
 /**
@@ -101,18 +101,7 @@ test.describe(
 				.getByRole( 'button', { name: 'Save', exact: true } )
 				.click();
 
-			// Wait until the save has finished and nothing is left to save.
-			await expect
-				.poll( () =>
-					page.evaluate( () => {
-						const editor = window.wp.data.select( 'core/editor' );
-						return (
-							! editor.isSavingPost() &&
-							! editor.isEditedPostDirty()
-						);
-					} )
-				)
-				.toBe( true );
+			await waitForEditorSaved( page );
 
 			// Verify the customization is present
 			await expect( editorFrame.getByText( uniqueText ) ).toBeVisible();
