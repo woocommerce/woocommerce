@@ -3,6 +3,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Emails;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
@@ -435,6 +436,21 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 				$this->assertStringNotContainsString( $prompt, $content );
 			}
 		}
+	}
+
+	/**
+	 * @testdox Should include the confirm link and how long it stays active in the plain-text verify email.
+	 */
+	public function test_plain_verify_email_includes_confirm_link_and_expiration(): void {
+		$notification = $this->build_notification();
+		$sut          = WC()->mailer()->get_emails()['WC_Email_Customer_Stock_Notification_Verify'];
+		$sut->prepare_email( $notification );
+
+		$content = $sut->get_content_plain();
+
+		$this->assertMatchesRegularExpression( '/^Confirm: https?:\/\/\S*email_link_action=verify\S*$/m', html_entity_decode( $content, ENT_QUOTES ) );
+		$minutes = (int) floor( Config::get_verification_expiration_time_threshold() / 60 );
+		$this->assertStringContainsString( "This link will remain active for {$minutes} minutes.", $content );
 	}
 
 	/**

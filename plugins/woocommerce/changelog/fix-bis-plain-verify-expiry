@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add the confirm link and its expiry time to the plain-text back in stock sign-up confirmation email.
