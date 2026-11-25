@@ -760,7 +760,7 @@ class Checkout extends AbstractCartRoute {
 			array(
 				'order_object'           => $order,
 				'processed_with_payment' => $order->needs_payment() ? 'yes' : 'no',
-				'payment_status'         => $payment_result->status,
+				'payment_status'         => $payment_result->get_status(),
 			),
 			'error' !== $payment_result->get_status()
 		);
