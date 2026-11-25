@@ -33,17 +33,17 @@ class ProductSales {
 	private const IMPORTED_SHARE = 0.9;
 
 	/**
-	 * How many best sellers last_days() lists: as many as one scan checks.
+	 * How many best sellers one page of more_top_products() returns: as many as one scan checks.
 	 */
 	public const TOP_PRODUCTS = ProductScan::PRODUCT_LIMIT;
 
 	/**
-	 * The store's net sales, the number of orders, the products with the most sales, and whether
-	 * Analytics holds the store's orders for the period, or null while Analytics is off. `since` is
-	 * the period's start, for reading the same period again for some products with for_products().
-	 * Sales per product stay in the database, so memory doesn't grow with the catalog.
+	 * The store's net sales, the number of orders, and whether Analytics holds the store's orders
+	 * for the period, or null while Analytics is off. `since` is the period's start, for reading
+	 * the same period again for some products with for_products(), and for the best sellers with
+	 * more_top_products() when the scan ranks by sales. Sales per product stay in the database.
 	 *
-	 * @return array{days:int,since:string,orders:int,imported:bool,total:float,top:array<int,int>}|null
+	 * @return array{days:int,since:string,orders:int,imported:bool,total:float}|null
 	 */
 	public function last_days(): ?array {
 		global $wpdb;
@@ -79,7 +79,6 @@ class ProductSales {
 			'orders'   => $orders,
 			'imported' => self::is_imported( $orders, self::store_orders( $start, $excluded ) ),
 			'total'    => max( 0.0, $total ),
-			'top'      => self::top_products( $since, $excluded ),
 		);
 	}
 
@@ -130,7 +129,7 @@ class ProductSales {
 	}
 
 	/**
-	 * The next published products by net sales after the first page from last_days().
+	 * A page of published products by net sales, highest first. Offset 0 is the first page.
 	 * A deleted or unpublished product is left out here; its revenue still counts in the total.
 	 *
 	 * @since 11.4.0
