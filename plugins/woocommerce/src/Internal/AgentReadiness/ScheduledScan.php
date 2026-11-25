@@ -13,7 +13,8 @@ defined( 'ABSPATH' ) || exit;
  * and keeps the stored report fresh with one run a day.
  *
  * Each run schedules the next one for the coming night, on the store's clock
- * (next_daily_run()), so nothing is queued until a
+ * (next_daily_run()), unless the merchant turned daily checks off (DAILY_OPTION),
+ * so nothing is queued until a
  * merchant or the REST API asks for the first scan, and no request pays for a
  * scheduling check. The next run is scheduled before the scan, so a scan that
  * fails or times out does not end the chain. Cancelling the scheduled actions
@@ -45,6 +46,11 @@ class ScheduledScan implements RegisterHooksInterface {
 	public const RETRY_AFTER = 10 * MINUTE_IN_SECONDS;
 
 	public const GROUP = 'woocommerce-agent-readiness';
+
+	/**
+	 * Option that holds whether the store is checked every day: 'no' when the merchant turned it off.
+	 */
+	public const DAILY_OPTION = 'woocommerce_agent_readiness_daily_scan';
 
 	/**
 	 * Hours of the night, on the store's clock, between which the daily scan is scheduled.
@@ -173,18 +179,92 @@ class ScheduledScan implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Schedule the next daily run, fetch the rules file, then start the scan, replacing one in progress.
+	 * When daily checks are on, schedule the next one, then fetch the rules file and start the scan, replacing one in progress.
+	 * A daily run does nothing when the saved switch is off, so one queued before the merchant turned it off does not scan.
 	 * Each batch of products runs in its own action, then the last stores the report.
 	 *
 	 * @internal
 	 */
 	public function run(): void {
-		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
-		as_schedule_single_action( self::next_daily_run(), self::DAILY_HOOK, array(), self::GROUP );
+		// The row in the database, not the value this request already read. The merchant may have saved since.
+		if ( self::DAILY_HOOK === current_action() && ! self::daily_enabled_saved() ) {
+			as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
+			return;
+		}
+
+		$this->sync_daily_run();
 
 		$this->remote_rules->refresh( array_keys( $this->agent_readiness->get_default_rules() ) );
 		as_unschedule_all_actions( self::NEXT_HOOK );
 		as_schedule_single_action( time(), self::NEXT_HOOK, array( $this->agent_readiness->start_refresh() ), self::GROUP );
+	}
+
+	/**
+	 * Whether the store is checked every day. On unless the merchant turned it off.
+	 *
+	 * @since 11.4.0
+	 */
+	public static function daily_enabled(): bool {
+		return 'no' !== get_option( self::DAILY_OPTION, 'yes' );
+	}
+
+	/**
+	 * Turn the daily scan on or off. Off removes the scheduled run, and checks only run on request.
+	 * On schedules the next run once the store has been checked, or when a check is already running.
+	 * Before the first check, nothing is queued.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param bool $enable Whether to check the store every day.
+	 */
+	public function set_daily_enabled( bool $enable ): void {
+		update_option( self::DAILY_OPTION, $enable ? 'yes' : 'no', false );
+		// A check already running queued its next run before it saved a report. Keep that run.
+		if ( $enable && null === $this->agent_readiness->get_cached_report() && ! $this->is_pending() ) {
+			as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
+			return;
+		}
+		$this->sync_daily_run();
+	}
+
+	/**
+	 * Queue the next nightly run when daily checks are on, and remove it when they are off.
+	 * The saved option is read again after scheduling, so a switch turned off while this runs drops the queued run.
+	 */
+	private function sync_daily_run(): void {
+		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
+		if ( ! self::daily_enabled_saved() ) {
+			return;
+		}
+		as_schedule_single_action( self::next_daily_run(), self::DAILY_HOOK, array(), self::GROUP );
+		$this->drop_queued_daily_run_if_off();
+	}
+
+	/**
+	 * Remove the run just queued when daily checks were turned off while it was stored.
+	 */
+	private function drop_queued_daily_run_if_off(): void {
+		if ( self::daily_enabled_saved() ) {
+			return;
+		}
+		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
+	}
+
+	/**
+	 * Whether daily checks are on in the database.
+	 * get_option() would repeat the value this request already read, which can be from before the merchant saved.
+	 */
+	private static function daily_enabled_saved(): bool {
+		global $wpdb;
+
+		$value = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s LIMIT 1",
+				self::DAILY_OPTION
+			)
+		);
+
+		return ! is_string( $value ) || 'no' !== $value;
 	}
 
 	/**

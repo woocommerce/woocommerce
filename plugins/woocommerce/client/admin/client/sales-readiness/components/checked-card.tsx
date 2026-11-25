@@ -4,7 +4,7 @@
 /* eslint-disable @wordpress/use-recommended-components -- The design asks for these @wordpress/ui components; this chunk bundles the package. */
 import { Button, Card, Link, Text } from '@wordpress/ui';
 /* eslint-enable @wordpress/use-recommended-components */
-import { Spinner } from '@wordpress/components';
+import { Spinner, ToggleControl } from '@wordpress/components';
 import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
@@ -20,19 +20,23 @@ interface CheckedCardProps {
 	running: boolean;
 	onRun: () => void;
 	onDownloadError: ( message: string ) => void;
+	onDailyChecks?: ( enabled: boolean ) => void;
+	savingDailyChecks?: boolean;
 }
 
 /**
  * When the store was last checked, with Check again. Before the first check it says Not checked
  * yet and offers Check your store. While a check runs it shows a spinner and Checking your store,
  * with Check again turned off. From the first check on, Need help? offers the results to
- * download for support (built from the last check).
+ * download for support (built from the last check), and a switch turns the daily check off or on.
  */
 export const CheckedCard = ( {
 	view,
 	running,
 	onRun,
 	onDownloadError,
+	onDailyChecks,
+	savingDailyChecks = false,
 }: CheckedCardProps ) => {
 	const checking = ( view.run.pending && ! view.run.stalled ) || running;
 	return (
@@ -102,6 +106,28 @@ export const CheckedCard = ( {
 					</Button>
 				</div>
 				{ ! checking && <RunStatus run={ view.run } /> }
+				{ view.checked && onDailyChecks && (
+					<div className="wc-sales-readiness-checked__daily">
+						<ToggleControl
+							__nextHasNoMarginBottom
+							label={ __(
+								'Automatically run checks daily',
+								'woocommerce'
+							) }
+							help={
+								view.daily_checks
+									? undefined
+									: __(
+											'For an updated report on how well AI assistants can find and shop your store, select Check again above.',
+											'woocommerce'
+										)
+							}
+							checked={ view.daily_checks }
+							disabled={ savingDailyChecks }
+							onChange={ onDailyChecks }
+						/>
+					</div>
+				) }
 			</Card.Content>
 		</Card.Root>
 	);
