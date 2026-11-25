@@ -114,7 +114,7 @@ query code.
 - A method or loop reading several non-autoloaded options through sequential `get_option()` calls
   should batch them with one `wp_prime_option_caches( [...] )` (static lists, `sprintf`-derived key
   patterns, or keys pulled from a settings or registry structure).
-- **Autoload guard** (the false-positive control for this subsection): options saved through the WC
+- **Autoload guard:** options saved through the WC
   settings API autoload by default (`WC_Admin_Settings::save_fields`, `WC_Settings_API`). Endpoint
   options, settings toggles, and general store settings come from `alloptions` at boot, so a
   missing-priming finding on autoloaded, already-saved options is a no-op. Don't flag it. Priming
