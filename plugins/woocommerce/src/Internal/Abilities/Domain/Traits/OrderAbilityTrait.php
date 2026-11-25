@@ -476,7 +476,7 @@ trait OrderAbilityTrait {
 		}
 		if ( in_array( 'lines', $includes, true ) ) {
 			foreach ( $orders as $order ) {
-				array_push( $items, ...array_values( $order->get_items( array( 'shipping', 'fee', 'coupon' ) ) ) );
+				array_push( $items, ...array_values( $order->get_shipping_methods() ), ...array_values( $order->get_fees() ), ...array_values( $order->get_coupons() ) );
 			}
 		}
 		ExtensibleAbilities::prime( 'order_item', $items );

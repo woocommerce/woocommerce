@@ -1250,7 +1250,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should call the order and order item prime callbacks once with every order and every product, shipping, fee and coupon line.
+	 * @testdox Should call the order and order item prime callbacks once with every order and every product, shipping, fee and coupon line, including a fee a filter adds.
 	 */
 	public function test_prime_callbacks_get_orders_and_line_items(): void {
 		$product = \WC_Helper_Product::create_simple_product();
@@ -1263,6 +1263,19 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$order->add_item( new \WC_Order_Item_Tax() );
 			$order->save();
 		}
+		$added_fee = new \WC_Order_Item_Fee();
+		$added_fee->save();
+		$this->add_test_filter(
+			'woocommerce_order_get_items',
+			static function ( $items, $order, $types ) use ( $added_fee, $orders ) {
+				if ( array( 'fee' ) === $types && $order->get_id() === $orders[0]->get_id() ) {
+					$items[ $added_fee->get_id() ] = $added_fee;
+				}
+				return $items;
+			},
+			10,
+			3
+		);
 		$calls = array();
 		foreach ( array( 'order', 'order_item' ) as $resource_name ) {
 			$this->register_prime(
@@ -1283,8 +1296,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$item_ids = array_merge( ...array_map( static fn( \WC_Order $order ) => array_keys( $order->get_items( array( 'line_item', 'shipping', 'fee', 'coupon' ) ) ), $orders ) );
-		$this->assertCount( 8, $item_ids );
+		$item_ids   = array_merge( ...array_map( static fn( \WC_Order $order ) => array_keys( $order->get_items( array( 'line_item', 'shipping', 'fee', 'coupon' ) ) ), $orders ) );
+		$item_ids[] = $added_fee->get_id();
+		$this->assertCount( 9, $item_ids );
 		$this->assertCount( 1, $calls['order'] );
 		$this->assertEqualsCanonicalizing( array_map( static fn( \WC_Order $order ) => $order->get_id(), $orders ), $calls['order'][0] );
 		$this->assertCount( 1, $calls['order_item'] );
