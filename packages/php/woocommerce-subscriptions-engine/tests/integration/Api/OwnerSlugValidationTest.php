@@ -16,6 +16,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ValidationException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\HistoryEntryView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
@@ -160,6 +161,10 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 				$this->assertIsInt( $result );
 				$this->assertSame( 'x', Contracts::get_meta( $this->contract_id, 'note', true ) );
 				return;
+			case 'Contracts::add_history_entry':
+				$this->assertInstanceOf( HistoryEntryView::class, $result );
+				$this->assertSame( $this->contract_id, $result->get_contract_id() );
+				return;
 			case 'Contracts::list_for_customer':
 				$this->assertSame( array( $this->contract_id ), self::get_ids( $result ) );
 				return;
@@ -197,6 +202,7 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 			'Contracts::add_meta',
 			'Contracts::update_meta',
 			'Contracts::delete_meta',
+			'Contracts::add_history_entry',
 			'Contracts::list_for_customer',
 			'Plans::create',
 			'Plans::update',
@@ -286,6 +292,15 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 				return Contracts::update_meta( $this->contract_id, $slug, 'note', 'x', null, $this->lock );
 			case 'Contracts::delete_meta':
 				return Contracts::delete_meta( $this->contract_id, $slug, 'note', null, $this->lock );
+			case 'Contracts::add_history_entry':
+				return Contracts::add_history_entry(
+					$this->contract_id,
+					array(
+						'extension_slug' => $slug,
+						'type'           => 'note',
+					),
+					$this->lock
+				);
 			case 'Contracts::list_for_customer':
 				return Contracts::list_for_customer( self::CUSTOMER_ID, 20, 0, array( 'extension_slug' => $slug ) );
 			case 'Plans::create':
