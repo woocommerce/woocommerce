@@ -8,7 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderRefundAbilityTrait;
 use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
@@ -354,7 +354,7 @@ class OrderRefundCreate extends AbstractDomainAbility implements AbilityDefiniti
 
 			$formatted = self::format_refund_for_response( $result );
 			if ( is_wp_error( $formatted ) ) {
-				return ExtensibleAbilities::saved_write_error( $formatted, 'order_refund', $result->get_id(), array( 'refunded_payment' => $paid ) );
+				return AbilityExtensions::saved_write_error( $formatted, 'order_refund', $result->get_id(), array( 'refunded_payment' => $paid ) );
 			}
 
 			return array( 'refund' => $formatted );

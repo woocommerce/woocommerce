@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+use Automattic\WooCommerce\Internal\Abilities\AbilityExtensions;
 
 /**
  * Turns the extensible abilities feature on for one test, and puts the registries back after it.
@@ -20,12 +21,12 @@ trait ExtensibleAbilitiesTestTrait {
 	private ?array $extensible_abilities_before = null;
 
 	/**
-	 * Empty the registries of ExtensibleAbilities, so the test starts without resources and fields.
+	 * Empty the registries of AbilityExtensions, so the test starts without resources and fields.
 	 */
 	private function isolate_extensible_abilities(): void {
 		$registries = array();
 		foreach ( array( 'resources', 'fields', 'validators', 'syncs', 'primes', 'filters' ) as $name ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property = new \ReflectionProperty( AbilityExtensions::class, $name );
 			$property->setAccessible( true );
 			$registries[ $name ] = $property->getValue();
 			$property->setValue( null, array() );
@@ -59,7 +60,7 @@ trait ExtensibleAbilitiesTestTrait {
 	 */
 	public function restore_extensible_abilities(): void {
 		foreach ( $this->extensible_abilities_before ?? array() as $name => $value ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property = new \ReflectionProperty( AbilityExtensions::class, $name );
 			$property->setAccessible( true );
 			$property->setValue( null, $value );
 		}

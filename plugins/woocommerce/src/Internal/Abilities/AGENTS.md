@@ -2,6 +2,13 @@
 
 The Core abilities live in `Domain/`. `AbilitiesLoader` registers them with `Ability` or a subclass of `ActionableAbility`. Two PHPStan rules keep it that way.
 
+## Keep ExtensibleAbilities to its public API
+
+`Automattic\WooCommerce\Abilities\ExtensibleAbilities` is the API that extensions call. Keep the state and the logic in internal classes, and keep `ExtensibleAbilities` a thin layer over them.
+
+- Put a method that only Core calls in an internal class, not in `ExtensibleAbilities`. Do not tag a public method of `ExtensibleAbilities` with `@internal`.
+- Add a method to `ExtensibleAbilities` only when an extension needs it.
+
 ## Trust the input schema
 
 `WP_Ability::execute()` validates the input against the input schema before it calls the permission or execute callback. `Ability` also converts the input to the schema types. So a callback gets `true`, not `"true"`, and `5`, not `"5"`.
@@ -33,7 +40,7 @@ Do not use `destructive` for this. An ability with `destructive: false`, such as
 
 ## Use `ExtensibleAbilitiesTestTrait` in tests
 
-A test that needs the `extensible_abilities` feature on uses `Automattic\WooCommerce\Tests\Internal\Abilities\ExtensibleAbilitiesTestTrait`. Do not turn the feature on with `update_option()` alone, fire the init actions by hand, or reach into the registries of `ExtensibleAbilities` with reflection.
+A test that needs the `extensible_abilities` feature on uses `Automattic\WooCommerce\Tests\Internal\Abilities\ExtensibleAbilitiesTestTrait`. Do not turn the feature on with `update_option()` alone, fire the init actions by hand, or reach into the registries of `AbilityExtensions` with reflection.
 
 - Call `enable_extensible_abilities()` to turn the feature on with Core's resources registered. Pass a callback to register the fields, validators, syncs or filters of the test.
 - Call `isolate_extensible_abilities()` when the test needs empty registries while the feature is off.
