@@ -152,7 +152,7 @@ test.describe(
 			).toBeHidden();
 		} );
 
-		test( 'Core Template panel has no template actions', async ( {
+		test( 'Core Template panel edits the email template only', async ( {
 			page,
 		} ) => {
 			test.skip(
@@ -161,8 +161,6 @@ test.describe(
 			);
 			await accessAndTrackEmailPost( page );
 
-			// "Create new" would add a site template, and "Edit" would skip the
-			// email editor's warning that the template is shared by other emails.
 			const templatePanelToggle = page.getByRole( 'button', {
 				name: /^Template:/,
 			} );
@@ -170,20 +168,25 @@ test.describe(
 			const templatePanel = page
 				.locator( '.components-panel__body' )
 				.filter( { has: templatePanelToggle } );
-			await expect(
-				templatePanel.locator(
-					'.editor-template-actions-panel__preview'
-				)
-			).toBeVisible();
+			const editButton = templatePanel.getByRole( 'button', {
+				name: 'Edit',
+				exact: true,
+			} );
+			await expect( editButton ).toBeVisible();
+			// "Create new" would add a site template, not an email template.
 			await expect(
 				templatePanel.getByRole( 'button', { name: 'Create new' } )
 			).toBeHidden();
+
+			// Core's notice talks about posts and pages; the email editor rewords it.
+			await editButton.click();
 			await expect(
-				templatePanel.getByRole( 'button', {
-					name: 'Edit',
-					exact: true,
-				} )
-			).toBeHidden();
+				page
+					.locator( '.components-snackbar' )
+					.filter( { hasText: 'Editing template.' } )
+			).toContainText(
+				'Changes made here affect all emails that use the template.'
+			);
 		} );
 
 		test( 'Can preview in new tab', async ( { page } ) => {
