@@ -282,8 +282,12 @@ export function classicPlugin( config, state ) {
 								part
 							) }] = ${ target }[${ JSON.stringify( part ) }] || {})`;
 						}
+						// Webpack flags library exports `__esModule` when the entry has
+						// exports. Extensions built with webpack read `default` through
+						// that flag, as in `import CurrencyFactory from '@woocommerce/currency'`.
 						lines.push(
 							`import * as entryExports from ${ files.at( -1 ) };`,
+							`if ( Object.keys( entryExports ).length ) Object.defineProperty( entryExports, '__esModule', { value: true } );`,
 							`${ target }[${ JSON.stringify(
 								rest.at( -1 )
 							) }] = entryExports;`

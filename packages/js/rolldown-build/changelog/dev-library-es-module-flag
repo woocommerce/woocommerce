@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Flag library exports as ES modules like webpack, so default imports from extensions keep working; build tooling only.
+
