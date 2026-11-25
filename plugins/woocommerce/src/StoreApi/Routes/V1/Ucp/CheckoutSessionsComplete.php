@@ -249,9 +249,9 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			return;
 		}
 
-		// Every field is set, because the listener reads each one without checking it exists.
+		// Every field is set, because the listener reads each one without checking it exists. Unset ones are '(none)', as on the classic checkout.
 		$data = array_merge(
-			array_fill_keys( $attribution->get_field_names(), '' ),
+			array_fill_keys( $attribution->get_field_names(), '(none)' ),
 			array(
 				'source_type' => 'ai_shopper',
 				'utm_source'  => $this->agent_profile_host( (string) $request->get_header( 'UCP-Agent' ) ),
