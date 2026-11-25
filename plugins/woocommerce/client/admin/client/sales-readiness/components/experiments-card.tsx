@@ -19,8 +19,8 @@ export const EXPERIMENTS_PATH =
 
 /**
  * The AI tools Overview card for Features for AI assistants, laid out like a checklist row: the title
- * and description, with a button to turn them on beside them, then a line linking to the Features page,
- * where they're turned off.
+ * and description, with a button to turn them on beside them. Once they're on, the description says so
+ * and links to the Features page, where they're turned off.
  */
 export const ExperimentsCard = ( { card }: { card: ExperimentsCardView } ) => {
 	const [ enabled, setEnabled ] = useState( card.enabled );
@@ -64,22 +64,16 @@ export const ExperimentsCard = ( { card }: { card: ExperimentsCardView } ) => {
 							variant="body-md"
 							className="wc-sales-readiness__muted"
 						>
-							{ card.text }
+							{ enabled
+								? createInterpolateElement( card.on.text, {
+										link: featuresHref ? (
+											<Link href={ featuresHref } />
+										) : (
+											<span />
+										),
+									} )
+								: card.text }
 						</Text>
-						{ enabled && (
-							<Text
-								variant="body-md"
-								className="wc-sales-readiness__muted wc-sales-readiness-experiments__on"
-							>
-								{ createInterpolateElement( card.on.text, {
-									link: featuresHref ? (
-										<Link href={ featuresHref } />
-									) : (
-										<span />
-									),
-								} ) }
-							</Text>
-						) }
 					</div>
 					{ ! enabled && (
 						<Button

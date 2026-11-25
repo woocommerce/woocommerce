@@ -400,8 +400,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The Overview's Features for AI assistants card: a button to turn them on, or once they're on, a line
-	 * linking to the Features page to turn them off. Null for a user who can't manage WooCommerce.
+	 * The Overview's Features for AI assistants card: a button to turn them on, or once they're on, a
+	 * description that says so and links to the Features page to turn them off. Null for a user who can't
+	 * manage WooCommerce.
 	 *
 	 * @return array{title:string,badge:array{intent:string,text:string},text:string,enabled:bool,button:string,on:array{text:string,href:string},error:string}|null
 	 */
@@ -417,7 +418,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'button'  => __( 'Turn on', 'woocommerce' ),
 			'on'      => array(
 				/* translators: <link> and </link> wrap the path to the Features page. */
-				'text' => __( 'They’re on. You can turn them off in <link>Settings > Advanced > Features</link>.', 'woocommerce' ),
+				'text' => __( 'You’re trying newer standards for AI assistants, such as WebMCP and Markdown versions of your pages. You can turn them off in <link>Settings > Advanced > Features</link>.', 'woocommerce' ),
 				'href' => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ),
 			),
 			'error'   => __( 'We couldn’t turn on features for AI assistants. Try again.', 'woocommerce' ),

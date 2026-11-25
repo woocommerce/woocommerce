@@ -104,7 +104,7 @@ export interface ExperimentsCardView {
 	enabled: boolean;
 	/** Turns them on. */
 	button: string;
-	/** Once they're on: wraps the path to the Features page in <link></link>. */
+	/** The description once they're on: wraps the path to the Features page in <link></link>. */
 	on: { text: string; href: string };
 	error: string;
 }

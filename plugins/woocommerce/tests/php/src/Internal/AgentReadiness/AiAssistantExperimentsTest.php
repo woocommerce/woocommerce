@@ -140,7 +140,7 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Try newer standards for AI assistants before they settle, such as WebMCP and Markdown versions of your pages.', $card['text'] );
 		$this->assertFalse( $card['enabled'] );
 		$this->assertSame( 'Turn on', $card['button'] );
-		$this->assertSame( 'They’re on. You can turn them off in <link>Settings > Advanced > Features</link>.', $card['on']['text'] );
+		$this->assertSame( 'You’re trying newer standards for AI assistants, such as WebMCP and Markdown versions of your pages. You can turn them off in <link>Settings > Advanced > Features</link>.', $card['on']['text'] );
 		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ), $card['on']['href'] );
 		$this->assertSame( 'We couldn’t turn on features for AI assistants. Try again.', $card['error'] );
 	}
