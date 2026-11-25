@@ -12,13 +12,9 @@ defined( 'ABSPATH' ) || exit;
  * Runs the readiness scan in Action Scheduler instead of the page request,
  * and keeps the stored report fresh with one run a day.
  *
-<<<<<<< HEAD
- * Each run schedules the next one a day later, so nothing is queued until a
-=======
  * Each run schedules the next one for the coming night, on the store's clock
  * (next_daily_run()), unless the merchant turned daily checks off (DAILY_OPTION),
  * so nothing is queued until a
->>>>>>> ef7c853b19 (Agent readiness: a switch to stop the daily check (#71443))
  * merchant or the REST API asks for the first scan, and no request pays for a
  * scheduling check. The next run is scheduled before the scan, so a scan that
  * fails or times out does not end the chain. Cancelling the scheduled actions
@@ -51,8 +47,6 @@ class ScheduledScan implements RegisterHooksInterface {
 
 	public const GROUP = 'woocommerce-agent-readiness';
 
-<<<<<<< HEAD
-=======
 	/**
 	 * Option that holds whether the store is checked every day: 'no' when the merchant turned it off.
 	 */
@@ -70,7 +64,6 @@ class ScheduledScan implements RegisterHooksInterface {
 	 */
 	public const MIN_GAP = 6 * HOUR_IN_SECONDS;
 
->>>>>>> ef7c853b19 (Agent readiness: a switch to stop the daily check (#71443))
 	public const STALLED_AFTER = 10 * MINUTE_IN_SECONDS;
 
 	/**
@@ -193,10 +186,6 @@ class ScheduledScan implements RegisterHooksInterface {
 	 * @internal
 	 */
 	public function run(): void {
-<<<<<<< HEAD
-		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
-		as_schedule_single_action( time() + DAY_IN_SECONDS, self::DAILY_HOOK, array(), self::GROUP );
-=======
 		// The row in the database, not the value this request already read. The merchant may have saved since.
 		if ( self::DAILY_HOOK === current_action() && ! self::daily_enabled_saved() ) {
 			as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
@@ -204,7 +193,6 @@ class ScheduledScan implements RegisterHooksInterface {
 		}
 
 		$this->sync_daily_run();
->>>>>>> ef7c853b19 (Agent readiness: a switch to stop the daily check (#71443))
 
 		$this->remote_rules->refresh( array_keys( $this->agent_readiness->get_default_rules() ) );
 		as_unschedule_all_actions( self::NEXT_HOOK );
@@ -212,8 +200,6 @@ class ScheduledScan implements RegisterHooksInterface {
 	}
 
 	/**
-<<<<<<< HEAD
-=======
 	 * Whether the store is checked every day. On unless the merchant turned it off.
 	 *
 	 * @since 11.4.0
@@ -304,7 +290,6 @@ class ScheduledScan implements RegisterHooksInterface {
 	}
 
 	/**
->>>>>>> ef7c853b19 (Agent readiness: a switch to stop the daily check (#71443))
 	 * Test one batch of a scan, then queue the next, or store the report after the last.
 	 *
 	 * @internal
