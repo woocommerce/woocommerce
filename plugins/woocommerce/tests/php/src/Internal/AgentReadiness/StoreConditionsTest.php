@@ -137,6 +137,7 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $checks['guest_checkout']['ok'] );
 		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['guest_checkout']['level'] );
 		$this->assertFalse( StoreConditions::shows_required( $checks['guest_checkout'] ), 'AI assistants can still build carts without guest checkout' );
+		$this->assertSame( 'With guest checkout off, AI assistants can’t check out for shoppers. They can still find your products and build carts.', $checks['guest_checkout']['why'], 'Creating an account at checkout doesn\'t help: the store serves no checkout to assistants' );
 	}
 
 	/**
