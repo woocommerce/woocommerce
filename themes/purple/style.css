@@ -42,8 +42,10 @@ body {
 		background-color: currentColor;
 		block-size: 0.42rem;
 		inline-size: 0.75rem;
+		margin-block-start: -1px;
 		margin-inline-start: var(--wp--preset--spacing--10);
 		mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%275.25 8.25 13.5 7.5%27 fill=%27none%27%3E%3Cpolyline points=%276 9 12 15 18 9%27 stroke=%27%23000%27 stroke-width=%271.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E");
+		mask-repeat: no-repeat;
 	}
 }
 
