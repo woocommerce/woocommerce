@@ -111,8 +111,8 @@ export interface DeclaredExperiments {
 	} | null;
 	/** After the offer's button succeeds, until the next check finishes. */
 	turned_on: { text: string; button: string };
-	/** Once they're on. */
-	on: { text: string; link: ViewLink };
+	/** Once they're on: wraps the path to the Features page in <link></link>. */
+	on: { text: string; href: string };
 	error: string;
 }
 

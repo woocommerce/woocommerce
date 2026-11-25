@@ -1176,7 +1176,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	/**
 	 * The AI assistant experiments notice at the top of Extra details. While the feature is off, it offers
 	 * to turn it on when any item the experiments add is not found, linking to the Features page that
-	 * lists every experiment. Once on, a line links to Features.
+	 * lists every experiment. Once on, a line under the card's description links there to turn them off.
 	 *
 	 * @param array<int, array<string, mixed>> $items   Items from the report.
 	 * @param bool                             $enabled Whether the feature is on.
@@ -1203,11 +1203,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'button' => __( 'Check again', 'woocommerce' ),
 			),
 			'on'        => array(
-				'text' => __( 'AI assistant experiments are on', 'woocommerce' ),
-				'link' => array(
-					'href' => $features_url,
-					'text' => __( 'Turn off in Settings > Advanced > Features', 'woocommerce' ),
-				),
+				/* translators: <link> and </link> wrap the path to the Features page. */
+				'text' => __( 'AI assistant experiments are on. You can turn them off in <link>Settings > Advanced > Features</link>.', 'woocommerce' ),
+				'href' => $features_url,
 			),
 			'error'     => __( 'We couldn’t turn on AI assistant experiments. Try again.', 'woocommerce' ),
 		);

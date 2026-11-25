@@ -179,7 +179,7 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Once the feature is on, Extra details says so and links to Features instead of offering it.
+	 * @testdox Once the feature is on, Extra details says so under its description and links to Features instead of offering it.
 	 */
 	public function test_declared_links_to_features_when_on(): void {
 		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'yes' );
@@ -188,9 +188,8 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $declared['experiments']['enabled'] );
 		$this->assertNull( $declared['experiments']['offer'] );
-		$this->assertSame( 'AI assistant experiments are on', $declared['experiments']['on']['text'] );
-		$this->assertSame( 'Turn off in Settings > Advanced > Features', $declared['experiments']['on']['link']['text'] );
-		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ), $declared['experiments']['on']['link']['href'] );
+		$this->assertSame( 'AI assistant experiments are on. You can turn them off in <link>Settings > Advanced > Features</link>.', $declared['experiments']['on']['text'] );
+		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ), $declared['experiments']['on']['href'] );
 	}
 
 	/**

@@ -462,6 +462,12 @@ body:has(.wc-sales-readiness) {
 	cursor: pointer;
 }
 
+// Once AI assistant experiments are on, under the card's description.
+.wc-sales-readiness-experiments-on {
+	display: block;
+	margin-block-start: 8px;
+}
+
 // The AI assistant experiments notice, above the card's description.
 .wc-sales-readiness-experiments {
 	margin-block-end: 12px;

@@ -183,11 +183,8 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 			button: 'Check again',
 		},
 		on: {
-			text: 'AI assistant experiments are on',
-			link: {
-				href: 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features',
-				text: 'Turn off in Settings > Advanced > Features',
-			},
+			text: 'AI assistant experiments are on. You can turn them off in <link>Settings > Advanced > Features</link>.',
+			href: 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features',
 		},
 		error: 'We couldn’t turn on AI assistant experiments. Try again.',
 		...overrides,
@@ -349,7 +346,7 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 		).not.toBeInTheDocument();
 		expect(
 			screen.getByRole( 'link', {
-				name: 'Turn off in Settings > Advanced > Features',
+				name: 'Settings > Advanced > Features',
 			} )
 		).toBeInTheDocument();
 	} );
@@ -382,7 +379,7 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'shows a line linking to Features once the experiments are on', async () => {
+	it( 'shows a line under the description linking to Features once the experiments are on', async () => {
 		const { container } = render(
 			<DeclaredCard
 				declared={ declared(
@@ -393,14 +390,28 @@ describe( 'DeclaredCard AI assistant experiments', () => {
 		);
 		await open();
 
-		expect(
-			container.querySelector( '.wc-sales-readiness-experiments__on' )
-		).toHaveTextContent(
-			'AI assistant experiments are on · Turn off in Settings > Advanced > Features'
+		const line = container.querySelector(
+			'.wc-sales-readiness-experiments-on'
+		);
+		if ( ! line ) {
+			throw new Error( 'The experiments-on line is missing.' );
+		}
+		expect( line ).toHaveTextContent(
+			'AI assistant experiments are on. You can turn them off in Settings > Advanced > Features.'
 		);
 		expect(
+			screen
+				.getByText(
+					'These are other files and code that some AI assistants use to learn about your store.'
+				)
+				.compareDocumentPosition( line )
+		).toBe( window.Node.DOCUMENT_POSITION_FOLLOWING );
+		expect(
+			container.querySelector( '.wc-sales-readiness-experiments' )
+		).not.toBeInTheDocument();
+		expect(
 			screen.getByRole( 'link', {
-				name: 'Turn off in Settings > Advanced > Features',
+				name: 'Settings > Advanced > Features',
 			} )
 		).toHaveAttribute(
 			'href',

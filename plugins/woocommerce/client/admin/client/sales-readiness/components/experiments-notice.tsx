@@ -26,7 +26,7 @@ export type ExperimentsRun = {
 
 /**
  * The AI assistant experiments notice at the top of Extra details for AI assistants: the offer to
- * turn them on, then a prompt to run the check once they're on, then a line linking to Features.
+ * turn them on, then a prompt to run the check once they're on. ExperimentsOn takes over after that.
  */
 export const ExperimentsNotice = ( {
 	experiments,
@@ -66,21 +66,7 @@ export const ExperimentsNotice = ( {
 	}
 
 	if ( experiments.enabled ) {
-		const href = safeHref( experiments.on.link.href );
-		return (
-			<Text
-				variant="body-sm"
-				className="wc-sales-readiness__muted wc-sales-readiness-experiments__on"
-			>
-				{ experiments.on.text }
-				{ href && (
-					<>
-						{ ' · ' }
-						<Link href={ href }>{ experiments.on.link.text }</Link>
-					</>
-				) }
-			</Text>
-		);
+		return null;
 	}
 
 	if ( ! experiments.offer ) {
@@ -136,5 +122,27 @@ export const ExperimentsNotice = ( {
 				</Notice.Actions>
 			</Notice.Root>
 		</>
+	);
+};
+
+/**
+ * The line under the card's description once AI assistant experiments are on, linking to Features
+ * to turn them off.
+ */
+export const ExperimentsOn = ( {
+	experiments,
+}: {
+	experiments: DeclaredExperiments;
+} ) => {
+	const href = safeHref( experiments.on.href );
+	return (
+		<Text
+			variant="body-md"
+			className="wc-sales-readiness__muted wc-sales-readiness-experiments-on"
+		>
+			{ createInterpolateElement( experiments.on.text, {
+				link: href ? <Link href={ href } /> : <span />,
+			} ) }
+		</Text>
 	);
 };

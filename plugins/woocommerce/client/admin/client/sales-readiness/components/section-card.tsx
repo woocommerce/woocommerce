@@ -21,7 +21,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
  */
 import type { Declared, Section } from '../types';
 import { CheckRow, RowLink } from './check-row';
-import { ExperimentsNotice } from './experiments-notice';
+import { ExperimentsNotice, ExperimentsOn } from './experiments-notice';
 import { trackReadiness } from '../tracks';
 
 /**
@@ -269,6 +269,7 @@ export const DeclaredCard = ( {
 			setTurnedOn( false );
 		}
 	}, [ turnedOn, pending ] );
+	const showOn = !! experiments?.enabled && ! turnedOn;
 
 	return (
 		<CollapsibleCard.Root
@@ -293,7 +294,7 @@ export const DeclaredCard = ( {
 				</div>
 			</CollapsibleCard.Header>
 			<CollapsibleCard.Content>
-				{ experiments && (
+				{ experiments && ! showOn && (
 					<div className="wc-sales-readiness-experiments">
 						<ExperimentsNotice
 							experiments={ experiments }
@@ -314,6 +315,7 @@ export const DeclaredCard = ( {
 				>
 					{ declared.text }
 				</Text>
+				{ showOn && <ExperimentsOn experiments={ experiments } /> }
 				<div className="wc-sales-readiness-declared">
 					{ declared.groups.map( ( group ) => (
 						<div
