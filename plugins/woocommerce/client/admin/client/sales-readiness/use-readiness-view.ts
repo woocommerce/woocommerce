@@ -50,9 +50,14 @@ export function useReadinessView(
 	const mounted = useRef( true );
 	// The latest view read wins, so a poll that started before a save can't put the switch back.
 	const viewRead = useRef( 0 );
+	// The view read that has not returned. The next poll waits, so a slow read can't discard the one that says the check finished.
+	const viewFlight = useRef( 0 );
+	// True while the daily switch is saving, so a poll can't start with the switch's old position.
+	const pausePoll = useRef( false );
 
 	const load = useCallback( async () => {
 		const read = ++viewRead.current;
+		viewFlight.current = read;
 		try {
 			const loaded = await apiFetch< ReadinessView >( {
 				path: VIEW_PATH,
@@ -84,6 +89,10 @@ export function useReadinessView(
 					'woocommerce'
 				)
 			);
+		} finally {
+			if ( viewFlight.current === read ) {
+				viewFlight.current = 0;
+			}
 		}
 	}, [ surface ] );
 
@@ -113,6 +122,10 @@ export function useReadinessView(
 		const timer = setInterval( () => {
 			if ( Date.now() - ( pendingSince.current ?? 0 ) >= POLL_FOR_MS ) {
 				clearInterval( timer );
+				return;
+			}
+			// A poll still waiting, or a switch save, would make this read stale before it returned.
+			if ( viewFlight.current !== 0 || pausePoll.current ) {
 				return;
 			}
 			void load();
@@ -147,6 +160,7 @@ export function useReadinessView(
 		async ( enabled: boolean ) => {
 			// Drop a view read already in flight. It still has the switch's old position.
 			++viewRead.current;
+			pausePoll.current = true;
 			setView(
 				( current ) => current && { ...current, daily_checks: enabled }
 			);
@@ -181,6 +195,7 @@ export function useReadinessView(
 							)
 				);
 			} finally {
+				pausePoll.current = false;
 				if ( mounted.current ) {
 					setSavingDailyChecks( false );
 				}

@@ -251,6 +251,31 @@ describe( 'useReadinessView', () => {
 		expect( result.current.view?.daily_checks ).toBe( false );
 		expect( result.current.error ).toBeNull();
 	} );
+
+	it( 'waits for a view read to finish before polling again, and shows that result', async () => {
+		let finishPoll: ( value: unknown ) => void = () => {};
+		mockFetch.mockResolvedValueOnce( view( true ) ).mockImplementationOnce(
+			() =>
+				new Promise( ( resolve ) => {
+					finishPoll = resolve;
+				} )
+		);
+		const { result } = renderHook( () => useReadinessView( 'page' ) );
+		await act( async () => jest.advanceTimersByTime( 0 ) );
+		expect( result.current.view?.run.pending ).toBe( true );
+
+		await act( async () => jest.advanceTimersByTime( POLL_MS ) );
+		await act( async () => jest.advanceTimersByTime( POLL_MS * 3 ) );
+		// The first load, then one poll. Later ticks wait for that poll.
+		expect( viewCalls() ).toBe( 2 );
+		expect( result.current.view?.run.pending ).toBe( true );
+
+		await act( async () => {
+			finishPoll( view( false, 'Check again' ) );
+		} );
+		expect( result.current.view?.run.label ).toBe( 'Check again' );
+		expect( result.current.view?.run.pending ).toBe( false );
+	} );
 } );
 
 describe( 'RunStatus', () => {
