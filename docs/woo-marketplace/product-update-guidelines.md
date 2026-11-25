@@ -66,20 +66,24 @@ Click the **Add version** button, then:
 
 Once submitted, we will run the following tests on the uploaded file:
 
-- [End-to-end](https://qit.woo.com/docs/managed-tests/woo-e2e) (E2E)
 - [Activation](https://qit.woo.com/docs/managed-tests/activation)
 - [Security](https://qit.woo.com/docs/managed-tests/security)
+- [Malware](https://qit.woo.com/docs/managed-tests/malware)
 - [Woo API](https://qit.woo.com/docs/managed-tests/woo-api)
 - [PHPCompatibility](https://qit.woo.com/docs/managed-tests/phpcompatibility)
-- [Malware](https://qit.woo.com/docs/managed-tests/malware)
+- [Validation](https://qit.woo.com/docs/managed-tests/validation)
 
 All vendor admins will receive email notifications throughout the process, including:
 
 - **Confirmation:** Vendor admins will receive an email when a new version is submitted, confirming that it is in the queue. No action is needed.
-- **Rejected:** If a version fails any part of our automated testing, vendor admins will receive an email including the specific error. Developers should try to resolve the error and submit a new version when ready.
-- **Live:** If a version passes automated testing, it will be automatically deployed and made available to customers. No action is needed.
+- **Rejected:** If the security or malware scan fails, or the extension causes a PHP fatal error in any test, the version is not deployed. Vendor admins will receive an email with the test results. Fix the error and submit a new version when ready.
+- **Live:** If none of those tests fail, the version is deployed automatically and made available to customers. No action is needed.
 
-Activation, security, and malware test passes are required for a new product version to be deployed.
+On updates, other Woo API, PHPCompatibility, and Validation failures show as warnings in the results. They don't stop the version from going live, but we recommend fixing them before your next release.
+
+:::note
+For products listed from WordPress.org, the new version is already live on WordPress.org by the time QIT tests it, so test results can't stop the release. If a release fails, vendor admins will receive an email with the results.
+:::
 
 #### Formatting the changelog
 

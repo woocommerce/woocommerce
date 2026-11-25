@@ -28,7 +28,7 @@ The badge is built on four factors, and a product needs to do well on all of the
 - **Secure**: scanned for vulnerabilities and malicious code.
 - **Compatible**: installs and runs cleanly on current WordPress and WooCommerce.
 - **Maintained**: kept up to date with recent releases.
-- **Merchant-approved**: rated 4.0+ by real merchants.
+- **Merchant-approved**: rated 3.5+ by real merchants.
 
 The first three are measured by the Quality Insights Toolkit (QIT). Here's what feeds each one:
 
