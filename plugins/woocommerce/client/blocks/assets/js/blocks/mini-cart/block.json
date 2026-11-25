@@ -30,6 +30,10 @@
 			"type": "string",
 			"default": "cart"
 		},
+		"displayStyle": {
+			"type": "string",
+			"enum": [ "icon_only", "text_only", "icon_and_text" ]
+		},
 		"addToCartBehaviour": {
 			"type": "string",
 			"default": "none"

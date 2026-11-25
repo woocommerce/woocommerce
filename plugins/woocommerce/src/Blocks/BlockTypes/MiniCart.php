@@ -336,6 +336,7 @@ class MiniCart extends AbstractBlock {
 			$formatted_subtotal               = '';
 			$html                             = new \WP_HTML_Tag_Processor( wc_price( $cart->get_displayed_subtotal() ) );
 			$on_cart_click_behaviour          = isset( $attributes['onCartClickBehaviour'] ) ? $attributes['onCartClickBehaviour'] : 'open_drawer';
+			$display_style                    = $attributes['displayStyle'] ?? 'icon_only';
 
 			if ( $html->next_tag( 'bdi' ) ) {
 				while ( $html->next_token() ) {
@@ -422,6 +423,7 @@ class MiniCart extends AbstractBlock {
 					class="wc-block-mini-cart__button"
 					<?php echo $button_role; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				>
+					<?php if ( 'text_only' !== $display_style ) : ?>
 					<span class="wc-block-mini-cart__quantity-badge">
 						<?php
 							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -439,6 +441,10 @@ class MiniCart extends AbstractBlock {
 							</span>
 						<?php endif; ?>
 					</span>
+					<?php endif; ?>
+					<?php if ( 'icon_only' !== $display_style ) : ?>
+						<span class="wc-block-mini-cart__label"><?php esc_html_e( 'Cart', 'woocommerce' ); ?></span>
+					<?php endif; ?>
 					<?php if ( $cart_always_shows_price ) : ?>
 						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" translate="no" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
 						</span>
@@ -680,11 +686,13 @@ class MiniCart extends AbstractBlock {
 		$icon                = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 
 		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
+		$display_style            = $attributes['displayStyle'] ?? 'icon_only';
 
-		$button_html = '<span class="wc-block-mini-cart__quantity-badge">
+		$button_html = ( 'text_only' !== $display_style ? '<span class="wc-block-mini-cart__quantity-badge">
 			' . $icon . '
 			' . ( 'never' !== $product_count_visibility ? '<span class="wc-block-mini-cart__badge" style="' . esc_attr( $styles ) . '"></span>' : '' ) . '
-		</span>
+		</span>' : '' ) . '
+		' . ( 'icon_only' !== $display_style ? '<span class="wc-block-mini-cart__label">' . esc_html__( 'Cart', 'woocommerce' ) . '</span>' : '' ) . '
 		' . $this->get_cart_price_markup( $attributes );
 
 		if ( is_cart() || is_checkout() ) {

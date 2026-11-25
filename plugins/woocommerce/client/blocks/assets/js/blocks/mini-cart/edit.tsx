@@ -12,6 +12,7 @@ import {
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	RadioControl,
+	SelectControl,
 } from '@wordpress/components';
 import { getSetting } from '@woocommerce/settings';
 import { __, isRTL } from '@wordpress/i18n';
@@ -33,9 +34,11 @@ import { defaultColorItem } from './utils/defaults';
 import { migrateAttributesToColorPanel } from './utils/data';
 import './editor.scss';
 import { useThemeColors } from '../../shared/hooks/use-theme-colors';
+import { DisplayStyle } from './types';
 
 export interface Attributes {
 	miniCartIcon: 'cart' | 'bag' | 'bag-alt';
+	displayStyle?: DisplayStyle;
 	addToCartBehaviour: string;
 	onCartClickBehaviour: 'navigate_to_checkout' | 'open_drawer';
 	hasHiddenPrice: boolean;
@@ -65,8 +68,11 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		iconColor = defaultColorItem,
 		productCountColor = defaultColorItem,
 		miniCartIcon,
+		displayStyle = DisplayStyle.ICON_ONLY,
 		productCountVisibility,
 	} = migrateAttributesToColorPanel( attributes );
+	const showIcon = displayStyle !== DisplayStyle.TEXT_ONLY;
+	const showLabel = displayStyle !== DisplayStyle.ICON_ONLY;
 	const miniCartButtonRef = useRef< HTMLButtonElement >( null );
 
 	const miniCartColorAttributes = {
@@ -118,32 +124,65 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		<div { ...blockProps }>
 			<InspectorControls>
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
-					<ToggleGroupControl
+					<SelectControl
 						__nextHasNoMarginBottom
 						__next40pxDefaultSize
-						className="wc-block-editor-mini-cart__cart-icon-toggle"
-						isBlock
-						label={ __( 'Cart Icon', 'woocommerce' ) }
-						value={ miniCartIcon }
-						onChange={ ( value: 'cart' | 'bag' | 'bag-alt' ) => {
-							setAttributes( {
-								miniCartIcon: value,
-							} );
-						} }
-					>
-						<ToggleGroupControlOption
-							value={ 'cart' }
-							label={ <Icon size={ 32 } icon={ cartOutline } /> }
-						/>
-						<ToggleGroupControlOption
-							value={ 'bag' }
-							label={ <Icon size={ 32 } icon={ bag } /> }
-						/>
-						<ToggleGroupControlOption
-							value={ 'bag-alt' }
-							label={ <Icon size={ 32 } icon={ bagAlt } /> }
-						/>
-					</ToggleGroupControl>
+						label={ __( 'Icon options', 'woocommerce' ) }
+						value={ displayStyle }
+						onChange={ ( value: DisplayStyle ) =>
+							setAttributes( { displayStyle: value } )
+						}
+						help={ __(
+							'Choose if you want to show an icon, a text label, or both.',
+							'woocommerce'
+						) }
+						options={ [
+							{
+								value: DisplayStyle.ICON_ONLY,
+								label: __( 'Icon-only', 'woocommerce' ),
+							},
+							{
+								value: DisplayStyle.TEXT_ONLY,
+								label: __( 'Text-only', 'woocommerce' ),
+							},
+							{
+								value: DisplayStyle.ICON_AND_TEXT,
+								label: __( 'Icon and text', 'woocommerce' ),
+							},
+						] }
+					/>
+					{ showIcon && (
+						<ToggleGroupControl
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
+							className="wc-block-editor-mini-cart__cart-icon-toggle"
+							isBlock
+							label={ __( 'Cart Icon', 'woocommerce' ) }
+							value={ miniCartIcon }
+							onChange={ (
+								value: 'cart' | 'bag' | 'bag-alt'
+							) => {
+								setAttributes( {
+									miniCartIcon: value,
+								} );
+							} }
+						>
+							<ToggleGroupControlOption
+								value={ 'cart' }
+								label={
+									<Icon size={ 32 } icon={ cartOutline } />
+								}
+							/>
+							<ToggleGroupControlOption
+								value={ 'bag' }
+								label={ <Icon size={ 32 } icon={ bag } /> }
+							/>
+							<ToggleGroupControlOption
+								value={ 'bag-alt' }
+								label={ <Icon size={ 32 } icon={ bagAlt } /> }
+							/>
+						</ToggleGroupControl>
+					) }
 					<BaseControl
 						__nextHasNoMarginBottom
 						id="wc-block-mini-cart__display-toggle"
@@ -165,45 +204,50 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							}
 						/>
 					</BaseControl>
-					<BaseControl
-						__nextHasNoMarginBottom
-						id="wc-block-mini-cart__product-count-basecontrol"
-						label={ __( 'Show Cart Item Count:', 'woocommerce' ) }
-					>
-						<RadioControl
-							className="wc-block-mini-cart__product-count-radiocontrol"
-							selected={ productCountVisibility }
-							options={ [
-								{
-									label: __(
-										'Always (even if empty)',
-										'woocommerce'
-									),
-									value: 'always',
-								},
-								{
-									label: __(
-										'Only if cart has items',
-										'woocommerce'
-									),
-									value: 'greater_than_zero',
-								},
-								{
-									label: __( 'Never', 'woocommerce' ),
-									value: 'never',
-								},
-							] }
-							help={ __(
-								'The editor does not display the real count value, but a placeholder to indicate how it will look on the front-end.',
+					{ showIcon && (
+						<BaseControl
+							__nextHasNoMarginBottom
+							id="wc-block-mini-cart__product-count-basecontrol"
+							label={ __(
+								'Show Cart Item Count:',
 								'woocommerce'
 							) }
-							onChange={ ( value ) =>
-								setAttributes( {
-									productCountVisibility: value,
-								} )
-							}
-						/>
-					</BaseControl>
+						>
+							<RadioControl
+								className="wc-block-mini-cart__product-count-radiocontrol"
+								selected={ productCountVisibility }
+								options={ [
+									{
+										label: __(
+											'Always (even if empty)',
+											'woocommerce'
+										),
+										value: 'always',
+									},
+									{
+										label: __(
+											'Only if cart has items',
+											'woocommerce'
+										),
+										value: 'greater_than_zero',
+									},
+									{
+										label: __( 'Never', 'woocommerce' ),
+										value: 'never',
+									},
+								] }
+								help={ __(
+									'The editor does not display the real count value, but a placeholder to indicate how it will look on the front-end.',
+									'woocommerce'
+								) }
+								onChange={ ( value ) =>
+									setAttributes( {
+										productCountVisibility: value,
+									} )
+								}
+							/>
+						</BaseControl>
+					) }
 					{ isSiteEditor && (
 						<ToggleGroupControl
 							__nextHasNoMarginBottom
@@ -321,13 +365,20 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 					ref={ miniCartButtonRef }
 					className="wc-block-mini-cart__button"
 				>
-					<QuantityBadge
-						count={ productCount }
-						iconColor={ iconColor }
-						productCountColor={ productCountColor }
-						icon={ miniCartIcon }
-						productCountVisibility={ productCountVisibility }
-					/>
+					{ showIcon && (
+						<QuantityBadge
+							count={ productCount }
+							iconColor={ iconColor }
+							productCountColor={ productCountColor }
+							icon={ miniCartIcon }
+							productCountVisibility={ productCountVisibility }
+						/>
+					) }
+					{ showLabel && (
+						<span className="wc-block-mini-cart__label">
+							{ __( 'Cart', 'woocommerce' ) }
+						</span>
+					) }
 					{ ! hasHiddenPrice && (
 						<span
 							className="wc-block-mini-cart__amount"
