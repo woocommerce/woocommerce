@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderRefundAbilityTrait;
+use Automattic\WooCommerce\Internal\Orders\RefundCreator;
 use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -19,11 +20,12 @@ use Automattic\WooCommerce\Utilities\NumberUtil;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Refunds an order with wc_create_refund(), as the admin screen and the REST API do, after checking that the
- * call does not repeat a recent refund. The `order_refund` fields and validators run on the refund that
- * wc_create_refund() built, before its first save, so a refusal saves nothing and does not call the payment
- * gateway. The `order_refund` syncs, and the `order` syncs when wc_create_refund() saved the parent order, run
- * after it returns, outside the rollback, because a rollback cannot undo a gateway refund.
+ * Refunds an order with the steps of wc_create_refund(), as the admin screen and the REST API do, after checking
+ * that the call does not repeat a recent refund. The refund is built and its taxes and totals staged in memory,
+ * like the order abilities stage an order. The `order_refund` fields and validators run on it before its first
+ * save, so a refusal saves nothing and does not call the payment gateway. The `order_refund` syncs, and the
+ * `order` syncs when the refund saved the parent order, run after the refund is complete, outside the rollback,
+ * because a rollback cannot undo a gateway refund.
  */
 class OrderRefundCreate extends ActionableAbility {
 
@@ -62,7 +64,7 @@ class OrderRefundCreate extends ActionableAbility {
 	private const LOCK_OPTION_PREFIX = 'woocommerce_ability_order_refund_lock_';
 
 	/**
-	 * Key of the wc_create_refund() argument that carries a value unique to the call, which woocommerce_create_refund
+	 * Key of the refund argument that carries a value unique to the call, which woocommerce_create_refund
 	 * passes on with the refund, so a refund that a callback makes during the call is not taken for the call's own.
 	 */
 	public const CALL_ARG = 'woocommerce_ability_call';
@@ -148,8 +150,7 @@ class OrderRefundCreate extends ActionableAbility {
 	}
 
 	/**
-	 * Nothing changes before the refund, because wc_create_refund() builds it. execute_change() writes the
-	 * fields to that refund.
+	 * Nothing changes before the refund, because execute_change() builds it and writes the fields to it.
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
@@ -173,8 +174,8 @@ class OrderRefundCreate extends ActionableAbility {
 
 	/**
 	 * Refund the order while holding its lock, so a second call cannot pass the duplicate and amount checks
-	 * before the first refund is saved. It replaces the steps of ActionableAbility, because wc_create_refund()
-	 * builds the refund, saves it and calls the payment gateway in one call.
+	 * before the first refund is saved. It replaces the steps of ActionableAbility, because the refund is built,
+	 * saved and sent to the payment gateway by the steps of wc_create_refund().
 	 *
 	 * @internal
 	 *
@@ -311,7 +312,7 @@ class OrderRefundCreate extends ActionableAbility {
 		 */
 		$candidate = null;
 		/**
-		 * Whether wc_create_refund() saved the parent order. Set in $watch_parent, which PHPStan does not follow.
+		 * Whether the refund steps saved the parent order. Set in $watch_parent, which PHPStan does not follow.
 		 *
 		 * @var bool $parent_saved
 		 */
@@ -319,22 +320,6 @@ class OrderRefundCreate extends ActionableAbility {
 		$marker       = wp_generate_uuid4();
 		$reason       = isset( $input['reason'] ) ? sanitize_textarea_field( $input['reason'] ) : null;
 
-		// Runs on the unsaved refund, so a lost lock or a refusal stops it before any save, and the fingerprints are on its first save.
-		$prepare = function ( $refund, $args ) use ( $order_id, $lock, $marker, $amount, $fingerprint, $resolved_fingerprint, $refund_payment, $enabled, $updates, &$sent, &$refusal ): void {
-			if ( ! $refund instanceof \WC_Order_Refund || ! is_array( $args ) || ( $args[ self::CALL_ARG ] ?? null ) !== $marker ) {
-				return;
-			}
-			$holds = self::holds_lock( $order_id, $lock );
-			if ( true !== $holds ) {
-				$refusal = null === $holds ? self::lock_failed_error() : self::lock_lost_error();
-				throw new \Exception( 'The refund lock of the order could not be confirmed.' );
-			}
-			self::add_fingerprints( $refund, $fingerprint, $resolved_fingerprint, $refund_payment );
-			$refusal = $enabled ? $this->write_fields( $refund, $updates, $amount, $sent ) : null;
-			if ( null !== $refusal ) {
-				throw new \Exception( 'An extension refused the refund.' );
-			}
-		};
 		// The last step before the gateway. A refund that reaches it with another call's marker was not the call's own.
 		$tag = static function ( $refund, $args ) use ( $order_id, $marker, &$candidate, &$tagged ): void {
 			if ( ! $refund instanceof \WC_Order_Refund || $refund->get_parent_id( 'edit' ) !== $order_id ) {
@@ -348,7 +333,7 @@ class OrderRefundCreate extends ActionableAbility {
 			}
 			$tagged = $tagged ?? $refund;
 		};
-		// wc_create_refund() sets the paid flag only after the gateway refunded, so a save that carries it means the money moved.
+		// The refund steps set the paid flag only after the gateway refunded, so a save that carries it means the money moved.
 		$watch_paid   = static function ( $refund ) use ( $order_id, &$candidate, &$tagged, &$paid ): void {
 			if ( null === $candidate && $refund instanceof \WC_Order_Refund && 0 === $refund->get_id() && $refund->get_parent_id( 'edit' ) === $order_id ) {
 				$candidate = $refund;
@@ -362,7 +347,6 @@ class OrderRefundCreate extends ActionableAbility {
 			$parent_saved = $parent_saved || ( $saved_order instanceof \WC_Order && $saved_order->get_id() === $order_id );
 		};
 
-		add_action( 'woocommerce_create_refund_before_totals', $prepare, PHP_INT_MIN, 2 );
 		add_action( 'woocommerce_create_refund', $tag, PHP_INT_MIN, 2 );
 		add_action( 'woocommerce_before_order_refund_object_save', $watch_paid, PHP_INT_MIN );
 		add_action( 'woocommerce_after_order_refund_object_save', $watch_save, PHP_INT_MIN );
@@ -373,20 +357,37 @@ class OrderRefundCreate extends ActionableAbility {
 		 * @var bool $crashed
 		 */
 		$crashed = false;
+		$creator = new RefundCreator();
 		try {
-			$result = wc_create_refund(
-				array(
-					'amount'         => $amount,
-					'reason'         => $reason,
-					'order_id'       => $order_id,
-					'line_items'     => $prepared['line_items'],
-					'refund_payment' => $refund_payment,
-					'restock_items'  => $input['restock_items'] ?? false,
-					self::CALL_ARG   => $marker,
-				)
-			);
-		} catch ( \Error $e ) { // @phpstan-ignore catch.neverThrown (Callbacks that wc_create_refund() runs can throw an Error, which its @throws does not list.)
-			// wc_create_refund() catches only exceptions, so delete the half-made refund as it would. It saves the refund before woocommerce_create_refund, so the refund can exist untagged.
+			try {
+				$refund  = $creator->build(
+					array(
+						'amount'         => $amount,
+						'reason'         => $reason,
+						'order_id'       => $order_id,
+						'line_items'     => $prepared['line_items'],
+						'refund_payment' => $refund_payment,
+						'restock_items'  => $input['restock_items'] ?? false,
+						self::CALL_ARG   => $marker,
+					)
+				);
+				$refusal = $this->stage_refund( $creator, $refund, $order_id, $lock, $amount, $fingerprint, $resolved_fingerprint, $refund_payment, $updates, $sent );
+				if ( null === $refusal ) {
+					$refund->save();
+					$result = $creator->complete();
+				} else {
+					$result = $refusal;
+				}
+			} catch ( \Exception $e ) {
+				// The same cleanup as wc_create_refund().
+				$made = $creator->get_refund();
+				if ( null !== $made ) {
+					$made->delete( true );
+				}
+				$result = new \WP_Error( 'error', $e->getMessage() );
+			}
+		} catch ( \Error $e ) {
+			// The refund steps catch only exceptions, so delete the half-made refund as they would. The refund is saved before woocommerce_create_refund, so it can exist untagged.
 			// A paid refund stays as the record of the money, so a retry finds it, and an untagged one was paid by another call.
 			$crashed = true;
 			$result  = new \WP_Error( 'error', $e->getMessage() );
@@ -395,7 +396,6 @@ class OrderRefundCreate extends ActionableAbility {
 				$made->delete( true );
 			}
 		} finally {
-			remove_action( 'woocommerce_create_refund_before_totals', $prepare, PHP_INT_MIN );
 			remove_action( 'woocommerce_create_refund', $tag, PHP_INT_MIN );
 			remove_action( 'woocommerce_before_order_refund_object_save', $watch_paid, PHP_INT_MIN );
 			remove_action( 'woocommerce_after_order_refund_object_save', $watch_save, PHP_INT_MIN );
@@ -403,7 +403,7 @@ class OrderRefundCreate extends ActionableAbility {
 		}
 
 		if ( $result instanceof \WC_Order_Refund ) {
-			// An order save stores its exception instead of throwing, so wc_create_refund() goes on after a failed save.
+			// An order save stores its exception instead of throwing, so the refund steps go on after a failed save.
 			$save_error = $result->get_last_save_error();
 			if ( null !== $save_error ) {
 				/* translators: 1: refund ID, 2: error message. */
@@ -424,7 +424,7 @@ class OrderRefundCreate extends ActionableAbility {
 				);
 			}
 
-			// Callbacks of wc_create_refund() can change the refund through another instance, so the syncs and the response read it again.
+			// Refund callbacks can change the refund through another instance, so the syncs and the response read it again.
 			$refund = wc_get_order( $result->get_id() );
 			$refund = $refund instanceof \WC_Order_Refund ? $refund : $result;
 			foreach ( $sent as $fields ) {
@@ -469,8 +469,39 @@ class OrderRefundCreate extends ActionableAbility {
 	}
 
 	/**
-	 * Write the extension fields to the refund that wc_create_refund() built, before its first save, and run the
-	 * `order_refund` validators on it. A field that changes the amount the call checked is refused, because the
+	 * Add the taxes and totals to the built refund in memory, then check the order lock, add the fingerprints and
+	 * write the extension fields and run the validators. Nothing is saved, so a refusal leaves no refund.
+	 *
+	 * @param RefundCreator    $creator              Creator that built the refund.
+	 * @param \WC_Order_Refund $refund               Built refund.
+	 * @param int              $order_id             Order ID.
+	 * @param string           $lock                 Lock value of the call.
+	 * @param float            $amount               Amount that the call checked.
+	 * @param string           $fingerprint          Fingerprint of the call input.
+	 * @param string           $resolved_fingerprint Fingerprint of the amount and lines the call resolved to.
+	 * @param bool             $refund_payment       Whether the call asked the gateway to refund the payment.
+	 * @param array            $updates              Extension field values from prepare_fields().
+	 * @param array            $sent                 Collects the sent field values, for the syncs.
+	 * @return \WP_Error|null The refusal, or null when the refund can be saved.
+	 */
+	private function stage_refund( RefundCreator $creator, \WC_Order_Refund $refund, int $order_id, string $lock, float $amount, string $fingerprint, string $resolved_fingerprint, bool $refund_payment, array $updates, array &$sent ): ?\WP_Error {
+		try {
+			$creator->stage();
+		} catch ( \WC_Data_Exception $e ) {
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array_merge( array( 'status' => 500 ), (array) $e->getErrorData() ) );
+		}
+		$holds = self::holds_lock( $order_id, $lock );
+		if ( true !== $holds ) {
+			return null === $holds ? self::lock_failed_error() : self::lock_lost_error();
+		}
+		self::add_fingerprints( $refund, $fingerprint, $resolved_fingerprint, $refund_payment );
+
+		return ExtensibleAbilities::is_enabled() ? $this->write_fields( $refund, $updates, $amount, $sent ) : null;
+	}
+
+	/**
+	 * Write the extension fields to the built refund, before its first save, and run the `order_refund` validators
+	 * on it, with its taxes and totals. A field that changes the amount the call checked is refused, because the
 	 * gateway and the order status would then use different amounts.
 	 *
 	 * @param \WC_Order_Refund                                               $refund  Refund.
@@ -535,7 +566,7 @@ class OrderRefundCreate extends ActionableAbility {
 	 * that it cannot tell for its own was saved during the call. That refund is left as it is.
 	 *
 	 * @param int   $refund_id ID of the paid refund.
-	 * @param mixed $result    Result of wc_create_refund().
+	 * @param mixed $result    Result of the refund steps.
 	 * @return \WP_Error
 	 */
 	private static function unconfirmed_refund_error( int $refund_id, $result ): \WP_Error {
@@ -558,7 +589,7 @@ class OrderRefundCreate extends ActionableAbility {
 	 * The error of a failed call whose refund is still on the order, because an extension stopped its deletion.
 	 *
 	 * @param int   $refund_id Refund ID.
-	 * @param mixed $result    Result of wc_create_refund().
+	 * @param mixed $result    Result of the refund steps.
 	 * @param bool  $paid      Whether the gateway refunded the payment.
 	 * @return \WP_Error
 	 */
@@ -582,10 +613,10 @@ class OrderRefundCreate extends ActionableAbility {
 	}
 
 	/**
-	 * The error of a wc_create_refund() call that failed. It deletes the refund on any failure, also after the
+	 * The error of a refund that failed. It deletes the refund on any failure, also after the
 	 * gateway or a refund callback moved the money, so the error says when a retry could refund twice.
 	 *
-	 * @param mixed          $result        Result of wc_create_refund().
+	 * @param mixed          $result        Result of the refund steps.
 	 * @param int            $order_id       Order ID.
 	 * @param \WP_Error|null $refusal        Error of the lock check or the extensions that declined the refund, if they did.
 	 * @param bool           $saved          Whether the refund was saved after woocommerce_create_refund, or a callback crashed.

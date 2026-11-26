@@ -33380,7 +33380,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product_id\(\)\.$#'
 			identifier: method.notFound
-			count: 2
+			count: 1
 			path: includes/wc-order-functions.php
 
 		-

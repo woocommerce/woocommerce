@@ -54,9 +54,9 @@ defined( 'ABSPATH' ) || exit;
  * table engine without transactions. The other steps must not save, send email
  * or make HTTP requests.
  *
- * An ability whose object is built and saved by one WooCommerce function, such
- * as wc_create_refund(), overrides execute_change() and calls prepare_fields(),
- * apply_fields(), validate() and sync() itself.
+ * An ability whose object is built and saved by its own steps, such as a refund,
+ * overrides execute_change() and calls prepare_fields(), apply_fields(),
+ * validate() and sync() itself.
  *
  * The API is experimental while the `extensible_abilities` feature exists.
  *
