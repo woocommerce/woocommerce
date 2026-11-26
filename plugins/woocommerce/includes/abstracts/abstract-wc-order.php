@@ -386,16 +386,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 
 			$message_id = $this->get_id() ? $this->get_id() : __( '(no ID)', 'woocommerce' );
-			$this->handle_exception(
-				$e,
-				wp_kses_post(
-					sprintf(
-						/* translators: 1: Order ID or "(no ID)" if not known. */
-						__( 'Error saving order ID %1$s.', 'woocommerce' ),
-						$message_id
+			try {
+				$this->handle_exception(
+					$e,
+					wp_kses_post(
+						sprintf(
+							/* translators: 1: Order ID or "(no ID)" if not known. */
+							__( 'Error saving order ID %1$s.', 'woocommerce' ),
+							$message_id
+						)
 					)
-				)
-			);
+				);
+			} catch ( Throwable $report_error ) {
+				$this->requeue_deferred_actions( $deferred_actions, true );
+				throw $report_error;
+			}
 		} catch ( Throwable $e ) {
 			$this->requeue_deferred_actions( $deferred_actions, true );
 			throw $e;

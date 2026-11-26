@@ -1488,15 +1488,16 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Hooks around the order write whose listener throws an Error.
+	 * Hooks around the order write whose listener throws an Error, and whether the write fails first.
 	 *
-	 * @return array<string, array{0: string}>
+	 * @return array<string, array{0: string, 1?: bool}>
 	 */
 	public function provide_errors_around_the_write(): array {
 		return array(
-			'before the write'                 => array( 'woocommerce_before_order_object_save' ),
-			'after the write'                  => array( 'woocommerce_after_order_object_save' ),
-			'the payment note after the write' => array( 'woocommerce_order_note_added' ),
+			'before the write'                     => array( 'woocommerce_before_order_object_save' ),
+			'after the write'                      => array( 'woocommerce_after_order_object_save' ),
+			'the payment note after the write'     => array( 'woocommerce_order_note_added' ),
+			'the error note after a failing write' => array( 'woocommerce_order_note_added', true ),
 		);
 	}
 
@@ -1504,9 +1505,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * @testdox An Error around the write keeps the payment that a staged hook listener staged, for the next save.
 	 * @dataProvider provide_errors_around_the_write
 	 *
-	 * @param string $hook Hook whose listener throws an Error once.
+	 * @param string $hook       Hook whose listener throws an Error once.
+	 * @param bool   $fail_write True to make the first write fail with an Exception.
 	 */
-	public function test_error_around_the_write_keeps_the_work_queued_by_a_staged_hook_listener( string $hook ): void {
+	public function test_error_around_the_write_keeps_the_work_queued_by_a_staged_hook_listener( string $hook, bool $fail_write = false ): void {
 		$order = new WC_Order();
 		$order->save();
 		$fired = did_action( 'woocommerce_payment_complete' );
@@ -1519,8 +1521,15 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			remove_action( $hook, $throw );
 			throw new Error( 'Listener failed.' );
 		};
+		$fail  = static function () use ( &$fail ) {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+			throw new Exception( 'Disk full.' );
+		};
 		add_action( 'woocommerce_order_edit_status', $pay );
 		add_action( $hook, $throw );
+		if ( $fail_write ) {
+			add_action( 'woocommerce_before_order_object_save', $fail );
+		}
 
 		$order->stage_status( OrderStatus::ON_HOLD, '', true );
 		$caught = null;
@@ -1531,6 +1540,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		} finally {
 			remove_action( 'woocommerce_order_edit_status', $pay );
 			remove_action( $hook, $throw );
+			remove_action( 'woocommerce_before_order_object_save', $fail );
 		}
 		$this->assertInstanceOf( Error::class, $caught, 'save() should pass on the Error.' );
 		$order->save();
