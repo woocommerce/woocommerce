@@ -21,7 +21,6 @@ import type { SelectedAttributes } from '@woocommerce/stores/woocommerce';
 type ProductContext = {
 	productId: number;
 	variationId?: number | null;
-	skuFallback?: string;
 };
 
 /**
@@ -81,10 +80,6 @@ export type ProductsStoreState = {
 	 *   state.productInContext.sku
 	 */
 	productInContext: ProductResponseItem | null;
-	/**
-	 * The current SKU, or the Product SKU block's fallback when empty.
-	 */
-	productSkuInContext: string;
 };
 
 /**
@@ -214,17 +209,6 @@ const { state: productsState } = store< ProductsStore >(
 				return (
 					productsState.productVariationInContext ||
 					productsState.mainProductInContext
-				);
-			},
-
-			get productSkuInContext(): string {
-				const context = getContext< ProductContext >(
-					'woocommerce/products'
-				);
-				return (
-					productsState.productInContext?.sku ||
-					context?.skuFallback ||
-					''
 				);
 			},
 		},

@@ -165,15 +165,6 @@ class ProductsStore {
 						? $state['mainProductInContext']()
 						: $state['mainProductInContext'];
 				},
-				'productSkuInContext'       => function () {
-					$state   = wp_interactivity_state( self::$store_namespace );
-					$product = $state['productInContext'] instanceof \Closure
-						? $state['productInContext']()
-						: $state['productInContext'];
-					$sku     = $product['sku'] ?? '';
-
-					return is_string( $sku ) && '' !== $sku ? $sku : ( wp_interactivity_get_context()['skuFallback'] ?? '' );
-				},
 			)
 		);
 	}

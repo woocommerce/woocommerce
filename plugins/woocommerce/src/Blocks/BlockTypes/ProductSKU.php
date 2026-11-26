@@ -72,13 +72,20 @@ class ProductSKU extends AbstractBlock {
 			return '';
 		}
 
-		$hide_when_unavailable  = $is_interactive && ( $attributes['hideWhenUnavailable'] ?? true );
-		$display_sku            = '' === $product_sku && ! $hide_when_unavailable ? __( 'N/A', 'woocommerce' ) : $product_sku;
+		$hide_when_unavailable  = '' === $product_sku && ( $attributes['hideWhenUnavailable'] ?? true );
 		$interactive_attributes = '';
+		$sku_fallback           = '';
 
 		if ( $is_interactive ) {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
-			$interactive_attributes = 'data-wp-interactive="woocommerce/products" data-wp-text="state.productSkuInContext" ' . wp_interactivity_data_wp_context( array( 'skuFallback' => $display_sku ) );
+			$interactive_attributes = 'data-wp-interactive="woocommerce/products" data-wp-text="state.productInContext.sku"';
+
+			if ( ! $hide_when_unavailable ) {
+				$sku_fallback = sprintf(
+					'<span class="wc-block-components-product-sku__fallback">%s</span>',
+					'' === $product_sku ? esc_html__( 'N/A', 'woocommerce' ) : esc_html( $product_sku )
+				);
+			}
 		}
 
 		$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
@@ -99,14 +106,15 @@ class ProductSKU extends AbstractBlock {
 		return sprintf(
 			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta wp-block-post-terms %1$s" style="%2$s">
 				%3$s
-				<span class="sku" %4$s>%5$s</span>
-				%6$s
+				<span class="sku" %4$s>%5$s</span>%6$s
+				%7$s
 			</div>',
 			esc_attr( $styles_and_classes['classes'] ),
 			esc_attr( $styles_and_classes['styles'] ?? '' ),
 			$prefix,
 			$interactive_attributes,
-			esc_html( $display_sku ),
+			esc_html( $product_sku ),
+			$sku_fallback,
 			$suffix
 		);
 	}

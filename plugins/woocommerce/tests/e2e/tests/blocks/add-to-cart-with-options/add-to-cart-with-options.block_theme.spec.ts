@@ -81,6 +81,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const productUrl = `/?p=${ id }`;
 		const skuBlock = page.locator( '.wp-block-woocommerce-product-sku' );
 		const sku = skuBlock.locator( '.sku' );
+		const unavailableSku = skuBlock.getByText( 'N/A', { exact: true } );
 		const hideSku = page.getByRole( 'checkbox', {
 			name: 'Hide SKU when unavailable',
 		} );
@@ -115,11 +116,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await page.goto( productUrl );
 			const finish = page.getByLabel( 'Finish', { exact: true } );
-			await expect( sku ).toHaveText( 'N/A' );
+			await expect( unavailableSku ).toBeVisible();
 			await finish.selectOption( { label: 'Matte' } );
 			await expect( sku ).toHaveText( variationSku );
+			await expect( unavailableSku ).toBeHidden();
 			await finish.selectOption( { label: 'Glossy' } );
-			await expect( sku ).toHaveText( 'N/A' );
+			await expect( unavailableSku ).toBeVisible();
 		} );
 
 		await pageObject.updateSingleProductTemplate();
@@ -150,6 +152,25 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( sku ).toHaveText( variationSku );
 		await matte.click();
 		await expect( skuBlock ).toBeHidden();
+
+		await test.step( 'shows N/A with the block variation selector when hiding is turned off', async () => {
+			await pageObject.updateSingleProductTemplate();
+			await editor.selectBlocks(
+				await editor.getBlockByName( 'woocommerce/product-sku' )
+			);
+			await hideSku.uncheck();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+
+			await page.goto( productUrl );
+			await expect( unavailableSku ).toBeVisible();
+			await matte.click();
+			await expect( sku ).toHaveText( variationSku );
+			await expect( unavailableSku ).toBeHidden();
+			await glossy.click();
+			await expect( unavailableSku ).toBeVisible();
+		} );
 	} );
 
 	test( 'allows adding 3rd-party product types to cart when using PHP templates', async ( {

@@ -6,6 +6,12 @@
 		display: none;
 	}
 
+	&__fallback {
+		.sku:not(:empty) + & {
+			display: none;
+		}
+	}
+
 	&__prefix {
 		color: var(--wp--preset--color--contrast-2);
 	}
