@@ -5231,24 +5231,23 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return a fixed 500 error when a pre-payment listener throws during staging.
+	 * @testdox Should log an exception of the change step and return a fixed 500 error without its text.
 	 */
-	public function test_a_failed_staged_payment_returns_a_fixed_error(): void {
-		$this->register_order_status_ability( TestOrderStageAbility::class );
-		$order = \WC_Helper_Order::create_order();
-		$this->add_test_action(
-			'woocommerce_pre_payment_complete',
-			static function () {
-				throw new \RuntimeException( 'Payment listener failed.' );
-			}
+	public function test_a_change_that_throws_returns_a_fixed_error(): void {
+		$this->register_order_status_ability( TestThrowingOrderAbility::class );
+		$order  = \WC_Helper_Order::create_order();
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->expects( $this->once() )->method( 'error' )->with(
+			'Ability "test-ext/order-status" failed during change: Ledger table is locked.',
+			array( 'source' => 'woocommerce-abilities' )
 		);
+		add_filter( 'woocommerce_logging_class', static fn() => $logger );
 
 		$response = $this->run_ability_response( 'test-ext/order-status', array( 'id' => $order->get_id() ) );
 
 		$this->assertSame( 500, $response->get_status() );
 		$this->assertSame( 'woocommerce_ability_save_failed', $response->get_data()['code'] );
-		$this->assertStringNotContainsString( 'Payment listener failed.', wp_json_encode( $response->get_data() ) );
-		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
+		$this->assertStringNotContainsString( 'Ledger table is locked.', wp_json_encode( $response->get_data() ) );
 	}
 
 	/**
