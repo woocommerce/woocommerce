@@ -172,14 +172,19 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The refusal names the hook, each callback that does not accept $staged, and the argument count to register with.
+	 * @testdox The refusal names the hook, each callback that does not accept $staged, and the argument count to register with. A closure outside WP_CONTENT_DIR shows only its file name.
 	 */
 	public function test_the_refusal_names_the_hook_and_each_callback(): void {
 		$object  = $this->create_staging_object();
 		$closure = static function () {};
+		$outside = get_temp_dir() . 'wc-staged-hook-closure.php';
+		file_put_contents( $outside, '<?php return static function () {};' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$outside_closure = require $outside;
+		unlink( $outside ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
 		add_action( 'woocommerce_test_staged_action', '__return_false' );
 		add_action( 'woocommerce_test_staged_action', array( self::class, 'listener_without_staged' ), 10, 2 );
 		add_action( 'woocommerce_test_staged_action', $closure );
+		add_action( 'woocommerce_test_staged_action', $outside_closure );
 		add_action( 'woocommerce_test_staged_action', array( self::class, 'listener_with_staged' ), 10, 3 );
 
 		$object->mark_staged();
@@ -189,7 +194,7 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 		} catch ( WC_Data_Exception $e ) {
 			$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode() );
 			$this->assertStringContainsString(
-				'woocommerce_test_staged_action hook does not support staged changes: __return_false, WC_Data_Test::listener_without_staged, a closure in plugins/woocommerce/tests/php/includes/abstracts/class-wc-abstract-data-test.php on line ' . ( new ReflectionFunction( $closure ) )->getStartLine() . '. Each of these callbacks needs to accept $staged as its last argument, registered with 3 accepted arguments.',
+				'woocommerce_test_staged_action hook does not support staged changes: __return_false, WC_Data_Test::listener_without_staged, a closure in plugins/woocommerce/tests/php/includes/abstracts/class-wc-abstract-data-test.php on line ' . ( new ReflectionFunction( $closure ) )->getStartLine() . ', a closure in wc-staged-hook-closure.php on line 1. Each of these callbacks needs to accept $staged as its last argument, registered with 3 accepted arguments.',
 				$e->getMessage()
 			);
 		}

@@ -115,7 +115,8 @@ final class StagedMethod {
 	}
 
 	/**
-	 * Readable name of a hook callback: a function, a class method, or the file and line of a closure.
+	 * Readable name of a hook callback: a function, a class method, or the file and line of a closure. The file of a
+	 * closure is relative to WP_CONTENT_DIR, or only its name when it is outside, so the server path stays private.
 	 *
 	 * @param mixed $callback Hook callback.
 	 * @return string
@@ -131,7 +132,9 @@ final class StagedMethod {
 
 		if ( $callback instanceof \Closure ) {
 			$function = new \ReflectionFunction( $callback );
-			$file     = str_replace( wp_normalize_path( WP_CONTENT_DIR ) . '/', '', wp_normalize_path( (string) $function->getFileName() ) );
+			$file     = wp_normalize_path( (string) $function->getFileName() );
+			$content  = wp_normalize_path( WP_CONTENT_DIR ) . '/';
+			$file     = 0 === strpos( $file, $content ) ? substr( $file, strlen( $content ) ) : wp_basename( $file );
 			/* translators: 1: PHP file path, 2: line number. */
 			return sprintf( __( 'a closure in %1$s on line %2$d', 'woocommerce' ), $file, $function->getStartLine() );
 		}
