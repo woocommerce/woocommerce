@@ -110,10 +110,7 @@ export default class PackagePrepare extends Command {
 						);
 					}
 
-					// @todo: When the composer.json versioning is "wordpress" as is for plugins, this value needs to be 1.0
-					const version = nextVersion ?? '1.0.0';
-					this.bumpPackageVersion( name, version );
-					writeChangelog( name, nextVersion ? undefined : version );
+					this.preparePackage( name, nextVersion ?? undefined );
 
 					ux.action.stop();
 				} else {
@@ -130,12 +127,12 @@ export default class PackagePrepare extends Command {
 	}
 
 	/**
-	 * Update the version number in package.json.
+	 * Update a package's version files and write its changelog.
 	 *
-	 * @param {string} name    Package name.
-	 * @param {string} version Next version.
+	 * @param {string} name        Package name.
+	 * @param {string} nextVersion Next version, if the package has a prior release.
 	 */
-	private bumpPackageVersion( name: string, version: string ) {
+	private preparePackage( name: string, nextVersion?: string ) {
 		try {
 			const filepath = getFilepathFromPackageName( name );
 			const packageType = getPackageType( name );
@@ -155,30 +152,33 @@ export default class PackagePrepare extends Command {
 			}
 
 			const lockFilepath = `${ filepath }/composer.lock`;
-			const originalFiles =
+			const originalManifest = readFileSync( jsonFilepath );
+			const originalLockfile =
 				packageType === 'php' && existsSync( lockFilepath )
-					? {
-							manifest: readFileSync( jsonFilepath ),
-							lockfile: readFileSync( lockFilepath ),
-						}
+					? readFileSync( lockFilepath )
 					: null;
+			// @todo: When the composer.json versioning is "wordpress" as is for plugins, this value needs to be 1.0
+			const version = nextVersion ?? '1.0.0';
 			json.version = version;
 			writeFileSync(
 				jsonFilepath,
 				JSON.stringify( json, null, '\t' ) + '\n'
 			);
 
-			if ( originalFiles ) {
-				try {
+			try {
+				if ( originalLockfile ) {
 					execSync(
 						'composer update --lock --no-install --no-scripts --no-plugins --no-interaction',
 						{ cwd: filepath, stdio: 'inherit' }
 					);
-				} catch ( error ) {
-					writeFileSync( jsonFilepath, originalFiles.manifest );
-					writeFileSync( lockFilepath, originalFiles.lockfile );
-					throw error;
 				}
+				writeChangelog( name, nextVersion ? undefined : version );
+			} catch ( error ) {
+				writeFileSync( jsonFilepath, originalManifest );
+				if ( originalLockfile ) {
+					writeFileSync( lockFilepath, originalLockfile );
+				}
+				throw error;
 			}
 
 			// if preparing a php package and the package is used in the woocommerce plugin
@@ -207,7 +207,7 @@ export default class PackagePrepare extends Command {
 				}
 			}
 		} catch ( e ) {
-			this.error( `Can't bump version for ${ name }. ${ String( e ) }` );
+			this.error( `Can't prepare ${ name }. ${ String( e ) }` );
 		}
 	}
 }
