@@ -1005,10 +1005,6 @@ importers:
   packages/js/create-woo-extension: {}
 
   packages/js/csv-export:
-    dependencies:
-      '@types/node':
-        specifier: catalog:types
-        version: 24.12.2
     devDependencies:
       '@babel/core':
         specifier: catalog:tooling
@@ -1016,6 +1012,9 @@ importers:
       '@types/jest':
         specifier: catalog:tooling
         version: 29.5.14
+      '@types/node':
+        specifier: catalog:types
+        version: 24.12.2
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
@@ -2937,9 +2936,6 @@ importers:
 
   plugins/woocommerce-beta-tester:
     dependencies:
-      '@types/prop-types':
-        specifier: catalog:types
-        version: 15.7.15
       '@woocommerce/data':
         specifier: workspace:*
         version: link:../../packages/js/data
@@ -2974,6 +2970,9 @@ importers:
         specifier: ^15.8.1
         version: 15.8.1
     devDependencies:
+      '@types/prop-types':
+        specifier: catalog:types
+        version: 15.7.15
       '@types/react':
         specifier: 18.3.x
         version: 18.3.28
@@ -4371,9 +4370,6 @@ importers:
       '@oclif/plugin-plugins':
         specifier: ^5.4.87
         version: 5.5.0
-      '@types/semver':
-        specifier: catalog:types
-        version: 7.7.1
       semver:
         specifier: ^7.5.4
         version: 7.7.4
@@ -4381,6 +4377,9 @@ importers:
       '@types/node':
         specifier: catalog:types
         version: 24.12.2
+      '@types/semver':
+        specifier: catalog:types
+        version: 7.7.1
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config

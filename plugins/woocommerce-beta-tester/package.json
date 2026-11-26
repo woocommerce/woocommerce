@@ -11,6 +11,7 @@
 	"version": "4.0.0",
 	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
 	"devDependencies": {
+		"@types/prop-types": "catalog:types",
 		"@types/react": "catalog:types",
 		"@types/react-dom": "catalog:types",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
@@ -28,7 +29,6 @@
 		"uglify-js": "^3.17.4"
 	},
 	"dependencies": {
-		"@types/prop-types": "catalog:types",
 		"@woocommerce/data": "workspace:*",
 		"@woocommerce/remote-logging": "workspace:*",
 		"@wordpress/api-fetch": "catalog:wp-min",
