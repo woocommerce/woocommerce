@@ -31,7 +31,6 @@ const chunkResponse: RunChunkResponse = {
 	done: false,
 	counts: { created: 8, updated: 1, skipped: 1, failed: 0, notified: 0 },
 	rows: [],
-	errors: [],
 };
 
 const summary: ImporterSummary = {

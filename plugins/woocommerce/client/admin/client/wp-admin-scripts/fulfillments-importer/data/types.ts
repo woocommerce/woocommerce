@@ -4,8 +4,7 @@ export interface ImporterRowResult {
 	message: string;
 	/**
 	 * Raw order number value from the CSV, so failed rows can still name the
-	 * order the file referred to. Current servers send it for every row;
-	 * optional for rows from before the field existed.
+	 * order the file referred to. The server sends it for every row.
 	 */
 	order_number?: string;
 	/** Stable failure code, present on failed rows only. */
@@ -72,12 +71,6 @@ export interface PrepareResponse {
 	delimiter: string;
 }
 
-export interface RunChunkError {
-	row: number;
-	code: string;
-	message: string;
-}
-
 export interface RunChunkCounts {
 	created: number;
 	updated: number;
@@ -92,6 +85,5 @@ export interface RunChunkResponse {
 	done: boolean;
 	counts: RunChunkCounts;
 	rows: ImporterRowResult[];
-	errors: RunChunkError[];
 	summary?: ImporterSummary;
 }

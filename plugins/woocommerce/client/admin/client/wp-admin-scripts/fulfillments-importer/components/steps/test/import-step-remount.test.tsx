@@ -45,7 +45,6 @@ function chunk( processed: number ): RunChunkResponse {
 			notified: 0,
 		},
 		rows: [],
-		errors: [],
 	};
 }
 

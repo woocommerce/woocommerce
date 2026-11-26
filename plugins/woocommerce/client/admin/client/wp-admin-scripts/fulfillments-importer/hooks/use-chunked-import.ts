@@ -78,8 +78,8 @@ function delay( ms: number, signal: AbortSignal ): Promise< void > {
 
 /**
  * True when the server refused the chunk without running it, so sending it
- * again cannot write a row twice: another request for the same session still
- * holds the chunk lock.
+ * again cannot write a row twice: another request of the same user still
+ * holds the import lock.
  */
 function isSafeToResend( error: unknown ): boolean {
 	return (
@@ -155,7 +155,7 @@ function isChunkResponse( response: unknown ): response is RunChunkResponse {
  * The caller must keep the hook mounted while a request is in flight. An
  * unmount aborts that request without an error, so a later mount sends the
  * chunk again and treats its outcome as known, although the server may have
- * written it and ended the session.
+ * written it.
  */
 export function useChunkedImport( args: UseChunkedImportArgs ) {
 	const {
@@ -275,7 +275,7 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 					if ( hasCounts( response.summary ) ) {
 						callbacksRef.current.onFinish?.( response.summary );
 					} else {
-						// The server ends the session with the last chunk, so there is nothing to retry.
+						// The server sends the summary with every done response, so asking again cannot bring one.
 						fail(
 							__(
 								'The import finished, but its summary could not be loaded. Check your orders to see what was imported.',
@@ -308,7 +308,7 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 				outcomeUnknownRef.current &&
 				errorCode( error ) === TOKEN_INVALID_CODE
 			) {
-				// The failed chunk may have been the last one: the server ends the session when the import finishes.
+				// The server keeps a finished session for an hour, or until the next upload, so the failed chunk may have been the last one.
 				fail(
 					__(
 						'The import session ended before the last batch of rows was confirmed, so the import may have finished. Check your orders before you upload the file again.',

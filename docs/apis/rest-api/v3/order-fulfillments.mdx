@@ -1122,8 +1122,114 @@ Error codes specific to this endpoint:
 -   `woocommerce_fulfillments_import_upload_failed` (`400` or `500`) - The file could not be staged, is not a CSV, or was stored outside the import directory.
 -   `woocommerce_fulfillments_csv_parse_error` (`400`) - The file is empty, unreadable, not valid UTF-8, saved as UTF-16 or with CR-only line endings, or has no data rows. The error `data.reason` carries the importer's code.
 -   `woocommerce_fulfillments_import_too_many_rows` (`413`) - The file has more than 5,000 data rows.
+-   `woocommerce_fulfillments_import_chunk_in_progress` (`409`) - Another request of the caller's import is being processed: a chunk, or another upload. The upload is dropped and the current session is kept; send the file again in a moment.
+-   `woocommerce_fulfillments_import_lock_failed` (`500`) - The import could not be locked because of a database error. The upload is dropped and the current session is kept.
 -   `woocommerce_fulfillments_import_session_failed` (`500`) - The import session could not be stored, or the cleanup of its staged file could not be scheduled. The staged file is removed. The caller's previous session was replaced before this point and is gone as well.
 -   `rest_invalid_param` (`400`) - The `delimiter` is not a single ASCII character or `tab`, or `notify_customer` or `update_existing` is not a boolean.
+-   `woocommerce_rest_cannot_create` (`401` or `403`) - The request is not authenticated or the user lacks `manage_woocommerce`.
+
+## Run a fulfillments import
+
+Imports the next chunk of data rows from the file a prepare call staged, and records the progress on the import session. Call it in a loop: start with `offset` `0`, then send the `processed` value of each response as the next `offset`, until `done` is `true`. Requires the `manage_woocommerce` capability, and the token must belong to the calling user.
+
+Each row creates a fulfilled fulfillment on its order, or updates the order's fulfillment that has the same tracking number. A row that cannot be imported fails on its own and the rest of the chunk still imports. The `mapping` and `options` of the first chunk are stored on the session; later chunks import under them whatever they send.
+
+```http
+POST /wp-json/wc/v3/fulfillments/import/run
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X POST "https://example.com/wp-json/wc/v3/fulfillments/import/run" \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{
+	"token": "6b4c90a944064f5ba32938f140d453d5",
+	"offset": 0,
+	"mapping": { "0": "order_number", "1": "tracking_number", "2": "shipment_provider", "3": "tracking_url" },
+	"options": { "notify_customer": false, "update_existing": true }
+}'
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+	"processed": 2,
+	"total": 2,
+	"done": true,
+	"counts": { "created": 1, "updated": 0, "skipped": 0, "failed": 1, "notified": 0 },
+	"rows": [
+		{
+			"row": 2,
+			"order_number": "101",
+			"status": "created",
+			"message": "Fulfillment created.",
+			"order_id": 101,
+			"fulfillment_id": 12,
+			"notified": false,
+			"order_edit_url": "https://example.com/wp-admin/admin.php?page=wc-orders&action=edit&id=101"
+		},
+		{
+			"row": 3,
+			"order_number": "999",
+			"status": "failed",
+			"message": "Order not found for order number \"999\".",
+			"code": "order_not_found"
+		}
+	],
+	"summary": { "created": 1, "updated": 0, "skipped": 0, "failed": 1, "notified": 0, "rows": [] }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+#### Available parameters
+
+| Parameter | Type    | Description                                                                                                                                                                                              |
+| --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `token`   | string  | Required. The `token` a prepare call returned.                                                                                                                                                            |
+| `offset`  | integer | Number of data rows processed so far: `0` for the first chunk, then the `processed` value of the previous response. Defaults to `0`.                                                                      |
+| `limit`   | integer | Most data rows to import in this request, from 1 to 1000. Defaults to, and is capped by, the store's chunk size: 200 rows, or 25 while customers are notified.                                            |
+| `mapping` | object  | Required. Canonical column (`order_number`, `tracking_number`, `shipment_provider`, `tracking_url` or `items`) for each CSV column index. The first three are required, and a column can be used once.   |
+| `options` | object  | `notify_customer` and `update_existing` booleans. An option left out keeps the value sent to the prepare call.                                                                                            |
+
+#### Response properties
+
+| Property    | Type    | Description                                                                                                                                              |
+| ----------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `processed` | integer | Data rows processed so far. Send it as the `offset` of the next request.                                                                                 |
+| `total`     | integer | Number of non-blank data rows in the file.                                                                                                               |
+| `done`      | boolean | Whether every data row has been processed.                                                                                                               |
+| `counts`    | object  | Results of all chunks so far: `created`, `updated`, `skipped`, `failed`, and `notified`, the rows whose customer notification action ran.                |
+| `rows`      | array   | Result of each row in this chunk.                                                                                                                        |
+| `summary`   | object  | Present once `done` is `true`: the final counts and an empty `rows` list.                                                                                |
+
+Each entry of `rows` has `row` (the record number in the file, counting the header and blank lines), `order_number` (the cell from the file), `status` (`created`, `updated`, `skipped` or `failed`) and `message`. A failed row adds `code`. `order_id` and `order_edit_url` are set once the order is found, `fulfillment_id` when the row matched or saved a fulfillment, and `notified` on created and updated rows. `message` is plain text that can quote values from the file, so escape it before output.
+
+#### Sending a chunk again
+
+A response can be lost after the server imported the chunk. Sending the same `offset` again is safe: the offset of the last recorded chunk is answered with the stored result of that chunk, and nothing is imported or emailed twice. This also works for the last chunk, because a finished session is kept for an hour, or until the user's next prepare call. Its staged file is removed when the import finishes.
+
+Only one request per user runs at a time. A request that arrives while another one is importing gets `woocommerce_fulfillments_import_chunk_in_progress`; it imported nothing and can be sent again. A prepare call made during that time gets the same error. The lock of a request that never ended (PHP was killed) expires after five minutes. A chunk that is still running at that point can lose its lock to another request: it then answers `woocommerce_fulfillments_import_lock_lost` and its rows may be imported by both.
+
+Error codes specific to this endpoint:
+
+-   `woocommerce_fulfillments_import_token_invalid` (`400`) - The session does not exist, has expired, or belongs to another user.
+-   `woocommerce_fulfillments_import_mapping_invalid` (`400`) - The mapping lacks a required column, names a column the file does not have, or uses a canonical column twice.
+-   `woocommerce_fulfillments_import_chunk_in_progress` (`409`) - Another request of this user is importing a chunk. Nothing was imported.
+-   `woocommerce_fulfillments_import_offset_mismatch` (`409`) - The `offset` is neither the recorded progress nor the offset of the last recorded chunk, or the import has already finished and the `offset` is not that of its last chunk. Nothing was imported.
+-   `woocommerce_fulfillments_import_file_changed` (`409`) - The staged file was changed or removed after the prepare call. The session is deleted.
+-   `woocommerce_fulfillments_import_chunk_failed` (`500`) - The staged file could not be read. Nothing was imported and the session is kept. The error `data.reason` carries the importer's code.
+-   `woocommerce_fulfillments_import_progress_failed` (`500`) - The settings or the progress of the chunk could not be saved. When it was the progress, the rows are already imported: the same `offset` imports them again and reports them as skipped or updated.
+-   `woocommerce_fulfillments_import_lock_failed` (`500`) - The import could not be locked because of a database error. Nothing was imported.
+-   `woocommerce_fulfillments_import_lock_lost` (`500`) - The chunk ran longer than its lock and another request took over. Its rows are imported but not recorded by this request; send the same `offset` again.
+-   `rest_missing_callback_param` (`400`) - `token` or `mapping` is missing.
+-   `rest_invalid_param` (`400`) - An argument is outside the limits above.
 -   `woocommerce_rest_cannot_create` (`401` or `403`) - The request is not authenticated or the user lacks `manage_woocommerce`.
 
 ## Error responses

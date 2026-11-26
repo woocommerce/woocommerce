@@ -18,7 +18,8 @@ defined( 'ABSPATH' ) || exit;
  * The prepare endpoint creates it with the staged file path, attachment ID, delimiter,
  * headers and row total, and schedules the cleanup of the staged file. The import run
  * freezes its mapping here and records each chunk's progress (processed, byte_offset,
- * counts, seen_tracking_pairs, last chunk). One session is active per user at a time.
+ * counts, seen_tracking_pairs, last chunk). A finished import is marked completed and
+ * its record is kept until it expires. One session is active per user at a time.
  *
  * @internal
  * @since 11.4.0
@@ -483,6 +484,13 @@ final class ImportSession {
 			delete_transient( self::INDEX_PREFIX . $this->user_id );
 		}
 
+		$this->unschedule_cleanup();
+	}
+
+	/**
+	 * Unschedule the pending cleanup action of the staged file.
+	 */
+	private function unschedule_cleanup(): void {
 		if ( function_exists( 'as_unschedule_action' ) ) {
 			as_unschedule_action(
 				self::CLEANUP_HOOK,
@@ -677,7 +685,7 @@ final class ImportSession {
 	 * settings or recorded a chunk cannot write over them. That narrows the window for two
 	 * requests freezing at once; the caller's lock closes it.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 *
 	 * @param array<int, string> $mapping CSV column index => canonical column key.
 	 * @param bool               $notify  Whether to fire customer notifications.
@@ -720,7 +728,7 @@ final class ImportSession {
 	/**
 	 * Physical record number of the row at byte_offset(), passed back to the reader on resume.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 *
 	 * @return int 0 until a chunk is recorded.
 	 */
@@ -733,7 +741,7 @@ final class ImportSession {
 	 *
 	 * Lets a caller answer a replay of that chunk without importing its rows again.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 *
 	 * @return array{offset:int, rows:array<int, array<string, mixed>>, eof:bool}|null Null until a chunk is recorded.
 	 */
@@ -760,7 +768,7 @@ final class ImportSession {
 	 * settings another copy froze are kept. The dedupe set and the resume position are
 	 * replaced, and only this chunk's rows are kept, which bounds the payload.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 *
 	 * @param int                  $offset Data rows processed before this chunk; must equal processed().
 	 * @param array<string, mixed> $chunk  Result of import_chunk() without an error.
@@ -832,6 +840,61 @@ final class ImportSession {
 	 */
 	public function summary(): array {
 		return array_merge( $this->counts(), array( 'rows' => array() ) );
+	}
+
+	/**
+	 * Whether every data row has been processed.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @return bool
+	 */
+	public function done(): bool {
+		$last = $this->last_chunk();
+		return $this->processed() >= $this->total() || ( null !== $last && $last['eof'] );
+	}
+
+	/**
+	 * Whether complete() has released the staged file of this session.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @return bool
+	 */
+	public function completed(): bool {
+		return ! empty( $this->data['completed'] );
+	}
+
+	/**
+	 * Mark a finished import as completed and release its staged file.
+	 *
+	 * The record itself is kept until it expires or the user's next upload replaces it, so
+	 * a request that repeats the last chunk can still be answered. The flag is stored
+	 * first: when that fails the file and its scheduled cleanup stay, and a later call
+	 * can complete the session. The cleanup is unscheduled once the file is gone.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @return bool True when this call completed the session; false when it was already
+	 *              completed, is not done yet, or the flag could not be stored.
+	 */
+	public function complete(): bool {
+		if ( $this->completed() || ! $this->done() ) {
+			return false;
+		}
+
+		$this->data['completed'] = true;
+		if ( ! $this->persist() ) {
+			unset( $this->data['completed'] );
+			return false;
+		}
+
+		// A file that could not be deleted keeps its scheduled cleanup, which removes it later.
+		self::delete_staged_file( $this->file(), $this->attachment_id() );
+		if ( ! file_exists( $this->file() ) ) {
+			$this->unschedule_cleanup();
+		}
+		return true;
 	}
 
 	/**

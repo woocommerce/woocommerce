@@ -257,7 +257,7 @@ class FulfillmentsCsvImporter {
 	 * The filtered value is kept between 1 and MAX_CHUNK_SIZE, and at most NOTIFY_CHUNK_SIZE
 	 * when customers are notified, so a chunk stays within typical request time limits.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 *
 	 * @param bool $notify_customer Whether the import sends customer notifications.
 	 * @return int
@@ -269,7 +269,7 @@ class FulfillmentsCsvImporter {
 		 * The result is kept between 1 and 1000, and at most 25 while customer notifications
 		 * are on. A value that is not a positive number falls back to the default.
 		 *
-		 * @since 11.4.0
+		 * @since 11.5.0
 		 *
 		 * @param int  $chunk_size      Default chunk size (200).
 		 * @param bool $notify_customer Whether the import sends customer notifications.
@@ -450,7 +450,7 @@ class FulfillmentsCsvImporter {
 	 * adds `notified`: whether the notification action ran without an error, which is not
 	 * proof that an email was sent. Messages are plain text and can quote CSV values.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 *
 	 * @param int                  $limit   Data rows to import. Capped by resolve_chunk_size(), which is also used when 0 or less.
 	 * @param array<int, string>   $mapping CSV column index => canonical column key.
@@ -945,7 +945,7 @@ class FulfillmentsCsvImporter {
 		 * map custom order numbers, or null when the order cannot be found. Any other value
 		 * fails the row.
 		 *
-		 * @since 11.4.0
+		 * @since 11.5.0
 		 *
 		 * @param WC_Order|null $order        Order found by ID, or null.
 		 * @param string        $order_number Order number cell from the CSV.

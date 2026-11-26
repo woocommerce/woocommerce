@@ -57,7 +57,6 @@ function buildResponse(
 			notified: 0,
 		},
 		rows: [],
-		errors: [],
 		...( done && withSummary
 			? {
 					summary: {
