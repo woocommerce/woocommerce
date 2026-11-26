@@ -115,9 +115,9 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			* step is 1 and the store allows decimal quantities.
 			*
 			* @since   5.8.0
-			* @param   int|float   $step    The current step amount to be used in the quantity editor.
-			* @param   WC_Product  $product The product that is being edited.
-			* @param   string      $context The context in which the quantity editor is shown, 'edit' or 'refund'.
+			* @param   int|float|string $step    The current step amount to be used in the quantity editor, or 'any' to accept any quantity.
+			* @param   WC_Product       $product The product that is being edited.
+			* @param   string           $context The context in which the quantity editor is shown, 'edit' or 'refund'.
 			*/
 			$step_edit   = apply_filters( 'woocommerce_quantity_input_step_admin', $step, $product, 'edit' );
 			$step_refund = apply_filters( 'woocommerce_quantity_input_step_admin', $step, $product, 'refund' );
