@@ -255,9 +255,6 @@ CSS;
 		if ( $has_overlay && 'right' === $overlay_position ) {
 			$wrapper_classes[] = 'is-overlay-right';
 		}
-		if ( $has_overlay && $is_button_style ) {
-			$wrapper_classes[] = 'has-styled-overlay-button';
-		}
 
 		$wrapper_attributes = array(
 			'class'                          => implode( ' ', $wrapper_classes ),

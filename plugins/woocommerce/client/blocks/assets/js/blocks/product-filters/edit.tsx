@@ -92,8 +92,6 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 			'is-filter-drawer-disabled': ! hasOverlay,
 			'is-mobile-overlay': overlayMode === 'mobile',
 			'is-overlay-right': hasOverlay && overlayPosition === 'right',
-			'has-styled-overlay-button':
-				hasOverlay && overlayButtonStyle === 'button',
 		} ),
 		style: {
 			'--wc-product-filters-background-color':

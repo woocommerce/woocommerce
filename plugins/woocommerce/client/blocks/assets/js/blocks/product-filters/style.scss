@@ -43,21 +43,6 @@
 		}
 	}
 
-	@media (width < 480px) {
-		&.has-styled-overlay-button {
-			width: 100%;
-		}
-
-		:where(.is-layout-flex:not(.is-vertical)) > &.has-styled-overlay-button {
-			flex: 1 1 0;
-		}
-
-		.wc-block-product-filters__open-overlay.wp-element-button {
-			width: 100%;
-			justify-content: center;
-		}
-	}
-
 	.wc-block-product-filters__overlay {
 		position: fixed;
 		inset: 0;
