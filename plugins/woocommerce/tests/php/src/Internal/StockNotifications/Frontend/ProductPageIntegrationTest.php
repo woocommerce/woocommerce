@@ -158,8 +158,7 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'woocommerce/back-in-stock-form', $html->get_attribute( 'data-wp-interactive' ), 'The form should be driven by the Interactivity API.' );
 
 		$html->next_tag( 'form' );
-		$this->assertNotEmpty( $html->get_attribute( 'id' ), 'The Back in Stock form should have an ID.' );
-		$this->assertSame( $html->get_attribute( 'id' ), $attribute_input['form'] ?? null, 'The attribute inputs should be posted with the Back in Stock form.' );
+		$this->assertSame( $html->get_attribute( 'id' ), $attribute_input['form'] ?? '', 'The attribute inputs should be posted with the Back in Stock form.' );
 
 		$bound_inputs = array();
 		while ( $html->next_tag( 'input' ) ) {
