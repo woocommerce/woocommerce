@@ -1494,8 +1494,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function provide_errors_around_the_write(): array {
 		return array(
-			'before the write' => array( 'woocommerce_before_order_object_save' ),
-			'after the write'  => array( 'woocommerce_after_order_object_save' ),
+			'before the write'                 => array( 'woocommerce_before_order_object_save' ),
+			'after the write'                  => array( 'woocommerce_after_order_object_save' ),
+			'the payment note after the write' => array( 'woocommerce_order_note_added' ),
 		);
 	}
 
