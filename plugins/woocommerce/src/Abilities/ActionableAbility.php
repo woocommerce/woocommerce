@@ -151,11 +151,11 @@ abstract class ActionableAbility extends Ability {
 	}
 
 	/**
-	 * Whether the ability takes part in the extensible abilities feature. When
-	 * it does not, it runs as with the feature off: no `extensions` input, no
-	 * field writes, no validators and no syncs. Core's order abilities return
-	 * false for now.
+	 * Whether the ability runs the extensible abilities steps. When it returns
+	 * false, the ability runs as with the feature off: no `extensions` input,
+	 * no field writes, no validators and no syncs.
 	 *
+	 * @internal
 	 * @since 11.4.0
 	 *
 	 * @return bool
