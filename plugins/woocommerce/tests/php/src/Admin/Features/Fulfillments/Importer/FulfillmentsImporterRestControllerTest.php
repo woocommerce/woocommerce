@@ -1811,6 +1811,40 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox handle_run checks the offset again after the first chunk stored its settings, which reloads the session.
+	 */
+	public function test_run_checks_the_offset_again_after_the_settings_reload(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 3 );
+		$recorded                    = false;
+		// The upload directory is read during the staged-file check, between the offset check
+		// and the settings. Another request stores the settings and records the first row there.
+		add_filter(
+			'upload_dir',
+			function ( $uploads ) use ( &$recorded, $session ) {
+				if ( ! $recorded ) {
+					$recorded = true;
+					$other    = ImportSession::load( get_current_user_id(), $session->token() );
+					$other->freeze_run_settings( array_values( self::RUN_MAPPING ), false, true );
+					$other->record_chunk(
+						0,
+						array(
+							'consumed'    => 1,
+							'byte_offset' => 60,
+						)
+					);
+				}
+				return $uploads;
+			}
+		);
+
+		$response = $this->run_chunk( $session->token(), 0, 1 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_offset_mismatch', 409, $response );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[1] ), 'The request does not import the next row under an offset that is no longer the progress' );
+		$this->assertSame( 1, ImportSession::load( get_current_user_id(), $session->token() )->processed(), 'The recorded progress is left as the other request stored it' );
+	}
+
+	/**
 	 * @testdox handle_run keeps a cleanup scheduled for a changed staged file it could not delete.
 	 */
 	public function test_run_keeps_a_cleanup_for_a_changed_file_it_could_not_delete(): void {

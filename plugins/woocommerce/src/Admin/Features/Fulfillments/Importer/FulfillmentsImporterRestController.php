@@ -598,11 +598,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			return $this->complete_finished_import( $session ) ?? $this->build_run_response( $session, $last['rows'] );
 		}
 		if ( $session->done() || $offset !== $session->processed() ) {
-			return new WP_Error(
-				'woocommerce_fulfillments_import_offset_mismatch',
-				__( 'The import is out of step with its recorded progress. Please start the import again.', 'woocommerce' ),
-				array( 'status' => WP_Http::CONFLICT )
-			);
+			return $this->offset_mismatch_error();
 		}
 
 		if ( $this->staged_file_changed( $session ) ) {
@@ -620,6 +616,10 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$frozen = $this->freeze_run_settings( $session, $request );
 		if ( $frozen instanceof WP_Error ) {
 			return $frozen;
+		}
+		// Storing the settings reads the stored session again, so the progress is checked once more.
+		if ( $offset !== $session->processed() ) {
+			return $this->offset_mismatch_error();
 		}
 
 		$chunk = $this->import_next_chunk( $session, (int) $request->get_param( 'limit' ) );
@@ -973,6 +973,19 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			'woocommerce_fulfillments_import_token_invalid',
 			__( 'The import session is missing or has expired. Please upload the CSV file again.', 'woocommerce' ),
 			array( 'status' => WP_Http::BAD_REQUEST )
+		);
+	}
+
+	/**
+	 * Build the 409 error for an offset that is not the recorded progress.
+	 *
+	 * @return WP_Error
+	 */
+	private function offset_mismatch_error(): WP_Error {
+		return new WP_Error(
+			'woocommerce_fulfillments_import_offset_mismatch',
+			__( 'The import is out of step with its recorded progress. Please start the import again.', 'woocommerce' ),
+			array( 'status' => WP_Http::CONFLICT )
 		);
 	}
 
