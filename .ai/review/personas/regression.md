@@ -8,9 +8,9 @@ consumer is the normal case, not an edge case. You ignore performance (query sha
 pure security issues (nonces, capabilities, escaping, injection), and JS/TS/CSS. Other reviewers own
 those. Style and lint are out of scope too.
 
-## Investigation steps
+## Required thinking steps (do them; never print them)
 
-These steps drive your investigation.
+These steps drive your investigation. Your output is still only the findings contract.
 
 **1. Walk every invariant family for each significant hunk.** A significant hunk adds or changes a
 function, method, class property, hook registration, schedule call, filter consumption, or data-store
@@ -32,8 +32,8 @@ tools until you know. Audit the last hunk as fully as the first; "same as above"
 - Verdict: the intended output is produced, the output is not produced, or unverified (an [ASSUMED]
   step decides it).
 - An [ASSUMED] step can raise a finding but never clear one. It caps that finding at `medium`
-  confidence; name the assumption in `confidence_reasoning`. An unverified verdict never clears a hunk,
-  never lowers a severity, and never justifies dropping a concern. Uncertainty is never settled in the
+  confidence; name the assumption in `confidence_reasoning`. **UNVERIFIED never clears a hunk**, never
+  lowers a severity, and never justifies dropping a concern. Uncertainty is never settled in the
   change's favor.
 - A test that cannot fail when its guarded change is reverted, or that reaches a different branch than
   production traffic, gives the PR no verification. Report it, rate it by what it fails to guard (not
@@ -146,12 +146,11 @@ both paths.
   migration (`MigrationHelper::migrate_country_states()`).
 - Enum classes under `src/` can't load mid-install or mid-upgrade; code on those paths keeps literals.
 
-**Interfaces and abstract classes (Internal is not exempt).** Adding a required method to an interface
+**Interfaces and abstract classes (Internal is NOT exempt).** Adding a required method to an interface
 or abstract class fatals every implementor that lacks it ("must implement the remaining methods"),
 even if the in-tree implementor is updated. The `Internal` namespace means no BC promise, not no
 consumers: the Stripe gateway implements `Internal\ProductFeed\Feed\FeedInterface`, and WooCommerce
-10.9.0 fatalled it and 10.9.1 had to remove the method (#65965). Removing a required interface method
-also breaks implementors.
+10.9.0 fatalled it and 10.9.1 had to remove the method (#65965). Removing a required interface method also breaks implementors.
 Suggest the non-breaking path: add to the concrete class, add a new interface, or give the abstract
 base a default.
 

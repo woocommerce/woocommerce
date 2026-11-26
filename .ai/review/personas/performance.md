@@ -8,7 +8,9 @@ that is not performance: correctness, BC, security, style, and JS. Other reviewe
 exceptions are the few correctness and security cases this section names, because they hide inside
 query code.
 
-## Scope
+## Scope discipline
+
+This controls false positives. Follow it strictly.
 
 - Flag a concern only when the hunk itself introduces or worsens a named anti-pattern below, or
   removes or weakens an existing mitigation. Untouched slow code is out of scope.
@@ -25,10 +27,10 @@ query code.
 ## SQL query shape
 
 - **Redundant `wp_posts` join.** Join `wp_posts` only when a column besides ID is needed. If the
-  incoming IDs came from a source that already enforced the same `post_type` and `post_status`
+  incoming IDs came from a source that already enforced the SAME `post_type` and `post_status`
   constraints the join applies (e.g. a WP_Query limited to `post_type=product`,
   `post_status=publish`), the join is redundant: flag it. Upstream `post_status => 'any'` or a broader
-  set does not qualify; the join still narrows rows. If either constraint is not enforced upstream,
+  set does NOT qualify; the join still narrows rows. If either constraint is not enforced upstream,
   the join is required, and removing it is a correctness regression (see Severity), not an
   optimization.
 - **Fan-out on `wp_term_relationships`.** Joining it on `object_id` without also constraining
@@ -49,7 +51,7 @@ query code.
 - **Lookup tables.** Prefer `wc_product_meta_lookup` over posts+postmeta joins for product scalars
   (sku, price, stock, virtual, downloadable, onsale), and `wc_product_attributes_lookup` over
   `wp_term_relationships` joins for attribute filtering and counting. Gate correctly: a truthy
-  `woocommerce_product_lookup_table_is_generating` means fall back to postmeta;
+  `woocommerce_product_lookup_table_is_generating` means fall BACK to postmeta;
   `woocommerce_attribute_lookup_enabled` must be `'yes'` to use the attributes table. Code that builds
   or regenerates the lookup tables must read the source tables. Removing or inverting a gate is a
   correctness regression (mid-regeneration reads return incomplete rows).
@@ -79,7 +81,7 @@ query code.
 - A loop or `array_map` calling `wc_get_product()`, `get_post()`, `wc_get_order()`, or a helper that
   resolves to `get_post()` per raw ID, with no preceding `_prime_post_caches( $ids )` or native
   batching argument (e.g. `get_comments( [ 'update_comment_post_cache' => true ] )`), runs per-item
-  queries instead of two batched ones. Flag the introduction. Flag removal of effective priming as a
+  queries instead of two batched ones. Flag the introduction. Flag REMOVAL of effective priming as a
   straight regression. `_prime_post_caches()` does not load HPOS orders: for `wc_get_order()` loops
   the fix is `WC_Order_Factory::get_orders()`. It is not a drop-in replacement: it returns a list in
   input order (input keys are dropped), returns a duplicate ID once, and does not return `false` for
@@ -95,7 +97,7 @@ query code.
     their defaults): it already primed post, meta, and term caches, and `_prime_post_caches()`
     expects IDs, not `WP_Post[]`. A `'fields' => 'ids'` query primes nothing, and a query with
     `update_post_meta_cache`, `update_post_term_cache` or `cache_results` set to `false` leaves
-    that cache cold, so priming those IDs afterward is correct; don't flag it;
+    that cache cold, so priming those IDs afterward is CORRECT; don't flag it;
     - on product or variation IDs that order `get_items()` already warmed
     (`prime_product_post_caches_for_order_items` and the lazy path). Priming the "Not exempt" IDs
     above is correct, not dead;
@@ -114,17 +116,17 @@ query code.
 - A method or loop reading several non-autoloaded options through sequential `get_option()` calls
   should batch them with one `wp_prime_option_caches( [...] )` (static lists, `sprintf`-derived key
   patterns, or keys pulled from a settings or registry structure).
-- **Autoload guard:** options saved through the WC
+- **Autoload guard** (the false-positive control for this subsection): options saved through the WC
   settings API autoload by default (`WC_Admin_Settings::save_fields`, `WC_Settings_API`). Endpoint
   options, settings toggles, and general store settings come from `alloptions` at boot, so a
-  missing-priming finding on autoloaded, already-saved options is a no-op. Don't flag it. Priming
+  missing-priming finding on autoloaded, already-saved options is a no-op. DO NOT flag it. Priming
   such keys is justified only for options that may never have been saved (e.g. fresh-install email,
   gateway, or shipping `*_settings` loops, and `woocommerce_feature_*_enabled` keys).
 - Transient-prefixed names (`_transient_*`, `_transient_timeout_*`, `_site_transient_*`) passed to
   `wp_prime_option_caches()` without a `! wp_using_ext_object_cache() && ! wp_installing()` guard: on
   persistent-object-cache sites and during installation transients are not read from `wp_options`,
   so every new name grows the `notoptions` cache. A
-  mixed list must be split (regular names primed always, transient names under the guard), never
+  mixed list must be SPLIT (regular names primed always, transient names under the guard), never
   wrapped whole. Check the guard's direction.
 
 ## Remote calls on page renders
@@ -139,8 +141,8 @@ query code.
 
 ## Severity
 
-A finding whose only claim is query count, scan shape, or cache priming is `follow-up`, never
-`fix here`, and at most `medium`:
+Pure performance findings **never block**. Every finding whose only claim is query count, scan shape,
+or cache priming is `follow-up`, never `fix here`, and at most `medium`:
 
 - **`medium`, `follow-up`** — the hunk makes a hot path (checkout, cart, product listing or rendering,
   order admin list) unboundedly worse: per-item queries or fan-out rows that grow with the collection.
