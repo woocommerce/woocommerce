@@ -96,21 +96,11 @@ export interface Declared {
 	}[];
 }
 
-/** One state of the Features for AI assistants card: its description, button and error. */
-export interface ExperimentsCardState {
+/** The AI shopping health notice that suggests Features for AI assistants. */
+export interface ExperimentsNoticeView {
 	text: string;
-	button: string;
-	/** Shown when the button's change fails. */
-	error: string;
-}
-
-/** The Features for AI assistants card on the AI tools Overview. */
-export interface ExperimentsCardView {
-	title: string;
-	badge: ViewBadge;
-	enabled: boolean;
-	off: ExperimentsCardState;
-	on: ExperimentsCardState;
+	/** Their row on the Features page. */
+	link: ViewLink;
 }
 
 export interface ShoppingCard {
@@ -143,10 +133,10 @@ export interface ReadinessView {
 	fix_first: FixFirst | null;
 	sections: Section[];
 	declared: Declared | null;
+	/** Above Extra details. Null once they're on, once dismissed, or for users who can't manage WooCommerce. */
+	experiments?: ExperimentsNoticeView | null;
 	overview: {
 		shopping: ShoppingCard;
-		/** Null for users who can't manage WooCommerce. */
-		experiments?: ExperimentsCardView | null;
 		view_all: ViewLink;
 		/** "Based on your 5,000 most recently changed products.", when the check stopped at the limit. */
 		based_on: string | null;

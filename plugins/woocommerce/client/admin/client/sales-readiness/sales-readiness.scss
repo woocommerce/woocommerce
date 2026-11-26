@@ -461,36 +461,3 @@ body:has(.wc-sales-readiness) {
 	text-decoration-line: underline;
 	cursor: pointer;
 }
-
-// Features for AI assistants on the Overview, laid out like a checklist row: the title, badge and
-// description close together, and the button beside them, centred.
-.wc-sales-readiness-experiments {
-	&__row {
-		display: flex;
-		align-items: center;
-		gap: var(--wpds-dimension-gap-lg);
-	}
-
-	&__body {
-		display: flex;
-		flex: 1;
-		flex-direction: column;
-		gap: var(--wpds-dimension-gap-xs);
-		min-width: 0;
-	}
-
-	&__title {
-		display: flex;
-		align-items: center;
-		gap: var(--wpds-dimension-gap-sm);
-
-		// The badge is taller than the title line, so it overlaps it instead of adding space.
-		> span {
-			margin-block: -2px;
-		}
-	}
-
-	.components-notice {
-		margin: var(--wpds-dimension-gap-md) 0 0;
-	}
-}

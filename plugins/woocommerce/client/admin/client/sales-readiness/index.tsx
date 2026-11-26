@@ -13,6 +13,7 @@ import './sales-readiness.scss';
 import { useReadinessView } from './use-readiness-view';
 import { CheckedCard } from './components/checked-card';
 import { ComingSoonNotice } from './components/coming-soon-notice';
+import { ExperimentsNotice } from './components/experiments-notice';
 import { ErrorNotice } from './components/error-notice';
 import { FixFirstCard } from './components/fix-first';
 import { DeclaredCard, SectionCard } from './components/section-card';
@@ -76,6 +77,9 @@ export default function SalesReadiness() {
 								section={ section }
 							/>
 						) ) }
+						{ view.experiments && (
+							<ExperimentsNotice notice={ view.experiments } />
+						) }
 						{ view.declared && (
 							<DeclaredCard declared={ view.declared } />
 						) }

@@ -15,8 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * (null before the first scan) and whether a scan is pending, so a settings
  * page can show the last result and poll while a scan runs. POST
  * wc/v3/agent-readiness/ucp turns UCP on or off for the AI tools settings
- * page, POST wc/v3/agent-readiness/ai-assistant-experiments turns Features for AI
- * assistants on or off, GET wc/v3/agent-readiness/view gives the Sales readiness page and
+ * page, DELETE wc/v3/agent-readiness/ai-assistant-experiments-notice dismisses the
+ * Features for AI assistants notice for the current user, GET wc/v3/agent-readiness/view gives the Sales readiness page and
  * the AI tools Overview what they show, and GET wc/v3/agent-readiness/support-report
  * gives the text file a merchant sends to support.
  *
@@ -171,19 +171,12 @@ class ReadinessRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
-			'/agent-readiness/ai-assistant-experiments',
+			'/agent-readiness/ai-assistant-experiments-notice',
 			array(
 				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'set_ai_assistant_experiments' ),
+					'methods'             => \WP_REST_Server::DELETABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'dismiss_ai_assistant_experiments_notice' ),
 					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'manage_woocommerce' ),
-					'args'                => array(
-						'enabled' => array(
-							'description' => __( 'Whether Features for AI assistants are on.', 'woocommerce' ),
-							'type'        => 'boolean',
-							'required'    => true,
-						),
-					),
 				),
 			)
 		);
@@ -276,24 +269,16 @@ class ReadinessRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Turn the Features for AI assistants feature on or off, as the AI tools card does.
+	 * Dismiss the Features for AI assistants notice on AI tools for the current user.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @return array{enabled:bool}|\WP_Error
+	 * @return array{dismissed:bool}
 	 */
-	protected function set_ai_assistant_experiments( WP_REST_Request $request ) {
-		$enable = (bool) $request->get_param( 'enabled' );
-		// change_feature_enable() also returns false when nothing changes, so read the result back.
-		$this->features_controller->change_feature_enable( AiAssistantExperiments::FEATURE_NAME, $enable );
-		if ( $enable !== $this->features_controller->feature_is_enabled( AiAssistantExperiments::FEATURE_NAME ) ) {
-			return new \WP_Error(
-				'woocommerce_ai_assistant_experiments_not_changed',
-				$enable ? __( 'We couldn’t turn on features for AI assistants. Try again.', 'woocommerce' ) : __( 'We couldn’t turn off features for AI assistants. Try again.', 'woocommerce' ),
-				array( 'status' => 500 )
-			);
-		}
-		return array( 'enabled' => $enable );
+	protected function dismiss_ai_assistant_experiments_notice( WP_REST_Request $request ): array {
+		unset( $request );
+		update_user_meta( get_current_user_id(), AiAssistantExperiments::NOTICE_DISMISSED_META, '1' );
+		return array( 'dismissed' => true );
 	}
 
 	/**

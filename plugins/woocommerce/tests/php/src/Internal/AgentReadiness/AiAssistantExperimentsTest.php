@@ -122,62 +122,82 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The AI tools Overview card has a description and a button for each state.
+	 * @testdox While the feature is off, AI shopping health suggests it and links to its row on the Features page.
 	 */
-	public function test_overview_card_copy(): void {
+	public function test_health_notice_copy(): void {
 		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
 
-		$card = $this->overview_card();
-
-		$this->assertSame( 'Features for AI assistants', $card['title'] );
 		$this->assertSame(
 			array(
-				'intent' => 'none',
-				'text'   => 'Experimental',
+				'text' => 'Try newer standards for AI assistants, such as WebMCP and Markdown versions of your pages.',
+				'link' => array(
+					'href' => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features#woocommerce_feature_ai_assistant_experiments_enabled' ),
+					'text' => 'Turn on in Features',
+				),
 			),
-			$card['badge']
-		);
-		$this->assertFalse( $card['enabled'] );
-		$this->assertSame(
-			array(
-				'text'   => 'Try newer standards for AI assistants before they settle, such as WebMCP and Markdown versions of your pages.',
-				'button' => 'Turn on',
-				'error'  => 'We couldn’t turn on features for AI assistants. Try again.',
-			),
-			$card['off']
-		);
-		$this->assertSame(
-			array(
-				'text'   => 'You’re trying newer standards for AI assistants, such as WebMCP and Markdown versions of your pages.',
-				'button' => 'Turn off',
-				'error'  => 'We couldn’t turn off features for AI assistants. Try again.',
-			),
-			$card['on']
+			$this->view_with_report()['experiments']
 		);
 	}
 
 	/**
-	 * @testdox Once the feature is on, the Overview card says so.
+	 * @testdox The notice goes away once the feature is on.
 	 */
-	public function test_overview_card_is_on_when_feature_is_on(): void {
+	public function test_health_notice_hidden_when_on(): void {
 		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'yes' );
 
-		$this->assertTrue( $this->overview_card()['enabled'] );
+		$this->assertNull( $this->view_with_report()['experiments'] );
 	}
 
 	/**
-	 * @testdox A user who can't manage WooCommerce gets no card.
+	 * @testdox The notice stays away for a user who dismissed it.
 	 */
-	public function test_overview_card_hidden_without_manage_woocommerce(): void {
+	public function test_health_notice_hidden_once_dismissed(): void {
+		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
+		update_user_meta( get_current_user_id(), AiAssistantExperiments::NOTICE_DISMISSED_META, '1' );
+
+		$this->assertNull( $this->view_with_report()['experiments'] );
+	}
+
+	/**
+	 * @testdox A user who can't manage WooCommerce gets no notice.
+	 */
+	public function test_health_notice_hidden_without_manage_woocommerce(): void {
+		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
 
-		$this->assertNull( $this->overview_card() );
+		$this->assertNull( $this->view_with_report()['experiments'] );
 	}
 
 	/**
-	 * @testdox AI shopping health's Extra details card doesn't mention the experiments.
+	 * @testdox Before the first check there's no Extra details card, so there's no notice above it either.
 	 */
-	public function test_declared_card_has_no_experiments(): void {
+	public function test_health_notice_needs_a_report(): void {
+		StoreOutputChecksTest::block_requests();
+		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
+		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
+		delete_option( AgentReadiness::REPORT_OPTION );
+
+		$this->assertNull( wc_get_container()->get( ReadinessCheckPage::class )->view()['experiments'] );
+	}
+
+	/**
+	 * @testdox The Extra details card and the AI tools Overview don't mention the experiments.
+	 */
+	public function test_no_experiments_in_extra_details_or_overview(): void {
+		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
+
+		$view = $this->view_with_report();
+
+		$this->assertArrayNotHasKey( 'experiments', $view['declared'] );
+		$this->assertArrayNotHasKey( 'experiments', $view['overview'] );
+	}
+
+	/**
+	 * The AI shopping health view, after a check that found one item missing.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function view_with_report(): array {
 		StoreOutputChecksTest::block_requests();
 		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		update_option(
@@ -194,20 +214,6 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 				),
 			)
 		);
-
-		$declared = wc_get_container()->get( ReadinessCheckPage::class )->view()['declared'];
-
-		$this->assertArrayNotHasKey( 'experiments', $declared );
-	}
-
-	/**
-	 * The Features for AI assistants card from the AI tools Overview.
-	 *
-	 * @return array<string, mixed>|null
-	 */
-	private function overview_card(): ?array {
-		StoreOutputChecksTest::block_requests();
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
-		return wc_get_container()->get( ReadinessCheckPage::class )->view()['overview']['experiments'];
+		return wc_get_container()->get( ReadinessCheckPage::class )->view();
 	}
 }

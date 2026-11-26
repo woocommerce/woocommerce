@@ -19,6 +19,11 @@ final class AiAssistantExperiments {
 	public const FEATURE_NAME = 'ai_assistant_experiments';
 
 	/**
+	 * User meta that records the user dismissed the notice on AI tools.
+	 */
+	public const NOTICE_DISMISSED_META = 'woocommerce_ai_assistant_experiments_notice_dismissed';
+
+	/**
 	 * Experiment that relies on the store's AI training choice.
 	 */
 	public const AI_TRAINING_NOTICES = 'ai_training_notices';

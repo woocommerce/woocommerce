@@ -339,17 +339,17 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			// Setup steps live in the Setup checklist and, while one blocks sales, in Fix first; the cards hold what the scan read.
 			'sections'     => null === $report ? array() : $this->sections( array_values( array_filter( $visible, static fn( array $check ): bool => ! self::is_setup_step( $check ) ) ), $launched, $report ),
 			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ),
+			// Above Extra details for AI assistants, which lists what these features add.
+			'experiments'  => null === $report ? null : $this->experiments_notice(),
 			'overview'     => array(
-				'shopping'    => $this->shopping_card( $checks ),
-				// Last on the Overview, after the AI shopping health card.
-				'experiments' => $this->experiments_card(),
+				'shopping' => $this->shopping_card( $checks ),
 				// After the description, when the last check stopped at the product limit.
-				'based_on'    => null === $truncated ? null : sprintf(
+				'based_on' => null === $truncated ? null : sprintf(
 					/* translators: %s: number of products checked. */
 					__( 'Based on your %s most recently changed products.', 'woocommerce' ),
 					number_format_i18n( ProductScan::PRODUCT_LIMIT )
 				),
-				'view_all'    => array(
+				'view_all' => array(
 					'href' => self::url(),
 					'text' => __( 'View all checks', 'woocommerce' ),
 				),
@@ -400,29 +400,25 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The Overview's Features for AI assistants card: a description and a button to turn them on, or once
-	 * they're on, a description that says so and a button to turn them off. Null for a user who can't
-	 * manage WooCommerce.
+	 * The AI shopping health notice suggesting Features for AI assistants, with a link to their row on the
+	 * Features page. Null for a user who can't manage WooCommerce, once they're on, or once the user dismissed it.
 	 *
-	 * @return array{title:string,badge:array{intent:string,text:string},enabled:bool,off:array{text:string,button:string,error:string},on:array{text:string,button:string,error:string}}|null
+	 * @return array{text:string,link:array{href:string,text:string}}|null
 	 */
-	private function experiments_card(): ?array {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+	private function experiments_notice(): ?array {
+		if (
+			! current_user_can( 'manage_woocommerce' )
+			|| $this->features_controller->feature_is_enabled( AiAssistantExperiments::FEATURE_NAME )
+			|| get_user_meta( get_current_user_id(), AiAssistantExperiments::NOTICE_DISMISSED_META, true )
+		) {
 			return null;
 		}
 		return array(
-			'title'   => __( 'Features for AI assistants', 'woocommerce' ),
-			'badge'   => self::badge_data( array( 'off', __( 'Experimental', 'woocommerce' ) ) ),
-			'enabled' => $this->features_controller->feature_is_enabled( AiAssistantExperiments::FEATURE_NAME ),
-			'off'     => array(
-				'text'   => __( 'Try newer standards for AI assistants before they settle, such as WebMCP and Markdown versions of your pages.', 'woocommerce' ),
-				'button' => __( 'Turn on', 'woocommerce' ),
-				'error'  => __( 'We couldn’t turn on features for AI assistants. Try again.', 'woocommerce' ),
-			),
-			'on'      => array(
-				'text'   => __( 'You’re trying newer standards for AI assistants, such as WebMCP and Markdown versions of your pages.', 'woocommerce' ),
-				'button' => __( 'Turn off', 'woocommerce' ),
-				'error'  => __( 'We couldn’t turn off features for AI assistants. Try again.', 'woocommerce' ),
+			'text' => __( 'Try newer standards for AI assistants, such as WebMCP and Markdown versions of your pages.', 'woocommerce' ),
+			'link' => array(
+				// The row's checkbox id, so the page scrolls to it.
+				'href' => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features#' . $this->features_controller->feature_enable_option_name( AiAssistantExperiments::FEATURE_NAME ) ),
+				'text' => __( 'Turn on in Features', 'woocommerce' ),
 			),
 		);
 	}
