@@ -1,0 +1,14 @@
+{
+	"name": "@woocommerce/entity-fields",
+	"private": true,
+	"description": "Fields of the experimental settings screens, registered on the server with the Entity fields API.",
+	"module": "build-module/cheque/index.mjs",
+	"wpScriptModuleExports": {
+		"./cheque": "./build-module/cheque/index.mjs"
+	},
+	"wpCopyFiles": {
+		"files": [
+			"src/**/*.php"
+		]
+	}
+}
