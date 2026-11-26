@@ -13,6 +13,7 @@
 # versions and commands come from `pnpm utils ci-jobs`, as in CI. Cells start
 # without `--update` so they stay warm, unless their WordPress is not the
 # version the cell needs; `--fresh` starts them as CI does.
+# Pick sharded cells by index from --list. --tests selects across both shards.
 # One invocation at a time.
 
 set -euo pipefail
@@ -205,6 +206,23 @@ else
 	done
 fi
 
+# A manual selection runs once per PHP/WordPress cell, even if CI uses two shards.
+if [[ ${#tests[@]} -gt 0 ]]; then
+	narrowed=()
+	sharded_cells=()
+	for index in "${selected[@]}"; do
+		row="${cell_rows[$(( index - 1 ))]}"
+		command="$(field "$row" 3)"
+		if [[ "$command" == *" --testsuite="* ]]; then
+			key="$(field "$row" 6):${command% --testsuite=*}"
+			[[ " ${sharded_cells[*]:-} " == *" $key "* ]] && continue
+			sharded_cells+=( "$key" )
+		fi
+		narrowed+=( "$index" )
+	done
+	selected=( "${narrowed[@]}" )
+fi
+
 # Install as CI does for a unit:php job.
 run composer install --working-dir="$project_dir" --quiet &
 composer_pid=$!
@@ -298,17 +316,21 @@ run_group() {
 	for index in "${selected[@]}"; do
 		local row="${cell_rows[$(( index - 1 ))]}"
 		[[ "$(field "$row" 6)" == "$slug" ]] || continue
-		local name command log start_at rc
+		local name log start_at rc
+		local -a command_args
 		name="$(field "$row" 2)"
-		command="$(field "$row" 3)"
-		command="${command/test:php:env/test:php:env:run}"
+		read -r -a command_args <<< "$(field "$row" 3)"
+		command_args[0]="${command_args[0]/test:php:env/test:php:env:run}"
+		if [[ ${#tests[@]} -gt 0 && "${command_args[1]:-}" == --testsuite=* ]]; then
+			command_args=( "${command_args[0]}" )
+		fi
 		log="$tmp/cell-$index.log"
 		envs=()
 		while IFS= read -r line; do envs+=( "$line" ); done < <( cell_env "$(field "$row" 7)" )
 		start_at=$(date +%s)
 		rc=0
 		if truncate_action_scheduler "$config" > "$log" 2>&1; then
-			CI=true WC_TEST_ENV_CONFIG="$config" env ${envs[@]+"${envs[@]}"} pnpm --filter="$project" "$command" ${phpunit_args[@]+"${phpunit_args[@]}"} >> "$log" 2>&1 || rc=$?
+			CI=true WC_TEST_ENV_CONFIG="$config" env ${envs[@]+"${envs[@]}"} pnpm --filter="$project" "${command_args[@]}" ${phpunit_args[@]+"${phpunit_args[@]}"} >> "$log" 2>&1 || rc=$?
 		else
 			rc=$?
 			echo "could not reset the Action Scheduler tables" >> "$log"

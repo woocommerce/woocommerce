@@ -268,7 +268,10 @@
 					"optional": true,
 					"testType": "unit:php",
 					"command": "test:php:env",
-					"shardingArguments": [],
+					"shardingArguments": [
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main-includes",
+						"--testsuite=wc-phpunit-main-other"
+					],
 					"onlyForDependencies": [],
 					"changes": [
 						"tests/legacy/**",
