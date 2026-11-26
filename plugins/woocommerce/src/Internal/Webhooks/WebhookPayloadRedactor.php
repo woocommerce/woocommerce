@@ -263,12 +263,44 @@ final class WebhookPayloadRedactor {
 		$pairs = explode( '&', $form );
 		foreach ( $pairs as $index => $pair ) {
 			$parts = explode( '=', $pair, 2 );
-			$key   = strtolower( urldecode( $parts[0] ) );
-			if ( isset( $fields[ $key ] ) && '' !== ( $parts[1] ?? '' ) ) {
+			if ( '' === ( $parts[1] ?? '' ) ) {
+				continue;
+			}
+
+			$key = strtolower( urldecode( $parts[0] ) );
+			if ( self::is_redacted_form_field( $key, $fields ) ) {
 				$pairs[ $index ] = $parts[0] . '=' . self::REDACTED;
 			}
 		}
 
 		return $prefix . implode( '&', $pairs );
+	}
+
+	/**
+	 * Match the full form field name or any part of a bracketed field name.
+	 *
+	 * @param string              $key    Decoded field name in lowercase.
+	 * @param array<string, bool> $fields Field names to hide.
+	 * @return bool
+	 */
+	private static function is_redacted_form_field( string $key, array $fields ): bool {
+		if ( isset( $fields[ $key ] ) ) {
+			return true;
+		}
+
+		$parts = explode( '[', $key );
+		$root  = array_shift( $parts );
+		if ( isset( $fields[ $root ] ) ) {
+			return true;
+		}
+
+		foreach ( $parts as $part ) {
+			$end = strpos( $part, ']' );
+			if ( false !== $end && isset( $fields[ substr( $part, 0, $end ) ] ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
