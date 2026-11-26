@@ -246,6 +246,11 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( null !== $order && $order->get_id() !== $order_id ) {
 			$this->order = null;
 		}
+
+		$holder = $this->holder ? $this->holder->get() : null;
+		if ( null !== $holder && $holder->get_id() !== $order_id ) {
+			$this->holder = null;
+		}
 	}
 
 	/**
