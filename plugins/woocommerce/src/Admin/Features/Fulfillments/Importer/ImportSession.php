@@ -895,9 +895,8 @@ final class ImportSession {
 	 * The record itself is kept until it expires or the user's next upload replaces it, so
 	 * a request that repeats the last chunk can still be answered. The flag is stored
 	 * first: when that fails the file and its scheduled cleanup stay, and a later call
-	 * can complete the session. The cleanup is unscheduled once the file and its
-	 * attachment are gone. The stored payload is read first, as record_chunk() does, so a
-	 * copy of a session that was replaced or deleted cannot store it again.
+	 * can complete the session. The stored payload is read first, as record_chunk() does,
+	 * so a copy of a session that was replaced or deleted cannot store it again.
 	 *
 	 * @since 11.5.0
 	 *
@@ -923,8 +922,23 @@ final class ImportSession {
 			return false;
 		}
 
-		// The import is completed either way. A file or attachment that could not be deleted
-		// keeps the scheduled cleanup, which tries again after the session has expired.
+		// The import is completed either way; what could not be deleted keeps a cleanup.
+		$this->release_staged_file();
+		return true;
+	}
+
+	/**
+	 * Delete the staged file of a session that no longer needs it, and its attachment.
+	 *
+	 * For a completed session and for one that was replaced. When the file and the
+	 * attachment are gone the scheduled cleanup goes too. When something is left, because
+	 * a delete failed or a callback threw, a cleanup stays scheduled and tries again later.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @return bool Whether the file and its attachment are gone.
+	 */
+	public function release_staged_file(): bool {
 		$hook_depth = count( $GLOBALS['wp_current_filter'] );
 		try {
 			self::delete_staged_file( $this->file(), $this->attachment_id() );
@@ -936,11 +950,23 @@ final class ImportSession {
 				array( 'source' => 'fulfillments-importer' )
 			);
 		}
+
 		$attachment_left = $this->attachment_id() > 0 && null !== get_post( $this->attachment_id() );
 		if ( ! file_exists( $this->file() ) && ! $attachment_left ) {
 			$this->unschedule_cleanup();
+			return true;
 		}
-		return true;
+
+		// A path outside the import directory is never deleted, so it gets no cleanup either.
+		$args = array( $this->user_id, $this->token, $this->file(), $this->attachment_id() );
+		if (
+			self::is_staged_path( $this->file() )
+			&& function_exists( 'as_next_scheduled_action' )
+			&& false === as_next_scheduled_action( self::CLEANUP_HOOK, $args, 'woocommerce-fulfillments-importer' )
+		) {
+			self::schedule_cleanup( $this->user_id, $this->token, $this->file(), $this->attachment_id(), 0 );
+		}
+		return false;
 	}
 
 	/**

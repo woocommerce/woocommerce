@@ -461,8 +461,9 @@ class FulfillmentsCsvImporter {
 	 *     @type int                 $next_record_number  Physical record number at byte_offset.
 	 *     @type array<string, true> $seen_tracking_pairs Order and tracking number pairs imported so far.
 	 *     @type int                 $remaining_rows      Data rows the caller still expects. When set, a read that
-	 *                                                    reaches the end of the file before them is an error and
-	 *                                                    nothing of the chunk is imported.
+	 *                                                    ends before them is an error and nothing of the chunk is
+	 *                                                    imported. A read that ends before the size of the file is
+	 *                                                    an error either way.
 	 * }
 	 * @return array{
 	 *     counts?: array{created:int, updated:int, skipped:int, failed:int, notified:int},
@@ -501,13 +502,19 @@ class FulfillmentsCsvImporter {
 		if ( isset( $read['error'] ) ) {
 			return $read;
 		}
-		// A reader that reaches the end before the rows the caller counted stopped early, for
-		// example on a failing stream. Its last row may be cut short, so none of them is imported.
-		if ( isset( $state['remaining_rows'] ) && ! empty( $read['eof'] ) && (int) ( $read['consumed'] ?? 0 ) < (int) $state['remaining_rows'] ) {
-			return $this->error(
-				'unexpected_eof',
-				__( 'The CSV file ended before all of its rows were read. Please try again, or upload the file again.', 'woocommerce' )
-			);
+		// A read that ends before the size of the file, or before the rows the caller counted,
+		// stopped early, for example on a stream that dropped. Its last row may be cut short and
+		// still look like a row, so nothing of the chunk is imported.
+		if ( ! empty( $read['eof'] ) ) {
+			$size      = filesize( $this->file );
+			$cut_short = false !== $size && (int) ( $read['byte_offset'] ?? 0 ) < $size;
+			$too_few   = isset( $state['remaining_rows'] ) && (int) ( $read['consumed'] ?? 0 ) < (int) $state['remaining_rows'];
+			if ( $cut_short || $too_few ) {
+				return $this->error(
+					'unexpected_eof',
+					__( 'The CSV file ended before all of its rows were read. Please try again, or upload the file again.', 'woocommerce' )
+				);
+			}
 		}
 
 		/**

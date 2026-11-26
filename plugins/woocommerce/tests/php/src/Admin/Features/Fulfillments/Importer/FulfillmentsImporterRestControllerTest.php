@@ -1454,6 +1454,28 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox handle_prepare keeps a cleanup scheduled for a replaced session's file it could not delete.
+	 */
+	public function test_prepare_keeps_a_cleanup_for_a_replaced_file_it_could_not_delete(): void {
+		$old_file = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n1,OLD-1,ups\n" );
+		$prior    = $this->make_session( $old_file );
+		$upload   = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n1,NEW-1,ups\n" );
+		// An empty path from this filter makes wp_delete_file() leave the file in place.
+		add_filter( 'wp_delete_file', '__return_empty_string' );
+
+		$response = $this->prepare_with_staged_file( $upload );
+		// Removed before tearDown() deletes the fixtures through the same function.
+		remove_filter( 'wp_delete_file', '__return_empty_string' );
+
+		$this->assertIsArray( $response );
+		$this->assertFileExists( $old_file, 'The file of the replaced session could not be deleted' );
+		$this->assertIsInt(
+			as_next_scheduled_action( ImportSession::CLEANUP_HOOK, array( get_current_user_id(), $prior->token(), $old_file, 0 ), 'woocommerce-fulfillments-importer' ),
+			'A cleanup stays scheduled for the file that is left'
+		);
+	}
+
+	/**
 	 * @testdox handle_prepare is refused while a chunk is being imported, and keeps the session that is importing.
 	 */
 	public function test_prepare_is_refused_while_a_chunk_is_being_imported(): void {

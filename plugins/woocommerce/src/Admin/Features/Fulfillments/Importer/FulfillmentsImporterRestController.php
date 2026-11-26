@@ -464,10 +464,11 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 
 				// The replaced session's record and cleanup action are already gone, so its staged
 				// file goes too, whether or not the new session could be stored. The path comes from
-				// stored session state, so the containment check in ImportSession applies.
+				// stored session state, so the containment check in ImportSession applies. A file
+				// that cannot be deleted now gets a cleanup scheduled again.
 				$replaced = $session->replaced();
 				if ( $replaced instanceof ImportSession ) {
-					ImportSession::delete_staged_file( $replaced->file(), $replaced->attachment_id() );
+					$replaced->release_staged_file();
 				}
 				return $session;
 			}
