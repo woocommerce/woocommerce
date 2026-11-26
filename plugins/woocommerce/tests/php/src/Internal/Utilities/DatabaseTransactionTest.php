@@ -74,7 +74,7 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 			$this->statements[] = $query;
 			return 'SELECT ' . $this->autocommit;
 		}
-		foreach ( array( 'START TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'RELEASE SAVEPOINT', 'SET autocommit' ) as $prefix ) {
+		foreach ( array( 'START TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'RELEASE SAVEPOINT', 'SET autocommit', 'SET TRANSACTION ISOLATION LEVEL' ) as $prefix ) {
 			if ( 0 === strpos( $query, $prefix ) ) {
 				$this->statements[] = $query;
 				return 'SELECT 1';
@@ -530,6 +530,33 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 		DatabaseTransaction::run( static fn() => null );
 
 		$this->assertSame( array( 'SELECT @@autocommit', 'START TRANSACTION', 'COMMIT' ), $this->statements );
+	}
+
+	/** @testdox Read committed applies only to the next transaction WooCommerce opens. */
+	public function test_run_sets_read_committed_for_one_transaction(): void {
+		$this->assertSame( 'done', DatabaseTransaction::run( static fn() => 'done', true ) );
+
+		$this->assertSame(
+			array( 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED', 'SELECT @@autocommit', 'SET autocommit = 0', 'START TRANSACTION', 'COMMIT', 'SET autocommit = 1' ),
+			$this->statements
+		);
+	}
+
+	/** @testdox An isolation error leaves a caller's transaction untouched. */
+	public function test_run_does_not_change_autocommit_when_isolation_is_refused(): void {
+		add_filter(
+			'query',
+			static function ( $query ) {
+				return 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED' === $query ? 'SELECT * FROM missing_transaction_test_table' : $query;
+			},
+			0
+		);
+
+		$result = DatabaseTransaction::run( fn() => $this->fail( 'A rejected transaction must skip the callback.' ), true );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_transaction_isolation_unavailable', $result->get_error_code() );
+		$this->assertSame( array(), $this->statements );
 	}
 
 	/**

@@ -13,7 +13,6 @@ use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 use WC_Order;
 use WC_Order_Item_Product;
 use WC_Product;
@@ -77,15 +76,13 @@ final class PaymentStock {
 	 *
 	 * @param WC_Order             $order Order to pay for.
 	 * @param array<int,int|float> $quantities Checked quantities keyed by stock-managing product ID.
-	 * @throws ReserveStockException When the database rolls back the reservation.
-	 * @throws \Throwable When an order save or integration fails.
+	 * @throws \Throwable When the reservation, order save or integration fails.
 	 */
 	private function save_payment_reservation( WC_Order $order, array $quantities ): void {
 		try {
-			$result = DatabaseTransaction::run( fn() => $this->reserve_and_save_order( $order, $quantities ) );
-			if ( is_wp_error( $result ) ) {
-				throw ReserveStockException::stock_check_failed();
-			}
+			$minutes = (int) get_option( 'woocommerce_hold_stock_minutes', 60 );
+			$reserve = wc_get_container()->get( ReserveStock::class );
+			$reserve->reserve_stock_for_payment( $order, $minutes, $quantities, fn() => $this->save_unpaid_order( $order ) );
 		} catch ( \Throwable $e ) {
 			$this->clear_order_caches_after_rollback( $order );
 			throw $e;
@@ -93,18 +90,12 @@ final class PaymentStock {
 	}
 
 	/**
-	 * Save the stock holds and the unpaid order in the caller's transaction.
+	 * Save the unpaid order so its hold counts and the cancellation timer starts again.
 	 *
-	 * @param WC_Order             $order Order to pay for.
-	 * @param array<int,int|float> $quantities Checked quantities keyed by stock-managing product ID.
-	 * @throws ReserveStockException When stock cannot be held or the order cannot be saved.
+	 * @param WC_Order $order Order to pay for.
+	 * @throws ReserveStockException When the order cannot be saved.
 	 */
-	private function reserve_and_save_order( WC_Order $order, array $quantities ): void {
-		$minutes = (int) get_option( 'woocommerce_hold_stock_minutes', 60 );
-		$reserve = wc_get_container()->get( ReserveStock::class );
-		if ( ! $reserve->reserve_stock_for_payment( $order, $minutes, $quantities ) ) {
-			return;
-		}
+	private function save_unpaid_order( WC_Order $order ): void {
 		// Failed orders do not count in the stock-hold query, so a payment retry must become pending.
 		if ( $order->has_status( OrderStatus::FAILED ) ) {
 			$order->set_status( OrderStatus::PENDING );

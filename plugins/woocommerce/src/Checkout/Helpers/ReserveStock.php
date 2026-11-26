@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Checkout\Helpers;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -105,31 +106,33 @@ final class ReserveStock {
 	/**
 	 * Reserve the checked stock quantities before payment starts.
 	 *
-	 * The caller must keep a transaction open through the order save.
+	 * Save the order and its holds together when given an order save callback.
 	 *
 	 * @internal
 	 * @since 11.4.0
 	 *
-	 * @param \WC_Order             $order Order to reserve stock for.
-	 * @param int                   $minutes Hold duration.
+	 * @param \WC_Order             $order            Order to reserve stock for.
+	 * @param int                   $minutes          Hold duration.
 	 * @param array<int, int|float> $stock_quantities Required quantities keyed by stock-managing product ID.
+	 * @param callable|null         $save_order       Callback that saves the order in the same transaction.
 	 * @return bool Whether a fresh reservation was created.
 	 * @throws ReserveStockException When stock cannot be reserved.
 	 */
-	public function reserve_stock_for_payment( $order, int $minutes, array $stock_quantities ): bool {
-		return $this->reserve_order_stock( $order, $minutes, $stock_quantities );
+	public function reserve_stock_for_payment( $order, int $minutes, array $stock_quantities, ?callable $save_order = null ): bool {
+		return $this->reserve_order_stock( $order, $minutes, $stock_quantities, $save_order );
 	}
 
 	/**
 	 * Reserve the order's stock through the existing stock writer.
 	 *
-	 * @param \WC_Order                  $order Order to reserve stock for.
-	 * @param int                        $minutes Hold duration.
+	 * @param \WC_Order                  $order            Order to reserve stock for.
+	 * @param int                        $minutes          Hold duration.
 	 * @param array<int, int|float>|null $stock_quantities Checked payment quantities, or null for regular checkout.
+	 * @param callable|null              $save_order       Callback that saves the payment order.
 	 * @return bool Whether a fresh reservation was created.
 	 * @throws ReserveStockException When stock cannot be reserved.
 	 */
-	private function reserve_order_stock( $order, $minutes, ?array $stock_quantities ): bool {
+	private function reserve_order_stock( $order, $minutes, ?array $stock_quantities, ?callable $save_order = null ): bool {
 		$for_payment = null !== $stock_quantities;
 		if ( ! $this->is_enabled() ) {
 			return false;
@@ -215,17 +218,12 @@ final class ReserveStock {
 			}
 
 			if ( ! empty( $rows ) ) {
-				// Reliability: consistent lock order = no cross-product ordering deadlocks from concurrent orders with same products added in different sequences.
-				ksort( $rows );
-				foreach ( $rows as $product_id => $quantity ) {
-					$this->reserve_stock_for_product( $product_id, $quantity, $order, $minutes, $for_payment );
-				}
-
+				$this->write_order_holds( $order, $minutes, $rows, $for_payment, $save_order );
 				$this->remember_order_for_shopper( $order );
 			}
 		} catch ( ReserveStockException $e ) {
 			// Payment holds roll back together. A deadlock may already have rolled back their transaction.
-			if ( ! $for_payment || ! DatabaseTransaction::is_open() ) {
+			if ( ! $for_payment || ( null === $save_order && ! DatabaseTransaction::is_open() ) ) {
 				$this->release_stock_for_order( $order );
 			}
 			throw $e;
@@ -260,6 +258,174 @@ final class ReserveStock {
 	}
 
 	/**
+	 * Write holds in stock ID order and keep payment state in the same transaction.
+	 *
+	 * @param \WC_Order            $order       Order receiving the holds.
+	 * @param int                  $minutes     Hold duration in minutes.
+	 * @param array<int,int|float> $rows        Quantities by stock owner.
+	 * @param bool                 $for_payment Whether this is an existing order payment.
+	 * @param callable|null        $save_order  Order save callback.
+	 * @throws ReserveStockException If the transaction cannot save its changes.
+	 */
+	private function write_order_holds( $order, int $minutes, array $rows, bool $for_payment, ?callable $save_order ): void {
+		$store       = \WC_Data_Store::load( 'product' );
+		$exact_locks = $this->can_lock_product_stock( $store );
+		$can_renew   = $for_payment && $order->has_status( array( OrderStatus::PENDING, OrderStatus::CHECKOUT_DRAFT ) );
+		ksort( $rows );
+
+		$write = function ( bool $lock_product_stock ) use ( $store, $can_renew, $rows, $order, $minutes, $for_payment, $save_order ) {
+			// Emit failed-to-pending status hooks only after stock has been secured.
+			$save_first = $lock_product_stock && $save_order && ! $order->has_status( OrderStatus::FAILED );
+			if ( $save_first ) {
+				$save_order();
+			}
+
+			foreach ( $rows as $product_id => $quantity ) {
+				$quantity = $for_payment ? $quantity : (int) $quantity;
+				if ( $lock_product_stock ) {
+					$this->reserve_under_product_lock( $product_id, $quantity, $order, $minutes, $can_renew );
+				} else {
+					$this->reserve_stock_for_product( $product_id, $quantity, $order, $minutes, $for_payment, $store );
+				}
+			}
+
+			if ( $save_order && ! $save_first ) {
+				$save_order();
+			}
+		};
+
+		if ( $exact_locks ) {
+			$result = DatabaseTransaction::run( fn() => $write( true ), true );
+			if ( ! is_wp_error( $result ) ) {
+				return;
+			}
+			// A caller may own an untracked transaction. Normal checkout can use its original writer in it.
+			if ( $save_order || 'woocommerce_transaction_isolation_unavailable' !== $result->get_error_code() ) {
+				throw ReserveStockException::stock_check_failed();
+			}
+		}
+
+		if ( $save_order ) {
+			if ( is_wp_error( DatabaseTransaction::run( fn() => $write( false ) ) ) ) {
+				throw ReserveStockException::stock_check_failed();
+			}
+		} else {
+			$write( false );
+		}
+	}
+
+	/**
+	 * Check whether the checkout can own a READ COMMITTED transaction for core stock records.
+	 *
+	 * @param \WC_Data_Store $store Product data store.
+	 * @return bool Whether to lock the product stock rows directly.
+	 */
+	private function can_lock_product_stock( \WC_Data_Store $store ): bool {
+		global $wpdb;
+
+		if ( \WC_Product_Data_Store_CPT::class !== $store->get_current_class_name() || DatabaseTransaction::has_active_transaction()
+			|| ( Constants::is_defined( 'WC_USE_TRANSACTIONS' ) && ! Constants::is_true( 'WC_USE_TRANSACTIONS' ) ) ) {
+			return false;
+		}
+
+		// InnoDB writes at READ COMMITTED require row-based logging when binary logging is on.
+		$format = $wpdb->get_var( "SHOW SESSION VARIABLES LIKE 'binlog_format'", 1 );
+		return ! $wpdb->last_error && ( 'STATEMENT' !== $format || '0' === $wpdb->get_var( 'SELECT @@log_bin AND @@session.sql_log_bin' ) );
+	}
+
+	/**
+	 * Lock the stock rows by primary key, then use fresh, non-locking reservation reads.
+	 *
+	 * @param int       $product_id     Stock owner's product ID.
+	 * @param int|float $stock_quantity Quantity required.
+	 * @param \WC_Order $order          Order receiving the hold.
+	 * @param int       $minutes        Hold duration in minutes.
+	 * @param bool      $can_renew      Whether this order's existing hold still counts.
+	 * @throws ReserveStockException If stock is unavailable or a database operation fails.
+	 */
+	private function reserve_under_product_lock( int $product_id, $stock_quantity, $order, int $minutes, bool $can_renew ): void {
+		global $wpdb;
+
+		$reserved_query = $this->get_query_for_reserved_stock( $product_id, $order->get_id() );
+		$stock          = $this->lock_product_stock( $product_id );
+		if ( $can_renew && $this->has_sufficient_hold( $product_id, $stock_quantity, $order ) ) {
+			$this->renew_stock_hold( $product_id, $stock_quantity, $order, $minutes );
+			return;
+		}
+
+		// A competing hold for this product cannot be written before our stock lock is released.
+		$held = $wpdb->get_var( $reserved_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Prepared by get_query_for_reserved_stock().
+		if ( $wpdb->last_error ) {
+			throw ReserveStockException::stock_check_failed();
+		}
+		if ( null === $held || $stock - (float) $held < $stock_quantity ) {
+			$this->throw_insufficient_stock( $product_id );
+		}
+
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->wc_reserved_stock} (order_id, product_id, stock_quantity, timestamp, expires)
+				VALUES (%d, %d, %f, NOW(), NOW() + INTERVAL %d MINUTE)
+				ON DUPLICATE KEY UPDATE expires = VALUES(expires), stock_quantity = VALUES(stock_quantity)",
+				$order->get_id(),
+				$product_id,
+				$stock_quantity,
+				$minutes
+			)
+		);
+		if ( false === $result ) {
+			throw ReserveStockException::stock_check_failed();
+		}
+	}
+
+	/**
+	 * Lock the product's stock metadata by its primary keys and read its current quantity.
+	 *
+	 * @param int $product_id Stock owner's product ID.
+	 * @return float Current stock quantity.
+	 * @throws ReserveStockException If stock cannot be locked or read.
+	 */
+	private function lock_product_stock( int $product_id ): float {
+		global $wpdb;
+
+		$meta_ids = $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_stock' ORDER BY meta_id", $product_id ) );
+		if ( $wpdb->last_error ) {
+			throw ReserveStockException::stock_check_failed();
+		}
+		// A product without a stock row has no stock we can lock for this attempt.
+		if ( ! $meta_ids ) {
+			return 0;
+		}
+		$placeholders = implode( ', ', array_fill( 0, count( $meta_ids ), '%d' ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Only generated %d placeholders are interpolated.
+		$sql   = $wpdb->prepare( "SELECT COALESCE(MAX(meta_value), 0) FROM {$wpdb->postmeta} FORCE INDEX (PRIMARY) WHERE meta_id IN ( $placeholders ) AND post_id = %d AND meta_key = '_stock' FOR UPDATE", array_merge( $meta_ids, array( $product_id ) ) );
+		$stock = $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Prepared above.
+		if ( null === $stock ) {
+			throw ReserveStockException::stock_check_failed();
+		}
+		return (float) $stock;
+	}
+
+	/**
+	 * Read this order's own hold after getting the stock lock.
+	 *
+	 * @param int       $product_id     Stock owner's product ID.
+	 * @param int|float $stock_quantity Quantity required.
+	 * @param \WC_Order $order          Order owning the hold.
+	 * @return bool
+	 * @throws ReserveStockException If the hold cannot be read.
+	 */
+	private function has_sufficient_hold( int $product_id, $stock_quantity, $order ): bool {
+		global $wpdb;
+
+		$quantity = $wpdb->get_var( $wpdb->prepare( "SELECT stock_quantity FROM {$wpdb->wc_reserved_stock} WHERE order_id = %d AND product_id = %d AND expires > NOW() FOR UPDATE", $order->get_id(), $product_id ) );
+		if ( $wpdb->last_error ) {
+			throw ReserveStockException::stock_check_failed();
+		}
+		return null !== $quantity && (float) $quantity >= $stock_quantity;
+	}
+
+	/**
 	 * Release a temporary hold on stock for an order.
 	 *
 	 * @param \WC_Order $order Order object.
@@ -284,16 +450,17 @@ final class ReserveStock {
 	 *
 	 * @throws ReserveStockException If a row cannot be inserted.
 	 *
-	 * @param int       $product_id     Product ID which is having stock reserved.
-	 * @param int|float $stock_quantity Stock amount to reserve.
-	 * @param \WC_Order $order          Order object which contains the product.
-	 * @param int       $minutes        How long to reserve stock in minutes.
-	 * @param bool      $for_payment    Whether this is a payment attempt with checked quantities.
+	 * @param int            $product_id     Product ID which is having stock reserved.
+	 * @param int|float      $stock_quantity Stock amount to reserve.
+	 * @param \WC_Order      $order          Order object which contains the product.
+	 * @param int            $minutes        How long to reserve stock in minutes.
+	 * @param bool           $for_payment    Whether this is a payment attempt with checked quantities.
+	 * @param \WC_Data_Store $store          Product data store.
 	 */
-	private function reserve_stock_for_product( $product_id, $stock_quantity, $order, $minutes, bool $for_payment = false ) {
+	private function reserve_stock_for_product( $product_id, $stock_quantity, $order, $minutes, bool $for_payment, \WC_Data_Store $store ) {
 		global $wpdb;
 
-		$query_for_stock          = \WC_Data_Store::load( 'product' )->get_query_for_stock( $product_id );
+		$query_for_stock          = $store->get_query_for_stock( $product_id );
 		$query_for_reserved_stock = $this->get_query_for_reserved_stock( $product_id, $order->get_id() );
 
 		if ( $for_payment ) {
@@ -302,21 +469,10 @@ final class ReserveStock {
 			if ( false === $locked ) {
 				throw ReserveStockException::stock_check_failed();
 			}
-			if ( $order->has_status( array( OrderStatus::PENDING, OrderStatus::CHECKOUT_DRAFT ) ) ) {
-				$held = $wpdb->query( $wpdb->prepare( "SELECT stock_quantity FROM {$wpdb->wc_reserved_stock} WHERE order_id = %d AND product_id = %d AND expires > NOW() FOR UPDATE", $order->get_id(), $product_id ) );
-				if ( false === $held ) {
-					throw ReserveStockException::stock_check_failed();
-				}
-				$own_hold = $wpdb->get_var(); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Read the locked result without issuing another query.
-				if ( null !== $own_hold && (float) $own_hold >= $stock_quantity ) {
-					$this->renew_stock_hold( $product_id, $stock_quantity, $order, $minutes );
-					return;
-				}
+			if ( $order->has_status( array( OrderStatus::PENDING, OrderStatus::CHECKOUT_DRAFT ) ) && $this->has_sufficient_hold( $product_id, $stock_quantity, $order ) ) {
+				$this->renew_stock_hold( $product_id, $stock_quantity, $order, $minutes );
+				return;
 			}
-		}
-		if ( ! $for_payment ) {
-			// Preserve the existing checkout writer's integer quantities.
-			$stock_quantity = (int) $stock_quantity;
 		}
 
 		// Performance note: this method uses pessimistic locking and requires InnoDB table types to function correctly.
@@ -353,17 +509,27 @@ final class ReserveStock {
 		}
 
 		if ( ! $result ) {
-			$product = wc_get_product( $product_id );
-			throw new ReserveStockException(
-				'woocommerce_product_not_enough_stock',
-				sprintf(
-					/* translators: %s: product name */
-					esc_html__( 'Not enough units of %s are available in stock to fulfil this order.', 'woocommerce' ),
-					esc_html( $product ? $product->get_name() : '#' . $product_id )
-				),
-				403
-			);
+			$this->throw_insufficient_stock( $product_id );
 		}
+	}
+
+	/**
+	 * Reject an order that needs more units than are available.
+	 *
+	 * @param int $product_id Stock owner's product ID.
+	 * @throws ReserveStockException When stock is insufficient.
+	 */
+	private function throw_insufficient_stock( int $product_id ): void {
+		$product = wc_get_product( $product_id );
+		throw new ReserveStockException(
+			'woocommerce_product_not_enough_stock',
+			sprintf(
+				/* translators: %s: product name */
+				esc_html__( 'Not enough units of %s are available in stock to fulfil this order.', 'woocommerce' ),
+				esc_html( $product ? $product->get_name() : '#' . $product_id )
+			),
+			403
+		);
 	}
 
 	/**

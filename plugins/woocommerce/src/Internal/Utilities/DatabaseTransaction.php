@@ -74,18 +74,25 @@ final class DatabaseTransaction {
 	 * throws. Inside another run(), or inside a transaction that wc_transaction_query() started, the callback
 	 * runs in a savepoint.
 	 *
-	 * @param callable $callback Callback to run.
+	 * @param callable $callback       Callback to run.
+	 * @param bool     $read_committed Use a fresh view for each read in the transaction this call opens.
 	 * @return mixed What the callback returns, or a WP_Error when a query hit an error that lost the write.
 	 * @throws \Throwable What the callback throws, after the rollback.
 	 */
-	public static function run( callable $callback ) {
+	public static function run( callable $callback, bool $read_committed = false ) {
 		wc_maybe_define_constant( 'WC_USE_TRANSACTIONS', true );
 		if ( ! Constants::is_true( 'WC_USE_TRANSACTIONS' ) ) {
 			return $callback();
 		}
 
-		$joined      = 0 === self::$depth && self::$caller_open;
-		$level       = $joined ? 1 : self::$depth;
+		$joined         = 0 === self::$depth && self::$caller_open;
+		$level          = $joined ? 1 : self::$depth;
+		$read_committed = $read_committed && 0 === $level;
+		// An untracked transaction can refuse the isolation change. Leave its autocommit untouched.
+		if ( $read_committed && ! self::query( 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED', true ) ) {
+			return new \WP_Error( 'woocommerce_transaction_isolation_unavailable' );
+		}
+
 		$outermost   = ! self::$watching;
 		$autocommit  = 0 === $level && self::is_autocommit_on();
 		self::$depth = $level;
@@ -94,7 +101,14 @@ final class DatabaseTransaction {
 			if ( $autocommit ) {
 				self::query( 'SET autocommit = 0' );
 			}
-			self::start();
+			if ( $read_committed ) {
+				if ( ! self::query( 'START TRANSACTION' ) ) {
+					return new \WP_Error( 'woocommerce_transaction_unavailable' );
+				}
+				++self::$depth;
+			} else {
+				self::start();
+			}
 			$started = true;
 			if ( $outermost ) {
 				self::$lost     = false;
@@ -248,14 +262,16 @@ final class DatabaseTransaction {
 	 *
 	 * @param string $sql   Statement. The only variable part is an integer level.
 	 * @param bool   $quiet Whether to keep an expected failure out of the output.
+	 * @return bool Whether the statement succeeded.
 	 */
-	private static function query( string $sql, bool $quiet = false ): void {
+	private static function query( string $sql, bool $quiet = false ): bool {
 		global $wpdb;
 
 		$suppress = $quiet ? $wpdb->suppress_errors() : null;
-		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The only variable part is an integer level.
+		$result   = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The only variable part is an integer level.
 		if ( null !== $suppress ) {
 			$wpdb->suppress_errors( $suppress );
 		}
+		return false !== $result;
 	}
 }
