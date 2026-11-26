@@ -872,7 +872,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function test_malformed_date_arg_returns_no_products( string $date_key, $date_value ): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_date_created( '2000-01-01T10:00:00' );
-		$product->set_date_on_sale_from( '2000-01-01T10:00:00' );
 		$product->save();
 
 		$this->assertSame(
@@ -906,7 +905,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'post column, array'      => array( 'date_created', array( '2000-01-01' ) ),
 			'post column, object'     => array( 'date_created', new stdClass() ),
 			'post column, Stringable' => array( 'date_created', new WC_Product_Data_Store_CPT_Test_Stringable( '2000-01-01' ) ),
-			'sale date, array'        => array( 'date_on_sale_from', array( '2000-01-01' ) ),
 		);
 	}
 

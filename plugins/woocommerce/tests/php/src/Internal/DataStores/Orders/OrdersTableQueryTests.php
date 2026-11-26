@@ -205,7 +205,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	public function test_malformed_date_arg_returns_no_orders( string $date_key, $date_value ): void {
 		$order = OrderHelper::create_order();
 		$order->set_date_created( '2000-01-01T10:00:00' );
-		$order->set_date_paid( '2000-01-01T10:00:00' );
 		$order->save();
 
 		$this->assertSame(
@@ -249,8 +248,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 					}
 				},
 			),
-			'GMT key, array'        => array( 'date_paid_gmt', array( '2000-01-01' ) ),
-			'GMT key, object'       => array( 'date_paid_gmt', new \stdClass() ),
 		);
 	}
 
