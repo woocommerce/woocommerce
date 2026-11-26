@@ -174,9 +174,21 @@ export default class PackagePrepare extends Command {
 				}
 				writeChangelog( name, nextVersion ? undefined : version );
 			} catch ( error ) {
-				writeFileSync( jsonFilepath, originalManifest );
-				if ( originalLockfile ) {
-					writeFileSync( lockFilepath, originalLockfile );
+				for ( const [ path, contents ] of [
+					[ jsonFilepath, originalManifest ],
+					[ lockFilepath, originalLockfile ],
+				] as const ) {
+					if ( contents === null ) {
+						continue;
+					}
+
+					try {
+						writeFileSync( path, contents );
+					} catch ( restoreError ) {
+						this.warn(
+							`Can't restore ${ path }. ${ String( restoreError ) }`
+						);
+					}
 				}
 				throw error;
 			}
