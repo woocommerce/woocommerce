@@ -197,7 +197,7 @@
 		"replace": "^1.2.2",
 		"rimraf": "catalog:tooling",
 		"rtlcss": "4.3.x",
-		"sass": "^1.69.5",
+		"sass": "catalog:tooling",
 		"sass-loader": "catalog:tooling",
 		"stylelint": "catalog:tooling",
 		"ts-jest": "catalog:tooling",

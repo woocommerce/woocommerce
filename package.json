@@ -76,7 +76,7 @@
 		"prettier": "catalog:tooling",
 		"regenerator-runtime": "^0.13.11",
 		"rimraf": "catalog:tooling",
-		"sass": "^1.69.5",
+		"sass": "catalog:tooling",
 		"sass-loader": "catalog:tooling",
 		"stylelint": "catalog:tooling",
 		"syncpack": "15.3.3",

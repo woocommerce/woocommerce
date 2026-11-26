@@ -42,7 +42,7 @@
 		"jest-fixed-jsdom": "catalog:tooling",
 		"jquery": "3.7.1",
 		"jquery4": "npm:jquery@4.0.0",
-		"sass": "^1.69.5",
+		"sass": "catalog:tooling",
 		"stylelint": "catalog:tooling"
 	},
 	"dependencies": {
