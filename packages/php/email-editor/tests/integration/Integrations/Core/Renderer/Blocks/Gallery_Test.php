@@ -440,13 +440,327 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test galleries without an aspect ratio are left uncropped (no regression).
+	 * Test galleries without known image dimensions are left uncropped.
 	 */
-	public function testItDoesNotCropWhenNoAspectRatioIsSet(): void {
+	public function testItDoesNotCropWhenImageDimensionsAreUnknown(): void {
 		$rendered = $this->gallery_renderer->render( '', $this->parsed_gallery, $this->rendering_context );
 
 		$this->assertStringNotContainsString( 'object-fit', $rendered );
 		$this->assertStringNotContainsString( 'aspect-ratio', $rendered );
+	}
+
+	/**
+	 * Test automatic cropping with the existing crop URL filter.
+	 *
+	 * @testdox Crops mixed rows and respects explicit ratios and crop opt-outs.
+	 *
+	 * @param array       $attrs Additional gallery attributes.
+	 * @param array       $sizes Image dimensions or markup for a rejected image.
+	 * @param array       $expected Ratios passed to the server crop filter, in render order.
+	 * @param int         $caption_count Number of captions expected in the rendered gallery.
+	 * @param string|null $first_image_ratio Explicit ratio for the first image, if any.
+	 * @phpstan-param list<array{int, int}|string> $sizes
+	 * @testWith [{}, [[900,600],[600,900],[900,600]], ["600/900","600/900"]]
+	 *           [{"imageCrop":true,"aspectRatio":"auto"}, [[900,600],"<img alt='No source'>",[600,900],[900,600]], ["600/900","600/900"]]
+	 *           [{"columns":3}, [[900,600],"<img alt='No source'><figcaption>Caption</figcaption>",[600,900]], ["600/900","600/900"], 1]
+	 *           [{"imageCrop":false}, [[900,600],[600,900],[900,600]], []]
+	 *           [{}, [[900,600],[600,400],[900,600]], []]
+	 *           [{}, [[900,600],[900,600]], ["1","1"], 0, "1"]
+	 */
+	public function testItCropsMixedGalleryRowsToFit( array $attrs, array $sizes, array $expected, int $caption_count = 0, ?string $first_image_ratio = null ): void {
+		$gallery          = $this->build_gallery_with_images( count( $sizes ), 2 );
+		$gallery['attrs'] = array_merge( $gallery['attrs'], $attrs );
+		$sources          = array();
+		foreach ( $sizes as $index => $size ) {
+			$gallery['innerBlocks'][ $index ]['attrs'] = array();
+			if ( is_array( $size ) ) {
+				$src       = "https://example.com/image$index.jpg";
+				$sources[] = $src;
+				$gallery['innerBlocks'][ $index ]['innerHTML'] = sprintf( '<img src="%s" width="%d" height="%d">', $src, $size[0], $size[1] );
+			} else {
+				$gallery['innerBlocks'][ $index ]['innerHTML'] = $size;
+			}
+		}
+		if ( null !== $first_image_ratio ) {
+			$gallery['innerBlocks'][0]['attrs']['aspectRatio'] = $first_image_ratio;
+		}
+
+		$ratios = array();
+		$filter = function ( $url, $ratio ) use ( &$ratios ) {
+			$ratios[ $url ] = $ratio;
+			return add_query_arg( 'crop', '1', $url );
+		};
+		add_filter( 'woocommerce_email_editor_gallery_cropped_image_url', $filter, 10, 2 );
+		try {
+			$rendered = $this->gallery_renderer->render( '', $gallery, $this->rendering_context );
+		} finally {
+			remove_filter( 'woocommerce_email_editor_gallery_cropped_image_url', $filter, 10 );
+		}
+
+		$expected_crops = array_combine( array_slice( $sources, 0, count( $expected ) ), $expected );
+		$this->assertSame( $expected_crops, $ratios );
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		foreach ( $sources as $src ) {
+			$this->assertTrue( $html->next_tag( array( 'tag_name' => 'img' ) ) );
+			$expected_src = isset( $expected_crops[ $src ] ) ? add_query_arg( 'crop', '1', $src ) : $src;
+			$this->assertSame( $expected_src, $html->get_attribute( 'src' ) );
+		}
+		$this->assertFalse( $html->next_tag( array( 'tag_name' => 'img' ) ) );
+		$this->assertSame( $caption_count, substr_count( $rendered, '>Caption</div>' ) );
+	}
+
+	/**
+	 * Test fallback when the attachment lacks dimension metadata.
+	 *
+	 * @testdox Uses saved dimensions when a resize service supplies defaults for missing metadata.
+	 * @param string $dimensions Saved image dimensions in the HTML.
+	 * @param int    $crop_count Expected instances of the crop ratio.
+	 * @param bool   $generated_size Whether a metadata filter supplies an intermediate size.
+	 * @testWith ["", 0, false]
+	 *           [" width=\"600\" height=\"900\"", 2, false]
+	 *           ["", 0, true]
+	 *           [" width=\"600\" height=\"900\"", 2, true]
+	 */
+	public function testItDoesNotUseResizeDefaultsForAutomaticCropping( string $dimensions, int $crop_count, bool $generated_size ): void {
+		$attachment_id = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+		$this->assertIsInt( $attachment_id );
+
+		$gallery                                = $this->build_gallery_with_images( 2, 2 );
+		$gallery['innerBlocks'][0]['attrs']     = array(
+			'id'       => $attachment_id,
+			'sizeSlug' => 'large',
+		);
+		$gallery['innerBlocks'][0]['innerHTML'] = '<img src="https://example.com/portrait.jpg"' . $dimensions . '>';
+		$gallery['innerBlocks'][1]['attrs']     = array();
+		$gallery['innerBlocks'][1]['innerHTML'] = '<img src="https://example.com/landscape.jpg" width="900" height="600">';
+		add_filter(
+			'image_downsize',
+			static function ( $size, $id ) use ( $attachment_id ) {
+				return $attachment_id === $id ? array( 'https://example.com/portrait.jpg', 1024, 1024, false ) : $size;
+			},
+			10,
+			2
+		);
+		if ( $generated_size ) {
+			wp_update_attachment_metadata( $attachment_id, array( 'file' => 'portrait.jpg' ) );
+			add_filter(
+				'wp_get_attachment_metadata',
+				static function ( $metadata, $id ) use ( $attachment_id ) {
+					if ( $attachment_id === $id ) {
+						$metadata['sizes']['large'] = array(
+							'width'  => 1024,
+							'height' => 1024,
+						);
+					}
+					return $metadata;
+				},
+				10,
+				2
+			);
+		}
+
+		$rendered = $this->gallery_renderer->render( '', $gallery, $this->rendering_context );
+
+		$this->assertSame( $crop_count, substr_count( $rendered, 'aspect-ratio:' ) );
+		$this->assertSame( $crop_count, substr_count( $rendered, 'aspect-ratio: 600/900;' ) );
+	}
+
+	/**
+	 * Test attachment dimensions with current, stale, and malformed source data.
+	 *
+	 * @testdox Uses the attachment dimensions when they match the saved gallery image.
+	 *
+	 * @param string      $source Image filename saved in the gallery.
+	 * @param string|null $variant A change to the thumbnail metadata or filtered source.
+	 * @param string      $ratio Expected ratio for the row.
+	 * @testWith ["portrait-150x150.jpg", null, "150/150"]
+	 *           ["portrait-600x900.jpg", null, "600/900"]
+	 *           ["portrait-150x150.jpg", "invalid-height", "600/900"]
+	 *           ["portrait-150x150.jpg", "missing-file", "600/900"]
+	 *           ["portrait-150x150.jpg", "cdn", "150/200"]
+	 *           ["portrait-150x150.jpg", "cdn-without-file", "150/150"]
+	 *           ["portrait-150x150.jpg", "missing-full-height", "150/150"]
+	 */
+	public function testItUsesTheSelectedAttachmentSizeForAutomaticCropping( string $source, ?string $variant, string $ratio ): void {
+		$attachment_id = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+		$this->assertIsInt( $attachment_id );
+		update_attached_file( $attachment_id, 'portrait.jpg' );
+
+		$thumbnail = array(
+			'width'  => 150,
+			'height' => 150,
+		);
+		if ( ! in_array( $variant, array( 'missing-file', 'cdn-without-file' ), true ) ) {
+			$thumbnail['file'] = 'portrait-150x150.jpg';
+		}
+		wp_update_attachment_metadata(
+			$attachment_id,
+			array(
+				'file'   => 'portrait.jpg',
+				'width'  => 900,
+				'height' => 'missing-full-height' === $variant ? null : 600,
+				'sizes'  => array( 'thumbnail' => $thumbnail ),
+			)
+		);
+		$attachment_url = wp_get_attachment_url( $attachment_id );
+		$this->assertIsString( $attachment_url );
+
+		$url = trailingslashit( dirname( $attachment_url ) ) . $source;
+		if ( 'invalid-height' === $variant || 'cdn' === $variant ) {
+			$url = 'https://cdn.example.com/' . $source;
+			add_filter(
+				'wp_get_attachment_image_src',
+				static function ( $size, $id ) use ( $attachment_id, $variant, $url ) {
+					if ( $attachment_id === $id ) {
+						return array( $url, 150, 'cdn' === $variant ? 200 : 'unknown', true );
+					}
+					return $size;
+				},
+				10,
+				2
+			);
+		}
+
+		if ( 'cdn-without-file' === $variant ) {
+			$url = 'https://cdn.example.com/' . $source;
+			add_filter(
+				'image_downsize',
+				static function ( $size, $id ) use ( $attachment_id, $url ) {
+					return $attachment_id === $id ? array( $url, 150, 150, true ) : $size;
+				},
+				10,
+				2
+			);
+		}
+
+		if ( 'missing-full-height' === $variant ) {
+			add_filter(
+				'image_downsize',
+				function ( $size, $id ) use ( $attachment_id ) {
+					$this->assertNotSame( $attachment_id, $id, 'The resize service requires both original dimensions.' );
+					return $size;
+				},
+				10,
+				2
+			);
+		}
+
+		$dimensions                             = in_array( $variant, array( 'cdn', 'cdn-without-file' ), true ) ? '' : ' width="600" height="900"';
+		$gallery                                = $this->build_gallery_with_images( 2, 2 );
+		$gallery['innerBlocks'][0]['attrs']     = array(
+			'id'       => $attachment_id,
+			'sizeSlug' => 'thumbnail',
+		);
+		$gallery['innerBlocks'][0]['innerHTML'] = '<img src="' . esc_url( $url ) . '"' . $dimensions . '>';
+		$gallery['innerBlocks'][1]['attrs']     = array();
+		$gallery['innerBlocks'][1]['innerHTML'] = '<img src="https://example.com/landscape.jpg" width="900" height="600">';
+
+		$rendered = $this->gallery_renderer->render( '', $gallery, $this->rendering_context );
+
+		$this->assertSame( 2, substr_count( $rendered, 'aspect-ratio: ' . $ratio . ';' ) );
+	}
+
+	/**
+	 * Test layout rounding does not turn two equal image shapes into a crop.
+	 *
+	 * @testdox Uses file dimensions when WordPress returns rounded display dimensions.
+	 * @param bool $intermediate Whether a stored intermediate file matches the saved source.
+	 * @testWith [false]
+	 *           [true]
+	 */
+	public function testItDoesNotCropEqualImageShapesWhenDisplayDimensionsAreRounded( bool $intermediate ): void {
+		$attachment_id = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+		$this->assertIsInt( $attachment_id );
+		update_attached_file( $attachment_id, 'banner.jpg' );
+		$metadata = array(
+			'file'   => 'banner.jpg',
+			'width'  => $intermediate ? 2400 : 4800,
+			'height' => $intermediate ? 600 : 200,
+		);
+		if ( $intermediate ) {
+			$metadata['sizes']['medium'] = array(
+				'file'   => 'banner-2400x100.jpg',
+				'width'  => 2400,
+				'height' => 100,
+			);
+		}
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+		update_option( 'medium_size_w', 300 );
+		update_option( 'medium_size_h', 300 );
+		$attachment_url = wp_get_attachment_url( $attachment_id );
+		$this->assertIsString( $attachment_url );
+		$url = $intermediate ? path_join( dirname( $attachment_url ), 'banner-2400x100.jpg' ) : $attachment_url;
+		$this->assertSame( array( $url, 300, 13, $intermediate ), wp_get_attachment_image_src( $attachment_id, 'medium' ) );
+
+		$gallery                                = $this->build_gallery_with_images( 2, 2 );
+		$gallery['innerBlocks'][0]['attrs']     = array(
+			'id'       => $attachment_id,
+			'sizeSlug' => 'medium',
+		);
+		$gallery['innerBlocks'][0]['innerHTML'] = '<img src="' . esc_url( $url ) . '">';
+		$gallery['innerBlocks'][1]['attrs']     = array();
+		$gallery['innerBlocks'][1]['innerHTML'] = '<img src="https://example.com/banner.jpg" width="2400" height="100">';
+
+		$rendered = $this->gallery_renderer->render( '', $gallery, $this->rendering_context );
+
+		$this->assertStringNotContainsString( 'aspect-ratio:', $rendered );
+	}
+
+	/**
+	 * Test matching the original file with width-only queries and malformed intermediate metadata.
+	 *
+	 * @testdox Preserves automatic cropping when the same file was saved at a different width.
+	 * @param string $query Query saved on the image URL.
+	 * @param int    $crop_count Number of images expected to crop.
+	 * @param array  $malformed_sizes Optional malformed intermediate metadata.
+	 * @testWith ["?w=190", 2]
+	 *           ["?w=190&h=190&crop=1", 0]
+	 *           ["?w=0190", 0]
+	 *           ["?w=190#image", 0]
+	 *           ["", 2, {"large":"invalid"}]
+	 *           ["?w=190&crop=1", 0, {"large":{"file":["invalid"],"width":150,"height":150}}]
+	 */
+	public function testItUsesOriginalDimensionsForMatchingImageUrls( string $query, int $crop_count, array $malformed_sizes = array() ): void {
+		$attachment_id = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+		$this->assertIsInt( $attachment_id );
+		update_attached_file( $attachment_id, 'portrait.jpg' );
+		wp_update_attachment_metadata(
+			$attachment_id,
+			array(
+				'file'   => 'portrait.jpg',
+				'width'  => 600,
+				'height' => 900,
+				'sizes'  => $malformed_sizes,
+			)
+		);
+		$attachment_url = wp_get_attachment_url( $attachment_id );
+		$this->assertIsString( $attachment_url );
+
+		add_filter(
+			'image_downsize',
+			function ( $size, $id ) use ( $attachment_id, $attachment_url, $malformed_sizes ) {
+				if ( $attachment_id === $id ) {
+					$this->assertEmpty( $malformed_sizes, 'The resize provider should only read valid size metadata.' );
+					return array( $attachment_url . '?w=600', 600, 900, false );
+				}
+				return $size;
+			},
+			10,
+			2
+		);
+		$gallery                                = $this->build_gallery_with_images( 2, 2 );
+		$gallery['innerBlocks'][0]['attrs']     = array(
+			'id'       => $attachment_id,
+			'sizeSlug' => 'large',
+		);
+		$gallery['innerBlocks'][0]['innerHTML'] = '<img src="' . esc_url( $attachment_url . $query ) . '">';
+		$gallery['innerBlocks'][1]['attrs']     = array();
+		$gallery['innerBlocks'][1]['innerHTML'] = '<img src="https://example.com/landscape.jpg" width="900" height="600">';
+
+		$rendered = $this->gallery_renderer->render( '', $gallery, $this->rendering_context );
+
+		$this->assertSame( $crop_count, substr_count( $rendered, 'aspect-ratio:' ) );
+		$this->assertSame( $crop_count, substr_count( $rendered, 'aspect-ratio: 600/900;' ) );
 	}
 
 	/**

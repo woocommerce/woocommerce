@@ -229,9 +229,6 @@ catalogs:
     '@oclif/core':
       specifier: ^4.13.5
       version: 4.13.5
-    '@types/jest':
-      specifier: 29.5.x
-      version: 29.5.14
     '@wordpress/browserslist-config':
       specifier: next
       version: 6.43.1-next.v.202604091042.0
@@ -331,6 +328,34 @@ catalogs:
     webpack-cli:
       specifier: 5.1.x
       version: 5.1.4
+  types:
+    '@types/debug':
+      specifier: ^4.1.12
+      version: 4.1.12
+    '@types/jest':
+      specifier: 29.5.x
+      version: 29.5.14
+    '@types/lodash':
+      specifier: ^4.14.202
+      version: 4.17.24
+    '@types/node':
+      specifier: ^24.1.0
+      version: 24.12.2
+    '@types/prop-types':
+      specifier: ^15.7.11
+      version: 15.7.15
+    '@types/qs':
+      specifier: ^6.9.10
+      version: 6.15.0
+    '@types/react-dom':
+      specifier: 18.3.x
+      version: 18.3.7
+    '@types/react-transition-group':
+      specifier: ^4.4.10
+      version: 4.4.12
+    '@types/semver':
+      specifier: ^7.5.6
+      version: 7.7.1
   wp-bundled:
     '@wordpress/admin-ui':
       specifier: 2.5.0
@@ -390,9 +415,6 @@ catalogs:
     '@wordpress/blocks':
       specifier: 15.6.3
       version: 15.6.3
-    '@wordpress/commands':
-      specifier: 1.33.5
-      version: 1.33.5
     '@wordpress/components':
       specifier: 30.6.5
       version: 30.6.5
@@ -543,7 +565,7 @@ importers:
         specifier: catalog:tooling
         version: 7.25.7
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -804,9 +826,6 @@ importers:
       clsx:
         specifier: 2.1.x
         version: 2.1.1
-      core-js:
-        specifier: ^3.34.0
-        version: 3.49.0
       d3-axis:
         specifier: ^1.0.12
         version: 1.0.12
@@ -861,6 +880,9 @@ importers:
       react-window:
         specifier: ^1.8.11
         version: 1.8.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      uuid:
+        specifier: ^11.1.1
+        version: 11.1.1
     devDependencies:
       '@babel/core':
         specifier: catalog:tooling
@@ -893,20 +915,17 @@ importers:
         specifier: ^1.6.4
         version: 1.9.0
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/lodash':
-        specifier: ^4.14.202
+        specifier: catalog:types
         version: 4.17.24
       '@types/prop-types':
-        specifier: ^15.7.11
+        specifier: catalog:types
         version: 15.7.15
       '@types/testing-library__jest-dom':
         specifier: ^5.14.9
         version: 5.14.9
-      '@types/uuid':
-        specifier: ^8.3.4
-        version: 8.3.4
       '@types/wordpress__viewport':
         specifier: catalog:wp-min
         version: 5.5.3(react@18.3.1)
@@ -976,9 +995,6 @@ importers:
       typescript:
         specifier: catalog:tooling
         version: 5.7.3
-      uuid:
-        specifier: ^11.1.1
-        version: 11.1.1
       webpack:
         specifier: catalog:tooling
         version: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
@@ -989,20 +1005,16 @@ importers:
   packages/js/create-woo-extension: {}
 
   packages/js/csv-export:
-    dependencies:
-      '@types/node':
-        specifier: ^24.1.0
-        version: 24.12.2
-      browser-filesaver:
-        specifier: ^1.1.1
-        version: 1.1.1
     devDependencies:
       '@babel/core':
         specifier: catalog:tooling
         version: 7.29.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
+      '@types/node':
+        specifier: catalog:types
+        version: 24.12.2
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
@@ -1062,7 +1074,7 @@ importers:
         specifier: catalog:tooling
         version: 7.29.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/react':
         specifier: 18.3.x
@@ -1144,10 +1156,10 @@ importers:
         specifier: ^16.x.x
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/prop-types':
-        specifier: ^15.7.11
+        specifier: catalog:types
         version: 15.7.15
       '@types/testing-library__jest-dom':
         specifier: ^5.14.9
@@ -1292,19 +1304,19 @@ importers:
         specifier: ^16.x.x
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/lodash':
-        specifier: ^4.14.202
+        specifier: catalog:types
         version: 4.17.24
       '@types/md5':
         specifier: ^2.3.5
         version: 2.3.6
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
       '@types/qs':
-        specifier: ^6.9.10
+        specifier: catalog:types
         version: 6.15.0
       '@types/react':
         specifier: 18.3.x
@@ -1377,16 +1389,16 @@ importers:
         specifier: catalog:tooling
         version: 7.29.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/lodash':
-        specifier: ^4.14.202
+        specifier: catalog:types
         version: 4.17.24
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
       '@types/qs':
-        specifier: ^6.9.10
+        specifier: catalog:types
         version: 6.15.0
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -1478,10 +1490,10 @@ importers:
         specifier: ^1.63.0
         version: 1.63.0
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -1528,9 +1540,6 @@ importers:
       '@wordpress/blocks':
         specifier: catalog:wp-min
         version: 15.6.3(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@wordpress/commands':
-        specifier: catalog:wp-min
-        version: 1.33.5(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/components':
         specifier: catalog:wp-min
         version: 30.6.5(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1635,22 +1644,22 @@ importers:
         specifier: ^4.7.11
         version: 4.7.11
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/js-cookie':
         specifier: ^3.0.2
         version: 3.0.6
       '@types/lodash':
-        specifier: ^4.14.180
+        specifier: catalog:types
         version: 4.17.24
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
       '@types/react':
         specifier: 18.3.x
         version: 18.3.28
       '@types/react-dom':
-        specifier: 18.3.x
+        specifier: catalog:types
         version: 18.3.7(@types/react@18.3.28)
       '@types/wordpress__block-editor':
         specifier: catalog:wp-min
@@ -1808,10 +1817,10 @@ importers:
         specifier: 13.5.0
         version: 13.5.0(@testing-library/dom@10.4.1)
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/react-transition-group':
-        specifier: ^4.4.10
+        specifier: catalog:types
         version: 4.4.12(@types/react@18.3.28)
       '@types/testing-library__jest-dom':
         specifier: ^5.14.9
@@ -1908,13 +1917,13 @@ importers:
         specifier: ^0.6.0
         version: 0.6.0
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
       '@types/qs':
-        specifier: ^6.9.10
+        specifier: catalog:types
         version: 6.15.0
       '@types/react':
         specifier: 18.3.x
@@ -1966,7 +1975,7 @@ importers:
         specifier: catalog:tooling
         version: 7.29.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -2224,10 +2233,10 @@ importers:
         specifier: catalog:tooling
         version: 7.25.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/qs':
-        specifier: ^6.9.10
+        specifier: catalog:types
         version: 6.15.0
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -2291,7 +2300,7 @@ importers:
         specifier: catalog:tooling
         version: 7.29.7
       '@types/lodash':
-        specifier: ^4.14.202
+        specifier: catalog:types
         version: 4.17.24
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -2343,10 +2352,10 @@ importers:
         specifier: catalog:tooling
         version: 7.25.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/lodash':
-        specifier: ^4.14.202
+        specifier: catalog:types
         version: 4.17.24
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -2428,7 +2437,7 @@ importers:
         specifier: ^16.x.x
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/react':
         specifier: 18.3.x
@@ -2513,13 +2522,13 @@ importers:
         specifier: catalog:tooling
         version: 7.29.7
       '@types/debug':
-        specifier: ^4.1.12
+        specifier: catalog:types
         version: 4.1.12
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -2571,7 +2580,7 @@ importers:
         specifier: ^2.0.4
         version: 2.4.0
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/trusted-types':
         specifier: ^2.0.7
@@ -2635,7 +2644,7 @@ importers:
         specifier: catalog:tooling
         version: 7.29.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/react':
         specifier: 18.3.x
@@ -2690,13 +2699,13 @@ importers:
         specifier: catalog:tooling
         version: 7.29.7
       '@types/debug':
-        specifier: ^4.1.12
+        specifier: catalog:types
         version: 4.1.12
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -2783,7 +2792,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/jquery':
         specifier: 3.5.33
@@ -2927,9 +2936,6 @@ importers:
 
   plugins/woocommerce-beta-tester:
     dependencies:
-      '@types/prop-types':
-        specifier: ^15.7.11
-        version: 15.7.15
       '@woocommerce/data':
         specifier: workspace:*
         version: link:../../packages/js/data
@@ -2964,11 +2970,14 @@ importers:
         specifier: ^15.8.1
         version: 15.8.1
     devDependencies:
+      '@types/prop-types':
+        specifier: catalog:types
+        version: 15.7.15
       '@types/react':
         specifier: 18.3.x
         version: 18.3.28
       '@types/react-dom':
-        specifier: 18.3.x
+        specifier: catalog:types
         version: 18.3.7(@types/react@18.3.28)
       '@woocommerce/dependency-extraction-webpack-plugin':
         specifier: workspace:*
@@ -3056,7 +3065,7 @@ importers:
         version: 18.3.1(react@18.3.1)
     devDependencies:
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/react':
         specifier: 18.3.x
@@ -3366,25 +3375,25 @@ importers:
         specifier: ^0.4.1
         version: 0.4.1
       '@types/debug':
-        specifier: 4.1.12
+        specifier: catalog:types
         version: 4.1.12
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/lodash':
-        specifier: ^4.14.202
+        specifier: catalog:types
         version: 4.17.24
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
       '@types/qs':
-        specifier: ^6.9.10
+        specifier: catalog:types
         version: 6.15.0
       '@types/react':
         specifier: 18.3.x
         version: 18.3.28
       '@types/react-transition-group':
-        specifier: ^4.4.10
+        specifier: catalog:types
         version: 4.4.12(@types/react@18.3.28)
       '@types/testing-library__jest-dom':
         specifier: ^5.14.9
@@ -3754,7 +3763,7 @@ importers:
         specifier: 0.0.10
         version: 0.0.10
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/jquery':
         specifier: 3.5.14
@@ -3763,16 +3772,16 @@ importers:
         specifier: 4.14.182
         version: 4.14.182
       '@types/prop-types':
-        specifier: ^15.7.11
+        specifier: catalog:types
         version: 15.7.15
       '@types/react':
         specifier: 18.3.x
         version: 18.3.28
       '@types/react-dom':
-        specifier: 18.3.x
+        specifier: catalog:types
         version: 18.3.7(@types/react@18.3.28)
       '@types/react-transition-group':
-        specifier: ^4.4.10
+        specifier: catalog:types
         version: 4.4.12(@types/react@18.3.28)
       '@types/wordpress__block-editor':
         specifier: catalog:wp-min
@@ -4073,7 +4082,7 @@ importers:
         version: https://codeload.github.com/woocommerce/sourcebuster-js/tar.gz/b28980f98d8ed3f35ac84974e603a6c3bd103752
     devDependencies:
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
       '@wordpress/browserslist-config':
         specifier: catalog:tooling
@@ -4170,10 +4179,10 @@ importers:
         version: 4.0.2
     devDependencies:
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -4222,7 +4231,7 @@ importers:
         version: 10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)
     devDependencies:
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
 
   tools/eslint-config:
@@ -4311,10 +4320,10 @@ importers:
         version: 4.0.2
     devDependencies:
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -4361,16 +4370,16 @@ importers:
       '@oclif/plugin-plugins':
         specifier: ^5.4.87
         version: 5.5.0
-      '@types/semver':
-        specifier: ^7.5.6
-        version: 7.7.1
       semver:
         specifier: ^7.5.4
         version: 7.7.4
     devDependencies:
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
+      '@types/semver':
+        specifier: catalog:types
+        version: 7.7.1
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -4436,10 +4445,10 @@ importers:
         specifier: ^4.2.9
         version: 4.2.9
       '@types/node':
-        specifier: ^24.1.0
+        specifier: catalog:types
         version: 24.12.2
       '@types/semver':
-        specifier: ^7.5.6
+        specifier: catalog:types
         version: 7.7.1
       typescript:
         specifier: catalog:tooling
@@ -9236,9 +9245,6 @@ packages:
   '@types/uglify-js@3.17.5':
     resolution: {integrity: sha512-TU+fZFBTBcXj/GpDpDaBmgWk/gn96kMZ+uocaFUlV2f8a6WdMzzI44QBCmGcCiYR0Y6ZlNRiyUyKKt5nl/lbzQ==}
 
-  '@types/uuid@8.3.4':
-    resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
-
   '@types/webpack-sources@3.2.3':
     resolution: {integrity: sha512-4nZOdMwSPHZ4pTEZzSp0AsTM4K7Qmu40UKW4tJDiOVs20UzYF9l+qUe4s0ftfN0pin06n+5cWWDJXH+sbhAiDw==}
 
@@ -9946,13 +9952,6 @@ packages:
     engines: {node: '>=12'}
     peerDependencies:
       react: ^18.0.0
-
-  '@wordpress/commands@1.33.5':
-    resolution: {integrity: sha512-m8a/9ahGzEVYj77EfS6crzjq2Gq97DOXbeSqRSHrpePE/NSXPh6AAABRP/dKCI/0AysjJ0v/bKKTVnsFgkk0YA==}
-    engines: {node: '>=18.12.0', npm: '>=8.19.2'}
-    peerDependencies:
-      react: ^18.0.0
-      react-dom: ^18.0.0
 
   '@wordpress/commands@1.48.1':
     resolution: {integrity: sha512-yFmQ2yB4tOWPqhO+tE8uYyFqcGwxtOJ9uc1yHYfH40oMls3p+TswktsdbBM2gEmoYxfD+d3Nhp/mXGS38pdTdw==}
@@ -12189,9 +12188,6 @@ packages:
 
   brcast@2.0.2:
     resolution: {integrity: sha512-Tfn5JSE7hrUlFcOoaLzVvkbgIemIorMIyoMr3TgvszWW7jFt2C9PdeMLtysYD9RU0MmU17b69+XJG1eRY2OBRg==}
-
-  browser-filesaver@1.1.1:
-    resolution: {integrity: sha512-UI4ps3bE/YXvGKlL7BoITvw8bE/SOt7YnvZeCyME7votTLxsDQ0ES0lvQdEWZMvO9aF5/66h+a3PGWn1KOblBA==}
 
   browserify-zlib@0.1.4:
     resolution: {integrity: sha512-19OEpq7vWgsH6WkvkBJQDFvJS1uPcbFOQ4v9CU839dO+ZZXUZO6XpE6hNCqvlIIj+4fZvRiJ6DsAQ382GwiyTQ==}
@@ -26959,8 +26955,6 @@ snapshots:
       source-map: 0.6.1
     optional: true
 
-  '@types/uuid@8.3.4': {}
-
   '@types/webpack-sources@3.2.3':
     dependencies:
       '@types/node': 24.12.2
@@ -28405,26 +28399,6 @@ snapshots:
       - react-dom
       - supports-color
       - vite
-
-  '@wordpress/commands@1.33.5(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@wordpress/base-styles': 6.20.0
-      '@wordpress/components': 30.9.0(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@wordpress/data': 10.33.1(@types/react@18.3.28)(react@18.3.1)
-      '@wordpress/element': 6.45.0
-      '@wordpress/i18n': 6.30.0
-      '@wordpress/icons': 11.8.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@wordpress/keyboard-shortcuts': 5.48.1(@types/react-dom@18.3.7(@types/react@18.3.28))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@wordpress/private-apis': 1.48.1
-      clsx: 2.1.1
-      cmdk: 1.1.1(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-    transitivePeerDependencies:
-      - '@emotion/is-prop-valid'
-      - '@types/react'
-      - '@types/react-dom'
-      - supports-color
 
   '@wordpress/commands@1.48.1(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))':
     dependencies:
@@ -34594,8 +34568,6 @@ snapshots:
       fill-range: 7.1.1
 
   brcast@2.0.2: {}
-
-  browser-filesaver@1.1.1: {}
 
   browserify-zlib@0.1.4:
     dependencies:

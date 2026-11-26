@@ -127,54 +127,164 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that backorder meta is excluded from formatted meta data
-	 * for completed orders.
+	 * @testdox get_formatted_meta_data() backorder display label defers to the generic filter when it customized it, otherwise falls back to the deprecated filter.
+	 * @dataProvider provide_display_label_scenarios
+	 * @param bool   $generic_filter_customizes Whether the generic display-key filter customizes the label.
+	 * @param string $expected_label Expected display_key for the backorder meta.
 	 */
-	public function test_get_formatted_meta_data_excludes_backorder_on_completed() {
-		// 1. Set backorders allowed for the product.
-		$this->product->set_manage_stock( true );
-		$this->product->set_stock_quantity( 0 );
-		$this->product->set_backorders( 'notify' ); // Allow backorders with notification.
-		$this->product->save();
+	public function test_get_formatted_meta_data_backorder_display_label( bool $generic_filter_customizes, string $expected_label ): void {
+		add_filter(
+			'woocommerce_backordered_item_meta_name',
+			static function () {
+				return 'Pendiente';
+			}
+		);
 
-		// 2. Add backorder meta.
-		$backorder_meta_key = 'Backordered';
-		$this->item->add_meta_data( $backorder_meta_key, 1, true ); // Value typically is the backordered quantity.
+		if ( $generic_filter_customizes ) {
+			add_filter(
+				'woocommerce_order_item_display_meta_key',
+				function ( $display_key, $meta ) {
+					return WC_Order_Item_Product::BACKORDER_META_KEY === $meta->key ? 'Custom label' : $display_key;
+				},
+				10,
+				2
+			);
+		} else {
+			$this->setExpectedDeprecated( 'woocommerce_backordered_item_meta_name' );
+		}
+
+		$this->item->add_meta_data( WC_Order_Item_Product::BACKORDER_META_KEY, 1, true );
 		$this->item->save();
 
-		// 3. Assert: Check meta exists before completion.
-		$item_id                = $this->item->get_id();
-		$order_item             = $this->order->get_item( $item_id ); // Re-fetch item from order.
-		$formatted_meta_before  = $order_item->get_formatted_meta_data();
-		$found_backorder_before = false;
-		foreach ( $formatted_meta_before as $meta ) {
-			if ( $meta->key === $backorder_meta_key ) {
-				$found_backorder_before = true;
-				break;
-			}
-		}
-		$this->assertTrue( $found_backorder_before, 'Backorder meta should exist before order completion.' );
+		$formatted = $this->item->get_formatted_meta_data();
+		$backorder = current(
+			array_filter(
+				$formatted,
+				function ( $meta ) {
+					return WC_Order_Item_Product::BACKORDER_META_KEY === $meta->key;
+				}
+			)
+		);
 
-		// 4. Complete the order.
+		$this->assertNotFalse( $backorder, 'Backorder meta should be present in formatted meta data.' );
+		$this->assertSame( $expected_label, $backorder->display_key );
+	}
+
+	/**
+	 * Data provider for test_get_formatted_meta_data_backorder_display_label.
+	 *
+	 * @return array
+	 */
+	public function provide_display_label_scenarios(): array {
+		return array(
+			'deprecated filter sets the label when nothing else customized it' => array( false, 'Pendiente' ),
+			'generic filter customization is not overwritten'                  => array( true, 'Custom label' ),
+		);
+	}
+
+	/**
+	 * @testdox Both set_backorder_meta() and WC_Order::update_product() remove a pre-existing legacy-keyed note instead of leaving it alongside the fixed-key one.
+	 */
+	public function test_backorder_meta_write_paths_reconcile_legacy_key(): void {
+		add_filter(
+			'woocommerce_backordered_item_meta_name',
+			static function () {
+				return 'Pendiente';
+			}
+		);
+
+		$this->product->set_manage_stock( true );
+		$this->product->set_stock_quantity( 0 );
+		$this->product->set_backorders( 'notify' );
+		$this->product->save();
+
+		// set_backorder_meta() path: simulate an item that already had a legacy-keyed note before being re-touched.
+		$this->item->add_meta_data( 'Pendiente', 1, true );
+		$this->item->set_quantity( 1 );
+
+		$this->setExpectedDeprecated( 'woocommerce_backordered_item_meta_name' );
+		$this->item->set_backorder_meta();
+		$this->item->save();
+
+		$reloaded = new WC_Order_Item_Product( $this->item->get_id() );
+		$this->assertSame( '1', $reloaded->get_meta( WC_Order_Item_Product::BACKORDER_META_KEY ), 'set_backorder_meta() should store the fixed key.' );
+		$this->assertSame( '', $reloaded->get_meta( 'Pendiente' ), 'set_backorder_meta() should remove the legacy-keyed note.' );
+
+		// update_product() path: simulate the same item regaining a legacy-keyed note before being updated again.
+		$this->item->add_meta_data( 'Pendiente', 1, true );
+		$this->item->save();
+
+		$this->setExpectedDeprecated( 'WC_Order::update_product' );
+		$this->order->update_product(
+			$this->item->get_id(),
+			$this->product,
+			array(
+				'qty'      => 1,
+				'subtotal' => 0,
+				'total'    => 0,
+			)
+		);
+
+		$reloaded = new WC_Order_Item_Product( $this->item->get_id() );
+		$this->assertSame( '1', $reloaded->get_meta( WC_Order_Item_Product::BACKORDER_META_KEY ), 'update_product() should store the fixed key.' );
+		$this->assertSame( '', $reloaded->get_meta( 'Pendiente' ), 'update_product() should remove the legacy-keyed note.' );
+	}
+
+	/**
+	 * @testdox Backorder meta stored under the fixed key, a legacy key, or both is hidden once the order is completed.
+	 * @dataProvider provide_backorder_meta_keys_to_seed
+	 * @param array $keys_to_seed Meta keys to seed on the order item before completing it.
+	 */
+	public function test_get_formatted_meta_data_excludes_backorder_on_completed( array $keys_to_seed ): void {
+		$this->product->set_manage_stock( true );
+		$this->product->set_stock_quantity( 0 );
+		$this->product->set_backorders( 'notify' );
+		$this->product->save();
+
+		if ( in_array( 'Pendiente', $keys_to_seed, true ) ) {
+			add_filter(
+				'woocommerce_backordered_item_meta_name',
+				static function () {
+					return 'Pendiente';
+				}
+			);
+			$this->setExpectedDeprecated( 'woocommerce_backordered_item_meta_name' );
+		}
+
+		foreach ( $keys_to_seed as $key ) {
+			$this->item->add_meta_data( $key, 1, true );
+		}
+		$this->item->save();
+
+		$order_item_before = $this->order->get_item( $this->item->get_id() );
+		$keys_before       = wp_list_pluck( $order_item_before->get_formatted_meta_data(), 'key' );
+		foreach ( $keys_to_seed as $key ) {
+			$this->assertContains( $key, $keys_before, "$key should exist before order completion." );
+		}
+
 		$this->order->update_status( OrderStatus::COMPLETED );
 		$this->order->save();
 
-		// 5. Assert: Check meta is excluded after completion.
-		$order_item_after_complete = $this->order->get_item( $item_id ); // Re-fetch item again after status change.
-		$formatted_meta_after      = $order_item_after_complete->get_formatted_meta_data();
-		$found_backorder_after     = false;
-		foreach ( $formatted_meta_after as $meta ) {
-			if ( $meta->key === $backorder_meta_key ) {
-				$found_backorder_after = true;
-				break;
-			}
+		$order_item_after = $this->order->get_item( $this->item->get_id() );
+		$keys_after       = wp_list_pluck( $order_item_after->get_formatted_meta_data(), 'key' );
+		foreach ( $keys_to_seed as $key ) {
+			$this->assertNotContains( $key, $keys_after, "$key should be excluded after order completion." );
 		}
-		$this->assertFalse( $found_backorder_after, 'Backorder meta should be excluded after order completion.' );
-
-		// Clean up.
-		WC_Helper_Product::delete_product( $this->product->get_id() );
-		WC_Helper_Order::delete_order( $this->order->get_id() );
 	}
+
+	/**
+	 * Data provider for test_get_formatted_meta_data_excludes_backorder_on_completed.
+	 *
+	 * @return array
+	 */
+	public function provide_backorder_meta_keys_to_seed(): array {
+		return array(
+			'fixed key only'  => array( array( WC_Order_Item_Product::BACKORDER_META_KEY ) ),
+			'legacy key only' => array( array( 'Pendiente' ) ),
+			'both keys'       => array( array( 'Pendiente', WC_Order_Item_Product::BACKORDER_META_KEY ) ),
+		);
+	}
+
 
 	/**
 	 * @testdox get_formatted_meta_data keeps a variation attribute whose value only appears in the parent product name.

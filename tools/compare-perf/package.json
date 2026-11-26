@@ -19,7 +19,7 @@
 		"ts-node": "^10.9.2"
 	},
 	"devDependencies": {
-		"@types/node": "^24.1.0"
+		"@types/node": "catalog:types"
 	},
 	"engines": {
 		"node": "^24.15.0"

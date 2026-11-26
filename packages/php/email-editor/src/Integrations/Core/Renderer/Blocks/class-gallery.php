@@ -35,104 +35,259 @@ class Gallery extends Abstract_Block_Renderer {
 		$layout_width = (int) Styles_Helper::parse_value( $rendering_context->get_layout_width_without_padding() );
 
 		// Extract images directly from the block content (more efficient than re-rendering).
-		$gallery_images = $this->extract_images_from_gallery_content( $block_content, $parsed_block, $columns, $layout_width );
+		$gallery_rows = $this->extract_gallery_rows( $parsed_block, $columns, $layout_width );
 
 		// If we don't have any images, return empty.
-		if ( empty( $gallery_images ) ) {
+		if ( empty( $gallery_rows ) ) {
 			return '';
 		}
 
 		// Build the email-friendly layout.
-		return $this->build_email_layout( $gallery_images, $parsed_block, $block_content, $rendering_context );
+		return $this->build_email_layout( $gallery_rows, $columns, $parsed_block, $block_content, $rendering_context );
 	}
 
 	/**
-	 * Estimate the rendered width (in px) of the gallery cell that holds a given image.
+	 * Extract and crop the images using the same rows that the email will render.
 	 *
-	 * The gallery packs images into rows of `$columns`. A complete row splits the layout width
-	 * evenly, but an incomplete final row is distributed across only its remaining images — a lone
-	 * trailing image spans the full width (see {@see build_gallery_row_table()}). Sizing the crop to
-	 * the actual cell keeps an image CDN from serving an undersized file for such images.
-	 *
-	 * @param int $index Zero-based index of the image among the rendered images.
-	 * @param int $image_count Total number of rendered images.
-	 * @param int $columns Number of gallery columns.
-	 * @param int $layout_width Available layout width in px.
-	 * @return int Cell width in px (at least 1).
+	 * @param array $parsed_block The parsed block data.
+	 * @param int   $columns Number of gallery columns.
+	 * @param int   $layout_width Available layout width in px.
+	 * @phpstan-param int<1, 8> $columns
+	 * @return array Rows of sanitized image HTML strings.
 	 */
-	private function get_cell_width( int $index, int $image_count, int $columns, int $layout_width ): int {
-		$columns       = max( 1, $columns );
-		$row_start     = intdiv( $index, $columns ) * $columns;
-		$images_in_row = max( 1, min( $columns, $image_count - $row_start ) );
+	private function extract_gallery_rows( array $parsed_block, int $columns, int $layout_width ): array {
+		$gallery_attrs        = $parsed_block['attrs'] ?? array();
+		$gallery_aspect_ratio = $gallery_attrs['aspectRatio'] ?? null;
+		// The block's default crop setting can be omitted from the saved attributes.
+		$auto_crop = $columns > 1 && false !== ( $gallery_attrs['imageCrop'] ?? true ) && in_array( $gallery_aspect_ratio, array( null, '', 'auto' ), true );
 
-		return (int) max( 1, floor( $layout_width / $images_in_row ) );
-	}
-
-	/**
-	 * Extract all images from gallery content with their links and captions.
-	 *
-	 * @param string $block_content The rendered gallery block HTML.
-	 * @param array  $parsed_block The parsed block data.
-	 * @param int    $columns Number of gallery columns.
-	 * @param int    $layout_width Available layout width in px.
-	 * @return array Array of sanitized image HTML strings.
-	 */
-	private function extract_images_from_gallery_content( string $block_content, array $parsed_block, int $columns, int $layout_width ): array {
-		$gallery_images = array();
-		$inner_blocks   = $parsed_block['innerBlocks'] ?? array();
-
-		// The gallery can request a crop (aspect ratio) for all of its images. Individual images
-		// may override it with their own aspectRatio attribute. Guard against malformed input so a
-		// non-string ratio can't throw a TypeError and abort rendering.
-		$gallery_attrs        = isset( $parsed_block['attrs'] ) && is_array( $parsed_block['attrs'] ) ? $parsed_block['attrs'] : array();
-		$gallery_aspect_ratio = isset( $gallery_attrs['aspectRatio'] ) && is_string( $gallery_attrs['aspectRatio'] ) ? $gallery_attrs['aspectRatio'] : null;
-
-		// Collect the image blocks first so we know how many land in each rendered row and can size
-		// each crop to its actual cell (incomplete final rows are wider — see get_cell_width()).
-		$image_blocks = array();
-		foreach ( $inner_blocks as $block ) {
-			if ( 'core/image' === $block['blockName'] && isset( $block['innerHTML'] ) ) {
-				$image_blocks[] = $block;
+		$images         = array();
+		$attachment_ids = array();
+		foreach ( $parsed_block['innerBlocks'] ?? array() as $block ) {
+			if ( 'core/image' !== ( $block['blockName'] ?? null ) || ! isset( $block['innerHTML'] ) ) {
+				continue;
 			}
-		}
-		$image_count = count( $image_blocks );
 
-		foreach ( $image_blocks as $index => $block ) {
+			$image_html = $this->extract_image_from_html( $block['innerHTML'] );
+			if ( '' === $image_html ) {
+				continue;
+			}
+
 			$image_attrs = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+			$image_ratio = $image_attrs['aspectRatio'] ?? null;
+			if ( ! is_string( $image_ratio ) || null === Html_Processing_Helper::parse_aspect_ratio( $image_ratio ) ) {
+				$image_ratio = null;
+			}
 
-			// Use the per-image override only when it is a valid ratio; a malformed override falls
-			// back to the gallery ratio instead of silently disabling the crop for that image.
-			$image_ratio  = isset( $image_attrs['aspectRatio'] ) && is_string( $image_attrs['aspectRatio'] ) ? $image_attrs['aspectRatio'] : null;
-			$aspect_ratio = ( null !== $image_ratio && null !== Html_Processing_Helper::parse_aspect_ratio( $image_ratio ) ) ? $image_ratio : $gallery_aspect_ratio;
-
-			$cell_width      = $this->get_cell_width( $index, $image_count, $columns, $layout_width );
-			$extracted_image = $this->extract_image_from_html( $block['innerHTML'], $aspect_ratio, $cell_width, $image_attrs );
-			if ( ! empty( $extracted_image ) ) {
-				$gallery_images[] = $extracted_image;
+			$images[] = array(
+				'html'  => $image_html,
+				'attrs' => $image_attrs,
+				'ratio' => $image_ratio,
+			);
+			if ( $auto_crop && null === $image_ratio && is_numeric( $image_attrs['id'] ?? null ) && (int) $image_attrs['id'] > 0 ) {
+				$attachment_ids[ count( $images ) - 1 ] = (int) $image_attrs['id'];
 			}
 		}
 
-		return $gallery_images;
+		// A trailing single image never needs a size lookup for automatic cropping.
+		if ( 1 === count( $images ) % $columns ) {
+			unset( $attachment_ids[ count( $images ) - 1 ] );
+		}
+		if ( ! empty( $attachment_ids ) ) {
+			// Prime attachment posts and metadata before looking up image sizes.
+			_prime_post_caches( array_unique( $attachment_ids ), false );
+		}
+
+		$gallery_ratio = is_string( $gallery_aspect_ratio ) ? $gallery_aspect_ratio : null;
+		$gallery_rows  = array();
+		foreach ( array_chunk( $images, $columns ) as $row ) {
+			// An incomplete row divides the full layout width among the remaining images.
+			$cell_width = max( 1, intdiv( $layout_width, count( $row ) ) );
+			$row_ratio  = $auto_crop && count( $row ) > 1 ? $this->get_auto_crop_ratio( $row ) : $gallery_ratio;
+			$row_html   = array();
+			foreach ( $row as $image ) {
+				$image_html = $this->apply_aspect_ratio_crop( $image['html'], $image['ratio'] ?? $row_ratio, $cell_width, $image['attrs'] );
+				$row_html[] = $this->normalize_image_for_email( $image_html, $cell_width );
+			}
+			$gallery_rows[] = $row_html;
+		}
+
+		return $gallery_rows;
+	}
+
+	/**
+	 * Match the tallest image in the row at an equal cell width.
+	 *
+	 * @param array $row Images sharing an email row.
+	 * @return string|null Crop ratio, or null when the row does not need an automatic crop.
+	 */
+	private function get_auto_crop_ratio( array $row ): ?string {
+		$ratios = array();
+		foreach ( $row as $image ) {
+			$html = new \WP_HTML_Tag_Processor( $image['html'] );
+			if ( ! $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
+				// A caption can survive when its image was rejected.
+				continue;
+			}
+
+			if ( null !== $image['ratio'] ) {
+				$ratio = Html_Processing_Helper::parse_aspect_ratio( $image['ratio'] );
+				if ( null !== $ratio && $ratio > 0 && is_finite( $ratio ) ) {
+					$ratios[ $image['ratio'] ] = $ratio;
+				}
+				continue;
+			}
+
+			$size = $this->get_gallery_image_size( $image['attrs'], $html );
+			if ( null === $size ) {
+				return null;
+			}
+
+			list( $width, $height )     = $size;
+			$ratios[ "$width/$height" ] = $width / $height;
+		}
+
+		// Allow for rounding in resized attachments that are effectively the same shape.
+		if ( count( $ratios ) < 2 || max( $ratios ) <= min( $ratios ) * 1.01 ) {
+			return null;
+		}
+
+		return (string) array_search( min( $ratios ), $ratios, true );
+	}
+
+	/**
+	 * Get the dimensions of the selected attachment size or the saved image tag.
+	 *
+	 * @param array                  $attrs Parsed image block attributes.
+	 * @param \WP_HTML_Tag_Processor $html Processor positioned on the sanitized image tag.
+	 * @return array{int, int}|null Image width and height if known.
+	 */
+	private function get_gallery_image_size( array $attrs, \WP_HTML_Tag_Processor $html ): ?array {
+		$src = $html->get_attribute( 'src' );
+		if ( is_string( $src ) && isset( $attrs['id'] ) && is_numeric( $attrs['id'] ) && (int) $attrs['id'] > 0 ) {
+			$slug = isset( $attrs['sizeSlug'] ) && is_string( $attrs['sizeSlug'] ) ? $attrs['sizeSlug'] : 'full';
+			$size = $this->get_attachment_size_for_src( (int) $attrs['id'], $slug, $src );
+			if ( null !== $size ) {
+				return $size;
+			}
+		}
+
+		$width  = $this->get_positive_dimension( $html->get_attribute( 'width' ) );
+		$height = $this->get_positive_dimension( $html->get_attribute( 'height' ) );
+		return $width > 0 && $height > 0 ? array( $width, $height ) : null;
+	}
+
+	/**
+	 * Get attachment dimensions that describe the image URL saved in the gallery.
+	 *
+	 * @param int    $id Attachment ID.
+	 * @param string $slug Selected image size.
+	 * @param string $src Saved image URL.
+	 * @return array{int, int}|null Image width and height if known.
+	 */
+	private function get_attachment_size_for_src( int $id, string $slug, string $src ): ?array {
+		// Require stored dimensions so resize limits cannot stand in for unknown image dimensions.
+		$metadata = wp_get_attachment_metadata( $id, true );
+		$sizes    = $metadata['sizes'] ?? array();
+		$stored   = is_array( $sizes ) ? ( $sizes[ $slug ] ?? array() ) : null;
+		// A malformed intermediate record does not invalidate the original file metadata.
+		$malformed_size = ! is_array( $stored );
+		$stored         = $malformed_size ? array() : $stored;
+
+		$full_width      = $this->get_positive_dimension( $metadata['width'] ?? null );
+		$full_height     = $this->get_positive_dimension( $metadata['height'] ?? null );
+		$stored_width    = $this->get_positive_dimension( $stored['width'] ?? null );
+		$stored_height   = $this->get_positive_dimension( $stored['height'] ?? null );
+		$stored_file     = $stored['file'] ?? null;
+		$has_full_size   = $full_width > 0 && $full_height > 0;
+		$has_stored_size = is_string( $stored_file ) && '' !== $stored_file && $stored_width > 0 && $stored_height > 0;
+		if ( ! $has_full_size && ! $has_stored_size ) {
+			return null;
+		}
+
+		// Core can round the reported dimensions to fit the editor while keeping the file URL.
+		$saved_url = $this->get_file_url_for_src( $src );
+		if ( null !== $saved_url ) {
+			$original = wp_get_attachment_url( $id );
+			if ( is_string( $original ) ) {
+				if ( $has_stored_size && path_join( dirname( $original ), $stored_file ) === $saved_url ) {
+					return array( $stored_width, $stored_height );
+				}
+				if ( $has_full_size && $original === $saved_url ) {
+					return array( $full_width, $full_height );
+				}
+			}
+		}
+
+		$size = false;
+		// Resize services may read both the original dimensions and the intermediate record.
+		if ( $has_full_size && ! $malformed_size && ( null === $stored_file || is_string( $stored_file ) ) ) {
+			if ( $has_stored_size || empty( $stored ) ) {
+				$size = wp_get_attachment_image_src( $id, $slug );
+			} elseif ( wp_attachment_is_image( $id ) ) {
+				// Try the resize provider without letting Core read a partial intermediate record.
+				$size = apply_filters( 'image_downsize', false, $id, $slug );
+			}
+		}
+		if ( is_array( $size ) && ( $size[0] ?? null ) === $src ) {
+			$width  = $this->get_positive_dimension( $size[1] ?? null );
+			$height = $this->get_positive_dimension( $size[2] ?? null );
+			return $width > 0 && $height > 0 ? array( $width, $height ) : null;
+		}
+		return null;
+	}
+
+	/**
+	 * Get the file URL when the saved URL has no query or only sets the width.
+	 *
+	 * @param string $src Saved image URL.
+	 * @return string|null File URL if the source preserves its proportions.
+	 */
+	private function get_file_url_for_src( string $src ): ?string {
+		$parts = explode( '?', $src, 2 );
+		$file  = $parts[0];
+		$query = $parts[1] ?? null;
+		if ( '' === $file || false !== strpos( $src, '#' ) ) {
+			return null;
+		}
+		if ( null === $query ) {
+			return $file;
+		}
+		if ( 0 !== strpos( $query, 'w=' ) ) {
+			return null;
+		}
+		$width = substr( $query, 2 );
+		return ctype_digit( $width ) && '0' !== $width[0] ? $file : null;
+	}
+
+	/**
+	 * Read an integer pixel dimension from image metadata, filters, or markup.
+	 *
+	 * @param mixed $value Candidate dimension.
+	 * @return int Positive dimension, or zero when unknown.
+	 */
+	private function get_positive_dimension( $value ): int {
+		if ( is_int( $value ) || ( is_string( $value ) && ctype_digit( $value ) ) ) {
+			return max( 0, (int) $value );
+		}
+		return 0;
 	}
 
 	/**
 	 * Extract and sanitize image with optional link and caption from HTML content.
 	 * This is the unified method that handles all image extraction scenarios.
 	 *
-	 * @param string      $html_content HTML content containing the image.
-	 * @param string|null $aspect_ratio Optional aspect ratio (e.g. "1" or "4/3") to crop the image to.
-	 * @param int         $cell_width Estimated display width of the gallery cell in px.
-	 * @param array       $image_attrs Parsed attributes of the core/image block (id, sizeSlug, ...).
+	 * @param string $html_content HTML content containing the image.
 	 * @return string Sanitized image HTML with proper link and caption handling.
 	 */
-	private function extract_image_from_html( string $html_content, ?string $aspect_ratio = null, int $cell_width = 0, array $image_attrs = array() ): string {
+	private function extract_image_from_html( string $html_content ): string {
 		$result = '';
 
 		// First, try to find a linked image (most common case).
 		if ( preg_match( '/<a[^>]*href=(["\'])(.*?)\1[^>]*>(\s*<img[^>]*>)\s*<\/a>/s', $html_content, $link_matches ) ) {
 			// Validate and sanitize the link URL.
 			$sanitized_url = esc_url( $link_matches[2] );
-			$sanitized_img = $this->prepare_image_html( $link_matches[3], $aspect_ratio, $cell_width, $image_attrs );
+			$sanitized_img = Html_Processing_Helper::sanitize_image_html( $link_matches[3] );
 			if ( '' !== $sanitized_img ) {
 				if ( ! empty( $sanitized_url ) ) {
 					$result .= '<a href="' . $sanitized_url . '">' . $sanitized_img . '</a>';
@@ -143,10 +298,7 @@ class Gallery extends Abstract_Block_Renderer {
 			}
 		} elseif ( preg_match( '/<img[^>]*>/', $html_content, $img_matches ) ) {
 			// Image is not linked - just extract the img element with sanitization.
-			$sanitized_img = $this->prepare_image_html( $img_matches[0], $aspect_ratio, $cell_width, $image_attrs );
-			if ( '' !== $sanitized_img ) {
-				$result .= $sanitized_img;
-			}
+			$result = Html_Processing_Helper::sanitize_image_html( $img_matches[0] );
 		}
 
 		// Extract the caption if it exists (handle both figcaption and span formats).
@@ -166,26 +318,6 @@ class Gallery extends Abstract_Block_Renderer {
 		}
 
 		return $result;
-	}
-
-	/**
-	 * Sanitize a raw gallery <img>, apply the optional aspect-ratio crop, then normalize it for
-	 * email rendering.
-	 *
-	 * This is the single entry point every extraction path uses so image hardening (dropping the
-	 * web-only class and reining in an oversized raw width) is applied consistently, whether the
-	 * image is linked, unlinked, or cropped.
-	 *
-	 * @param string      $raw_img_html Raw <img> HTML extracted from the block content.
-	 * @param string|null $aspect_ratio Optional aspect ratio (e.g. "1" or "4/3") to crop the image to.
-	 * @param int         $cell_width Estimated display width of the gallery cell in px.
-	 * @param array       $image_attrs Parsed attributes of the core/image block (id, sizeSlug, ...).
-	 * @return string Prepared <img> HTML, or empty string when the image is invalid.
-	 */
-	private function prepare_image_html( string $raw_img_html, ?string $aspect_ratio, int $cell_width, array $image_attrs ): string {
-		$sanitized = Html_Processing_Helper::sanitize_image_html( $raw_img_html );
-		$sanitized = $this->apply_aspect_ratio_crop( $sanitized, $aspect_ratio, $cell_width, $image_attrs );
-		return $this->normalize_image_for_email( $sanitized, $cell_width );
 	}
 
 	/**
@@ -263,7 +395,7 @@ class Gallery extends Abstract_Block_Renderer {
 	 * matching the previous behavior with no regression.
 	 *
 	 * @param string      $img_html Sanitized <img> HTML.
-	 * @param string|null $aspect_ratio Aspect ratio to apply (e.g. "1" or "4/3").
+	 * @param string|null $aspect_ratio Aspect ratio to apply (e.g. "1", "4/3", or a derived ratio like "683/1024").
 	 * @param int         $cell_width Estimated display width of the gallery cell in px.
 	 * @param array       $image_attrs Parsed attributes of the core/image block (id, sizeSlug, ...).
 	 * @return string Image HTML with the crop applied, or the input unchanged when no valid ratio.
@@ -297,13 +429,12 @@ class Gallery extends Abstract_Block_Renderer {
 		 * Filters the URL of an image inside an email gallery so integrations can serve a
 		 * server-side-cropped file that honors the block's aspect ratio.
 		 *
-		 * Email can't crop client-side reliably, so returning an already-cropped URL (e.g. an image
-		 * CDN URL with resize/crop parameters) is the only way to honor the crop in every client.
-		 * Return the URL unchanged to leave the image uncropped (the renderer then falls back to
-		 * best-effort CSS cropping).
+		 * Fires for images with an explicit aspect ratio and for mixed-shape rows when the gallery
+		 * uses automatic cropping (`imageCrop`, on by default) with no ratio set. Return the URL
+		 * unchanged to leave the image uncropped and fall back to best-effort CSS cropping.
 		 *
 		 * @param string $image_url    The original image URL.
-		 * @param string $aspect_ratio The requested aspect ratio (e.g. "1", "4/3").
+		 * @param string $aspect_ratio The requested aspect ratio, either explicit (e.g. "1", "4/3") or derived from the row's tallest image (e.g. "683/1024").
 		 * @param int    $width        Target display width of the image in px (0 if unknown).
 		 * @param int    $height       Target display height derived from the aspect ratio in px (0 if unknown).
 		 * @param array  $image_attrs  Parsed attributes of the core/image block (id, sizeSlug, ...).
@@ -364,19 +495,19 @@ class Gallery extends Abstract_Block_Renderer {
 	/**
 	 * Build the email-friendly layout for gallery blocks.
 	 *
-	 * @param array             $gallery_images Array of image HTML strings.
+	 * @param array             $gallery_rows Rows of image HTML strings.
+	 * @param int               $columns Number of gallery columns.
 	 * @param array             $parsed_block Full parsed block data.
 	 * @param string            $block_content Original block content.
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string Rendered HTML.
 	 */
-	private function build_email_layout( array $gallery_images, array $parsed_block, string $block_content, Rendering_Context $rendering_context ): string {
+	private function build_email_layout( array $gallery_rows, int $columns, array $parsed_block, string $block_content, Rendering_Context $rendering_context ): string {
 		// Get original wrapper classes from block content.
 		$original_wrapper_classname = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'figure', 'class' ) ?? '';
 
 		// Get gallery attributes.
 		$block_attrs = $parsed_block['attrs'] ?? array();
-		$columns     = $this->get_columns_from_attributes( $block_attrs );
 
 		// Extract gallery-level caption from the original block content.
 		$gallery_caption = $this->extract_gallery_caption( $block_content );
@@ -411,8 +542,11 @@ class Gallery extends Abstract_Block_Renderer {
 			$cell_attrs['width'] = $parsed_block['email_attrs']['width'];
 		}
 
-		// Build the gallery rows with proper table structure.
-		$gallery_content = $this->build_gallery_table( $gallery_images, $columns );
+		// Each row is a separate table with half-em cell padding.
+		$gallery_content = '';
+		foreach ( $gallery_rows as $row_images ) {
+			$gallery_content .= $this->build_gallery_row_table( $row_images, $columns, 8 );
+		}
 
 		// Add gallery caption if it exists.
 		if ( ! empty( $gallery_caption ) ) {
@@ -421,28 +555,6 @@ class Gallery extends Abstract_Block_Renderer {
 
 		// Use Table_Wrapper_Helper for the main container (following tiled gallery pattern).
 		return Table_Wrapper_Helper::render_table_wrapper( $gallery_content, $table_attrs, $cell_attrs );
-	}
-
-	/**
-	 * Build the gallery table structure with proper rows and cells.
-	 * Uses the tiled gallery pattern: separate tables for each row, then wrap in main table.
-	 *
-	 * @param array $gallery_images Array of image HTML strings.
-	 * @param int   $columns Number of columns.
-	 * @return string Gallery table HTML.
-	 */
-	private function build_gallery_table( array $gallery_images, int $columns ): string {
-		$content_parts = array();
-		$image_count   = count( $gallery_images );
-		$cell_padding  = 8; // 0.5em equivalent (approximately 8px)
-
-		// Process images in chunks based on columns to create rows.
-		for ( $i = 0; $i < $image_count; $i += $columns ) {
-			$row_images      = array_slice( $gallery_images, $i, $columns );
-			$content_parts[] = $this->build_gallery_row_table( $row_images, $columns, $cell_padding );
-		}
-
-		return implode( '', $content_parts );
 	}
 
 	/**
@@ -496,6 +608,7 @@ class Gallery extends Abstract_Block_Renderer {
 	 *
 	 * @param array $block_attrs Block attributes.
 	 * @return int Number of columns (1-8).
+	 * @phpstan-return int<1, 8>
 	 */
 	private function get_columns_from_attributes( array $block_attrs ): int {
 		$columns = $block_attrs['columns'] ?? 3;

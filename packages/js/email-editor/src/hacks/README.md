@@ -44,7 +44,7 @@ Each hack below represents functionality that should ideally be supported throug
 
 - Unregisters the default `move-to-trash` action
 - Registers a custom trash action specific to email posts
-- Hooks into both `core.registerPostTypeSchema` (WP 6.8+) and `core.registerPostTypeActions` (WP 6.7+) for compatibility
+- Hooks into `core.registerPostTypeSchema`, which fires when the editor registers the post type's actions
 
 **Upstream solution needed:** A filter or configuration option to customize built-in entity actions without needing to unregister and re-register them.
 

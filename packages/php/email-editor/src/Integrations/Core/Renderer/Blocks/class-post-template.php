@@ -21,7 +21,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
  * laid out with CSS grid/flex. Email clients (Outlook especially) don't support those, so the grid
  * collapses to a single stacked column. This renderer re-flows the already-rendered `<li>` items
  * into an email-safe, table-based column layout — mirroring how the Gallery renderer arranges
- * images (see {@see Gallery::build_gallery_table()}).
+ * images (see {@see Gallery::build_gallery_row_table()}).
  *
  * The list items arrive already rendered (post-template is a dynamic block, so `$block_content`
  * holds the final `<ul><li>…</li></ul>`), so this renderer never re-runs the query. Each item's
@@ -182,7 +182,7 @@ class Post_Template extends Abstract_Block_Renderer {
 	/**
 	 * Build the grid as one `<table>` per row wrapped in a container table.
 	 *
-	 * Follows the tiled-gallery pattern ({@see Gallery::build_gallery_table()}): items are chunked
+	 * Follows the tiled-gallery pattern ({@see Gallery::build_gallery_row_table()}): items are chunked
 	 * into rows of `$columns` and each row is its own fixed-layout table, so every cell keeps a
 	 * consistent width regardless of how many items the final (possibly partial) row holds.
 	 *

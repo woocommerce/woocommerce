@@ -255,6 +255,52 @@ class WC_Email_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Plain-text emails keep an apostrophe that the template escaped in the heading.
+	 *
+	 * @testWith ["Your order's complete"]
+	 *           ["L'été est là"]
+	 *
+	 * @param string $heading Email heading with an apostrophe.
+	 */
+	public function test_plain_email_keeps_apostrophe_in_heading( string $heading ): void {
+		$email             = new WC_Email_Customer_Completed_Order();
+		$email->object     = WC_Helper_Order::create_order();
+		$email->email_type = 'plain';
+		add_filter(
+			'woocommerce_email_heading_customer_completed_order',
+			function () use ( $heading ) {
+				return $heading;
+			}
+		);
+
+		$this->assertStringContainsString( str_replace( "'", '&#039;', $heading ), $email->get_content_plain(), 'Fixture: the plain template must escape the apostrophe' );
+		$this->assertStringContainsString( $heading, $email->get_content() );
+	}
+
+	/**
+	 * @testdox The plain-text rules turn decimal and hexadecimal apostrophe codes into an apostrophe.
+	 *
+	 * @testWith ["&#39;"]
+	 *           ["&#x27;"]
+	 *
+	 * @param string $code Apostrophe character reference.
+	 */
+	public function test_plain_text_rules_turn_numeric_apostrophe_codes_into_apostrophe( string $code ): void {
+		$email = new WC_Email_Customer_Completed_Order();
+
+		$this->assertSame( "Your order's complete", preg_replace( $email->plain_search, $email->plain_replace, "Your order{$code}s complete" ) );
+	}
+
+	/**
+	 * @testdox The plain-text rules still turn &rsquo; into an apostrophe.
+	 */
+	public function test_plain_text_rules_turn_rsquo_into_apostrophe(): void {
+		$email = new WC_Email_Customer_Completed_Order();
+
+		$this->assertSame( "Your order's complete", preg_replace( $email->plain_search, $email->plain_replace, 'Your order&rsquo;s complete' ) );
+	}
+
+	/**
 	 * Create an email that opts out of Cc/Bcc support.
 	 *
 	 * @return WC_Email

@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { styles } from '@wordpress/icons';
 import { PluginSidebar, PluginSidebarMoreMenuItem } from '@wordpress/editor';
+import { Navigator } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -19,7 +20,6 @@ import {
 	ScreenColors,
 	ScreenBackground,
 } from './screens';
-import { Navigator } from './navigator';
 
 export function RawStylesSidebar(): JSX.Element {
 	const { userCanEditGlobalStyles } = useSelect( ( select ) => {

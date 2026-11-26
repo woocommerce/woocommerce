@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix select chevron not visible in dark themes with forced-colors:active
+
+

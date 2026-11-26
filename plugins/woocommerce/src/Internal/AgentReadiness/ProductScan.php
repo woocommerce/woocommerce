@@ -465,6 +465,23 @@ class ProductScan {
 	}
 
 	/**
+	 * The catalog counts as they stand now, by report key, so a count matches the Products list it links to.
+	 * Every published product is in one of the three, so the available ones are the rest: counting them
+	 * with their own query takes seconds on a large catalog.
+	 *
+	 * @return array{available:int,hidden_from_catalog:int,unsupported_types:int}
+	 */
+	public static function catalog_counts(): array {
+		$hidden      = self::count_published( self::count_query( self::COUNT_HIDDEN ) );
+		$unsupported = self::count_published( self::count_query( self::COUNT_UNSUPPORTED ) );
+		return array(
+			'available'           => max( 0, (int) wp_count_posts( 'product' )->publish - $hidden - $unsupported ),
+			'hidden_from_catalog' => $hidden,
+			'unsupported_types'   => $unsupported,
+		);
+	}
+
+	/**
 	 * Tax query for a supported type. A product with no type term loads as simple.
 	 *
 	 * @return array<string|int, mixed>

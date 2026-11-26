@@ -253,7 +253,7 @@ class Public_Api_Contract_Test extends \Email_Editor_Integration_Test_Case {
 			'link rendering context' => array( Personalizer::class . '::RENDERING_CONTEXT_HREF', 'href' ),
 			'rendering context key'  => array( Personalizer::class . '::RENDERING_CONTEXT_KEY', 'rendering_context' ),
 			'text value type'        => array( Personalization_Tag::class . '::VALUE_TYPE_TEXT', 'text' ),
-			'minimum WordPress'      => array( Dependency_Check::class . '::MIN_WP_VERSION', '6.7' ),
+			'minimum WordPress'      => array( Dependency_Check::class . '::MIN_WP_VERSION', '7.0' ),
 		);
 	}
 

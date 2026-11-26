@@ -145,6 +145,22 @@ describe( 'useStoreCartItemQuantity', () => {
 				[ '123', 2 ],
 			] );
 		} );
+
+		it( 'isPendingQuantity is true from a quantity change until the server saves it', () => {
+			const { result, rerender } = renderHook(
+				( cartItem ) => useStoreCartItemQuantity( cartItem ),
+				{ wrapper, initialProps: { key: '123', quantity: 1 } }
+			);
+			expect( result.current.isPendingQuantity ).toBe( false );
+
+			act( () => {
+				result.current.setItemQuantity( 2 );
+			} );
+			expect( result.current.isPendingQuantity ).toBe( true );
+
+			rerender( { key: '123', quantity: 2 } );
+			expect( result.current.isPendingQuantity ).toBe( false );
+		} );
 	} );
 
 	it( 'should expose store errors', () => {

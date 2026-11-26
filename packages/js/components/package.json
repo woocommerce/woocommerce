@@ -112,7 +112,6 @@
 		"@wordpress/viewport": "catalog:wp-min",
 		"canvas-confetti": "^1.9.2",
 		"clsx": "2.1.x",
-		"core-js": "^3.34.0",
 		"d3-axis": "^1.0.12",
 		"d3-format": "^1.4.5",
 		"d3-scale": "^2.2.2",
@@ -129,7 +128,8 @@
 		"prop-types": "^15.8.1",
 		"react-dates": "^21.8.0",
 		"react-transition-group": "^4.4.5",
-		"react-window": "^1.8.11"
+		"react-window": "^1.8.11",
+		"uuid": "^11.1.1"
 	},
 	"peerDependencies": {
 		"@types/react": "18.3.x",
@@ -160,11 +160,10 @@
 		"@testing-library/react": "^16.x.x",
 		"@testing-library/user-event": "13.5.0",
 		"@types/canvas-confetti": "^1.6.4",
-		"@types/jest": "catalog:tooling",
-		"@types/lodash": "^4.14.202",
-		"@types/prop-types": "^15.7.11",
+		"@types/jest": "catalog:types",
+		"@types/lodash": "catalog:types",
+		"@types/prop-types": "catalog:types",
 		"@types/testing-library__jest-dom": "^5.14.9",
-		"@types/uuid": "^8.3.4",
 		"@types/wordpress__viewport": "catalog:wp-min",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
@@ -188,7 +187,6 @@
 		"sass-loader": "catalog:tooling",
 		"ts-jest": "catalog:tooling",
 		"typescript": "catalog:tooling",
-		"uuid": "^11.1.1",
 		"webpack": "catalog:tooling",
 		"webpack-cli": "catalog:tooling"
 	},
