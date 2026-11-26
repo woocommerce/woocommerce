@@ -974,14 +974,16 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'link'   => $item['link'],
 			);
 		}
-		// Only setup steps: nothing is ranked, so the card says what the Setup checklist says.
-		// A required check the scan read, such as the connection, is not a setup step and keeps the ranking line.
+		// Count Required setup steps only, as the Setup checklist does. A step that blocks listing
+		// still joins when the rules file does not mark it Required, and a card with none of them
+		// keeps the ranking line. A scanned check is not a setup step and keeps that line too.
 		$setup_ids  = array_column( array_filter( $checks, array( self::class, 'is_setup_step' ) ), 'id' );
 		$setup_only = array() === array_diff( array_column( $items, 'id' ), $setup_ids );
+		$required   = $setup_only ? count( array_filter( $items, static fn( array $item ): bool => 0 === $item['tier'] ) ) : 0;
 		return array(
 			'title'   => __( 'Fix first', 'woocommerce' ),
-			'ranking' => $setup_only ? self::required_steps_summary( count( $items ) ) : self::ranking_text( $report, $items ),
-			'link'    => $setup_only ? null : self::ranking_link( $report ),
+			'ranking' => $required > 0 ? self::required_steps_summary( $required ) : self::ranking_text( $report, $items ),
+			'link'    => $required > 0 ? null : self::ranking_link( $report ),
 			'items'   => $list,
 		);
 	}
