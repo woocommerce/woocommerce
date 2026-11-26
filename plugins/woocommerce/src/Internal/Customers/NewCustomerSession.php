@@ -11,13 +11,15 @@ use Automattic\WooCommerce\Internal\CustomerEmailVerification\EmailVerificationS
  * Creating an account at checkout does not log the shopper in. They set a password from the new
  * account email, which also verifies their email address. Until then, the session keeps the new
  * account ID so a failed payment can be retried, and so the shopper can view and pay for their order.
+ * Both links end when the account is verified or its password changes, whichever comes first.
  *
  * @since 11.5.0
  */
 class NewCustomerSession {
 
 	/**
-	 * Session key that stores the account created during this session, with the ID of the session that created it.
+	 * Session key that stores the account created during this session, with the ID of the session that created it
+	 * and the account's password fingerprint.
 	 */
 	private const SESSION_KEY = 'new_customer';
 
@@ -25,6 +27,11 @@ class NewCustomerSession {
 	 * Order meta that stores the ID of the account the order created at checkout.
 	 */
 	private const ORDER_META_KEY = '_created_customer_id';
+
+	/**
+	 * Order meta that stores the password fingerprint of the account the order created at checkout.
+	 */
+	private const ORDER_FINGERPRINT_META_KEY = '_created_customer_fingerprint';
 
 	/**
 	 * Email verification service.
@@ -94,7 +101,7 @@ class NewCustomerSession {
 	}
 
 	/**
-	 * Whether the order belongs to the account created in this session, and that account has not verified its email.
+	 * Whether the order belongs to the account created in this session, and that account is still unclaimed.
 	 *
 	 * Only the session that created the account can keep it on an order, for example when a failed payment is retried.
 	 *
@@ -120,11 +127,12 @@ class NewCustomerSession {
 	public function mark_order_created_customer( \WC_Order $order, int $customer_id ): void {
 		if ( $customer_id > 0 && $order->get_customer_id() === $customer_id ) {
 			$order->update_meta_data( self::ORDER_META_KEY, (string) $customer_id );
+			$order->update_meta_data( self::ORDER_FINGERPRINT_META_KEY, $this->get_password_fingerprint( $customer_id ) );
 		}
 	}
 
 	/**
-	 * Whether the order created its account, and that account has not confirmed its email address yet.
+	 * Whether the order created its account, and that account is still unclaimed.
 	 *
 	 * The account has no password until then, so the order received and pay pages treat its order like a guest order.
 	 * Unlike {@see self::is_unverified_new_customer_order()}, this works in any session, such as a separate express
@@ -144,7 +152,7 @@ class NewCustomerSession {
 
 		return $customer_id > 0
 			&& (int) $order->get_meta( self::ORDER_META_KEY ) === $customer_id
-			&& ! $this->email_verification_service->is_verified( $customer_id );
+			&& $this->is_unclaimed( $customer_id, (string) $order->get_meta( self::ORDER_FINGERPRINT_META_KEY ) );
 	}
 
 	/**
@@ -211,9 +219,9 @@ class NewCustomerSession {
 	}
 
 	/**
-	 * Get the account created in this session while its email is unverified.
+	 * Get the account created in this session while it is unclaimed.
 	 *
-	 * A verified account has a password the shopper chose, so the shopper logs in instead. Logged in users never use
+	 * A claimed account has a password the shopper chose, so the shopper logs in instead. Logged in users never use
 	 * this account: a guest session moves to whoever logs in on the same browser, and must not carry the account over.
 	 * A session cloned from a shared checkout link gets a new session ID, so it does not carry the account over either.
 	 *
@@ -226,10 +234,15 @@ class NewCustomerSession {
 			return 0;
 		}
 
-		$stored      = $session->get( self::SESSION_KEY );
-		$customer_id = is_array( $stored ) && ( $stored['session'] ?? '' ) === (string) $session->get_customer_id() ? absint( $stored['id'] ?? 0 ) : 0;
+		$stored = $session->get( self::SESSION_KEY );
 
-		return $customer_id && ! $this->email_verification_service->is_verified( $customer_id ) ? $customer_id : 0;
+		if ( ! is_array( $stored ) || ( $stored['session'] ?? '' ) !== (string) $session->get_customer_id() ) {
+			return 0;
+		}
+
+		$customer_id = absint( $stored['id'] ?? 0 );
+
+		return $customer_id && $this->is_unclaimed( $customer_id, (string) ( $stored['fingerprint'] ?? '' ) ) ? $customer_id : 0;
 	}
 
 	/**
@@ -249,10 +262,39 @@ class NewCustomerSession {
 			$session->set(
 				self::SESSION_KEY,
 				array(
-					'id'      => $customer_id,
-					'session' => (string) $session->get_customer_id(),
+					'id'          => $customer_id,
+					'session'     => (string) $session->get_customer_id(),
+					'fingerprint' => $this->get_password_fingerprint( $customer_id ),
 				)
 			);
 		}
+	}
+
+	/**
+	 * Whether nobody has claimed the account since the link to it was stored.
+	 *
+	 * Verifying the email claims the account. So does any password change, even one that does not verify the email,
+	 * such as an admin setting the password.
+	 *
+	 * @param int    $customer_id Customer ID.
+	 * @param string $fingerprint Password fingerprint stored with the link.
+	 * @return bool
+	 */
+	private function is_unclaimed( int $customer_id, string $fingerprint ): bool {
+		return '' !== $fingerprint
+			&& hash_equals( $this->get_password_fingerprint( $customer_id ), $fingerprint )
+			&& ! $this->email_verification_service->is_verified( $customer_id );
+	}
+
+	/**
+	 * Get a keyed hash of the account's stored password hash. It changes whenever the password changes.
+	 *
+	 * @param int $customer_id Customer ID.
+	 * @return string Fingerprint, or an empty string when the account does not exist.
+	 */
+	private function get_password_fingerprint( int $customer_id ): string {
+		$user = get_user_by( 'id', $customer_id );
+
+		return $user instanceof \WP_User ? wp_hash( $user->user_pass ) : '';
 	}
 }
