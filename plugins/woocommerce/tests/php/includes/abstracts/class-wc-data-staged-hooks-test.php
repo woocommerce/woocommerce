@@ -190,9 +190,8 @@ class WC_Data_Staged_Hooks_Test extends WC_Unit_Test_Case {
 			'woocommerce_coupon_custom_discounts_array',
 			'woocommerce_orders_table_datastore_should_save_after_meta_change',
 		),
-		'Its order on the staged path is fixed in Core: woocommerce_order_edit_status by PR 71474, woocommerce_pre_payment_complete by PR 71473.' => array(
+		'Its order on the staged path is fixed in Core by PR 71474.' => array(
 			'woocommerce_order_edit_status',
-			'woocommerce_pre_payment_complete',
 		),
 	);
 

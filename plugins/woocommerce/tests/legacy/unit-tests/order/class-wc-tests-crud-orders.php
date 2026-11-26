@@ -1166,7 +1166,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: stage_payment_complete changes the order in memory, and the next save writes it, adds the note and fires woocommerce_payment_complete.
+	 * Test: stage_payment_complete changes the order in memory and fires woocommerce_pre_payment_complete, and the next save writes the order, clears the session flag, adds the note and fires woocommerce_payment_complete.
 	 */
 	public function test_stage_payment_complete_changes_the_order_in_memory_only() {
 		$object = new WC_Order();
@@ -1177,7 +1177,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		WC()->session->set( 'order_awaiting_payment', $object->get_id() );
 
 		$this->assertTrue( $object->stage_payment_complete( '12345' ) );
-		$this->assertSame( 0, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+		$this->assertSame( 1, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
 		$this->assertSame( $object->get_id(), WC()->session->get( 'order_awaiting_payment' ) );
 		$this->assertSame( OrderStatus::COMPLETED, $object->get_status() );
 		$this->assertSame( '12345', $object->get_transaction_id() );
@@ -1206,7 +1206,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: stage_payment_complete leaves nothing to the next save when the order status is not one that payment can complete.
+	 * Test: stage_payment_complete fires woocommerce_pre_payment_complete and leaves nothing to the next save when the order status is not one that payment can complete.
 	 */
 	public function test_stage_payment_complete_leaves_nothing_to_save_for_a_status_payment_cannot_complete() {
 		$object = new WC_Order();
@@ -1220,14 +1220,14 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertIsArray( $object->get_taxable_location(), 'A listener without $staged refused a read of the unmarked order' );
 		$object->save();
 
-		$this->assertSame( 0, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+		$this->assertSame( 1, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
 		$this->assertSame( $object->get_id(), WC()->session->get( 'order_awaiting_payment' ) );
 	}
 
 	/**
-	 * Test: a second stage_payment_complete that the status refuses keeps the pre-payment hook that the first one left to the save.
+	 * Test: a second stage_payment_complete that the status refuses keeps the session write that the first one left to the save.
 	 */
-	public function test_refused_second_stage_payment_complete_keeps_the_staged_pre_payment_hook() {
+	public function test_refused_second_stage_payment_complete_keeps_the_staged_session_write() {
 		$object = new WC_Order();
 		$object->save();
 		$pre   = did_action( 'woocommerce_pre_payment_complete' );
@@ -1238,15 +1238,15 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertFalse( $object->stage_payment_complete( '67890' ) );
 		$object->save();
 
-		$this->assertSame( 1, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+		$this->assertSame( 2, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
 		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );
 		$this->assertFalse( WC()->session->get( 'order_awaiting_payment' ) );
 	}
 
 	/**
-	 * Test: payment_complete after stage_payment_complete replaces the staged pre-payment hook, so the hook fires once.
+	 * Test: payment_complete after stage_payment_complete fires the pre-payment hook again, as two payment_complete calls do.
 	 */
-	public function test_payment_complete_after_stage_payment_complete_fires_the_pre_payment_hook_once() {
+	public function test_payment_complete_after_stage_payment_complete_fires_the_pre_payment_hook_twice() {
 		$object = new WC_Order();
 		$object->save();
 		$pre = did_action( 'woocommerce_pre_payment_complete' );
@@ -1255,7 +1255,63 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->payment_complete( '67890' );
 		$object->save();
 
-		$this->assertSame( 1, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+		$this->assertSame( 2, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+	}
+
+	/**
+	 * @testdox woocommerce_pre_payment_complete fires before both payment status filters, and only the saving path clears the session flag, right after the hook: $method on a $status order.
+	 *
+	 * @testWith ["payment_complete", "pending", [["woocommerce_pre_payment_complete", false, true], ["woocommerce_valid_order_statuses_for_payment_complete", false, false], ["woocommerce_payment_complete_order_status", false, false]]]
+	 *           ["stage_payment_complete", "pending", [["woocommerce_pre_payment_complete", true, true], ["woocommerce_valid_order_statuses_for_payment_complete", true, true], ["woocommerce_payment_complete_order_status", true, true]]]
+	 *           ["stage_payment_complete", "completed", [["woocommerce_pre_payment_complete", true, true], ["woocommerce_valid_order_statuses_for_payment_complete", true, true]]]
+	 *
+	 * @param string $method   Method that completes the payment. A stage call runs on a marked order and is never saved.
+	 * @param string $status   Order status before the call.
+	 * @param array  $expected Each hook fired, with its $staged value and whether the session flag was still set.
+	 */
+	public function test_pre_payment_complete_fires_before_the_payment_status_filters( string $method, string $status, array $expected ): void {
+		$order = new WC_Order();
+		$order->set_status( $status );
+		$order->save();
+		WC()->session->set( 'order_awaiting_payment', $order->get_id() );
+		$calls    = array();
+		$order_id = $order->get_id();
+		$record   = static function ( ...$args ) use ( &$calls, $order_id ) {
+			$calls[] = array( current_filter(), end( $args ), WC()->session->get( 'order_awaiting_payment' ) === $order_id );
+			return $args[0];
+		};
+		add_action( 'woocommerce_pre_payment_complete', $record, 10, 3 );
+		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', $record, 10, 3 );
+		add_filter( 'woocommerce_payment_complete_order_status', $record, 10, 4 );
+
+		if ( 'stage_payment_complete' === $method ) {
+			$order->mark_staged();
+		}
+		$order->$method( '12345' );
+
+		$this->assertSame( $expected, $calls );
+		$this->assertSame( 'payment_complete' === $method ? false : $order_id, WC()->session->get( 'order_awaiting_payment' ) );
+	}
+
+	/**
+	 * @testdox A woocommerce_pre_payment_complete listener without $staged refuses a staged payment before the order changes or the save gets work.
+	 */
+	public function test_old_pre_payment_listener_refuses_a_staged_payment_before_any_change(): void {
+		$order = new WC_Order();
+		$order->save();
+		add_action( 'woocommerce_pre_payment_complete', '__return_null', 10, 2 );
+
+		$order->mark_staged();
+		try {
+			$order->stage_payment_complete( '12345' );
+			$this->fail( 'The listener without $staged did not refuse the staged payment' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertStringContainsString( 'woocommerce_pre_payment_complete hook', $e->getMessage() );
+		}
+
+		$this->assertSame( '', $order->get_transaction_id() );
+		$this->assertNull( $order->get_date_paid( 'edit' ) );
+		$this->assertEmpty( ( fn() => $this->take_deferred_actions() )->call( $order ), 'The refused call queued work for the save' );
 	}
 
 	/**

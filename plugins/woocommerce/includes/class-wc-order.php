@@ -181,15 +181,16 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Make the in-memory changes of payment_complete(): the transaction ID, the paid date and the payment
-	 * complete status. Leave woocommerce_pre_payment_complete, the session's order_awaiting_payment flag, the
-	 * payment note and woocommerce_payment_complete to the next save(), which runs the first two before it
-	 * writes and adds the note and fires the action after it writes. payment_complete() runs this method through
-	 * write_through(), so it runs all of them and saves right away. When that save fails, the method throws, and
-	 * the note and the action wait for the next save that writes the order with the same status or a paid one.
+	 * complete status. Fire woocommerce_pre_payment_complete first, before the payment status filters, as
+	 * payment_complete() always did. Leave the session's order_awaiting_payment flag, the payment note and
+	 * woocommerce_payment_complete to the next save(), which clears the flag before it writes and adds the note
+	 * and fires the action after it writes. payment_complete() runs this method through write_through(), so it
+	 * runs all of them and saves right away. When that save fails, the method throws, and the note and the
+	 * action wait for the next save that writes the order with the same status or a paid one.
 	 *
 	 * When the order status is not one that payment can complete, the order does not change, the
-	 * woocommerce_payment_complete_order_status_<status> action fires right away, the method adds nothing for
-	 * the next save(), and it returns false.
+	 * woocommerce_pre_payment_complete and woocommerce_payment_complete_order_status_<status> actions fire right
+	 * away, the method adds nothing for the next save(), and it returns false.
 	 *
 	 * An order that is not saved yet does not change, and the method returns false.
 	 *
@@ -208,23 +209,29 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 
-		$pre_payment_complete = static function ( $order_id, $transaction_id ) {
-			/**
-			 * Fires before the payment of an order is completed.
-			 *
-			 * @param int    $order_id       Order ID.
-			 * @param string $transaction_id Transaction ID passed to payment_complete().
-			 * @since 2.1.0
-			 */
-			do_action( 'woocommerce_pre_payment_complete', $order_id, $transaction_id );
+		/**
+		 * Fires before the payment of an order is completed.
+		 *
+		 * A stage call followed by payment_complete() on the same order fires it twice. A listener that turns
+		 * something on here when $staged is true gets no matching woocommerce_payment_complete if the change is
+		 * refused.
+		 *
+		 * @param int    $order_id       Order ID.
+		 * @param string $transaction_id Transaction ID passed to payment_complete().
+		 * @param bool   $staged         Whether the order is staged and not saved yet.
+		 * @since 2.1.0
+		 * @since 11.4.0 Passes $staged.
+		 */
+		$this->do_staged_action( 'woocommerce_pre_payment_complete', $this->get_id(), $transaction_id );
 
+		$clear_awaiting_payment = static function () {
 			if ( WC()->session ) {
 				WC()->session->set( 'order_awaiting_payment', false );
 			}
 		};
 
 		if ( $this->writing_through ) {
-			$this->write_or_defer( 'pre_payment_complete', $pre_payment_complete, array( $this->get_id(), $transaction_id ) );
+			$this->write_or_defer( 'order_awaiting_payment', $clear_awaiting_payment );
 		}
 
 		/**
@@ -250,7 +257,7 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		if ( ! $this->writing_through ) {
-			$this->defer_to_save( 'pre_payment_complete', $pre_payment_complete, array( $this->get_id(), $transaction_id ) );
+			$this->defer_to_save( 'order_awaiting_payment', $clear_awaiting_payment );
 		}
 
 		$this->defer_to_save( 'payment_complete', null );
