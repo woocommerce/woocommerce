@@ -1471,6 +1471,40 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A manual status change staged on a new order fires woocommerce_order_edit_status once with the new ID, when a save after a failed write succeeds.
+	 */
+	public function test_staged_edit_status_of_a_new_order_fires_after_a_failed_write_is_retried(): void {
+		$events = array();
+		add_action(
+			'woocommerce_order_edit_status',
+			static function ( $order_id ) use ( &$events ) {
+				$events[] = array( 'edit_status', $order_id );
+			}
+		);
+		add_action(
+			'woocommerce_order_status_changed',
+			static function ( $order_id ) use ( &$events ) {
+				$events[] = array( 'status_changed', $order_id );
+			}
+		);
+
+		$order = new WC_Order();
+		$order->stage_status( OrderStatus::ON_HOLD, '', true );
+		$this->save_with_failed_write( $order );
+		$this->assertEmpty( $events );
+
+		$order->save();
+		$order->save();
+		$this->assertSame(
+			array(
+				array( 'edit_status', $order->get_id() ),
+				array( 'status_changed', $order->get_id() ),
+			),
+			$events
+		);
+	}
+
+	/**
 	 * Run a callback while a listener makes every order write fail.
 	 *
 	 * @param callable $callback Callback to run.
