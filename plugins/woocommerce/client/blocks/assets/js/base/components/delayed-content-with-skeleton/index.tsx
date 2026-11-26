@@ -55,6 +55,10 @@ export const useDelayedSkeleton = ( isLoading: boolean ): boolean => {
 			setIsHeld( ! isReducedMotion );
 			return;
 		}
+		if ( isReducedMotion ) {
+			setIsHeld( false );
+			return;
+		}
 		const timer = setTimeout(
 			() => setIsHeld( false ),
 			Math.max( 0, phaseStart + MIN_DISPLAY_TIME - now )

@@ -59,4 +59,14 @@ describe( 'useDelayedSkeleton', () => {
 
 		expect( skeleton.result.current ).toBe( false );
 	} );
+
+	it( 'ends a held skeleton when reduced motion turns on', () => {
+		const skeleton = renderSkeleton( true );
+		skeleton.rerender( false );
+		expect( skeleton.result.current ).toBe( true );
+
+		jest.mocked( useReducedMotion ).mockReturnValue( true );
+		skeleton.rerender( false );
+		expect( skeleton.result.current ).toBe( false );
+	} );
 } );
