@@ -1691,6 +1691,34 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A staged payment fires no payment hook and adds no payment note when the status changes before the save.
+	 *
+	 * @testWith ["stage_status", false]
+	 *           ["set_status", false]
+	 *           ["stage_status", true]
+	 *
+	 * @param string $method       Method that changes the status.
+	 * @param bool   $failed_write Whether a save fails before the status change.
+	 */
+	public function test_staged_payment_complete_drops_its_hook_when_the_status_changes( string $method, bool $failed_write ): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+
+		$this->assertTrue( $order->stage_payment_complete( '12345' ) );
+		if ( $failed_write ) {
+			$this->save_with_failed_write( $order );
+		}
+		$order->$method( OrderStatus::CANCELLED );
+		$order->save();
+
+		$this->assertSame( 0, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$this->assertSame( OrderStatus::CANCELLED, wc_get_order( $order->get_id() )->get_status() );
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertNotContains( 'Payment complete.', $notes );
+	}
+
+	/**
 	 * @testdox update_taxes() does not write the tax items when the order write fails.
 	 */
 	public function test_update_taxes_does_not_write_tax_items_when_the_write_fails(): void {

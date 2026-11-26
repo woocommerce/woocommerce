@@ -187,6 +187,10 @@ class WC_Order extends WC_Abstract_Order {
 	 * write_through(), so it runs all of them and saves right away. When that save fails, the method throws, and
 	 * the note and the action wait for the next save that writes the order with the same status or a paid one.
 	 *
+	 * A direct call has the same check: when a later status change leaves the order in a status that is not
+	 * paid, the save drops the note and the action. The save logs a throwing listener of the action and adds an
+	 * error note, as payment_complete() does.
+	 *
 	 * When the order status is not one that payment can complete, the order does not change, the
 	 * woocommerce_payment_complete_order_status_<status> action fires right away, the method adds nothing for
 	 * the next save(), and it returns false.
@@ -296,7 +300,7 @@ class WC_Order extends WC_Abstract_Order {
 		};
 		$action_args = array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
 		$save_error  = $this->writing_through ? $this->get_last_save_error() : null;
-		if ( null !== $save_error ) {
+		if ( null !== $save_error || ! $this->writing_through ) {
 			$paid_status = $this->get_status();
 			$this->defer_to_save(
 				'payment_complete',
@@ -321,7 +325,10 @@ class WC_Order extends WC_Abstract_Order {
 				array(),
 				true
 			);
-			throw $save_error;
+			if ( null !== $save_error ) {
+				throw $save_error;
+			}
+			return true;
 		}
 		$this->write_or_defer( 'payment_complete_note', $add_note, array(), true );
 		$this->write_or_defer( 'payment_complete', 'do_action', $action_args, true );

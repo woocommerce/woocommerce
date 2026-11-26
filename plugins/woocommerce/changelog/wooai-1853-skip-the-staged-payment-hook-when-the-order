@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Skip the staged payment hook and note when the status changes before the save; experimental feature only.
+
