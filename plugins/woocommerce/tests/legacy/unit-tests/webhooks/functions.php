@@ -58,6 +58,19 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 			array( false, wc_is_webhook_valid_topic( 'missingdot' ) ),
 			array( false, wc_is_webhook_valid_topic( 'with space' ) ),
 			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_login_credentials' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_webhook_payload.extra' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_mail_content.extra' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_form_field_password' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_webhook_secret' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_logger_days_to_retain_logs' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_paypal_capture_request' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_paypal_refund_request.extra' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.woocommerce_product_csv_importer_check_import_file_path' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.woocommerce_add_to_cart.extra' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.woocommerce_form_field_checkbox' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.woocommerce_format_log_entry' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.woocommerce_logger_log_message' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.wc_webhook_extension_event' ) ),
 		);
 	}
 
