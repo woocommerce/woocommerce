@@ -144,6 +144,7 @@ class SupportReport {
 			'Rules version: ' . ( '' !== $rules ? $rules : 'Built into WooCommerce' ),
 			'Last checked: ' . ( null === $report ? 'Not checked yet' : (string) ( $report['generated_at'] ?? '' ) ),
 			'Check status: ' . $state,
+			'Daily checks: ' . ( ScheduledScan::daily_enabled() ? 'On' : 'Off' ),
 		);
 		if ( null !== $report && ! empty( $report['truncated'] ) ) {
 			$count   = (int) ( $report['bestsellers_count'] ?? 0 );

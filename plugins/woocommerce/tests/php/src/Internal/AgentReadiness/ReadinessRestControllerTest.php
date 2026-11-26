@@ -148,6 +148,10 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertStringContainsString( 'Site: ' . home_url(), $data['text'] );
 		$this->assertStringContainsString( 'WooCommerce version: ' . WC_VERSION, $data['text'] );
 		$this->assertStringContainsString( 'Last checked: Not checked yet', $data['text'] );
+		$this->assertStringContainsString( "\nDaily checks: On\n", $data['text'], 'Support sees whether the store is checked each day' );
+		update_option( ScheduledScan::DAILY_OPTION, 'no' );
+		$this->assertStringContainsString( "\nDaily checks: Off\n", $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'] );
+		delete_option( ScheduledScan::DAILY_OPTION );
 		$this->assertStringContainsString( "AI shopping: Off\nStore visibility: Live", $data['text'] );
 		$this->assertStringContainsString( "### Store checks ###\n\nNot checked yet", $data['text'] );
 		$this->assertStringContainsString( '(launched)', $data['text'], 'Setup steps are read now, so they show before the first check.' );
