@@ -42,6 +42,11 @@ final class ValidationErrorCode {
 	public const NOT_IN_ENUM = 'not_in_enum';
 
 	/**
+	 * A string is longer than allowed. Params: `max` (int), the most characters allowed.
+	 */
+	public const TOO_LONG = 'too_long';
+
+	/**
 	 * A well-typed value is malformed or forbidden. No params.
 	 */
 	public const INVALID_VALUE = 'invalid_value';

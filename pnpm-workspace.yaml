@@ -79,6 +79,7 @@ catalogs:
         # Keep direct Jest packages on 29.5.x; WordPress scripts manages its own test runner.
         '@jest/globals': 29.5.x
         '@types/jest': 29.5.x
+        '@wordpress/browserslist-config': next
         '@wordpress/build': 0.24.0
         '@wordpress/env': 12.0.0
         '@wordpress/prettier-config': 4.56.0

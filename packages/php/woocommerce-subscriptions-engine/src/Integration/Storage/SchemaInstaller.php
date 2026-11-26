@@ -68,13 +68,15 @@ final class SchemaInstaller {
 	 * 2.10.0 - new contract_history table: per-contract extension records (type, optional cycle,
 	 *          opaque JSON payload, a binary-collated `creation_key` unique per contract), read
 	 *          newest first through the `contract` index. dbDelta creates it; nothing to recreate.
+	 * 2.11.0 - contract_addresses gain an `email` index for the owner-scoped address email read.
+	 *          dbDelta adds it; nothing to recreate.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	private const VERSION = '2.10.0';
+	private const VERSION = '2.11.0';
 
 	/**
 	 * Option key tracking the installed schema version.
@@ -340,7 +342,9 @@ final class SchemaInstaller {
 ) {$collate};";
 
 		// One billing + one shipping address per contract: composite PK on
-		// (contract_id, address_type).
+		// (contract_id, address_type). `email` keys the owner-scoped address email read on a
+		// 191-character prefix: 191 utf8mb4 characters (4 bytes each) fit the 767-byte index limit.
+		// Keep the `email` width in step with Api\Contracts::ADDRESS_EMAIL_MAX_LENGTH.
 		$contract_addresses_sql = "CREATE TABLE {$contract_addresses} (
   contract_id BIGINT UNSIGNED NOT NULL,
   address_type VARCHAR(20) NOT NULL,
@@ -355,7 +359,8 @@ final class SchemaInstaller {
   country TEXT NULL,
   email VARCHAR(320) NULL,
   phone VARCHAR(100) NULL,
-  PRIMARY KEY  (contract_id, address_type)
+  PRIMARY KEY  (contract_id, address_type),
+  KEY email (email(191))
 ) {$collate};";
 
 		$contract_meta_sql = "CREATE TABLE {$contract_meta} (

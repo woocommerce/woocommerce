@@ -396,6 +396,231 @@ class ContractHistoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox delete_history() deletes every entry of the contract in one statement and returns the count; other contracts keep theirs.
+	 */
+	public function test_delete_history_deletes_the_contracts_entries(): void {
+		$other = $this->insert_released( Contract::create( array( 'extension_slug' => self::OWNER ) ) );
+		foreach ( array( 'a', 'b', 'c' ) as $type ) {
+			$this->sut->add_history_entry( $this->entry( array( 'type' => $type ) ), self::OWNER );
+		}
+		$this->sut->add_history_entry( $this->entry( array( 'contract_id' => $other ) ), self::OWNER );
+		$lock = $this->take_lock( $this->id, 'erase' );
+
+		$deleted    = null;
+		$statements = $this->statements_during(
+			function () use ( &$deleted, $lock ): void {
+				$deleted = $this->sut->delete_history( $this->id, $lock );
+			}
+		);
+
+		$this->assertSame( 3, $deleted );
+		$this->assertSame( array(), $this->sut->find_history( $this->id ) );
+		$this->assertCount( 1, $this->sut->find_history( $other ) );
+		$this->assertCount( 1, $statements, 'A trusted lock costs no query, so the delete is the only statement.' );
+		$this->assertMatchesRegularExpression( '/^DELETE h FROM \S*contract_history h JOIN \S*contracts c ON c\.id = h\.contract_id WHERE h\.contract_id = ' . $this->id . ' AND c\.lock_token = /', $statements[0] );
+	}
+
+	/**
+	 * @testdox delete_history() returns 0 for a contract with no entries, after one read that confirms the lock is held.
+	 */
+	public function test_delete_history_of_an_empty_history_returns_zero(): void {
+		$lock = $this->take_lock( $this->id, 'erase' );
+
+		$deleted    = null;
+		$statements = $this->statements_during(
+			function () use ( &$deleted, $lock ): void {
+				$deleted = $this->sut->delete_history( $this->id, $lock );
+			}
+		);
+
+		$this->assertSame( 0, $deleted );
+		$this->assertCount( 2, $statements, 'The delete, then one lock check read; the fence runs no query because the lock was just taken.' );
+		$this->assertMatchesRegularExpression( '/^SELECT \( lock_token = .* \) AS held, .* AS live, lock_operation FROM \S*contracts WHERE id = ' . $this->id . '$/', $statements[1] );
+	}
+
+	/**
+	 * @testdox delete_history() refuses a lock for another contract and deletes nothing.
+	 */
+	public function test_delete_history_refuses_a_lock_for_another_contract(): void {
+		$other = $this->insert_released( Contract::create( array( 'extension_slug' => self::OWNER ) ) );
+		$this->sut->add_history_entry( $this->entry(), self::OWNER );
+
+		try {
+			$this->sut->delete_history( $this->id, $this->take_lock( $other, 'erase' ) );
+			$this->fail( 'Expected the lock for another contract to be refused.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertStringContainsString( "not contract {$this->id}", $e->getMessage() );
+		}
+
+		$this->assertCount( 1, $this->sut->find_history( $this->id ) );
+	}
+
+	/**
+	 * @testdox delete_history() with a lost lock throws ContractLockedException and deletes nothing.
+	 */
+	public function test_delete_history_with_a_lost_lock_deletes_nothing(): void {
+		$this->sut->add_history_entry( $this->entry(), self::OWNER );
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$old = $this->sut->acquire_lock( $this->id, self::OWNER, 'erase' );
+		$this->assertInstanceOf( ContractLock::class, $old );
+
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $this->id, self::OWNER, 'cancel' ) );
+		$this->age_lock_trust( $old );
+
+		try {
+			$this->sut->delete_history( $this->id, $old );
+			$this->fail( 'Expected the lost lock to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'cancel', $e->get_operation() );
+		}
+
+		$this->assertCount( 1, $this->sut->find_history( $this->id ) );
+	}
+
+	/**
+	 * @testdox delete_history() with a lock lost after the fence deletes nothing, throws ContractLockedException, and the new holder's entries survive.
+	 */
+	public function test_delete_history_with_a_lock_lost_after_the_fence_deletes_nothing(): void {
+		$this->sut->add_history_entry( $this->entry( array( 'type' => 'before' ) ), self::OWNER );
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$old = $this->sut->acquire_lock( $this->id, self::OWNER, 'erase' );
+		$this->assertInstanceOf( ContractLock::class, $old );
+
+		// The old lock expires and is taken over; the new holder appends an entry.
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$new = $this->sut->acquire_lock( $this->id, self::OWNER, 'cancel' );
+		$this->assertInstanceOf( ContractLock::class, $new );
+		$this->sut->add_history_entry( $this->entry( array( 'type' => 'cancelled' ) ), self::OWNER, $new );
+
+		// The old lock is still inside its trusted window, so the fence lets the delete run: the
+		// statement itself must refuse it.
+		try {
+			$this->sut->delete_history( $this->id, $old );
+			$this->fail( 'Expected the lost lock to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'cancel', $e->get_operation() );
+		}
+
+		$this->assertSame( array( 'cancelled', 'before' ), $this->types( $this->sut->find_history( $this->id ) ) );
+		$this->assertSame( 2, $this->sut->delete_history( $this->id, $new ), 'The holder of the live lock deletes.' );
+	}
+
+	/**
+	 * @testdox delete_history() with a lock that expired and was not taken over throws ContractLockedException without an operation and deletes nothing.
+	 */
+	public function test_delete_history_with_an_expired_lock_deletes_nothing(): void {
+		$this->sut->add_history_entry( $this->entry(), self::OWNER );
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$old = $this->sut->acquire_lock( $this->id, self::OWNER, 'erase' );
+		$this->assertInstanceOf( ContractLock::class, $old );
+
+		// The lock expires on the database clock; nobody takes it. It is still inside its trusted
+		// window, so the fence lets the delete run.
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		try {
+			$this->sut->delete_history( $this->id, $old );
+			$this->fail( 'Expected the expired lock to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertNull( $e->get_operation() );
+		}
+
+		$this->assertCount( 1, $this->sut->find_history( $this->id ) );
+	}
+
+	/**
+	 * @testdox delete_history() of an empty history with a lock lost after the fence throws ContractLockedException instead of returning 0.
+	 */
+	public function test_delete_history_of_an_empty_history_with_a_lock_lost_after_the_fence_throws(): void {
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$old = $this->sut->acquire_lock( $this->id, self::OWNER, 'erase' );
+		$this->assertInstanceOf( ContractLock::class, $old );
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $this->id, self::OWNER, 'cancel' ) );
+
+		try {
+			$this->sut->delete_history( $this->id, $old );
+			$this->fail( 'Expected the lost lock to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'cancel', $e->get_operation() );
+		}
+	}
+
+	/**
+	 * @testdox delete_history() throws RuntimeException on a failed delete, opens no transaction and deletes nothing.
+	 */
+	public function test_delete_history_throws_on_a_failed_delete(): void {
+		$this->sut->add_history_entry( $this->entry(), self::OWNER );
+		$lock = $this->take_lock( $this->id, 'erase' );
+
+		$this->fail_next_query( '/^DELETE h FROM \S*contract_history/' );
+		$statements = $this->statements_during(
+			function () use ( $lock ): void {
+				try {
+					$this->sut->delete_history( $this->id, $lock );
+					$this->fail( 'Expected the failed delete to throw.' );
+				} catch ( RuntimeException $e ) {
+					$this->assertStringContainsString( "Failed to delete the history of contract {$this->id}", $e->getMessage() );
+				}
+			}
+		);
+
+		foreach ( $statements as $statement ) {
+			$this->assertSame( 0, preg_match( '/^\s*(START TRANSACTION|BEGIN|COMMIT|ROLLBACK)\b/i', $statement ), 'The delete opens no transaction.' );
+		}
+		$this->assertCount( 1, $this->sut->find_history( $this->id ) );
+	}
+
+	/**
+	 * @testdox delete_history() of an empty history throws RuntimeException when the read of its lock check fails, instead of returning 0.
+	 */
+	public function test_delete_history_propagates_a_failed_lock_check(): void {
+		$lock = $this->take_lock( $this->id, 'erase' );
+
+		$this->fail_next_query( '/AS held, .* AS live, lock_operation FROM \S*contracts/' );
+		try {
+			$this->sut->delete_history( $this->id, $lock );
+			$this->fail( 'Expected the failed lock check to throw.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertNotInstanceOf( ContractLockedException::class, $e );
+			$this->assertStringContainsString( "lock on contract {$this->id}", $e->getMessage() );
+		}
+	}
+
+	/**
+	 * @testdox delete_history() with a still-trusted lock on a contract removed after the fence throws ContractLockedException, instead of returning 0.
+	 */
+	public function test_delete_history_of_a_removed_contract_throws(): void {
+		global $wpdb;
+
+		$lock = $this->take_lock( $this->id, 'erase' );
+		$wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'id' => $this->id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		try {
+			$this->sut->delete_history( $this->id, $lock );
+			$this->fail( 'Expected the removed contract to read as a lost lock.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertNull( $e->get_operation() );
+		}
+	}
+
+	/**
+	 * @testdox After delete_history(), new entries are written and paged, and a freed creation key can be written again.
+	 */
+	public function test_a_deleted_history_takes_new_entries_and_frees_creation_keys(): void {
+		$this->sut->add_history_entry( $this->entry( array( 'creation_key' => 'renewal-paid-7' ) ), self::OWNER );
+		$lock = $this->take_lock( $this->id, 'erase' );
+		$this->assertSame( 1, $this->sut->delete_history( $this->id, $lock ) );
+
+		$this->assertInstanceOf( HistoryEntry::class, $this->sut->add_history_entry( $this->entry( array( 'type' => 'personal-data-removed' ) ), self::OWNER, $lock ) );
+		$this->assertInstanceOf( HistoryEntry::class, $this->sut->add_history_entry( $this->entry( array( 'creation_key' => 'renewal-paid-7' ) ), self::OWNER ) );
+
+		$this->assertSame( array( 'held', 'personal-data-removed' ), $this->types( $this->sut->find_history( $this->id ) ) );
+		$this->assertSame( array( 'held' ), $this->types( $this->sut->find_history( $this->id, 1, 0 ) ) );
+		$this->assertSame( array( 'personal-data-removed' ), $this->types( $this->sut->find_history( $this->id, 1, 1 ) ) );
+	}
+
+	/**
 	 * A new entry on the fixture contract.
 	 *
 	 * @param array<string, mixed> $overrides Entry attributes to replace.
