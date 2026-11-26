@@ -1893,6 +1893,51 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A setup-only Fix first card counts the Required steps, and keeps the ranking line when the rules file marks the only one optional.
+	 */
+	public function test_fix_first_setup_line_counts_required_steps_only(): void {
+		$this->make_every_step_pass();
+		update_option( 'blog_public', '0' );
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			$this->restore[]  = array( $gateway, $gateway->enabled );
+			$gateway->enabled = 'no';
+		}
+		update_option(
+			RemoteRules::OPTION,
+			array(
+				'store_checks' => array(
+					'search_visible' => array( 'required' => false ),
+				),
+			),
+			false
+		);
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+				'sales'        => null,
+			),
+			false
+		);
+
+		$fix_first = $this->view()['fix_first'];
+		$items     = array_column( $fix_first['items'], null, 'id' );
+		$this->assertSame( 'Finish 1 required step to get your store ready for AI shopping.', $fix_first['ranking'], 'The optional search step is on the card and is not counted' );
+		$this->assertNull( $fix_first['link'], 'The required-steps line has no ranking link' );
+		$this->assertSame( 'Required', $items['payment_method']['badge']['text'] );
+		$this->assertNull( $items['search_visible']['badge'], 'The rules file left this step off the Required list' );
+		$this->assertStringStartsWith( 'Finish 1 required step', $this->shopping()['checklist']['summary'] );
+
+		$this->make_every_step_pass();
+		update_option( 'blog_public', '0' );
+		$fix_first = $this->view()['fix_first'];
+		$this->assertSame( array( 'search_visible' ), array_column( $fix_first['items'], 'id' ) );
+		$this->assertSame( 'Start with the fixes that affect the most products.', $fix_first['ranking'], 'No required step is left, so the card does not say to finish required steps' );
+		$this->assertSame( 'Turn on Analytics to see which fixes affect the most sales.', $fix_first['link']['text'] );
+	}
+
+	/**
 	 * @testdox Order confirmation emails that are off are Required in Fix first and the Setup checklist, not in the buying card, ahead of every sale-ranked issue, with AI shopping on or off and with or without sales, and never keep AI shopping from being turned on.
 	 *
 	 * @dataProvider ai_shopping_and_sales
