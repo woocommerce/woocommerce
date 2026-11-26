@@ -125,10 +125,8 @@ table.wc-block-cart-items {
 			line-height: 1.4;
 		}
 
-		&.is-disabled {
-			opacity: 0.5;
+		@include motion-dim(".is-disabled") {
 			pointer-events: none;
-			transition: opacity 200ms ease;
 		}
 	}
 

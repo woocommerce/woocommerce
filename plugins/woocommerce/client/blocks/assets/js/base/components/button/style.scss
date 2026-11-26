@@ -41,7 +41,7 @@
 	height: auto;
 	justify-content: center;
 	position: relative;
-	transition: box-shadow 0.1s linear;
+	transition: motion-state(box-shadow);
 
 	&:not(:where(.wp-block-woocommerce-cart *, .wp-block-woocommerce-checkout *)) {
 		@include button-appearance;
