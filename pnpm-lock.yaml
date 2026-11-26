@@ -390,9 +390,6 @@ catalogs:
     '@wordpress/blocks':
       specifier: 15.6.3
       version: 15.6.3
-    '@wordpress/commands':
-      specifier: 1.33.5
-      version: 1.33.5
     '@wordpress/components':
       specifier: 30.6.5
       version: 30.6.5
@@ -800,9 +797,6 @@ importers:
       clsx:
         specifier: 2.1.x
         version: 2.1.1
-      core-js:
-        specifier: ^3.34.0
-        version: 3.49.0
       d3-axis:
         specifier: ^1.0.12
         version: 1.0.12
@@ -857,6 +851,9 @@ importers:
       react-window:
         specifier: ^1.8.11
         version: 1.8.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      uuid:
+        specifier: ^11.1.1
+        version: 11.1.1
     devDependencies:
       '@babel/core':
         specifier: catalog:tooling
@@ -900,9 +897,6 @@ importers:
       '@types/testing-library__jest-dom':
         specifier: ^5.14.9
         version: 5.14.9
-      '@types/uuid':
-        specifier: ^8.3.4
-        version: 8.3.4
       '@types/wordpress__viewport':
         specifier: catalog:wp-min
         version: 5.5.3(react@18.3.1)
@@ -972,9 +966,6 @@ importers:
       typescript:
         specifier: catalog:tooling
         version: 5.7.3
-      uuid:
-        specifier: ^11.1.1
-        version: 11.1.1
       webpack:
         specifier: catalog:tooling
         version: 5.112.2(@swc/core@1.15.24)(clean-css@5.3.3)(cssnano@6.1.2(postcss@8.5.26))(csso@5.0.5)(esbuild@0.27.7)(html-minifier-terser@6.1.0)(postcss@8.5.26)(supports-color@9.4.0)(svgo@3.3.5)(uglify-js@3.19.3)(webpack-cli@5.1.4)(webpack-dev-server@6.1.0)
@@ -989,9 +980,6 @@ importers:
       '@types/node':
         specifier: ^24.1.0
         version: 24.12.2
-      browser-filesaver:
-        specifier: ^1.1.1
-        version: 1.1.1
     devDependencies:
       '@babel/core':
         specifier: catalog:tooling
@@ -1524,9 +1512,6 @@ importers:
       '@wordpress/blocks':
         specifier: catalog:wp-min
         version: 15.6.3(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@wordpress/commands':
-        specifier: catalog:wp-min
-        version: 1.33.5(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@9.4.0)
       '@wordpress/components':
         specifier: catalog:wp-min
         version: 30.6.5(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@9.4.0)
@@ -9199,9 +9184,6 @@ packages:
   '@types/unist@2.0.11':
     resolution: {integrity: sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA==}
 
-  '@types/uuid@8.3.4':
-    resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
-
   '@types/webpack-sources@3.2.3':
     resolution: {integrity: sha512-4nZOdMwSPHZ4pTEZzSp0AsTM4K7Qmu40UKW4tJDiOVs20UzYF9l+qUe4s0ftfN0pin06n+5cWWDJXH+sbhAiDw==}
 
@@ -9992,13 +9974,6 @@ packages:
     engines: {node: '>=12'}
     peerDependencies:
       react: ^18.0.0
-
-  '@wordpress/commands@1.33.5':
-    resolution: {integrity: sha512-m8a/9ahGzEVYj77EfS6crzjq2Gq97DOXbeSqRSHrpePE/NSXPh6AAABRP/dKCI/0AysjJ0v/bKKTVnsFgkk0YA==}
-    engines: {node: '>=18.12.0', npm: '>=8.19.2'}
-    peerDependencies:
-      react: ^18.0.0
-      react-dom: ^18.0.0
 
   '@wordpress/commands@1.48.1':
     resolution: {integrity: sha512-yFmQ2yB4tOWPqhO+tE8uYyFqcGwxtOJ9uc1yHYfH40oMls3p+TswktsdbBM2gEmoYxfD+d3Nhp/mXGS38pdTdw==}
@@ -12349,9 +12324,6 @@ packages:
 
   brcast@2.0.2:
     resolution: {integrity: sha512-Tfn5JSE7hrUlFcOoaLzVvkbgIemIorMIyoMr3TgvszWW7jFt2C9PdeMLtysYD9RU0MmU17b69+XJG1eRY2OBRg==}
-
-  browser-filesaver@1.1.1:
-    resolution: {integrity: sha512-UI4ps3bE/YXvGKlL7BoITvw8bE/SOt7YnvZeCyME7votTLxsDQ0ES0lvQdEWZMvO9aF5/66h+a3PGWn1KOblBA==}
 
   browserify-zlib@0.1.4:
     resolution: {integrity: sha512-19OEpq7vWgsH6WkvkBJQDFvJS1uPcbFOQ4v9CU839dO+ZZXUZO6XpE6hNCqvlIIj+4fZvRiJ6DsAQ382GwiyTQ==}
@@ -27487,8 +27459,6 @@ snapshots:
 
   '@types/unist@2.0.11': {}
 
-  '@types/uuid@8.3.4': {}
-
   '@types/webpack-sources@3.2.3':
     dependencies:
       '@types/node': 24.12.2
@@ -29931,26 +29901,6 @@ snapshots:
       - react-dom
       - supports-color
       - vite
-
-  '@wordpress/commands@1.33.5(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@9.4.0)':
-    dependencies:
-      '@wordpress/base-styles': 6.20.0
-      '@wordpress/components': 30.9.0(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@9.4.0)
-      '@wordpress/data': 10.33.1(@types/react@18.3.28)(react@18.3.1)
-      '@wordpress/element': 6.45.0
-      '@wordpress/i18n': 6.30.0
-      '@wordpress/icons': 11.8.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@wordpress/keyboard-shortcuts': 5.48.1(@types/react-dom@18.3.7(@types/react@18.3.28))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@wordpress/private-apis': 1.48.1
-      clsx: 2.1.1
-      cmdk: 1.1.1(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-    transitivePeerDependencies:
-      - '@emotion/is-prop-valid'
-      - '@types/react'
-      - '@types/react-dom'
-      - supports-color
 
   '@wordpress/commands@1.48.1(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(supports-color@10.2.2)(typescript@5.7.3))(supports-color@10.2.2)':
     dependencies:
@@ -38638,8 +38588,6 @@ snapshots:
       fill-range: 7.1.1
 
   brcast@2.0.2: {}
-
-  browser-filesaver@1.1.1: {}
 
   browserify-zlib@0.1.4:
     dependencies:

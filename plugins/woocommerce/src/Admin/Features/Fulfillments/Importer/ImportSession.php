@@ -16,9 +16,9 @@ defined( 'ABSPATH' ) || exit;
  * Per-user import session stored in a transient.
  *
  * The prepare endpoint creates it with the staged file path, attachment ID, delimiter,
- * headers and row total, and schedules the cleanup of the staged file. The progress
- * fields (processed, byte_offset, mapping, counts, seen_tracking_pairs) are stored here
- * for the import run that lands next. One session is active per user at a time.
+ * headers and row total, and schedules the cleanup of the staged file. The import run
+ * freezes its mapping here and records each chunk's progress (processed, byte_offset,
+ * counts, seen_tracking_pairs, last chunk). One session is active per user at a time.
  *
  * @internal
  * @since 11.4.0
@@ -670,6 +670,43 @@ final class ImportSession {
 	}
 
 	/**
+	 * Freeze the mapping and run options so every chunk imports under the same rules.
+	 *
+	 * Only the first call stores the values; later calls keep them. The stored payload is read
+	 * first and this copy takes it over, so a copy loaded before another request froze the
+	 * settings or recorded a chunk cannot write over them. That narrows the window for two
+	 * requests freezing at once; the caller's lock closes it.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array<int, string> $mapping CSV column index => canonical column key.
+	 * @param bool               $notify  Whether to fire customer notifications.
+	 * @param bool               $update  Whether to update existing fulfillments on tracking-number match.
+	 * @return bool False when the session is gone or the settings could not be stored.
+	 */
+	public function freeze_run_settings( array $mapping, bool $notify, bool $update ): bool {
+		if ( null !== $this->frozen_mapping() ) {
+			return true;
+		}
+		$stored = get_transient( self::PREFIX . $this->user_id . '_' . $this->token );
+		if ( ! is_array( $stored ) ) {
+			return false;
+		}
+		$this->data = $stored;
+		if ( null !== $this->frozen_mapping() ) {
+			return true;
+		}
+		$this->data['mapping']         = $mapping;
+		$this->data['notify_customer'] = $notify;
+		$this->data['update_existing'] = $update;
+		if ( $this->persist() ) {
+			return true;
+		}
+		$this->data = $stored;
+		return false;
+	}
+
+	/**
 	 * Byte offset in the CSV reached by the import run.
 	 *
 	 * @since 11.4.0
@@ -678,6 +715,92 @@ final class ImportSession {
 	 */
 	public function byte_offset(): int {
 		return (int) ( $this->data['byte_offset'] ?? 0 );
+	}
+
+	/**
+	 * Physical record number of the row at byte_offset(), passed back to the reader on resume.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return int 0 until a chunk is recorded.
+	 */
+	public function next_record_number(): int {
+		return (int) ( $this->data['next_record_number'] ?? 0 );
+	}
+
+	/**
+	 * The most recently recorded chunk: its offset, per-row results and end-of-file flag.
+	 *
+	 * Lets a caller answer a replay of that chunk without importing its rows again.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return array{offset:int, rows:array<int, array<string, mixed>>, eof:bool}|null Null until a chunk is recorded.
+	 */
+	public function last_chunk(): ?array {
+		$chunk = $this->data['last_chunk'] ?? null;
+		if ( ! is_array( $chunk ) ) {
+			return null;
+		}
+		return array(
+			'offset' => (int) ( $chunk['offset'] ?? 0 ),
+			'rows'   => is_array( $chunk['rows'] ?? null ) ? $chunk['rows'] : array(),
+			'eof'    => ! empty( $chunk['eof'] ),
+		);
+	}
+
+	/**
+	 * Record a chunk returned by FulfillmentsCsvImporter::import_chunk() and persist the session.
+	 *
+	 * Only a chunk that starts at the recorded progress, in memory and in the stored payload,
+	 * is accepted, so a replayed or out-of-order chunk never adds its counts twice. This
+	 * protects the counts only: the caller compares the offset before importing the rows.
+	 * Re-reading the payload narrows the window for two requests recording the same chunk;
+	 * the caller's lock closes it. The chunk is written on top of the stored payload, so
+	 * settings another copy froze are kept. The dedupe set and the resume position are
+	 * replaced, and only this chunk's rows are kept, which bounds the payload.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int                  $offset Data rows processed before this chunk; must equal processed().
+	 * @param array<string, mixed> $chunk  Result of import_chunk() without an error.
+	 * @return bool False for an error result, an offset that is not the recorded progress, a
+	 *              session that is gone, or a payload that could not be stored.
+	 */
+	public function record_chunk( int $offset, array $chunk ): bool {
+		if ( isset( $chunk['error'] ) || $offset !== $this->processed() ) {
+			return false;
+		}
+		$stored = get_transient( self::PREFIX . $this->user_id . '_' . $this->token );
+		if ( ! is_array( $stored ) || (int) ( $stored['processed'] ?? 0 ) !== $offset ) {
+			return false;
+		}
+		// Build on the stored payload, which may hold settings frozen by a copy loaded later.
+		$this->data = $stored;
+
+		$counts = $this->counts();
+		foreach ( array_keys( $counts ) as $key ) {
+			$counts[ $key ] += (int) ( $chunk['counts'][ $key ] ?? 0 );
+		}
+		$rows = is_array( $chunk['rows'] ?? null ) ? array_values( $chunk['rows'] ) : array();
+		$seen = $chunk['seen_tracking_pairs'] ?? array();
+
+		$this->data['processed']           = $offset + max( 0, (int) ( $chunk['consumed'] ?? 0 ) );
+		$this->data['counts']              = $counts;
+		$this->data['seen_tracking_pairs'] = is_array( $seen ) ? $seen : array();
+		$this->data['byte_offset']         = max( 0, (int) ( $chunk['byte_offset'] ?? 0 ) );
+		$this->data['next_record_number']  = max( 0, (int) ( $chunk['next_record_number'] ?? 0 ) );
+		$this->data['last_chunk']          = array(
+			'offset' => $offset,
+			'rows'   => $rows,
+			'eof'    => ! empty( $chunk['eof'] ),
+		);
+
+		if ( $this->persist() ) {
+			return true;
+		}
+		$this->data = $stored;
+		return false;
 	}
 
 	/**
@@ -690,18 +813,18 @@ final class ImportSession {
 	public function counts(): array {
 		$counts = is_array( $this->data['counts'] ?? null ) ? $this->data['counts'] : array();
 		return array(
-			'created'  => (int) ( $counts['created'] ?? 0 ),
-			'updated'  => (int) ( $counts['updated'] ?? 0 ),
-			'skipped'  => (int) ( $counts['skipped'] ?? 0 ),
-			'failed'   => (int) ( $counts['failed'] ?? 0 ),
-			'notified' => (int) ( $counts['notified'] ?? 0 ),
+			FulfillmentsCsvImporter::STATUS_CREATED => (int) ( $counts[ FulfillmentsCsvImporter::STATUS_CREATED ] ?? 0 ),
+			FulfillmentsCsvImporter::STATUS_UPDATED => (int) ( $counts[ FulfillmentsCsvImporter::STATUS_UPDATED ] ?? 0 ),
+			FulfillmentsCsvImporter::STATUS_SKIPPED => (int) ( $counts[ FulfillmentsCsvImporter::STATUS_SKIPPED ] ?? 0 ),
+			FulfillmentsCsvImporter::STATUS_FAILED  => (int) ( $counts[ FulfillmentsCsvImporter::STATUS_FAILED ] ?? 0 ),
+			'notified'                              => (int) ( $counts['notified'] ?? 0 ),
 		);
 	}
 
 	/**
 	 * The stored counts plus an empty rows list, in the shape the import run reports.
 	 *
-	 * Per-row results are not persisted, so rows is always empty here.
+	 * Rows are left empty here; the rows of the last recorded chunk are in last_chunk().
 	 *
 	 * @since 11.4.0
 	 *

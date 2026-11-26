@@ -333,6 +333,7 @@ class WC_Data_Store_WP {
 	 * Map a valid date query var to WP_Query arguments.
 	 * Valid date formats: YYYY-MM-DD or timestamp, possibly combined with an operator from $valid_operators.
 	 * Also accepts a WC_DateTime object.
+	 * An array, or an object other than WC_DateTime, adds an entry to $wp_query_args['errors'] instead, so callers must check 'errors' before querying.
 	 *
 	 * @since 3.2.0
 	 * @param mixed  $query_var A valid date format.
@@ -353,6 +354,11 @@ class WC_Data_Store_WP {
 		// The raw strings $dates[0] and $dates[1] came from. Only day precision reads them.
 		$raw_start = '';
 		$raw_end   = '';
+
+		if ( is_array( $query_var ) || ( is_object( $query_var ) && ! $query_var instanceof WC_DateTime ) ) {
+			$wp_query_args['errors'][] = new WP_Error( 'woocommerce_query_invalid', __( 'Invalid date query.', 'woocommerce' ) );
+			return $wp_query_args;
+		}
 
 		try {
 			// Specific time query with a WC_DateTime.

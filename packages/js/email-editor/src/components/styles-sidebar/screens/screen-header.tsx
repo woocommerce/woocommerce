@@ -4,15 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
 import {
+	Navigator,
 	__experimentalSpacer as Spacer,
 	__experimentalView as View,
 } from '@wordpress/components';
 import { Stack, Text } from '@wordpress/ui';
-
-/**
- * Internal dependencies
- */
-import { Navigator } from '../navigator';
 
 type Props = {
 	title: string;
