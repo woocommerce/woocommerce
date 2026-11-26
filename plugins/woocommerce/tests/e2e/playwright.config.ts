@@ -304,12 +304,6 @@ const blocksSerialSpecs = [
 	// Changes the shop page slug, so the `shop/` URL that other specs visit
 	// stops working.
 	'**/tests/blocks/templates/shop-page.block_theme.spec.ts',
-
-	// Creates a visible $10 product with limited stock, which the Product
-	// Collection block needs to show it. While it exists, it changes product
-	// counts that catalog specs check, such as the single product under $10 in
-	// `inspector-controls`.
-	'**/tests/blocks/product-collection/product-collection-errors.block_theme.spec.ts',
 ];
 
 export default defineConfig< { resetDatabaseAfterEachTest: boolean } >( {
