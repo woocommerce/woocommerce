@@ -144,7 +144,6 @@ class SupportReport {
 			'Rules version: ' . ( '' !== $rules ? $rules : 'Built into WooCommerce' ),
 			'Last checked: ' . ( null === $report ? 'Not checked yet' : (string) ( $report['generated_at'] ?? '' ) ),
 			'Check status: ' . $state,
-			'Daily checks: ' . ( ScheduledScan::daily_enabled() ? 'On' : 'Off' ),
 		);
 		if ( null !== $report && ! empty( $report['truncated'] ) ) {
 			$count   = (int) ( $report['bestsellers_count'] ?? 0 );
@@ -154,6 +153,7 @@ class SupportReport {
 					? sprintf( 'Checked %s products: bestsellers first, then the most recently changed.', ProductScan::PRODUCT_LIMIT )
 					: sprintf( 'Checked the %s products you changed most recently.', ProductScan::PRODUCT_LIMIT ) );
 		}
+		$lines[] = 'Daily checks: ' . ( ScheduledScan::daily_enabled() ? 'On' : 'Off' );
 		return $lines;
 	}
 
