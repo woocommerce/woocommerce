@@ -161,10 +161,13 @@ overrides:
     '@automattic/components>react-router-dom': ~7.18.5
     react-resize-aware: 3.1.1
     sass: 'catalog:tooling'
-    # Security: move vulnerable transitive pins to patched releases; remove each once its parent ships a patched range.
+    # Remove after upgrading Storybook to 11, which uses webpack-dev-middleware 8.3.0 or later.
     '@storybook/builder-webpack5>webpack-dev-middleware': ^7.4.6
+    # Remove after upgrading @wordpress/e2e-test-utils-playwright to 2.1.0, which drops the proxy-agent → get-uri → basic-ftp chain.
     'get-uri>basic-ftp': ^6.2.4
+    # Remove after the @wordpress/scripts upgrade merges (https://github.com/woocommerce/woocommerce/pull/71486).
     'markdownlint@0.25.1>markdown-it': ^14.3.3
+    # Remove after upgrading to an @wordpress/scripts release with the copy-webpack-plugin fix (https://github.com/WordPress/gutenberg/pull/87479).
     'serialize-javascript@<7.0.3': ^7.1.3
 
 patchedDependencies:
