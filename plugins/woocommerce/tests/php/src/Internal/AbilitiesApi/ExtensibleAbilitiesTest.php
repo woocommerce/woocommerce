@@ -5231,6 +5231,27 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return a fixed 500 error when a pre-payment listener throws during staging.
+	 */
+	public function test_a_failed_staged_payment_returns_a_fixed_error(): void {
+		$this->register_order_status_ability( TestOrderStageAbility::class );
+		$order = \WC_Helper_Order::create_order();
+		$this->add_test_action(
+			'woocommerce_pre_payment_complete',
+			static function () {
+				throw new \RuntimeException( 'Payment listener failed.' );
+			}
+		);
+
+		$response = $this->run_ability_response( 'test-ext/order-status', array( 'id' => $order->get_id() ) );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_ability_save_failed', $response->get_data()['code'] );
+		$this->assertStringNotContainsString( 'Payment listener failed.', wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
 	 * @testdox Should return a fixed 500 error when the order write fails, though the order's save() catches the exception.
 	 */
 	public function test_a_failed_order_write_returns_a_fixed_error(): void {
