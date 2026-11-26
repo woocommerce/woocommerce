@@ -1553,6 +1553,49 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A throw while save() reports a failed write of a new order keeps the note that a staged hook listener staged.
+	 */
+	public function test_throw_in_the_failed_write_report_keeps_the_note_staged_on_a_new_order(): void {
+		$order = new WC_Order();
+		$stage = static function ( $and_taxes, $order ) use ( &$stage ) {
+			remove_action( 'woocommerce_order_after_calculate_totals', $stage );
+			$order->stage_order_note( 'Staged note.' );
+		};
+		$fail  = static function () use ( &$fail ) {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+			throw new Exception( 'Disk full.' );
+		};
+		$throw = static function ( $translation, $text ) use ( &$throw ) {
+			if ( '(no ID)' !== $text ) {
+				return $translation;
+			}
+			remove_filter( 'gettext', $throw );
+			throw new Error( 'Listener failed.' );
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $stage, 10, 2 );
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		add_filter( 'gettext', $throw, 10, 2 );
+
+		$order->stage_totals();
+		$caught = null;
+		try {
+			$order->save();
+		} catch ( Error $e ) {
+			$caught = $e;
+		} finally {
+			remove_action( 'woocommerce_order_after_calculate_totals', $stage );
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+			remove_filter( 'gettext', $throw );
+		}
+		$this->assertInstanceOf( Error::class, $caught, 'save() should pass on the Error.' );
+		$order->save();
+		$order->save();
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertSame( 1, count( array_keys( $notes, 'Staged note.', true ) ) );
+	}
+
+	/**
 	 * Run a callback while a listener makes every order write fail.
 	 *
 	 * @param callable $callback Callback to run.

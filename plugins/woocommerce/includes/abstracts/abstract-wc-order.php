@@ -385,8 +385,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$this->last_save_error = $e;
 			}
 
-			$message_id = $this->get_id() ? $this->get_id() : __( '(no ID)', 'woocommerce' );
 			try {
+				$message_id = $this->get_id() ? $this->get_id() : __( '(no ID)', 'woocommerce' );
 				$this->handle_exception(
 					$e,
 					wp_kses_post(
