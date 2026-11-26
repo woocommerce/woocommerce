@@ -3336,72 +3336,80 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should run the refund validators on the refund with its taxes and totals, and store the same refund as wc_create_refund().
 	 */
 	public function test_order_refund_create_validates_the_staged_refund_and_stores_what_wc_create_refund_stores(): void {
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_feature_cost_of_goods_sold_enabled', 'yes' );
-		\WC_Tax::_insert_tax_rate(
-			array(
-				'tax_rate_country'  => '',
-				'tax_rate'          => '10.0000',
-				'tax_rate_name'     => 'VAT',
-				'tax_rate_priority' => '1',
-				'tax_rate_shipping' => '1',
-				'tax_rate_order'    => '1',
-			)
-		);
-		$validated = array();
-		$this->register_validator(
-			'order_refund',
-			'test-ext',
-			function ( \WC_Order_Refund $refund ) use ( &$validated ) {
-				$validated[] = array( $refund->get_id(), $this->describe_refund( $refund ) );
-				return null;
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( true );
+		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
+			update_option( 'woocommerce_feature_cost_of_goods_sold_enabled', 'yes' );
+			\WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => '',
+					'tax_rate'          => '10.0000',
+					'tax_rate_name'     => 'VAT',
+					'tax_rate_priority' => '1',
+					'tax_rate_shipping' => '1',
+					'tax_rate_order'    => '1',
+				)
+			);
+			$validated = array();
+			$this->register_validator(
+				'order_refund',
+				'test-ext',
+				function ( \WC_Order_Refund $refund ) use ( &$validated ) {
+					$validated[] = array( $refund->get_id(), $this->describe_refund( $refund ) );
+					return null;
+				}
+			);
+			$orders = array();
+			$input  = array();
+			for ( $i = 0; $i < 2; $i++ ) {
+				$product = \WC_Helper_Product::create_simple_product();
+				$product->set_cogs_value( 3.0 );
+				$product->save();
+				$order = \WC_Helper_Order::create_order( 1, $product );
+				$order->calculate_totals( true );
+				$order->set_status( OrderStatus::PROCESSING );
+				$order->save();
+				$lines = array();
+				foreach ( $order->get_items( array( 'line_item', 'shipping' ) ) as $item_id => $item ) {
+					$lines[] = $item instanceof \WC_Order_Item_Product ? array(
+						'line_item_id' => $item_id,
+						'quantity'     => $item->get_quantity(),
+					) : array(
+						'line_item_id' => $item_id,
+						'refund_total' => (float) $item->get_total() + (float) $item->get_total_tax(),
+					);
+				}
+				$orders[] = $order;
+				$input[]  = $lines;
 			}
-		);
-		$orders = array();
-		$input  = array();
-		for ( $i = 0; $i < 2; $i++ ) {
-			$product = \WC_Helper_Product::create_simple_product();
-			$product->set_cogs_value( 3.0 );
-			$product->save();
-			$order = \WC_Helper_Order::create_order( 1, $product );
-			$order->calculate_totals( true );
-			$order->set_status( OrderStatus::PROCESSING );
-			$order->save();
-			$lines = array();
-			foreach ( $order->get_items( array( 'line_item', 'shipping' ) ) as $item_id => $item ) {
-				$lines[] = $item instanceof \WC_Order_Item_Product ? array(
-					'line_item_id' => $item_id,
-					'quantity'     => $item->get_quantity(),
-				) : array(
-					'line_item_id' => $item_id,
-					'refund_total' => (float) $item->get_total() + (float) $item->get_total_tax(),
-				);
-			}
-			$orders[] = $order;
-			$input[]  = $lines;
+
+			$result   = wp_get_ability( 'woocommerce/order-refund-create' )->execute(
+				array(
+					'id'         => $orders[0]->get_id(),
+					'line_items' => $input[0],
+				)
+			);
+			$prepared = wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils::class )->prepare_refund_creation_or_error( $orders[1], $input[1], false, null, 'test' );
+			$plain    = wc_create_refund(
+				array(
+					'order_id'   => $orders[1]->get_id(),
+					'amount'     => $prepared['amount'],
+					'line_items' => $prepared['line_items'],
+				)
+			);
+
+			$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+			$stored = $this->describe_refund( wc_get_order( $result['refund']['id'] ) );
+			$this->assertNotEmpty( $stored[2], 'The refund should have tax lines.' );
+			$this->assertNotEquals( 0.0, $stored[7], 'The refund should have a cost of goods value.' );
+			$this->assertSame( array( array( 0, $stored ) ), $validated, 'The validator should see the unsaved refund with the taxes and totals that are stored.' );
+			$this->assertSame( $this->describe_refund( wc_get_order( $plain->get_id() ) ), $stored, 'The ability should store the same refund as wc_create_refund().' );
+		} finally {
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
-
-		$result   = wp_get_ability( 'woocommerce/order-refund-create' )->execute(
-			array(
-				'id'         => $orders[0]->get_id(),
-				'line_items' => $input[0],
-			)
-		);
-		$prepared = wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils::class )->prepare_refund_creation_or_error( $orders[1], $input[1], false, null, 'test' );
-		$plain    = wc_create_refund(
-			array(
-				'order_id'   => $orders[1]->get_id(),
-				'amount'     => $prepared['amount'],
-				'line_items' => $prepared['line_items'],
-			)
-		);
-
-		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
-		$stored = $this->describe_refund( wc_get_order( $result['refund']['id'] ) );
-		$this->assertNotEmpty( $stored[2], 'The refund should have tax lines.' );
-		$this->assertNotEquals( 0.0, $stored[7], 'The refund should have a cost of goods value.' );
-		$this->assertSame( array( array( 0, $stored ) ), $validated, 'The validator should see the unsaved refund with the taxes and totals that are stored.' );
-		$this->assertSame( $this->describe_refund( wc_get_order( $plain->get_id() ) ), $stored, 'The ability should store the same refund as wc_create_refund().' );
 	}
 
 	/**
