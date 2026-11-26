@@ -680,6 +680,36 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Check whether the order holds line item changes that the next save() writes: a line item without an ID,
+	 * or a line item removal that waits for the save.
+	 *
+	 * @since 11.4.0
+	 * @return bool
+	 */
+	protected function has_unsaved_line_item_changes(): bool {
+		if ( $this->bulk_delete_all_items_pending
+			|| in_array( 'line_item', $this->item_types_to_bulk_delete, true )
+			|| isset( $this->deferred_actions['delete_order_items_'] )
+			|| isset( $this->deferred_actions['delete_order_items_line_item'] ) ) {
+			return true;
+		}
+
+		foreach ( $this->items_to_delete as $item ) {
+			if ( $item->is_type( 'line_item' ) ) {
+				return true;
+			}
+		}
+
+		foreach ( $this->items['line_items'] ?? array() as $item ) {
+			if ( ! $item->get_id() ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Save all order items which are part of this order.
 	 *
 	 * @return void

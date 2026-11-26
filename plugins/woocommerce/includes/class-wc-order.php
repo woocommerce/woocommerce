@@ -2043,6 +2043,10 @@ class WC_Order extends WC_Abstract_Order {
 	 * Orders which only contain virtual, downloadable items do not need admin
 	 * intervention.
 	 *
+	 * The result is cached for a saved order. An order that is not saved yet, or that holds line item changes
+	 * that are not saved yet, computes the result and does not touch the cache.
+	 *
+	 * @since 11.4.0 the method skips the cache for unsaved orders and unsaved line item changes.
 	 * @since 10.8.0 the method no longer uses transients.
 	 * @since 3.0.0
 	 *
@@ -2051,7 +2055,8 @@ class WC_Order extends WC_Abstract_Order {
 	public function needs_processing() {
 		$order_id         = $this->get_id();
 		$cache_key        = 'order-needs-processing-' . $order_id;
-		$needs_processing = wp_cache_get( $cache_key, 'orders' );
+		$use_cache        = $order_id && ! $this->has_unsaved_line_item_changes();
+		$needs_processing = $use_cache ? wp_cache_get( $cache_key, 'orders' ) : false;
 		if ( false === $needs_processing ) {
 			$needs_processing = 0;
 
@@ -2083,7 +2088,9 @@ class WC_Order extends WC_Abstract_Order {
 				}
 			}
 
-			wp_cache_set( $cache_key, $needs_processing, 'orders', DAY_IN_SECONDS );
+			if ( $use_cache ) {
+				wp_cache_set( $cache_key, $needs_processing, 'orders', DAY_IN_SECONDS );
+			}
 		}
 
 		return 1 === absint( $needs_processing );
@@ -2400,6 +2407,12 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return WC_Order_Refund[]
 	 */
 	public function get_refunds() {
+		// An order that is not saved yet has no refunds.
+		if ( ! $this->get_id() ) {
+			$this->refunds = array();
+			return $this->refunds;
+		}
+
 		$cache_key  = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $this->get_id();
 		$refund_ids = wp_cache_get( $cache_key, $this->cache_group );
 

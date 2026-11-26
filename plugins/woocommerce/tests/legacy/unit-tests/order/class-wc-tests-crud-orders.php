@@ -1331,6 +1331,91 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox stage_status on a new order does not read the needs-processing value that another new order cached.
+	 */
+	public function test_stage_status_on_a_new_order_ignores_the_needs_processing_cache_of_order_id_0(): void {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'virtual'      => true,
+				'downloadable' => true,
+			)
+		);
+		$item    = new WC_Order_Item_Product();
+		$item->set_product( $product );
+		$object = new WC_Order();
+		$object->add_item( $item );
+		// The test suite uses the in-memory object cache, so this entry lasts for the whole test.
+		wp_cache_set( 'order-needs-processing-0', 1, 'orders' );
+
+		$object->stage_status( OrderStatus::PROCESSING );
+
+		$this->assertNull( $object->get_date_paid( 'edit' ), 'A virtual downloadable order is paid at completed, not at processing.' );
+	}
+
+	/**
+	 * @testdox needs_processing of a stored order is not cached from line item changes that a refused stage call left unsaved.
+	 * @dataProvider data_staged_line_item_changes
+	 *
+	 * @param bool     $stored_virtual Whether the stored line item is virtual and downloadable.
+	 * @param callable $stage          Callback that stages the line item change.
+	 * @param bool     $expected       needs_processing() of the stored order.
+	 */
+	public function test_needs_processing_ignores_refused_line_item_changes( bool $stored_virtual, callable $stage, bool $expected ): void {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'virtual'      => $stored_virtual,
+				'downloadable' => $stored_virtual,
+			)
+		);
+		$object  = new WC_Order();
+		$object->add_product( $product );
+		$object->save();
+
+		$stage( $object );
+		$object->stage_status( OrderStatus::PROCESSING );
+
+		// The caller discards the object after a refusal. The cache lasts for the whole test, as above.
+		$this->assertSame( $expected, wc_get_order( $object->get_id() )->needs_processing() );
+	}
+
+	/**
+	 * Staged line item changes that flip needs_processing(), and the value for the stored items.
+	 *
+	 * @return array
+	 */
+	public function data_staged_line_item_changes(): array {
+		return array(
+			'physical item staged on a virtual order' => array(
+				true,
+				static function ( WC_Order $order ) {
+					$order->stage_product_item( WC_Helper_Product::create_simple_product() );
+				},
+				false,
+			),
+			'line items removal staged on a physical order' => array(
+				false,
+				static function ( WC_Order $order ) {
+					$order->stage_order_items_removal( 'line_item' );
+				},
+				true,
+			),
+		);
+	}
+
+	/**
+	 * @testdox get_refunds of an order that is not saved yet returns no refunds, also when a refund without a parent exists.
+	 */
+	public function test_get_refunds_of_an_unsaved_order_returns_no_refunds(): void {
+		$refund = new WC_Order_Refund();
+		$refund->set_amount( 5 );
+		$refund->save();
+
+		$this->assertSame( array(), ( new WC_Order() )->get_refunds() );
+	}
+
+	/**
 	 * Test: stage_order_note saves nothing until save, then exactly one note exists.
 	 */
 	public function test_stage_order_note_adds_the_note_on_save() {

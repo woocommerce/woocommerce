@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Set the paid date and cost of goods of a new order from its own items, not from cached values of other new orders.
