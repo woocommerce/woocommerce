@@ -1,0 +1,141 @@
+{
+	"name": "woocommerce/shipping-zone-create",
+	"label": "Create shipping zone",
+	"description": "Create a shipping zone for a set of regions. It has no methods yet; add them with shipping-zone-method-create. A customer gets the first zone in order that matches their address.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"name": {
+				"type": "string",
+				"description": "Zone name, shown only to the store team."
+			},
+			"locations": {
+				"type": "array",
+				"description": "Regions the zone covers.",
+				"minItems": 1,
+				"items": {
+					"type": "object",
+					"properties": {
+						"code": {
+							"type": "string",
+							"description": "ISO country code such as DE, COUNTRY:STATE such as US:CA, continent code such as EU, or a postcode, a range such as 10000...19999, or a wildcard such as 10*.",
+							"minLength": 1,
+							"maxLength": 200
+						},
+						"type": {
+							"type": "string",
+							"enum": [
+								"country",
+								"state",
+								"postcode",
+								"continent"
+							]
+						}
+					},
+					"required": [
+						"code",
+						"type"
+					],
+					"additionalProperties": false
+				}
+			},
+			"order": {
+				"type": "integer",
+				"description": "Position among the zones. Lower is matched first.",
+				"minimum": 0
+			}
+		},
+		"required": [
+			"name",
+			"locations"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"zone": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"name": {
+						"type": "string"
+					},
+					"order": {
+						"type": "integer"
+					},
+					"locations": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"code": {
+									"type": "string",
+									"description": "Country code, COUNTRY:STATE, postcode pattern or continent code, by type."
+								},
+								"type": {
+									"type": "string",
+									"enum": [
+										"country",
+										"state",
+										"postcode",
+										"continent"
+									]
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"methods": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"instance_id": {
+									"type": "integer"
+								},
+								"method_id": {
+									"type": "string"
+								},
+								"title": {
+									"type": "string"
+								},
+								"enabled": {
+									"type": "boolean"
+								},
+								"order": {
+									"type": "integer"
+								},
+								"settings": {
+									"type": "object",
+									"description": "Settings such as cost or min_amount, as stored. Only for the flat rate, free shipping and local pickup methods.",
+									"additionalProperties": {
+										"type": "string"
+									}
+								}
+							},
+							"additionalProperties": false
+						}
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": false,
+			"idempotent": false
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

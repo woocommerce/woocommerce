@@ -1,0 +1,85 @@
+{
+	"name": "woocommerce/tax-rate-delete",
+	"label": "Delete tax rate",
+	"description": "Permanently delete a tax rate by its id from tax-rates-query. Returns the deleted rate; send its fields except id to tax-rate-create to add it back.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"minimum": 1
+			}
+		},
+		"required": [
+			"id"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"rate": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"country": {
+						"type": "string",
+						"description": "Empty for every country."
+					},
+					"state": {
+						"type": "string"
+					},
+					"postcodes": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"cities": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"rate": {
+						"type": "string",
+						"description": "Percentage as a decimal string."
+					},
+					"name": {
+						"type": "string"
+					},
+					"priority": {
+						"type": "integer"
+					},
+					"compound": {
+						"type": "boolean"
+					},
+					"shipping": {
+						"type": "boolean",
+						"description": "Whether the rate also applies to shipping."
+					},
+					"class": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": true,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

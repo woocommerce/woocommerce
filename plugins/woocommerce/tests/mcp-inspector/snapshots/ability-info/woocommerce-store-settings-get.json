@@ -1,0 +1,247 @@
+{
+	"name": "woocommerce/store-settings-get",
+	"label": "Get store settings",
+	"description": "Read store location, currency, units, tax, stock and checkout configuration. Fields whose WooCommerce settings are not opted into ability reads are omitted. For site identity use core/get-site-info.",
+	"input_schema": {
+		"type": "object",
+		"default": [],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"address": {
+				"type": "object",
+				"properties": {
+					"street": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"postcode": {
+						"type": "string"
+					},
+					"country_code": {
+						"type": "string"
+					},
+					"state_code": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": false
+			},
+			"units": {
+				"type": "object",
+				"properties": {
+					"dimension": {
+						"type": "string"
+					},
+					"weight": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": false
+			},
+			"currency": {
+				"type": "object",
+				"properties": {
+					"code": {
+						"type": "string"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"precision": {
+						"type": "integer"
+					},
+					"symbol_position": {
+						"type": "string"
+					},
+					"decimal_separator": {
+						"type": "string"
+					},
+					"thousand_separator": {
+						"type": "string"
+					},
+					"price_format": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": false
+			},
+			"timezone": {
+				"type": "string"
+			},
+			"gmt_offset": {
+				"type": "number"
+			},
+			"date_format": {
+				"type": "string"
+			},
+			"time_format": {
+				"type": "string"
+			},
+			"start_of_week": {
+				"type": "integer"
+			},
+			"tax": {
+				"type": "object",
+				"properties": {
+					"prices_include_tax": {
+						"type": "boolean"
+					},
+					"display_in_shop": {
+						"type": "string"
+					},
+					"display_in_cart": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": false
+			},
+			"stock": {
+				"type": "object",
+				"properties": {
+					"manage_stock": {
+						"type": "boolean"
+					},
+					"low_stock_threshold": {
+						"type": "integer"
+					},
+					"hide_out_of_stock_items": {
+						"type": "boolean"
+					}
+				},
+				"additionalProperties": false
+			},
+			"capabilities": {
+				"type": "object",
+				"properties": {
+					"coupons_enabled": {
+						"type": "boolean"
+					},
+					"guest_checkout": {
+						"type": "boolean"
+					},
+					"review_ratings_enabled": {
+						"type": "boolean"
+					}
+				},
+				"additionalProperties": false
+			},
+			"woocommerce_version": {
+				"type": "string"
+			},
+			"installed_at": {
+				"type": "integer"
+			},
+			"selling_locations": {
+				"type": "object",
+				"properties": {
+					"scope": {
+						"type": "string",
+						"enum": [
+							"all",
+							"all_except",
+							"specific"
+						]
+					},
+					"included_countries": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"excluded_countries": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				},
+				"additionalProperties": false
+			},
+			"shipping_locations": {
+				"type": "object",
+				"properties": {
+					"scope": {
+						"type": "string",
+						"enum": [
+							"same_as_selling_locations",
+							"all",
+							"specific",
+							"disabled"
+						]
+					},
+					"included_countries": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				},
+				"additionalProperties": false
+			},
+			"onboarding_profile": {
+				"type": "object",
+				"properties": {
+					"completed": {
+						"type": "boolean"
+					},
+					"skipped": {
+						"type": "boolean"
+					},
+					"is_agree_marketing": {
+						"type": "boolean"
+					},
+					"is_store_country_set": {
+						"type": "boolean"
+					},
+					"is_plugins_page_skipped": {
+						"type": "boolean"
+					},
+					"business_choice": {
+						"type": "string"
+					},
+					"selling_online_answer": {
+						"type": "string"
+					},
+					"industry": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"business_extensions": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"selling_platforms": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

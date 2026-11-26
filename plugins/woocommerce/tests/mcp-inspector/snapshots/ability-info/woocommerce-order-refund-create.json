@@ -1,0 +1,148 @@
+{
+	"name": "woocommerce/order-refund-create",
+	"label": "Refund order",
+	"description": "Refund an amount or lines of an order. With refund_payment, the payment gateway sends the money back; without it, the refund is only recorded and the money is returned outside WooCommerce.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"description": "Order ID.",
+				"minimum": 1
+			},
+			"amount": {
+				"type": "string",
+				"pattern": "^[0-9]+(\\.[0-9]+)?$",
+				"description": "Amount to refund, including tax, such as 12.50. Without line_items, it refunds this amount of the order. With line_items, it defaults to their total and cannot be lower."
+			},
+			"line_items": {
+				"type": "array",
+				"description": "Order lines to refund. Send quantity to refund whole units, or refund_total for a tax-inclusive amount of the line.",
+				"minItems": 1,
+				"items": {
+					"type": "object",
+					"properties": {
+						"line_item_id": {
+							"type": "integer",
+							"description": "ID of the order line, from the woocommerce/orders-query ability with include_line_items and include_lines.",
+							"minimum": 1
+						},
+						"quantity": {
+							"type": "integer",
+							"minimum": 1
+						},
+						"refund_total": {
+							"type": "number",
+							"description": "Tax-inclusive amount to refund for the line. Negative only for a discount or credit line."
+						}
+					},
+					"required": [
+						"line_item_id"
+					],
+					"additionalProperties": false
+				}
+			},
+			"reason": {
+				"type": "string"
+			},
+			"refund_payment": {
+				"type": "boolean",
+				"description": "Whether the payment gateway sends the money back.",
+				"default": false
+			},
+			"restock_items": {
+				"type": "boolean",
+				"description": "Whether to return the refunded quantities of the product lines to stock.",
+				"default": false
+			},
+			"allow_duplicate_of": {
+				"type": "integer",
+				"description": "ID of the refund that a duplicate error returned. Send it, with the same input, only when the merchant asked for a second refund after being told about that one. Never send it to retry a failed or timed-out call.",
+				"minimum": 1
+			}
+		},
+		"required": [
+			"id"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"refund": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"description": "Refund ID."
+					},
+					"order_id": {
+						"type": "integer"
+					},
+					"amount": {
+						"type": "string"
+					},
+					"reason": {
+						"type": "string",
+						"description": "Reason for the refund. Omitted when none was given."
+					},
+					"refunded_by": {
+						"type": "integer",
+						"description": "ID of the user who made the refund. Omitted when nobody was logged in."
+					},
+					"refunded_payment": {
+						"type": "boolean",
+						"description": "Whether WooCommerce recorded that the payment gateway refunded the payment. False for a manual refund, but also when the gateway or an extension refunded it and the refund was not marked as paid, so check with the gateway when a refund error asked you to."
+					},
+					"date_created": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Refund date in the store timezone."
+					},
+					"line_items": {
+						"type": "array",
+						"description": "Order lines that the refund covers. Empty for a refund of an amount only.",
+						"items": {
+							"type": "object",
+							"properties": {
+								"refunded_item_id": {
+									"type": "integer",
+									"description": "ID of the order line."
+								},
+								"name": {
+									"type": "string"
+								},
+								"quantity": {
+									"type": "number"
+								},
+								"total": {
+									"type": "string",
+									"description": "Amount refunded for the line, excluding tax. Negative for a discount or credit line."
+								},
+								"total_tax": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": true,
+			"idempotent": false
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

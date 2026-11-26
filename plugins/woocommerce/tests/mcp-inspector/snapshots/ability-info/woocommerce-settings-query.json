@@ -1,0 +1,202 @@
+{
+	"name": "woocommerce/settings-query",
+	"label": "Query settings",
+	"description": "Read approved settings in a group. Use include for specific setting IDs. Country fields return codes without choices. Unapproved fields and passwords are omitted.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"group": {
+				"type": "string",
+				"minLength": 1
+			},
+			"include": {
+				"type": "array",
+				"items": {
+					"type": "string",
+					"minLength": 1
+				},
+				"maxItems": 100
+			},
+			"page": {
+				"type": "integer",
+				"minimum": 1,
+				"default": 1
+			},
+			"per_page": {
+				"type": "integer",
+				"minimum": 1,
+				"maximum": 100,
+				"default": 20
+			}
+		},
+		"required": [
+			"group"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"settings": {
+				"type": "array",
+				"description": "Returned settings for the current page.",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "string"
+						},
+						"label": {
+							"type": "string"
+						},
+						"type": {
+							"type": "string"
+						},
+						"value": {
+							"anyOf": [
+								{
+									"type": "string"
+								},
+								{
+									"type": "number"
+								},
+								{
+									"type": "boolean"
+								},
+								{
+									"type": "array",
+									"items": {
+										"anyOf": [
+											{
+												"type": "string"
+											},
+											{
+												"type": "number"
+											},
+											{
+												"type": "boolean"
+											}
+										]
+									}
+								},
+								{
+									"type": "object",
+									"properties": {
+										"number": {
+											"anyOf": [
+												{
+													"type": "string"
+												},
+												{
+													"type": "number"
+												}
+											]
+										},
+										"unit": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false
+								}
+							]
+						},
+						"default": {
+							"anyOf": [
+								{
+									"type": "string"
+								},
+								{
+									"type": "number"
+								},
+								{
+									"type": "boolean"
+								},
+								{
+									"type": "array",
+									"items": {
+										"anyOf": [
+											{
+												"type": "string"
+											},
+											{
+												"type": "number"
+											},
+											{
+												"type": "boolean"
+											}
+										]
+									}
+								},
+								{
+									"type": "object",
+									"properties": {
+										"number": {
+											"anyOf": [
+												{
+													"type": "string"
+												},
+												{
+													"type": "number"
+												}
+											]
+										},
+										"unit": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false
+								}
+							]
+						},
+						"description": {
+							"type": "string"
+						},
+						"options": {
+							"type": "object",
+							"additionalProperties": {
+								"type": "string"
+							}
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"total_pages": {
+				"type": "integer",
+				"description": "Total number of result pages available for the current query."
+			},
+			"page": {
+				"type": "integer",
+				"description": "Current result page."
+			},
+			"per_page": {
+				"type": "integer",
+				"description": "Maximum number of items requested per page."
+			},
+			"total": {
+				"type": "integer"
+			},
+			"omitted": {
+				"type": "array",
+				"items": {
+					"type": "string"
+				},
+				"description": "Known setting IDs withheld from this query, before pagination. Unknown IDs are not listed."
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

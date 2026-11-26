@@ -1,0 +1,109 @@
+{
+	"name": "woocommerce/product-review-update",
+	"label": "Update product review",
+	"description": "Moderate a product review, or a reply to one: approve it, hold it for moderation (shown as Pending in wp-admin), mark it as spam or move it to the trash. Moderate for spam, abuse or off-topic content, never to hide negative reviews. Requesting the status a review already has changes nothing and returns changed false. Reviewer identity is withheld.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"description": "Review ID from the woocommerce/product-reviews-query ability, or the ID of a reply to a review.",
+				"minimum": 1
+			},
+			"status": {
+				"type": "string",
+				"description": "New moderation status. \"hold\" puts the review back in the moderation queue.",
+				"enum": [
+					"approved",
+					"hold",
+					"spam",
+					"trash"
+				]
+			}
+		},
+		"required": [
+			"id",
+			"status"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"changed": {
+				"type": "boolean"
+			},
+			"previous_status": {
+				"type": "string"
+			},
+			"review": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"product_id": {
+						"type": "integer"
+					},
+					"product_name": {
+						"type": "string"
+					},
+					"date_created": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"rating": {
+						"type": "integer"
+					},
+					"verified": {
+						"type": "boolean"
+					},
+					"status": {
+						"type": "string"
+					},
+					"review": {
+						"type": "string"
+					},
+					"store_reply_count": {
+						"type": "integer",
+						"description": "Approved and held replies from store staff. Replies from customers are not counted."
+					}
+				}
+			},
+			"reply": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"review_id": {
+						"type": "integer"
+					},
+					"status": {
+						"type": "string"
+					},
+					"date_created": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"reply": {
+						"type": "string"
+					}
+				}
+			}
+		}
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": true,
+			"idempotent": false
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

@@ -1,0 +1,200 @@
+{
+	"name": "woocommerce/product-terms-query",
+	"label": "Query product terms",
+	"description": "Find product categories, tags, brands or the terms of a global attribute, such as pa_color. Use include to retrieve specific term IDs.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"taxonomy": {
+				"description": "Product taxonomy to query: product_cat, product_tag, product_brand, or the slug of a global attribute from product-attributes-query.",
+				"type": "string",
+				"pattern": "^(product_cat|product_tag|product_brand|pa_[^\\s]+)$"
+			},
+			"include": {
+				"description": "Limit results to these term IDs. Use one ID to retrieve a single term.",
+				"type": "array",
+				"minItems": 1,
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"exclude": {
+				"description": "Exclude these term IDs. Ignored when include is set.",
+				"type": "array",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"search": {
+				"type": "string"
+			},
+			"slug": {
+				"description": "Limit results to these slugs. Send one slug as a list of one. An empty list applies no slug filter.",
+				"type": "array",
+				"items": {
+					"type": "string"
+				}
+			},
+			"parent": {
+				"description": "Parent term ID for categories or brands. Use zero for top-level terms.",
+				"type": "integer",
+				"minimum": 0
+			},
+			"product": {
+				"description": "Limit results to terms assigned to this product ID.",
+				"type": "integer",
+				"minimum": 1
+			},
+			"hide_empty": {
+				"type": "boolean",
+				"default": false
+			},
+			"orderby": {
+				"description": "Defaults to name, or for a pa_* taxonomy to the order set on the attribute.",
+				"type": "string",
+				"enum": [
+					"id",
+					"include",
+					"name",
+					"slug",
+					"term_group",
+					"description",
+					"count"
+				]
+			},
+			"order": {
+				"type": "string",
+				"enum": [
+					"asc",
+					"desc"
+				],
+				"default": "asc"
+			},
+			"page": {
+				"type": "integer",
+				"minimum": 1,
+				"default": 1
+			},
+			"per_page": {
+				"type": "integer",
+				"minimum": 1,
+				"maximum": 100,
+				"default": 10
+			},
+			"offset": {
+				"type": "integer",
+				"minimum": 0
+			}
+		},
+		"required": [
+			"taxonomy"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"terms": {
+				"type": "array",
+				"description": "Returned terms for the current page.",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer"
+						},
+						"name": {
+							"type": "string"
+						},
+						"slug": {
+							"type": "string"
+						},
+						"description": {
+							"type": "string"
+						},
+						"count": {
+							"type": "integer",
+							"description": "Number of published, catalog-visible products. hide_empty uses stored counts and also retains parents with non-empty children, so a returned term can have count zero."
+						},
+						"parent": {
+							"type": "integer"
+						},
+						"display": {
+							"type": "string"
+						},
+						"menu_order": {
+							"type": "integer"
+						},
+						"image": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer"
+								},
+								"src": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								},
+								"alt": {
+									"type": "string"
+								},
+								"date_created": {
+									"type": "string",
+									"format": "date-time"
+								},
+								"date_created_gmt": {
+									"type": "string",
+									"format": "date-time"
+								},
+								"date_modified": {
+									"type": "string",
+									"format": "date-time"
+								},
+								"date_modified_gmt": {
+									"type": "string",
+									"format": "date-time"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"total_pages": {
+				"type": "integer",
+				"description": "Total number of result pages available for the current query."
+			},
+			"page": {
+				"type": "integer",
+				"description": "Current result page."
+			},
+			"per_page": {
+				"type": "integer",
+				"description": "Maximum number of items requested per page."
+			},
+			"total": {
+				"type": "integer",
+				"description": "Total number of matching terms across all pages."
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

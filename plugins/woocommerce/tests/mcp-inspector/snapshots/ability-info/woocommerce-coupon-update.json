@@ -1,0 +1,233 @@
+{
+	"name": "woocommerce/coupon-update",
+	"label": "Update coupon",
+	"description": "Update an existing coupon, such as its amount, expiry date or usage limits.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"minimum": 1
+			},
+			"code": {
+				"type": "string",
+				"minLength": 1,
+				"description": "Coupon code. Must be unique."
+			},
+			"status": {
+				"type": "string",
+				"enum": [
+					"publish",
+					"draft",
+					"pending",
+					"private",
+					"future"
+				]
+			},
+			"discount_type": {
+				"type": "string",
+				"enum": [
+					"percent",
+					"fixed_cart",
+					"fixed_product"
+				]
+			},
+			"amount": {
+				"type": "string",
+				"description": "Discount amount as a decimal string, without a currency symbol.",
+				"pattern": "^[0-9]+(\\.[0-9]+)?$"
+			},
+			"description": {
+				"type": "string"
+			},
+			"date_expires": {
+				"type": "string",
+				"description": "Expiry date in the store timezone (Y-m-d or ISO 8601). A date without a time expires at 00:00 on that day; use the day after the last valid day. An empty string removes the expiry date."
+			},
+			"usage_limit": {
+				"type": "integer",
+				"minimum": 0,
+				"description": "How many times the coupon can be used in total. 0 means unlimited."
+			},
+			"usage_limit_per_user": {
+				"type": "integer",
+				"minimum": 0,
+				"description": "How many times each customer can use the coupon. 0 means unlimited."
+			},
+			"individual_use": {
+				"type": "boolean"
+			},
+			"free_shipping": {
+				"type": "boolean"
+			},
+			"minimum_amount": {
+				"type": "string",
+				"pattern": "^([0-9]+(\\.[0-9]+)?)?$"
+			},
+			"maximum_amount": {
+				"type": "string",
+				"pattern": "^([0-9]+(\\.[0-9]+)?)?$"
+			},
+			"email_restrictions": {
+				"type": "array",
+				"description": "Allowed billing emails supplied by the user. Replaces existing restrictions; an empty array clears them. Omit to keep them.",
+				"items": {
+					"type": "string"
+				}
+			}
+		},
+		"required": [
+			"id"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"coupon": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"code": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					},
+					"discount_type": {
+						"type": "string",
+						"enum": [
+							"percent",
+							"fixed_cart",
+							"fixed_product"
+						]
+					},
+					"amount": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"date_expires": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"date_expires_gmt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"product_ids": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					},
+					"excluded_product_ids": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					},
+					"product_categories": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					},
+					"excluded_product_categories": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					},
+					"email_restrictions": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"exclude_sale_items": {
+						"type": "boolean"
+					},
+					"redeemable": {
+						"type": "boolean"
+					},
+					"expired": {
+						"type": "boolean"
+					},
+					"scheduled": {
+						"type": "boolean"
+					},
+					"not_redeemable_reason": {
+						"type": "string"
+					},
+					"starts_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"expiry": {
+						"type": "object",
+						"properties": {
+							"expires_at": {
+								"type": "string"
+							},
+							"last_valid_day": {
+								"type": "string"
+							},
+							"timezone": {
+								"type": "string"
+							}
+						},
+						"additionalProperties": false
+					},
+					"usage_count": {
+						"type": "integer"
+					},
+					"usage_limit": {
+						"type": "integer"
+					},
+					"usage_limit_per_user": {
+						"type": "integer"
+					},
+					"individual_use": {
+						"type": "boolean"
+					},
+					"free_shipping": {
+						"type": "boolean"
+					},
+					"minimum_amount": {
+						"type": "string"
+					},
+					"maximum_amount": {
+						"type": "string"
+					},
+					"date_created": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"date_modified": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": true,
+			"idempotent": false
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

@@ -1,0 +1,228 @@
+{
+	"name": "woocommerce/coupons-query",
+	"label": "Query coupons",
+	"description": "Find coupons by ID, exact code, or search term.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"include": {
+				"type": "array",
+				"minItems": 1,
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"discount_type": {
+				"type": "string",
+				"enum": [
+					"percent",
+					"fixed_cart",
+					"fixed_product"
+				]
+			},
+			"code": {
+				"type": "string",
+				"description": "Exact coupon code. Matches coupons in any supported status."
+			},
+			"search": {
+				"type": "string"
+			},
+			"status": {
+				"type": "array",
+				"items": {
+					"type": "string",
+					"enum": [
+						"publish",
+						"draft",
+						"pending",
+						"private",
+						"future"
+					]
+				},
+				"minItems": 1
+			},
+			"page": {
+				"type": "integer",
+				"default": 1,
+				"minimum": 1
+			},
+			"per_page": {
+				"type": "integer",
+				"default": 10,
+				"minimum": 1,
+				"maximum": 100
+			}
+		},
+		"additionalProperties": false,
+		"default": []
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"coupons": {
+				"type": "array",
+				"description": "Returned coupons for the current page.",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer"
+						},
+						"code": {
+							"type": "string"
+						},
+						"status": {
+							"type": "string"
+						},
+						"discount_type": {
+							"type": "string",
+							"enum": [
+								"percent",
+								"fixed_cart",
+								"fixed_product"
+							]
+						},
+						"amount": {
+							"type": "string"
+						},
+						"description": {
+							"type": "string"
+						},
+						"date_expires": {
+							"type": "string",
+							"format": "date-time"
+						},
+						"date_expires_gmt": {
+							"type": "string",
+							"format": "date-time"
+						},
+						"product_ids": {
+							"type": "array",
+							"items": {
+								"type": "integer"
+							}
+						},
+						"excluded_product_ids": {
+							"type": "array",
+							"items": {
+								"type": "integer"
+							}
+						},
+						"product_categories": {
+							"type": "array",
+							"items": {
+								"type": "integer"
+							}
+						},
+						"excluded_product_categories": {
+							"type": "array",
+							"items": {
+								"type": "integer"
+							}
+						},
+						"email_restrictions": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"exclude_sale_items": {
+							"type": "boolean"
+						},
+						"redeemable": {
+							"type": "boolean"
+						},
+						"expired": {
+							"type": "boolean"
+						},
+						"scheduled": {
+							"type": "boolean"
+						},
+						"not_redeemable_reason": {
+							"type": "string"
+						},
+						"starts_at": {
+							"type": "string",
+							"format": "date-time"
+						},
+						"expiry": {
+							"type": "object",
+							"properties": {
+								"expires_at": {
+									"type": "string"
+								},
+								"last_valid_day": {
+									"type": "string"
+								},
+								"timezone": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						},
+						"usage_count": {
+							"type": "integer"
+						},
+						"usage_limit": {
+							"type": "integer"
+						},
+						"usage_limit_per_user": {
+							"type": "integer"
+						},
+						"individual_use": {
+							"type": "boolean"
+						},
+						"free_shipping": {
+							"type": "boolean"
+						},
+						"minimum_amount": {
+							"type": "string"
+						},
+						"maximum_amount": {
+							"type": "string"
+						},
+						"date_created": {
+							"type": "string",
+							"format": "date-time"
+						},
+						"date_modified": {
+							"type": "string",
+							"format": "date-time"
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"total_pages": {
+				"type": "integer",
+				"description": "Total number of result pages available for the current query."
+			},
+			"page": {
+				"type": "integer",
+				"description": "Current result page."
+			},
+			"per_page": {
+				"type": "integer",
+				"description": "Maximum number of items requested per page."
+			},
+			"total": {
+				"type": "integer"
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

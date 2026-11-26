@@ -1,0 +1,84 @@
+{
+	"name": "woocommerce/settings-groups-query",
+	"label": "Query settings groups",
+	"description": "List settings groups, including extension and email groups. Use settings-query to read approved settings in a group.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"include": {
+				"type": "array",
+				"items": {
+					"type": "string",
+					"minLength": 1
+				},
+				"maxItems": 100
+			},
+			"page": {
+				"type": "integer",
+				"minimum": 1,
+				"default": 1
+			},
+			"per_page": {
+				"type": "integer",
+				"minimum": 1,
+				"maximum": 100,
+				"default": 20
+			}
+		},
+		"default": [],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"groups": {
+				"type": "array",
+				"description": "Returned groups for the current page.",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "string"
+						},
+						"label": {
+							"type": "string"
+						},
+						"parent_id": {
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"total_pages": {
+				"type": "integer",
+				"description": "Total number of result pages available for the current query."
+			},
+			"page": {
+				"type": "integer",
+				"description": "Current result page."
+			},
+			"per_page": {
+				"type": "integer",
+				"description": "Maximum number of items requested per page."
+			},
+			"total": {
+				"type": "integer"
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

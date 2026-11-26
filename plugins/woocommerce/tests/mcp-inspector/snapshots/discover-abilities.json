@@ -1,0 +1,222 @@
+[
+	{
+		"name": "woocommerce/orders-query",
+		"label": "Query orders",
+		"description": "Find orders by ID or common order filters."
+	},
+	{
+		"name": "woocommerce/coupons-query",
+		"label": "Query coupons",
+		"description": "Find coupons by ID, exact code, or search term."
+	},
+	{
+		"name": "woocommerce/coupon-create",
+		"label": "Create coupon",
+		"description": "Create a coupon. Defaults to a published fixed cart discount. Requires publication permission even for drafts, matching WooCommerce REST."
+	},
+	{
+		"name": "woocommerce/coupon-update",
+		"label": "Update coupon",
+		"description": "Update an existing coupon, such as its amount, expiry date or usage limits."
+	},
+	{
+		"name": "woocommerce/order-add-note",
+		"label": "Add order note",
+		"description": "Add a note to an order."
+	},
+	{
+		"name": "woocommerce/order-create",
+		"label": "Create order",
+		"description": "Create an order, as the order screen does, for example for a phone order. Without customer_id, the order is a guest order. Without status, the order gets the default status of the store, which is pending payment unless an extension changes it. A processing, on-hold or completed status reduces the stock of the products and sends the order emails to the store and the customer, so confirm the status before you send it."
+	},
+	{
+		"name": "woocommerce/order-notes-query",
+		"label": "Query order notes",
+		"description": "List every note of an order, newest first."
+	},
+	{
+		"name": "woocommerce/order-refunds-query",
+		"label": "Query order refunds",
+		"description": "List the refunds of an order, newest first. Use the woocommerce/order-refund-create ability to refund an order."
+	},
+	{
+		"name": "woocommerce/order-refund-create",
+		"label": "Refund order",
+		"description": "Refund an amount or lines of an order. With refund_payment, the payment gateway sends the money back; without it, the refund is only recorded and the money is returned outside WooCommerce."
+	},
+	{
+		"name": "woocommerce/order-send-email",
+		"label": "Send order email",
+		"description": "Send an order email to the customer again."
+	},
+	{
+		"name": "woocommerce/order-delete",
+		"label": "Delete order",
+		"description": "Move an order to the trash, or delete it permanently."
+	},
+	{
+		"name": "woocommerce/order-update",
+		"label": "Update order",
+		"description": "Update the addresses, customer note, product lines and shipping lines of an order. Fields that are not sent keep their value. Changing lines recalculates the totals and needs an order status that allows editing. Use the woocommerce/order-update-status ability to change the status."
+	},
+	{
+		"name": "woocommerce/order-update-status",
+		"label": "Update order status",
+		"description": "Update an order status."
+	},
+	{
+		"name": "woocommerce/payment-gateways-query",
+		"label": "Query payment gateways",
+		"description": "List the payment gateways in checkout order, enabled or not, or get one by ID."
+	},
+	{
+		"name": "woocommerce/payment-gateway-update",
+		"label": "Update payment gateway",
+		"description": "Turn a payment gateway on or off, change its checkout title, or move it in the checkout order. Cannot change other gateway settings or credentials."
+	},
+	{
+		"name": "woocommerce/products-query",
+		"label": "Query products",
+		"description": "Find products by ID or common catalog filters."
+	},
+	{
+		"name": "woocommerce/product-terms-query",
+		"label": "Query product terms",
+		"description": "Find product categories, tags, brands or the terms of a global attribute, such as pa_color. Use include to retrieve specific term IDs."
+	},
+	{
+		"name": "woocommerce/product-term-create",
+		"label": "Create product term",
+		"description": "Create a product category, tag, brand or a term of a global attribute, such as pa_color. Product writes then assign it by ID."
+	},
+	{
+		"name": "woocommerce/product-term-update",
+		"label": "Update product term",
+		"description": "Change the name, slug, parent or description of a product category, tag, brand or global attribute term. Fields left out keep their value."
+	},
+	{
+		"name": "woocommerce/product-reviews-query",
+		"label": "Query product reviews",
+		"description": "Read product reviews, ratings and moderation status. Search matches review text only, never reviewer identity. Summary and per-product ranking cover all reviews in the requested product/status scope, ignoring search, rating range and include. Unrated reviews have rating zero and do not affect averages. Ranking is worst first; above 200 products it keeps the 100 worst and 100 best rated. Text searches omit the ranking. Requested products without reviews and unknown product IDs are reported separately. store_reply_count counts replies from store staff only, so a review with only customer replies has 0. Reviewer identity is withheld."
+	},
+	{
+		"name": "woocommerce/product-review-update",
+		"label": "Update product review",
+		"description": "Moderate a product review, or a reply to one: approve it, hold it for moderation (shown as Pending in wp-admin), mark it as spam or move it to the trash. Moderate for spam, abuse or off-topic content, never to hide negative reviews. Requesting the status a review already has changes nothing and returns changed false. Reviewer identity is withheld."
+	},
+	{
+		"name": "woocommerce/product-review-reply",
+		"label": "Reply to product review",
+		"description": "Publish a reply to an approved product review, as the current user and under their display name. Approve a held review with woocommerce/product-review-update first. Check the review's store_reply_count first, so the store does not answer it twice. A reply can be held or trashed with woocommerce/product-review-update. Replies to replies are not supported."
+	},
+	{
+		"name": "woocommerce/product-attributes-query",
+		"label": "Query product attributes",
+		"description": "Find the global product attributes, such as Color or Size, with their terms. Use include to retrieve specific attribute IDs."
+	},
+	{
+		"name": "woocommerce/product-attribute-create",
+		"label": "Create product attribute",
+		"description": "Create a global product attribute, such as Color or Size. Product writes then use it by ID or name, with global set to true, and create its terms from the options they send."
+	},
+	{
+		"name": "woocommerce/product-create",
+		"label": "Create product",
+		"description": "Create a product using supported catalog fields."
+	},
+	{
+		"name": "woocommerce/product-delete",
+		"label": "Delete product",
+		"description": "Move a product to the trash, or delete it permanently."
+	},
+	{
+		"name": "woocommerce/product-update",
+		"label": "Update product",
+		"description": "Update an existing product using supported catalog fields."
+	},
+	{
+		"name": "woocommerce/shipping-zones-query",
+		"label": "Query shipping zones",
+		"description": "List shipping zones in matching order, with the regions each covers and its shipping methods. Zone 0 covers every location no other zone matches."
+	},
+	{
+		"name": "woocommerce/system-status-get",
+		"label": "Get system status",
+		"description": "Get the WooCommerce and database versions, order storage, environment checks, installed plugins, enabled WooCommerce features, the theme, the store pages, security checks and post counts. WordPress, PHP and database server versions come from core/get-environment-info."
+	},
+	{
+		"name": "woocommerce/system-status-tools-query",
+		"label": "Query status tools",
+		"description": "List the maintenance tools under WooCommerce > Status > Tools, in screen order, and what each does. Run a runnable one with woocommerce/system-status-tool-run."
+	},
+	{
+		"name": "woocommerce/system-status-tool-run",
+		"label": "Run status tool",
+		"description": "Run a maintenance tool from WooCommerce > Status > Tools that clears caches or rebuilds derived data. Only tools that woocommerce/system-status-tools-query marks as runnable can be run."
+	},
+	{
+		"name": "woocommerce/shipping-zone-create",
+		"label": "Create shipping zone",
+		"description": "Create a shipping zone for a set of regions. It has no methods yet; add them with shipping-zone-method-create. A customer gets the first zone in order that matches their address."
+	},
+	{
+		"name": "woocommerce/shipping-zone-method-create",
+		"label": "Add shipping method to zone",
+		"description": "Add a flat rate, free shipping or local pickup method to a shipping zone, with its settings. Zone 0 covers every location no other zone matches."
+	},
+	{
+		"name": "woocommerce/shipping-zone-method-update",
+		"label": "Update shipping method",
+		"description": "Turn a flat rate, free shipping or local pickup method of a zone on or off, move it, or change its settings, such as the cost or the free shipping minimum. Get the instance_id from shipping-zones-query."
+	},
+	{
+		"name": "woocommerce/tax-rates-query",
+		"label": "Query tax rates",
+		"description": "List the tax rates of every tax class, in the order of the tax settings."
+	},
+	{
+		"name": "woocommerce/tax-rate-create",
+		"label": "Create tax rate",
+		"description": "Add a tax rate to a tax class. Takes the fields that tax-rates-query returns, so check there first that no rate already covers the location."
+	},
+	{
+		"name": "woocommerce/tax-rate-update",
+		"label": "Update tax rate",
+		"description": "Change a tax rate. Send its id from tax-rates-query and only the fields to change. An empty postcodes or cities list makes the rate apply to every postcode or city."
+	},
+	{
+		"name": "woocommerce/tax-rate-delete",
+		"label": "Delete tax rate",
+		"description": "Permanently delete a tax rate by its id from tax-rates-query. Returns the deleted rate; send its fields except id to tax-rate-create to add it back."
+	},
+	{
+		"name": "woocommerce/customers-query",
+		"label": "Query customers",
+		"description": "Find registered and guest customers by ID, user ID, name or email, with their order count, total spent and activity dates, as WooCommerce Analytics counts them. A registered customer appears once Analytics has recorded them: when they register, order, or visit signed in, or the store imports historical data. Guest orders with the same email count as one guest. Core fields leave out names, usernames, emails, phone numbers and addresses."
+	},
+	{
+		"name": "woocommerce/store-settings-get",
+		"label": "Get store settings",
+		"description": "Read store location, currency, units, tax, stock and checkout configuration. Fields whose WooCommerce settings are not opted into ability reads are omitted. For site identity use core/get-site-info."
+	},
+	{
+		"name": "woocommerce/settings-query",
+		"label": "Query settings",
+		"description": "Read approved settings in a group. Use include for specific setting IDs. Country fields return codes without choices. Unapproved fields and passwords are omitted."
+	},
+	{
+		"name": "woocommerce/settings-update",
+		"label": "Update settings",
+		"description": "Change approved settings in one group, such as the currency, store address or checkout pages. Changes apply to the whole store and every customer at once, so confirm them with the merchant before you send them. Read current values with woocommerce/settings-query first. Unapproved fields and passwords cannot be changed. If any setting is refused, nothing is saved. Each result returns the previous value, so a change can be undone."
+	},
+	{
+		"name": "woocommerce/settings-groups-query",
+		"label": "Query settings groups",
+		"description": "List settings groups, including extension and email groups. Use settings-query to read approved settings in a group."
+	},
+	{
+		"name": "woocommerce/customer-update",
+		"label": "Update customer",
+		"description": "Update the first name, last name, billing address and shipping address of a registered customer. Fields that are not sent keep their value. Guest customers have no account to update; their addresses live on their orders. The response lists the changed fields without their values. Analytics refreshes the name and address it searches only for customer roles; for other roles, woocommerce/customers-query finds the old values until their next order."
+	}
+]
