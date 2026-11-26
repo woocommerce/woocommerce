@@ -2769,6 +2769,9 @@ importers:
       '@types/jquery':
         specifier: 3.5.33
         version: 3.5.33
+      '@types/node':
+        specifier: ^24.1.0
+        version: 24.12.2
       '@wordpress/browserslist-config':
         specifier: catalog:tooling
         version: 6.55.1-next.v.202609171837.0
