@@ -171,7 +171,7 @@
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/babel-preset-default": "next",
-		"@wordpress/browserslist-config": "next",
+		"@wordpress/browserslist-config": "catalog:tooling",
 		"css-loader": "catalog:tooling",
 		"eslint": "catalog:tooling",
 		"stylelint": "catalog:tooling",

@@ -157,7 +157,7 @@
 		"@woocommerce/notices": "workspace:*",
 		"@wordpress/babel-preset-default": "next",
 		"@wordpress/block-editor": "catalog:wp-min",
-		"@wordpress/browserslist-config": "next",
+		"@wordpress/browserslist-config": "catalog:tooling",
 		"@wordpress/jest-preset-default": "next",
 		"@wordpress/postcss-plugins-preset": "catalog:tooling",
 		"@wordpress/postcss-themes": "next",
