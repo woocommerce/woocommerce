@@ -6,7 +6,7 @@ import {
 	clearInlineStyle,
 	inertCopy,
 } from './animate-collapse';
-import { whenAnimationsEnd } from './when-animations-end';
+import { whenAnimationsEnd, whenAllAnimationsEnd } from './when-animations-end';
 
 // The `motion-swap` mixin styles the container, the copies, and the sections by these attributes.
 const SWAPPING = 'data-wc-swapping';
@@ -38,27 +38,6 @@ const sectionsOf = ( container: HTMLElement ) =>
 		( child ): child is HTMLElement =>
 			child instanceof HTMLElement && ! child.hasAttribute( COPY )
 	);
-
-// Runs `callback` when the animations of all `elements` end. Returns a function that cancels it.
-const whenAllAnimationsEnd = (
-	elements: Element[],
-	callback: () => void
-): ( () => void ) => {
-	let pending = elements.length;
-	if ( pending === 0 ) {
-		callback();
-		return () => undefined;
-	}
-	const cancels = elements.map( ( element ) =>
-		whenAnimationsEnd( element, () => {
-			pending--;
-			if ( pending === 0 ) {
-				callback();
-			}
-		} )
-	);
-	return () => cancels.forEach( ( cancel ) => cancel() );
-};
 
 /**
  * Splits the sections of a swap. The group runs from the first section that changes to the last, in the old order and

@@ -52,3 +52,42 @@ export const whenAnimationsEnd = (
 		isCancelled = true;
 	};
 };
+
+/**
+ * Calls `callback` when the animations of all `elements` end. See `whenAnimationsEnd`.
+ *
+ * @param elements The elements that animate.
+ * @param callback Runs one time, when no animation of any element is in progress.
+ * @return A function that cancels the callback.
+ */
+export const whenAllAnimationsEnd = (
+	elements: Element[],
+	callback: () => void
+): ( () => void ) => {
+	if ( elements.length === 0 ) {
+		callback();
+		return () => undefined;
+	}
+	let cancels: Array< () => void > = [];
+	const waitForAll = () => {
+		let pending = elements.length;
+		let hasWaited = false;
+		cancels = elements.map( ( element ) =>
+			whenAnimationsEnd( element, () => {
+				pending--;
+				if ( pending > 0 ) {
+					return;
+				}
+				// An element that ended can start a new animation while another still runs, so check them all again.
+				if ( hasWaited ) {
+					waitForAll();
+				} else {
+					callback();
+				}
+			} )
+		);
+		hasWaited = true;
+	};
+	waitForAll();
+	return () => cancels.forEach( ( cancel ) => cancel() );
+};
