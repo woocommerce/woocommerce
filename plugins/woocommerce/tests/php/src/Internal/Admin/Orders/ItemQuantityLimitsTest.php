@@ -236,6 +236,11 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 	 *           [0, 2, "0", 1.0]
 	 *           ["not a step", 2, "0", 1.0]
 	 *           [["not a step"], 2, "0", 1.0]
+	 *           [0.1, 0.3, "0", 0.1]
+	 *           [0.1, 0.7, "0", 0.1]
+	 *           [0.1, 1.2, "0", 0.1]
+	 *           [0.5, 0.9, "0", null]
+	 *           [0.01, 1234.56, "0", 0.01]
 	 *
 	 * @param mixed      $step     Step returned by the step filter.
 	 * @param float      $quantity Stored quantity.
