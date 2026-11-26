@@ -16742,12 +16742,6 @@ parameters:
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Expected 3 @param tags, found 2\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Method WC_Abstract_Order\:\:get_cogs_total_value\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 2

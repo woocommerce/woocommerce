@@ -205,9 +205,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			 * @since 3.0.0
 			 *
 			 * @param string   $payment_complete_status Default status to use when payment is complete.
-			 * @param int      $order_id               Order ID.
+			 * @param int      $order_id                Order ID.
+			 * @param WC_Order $order                   Order object.
+			 * @param bool     $staged                  Whether the order is staged and not saved yet. Give it a default value, because other code also fires this hook with three arguments.
+			 * @since 11.4.0 Passes $staged.
 			 */
-			$payment_complete_status = apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $order->get_id(), $order );
+			$payment_complete_status = $order->apply_staged_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $order->get_id(), $order );
 			if ( $order->has_status( $payment_complete_status ) ) {
 				$order->set_date_paid( $order->get_date_created( 'edit' ) );
 			}

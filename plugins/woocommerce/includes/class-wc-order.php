@@ -269,7 +269,7 @@ class WC_Order extends WC_Abstract_Order {
 		 * @param string   $status        Order status.
 		 * @param int      $order_id      Order ID.
 		 * @param WC_Order $order         Order object.
-		 * @param bool     $staged        Whether the order is staged and not saved yet.
+		 * @param bool     $staged        Whether the order is staged and not saved yet. Give it a default value, because other code also fires this hook with three arguments.
 		 * @since 2.7.0
 		 * @since 11.4.0 Passes $staged.
 		 */
@@ -511,7 +511,7 @@ class WC_Order extends WC_Abstract_Order {
 			 * @param string   $status        Order status.
 			 * @param int      $order_id      Order ID.
 			 * @param WC_Order $order         Order object.
-			 * @param bool     $staged        Whether the order is staged and not saved yet.
+			 * @param bool     $staged        Whether the order is staged and not saved yet. Give it a default value, because other code also fires this hook with three arguments.
 			 * @since 2.7.0
 			 * @since 11.4.0 Passes $staged.
 			 */
@@ -1149,10 +1149,12 @@ class WC_Order extends WC_Abstract_Order {
 			 *
 			 * @param string   $status        Order status.
 			 * @param int      $order_id      Order ID.
-			 * @param WC_Order $this          Order object.
+			 * @param WC_Order $order         Order object.
+			 * @param bool     $staged        Whether the order is staged and not saved yet. Give it a default value, because other code also fires this hook with three arguments.
 			 * @since 3.0.0
+			 * @since 11.4.0 Passes $staged.
 			 */
-			&& $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this ) ) ) {
+			&& $this->has_status( $this->apply_staged_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this ) ) ) {
 			// In view context, return a date if missing.
 			$date_paid = $this->get_date_created( 'edit' );
 		}

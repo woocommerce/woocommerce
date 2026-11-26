@@ -3208,7 +3208,7 @@ FROM $order_meta_table
 		if (
 			! $order->get_date_paid( 'edit' )
 			&& version_compare( $order->get_version( 'edit' ), '3.0', '<' )
-			&& $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id(), $order ) ) // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			&& $order->has_status( $order->apply_staged_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id(), $order ) ) // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		) {
 			$order->set_date_paid( $order->get_date_created( 'edit' ) );
 		}
