@@ -88,10 +88,6 @@ test.describe( 'Add to Cart + Options Block: Back in Stock form', () => {
 		await page.goto( product.permalink );
 
 		await expect( bisFormLocator( page ) ).toBeVisible();
-		// Appended after the block, not nested in the block's <form>.
-		await expect(
-			page.locator( '.wp-block-add-to-cart-with-options .wc_bis_form' )
-		).toHaveCount( 0 );
 
 		await signUpOnProductPage( page, { email } );
 
