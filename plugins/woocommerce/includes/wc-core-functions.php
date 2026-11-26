@@ -3,6 +3,7 @@
  * WooCommerce Core Functions
  *
  * General core functions available on both the front-end and admin and in the REST API.
+ * Request values, such as $_GET, are passed through wp_unslash() before use.
  *
  * @package WooCommerce\Functions
  * @version 3.3.0
