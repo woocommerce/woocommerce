@@ -6897,7 +6897,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'additional_data', $data['additional_errors'][0] );
 	}
 
-
 	/**
 	 * @testdox Should not run validators with the feature off.
 	 */

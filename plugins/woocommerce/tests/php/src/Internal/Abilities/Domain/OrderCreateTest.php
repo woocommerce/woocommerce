@@ -261,7 +261,6 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 		$this->assertNull( $order->get_date_paid() );
 	}
 
-
 	/**
 	 * @testdox Should roll back the saved order when its status cannot be set with the feature off.
 	 */
