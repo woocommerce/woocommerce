@@ -89,7 +89,9 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	public function test_wc_rest_upload_image_from_url_should_return_error_when_invalid_image_is_passed() {
 		// empty file.
 		$wp_version = get_bloginfo( 'version' );
-		if ( version_compare( $wp_version, '5.4-alpha', '>=' ) ) {
+		if ( is_multisite() ) {
+			$expected_error_message = 'Invalid image: File is empty. Please upload something more substantial.';
+		} elseif ( version_compare( $wp_version, '5.4-alpha', '>=' ) ) {
 			$expected_error_message = 'Invalid image: File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini file or by post_max_size being defined as smaller than upload_max_filesize in php.ini.';
 		} else {
 			$expected_error_message = 'Invalid image: File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.';

@@ -493,6 +493,8 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 				do_action( 'wp_trash_post', $product );
 				break;
 			case 'delete_post':
+				// Core's multisite handler reads the post, and these test products have no post behind them.
+				remove_action( 'delete_post', '_update_blog_date_on_post_delete' );
 				do_action( 'delete_post', $product->get_id() );
 				break;
 			case 'delete_method_in_product':
