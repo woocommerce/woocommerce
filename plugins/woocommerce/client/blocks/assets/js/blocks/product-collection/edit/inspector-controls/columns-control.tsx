@@ -12,7 +12,10 @@ import {
 /**
  * Internal dependencies
  */
-import { DEFAULT_CAROUSEL_COLUMNS } from '../../constants';
+import {
+	DEFAULT_CAROUSEL_COLUMNS,
+	MAX_CAROUSEL_COLUMNS,
+} from '../../constants';
 import { DisplayLayoutControlProps, LayoutOptions } from '../../types';
 import { getDefaultDisplayLayout, sanitizeDisplayLayout } from '../../utils';
 
@@ -41,7 +44,7 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 	const effectiveMaxColumns = maxColumns ?? defaultMaxColumns;
 	const columnCount = isCarouselLayout
 		? ( carouselColumns ??
-			Math.min( DEFAULT_CAROUSEL_COLUMNS, effectiveMaxColumns ) )
+			Math.min( MAX_CAROUSEL_COLUMNS, effectiveMaxColumns ) )
 		: ( columns ?? defaultLayout.columns );
 
 	const onShrinkColumnsToggleChange = ( value: boolean ) => {

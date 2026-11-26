@@ -43,6 +43,7 @@ import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_TEMPLATE,
 	DEFAULT_CAROUSEL_COLUMNS,
+	MAX_CAROUSEL_COLUMNS,
 } from './constants';
 import blockJson from './block.json';
 import {
@@ -524,7 +525,7 @@ export function sanitizeDisplayLayout(
 		return {
 			type: displayLayout.type,
 			carouselColumns: Math.min(
-				DEFAULT_CAROUSEL_COLUMNS,
+				MAX_CAROUSEL_COLUMNS,
 				Math.max( 1, Math.round( carouselColumns ) )
 			),
 			shrinkColumns: displayLayout?.shrinkColumns ?? true,
