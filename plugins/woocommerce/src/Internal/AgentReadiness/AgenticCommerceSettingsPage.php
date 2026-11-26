@@ -358,8 +358,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * Product visibility: the counts from the last stored readiness report, each with a link to those
-	 * products, or a line saying they show after the first check.
+	 * Product visibility: the catalog counts as they stand now, each with a link to those products, or a
+	 * line saying they show after the first check.
 	 *
 	 * @param array<string, mixed>|null $report Stored report, or null before the first scan.
 	 * @return array{title:string,description:string,empty:string|null,counts:array<int, array{id:string,label:string,count:string,tip:string,tip_label:string,link:array{href:string,text:string}}>}
@@ -367,7 +367,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	private static function visibility( ?array $report ): array {
 		$counts = array();
 		if ( null !== $report ) {
-			$cards = array(
+			// Counted now: products added, hidden or removed since the last check count, as in the lists the cards link to.
+			$report = array_merge( $report, ProductScan::catalog_counts() );
+			$cards  = array(
 				// The whole catalog, like the other two; `products` stops at PRODUCT_LIMIT. Reports from before `available` have only `products`.
 				array( ProductScan::COUNT_AVAILABLE, __( 'Visible', 'woocommerce' ), (int) ( $report['available'] ?? $report['products'] ?? 0 ), '', '' ),
 				array( ProductScan::COUNT_HIDDEN, __( 'Hidden', 'woocommerce' ), (int) ( $report['hidden_from_catalog'] ?? 0 ), __( 'Products set to Hidden in Catalog visibility.', 'woocommerce' ), __( 'More information about hidden products', 'woocommerce' ) ),

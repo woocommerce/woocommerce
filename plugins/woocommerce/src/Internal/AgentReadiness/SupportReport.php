@@ -110,7 +110,7 @@ class SupportReport {
 		$lines   = array_merge(
 			$this->header( $report, $pending ),
 			array( '' ),
-			$this->shopping( $report ),
+			$this->shopping( $report, $live ),
 			array( '' ),
 			$this->store_checks( $report, $live )
 		);
@@ -160,10 +160,11 @@ class SupportReport {
 	/**
 	 * The UCP switch, store visibility and product visibility.
 	 *
-	 * @param array<string, mixed>|null $report Stored report.
+	 * @param array<string, mixed>|null                                                                                                     $report Stored report.
+	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $live   Store conditions read now.
 	 * @return string[]
 	 */
-	private function shopping( ?array $report ): array {
+	private function shopping( ?array $report, array $live ): array {
 		$statuses = array(
 			UcpSwitch::STATUS_ACTIVE          => 'On',
 			UcpSwitch::STATUS_NEEDS_ATTENTION => 'On, with required steps left',
@@ -176,10 +177,15 @@ class SupportReport {
 		} else {
 			$visibility = 'Live';
 		}
+		// As the page's Needs attention badge: a step shown as Required is left, whether or not it blocks the switch.
+		$status = $this->ucp_switch->status();
+		if ( UcpSwitch::STATUS_ACTIVE === $status && 'check' === $this->readiness_page->shopping_badge( $live )[0] ) {
+			$status = UcpSwitch::STATUS_NEEDS_ATTENTION;
+		}
 		$lines = array(
 			'### AI shopping ###',
 			'',
-			'AI shopping: ' . ( $statuses[ $this->ucp_switch->status() ] ?? '' ),
+			'AI shopping: ' . ( $statuses[ $status ] ?? '' ),
 			'Store visibility: ' . $visibility,
 		);
 		if ( null !== $report ) {

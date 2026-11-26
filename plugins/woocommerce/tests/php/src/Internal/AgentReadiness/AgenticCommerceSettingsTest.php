@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
+use Automattic\WooCommerce\Internal\AgentReadiness\SupportReport;
 use WC_Admin_Settings;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -300,7 +301,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The page shows the three counts from the stored report, the switch and failing checks.
+	 * @testdox The page shows the three catalog counts as they stand now, the switch and failing checks.
 	 */
 	public function test_output_with_report_and_failing_checks(): void {
 		remove_all_filters( 'pre_option_home' );
@@ -319,7 +320,30 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$stored['products']  = ProductScan::PRODUCT_LIMIT;
 		$stored['available'] = 8400;
 		update_option( AgentReadiness::REPORT_OPTION, $stored );
-		$this->assertSame( '8,400', array_column( $this->shopping()['visibility']['counts'], 'count', 'id' )[ ProductScan::COUNT_AVAILABLE ], 'The whole catalog, like the other two, not only the products the scan stopped at' );
+		WC_Helper_Product::create_simple_product();
+		$hidden = WC_Helper_Product::create_simple_product();
+		$hidden->set_catalog_visibility( 'hidden' );
+		$hidden->save();
+		$now = array_column( $this->shopping()['visibility']['counts'], 'count', 'id' );
+		$this->assertSame( '2', $now[ ProductScan::COUNT_AVAILABLE ], 'Counted now, as the list the card links to: a product added since the last check counts, whatever the stored report says' );
+		$this->assertSame( '1', $now[ ProductScan::COUNT_HIDDEN ] );
+		$this->assertSame( '1', $now[ ProductScan::COUNT_UNSUPPORTED ] );
+		$expected_counts = array(
+			ProductScan::COUNT_AVAILABLE   => 2,
+			ProductScan::COUNT_HIDDEN      => 1,
+			ProductScan::COUNT_UNSUPPORTED => 1,
+		);
+		foreach ( $expected_counts as $count => $expected ) {
+			$listed = new \WP_Query(
+				array(
+					'post_type'   => 'product',
+					'post_status' => 'publish',
+					'fields'      => 'ids',
+					'tax_query'   => ProductScan::count_query( $count ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				)
+			);
+			$this->assertSame( $expected, $listed->found_posts, 'The list the ' . $count . ' card links to has as many products as the card says' );
+		}
 		$this->assertSame( '1', $counts[ ProductScan::COUNT_UNSUPPORTED ]['count'] );
 		$this->assertMatchesRegularExpression( "#^AI assistants can find these products, but shoppers can't buy them through an assistant yet\\.#", $counts[ ProductScan::COUNT_UNSUPPORTED ]['tip'], 'The tip says what not supported means' );
 		$this->assertSame( '', $counts[ ProductScan::COUNT_AVAILABLE ]['tip'], 'Visible needs no tip' );
@@ -434,6 +458,26 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'turned off'          => array( 'every_step', 'no', '#^AI shopping is off\.$#', null, 'View settings', '#^Your store is ready for AI shopping\. Turn it on to let AI assistants find your products\.$#' ),
 			'off, steps left'     => array( 'coming_soon', 'no', '#^AI shopping is off\.$#', 'Needs attention', 'Continue setup', '#^Finish \d+ required steps? to get your store ready for AI shopping\.$#' ),
 		);
+	}
+
+	/**
+	 * @testdox With a required and an optional step left, the card, the Setup checklist and the support download count the required one.
+	 */
+	public function test_required_step_left_reads_the_same_everywhere(): void {
+		$this->make_every_step_pass();
+		$this->turn_off_order_emails();
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+
+		$shopping = $this->shopping( true );
+		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'Order emails are shown as Required and don\'t block the switch' );
+		$this->assertSame( '1 step left', $shopping['checklist']['badge']['text'] );
+		$this->assertSame( 'AI assistants can shop your store. 1 step left.', $this->view()['overview']['shopping']['text'], 'The card counts what the checklist badge counts, not the optional step too' );
+		$this->assertStringContainsString( "\nAI shopping: On, with required steps left\n", wc_get_container()->get( SupportReport::class )->text(), 'As the page\'s Needs attention badge' );
+
+		foreach ( array( 'WC_Email_Customer_Processing_Order', 'WC_Email_Customer_Completed_Order' ) as $email ) {
+			WC()->mailer()->get_emails()[ $email ]->enabled = 'yes';
+		}
+		$this->assertStringContainsString( "\nAI shopping: On\n", wc_get_container()->get( SupportReport::class )->text(), 'With only the optional step left' );
 	}
 
 	/**
