@@ -68,6 +68,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 		add_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 		wc_clear_notices();
+		$this->reset_expired_form_notice_flag();
 	}
 
 	/**
@@ -75,6 +76,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->reset_cancel_order_handled_flag();
+		$this->reset_expired_form_notice_flag();
 
 		$_GET     = $this->original_get;
 		$_POST    = $this->original_post;
@@ -156,6 +158,34 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 			array( 'Your session has expired. Please try again.' ),
 			wp_list_pluck( wc_get_notices( 'error' ), 'notice' ),
 			"{$handler}() should explain once why the form was not processed, instead of silently reloading the page."
+		);
+	}
+
+	/**
+	 * @testdox The expired form notice is added once even when a woocommerce_add_error filter changes its text.
+	 */
+	public function test_my_account_form_with_invalid_nonce_adds_one_filtered_error_notice(): void {
+		add_filter(
+			'woocommerce_add_error',
+			function ( $message ) {
+				return 'Prefixed: ' . $message;
+			}
+		);
+		$fields   = array(
+			'wc_reset_password'               => 'true',
+			'user_login'                      => 'customer',
+			'woocommerce-lost-password-nonce' => 'invalid',
+		);
+		$_POST    = $fields;
+		$_REQUEST = $fields;
+
+		WC_Form_Handler::process_lost_password();
+		WC_Form_Handler::process_lost_password();
+
+		$this->assertSame(
+			array( 'Prefixed: Your session has expired. Please try again.' ),
+			wp_list_pluck( wc_get_notices( 'error' ), 'notice' ),
+			'The notice should go through the filter once and not be added again.'
 		);
 	}
 
@@ -1926,6 +1956,15 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$pending = new ReflectionProperty( WC_Form_Handler::class, 'cancel_order_redirect_pending' );
 		$pending->setAccessible( true );
 		$pending->setValue( null, false );
+	}
+
+	/**
+	 * Resets the flag add_expired_form_notice() keeps for the request, so each test starts as a new request.
+	 */
+	private function reset_expired_form_notice_flag(): void {
+		$added = new ReflectionProperty( WC_Form_Handler::class, 'expired_form_notice_added' );
+		$added->setAccessible( true );
+		$added->setValue( null, false );
 	}
 
 	/**

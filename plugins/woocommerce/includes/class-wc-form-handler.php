@@ -44,6 +44,13 @@ class WC_Form_Handler {
 	private static $cancel_order_redirect_pending = false;
 
 	/**
+	 * Whether add_expired_form_notice() has already passed its notice to wc_add_notice() in this request.
+	 *
+	 * @var bool
+	 */
+	private static $expired_form_notice_added = false;
+
+	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
@@ -1755,9 +1762,14 @@ class WC_Form_Handler {
 
 		$message = __( 'Your session has expired. Please try again.', 'woocommerce' );
 
-		if ( ! wc_has_notice( $message, 'error' ) ) {
-			wc_add_notice( $message, 'error' );
+		// wc_has_notice() alone misses the notice once a woocommerce_add_error filter has changed its text,
+		// so the flag keeps it to one per request.
+		if ( self::$expired_form_notice_added || wc_has_notice( $message, 'error' ) ) {
+			return;
 		}
+
+		self::$expired_form_notice_added = true;
+		wc_add_notice( $message, 'error' );
 	}
 }
 
