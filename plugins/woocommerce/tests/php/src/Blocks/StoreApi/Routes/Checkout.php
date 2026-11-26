@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use WC_Gateway_BACS;
 use WC_Tax;
@@ -2808,22 +2809,96 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox Creating an account ignores a customer_password sent by the client and generates the password.
+	 * @testdox Creating an account ignores the deprecated customer_password and does not log the customer in.
 	 */
-	public function test_checkout_create_account_ignores_customer_password(): void {
+	public function test_checkout_create_account_ignores_password_and_does_not_log_in(): void {
 		WC()->session->set_customer_session_cookie( true );
 		WC()->session->save_data();
 		$request = $this->build_checkout_post_request();
 		$request->set_param( 'create_account', true );
-		$request->set_param( 'customer_password', 'chosen-Password-123' );
+		$request->set_param( 'customer_password', 'ignored-password' );
 
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 		$customer = get_user_by( 'id', $data['customer_id'] );
 
 		$this->assertSame( 200, $response->get_status(), print_r( $data, true ) );
-		$this->assertInstanceOf( \WP_User::class, $customer, 'The account should be created.' );
-		$this->assertFalse( wp_check_password( 'chosen-Password-123', $customer->user_pass, $customer->ID ), 'The posted password should be ignored.' );
+		$this->assertInstanceOf( \WP_User::class, $customer );
+		$this->assertSame( 0, get_current_user_id(), 'Checkout should not log the new customer in.' );
+		$this->assertFalse( wp_check_password( 'ignored-password', $customer->user_pass, $customer->ID ), 'The deprecated customer_password should be ignored.' );
+		$this->assertTrue( wc_get_container()->get( NewCustomerSession::class )->is_unclaimed_customer_order( wc_get_order( $data['order_id'] ) ), 'The order should record that it created the account.' );
+	}
+
+	/**
+	 * @testdox Retrying checkout in the same session reuses the account it created, instead of failing with an existing email error.
+	 */
+	public function test_checkout_create_account_reuses_session_account_on_retry(): void {
+		WC()->session->set_customer_session_cookie( true );
+		WC()->session->save_data();
+		$customer_id = wc_get_container()->get( NewCustomerSession::class )->create_customer( 'testaccount@test.com' );
+		$request     = $this->build_checkout_post_request();
+		$request->set_param( 'create_account', true );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertSame( $customer_id, $data['customer_id'], 'The order should belong to the account created earlier in the session.' );
+	}
+
+	/**
+	 * @testdox A retry with "Create an account" unticked places a guest order, instead of keeping the account an earlier attempt created.
+	 */
+	public function test_checkout_without_create_account_drops_session_account_from_order(): void {
+		WC()->session->set_customer_session_cookie( true );
+		WC()->session->save_data();
+		$customer_id = wc_get_container()->get( NewCustomerSession::class )->create_customer( 'earlier-attempt@example.com' );
+		$order       = $this->create_session_order_from_cart( 'checkout-draft' );
+		$order->set_customer_id( $customer_id );
+		$order->save();
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertSame( $order->get_id(), $data['order_id'], 'The retry should use the same order.' );
+		$this->assertSame( 0, $data['customer_id'], 'The order and its addresses should not go to the account from the earlier attempt.' );
+	}
+
+	/**
+	 * @testdox A logged out visitor can pay for an unclaimed new account's order, but the request does not change the account's addresses.
+	 */
+	public function test_paying_unclaimed_account_order_does_not_change_the_account(): void {
+		wp_set_current_user( 0 );
+		$new_customer_session = wc_get_container()->get( NewCustomerSession::class );
+		$customer_id          = $new_customer_session->create_customer( 'unclaimed-pay@example.com' );
+		$order                = \WC_Helper_Order::create_order( $customer_id );
+		$new_customer_session->mark_order_created_customer( $order, $customer_id );
+		$order->save();
+		WC()->session->set( 'new_customer', null );
+		$name_before = ( new \WC_Customer( $customer_id ) )->get_billing_first_name();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_query_params(
+			array(
+				'key'           => $order->get_order_key(),
+				'billing_email' => $order->get_billing_email(),
+			)
+		);
+		// The location cannot change on an existing order, so only change the name.
+		$billing_address = array_merge( $order->get_address( 'billing' ), array( 'first_name' => 'Other' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => $billing_address,
+				'shipping_address' => array_diff_key( $billing_address, array( 'email' => '' ) ),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $name_before, ( new \WC_Customer( $customer_id ) )->get_billing_first_name(), 'Only the account owner can change the account.' );
 	}
 
 	/**

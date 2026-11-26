@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
 
 /**
@@ -796,6 +797,33 @@ class Order extends ControllerTestCase {
 		$response = rest_get_server()->dispatch( $request );
 
 		$this->assertEquals( 403, $response->get_status() );
+	}
+
+	/**
+	 * @testdox A logged out shopper opens the order of an unclaimed new account with the key and billing email, like a guest order, until the account is claimed.
+	 */
+	public function test_guest_can_access_unclaimed_new_account_order_with_valid_credentials(): void {
+		$new_customer_session = wc_get_container()->get( NewCustomerSession::class );
+		$customer_id          = $new_customer_session->create_customer( 'unclaimed-order@example.com' );
+		$order                = $this->create_customer_order( $customer_id );
+		$new_customer_session->mark_order_created_customer( $order, $customer_id );
+		$order->save();
+		// Use the order marker alone, as in a separate express checkout session.
+		WC()->session->set( 'new_customer', null );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		wp_set_current_user( 0 );
+		$this->assertSame( 200, rest_get_server()->dispatch( $request )->get_status(), 'The key and billing email should open the order.' );
+
+		wp_set_current_user( $this->customer_id_2 );
+		$this->assertSame( 403, rest_get_server()->dispatch( $request )->get_status(), 'Another logged in customer must not open it.' );
+
+		wp_set_current_user( 0 );
+		wp_set_password( 'chosen-Password-123', $customer_id );
+		$this->assertSame( 403, rest_get_server()->dispatch( $request )->get_status(), 'Once claimed, the owner must log in.' );
 	}
 
 	/**

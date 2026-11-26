@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\OrderReviews;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use Automattic\WooCommerce\Internal\OrderReviews\Endpoint;
 use Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility;
 use Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler;
@@ -1411,6 +1412,29 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$html = $this->render( $order->get_id() );
 
 		$this->assertStringContainsString( 'woocommerce-review-order__form', $html );
+	}
+
+	/**
+	 * @testdox The order of an unclaimed new account is reachable with the key alone, like a guest order, until the account is claimed.
+	 */
+	public function test_unclaimed_new_account_order_renders_for_a_signed_out_visitor(): void {
+		wp_set_current_user( 0 );
+		$new_customer_session = wc_get_container()->get( NewCustomerSession::class );
+		$customer_id          = $new_customer_session->create_customer( 'review-unclaimed@example.com' );
+		$order                = OrderHelper::create_order( $customer_id );
+		$new_customer_session->mark_order_created_customer( $order, $customer_id );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		// The review email arrives in a later session, so only the order marker links the account.
+		WC()->session->set( 'new_customer', null );
+
+		$_GET = array( 'key' => $order->get_order_key() );
+		$this->assertStringContainsString( 'woocommerce-review-order__form', $this->render( $order->get_id() ), 'The shopper has no password yet, so the key should open the form.' );
+
+		wp_set_password( 'chosen-Password-123', $customer_id );
+
+		$_GET = array( 'key' => $order->get_order_key() );
+		$this->assertStringNotContainsString( 'woocommerce-review-order__form', $this->render( $order->get_id() ), 'Once claimed, the owner must log in.' );
 	}
 
 	/**

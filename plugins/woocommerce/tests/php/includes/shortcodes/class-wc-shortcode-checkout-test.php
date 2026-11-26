@@ -54,6 +54,7 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 
 		WC()->customer->set_props( $this->original_customer_billing );
 		WC()->customer->save();
+		WC()->session->set( 'new_customer', null );
 
 		foreach ( $this->original_gateway_enabled as $gateway_id => $enabled ) {
 			WC()->payment_gateways()->payment_gateways()[ $gateway_id ]->enabled = $enabled;
@@ -514,6 +515,50 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( $expected, WC()->cart->get_cart_contents_count(), 'Only an awaiting order that went through should clear its matching cart.' );
 		$this->assertNull( WC()->session->get( 'order_awaiting_payment' ), 'The receipt should still reset the awaiting-payment session.' );
+	}
+
+	/**
+	 * @testdox The order received page shows the order when the account was created in another session, such as an express checkout on a product page.
+	 */
+	public function test_order_received_shows_order_for_new_customer_created_in_another_session(): void {
+		global $wp;
+
+		wp_set_current_user( 0 );
+		$new_customer_session = wc_get_container()->get( \Automattic\WooCommerce\Internal\Customers\NewCustomerSession::class );
+		$customer_id          = $new_customer_session->create_customer( 'thankyou-other-session@example.com' );
+		$order                = WC_Helper_Order::create_order( $customer_id );
+		$new_customer_session->mark_order_created_customer( $order, $customer_id );
+		$order->save();
+		// The order received page loads in a session that did not create the account.
+		WC()->session->set( 'new_customer', null );
+
+		$wp->query_vars['order-received'] = $order->get_id();
+		$_GET['key']                      = $order->get_order_key();
+
+		ob_start();
+		WC_Shortcode_Checkout::output( array() );
+		$output = (string) ob_get_clean();
+
+		$this->assertStringNotContainsString( 'Please log in to your account to view this order.', $output, 'The shopper has no password yet, so a login prompt is a dead end.' );
+		$this->assertStringContainsString( 'woocommerce-thankyou-order-details', $output, 'The order details should be shown.' );
+	}
+
+	/**
+	 * @testdox The pay page shows the payment form to a logged out shopper whose account was created at checkout.
+	 */
+	public function test_order_pay_shows_payment_form_for_new_customer(): void {
+		wp_set_current_user( 0 );
+		$this->enable_gateways( array( WC_Gateway_BACS::ID ) );
+		$new_customer_session = wc_get_container()->get( \Automattic\WooCommerce\Internal\Customers\NewCustomerSession::class );
+		$customer_id          = $new_customer_session->create_customer( 'pay-new@example.com' );
+		$order                = WC_Helper_Order::create_order( $customer_id );
+		$new_customer_session->mark_order_created_customer( $order, $customer_id );
+		$order->save();
+
+		$output = $this->render_pay_page( $order );
+
+		$this->assertStringNotContainsString( 'Please log in to your account below to continue to the payment form.', $output );
+		$this->assertStringContainsString( 'id="order_review"', $output, 'The payment form should be shown.' );
 	}
 
 	/**

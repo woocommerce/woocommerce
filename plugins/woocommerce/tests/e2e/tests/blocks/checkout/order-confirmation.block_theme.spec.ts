@@ -219,12 +219,21 @@ test.describe( 'Shopper (guest) → Order Confirmation → Create Account', () =
 
 		// Verify the account was created.
 		await expect(
-			page.getByText( 'Your account has been successfully created' )
+			page.getByText( 'Your account has been created' )
 		).toBeVisible();
 
-		// Verify the user was logged in.
+		// The order now belongs to the new account, but the shopper can still view it without logging in.
+		await page.reload();
+		await expect(
+			page.getByRole( 'heading', { name: 'Billing address' } )
+		).toBeVisible();
+
+		// Verify the user was not logged in.
 		await page.goto( '/my-account' );
-		await expect( page.getByText( 'Hello John Doe' ) ).toBeVisible();
+		await expect( page.getByText( 'Hello John Doe' ) ).toBeHidden();
+		await expect(
+			page.getByRole( 'button', { name: 'Log in' } )
+		).toBeVisible();
 	} );
 } );
 
