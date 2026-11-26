@@ -279,6 +279,7 @@ class StockNotificationsRestController extends RestApiControllerBase {
 	 */
 	private function expand_variable_products( array $product_ids ): array {
 		$expanded = array_map( 'intval', $product_ids );
+		_prime_post_caches( $expanded );
 		foreach ( $product_ids as $product_id ) {
 			$product = wc_get_product( $product_id );
 			if ( $product && $product->is_type( ProductType::VARIABLE ) ) {
