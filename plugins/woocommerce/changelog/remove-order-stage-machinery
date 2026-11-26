@@ -1,3 +1,3 @@
 Significance: patch
 Type: dev
-Comment: Remove the unreleased order stage methods; order saving matches 11.3.1, so merchants see no change.
+Comment: Remove the unreleased order stage methods; saving keeps 11.3.1 behavior plus the other 11.4 fixes.
