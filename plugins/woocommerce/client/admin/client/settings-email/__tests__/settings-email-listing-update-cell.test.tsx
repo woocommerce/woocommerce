@@ -5,6 +5,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import { render, screen, fireEvent } from '@testing-library/react';
 
 /**
@@ -12,6 +13,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
  */
 import type { EmailType } from '../settings-email-listing-slotfill';
 import { UpdatesCell } from '../settings-email-listing-update-cell';
+
+const setHref = mockBrowserLocation( 'href' );
 
 jest.mock( '@woocommerce/settings', () => ( {
 	getAdminLink: ( path: string ) => `https://example.test/wp-admin/${ path }`,
@@ -52,24 +55,7 @@ const baseEmail: EmailType = {
 };
 
 describe( '<UpdatesCell>', () => {
-	let originalLocation: Location;
-
-	beforeEach( () => {
-		originalLocation = window.location;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		delete ( window as any ).location;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		( window as any ).location = {
-			...originalLocation,
-			href: '',
-			assign: jest.fn(),
-		};
-	} );
-
-	afterEach( () => {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		( window as any ).location = originalLocation;
-	} );
+	beforeEach( () => {} );
 
 	it( 'renders a Review update button when status is core_updated_customized and merchant version is older than current', () => {
 		render(
@@ -184,8 +170,10 @@ describe( '<UpdatesCell>', () => {
 			screen.getByRole( 'button', { name: /review update/i } )
 		);
 
-		expect( window.location.href ).toMatch(
-			/\/wp-admin\/post\.php\?post=123&action=edit&wc_email_review_drawer=1$/
+		expect( setHref ).toHaveBeenCalledWith(
+			expect.stringMatching(
+				/\/wp-admin\/post\.php\?post=123&action=edit&wc_email_review_drawer=1$/
+			)
 		);
 	} );
 
@@ -204,6 +192,6 @@ describe( '<UpdatesCell>', () => {
 			screen.getByRole( 'button', { name: /review update/i } )
 		);
 
-		expect( window.location.href ).toBe( '' );
+		expect( setHref ).not.toHaveBeenCalled();
 	} );
 } );

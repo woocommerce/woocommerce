@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { recordEvent } from '@woocommerce/tracks';
 import { TaskType } from '@woocommerce/data';
@@ -9,6 +10,8 @@ import { TaskType } from '@woocommerce/data';
  * Internal dependencies
  */
 import { Shipping, hasInstallableSlug } from '../index';
+
+const setHref = mockBrowserLocation( 'href' );
 
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
@@ -68,21 +71,14 @@ describe( 'Shipping', () => {
 		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
 		( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
 
-		const mockLocation = {
-			href: 'test',
-		} as Location;
-
-		mockLocation.href = 'test';
-		Object.defineProperty( global.window, 'location', {
-			value: mockLocation,
-		} );
-
 		render( <Shipping { ...props } /> );
 
 		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
-		expect( mockLocation.href ).toContain(
-			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'
+		expect( setHref ).toHaveBeenCalledWith(
+			expect.stringContaining(
+				'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'
+			)
 		);
 	} );
 

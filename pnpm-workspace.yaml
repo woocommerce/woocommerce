@@ -77,7 +77,6 @@ catalogs:
         '@babel/preset-typescript': 7.25.7
         '@babel/runtime': 7.25.7
         '@commander-js/extra-typings': ^10.0.3
-        '@jest/environment-jsdom-abstract': 30.5.2
         '@jest/globals': 30.5.2
         '@oclif/core': ^4.13.5
         '@types/jest': 30.0.0
@@ -104,7 +103,6 @@ catalogs:
         jest-environment-jsdom: 30.5.2
         jest-environment-node: 30.5.2
         jest-fixed-jsdom: ^0.0.10
-        jsdom: 20.0.3
         mini-css-extract-plugin: 2.9.x
         postcss: ^8.5.26
         postcss-loader: 4.3.x

@@ -3,6 +3,8 @@
  */
 import { screen } from '@testing-library/react';
 
+export { mockBrowserLocation } from './mock-browser-location';
+
 /**
  * For use with react-testing-library, like getText but allows the text to reside in multiple elements
  *

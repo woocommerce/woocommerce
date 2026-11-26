@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import { render } from '@testing-library/react';
 import type { ComponentType } from 'react';
 
@@ -10,6 +11,8 @@ import type { ComponentType } from 'react';
 import { ListView } from '../settings-email-listing-listview';
 import type { EmailType } from '../settings-email-listing-slotfill';
 import { useSendTestEmail } from '../settings-email-send-test';
+
+const setHref = mockBrowserLocation( 'href' );
 
 type DataViewsAction = {
 	id: string;
@@ -115,28 +118,11 @@ const renderTestModal = ( email: EmailType ) => {
 };
 
 describe( 'ListView', () => {
-	let originalLocation: typeof window.location;
-
 	beforeEach( () => {
 		capturedActions = [];
 		capturedOnClickItem = undefined;
 		useSendTestEmailMock.mockClear();
 		mockRecreateEmailPost.mockReset();
-
-		originalLocation = window.location;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		delete ( window as any ).location;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		( window as any ).location = {
-			...originalLocation,
-			href: '',
-			assign: jest.fn(),
-		};
-	} );
-
-	afterEach( () => {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		( window as any ).location = originalLocation;
 	} );
 
 	describe( 'edit action', () => {
@@ -146,7 +132,7 @@ describe( 'ListView', () => {
 			await getAction( 'edit' )?.callback?.( [ emailType ] );
 
 			expect( mockRecreateEmailPost ).not.toHaveBeenCalled();
-			expect( window.location.href ).toBe(
+			expect( setHref ).toHaveBeenCalledWith(
 				'https://example.test/wp-admin/post.php?post=123&action=edit'
 			);
 		} );
@@ -166,7 +152,7 @@ describe( 'ListView', () => {
 			await getAction( 'edit' )?.callback?.( [ emailWithoutPost ] );
 
 			expect( mockRecreateEmailPost ).toHaveBeenCalledWith( 'new_order' );
-			expect( window.location.href ).toBe(
+			expect( setHref ).toHaveBeenCalledWith(
 				'https://example.test/wp-admin/post.php?post=456&action=edit'
 			);
 		} );
@@ -186,7 +172,7 @@ describe( 'ListView', () => {
 			await getAction( 'edit' )?.callback?.( [ classicEmail ] );
 
 			expect( mockRecreateEmailPost ).not.toHaveBeenCalled();
-			expect( window.location.href ).toBe(
+			expect( setHref ).toHaveBeenCalledWith(
 				'https://example.test/wp-admin/admin.php?page=wc-settings&tab=email&section=wc_email_customer_stock_notification_verify'
 			);
 			expect( mockCreateErrorNotice ).not.toHaveBeenCalled();
@@ -204,7 +190,7 @@ describe( 'ListView', () => {
 			await getAction( 'edit' )?.callback?.( [ emailWithoutPost ] );
 
 			expect( mockRecreateEmailPost ).toHaveBeenCalledWith( 'new_order' );
-			expect( window.location.href ).toBe( '' );
+			expect( setHref ).not.toHaveBeenCalled();
 			expect( mockCreateErrorNotice ).toHaveBeenCalled();
 		} );
 	} );
@@ -215,7 +201,7 @@ describe( 'ListView', () => {
 
 			await capturedOnClickItem?.( emailType );
 
-			expect( window.location.href ).toBe(
+			expect( setHref ).toHaveBeenCalledWith(
 				'https://example.test/wp-admin/post.php?post=123&action=edit'
 			);
 		} );
@@ -235,7 +221,7 @@ describe( 'ListView', () => {
 			await capturedOnClickItem?.( emailWithoutPost );
 
 			expect( mockRecreateEmailPost ).toHaveBeenCalledWith( 'new_order' );
-			expect( window.location.href ).toBe(
+			expect( setHref ).toHaveBeenCalledWith(
 				'https://example.test/wp-admin/post.php?post=456&action=edit'
 			);
 		} );

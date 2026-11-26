@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import { getQuery } from '@woocommerce/navigation';
 import { createActor, toPromise, waitFor } from 'xstate5';
 
@@ -12,6 +13,8 @@ import {
 	coreProfilerMachineActors,
 	coreProfilerStateMachineDefinition,
 } from '../index';
+
+const setHref = mockBrowserLocation( 'href' );
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
@@ -121,14 +124,13 @@ const skipToBusinessLocationAndSubmit = async (
 
 const waitForNavigation = async () => {
 	// The skip flow shows its loader for two 1500 ms steps before leaving.
-	for ( let i = 0; i < 40 && window.location.href === 'about:blank'; i++ ) {
+	for ( let i = 0; i < 40 && ! setHref.mock.lastCall; i++ ) {
 		await jest.advanceTimersByTimeAsync( 100 );
 	}
-	return window.location.href;
+	return setHref.mock.lastCall?.[ 0 ];
 };
 
 describe( 'Core Profiler skip flow when REST requests fail', () => {
-	const originalLocation = window.location;
 	let consoleError: jest.SpyInstance;
 
 	// Each simulated request rejects with "<request> failed", so this pins which failure was logged.
@@ -148,17 +150,11 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 		mockFailingRequests.clear();
 		mockStoreCalls.length = 0;
 		mockOnboardingSetting.skipOnboardingFallbackUrl = FALLBACK_URL;
-		// @ts-expect-error Replace jsdom's location so navigation can be observed.
-		delete window.location;
-		// @ts-expect-error Minimal location stub.
-		window.location = { href: 'about:blank' };
 	} );
 
 	afterEach( () => {
 		jest.useRealTimers();
 		jest.restoreAllMocks();
-		// @ts-expect-error Restore jsdom's location.
-		window.location = originalLocation;
 	} );
 
 	it( 'keeps the profiler usable when every REST request fails', async () => {

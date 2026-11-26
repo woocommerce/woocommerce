@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -11,6 +12,8 @@ import { recordEvent } from '@woocommerce/tracks';
 import PaymentRecommendations from '../payment-recommendations';
 import { isWCPaySupported } from '../../task-lists/fills/PaymentGatewaySuggestions/components/WCPay';
 import { createNoticesFromResponse } from '../../lib/notices';
+
+const setHref = mockBrowserLocation( 'href' );
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
@@ -191,10 +194,6 @@ describe( 'Payment recommendations', () => {
 	} );
 
 	describe( 'interactions', () => {
-		let oldLocation: Location;
-		const mockLocation = {
-			href: 'test',
-		} as Location;
 		const updateOptionsMock = jest.fn();
 		const installAndActivateMock = jest
 			.fn()
@@ -225,18 +224,6 @@ describe( 'Payment recommendations', () => {
 					},
 				],
 			} );
-
-			oldLocation = global.window.location;
-			mockLocation.href = 'test';
-			Object.defineProperty( global.window, 'location', {
-				value: mockLocation,
-			} );
-		} );
-
-		afterEach( () => {
-			if ( oldLocation !== undefined ) {
-				Object.defineProperty( global.window, 'location', oldLocation );
-			}
 		} );
 
 		it( 'should install plugin and trigger event and redirect when finished, when clicking the action button', async () => {
@@ -255,7 +242,7 @@ describe( 'Payment recommendations', () => {
 					extension_selected: 'test-product',
 				}
 			);
-			expect( mockLocation.href ).toEqual(
+			expect( setHref ).toHaveBeenCalledWith(
 				'https://test.ca/random-link'
 			);
 		} );
@@ -301,7 +288,7 @@ describe( 'Payment recommendations', () => {
 			await waitFor( () => {
 				expect( createNoticesFromResponse ).toHaveBeenCalled();
 			} );
-			expect( mockLocation.href ).toEqual( 'test' );
+			expect( setHref ).not.toHaveBeenCalled();
 		} );
 
 		it( 'should only show gateways that have not been installed', async () => {
@@ -342,8 +329,10 @@ describe( 'Payment recommendations', () => {
 
 			expect( container.firstChild ).not.toBeNull();
 			fireEvent.click( getByText( 'the WooCommerce Marketplace' ) );
-			expect( mockLocation.href ).toContain(
-				'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+			expect( setHref ).toHaveBeenCalledWith(
+				expect.stringContaining(
+					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+				)
 			);
 		} );
 	} );

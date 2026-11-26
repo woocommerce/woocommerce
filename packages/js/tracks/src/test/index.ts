@@ -13,20 +13,19 @@ jest.mock( '../utils', () => ( {
 } ) );
 
 describe( 'recordEvent', () => {
-	let windowSpy: jest.SpyInstance;
+	const originalTracks = window.wcTracks;
 	const recordEventMock = jest.fn();
 
 	beforeEach( () => {
-		windowSpy = jest.spyOn( window, 'window', 'get' );
-		windowSpy.mockImplementation( () => ( {
-			wcTracks: {
-				recordEvent: recordEventMock,
-			},
-		} ) );
+		recordEventMock.mockClear();
+		window.wcTracks = {
+			...originalTracks,
+			recordEvent: recordEventMock,
+		};
 	} );
 
 	afterEach( () => {
-		windowSpy.mockRestore();
+		window.wcTracks = originalTracks;
 	} );
 
 	it( 'should record an event without props', () => {
