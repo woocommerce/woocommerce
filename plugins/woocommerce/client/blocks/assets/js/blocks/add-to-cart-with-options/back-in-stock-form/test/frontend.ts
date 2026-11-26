@@ -70,6 +70,36 @@ describe( 'Back in Stock form store', () => {
 		}
 	);
 
+	it.each( [
+		{ variation: null, form: false, notice: false },
+		{
+			variation: { id: 7, is_in_stock: false, is_purchasable: true },
+			form: false,
+			notice: true,
+		},
+		{
+			variation: { id: 7, is_in_stock: true, is_purchasable: true },
+			form: false,
+			notice: false,
+		},
+		{
+			variation: { id: 8, is_in_stock: false, is_purchasable: true },
+			form: true,
+			notice: false,
+		},
+	] )(
+		'shows the form ($form) or the "already joined" notice ($notice) for variation $variation when variation 7 is joined',
+		( { variation, form, notice } ) => {
+			mockRegisteredStore.state.signedUpVariationIds = [ 7 ];
+			mockProductsState.productVariationInContext = variation;
+
+			expect( mockRegisteredStore.state.isVisible ).toBe( form );
+			expect( mockRegisteredStore.state.isSignedUpNoticeVisible ).toBe(
+				notice
+			);
+		}
+	);
+
 	it( 'reads the selected attribute value from the Add to Cart + Options context', () => {
 		expect( mockRegisteredStore.state.selectedAttributeValue ).toBe( '' );
 

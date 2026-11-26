@@ -202,9 +202,11 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should render a visible form for the parent product when no variation can be bought, as the block shows no variation selector.
+	 * Create a variable product whose variations are all out of stock and load its single product page.
+	 *
+	 * @return int The product ID.
 	 */
-	public function test_form_is_rendered_for_parent_when_no_variation_can_be_bought(): void {
+	private function create_and_visit_out_of_stock_variable_product(): int {
 		$fixtures         = new FixtureData();
 		$variable_product = $fixtures->get_variable_product(
 			array(),
@@ -224,6 +226,15 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		\WC_Product_Variable::sync( $product_id );
 		$this->go_to( get_permalink( $product_id ) );
 		$GLOBALS['product'] = wc_get_product( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		return $product_id;
+	}
+
+	/**
+	 * @testdox Should render a visible form for the parent product when no variation can be bought, as the block shows no variation selector.
+	 */
+	public function test_form_is_rendered_for_parent_when_no_variation_can_be_bought(): void {
+		$product_id = $this->create_and_visit_out_of_stock_variable_product();
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
@@ -357,6 +368,44 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'You have already joined this waitlist.', $markup, 'A signed-up customer should see the "already joined" notice on load.' );
 		$this->assertStringNotContainsString( 'wc_bis_form', $markup, 'A signed-up customer should not see the Back in Stock form on load.' );
+	}
+
+	/**
+	 * @testdox Should show the "already joined" notice after the Add to Cart + Options block to a customer signed up for a parent product no variation of which can be bought.
+	 */
+	public function test_already_joined_notice_replaces_block_form_for_parent_when_no_variation_can_be_bought(): void {
+		$product_id = $this->create_and_visit_out_of_stock_variable_product();
+		$this->log_in_customer_signed_up_for( $product_id );
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertSame( 1, substr_count( $markup, 'You have already joined this waitlist.' ), 'The notice should be printed once.' );
+
+		$html = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertFalse( $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ), 'The form should not render.' );
+	}
+
+	/**
+	 * @testdox Should let the Interactivity API swap the form for the "already joined" notice when a joined variation is chosen in the Add to Cart + Options block.
+	 */
+	public function test_block_form_gives_way_to_notice_for_joined_variation(): void {
+		$product_id      = $this->create_and_visit_variable_product();
+		$out_of_stock_id = wc_get_product( $product_id )->get_children()[1];
+		$this->log_in_customer_signed_up_for( $out_of_stock_id );
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$state = wp_interactivity_state( 'woocommerce/back-in-stock-form' );
+		$this->assertSame( array( $out_of_stock_id ), $state['signedUpVariationIds'] ?? null, 'The store should know the joined variations.' );
+
+		$html = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue( $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ), 'The form should render.' );
+		$this->assertSame( '!state.isVisible', $html->get_attribute( 'data-wp-bind--hidden' ), 'The store should show and hide the form.' );
+
+		$this->assertTrue( $html->next_tag( array( 'class_name' => 'wc_bis_already_signed_up' ) ), 'The notice should render after the form.' );
+		$this->assertNotNull( $html->get_attribute( 'hidden' ), 'The notice should stay hidden until a joined variation is chosen.' );
+		$this->assertSame( 'woocommerce/back-in-stock-form', $html->get_attribute( 'data-wp-interactive' ), 'The notice should be driven by the Interactivity API.' );
+		$this->assertSame( '!state.isSignedUpNoticeVisible', $html->get_attribute( 'data-wp-bind--hidden' ), 'The store should show and hide the notice.' );
 	}
 
 	/**
