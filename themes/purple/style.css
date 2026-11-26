@@ -40,7 +40,7 @@ body {
 	}
 
 	select:not([multiple], [size])::picker-icon {
-		forced-color-adjust: none;
+		forced-color-adjust: preserve-parent-color;
 		background-color: currentColor;
 		block-size: 0.42rem;
 		content: "";
