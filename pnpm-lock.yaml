@@ -2960,9 +2960,6 @@ importers:
         specifier: ^15.8.1
         version: 15.8.1
     devDependencies:
-      '@babel/core':
-        specifier: catalog:tooling
-        version: 7.29.7(supports-color@9.4.0)
       '@types/react':
         specifier: 18.3.x
         version: 18.3.28
@@ -2978,21 +2975,12 @@ importers:
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
-      '@wordpress/babel-preset-default':
-        specifier: next
-        version: 8.55.1-next.v.202609171837.0(supports-color@9.4.0)
       '@wordpress/env':
         specifier: catalog:tooling
         version: 12.0.0(@types/node@24.12.2)(supports-color@9.4.0)
-      '@wordpress/jest-preset-default':
-        specifier: catalog:tooling
-        version: 12.43.1-next.v.202604091042.0(@babel/core@7.29.7(supports-color@9.4.0))(jest@30.5.2(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(supports-color@9.4.0)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(supports-color@9.4.0)
       '@wordpress/scripts':
         specifier: catalog:tooling
         version: 37.2.0(06f162b87ab9fea214f430ed8956dfb1)
-      babel-jest:
-        specifier: catalog:tooling
-        version: 30.5.2(@babel/core@7.29.7(supports-color@9.4.0))(supports-color@9.4.0)
       eslint:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)(supports-color@9.4.0)
@@ -3002,9 +2990,6 @@ importers:
       jest:
         specifier: catalog:tooling
         version: 30.5.2(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(supports-color@9.4.0)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-environment-jsdom:
-        specifier: catalog:tooling
-        version: 30.5.2(supports-color@9.4.0)
       prettier:
         specifier: catalog:tooling
         version: wp-prettier@3.9.6
