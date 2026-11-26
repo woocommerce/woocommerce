@@ -78,9 +78,14 @@ class ProductPageIntegration {
 		}
 
 		global $product;
-		if ( is_a( $product, 'WC_Product' ) ) {
-			$this->maybe_render_product_form( $product );
+		if ( ! is_a( $product, 'WC_Product' ) || ! $this->should_render_form( $product ) ) {
+			return;
 		}
+
+		$this->rendered[ $product->get_id() ] = true;
+
+		wp_enqueue_script( 'wc-back-in-stock-form' );
+		$this->render_form( $product );
 	}
 
 	/**
@@ -98,12 +103,13 @@ class ProductPageIntegration {
 
 		// Only the block for the product being viewed, not those in related products, upsells or other products' Single Product blocks.
 		$product = $product_id && get_queried_object_id() === $product_id ? wc_get_product( $product_id ) : null;
-		if ( '' === $block_content || ! $product ) {
+		if ( '' === $block_content || ! $product || ! $this->should_render_form( $product ) ) {
 			return $block_content;
 		}
 
+		// The product isn't marked as rendered, as the block's output can be discarded.
 		ob_start();
-		$this->maybe_render_product_form( $product, true );
+		$this->render_form( $product );
 
 		return $this->add_interactivity_to_form( $block_content, (string) ob_get_clean(), $product );
 	}
@@ -177,49 +183,19 @@ class ProductPageIntegration {
 	}
 
 	/**
-	 * Render the BIS form for a product when it is eligible for sign-ups.
+	 * Whether a product page should get the BIS form, or the notice shown in its place.
 	 *
-	 * @param WC_Product $product  Product object.
-	 * @param bool       $is_block Whether the form renders for the Add to Cart + Options block.
-	 * @return void
+	 * @param WC_Product $product Product object.
+	 * @return bool
 	 */
-	private function maybe_render_product_form( WC_Product $product, bool $is_block = false ): void {
-
-		if ( ! Config::allows_signups() || ! is_product() ) {
-			return;
-		}
-
-		if ( isset( $this->rendered[ $product->get_id() ] ) ) {
-			return;
-		}
-
-		// The block doesn't mark the product as rendered, as its output can be discarded.
-		if ( ! $is_block ) {
-			$this->rendered[ $product->get_id() ] = true;
-		}
-
-		$is_variable = $product->is_type( 'variable' );
-		// Check if the product is in stock.
-		// Hint: This is negative logic. If the product is eligible for notifications, skip rendering.
-		// We avoid checking for variable products here because we want to render the form for out of stock variations.
-		if ( ! $is_variable && $this->eligibility_service->is_stock_status_eligible( $product->get_stock_status() ) ) {
-			return;
-		}
-
-		if ( ! $this->eligibility_service->is_product_eligible( $product ) ) {
-			return;
-		}
-
-		if ( ! $this->eligibility_service->product_allows_signups( $product ) ) {
-			return;
-		}
-
-		// The block is driven by the Interactivity API, see add_interactivity_to_form().
-		if ( ! $is_block ) {
-			wp_enqueue_script( 'wc-back-in-stock-form' );
-		}
-
-		$this->render_form( $product );
+	private function should_render_form( WC_Product $product ): bool {
+		return Config::allows_signups()
+			&& is_product()
+			&& ! isset( $this->rendered[ $product->get_id() ] )
+			// A variable product is checked per variation, any other product must be out of stock.
+			&& ( $product->is_type( 'variable' ) || ! $this->eligibility_service->is_stock_status_eligible( $product->get_stock_status() ) )
+			&& $this->eligibility_service->is_product_eligible( $product )
+			&& $this->eligibility_service->product_allows_signups( $product );
 	}
 
 	/**
