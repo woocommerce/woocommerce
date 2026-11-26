@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Check order hook listeners on direct stage calls of the experimental extensible abilities; no change on the saving path.
+Comment: Check order hook listeners on staged changes of the experimental extensible abilities; no change on the saving path.
 

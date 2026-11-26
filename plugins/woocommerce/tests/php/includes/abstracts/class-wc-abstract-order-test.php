@@ -1787,6 +1787,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			3
 		);
 
+		$refund->mark_staged();
 		$refund->stage_totals( false );
 
 		$this->assertSame( array( true ), $staged );
@@ -3410,9 +3411,9 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A woocommerce_order_before_calculate_totals listener without $staged refuses a direct stage_totals() call and works through calculate_totals(); one with $staged gets true and false.
+	 * @testdox A woocommerce_order_before_calculate_totals listener without $staged refuses a stage_totals() call on a marked order and works through calculate_totals(); one with $staged gets true and false.
 	 */
-	public function test_before_calculate_totals_checks_its_listeners_on_a_direct_stage_call(): void {
+	public function test_before_calculate_totals_checks_its_listeners_on_a_marked_order(): void {
 		$order    = WC_Helper_Order::create_order();
 		$old_runs = 0;
 		$old      = static function () use ( &$old_runs ) {
@@ -3423,6 +3424,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->calculate_totals();
 		$this->assertSame( 1, $old_runs, 'The old listener runs on the saving path' );
 
+		$order->mark_staged();
 		try {
 			$order->stage_totals();
 			$this->fail( 'stage_totals() did not refuse the old listener' );
@@ -3445,12 +3447,13 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		);
 
 		$order->calculate_totals();
+		$order->mark_staged();
 		$order->stage_totals();
 		$this->assertSame( array( false, true ), $received );
 	}
 
 	/**
-	 * @testdox A woocommerce_order_after_calculate_totals listener without $staged refuses a direct stage_totals() call before the order changes and never runs; one with $staged gets true at the save and false through calculate_totals().
+	 * @testdox A woocommerce_order_after_calculate_totals listener without $staged refuses a stage_totals() call on a marked order before the order changes and never runs; one with $staged gets true at the save and false through calculate_totals().
 	 */
 	public function test_after_calculate_totals_checks_its_listeners_at_stage_time(): void {
 		$order    = WC_Helper_Order::create_order();
@@ -3462,6 +3465,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->set_shipping_total( 99 );
 		$order->save();
 
+		$order->mark_staged();
 		try {
 			$order->stage_totals();
 			$this->fail( 'stage_totals() did not refuse the old listener' );
@@ -3486,6 +3490,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			3
 		);
 
+		$order->mark_staged();
 		$order->stage_totals();
 		$this->assertSame( array(), $received, 'The action waits for the save' );
 		$order->save();

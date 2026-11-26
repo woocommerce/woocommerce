@@ -244,15 +244,17 @@ Database migrations live in `WC_Install::$db_updates`. Read that class for the c
 
 A stage method (`stage_*()` on a `WC_Data` class, for example `WC_Abstract_Order::stage_totals()`) changes the object in memory and does not save. Its saving method, for example `calculate_totals()`, runs it through `write_through()` and saves as before. A new stage method starts with `$this->refuse_unstaged_override( 'saving_method', 'stage_method' )`.
 
-A hook needs the listener check when it can fire on a direct stage call, fires before the write, and passes the staged object or one of its children (the order or an order item, also inside the discount items that `WC_Discounts` builds for an order). Fire it through the wrapper, with the hook name and arguments written once:
+A caller that stages, validates and then saves marks the object first with `WC_Data::mark_staged()`; `ActionableAbility` does this for every ability. Stage methods do not mark the object. `save()` clears the mark.
+
+A hook needs the listener check when it can fire on a staged call, fires before the write, and passes the staged object or one of its children (the order or an order item, also inside the discount items that `WC_Discounts` builds for an order). Fire it through the wrapper, with the hook name and arguments written once:
 
 ```php
 $this->do_staged_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 ```
 
-Use `apply_staged_filters()` for a filter. It returns the filtered value. Both wrappers pass `$staged` as the last argument: true on a direct stage call, false on the saving path. Document `$staged` in the hook docblock with `@since`. phpcs and PHPStan check the docblock of a wrapper call like a `do_action()` docblock.
+Use `apply_staged_filters()` for a filter. It returns the filtered value. Both wrappers pass `$staged` as the last argument: true when the object is marked as staged, false on the saving path. Document `$staged` in the hook docblock with `@since`. phpcs and PHPStan check the docblock of a wrapper call like a `do_action()` docblock.
 
-- **Listeners that did not adapt:** on a direct stage call, a listener registered with fewer arguments than the hook passes refuses the call with a `WC_Data_Exception` that names the hook and the listener. The hook does not fire. No callback is exempt, `__return_true` included. On the saving path nothing is checked, and old listeners work as before.
+- **Listeners that did not adapt:** on a marked object, a listener registered with fewer arguments than the hook passes refuses the call with a `WC_Data_Exception` that names the hook and the listener. The hook does not fire. No callback is exempt, `__return_true` included. On the saving path nothing is checked, and old listeners work as before.
 - **Deferred hooks:** a hook that a stage method defers to the save calls `check_staged_listeners()` before the stage method changes the object, and defers a closure with a literal `do_action()` that passes the result as `$staged`. See `woocommerce_order_after_calculate_totals` in `stage_totals()`.
 - **Cart paths:** a hook that a cart fires too, in `WC_Discounts` or `WC_Coupon`, gets an explicit branch: the wrapper for an order, and the plain call for a cart, unchanged.
 - **Core listeners:** a listener in Core on a wrapped hook accepts `$staged`. When it is true, the order and its items can have no IDs and the change can still be refused, so the listener must not treat IDs as real and must not write to the database.
@@ -262,7 +264,7 @@ Left out on purpose:
 - Getter filters, such as `get_prop()` filters, `woocommerce_order_get_items` and `woocommerce_order_has_status`. A getter filter must not write.
 - Hooks that fire after the write.
 
-`WC_Data_Staged_Hooks_Test` enforces this. It stages through every public stage method and fails when a WooCommerce hook fires before the write without the wrapper. Its `DECIDED` constant lists the hooks that get no check, each group with a reason. For a new stage method, add a row; for a new hook, wrap it or add it to `DECIDED` with a reason.
+`WC_Data_Staged_Hooks_Test` enforces this. It stages through every public stage method on a marked object and fails when a WooCommerce hook fires before the write without the wrapper. Its `DECIDED` constant lists the hooks that get no check, each group with a reason. For a new stage method, add a row; for a new hook, wrap it or add it to `DECIDED` with a reason.
 
 ## Comments and Docblocks
 

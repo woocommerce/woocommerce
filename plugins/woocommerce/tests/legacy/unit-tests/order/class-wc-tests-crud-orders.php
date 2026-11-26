@@ -1214,8 +1214,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 		$pre = did_action( 'woocommerce_pre_payment_complete' );
 		WC()->session->set( 'order_awaiting_payment', $object->get_id() );
+		add_filter( 'woocommerce_order_get_tax_location', static fn( $location ) => $location, 10, 2 );
 
 		$this->assertFalse( $object->stage_payment_complete( '12345' ) );
+		$this->assertIsArray( $object->get_taxable_location(), 'A listener without $staged refused a read of the unmarked order' );
 		$object->save();
 
 		$this->assertSame( 0, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
@@ -1454,6 +1456,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			2
 		);
 
+		$order->mark_staged();
 		$order->stage_status( OrderStatus::ON_HOLD );
 		$this->save_with_failed_write( $order );
 		$order->do_staged_action( 'woocommerce_test_staged_action', $order );
@@ -1491,6 +1494,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			2
 		);
 
+		$refund->mark_staged();
 		$refund->stage_order_items_removal();
 		if ( 'queued step' === $failure ) {
 			$refund->queue_before_write(
@@ -1537,6 +1541,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_order_item_needs_processing', static fn( $needs_processing, $product, $id, $staged ) => ! $staged, 10, 4 );
 
 		$staged_order = wc_get_order( $order_id );
+		$staged_order->mark_staged();
 		$staged_order->stage_status( OrderStatus::PROCESSING );
 
 		$this->assertTrue( wc_get_order( $order_id )->needs_processing(), 'The saving path caches its answer' );
@@ -1871,6 +1876,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		};
 		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 3 );
 
+		$order->mark_staged();
 		$order->stage_totals( false );
 		$this->assertSame( array(), $calls );
 

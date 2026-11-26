@@ -3393,7 +3393,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			 *
 			 * @param bool              $and_taxes Whether the taxes were calculated too.
 			 * @param WC_Abstract_Order $order     Order object.
-			 * @param bool              $staged    Whether the totals were staged and are not yet saved. When true, the order and its tax items are in memory and have no IDs yet; use the $order object, not the database. A listener must accept it: on a direct stage_totals() call, a listener registered with fewer arguments refuses the call.
+			 * @param bool              $staged    Whether the totals were staged and are not yet saved. When true, the order and its tax items are in memory and have no IDs yet; use the $order object, not the database. A listener must accept it: on an order marked as staged, a listener registered with fewer arguments refuses the call.
 			 * @since 3.3.0
 			 * @since 11.4.0 Passes $staged.
 			 */

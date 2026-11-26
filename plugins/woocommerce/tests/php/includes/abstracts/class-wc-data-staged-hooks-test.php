@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests that every WooCommerce hook a direct stage call fires before the write is checked or decided.
+ * Tests that every WooCommerce hook a stage call on a marked object fires before the write is checked or decided.
  *
  * @package WooCommerce\Tests\Abstracts
  */
@@ -13,8 +13,8 @@ use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Matches the WC_Data class it tests.
 /**
- * Stages through every public stage_*() method directly and accounts for every WooCommerce hook that fires before
- * the write: fired with do_staged_action() or apply_staged_filters(), deferred with a listener check, or decided.
+ * Stages through every public stage_*() method on an object marked as staged and accounts for every WooCommerce hook
+ * that fires before the write: fired with do_staged_action() or apply_staged_filters(), deferred with a listener check, or decided.
  */
 class WC_Data_Staged_Hooks_Test extends WC_Unit_Test_Case {
 
@@ -31,7 +31,7 @@ class WC_Data_Staged_Hooks_Test extends WC_Unit_Test_Case {
 	private const DEFERRED_CHECKED = array( 'woocommerce_order_after_calculate_totals' );
 
 	/**
-	 * WooCommerce hooks that can fire before the write on a direct stage call and get no listener check, by group.
+	 * WooCommerce hooks that can fire before the write on a staged call and get no listener check, by group.
 	 * Each group has the reason. The names come from the review of every hook that fires before the write on a
 	 * staged call. A `*` matches any part of a dynamic hook name. Hooks fired by a read method of the object, and
 	 * hooks that WordPress fires, are left out by a rule in record_fires(), not by name.
@@ -257,16 +257,16 @@ class WC_Data_Staged_Hooks_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Every WooCommerce hook that a direct stage call fires before the write is checked or decided, and a listener without $staged on a checked hook refuses the call before it runs.
+	 * @testdox Every WooCommerce hook that a stage call on a marked object fires before the write is checked or decided, and a listener without $staged on a checked hook refuses the call before it runs.
 	 * @dataProvider provide_rows
 	 *
 	 * @param string $method Stage method.
 	 * @param string $state  State of the object: new, existing, synchronous or guest.
 	 */
-	public function test_every_hook_of_a_direct_stage_call_is_checked_or_decided( string $method, string $state ): void {
+	public function test_every_hook_of_a_staged_call_is_checked_or_decided( string $method, string $state ): void {
 		list( $checked, $unaccounted ) = $this->record_fires( $method, $state );
 
-		$this->assertSame( array(), $unaccounted, 'These hooks fire before the write on a direct stage call without a listener check' );
+		$this->assertSame( array(), $unaccounted, 'These hooks fire before the write on a staged call without a listener check' );
 
 		foreach ( $checked as $site => $fire ) {
 			if ( isset( self::$proven_sites[ $site ] ) ) {
@@ -361,7 +361,7 @@ class WC_Data_Staged_Hooks_Test extends WC_Unit_Test_Case {
 					return;
 				}
 				if ( ! self::is_decided( $hook ) ) {
-					$unaccounted[ $site ] = sprintf( '%s fired at %s before the write on a direct %s call (%s). Fire it with do_staged_action() or apply_staged_filters() when it passes the staged object or one of its children, or add it to DECIDED in this test with a reason.', $hook, $location, $method, $state );
+					$unaccounted[ $site ] = sprintf( '%s fired at %s before the write on a staged %s call (%s). Fire it with do_staged_action() or apply_staged_filters() when it passes the staged object or one of its children, or add it to DECIDED in this test with a reason.', $hook, $location, $method, $state );
 				}
 				return;
 			}
@@ -438,7 +438,7 @@ class WC_Data_Staged_Hooks_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create the object of a row and the callable that stages on it directly and then saves.
+	 * Create the object of a row and the callable that marks it as staged, stages on it and then saves.
 	 *
 	 * @param string $method Stage method.
 	 * @param string $state  Object state.
@@ -462,6 +462,7 @@ class WC_Data_Staged_Hooks_Test extends WC_Unit_Test_Case {
 			return array(
 				$notification,
 				static function () use ( $notification, $name ) {
+					$notification->mark_staged();
 					$notification->$name();
 					do_action( 'wc_staged_hooks_test_save' );
 					$notification->save();
@@ -480,6 +481,7 @@ class WC_Data_Staged_Hooks_Test extends WC_Unit_Test_Case {
 			return array(
 				$refund,
 				static function () use ( $refund ) {
+					$refund->mark_staged();
 					$refund->stage_coupon( 'staged_restricted' );
 					$refund->save();
 				},
@@ -516,6 +518,7 @@ class WC_Data_Staged_Hooks_Test extends WC_Unit_Test_Case {
 		return array(
 			$order,
 			static function () use ( $order, $calls, $name ) {
+				$order->mark_staged();
 				$calls[ $name ]();
 				$order->save();
 			},
@@ -546,6 +549,7 @@ class WC_Data_Staged_Hooks_Test extends WC_Unit_Test_Case {
 			$webhook,
 			static function () use ( $webhook, $name, $http ) {
 				add_filter( 'pre_http_request', $http );
+				$webhook->mark_staged();
 				try {
 					'stage_delivery_ping' === $name ? $webhook->stage_delivery_ping() : $webhook->stage_delivery_result( 500 );
 				} finally {

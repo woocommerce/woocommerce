@@ -75,7 +75,7 @@ final class StagedMethod {
 	}
 
 	/**
-	 * Whether a hook may fire on a direct stage call: refuse the change when a callback of the hook accepts fewer
+	 * Whether a hook may fire on a staged object: refuse the change when a callback of the hook accepts fewer
 	 * arguments than the hook passes, $staged included. Such a callback was written for the saving path, where the
 	 * object and its items are saved.
 	 *

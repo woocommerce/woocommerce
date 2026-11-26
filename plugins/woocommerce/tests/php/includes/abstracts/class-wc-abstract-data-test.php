@@ -98,7 +98,7 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A listener that does not accept $staged refuses a direct stage call and does not run, and works unchanged on the saving path.
+	 * @testdox A listener that does not accept $staged refuses a stage call on a marked object and does not run, and works unchanged on the saving path.
 	 * @testWith ["woocommerce_test_staged_action"]
 	 *           ["woocommerce_test_staged_filter"]
 	 *
@@ -121,6 +121,7 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $runs, 'The listener runs on the saving path' );
 
 		$this->expectException( WC_Data_Exception::class );
+		$object->mark_staged();
 		try {
 			$object->stage_value();
 		} finally {
@@ -129,7 +130,7 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A listener that accepts $staged gets true on a direct stage call and false on the saving path, and a filter returns the filtered value.
+	 * @testdox A listener that accepts $staged gets true on a marked object and false on the saving path, and a filter returns the filtered value.
 	 * @testWith ["woocommerce_test_staged_action", "value"]
 	 *           ["woocommerce_test_staged_filter", "filtered"]
 	 *
@@ -149,6 +150,7 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 			3
 		);
 
+		$object->mark_staged();
 		$object->stage_value();
 		$object->set_value();
 
@@ -157,7 +159,7 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox __return_true on a filter refuses a direct stage call: no callback is exempt.
+	 * @testdox __return_true on a filter refuses a stage call on a marked object: no callback is exempt.
 	 */
 	public function test_return_true_refuses_a_direct_stage_call(): void {
 		$object = $this->create_staging_object();
@@ -165,6 +167,7 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 
 		$this->expectException( WC_Data_Exception::class );
 		$this->expectExceptionMessage( 'woocommerce_test_staged_filter hook does not support staged changes: __return_true.' );
+		$object->mark_staged();
 		$object->stage_value();
 	}
 
@@ -179,9 +182,10 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 		add_action( 'woocommerce_test_staged_action', $closure );
 		add_action( 'woocommerce_test_staged_action', array( self::class, 'listener_with_staged' ), 10, 3 );
 
+		$object->mark_staged();
 		try {
 			$object->stage_value();
-			$this->fail( 'The direct stage call was not refused' );
+			$this->fail( 'The staged call was not refused' );
 		} catch ( WC_Data_Exception $e ) {
 			$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode() );
 			$this->assertStringContainsString(
@@ -217,6 +221,7 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 			3
 		);
 
+		$object->mark_staged();
 		$object->stage_value();
 		try {
 			$object->save();

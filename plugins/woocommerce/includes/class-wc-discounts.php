@@ -1390,7 +1390,7 @@ class WC_Discounts {
 			}
 		} catch ( Exception $e ) {
 			if ( $e instanceof WC_Data_Exception && 'woocommerce_data_staging_unsupported' === $e->getErrorCode() ) {
-				// A hook listener refused a direct stage call. The call fails; the coupon is not invalid.
+				// A hook listener refused a staged change. The call fails; the coupon is not invalid.
 				throw $e;
 			}
 

@@ -37,7 +37,8 @@ abstract class WC_Data {
 	protected $writing_through = false;
 
 	/**
-	 * Whether a direct call of a stage_*() method changed the object since its last save.
+	 * Whether the object is marked as staged: it holds changes that are not saved yet and that a validator can still
+	 * refuse. mark_staged() sets it, and save() clears it.
 	 *
 	 * @since 11.4.0
 	 * @var bool
@@ -204,19 +205,31 @@ abstract class WC_Data {
 		}
 
 		StagedMethod::refuse_unstaged( $this, $method, $stage_method );
+	}
+
+	/**
+	 * Mark the object as staged: it holds changes that are not saved yet and that a validator can still refuse. A
+	 * caller that changes the object, validates it and then saves it calls this before the first change. save()
+	 * clears the mark.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 * @return void
+	 */
+	public function mark_staged(): void {
 		$this->staged_unsaved = true;
 	}
 
 	/**
 	 * Fire an action about this object from code that can run staged. The action gets $staged as its last argument:
-	 * true on a direct call of a stage_*() method, false on the saving path. On a direct stage call, a listener that
-	 * accepts fewer arguments than the action passes refuses the call, and the action does not fire.
+	 * true when the object is marked as staged, false on the saving path. On a marked object, a listener that accepts
+	 * fewer arguments than the action passes refuses the call, and the action does not fire.
 	 *
 	 * @since 11.4.0
 	 * @param string $hook    Action name.
 	 * @param mixed  ...$args Action arguments, without $staged.
 	 * @return void
-	 * @throws WC_Data_Exception When a listener does not accept $staged on a direct stage call.
+	 * @throws WC_Data_Exception When a listener does not accept $staged on a marked object.
 	 */
 	public function do_staged_action( string $hook, ...$args ): void {
 		$args[] = $this->check_staged_listeners( $hook, ...$args );
@@ -226,15 +239,15 @@ abstract class WC_Data {
 
 	/**
 	 * Apply a filter about this object from code that can run staged, and return the filtered value. The filter gets
-	 * $staged as its last argument: true on a direct call of a stage_*() method, false on the saving path. On a direct
-	 * stage call, a listener that accepts fewer arguments than the filter passes refuses the call, and the filter does
-	 * not run.
+	 * $staged as its last argument: true when the object is marked as staged, false on the saving path. On a marked
+	 * object, a listener that accepts fewer arguments than the filter passes refuses the call, and the filter does not
+	 * run.
 	 *
 	 * @since 11.4.0
 	 * @param string $hook    Filter name.
 	 * @param mixed  ...$args Filter arguments, the value to filter first, without $staged.
 	 * @return mixed The filtered value.
-	 * @throws WC_Data_Exception When a listener does not accept $staged on a direct stage call.
+	 * @throws WC_Data_Exception When a listener does not accept $staged on a marked object.
 	 */
 	public function apply_staged_filters( string $hook, ...$args ) {
 		$args[] = $this->check_staged_listeners( $hook, ...$args );
@@ -243,8 +256,8 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Whether hooks about this object fire on a direct stage call: a stage_*() method changed the object since its
-	 * last save, and no saving method runs right now.
+	 * Whether hooks about this object fire on a staged object: the object is marked as staged, and no saving method
+	 * runs right now.
 	 *
 	 * @since 11.4.0
 	 * @return bool
@@ -255,15 +268,15 @@ abstract class WC_Data {
 
 	/**
 	 * Check the listeners of a hook about this object, and return the value to pass as the hook's last argument,
-	 * $staged: true on a direct call of a stage_*() method, false otherwise. On a direct stage call, a listener that
-	 * accepts fewer arguments than the hook passes refuses the call. A stage method that defers a hook to the next
-	 * save() calls this before it changes the object, and defers the hook with the value it returns.
+	 * $staged: true when the object is marked as staged and no saving method runs, false otherwise. When it is true,
+	 * a listener that accepts fewer arguments than the hook passes refuses the call. A stage method that defers a hook
+	 * to the next save() calls this before it changes the object, and defers the hook with the value it returns.
 	 *
 	 * @since 11.4.0
 	 * @param string $hook    Hook name.
 	 * @param mixed  ...$args Hook arguments, without $staged.
 	 * @return bool Whether the object is staged and not saved yet.
-	 * @throws WC_Data_Exception When a listener does not accept $staged on a direct stage call.
+	 * @throws WC_Data_Exception When a listener does not accept $staged on a marked object.
 	 */
 	protected function check_staged_listeners( string $hook, ...$args ): bool {
 		$staged = $this->is_staged_unsaved();

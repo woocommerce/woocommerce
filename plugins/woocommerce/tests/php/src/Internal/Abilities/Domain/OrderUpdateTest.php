@@ -139,6 +139,45 @@ class OrderUpdateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should mark the order as staged on an update that changes only the billing city, so a hook that a validator reaches gets $staged as true.
+	 */
+	public function test_an_address_only_update_reaches_hooks_as_staged(): void {
+		$order  = WC_Helper_Order::create_order();
+		$staged = array();
+		add_filter(
+			'woocommerce_order_get_tax_location',
+			static function ( $location, $listened_order, $is_staged ) use ( &$staged ) {
+				$staged[] = $is_staged;
+				return $location;
+			},
+			10,
+			3
+		);
+		$this->enable_extensible_abilities(
+			static function () {
+				ExtensibleAbilities::register_validator(
+					array(
+						'resource'  => 'order',
+						'namespace' => 'test-ext',
+						'callback'  => static function ( \WC_Order $staged_order ) {
+							$staged_order->get_taxable_location();
+						},
+					)
+				);
+			}
+		);
+
+		$this->execute(
+			array(
+				'id'      => $order->get_id(),
+				'billing' => array( 'city' => 'New City' ),
+			)
+		);
+
+		$this->assertSame( array( true ), $staged );
+	}
+
+	/**
 	 * @testdox Should strip tags from the customer note.
 	 */
 	public function test_sanitizes_customer_note(): void {

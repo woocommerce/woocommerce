@@ -17,7 +17,8 @@ defined( 'ABSPATH' ) || exit;
  * An ability that changes a primary object, and optionally secondary objects,
  * and saves them in one call. Register it with a subclass as the
  * `ability_class`. The execute callback loads the primary object, checks the
- * `extensions` input against the field input schemas, changes the objects in memory,
+ * `extensions` input against the field input schemas, marks the primary object
+ * as staged with WC_Data::mark_staged() when the feature is on, changes the objects in memory,
  * writes the fields that have a `set_callback`, runs the validators that
  * ExtensibleAbilities::register_validator() adds, saves, and then prepares the
  * response. A rejection before the save saves nothing. When prepare_response()
@@ -209,6 +210,10 @@ abstract class ActionableAbility extends Ability {
 		$updates = $writes ? $this->prepare_fields( $input['extensions'] ?? array(), $this->get_resource() ) : array();
 		if ( is_wp_error( $updates ) ) {
 			return $updates;
+		}
+
+		if ( $enabled && $subject instanceof \WC_Data ) {
+			$subject->mark_staged();
 		}
 
 		$refused = new \WP_Error();
