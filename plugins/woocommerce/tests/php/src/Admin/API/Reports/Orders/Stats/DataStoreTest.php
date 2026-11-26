@@ -902,6 +902,7 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		$customer_count = static function () use ( $wpdb ) {
 			return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_customer_lookup" );
 		};
+
 		$before = $customer_count();
 
 		$first  = OrdersStatsDataStore::get_order_stats_row_data( wc_get_order( $order->get_id() ) );
