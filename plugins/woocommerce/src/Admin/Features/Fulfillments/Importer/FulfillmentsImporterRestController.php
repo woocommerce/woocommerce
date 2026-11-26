@@ -677,6 +677,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				'byte_offset'         => $session->byte_offset(),
 				'next_record_number'  => $session->next_record_number(),
 				'seen_tracking_pairs' => $session->seen_tracking_pairs(),
+				'remaining_rows'      => $session->total() - $session->processed(),
 			)
 		);
 
@@ -692,18 +693,6 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			);
 		}
 
-		// The caller only asks for a chunk while rows are expected, so a chunk without rows
-		// means the reader stopped early. Nothing was written and the same chunk can be sent again.
-		if ( 0 === (int) ( $chunk['consumed'] ?? 0 ) ) {
-			return new WP_Error(
-				'woocommerce_fulfillments_import_chunk_failed',
-				__( 'The CSV file ended before all of its rows were read. Please try again, or upload the file again.', 'woocommerce' ),
-				array(
-					'status' => WP_Http::INTERNAL_SERVER_ERROR,
-					'reason' => 'unexpected_eof',
-				)
-			);
-		}
 		return $chunk;
 	}
 

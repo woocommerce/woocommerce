@@ -1377,22 +1377,24 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox handle_run does not end the import when the file ends before the rows the prepare step counted.
+	 * @testdox handle_run imports nothing from a chunk when the file ends before the rows the prepare step counted.
 	 */
-	public function test_run_does_not_end_the_import_when_the_file_ends_early(): void {
-		$order_id = $this->make_order();
-		$file     = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n{$order_id},SHORT-1,ups\n" );
+	public function test_run_imports_nothing_when_the_file_ends_early(): void {
+		$first_order  = $this->make_order();
+		$second_order = $this->make_order();
+		$file         = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n{$first_order},SHORT-1,ups\n{$second_order},SHORT-2,ups\n" );
 		// A reader that stops early looks like a file with fewer rows than the session counted.
 		$session = ImportSession::create( get_current_user_id(), $file, ',', array( 'order_number', 'tracking_number', 'shipment_provider' ), 3, false, true );
 
-		$first  = $this->run_chunk( $session->token(), 0 );
-		$second = $this->run_chunk( $session->token(), 1 );
+		$first  = $this->run_chunk( $session->token(), 0, 1 );
+		$second = $this->run_chunk( $session->token(), 1, 1 );
 
-		$this->assertIsArray( $first );
-		$this->assertFalse( $first['done'], 'One of three rows is not the end of the import' );
-		$this->assertSame( 1, $first['processed'] );
+		$this->assertIsArray( $first, 'A chunk with a row after it is a normal chunk' );
+		$this->assertFalse( $first['done'] );
 		$this->assert_run_error( 'woocommerce_fulfillments_import_chunk_failed', 500, $second );
 		$this->assertSame( 'unexpected_eof', $second->get_error_data()['reason'] );
+		$this->assertCount( 0, $this->fulfillments_of( $second_order ), 'The rows of a chunk that ended early are not written' );
+		$this->assertSame( 1, ImportSession::load( get_current_user_id(), $session->token() )->processed(), 'The chunk that ended early is not recorded' );
 		$this->assertFileExists( $file, 'The staged file is kept while rows are still expected' );
 		$this->assertSame( 0, did_action( 'woocommerce_fulfillments_csv_import_completed' ) );
 	}
