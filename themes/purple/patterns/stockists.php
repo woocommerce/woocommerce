@@ -33,10 +33,9 @@
 
 <!-- wp:columns -->
 <div class="wp-block-columns"><!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -45,10 +44,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -59,10 +57,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:column -->
 
 <!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -71,10 +68,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -93,10 +89,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 
 <!-- wp:columns -->
 <div class="wp-block-columns"><!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -105,10 +100,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -119,10 +113,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:column -->
 
 <!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -131,10 +124,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -155,10 +147,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 
 <!-- wp:columns -->
 <div class="wp-block-columns"><!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -167,10 +158,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -181,10 +171,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:column -->
 
 <!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -193,10 +182,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -215,10 +203,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 
 <!-- wp:columns -->
 <div class="wp-block-columns"><!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -227,10 +214,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -241,10 +227,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:column -->
 
 <!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -253,10 +238,9 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Placeholder stockist name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
-printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
+<p><strong><?php echo esc_html_x( 'Store', 'Placeholder stockist name', 'purple' ); ?></strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
