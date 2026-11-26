@@ -72,6 +72,8 @@ class ItemQuantityLimits {
 		// A callback can return anything; browsers read a non-numeric or non-positive step as 1.
 		$step = is_numeric( $step ) && (float) $step > 0 ? (float) $step : 1.0;
 
+		// A step of 1 only accepts whole numbers. It is the default step, so on a store that allows
+		// decimal quantities it is left out and the input accepts decimals too.
 		if ( abs( $step - 1.0 ) < 0.000001 && ! wc_is_stock_amount_integer() ) {
 			return null;
 		}
