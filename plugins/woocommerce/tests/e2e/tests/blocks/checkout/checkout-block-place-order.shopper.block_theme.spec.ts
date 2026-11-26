@@ -102,8 +102,8 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 			name: 'Billing address',
 		} );
 
-		expect( shippingForm.getByLabel( 'Phone' ).inputValue ).toEqual(
-			billingForm.getByLabel( 'Phone' ).inputValue
+		await expect( billingForm.getByLabel( 'Phone' ) ).toHaveValue(
+			await shippingForm.getByLabel( 'Phone' ).inputValue()
 		);
 
 		await checkoutPageObject.fillInCheckoutWithTestData();
