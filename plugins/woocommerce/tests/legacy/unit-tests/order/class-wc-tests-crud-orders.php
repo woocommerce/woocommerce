@@ -1719,6 +1719,26 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A staged payment fires its payment hook when a status listener changes the status after the write.
+	 */
+	public function test_staged_payment_complete_fires_its_hook_when_a_status_listener_changes_the_status(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid   = did_action( 'woocommerce_payment_complete' );
+		$cancel = function ( $order_id, $listened_order ) {
+			$listened_order->set_status( OrderStatus::CANCELLED );
+		};
+		add_action( 'woocommerce_order_status_processing', $cancel, 10, 2 );
+		add_action( 'woocommerce_order_status_completed', $cancel, 10, 2 );
+
+		$order->stage_payment_complete( '12345' );
+		$order->save();
+
+		$this->assertTrue( wc_get_order( $order->get_id() )->is_paid() );
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+	}
+
+	/**
 	 * @testdox update_taxes() does not write the tax items when the order write fails.
 	 */
 	public function test_update_taxes_does_not_write_tax_items_when_the_write_fails(): void {

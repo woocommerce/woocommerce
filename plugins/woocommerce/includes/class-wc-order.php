@@ -187,8 +187,9 @@ class WC_Order extends WC_Abstract_Order {
 	 * write_through(), so it runs all of them and saves right away. When that save fails, the method throws, and
 	 * the note and the action wait for the next save that writes the order with the same status or a paid one.
 	 *
-	 * A direct call has the same check: when a later status change leaves the order in a status that is not
-	 * paid, the save drops the note and the action. The save logs a throwing listener of the action and adds an
+	 * A direct call has the same check: when the save writes a status that is not paid, for example after a
+	 * later status change, the save drops the note and the action. A status listener that changes the status
+	 * after the write does not drop them. The save logs a throwing listener of the action and adds an
 	 * error note, as payment_complete() does.
 	 *
 	 * When the order status is not one that payment can complete, the order does not change, the
@@ -305,7 +306,13 @@ class WC_Order extends WC_Abstract_Order {
 			$this->defer_to_save(
 				'payment_complete',
 				function () use ( $paid_status, $add_note, $action_args ) {
-					if ( ! $this->has_status( $paid_status ) && ! $this->is_paid() ) {
+					if ( isset( $this->changes['status'] ) ) {
+						$saved_status = $this->data['status'];
+						$paid         = $saved_status === $paid_status || in_array( $saved_status, wc_get_is_paid_statuses(), true );
+					} else {
+						$paid = $this->has_status( $paid_status ) || $this->is_paid();
+					}
+					if ( ! $paid ) {
 						return;
 					}
 					$add_note();
