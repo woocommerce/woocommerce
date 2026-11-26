@@ -25,16 +25,7 @@ class AdminScreens {
 	public const FEATURE_FLAG = 'experimental-admin-screens';
 
 	/**
-	 * Register hooks.
-	 *
-	 * @internal
-	 */
-	public function __construct() {
-		add_action( 'init', array( $this, 'handle_init' ) );
-	}
-
-	/**
-	 * Load the build output in admin requests while the flag is on.
+	 * Load the build output during admin bootstrap while the feature flag is on.
 	 *
 	 * @internal
 	 *
