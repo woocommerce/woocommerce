@@ -125,6 +125,11 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	 * @param string      $expected  Expected status.
 	 */
 	public function test_serve_status( string $structure, ?string $file, string $expected ): void {
+		// Multisite never writes the file, so Plain and index.php permalinks can't work without one.
+		if ( is_multisite() && null === $file && '/%postname%/' !== $structure ) {
+			$expected = 'no_file';
+		}
+
 		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/.well-known/ucp';
 		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
 		$this->set_permalink_structure( $structure );
@@ -182,8 +187,11 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Plain and index.php permalinks are not ok once UCP is on without a file, or when the folder can't be written.
+	 * @group ms-excluded
 	 */
 	public function test_serve_status_no_file_when_the_address_cannot_be_served(): void {
+		$this->skipWithMultisite();
+
 		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
 		$this->set_permalink_structure( '' );
 		$this->assertSame( 'no_file', UcpDiscovery::serve_status() );
@@ -215,8 +223,11 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox The static file is written under plain permalinks, removed under pretty ones, and removed when UCP is turned off or WooCommerce is deactivated.
+	 * @group ms-excluded
 	 */
 	public function test_sync_file(): void {
+		$this->skipWithMultisite();
+
 		$this->set_permalink_structure( '' );
 		$this->sut->maybe_sync_file();
 		$this->assertSame( wp_json_encode( $this->sut->get_profile(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ), file_get_contents( $this->file ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
@@ -248,8 +259,11 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	 *           [false]
 	 *
 	 * @param bool $owned Whether the existing file carries the WooCommerce marker.
+	 * @group ms-excluded
 	 */
 	public function test_sync_file_only_touches_owned_file( bool $owned ): void {
+		$this->skipWithMultisite();
+
 		$stale = (string) wp_json_encode( array( 'links' => array( array( 'rel' => $owned ? UcpDiscovery::LINK_REL : 'other' ) ) ) );
 		wp_mkdir_p( dirname( $this->file ) );
 		// phpcs:disable WordPress.WP.AlternativeFunctions

@@ -961,8 +961,11 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Auto-update data reports off for a plugin absent from the auto_update_plugins option.
+	 * @group ms-excluded
 	 */
 	public function test_plugin_auto_update_data_reports_off_by_default(): void {
+		$this->skipWithMultisite();
+
 		$this->prepare_auto_update_env();
 
 		$data = WC_Helper::get_plugin_auto_update_data( 'test-woo-extension/test-woo-extension.php' );
@@ -1034,8 +1037,11 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Enabling auto-updates writes the plugin into the auto_update_plugins option.
+	 * @group ms-excluded
 	 */
 	public function test_set_subscription_auto_update_enables(): void {
+		$this->skipWithMultisite();
+
 		$this->prepare_auto_update_env();
 		$this->set_subscription_for_local_plugin();
 
@@ -1049,8 +1055,11 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Disabling auto-updates removes the plugin from the auto_update_plugins option.
+	 * @group ms-excluded
 	 */
 	public function test_set_subscription_auto_update_disables(): void {
+		$this->skipWithMultisite();
+
 		$this->prepare_auto_update_env();
 		$this->set_subscription_for_local_plugin();
 		update_site_option( 'auto_update_plugins', array( 'test-woo-extension/test-woo-extension.php', 'other/other.php' ) );
@@ -1075,8 +1084,11 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Auto-updates can be set for a product distributed through WordPress.org.
+	 * @group ms-excluded
 	 */
 	public function test_set_subscription_auto_update_handles_a_wporg_product(): void {
+		$this->skipWithMultisite();
+
 		$this->prepare_auto_update_env();
 		$this->set_subscription_for_local_plugin();
 
@@ -1206,8 +1218,11 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Auto-update data for a theme reads the auto_update_themes option.
+	 * @group ms-excluded
 	 */
 	public function test_theme_auto_update_data_reads_the_theme_option(): void {
+		$this->skipWithMultisite();
+
 		$this->prepare_auto_update_env();
 		$stylesheet = get_stylesheet();
 
@@ -1296,8 +1311,11 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Enabling auto-updates for a theme writes the stylesheet into auto_update_themes.
+	 * @group ms-excluded
 	 */
 	public function test_set_subscription_auto_update_enables_a_theme(): void {
+		$this->skipWithMultisite();
+
 		$this->prepare_auto_update_env();
 		$stylesheet = get_stylesheet();
 		$this->set_subscription_for_local_theme( $stylesheet );
@@ -1313,8 +1331,11 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Disabling auto-updates for a theme removes the stylesheet from auto_update_themes.
+	 * @group ms-excluded
 	 */
 	public function test_set_subscription_auto_update_disables_a_theme(): void {
+		$this->skipWithMultisite();
+
 		$this->prepare_auto_update_env();
 		$stylesheet = get_stylesheet();
 		$this->set_subscription_for_local_theme( $stylesheet );

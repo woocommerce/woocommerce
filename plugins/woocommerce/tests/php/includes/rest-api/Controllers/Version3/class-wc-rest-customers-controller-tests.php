@@ -81,8 +81,11 @@ class WC_REST_Customers_Controller_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * @testDox Test updating customers.
+	 * @group ms-excluded
 	 */
 	public function test_customer_update_permissions(): void {
+		$this->skipWithMultisite();
+
 		$api_request = new WP_REST_Request( 'PUT', '/wc/v3/customers/' );
 		$api_request->set_param( 'id', $this->customer_id );
 
