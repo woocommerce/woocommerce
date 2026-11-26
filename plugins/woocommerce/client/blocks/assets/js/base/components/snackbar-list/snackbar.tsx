@@ -13,12 +13,15 @@ import { SNACKBAR_TIMEOUT } from './constants';
 export interface SnackbarProps extends NoticeBannerProps {
 	// A ref to the list that contains the snackbar.
 	listRef?: React.MutableRefObject< HTMLDivElement | null >;
+	// Called before `onRemove` when the shopper dismisses the snackbar.
+	onDismiss?: () => void;
 }
 
 export const Snackbar = ( {
 	onRemove = () => void 0,
 	children,
 	listRef,
+	onDismiss,
 	className,
 	...notice
 }: SnackbarProps ) => {
@@ -43,6 +46,7 @@ export const Snackbar = ( {
 				if ( listRef && listRef.current ) {
 					listRef.current.focus();
 				}
+				onDismiss?.();
 				onRemove();
 			} }
 		>

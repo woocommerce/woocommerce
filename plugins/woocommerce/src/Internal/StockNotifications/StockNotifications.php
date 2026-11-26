@@ -120,6 +120,7 @@ class StockNotifications implements RegisterHooksInterface {
 		$container->get( PrivacyEraser::class );
 		$container->get( DataRetentionController::class );
 		$container->get( Telemetry::class );
+		$container->get( StockNotificationsRestController::class )->register();
 
 		$container->get( NotificationManagementService::class );
 		$container->get( MyAccountEndpoint::class );

@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
  * One pass over the published catalog for the readiness checks.
  *
  * Walks published simple and variable products in batches, most recently
- * modified first, tests each against every rule once and tallies product
+ * modified first (best sellers first on a catalog over PRODUCT_LIMIT), tests each against every rule once and tallies product
  * statuses per channel. Stops after PRODUCT_LIMIT products so the scan stays
  * inside one request. Products set to Hidden are the merchant's choice and
  * agents can't buy other product types through UCP yet, so both are counted,
@@ -25,6 +25,12 @@ class ProductScan {
 	public const BATCH_SIZE = 200;
 
 	public const PRODUCT_LIMIT = 5000;
+
+	/**
+	 * Sales pages read when earlier pages are products the scan does not check.
+	 * Each page repeats the aggregation, so a catalog of other product types stays bounded.
+	 */
+	private const SELLER_PAGES = 10;
 
 	public const SUPPORTED_TYPES = array( 'simple', 'variable' );
 
@@ -123,6 +129,20 @@ class ProductScan {
 	private bool $truncated = false;
 
 	/**
+	 * Whether start() put best sellers ahead of the newest changes.
+	 *
+	 * @var bool
+	 */
+	private bool $best_sellers_first = false;
+
+	/**
+	 * How many of the products start() returns are bestsellers it checked.
+	 *
+	 * @var int
+	 */
+	private int $bestsellers_count = 0;
+
+	/**
 	 * Called with each product id and its failures during test(). Cleared when that batch ends.
 	 *
 	 * @var callable|null
@@ -164,6 +184,22 @@ class ProductScan {
 	 * @throws \RuntimeException When the product list query fails.
 	 */
 	public function start(): array {
+		return $this->start_best_sellers_first( array() );
+	}
+
+	/**
+	 * Same list as start(), with bestsellers ahead of the newest changes when the catalog is over the limit.
+	 * A saved product is checked again on save; one nobody edits would never be.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array<int, int> $best_sellers       Product ids with the most sales first, or none to go by last change only.
+	 * @param callable|null   $more_best_sellers Next page `(int $offset, int $limit): array<int, int>`, when that list may continue.
+	 * @return array<int, int> Product ids.
+	 *
+	 * @throws \RuntimeException When the product list query fails.
+	 */
+	public function start_best_sellers_first( array $best_sellers, ?callable $more_best_sellers = null ): array {
 		$this->results             = array();
 		$this->products            = 0;
 		$this->statuses            = array();
@@ -171,41 +207,135 @@ class ProductScan {
 		$this->available           = self::count_published( self::count_query( self::COUNT_AVAILABLE ) );
 		$this->unsupported_types   = self::count_published( self::count_query( self::COUNT_UNSUPPORTED ) );
 
-		global $wpdb;
-		// An ids query returns before posts_results runs, so read the error the query left instead.
-		$wpdb->last_error = '';
-		$query            = new \WP_Query(
+		// One more than the limit, to tell a catalog cut short from one that fits.
+		$product_ids              = self::list_products(
 			array(
-				'post_type'      => 'product',
-				'post_status'    => 'publish',
-				// One more than the limit, to tell a catalog cut short from one that fits.
 				'posts_per_page' => self::PRODUCT_LIMIT + 1,
-				'fields'         => 'ids',
 				'orderby'        => array(
 					'modified' => 'DESC',
 					'ID'       => 'DESC',
 				),
-				'no_found_rows'  => true,
-				// A failed query would be cached as an empty list, and the next scan would read it without an error.
-				'cache_results'  => false,
-				'tax_query'      => self::count_query( self::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			)
 		);
-		$query_failed = '' !== self::db_error();
+		$this->truncated          = count( $product_ids ) > self::PRODUCT_LIMIT;
+		$this->best_sellers_first = false;
+		$this->bestsellers_count  = 0;
+		$eligible                 = $this->truncated ? $this->eligible_sellers( $best_sellers, $more_best_sellers ) : array();
+		if ( array() !== $eligible ) {
+			$this->best_sellers_first = true;
+			$this->bestsellers_count  = count( $eligible );
+			$product_ids              = array_values( array_unique( array_merge( $eligible, $product_ids ) ) );
+		}
+		return array_slice( $product_ids, 0, self::PRODUCT_LIMIT );
+	}
 
-		$product_ids = array_map(
+	/**
+	 * Bestsellers the scan checks, most sales first, reading further pages while earlier ones
+	 * are hidden, unpublished or another type. Stops at PRODUCT_LIMIT.
+	 *
+	 * @param array<int, int> $best_sellers       First page, most sales first.
+	 * @param callable|null   $more_best_sellers Next page, or null when $best_sellers is the whole list.
+	 * @return array<int, int>
+	 *
+	 * @throws \RuntimeException When a product list query fails.
+	 */
+	private function eligible_sellers( array $best_sellers, ?callable $more_best_sellers ): array {
+		$eligible = array();
+		$seen     = array();
+		$page     = self::positive_ids( $best_sellers );
+		$offset   = 0;
+		$pages    = 0;
+		$room     = self::PRODUCT_LIMIT;
+		while ( array() !== $page && $pages < self::SELLER_PAGES && $room > 0 ) {
+			++$pages;
+			$page    = array_slice( $page, 0, self::PRODUCT_LIMIT );
+			$offset += count( $page );
+			foreach ( self::eligible_ids( $page ) as $id ) {
+				if ( isset( $seen[ $id ] ) ) {
+					continue;
+				}
+				$seen[ $id ] = true;
+				$eligible[]  = $id;
+				--$room;
+				if ( 0 === $room ) {
+					break;
+				}
+			}
+			if ( 0 === $room || count( $page ) < self::PRODUCT_LIMIT || ! is_callable( $more_best_sellers ) ) {
+				break;
+			}
+			$next = $more_best_sellers( $offset, self::PRODUCT_LIMIT );
+			$page = self::positive_ids( is_array( $next ) ? $next : array() );
+		}
+		return $eligible;
+	}
+
+	/**
+	 * Ids from a sales page that the scan checks, in that page's order.
+	 *
+	 * @param array<int, int> $ids Product ids, most sales first.
+	 * @return array<int, int>
+	 *
+	 * @throws \RuntimeException When the product list query fails.
+	 */
+	private static function eligible_ids( array $ids ): array {
+		if ( array() === $ids ) {
+			return array();
+		}
+		// The same query as the catalog list, so a hidden, unpublished or other type is left out.
+		return self::list_products(
+			array(
+				'posts_per_page' => count( $ids ),
+				'post__in'       => $ids,
+				'orderby'        => 'post__in',
+			)
+		);
+	}
+
+	/**
+	 * Product ids, dropping empties. A sales row can name a product id of 0.
+	 *
+	 * @param array<mixed> $ids Ids from the sales query or its next page.
+	 * @return array<int, int>
+	 */
+	private static function positive_ids( array $ids ): array {
+		return array_values( array_filter( array_map( 'intval', $ids ) ) );
+	}
+
+	/**
+	 * Ids of published products the scan checks, for start().
+	 *
+	 * @param array<string, mixed> $args Which of them, and in what order.
+	 * @return array<int, int>
+	 *
+	 * @throws \RuntimeException When the query fails.
+	 */
+	private static function list_products( array $args ): array {
+		global $wpdb;
+		// An ids query returns before posts_results runs, so read the error the query left instead.
+		$wpdb->last_error = '';
+		$query            = new \WP_Query(
+			$args + array(
+				'post_type'     => 'product',
+				'post_status'   => 'publish',
+				'fields'        => 'ids',
+				'no_found_rows' => true,
+				// A failed query would be cached as an empty list, and the next scan would read it without an error.
+				'cache_results' => false,
+				'tax_query'     => self::count_query( self::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			)
+		);
+		// Only a database error is a failed list, whatever the counts say: they read 0 when their own queries fail.
+		// An empty success publishes a scan of what is left.
+		if ( '' !== self::db_error() ) {
+			throw new \RuntimeException( 'Agent readiness could not list products to scan.' );
+		}
+		return array_map(
 			static function ( $post ): int {
 				return $post instanceof \WP_Post ? $post->ID : (int) $post;
 			},
 			is_array( $query->posts ) ? $query->posts : array()
 		);
-		// Only a database error is a failed list, whatever the counts say: they read 0 when their own queries fail.
-		// An empty success publishes a scan of what is left.
-		if ( $query_failed ) {
-			throw new \RuntimeException( 'Agent readiness could not list products to scan.' );
-		}
-		$this->truncated = count( $product_ids ) > self::PRODUCT_LIMIT;
-		return array_slice( $product_ids, 0, self::PRODUCT_LIMIT );
 	}
 
 	/**
@@ -332,6 +462,23 @@ class ProductScan {
 			);
 		}
 		return array( self::supported_type_query(), self::catalog_query( self::COUNT_HIDDEN === $count ) );
+	}
+
+	/**
+	 * The catalog counts as they stand now, by report key, so a count matches the Products list it links to.
+	 * Every published product is in one of the three, so the available ones are the rest: counting them
+	 * with their own query takes seconds on a large catalog.
+	 *
+	 * @return array{available:int,hidden_from_catalog:int,unsupported_types:int}
+	 */
+	public static function catalog_counts(): array {
+		$hidden      = self::count_published( self::count_query( self::COUNT_HIDDEN ) );
+		$unsupported = self::count_published( self::count_query( self::COUNT_UNSUPPORTED ) );
+		return array(
+			'available'           => max( 0, (int) wp_count_posts( 'product' )->publish - $hidden - $unsupported ),
+			'hidden_from_catalog' => $hidden,
+			'unsupported_types'   => $unsupported,
+		);
 	}
 
 	/**
@@ -551,6 +698,25 @@ class ProductScan {
 	 */
 	public function truncated(): bool {
 		return $this->truncated;
+	}
+
+	/**
+	 * Whether start() put best sellers ahead of the newest changes: only on a catalog over
+	 * PRODUCT_LIMIT, and only when at least one best seller is a product the scan checks.
+	 *
+	 * @since 11.4.0
+	 */
+	public function best_sellers_first(): bool {
+		return $this->best_sellers_first;
+	}
+
+	/**
+	 * How many leading products are bestsellers the scan checks. PRODUCT_LIMIT when they fill the list.
+	 *
+	 * @since 11.4.0
+	 */
+	public function bestsellers_count(): int {
+		return $this->bestsellers_count;
 	}
 
 	/**

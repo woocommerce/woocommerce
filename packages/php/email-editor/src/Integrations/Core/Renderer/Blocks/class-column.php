@@ -121,7 +121,7 @@ class Column extends Abstract_Block_Renderer {
 		$wrapper_cell_attrs = array(
 			'class' => $wrapper_classname,
 			'style' => $wrapper_styles['css'],
-			'width' => $this->get_width_attribute_value( $block_attributes['width'] ),
+			'width' => $this->get_width_attribute_value( $parsed_block['email_attrs']['column-width'] ?? $block_attributes['width'] ),
 		);
 
 		return Table_Wrapper_Helper::render_table_cell( $inner_table, $wrapper_cell_attrs );

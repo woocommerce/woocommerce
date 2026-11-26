@@ -329,7 +329,7 @@ class ProductsList {
 		}
 		printf(
 			'<div class="notice notice-info"><p>%s <a href="%s">%s</a></p></div>',
-			esc_html__( 'Showing products from AI shopping health.', 'woocommerce' ),
+			esc_html__( 'Showing only products from AI shopping health.', 'woocommerce' ),
 			esc_url( admin_url( 'edit.php?post_type=product' ) ),
 			esc_html__( 'Show all products', 'woocommerce' )
 		);

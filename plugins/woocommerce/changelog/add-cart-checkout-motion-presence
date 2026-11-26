@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Animate the address suggestions in Checkout as they open and close, and keep them open when the first results appear.

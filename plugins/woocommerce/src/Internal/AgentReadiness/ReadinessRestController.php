@@ -138,6 +138,24 @@ class ReadinessRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
+			'/agent-readiness/daily-checks',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'set_daily_checks' ),
+					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'manage_woocommerce' ),
+					'args'                => array(
+						'enabled' => array(
+							'description' => __( 'Whether the store is checked every day.', 'woocommerce' ),
+							'type'        => 'boolean',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+		register_rest_route(
+			$this->route_namespace,
 			'/agent-readiness/ucp',
 			array(
 				array(
@@ -210,6 +228,18 @@ class ReadinessRestController extends RestApiControllerBase {
 	protected function queue_scan( WP_REST_Request $request ): \WP_REST_Response {
 		$this->scheduled_scan->queue();
 		return new \WP_REST_Response( $this->get_status( $request ), 202 );
+	}
+
+	/**
+	 * Turn the daily check on or off. Off, checks only run when asked for.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return array{enabled:bool}
+	 */
+	protected function set_daily_checks( WP_REST_Request $request ): array {
+		$this->scheduled_scan->set_daily_enabled( (bool) $request->get_param( 'enabled' ) );
+		return array( 'enabled' => ScheduledScan::daily_enabled() );
 	}
 
 	/**
@@ -295,6 +325,11 @@ class ReadinessRestController extends RestApiControllerBase {
 			),
 			'checked'      => array(
 				'description' => __( 'Whether the store has been checked at least once.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => array( 'view' ),
+			),
+			'daily_checks' => array(
+				'description' => __( 'Whether the store is checked every day.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => array( 'view' ),
 			),

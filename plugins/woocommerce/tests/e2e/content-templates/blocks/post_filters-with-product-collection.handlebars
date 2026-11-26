@@ -30,7 +30,7 @@
 			<h3 class='wp-block-heading'>Filter by stock status</h3>
 			<!-- /wp:heading -->
 
-			<!-- wp:woocommerce/stock-filter {"heading":"","lock":{"remove":true}} -->
+			<!-- wp:woocommerce/stock-filter {"heading":"",{{#if showFilterButton}}"showFilterButton":true,{{/if}}"lock":{"remove":true}} -->
 			<div class="wp-block-woocommerce-stock-filter is-loading"></div>
 			<!-- /wp:woocommerce/stock-filter -->
 		</div>
@@ -42,7 +42,7 @@
 			<h3 class='wp-block-heading'>Filter by rating</h3>
 			<!-- /wp:heading -->
 
-			<!-- wp:woocommerce/rating-filter {"lock":{"remove":true}} -->
+			<!-- wp:woocommerce/rating-filter { {{#if showFilterButton}}"showFilterButton":true,{{/if}}"lock":{"remove":true}} -->
 			<div class="wp-block-woocommerce-rating-filter is-loading"></div>
 			<!-- /wp:woocommerce/rating-filter -->
 		</div>
