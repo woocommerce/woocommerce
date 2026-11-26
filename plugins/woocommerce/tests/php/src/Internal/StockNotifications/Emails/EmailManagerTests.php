@@ -455,7 +455,7 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 			fn( $url ) => html_entity_decode( $url, ENT_QUOTES ),
 			$matches[0]
 		);
-		return array_values( array_unique( array_filter( $urls, fn( $url ) => 1 === preg_match( $pattern, $url ) ) ) );
+		return array_values( array_filter( $urls, fn( $url ) => 1 === preg_match( $pattern, $url ) ) );
 	}
 
 	/**
