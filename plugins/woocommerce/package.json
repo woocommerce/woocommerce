@@ -232,7 +232,10 @@
 					"name": "PHP: 7.4 WP: latest - 1",
 					"testType": "unit:php",
 					"command": "test:php:env",
-					"shardingArguments": [],
+					"shardingArguments": [
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main-includes",
+						"--testsuite=wc-phpunit-main-other"
+					],
 					"onlyForDependencies": [
 						"@woocommerce/email-editor-config"
 					],
