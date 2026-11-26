@@ -760,8 +760,10 @@ final class Contracts {
 	public static function list_for_address_email( string $email, int $limit = 20, int $offset = 0, array $args = array() ): array {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::LIST_FOR_ADDRESS_EMAIL_KEYS );
 
+		// The email is trimmed before matching: the default collations ignore trailing spaces but not leading ones,
+		// and a blank value would match stored empty emails, so it is refused as required.
 		$validator      = new ArgumentValidator();
-		$email          = $validator->get_bounded_string( 'email', $email, self::ADDRESS_EMAIL_MAX_LENGTH );
+		$email          = $validator->get_bounded_string( 'email', trim( $email ), self::ADDRESS_EMAIL_MAX_LENGTH );
 		$limit          = (int) $validator->get_non_negative_int( 'limit', $limit );
 		$offset         = (int) $validator->get_non_negative_int( 'offset', $offset );
 		$extension_slug = (string) $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] ?? null );

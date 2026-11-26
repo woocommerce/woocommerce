@@ -434,7 +434,7 @@ class ContractHistoryTest extends EngineIntegrationTestCase {
 		);
 
 		$this->assertSame( 0, $deleted );
-		$this->assertCount( 2, $statements, 'The delete, then one lock check read.' );
+		$this->assertCount( 2, $statements, 'The delete, then one lock check read; the fence runs no query because the lock was just taken.' );
 		$this->assertMatchesRegularExpression( '/^SELECT \( lock_token = .* \) AS held, .* AS live, lock_operation FROM \S*contracts WHERE id = ' . $this->id . '$/', $statements[1] );
 	}
 
