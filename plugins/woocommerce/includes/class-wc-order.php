@@ -408,7 +408,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int order ID
 	 */
 	public function save() {
-		$deferred_actions = $this->take_deferred_actions( true );
+		$deferred_actions = $this->take_after_save_actions();
 
 		$this->maybe_set_user_billing_email();
 		parent::save();
