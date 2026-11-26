@@ -3379,7 +3379,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$after_calculate_totals = static function ( $and_taxes, $order, $staged ) {
 			/**
 			 * Fires after the order totals are calculated. A direct stage_totals() call defers it to the next save(),
-			 * which fires it right before the write.
+			 * which fires it right before the write. That call checks the listeners when it runs, so a listener added
+			 * after it and before the save is not checked.
 			 *
 			 * @param bool              $and_taxes Whether the taxes were calculated too.
 			 * @param WC_Abstract_Order $order     Order object.
