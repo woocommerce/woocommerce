@@ -1770,13 +1770,36 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An item of a refund that a stage method changes passes $staged as true to its hooks.
+	 */
+	public function test_an_item_of_a_staged_refund_passes_staged_to_its_hooks(): void {
+		$this->enable_cogs_feature();
+		$refund = new WC_Order_Refund();
+		$this->add_product_with_cogs_to_order( $refund, 12.34, 1 );
+		$staged = array();
+		add_filter(
+			'woocommerce_calculated_order_item_cogs_value',
+			static function ( $value, $item, $is_staged ) use ( &$staged ) {
+				$staged[] = $is_staged;
+				return $value;
+			},
+			10,
+			3
+		);
+
+		$refund->stage_totals( false );
+
+		$this->assertSame( array( true ), $staged );
+	}
+
+	/**
 	 * Add a product order item with a given Cost of Goods Sold to an existing order.
 	 *
-	 * @param WC_Order $order The target order.
-	 * @param float    $cogs_value The COGS value of the product.
-	 * @param int      $quantity The quantity of the order item.
+	 * @param WC_Abstract_Order $order The target order.
+	 * @param float             $cogs_value The COGS value of the product.
+	 * @param int               $quantity The quantity of the order item.
 	 */
-	private function add_product_with_cogs_to_order( WC_Order $order, float $cogs_value, int $quantity ) {
+	private function add_product_with_cogs_to_order( WC_Abstract_Order $order, float $cogs_value, int $quantity ) {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_cogs_value( $cogs_value );
 		$product->save();

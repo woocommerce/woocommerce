@@ -91,6 +91,13 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	private $order;
 
 	/**
+	 * The order or refund that holds the item, for is_staged_unsaved(). Unlike $order, it can hold a refund.
+	 *
+	 * @var null|\WeakReference<\WC_Abstract_Order>
+	 */
+	private $holder;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item object.
@@ -216,7 +223,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return bool
 	 */
 	protected function is_staged_unsaved(): bool {
-		$order = $this->order ? $this->order->get() : null;
+		$order = $this->holder ? $this->holder->get() : null;
 		return null !== $order && $order->is_staged_unsaved();
 	}
 
@@ -253,6 +260,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$this->error( 'order_item_invalid_order', __( 'Invalid order', 'woocommerce' ) );
 		}
 		$this->set_order_id( $order->get_id() );
+		$this->holder = \WeakReference::create( $order );
 		// Don't inject the refund object: get_order() declares a WC_Order return type; WC_Order_Refund would violate that contract.
 		if ( $order instanceof \WC_Order ) {
 			$this->order = \WeakReference::create( $order );
