@@ -303,15 +303,10 @@ class WC_Order extends WC_Abstract_Order {
 		$save_error  = $this->writing_through ? $this->get_last_save_error() : null;
 		if ( null !== $save_error || ! $this->writing_through ) {
 			$paid_status = $this->get_status();
+			// save() replaces the paid status with whether the written status is paid.
 			$this->defer_to_save(
 				'payment_complete',
-				function () use ( $paid_status, $add_note, $action_args ) {
-					if ( isset( $this->changes['status'] ) ) {
-						$saved_status = $this->data['status'];
-						$paid         = $saved_status === $paid_status || in_array( $saved_status, wc_get_is_paid_statuses(), true );
-					} else {
-						$paid = $this->has_status( $paid_status ) || $this->is_paid();
-					}
+				function ( $paid ) use ( $add_note, $action_args ) {
 					if ( ! $paid ) {
 						return;
 					}
@@ -329,7 +324,7 @@ class WC_Order extends WC_Abstract_Order {
 						$this->add_order_note( __( 'Payment complete event failed.', 'woocommerce' ) . ' ' . $e->getMessage(), 0, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
 					}
 				},
-				array(),
+				array( $paid_status ),
 				true
 			);
 			if ( null !== $save_error ) {
@@ -424,6 +419,12 @@ class WC_Order extends WC_Abstract_Order {
 		$this->maybe_set_user_billing_email();
 		parent::save();
 		if ( null === $this->get_last_save_error() ) {
+			// Decide a staged payment from the written status, before the status listeners can change it.
+			if ( isset( $deferred_actions['payment_complete'] ) ) {
+				$paid_status = $deferred_actions['payment_complete']['args'][0];
+
+				$deferred_actions['payment_complete']['args'] = array( $this->has_status( $paid_status ) || $this->is_paid() );
+			}
 			$this->status_transition();
 		}
 

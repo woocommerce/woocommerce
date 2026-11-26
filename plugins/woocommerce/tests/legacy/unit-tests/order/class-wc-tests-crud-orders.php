@@ -1739,6 +1739,26 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A staged payment applies the is_paid filter to the written status when a status listener changes the status after the write.
+	 */
+	public function test_staged_payment_complete_applies_the_is_paid_filter_to_the_written_status(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid   = did_action( 'woocommerce_payment_complete' );
+		$cancel = function ( $order_id, $listened_order ) {
+			$listened_order->set_status( OrderStatus::CANCELLED );
+		};
+		add_filter( 'woocommerce_order_is_paid', '__return_true' );
+		add_action( 'woocommerce_order_status_on-hold', $cancel, 10, 2 );
+
+		$order->stage_payment_complete( '12345' );
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+	}
+
+	/**
 	 * @testdox update_taxes() does not write the tax items when the order write fails.
 	 */
 	public function test_update_taxes_does_not_write_tax_items_when_the_write_fails(): void {
