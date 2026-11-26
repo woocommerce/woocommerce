@@ -464,6 +464,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Leave a callback to run after the next save() writes the order, when the order is marked as staged. Otherwise
+	 * leave nothing and return false, so the caller runs the callback itself. A change that is refused is never
+	 * saved, so its callback never runs.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 * @param string   $key      Name of the entry. An entry with the same key replaces the earlier one.
+	 * @param callable $callback Callback to run after the write.
+	 * @return bool Whether the callback waits for the save.
+	 */
+	public function defer_to_save_when_staged( string $key, callable $callback ): bool {
+		if ( ! $this->is_staged_unsaved() ) {
+			return false;
+		}
+
+		$this->defer_to_save( $key, $callback, array(), true );
+
+		return true;
+	}
+
+	/**
 	 * Take the deferred callbacks and clear the list, so that each one runs for one save only. When the write
 	 * fails, run_deferred_actions() puts the after-save callbacks back for the next save.
 	 *

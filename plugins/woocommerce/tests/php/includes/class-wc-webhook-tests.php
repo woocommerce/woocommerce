@@ -1644,18 +1644,21 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A webhook on a hook that passes $staged does not refuse a direct stage call, and still processes the hook.
+	 * @testdox A webhook on a hook that passes $staged does not refuse a staged change, and processes the hook once the order is saved.
 	 */
 	public function test_a_webhook_on_a_staged_hook_does_not_refuse_a_staged_change(): void {
 		$sut = $this->create_active_webhook( 'action.woocommerce_order_before_calculate_totals' );
 		$sut->save();
 		$sut->enqueue();
-		$order = WC_Helper_Order::create_order();
-
-		$order->stage_totals();
-
+		$order     = WC_Helper_Order::create_order();
 		$processed = new ReflectionProperty( WC_Webhook::class, 'processed' );
 		$processed->setAccessible( true );
+
+		$order->mark_staged();
+		$order->stage_totals();
+		$this->assertSame( array(), $processed->getValue( $sut ), 'The webhook waits for the save' );
+
+		$order->save();
 		$this->assertSame( array( true ), $processed->getValue( $sut ) );
 	}
 }
