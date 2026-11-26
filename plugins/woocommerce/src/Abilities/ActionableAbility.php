@@ -216,6 +216,12 @@ abstract class ActionableAbility extends Ability {
 			$changed = $this->change( $subject, $input );
 		} catch ( \WC_Data_Exception $e ) {
 			$changed = new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+		} catch ( \Exception $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Ability "%s" failed during change: %s', $this->get_name(), $e->getMessage() ),
+				array( 'source' => 'woocommerce-abilities' )
+			);
+			return self::save_failed();
 		}
 		$core_refused = is_wp_error( $changed );
 		if ( $core_refused ) {
