@@ -784,33 +784,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * Send a test ping to the delivery URL, sent when the webhook is first created.
 	 *
 	 * @since  2.2.0
-	 * @uses   self::stage_delivery_ping()
 	 * @return bool|WP_Error
 	 */
 	public function deliver_ping() {
-		$result = $this->write_through(
-			function () {
-				return $this->stage_delivery_ping();
-			}
-		);
-
-		if ( true === $result ) {
-			$this->save();
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Send a test ping to the delivery URL and, when it succeeds, clear the pending delivery flag in memory.
-	 * The next save() writes it. deliver_ping() calls this method, then save().
-	 *
-	 * @since  11.4.0
-	 * @return bool|WP_Error True when the ping succeeded, an error otherwise.
-	 */
-	public function stage_delivery_ping() {
-		$this->refuse_unstaged_override( 'deliver_ping', 'stage_delivery_ping' );
-
 		$args = array(
 			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', Constants::get_constant( 'WC_VERSION' ), $GLOBALS['wp_version'] ),
 			'body'       => 'webhook_id=' . $this->get_id(),
@@ -841,6 +817,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		}
 
 		$this->set_pending_delivery( false );
+		$this->save();
 
 		return true;
 	}
