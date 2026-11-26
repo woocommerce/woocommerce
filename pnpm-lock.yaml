@@ -804,9 +804,6 @@ importers:
       clsx:
         specifier: 2.1.x
         version: 2.1.1
-      core-js:
-        specifier: ^3.34.0
-        version: 3.49.0
       d3-axis:
         specifier: ^1.0.12
         version: 1.0.12
@@ -861,6 +858,9 @@ importers:
       react-window:
         specifier: ^1.8.11
         version: 1.8.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      uuid:
+        specifier: ^11.1.1
+        version: 11.1.1
     devDependencies:
       '@babel/core':
         specifier: catalog:tooling
@@ -904,9 +904,6 @@ importers:
       '@types/testing-library__jest-dom':
         specifier: ^5.14.9
         version: 5.14.9
-      '@types/uuid':
-        specifier: ^8.3.4
-        version: 8.3.4
       '@types/wordpress__viewport':
         specifier: catalog:wp-min
         version: 5.5.3(react@18.3.1)
@@ -976,9 +973,6 @@ importers:
       typescript:
         specifier: catalog:tooling
         version: 5.7.3
-      uuid:
-        specifier: ^11.1.1
-        version: 11.1.1
       webpack:
         specifier: catalog:tooling
         version: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
@@ -993,9 +987,6 @@ importers:
       '@types/node':
         specifier: ^24.1.0
         version: 24.12.2
-      browser-filesaver:
-        specifier: ^1.1.1
-        version: 1.1.1
     devDependencies:
       '@babel/core':
         specifier: catalog:tooling
@@ -9236,9 +9227,6 @@ packages:
   '@types/uglify-js@3.17.5':
     resolution: {integrity: sha512-TU+fZFBTBcXj/GpDpDaBmgWk/gn96kMZ+uocaFUlV2f8a6WdMzzI44QBCmGcCiYR0Y6ZlNRiyUyKKt5nl/lbzQ==}
 
-  '@types/uuid@8.3.4':
-    resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
-
   '@types/webpack-sources@3.2.3':
     resolution: {integrity: sha512-4nZOdMwSPHZ4pTEZzSp0AsTM4K7Qmu40UKW4tJDiOVs20UzYF9l+qUe4s0ftfN0pin06n+5cWWDJXH+sbhAiDw==}
 
@@ -12189,9 +12177,6 @@ packages:
 
   brcast@2.0.2:
     resolution: {integrity: sha512-Tfn5JSE7hrUlFcOoaLzVvkbgIemIorMIyoMr3TgvszWW7jFt2C9PdeMLtysYD9RU0MmU17b69+XJG1eRY2OBRg==}
-
-  browser-filesaver@1.1.1:
-    resolution: {integrity: sha512-UI4ps3bE/YXvGKlL7BoITvw8bE/SOt7YnvZeCyME7votTLxsDQ0ES0lvQdEWZMvO9aF5/66h+a3PGWn1KOblBA==}
 
   browserify-zlib@0.1.4:
     resolution: {integrity: sha512-19OEpq7vWgsH6WkvkBJQDFvJS1uPcbFOQ4v9CU839dO+ZZXUZO6XpE6hNCqvlIIj+4fZvRiJ6DsAQ382GwiyTQ==}
@@ -26959,8 +26944,6 @@ snapshots:
       source-map: 0.6.1
     optional: true
 
-  '@types/uuid@8.3.4': {}
-
   '@types/webpack-sources@3.2.3':
     dependencies:
       '@types/node': 24.12.2
@@ -34594,8 +34577,6 @@ snapshots:
       fill-range: 7.1.1
 
   brcast@2.0.2: {}
-
-  browser-filesaver@1.1.1: {}
 
   browserify-zlib@0.1.4:
     dependencies:
