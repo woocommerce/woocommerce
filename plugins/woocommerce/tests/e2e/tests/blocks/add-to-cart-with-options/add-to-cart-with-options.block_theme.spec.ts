@@ -90,6 +90,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await page.goto( productUrl );
 			const finish = page.getByLabel( 'Finish', { exact: true } );
 
+			await expect( unavailableSku ).toHaveCount( 0 );
 			await expect( skuBlock ).toBeHidden();
 			await finish.selectOption( { label: 'Matte' } );
 			await expect( skuBlock ).toBeVisible();
@@ -371,6 +372,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await page.goto( '/product/hoodie/' );
+		await expect(
+			page.locator( '.wc-block-components-product-sku__fallback' )
+		).toHaveCount( 0 );
 
 		await test.step( 'increase and reduce quantity buttons work even when no variation is selected', async () => {
 			const increaseQuantityButton = page.getByLabel(

@@ -72,25 +72,24 @@ class ProductSKU extends AbstractBlock {
 			return '';
 		}
 
-		$hide_when_unavailable  = '' === $product_sku && ( $attributes['hideWhenUnavailable'] ?? true );
 		$interactive_attributes = '';
 		$sku_fallback           = '';
 
 		if ( $is_interactive ) {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
 			$interactive_attributes = 'data-wp-interactive="woocommerce/products" data-wp-text="state.productInContext.sku"';
-
-			if ( ! $hide_when_unavailable ) {
-				$sku_fallback = sprintf(
-					'<span class="wc-block-components-product-sku__fallback">%s</span>',
-					'' === $product_sku ? esc_html__( 'N/A', 'woocommerce' ) : esc_html( $product_sku )
-				);
-			}
 		}
 
 		$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-		if ( $hide_when_unavailable ) {
-			$styles_and_classes['classes'] .= ' wc-block-components-product-sku--hide-when-unavailable';
+		if ( '' === $product_sku ) {
+			if ( $attributes['hideWhenUnavailable'] ?? true ) {
+				$styles_and_classes['classes'] .= ' wc-block-components-product-sku--hide-when-unavailable';
+			} else {
+				$sku_fallback = sprintf(
+					'<span class="wc-block-components-product-sku__fallback">%s</span>',
+					esc_html__( 'N/A', 'woocommerce' )
+				);
+			}
 		}
 
 		$prefix = isset( $attributes['prefix'] ) ? wp_kses_post( ( $attributes['prefix'] ) ) : __( 'SKU: ', 'woocommerce' );
