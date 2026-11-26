@@ -1166,6 +1166,38 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: a manual status change staged on a new order fires woocommerce_order_edit_status once, after the order is created and before the status transition hooks, with the new ID.
+	 */
+	public function test_edit_status_action_gets_the_id_of_a_new_staged_order(): void {
+		$events = array();
+		add_action(
+			'woocommerce_order_edit_status',
+			static function ( $order_id ) use ( &$events ) {
+				$events[] = array( 'edit_status', $order_id );
+			}
+		);
+		add_action(
+			'woocommerce_order_status_changed',
+			static function ( $order_id ) use ( &$events ) {
+				$events[] = array( 'status_changed', $order_id );
+			}
+		);
+
+		$object = new WC_Order();
+		$object->stage_status( OrderStatus::ON_HOLD, '', true );
+		$object->save();
+
+		$this->assertNotSame( 0, $object->get_id() );
+		$this->assertSame(
+			array(
+				array( 'edit_status', $object->get_id() ),
+				array( 'status_changed', $object->get_id() ),
+			),
+			$events
+		);
+	}
+
+	/**
 	 * Test: stage_payment_complete changes the order in memory, and the next save writes it, adds the note and fires woocommerce_payment_complete.
 	 */
 	public function test_stage_payment_complete_changes_the_order_in_memory_only() {

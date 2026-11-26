@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Fix the order ID of woocommerce_order_edit_status for a new staged order in the experimental abilities.
+

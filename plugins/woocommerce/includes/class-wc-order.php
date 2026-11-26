@@ -410,6 +410,9 @@ class WC_Order extends WC_Abstract_Order {
 		$this->maybe_set_user_billing_email();
 		parent::save();
 		if ( null === $this->get_last_save_error() ) {
+			// A manual status change staged on a new order fires woocommerce_order_edit_status here, once the order has an ID.
+			$this->run_deferred_actions( array_intersect_key( $deferred_actions, array( 'order_edit_status' => true ) ), true );
+			unset( $deferred_actions['order_edit_status'] );
 			$this->status_transition();
 		}
 
@@ -458,7 +461,20 @@ class WC_Order extends WC_Abstract_Order {
 			);
 
 			if ( $manual_update && $this->staging_status ) {
-				$this->defer_to_save( 'order_edit_status', 'do_action', array( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] ) );
+				$status = $result['to'];
+				$this->defer_to_save(
+					'order_edit_status',
+					function () use ( $status ) {
+						/**
+						 * This action is documented in set_status().
+						 *
+						 * @since 3.0.0
+						 */
+						do_action( 'woocommerce_order_edit_status', $this->get_id(), $status );
+					},
+					array(),
+					! $this->get_id()
+				);
 			} else {
 				$this->defer_to_save( 'order_edit_status', null );
 			}
@@ -469,7 +485,9 @@ class WC_Order extends WC_Abstract_Order {
 				 * is written, so a listener that reloads the order sees the old row.
 				 * After set_status(), it fires before the paid and completed dates
 				 * are set. After stage_status() or update_status(), it fires from
-				 * save(), with those dates already set on the order object.
+				 * save(), with those dates already set on the order object. For a
+				 * new order, stage_status() leaves it to after the order is created
+				 * and before the status transition hooks, so it gets the new ID.
 				 *
 				 * @since 3.0.0
 				 * @param int    $order_id Order ID.
@@ -539,9 +557,9 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Set the order status in memory, like set_status(), including the paid and completed dates, but leave
-	 * woocommerce_order_edit_status to the next save(), which fires it before it writes. A later status
-	 * change before that save() replaces the pending action, or cancels it when the change is not manual.
-	 * update_status() calls this method, then save().
+	 * woocommerce_order_edit_status to the next save(), which fires it before it writes, or after it creates a
+	 * new order. A later status change before that save() replaces the pending action, or cancels it when the
+	 * change is not manual. update_status() calls this method, then save().
 	 *
 	 * An order class that overrides update_status() with rules of its own must override this method
 	 * too, in the same class, with the same rules. A direct call of this method refuses a class that has
