@@ -184,8 +184,8 @@ class CustomerStockNotificationEmail extends WC_Email {
 			'button_text'      => $button_text,
 			'button_link'      => $button_link,
 			'account_link'     => $account_link,
-			// The sign-up is sent with this email, so there's nothing left to unsubscribe from. Kept empty for template overrides.
-			'unsubscribe_link' => '',
+			// Unsubscribe is no longer used in the template, since the sign-up is sent with this email, but we're keeping it for backwards compatibility with custom templates, which now link to account management.
+			'unsubscribe_link' => $account_link,
 			'is_guest'         => $is_guest,
 		);
 	}
