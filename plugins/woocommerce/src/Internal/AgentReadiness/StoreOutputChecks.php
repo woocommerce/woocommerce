@@ -1457,7 +1457,8 @@ class StoreOutputChecks {
 	/**
 	 * Whether a Product item, a variant or one of their offers has a BuyAction potentialAction.
 	 * Null without one when WooCommerce wouldn't print it: it links only a simple product, or a chosen
-	 * variation, that can be bought now (the conditions of WC_Structured_Data::get_product_checkout_url()).
+	 * variation, that can be bought now (the conditions of WC_Structured_Data::get_product_checkout_url()),
+	 * and prints no offer at all for a product without a price.
 	 *
 	 * @param array<int, array<string, mixed>> $products Product items.
 	 * @param \WC_Product|null                 $scanned  The scanned product.
@@ -1473,7 +1474,7 @@ class StoreOutputChecks {
 				}
 			}
 		}
-		if ( null !== $scanned && ( ! $scanned->is_type( ProductType::SIMPLE ) || ( ! $scanned->is_visible() && CatalogVisibility::SEARCH !== $scanned->get_catalog_visibility() ) || ! $scanned->is_publicly_viewable() || ! $scanned->is_purchasable() || ! $scanned->is_in_stock() || ! $scanned->has_enough_stock( 1 ) ) ) {
+		if ( null !== $scanned && ( '' === $scanned->get_price() || ! $scanned->is_type( ProductType::SIMPLE ) || ( ! $scanned->is_visible() && CatalogVisibility::SEARCH !== $scanned->get_catalog_visibility() ) || ! $scanned->is_publicly_viewable() || ! $scanned->is_purchasable() || ! $scanned->is_in_stock() || ! $scanned->has_enough_stock( 1 ) ) ) {
 			return null;
 		}
 		return false;
