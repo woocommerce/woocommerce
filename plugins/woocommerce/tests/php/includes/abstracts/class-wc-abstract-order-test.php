@@ -3453,6 +3453,29 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A save() of a marked order runs its deferred woocommerce_order_after_calculate_totals after it clears the mark, so a hook that a listener reaches there does not refuse the save.
+	 */
+	public function test_a_hook_reached_from_a_deferred_entry_does_not_refuse_the_save(): void {
+		$order = WC_Helper_Order::create_order();
+		add_action(
+			'woocommerce_order_after_calculate_totals',
+			static function ( $and_taxes, $listened_order ) {
+				$listened_order->get_taxable_location();
+			},
+			10,
+			3
+		);
+
+		$order->mark_staged();
+		$order->set_billing_city( 'New City' );
+		$order->stage_totals( false );
+		add_filter( 'woocommerce_order_get_tax_location', static fn( $location ) => $location, 10, 2 );
+		$order->save();
+
+		$this->assertSame( 'New City', wc_get_order( $order->get_id() )->get_billing_city() );
+	}
+
+	/**
 	 * @testdox A woocommerce_order_after_calculate_totals listener without $staged refuses a stage_totals() call on a marked order before the order changes and never runs; one with $staged gets true at the save and false through calculate_totals().
 	 */
 	public function test_after_calculate_totals_checks_its_listeners_at_stage_time(): void {
