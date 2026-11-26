@@ -1530,6 +1530,23 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox needs_processing() on a staged order neither reads nor writes the cache, so the saving path does not get the staged answer.
+	 */
+	public function test_needs_processing_does_not_cache_a_staged_answer(): void {
+		$order_id = WC_Helper_Order::create_order()->get_id();
+		add_filter( 'woocommerce_order_item_needs_processing', static fn( $needs_processing, $product, $id, $staged ) => ! $staged, 10, 4 );
+
+		$staged_order = wc_get_order( $order_id );
+		$staged_order->stage_status( OrderStatus::PROCESSING );
+
+		$this->assertTrue( wc_get_order( $order_id )->needs_processing(), 'The saving path caches its answer' );
+		$this->assertFalse( $staged_order->needs_processing(), 'The staged call read the cached answer' );
+		wp_cache_delete( 'order-needs-processing-' . $order_id, 'orders' );
+		$this->assertFalse( $staged_order->needs_processing(), 'The staged call gets the staged answer' );
+		$this->assertTrue( wc_get_order( $order_id )->needs_processing(), 'The staged call cached its answer' );
+	}
+
+	/**
 	 * Run a callback while a listener makes every order write fail.
 	 *
 	 * @param callable $callback Callback to run.

@@ -2057,7 +2057,8 @@ class WC_Order extends WC_Abstract_Order {
 	public function needs_processing() {
 		$order_id         = $this->get_id();
 		$cache_key        = 'order-needs-processing-' . $order_id;
-		$needs_processing = wp_cache_get( $cache_key, 'orders' );
+		$use_cache        = ! $this->is_staged_unsaved();
+		$needs_processing = $use_cache ? wp_cache_get( $cache_key, 'orders' ) : false;
 		if ( false === $needs_processing ) {
 			$needs_processing = 0;
 
@@ -2091,7 +2092,9 @@ class WC_Order extends WC_Abstract_Order {
 				}
 			}
 
-			wp_cache_set( $cache_key, $needs_processing, 'orders', DAY_IN_SECONDS );
+			if ( $use_cache ) {
+				wp_cache_set( $cache_key, $needs_processing, 'orders', DAY_IN_SECONDS );
+			}
 		}
 
 		return 1 === absint( $needs_processing );
