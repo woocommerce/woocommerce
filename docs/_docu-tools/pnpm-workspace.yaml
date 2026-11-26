@@ -6,3 +6,5 @@ allowBuilds:
 # Docusaurus requires tinypool 1.x, which has critical advisories (GHSA-5gmw-xhrv-c9v3, GHSA-85c8-ppgw-ccpr). Remove once it depends on tinypool 2.x.
 overrides:
     'tinypool@<2.1.2': ^2.1.2
+    # Security: copy-webpack-plugin and terser-webpack-plugin still pin serialize-javascript 6 (GHSA-5c6j-r48x-rmvq).
+    'serialize-javascript@<7.0.3': ^7.1.3
