@@ -1183,6 +1183,8 @@ class OrderController {
 		 * This filter is documented in includes/class-wc-cart.php.
 		 *
 		 * @since 2.7.0
+		 *
+		 * @param bool $ready Whether the cart is ready to calculate shipping.
 		 */
 		if ( (bool) apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true ) ) {
 			// No packages were calculated, so the checkout shows no shipping selector to pick from;

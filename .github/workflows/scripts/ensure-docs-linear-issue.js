@@ -1,0 +1,186 @@
+/**
+ * Describes what Linear reported for a failed call: the error type and GraphQL messages.
+ *
+ * @param {Error} error Error thrown by the Linear SDK.
+ * @return {string} A sentence to append to the failure message, or an empty string.
+ */
+const linearErrorDetails = ( error ) => {
+	const details = [
+		error?.type,
+		...( error?.errors?.map( ( graphqlError ) => graphqlError.message ) ??
+			[] ),
+	].filter( Boolean );
+	if ( ! details.length && error?.message ) {
+		details.push( error.message );
+	}
+	return details.length ? ` Linear reported: ${ details.join( '; ' ) }` : '';
+};
+
+/**
+ * Finds or creates the documentation issue for a pull request.
+ *
+ * @param {Object} options              Workflow inputs.
+ * @param {Object} options.linearClient Linear SDK client.
+ * @param {string} options.teamId       Configured team UUID or exact team key.
+ * @param {string} options.labelId      Configured label UUID.
+ * @param {Object} options.pr           Pull request from the GitHub event.
+ * @param {string} options.repoFullName Repository name, including its owner.
+ * @param {?Object} options.verdict     Structured documentation verdict, or null when only the label is known.
+ * @return {Promise<Object>} Existing or newly created issue and whether it was reused.
+ */
+module.exports = async ( {
+	linearClient,
+	teamId,
+	labelId,
+	pr,
+	repoFullName,
+	verdict,
+} ) => {
+	teamId = teamId?.trim();
+	labelId = labelId?.trim();
+	if ( ! teamId || ! labelId ) {
+		throw new Error(
+			'Set both LINEAR_DOCS_TEAM_ID and LINEAR_DOCS_AUTO_LABEL before running this workflow.'
+		);
+	}
+
+	let team;
+	try {
+		if ( /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i.test( teamId ) ) {
+			team = await linearClient.team( teamId );
+		} else {
+			const teams = await linearClient.teams( {
+				filter: { key: { eq: teamId } },
+			} );
+			if ( teams.nodes.length === 1 ) {
+				team = teams.nodes[ 0 ];
+			}
+		}
+	} catch ( error ) {
+		throw new Error(
+			'Cannot read the configured Linear team. Check LINEAR_DOCS_TEAM_ID and that LINEAR_OAUTH_TOKEN can access that team in the same workspace.' +
+				linearErrorDetails( error )
+		);
+	}
+	if ( ! team?.id ) {
+		throw new Error(
+			'Configured Linear team was not found. Set LINEAR_DOCS_TEAM_ID to its UUID or exact team key and grant LINEAR_OAUTH_TOKEN access to that team.'
+		);
+	}
+
+	let existingIssues;
+	try {
+		// Search every team the token can read: triage may have moved the issue out of the docs team.
+		existingIssues = await linearClient.issues( {
+			filter: {
+				description: { contains: pr.html_url },
+			},
+			includeArchived: true,
+		} );
+		// Match only the "Pull request" line this helper writes, so an issue that merely mentions
+		// the PR is not taken for its docs issue. Linear may wrap the URL as an autolink, and the
+		// trailing boundary keeps #123 from matching #1234.
+		const prUrl = new RegExp(
+			'^\\*\\*Pull request:\\*\\* [<[]?' +
+				pr.html_url.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' ) +
+				'(?![0-9])',
+			'm'
+		);
+		for (;;) {
+			const issue = existingIssues.nodes.find( ( candidate ) =>
+				prUrl.test( candidate.description || '' )
+			);
+			if ( issue ) {
+				return { issue, reused: true };
+			}
+			if ( ! existingIssues.pageInfo.hasNextPage ) {
+				break;
+			}
+			existingIssues = await existingIssues.fetchNext();
+		}
+	} catch ( error ) {
+		throw new Error(
+			'Cannot check for an existing Linear documentation issue. No issue was created; verify read access before retrying.' +
+				linearErrorDetails( error )
+		);
+	}
+
+	let label;
+	let labelTeam;
+	// Sub-teams can use labels inherited from their parent teams.
+	const usableLabelTeamIds = new Set();
+	try {
+		label = await linearClient.issueLabel( labelId );
+		labelTeam = await label.team;
+		for (
+			let current = team;
+			current?.id && ! usableLabelTeamIds.has( current.id );
+			current = await current.parent
+		) {
+			usableLabelTeamIds.add( current.id );
+		}
+	} catch ( error ) {
+		throw new Error(
+			"Cannot read the documentation label. Check LINEAR_DOCS_AUTO_LABEL and the token's access to that label." +
+				linearErrorDetails( error )
+		);
+	}
+	if (
+		! label?.id ||
+		( labelTeam && ! usableLabelTeamIds.has( labelTeam.id ) )
+	) {
+		throw new Error(
+			'LINEAR_DOCS_AUTO_LABEL must identify a workspace label or a label belonging to the configured documentation team or one of its parent teams.'
+		);
+	}
+
+	// The PR title and the AI reason are untrusted: the reason comes from a model that read the diff.
+	// Keep each on one line and quote the reason, so neither can add or fake a description line.
+	const oneLine = ( text ) => String( text ?? '' ).replace( /\s+/g, ' ' ).trim();
+	const lines = [
+		'A pull request was flagged as containing user-facing changes that may require documentation updates.',
+		'',
+		`**Pull request:** ${ pr.html_url }`,
+		`**Repository:** ${ repoFullName }`,
+	];
+	if ( verdict ) {
+		const confidence = [ 'high', 'medium', 'low' ].includes(
+			verdict.confidence
+		)
+			? verdict.confidence
+			: 'unknown';
+		lines.push(
+			`**Confidence:** ${ confidence }`,
+			'**AI reasoning:**',
+			`> ${ oneLine( verdict.reason ) }`
+		);
+	} else {
+		// No analysis ran: a person or an earlier run labeled the PR. Don't invent an assessment.
+		lines.push( '**Flagged by:** the `needs: documentation` label' );
+	}
+	const description = lines.join( '\n' );
+
+	let result;
+	let issue;
+	try {
+		result = await linearClient.createIssue( {
+			teamId: team.id,
+			title: `Docs update needed: ${ oneLine( pr.title ) }`,
+			description,
+			labelIds: [ label.id ],
+		} );
+		issue = await result.issue;
+	} catch ( error ) {
+		throw new Error(
+			'Linear issue creation did not complete successfully. Check create-issue permissions before retrying; the next run will check for an existing issue first.' +
+				linearErrorDetails( error )
+		);
+	}
+	if ( ! result.success || ! issue?.id || ! issue.url ) {
+		throw new Error(
+			'Linear did not confirm issue creation. The next run will check for an existing issue before trying again.'
+		);
+	}
+
+	return { issue, reused: false };
+};

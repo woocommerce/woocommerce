@@ -1,0 +1,3 @@
+Significance: patch
+Type: changed
+Comment: Share the Browserslist configuration version through the workspace catalog.

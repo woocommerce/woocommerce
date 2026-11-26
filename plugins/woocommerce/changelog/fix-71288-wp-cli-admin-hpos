@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent WP-CLI commands in admin context from crashing when High-Performance Order Storage is enabled.

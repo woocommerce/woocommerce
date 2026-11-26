@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Tests\Internal\Abilities\ExtensibleAbilitiesTestTrait;
 use WC_Helper_Order;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -13,6 +14,8 @@ use WC_Unit_Test_Case;
  * Tests for the address, shipping line and product line rules of the order-update ability.
  */
 class OrderUpdateTest extends WC_Unit_Test_Case {
+
+	use ExtensibleAbilitiesTestTrait;
 
 	/**
 	 * Log in as an administrator, who may edit orders.
@@ -490,7 +493,11 @@ class OrderUpdateTest extends WC_Unit_Test_Case {
 	 * @param bool $enabled Whether the feature is on.
 	 */
 	private function set_feature( bool $enabled ): void {
-		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', $enabled ? 'yes' : 'no' );
+		if ( $enabled ) {
+			$this->enable_extensible_abilities();
+			return;
+		}
+		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', 'no' );
 	}
 
 	/**

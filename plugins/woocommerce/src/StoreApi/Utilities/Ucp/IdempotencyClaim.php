@@ -68,7 +68,7 @@ final class IdempotencyClaim {
 		 * Filters whether a UCP write must carry an `Idempotency-Key`.
 		 *
 		 * True, the default, matches the UCP specs, and returns 400 for a missing or malformed key.
-		 * False honors a key when one is sent and lets a keyless write through.
+		 * False honors a well-formed key when one is sent, ignores a malformed key, and lets a keyless write through.
 		 *
 		 * @since 11.4.0
 		 *

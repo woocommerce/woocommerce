@@ -452,6 +452,12 @@ body:has(.wc-sales-readiness) {
 	}
 }
 
+.wc-sales-readiness-checked__daily {
+	margin-block-start: var(--wpds-dimension-gap-lg);
+	padding-block-start: var(--wpds-dimension-gap-lg);
+	border-block-start: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+}
+
 // Download your results: a button styled like the contact support link.
 .wc-sales-readiness__link-button {
 	padding: 0;

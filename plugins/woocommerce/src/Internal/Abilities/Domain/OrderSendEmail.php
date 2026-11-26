@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 
@@ -21,21 +22,32 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 	use OrderAbilityTrait;
 
 	/**
-	 * Email class for each email that the ability can send.
+	 * Get the emails that the ability can send: Core's emails, then the order
+	 * emails that extensions register with ExtensibleAbilities::register_order_email().
+	 *
+	 * @return array<string, array{email_class: string, description: string, statuses: array<int, string>, trigger_callback?: callable|null}>
 	 */
-	private const EMAIL_CLASSES = array(
-		'invoice'    => 'WC_Email_Customer_Invoice',
-		'processing' => 'WC_Email_Customer_Processing_Order',
-		'completed'  => 'WC_Email_Customer_Completed_Order',
-	);
+	private static function get_emails(): array {
+		$core_emails = array(
+			'invoice'    => array(
+				'email_class' => 'WC_Email_Customer_Invoice',
+				'description' => __( 'The order details, with a payment link while the order is pending.', 'woocommerce' ),
+				'statuses'    => array(),
+			),
+			'processing' => array(
+				'email_class' => 'WC_Email_Customer_Processing_Order',
+				'description' => __( 'Tells the customer that the order is being processed.', 'woocommerce' ),
+				'statuses'    => array( OrderStatus::PROCESSING ),
+			),
+			'completed'  => array(
+				'email_class' => 'WC_Email_Customer_Completed_Order',
+				'description' => __( 'Tells the customer that the order is complete.', 'woocommerce' ),
+				'statuses'    => array( OrderStatus::COMPLETED ),
+			),
+		);
 
-	/**
-	 * Order status that each status email needs.
-	 */
-	private const REQUIRED_STATUSES = array(
-		'processing' => OrderStatus::PROCESSING,
-		'completed'  => OrderStatus::COMPLETED,
-	);
+		return array_merge( $core_emails, ExtensibleAbilities::get_order_emails() );
+	}
 
 	/**
 	 * Get the ability name.
@@ -59,7 +71,7 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 		return array(
 			'label'               => __( 'Send order email', 'woocommerce' ),
 			'description'         => __(
-				'Send an order email to the customer again.',
+				'Send an order email again. A customer email goes to the billing email of the order, and a store email goes to the recipients set in the email settings.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
@@ -98,35 +110,31 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 		}
 
 		$email_name = $input['email'];
-		$refusal    = self::get_status_refusal( $order, $email_name );
+		$email_args = self::get_emails()[ $email_name ];
+		$refusal    = self::get_status_refusal( $order, $email_name, $email_args['statuses'] );
 
 		if ( is_wp_error( $refusal ) ) {
 			return $refusal;
 		}
 
-		if ( ! is_email( $order->get_billing_email() ) ) {
-			return new \WP_Error(
-				'woocommerce_ability_order_email_no_recipient',
-				__( 'The order has no valid billing email. Set billing.email with the woocommerce/order-update ability, then send the email again.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
 		WC()->payment_gateways();
 		WC()->shipping();
 
-		/**
-		 * The email to send, or null when a filter removed its class.
-		 *
-		 * @var \WC_Email_Customer_Invoice|\WC_Email_Customer_Processing_Order|\WC_Email_Customer_Completed_Order|null $email
-		 */
-		$email = WC()->mailer()->get_emails()[ self::EMAIL_CLASSES[ $email_name ] ] ?? null;
+		$email = WC()->mailer()->get_emails()[ $email_args['email_class'] ] ?? null;
 
 		if ( ! $email instanceof \WC_Email || ( ! $email->is_manual() && ! $email->is_enabled() ) ) {
 			return new \WP_Error(
 				'woocommerce_ability_order_email_disabled',
 				/* translators: %s: email name. */
 				sprintf( __( 'The %s email is turned off on this store. Ask the store owner to turn it on in WooCommerce > Settings > Emails.', 'woocommerce' ), $email_name ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( $email->is_customer_email() && ! is_email( $order->get_billing_email() ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_email_no_recipient',
+				__( 'The order has no valid billing email. Set billing.email with the woocommerce/order-update ability, then send the email again.', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -142,9 +150,29 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 		/** This action is documented in includes/admin/meta-boxes/class-wc-meta-box-order-actions.php */
 		do_action( 'woocommerce_before_resend_order_emails', $order, $email->id );
 
+		$failed = false;
 		add_action( 'woocommerce_email_sent', $capture, 10, 2 );
-		$email->trigger( $order->get_id(), $order );
-		remove_action( 'woocommerce_email_sent', $capture, 10 );
+		try {
+			if ( isset( $email_args['trigger_callback'] ) ) {
+				call_user_func( $email_args['trigger_callback'], $email, $order );
+			} elseif ( method_exists( $email, 'trigger' ) ) {
+				$email->trigger( $order->get_id(), $order );
+			}
+		} catch ( \Throwable $e ) {
+			$failed = true;
+			wc_get_logger()->error( sprintf( 'Sending the %1$s email of order %2$d failed: %3$s', $email_name, $order->get_id(), $e->getMessage() ), array( 'source' => 'extensible-abilities' ) );
+		} finally {
+			remove_action( 'woocommerce_email_sent', $capture, 10 );
+		}
+
+		if ( ! $sent && $failed ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_email_send_failed',
+				/* translators: %s: email name. */
+				sprintf( __( 'The %s email failed with an error before the site sent it. Ask the store owner to check the extensible-abilities log in WooCommerce > Status > Logs.', 'woocommerce' ), $email_name ),
+				array( 'status' => 500 )
+			);
+		}
 
 		if ( ! $sent ) {
 			return new \WP_Error(
@@ -166,26 +194,26 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 	}
 
 	/**
-	 * Refuse a status email when the order does not have that status. The email
-	 * would tell the customer something that is not true.
+	 * Refuse an email when the order does not have one of the statuses of the
+	 * email. The email would say something about the order that is not true.
 	 *
-	 * @param \WC_Order $order      Order.
-	 * @param string    $email_name Email name from the input.
+	 * @param \WC_Order          $order      Order.
+	 * @param string             $email_name Email name from the input.
+	 * @param array<int, string> $statuses   Statuses of the email. Empty for any status.
 	 * @return null|\WP_Error
 	 */
-	private static function get_status_refusal( \WC_Order $order, string $email_name ): ?\WP_Error {
-		$required_status = self::REQUIRED_STATUSES[ $email_name ] ?? null;
-
-		if ( null === $required_status || $order->has_status( $required_status ) ) {
+	private static function get_status_refusal( \WC_Order $order, string $email_name, array $statuses ): ?\WP_Error {
+		if ( empty( $statuses ) || $order->has_status( $statuses ) ) {
 			return null;
 		}
 
 		return new \WP_Error(
 			'woocommerce_ability_order_email_status_mismatch',
 			sprintf(
-				/* translators: 1: email name, 2: order status slug. */
-				__( 'The %1$s email only applies to an order with that status, and this order has the "%2$s" status. Send the invoice email, or change the status with the woocommerce/order-update-status ability first.', 'woocommerce' ),
+				/* translators: 1: email name, 2: comma-separated order status slugs, 3: order status slug. */
+				__( 'The %1$s email only applies to an order with the status %2$s, and this order has the "%3$s" status. Send the invoice email, or change the status with the woocommerce/order-update-status ability first.', 'woocommerce' ),
 				$email_name,
+				implode( ', ', $statuses ),
 				$order->get_status()
 			),
 			array( 'status' => 400 )
@@ -198,6 +226,17 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
+		$lines = array();
+		foreach ( self::get_emails() as $email_name => $email_args ) {
+			$lines[] = sprintf(
+				/* translators: 1: email name, 2: email description, 3: comma-separated order status slugs. */
+				__( '%1$s: %2$s Statuses: %3$s.', 'woocommerce' ),
+				$email_name,
+				$email_args['description'],
+				empty( $email_args['statuses'] ) ? __( 'any', 'woocommerce' ) : implode( ', ', $email_args['statuses'] )
+			);
+		}
+
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
@@ -207,8 +246,8 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 				),
 				'email' => array(
 					'type'        => 'string',
-					'description' => __( 'A status email needs the order to have that status.', 'woocommerce' ),
-					'enum'        => array_keys( self::EMAIL_CLASSES ),
+					'description' => __( 'The email to send, from the emails of WooCommerce and extensions. An email is refused for an order without one of its statuses.', 'woocommerce' ) . ' ' . implode( ' ', $lines ),
+					'enum'        => array_keys( self::get_emails() ),
 				),
 			),
 			'required'             => array( 'id', 'email' ),
@@ -228,7 +267,7 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 				'order_id' => array( 'type' => 'integer' ),
 				'email'    => array(
 					'type' => 'string',
-					'enum' => array_keys( self::EMAIL_CLASSES ),
+					'enum' => array_keys( self::get_emails() ),
 				),
 			),
 			'additionalProperties' => false,

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove download logs and permissions when erasing personal data with download and order removal enabled.

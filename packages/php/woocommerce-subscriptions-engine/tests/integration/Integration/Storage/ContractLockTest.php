@@ -659,7 +659,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Contract::class, $stored );
 		$this->assertSame( array(), $stored->get_items(), 'No item row is written.' );
 		$this->assertSame( array(), $stored->get_addresses(), 'No address row is written.' );
-		$this->assertSame( array(), $this->sut->find_cycle_history( $id ), 'No cycle row is written.' );
+		$this->assertSame( array(), $this->sut->find_cycles( $id ), 'No cycle row is written.' );
 	}
 
 	/**

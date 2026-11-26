@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -110,6 +110,80 @@ describe( 'CheckedCard', () => {
 		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
 			'Checking your store'
 		);
+	} );
+
+	it( 'offers the daily check switch once the store has been checked, and reports a change', () => {
+		const onDailyChecks = jest.fn();
+		const checked = {
+			...firstVisit,
+			last_checked: 'Last checked today at 10:42 am.',
+			checked: true,
+			daily_checks: true,
+			support_url: 'https://example.com/support',
+			run: { ...firstVisit.run, label: 'Check again' },
+		};
+		const { rerender } = render(
+			<CheckedCard
+				view={ checked }
+				running={ false }
+				onRun={ jest.fn() }
+				onDownloadError={ jest.fn() }
+				onDailyChecks={ onDailyChecks }
+			/>
+		);
+		const toggle = screen.getByRole( 'checkbox', {
+			name: 'Automatically run checks daily',
+		} );
+		expect( toggle ).toBeChecked();
+		expect( screen.queryByText( /select Check again above/ ) ).toBeNull();
+		fireEvent.click( toggle );
+		expect( onDailyChecks ).toHaveBeenCalledWith( false );
+
+		rerender(
+			<CheckedCard
+				view={ { ...checked, daily_checks: false } }
+				running={ false }
+				onRun={ jest.fn() }
+				onDownloadError={ jest.fn() }
+				onDailyChecks={ onDailyChecks }
+			/>
+		);
+		expect(
+			screen.getByText(
+				'For an updated report on how well AI assistants can find and shop your store, select Check again above.'
+			)
+		).toBeInTheDocument();
+
+		rerender(
+			<CheckedCard
+				view={ checked }
+				running={ false }
+				onRun={ jest.fn() }
+				onDownloadError={ jest.fn() }
+				onDailyChecks={ onDailyChecks }
+				savingDailyChecks
+			/>
+		);
+		expect(
+			screen.getByRole( 'checkbox', {
+				name: 'Automatically run checks daily',
+			} )
+		).toBeDisabled();
+
+		rerender(
+			<CheckedCard
+				view={ firstVisit }
+				running={ false }
+				onRun={ jest.fn() }
+				onDownloadError={ jest.fn() }
+				onDailyChecks={ onDailyChecks }
+			/>
+		);
+		expect(
+			screen.queryByRole( 'checkbox', {
+				name: 'Automatically run checks daily',
+			} )
+		).toBeNull();
 	} );
 } );
 

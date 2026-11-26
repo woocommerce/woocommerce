@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Share the extensible abilities setup of the abilities tests in one trait; no production change.
+
