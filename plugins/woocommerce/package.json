@@ -981,8 +981,10 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:parallel",
 					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
+						"--shard=1/4",
+						"--shard=2/4",
+						"--shard=3/4",
+						"--shard=4/4"
 					],
 					"changes": [
 						"patterns/**/*.php",
@@ -1032,9 +1034,12 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:serial",
 					"shardingArguments": [
-						"--shard=1/3",
-						"--shard=2/3",
-						"--shard=3/3"
+						"--shard=1/6",
+						"--shard=2/6",
+						"--shard=3/6",
+						"--shard=4/6",
+						"--shard=5/6",
+						"--shard=6/6"
 					],
 					"changes": [
 						"patterns/**/*.php",
@@ -1083,7 +1088,12 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:parallel",
-					"shardingArguments": [],
+					"shardingArguments": [
+						"--shard=1/4",
+						"--shard=2/4",
+						"--shard=3/4",
+						"--shard=4/4"
+					],
 					"changes": [],
 					"onlyForDependencies": [
 						"@woocommerce/block-library"
@@ -1109,8 +1119,12 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:serial",
 					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
+						"--shard=1/6",
+						"--shard=2/6",
+						"--shard=3/6",
+						"--shard=4/6",
+						"--shard=5/6",
+						"--shard=6/6"
 					],
 					"changes": [],
 					"onlyForDependencies": [
@@ -1136,7 +1150,12 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:parallel",
-					"shardingArguments": [],
+					"shardingArguments": [
+						"--shard=1/4",
+						"--shard=2/4",
+						"--shard=3/4",
+						"--shard=4/4"
+					],
 					"changes": [],
 					"onlyForDependencies": [
 						"@woocommerce/block-library"
@@ -1162,8 +1181,12 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:serial",
 					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
+						"--shard=1/6",
+						"--shard=2/6",
+						"--shard=3/6",
+						"--shard=4/6",
+						"--shard=5/6",
+						"--shard=6/6"
 					],
 					"changes": [],
 					"onlyForDependencies": [
@@ -1189,7 +1212,12 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:unified-editor-assets:parallel",
-					"shardingArguments": [],
+					"shardingArguments": [
+						"--shard=1/4",
+						"--shard=2/4",
+						"--shard=3/4",
+						"--shard=4/4"
+					],
 					"changes": [
 						"patterns/**/*.php",
 						"includes/**/*.php",
@@ -1232,8 +1260,12 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:unified-editor-assets:serial",
 					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
+						"--shard=1/6",
+						"--shard=2/6",
+						"--shard=3/6",
+						"--shard=4/6",
+						"--shard=5/6",
+						"--shard=6/6"
 					],
 					"changes": [
 						"patterns/**/*.php",
@@ -1278,8 +1310,10 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:parallel",
 					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
+						"--shard=1/4",
+						"--shard=2/4",
+						"--shard=3/4",
+						"--shard=4/4"
 					],
 					"changes": [
 						"sample-data/sample_products.xml",
@@ -1322,9 +1356,12 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:serial",
 					"shardingArguments": [
-						"--shard=1/3",
-						"--shard=2/3",
-						"--shard=3/3"
+						"--shard=1/6",
+						"--shard=2/6",
+						"--shard=3/6",
+						"--shard=4/6",
+						"--shard=5/6",
+						"--shard=6/6"
 					],
 					"changes": [
 						"sample-data/sample_products.xml",
@@ -1366,8 +1403,10 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:parallel",
 					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
+						"--shard=1/4",
+						"--shard=2/4",
+						"--shard=3/4",
+						"--shard=4/4"
 					],
 					"changes": [
 						"sample-data/sample_products.xml",
@@ -1409,9 +1448,12 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:serial",
 					"shardingArguments": [
-						"--shard=1/3",
-						"--shard=2/3",
-						"--shard=3/3"
+						"--shard=1/6",
+						"--shard=2/6",
+						"--shard=3/6",
+						"--shard=4/6",
+						"--shard=5/6",
+						"--shard=6/6"
 					],
 					"changes": [
 						"sample-data/sample_products.xml",
