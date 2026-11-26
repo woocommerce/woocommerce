@@ -1693,21 +1693,34 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * @testdox A staged payment fires no payment hook and adds no payment note when the status changes before the save.
 	 *
-	 * @testWith ["stage_status", false]
-	 *           ["set_status", false]
-	 *           ["stage_status", true]
+	 * @testWith ["stage_status", ""]
+	 *           ["set_status", ""]
+	 *           ["stage_status", "write"]
+	 *           ["set_status", "pre_payment_hook"]
 	 *
-	 * @param string $method       Method that changes the status.
-	 * @param bool   $failed_write Whether a save fails before the status change.
+	 * @param string $method      Method that changes the status.
+	 * @param string $failed_step Step of a save that fails before the status change, or an empty string for no such save.
 	 */
-	public function test_staged_payment_complete_drops_its_hook_when_the_status_changes( string $method, bool $failed_write ): void {
+	public function test_staged_payment_complete_drops_its_hook_when_the_status_changes( string $method, string $failed_step ): void {
 		$order = new WC_Order();
 		$order->save();
 		$paid = did_action( 'woocommerce_payment_complete' );
 
 		$this->assertTrue( $order->stage_payment_complete( '12345' ) );
-		if ( $failed_write ) {
+		if ( 'write' === $failed_step ) {
 			$this->save_with_failed_write( $order );
+		} elseif ( 'pre_payment_hook' === $failed_step ) {
+			$throw = static function () use ( &$throw ) {
+				remove_action( 'woocommerce_pre_payment_complete', $throw );
+				throw new Exception( 'Listener failed.' );
+			};
+			add_action( 'woocommerce_pre_payment_complete', $throw );
+			try {
+				$order->save();
+				$this->fail( 'save() should pass on the exception.' );
+			} catch ( Exception $e ) {
+				$this->assertSame( 'Listener failed.', $e->getMessage() );
+			}
 		}
 		$order->$method( OrderStatus::CANCELLED );
 		$order->save();
