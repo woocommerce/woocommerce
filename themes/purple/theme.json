@@ -539,7 +539,33 @@
 				}
 			},
 			"woocommerce/product-filters": {
-				"css": "--wc-product-filter-block-spacing: 0;"
+				"css": "--wc-product-filter-block-spacing: 0;",
+				"elements": {
+					"button": {
+						"color": {
+							"background": "transparent",
+							"text": "var(--wp--custom--outline-button-color)"
+						},
+						"border": {
+							"color": "currentColor",
+							"width": "1px",
+							"style": "solid"
+						},
+						"spacing": {
+							"padding": {
+								"top": "calc(0.75rem - 1px)",
+								"bottom": "calc(0.75rem - 1px)",
+								"left": "calc(1.25rem - 1px)",
+								"right": "calc(1.25rem - 1px)"
+							}
+						},
+						":hover": {
+							"color": {
+								"background": "color-mix(in srgb, currentColor 5%, transparent)"
+							}
+						}
+					}
+				}
 			},
 			"woocommerce/product-gallery": {
 				"spacing": {
