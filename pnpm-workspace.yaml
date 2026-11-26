@@ -78,6 +78,7 @@ catalogs:
         '@babel/runtime': 7.25.7
         # Keep direct Jest packages on 29.5.x; WordPress scripts manages its own test runner.
         '@jest/globals': 29.5.x
+        '@swc/core': 1.15.24
         '@types/jest': 29.5.x
         '@wordpress/browserslist-config': next
         '@wordpress/build': 0.24.0
@@ -88,7 +89,6 @@ catalogs:
         '@wordpress/stylelint-config': ^23.14.0
         babel-jest: 29.5.x
         babel-loader: 9.2.x
-        babel-plugin-transform-react-remove-prop-types: 0.4.24
         copy-webpack-plugin: 14.0.x
         css-loader: 6.11.x
         eslint: ^10.0.0
@@ -106,6 +106,7 @@ catalogs:
         sass-loader: 10.5.x
         simple-git: ^4.0.2
         stylelint: ^16.9.0
+        swc-loader: 0.2.7
         ts-jest: 29.1.x
         typescript: 5.7.x
         webpack: 5.112.2

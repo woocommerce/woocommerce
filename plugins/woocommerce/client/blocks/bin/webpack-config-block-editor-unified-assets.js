@@ -11,6 +11,7 @@ const webpack = require( 'webpack' );
 /**
  * Internal dependencies
  */
+const { swcLoader } = require( '@woocommerce/internal-build/swc-loader' );
 const { getEntryConfig } = require( './webpack-entries' );
 const {
 	editorStyleEntries,
@@ -26,15 +27,10 @@ const {
 const { getSharedPlugins, getStylingConfig } = require( './webpack-configs' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 
-const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
 // Blocks' webpack writes directly to the WooCommerce plugin's
 // `assets/client/blocks/` so PHP can enqueue files from their final location
 // without an intermediate rsync step.
 const BUILD_DIR = path.resolve( __dirname, '../../../assets/client/blocks' );
-const BABEL_CACHE_DIR = path.join(
-	ROOT_DIR,
-	'node_modules/.cache/babel-loader'
-);
 const isProduction = NODE_ENV === 'production';
 const UNIFIED_EDITOR_STYLE_HANDLE = 'wc-block-library-style';
 const UNIFIED_EDITOR_STYLE_PATTERN = /^wc-block-library-style(?:-rtl)?\.css$/;
@@ -248,19 +244,7 @@ const getUnifiedMainConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
-					use: {
-						loader: 'babel-loader',
-						options: {
-							presets: [ '@wordpress/babel-preset-default' ],
-							plugins: [
-								isProduction
-									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
-									: false,
-							].filter( Boolean ),
-							cacheDirectory: BABEL_CACHE_DIR,
-							cacheCompression: false,
-						},
-					},
+					use: swcLoader,
 				},
 				{
 					test: /\.s[c|a]ss$/,
