@@ -276,18 +276,19 @@ const toggleImageVisibility = ( element: HTMLElement ) => {
 		`${ SELECTORS.largeImageWrapper }, ${ SELECTORS.thumbnail }`
 	) as HTMLElement | null;
 	const visibilityTarget = closestWrapper || element;
-	// The large image viewer shows one slide at a time, so hide the other
-	// slides from screen readers. The thumbnails, arrow buttons and arrow keys
-	// still reach every image.
-	const isOffscreenSlide =
-		!! element.closest( SELECTORS.largeImageWrapper ) &&
-		imageId !== selectedImageId;
+	const largeImageSlide = element.closest( SELECTORS.largeImageWrapper );
 
 	visibilityTarget.hidden = ! isVisible;
 	visibilityTarget.style.order = isVisible ? String( visibleIndex ) : '';
-	element.setAttribute(
+	element.setAttribute( 'aria-hidden', isVisible ? 'false' : 'true' );
+
+	// The large image viewer shows one slide at a time, so hide the other
+	// slides from screen readers. Hide the whole slide, so a product link
+	// around the image is hidden too. The thumbnails, arrow buttons and
+	// arrow keys still reach every image.
+	largeImageSlide?.setAttribute(
 		'aria-hidden',
-		isVisible && ! isOffscreenSlide ? 'false' : 'true'
+		imageId === selectedImageId ? 'false' : 'true'
 	);
 };
 
