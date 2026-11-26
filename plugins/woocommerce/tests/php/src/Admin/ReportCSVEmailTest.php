@@ -129,6 +129,15 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The Stock notifications report export names its report in the subject.
+	 */
+	public function test_subject_names_the_stock_notifications_report(): void {
+		$subject = $this->trigger_and_get_subject( '', 'stock-notifications' );
+
+		$this->assertStringContainsString( 'Your Stock notifications Report download is ready', $subject );
+	}
+
+	/**
 	 * @testdox trigger() keeps the parameters it shipped with, so a subclass overriding it still loads.
 	 */
 	public function test_trigger_keeps_its_original_parameters(): void {
@@ -144,10 +153,11 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 	/**
 	 * Send the email to a user and return the subject it went out with.
 	 *
-	 * @param string $date_range Optional. Date range the report covers, formatted for display.
+	 * @param string $date_range  Optional. Date range the report covers, formatted for display.
+	 * @param string $report_type Optional. Report type being exported.
 	 * @return string
 	 */
-	private function trigger_and_get_subject( string $date_range = '' ): string {
+	private function trigger_and_get_subject( string $date_range = '', string $report_type = 'orders' ): string {
 		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		$mailer  = tests_retrieve_phpmailer_instance();
 		$email   = new ReportCSVEmail();
@@ -155,8 +165,8 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 		$email->set_report_date_range( $date_range );
 		$email->trigger(
 			$user_id,
-			'orders',
-			'https://example.org/?action=woocommerce_admin_download_report_csv&filename=wc-orders-report-export'
+			$report_type,
+			"https://example.org/?action=woocommerce_admin_download_report_csv&filename=wc-{$report_type}-report-export"
 		);
 
 		$sent = end( $mailer->mock_sent );

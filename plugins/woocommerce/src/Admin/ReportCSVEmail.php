@@ -72,16 +72,17 @@ class ReportCSVEmail extends \WC_Email {
 		$this->report_labels = apply_filters(
 			'woocommerce_report_export_email_labels',
 			array(
-				'categories' => __( 'Categories', 'woocommerce' ),
-				'coupons'    => __( 'Coupons', 'woocommerce' ),
-				'customers'  => __( 'Customers', 'woocommerce' ),
-				'downloads'  => __( 'Downloads', 'woocommerce' ),
-				'orders'     => __( 'Orders', 'woocommerce' ),
-				'products'   => __( 'Products', 'woocommerce' ),
-				'revenue'    => __( 'Revenue', 'woocommerce' ),
-				'stock'      => __( 'Stock', 'woocommerce' ),
-				'taxes'      => __( 'Taxes', 'woocommerce' ),
-				'variations' => __( 'Variations', 'woocommerce' ),
+				'categories'          => __( 'Categories', 'woocommerce' ),
+				'coupons'             => __( 'Coupons', 'woocommerce' ),
+				'customers'           => __( 'Customers', 'woocommerce' ),
+				'downloads'           => __( 'Downloads', 'woocommerce' ),
+				'orders'              => __( 'Orders', 'woocommerce' ),
+				'products'            => __( 'Products', 'woocommerce' ),
+				'revenue'             => __( 'Revenue', 'woocommerce' ),
+				'stock'               => __( 'Stock', 'woocommerce' ),
+				'stock-notifications' => __( 'Stock notifications', 'woocommerce' ),
+				'taxes'               => __( 'Taxes', 'woocommerce' ),
+				'variations'          => __( 'Variations', 'woocommerce' ),
 			)
 		);
 
