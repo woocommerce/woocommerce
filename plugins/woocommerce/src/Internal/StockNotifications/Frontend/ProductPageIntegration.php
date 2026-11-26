@@ -263,7 +263,7 @@ class ProductPageIntegration {
 		// JS points a variable product's hidden form at the selected variation, and shows the
 		// "already joined" notice instead for the variations listed on the form.
 		$signups = $this->get_current_user_variation_signups( $product );
-		$this->display_form( $product, array_keys( $signups ) );
+		$this->print_form( $product, false, array_keys( $signups ) );
 
 		if ( $signups ) {
 			echo '<div class="wc_bis_already_signed_up" data-bis-product-id="' . absint( $product->get_id() ) . '" hidden>';
@@ -398,11 +398,22 @@ class ProductPageIntegration {
 	/**
 	 * Display the form.
 	 *
+	 * @param WC_Product $product Product object.
+	 * @return void
+	 */
+	public function display_form( WC_Product $product ): void {
+		$this->print_form( $product, $this->is_visible_on_load( $product ) );
+	}
+
+	/**
+	 * Print the form.
+	 *
 	 * @param WC_Product $product                 Product object.
+	 * @param bool       $is_visible              Whether the form is visible on page load.
 	 * @param int[]      $signed_up_variation_ids Variations the shopper already joined, listed on the form for JS.
 	 * @return void
 	 */
-	public function display_form( WC_Product $product, array $signed_up_variation_ids = array() ): void {
+	private function print_form( WC_Product $product, bool $is_visible, array $signed_up_variation_ids = array() ): void {
 
 		$button_class = implode(
 			' ',
@@ -421,7 +432,7 @@ class ProductPageIntegration {
 			'show_checkbox'    => false,
 			'show_email_field' => ! is_user_logged_in() && ! Config::requires_account(),
 			'button_class'     => $button_class,
-			'is_visible'       => $this->is_visible_on_load( $product ),
+			'is_visible'       => $is_visible,
 		);
 
 		// Added to the rendered markup, so template overrides get it too.
