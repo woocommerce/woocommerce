@@ -91,11 +91,11 @@ class SupportReport {
 	}
 
 	/**
-	 * File name for the download, like the System Status Report's: AISalesReadiness_<site host>_<date and time>.txt.
+	 * File name for the download, like the System Status Report's: AIShoppingHealth_<site host>_<date and time>.txt.
 	 */
 	public function filename(): string {
 		$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
-		return sanitize_file_name( 'AISalesReadiness_' . ( '' !== $host ? $host : 'site' ) . '_' . gmdate( 'Y-m-d\TH-i-s' ) . '.txt' );
+		return sanitize_file_name( 'AIShoppingHealth_' . ( '' !== $host ? $host : 'site' ) . '_' . gmdate( 'Y-m-d\TH-i-s' ) . '.txt' );
 	}
 
 	/**
@@ -110,7 +110,7 @@ class SupportReport {
 		$lines   = array_merge(
 			$this->header( $report, $pending ),
 			array( '' ),
-			$this->shopping( $report ),
+			$this->shopping( $report, $live ),
 			array( '' ),
 			$this->store_checks( $report, $live )
 		);
@@ -137,7 +137,7 @@ class SupportReport {
 			$state = null === $report ? 'Not checked yet' : 'Finished';
 		}
 		$lines = array(
-			'### AI sales readiness ###',
+			'### AI shopping health ###',
 			'',
 			'Site: ' . home_url(),
 			'WooCommerce version: ' . (string) Constants::get_constant( 'WC_VERSION' ),
@@ -153,16 +153,18 @@ class SupportReport {
 					? sprintf( 'Checked %s products: bestsellers first, then the most recently changed.', ProductScan::PRODUCT_LIMIT )
 					: sprintf( 'Checked the %s products you changed most recently.', ProductScan::PRODUCT_LIMIT ) );
 		}
+		$lines[] = 'Daily checks: ' . ( ScheduledScan::daily_enabled() ? 'On' : 'Off' );
 		return $lines;
 	}
 
 	/**
 	 * The UCP switch, store visibility and product visibility.
 	 *
-	 * @param array<string, mixed>|null $report Stored report.
+	 * @param array<string, mixed>|null                                                                                                     $report Stored report.
+	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $live   Store conditions read now.
 	 * @return string[]
 	 */
-	private function shopping( ?array $report ): array {
+	private function shopping( ?array $report, array $live ): array {
 		$statuses = array(
 			UcpSwitch::STATUS_ACTIVE          => 'On',
 			UcpSwitch::STATUS_NEEDS_ATTENTION => 'On, with required steps left',
@@ -175,10 +177,15 @@ class SupportReport {
 		} else {
 			$visibility = 'Live';
 		}
+		// As the page's Needs attention badge: a step shown as Required is left, whether or not it blocks the switch.
+		$status = $this->ucp_switch->status();
+		if ( UcpSwitch::STATUS_ACTIVE === $status && 'check' === $this->readiness_page->shopping_badge( $live )[0] ) {
+			$status = UcpSwitch::STATUS_NEEDS_ATTENTION;
+		}
 		$lines = array(
 			'### AI shopping ###',
 			'',
-			'AI shopping: ' . ( $statuses[ $this->ucp_switch->status() ] ?? '' ),
+			'AI shopping: ' . ( $statuses[ $status ] ?? '' ),
 			'Store visibility: ' . $visibility,
 		);
 		if ( null !== $report ) {
@@ -304,6 +311,11 @@ class SupportReport {
 			);
 		}
 		$lines[] = '';
+		// With nothing checked, a count of 0 is not a pass; the page says there are no products too.
+		if ( isset( $report['products'] ) && 0 === (int) $report['products'] ) {
+			$lines[] = 'No products to check.';
+			return $lines;
+		}
 		foreach ( is_array( $report['checks'] ?? null ) ? $report['checks'] : array() as $check ) {
 			if ( ! is_array( $check ) || ! isset( $check['id'] ) ) {
 				continue;

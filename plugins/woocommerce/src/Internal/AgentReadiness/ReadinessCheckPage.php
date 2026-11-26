@@ -409,13 +409,15 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @return array{title:string,badge:array{intent:string,text:string}|null,text:string,button:array{href:string,text:string}}
 	 */
 	private function shopping_card( array $checks ): array {
-		$enabled  = UcpUtils::is_enabled();
-		$left     = count( self::open_steps( $checks ) );
+		$enabled = UcpUtils::is_enabled();
+		// As the Setup checklist's badge: the required steps while any is left, then the optional ones.
+		$required = count( array_filter( self::open_steps( $checks ), array( StoreConditions::class, 'shows_required' ) ) );
+		$left     = $required > 0 ? $required : count( self::open_steps( $checks ) );
 		$badge    = $this->shopping_badge( $checks );
 		$blocked  = array() !== $this->store_conditions->failing_required( $checks );
 		$can_shop = $enabled && ! $blocked;
 		// As in the design: Continue setup while a required step is left, as the Setup checklist counts them, otherwise View settings.
-		$button = array() !== array_filter( self::open_steps( $checks ), array( StoreConditions::class, 'shows_required' ) ) ? __( 'Continue setup', 'woocommerce' ) : __( 'View settings', 'woocommerce' );
+		$button = $required > 0 ? __( 'Continue setup', 'woocommerce' ) : __( 'View settings', 'woocommerce' );
 		$set_up = $enabled || false !== get_option( $this->features_controller->feature_enable_option_name( UcpUtils::FEATURE_ID ) );
 		if ( ! $set_up ) {
 			$text   = __( 'Let shoppers find and buy your products through AI assistants.', 'woocommerce' );
@@ -1039,12 +1041,28 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'link'   => $item['link'],
 			);
 		}
+		// Count Required setup steps only, as the Setup checklist does. A step that blocks listing
+		// still joins when the rules file does not mark it Required, and a card with none of them
+		// keeps the ranking line. A scanned check is not a setup step and keeps that line too.
+		$setup_ids  = array_column( array_filter( $checks, array( self::class, 'is_setup_step' ) ), 'id' );
+		$setup_only = array() === array_diff( array_column( $items, 'id' ), $setup_ids );
+		$required   = $setup_only ? count( array_filter( $items, static fn( array $item ): bool => 0 === $item['tier'] ) ) : 0;
 		return array(
 			'title'   => __( 'Fix first', 'woocommerce' ),
-			'ranking' => self::ranking_text( $report, $items ),
-			'link'    => self::ranking_link( $report ),
+			'ranking' => $required > 0 ? self::required_steps_summary( $required ) : self::ranking_text( $report, $items ),
+			'link'    => $required > 0 ? null : self::ranking_link( $report ),
 			'items'   => $list,
 		);
+	}
+
+	/**
+	 * How many required setup steps are left, as the Setup checklist and a Fix first card with only setup steps say it.
+	 *
+	 * @param int $required Number of failing required setup steps.
+	 */
+	public static function required_steps_summary( int $required ): string {
+		/* translators: %d: number of failing required setup steps. */
+		return sprintf( _n( 'Finish %d required step to get your store ready for AI shopping.', 'Finish %d required steps to get your store ready for AI shopping.', $required, 'woocommerce' ), $required );
 	}
 
 	/**
@@ -1472,7 +1490,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'id'       => $id,
 				'title'    => $group[0],
 				'badge'    => self::badge_data( $cant && array() === $rows ? ( $waiting ? self::waiting_badge() : self::cant_check_badge() ) : self::group_badge( $checks, $waiting ) ),
-				'note'     => $ucp_off && ! $ucp_only ? self::ucp_off_note() : ( 'understand' === $id ? self::sample_note( $report ) : null ),
+				// In coming soon mode the row says why nothing ran; the AI shopping note waits until the store is live.
+				'note'     => $ucp_off && ! $ucp_only && $launched ? self::ucp_off_note() : ( 'understand' === $id ? self::sample_note( $report ) : null ),
 				'channels' => array(),
 				'rows'     => $cant ? array_merge( $rows, array( self::cant_check_row( $launched, $was_live ) ) ) : $rows,
 				'folded'   => self::check_rows( array_values( $folded ), $launched, $was_live ),

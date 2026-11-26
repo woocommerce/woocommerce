@@ -358,8 +358,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * Product visibility: the counts from the last stored readiness report, each with a link to those
-	 * products, or a line saying they show after the first check.
+	 * Product visibility: the catalog counts as they stand now, each with a link to those products, or a
+	 * line saying they show after the first check.
 	 *
 	 * @param array<string, mixed>|null $report Stored report, or null before the first scan.
 	 * @return array{title:string,description:string,empty:string|null,counts:array<int, array{id:string,label:string,count:string,tip:string,tip_label:string,link:array{href:string,text:string}}>}
@@ -367,7 +367,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	private static function visibility( ?array $report ): array {
 		$counts = array();
 		if ( null !== $report ) {
-			$cards = array(
+			// Counted now: products added, hidden or removed since the last check count, as in the lists the cards link to.
+			$report = array_merge( $report, ProductScan::catalog_counts() );
+			$cards  = array(
 				// The whole catalog, like the other two; `products` stops at PRODUCT_LIMIT. Reports from before `available` have only `products`.
 				array( ProductScan::COUNT_AVAILABLE, __( 'Visible', 'woocommerce' ), (int) ( $report['available'] ?? $report['products'] ?? 0 ), '', '' ),
 				array( ProductScan::COUNT_HIDDEN, __( 'Hidden', 'woocommerce' ), (int) ( $report['hidden_from_catalog'] ?? 0 ), __( 'Products set to Hidden in Catalog visibility.', 'woocommerce' ), __( 'More information about hidden products', 'woocommerce' ) ),
@@ -408,8 +410,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$open     = ReadinessCheckPage::open_steps( $checks );
 		$required = count( array_filter( $open, array( StoreConditions::class, 'shows_required' ) ) );
 		if ( $required > 0 ) {
-			/* translators: %d: number of failing required setup steps. */
-			$summary = sprintf( _n( 'Finish %d required step to get your store ready for AI shopping.', 'Finish %d required steps to get your store ready for AI shopping.', $required, 'woocommerce' ), $required );
+			$summary = ReadinessCheckPage::required_steps_summary( $required );
 		} elseif ( array() !== $open ) {
 			/* translators: %d: number of open setup steps. */
 			$summary = sprintf( _n( 'Your store is ready for AI shopping. You have %d optional step left.', 'Your store is ready for AI shopping. You have %d optional steps left.', count( $open ), 'woocommerce' ), count( $open ) );
@@ -452,6 +453,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			);
 		}
 
+		// The badge counts what the summary counts: the required steps while any is left, then the optional ones.
+		$left = $required > 0 ? $required : count( $open );
 		return array(
 			'title'     => __( 'Setup checklist', 'woocommerce' ),
 			// As in the design: the steps left, or All steps done in green once none are.
@@ -461,7 +464,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			) : array(
 				'intent' => 'none',
 				/* translators: %d: number of setup steps left. */
-				'text'   => sprintf( _n( '%d step left', '%d steps left', count( $open ), 'woocommerce' ), count( $open ) ),
+				'text'   => sprintf( _n( '%d step left', '%d steps left', $left, 'woocommerce' ), $left ),
 			),
 			'summary'   => $summary,
 			'steps'     => $steps,
