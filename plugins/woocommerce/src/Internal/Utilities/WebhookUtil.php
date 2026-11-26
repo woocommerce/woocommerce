@@ -117,6 +117,16 @@ class WebhookUtil {
 		);
 
 		echo '<p>' . wp_kses_post( $text ) . '</p>';
+
+		if ( $users_have_content ) {
+			$text = sprintf(
+				/* translators: 1 = url of the WooCommerce webhooks settings page */
+				__( 'If the "Attribute all content to" option is selected, the affected WooCommerce webhooks will be attributed to the selected user. They will keep their delivery URLs, and their payloads will be built as that user. You can review them on the <a href="%1$s">WooCommerce webhooks settings page</a>.', 'woocommerce' ),
+				$webhooks_settings_url
+			);
+
+			echo '<p>' . wp_kses_post( $text ) . '</p>';
+		}
 	}
 
 	/**

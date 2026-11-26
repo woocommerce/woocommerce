@@ -30,10 +30,15 @@ interface EmailStylesData {
  * @return {boolean} True if the nested object is empty, false otherwise.
  */
 function isNestedEmpty( obj ) {
-	const isNotEmpty = Object.keys( obj ).some(
-		( key ) => Object.keys( obj[ key ] ).length > 0
-	);
-	return ! isNotEmpty;
+	// An empty string or null is unset; other plain values (0, false, numbers) are set.
+	if ( obj === null ) {
+		return true;
+	}
+	if ( typeof obj !== 'object' ) {
+		return obj === '';
+	}
+	// Children are already cleaned, so any key left holds a value.
+	return Object.keys( obj ).length === 0;
 }
 
 /**
@@ -78,7 +83,7 @@ export function setImmutably( setObject, setPath, value ): typeof setObject {
  * @param {Object} obj The object to shorten the variable names in.
  * @return {Object} The object with the shortened variable names.
  */
-function shortenWpPresetVariables( obj ) {
+export function shortenWpPresetVariables( obj ) {
 	// Helper function to replace the variable string
 	const replaceVariable = ( value ) => {
 		return value.replace(
@@ -114,7 +119,7 @@ function shortenWpPresetVariables( obj ) {
  * @param {Object} obj The object to clean.
  * @return {Object} The cleaned object.
  */
-function cleanupUserStyles( obj ) {
+export function cleanupUserStyles( obj ) {
 	const cleanObject = ( current ) => {
 		if (
 			( typeof current === 'object' && current !== null ) ||

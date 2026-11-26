@@ -1078,7 +1078,7 @@ The contents of this block will display when there are no products found.
 - **Name:** woocommerce/product-collection-no-results
 - **Category:** woocommerce
 - **Ancestor:** woocommerce/product-collection
-- **Supports:** align, color (background, gradients, link, text), email, interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
+- **Supports:** align, color (background, gradients, link, text), email, interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
 
 ## Product Description - woocommerce/product-description
 
@@ -1249,7 +1249,7 @@ Add a set of filters shoppers can use.
 - **Name:** woocommerce/product-filters
 - **Category:** woocommerce
 - **Supports:** align, color (background, button, heading, text, ~~enableContrastChecker~~), inserter, interactivity, layout (default, ~~allowEditing~~), position (sticky), spacing (blockGap), typography (fontSize)
-- **Attributes:** overlayMode, overlayPosition
+- **Attributes:** overlayButtonStyle, overlayMode, overlayPosition
 
 ## Active Filters - woocommerce/product-filter-active
 

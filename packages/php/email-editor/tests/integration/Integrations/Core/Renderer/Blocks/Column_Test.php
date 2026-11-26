@@ -206,6 +206,31 @@ class Column_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it uses the shrunk width set by Blocks_Width_Preprocessor instead of the saved width.
+	 */
+	public function testItUsesShrunkColumnWidthFromEmailAttrs(): void {
+		$parsed_column                                = $this->parsed_column;
+		$parsed_column['attrs']['width']              = '100%';
+		$parsed_column['email_attrs']['column-width'] = '290px';
+		$rendered                                     = $this->column_renderer->render( '<p>Column content</p>', $parsed_column, $this->rendering_context );
+		$this->checkValidHTML( $rendered );
+		$this->assertStringContainsString( 'width="290"', $rendered );
+		$this->assertStringNotContainsString( 'width="100%"', $this->get_column_cell_tag( $rendered ) );
+	}
+
+	/**
+	 * Return the opening tag of the column's outer cell.
+	 *
+	 * @param string $rendered Rendered column.
+	 * @return string
+	 */
+	private function get_column_cell_tag( string $rendered ): string {
+		preg_match( '/<td[^>]*wp-block-column[^>]*>/', $rendered, $matches );
+		$this->assertNotEmpty( $matches, 'Column cell not found.' );
+		return $matches[0];
+	}
+
+	/**
 	 * Test it applies padding-left from email_attrs (set by Spacing_Preprocessor for columns blockGap)
 	 */
 	public function testItAppliesPaddingLeftFromEmailAttrs(): void {

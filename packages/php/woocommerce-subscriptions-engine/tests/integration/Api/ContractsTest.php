@@ -1579,7 +1579,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @param int $cycle_id    Cycle id.
 	 */
 	private function cycle( int $contract_id, int $cycle_id ): Cycle {
-		foreach ( ( new ContractRepository() )->find_cycle_history( $contract_id ) as $cycle ) {
+		foreach ( ( new ContractRepository() )->find_cycles( $contract_id ) as $cycle ) {
 			if ( $cycle->get_id() === $cycle_id ) {
 				return $cycle;
 			}
@@ -1895,16 +1895,16 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$id      = $this->contract_with_currency();
 		$created = $this->add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) );
 
-		$history = Contracts::get_cycles( $id );
+		$cycles = Contracts::get_cycles( $id );
 
-		$this->assertCount( 1, $history );
-		$this->assertEquals( $history[0], $created, 'The returned view matches a fresh read.' );
+		$this->assertCount( 1, $cycles );
+		$this->assertEquals( $cycles[0], $created, 'The returned view matches a fresh read.' );
 		$cycle_id = $created->get_id();
 		$this->assertGreaterThan( 0, $cycle_id );
-		$this->assertInstanceOf( CycleView::class, $history[0] );
-		$this->assertSame( $cycle_id, $history[0]->get_id() );
-		$this->assertSame( CycleStatus::BILLED, $history[0]->get_status() );
-		$this->assertSame( 77, $history[0]->get_order_id() );
+		$this->assertInstanceOf( CycleView::class, $cycles[0] );
+		$this->assertSame( $cycle_id, $cycles[0]->get_id() );
+		$this->assertSame( CycleStatus::BILLED, $cycles[0]->get_status() );
+		$this->assertSame( 77, $cycles[0]->get_order_id() );
 	}
 
 	/**
@@ -2905,11 +2905,11 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		$history = Contracts::get_cycles( $contract_id );
-		$this->assertCount( 1, $history );
-		$this->assertInstanceOf( CycleView::class, $history[0] );
-		$this->assertSame( 1, $history[0]->get_count() );
-		$this->assertSame( CycleStatus::BILLED, $history[0]->get_status() );
+		$cycles = Contracts::get_cycles( $contract_id );
+		$this->assertCount( 1, $cycles );
+		$this->assertInstanceOf( CycleView::class, $cycles[0] );
+		$this->assertSame( 1, $cycles[0]->get_count() );
+		$this->assertSame( CycleStatus::BILLED, $cycles[0]->get_status() );
 	}
 
 	/**
