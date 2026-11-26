@@ -739,14 +739,18 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$webhook = $this->create_active_webhook( 'product.updated' );
 		$webhook->save();
 
+		$requests = 0;
 		add_filter(
 			'pre_http_request',
-			function () use ( $response_code ) {
+			function () use ( $response_code, &$requests ) {
+				++$requests;
 				return $this->mock_http_response( $response_code );
 			}
 		);
 
 		$result = $webhook->deliver_ping();
+
+		$this->assertSame( 1, $requests, 'The ping should send one request, and its save should not ping again.' );
 
 		if ( $expect_success ) {
 			$this->assertTrue( $result, "A ping answered with {$response_code} should succeed." );
@@ -950,16 +954,13 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A class that overrides the saving delivery methods keeps working through them, and the stage methods refuse it.
+	 * @testdox A class that overrides log_delivery() keeps working through it, and stage_delivery_result() refuses it.
 	 */
-	public function test_stage_delivery_methods_refuse_a_class_that_has_not_adopted_them() {
+	public function test_stage_delivery_result_refuses_a_class_that_has_not_adopted_it() {
 		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
 		$webhook = new class() extends WC_Webhook {
 			public function log_delivery( $delivery_id, $request, $response, $duration ) {
 				parent::log_delivery( $delivery_id, $request, $response, $duration );
-			}
-			public function deliver_ping() {
-				return parent::deliver_ping();
 			}
 		};
 		// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
@@ -990,29 +991,38 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$webhook->log_delivery( 'delivery', $request, $response, 0.1 );
 		$this->assertSame( 1, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
 
-		$http = static fn() => array(
-			'response' => array(
-				'code'    => 200,
-				'message' => 'OK',
-			),
-			'headers'  => array(),
-			'body'     => '',
-		);
-		add_filter( 'pre_http_request', $http );
-		$this->assertTrue( $webhook->deliver_ping() );
-		remove_filter( 'pre_http_request', $http );
+		try {
+			$webhook->stage_delivery_result( 500 );
+			$this->fail( 'stage_delivery_result() did not refuse the class.' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode() );
+			$this->assertStringContainsString( 'stage_delivery_result()', $e->getMessage() );
+		}
+	}
 
-		$calls = array(
-			'stage_delivery_result' => array( 500 ),
-			'stage_delivery_ping'   => array(),
+	/**
+	 * @testdox No stage method of WC_Webhook sends an HTTP request.
+	 */
+	public function test_stage_methods_send_no_request(): void {
+		$webhook = $this->create_active_webhook( 'order.created' );
+		$webhook->save();
+
+		$requests = array();
+		add_filter(
+			'pre_http_request',
+			function ( $response, $args, $url ) use ( &$requests ) {
+				$requests[] = $url;
+				return $this->mock_http_response( 200 );
+			},
+			10,
+			3
 		);
-		foreach ( $calls as $stage_method => $args ) {
-			try {
-				$webhook->$stage_method( ...$args );
-				$this->fail( $stage_method . ' did not refuse the class.' );
-			} catch ( WC_Data_Exception $e ) {
-				$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode() );
-				$this->assertStringContainsString( $stage_method . '()', $e->getMessage() );
+
+		$args_by_method = array( 'stage_delivery_result' => array( 500 ) );
+		foreach ( get_class_methods( WC_Webhook::class ) as $method ) {
+			if ( 0 === strpos( $method, 'stage_' ) ) {
+				$webhook->$method( ...( $args_by_method[ $method ] ?? array() ) );
+				$this->assertSame( array(), $requests, "{$method}() must only change the webhook in memory." );
 			}
 		}
 	}
