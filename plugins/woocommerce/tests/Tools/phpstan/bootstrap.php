@@ -12,13 +12,15 @@ require_once __DIR__ . '/../../../vendor/autoload.php';
 spl_autoload_register(
 	function ( string $class_name ): void {
 		$files = array(
-			'WC_Data'               => 'stubs.php',
-			'WC_Data_Store'         => 'stubs.php',
-			'Stage_Refusal_Fixture' => 'stage-refusal.php',
-			'Writes_Fixture'        => 'writes.php',
-			'Twins_Fixture'         => 'twins.php',
-			'Exempt_Fixture'        => 'exempt.php',
-			'Not_WC_Data_Fixture'   => 'exempt.php',
+			'WC_Data'                     => 'stubs.php',
+			'WC_Data_Store'               => 'stubs.php',
+			'Stage_Refusal_Fixture'       => 'stage-refusal.php',
+			'Writes_Fixture'              => 'writes.php',
+			'Twins_Fixture'               => 'twins.php',
+			'Exempt_Fixture'              => 'exempt.php',
+			'Not_WC_Data_Fixture'         => 'exempt.php',
+			'Staged_Hooks_Fixture'        => 'staged-hooks.php',
+			'Staged_Filter_Types_Fixture' => 'staged-filter-types.php',
 		);
 
 		if ( isset( $files[ $class_name ] ) ) {

@@ -75,6 +75,71 @@ final class StagedMethod {
 	}
 
 	/**
+	 * Whether a hook may fire on a direct stage call: refuse the change when a callback of the hook accepts fewer
+	 * arguments than the hook passes, $staged included. Such a callback was written for the saving path, where the
+	 * object and its items are saved.
+	 *
+	 * @param string $hook      Hook name.
+	 * @param int    $arg_count Number of arguments the hook passes, $staged included.
+	 * @throws \WC_Data_Exception When a callback does not accept $staged.
+	 */
+	public static function refuse_unadapted_callbacks( string $hook, int $arg_count ): void {
+		global $wp_filter;
+
+		$names = array();
+		foreach ( isset( $wp_filter[ $hook ] ) ? $wp_filter[ $hook ]->callbacks : array() as $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				if ( (int) $callback['accepted_args'] < $arg_count ) {
+					$names[] = self::callback_name( $callback['function'] );
+				}
+			}
+		}
+
+		if ( empty( $names ) ) {
+			return;
+		}
+
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- A plain text message for a client, built from PHP names.
+		throw new \WC_Data_Exception(
+			'woocommerce_data_staging_unsupported',
+			sprintf(
+				/* translators: 1: hook name, 2: comma-separated list of PHP callbacks, 3: number of arguments. */
+				__( 'This change cannot be staged yet, because code on the %1$s hook does not support staged changes: %2$s. Each of these callbacks needs to accept $staged as its last argument, registered with %3$d accepted arguments. When $staged is true, the object and its items are not saved yet: they can have no IDs, they are not in the database, and the change can still be refused. The callback must read them from the object it gets and must not write to the database.', 'woocommerce' ),
+				$hook,
+				implode( ', ', $names ),
+				$arg_count
+			),
+			400
+		);
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+	}
+
+	/**
+	 * Readable name of a hook callback: a function, a class method, or the file and line of a closure.
+	 *
+	 * @param mixed $callback Hook callback.
+	 * @return string
+	 */
+	private static function callback_name( $callback ): string {
+		if ( is_string( $callback ) ) {
+			return $callback;
+		}
+
+		if ( is_array( $callback ) && isset( $callback[0], $callback[1] ) ) {
+			return ( is_object( $callback[0] ) ? get_class( $callback[0] ) : (string) $callback[0] ) . '::' . $callback[1];
+		}
+
+		if ( $callback instanceof \Closure ) {
+			$function = new \ReflectionFunction( $callback );
+			$file     = str_replace( wp_normalize_path( WP_CONTENT_DIR ) . '/', '', wp_normalize_path( (string) $function->getFileName() ) );
+			/* translators: 1: PHP file path, 2: line number. */
+			return sprintf( __( 'a closure in %1$s on line %2$d', 'woocommerce' ), $file, $function->getStartLine() );
+		}
+
+		return is_object( $callback ) ? get_class( $callback ) . '::__invoke' : '';
+	}
+
+	/**
 	 * Whether the class itself declares the method, rather than inherits it.
 	 *
 	 * @param string $class_name Class name.

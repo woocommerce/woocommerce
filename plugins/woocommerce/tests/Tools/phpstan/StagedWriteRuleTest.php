@@ -29,6 +29,15 @@ final class StagedWriteRuleTest extends RuleTestCase {
 	}
 
 	/**
+	 * The same config files as the other rule tests, so all of them share one PHPStan container.
+	 *
+	 * @return string[]
+	 */
+	public static function getAdditionalConfigFiles(): array {
+		return array( __DIR__ . '/data/staged-hooks.neon' );
+	}
+
+	/**
 	 * @testdox A stage method that does not start with refuse_unstaged_override() is reported.
 	 */
 	public function test_stage_method_without_leading_refusal_is_reported(): void {

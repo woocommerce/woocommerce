@@ -154,6 +154,24 @@ class WC_Discounts {
 	 * @return object[]
 	 */
 	public function get_items_to_validate() {
+		if ( $this->object instanceof WC_Order ) {
+			/**
+			 * Filters the items that a coupon is validated against.
+			 *
+			 * @param array        $items     Discounted items. For an order, ->object of each is the order item.
+			 * @param WC_Discounts $discounts The discounts instance.
+			 * @param bool         $staged    Passed for an order only: whether the order is staged and not saved yet.
+			 *
+			 * @since 11.4.0 Passes $staged for an order.
+			 */
+			return $this->object->apply_staged_filters( 'woocommerce_coupon_get_items_to_validate', $this->get_items(), $this );
+		}
+
+		/**
+		 * This filter is documented in the order branch below. A cart fires it without $staged.
+		 *
+		 * @since 11.4.0
+		 */
 		return apply_filters( 'woocommerce_coupon_get_items_to_validate', $this->get_items(), $this );
 	}
 
@@ -316,7 +334,7 @@ class WC_Discounts {
 	 * Get items which the coupon should be applied to.
 	 *
 	 * @since  3.2.0
-	 * @param  object $coupon Coupon object.
+	 * @param  WC_Coupon $coupon Coupon object.
 	 * @return array
 	 */
 	protected function get_items_to_apply_coupon( $coupon ) {
@@ -336,17 +354,28 @@ class WC_Discounts {
 			$items_to_apply[] = $item_to_apply;
 		}
 
+		if ( $this->object instanceof WC_Order ) {
+			/**
+			 * Filters the items that a coupon should be applied to.
+			 *
+			 * This filter allows you to modify the items that a coupon will be applied to before the discount calculations take place.
+			 *
+			 * @since 8.8.0
+			 * @since 11.4.0 Passes $staged for an order.
+			 * @param array            $items_to_apply The items that the coupon will be applied to.
+			 * @param WC_Coupon        $coupon         The coupon object.
+			 * @param WC_Discounts     $discounts      The discounts instance.
+			 * @param bool             $staged         Passed for an order only: whether the order is staged and not saved yet.
+			 *
+			 * @return array The modified list of items that the coupon should be applied to.
+			 */
+			return $this->object->apply_staged_filters( 'woocommerce_coupon_get_items_to_apply', $items_to_apply, $coupon, $this );
+		}
+
 		/**
-		 * Filters the items that a coupon should be applied to.
-		 *
-		 * This filter allows you to modify the items that a coupon will be applied to before the discount calculations take place.
+		 * This filter is documented in the order branch below. A cart fires it without $staged.
 		 *
 		 * @since 8.8.0
-		 * @param array            $items_to_apply The items that the coupon will be applied to.
-		 * @param WC_Coupon        $coupon The coupon object.
-		 * @param WC_Discounts     $this The discounts instance.
-		 *
-		 * @return array The modified list of items that the coupon should be applied to.
 		 */
 		return apply_filters( 'woocommerce_coupon_get_items_to_apply', $items_to_apply, $coupon, $this );
 	}
@@ -380,8 +409,28 @@ class WC_Discounts {
 			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : NumberUtil::round( $item->price );
 
 			// See how many and what price to apply to.
-			$apply_quantity    = $limit_usage_qty && ( $limit_usage_qty - $applied_count ) < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
-			$apply_quantity    = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
+			$apply_quantity = $limit_usage_qty && ( $limit_usage_qty - $applied_count ) < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
+			if ( $this->object instanceof WC_Order ) {
+				/**
+				 * Filters how many units of the item the coupon applies to.
+				 *
+				 * @param int          $apply_quantity Quantity the coupon applies to.
+				 * @param object       $item           Discounted item. For an order, ->object is the order item.
+				 * @param WC_Coupon    $coupon         Coupon.
+				 * @param WC_Discounts $discounts      The discounts instance.
+				 * @param bool         $staged         Passed for an order only: whether the order is staged and not saved yet.
+				 *
+				 * @since 11.4.0 Passes $staged for an order.
+				 */
+				$apply_quantity = max( 0, $this->object->apply_staged_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
+			} else {
+				/**
+				 * This filter is documented in the order branch below. A cart fires it without $staged.
+				 *
+				 * @since 11.4.0
+				 */
+				$apply_quantity = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
+			}
 			$price_to_discount = ( $price_to_discount / $item->quantity ) * $apply_quantity;
 
 			// Run coupon calculations.
@@ -445,9 +494,48 @@ class WC_Discounts {
 			// Run coupon calculations.
 			if ( $limit_usage_qty ) {
 				$apply_quantity = $limit_usage_qty - $applied_count < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
-				$apply_quantity = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
-				$discount       = min( $amount, $item->price / $item->quantity ) * $apply_quantity;
+				if ( $this->object instanceof WC_Order ) {
+					/**
+					 * Filters how many units of the item the coupon applies to.
+					 *
+					 * @param int          $apply_quantity Quantity the coupon applies to.
+					 * @param object       $item           Discounted item. For an order, ->object is the order item.
+					 * @param WC_Coupon    $coupon         Coupon.
+					 * @param WC_Discounts $discounts      The discounts instance.
+					 * @param bool         $staged         Passed for an order only: whether the order is staged and not saved yet.
+					 *
+					 * @since 11.4.0 Passes $staged for an order.
+					 */
+					$apply_quantity = max( 0, $this->object->apply_staged_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
+				} else {
+					/**
+					 * This filter is documented in the order branch below. A cart fires it without $staged.
+					 *
+					 * @since 11.4.0
+					 */
+					$apply_quantity = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
+				}
+				$discount = min( $amount, $item->price / $item->quantity ) * $apply_quantity;
+			} elseif ( $this->object instanceof WC_Order ) {
+				/**
+				 * Filters how many units of the item the coupon applies to.
+				 *
+				 * @param int          $apply_quantity Quantity the coupon applies to.
+				 * @param object       $item           Discounted item. For an order, ->object is the order item.
+				 * @param WC_Coupon    $coupon         Coupon.
+				 * @param WC_Discounts $discounts      The discounts instance.
+				 * @param bool         $staged         Passed for an order only: whether the order is staged and not saved yet.
+				 *
+				 * @since 11.4.0 Passes $staged for an order.
+				 */
+				$apply_quantity = $this->object->apply_staged_filters( 'woocommerce_coupon_get_apply_quantity', $item->quantity, $item, $coupon, $this );
+				$discount       = $amount * $apply_quantity;
 			} else {
+				/**
+				 * This filter is documented in the order branch below. A cart fires it without $staged.
+				 *
+				 * @since 11.4.0
+				 */
 				$apply_quantity = apply_filters( 'woocommerce_coupon_get_apply_quantity', $item->quantity, $item, $coupon, $this );
 				$discount       = $amount * $apply_quantity;
 			}
@@ -534,7 +622,27 @@ class WC_Discounts {
 
 			// See how many and what price to apply to.
 			$apply_quantity = $limit_usage_qty && ( $limit_usage_qty - $applied_count ) < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
-			$apply_quantity = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
+			if ( $this->object instanceof WC_Order ) {
+				/**
+				 * Filters how many units of the item the coupon applies to.
+				 *
+				 * @param int          $apply_quantity Quantity the coupon applies to.
+				 * @param object       $item           Discounted item. For an order, ->object is the order item.
+				 * @param WC_Coupon    $coupon         Coupon.
+				 * @param WC_Discounts $discounts      The discounts instance.
+				 * @param bool         $staged         Passed for an order only: whether the order is staged and not saved yet.
+				 *
+				 * @since 11.4.0 Passes $staged for an order.
+				 */
+				$apply_quantity = max( 0, $this->object->apply_staged_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
+			} else {
+				/**
+				 * This filter is documented in the order branch below. A cart fires it without $staged.
+				 *
+				 * @since 11.4.0
+				 */
+				$apply_quantity = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
+			}
 
 			// Run coupon calculations.
 			$discount      = wc_add_number_precision( (float) $coupon->get_discount_amount( $price_to_discount / $item->quantity, $item->object, true ) ) * $apply_quantity;
@@ -1281,6 +1389,11 @@ class WC_Discounts {
 				throw new Exception( __( 'Coupon is not valid.', 'woocommerce' ), WC_Coupon::E_WC_COUPON_INVALID_FILTERED );
 			}
 		} catch ( Exception $e ) {
+			if ( $e instanceof WC_Data_Exception && 'woocommerce_data_staging_unsupported' === $e->getErrorCode() ) {
+				// A hook listener refused a direct stage call. The call fails; the coupon is not invalid.
+				throw $e;
+			}
+
 			/**
 			 * Filter the coupon error message.
 			 *

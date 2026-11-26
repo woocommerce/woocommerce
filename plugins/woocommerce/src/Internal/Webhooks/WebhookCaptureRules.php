@@ -72,21 +72,17 @@ final class WebhookCaptureRules {
 	}
 
 	/**
-	 * Register a webhook callback with the arguments its guard needs.
+	 * Register a webhook callback that gets every argument of the hook. The guards read the arguments after the
+	 * first, and a webhook on a hook that passes $staged never refuses a staged change, because the callback accepts
+	 * every argument.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param string   $hook             Hook to capture.
-	 * @param callable $callback         Callback for the first argument.
-	 * @param callable $context_callback Callback for hooks with extra arguments.
+	 * @param string   $hook     Hook to capture.
+	 * @param callable $callback Callback that takes the first hook argument and the others after it.
 	 */
-	public static function subscribe( string $hook, callable $callback, callable $context_callback ): void {
-		if ( ! isset( self::FILTER_GUARDS[ $hook ] ) ) {
-			add_action( $hook, $callback );
-			return;
-		}
-
-		add_filter( $hook, $context_callback, 10, self::FILTER_GUARDS[ $hook ][1] );
+	public static function subscribe( string $hook, callable $callback ): void {
+		add_filter( $hook, $callback, 10, PHP_INT_MAX );
 	}
 
 	/**

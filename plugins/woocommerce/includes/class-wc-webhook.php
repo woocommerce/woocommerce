@@ -119,7 +119,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$this->enqueued_blog_id = get_current_blog_id();
 
 			foreach ( $hooks as $hook ) {
-				WebhookCaptureRules::subscribe( $hook, array( $this, 'process' ), array( $this, 'process_with_context' ) );
+				WebhookCaptureRules::subscribe( $hook, array( $this, 'process_with_context' ) );
 			}
 		}
 	}

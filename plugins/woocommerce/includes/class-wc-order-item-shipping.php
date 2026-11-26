@@ -56,7 +56,16 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 			$this->set_taxes( false );
 		}
 
-		do_action( 'woocommerce_order_item_shipping_after_calculate_taxes', $this, $calculate_tax_for );
+		/**
+		 * Fires after the taxes of the item are calculated.
+		 *
+		 * @param WC_Order_Item $item              Order item.
+		 * @param array         $calculate_tax_for Location the taxes were calculated for.
+		 * @param bool          $staged            Whether the order of the item is staged and not saved yet.
+		 *
+		 * @since 11.4.0 Passes $staged.
+		 */
+		$this->do_staged_action( 'woocommerce_order_item_shipping_after_calculate_taxes', $this, $calculate_tax_for );
 
 		return true;
 	}

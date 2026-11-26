@@ -171,6 +171,15 @@
 	     exercise callbacks, they don't declare API surface. -->
 	<rule ref="WooCommerce.Commenting.CommentHooks">
 		<exclude-pattern>tests/</exclude-pattern>
+		<properties>
+			<!-- WC_Data::do_staged_action() and apply_staged_filters() fire hooks too. -->
+			<property name="hooks" type="array">
+				<element value="do_action"/>
+				<element value="apply_filters"/>
+				<element value="do_staged_action"/>
+				<element value="apply_staged_filters"/>
+			</property>
+		</properties>
 	</rule>
 
 	<!-- Tests fire legacy hyphenated core hooks (e.g. woocommerce_settings-{page_id}) that

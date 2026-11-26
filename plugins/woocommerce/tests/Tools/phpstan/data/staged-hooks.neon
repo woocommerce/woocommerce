@@ -1,0 +1,11 @@
+services:
+	-
+		class: SzepeViktor\PHPStan\WordPress\HookDocBlock
+	-
+		class: SzepeViktor\PHPStan\WordPress\HookDocsVisitor
+		tags:
+			- phpstan.parser.richParserNodeVisitor
+	-
+		class: Automattic\WooCommerce\Testing\Tools\phpstan\StagedFiltersReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension

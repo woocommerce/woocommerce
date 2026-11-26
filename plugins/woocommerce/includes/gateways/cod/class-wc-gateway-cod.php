@@ -61,7 +61,13 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
-		add_filter( 'woocommerce_payment_complete_order_status', array( $this, 'change_payment_complete_order_status' ), 10, 3 );
+		// Accepts $staged without a fourth parameter on change_payment_complete_order_status(), which plugins override with three.
+		add_filter(
+			'woocommerce_payment_complete_order_status',
+			fn( $status, $order_id = 0, $order = false, $staged = false ) => $this->change_payment_complete_order_status( $status, $order_id, $order ), // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The callback only reads the order object, so a staged order works the same.
+			10,
+			4
+		);
 
 		// Customer Emails.
 		add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );

@@ -96,4 +96,157 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 
 		$this->assertNotSame( 'WC_DateTime', $order->get_date_created(), 'The class name string must not be stored as the date' );
 	}
+
+	/**
+	 * @testdox A listener that does not accept $staged refuses a direct stage call and does not run, and works unchanged on the saving path.
+	 * @testWith ["woocommerce_test_staged_action"]
+	 *           ["woocommerce_test_staged_filter"]
+	 *
+	 * @param string $hook Hook that the stage method fires.
+	 */
+	public function test_a_listener_without_staged_refuses_a_direct_stage_call( string $hook ): void {
+		$object = $this->create_staging_object();
+		$runs   = 0;
+		add_filter(
+			$hook,
+			static function ( $value ) use ( &$runs ) {
+				++$runs;
+				return $value;
+			},
+			10,
+			2
+		);
+
+		$object->set_value();
+		$this->assertSame( 1, $runs, 'The listener runs on the saving path' );
+
+		$this->expectException( WC_Data_Exception::class );
+		try {
+			$object->stage_value();
+		} finally {
+			$this->assertSame( 1, $runs, 'The listener did not run on the refused call' );
+		}
+	}
+
+	/**
+	 * @testdox A listener that accepts $staged gets true on a direct stage call and false on the saving path, and a filter returns the filtered value.
+	 * @testWith ["woocommerce_test_staged_action", "value"]
+	 *           ["woocommerce_test_staged_filter", "filtered"]
+	 *
+	 * @param string $hook     Hook that the stage method fires.
+	 * @param string $returned Value that apply_staged_filters() returns.
+	 */
+	public function test_a_listener_with_staged_gets_true_then_false( string $hook, string $returned ): void {
+		$object = $this->create_staging_object();
+		$staged = array();
+		add_filter(
+			$hook,
+			static function ( $value, $data_object, $is_staged ) use ( &$staged ) {
+				$staged[] = $is_staged;
+				return 'filtered';
+			},
+			10,
+			3
+		);
+
+		$object->stage_value();
+		$object->set_value();
+
+		$this->assertSame( array( true, false ), $staged );
+		$this->assertSame( array( $returned, $returned ), $object->filtered );
+	}
+
+	/**
+	 * @testdox __return_true on a filter refuses a direct stage call: no callback is exempt.
+	 */
+	public function test_return_true_refuses_a_direct_stage_call(): void {
+		$object = $this->create_staging_object();
+		add_filter( 'woocommerce_test_staged_filter', '__return_true' );
+
+		$this->expectException( WC_Data_Exception::class );
+		$this->expectExceptionMessage( 'woocommerce_test_staged_filter hook does not support staged changes: __return_true.' );
+		$object->stage_value();
+	}
+
+	/**
+	 * @testdox The refusal names the hook, each callback that does not accept $staged, and the argument count to register with.
+	 */
+	public function test_the_refusal_names_the_hook_and_each_callback(): void {
+		$object  = $this->create_staging_object();
+		$closure = static function () {};
+		add_action( 'woocommerce_test_staged_action', '__return_false' );
+		add_action( 'woocommerce_test_staged_action', array( self::class, 'listener_without_staged' ), 10, 2 );
+		add_action( 'woocommerce_test_staged_action', $closure );
+		add_action( 'woocommerce_test_staged_action', array( self::class, 'listener_with_staged' ), 10, 3 );
+
+		try {
+			$object->stage_value();
+			$this->fail( 'The direct stage call was not refused' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode() );
+			$this->assertStringContainsString(
+				'woocommerce_test_staged_action hook does not support staged changes: __return_false, WC_Data_Test::listener_without_staged, a closure in plugins/woocommerce/tests/php/includes/abstracts/class-wc-abstract-data-test.php on line ' . ( new ReflectionFunction( $closure ) )->getStartLine() . '. Each of these callbacks needs to accept $staged as its last argument, registered with 3 accepted arguments.',
+				$e->getMessage()
+			);
+		}
+	}
+
+	/**
+	 * Listener that was written before $staged.
+	 *
+	 * @param mixed $value Value.
+	 * @return mixed
+	 */
+	public static function listener_without_staged( $value ) {
+		return $value;
+	}
+
+	/**
+	 * Listener that accepts $staged.
+	 *
+	 * @param mixed   $value       Value.
+	 * @param WC_Data $data_object Object.
+	 * @param bool    $staged      Whether the object is staged.
+	 * @return mixed
+	 */
+	public static function listener_with_staged( $value, $data_object, $staged ) {
+		return $value;
+	}
+
+	/**
+	 * Create an object with a stage method that fires woocommerce_test_staged_action and woocommerce_test_staged_filter,
+	 * and a saving method that runs it through write_through().
+	 *
+	 * @return WC_Data
+	 */
+	private function create_staging_object(): WC_Data {
+		return new class() extends WC_Data {
+			/**
+			 * Values that the filter returned.
+			 *
+			 * @var array
+			 */
+			public $filtered = array();
+
+			/**
+			 * Saving method.
+			 */
+			public function set_value(): void {
+				$this->write_through(
+					function () {
+						$this->stage_value();
+					}
+				);
+			}
+
+			/**
+			 * Stage method.
+			 */
+			public function stage_value(): void {
+				$this->refuse_unstaged_override( 'set_value', 'stage_value' );
+				$this->do_staged_action( 'woocommerce_test_staged_action', 'value', $this );
+				$this->filtered[] = $this->apply_staged_filters( 'woocommerce_test_staged_filter', 'value', $this );
+			}
+		};
+	}
 }

@@ -37,6 +37,14 @@ abstract class WC_Data {
 	protected $writing_through = false;
 
 	/**
+	 * Whether a direct call of a stage_*() method changed the object since its last save.
+	 *
+	 * @since 11.4.0
+	 * @var bool
+	 */
+	protected $staged_unsaved = false;
+
+	/**
 	 * Clone mode constant: Duplicate mode clears meta IDs (default, for backward compatibility).
 	 *
 	 * @since 10.4.0
@@ -196,6 +204,74 @@ abstract class WC_Data {
 		}
 
 		StagedMethod::refuse_unstaged( $this, $method, $stage_method );
+		$this->staged_unsaved = true;
+	}
+
+	/**
+	 * Fire an action about this object from code that can run staged. The action gets $staged as its last argument:
+	 * true on a direct call of a stage_*() method, false on the saving path. On a direct stage call, a listener that
+	 * accepts fewer arguments than the action passes refuses the call, and the action does not fire.
+	 *
+	 * @since 11.4.0
+	 * @param string $hook    Action name.
+	 * @param mixed  ...$args Action arguments, without $staged.
+	 * @return void
+	 * @throws WC_Data_Exception When a listener does not accept $staged on a direct stage call.
+	 */
+	public function do_staged_action( string $hook, ...$args ): void {
+		$args[] = $this->check_staged_listeners( $hook, ...$args );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- The caller documents the hook.
+		do_action( $hook, ...$args );
+	}
+
+	/**
+	 * Apply a filter about this object from code that can run staged, and return the filtered value. The filter gets
+	 * $staged as its last argument: true on a direct call of a stage_*() method, false on the saving path. On a direct
+	 * stage call, a listener that accepts fewer arguments than the filter passes refuses the call, and the filter does
+	 * not run.
+	 *
+	 * @since 11.4.0
+	 * @param string $hook    Filter name.
+	 * @param mixed  ...$args Filter arguments, the value to filter first, without $staged.
+	 * @return mixed The filtered value.
+	 * @throws WC_Data_Exception When a listener does not accept $staged on a direct stage call.
+	 */
+	public function apply_staged_filters( string $hook, ...$args ) {
+		$args[] = $this->check_staged_listeners( $hook, ...$args );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- The caller documents the hook.
+		return apply_filters( $hook, ...$args );
+	}
+
+	/**
+	 * Whether hooks about this object fire on a direct stage call: a stage_*() method changed the object since its
+	 * last save, and no saving method runs right now.
+	 *
+	 * @since 11.4.0
+	 * @return bool
+	 */
+	protected function is_staged_unsaved(): bool {
+		return $this->staged_unsaved && ! $this->writing_through;
+	}
+
+	/**
+	 * Check the listeners of a hook about this object, and return the value to pass as the hook's last argument,
+	 * $staged: true on a direct call of a stage_*() method, false otherwise. On a direct stage call, a listener that
+	 * accepts fewer arguments than the hook passes refuses the call. A stage method that defers a hook to the next
+	 * save() calls this before it changes the object, and defers the hook with the value it returns.
+	 *
+	 * @since 11.4.0
+	 * @param string $hook    Hook name.
+	 * @param mixed  ...$args Hook arguments, without $staged.
+	 * @return bool Whether the object is staged and not saved yet.
+	 * @throws WC_Data_Exception When a listener does not accept $staged on a direct stage call.
+	 */
+	protected function check_staged_listeners( string $hook, ...$args ): bool {
+		$staged = $this->is_staged_unsaved();
+		if ( $staged ) {
+			StagedMethod::refuse_unadapted_callbacks( $hook, count( $args ) + 1 );
+		}
+
+		return $staged;
 	}
 
 	/**
@@ -340,6 +416,7 @@ abstract class WC_Data {
 	 * @return int
 	 */
 	public function save() {
+		$this->staged_unsaved = false;
 		if ( ! $this->data_store ) {
 			return $this->get_id();
 		}

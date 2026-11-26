@@ -1642,4 +1642,20 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
 		$this->assertSame( 'disabled', wc_get_webhook( $webhook->get_id() )->get_status() );
 	}
+
+	/**
+	 * @testdox A webhook on a hook that passes $staged does not refuse a direct stage call, and still processes the hook.
+	 */
+	public function test_a_webhook_on_a_staged_hook_does_not_refuse_a_staged_change(): void {
+		$sut = $this->create_active_webhook( 'action.woocommerce_order_before_calculate_totals' );
+		$sut->save();
+		$sut->enqueue();
+		$order = WC_Helper_Order::create_order();
+
+		$order->stage_totals();
+
+		$processed = new ReflectionProperty( WC_Webhook::class, 'processed' );
+		$processed->setAccessible( true );
+		$this->assertSame( array( true ), $processed->getValue( $sut ) );
+	}
 }

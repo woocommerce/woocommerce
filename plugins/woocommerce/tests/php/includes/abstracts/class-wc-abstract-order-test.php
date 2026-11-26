@@ -3385,4 +3385,88 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_email_change', 'before@example.com' ), 'The use is found through the email recorded with it' );
 	}
+
+	/**
+	 * @testdox A woocommerce_order_before_calculate_totals listener without $staged refuses a direct stage_totals() call and works through calculate_totals(); one with $staged gets true and false.
+	 */
+	public function test_before_calculate_totals_checks_its_listeners_on_a_direct_stage_call(): void {
+		$order    = WC_Helper_Order::create_order();
+		$old_runs = 0;
+		$old      = static function () use ( &$old_runs ) {
+			++$old_runs;
+		};
+		add_action( 'woocommerce_order_before_calculate_totals', $old, 10, 2 );
+
+		$order->calculate_totals();
+		$this->assertSame( 1, $old_runs, 'The old listener runs on the saving path' );
+
+		try {
+			$order->stage_totals();
+			$this->fail( 'stage_totals() did not refuse the old listener' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode() );
+			$this->assertStringContainsString( 'woocommerce_order_before_calculate_totals hook', $e->getMessage() );
+			$this->assertStringContainsString( 'class-wc-abstract-order-test.php on line ' . ( new ReflectionFunction( $old ) )->getStartLine(), $e->getMessage() );
+		}
+		$this->assertSame( 1, $old_runs, 'The old listener did not run on the refused call' );
+
+		remove_action( 'woocommerce_order_before_calculate_totals', $old, 10 );
+		$received = array();
+		add_action(
+			'woocommerce_order_before_calculate_totals',
+			static function ( $and_taxes, $listened_order, $staged ) use ( &$received ) {
+				$received[] = $staged;
+			},
+			10,
+			3
+		);
+
+		$order->calculate_totals();
+		$order->stage_totals();
+		$this->assertSame( array( false, true ), $received );
+	}
+
+	/**
+	 * @testdox A woocommerce_order_after_calculate_totals listener without $staged refuses a direct stage_totals() call before the order changes and never runs; one with $staged gets true at the save and false through calculate_totals().
+	 */
+	public function test_after_calculate_totals_checks_its_listeners_at_stage_time(): void {
+		$order    = WC_Helper_Order::create_order();
+		$old_runs = 0;
+		$old      = static function () use ( &$old_runs ) {
+			++$old_runs;
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $old, 10, 2 );
+		$order->set_shipping_total( 99 );
+		$order->save();
+
+		try {
+			$order->stage_totals();
+			$this->fail( 'stage_totals() did not refuse the old listener' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertStringContainsString( 'woocommerce_order_after_calculate_totals hook', $e->getMessage() );
+		}
+		$order->save();
+		$this->assertSame( 99.0, (float) wc_get_order( $order->get_id() )->get_shipping_total(), 'The refused call did not change the order' );
+		$this->assertSame( 0, $old_runs, 'The old listener did not run at the save' );
+
+		$order->calculate_totals();
+		$this->assertSame( 1, $old_runs, 'The old listener runs on the saving path' );
+
+		remove_action( 'woocommerce_order_after_calculate_totals', $old, 10 );
+		$received = array();
+		add_action(
+			'woocommerce_order_after_calculate_totals',
+			static function ( $and_taxes, $listened_order, $staged ) use ( &$received ) {
+				$received[] = $staged;
+			},
+			10,
+			3
+		);
+
+		$order->stage_totals();
+		$this->assertSame( array(), $received, 'The action waits for the save' );
+		$order->save();
+		$order->calculate_totals();
+		$this->assertSame( array( true, false ), $received );
+	}
 }

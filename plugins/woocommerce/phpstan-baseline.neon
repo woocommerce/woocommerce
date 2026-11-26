@@ -339,7 +339,7 @@ parameters:
 		-
 			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
 			identifier: phpDoc.parseError
-			count: 4
+			count: 3
 			path: includes/abstracts/abstract-wc-order.php
 
 		-
@@ -10812,11 +10812,6 @@ parameters:
 			count: 1
 			path: includes/class-wc-deprecated-filter-hooks.php
 
-		-
-			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wc-discounts.php
 
 		-
 			message: '#^Access to an undefined property object\:\:\$key\.$#'
@@ -12501,7 +12496,7 @@ parameters:
 		-
 			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
 			identifier: phpDoc.parseError
-			count: 6
+			count: 3
 			path: includes/class-wc-order.php
 
 		-

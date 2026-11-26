@@ -1805,7 +1805,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$listener = static function ( $and_taxes, $listened_order ) use ( &$orders ) {
 			$orders[] = $listened_order;
 		};
-		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 2 );
+		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 3 );
 
 		$order->stage_totals( false );
 		$copy = clone $order;
@@ -1875,7 +1875,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			$listened_order->update_taxes();
 			$listened_order->set_total( 123 );
 		};
-		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 2 );
+		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 3 );
 
 		$order->stage_totals( true );
 		$this->assertSame( 0, $calls );

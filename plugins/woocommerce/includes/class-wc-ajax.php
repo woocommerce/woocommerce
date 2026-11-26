@@ -1367,10 +1367,10 @@ class WC_AJAX {
 				$use_editor_tax_location = null;
 				if ( ! empty( $tax_location['country'] ) ) {
 					$editor_tax_location     = $order->get_taxable_location( $tax_location );
-					$use_editor_tax_location = function ( $location, $location_order ) use ( $order, $editor_tax_location ) {
+					$use_editor_tax_location = function ( $location, $location_order, $staged = false ) use ( $order, $editor_tax_location ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Accepts $staged; it only reads the order object.
 						return $location_order->get_id() === $order->get_id() ? $editor_tax_location : $location;
 					};
-					add_filter( 'woocommerce_order_get_tax_location', $use_editor_tax_location, PHP_INT_MAX, 2 );
+					add_filter( 'woocommerce_order_get_tax_location', $use_editor_tax_location, PHP_INT_MAX, 3 );
 				}
 
 				// When prices include tax, the discount is taken from the price with tax, so the new items need their tax first.

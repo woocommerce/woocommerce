@@ -341,6 +341,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return int order ID
 	 */
 	public function save() {
+		$this->staged_unsaved = false;
 		if ( ! $this->data_store ) {
 			return $this->get_id();
 		}
@@ -1380,12 +1381,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		/**
 		 * Trigger action before removing all order line items. Allows you to track order items.
 		 *
-		 * @param  WC_Order  $this  The current order object.
-		 * @param  string|null $type Order item type. Default null.
+		 * @param  WC_Abstract_Order $order  The current order object.
+		 * @param  string|null       $type   Order item type. Default null.
+		 * @param  bool              $staged Whether the order is staged and not saved yet.
 		 *
 		 * @since 7.8.0
+		 * @since 11.4.0 Passes $staged.
 		 */
-		do_action( 'woocommerce_remove_order_items', $this, $type );
+		$this->do_staged_action( 'woocommerce_remove_order_items', $this, $type );
 
 		// Unsaved orders (id 0) have no persisted items — there's nothing to defer for deletion.
 		$has_persisted_items  = $this->get_id() > 0;
@@ -2049,10 +2052,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 *
 		 * @param  WC_Coupon $coupon The applied coupon object.
 		 * @param  WC_Order  $order  The current order object.
+		 * @param  bool      $staged Whether the order is staged and not saved yet.
 		 *
 		 * @since 7.3
+		 * @since 11.4.0 Passes $staged.
 		 */
-		do_action( 'woocommerce_order_applied_coupon', $coupon, $this );
+		$this->do_staged_action( 'woocommerce_order_applied_coupon', $coupon, $this );
 
 		$this->set_coupon_discount_amounts( $discounts );
 		$recorded_before_save = $this->writing_through && $this->has_recorded_coupon_usage();
@@ -2539,9 +2544,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			/**
 			 * Allow developers to filter this coupon before it gets re-applied to the order.
 			 *
+			 * @param WC_Coupon|false   $coupon_object Coupon to apply again.
+			 * @param string            $coupon_code   Coupon code.
+			 * @param WC_Order_Item     $coupon_item   Coupon line of the order.
+			 * @param WC_Abstract_Order $order         Order.
+			 * @param bool              $staged        Whether the order is staged and not saved yet.
+			 *
 			 * @since 3.2.0
+			 * @since 11.4.0 Passes $staged.
 			 */
-			$coupon_object = apply_filters( 'woocommerce_order_recalculate_coupons_coupon_object', $coupon_object, $coupon_code, $coupon_item, $this );
+			$coupon_object = $this->apply_staged_filters( 'woocommerce_order_recalculate_coupons_coupon_object', $coupon_object, $coupon_code, $coupon_item, $this );
 
 			if ( $coupon_object ) {
 				$discounts->apply_coupon( $coupon_object, false );
@@ -2977,7 +2989,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$args['city']     = WC()->countries->get_base_city();
 		}
 
-		return apply_filters( 'woocommerce_order_get_tax_location', $args, $this );
+		/**
+		 * Filters the tax location of the order.
+		 *
+		 * @param array             $args   Tax location with country, state, postcode and city.
+		 * @param WC_Abstract_Order $order  Order.
+		 * @param bool              $staged Whether the order is staged and not saved yet.
+		 *
+		 * @since 11.4.0 Passes $staged.
+		 */
+		return $this->apply_staged_filters( 'woocommerce_order_get_tax_location', $args, $this );
 	}
 
 	/**
@@ -3017,11 +3038,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 *
 		 * @since 3.3.0
 		 * @since 11.3.0 Also applied to discounts.
+		 * @since 11.4.0 Passes $staged.
 		 *
 		 * @param bool              $is_vat_exempt Whether the order is exempt from VAT.
 		 * @param WC_Abstract_Order $order         Order instance.
+		 * @param bool              $staged        Whether the order is staged and not saved yet.
 		 */
-		return (bool) apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
+		return (bool) $this->apply_staged_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
 	}
 
 	/**
@@ -3056,7 +3079,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->refuse_unstaged_override( 'calculate_taxes', 'stage_taxes' );
 		$this->refuse_unstaged_chain( 'update_taxes' );
 
-		do_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
+		/**
+		 * Fires before the taxes of the order are calculated.
+		 *
+		 * @param array             $args   Tax location that overrides the order's.
+		 * @param WC_Abstract_Order $order  Order.
+		 * @param bool              $staged Whether the order is staged and not saved yet.
+		 *
+		 * @since 11.4.0 Passes $staged.
+		 */
+		$this->do_staged_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
 
 		$calculate_tax_for  = $this->get_tax_location( $args );
 		$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
@@ -3273,8 +3305,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $and_taxes ) {
 			$this->refuse_unstaged_chain( 'calculate_taxes' );
 		}
+		$staged_after_totals = $this->check_staged_listeners( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
 
-		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
+		/**
+		 * Fires before the order totals are calculated.
+		 *
+		 * @param bool              $and_taxes Whether the taxes are calculated too.
+		 * @param WC_Abstract_Order $order     Order.
+		 * @param bool              $staged    Whether the order is staged and not saved yet. When true, the order and its items can have no IDs; read them from the order object and do not write to the database.
+		 *
+		 * @since 11.4.0 Passes $staged.
+		 */
+		$this->do_staged_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 
 		$fees_total        = 0;
 		$shipping_total    = 0;
@@ -3334,15 +3376,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->calculate_cogs_total_value();
 		}
 
-		/**
-		 * Fires after the order totals are calculated.
-		 *
-		 * @param bool              $and_taxes Whether the taxes were calculated too.
-		 * @param WC_Abstract_Order $order     Order object.
-		 * @param bool              $staged    Whether the totals were staged and are not yet saved. Always passed; a listener that wants it declares it with a default. When true, the order and its tax items are in memory and have no IDs yet; use the $order object, not the database. @since 11.4.0
-		 * @since 3.3.0
-		 */
-		$this->write_or_defer( 'after_calculate_totals', 'do_action', array( 'woocommerce_order_after_calculate_totals', $and_taxes, $this, ! $this->writing_through ) );
+		$after_calculate_totals = static function ( $and_taxes, $order, $staged ) {
+			/**
+			 * Fires after the order totals are calculated. A direct stage_totals() call defers it to the next save(),
+			 * which fires it right before the write.
+			 *
+			 * @param bool              $and_taxes Whether the taxes were calculated too.
+			 * @param WC_Abstract_Order $order     Order object.
+			 * @param bool              $staged    Whether the totals were staged and are not yet saved. When true, the order and its tax items are in memory and have no IDs yet; use the $order object, not the database. A listener must accept it: on a direct stage_totals() call, a listener registered with fewer arguments refuses the call.
+			 * @since 3.3.0
+			 * @since 11.4.0 Passes $staged.
+			 */
+			do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $order, $staged );
+		};
+		$this->write_or_defer( 'after_calculate_totals', $after_calculate_totals, array( $and_taxes, $this, $staged_after_totals ) );
 
 		$this->save_if_writing_through();
 
@@ -3887,10 +3934,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 *
 		 * @since 9.5.0
 		 *
+		 * @since 11.4.0 Passes $staged.
+		 *
 		 * @param float $value The value originally calculated.
 		 * @param WC_Abstract_Order $order The order for which the value is calculated.
+		 * @param bool $staged Whether the order is staged and not saved yet.
 		 */
-		$cogs_value = apply_filters( 'woocommerce_calculated_order_cogs_value', $cogs_value, $this );
+		$cogs_value = $this->apply_staged_filters( 'woocommerce_calculated_order_cogs_value', $cogs_value, $this );
 
 		$this->set_cogs_total_value( $cogs_value );
 

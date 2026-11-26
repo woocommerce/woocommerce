@@ -10,6 +10,15 @@ class WC_Data {
 	}
 
 	protected function refuse_unstaged_override( string $method, string $stage_method ): void {}
+
+	public function do_staged_action( string $hook, ...$args ): void {}
+
+	/**
+	 * @return mixed
+	 */
+	public function apply_staged_filters( string $hook, ...$args ) {
+		return null;
+	}
 }
 
 class WC_Data_Store {

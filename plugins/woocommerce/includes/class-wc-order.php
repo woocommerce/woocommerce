@@ -231,10 +231,12 @@ class WC_Order extends WC_Abstract_Order {
 		 * Filters the valid order statuses for payment complete.
 		 *
 		 * @param array    $valid_completed_statuses Array of valid order statuses for payment complete.
-		 * @param WC_Order $this                     Order object.
+		 * @param WC_Order $order                    Order object.
+		 * @param bool     $staged                   Whether the order is staged and not saved yet.
 		 * @since 2.7.0
+		 * @since 11.4.0 Passes $staged.
 		 */
-		$valid_completed_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', OrderStatus::PAYMENT_COMPLETE_STATUSES, $this );
+		$valid_completed_statuses = $this->apply_staged_filters( 'woocommerce_valid_order_statuses_for_payment_complete', OrderStatus::PAYMENT_COMPLETE_STATUSES, $this );
 		if ( ! $this->has_status( $valid_completed_statuses ) ) {
 			/**
 			 * Fires when payment completes for an order whose status payment cannot complete.
@@ -266,10 +268,12 @@ class WC_Order extends WC_Abstract_Order {
 		 *
 		 * @param string   $status        Order status.
 		 * @param int      $order_id      Order ID.
-		 * @param WC_Order $this          Order object.
+		 * @param WC_Order $order         Order object.
+		 * @param bool     $staged        Whether the order is staged and not saved yet.
 		 * @since 2.7.0
+		 * @since 11.4.0 Passes $staged.
 		 */
-		$next_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
+		$next_status = $this->apply_staged_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
 
 		$transaction_id = $this->get_transaction_id();
 		$payment_method = $this->get_payment_method_title();
@@ -507,10 +511,12 @@ class WC_Order extends WC_Abstract_Order {
 			 *
 			 * @param string   $status        Order status.
 			 * @param int      $order_id      Order ID.
-			 * @param WC_Order $this          Order object.
+			 * @param WC_Order $order         Order object.
+			 * @param bool     $staged        Whether the order is staged and not saved yet.
 			 * @since 2.7.0
+			 * @since 11.4.0 Passes $staged.
 			 */
-			$payment_completed_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
+			$payment_completed_status = $this->apply_staged_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
 
 			if ( $this->has_status( $payment_completed_status ) ) {
 				// If payment complete status is reached, set paid now.
@@ -2067,13 +2073,15 @@ class WC_Order extends WC_Abstract_Order {
 							 * virtual downloadable items do not require processing; all other items do.
 							 *
 							 * @since 2.7.0
+							 * @since 11.4.0 Passes $staged.
 							 *
 							 * @param bool        $needs_processing
 							 * @param \WC_Product $product
 							 * @param int         $order_id
+							 * @param bool        $staged   Whether the order is staged and not saved yet. When true, the order ID can be 0.
 							 * @return bool
 							 */
-							$custom_needs_processing = (bool) apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $order_id );
+							$custom_needs_processing = (bool) $this->apply_staged_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $order_id );
 							if ( $custom_needs_processing ) {
 								$needs_processing = 1;
 								break;

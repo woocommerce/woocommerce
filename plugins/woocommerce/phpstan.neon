@@ -17,6 +17,8 @@ parameters:
 	bootstrapFiles:
 		- vendor/autoload.php
 		- tests/Tools/phpstan/StagedWriteRule.php
+		- tests/Tools/phpstan/StagedHookDocsRule.php
+		- tests/Tools/phpstan/StagedFiltersReturnTypeExtension.php
 		- tests/Tools/phpstan/AbilityClassRule.php
 		- tests/Tools/phpstan/AbilityRegistrationRule.php
 	scanDirectories:
@@ -108,6 +110,14 @@ services:
 		class: Automattic\WooCommerce\Testing\Tools\phpstan\StagedWriteRule
 		tags:
 			- phpstan.rules.rule
+	-
+		class: Automattic\WooCommerce\Testing\Tools\phpstan\StagedHookDocsRule
+		tags:
+			- phpstan.rules.rule
+	-
+		class: Automattic\WooCommerce\Testing\Tools\phpstan\StagedFiltersReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension
 	-
 		class: Automattic\WooCommerce\Testing\Tools\phpstan\AbilityClassRule
 		tags:

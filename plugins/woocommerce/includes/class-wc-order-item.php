@@ -208,6 +208,18 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		return $order ?? wc_get_order( $this->get_order_id() );
 	}
 
+	/**
+	 * Whether the order of the item is staged and not saved yet. Reads the order object that holds the item, and
+	 * never loads the order.
+	 *
+	 * @since 11.4.0
+	 * @return bool
+	 */
+	protected function is_staged_unsaved(): bool {
+		$order = $this->order ? $this->order->get() : null;
+		return null !== $order && $order->is_staged_unsaved();
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -303,7 +315,16 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$this->set_taxes( false );
 		}
 
-		do_action( 'woocommerce_order_item_after_calculate_taxes', $this, $calculate_tax_for );
+		/**
+		 * Fires after the taxes of the item are calculated.
+		 *
+		 * @param WC_Order_Item $item              Order item.
+		 * @param array         $calculate_tax_for Location the taxes were calculated for.
+		 * @param bool          $staged            Whether the order of the item is staged and not saved yet.
+		 *
+		 * @since 11.4.0 Passes $staged.
+		 */
+		$this->do_staged_action( 'woocommerce_order_item_after_calculate_taxes', $this, $calculate_tax_for );
 
 		return true;
 	}
@@ -534,10 +555,13 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		 *
 		 * @since 9.5.0
 		 *
+		 * @since 11.4.0 Passes $staged.
+		 *
 		 * @param float|null $value The value originally calculated, null if it was not possible to calculate it.
 		 * @param WC_Order_Item $line_item The order item for which the value is calculated.
+		 * @param bool $staged Whether the order of the item is staged and not saved yet.
 		 */
-		$value = apply_filters( 'woocommerce_calculated_order_item_cogs_value', $value, $this );
+		$value = $this->apply_staged_filters( 'woocommerce_calculated_order_item_cogs_value', $value, $this );
 
 		if ( is_null( $value ) ) {
 			return false;

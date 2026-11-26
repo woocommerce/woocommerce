@@ -524,14 +524,29 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$discount = $single ? $discount : $discount * $cart_item_qty;
 		}
 
-		return apply_filters(
-			'woocommerce_coupon_get_discount_amount',
-			NumberUtil::round( min( $discount, $discounting_amount ), wc_get_rounding_precision() ),
-			$discounting_amount,
-			$cart_item,
-			$single,
-			$this
-		);
+		$discount = NumberUtil::round( min( $discount, $discounting_amount ), wc_get_rounding_precision() );
+		if ( $cart_item instanceof WC_Order_Item ) {
+			/**
+			 * Filters the discount amount of the coupon for an order item.
+			 *
+			 * @param float         $discount           Discount amount.
+			 * @param float         $discounting_amount Amount the coupon is applied to.
+			 * @param WC_Order_Item $cart_item          Order item.
+			 * @param bool          $single             Whether a single quantity is discounted.
+			 * @param WC_Coupon     $coupon             Coupon.
+			 * @param bool          $staged             Passed for an order item only: whether its order is staged and not saved yet.
+			 *
+			 * @since 11.4.0 Passes $staged for an order item.
+			 */
+			return $cart_item->apply_staged_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
+		}
+
+		/**
+		 * This filter is documented in the order item branch above. A cart item fires it without $staged.
+		 *
+		 * @since 11.4.0
+		 */
+		return apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
 	}
 
 	/*
@@ -1020,6 +1035,26 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function is_valid_for_product( $product, $values = array() ) {
 		if ( ! $this->is_type( wc_get_product_coupon_types() ) || ! is_a( $product, WC_Product::class ) ) {
+			if ( $values instanceof WC_Order_Item ) {
+				/**
+				 * Filters whether the coupon is valid for the product.
+				 *
+				 * @param bool          $valid   Whether the coupon is valid for the product.
+				 * @param WC_Product    $product Product.
+				 * @param WC_Coupon     $coupon  Coupon.
+				 * @param WC_Order_Item $values  Order item.
+				 * @param bool          $staged  Passed for an order item only: whether its order is staged and not saved yet.
+				 *
+				 * @since 11.4.0 Passes $staged for an order item.
+				 */
+				return $values->apply_staged_filters( 'woocommerce_coupon_is_valid_for_product', false, $product, $this, $values );
+			}
+
+			/**
+			 * This filter is documented in the order item branch above. A cart item fires it without $staged.
+			 *
+			 * @since 11.4.0
+			 */
 			return apply_filters( 'woocommerce_coupon_is_valid_for_product', false, $product, $this, $values );
 		}
 
@@ -1057,6 +1092,26 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$valid = false;
 		}
 
+		if ( $values instanceof WC_Order_Item ) {
+			/**
+			 * Filters whether the coupon is valid for the product.
+			 *
+			 * @param bool          $valid   Whether the coupon is valid for the product.
+			 * @param WC_Product    $product Product.
+			 * @param WC_Coupon     $coupon  Coupon.
+			 * @param WC_Order_Item $values  Order item.
+			 * @param bool          $staged  Passed for an order item only: whether its order is staged and not saved yet.
+			 *
+			 * @since 11.4.0 Passes $staged for an order item.
+			 */
+			return $values->apply_staged_filters( 'woocommerce_coupon_is_valid_for_product', $valid, $product, $this, $values );
+		}
+
+		/**
+		 * This filter is documented in the order item branch above. A cart item fires it without $staged.
+		 *
+		 * @since 11.4.0
+		 */
 		return apply_filters( 'woocommerce_coupon_is_valid_for_product', $valid, $product, $this, $values );
 	}
 
