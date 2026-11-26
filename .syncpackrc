@@ -39,7 +39,8 @@
 			"label": "Shared type declarations",
 			"dependencyTypes": [
 				"prod",
-				"dev"
+				"dev",
+				"pnpmOverrides"
 			],
 			"dependencies": [
 				"@types/debug",
