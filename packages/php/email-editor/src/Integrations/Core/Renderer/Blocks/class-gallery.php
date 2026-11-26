@@ -395,7 +395,7 @@ class Gallery extends Abstract_Block_Renderer {
 	 * matching the previous behavior with no regression.
 	 *
 	 * @param string      $img_html Sanitized <img> HTML.
-	 * @param string|null $aspect_ratio Aspect ratio to apply (e.g. "1" or "4/3").
+	 * @param string|null $aspect_ratio Aspect ratio to apply (e.g. "1", "4/3", or a derived ratio like "683/1024").
 	 * @param int         $cell_width Estimated display width of the gallery cell in px.
 	 * @param array       $image_attrs Parsed attributes of the core/image block (id, sizeSlug, ...).
 	 * @return string Image HTML with the crop applied, or the input unchanged when no valid ratio.
@@ -429,13 +429,12 @@ class Gallery extends Abstract_Block_Renderer {
 		 * Filters the URL of an image inside an email gallery so integrations can serve a
 		 * server-side-cropped file that honors the block's aspect ratio.
 		 *
-		 * Email can't crop client-side reliably, so returning an already-cropped URL (e.g. an image
-		 * CDN URL with resize/crop parameters) is the only way to honor the crop in every client.
-		 * Return the URL unchanged to leave the image uncropped (the renderer then falls back to
-		 * best-effort CSS cropping).
+		 * Fires for images with an explicit aspect ratio and for mixed-shape rows when the gallery
+		 * uses automatic cropping (`imageCrop`, on by default) with no ratio set. Return the URL
+		 * unchanged to leave the image uncropped and fall back to best-effort CSS cropping.
 		 *
 		 * @param string $image_url    The original image URL.
-		 * @param string $aspect_ratio The requested aspect ratio (e.g. "1", "4/3").
+		 * @param string $aspect_ratio The requested aspect ratio, either explicit (e.g. "1", "4/3") or derived from the row's tallest image (e.g. "683/1024").
 		 * @param int    $width        Target display width of the image in px (0 if unknown).
 		 * @param int    $height       Target display height derived from the aspect ratio in px (0 if unknown).
 		 * @param array  $image_attrs  Parsed attributes of the core/image block (id, sizeSlug, ...).
