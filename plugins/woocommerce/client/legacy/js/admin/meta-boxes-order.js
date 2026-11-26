@@ -798,14 +798,17 @@ jQuery( function ( $ ) {
 		},
 
 		/**
-		 * Check the quantity inputs in the items panel against their minimum,
-		 * revealing and reporting the first one below it.
+		 * Check the quantity inputs in the items panel against their minimum
+		 * and their step, revealing and reporting the first one that fails.
 		 *
-		 * @return {boolean} True when every quantity input meets its minimum.
+		 * @return {boolean} True when every quantity input meets its minimum and step.
 		 */
 		validate_quantity_inputs: function() {
-			var input = wc_meta_boxes_order_items.find_input_with_qty_below_min(
-				document.querySelectorAll( '#woocommerce-order-items input.quantity' )
+			var input = Array.prototype.find.call(
+				document.querySelectorAll( '#woocommerce-order-items input.quantity' ),
+				function( quantity_input ) {
+					return quantity_input.validity.rangeUnderflow || quantity_input.validity.stepMismatch;
+				}
 			);
 
 			if ( ! input ) {
