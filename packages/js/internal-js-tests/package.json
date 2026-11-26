@@ -66,6 +66,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
+		"@jest/environment-jsdom-abstract": "catalog:tooling",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
@@ -78,7 +79,7 @@
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
 		"jest-cli": "catalog:tooling",
-		"jest-environment-jsdom": "catalog:tooling",
+		"jsdom": "catalog:tooling",
 		"lib0": "0.2.x",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
@@ -112,7 +113,7 @@
 				"command": "lint",
 				"changes": [
 					"src/**/*.{js,jsx,ts,tsx}",
-					"lib/**/*.js",
+					"lib/**/*.{js,mjs}",
 					"jest-preset.js"
 				]
 			},
@@ -123,7 +124,7 @@
 					"changes": [
 						"jest-preset.js",
 						"jest.config.json",
-						"lib/**/*.js"
+						"lib/**/*.{js,mjs}"
 					],
 					"events": [
 						"pull_request",

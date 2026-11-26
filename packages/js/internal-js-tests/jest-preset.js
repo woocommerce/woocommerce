@@ -146,7 +146,10 @@ module.exports = {
 			],
 		}
 	),
-	testEnvironment: 'jest-environment-jsdom',
+	testEnvironment: path.resolve(
+		__dirname,
+		'lib/jest-environment-jsdom-20.mjs'
+	),
 	timers: 'modern',
 	verbose: true,
 	cacheDirectory: path.resolve(

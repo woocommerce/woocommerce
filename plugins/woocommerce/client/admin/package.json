@@ -158,7 +158,7 @@
 		"@wordpress/babel-preset-default": "next",
 		"@wordpress/block-editor": "catalog:wp-min",
 		"@wordpress/browserslist-config": "catalog:tooling",
-		"@wordpress/jest-preset-default": "next",
+		"@wordpress/jest-preset-default": "catalog:tooling",
 		"@wordpress/postcss-plugins-preset": "catalog:tooling",
 		"@wordpress/postcss-themes": "next",
 		"@xstate/inspect": "0.8.0",

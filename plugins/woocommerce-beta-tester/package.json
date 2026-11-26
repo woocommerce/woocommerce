@@ -11,15 +11,21 @@
 	"version": "4.0.0",
 	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
 	"devDependencies": {
+		"@babel/core": "catalog:tooling",
 		"@types/react": "18.3.x",
 		"@types/react-dom": "18.3.x",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/babel-preset-default": "next",
 		"@wordpress/env": "catalog:tooling",
+		"@wordpress/jest-preset-default": "catalog:tooling",
 		"@wordpress/scripts": "catalog:tooling",
+		"babel-jest": "catalog:tooling",
 		"eslint": "catalog:tooling",
 		"globals": "^16.5.0",
+		"jest": "catalog:tooling",
+		"jest-environment-jsdom": "catalog:tooling",
 		"prettier": "catalog:tooling",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
@@ -46,6 +52,19 @@
 		"@types/react-dom": "18.3.x",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
+	},
+	"jest": {
+		"preset": "@wordpress/jest-preset-default",
+		"transform": {
+			"\\.[jt]sx?$": [
+				"babel-jest",
+				{
+					"presets": [
+						"@wordpress/babel-preset-default"
+					]
+				}
+			]
+		}
 	},
 	"assets": {
 		"js": {
@@ -107,7 +126,7 @@
 		"packages-update": "wp-scripts packages-update",
 		"start": "wp-scripts start",
 		"test:e2e": "wp-scripts test-e2e",
-		"test:js": "wp-scripts test-unit-js --passWithNoTests",
+		"test:js": "wp-scripts test-unit-jest --passWithNoTests",
 		"uglify": "rm -f $npm_package_assets_js_min && for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done"
 	},
 	"engines": {
