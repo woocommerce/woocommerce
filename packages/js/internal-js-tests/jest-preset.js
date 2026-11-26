@@ -146,7 +146,7 @@ module.exports = {
 			],
 		}
 	),
-	testEnvironment: require.resolve( 'jest-environment-jsdom' ),
+	testEnvironment: 'jest-environment-jsdom',
 	timers: 'modern',
 	verbose: true,
 	cacheDirectory: path.resolve(
