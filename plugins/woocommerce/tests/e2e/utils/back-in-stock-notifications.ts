@@ -665,7 +665,8 @@ export function corruptEmailLinkKey( link: string ): string {
  */
 export const BIS_EMAIL_FOOTER = {
 	manage: /Manage notifications/,
-	unsubscribe: /To stop receiving these messages, click here to unsubscribe\./,
+	unsubscribe:
+		/To stop receiving these messages, click here to unsubscribe\./,
 } as const;
 
 /**

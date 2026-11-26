@@ -133,7 +133,9 @@ test.describe(
 			const body = bisEmailBody( page ).locator( 'body' );
 
 			await expect( body ).toContainText( BIS_EMAIL_FOOTER.manage );
-			await expect( body ).not.toContainText( BIS_EMAIL_FOOTER.unsubscribe );
+			await expect( body ).not.toContainText(
+				BIS_EMAIL_FOOTER.unsubscribe
+			);
 
 			// Account management must not cancel the notification.
 			const accountLink = bisEmailBody( page ).locator(

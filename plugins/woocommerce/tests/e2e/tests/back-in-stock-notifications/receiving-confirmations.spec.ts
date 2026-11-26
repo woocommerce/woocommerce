@@ -281,7 +281,9 @@ test.describe(
 			// every other email test signs up as a guest, so this is the only
 			// place the account branch renders.
 			await expect( body ).toContainText( BIS_EMAIL_FOOTER.manage );
-			await expect( body ).not.toContainText( BIS_EMAIL_FOOTER.unsubscribe );
+			await expect( body ).not.toContainText(
+				BIS_EMAIL_FOOTER.unsubscribe
+			);
 
 			// Account management must not cancel the notification.
 			const accountLink = bisEmailBody( page ).locator(
