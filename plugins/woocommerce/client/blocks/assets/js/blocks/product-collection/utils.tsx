@@ -519,10 +519,14 @@ export function sanitizeDisplayLayout(
 	}
 
 	if ( displayLayout?.type === LayoutOptions.CAROUSEL ) {
+		const carouselColumns =
+			displayLayout?.carouselColumns ?? DEFAULT_CAROUSEL_COLUMNS;
 		return {
 			type: displayLayout.type,
-			carouselColumns:
-				displayLayout?.carouselColumns ?? DEFAULT_CAROUSEL_COLUMNS,
+			carouselColumns: Math.min(
+				DEFAULT_CAROUSEL_COLUMNS,
+				Math.max( 1, Math.round( carouselColumns ) )
+			),
 			shrinkColumns: displayLayout?.shrinkColumns ?? true,
 		};
 	}

@@ -230,6 +230,19 @@ describe( 'Product Collection editor contracts', () => {
 				shrinkColumns: false,
 			},
 		},
+		{
+			caseName: 'a carousel column count above the maximum',
+			input: {
+				type: LayoutOptions.CAROUSEL,
+				carouselColumns: 8,
+				shrinkColumns: false,
+			},
+			saved: {
+				type: LayoutOptions.CAROUSEL,
+				carouselColumns: DEFAULT_CAROUSEL_COLUMNS,
+				shrinkColumns: false,
+			},
+		},
 	] )(
 		'saves $caseName and drops grid columns from the Carousel markup',
 		( { input, saved } ) => {
