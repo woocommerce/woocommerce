@@ -42,9 +42,6 @@ if ( $account_link ) {
 	}
 	// translators: %s: Account management URL.
 	printf( esc_html__( 'Manage notifications: %s', 'woocommerce' ), esc_url( $account_link ) );
-} else {
-	// translators: %s: Unsubscribe URL.
-	printf( esc_html__( 'To stop receiving these messages, unsubscribe: %s', 'woocommerce' ), esc_url( $unsubscribe_link ) );
 }
 echo "\n\n----------------------------------------\n\n";
 

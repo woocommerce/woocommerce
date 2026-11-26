@@ -70,11 +70,6 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 				echo ' ';
 			}
 			printf( '<a href="%1$s" id="notification__unsubscribe_link">%2$s</a>', esc_url( $account_link ), esc_html__( 'Manage notifications', 'woocommerce' ) );
-		} else {
-			// translators: %1$s placeholder is the unsubscribe link, %2$s placeholder is the Unsubscribe text link.
-			$unsubscribe_link_tag = sprintf( '<a href="%1$s" id="notification__unsubscribe_link">%2$s</a>', esc_url( $unsubscribe_link ), _x( 'click here', 'unsubscribe cta for stock notifications for guests', 'woocommerce' ) );
-			// translators: %s placeholder is the text part from above.
-			echo wp_kses_post( sprintf( __( 'To stop receiving these messages, %s to unsubscribe.', 'woocommerce' ), $unsubscribe_link_tag ) );
 		}
 		?>
 		<br><br>

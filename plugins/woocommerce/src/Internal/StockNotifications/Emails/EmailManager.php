@@ -228,7 +228,8 @@ class EmailManager {
 			margin-top: 20px;
 			color: <?php echo esc_attr( $text ); ?>;
 		}
-		#notification__unsubscribe_link {
+		#notification__unsubscribe_link,
+		#notification__footer a {
 			color: <?php echo esc_attr( $text ); ?>;
 		}
 		#notification__product__price .screen-reader-text {

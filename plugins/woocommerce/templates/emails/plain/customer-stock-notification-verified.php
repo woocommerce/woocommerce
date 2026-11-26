@@ -36,16 +36,20 @@ echo "\n\n----------------------------------------\n\n";
  */
 do_action( 'woocommerce_email_stock_notification_product', $product, $notification, true, $email );
 
+$footer_lines = array();
+// The sign-up is still active, so guests, and anyone who can't reach their account, can cancel it in one click.
+if ( $is_guest || ! $account_link ) {
+	// translators: %s: Unsubscribe URL.
+	$footer_lines[] = sprintf( esc_html__( 'To stop receiving these messages, unsubscribe: %s', 'woocommerce' ), esc_url( $unsubscribe_link ) );
+}
 if ( $account_link ) {
 	if ( $is_guest ) {
-		echo esc_html__( 'Create an account or log in with this email address to manage your notifications.', 'woocommerce' ) . "\n";
+		$footer_lines[] = esc_html__( 'Create an account or log in with this email address to manage your notifications.', 'woocommerce' );
 	}
 	// translators: %s: Account management URL.
-	printf( esc_html__( 'Manage notifications: %s', 'woocommerce' ), esc_url( $account_link ) );
-} else {
-	// translators: %s: Unsubscribe URL.
-	printf( esc_html__( 'To stop receiving these messages, unsubscribe: %s', 'woocommerce' ), esc_url( $unsubscribe_link ) );
+	$footer_lines[] = sprintf( esc_html__( 'Manage notifications: %s', 'woocommerce' ), esc_url( $account_link ) );
 }
+echo implode( "\n", $footer_lines ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Each line is escaped above.
 echo "\n\n----------------------------------------\n\n";
 
 /**

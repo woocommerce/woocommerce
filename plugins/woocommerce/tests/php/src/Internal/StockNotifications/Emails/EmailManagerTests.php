@@ -306,9 +306,9 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not save the notification while sending the stock email, leaving the unsubscribe key to the caller's save.
+	 * @testdox Should not save the notification while sending the stock email, and should not link to unsubscribe.
 	 */
-	public function test_send_stock_notification_email_leaves_saving_the_unsubscribe_key_to_the_caller() {
+	public function test_send_stock_notification_email_does_not_save_or_link_to_unsubscribe() {
 		$notification = $this->build_notification();
 		$updates      = 0;
 		$count        = function () use ( &$updates ) {
@@ -321,11 +321,7 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		remove_action( 'woocommerce_update_stock_notification', $count );
 		$this->assertSame( 0, $updates );
 		$this->assertCount( 1, $this->sent_messages );
-		$this->assertSame( 1, preg_match( '/email_link_action_key=([A-Za-z0-9]+)/', $this->sent_messages[0], $matches ) );
-
-		$notification->save();
-		$notification = new Notification( $notification->get_id() );
-		$this->assertTrue( $notification->check_unsubscribe_key( $matches[1] ) );
+		$this->assertStringNotContainsString( 'email_link_action=unsubscribe', $this->sent_messages[0] );
 	}
 
 	/**
@@ -353,14 +349,13 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 */
 	public function provider_email_send_methods(): array {
 		return array(
-			'stock notification' => array( 'send_stock_notification_email' ),
-			'verify'             => array( 'send_verify_email' ),
-			'verified'           => array( 'send_verified_email' ),
+			'verify'   => array( 'send_verify_email' ),
+			'verified' => array( 'send_verified_email' ),
 		);
 	}
 
 	/**
-	 * @testdox Should link recipients to account management, falling back to unsubscribe links when the account can't be reached.
+	 * @testdox Should link recipients to account management, and offer guests an unsubscribe link only in the sign-up confirmation email.
 	 * @testWith [false, false, "stock-notifications"]
 	 *           [true, false, "stock-notifications"]
 	 *           [false, false, "restock-alerts"]
@@ -410,32 +405,52 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$sut->prepare_email( $notification );
 		$notification->save();
 		$content = $plain_text ? $sut->get_content_plain() : $sut->get_content_html();
-		$pattern = $plain_text ? '/^.*: (https?:\/\/\S+)$/m' : '/href="([^"]+)" id="notification__unsubscribe_link"/';
-		$this->assertSame( 1, preg_match( $pattern, $content, $matches ), 'The footer must contain its management link.' );
-		$link = html_entity_decode( $matches[1], ENT_QUOTES );
-		parse_str( (string) wp_parse_url( $link, PHP_URL_QUERY ), $query );
 
-		$this->assertSame( 'back-in-stock-notifications', $query['utm_source'] );
-		$this->assertSame( 'email', $query['utm_medium'] );
-		if ( ( $guest && ! $registration ) || '' === $endpoint ) {
+		$can_manage      = '' !== $endpoint && ( ! $guest || $registration );
+		$can_unsubscribe = $verified && ( $guest || ! $can_manage );
+		$prompt          = 'Create an account or log in with this email address to manage your notifications.';
+
+		if ( $can_manage ) {
+			$link = $this->get_footer_link( $content, 'Manage notifications', $plain_text );
+			parse_str( (string) wp_parse_url( $link, PHP_URL_QUERY ), $query );
+			$this->assertSame( wc_get_account_endpoint_url( $endpoint ), remove_query_arg( array( 'utm_source', 'utm_medium' ), $link ) );
+			$this->assertSame( 'back-in-stock-notifications', $query['utm_source'] );
+			$this->assertSame( 'email', $query['utm_medium'] );
+		} else {
+			$this->assertStringNotContainsString( 'Manage notifications', $content );
+		}
+		if ( $guest && $can_manage ) {
+			$this->assertStringContainsString( $prompt, $content );
+		} else {
+			$this->assertStringNotContainsString( $prompt, $content );
+		}
+
+		if ( $can_unsubscribe ) {
+			$link = $this->get_footer_link( $content, 'unsubscribe', $plain_text );
+			parse_str( (string) wp_parse_url( $link, PHP_URL_QUERY ), $query );
 			$this->assertSame( 'unsubscribe', $query['email_link_action'] );
 			$this->assertTrue( ( new Notification( $notification->get_id() ) )->check_unsubscribe_key( $query['email_link_action_key'] ), 'The unsubscribe link must contain the persisted unsubscribe key.' );
 			$this->assertSame( (string) $notification->get_id(), $query['notification_id'] );
-			$this->assertStringContainsString( 'To stop receiving these messages,', $content );
-			$this->assertStringNotContainsString( 'Manage notifications', $content );
 		} else {
-			$this->assertSame( wc_get_account_endpoint_url( $endpoint ), remove_query_arg( array( 'utm_source', 'utm_medium' ), $link ) );
-			$this->assertArrayNotHasKey( 'email_link_action', $query );
-			$this->assertArrayNotHasKey( 'email_link_action_key', $query );
-			$this->assertStringContainsString( 'Manage notifications', $content );
+			$this->assertStringNotContainsString( 'email_link_action=unsubscribe', $content );
 			$this->assertStringNotContainsString( 'To stop receiving these messages,', $content );
-			$prompt = 'Create an account or log in with this email address to manage your notifications.';
-			if ( $guest ) {
-				$this->assertStringContainsString( $prompt, $content );
-			} else {
-				$this->assertStringNotContainsString( $prompt, $content );
-			}
 		}
+	}
+
+	/**
+	 * Find a footer link by its label in an HTML or plain-text email.
+	 *
+	 * @param string $content    The email content.
+	 * @param string $label      The link text in HTML, or the start of its line in plain text.
+	 * @param bool   $plain_text Whether the content is plain text.
+	 * @return string The decoded link URL.
+	 */
+	private function get_footer_link( string $content, string $label, bool $plain_text ): string {
+		$pattern = $plain_text
+			? '/' . preg_quote( $label, '/' ) . ': (https?:\/\/\S+)$/mi'
+			: '/<a href="([^"]+)"[^>]*>' . ( 'unsubscribe' === $label ? 'click here' : preg_quote( $label, '/' ) ) . '<\/a>/';
+		$this->assertSame( 1, preg_match( $pattern, $content, $matches ), "The footer must contain the {$label} link." );
+		return html_entity_decode( $matches[1], ENT_QUOTES );
 	}
 
 	/**
