@@ -792,6 +792,19 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox complete() refuses a copy of the session that was loaded before another copy completed it.
+	 */
+	public function test_complete_refuses_a_copy_loaded_before_the_session_was_completed(): void {
+		$session = $this->make_session( 97 );
+		$this->assertTrue( $session->record_chunk( 0, $this->chunk_result( 42, 42, 900, true ) ) );
+		$earlier_copy = ImportSession::load( 97, $session->token() );
+
+		$this->assertTrue( $session->complete() );
+		$this->assertFalse( $earlier_copy->complete(), 'The stored session is already completed' );
+		$this->assertTrue( $earlier_copy->completed(), 'The copy takes over the stored state' );
+	}
+
+	/**
 	 * @testdox complete() leaves the staged file and its cleanup in place when the flag cannot be stored.
 	 */
 	public function test_complete_keeps_the_file_when_the_flag_cannot_be_stored(): void {
@@ -849,6 +862,7 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertTrue( $session->complete(), 'The session is completed although its file could not be released' );
+		$this->assertFalse( doing_action( 'delete_attachment' ), 'The hook the callback threw from is taken off the stack' );
 		$this->assertTrue( ImportSession::load( 94, $session->token() )->completed() );
 		$this->assertIsInt( as_next_scheduled_action( ImportSession::CLEANUP_HOOK, $this->cleanup_args( $session ), self::CLEANUP_GROUP ), 'The cleanup stays scheduled for what is left' );
 	}
@@ -864,7 +878,38 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		add_filter( 'pre_delete_attachment', '__return_false' );
 
 		$this->assertTrue( $session->complete() );
+		$this->assertFileDoesNotExist( $file, 'Only the attachment is left' );
 		$this->assertNotNull( get_post( $attachment_id ), 'The attachment is still there' );
 		$this->assertIsInt( as_next_scheduled_action( ImportSession::CLEANUP_HOOK, $this->cleanup_args( $session ), self::CLEANUP_GROUP ), 'The cleanup stays scheduled for the attachment that is left' );
+	}
+
+	/**
+	 * @testdox complete() refuses a session that was replaced and does not bring it back.
+	 */
+	public function test_complete_refuses_a_session_that_was_replaced(): void {
+		$stale = $this->make_session( 96 );
+		$this->assertTrue( $stale->record_chunk( 0, $this->chunk_result( 42, 42, 900, true ) ) );
+		$replacement = $this->make_session( 96 );
+
+		$this->assertFalse( $stale->complete(), 'A session that is gone cannot be completed' );
+		$this->assertNull( ImportSession::load( 96, $stale->token() ), 'The replaced session is not stored again' );
+		$this->assertSame( $replacement->token(), ImportSession::active_for_user( 96 )->token(), 'The replacement stays the active session' );
+	}
+
+	/**
+	 * @testdox keep_alive() gives the stored session its full lifetime again and does not bring back one that is gone.
+	 */
+	public function test_keep_alive_extends_the_stored_session(): void {
+		$session        = $this->make_session( 98 );
+		$timeout_option = '_transient_timeout_wc_fulfillment_import_98_' . $session->token();
+		update_option( $timeout_option, time() + 5 );
+
+		$this->assertTrue( $session->keep_alive() );
+		$this->assertGreaterThanOrEqual( time() + HOUR_IN_SECONDS - MINUTE_IN_SECONDS, (int) get_option( $timeout_option ), 'The session has a full hour again' );
+
+		$copy = ImportSession::load( 98, $session->token() );
+		$session->delete();
+		$this->assertFalse( $copy->keep_alive(), 'A session that is gone is refused' );
+		$this->assertNull( ImportSession::load( 98, $session->token() ), 'A refused call does not store the session again' );
 	}
 }

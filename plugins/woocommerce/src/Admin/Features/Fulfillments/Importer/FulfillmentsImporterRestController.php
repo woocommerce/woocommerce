@@ -584,11 +584,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	private function handle_run_locked( WP_REST_Request $request, int $user_id, string $lock ) {
 		$session = ImportSession::load( $user_id, (string) $request->get_param( 'token' ) );
 		if ( ! $session instanceof ImportSession ) {
-			return new WP_Error(
-				'woocommerce_fulfillments_import_token_invalid',
-				__( 'The import session is missing or has expired. Please upload the CSV file again.', 'woocommerce' ),
-				array( 'status' => WP_Http::BAD_REQUEST )
-			);
+			return $this->token_invalid_error();
 		}
 
 		$offset = (int) $request->get_param( 'offset' );
@@ -618,6 +614,11 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$frozen = $this->freeze_run_settings( $session, $request );
 		if ( $frozen instanceof WP_Error ) {
 			return $frozen;
+		}
+
+		// Nothing is written yet, so a session that expired since it was loaded ends here.
+		if ( ! $session->keep_alive() ) {
+			return $this->token_invalid_error();
 		}
 
 		$chunk = $this->import_next_chunk( $session, (int) $request->get_param( 'limit' ) );
@@ -951,6 +952,19 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			'woocommerce_fulfillments_import_chunk_in_progress',
 			__( 'Another request of your import is still being processed. Please try again in a moment.', 'woocommerce' ),
 			array( 'status' => WP_Http::CONFLICT )
+		);
+	}
+
+	/**
+	 * Build the 400 error for a session that does not exist, has expired or belongs to another user.
+	 *
+	 * @return WP_Error
+	 */
+	private function token_invalid_error(): WP_Error {
+		return new WP_Error(
+			'woocommerce_fulfillments_import_token_invalid',
+			__( 'The import session is missing or has expired. Please upload the CSV file again.', 'woocommerce' ),
+			array( 'status' => WP_Http::BAD_REQUEST )
 		);
 	}
 

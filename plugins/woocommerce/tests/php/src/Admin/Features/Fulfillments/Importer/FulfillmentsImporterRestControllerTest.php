@@ -1277,7 +1277,9 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 		$repeated = $this->run_chunk( $session->token(), 0, 1, $options );
 
 		$this->assertSame( 1, $first['counts']['notified'], 'The option of the first chunk turns notifications on' );
-		$this->assertSame( $first, $repeated, 'The repeated request gets the response of the first one' );
+		$this->assertSame( $first['processed'], $repeated['processed'], 'The repeated request reports the same progress' );
+		$this->assertSame( $first['counts'], $repeated['counts'], 'The repeated request does not count the rows again' );
+		$this->assertSame( $first['rows'], $repeated['rows'], 'The repeated request gets the row results of the first one' );
 		$this->assertSame( OrderUtil::get_order_admin_edit_url( $order_ids[0] ), $repeated['rows'][0]['order_edit_url'] );
 		$this->assertCount( 1, $this->fulfillments_of( $order_ids[0] ), 'The row is not written a second time' );
 		$this->assertCount( 0, $this->fulfillments_of( $order_ids[1] ), 'The repeated request does not import the next chunk' );
@@ -1294,7 +1296,10 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 		$repeated = $this->run_chunk( $session->token(), 0 );
 
 		$this->assertTrue( $last['done'] );
-		$this->assertSame( $last, $repeated, 'The record of the completed import answers the repeated request' );
+		$this->assertTrue( $repeated['done'], 'The record of the completed import answers the repeated request' );
+		$this->assertSame( $last['counts'], $repeated['counts'], 'The repeated request does not count the rows again' );
+		$this->assertSame( $last['rows'], $repeated['rows'], 'The repeated request gets the row results of the last chunk' );
+		$this->assertSame( $last['summary'], $repeated['summary'] );
 		$this->assertSame( 1, did_action( 'woocommerce_fulfillments_csv_import_completed' ), 'The repeated request does not complete the import again' );
 	}
 
@@ -1510,10 +1515,11 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertNull( $this->run_lock_value(), 'An error response releases the lock' );
 
 		list( $session, ) = $this->make_run_session( 1 );
+		$thrown           = new \RuntimeException( 'A callback failed during the import.' );
 		add_filter(
 			'woocommerce_fulfillments_csv_importer_chunk_size',
-			function () {
-				throw new \RuntimeException( 'A callback failed during the import.' );
+			function () use ( $thrown ) {
+				throw $thrown;
 			}
 		);
 
@@ -1521,6 +1527,7 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 			$this->run_chunk( $session->token(), 0 );
 			$this->fail( 'The exception of the callback should reach the caller.' );
 		} catch ( \RuntimeException $e ) {
+			$this->assertSame( $thrown, $e, 'The request ended in the exception of the callback' );
 			$this->assertNull( $this->run_lock_value(), 'An exception releases the lock' );
 		}
 	}
@@ -1710,6 +1717,27 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 0, $this->fulfillments_of( $order_ids[0] ), 'No row is imported under settings that are not stored' );
 		$this->assertNull( ImportSession::load( get_current_user_id(), $session->token() )->frozen_mapping() );
 		$this->assertNull( $this->run_lock_value(), 'The lock is released after the failure' );
+	}
+
+	/**
+	 * @testdox handle_run imports nothing when the session expired after it was loaded.
+	 */
+	public function test_run_imports_nothing_when_the_session_expired_after_it_was_loaded(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 2 );
+		$this->run_chunk( $session->token(), 0, 1 );
+		// The upload directory is read during the staged-file check, after the session is loaded.
+		add_filter(
+			'upload_dir',
+			function ( $uploads ) use ( $session ) {
+				delete_transient( 'wc_fulfillment_import_' . get_current_user_id() . '_' . $session->token() );
+				return $uploads;
+			}
+		);
+
+		$response = $this->run_chunk( $session->token(), 1, 1 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_token_invalid', 400, $response );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[1] ), 'No row is written for a session that cannot record it' );
 	}
 
 	/**

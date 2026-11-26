@@ -843,6 +843,25 @@ final class ImportSession {
 	}
 
 	/**
+	 * Write the stored session again so it does not expire while a chunk is imported.
+	 *
+	 * A session expires an hour after its last write. A chunk that starts just before
+	 * that would write its rows and then find no session to record them on.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @return bool False when the session is gone or could not be stored.
+	 */
+	public function keep_alive(): bool {
+		$stored = get_transient( self::PREFIX . $this->user_id . '_' . $this->token );
+		if ( ! is_array( $stored ) ) {
+			return false;
+		}
+		$this->data = $stored;
+		return $this->persist();
+	}
+
+	/**
 	 * Whether every data row the prepare step counted has been processed.
 	 *
 	 * The end of the file alone does not end the import: a reader that stops before the
@@ -857,7 +876,10 @@ final class ImportSession {
 	}
 
 	/**
-	 * Whether complete() has released the staged file of this session.
+	 * Whether the session was marked completed.
+	 *
+	 * The staged file is released after this flag is stored, so the flag does not prove the
+	 * file is gone: a file that could not be deleted is left to its scheduled cleanup.
 	 *
 	 * @since 11.5.0
 	 *
@@ -874,15 +896,24 @@ final class ImportSession {
 	 * a request that repeats the last chunk can still be answered. The flag is stored
 	 * first: when that fails the file and its scheduled cleanup stay, and a later call
 	 * can complete the session. The cleanup is unscheduled once the file and its
-	 * attachment are gone.
+	 * attachment are gone. The stored payload is read first, as record_chunk() does, so a
+	 * copy of a session that was replaced or deleted cannot store it again.
 	 *
 	 * @since 11.5.0
 	 *
 	 * @return bool True when this call completed the session; false when it was already
-	 *              completed, is not done yet, or the flag could not be stored.
+	 *              completed, is not done yet, is gone, or the flag could not be stored.
 	 */
 	public function complete(): bool {
 		if ( $this->completed() || ! $this->done() ) {
+			return false;
+		}
+		$stored = get_transient( self::PREFIX . $this->user_id . '_' . $this->token );
+		if ( ! is_array( $stored ) ) {
+			return false;
+		}
+		$this->data = $stored;
+		if ( $this->completed() ) {
 			return false;
 		}
 
@@ -894,9 +925,12 @@ final class ImportSession {
 
 		// The import is completed either way. A file or attachment that could not be deleted
 		// keeps the scheduled cleanup, which tries again after the session has expired.
+		$hook_depth = count( $GLOBALS['wp_current_filter'] );
 		try {
 			self::delete_staged_file( $this->file(), $this->attachment_id() );
 		} catch ( \Throwable $e ) {
+			// WordPress leaves the hook on the stack when a callback throws.
+			array_splice( $GLOBALS['wp_current_filter'], $hook_depth );
 			wc_get_logger()->error(
 				sprintf( 'The staged file of fulfillments import session %1$s could not be released: %2$s', $this->token, $e->getMessage() ),
 				array( 'source' => 'fulfillments-importer' )
