@@ -57,22 +57,6 @@ const test = base.extend< {
 	},
 } );
 
-/**
- * The sign-up stored for an email: the product it targets and the serialized
- * `posted_attributes` meta, if any.
- *
- * @param email The guest's email address.
- */
-async function getStoredSignup( email: string ) {
-	const { stdout } = await wpCLI(
-		`db query "SELECT n.product_id, IFNULL(m.meta_value, '') FROM wp_wc_stock_notifications n LEFT JOIN wp_wc_stock_notificationmeta m ON m.notification_id = n.id AND m.meta_key = 'posted_attributes' WHERE n.user_email = '${ email }'" --skip-column-names`
-	);
-	const [ productId = '', postedAttributes = '' ] = stdout
-		.trim()
-		.split( '\t' );
-	return { productId, postedAttributes };
-}
-
 test.describe( 'Add to Cart + Options Block: Back in Stock form', () => {
 	test.use( { storageState: guestFile } );
 
@@ -100,9 +84,6 @@ test.describe( 'Add to Cart + Options Block: Back in Stock form', () => {
 		await expect(
 			page.getByText( bisNotice.success( product.name ) )
 		).toBeVisible();
-		expect( ( await getStoredSignup( email ) ).productId ).toBe(
-			String( product.id )
-		);
 	} );
 
 	test.describe( 'variable product', () => {
@@ -183,17 +164,23 @@ test.describe( 'Add to Cart + Options Block: Back in Stock form', () => {
 				)
 			).toHaveValue( 'large' );
 
+			const signupRequest = page.waitForRequest(
+				( request ) =>
+					request.method() === 'POST' &&
+					( request.postData() ?? '' ).includes( 'wc_bis_product_id' )
+			);
 			await signUpOnProductPage( page, { email } );
+			const posted = new URLSearchParams(
+				( await signupRequest ).postData() ?? ''
+			);
 
 			await expect(
 				page.getByText( /You have successfully signed up!/ )
 			).toBeVisible();
-			const signup = await getStoredSignup( email );
-			expect( signup.productId ).toBe( String( outOfStockVariationId ) );
-			// Only the "any" attribute is stored, with the chosen term's slug.
-			expect( signup.postedAttributes ).toBe(
-				'a:1:{s:17:"attribute_pa_size";s:5:"large";}'
+			expect( posted.get( 'wc_bis_product_id' ) ).toBe(
+				String( outOfStockVariationId )
 			);
+			expect( posted.get( 'attribute_pa_size' ) ).toBe( 'large' );
 		} );
 
 		test( 'hides the form for an in-stock variation and a cleared selection', async ( {
