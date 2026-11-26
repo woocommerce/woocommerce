@@ -355,3 +355,5 @@ export default defineConfig< { resetDatabaseAfterEachTest: boolean } >( {
 		},
 	],
 } );
+
+// THROWAWAY: starts the core e2e jobs to test the report job. Revert before merge.
