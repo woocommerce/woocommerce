@@ -437,7 +437,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test that rendering preserves personalization tags.
 	 */
 	public function testItPreservesPersonalizationTags(): void {
-		$this->email_post->post_content = '<!-- wp:paragraph --><p><!--[woocommerce/customer-username]--><!--[woocommerce/customer-username default="john"]--></p><!-- /wp:paragraph -->';
+		$this->email_post->post_content = '<!-- wp:paragraph --><p><!--[woocommerce/customer-username]--><!--[woocommerce/customer-username default="john"]--><!--[woocommerce/customer-username default="a [2026]"]--></p><!-- /wp:paragraph -->';
 		wp_update_post(
 			array(
 				'ID'           => $this->email_post->ID,
@@ -454,6 +454,8 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="john"]-->', $rendered['html'] );
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username]-->', $rendered['text'] );
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="john"]-->', $rendered['text'] );
+		// A "]" inside a quoted attribute value must not end the tag early.
+		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="a [2026]"]-->', $rendered['text'] );
 	}
 
 	/**
@@ -797,6 +799,15 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			$personalized
 		);
 		$this->assertStringNotContainsString( '[other-plugin/url]', $personalized );
+
+		// A "]" inside a quoted argument does not end the link target early.
+		list( $registry, $text ) = $this->render_with_link_tag(
+			'<!-- wp:paragraph --><p>F <a data-link-href="[renderer-test/account-url note=\'a]b\']">Account</a>.</p><!-- /wp:paragraph -->'
+		);
+		$this->assertStringContainsString(
+			'F [Account](https://shop.example/account?a=1&b=2).',
+			( new Personalizer( $registry ) )->personalize_content( $text, Personalizer::RENDERING_CONTEXT_TEXT )
+		);
 	}
 
 	/**
@@ -805,5 +816,13 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItDoesNotMarkBoldTagsInTextVersion(): void {
 		list( , $text ) = $this->render_with_link_tag( '<!-- wp:paragraph --><p>Username: <strong><!--[other-plugin/username]--></strong>, <strong>Bold</strong></p><!-- /wp:paragraph -->' );
 		$this->assertStringContainsString( 'Username: <!--[other-plugin/username]-->, *Bold*', $text );
+	}
+
+	/**
+	 * Test that a preheader with a bare "<" keeps its text in the HTML email.
+	 */
+	public function testItKeepsPreheaderTextAfterLessThanSign(): void {
+		$rendered = $this->renderer->render( $this->email_post, 'Subject', 'I <3 Shoes &amp; more', 'en' );
+		$this->assertStringContainsString( 'I &lt;3 Shoes &amp; more', $rendered['html'] );
 	}
 }

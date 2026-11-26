@@ -15,6 +15,12 @@
 		}
 	}
 
+	// Block themes print the meta line as an address, which browsers show in italics and without a paragraph's margin.
+	address.woocommerce-review-order__meta {
+		margin-block: 1em;
+		font-style: normal;
+	}
+
 	// Nested for the weight to beat a theme's own button rules.
 	& &__submit[aria-disabled="true"] {
 		opacity: 0.5;

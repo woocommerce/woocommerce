@@ -88,6 +88,36 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A product and each variation return their own GTIN; a variation without one doesn't get its parent's.
+	 */
+	public function test_get_item_returns_gtin() {
+		$product = $this->products[1];
+		$product->set_global_unique_id( '4006381333931' );
+		$product->save();
+		$variable = \WC_Helper_Product::create_variation_product();
+		$children = $variable->get_children();
+		$variable->set_global_unique_id( '9780306406157' );
+		$variable->save();
+		$variation = wc_get_product( $children[0] );
+		$variation->set_global_unique_id( '012345678905' );
+		$variation->save();
+		$get = static fn( int $id ): array => rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $id ) )->get_data();
+
+		$this->assertSame( '4006381333931', $get( $product->get_id() )['global_unique_id'] );
+		$this->assertSame( '9780306406157', $get( $variable->get_id() )['global_unique_id'] );
+		$this->assertSame( '012345678905', $get( $variation->get_id() )['global_unique_id'] );
+		$this->assertSame( '', $get( $children[1] )['global_unique_id'] );
+
+		$product->set_global_unique_id( '123--456' );
+		$product->save();
+		$this->assertSame( '123--456', $get( $product->get_id() )['global_unique_id'], 'Consecutive hyphens stay as entered' );
+
+		$product->set_global_unique_id( '' );
+		$product->save();
+		$variable->delete( true );
+	}
+
+	/**
 	 * Test getting item.
 	 */
 	public function test_get_item() {
@@ -105,6 +135,7 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( $this->products[0]->get_slug(), $data['slug'] );
 		$this->assertEquals( $this->products[0]->get_permalink(), $data['permalink'] );
 		$this->assertEquals( $this->products[0]->get_sku(), $data['sku'] );
+		$this->assertSame( '', $data['global_unique_id'], 'No GTIN set: an empty string' );
 		$this->assertEquals( $this->products[0]->get_price(), $data['prices']->price / ( 10 ** $data['prices']->currency_minor_unit ) );
 		$this->assertEquals( $this->products[0]->get_average_rating(), $data['average_rating'] );
 		$this->assertEquals( $this->products[0]->get_review_count(), $data['review_count'] );
@@ -209,6 +240,7 @@ class Products extends ControllerTestCase {
 		$this->assertArrayHasKey( 'description', $data[0] );
 		$this->assertArrayHasKey( 'on_sale', $data[0] );
 		$this->assertArrayHasKey( 'sku', $data[0] );
+		$this->assertArrayHasKey( 'global_unique_id', $data[0] );
 		$this->assertArrayHasKey( 'prices', $data[0] );
 		$this->assertArrayHasKey( 'average_rating', $data[0] );
 		$this->assertArrayHasKey( 'review_count', $data[0] );

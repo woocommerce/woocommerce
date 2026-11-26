@@ -28,10 +28,6 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 	 * Test teardown.
 	 */
 	public function tearDown(): void {
-		remove_filter(
-			'wp_mail_from',
-			array( $this, 'filter_test_email' )
-		);
 		reset_phpmailer_instance();
 		parent::tearDown();
 	}

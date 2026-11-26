@@ -35,6 +35,8 @@
 - [woocommerce_breadcrumb_product_terms_args](#woocommerce_breadcrumb_product_terms_args)
 - [woocommerce_cart_contents_changed](#woocommerce_cart_contents_changed)
 - [woocommerce_cart_item_permalink](#woocommerce_cart_item_permalink)
+- [woocommerce_cart_ready_to_calc_shipping](#woocommerce_cart_ready_to_calc_shipping)
+- [woocommerce_checkout_link_sold_individually_cart_item_data](#woocommerce_checkout_link_sold_individually_cart_item_data)
 - [woocommerce_checkout_must_be_logged_in_message](#woocommerce_checkout_must_be_logged_in_message)
 - [woocommerce_checkout_show_terms](#woocommerce_checkout_show_terms)
 - [woocommerce_default_payment_method](#woocommerce_default_payment_method)
@@ -60,6 +62,7 @@
 - [woocommerce_pay_order_product_in_stock](#woocommerce_pay_order_product_in_stock)
 - [woocommerce_product_details_hooked_blocks](#woocommerce_product_details_hooked_blocks)
 - [woocommerce_product_image_loading_attr](#woocommerce_product_image_loading_attr)
+- [woocommerce_product_is_visible](#woocommerce_product_is_visible)
 - [woocommerce_product_review_comment_form_args](#woocommerce_product_review_comment_form_args)
 - [woocommerce_product_tabs](#woocommerce_product_tabs)
 - [woocommerce_quantity_input_placeholder](#woocommerce_quantity_input_placeholder)
@@ -81,6 +84,7 @@
 - [woocommerce_store_api_rate_limit_options](#woocommerce_store_api_rate_limit_options)
 - [woocommerce_thankyou_order_failed_text](#woocommerce_thankyou_order_failed_text)
 - [woocommerce_thankyou_order_received_title](#woocommerce_thankyou_order_received_title)
+- [woocommerce_ucp_cart_continue_url](#woocommerce_ucp_cart_continue_url)
 - [woocommerce_ucp_idempotency_enabled](#woocommerce_ucp_idempotency_enabled)
 - [woocommerce_ucp_idempotency_retention_seconds](#woocommerce_ucp_idempotency_retention_seconds)
 - [woocommerce_ucp_idempotency_strict](#woocommerce_ucp_idempotency_strict)
@@ -865,6 +869,54 @@ This is a hook taken from the legacy cart/mini-cart templates that allows the pe
 
 ---
 
+## woocommerce_cart_ready_to_calc_shipping
+
+
+This filter is documented in includes/class-wc-cart.php.
+
+```php
+apply_filters( 'woocommerce_cart_ready_to_calc_shipping', bool $ready )
+```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $ready | bool | Whether the cart is ready to calculate shipping. |
+
+### Source
+
+- [StoreApi/Utilities/OrderController.php](../../../../../../src/StoreApi/Utilities/OrderController.php)
+
+---
+
+## woocommerce_checkout_link_sold_individually_cart_item_data
+
+
+Filters the cart item data kept for a sold-individually product or variation added via a checkout link.
+
+```php
+apply_filters( 'woocommerce_checkout_link_sold_individually_cart_item_data', array $cart_item_data, array $raw_cart_item_data, \WC_Product $product )
+```
+
+### Description
+
+Empty by default, so repeated adds of the same product share one cart item and the one-per-order limit holds. Returning data lets it vary, so the limit is no longer guaranteed.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $cart_item_data | array | Cart item data to keep. Empty by default. |
+| $raw_cart_item_data | array | Cart item data parsed from the link, before stripping. |
+| $product | \WC_Product | The resolved product or variation. |
+
+### Source
+
+- [Blocks/Domain/Services/CheckoutLink.php](../../../../../../src/Blocks/Domain/Services/CheckoutLink.php)
+
+---
+
 ## woocommerce_checkout_must_be_logged_in_message
 
 
@@ -914,7 +966,7 @@ Returning false hides the terms and conditions on classic checkout and on the Ch
 ## woocommerce_default_payment_method
 
 
-Filters the payment method the Checkout block starts with.
+Filters the payment method the checkout starts with: the Checkout block, the classic checkout shortcode and the pay-for-order page all ask it. On the checkout it runs only when the shopper has no session choice that is still available for the cart.
 
 ```php
 apply_filters( 'woocommerce_default_payment_method', string $payment_method, array $available_gateways )
@@ -928,7 +980,7 @@ Return a gateway id from `$available_gateways` to preselect it, or an empty stri
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $payment_method | string | Gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first enabled gateway; '' when there is none. |
+| $payment_method | string | Gateway id WooCommerce would preselect, or '' when there is none. See PaymentUtils::get_default_payment_method() for how it is picked. |
 | $available_gateways | array | Gateways available for this cart, keyed by id. |
 
 ### Source
@@ -1471,6 +1523,28 @@ Allowed values are 'lazy', 'eager', and 'auto'. Any other value will result in d
 ### Source
 
 - [Blocks/BlockTypes/ProductImage.php](../../../../../../src/Blocks/BlockTypes/ProductImage.php)
+
+---
+
+## woocommerce_product_is_visible
+
+
+Filters the product visibility for catalog lookup (same hook as WC_Product::is_visible).
+
+```php
+apply_filters( 'woocommerce_product_is_visible', bool $visible, int $product_id )
+```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $visible | bool | Whether the product is considered visible. |
+| $product_id | int | Product ID. |
+
+### Source
+
+- [StoreApi/Routes/V1/Ucp/AbstractCatalogRoute.php](../../../../../../src/StoreApi/Routes/V1/Ucp/AbstractCatalogRoute.php)
 
 ---
 
@@ -2038,6 +2112,28 @@ apply_filters( 'woocommerce_thankyou_order_received_title', string $title, \WC_O
 
 ---
 
+## woocommerce_ucp_cart_continue_url
+
+
+Filters the URL a UCP cart hands the buyer for completing the purchase.
+
+```php
+apply_filters( 'woocommerce_ucp_cart_continue_url', string $continue_url, string $cart_id )
+```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $continue_url | string | Continue URL. |
+| $cart_id | string | Cart identifier. |
+
+### Source
+
+- [StoreApi/Utilities/Ucp/CartMapper.php](../../../../../../src/StoreApi/Utilities/Ucp/CartMapper.php)
+
+---
+
 ## woocommerce_ucp_idempotency_enabled
 
 
@@ -2070,7 +2166,7 @@ apply_filters( 'woocommerce_ucp_idempotency_retention_seconds', int $seconds )
 
 ### Description
 
-How long a retry carrying the same key is answered from storage. The [UCP spec](https://ucp.dev/2026-04-08/specification/checkout-rest/) requires at least 24 hours.
+The UCP spec requires at least 24 hours.
 
 ### Parameters
 
@@ -2095,7 +2191,7 @@ apply_filters( 'woocommerce_ucp_idempotency_strict', bool $strict )
 
 ### Description
 
-True, the default, matches the UCP OpenAPI document, which declares the header required on every mutating cart operation: a missing or malformed key is refused at 400. False honours a key when one is sent and lets a keyless write through.
+True, the default, matches the UCP specs, and returns 400 for a missing or malformed key. False honors a well-formed key when one is sent, ignores a malformed key, and lets a keyless write through.
 
 ### Parameters
 

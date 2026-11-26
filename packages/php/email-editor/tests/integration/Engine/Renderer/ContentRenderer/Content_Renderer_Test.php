@@ -9,6 +9,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer as Core_Initializer;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 
@@ -79,16 +80,22 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			)
 		);
 		$this->assertIsInt( $email_post_id );
-		update_post_meta(
-			$email_post_id,
-			'woocommerce_email_theme',
+		$user_theme_post = $this->di_container->get( User_Theme::class )->get_user_theme_post();
+		wp_update_post(
 			array(
-				'styles' => array(
-					'elements' => array(
-						'caption' => array(
-							'color' => array( 'text' => '#f78da7' ),
+				'ID'           => $user_theme_post->ID,
+				'post_content' => (string) wp_json_encode(
+					array(
+						'version'                     => 3,
+						'isGlobalStylesUserThemeJSON' => true,
+						'styles'                      => array(
+							'elements' => array(
+								'caption' => array(
+									'color' => array( 'text' => '#f78da7' ),
+								),
+							),
 						),
-					),
+					)
 				),
 			)
 		);
@@ -1101,5 +1108,93 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 
 		$this->assertSame( 1, preg_match( '/<strong[^>]*>Bold text<\/strong>/', $content, $strong ) );
 		$this->assertMatchesRegularExpression( '/style="[^"]*font-weight:\s*bold\s*(;|")/', $strong[0] );
+	}
+
+	/**
+	 * Paragraphs in one chunk of HTML (Classic content, a Custom HTML block) are separated by the
+	 * email's block gap, as paragraph blocks are.
+	 *
+	 * @testWith ["<p>First</p>\n<p>Second</p>"]
+	 *           ["<!-- wp:html --><p>First</p><p>Second</p><!-- /wp:html -->"]
+	 *
+	 * @param string $post_content Post content holding two paragraphs that are not paragraph blocks.
+	 */
+	public function testItSpacesParagraphsThatAreNotParagraphBlocks( string $post_content ): void {
+		$paragraphs = $this->render_paragraph_styles( $post_content );
+
+		$this->assertSame( array( 'First', 'Second' ), array_keys( $paragraphs ) );
+		$this->assertStringNotContainsString( 'margin-top', $paragraphs['First'] );
+		$this->assertStringEndsWith( 'margin-top: 16px;', $paragraphs['Second'] );
+	}
+
+	/**
+	 * The gap between paragraphs that are not paragraph blocks follows the email's block gap setting.
+	 * A gap that is not a single length or spacing preset adds no rule, so it can't add other styles to the email.
+	 *
+	 * @testWith ["24px", "display: block; margin: 0; margin-top: 24px;"]
+	 *           ["1.5rem", "display: block; margin: 0; margin-top: 1.5rem;"]
+	 *           [".5rem", "display: block; margin: 0; margin-top: .5rem;"]
+	 *           ["var:preset|spacing|20", "display: block; margin: 0; margin-top: 24px;"]
+	 *           ["16px; font-size: 0", "display: block; margin: 0;"]
+	 *           ["16px } p { display: none", "display: block; margin: 0;"]
+	 *           ["var(--x} p { display:none)", "display: block; margin: 0;"]
+	 *           ["junk", "display: block; margin: 0;"]
+	 *
+	 * @param string $block_gap      Block gap set in the email's theme.json.
+	 * @param string $expected_style Expected style of the second paragraph.
+	 */
+	public function testItSpacesParagraphsThatAreNotParagraphBlocksByTheBlockGap( string $block_gap, string $expected_style ): void {
+		$set_block_gap = static function ( \WP_Theme_JSON $theme ) use ( $block_gap ): \WP_Theme_JSON {
+			$theme->merge(
+				new \WP_Theme_JSON(
+					array(
+						'version' => 3,
+						'styles'  => array( 'spacing' => array( 'blockGap' => $block_gap ) ),
+					)
+				)
+			);
+			return $theme;
+		};
+		add_filter( 'woocommerce_email_editor_theme_json', $set_block_gap );
+
+		$paragraphs = $this->render_paragraph_styles( '<!-- wp:html --><p>First</p><p>Second</p><!-- /wp:html -->' );
+
+		$this->assertSame( $expected_style, $paragraphs['Second'] );
+	}
+
+	/**
+	 * Paragraph blocks already get the block gap on their wrappers, so the paragraphs themselves get no margin.
+	 */
+	public function testItAddsNoMarginToParagraphBlocks(): void {
+		$paragraphs = $this->render_paragraph_styles( '<!-- wp:paragraph --><p>First</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>Second</p><!-- /wp:paragraph -->' );
+
+		$this->assertSame( array( 'First', 'Second' ), array_keys( $paragraphs ) );
+		$this->assertStringNotContainsString( 'margin-top', $paragraphs['First'] );
+		$this->assertStringNotContainsString( 'margin-top', $paragraphs['Second'] );
+	}
+
+	/**
+	 * Renders the post content and returns the style attribute of each paragraph, keyed by its text.
+	 *
+	 * @param string $post_content Post content.
+	 * @return array<string, string>
+	 */
+	private function render_paragraph_styles( string $post_content ): array {
+		$email_post_id = $this->factory->post->create( array( 'post_content' => $post_content ) );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$rendered          = $this->renderer->render( $email_post, $template );
+
+		preg_match_all( '/<p[^>]*style="([^"]*)"[^>]*>(\w+)<\/p>/', $rendered, $matches, PREG_SET_ORDER );
+		$styles = array();
+		foreach ( $matches as $match ) {
+			$styles[ $match[2] ] = $match[1];
+		}
+		return $styles;
 	}
 }

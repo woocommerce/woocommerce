@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a critical error when updating the quantity of an item that is no longer in the cart.

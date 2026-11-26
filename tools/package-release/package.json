@@ -24,7 +24,7 @@
 		"posttest": "pnpm lint"
 	},
 	"dependencies": {
-		"@oclif/core": "^4.13.5",
+		"@oclif/core": "catalog:tooling",
 		"@oclif/plugin-help": "^6.2.58",
 		"@oclif/plugin-plugins": "^5.4.87",
 		"@types/semver": "^7.5.6",

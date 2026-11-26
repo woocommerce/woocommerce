@@ -1,35 +1,61 @@
 /**
  * External dependencies
  */
-import { expect, test as base, enableTestPlugin } from '@woocommerce/e2e-utils';
+import type { Page } from '@playwright/test';
+import {
+	expect,
+	test as base,
+	adminFile,
+	enableTestPlugin,
+	guestFile,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
-import { REGULAR_PRICED_PRODUCT_NAME } from './constants';
 import { CheckoutPage } from './checkout.page';
 
-const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
+const test = base.extend< {
+	checkoutPageObject: CheckoutPage;
+	adminPage: Page;
+} >( {
 	checkoutPageObject: async ( { page }, use ) => {
 		const pageObject = new CheckoutPage( {
 			page,
 		} );
 		await use( pageObject );
 	},
+	// The order is placed as a guest, because all workers share the admin
+	// cart. The merchant views it in a separate admin context.
+	adminPage: async ( { browser }, use ) => {
+		const context = await browser.newContext( {
+			storageState: adminFile,
+		} );
+		await enableTestPlugin( context, 'additional-checkout-fields' );
+		await use( await context.newPage() );
+		await context.close();
+	},
 } );
 
 test.describe( 'Merchant → Additional Checkout Fields', () => {
-	test.beforeEach( async ( { context, frontendUtils } ) => {
-		await enableTestPlugin( context, 'additional-checkout-fields' );
+	test.use( { storageState: guestFile } );
 
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-	} );
+	test.beforeEach(
+		async ( { context, page, createHiddenProduct, frontendUtils } ) => {
+			await enableTestPlugin( context, 'additional-checkout-fields' );
+
+			const { id } = await createHiddenProduct( {
+				name: 'Additional fields merchant product',
+				regular_price: '20',
+			} );
+			await page.goto( `/?add-to-cart=${ id }` );
+			await frontendUtils.goToCheckout();
+		}
+	);
 
 	test( 'Merchant can see additional fields in the order admin page', async ( {
 		checkoutPageObject,
-		admin,
+		adminPage,
 	} ) => {
 		await checkoutPageObject.editShippingDetails();
 		await checkoutPageObject.unsyncBillingWithShipping();
@@ -108,69 +134,69 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 		await checkoutPageObject.placeOrder();
 
 		const orderId = checkoutPageObject.getOrderId();
-		await admin.page.goto(
+		await adminPage.goto(
 			`wp-admin/post.php?post=${ orderId }&action=edit`
 		);
 
 		await expect(
-			admin.page.getByText( 'Government ID: 12345', { exact: true } )
+			adminPage.getByText( 'Government ID: 12345', { exact: true } )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'Confirm government ID: 12345', {
+			adminPage.getByText( 'Confirm government ID: 12345', {
 				exact: true,
 			} )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'Government ID: 54321', { exact: true } )
+			adminPage.getByText( 'Government ID: 54321', { exact: true } )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'Confirm government ID: 54321', {
+			adminPage.getByText( 'Confirm government ID: 54321', {
 				exact: true,
 			} )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'What is your favourite colour?: Blue' )
+			adminPage.getByText( 'What is your favourite colour?: Blue' )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText(
+			adminPage.getByText(
 				'Enter a gift message to include in the package: This is for you!'
 			)
 		).toBeVisible();
 		await expect(
-			admin.page.getByText(
+			adminPage.getByText(
 				'Do you want to subscribe to our newsletter?: Yes'
 			)
 		).toBeVisible();
 		await expect(
-			admin.page.getByText(
+			adminPage.getByText(
 				'Would you like a free gift with your order?: Yes'
 			)
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'Can a truck fit down your road?: Yes' )
+			adminPage.getByText( 'Can a truck fit down your road?: Yes' )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'Can a truck fit down your road?: No' )
+			adminPage.getByText( 'Can a truck fit down your road?: No' )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'How wide is your road?: Wide' )
+			adminPage.getByText( 'How wide is your road?: Wide' )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'How wide is your road?: Narrow' )
+			adminPage.getByText( 'How wide is your road?: Narrow' )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText(
+			adminPage.getByText(
 				'Is this a personal purchase or a business purchase?: Business'
 			)
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'How did you hear about us?: Other' )
+			adminPage.getByText( 'How did you hear about us?: Other' )
 		).toBeVisible();
 	} );
 
 	test( 'Merchant can edit custom fields from the order admin page', async ( {
 		checkoutPageObject,
-		admin,
+		adminPage,
 	} ) => {
 		await checkoutPageObject.editShippingDetails();
 		await checkoutPageObject.unsyncBillingWithShipping();
@@ -249,165 +275,165 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 		await checkoutPageObject.placeOrder();
 
 		const orderId = checkoutPageObject.getOrderId();
-		await admin.page.goto(
+		await adminPage.goto(
 			`wp-admin/post.php?post=${ orderId }&action=edit`
 		);
 
-		await admin.page
+		await adminPage
 			.getByRole( 'heading', { name: 'Billing Edit' } )
 			.getByRole( 'link' )
 			.click();
 
 		// Change all the billing details
-		await admin.page
+		await adminPage
 			.getByRole( 'textbox', {
 				name: 'Government ID',
 				exact: true,
 			} )
 			.fill( '99999' );
-		await admin.page
+		await adminPage
 			.getByRole( 'textbox', {
 				name: 'Confirm government ID',
 				exact: true,
 			} )
 			.fill( '99999' );
-		await admin.page
+		await adminPage
 			.getByRole( 'checkbox', {
 				name: 'Can a truck fit down your road?',
 			} )
 			.check();
 
 		// Use Locator here because the select2 box is duplicated in shipping.
-		await admin.page
+		await adminPage
 			.locator(
 				'[id="\\_wc_billing\\/first-plugin-namespace\\/road-size"]'
 			)
 			.selectOption( 'wide' );
 
 		// Handle changing the contact fields.
-		await admin.page
+		await adminPage
 			.getByLabel( 'Do you want to subscribe to our newsletter?' )
 			.uncheck();
-		await admin.page
+		await adminPage
 			.getByLabel( 'Enter a gift message to include in the package' )
 			.fill( 'Some other message' );
-		await admin.page
+		await adminPage
 			.getByLabel( 'Is this a personal purchase or a business purchase?' )
 			.selectOption( 'personal' );
 
-		const clickPromise = admin.page
+		const clickPromise = adminPage
 			.getByRole( 'button', { name: 'Update' } )
 			.first()
 			.click();
 
-		const navigationPromise = admin.page.waitForEvent( 'domcontentloaded' );
+		const navigationPromise = adminPage.waitForEvent( 'domcontentloaded' );
 
 		// When update is clicked without waiting for DOMContentLoaded the page becomes
 		// available before click handlers are attached to the shipping edit link.
 		await Promise.all( [ clickPromise, navigationPromise ] );
 
-		await admin.page
+		await adminPage
 			.getByRole( 'heading', { name: 'Shipping Edit' } )
 			.getByRole( 'link' )
 			.click();
 
 		// Change all the shipping details
-		await admin.page
+		await adminPage
 			.getByRole( 'textbox', {
 				name: 'Government ID',
 				exact: true,
 			} )
 			.fill( '88888' );
-		await admin.page
+		await adminPage
 			.getByRole( 'textbox', {
 				name: 'Confirm government ID',
 				exact: true,
 			} )
 			.fill( '88888' );
-		await admin.page
+		await adminPage
 			.getByRole( 'checkbox', {
 				name: 'Can a truck fit down your road?',
 			} )
 			.uncheck();
 
 		// Use Locator here because the select2 box is duplicated in billing.
-		await admin.page
+		await adminPage
 			.locator(
 				'[id="\\_wc_shipping\\/first-plugin-namespace\\/road-size"]'
 			)
 			.selectOption( 'super-wide' );
 
 		// Handle changing the additional information fields.
-		await admin.page
+		await adminPage
 			.getByLabel( 'Would you like a free gift with your order?' )
 			.uncheck();
-		await admin.page
+		await adminPage
 			.getByLabel( 'What is your favourite colour?' )
 			.fill( 'Green' );
-		await admin.page
+		await adminPage
 			.getByLabel( 'How did you hear about us?' )
 			.selectOption( 'google' );
 
-		await admin.page
+		await adminPage
 			.getByRole( 'button', { name: 'Update' } )
 			.first()
 			.click();
 
-		await admin.page.waitForLoadState( 'domcontentloaded' );
+		await adminPage.waitForLoadState( 'domcontentloaded' );
 
 		await expect(
-			admin.page.getByText( 'Government ID: 88888', { exact: true } )
+			adminPage.getByText( 'Government ID: 88888', { exact: true } )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'Confirm government ID: 88888', {
+			adminPage.getByText( 'Confirm government ID: 88888', {
 				exact: true,
 			} )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'Government ID: 99999', { exact: true } )
+			adminPage.getByText( 'Government ID: 99999', { exact: true } )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'Confirm government ID: 99999', {
+			adminPage.getByText( 'Confirm government ID: 99999', {
 				exact: true,
 			} )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'What is your favourite colour?: Green' )
+			adminPage.getByText( 'What is your favourite colour?: Green' )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText(
+			adminPage.getByText(
 				'Enter a gift message to include in the package: Some other message'
 			)
 		).toBeVisible();
 		await expect(
-			admin.page.getByText(
+			adminPage.getByText(
 				'Do you want to subscribe to our newsletter?: No'
 			)
 		).toBeVisible();
 		await expect(
-			admin.page.getByText(
+			adminPage.getByText(
 				'Would you like a free gift with your order?: No'
 			)
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'Can a truck fit down your road?: Yes' )
+			adminPage.getByText( 'Can a truck fit down your road?: Yes' )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'Can a truck fit down your road?: No' )
+			adminPage.getByText( 'Can a truck fit down your road?: No' )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'How wide is your road?: Super wide' )
+			adminPage.getByText( 'How wide is your road?: Super wide' )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'How wide is your road?: Wide' )
+			adminPage.getByText( 'How wide is your road?: Wide' )
 		).toBeVisible();
 		await expect(
-			admin.page.getByText(
+			adminPage.getByText(
 				'Is this a personal purchase or a business purchase?: Personal'
 			)
 		).toBeVisible();
 		await expect(
-			admin.page.getByText( 'How did you hear about us?: Google' )
+			adminPage.getByText( 'How did you hear about us?: Google' )
 		).toBeVisible();
 	} );
 } );

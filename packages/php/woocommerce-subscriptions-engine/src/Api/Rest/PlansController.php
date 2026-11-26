@@ -16,6 +16,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\ValidationException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
@@ -246,8 +247,12 @@ final class PlansController extends WP_REST_Controller {
 			}
 		}
 
-		$plans = $this->plan_repository->query( $args );
-		$total = $this->plan_repository->count( $args );
+		try {
+			$plans = $this->plan_repository->query( $args );
+			$total = $this->plan_repository->count( $args );
+		} catch ( RuntimeException $e ) {
+			return $this->read_failed_error( $e );
+		}
 
 		$response = new WP_REST_Response(
 			array_map(
@@ -279,7 +284,11 @@ final class PlansController extends WP_REST_Controller {
 			return $extension_slug;
 		}
 
-		$plan = Plans::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
+		try {
+			$plan = Plans::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
+		} catch ( RuntimeException $e ) {
+			return $this->read_failed_error( $e );
+		}
 		if ( null === $plan || $extension_slug !== $plan->get_extension_slug() ) {
 			return $this->not_found_error();
 		}
@@ -551,6 +560,24 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
+	 * Error for a failed plan read: logged, then a generic 500 so database details stay out of the response.
+	 *
+	 * @param RuntimeException $e Failure.
+	 */
+	private function read_failed_error( RuntimeException $e ): WP_Error {
+		wc_get_logger()->error(
+			sprintf( 'PlansController: the plan read failed: %s', $e->getMessage() ),
+			array( 'source' => self::LOG_SOURCE )
+		);
+
+		return new WP_Error(
+			'woocommerce_subscriptions_engine_plan_read_failed',
+			__( 'The plan could not be read.', 'woocommerce' ),
+			array( 'status' => 500 )
+		);
+	}
+
+	/**
 	 * Map a failed write to a 500. The facade wraps a throwing validation callback
 	 * (the cause is chained, and the facade logs it); a failed insert or update carries
 	 * no cause and is logged here with the database error. `Api\Plans` documents this
@@ -800,7 +827,7 @@ final class PlansController extends WP_REST_Controller {
 		if ( null === $raw ) {
 			return $this->get_extension_slug_error( ValidationErrorCode::REQUIRED, 'extension_slug is required.' );
 		}
-		$raw_string = trim( Coercion::coerce_string( $raw ) );
+		$raw_string = Coercion::coerce_string( $raw );
 		if ( '' === $raw_string ) {
 			return $this->get_extension_slug_error( ValidationErrorCode::REQUIRED, 'extension_slug is required.' );
 		}
@@ -810,10 +837,16 @@ final class PlansController extends WP_REST_Controller {
 		}
 
 		$slugs = array();
-		foreach ( explode( ',', $raw_string ) as $possible_slug ) {
-			$slug = trim( $possible_slug );
-			if ( '' === $slug || 'any' === $slug || ! $this->is_valid_extension_slug( $slug ) ) {
+		// Whitespace next to a comma is list formatting (`a, b`) and is dropped; any other
+		// whitespace stays part of the slug and is refused, as at the facades.
+		foreach ( (array) preg_split( '/\s*,\s*/', $raw_string ) as $slug ) {
+			$slug = (string) $slug;
+			if ( '' === $slug || 'any' === $slug ) {
 				return $this->get_extension_slug_error( ValidationErrorCode::INVALID_VALUE, 'extension_slug must be "any" or a comma-separated list of extension slugs.' );
+			}
+			$slug_error = $this->get_extension_slug_pattern_error( $slug );
+			if ( null !== $slug_error ) {
+				return $slug_error;
 			}
 
 			$slugs[ $slug ] = $slug;
@@ -836,16 +869,15 @@ final class PlansController extends WP_REST_Controller {
 		if ( ! is_string( $raw ) ) {
 			return $this->get_extension_slug_error( ValidationErrorCode::INVALID_TYPE, 'extension_slug must be a string.', array( 'type' => 'string' ) );
 		}
-		$raw_string = trim( $raw );
-		if ( '' === $raw_string ) {
+		if ( '' === $raw ) {
 			return $this->get_extension_slug_error( ValidationErrorCode::REQUIRED, 'extension_slug is required.' );
 		}
 
-		if ( 'any' === $raw_string || false !== strpos( $raw_string, ',' ) || ! $this->is_valid_extension_slug( $raw_string ) ) {
+		if ( 'any' === $raw || false !== strpos( $raw, ',' ) ) {
 			return $this->get_extension_slug_error( ValidationErrorCode::INVALID_VALUE, 'extension_slug must be a concrete extension slug.' );
 		}
 
-		return $raw_string;
+		return $this->get_extension_slug_pattern_error( $raw ) ?? $raw;
 	}
 
 	/**
@@ -862,12 +894,18 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Whether a value is a valid extension slug.
+	 * The validation error for a slug that is not a valid extension slug, or null for a valid one.
 	 *
 	 * @param string $slug Possible extension slug.
 	 */
-	private function is_valid_extension_slug( string $slug ): bool {
-		return '' !== $slug && sanitize_key( $slug ) === $slug;
+	private function get_extension_slug_pattern_error( string $slug ): ?WP_Error {
+		try {
+			ArgumentValidator::validate_extension_slug( 'extension_slug', $slug );
+		} catch ( InvalidInputException $e ) {
+			return $this->get_validation_error( ValidationException::from_core( $e ) );
+		}
+
+		return null;
 	}
 
 	/**

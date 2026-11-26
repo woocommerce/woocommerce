@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
-import { useEffectOnce } from 'usehooks-ts';
+import { Fragment, useEffect } from '@wordpress/element';
 import {
 	useCheckoutAddress,
 	useEditorContext,
@@ -79,11 +78,13 @@ const Block = (): JSX.Element => {
 	};
 
 	// Run this on first render to ensure addresses sync if needed (this is not re-ran when toggling the checkbox).
-	useEffectOnce( () => {
+	useEffect( () => {
 		if ( useShippingAsBilling ) {
 			syncBillingWithShipping();
 		}
-	} );
+		// The address should only be initialized on mount.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
 
 	const WrapperComponent = isEditor ? Noninteractive : Fragment;
 	const noticeContext = useShippingAsBilling

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Update the email renderer snapshots after image attributes were removed; no production change.
-

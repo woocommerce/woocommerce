@@ -54,7 +54,6 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		remove_filter( 'pre_http_request', array( $this, 'mock_paypal_http_response' ) );
 		$this->webhook_handler = null;
 		$this->mock_request    = null;
 		parent::tearDown();
@@ -70,13 +69,14 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test process_checkout_order_approved with valid data.
+	 * @testdox Processing checkout approval revokes the shipping callback credential.
 	 *
 	 * @return void
 	 */
 	public function test_process_checkout_order_approved_with_valid_data(): void {
 		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
+		$test_order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, 'callback-token' );
 		$test_order->save();
 
 		$custom_id_data = array(
@@ -114,6 +114,7 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 		// Verify order was updated.
 		$test_order = wc_get_order( $test_order->get_id() );
 		$this->assertEquals( 'APPROVED', $test_order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) );
+		$this->assertSame( '', $test_order->get_meta( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, true ) );
 
 		// Clean up.
 		$test_order->delete( true );

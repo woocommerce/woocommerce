@@ -32,14 +32,6 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		$this->disable_cogs_feature();
-	}
-
-	/**
 	 * @testdox By default the defined Cost of Goods Sold is null, and the value is absolute.
 	 */
 	public function test_default_cogs_values() {

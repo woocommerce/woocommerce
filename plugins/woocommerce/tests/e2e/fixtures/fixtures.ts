@@ -128,4 +128,7 @@ export const locks = {
 	// `taxonomy-product_brand` templates. The Site Editor offers to add one only
 	// while it does not exist.
 	TAXONOMY_TEMPLATES: 'taxonomy-templates',
+	// The `taxonomy-product_cat-tshirts` template. Each test creates it and
+	// deletes it.
+	TSHIRTS_CATEGORY_TEMPLATE: 'tshirts-category-template',
 } as const;

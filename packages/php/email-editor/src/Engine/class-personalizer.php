@@ -13,6 +13,8 @@ use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\HTML_Tag_Processor;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Html2Text;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 
 /**
  * Class for replacing personalization tags with their values in the email content.
@@ -26,13 +28,24 @@ class Personalizer {
 	private const TAG_NAME_PATTERN = '[a-zA-Z0-9\-\/]+';
 
 	/**
+	 * Regex pattern for the optional arguments part of a tag token inside a link, e.g. ` default="a [2026]"`.
+	 * A value quoted right after "=" and closed before a space or "]" is consumed whole, so a "]" inside it
+	 * does not end the token, while an apostrophe inside an unquoted value (O'Brien) and a quote that is
+	 * never closed are plain characters. The possessive quantifier stops
+	 * backtracking, which keeps the scan linear.
+	 *
+	 * @internal Shared with the Renderer, which protects tag tokens in the plain-text version; not a public API.
+	 */
+	public const TAG_ARGUMENTS_PATTERN = '(?:\s(?:=(?:"[^"]*"(?=[\s\]])|\'[^\']*\'(?=[\s\]]))|[^\]])*+)?';
+
+	/**
 	 * Rendering context for HTML content. Tag values are rendered into HTML markup.
 	 */
 	public const RENDERING_CONTEXT_HTML = 'html';
 
 	/**
 	 * Rendering context for plain-text content (e.g., email subject, preheader, plain-text body).
-	 * Tag values must be raw text without HTML entities or markup.
+	 * Text-typed tags return raw text; values of HTML-typed tags are converted to plain text.
 	 */
 	public const RENDERING_CONTEXT_TEXT = 'text';
 
@@ -158,7 +171,7 @@ class Personalizer {
 	/**
 	 * Set a callback intercepting each resolved personalization tag value before it is written.
 	 *
-	 * The interceptor receives the resolved value (after any context-driven escaping),
+	 * The interceptor receives the resolved value (after any context-driven escaping or plain-text conversion),
 	 * the raw source text being replaced (the trimmed tag token including arguments,
 	 * the raw data-link-href attribute value, or the tag token found inside a plain href),
 	 * and the rendering context of the replacement site — one of the RENDERING_CONTEXT_HTML,
@@ -224,6 +237,32 @@ class Personalizer {
 			$content = $this->personalize_text_link_targets( $content );
 		}
 
+		return $this->replace_tags( $content, $rendering_context, false );
+	}
+
+	/**
+	 * Personalize rich text, such as a subject or preheader edited in the editor, and return it as plain text.
+	 *
+	 * Tags get the text rendering context, and each value is escaped as it goes into the rich text, so the
+	 * field stays HTML until a single conversion to plain text at the end. Neither the author's text nor a
+	 * tag value is read as HTML twice. Unresolved tags and other comments are dropped.
+	 *
+	 * @param string $rich_text The rich text as stored by the editor.
+	 * @return string The personalized plain text.
+	 */
+	public function personalize_rich_text_as_plain_text( string $rich_text ): string {
+		return Html_Processing_Helper::get_plain_text( $this->replace_tags( $rich_text, self::RENDERING_CONTEXT_TEXT, true ) );
+	}
+
+	/**
+	 * Replace the personalization tags in the content with their values.
+	 *
+	 * @param string $content           The content to personalize.
+	 * @param string $rendering_context One of the RENDERING_CONTEXT_HTML or RENDERING_CONTEXT_TEXT constants.
+	 * @param bool   $escape_values     Whether to escape tag values for HTML as they are inserted.
+	 * @return string The personalized content.
+	 */
+	private function replace_tags( string $content, string $rendering_context, bool $escape_values ): string {
 		$content_processor = new HTML_Tag_Processor( $content );
 		while ( $content_processor->next_token() ) {
 			if ( $content_processor->get_token_type() === '#comment' ) {
@@ -238,12 +277,19 @@ class Personalizer {
 					continue;
 				}
 
-				$value = $this->get_tag_value( $tag, $rendering_context, $token['arguments'] );
+				$arguments = $token['arguments'];
+				if ( self::RENDERING_CONTEXT_HTML === $rendering_context && Personalization_Tag::VALUE_TYPE_HTML === $tag->get_value_type() ) {
+					// An HTML-typed callback may output an argument as it is, so in HTML content it gets the values escaped for HTML.
+					$arguments = array_map( 'esc_html', $arguments );
+				}
+				$value = $this->get_tag_value( $tag, $rendering_context, $arguments );
 				if ( self::RENDERING_CONTEXT_HTML === $rendering_context && Personalization_Tag::VALUE_TYPE_TEXT === $tag->get_value_type() ) {
 					$value = esc_html( $value );
+				} elseif ( self::RENDERING_CONTEXT_TEXT === $rendering_context && Personalization_Tag::VALUE_TYPE_HTML === $tag->get_value_type() ) {
+					$value = $this->convert_html_value_to_text( $value );
 				}
 				$value = $this->intercept_value( (string) $value, trim( $modifiable_text ), $rendering_context );
-				$content_processor->replace_token( $value );
+				$content_processor->replace_token( $escape_values ? htmlspecialchars( $value, ENT_QUOTES, 'UTF-8' ) : $value );
 
 			} elseif ( $content_processor->get_token_type() === '#tag' && $content_processor->get_tag() === 'TITLE' ) {
 				// The title tag contains the subject of the email which should be personalized. HTML_Tag_Processor does parse the header tags.
@@ -297,7 +343,7 @@ class Personalizer {
 	 */
 	private function personalize_text_link_targets( string $content ): string {
 		return (string) preg_replace_callback(
-			'/\]\((\[[^\]]+\]|(?:[^()\s]++|\([^()\s]*\))++)\)/',
+			'/\]\((\[' . self::TAG_NAME_PATTERN . self::TAG_ARGUMENTS_PATTERN . '\]|(?:[^()\s]++|\([^()\s]*\))++)\)/',
 			function ( array $matches ): string {
 				$url = $this->personalize_href_tokens( $matches[1] );
 				if ( null !== $url ) {
@@ -310,6 +356,33 @@ class Personalizer {
 	}
 
 	/**
+	 * Convert an HTML tag value to plain text the same way the Renderer converts the plain-text body.
+	 * Values without markup or entities are returned untouched, so a bare "&" or "<3" and the
+	 * value's own whitespace survive.
+	 *
+	 * @param string $value The tag value.
+	 * @return string The plain-text value.
+	 */
+	private function convert_html_value_to_text( string $value ): string {
+		if ( ! preg_match( '/<[a-z!\/]|&(?:#\d+|#x[0-9a-f]+|[a-z][a-z0-9]*);/i', $value ) ) {
+			return $value;
+		}
+		// Encode a "<" that does not start a tag, or older libxml versions drop the text after it.
+		$value = (string) preg_replace( '/<(?![a-z!\/])/i', '&lt;', $value );
+		$text  = Html2Text::convert( $value, array( 'ignore_errors' => true ) );
+
+		// Html2Text trims its output, so keep a space where the value started or ended with one,
+		// otherwise a separator such as "&nbsp;" between two tags disappears.
+		$space    = '(?:\s|&nbsp;|&#160;|&#xa0;)';
+		$leading  = preg_match( '/^' . $space . '/i', $value ) ? ' ' : '';
+		$trailing = preg_match( '/' . $space . '$/i', $value ) ? ' ' : '';
+		if ( '' === $text ) {
+			return ( '' !== $leading . $trailing ) ? ' ' : '';
+		}
+		return $leading . $text . $trailing;
+	}
+
+	/**
 	 * Replace personalization tag tokens embedded in a link URL.
 	 *
 	 * @param string $href The href attribute value.
@@ -318,7 +391,7 @@ class Personalizer {
 	private function personalize_href_tokens( string $href ): ?string {
 		// Decode both URL encoding (%XX) and HTML entities (&#039;) to handle various encoding scenarios.
 		$decoded_href = html_entity_decode( urldecode( $href ), ENT_QUOTES, 'UTF-8' );
-		if ( ! preg_match_all( '/\[' . self::TAG_NAME_PATTERN . '(?:\s+[^\]]+)?\]/', $decoded_href, $matches ) ) {
+		if ( ! preg_match_all( '/\[' . self::TAG_NAME_PATTERN . self::TAG_ARGUMENTS_PATTERN . '\]/', $decoded_href, $matches ) ) {
 			return null;
 		}
 
@@ -361,7 +434,7 @@ class Personalizer {
 		// ("http://[tag]"). Strip it only when the token directly after it is being
 		// replaced, so the tag value is used as-is while any suffix (e.g. appended
 		// query parameters) is kept.
-		if ( preg_match( '#^https?://(\[' . self::TAG_NAME_PATTERN . '(?:\s+[^\]]+)?\])#i', $base, $prefix_match ) && isset( $replacements[ $prefix_match[1] ] ) ) {
+		if ( preg_match( '#^https?://(\[' . self::TAG_NAME_PATTERN . self::TAG_ARGUMENTS_PATTERN . '\])#i', $base, $prefix_match ) && isset( $replacements[ $prefix_match[1] ] ) ) {
 			$base = (string) preg_replace( '#^https?://#i', '', $base );
 		}
 
@@ -416,12 +489,14 @@ class Personalizer {
 					$unquoted_value      = $attribute[4] ?? '';
 
 					if ( '' !== $double_quoted_value ) {
-						$result['arguments'][ $attribute[1] ] = $double_quoted_value;
+						$value = $double_quoted_value;
 					} elseif ( '' !== $single_quoted_value ) {
-						$result['arguments'][ $attribute[1] ] = $single_quoted_value;
+						$value = $single_quoted_value;
 					} else {
-						$result['arguments'][ $attribute[1] ] = $unquoted_value;
+						$value = $unquoted_value;
 					}
+					// Tokens live in comments and attributes, so values can carry entities such as &#039; from esc_attr().
+					$result['arguments'][ $attribute[1] ] = html_entity_decode( $value, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 				}
 			}
 		}
@@ -443,7 +518,7 @@ class Personalizer {
 		$escaped_shortcode = preg_quote( substr( $token, 1, strlen( $token ) - 2 ), '/' );
 
 		// Create a regex pattern dynamically.
-		$pattern = '/\[' . $escaped_shortcode . '(?:\s+[^\]]+)?\]/';
+		$pattern = '/\[' . $escaped_shortcode . self::TAG_ARGUMENTS_PATTERN . '\]/';
 
 		// Escape `$` and `\` so they are inserted literally instead of being interpreted as backreferences.
 		return trim( (string) preg_replace( $pattern, addcslashes( $replacement, '\\$' ), $content ) );

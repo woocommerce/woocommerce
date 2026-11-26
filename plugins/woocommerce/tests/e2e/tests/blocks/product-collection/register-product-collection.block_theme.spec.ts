@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	BLOCK_THEME_SLUG,
+	enableTestPlugin,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -11,6 +16,7 @@ import ProductCollectionPage, {
 	Collections,
 	SELECTORS,
 } from './product-collection.page';
+import { locks } from '../../../fixtures/fixtures';
 
 declare global {
 	interface Window {
@@ -53,47 +59,9 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 		},
 	};
 
-	// Activate plugin which registers custom product collections
-	test.beforeEach( async ( { requestUtils } ) => {
-		// There's been multiple instances of flaky tests due to "socket hang up" errors.
-		// Seems it's more common as I found a similar issue in here:
-		// https://github.com/sillsdev/web-languageforge/issues/1402.
-		// This is a retry mechanism to ensure the plugin is activated and ready.
-		const maxRetries = 3;
-		let retryCount = 0;
-		let lastError;
-
-		while ( retryCount < maxRetries ) {
-			try {
-				await requestUtils.activatePlugin(
-					'woocommerce-blocks-test-register-product-collection'
-				);
-
-				// Verify plugin is active by making a test request
-				try {
-					await requestUtils.rest( {
-						method: 'GET',
-						path: 'wp/v2/plugins',
-					} );
-					return; // If we get here, plugin is ready
-				} catch ( verifyError ) {
-					// If verification fails, continue to retry
-					lastError = verifyError;
-				}
-			} catch ( error ) {
-				lastError = error;
-			}
-
-			retryCount++;
-			if ( retryCount < maxRetries ) {
-				// Exponential backoff for retries
-				await new Promise( ( resolve ) =>
-					setTimeout( resolve, Math.pow( 2, retryCount ) * 200 )
-				);
-			}
-		}
-
-		throw lastError;
+	// Enable the plugin which registers custom product collections.
+	test.beforeEach( async ( { context } ) => {
+		await enableTestPlugin( context, 'register-product-collection' );
 	} );
 
 	test( `Registered collections should be available in Collection chooser`, async ( {
@@ -359,35 +327,60 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 		},
 	].forEach( ( collection ) => {
 		collection.previewLabelTemplate.forEach( ( template ) => {
-			test( `Collection "${ collection.name }" should show preview label in "${ template }"`, async ( {
-				admin,
-				pageObject,
-				editor,
-			} ) => {
-				if (
-					template === `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`
-				) {
-					await admin.visitSiteEditor( {
-						postType: 'wp_template',
-					} );
-					await editor.createTemplate( {
-						templateName: 'Products by Category',
-					} );
-				} else {
-					await pageObject.goToEditorTemplate( template );
+			const isTaxonomyTemplate =
+				template === `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`;
+
+			test(
+				`Collection "${ collection.name }" should show preview label in "${ template }"`,
+				{ lock: isTaxonomyTemplate ? locks.TAXONOMY_TEMPLATES : [] },
+				async ( {
+					admin,
+					pageObject,
+					editor,
+					requestUtils,
+					cleanup,
+				} ) => {
+					if ( isTaxonomyTemplate ) {
+						const deleteTemplate = () =>
+							requestUtils
+								.rest( {
+									method: 'DELETE',
+									path: `/wp/v2/templates/${ template }`,
+									params: { force: true },
+								} )
+								.catch( ( error ) => {
+									if (
+										error?.code !==
+										'rest_template_not_found'
+									) {
+										throw error;
+									}
+								} );
+						// A stopped run can leave the template, and then the Site Editor does not offer it.
+						await deleteTemplate();
+						cleanup( deleteTemplate );
+						await admin.visitSiteEditor( {
+							postType: 'wp_template',
+						} );
+						await editor.createTemplate( {
+							templateName: 'Products by Category',
+						} );
+					} else {
+						await pageObject.goToEditorTemplate( template );
+					}
+					await pageObject.insertProductCollection();
+					await pageObject.chooseCollectionInTemplate(
+						collection.id as Collections
+					);
+
+					// Check if the preview button is visible
+					const previewButtonLocator = editor.canvas.getByTestId(
+						SELECTORS.previewButtonTestID
+					);
+
+					await expect( previewButtonLocator ).toBeVisible();
 				}
-				await pageObject.insertProductCollection();
-				await pageObject.chooseCollectionInTemplate(
-					collection.id as Collections
-				);
-
-				// Check if the preview button is visible
-				const previewButtonLocator = editor.canvas.getByTestId(
-					SELECTORS.previewButtonTestID
-				);
-
-				await expect( previewButtonLocator ).toBeVisible();
-			} );
+			);
 		} );
 
 		test( `Collection "${ collection.name }" should not show preview label in a post`, async ( {
@@ -449,18 +442,37 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 		editor,
 		requestUtils,
 		page,
+		cleanup,
 	} ) => {
-		// Add a new test product to the database
-		let testProductId: number | null = null;
-		const newProduct = await requestUtils.rest( {
+		// Other specs read the sample catalog. Hidden and dated in the past,
+		// this product stays out of the catalog and New Arrivals.
+		const { id: testProductId } = await requestUtils.rest< {
+			id: number;
+		} >( {
 			method: 'POST',
 			path: 'wc/v3/products',
 			data: {
 				name: 'A Test Product',
 				price: 10,
+				catalog_visibility: 'hidden',
+				date_created: '2020-01-01T00:00:00',
 			},
 		} );
-		testProductId = newProduct.id;
+		cleanup( () =>
+			requestUtils
+				.rest( {
+					method: 'DELETE',
+					path: `wc/v3/products/${ testProductId }`,
+					params: { force: true },
+				} )
+				.catch( ( error ) => {
+					if (
+						error?.code !== 'woocommerce_rest_product_invalid_id'
+					) {
+						throw error;
+					}
+				} )
+		);
 
 		await admin.createNewPost();
 		await pageObject.insertProductCollection();

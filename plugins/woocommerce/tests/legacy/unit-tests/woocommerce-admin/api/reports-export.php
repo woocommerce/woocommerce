@@ -17,14 +17,14 @@ class WC_Admin_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $export_route = '/wc-analytics/reports/(?P<type>[a-z]+)/export';
+	protected $export_route = '/wc-analytics/reports/(?P<type>[a-z-]+)/export';
 
 	/**
 	 * Export status route.
 	 *
 	 * @var string
 	 */
-	protected $status_route = '/wc-analytics/reports/(?P<type>[a-z]+)/export/(?P<export_id>[a-z0-9]+)/status';
+	protected $status_route = '/wc-analytics/reports/(?P<type>[a-z-]+)/export/(?P<export_id>[a-z0-9]+)/status';
 
 	/**
 	 * Setup test reports categories data.
@@ -157,7 +157,6 @@ class WC_Admin_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 100, $status['percent_complete'] );
 		$this->assertStringMatchesFormat( '%s/wp-admin/?action=woocommerce_admin_download_report_csv&filename=wc-taxes-report-export-%d', $status['download_url'] );
 		$this->assertStringMatchesFormat( '%s/wc-analytics/reports/taxes/export/%d/status', $status['_links']['self'][0]['href'] );
-		remove_filter( 'wc_tax_enabled', '__return_true' );
 	}
 
 	/**

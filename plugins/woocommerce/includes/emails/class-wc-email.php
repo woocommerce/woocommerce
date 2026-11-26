@@ -5,7 +5,6 @@
  * @package WooCommerce\Emails
  */
 
-use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Html2Text;
 use Automattic\WooCommerce\Internal\Email\EmailHeaders;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -207,7 +206,7 @@ class WC_Email extends WC_Settings_API {
 		"/\r/",                                                  // Non-legal carriage return.
 		'/&(nbsp|#0*160);/i',                                    // Non-breaking space.
 		'/&(quot|rdquo|ldquo|#0*8220|#0*8221|#0*147|#0*148);/i', // Double quotes.
-		'/&(apos|rsquo|lsquo|#0*8216|#0*8217);/i',               // Single quotes.
+		'/&(apos|rsquo|lsquo|#0*39|#x0*27|#0*8216|#0*8217);/i',  // Single quotes.
 		'/&gt;/i',                                               // Greater-than.
 		'/&lt;/i',                                               // Less-than.
 		'/&#0*38;/i',                                            // Ampersand.
@@ -595,8 +594,8 @@ class WC_Email extends WC_Settings_API {
 		 */
 		$subject = apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option_or_transient( 'subject', $this->get_default_subject() ) ), $this->object, $this );
 		if ( $this->block_email_editor_enabled ) {
-			// Because the new email editor uses rich-text component for subject editing, to be ensure that the subject is always in plain text, we need to strip all tags.
-			$subject = wp_strip_all_tags( $this->personalizer->personalize_transactional_content( $subject, $this, Personalizer::RENDERING_CONTEXT_TEXT ) );
+			// The block email editor edits the subject as rich text, so convert it to personalized plain text.
+			$subject = $this->personalizer->personalize_transactional_rich_text_as_plain_text( $subject, $this );
 		}
 		return $subject;
 	}
@@ -620,7 +619,7 @@ class WC_Email extends WC_Settings_API {
 		 */
 		$preheader = apply_filters( 'woocommerce_email_preheader' . $this->id, $this->format_string( $this->get_option_or_transient( 'preheader', '' ) ), $this->object, $this );
 		if ( $this->block_email_editor_enabled ) {
-			$preheader = $this->personalizer->personalize_transactional_content( $preheader, $this, Personalizer::RENDERING_CONTEXT_TEXT );
+			$preheader = $this->personalizer->personalize_transactional_rich_text_as_plain_text( $preheader, $this );
 		}
 		return $preheader;
 	}
@@ -1337,12 +1336,20 @@ class WC_Email extends WC_Settings_API {
 		$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
 		$this->form_fields = array(
 			'enabled'            => array(
-				'title'   => __( 'Enable/Disable', 'woocommerce' ),
-				'type'    => 'checkbox',
-				'label'   => __( 'Enable this email notification', 'woocommerce' ),
-				'default' => 'yes',
+				'abilities' => array(
+					'read'  => true,
+					'write' => true,
+				),
+				'title'     => __( 'Enable/Disable', 'woocommerce' ),
+				'type'      => 'checkbox',
+				'label'     => __( 'Enable this email notification', 'woocommerce' ),
+				'default'   => 'yes',
 			),
 			'subject'            => array(
+				'abilities'   => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'title'       => __( 'Subject', 'woocommerce' ),
 				'type'        => 'text',
 				'desc_tip'    => true,
@@ -1351,6 +1358,10 @@ class WC_Email extends WC_Settings_API {
 				'default'     => '',
 			),
 			'heading'            => array(
+				'abilities'   => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'title'       => __( 'Email heading', 'woocommerce' ),
 				'type'        => 'text',
 				'desc_tip'    => true,
@@ -1359,6 +1370,10 @@ class WC_Email extends WC_Settings_API {
 				'default'     => '',
 			),
 			'additional_content' => array(
+				'abilities'   => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'title'       => __( 'Additional content', 'woocommerce' ),
 				'description' => __( 'Text to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
 				'css'         => 'width:400px; height: 75px;',
@@ -1368,6 +1383,10 @@ class WC_Email extends WC_Settings_API {
 				'desc_tip'    => true,
 			),
 			'email_type'         => array(
+				'abilities'   => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'title'       => __( 'Email type', 'woocommerce' ),
 				'type'        => 'select',
 				'description' => __( 'Choose which format of email to send.', 'woocommerce' ),

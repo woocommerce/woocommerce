@@ -194,6 +194,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			'route differs from resolved route'   => array( '/en/wp-json/wc/v3/products', '/wp/v2/users', false ),
 			'custom rewrite without REST prefix'  => array( '/shop-api/products', '/wc/v3/products', true ),
 			'resolved route overrides URI route'  => array( '/wp-json/wp/v2/users', '/wc/v3/products', true ),
+			'resolved route is the Store API'     => array( '/wp-json/wc/v3/products', '/wc/store/v1/cart', false ),
 		);
 	}
 
@@ -385,11 +386,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$this->simulate_rest_dispatching( true );
 		$_SERVER['REQUEST_URI'] = $request_uri;
 
-		try {
-			$this->assertSame( $expected, $this->is_request_to_rest_api() );
-		} finally {
-			remove_filter( 'option_home', $home_filter );
-		}
+		$this->assertSame( $expected, $this->is_request_to_rest_api() );
 	}
 
 	/**
@@ -450,6 +447,9 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			'core users route'              => array( '/wp/v2/users', false ),
 			'route index'                   => array( '/', false ),
 			'woocommerce route as a suffix' => array( '/wp/v2/users?x=wc/v3/products', false ),
+			'store api route'               => array( '/wc/store/v1/cart', false ),
+			'unversioned store api route'   => array( '/wc/store/cart', false ),
+			'store api route, mixed case'   => array( '/wc/Store/v1/cart', false ),
 		);
 	}
 
@@ -532,20 +532,16 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 
 		add_filter( 'woocommerce_rest_is_request_to_rest_api', '__return_true' );
 
-		try {
-			$this->assertTrue(
-				$this->is_request_to_rest_api(),
-				'A namespace opted in through the filter must be treated as a WooCommerce request.'
-			);
+		$this->assertTrue(
+			$this->is_request_to_rest_api(),
+			'A namespace opted in through the filter must be treated as a WooCommerce request.'
+		);
 
-			$this->simulate_rest_dispatching( false );
-			$this->assertFalse(
-				$this->is_request_to_rest_api(),
-				'The filter must not opt in a request WordPress is not dispatching as REST.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_rest_is_request_to_rest_api', '__return_true' );
-		}
+		$this->simulate_rest_dispatching( false );
+		$this->assertFalse(
+			$this->is_request_to_rest_api(),
+			'The filter must not opt in a request WordPress is not dispatching as REST.'
+		);
 	}
 
 	/**
@@ -815,6 +811,174 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			$this->sut->reject_out_of_scope_route( null ),
 			'A request without WooCommerce API key credentials should be left alone.'
 		);
+	}
+
+	/**
+	 * @testdox Should not treat a Store API request as one an API key may authenticate.
+	 *
+	 * @dataProvider provider_store_api_request_uris
+	 *
+	 * @param string $request_uri Request URI.
+	 * @param bool   $expected    Expected result.
+	 */
+	public function test_is_request_to_rest_api_excludes_store_api( string $request_uri, bool $expected ): void {
+		$_SERVER['REQUEST_URI'] = $request_uri;
+		$this->simulate_rest_dispatching( true );
+
+		$this->assertSame( $expected, $this->is_request_to_rest_api() );
+	}
+
+	/**
+	 * Data provider for Store API request detection.
+	 *
+	 * @return array[]
+	 */
+	public static function provider_store_api_request_uris(): array {
+		return array(
+			'store api route'                         => array( '/wp-json/wc/store/v1/cart', false ),
+			'unversioned store api route'             => array( '/wp-json/wc/store/cart', false ),
+			'store api namespace index'               => array( '/wp-json/wc/store', false ),
+			'plain permalink store api route'         => array( '/?rest_route=/wc/store/v1/cart', false ),
+			'query string names the store api'        => array( '/wp-json/wc/v3/products?rest_route=/wc/store/v1/cart', false ),
+			// WordPress matches routes case-insensitively, so these still reach the Store API.
+			'store api route, upper case'             => array( '/wp-json/wc/STORE/v1/cart', false ),
+			'store api route, percent-encoded'        => array( '/wp-json/wc/%73tore/v1/cart', false ),
+			'namespace that only starts with "store"' => array( '/wp-json/wc/store-locator/v1/stores', true ),
+		);
+	}
+
+	/**
+	 * @testdox Should reject a key on the Store API even when a filter claims the request.
+	 */
+	public function test_reject_out_of_scope_route_rejects_store_api_when_filter_claims_it(): void {
+		global $wp;
+
+		add_filter( 'woocommerce_rest_is_request_to_rest_api', '__return_true' );
+
+		$this->simulate_rest_dispatching( true );
+		$_SERVER['REQUEST_URI']       = '/wp-json/wc/store/v1/cart';
+		$wp->query_vars['rest_route'] = '/wc/store/v1/cart';
+
+		$this->authenticate_as( 1 );
+
+		try {
+			$this->assertTrue( $this->is_request_to_rest_api(), 'The filter should still be able to claim the request.' );
+
+			$result = $this->sut->reject_out_of_scope_route( null );
+
+			$this->assertWPError( $result, 'A key must not reach the Store API, whatever the filter says.' );
+			$this->assertSame( 'woocommerce_rest_authentication_error', $result->get_error_code() );
+		} finally {
+			remove_filter( 'woocommerce_rest_is_request_to_rest_api', '__return_true' );
+		}
+	}
+
+	/**
+	 * @testdox Should leave a key-signed Store API request unauthenticated so it is served as a guest.
+	 *
+	 * @testWith ["read"]
+	 *           ["read_write"]
+	 *
+	 * @param string $permissions Key permissions.
+	 */
+	public function test_rest_authentication_errors_ignores_key_on_store_api( string $permissions ): void {
+		global $wp, $wpdb;
+
+		$consumer_key    = 'ck_' . wp_generate_password( 32, false );
+		$consumer_secret = 'cs_' . wp_generate_password( 32, false );
+		$user_id         = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array(
+				'user_id'         => $user_id,
+				'description'     => 'Store API scope test key',
+				'permissions'     => $permissions,
+				'consumer_key'    => wc_api_hash( $consumer_key ),
+				'consumer_secret' => $consumer_secret,
+				'truncated_key'   => substr( $consumer_key, -7 ),
+			)
+		);
+
+		$this->simulate_rest_dispatching( true );
+		$_SERVER['HTTPS']             = 'on';
+		$_SERVER['PHP_AUTH_USER']     = $consumer_key;
+		$_SERVER['PHP_AUTH_PW']       = $consumer_secret;
+		$_SERVER['REQUEST_URI']       = '/wp-json/wc/store/v1/cart';
+		$wp->query_vars['rest_route'] = '/wc/store/v1/cart';
+
+		wp_set_current_user( 0 );
+
+		try {
+			$this->assertFalse( $this->sut->authenticate( false ), 'An API key must not set the current user on the Store API.' );
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Running WordPress core's filter so our callbacks fire in order; not defining a hook.
+			$result = apply_filters( 'rest_authentication_errors', null );
+
+			$this->assertNotWPError( $result, 'The key should be ignored, not rejected.' );
+			$this->assertSame( 0, get_current_user_id(), 'The request should be served as a guest.' );
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
+			unset( $_SERVER['HTTPS'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Should not authenticate a Basic-auth key on the Store API when application passwords are in use.
+	 */
+	public function test_basic_auth_key_on_store_api_with_application_passwords_in_use(): void {
+		global $wp, $wpdb, $wp_rest_application_password_status;
+
+		$consumer_key    = 'ck_' . wp_generate_password( 32, false );
+		$consumer_secret = 'cs_' . wp_generate_password( 32, false );
+		$user_id         = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array(
+				'user_id'         => $user_id,
+				'description'     => 'Store API scope test key',
+				'permissions'     => 'read',
+				'consumer_key'    => wc_api_hash( $consumer_key ),
+				'consumer_secret' => $consumer_secret,
+				'truncated_key'   => substr( $consumer_key, -7 ),
+			)
+		);
+
+		// Application passwords need SSL, and core only accepts them on API requests. REST_REQUEST is not defined here.
+		$_SERVER['HTTPS'] = 'on';
+		WP_Application_Passwords::create_new_application_password( $this->factory->user->create( array( 'role' => 'administrator' ) ), array( 'name' => 'Store API scope test' ) );
+		add_filter( 'application_password_is_api_request', '__return_true' );
+
+		$this->simulate_rest_dispatching( true );
+		$_SERVER['PHP_AUTH_USER']     = $consumer_key;
+		$_SERVER['PHP_AUTH_PW']       = $consumer_secret;
+		$_SERVER['REQUEST_URI']       = '/wp-json/wc/store/v1/cart';
+		$wp->query_vars['rest_route'] = '/wc/store/v1/cart';
+
+		wp_set_current_user( 0 );
+
+		try {
+			$this->assertTrue( WP_Application_Passwords::is_in_use(), 'Application passwords should be in use for this test.' );
+
+			// Core's wp_validate_application_password() runs after us and reads the key as a username.
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Running WordPress core's filter so core's callbacks run after ours; not defining a hook.
+			$this->assertFalse( apply_filters( 'determine_current_user', false ), 'An API key must not set the current user on the Store API.' );
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Running WordPress core's filter so core's callbacks run after ours; not defining a hook.
+			$result = apply_filters( 'rest_authentication_errors', null );
+
+			$this->assertWPError( $result, 'WordPress should reject credentials it cannot match to a user.' );
+			$this->assertSame( 401, $result->get_error_data()['status'] ?? null );
+			$this->assertSame( 0, get_current_user_id(), 'The key user must not be authenticated.' );
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
+			unset( $_SERVER['HTTPS'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
+			remove_filter( 'application_password_is_api_request', '__return_true' );
+			$wp_rest_application_password_status = null;
+			wp_set_current_user( 0 );
+		}
 	}
 
 	/**

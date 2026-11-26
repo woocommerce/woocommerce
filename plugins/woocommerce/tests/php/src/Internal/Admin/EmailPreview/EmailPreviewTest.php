@@ -49,14 +49,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		update_option( 'woocommerce_feature_email_improvements_enabled', 'no' );
-	}
-
-	/**
 	 * Tests that it returns processing order email preview.
 	 */
 	public function test_it_returns_order_email_preview() {
@@ -135,6 +127,9 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		// {order_number} placeholder
 		$this->assertStringContainsString( '12345', $subject );
 
+		// Only the customer note's subject without email improvements has {order_date}, and the shared
+		// mailer keeps whichever subject it was built with, so set the one the preview reads.
+		set_transient( 'woocommerce_customer_note_subject', 'Note added to your {site_title} order from {order_date}' );
 		$this->sut->set_email_type( 'WC_Email_Customer_Note' );
 		$subject = $this->sut->get_subject();
 		// {order_date} placeholder
@@ -163,7 +158,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$product = $this->sut->get_dummy_product_when_not_set( null );
 		$this->assertEquals( 'Filtered Product', $product->get_name() );
 		$this->assertEquals( '99', $product->get_price() );
-		remove_filter( 'woocommerce_email_preview_dummy_product', $product_filter, 10 );
 	}
 
 	/**
@@ -179,8 +173,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$content = $this->sut->render();
 		$this->assertStringContainsString( '500.00', $content );
 		$this->assertStringNotContainsString( '100.00', $content );
-
-		remove_filter( 'woocommerce_email_preview_dummy_order', $order_filter, 10 );
 	}
 
 	/**
@@ -228,8 +220,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$content = $this->sut->render();
 		$this->assertStringContainsString( 'Jane Smith', $content );
 		$this->assertStringNotContainsString( 'John Doe', $content );
-
-		remove_filter( 'woocommerce_email_preview_dummy_address', $address_filter, 10 );
 	}
 
 	/**
@@ -246,8 +236,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$subject = $this->sut->get_subject();
 		$this->assertStringContainsString( '98765', $subject );
 		$this->assertStringNotContainsString( '12345', $subject );
-
-		remove_filter( 'woocommerce_email_preview_placeholders', $placeholders_filter, 10 );
 	}
 
 	/**
@@ -265,8 +253,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$subject = $this->sut->get_subject();
 		$this->assertStringContainsString( 'Filtered Subject 12345', $subject );
 		$this->assertStringNotContainsString( 'Your ' . self::SITE_TITLE . ' order has been received!', $subject );
-
-		remove_filter( 'woocommerce_prepare_email_for_preview', $email_filter, 10 );
 	}
 
 	/**
@@ -348,8 +334,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$this->sut->set_email_type( 'WC_Email_Customer_Completed_Order' );
 		$content = $this->sut->render();
 		$this->assertStringContainsString( 'Filtered Downloadable Product', $content );
-
-		remove_filter( 'woocommerce_email_preview_dummy_downloadable_product', $downloadable_product_filter, 10 );
 	}
 
 	/**
@@ -518,5 +502,38 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$this->assertSame( 0, $order->add_order_note( 'Preview note' ), 'add_order_note() must not write a note.' );
 		$this->assertSame( array(), $order->get_refunds(), 'get_refunds() must not read refunds from the database.' );
 		$this->assertSame( array(), $order->get_customer_order_notes(), 'get_customer_order_notes() must not read notes from the database.' );
+	}
+
+	/**
+	 * @testdox Email preview must not leak real order notes when a template or hook calls wc_get_order_notes().
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/71100
+	 */
+	public function test_preview_does_not_leak_order_notes_via_wc_get_order_notes(): void {
+		$real_order = wc_create_order();
+		$real_order->add_order_note( 'Secret customer note from real order', 1 );
+		$real_order->save();
+
+		$captured_notes = null;
+		add_action(
+			'woocommerce_email_order_details',
+			function ( $order ) use ( &$captured_notes ) {
+				$captured_notes = wc_get_order_notes(
+					array(
+						'order_id' => $order->get_id(),
+						'type'     => 'customer',
+					)
+				);
+				foreach ( $captured_notes as $note ) {
+					echo wp_kses_post( wpautop( $note->content ) );
+				}
+			}
+		);
+
+		$this->sut->set_email_type( 'WC_Email_Customer_Completed_Order' );
+		$content = $this->sut->render();
+
+		$this->assertSame( array(), $captured_notes, 'wc_get_order_notes() must return no notes for the preview order.' );
+		$this->assertStringNotContainsString( 'Secret customer note from real order', $content, 'Real order notes must not appear in the rendered email preview.' );
 	}
 }

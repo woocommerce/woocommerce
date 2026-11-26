@@ -4,13 +4,13 @@
 import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { Icon, close } from '@wordpress/icons';
+import { Button } from '@ariakit/react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import { getDefaultPoliteness, getStatusIcon } from './utils';
-import Button from '../button';
 import { useSpokenMessage } from '../../hooks';
 
 export interface NoticeBannerProps {
@@ -80,10 +80,9 @@ const NoticeBanner = ( {
 			</div>
 			{ !! isDismissible && (
 				<Button
-					className="wc-block-components-notice-banner__dismiss"
+					className="wc-block-components-button wc-block-components-notice-banner__dismiss contained"
 					aria-label={ __( 'Dismiss this notice', 'woocommerce' ) }
 					onClick={ dismiss }
-					removeTextWrap
 				>
 					<Icon icon={ close } />
 				</Button>
