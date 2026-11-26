@@ -109,6 +109,7 @@ class WC_Payment_Gateways {
 
 		// Start from an empty list so a re-init overwrites, rather than appends to, the previous gateways.
 		$this->payment_gateways = array();
+		$overflow               = array();
 
 		// Load gateways in order.
 		foreach ( $load_gateways as $gateway ) {
@@ -135,9 +136,10 @@ class WC_Payment_Gateways {
 				while ( isset( $this->payment_gateways[ $position ] ) && $position < PHP_INT_MAX ) {
 					++$position;
 				}
-				// Fall back to the end of the list if no free integer position is left.
+				// Keep the gateway aside, to append after sorting, if no free integer position is left.
 				if ( isset( $this->payment_gateways[ $position ] ) ) {
-					$position = null;
+					$overflow[] = $gateway;
+					continue;
 				}
 			}
 
@@ -155,6 +157,11 @@ class WC_Payment_Gateways {
 		}
 
 		ksort( $this->payment_gateways );
+
+		// Gateways that found no free position go last.
+		if ( ! empty( $overflow ) ) {
+			$this->payment_gateways = array_merge( $this->payment_gateways, $overflow );
+		}
 
 		add_action( 'wc_payment_gateways_initialized', array( $this, 'on_payment_gateways_initialized' ) );
 		/**

@@ -582,6 +582,11 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		$this->assertContains( WC_Gateway_BACS::ID, $gateway_ids );
 		$this->assertContains( WC_Gateway_Cheque::ID, $gateway_ids );
 		$this->assertContains( WC_Gateway_COD::ID, $gateway_ids );
+		$this->assertSame(
+			array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ),
+			array_values( array_intersect( $gateway_ids, array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ) ) ),
+			'Overflow gateways should come after the gateway holding the maximum position, in load order.'
+		);
 	}
 
 	/**
