@@ -138,34 +138,25 @@ $carousel-narrow-columns: 2;
 @mixin carousel-scroll-for-count($count) {
 	$style: map.get($carousel-columns, $count);
 
-	scroll-padding: 0 #{ map.get($style, padding) };
-
 	.wc-block-product {
+		scroll-margin-inline: math.div(map.get($style, padding), 1%) * 1cqi;
 		scroll-snap-align: map.get($style, align);
 	}
 }
 
-// The collection is the query container so rules can style the carousel.
-// The carousel is the scroll container, and a container query cannot style
-// the element that defines the container.
-.wp-block-woocommerce-product-collection:has(
-		.is-product-collection-layout-carousel
-	) {
+.is-product-collection-layout-carousel {
 	container-type: inline-size;
 	container-name: carousel;
-}
-
-.is-product-collection-layout-carousel {
 	overflow-x: auto;
 	scrollbar-width: none;
 	scroll-snap-type: x mandatory;
-	scroll-padding: 0 30%;
 	position: relative; // Create new stacking context
 
 	.wc-block-product {
 		box-sizing: border-box;
 		// Padding to prevent focus outline from being clipped.
 		padding: 4px;
+		scroll-margin-inline: 30cqi;
 		scroll-snap-align: center;
 		flex-basis: 0;
 		min-width: carousel-product-width($carousel-narrow-columns);
@@ -191,7 +182,7 @@ $carousel-narrow-columns: 2;
 	&.wc-block-product-template__carousel-responsive {
 		display: flex;
 		flex-wrap: nowrap;
-		// Inherited by products. Wider steps below override it per column count.
+
 		--carousel-visible-width: #{carousel-product-width($carousel-narrow-columns)};
 
 		.wc-block-product {
@@ -223,7 +214,10 @@ $carousel-narrow-columns: 2;
 					@if $step-columns <= $columns {
 						@container carousel (min-width: #{$breakpoint}) {
 							@include carousel-scroll-for-count($step-columns);
-							--carousel-visible-width: #{carousel-product-width($step-columns)};
+
+							.wc-block-product {
+								--carousel-visible-width: #{carousel-product-width($step-columns)};
+							}
 						}
 					}
 				}
