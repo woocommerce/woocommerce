@@ -1439,6 +1439,55 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Hooks that throw during save() before the order is written, with what they throw.
+	 *
+	 * @return array<string, array{0: string, 1: Throwable}>
+	 */
+	public function provide_throws_before_the_write(): array {
+		return array(
+			'a staged hook'                   => array( 'woocommerce_order_edit_status', new Exception( 'Listener failed.' ) ),
+			'an error inside the parent save' => array( 'woocommerce_before_order_object_save', new Error( 'Listener failed.' ) ),
+		);
+	}
+
+	/**
+	 * @testdox A throw before the write keeps the staged note for the next save, and runs the staged hook once.
+	 * @dataProvider provide_throws_before_the_write
+	 *
+	 * @param string    $hook  Hook whose listener throws once.
+	 * @param Throwable $error What the listener throws.
+	 */
+	public function test_throw_before_the_write_keeps_the_staged_work_for_the_next_save( string $hook, Throwable $error ): void {
+		$order = new WC_Order();
+		$order->save();
+		$edits = did_action( 'woocommerce_order_edit_status' );
+		$throw = static function () use ( &$throw, $hook, $error ) {
+			remove_action( $hook, $throw );
+			throw $error;
+		};
+		add_action( $hook, $throw );
+
+		$order->stage_order_note( 'Staged note.' );
+		$order->stage_status( OrderStatus::PROCESSING, '', true );
+		$caught = null;
+		try {
+			$order->save();
+		} catch ( Throwable $e ) {
+			$caught = $e;
+		} finally {
+			remove_action( $hook, $throw );
+		}
+		$this->assertSame( $error, $caught, 'save() should pass on the exception.' );
+		$order->save();
+		$order->save();
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertSame( 1, count( array_keys( $notes, 'Staged note.', true ) ) );
+		$this->assertSame( 1, did_action( 'woocommerce_order_edit_status' ) - $edits );
+		$this->assertSame( OrderStatus::PROCESSING, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
 	 * Run a callback while a listener makes every order write fail.
 	 *
 	 * @param callable $callback Callback to run.

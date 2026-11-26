@@ -471,26 +471,45 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * that belong after it stay queued for the next save, so no hook reports a change that was not saved.
 	 * A callback queued under the same key during the failed save replaces the old one.
 	 *
+	 * When a callback throws, the exception reaches the caller of save(). The callbacks that did not run yet stay
+	 * queued for the next save, and the ones that ran, including the one that threw, do not run again.
+	 *
 	 * @since 11.4.0
 	 * @param array $deferred_actions Entries from take_deferred_actions().
 	 * @param bool  $after_save       True to run the entries that belong after the write.
+	 * @throws Throwable What a callback throws.
 	 */
 	protected function run_deferred_actions( array $deferred_actions, bool $after_save ): void {
 		if ( $after_save && null !== $this->last_save_error ) {
-			$this->deferred_actions += array_filter(
-				$deferred_actions,
-				static function ( array $entry ): bool {
-					return $entry['after_save'];
-				}
-			);
+			$this->requeue_deferred_actions( $deferred_actions, true );
 			return;
 		}
 
-		foreach ( $deferred_actions as $entry ) {
-			if ( $entry['after_save'] === $after_save ) {
+		foreach ( $deferred_actions as $key => $entry ) {
+			if ( $entry['after_save'] !== $after_save ) {
+				continue;
+			}
+
+			unset( $deferred_actions[ $key ] );
+			try {
 				call_user_func_array( $entry['callback'], $entry['args'] );
+			} catch ( Throwable $e ) {
+				$this->requeue_deferred_actions( $deferred_actions, $after_save );
+				throw $e;
 			}
 		}
+	}
+
+	/**
+	 * Queue entries again for the next save(), after a save that did not run them. An entry queued under the
+	 * same key since then stays.
+	 *
+	 * @since 11.4.0
+	 * @param array $deferred_actions Entries from take_deferred_actions().
+	 * @param bool  $after_save_only  True to queue only the entries that belong after the write.
+	 */
+	protected function requeue_deferred_actions( array $deferred_actions, bool $after_save_only ): void {
+		$this->deferred_actions += $after_save_only ? array_filter( $deferred_actions, static fn( array $entry ): bool => $entry['after_save'] ) : $deferred_actions;
 	}
 
 	/**

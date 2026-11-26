@@ -166,6 +166,10 @@ abstract class WC_Data {
 	 * same points, and fires its hooks in the same order, as the saving method always did. It also does not
 	 * refuse the object, so a class that has not adopted the stage method keeps working.
 	 *
+	 * A direct call of a stage method leaves the change on the object for the next save(). A caller that does not
+	 * save after it, for example because a validator refused the change, must discard the object: the staged values
+	 * and the work queued for save() stay on it, and a later save() would write them.
+	 *
 	 * @since 11.4.0
 	 * @param callable $stage Callback that calls the stage method.
 	 * @return mixed What the stage method returns.

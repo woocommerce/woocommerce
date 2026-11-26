@@ -402,15 +402,21 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @since 3.0.0
 	 * @return int order ID
+	 * @throws Throwable What a callback queued by a stage method throws.
 	 */
 	public function save() {
 		$deferred_actions = $this->take_deferred_actions();
 		$this->run_deferred_actions( $deferred_actions, false );
 
-		$this->maybe_set_user_billing_email();
-		parent::save();
-		if ( null === $this->get_last_save_error() ) {
-			$this->status_transition();
+		try {
+			$this->maybe_set_user_billing_email();
+			parent::save();
+			if ( null === $this->get_last_save_error() ) {
+				$this->status_transition();
+			}
+		} catch ( Throwable $e ) {
+			$this->requeue_deferred_actions( $deferred_actions, true );
+			throw $e;
 		}
 
 		$this->run_deferred_actions( $deferred_actions, true );
