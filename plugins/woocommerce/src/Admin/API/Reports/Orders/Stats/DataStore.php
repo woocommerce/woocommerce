@@ -603,7 +603,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Like update(), it adds the order's customer to the customer lookup table if missing, but it
 	 * leaves the stats rows of the customer's other orders unchanged. Customer fields use the saved order.
 	 *
-	 * @since 11.3.0
+	 * @since 11.5.0
 	 *
 	 * @param WC_Order|WC_Order_Refund $order Order or refund to build the row for.
 	 * @return array|false Row data keyed by column name, or false when the order is not tracked in analytics.
@@ -611,6 +611,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function get_order_stats_row_data( $order ) {
 		$date_created = self::get_tracked_order_date_created( $order );
 		if ( ! $date_created ) {
+			return false;
+		}
+
+		// update() writes no row for records the import conditions exclude, nor when that check fails.
+		if ( false !== OrdersScheduler::is_excluded_from_import( (int) $order->get_id() ) ) {
 			return false;
 		}
 

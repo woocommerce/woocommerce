@@ -815,4 +815,25 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( $order ), 'A test order has no row.' );
 		$this->assertSame( -1, OrdersStatsDataStore::update( $order ), 'update() should skip a test order.' );
 	}
+
+	/**
+	 * @testdox get_order_stats_row_data() returns false for a record the import conditions exclude, as update() skips it.
+	 */
+	public function test_get_order_stats_row_data_returns_false_for_excluded_record(): void {
+		global $wpdb;
+
+		$order = WC_Helper_Order::create_order();
+		// A record Analytics already holds is never excluded, so start without its row.
+		$wpdb->delete( "{$wpdb->prefix}wc_order_stats", array( 'order_id' => $order->get_id() ) );
+		add_filter(
+			'woocommerce_analytics_orders_import_where_clauses',
+			static function ( $clauses ) {
+				$clauses[] = '0';
+				return $clauses;
+			}
+		);
+
+		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( $order ), 'An excluded record has no row.' );
+		$this->assertSame( -1, OrdersStatsDataStore::update( $order ), 'update() should skip an excluded record.' );
+	}
 }
