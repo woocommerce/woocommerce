@@ -23,11 +23,31 @@
 		position: relative;
 
 		> .components-flex {
-			padding: 2px 4px;
+			gap: 0;
+			padding: 0;
 		}
 
 		input[type="text"].components-form-token-field__input {
 			min-height: 30px;
+		}
+	}
+
+	.components-flex-item {
+		margin-block: 2px;
+	}
+
+	&:not(.single-selection) .components-form-token-field__input-container {
+		.components-flex-item {
+			// Preserve the physical margin used by the legacy token layout.
+			margin-right: 4px;
+		}
+
+		input[type="text"].components-form-token-field__input {
+			margin-block: 0.25em;
+		}
+
+		.components-flex-item + input[type="text"].components-form-token-field__input {
+			inline-size: auto;
 		}
 	}
 
@@ -67,7 +87,6 @@
 
 	&.single-selection {
 		.components-flex-item {
-			margin-block: 2px;
 			width: 100%;
 		}
 
@@ -83,6 +102,10 @@
 			background: transparent;
 		}
 
+		.components-form-token-field__remove-token.components-button {
+			padding: 0 2px;
+		}
+
 		.components-form-token-field__token-text {
 			padding-left: 4px;
 			width: 100%;
@@ -96,6 +119,7 @@
 		.is-active
 			.components-flex-item + input[type="text"].components-form-token-field__input {
 			border: 1px solid $gray-600;
+			box-sizing: content-box;
 			margin: 0 2px 4px;
 			padding: 0 5px;
 			position: static;
