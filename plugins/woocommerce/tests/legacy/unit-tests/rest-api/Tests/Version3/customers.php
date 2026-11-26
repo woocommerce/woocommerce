@@ -760,8 +760,11 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'DELETE', '/wc/v3/customers/' . $customer_id );
 		$request->set_param( 'force', true );
 		$this->assertSame( 200, $this->server->dispatch( $request )->get_status() );
-		$this->assertSame( 404, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer_id ) )->get_status() );
-		$this->assertFalse( get_userdata( $customer_id ) );
+		// On multisite, user 1 is a network admin, who can still read users removed from this site.
+		if ( ! is_multisite() ) {
+			$this->assertSame( 404, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer_id ) )->get_status() );
+		}
+		$this->assert_user_deleted( $customer_id );
 	}
 
 	/**
@@ -834,8 +837,11 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( $customer_ids, wp_list_pluck( $response->get_data()['delete'], 'id' ) );
 		foreach ( $customer_ids as $customer_id ) {
-			$this->assertSame( 404, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer_id ) )->get_status() );
-			$this->assertFalse( get_userdata( $customer_id ) );
+			// On multisite, user 1 is a network admin, who can still read users removed from this site.
+			if ( ! is_multisite() ) {
+				$this->assertSame( 404, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer_id ) )->get_status() );
+			}
+			$this->assert_user_deleted( $customer_id );
 		}
 	}
 

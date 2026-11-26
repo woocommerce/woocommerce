@@ -90,7 +90,7 @@ class EditLockTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $this->sut->is_locked_by_another_user( $this->order ) );
 
 		// If the user no longer exists, the order shouldn't be considered locked.
-		wp_delete_user( $this->user1 );
+		self::delete_user( $this->user1 );
 		$this->assertFalse( $this->sut->is_locked( $this->order ) );
 	}
 

@@ -707,6 +707,20 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Assert that wp_delete_user() removed a user. On multisite, it only removes the user from the current site.
+	 *
+	 * @param int    $user_id The id of the user.
+	 * @param string $message The failure message.
+	 */
+	protected function assert_user_deleted( int $user_id, string $message = '' ): void {
+		if ( is_multisite() ) {
+			$this->assertFalse( is_user_member_of_blog( $user_id ), $message );
+		} else {
+			$this->assertFalse( get_userdata( $user_id ), $message );
+		}
+	}
+
+	/**
 	 * Revoke the super admins that create_super_admin() made in class fixtures, which the test rollback doesn't cover.
 	 *
 	 * The class teardown deletes those users with SQL, which would leave their logins in the network's super admin list.
