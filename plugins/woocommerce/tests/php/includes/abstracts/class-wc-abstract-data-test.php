@@ -192,6 +192,44 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A save() whose write fails keeps the object staged.
+	 */
+	public function test_a_failed_write_keeps_the_object_staged(): void {
+		$object             = $this->create_staging_object();
+		$object->data_store = new class() {
+			/**
+			 * Write that fails.
+			 *
+			 * @throws Exception Always.
+			 */
+			public function create(): void {
+				throw new Exception( 'Disk full.' );
+			}
+		};
+
+		$staged = array();
+		add_action(
+			'woocommerce_test_staged_action',
+			static function ( $value, $data_object, $is_staged ) use ( &$staged ) {
+				$staged[] = $is_staged;
+			},
+			10,
+			3
+		);
+
+		$object->stage_value();
+		try {
+			$object->save();
+			$this->fail( 'The write did not fail' );
+		} catch ( Exception $e ) {
+			$this->assertSame( 'Disk full.', $e->getMessage() );
+		}
+		$object->do_staged_action( 'woocommerce_test_staged_action', 'value', $object );
+
+		$this->assertSame( array( true, true ), $staged );
+	}
+
+	/**
 	 * Listener that was written before $staged.
 	 *
 	 * @param mixed $value Value.
@@ -227,6 +265,13 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 			 * @var array
 			 */
 			public $filtered = array();
+
+			/**
+			 * Data store, public so that a test can make the write fail.
+			 *
+			 * @var object|null
+			 */
+			public $data_store;
 
 			/**
 			 * Saving method.

@@ -1439,6 +1439,97 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A staged order stays staged after a failed write, and the next save that writes it ends that.
+	 */
+	public function test_a_failed_write_keeps_the_order_staged(): void {
+		$order = new WC_Order();
+		$order->save();
+		$staged = array();
+		add_action(
+			'woocommerce_test_staged_action',
+			static function ( $listened_order, $is_staged ) use ( &$staged ) {
+				$staged[] = $is_staged;
+			},
+			10,
+			2
+		);
+
+		$order->stage_status( OrderStatus::ON_HOLD );
+		$this->save_with_failed_write( $order );
+		$order->do_staged_action( 'woocommerce_test_staged_action', $order );
+		$order->save();
+		$order->do_staged_action( 'woocommerce_test_staged_action', $order );
+
+		$this->assertSame( array( true, false ), $staged );
+	}
+
+	/**
+	 * @testdox A staged refund stays staged when its save throws before the write: $failure.
+	 * @dataProvider provide_failures_before_the_write
+	 *
+	 * @param string $failure Where the save throws.
+	 */
+	public function test_a_save_that_throws_before_the_write_keeps_the_order_staged( string $failure ): void {
+		$refund = new class() extends WC_Order_Refund {
+			/**
+			 * Queue a step that runs before the write.
+			 *
+			 * @param callable $step Step to run.
+			 */
+			public function queue_before_write( callable $step ): void {
+				$this->defer_to_save( 'test_step', $step );
+			}
+		};
+		$refund->save();
+		$staged = array();
+		add_action(
+			'woocommerce_test_staged_action',
+			static function ( $listened_order, $is_staged ) use ( &$staged ) {
+				$staged[] = $is_staged;
+			},
+			10,
+			2
+		);
+
+		$refund->stage_order_items_removal();
+		if ( 'queued step' === $failure ) {
+			$refund->queue_before_write(
+				static function () {
+					throw new Exception( 'Disk full.' );
+				}
+			);
+		} else {
+			add_action(
+				'woocommerce_before_order_refund_object_save',
+				static function () {
+					throw new Error( 'Disk full.' );
+				}
+			);
+		}
+		try {
+			$refund->save();
+			$this->fail( 'The save did not throw' );
+		} catch ( Throwable $e ) {
+			$this->assertSame( 'Disk full.', $e->getMessage() );
+		}
+		$refund->do_staged_action( 'woocommerce_test_staged_action', $refund );
+
+		$this->assertSame( array( true ), $staged );
+	}
+
+	/**
+	 * Ways a save throws before the write.
+	 *
+	 * @return array
+	 */
+	public function provide_failures_before_the_write(): array {
+		return array(
+			'a queued step throws an Exception'  => array( 'queued step' ),
+			'a before-save hook throws an Error' => array( 'Error' ),
+		);
+	}
+
+	/**
 	 * Run a callback while a listener makes every order write fail.
 	 *
 	 * @param callable $callback Callback to run.

@@ -341,61 +341,70 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return int order ID
 	 */
 	public function save() {
-		$this->staged_unsaved = false;
 		if ( ! $this->data_store ) {
 			return $this->get_id();
 		}
 
+		$staged_unsaved        = $this->staged_unsaved;
+		$this->staged_unsaved  = false;
 		$persisted             = false;
 		$this->last_save_error = null;
 
 		$deferred_actions = $this->take_deferred_actions();
-		$this->run_deferred_actions( $deferred_actions, false );
-
 		try {
-			/**
-			 * Trigger action before saving to the DB. Allows you to adjust object props before save.
-			 *
-			 * @param WC_Data          $this The object being saved.
-			 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
-			 */
-			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+			$this->run_deferred_actions( $deferred_actions, false );
 
-			if ( $this->get_id() ) {
-				$this->data_store->update( $this );
-			} else {
-				$this->data_store->create( $this );
-			}
+			try {
+				/**
+				 * Trigger action before saving to the DB. Allows you to adjust object props before save.
+				 *
+				 * @since 3.0.0
+				 * @param WC_Data          $this The object being saved.
+				 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+				 */
+				do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
-			$this->save_items();
+				if ( $this->get_id() ) {
+					$this->data_store->update( $this );
+				} else {
+					$this->data_store->create( $this );
+				}
 
-			$persisted = true;
+				$this->save_items();
 
-			/**
-			 * Trigger action after saving to the DB.
-			 *
-			 * @param WC_Data          $this The object being saved.
-			 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
-			 */
-			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+				$persisted = true;
 
-		} catch ( Exception $e ) {
-			// A callback on the after-save action throwing doesn't mean the order wasn't saved.
-			if ( ! $persisted ) {
-				$this->last_save_error = $e;
-			}
+				/**
+				 * Trigger action after saving to the DB.
+				 *
+				 * @since 3.0.0
+				 * @param WC_Data          $this The object being saved.
+				 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+				 */
+				do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 
-			$message_id = $this->get_id() ? $this->get_id() : __( '(no ID)', 'woocommerce' );
-			$this->handle_exception(
-				$e,
-				wp_kses_post(
-					sprintf(
-						/* translators: 1: Order ID or "(no ID)" if not known. */
-						__( 'Error saving order ID %1$s.', 'woocommerce' ),
-						$message_id
+			} catch ( Exception $e ) {
+				// A callback on the after-save action throwing doesn't mean the order wasn't saved.
+				if ( ! $persisted ) {
+					$this->last_save_error = $e;
+				}
+
+				$message_id = $this->get_id() ? $this->get_id() : __( '(no ID)', 'woocommerce' );
+				$this->handle_exception(
+					$e,
+					wp_kses_post(
+						sprintf(
+							/* translators: 1: Order ID or "(no ID)" if not known. */
+							__( 'Error saving order ID %1$s.', 'woocommerce' ),
+							$message_id
+						)
 					)
-				)
-			);
+				);
+			}
+		} finally {
+			if ( ! $persisted ) {
+				$this->staged_unsaved = $staged_unsaved;
+			}
 		}
 
 		$this->run_deferred_actions( $deferred_actions, true );

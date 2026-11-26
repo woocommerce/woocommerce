@@ -414,25 +414,33 @@ abstract class WC_Data {
 	 *
 	 * @since  2.6.0
 	 * @return int
+	 * @throws Throwable When the write fails.
 	 */
 	public function save() {
-		$this->staged_unsaved = false;
 		if ( ! $this->data_store ) {
 			return $this->get_id();
 		}
 
-		/**
-		 * Trigger action before saving to the DB. Allows you to adjust object props before save.
-		 *
-		 * @param WC_Data          $this The object being saved.
-		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
-		 */
-		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+		$staged_unsaved       = $this->staged_unsaved;
+		$this->staged_unsaved = false;
+		try {
+			/**
+			 * Trigger action before saving to the DB. Allows you to adjust object props before save.
+			 *
+			 * @since 3.0.0
+			 * @param WC_Data          $this The object being saved.
+			 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+			 */
+			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
-		if ( $this->get_id() ) {
-			$this->data_store->update( $this );
-		} else {
-			$this->data_store->create( $this );
+			if ( $this->get_id() ) {
+				$this->data_store->update( $this );
+			} else {
+				$this->data_store->create( $this );
+			}
+		} catch ( Throwable $e ) {
+			$this->staged_unsaved = $staged_unsaved;
+			throw $e;
 		}
 
 		/**
