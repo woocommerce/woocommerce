@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep attribute filter counts within the current archive when the product attributes lookup table is enabled.
+Keep "Filter Products by Attribute" OR counts within the current attribute archive.
