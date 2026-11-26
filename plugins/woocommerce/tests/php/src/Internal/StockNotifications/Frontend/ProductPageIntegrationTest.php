@@ -193,7 +193,9 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( strpos( $markup, '</form>' ), strpos( $markup, 'class="wc_bis_form"' ), 'The Back in Stock form should render outside the block form.' );
 
 		$form = substr( $markup, strpos( $markup, '<div class="wc_bis_form"' ) );
-		$this->assertDoesNotMatchRegularExpression( '/^<div class="wc_bis_form"[^>]*\shidden[\s=>]/', $form, 'The form should be visible.' );
+		$html = new \WP_HTML_Tag_Processor( $form );
+		$this->assertTrue( $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ), 'The Back in Stock form should render.' );
+		$this->assertNull( $html->get_attribute( 'hidden' ), 'The form should be visible.' );
 		$this->assertStringNotContainsString( 'woocommerce/back-in-stock-form', $form, 'A simple product form needs no Interactivity API store.' );
 	}
 
