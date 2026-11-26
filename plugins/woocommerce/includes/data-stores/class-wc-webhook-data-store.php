@@ -141,7 +141,9 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			'pending_delivery'  => $webhook->get_pending_delivery( 'edit' ),
 		);
 
-		// The getter can return a filtered URL even when the URL was not edited.
+		// The getter can return a filtered URL even when the URL was not edited,
+		// that's why we don't want to update it if it hasn't changed, so the filter
+		// isn't applied twice.
 		if ( $trigger ) {
 			$data['delivery_url'] = $webhook->get_delivery_url( 'edit' );
 		}

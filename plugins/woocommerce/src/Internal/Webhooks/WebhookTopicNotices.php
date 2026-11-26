@@ -193,7 +193,7 @@ class WebhookTopicNotices implements RegisterHooksInterface {
 		WC_Admin_Notices::add_custom_notice(
 			self::BLOCKED_TOPICS_NOTICE,
 			'<p><strong>' . esc_html__( 'Some webhooks use topics that are no longer supported.', 'woocommerce' ) . '</strong></p>' .
-			'<p>' . esc_html__( 'These webhooks are disabled. To use one again, select a supported topic.', 'woocommerce' ) . '</p>' .
+			'<p>' . esc_html__( 'These webhooks are disabled. To activate them again, switch to a supported topic and set its status to Active.', 'woocommerce' ) . '</p>' .
 			'<ul>' . implode( '', $items ) . '</ul>' .
 			'<p>' . $this->get_webhooks_settings_link() . '</p>'
 		);
