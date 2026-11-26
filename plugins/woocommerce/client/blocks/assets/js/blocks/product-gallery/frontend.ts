@@ -281,10 +281,7 @@ const toggleImageVisibility = ( element: HTMLElement ) => {
 	visibilityTarget.hidden = ! isVisible;
 	visibilityTarget.style.order = isVisible ? String( visibleIndex ) : '';
 
-	// The large image viewer shows one slide at a time, so hide the other
-	// slides from screen readers. Hide the whole slide, so a product link
-	// around the image is hidden too. The thumbnails, arrow buttons and
-	// arrow keys still reach every image.
+	// Only the slide on screen is exposed to screen readers. The thumbnails and arrows reach the rest.
 	largeImageSlide?.setAttribute(
 		'aria-hidden',
 		imageId === selectedImageId ? 'false' : 'true'
