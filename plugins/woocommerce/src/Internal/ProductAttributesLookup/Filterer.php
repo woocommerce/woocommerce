@@ -162,14 +162,13 @@ class Filterer {
 		$tax_query        = \WC_Query::get_main_tax_query();
 		$meta_query       = \WC_Query::get_main_meta_query();
 		$use_lookup_table = $this->filtering_via_lookup_table_is_active();
-		if ( 'or' === $query_type ) {
-			$main_query = \WC_Query::get_main_query();
-			// The lookup table applies widget selections separately, so keep the archive's taxonomy clauses.
-			if ( ! $use_lookup_table || ! $main_query || ! $main_query->is_tax() ) {
-				foreach ( $tax_query as $key => $query ) {
-					if ( is_array( $query ) && $taxonomy === $query['taxonomy'] ) {
-						unset( $tax_query[ $key ] );
-					}
+		if ( 'or' === $query_type && ! $use_lookup_table ) {
+			// Without the lookup table, WC_Query::get_tax_query() adds the shopper's selection as a tax clause.
+			// Drop only that clause, so other options keep their counts and an attribute archive's own term still applies.
+			$chosen_terms = \WC_Query::get_layered_nav_chosen_attributes()[ $taxonomy ]['terms'] ?? array();
+			foreach ( $tax_query as $key => $query ) {
+				if ( is_array( $query ) && $taxonomy === $query['taxonomy'] && $chosen_terms === $query['terms'] && empty( $query['include_children'] ) ) {
+					unset( $tax_query[ $key ] );
 				}
 			}
 		}

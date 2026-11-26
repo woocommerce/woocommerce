@@ -131,7 +131,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox OR counts respect the attribute archive when the lookup table is enabled.
+	 * @testdox OR counts stay within the attribute archive, with or without the lookup table.
 	 *
 	 * @testWith [true, true]
 	 *           [true, false]
@@ -141,7 +141,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * @param bool $use_lookup Whether to use the attribute lookup table.
 	 * @param bool $cache_counts Whether to cache counts.
 	 */
-	public function test_or_counts_scope_attribute_archive_with_lookup_table( bool $use_lookup, bool $cache_counts ): void {
+	public function test_or_counts_scope_attribute_archive( bool $use_lookup, bool $cache_counts ): void {
 		global $wp_the_query;
 
 		$this->set_use_lookup_table( $use_lookup );
@@ -163,7 +163,6 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		);
 		$sut   = wc_get_container()->get( Filterer::class );
 
-		// The legacy query counts across both archives in this fixture. Archive scoping applies only with the lookup table enabled.
 		foreach ( array( 'alpha', 'beta', 'alpha' ) as $archive ) {
 			\WC_Query::reset_chosen_attributes();
 			$wp_the_query->query(
@@ -174,9 +173,9 @@ class FiltererTest extends \WC_Unit_Test_Case {
 				)
 			);
 			$counts = $sut->get_filtered_term_product_counts( array_values( $terms ), 'pa_facetmodel', 'or' );
-			$this->assertSame( $use_lookup ? 1 : 2, $counts[ $terms['Shared'] ], 'Only lookup table counts restrict Shared to the current archive.' );
-			$this->assertSame( ! $use_lookup || 'alpha' === $archive ? 2 : 0, $counts[ $terms['Alpha'] ] ?? 0, 'Lookup table counts exclude Alpha on the Beta archive.' );
-			$this->assertSame( ! $use_lookup || 'beta' === $archive ? 1 : 0, $counts[ $terms['Beta'] ] ?? 0, 'Lookup table counts exclude Beta on the Alpha archive.' );
+			$this->assertSame( 1, $counts[ $terms['Shared'] ], 'Shared counts only products in the current archive.' );
+			$this->assertSame( 'alpha' === $archive ? 2 : 0, $counts[ $terms['Alpha'] ] ?? 0, 'Alpha is not counted on the Beta archive.' );
+			$this->assertSame( 'beta' === $archive ? 1 : 0, $counts[ $terms['Beta'] ] ?? 0, 'Beta is not counted on the Alpha archive.' );
 		}
 
 		$_GET['filter_facetmodel']     = 'shared';
@@ -194,7 +193,21 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$counts      = $sut->get_filtered_term_product_counts( array_values( $terms ), 'pa_facetmodel', 'or' );
 		$this->assertSame( $parse_count, did_action( 'parse_tax_query' ), 'Counting must not invoke taxonomy query callbacks again.' );
 		$this->assertSame( 2, $counts[ $terms['Alpha'] ], 'OR counts ignore the Shared selection.' );
-		$this->assertSame( $use_lookup ? 0 : 1, $counts[ $terms['Beta'] ] ?? 0, 'Only lookup table counts exclude the unrelated model after selection.' );
+		$this->assertSame( 0, $counts[ $terms['Beta'] ] ?? 0, 'Beta stays out of the Alpha archive after a selection.' );
+
+		// Selecting the archive's own term must not drop the archive.
+		$_GET['filter_facetmodel'] = 'alpha';
+		\WC_Query::reset_chosen_attributes();
+		$wp_the_query->query(
+			array(
+				'post_type' => 'product',
+				'taxonomy'  => 'pa_facetmodel',
+				'term'      => 'alpha',
+			)
+		);
+		$counts = $sut->get_filtered_term_product_counts( array_values( $terms ), 'pa_facetmodel', 'or' );
+		$this->assertSame( 1, $counts[ $terms['Shared'] ], 'Shared stays within the Alpha archive when Alpha is selected.' );
+		$this->assertSame( 0, $counts[ $terms['Beta'] ] ?? 0, 'Beta stays out of the Alpha archive when Alpha is selected.' );
 	}
 
 	/**
