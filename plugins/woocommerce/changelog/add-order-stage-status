@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add WC_Order::stage_status() and let order-update-status write extension fields with the extensible abilities feature on.

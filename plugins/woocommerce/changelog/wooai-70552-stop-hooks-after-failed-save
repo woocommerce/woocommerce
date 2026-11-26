@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Stop reporting an order as paid, or changing its tax lines, when the order fails to save.

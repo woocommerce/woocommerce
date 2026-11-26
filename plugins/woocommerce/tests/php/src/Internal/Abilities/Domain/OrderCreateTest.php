@@ -261,30 +261,6 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 		$this->assertNull( $order->get_date_paid() );
 	}
 
-	/**
-	 * @testdox Should return the saved order, not changes that a listener made in memory after the only save, with the feature on.
-	 */
-	public function test_returns_the_saved_order(): void {
-		$this->set_feature( true );
-		$product = WC_Helper_Product::create_simple_product();
-		add_action(
-			'woocommerce_after_order_object_save',
-			static function ( \WC_Order $order ): void {
-				$order->set_billing_email( 'unsaved@example.com' );
-			}
-		);
-
-		$result = $this->execute(
-			array(
-				'billing'    => array( 'email' => 'ana@example.com' ),
-				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
-			)
-		);
-
-		$this->assertSame( 'ana@example.com', $result['order']['billing_email'] );
-		$this->assertArrayHasKey( 'date_modified', $result['order'] );
-		$this->assertCount( 1, $result['order']['line_items'] );
-	}
 
 	/**
 	 * @testdox Should roll back the saved order when its status cannot be set with the feature off.

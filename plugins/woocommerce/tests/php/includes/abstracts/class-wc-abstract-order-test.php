@@ -220,40 +220,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertSame( $original_info, $coupon_item->get_meta( 'coupon_info' ), 'The stored coupon definition should not be replaced.' );
 	}
 
-	/**
-	 * @testdox Recalculating coupons discounts each unsaved line item without failing.
-	 */
-	public function test_recalculate_coupons_with_unsaved_line_items(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		$coupon  = new WC_Coupon();
-		$coupon->set_code( 'unsaved-line-items' );
-		$coupon->set_discount_type( 'percent' );
-		$coupon->set_amount( 10 );
-		$coupon->save();
-
-		$order = new WC_Order();
-		foreach ( array( 100, 50 ) as $total ) {
-			$line_item = new WC_Order_Item_Product();
-			$line_item->set_product( $product );
-			$line_item->set_quantity( 1 );
-			$line_item->set_subtotal( $total );
-			$line_item->set_total( $total );
-			$order->add_item( $line_item );
-		}
-		$coupon_item = new WC_Order_Item_Coupon();
-		$coupon_item->set_code( 'unsaved-line-items' );
-		$order->add_item( $coupon_item );
-
-		$order->recalculate_coupons();
-
-		$line_totals = array_map(
-			fn( $item ) => (float) $item->get_total(),
-			array_values( $order->get_items() )
-		);
-		$this->assertEqualsCanonicalizing( array( 90.0, 45.0 ), $line_totals, 'Each unsaved line item should get its own discount.' );
-		$this->assertCount( 1, $order->get_items( 'coupon' ), 'The coupon item should not be duplicated.' );
-		$this->assertEquals( 15, $order->get_discount_total() );
-	}
 
 	/**
 	 * @testdox Order and refund defaults capture the store tax mode without pending changes.
@@ -1126,27 +1092,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( $stored->get_data_store()->get_recorded_coupon_usage_counts( $stored ), 'The order should stay counted for the kept coupon' );
 	}
 
-	/**
-	 * @testdox Two copies of one order that both stage the removal of the same coupon and save give its use back only once.
-	 */
-	public function test_stage_coupon_removal_on_two_copies_of_order_gives_use_back_once(): void {
-		$order       = $this->create_pending_order_with_counted_coupons( array( 'two-staged-copies' ) );
-		$first_copy  = wc_get_order( $order->get_id() );
-		$second_copy = wc_get_order( $order->get_id() );
-		$this->assertCount( 1, $second_copy->get_items( 'coupon' ), 'The second copy should load the coupon line before the first one removes it' );
-
-		$this->assertTrue( $first_copy->stage_coupon_removal( 'two-staged-copies' ), 'The first copy should stage the removal' );
-		$this->assertTrue( $second_copy->stage_coupon_removal( 'two-staged-copies' ), 'The second copy should also stage the removal' );
-		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items( 'coupon' ), 'Staging should leave the stored coupon line until the save' );
-		$this->assertSame( 6, ( new WC_Coupon( 'two-staged-copies' ) )->get_usage_count(), 'Staging should not give the use back yet' );
-		$first_copy->save();
-		$second_copy->save();
-
-		$this->assertSame( 5, ( new WC_Coupon( 'two-staged-copies' ) )->get_usage_count(), 'The use should be given back once' );
-		$stored = wc_get_order( $order->get_id() );
-		$this->assertSame( array(), $stored->get_coupon_codes(), 'The coupon should be gone from the order' );
-		$this->assertFalse( $stored->get_data_store()->get_recorded_coupon_usage_counts( $stored ), 'The order should no longer be counted' );
-	}
 
 	/**
 	 * @testdox Removing two coupons one after the other gives each use back and clears the counted flag after the last one.

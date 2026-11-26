@@ -3396,11 +3396,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should write extension fields in product create and in order status update.
+	 * @testdox Should accept extension fields in product create, and none in the order write abilities.
 	 */
-	public function test_product_create_and_order_status_update_write_fields(): void {
-		$order = \WC_Helper_Order::create_order();
-
+	public function test_product_create_writes_fields_and_order_abilities_do_not(): void {
 		$created = $this->run_ability(
 			'woocommerce/product-create',
 			array(
@@ -3408,20 +3406,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				'extensions' => array( 'test-ext' => array( 'color' => 'blue' ) ),
 			)
 		);
-		$updated = $this->run_ability(
-			'woocommerce/order-update-status',
-			array(
-				'id'         => $order->get_id(),
-				'status'     => 'on-hold',
-				'extensions' => array( 'test-ext' => array( 'gift_message' => 'Happy birthday' ) ),
-			)
-		);
 
-		$saved = wc_get_order( $order->get_id() );
 		$this->assertSame( 'blue', wc_get_product( $created['product']['id'] )->get_meta( '_test_color' ) );
-		$this->assertSame( 'on-hold', $saved->get_status() );
-		$this->assertSame( 'Happy birthday', $saved->get_meta( '_test_gift_message' ) );
-		$this->assertSame( 'Happy birthday', $updated['order']['extensions']['test-ext']['gift_message'] );
+		foreach ( array( 'woocommerce/order-create', 'woocommerce/order-update', 'woocommerce/order-update-status' ) as $name ) {
+			$this->assertArrayNotHasKey( 'extensions', $this->get_ability( $name )['input_schema']['properties'], $name );
+		}
 	}
 
 	/**
@@ -5032,9 +5021,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should call WC_Order::update_status() with the feature off, and refuse an order class that only overrides it with the feature on.
+	 * @testdox Should call WC_Order::update_status() with the feature off and on.
 	 */
-	public function test_the_feature_off_path_calls_update_status(): void {
+	public function test_order_update_status_calls_update_status(): void {
 		$calls        = 0;
 		$order_class  = get_class(
 			new class() extends \WC_Order {
@@ -5076,17 +5065,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				)
 			);
 
-			$calls = $order_class::$calls;
-			if ( $enabled ) {
-				$this->assertSame( 400, $response->get_status() );
-				$this->assertSame( 'woocommerce_data_staging_unsupported', $response->get_data()['code'] );
-				$this->assertSame( 0, $calls );
-				$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
-			} else {
-				$this->assertSame( 200, $response->get_status() );
-				$this->assertSame( 1, $calls );
-				$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
-			}
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( 1, $order_class::$calls );
+			$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
 		}
 	}
 
@@ -5327,8 +5308,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->assertSame( 2, substr_count( wp_json_encode( $schema ), '"color"' ) );
 			$this->assertArrayNotHasKey( 'oneOf', $schema );
 		}
-		$order = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
-		$this->assertSame( array( 'string', 'null' ), array_column( $order['properties']['extensions']['properties']['test-ext']['properties']['gift_message']['anyOf'], 'type' ) );
 		$delete = $this->get_ability( 'woocommerce/product-delete' )['input_schema'];
 		$this->assertArrayNotHasKey( 'extensions', $delete['properties'], 'A delete writes no extension fields.' );
 	}
@@ -6209,230 +6188,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'woocommerce_invalid_product_type', $refused->get_data()['code'] );
 	}
 
-	/**
-	 * @testdox Should write an order extension field and the shipping address in one save, and save nothing when a validator refuses.
-	 */
-	public function test_order_update_writes_extension_fields_and_runs_validators(): void {
-		$this->add_test_action(
-			'woocommerce_extensible_abilities_init',
-			static function () {
-				ExtensibleAbilities::register_field(
-					array(
-						'resource'      => 'order',
-						'namespace'     => 'test-ext',
-						'field'         => 'priority',
-						'output_schema' => array( 'type' => 'string' ),
-						'input_schema'  => array( 'type' => 'string' ),
-						'get_callback'  => static function ( \WC_Order $order ) {
-							return $order->get_meta( '_test_priority' );
-						},
-						'set_callback'  => static function ( \WC_Order $order, $value ) {
-							$order->update_meta_data( '_test_priority', $value );
-						},
-					)
-				);
-			}
-		);
-		$this->register_validator(
-			'order',
-			'test-ext',
-			static function ( \WC_Order $order ) {
-				return 'Closed' === $order->get_shipping_city() ? new \WP_Error( 'test_refused', 'Refused.' ) : null;
-			}
-		);
-		$this->reset_registries();
-		AbilitiesLoader::init_extensions();
-		$order = \WC_Helper_Order::create_order();
-		$saves = 0;
-		$count = static function () use ( &$saves ) {
-			++$saves;
-		};
-		$this->add_test_action( 'woocommerce_update_order', $count );
 
-		$output  = $this->run_ability(
-			'woocommerce/order-update',
-			array(
-				'id'         => $order->get_id(),
-				'shipping'   => array( 'city' => 'Lisbon' ),
-				'extensions' => array( 'test-ext' => array( 'priority' => 'high' ) ),
-			)
-		);
-		$refused = $this->run_ability_response(
-			'woocommerce/order-update',
-			array(
-				'id'         => $order->get_id(),
-				'shipping'   => array( 'city' => 'Closed' ),
-				'extensions' => array( 'test-ext' => array( 'priority' => 'low' ) ),
-			)
-		);
 
-		wp_cache_flush();
-		$saved = wc_get_order( $order->get_id() );
-		$this->assertSame( 1, $saves );
-		$this->assertSame( 'high', $output['order']['extensions']['test-ext']['priority'] );
-		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'test-ext:test_refused', $refused->get_data()['code'] );
-		$this->assertSame( 'Lisbon', $saved->get_shipping_city() );
-		$this->assertSame( 'high', $saved->get_meta( '_test_priority' ) );
-	}
 
 	/**
-	 * @testdox Should create an order with an extension field in one save, show validators the sent status, and create nothing when a validator refuses.
+	 * @testdox Should recalculate order-update with calculate_totals() after the save.
 	 */
-	public function test_order_create_writes_extension_fields_and_runs_validators(): void {
-		$this->add_test_action(
-			'woocommerce_extensible_abilities_init',
-			static function () {
-				ExtensibleAbilities::register_field(
-					array(
-						'resource'      => 'order',
-						'namespace'     => 'test-ext',
-						'field'         => 'priority',
-						'output_schema' => array( 'type' => 'string' ),
-						'input_schema'  => array( 'type' => 'string' ),
-						'get_callback'  => static function ( \WC_Order $order ) {
-							return $order->get_meta( '_test_priority' );
-						},
-						'set_callback'  => static function ( \WC_Order $order, $value ) {
-							$order->update_meta_data( '_test_priority', $value );
-						},
-					)
-				);
-			}
-		);
-		$seen = array();
-		$this->register_validator(
-			'order',
-			'test-ext',
-			static function ( \WC_Order $order ) use ( &$seen ) {
-				$seen[] = array( $order->get_status(), count( $order->get_items() ), $order->get_total() );
-				return 'Closed' === $order->get_shipping_city() ? new \WP_Error( 'test_refused', 'Refused.' ) : null;
-			}
-		);
-		$this->reset_registries();
-		AbilitiesLoader::init_extensions();
-		$product = \WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '10' ) );
-		$writes  = array(
-			'woocommerce_new_order'    => 0,
-			'woocommerce_update_order' => 0,
-		);
-		foreach ( array_keys( $writes ) as $hook ) {
-			$this->add_test_action(
-				$hook,
-				static function () use ( &$writes, $hook ) {
-					++$writes[ $hook ];
-				}
-			);
-		}
-		$before = wc_get_orders(
-			array(
-				'limit'  => -1,
-				'return' => 'ids',
-			)
-		);
-
-		$output  = $this->run_ability(
-			'woocommerce/order-create',
-			array(
-				'status'     => 'processing',
-				'shipping'   => array( 'city' => 'Lisbon' ),
-				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
-				'extensions' => array( 'test-ext' => array( 'priority' => 'high' ) ),
-			)
-		);
-		$refused = $this->run_ability_response(
-			'woocommerce/order-create',
-			array(
-				'shipping'   => array( 'city' => 'Closed' ),
-				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
-				'extensions' => array( 'test-ext' => array( 'priority' => 'low' ) ),
-			)
-		);
-
-		wp_cache_flush();
-		$saved = wc_get_order( $output['order']['id'] );
-		$this->assertSame( 1, $writes['woocommerce_new_order'] );
-		$this->assertSame( 0, $writes['woocommerce_update_order'], 'The order should save once, with its lines, totals and status.' );
-		$this->assertSame( array( 'processing', 1, '10.00' ), $seen[0], 'The validator should see the status and totals that the save writes.' );
-		$this->assertSame( 'high', $output['order']['extensions']['test-ext']['priority'] );
-		$this->assertSame( 'high', $saved->get_meta( '_test_priority' ) );
-		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'test-ext:test_refused', $refused->get_data()['code'] );
-		$this->assertEqualsCanonicalizing(
-			array_merge( $before, array( $saved->get_id() ) ),
-			wc_get_orders(
-				array(
-					'limit'  => -1,
-					'return' => 'ids',
-				)
-			),
-			'The refused call should create no order.'
-		);
-	}
-
-	/**
-	 * @testdox Should show an order validator the saved address fields that Core refuses, and save nothing.
-	 */
-	public function test_an_order_validator_sees_the_saved_values_of_refused_address_fields(): void {
-		$seen = array();
-		$this->register_validator(
-			'order',
-			'test-ext',
-			static function ( \WC_Order $order ) use ( &$seen ) {
-				$seen[] = array( $order->get_shipping_country(), $order->get_shipping_state(), $order->get_shipping_postcode(), $order->get_shipping_city() );
-				return null;
-			}
-		);
-		$this->reset_registries();
-		AbilitiesLoader::init_extensions();
-		$order = \WC_Helper_Order::create_order();
-		$order->set_shipping_country( 'US' );
-		$order->set_shipping_state( 'CA' );
-		$order->set_shipping_postcode( '94110' );
-		$order->set_shipping_city( 'Before' );
-		$order->save();
-
-		$bad_country  = $this->run_ability_response(
-			'woocommerce/order-update',
-			array(
-				'id'       => $order->get_id(),
-				'shipping' => array(
-					'country'  => 'XX',
-					'state'    => 'ZZ',
-					'postcode' => 'nope',
-					'city'     => 'After',
-				),
-			)
-		);
-		$bad_postcode = $this->run_ability_response(
-			'woocommerce/order-update',
-			array(
-				'id'       => $order->get_id(),
-				'shipping' => array(
-					'postcode' => 'not a zip',
-					'city'     => 'After',
-				),
-			)
-		);
-
-		$this->assertSame( 400, $bad_country->get_status() );
-		$this->assertSame( 400, $bad_postcode->get_status() );
-		$this->assertSame(
-			array(
-				array( 'US', 'CA', '94110', 'After' ),
-				array( 'US', 'CA', '94110', 'After' ),
-			),
-			$seen
-		);
-		wp_cache_flush();
-		$this->assertSame( 'Before', wc_get_order( $order->get_id() )->get_shipping_city() );
-	}
-
-	/**
-	 * @testdox Should recalculate with calculate_totals() after the save when the feature is off.
-	 */
-	public function test_order_update_uses_the_saving_totals_with_the_feature_off(): void {
-		$this->set_feature( false );
+	public function test_order_update_uses_the_saving_totals(): void {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		\WC_Tax::_insert_tax_rate(
 			array(
@@ -6453,14 +6215,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$order->save();
 
 		$calls  = array();
-		$record = static function ( $and_taxes, $listened, $staged ) use ( &$calls ) {
+		$record = static function ( $and_taxes, $listened ) use ( &$calls ) {
 			$calls[] = array(
-				'staged'   => $staged,
 				'quantity' => array_sum( array_map( static fn( $item ) => $item->get_quantity(), wc_get_order( $listened->get_id() )->get_items() ) ),
 				'tax_ids'  => array_map( static fn( $tax ) => $tax->get_id(), array_values( $listened->get_taxes() ) ),
 			);
 		};
-		add_action( 'woocommerce_order_after_calculate_totals', $record, 10, 3 );
+		add_action( 'woocommerce_order_after_calculate_totals', $record, 10, 2 );
 
 		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
 			array(
@@ -6478,124 +6239,17 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertNotWPError( $result );
 		$this->assertCount( 1, $calls );
-		$this->assertFalse( $calls[0]['staged'] );
 		$this->assertSame( 3, $calls[0]['quantity'] );
 		$this->assertGreaterThan( 0, $calls[0]['tax_ids'][0] );
 		$this->assertSame( '33.00', wc_get_order( $order->get_id() )->get_total() );
 	}
 
-	/**
-	 * @testdox Should save no line change and fire no totals action when a validator refuses, and fire it staged once when the change saves.
-	 */
-	public function test_order_update_refusal_saves_no_line_change(): void {
-		$this->register_validator(
-			'order',
-			'test-ext',
-			static function ( \WC_Order $order ) {
-				return count( $order->get_shipping_methods() ) === 0 ? new \WP_Error( 'test_refused', 'Keep one shipping line.' ) : null;
-			}
-		);
-		$this->reset_registries();
-		AbilitiesLoader::init_extensions();
-		$order = \WC_Helper_Order::create_order();
-		$order->set_status( 'pending' );
-		$order->save();
-		$shipping_id = array_key_first( $order->get_shipping_methods() );
-		$total       = $order->get_total();
-		$staged      = array();
-		$record      = static function ( $and_taxes, $order, $is_staged = false ) use ( &$staged ) {
-			$staged[] = $is_staged;
-		};
-		add_action( 'woocommerce_order_after_calculate_totals', $record, 10, 3 );
 
-		$refused = $this->run_ability_response(
-			'woocommerce/order-update',
-			array(
-				'id'           => $order->get_id(),
-				'remove_items' => array( $shipping_id ),
-			)
-		);
-
-		wp_cache_flush();
-		$saved = wc_get_order( $order->get_id() );
-		$this->assertSame( 'test-ext:test_refused', $refused->get_data()['code'] );
-		$this->assertArrayHasKey( $shipping_id, $saved->get_shipping_methods() );
-		$this->assertSame( $total, $saved->get_total() );
-		$this->assertSame( array(), $staged );
-
-		$saves = 0;
-		$count = static function () use ( &$saves ) {
-			++$saves;
-		};
-		add_action( 'woocommerce_update_order', $count );
-
-		$output = $this->run_ability(
-			'woocommerce/order-update',
-			array(
-				'id'             => $order->get_id(),
-				'shipping_lines' => array(
-					array(
-						'id'    => $shipping_id,
-						'total' => '25.00',
-					),
-				),
-			)
-		);
-
-		remove_action( 'woocommerce_update_order', $count );
-		remove_action( 'woocommerce_order_after_calculate_totals', $record, 10 );
-		$this->assertSame( 1, $saves );
-		$this->assertSame( array( true ), $staged );
-		$this->assertSame( '25.00', wc_format_decimal( $output['order']['shipping_lines'][0]['total'], 2 ) );
-	}
 
 	/**
-	 * @testdox Should refuse a line change, and save nothing, when the order class overrides add_product() without its twin.
+	 * @testdox Should add a product line through add_product() of the order class, and save nothing when a later line is refused.
 	 */
-	public function test_order_update_refuses_class_without_stage_twin(): void {
-		$order = \WC_Helper_Order::create_order();
-		$order->set_status( 'pending' );
-		$order->save();
-		$order_class  = get_class(
-			new class() extends \WC_Order {
-				/**
-				 * Add a product with a rule of this class.
-				 *
-				 * @param \WC_Product $product Product.
-				 * @param int         $qty     Quantity.
-				 * @param array       $args    Arguments.
-				 * @return int
-				 */
-				public function add_product( $product, $qty = 1, $args = array() ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found -- The test needs an add_product() override without a stage_product_item() twin.
-					return parent::add_product( $product, $qty, $args );
-				}
-			}
-		);
-		$filter_class = static fn() => $order_class;
-		add_filter( 'woocommerce_order_class', $filter_class, 100 );
-		$product      = \WC_Helper_Product::create_simple_product();
-		$count        = count( $order->get_items() );
-
-		$refused = $this->run_ability_response(
-			'woocommerce/order-update',
-			array(
-				'id'         => $order->get_id(),
-				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
-			)
-		);
-
-		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
-		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'woocommerce_data_staging_unsupported', $refused->get_data()['code'] );
-		$this->assertStringContainsString( 'stage_product_item', $refused->get_data()['message'] );
-		$this->assertCount( $count, ( new \WC_Order( $order->get_id() ) )->get_items() );
-	}
-
-	/**
-	 * @testdox Should add a product line through add_product() of a class without the stage twin when the feature is off, and save nothing when a later line is refused.
-	 */
-	public function test_order_update_falls_back_to_add_product_with_the_feature_off(): void {
-		$this->set_feature( false );
+	public function test_order_update_adds_lines_with_add_product(): void {
 		$order = \WC_Helper_Order::create_order();
 		$order->set_status( 'pending' );
 		$order->save();
@@ -6656,10 +6310,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should delete the product line that add_product() wrote when the order save fails with the feature off.
+	 * @testdox Should delete the product line that add_product() wrote when the order save fails.
 	 */
-	public function test_order_update_deletes_the_added_line_when_the_save_fails_with_the_feature_off(): void {
-		$this->set_feature( false );
+	public function test_order_update_deletes_the_added_line_when_the_save_fails(): void {
 		$order = \WC_Helper_Order::create_order();
 		$order->set_status( 'pending' );
 		$order->save();
@@ -6783,275 +6436,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'test-ext/order-status', $ability );
 	}
 
-	/**
-	 * @testdox Should stage the status on a plain order, so an order validator sees it, and save nothing or fire no status action when the validator refuses.
-	 */
-	public function test_an_order_validator_sees_the_staged_status(): void {
-		$order = \WC_Helper_Order::create_order();
-		$order->set_status( 'processing' );
-		$order->save();
-		$seen = array();
-		$this->register_validator(
-			'order',
-			'other_ext',
-			static function ( \WC_Order $subject ) use ( &$seen ) {
-				$seen[] = array( $subject->get_status(), $subject->get_meta( '_test_gift_message' ) );
-				if ( 'completed' === $subject->get_status() && 'Hi' === $subject->get_meta( '_test_gift_message' ) ) {
-					return new \WP_Error( 'test_gift_not_sent', 'Send the gift message first.' );
-				}
-				return null;
-			}
-		);
-		$edits   = did_action( 'woocommerce_order_edit_status' );
-		$changes = did_action( 'woocommerce_order_status_changed' );
 
-		$refused = $this->run_ability_response(
-			'woocommerce/order-update-status',
-			array(
-				'id'         => $order->get_id(),
-				'status'     => 'completed',
-				'extensions' => array( 'test-ext' => array( 'gift_message' => 'Hi' ) ),
-			)
-		);
 
-		$saved = wc_get_order( $order->get_id() );
-		$this->assertSame( 400, $refused->get_status() );
-		$this->assertStringEndsWith( 'test_gift_not_sent', $refused->get_data()['code'] );
-		$this->assertSame( 'processing', $saved->get_status() );
-		$this->assertFalse( $saved->meta_exists( '_test_gift_message' ) );
-		$this->assertSame( 0, did_action( 'woocommerce_order_edit_status' ) - $edits );
-		$this->assertSame( 0, did_action( 'woocommerce_order_status_changed' ) - $changes );
 
-		$this->run_ability(
-			'woocommerce/order-update-status',
-			array(
-				'id'         => $order->get_id(),
-				'status'     => 'completed',
-				'extensions' => array( 'test-ext' => array( 'gift_message' => 'Thanks' ) ),
-			)
-		);
 
-		$saved = wc_get_order( $order->get_id() );
-		$this->assertSame( 'completed', $saved->get_status() );
-		$this->assertSame( 'Thanks', $saved->get_meta( '_test_gift_message' ) );
-		$this->assertSame( 1, did_action( 'woocommerce_order_edit_status' ) - $edits );
-		$this->assertSame( 1, did_action( 'woocommerce_order_status_changed' ) - $changes );
-		$this->assertSame( array( array( 'completed', 'Hi' ), array( 'completed', 'Thanks' ) ), $seen );
-	}
 
-	/**
-	 * @testdox Should show the staged status and its completed date to an order validator, and fire woocommerce_order_edit_status before the write.
-	 */
-	public function test_an_order_validator_sees_the_dates_that_the_status_sets(): void {
-		$order = \WC_Helper_Order::create_order();
-		$seen  = array();
-		$this->register_validator(
-			'order',
-			'other_ext',
-			static function ( \WC_Order $data ) use ( &$seen ) {
-				$seen[] = array( $data->get_status(), null !== $data->get_date_completed( 'edit' ) );
-				return null;
-			}
-		);
-		$events   = array();
-		$listener = static function ( $order_id ) use ( &$events ) {
-			$events[] = wc_get_order( $order_id )->get_status();
-		};
-		add_action( 'woocommerce_order_edit_status', $listener );
-
-		$this->run_ability(
-			'woocommerce/order-update-status',
-			array(
-				'id'     => $order->get_id(),
-				'status' => 'completed',
-			)
-		);
-
-		remove_action( 'woocommerce_order_edit_status', $listener );
-		$this->assertSame( array( array( 'completed', true ) ), $seen );
-		$this->assertSame( array( 'pending' ), $events );
-		$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
-	}
-
-	/**
-	 * @testdox Should stage the status on an order class that overrides update_status() and stage_status(), with its rule, and refuse a subclass that overrides update_status() again.
-	 */
-	public function test_an_order_class_that_stages_keeps_its_rule(): void {
-		$order_class  = TestStagingOrder::class;
-		$filter_class = static function () use ( &$order_class ) {
-			return $order_class;
-		};
-		add_filter( 'woocommerce_order_class', $filter_class, 100 );
-		$order = \WC_Helper_Order::create_order();
-
-		$refused     = $this->run_ability_response(
-			'woocommerce/order-update-status',
-			array(
-				'id'     => $order->get_id(),
-				'status' => 'on-hold',
-			)
-		);
-		$updated     = $this->run_ability(
-			'woocommerce/order-update-status',
-			array(
-				'id'     => $order->get_id(),
-				'status' => 'processing',
-			)
-		);
-		$order_class = get_class(
-			new class() extends TestStagingOrder {
-				/**
-				 * Mark the order, then change the status.
-				 *
-				 * @param string $new_status    Status to change the order to.
-				 * @param string $note          Optional note.
-				 * @param bool   $manual_update Whether a person made the change.
-				 * @return bool
-				 */
-				public function update_status( $new_status, $note = '', $manual_update = false ) {
-					$this->update_meta_data( '_test_child_rule', 'yes' );
-					return parent::update_status( $new_status, $note, $manual_update );
-				}
-			}
-		);
-		$child       = \WC_Helper_Order::create_order();
-		$again       = $this->run_ability_response(
-			'woocommerce/order-update-status',
-			array(
-				'id'     => $child->get_id(),
-				'status' => 'completed',
-			)
-		);
-
-		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
-		$this->assertSame( 409, $refused->get_status() );
-		$this->assertSame( 'test_on_hold_refused', $refused->get_data()['code'] );
-		$this->assertSame( 'processing', $updated['order']['status'] );
-		$this->assertSame( 400, $again->get_status() );
-		$this->assertSame( 'woocommerce_data_staging_unsupported', $again->get_data()['code'] );
-		$this->assertSame( 'processing', wc_get_order( $order->get_id() )->get_status() );
-		$this->assertSame( 'pending', wc_get_order( $child->get_id() )->get_status() );
-	}
-
-	/**
-	 * @testdox Should stage the status on an order class that overrides stage_status() only.
-	 */
-	public function test_an_order_class_that_overrides_stage_status_only_is_staged(): void {
-		$order_class  = get_class(
-			new class() extends \WC_Order {
-				/**
-				 * Mark the order, then stage the status.
-				 *
-				 * @param string       $new_status    Status to change the order to.
-				 * @param string|false $note          Optional note.
-				 * @param bool         $manual_update Whether a person made the change.
-				 * @return array
-				 */
-				public function stage_status( $new_status, $note = '', $manual_update = false ) {
-					$this->update_meta_data( '_test_staged', 'yes' );
-					return parent::stage_status( $new_status, $note, $manual_update );
-				}
-			}
-		);
-		$filter_class = static function () use ( $order_class ) {
-			return $order_class;
-		};
-		add_filter( 'woocommerce_order_class', $filter_class, 100 );
-		$order = \WC_Helper_Order::create_order();
-
-		$updated = $this->run_ability(
-			'woocommerce/order-update-status',
-			array(
-				'id'     => $order->get_id(),
-				'status' => 'completed',
-			)
-		);
-
-		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
-		$this->assertSame( 'completed', $updated['order']['status'] );
-		$saved = wc_get_order( $order->get_id() );
-		$this->assertSame( 'completed', $saved->get_status() );
-		$this->assertSame( 'yes', $saved->get_meta( '_test_staged' ) );
-	}
-
-	/**
-	 * @testdox Should refuse an order class whose parent overrides update_status() without stage_status(), and name that parent.
-	 */
-	public function test_an_order_class_below_an_unstaged_parent_is_refused(): void {
-		$order_class  = get_class(
-			new class() extends TestUnstagedOrder {
-				/**
-				 * Mark the order, then stage the status.
-				 *
-				 * @param string       $new_status    Status to change the order to.
-				 * @param string|false $note          Optional note.
-				 * @param bool         $manual_update Whether a person made the change.
-				 * @return array
-				 */
-				public function stage_status( $new_status, $note = '', $manual_update = false ) {
-					$this->update_meta_data( '_test_staged', 'yes' );
-					return parent::stage_status( $new_status, $note, $manual_update );
-				}
-			}
-		);
-		$filter_class = static fn() => $order_class;
-		add_filter( 'woocommerce_order_class', $filter_class, 100 );
-		$order        = \WC_Helper_Order::create_order();
-
-		$response = $this->run_ability_response(
-			'woocommerce/order-update-status',
-			array(
-				'id'     => $order->get_id(),
-				'status' => 'completed',
-			)
-		);
-
-		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
-		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'woocommerce_data_staging_unsupported', $response->get_data()['code'] );
-		$this->assertStringContainsString( TestUnstagedOrder::class, $response->get_data()['message'] );
-		$this->assertStringContainsString( 'stage_status()', $response->get_data()['message'] );
-		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
-	}
-
-	/**
-	 * @testdox Should refuse an ability that calls a stage method on an order class that overrides the saving method only, and save nothing.
-	 */
-	public function test_any_ability_that_stages_refuses_an_unadopted_order_class(): void {
-		$order_class  = get_class(
-			new class() extends \WC_Order {
-				/**
-				 * Mark the order, then complete the payment.
-				 *
-				 * @param string $transaction_id Transaction ID.
-				 * @return bool
-				 */
-				public function payment_complete( $transaction_id = '' ) {
-					$this->update_meta_data( '_test_override', 'yes' );
-					return parent::payment_complete( $transaction_id );
-				}
-			}
-		);
-		$filter_class = static fn() => $order_class;
-		add_filter( 'woocommerce_order_class', $filter_class, 100 );
-		$this->register_order_status_ability( TestOrderStageAbility::class );
-		$this->reset_registries();
-		$order = \WC_Helper_Order::create_order();
-
-		$response = $this->run_ability_response(
-			'test-ext/order-status',
-			array(
-				'id'     => $order->get_id(),
-				'status' => 'completed',
-			)
-		);
-
-		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
-		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'woocommerce_data_staging_unsupported', $response->get_data()['code'] );
-		$this->assertStringContainsString( 'stage_payment_complete()', $response->get_data()['message'] );
-		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
-	}
 
 	/**
 	 * @testdox Should run a validator on the changed product, after the field callbacks, and save nothing when it refuses.
@@ -7508,35 +6897,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'additional_data', $data['additional_errors'][0] );
 	}
 
-	/**
-	 * @testdox Should refuse a class outside WC_Data that overrides a saving method without its stage method.
-	 */
-	public function test_refuse_unstaged_override_works_for_a_class_outside_wc_data(): void {
-		$adopted   = new class() extends TestStagedService {
-			/**
-			 * Save an item.
-			 */
-			public function add_item(): void {}
-
-			/**
-			 * Stage an item.
-			 */
-			public function stage_item(): void {}
-		};
-		$unadopted = new class() extends TestStagedService {
-			/**
-			 * Save an item.
-			 */
-			public function add_item(): void {}
-		};
-
-		ExtensibleAbilities::refuse_unstaged_override( new TestStagedService(), 'add_item', 'stage_item' );
-		ExtensibleAbilities::refuse_unstaged_override( $adopted, 'add_item', 'stage_item' );
-
-		$this->expectException( \WC_Data_Exception::class );
-		$this->expectExceptionMessage( 'overrides add_item() and needs to override stage_item() too' );
-		ExtensibleAbilities::refuse_unstaged_override( $unadopted, 'add_item', 'stage_item' );
-	}
 
 	/**
 	 * @testdox Should not run validators with the feature off.

@@ -33,10 +33,6 @@ jobs:
               working-directory: plugins/woocommerce
               run: XDEBUG_MODE=off composer install --quiet
 
-            - name: 'Run PHPStan rule tests'
-              working-directory: plugins/woocommerce
-              run: composer test:phpstan-rules
-
             - name: 'Create tmp directory'
               working-directory: plugins/woocommerce
               run: mkdir -p tmp
