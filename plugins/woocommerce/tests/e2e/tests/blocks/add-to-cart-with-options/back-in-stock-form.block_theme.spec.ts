@@ -3,7 +3,13 @@
  */
 import { randomUUID } from 'crypto';
 import type { Page } from '@playwright/test';
-import { test as base, expect, guestFile, wpCLI } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	getProductAttributeIds,
+	guestFile,
+	wpCLI,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -104,13 +110,8 @@ test.describe( 'Add to Cart + Options Block: Back in Stock form', () => {
 		let outOfStockVariationId: number;
 
 		test.beforeEach( async ( { requestUtils, createProductPage } ) => {
-			const attributes = await requestUtils.rest<
-				{ id: number; slug: string }[]
-			>( { path: 'wc/v3/products/attributes' } );
-			const attributeId = ( slug: string ) =>
-				attributes.find( ( attribute ) => attribute.slug === slug )?.id;
-			const colorId = attributeId( 'pa_color' );
-			const sizeId = attributeId( 'pa_size' );
+			const { colorAttributeId: colorId, sizeAttributeId: sizeId } =
+				await getProductAttributeIds();
 
 			product = await createProductPage( {
 				type: 'variable',
