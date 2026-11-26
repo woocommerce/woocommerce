@@ -36,7 +36,6 @@ echo "\n\n----------------------------------------\n\n";
  */
 do_action( 'woocommerce_email_stock_notification_product', $product, $notification, true, $email );
 
-echo "\n\n";
 echo esc_html( $verification_button_text ) . ': ' . esc_url( $verification_link ) . "\n";
 // translators: %s placeholder is the verification expiration datetime string.
 printf( esc_html__( 'This link will remain active for %s.', 'woocommerce' ), esc_html( $verification_expiration_threshold ) );

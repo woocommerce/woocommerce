@@ -36,7 +36,6 @@ echo "\n\n----------------------------------------\n\n";
  */
 do_action( 'woocommerce_email_stock_notification_product', $product, $notification, true, $email );
 
-echo "\n\n";
 if ( $account_link ) {
 	if ( $is_guest ) {
 		echo esc_html__( 'Create an account or log in with this email address to manage your notifications.', 'woocommerce' ) . "\n";
