@@ -114,7 +114,7 @@ final class SimpleCheck extends AbstractReadinessCheck {
 				'uncategorised',
 				array(
 					'label' => __( 'Products with only the default category', 'woocommerce' ),
-					'why'   => __( 'Agents narrow searches by category first; an uncategorised product is harder to find.', 'woocommerce' ),
+					'why'   => __( 'AI assistants narrow searches by category first; an uncategorised product is harder to find.', 'woocommerce' ),
 					'fix'   => __( 'Assign a category.', 'woocommerce' ),
 				),
 				self::fields( array( 'product_category', 'product_type', 'productType' ), self::EFFECT_GAPS ),
@@ -163,7 +163,7 @@ final class SimpleCheck extends AbstractReadinessCheck {
 				'image_alt_text',
 				array(
 					'label' => __( 'Products whose main image has no alt text', 'woocommerce' ),
-					'why'   => __( 'AI agents and screen readers read alt text to tell what an image shows. No channel\'s feed asks for it, so it doesn\'t change the channel counts.', 'woocommerce' ),
+					'why'   => __( 'AI assistants and screen readers read alt text to tell what an image shows. No channel\'s feed asks for it, so it doesn\'t change the channel counts.', 'woocommerce' ),
 					'fix'   => __( 'Describe the main image in its Alternative text field in the media library.', 'woocommerce' ),
 				),
 				array(),

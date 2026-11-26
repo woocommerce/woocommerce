@@ -87,7 +87,7 @@ class StoreConditions {
 				'level'   => self::LEVEL_REQUIRED,
 				'name'    => __( 'Store is launched', 'woocommerce' ),
 				'label'   => __( 'Store is in coming soon mode', 'woocommerce' ),
-				'why'     => __( 'Visitors, crawlers and shopping agents see a holding page instead of your products.', 'woocommerce' ),
+				'why'     => __( 'Visitors, crawlers and AI assistants see a holding page instead of your products.', 'woocommerce' ),
 				'fix'     => __( 'Launch the store under WooCommerce > Settings > Site visibility.', 'woocommerce' ),
 				'fix_url' => $settings_url( 'site-visibility' ),
 			),
@@ -112,7 +112,7 @@ class StoreConditions {
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Universal Commerce Protocol (UCP) is on', 'woocommerce' ),
 				'label'   => __( 'Universal Commerce Protocol (UCP) is off', 'woocommerce' ),
-				'why'     => __( 'Shopping agents that use UCP cannot read your catalog.', 'woocommerce' ),
+				'why'     => __( 'AI assistants that use UCP cannot read your catalog.', 'woocommerce' ),
 				'fix'     => __( 'Turn on "Allow AI assistants to shop your store" under WooCommerce > Settings > AI tools > AI shopping.', 'woocommerce' ),
 				'fix_url' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ),
 			),
@@ -124,7 +124,7 @@ class StoreConditions {
 				'level'   => self::LEVEL_REQUIRED,
 				'name'    => __( 'Site uses HTTPS', 'woocommerce' ),
 				'label'   => __( 'Site does not use HTTPS', 'woocommerce' ),
-				'why'     => __( 'Agents only send shoppers to a secure checkout.', 'woocommerce' ),
+				'why'     => __( 'AI assistants only send shoppers to a secure checkout.', 'woocommerce' ),
 				'fix'     => __( 'Move the site to HTTPS; your hosting provider can usually turn it on.', 'woocommerce' ),
 				'fix_url' => wp_get_update_https_url(),
 			),
@@ -134,28 +134,28 @@ class StoreConditions {
 				AgenticCommerceSettings::PRIVACY_PAGE_OPTION,
 				__( 'Privacy policy page is selected and published', 'woocommerce' ),
 				__( 'No privacy policy page', 'woocommerce' ),
-				__( 'Agents will be able to link shoppers to your privacy policy before they buy.', 'woocommerce' )
+				__( 'AI assistants will be able to link shoppers to your privacy policy before they buy.', 'woocommerce' )
 			),
 			$policy_page(
 				'terms_page',
 				AgenticCommerceSettings::TERMS_PAGE_OPTION,
 				__( 'Terms and conditions page is selected and published', 'woocommerce' ),
 				__( 'No terms and conditions page', 'woocommerce' ),
-				__( 'Agents will be able to link shoppers to your terms before they buy.', 'woocommerce' )
+				__( 'AI assistants will be able to link shoppers to your terms before they buy.', 'woocommerce' )
 			),
 			$policy_page(
 				'refund_returns_page',
 				AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION,
 				__( 'Refund and returns page is selected and published', 'woocommerce' ),
 				__( 'No refund and returns page', 'woocommerce' ),
-				__( 'Agents will be able to link shoppers to your return terms before they buy.', 'woocommerce' )
+				__( 'AI assistants will be able to link shoppers to your return terms before they buy.', 'woocommerce' )
 			),
 			$policy_page(
 				'shipping_policy_page',
 				AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION,
 				__( 'Shipping policy page is selected and published', 'woocommerce' ),
 				__( 'No shipping policy page', 'woocommerce' ),
-				__( 'Shoppers ask agents about delivery times and costs.', 'woocommerce' )
+				__( 'Shoppers ask AI assistants about delivery times and costs.', 'woocommerce' )
 			),
 			array(
 				'id'      => 'payment_method',
@@ -165,7 +165,7 @@ class StoreConditions {
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'A payment method is turned on', 'woocommerce' ),
 				'label'   => __( 'No payment method is turned on', 'woocommerce' ),
-				'why'     => __( 'Shoppers sent by an agent cannot pay for their order.', 'woocommerce' ),
+				'why'     => __( 'Shoppers sent by an AI assistant cannot pay for their order.', 'woocommerce' ),
 				'fix'     => __( 'Turn on a payment method under WooCommerce > Settings > Payments.', 'woocommerce' ),
 				'fix_url' => $settings_url( 'checkout' ),
 			),
@@ -189,7 +189,7 @@ class StoreConditions {
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Order confirmation emails are on', 'woocommerce' ),
 				'label'   => __( 'Order confirmation emails are off', 'woocommerce' ),
-				'why'     => __( 'Shoppers who buy through an agent get no confirmation from your store.', 'woocommerce' ),
+				'why'     => __( 'Shoppers who buy through an AI assistant get no confirmation from your store.', 'woocommerce' ),
 				'fix'     => __( 'Turn on the Processing or Completed order email under WooCommerce > Settings > Emails.', 'woocommerce' ),
 				'fix_url' => $settings_url( 'email&section=wc_email_customer_processing_order' ),
 			),
