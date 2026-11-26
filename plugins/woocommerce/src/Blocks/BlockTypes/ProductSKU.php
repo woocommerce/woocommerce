@@ -64,20 +64,27 @@ class ProductSKU extends AbstractBlock {
 			return '';
 		}
 
-		$product_sku = $product->get_sku();
-
-		if ( ! $product_sku ) {
-			return '';
-		}
-
+		$product_sku                         = $product->get_sku();
 		$is_descendant_of_product_collection = isset( $block->context['query']['isProductCollectionBlock'] );
 		$is_interactive                      = ! $is_descendant_of_product_collection && $product->is_type( ProductType::VARIABLE );
 
+		if ( '' === $product_sku && ! $is_interactive ) {
+			return '';
+		}
+
+		$hide_when_unavailable  = $is_interactive && ( $attributes['hideWhenUnavailable'] ?? true );
+		$display_sku            = '' === $product_sku && ! $hide_when_unavailable ? __( 'N/A', 'woocommerce' ) : $product_sku;
+		$interactive_attributes = '';
+
 		if ( $is_interactive ) {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
+			$interactive_attributes = 'data-wp-interactive="woocommerce/products" data-wp-text="state.productSkuInContext" ' . wp_interactivity_data_wp_context( array( 'skuFallback' => $display_sku ) );
 		}
 
 		$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		if ( $hide_when_unavailable ) {
+			$styles_and_classes['classes'] .= ' wc-block-components-product-sku--hide-when-unavailable';
+		}
 
 		$prefix = isset( $attributes['prefix'] ) ? wp_kses_post( ( $attributes['prefix'] ) ) : __( 'SKU: ', 'woocommerce' );
 		if ( ! empty( $prefix ) ) {
@@ -89,8 +96,6 @@ class ProductSKU extends AbstractBlock {
 			$suffix = sprintf( '<span class="wp-block-post-terms__suffix">%s</span>', $suffix );
 		}
 
-		$interactive_attributes = $is_interactive ? 'data-wp-interactive="woocommerce/products" data-wp-text="state.productInContext.sku"' : '';
-
 		return sprintf(
 			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta wp-block-post-terms %1$s" style="%2$s">
 				%3$s
@@ -101,7 +106,7 @@ class ProductSKU extends AbstractBlock {
 			esc_attr( $styles_and_classes['styles'] ?? '' ),
 			$prefix,
 			$interactive_attributes,
-			$product_sku,
+			esc_html( $display_sku ),
 			$suffix
 		);
 	}

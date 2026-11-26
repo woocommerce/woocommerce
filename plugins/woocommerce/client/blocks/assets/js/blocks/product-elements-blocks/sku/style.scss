@@ -2,6 +2,10 @@
 	display: block;
 	overflow-wrap: break-word;
 
+	&--hide-when-unavailable:has(> .sku:empty) {
+		display: none;
+	}
+
 	&__prefix {
 		color: var(--wp--preset--color--contrast-2);
 	}

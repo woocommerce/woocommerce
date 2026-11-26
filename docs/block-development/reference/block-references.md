@@ -1210,7 +1210,7 @@ Displays the SKU of a product.
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/product-meta, woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 - **Supports:** color (background, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
-- **Attributes:** isDescendantOfAllProducts, prefix, productId, showProductSelector, suffix
+- **Attributes:** hideWhenUnavailable, isDescendantOfAllProducts, prefix, productId, showProductSelector, suffix
 
 ## Product Stock Indicator - woocommerce/product-stock-indicator
 

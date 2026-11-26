@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	wpCLI,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -35,6 +40,118 @@ const test = base.extend< {
 } );
 
 test.describe( 'Add to Cart + Options Block', () => {
+	test( 'shows the selected variation SKU when the parent has no SKU', async ( {
+		page,
+		admin,
+		pageObject,
+		editor,
+		requestUtils,
+		createHiddenProduct,
+	} ) => {
+		const { id } = await createHiddenProduct( {
+			name: 'Variable product without a parent SKU',
+			type: 'variable',
+			attributes: [
+				{
+					name: 'Finish',
+					variation: true,
+					options: [ 'Matte', 'Glossy' ],
+				},
+			],
+		} );
+		const variationSku = `matte-${ id }`;
+		await requestUtils.rest( {
+			method: 'POST',
+			path: `wc/v3/products/${ id }/variations/batch`,
+			data: {
+				create: [
+					{
+						regular_price: '10',
+						sku: variationSku,
+						attributes: [ { name: 'Finish', option: 'Matte' } ],
+					},
+					{
+						regular_price: '10',
+						attributes: [ { name: 'Finish', option: 'Glossy' } ],
+					},
+				],
+			},
+		} );
+
+		const productUrl = `/?p=${ id }`;
+		const skuBlock = page.locator( '.wp-block-woocommerce-product-sku' );
+		const sku = skuBlock.locator( '.sku' );
+		const hideSku = page.getByRole( 'checkbox', {
+			name: 'Hide SKU when unavailable',
+		} );
+
+		await test.step( 'hides and reveals the SKU with the legacy variation form', async () => {
+			await page.goto( productUrl );
+			const finish = page.getByLabel( 'Finish', { exact: true } );
+
+			await expect( skuBlock ).toBeHidden();
+			await finish.selectOption( { label: 'Matte' } );
+			await expect( skuBlock ).toBeVisible();
+			await expect( sku ).toHaveText( variationSku );
+			await finish.selectOption( '' );
+			await expect( skuBlock ).toBeHidden();
+		} );
+
+		await test.step( 'shows N/A when hiding is turned off', async () => {
+			await admin.visitSiteEditor( {
+				postId: `${ BLOCK_THEME_SLUG }//single-product`,
+				postType: 'wp_template',
+				canvas: 'edit',
+			} );
+			await editor.openDocumentSettingsSidebar();
+			await editor.selectBlocks(
+				await editor.getBlockByName( 'woocommerce/product-sku' )
+			);
+			await expect( hideSku ).toBeChecked();
+			await hideSku.uncheck();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+
+			await page.goto( productUrl );
+			const finish = page.getByLabel( 'Finish', { exact: true } );
+			await expect( sku ).toHaveText( 'N/A' );
+			await finish.selectOption( { label: 'Matte' } );
+			await expect( sku ).toHaveText( variationSku );
+			await finish.selectOption( { label: 'Glossy' } );
+			await expect( sku ).toHaveText( 'N/A' );
+		} );
+
+		await pageObject.updateSingleProductTemplate();
+		await pageObject.setVariationSelectorAttributes( {
+			optionStyle: 'chips',
+		} );
+		await editor.selectBlocks(
+			await editor.getBlockByName( 'woocommerce/product-sku' )
+		);
+		await expect( hideSku ).not.toBeChecked();
+		await hideSku.check();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+		await page.goto( productUrl );
+
+		const finishes = page.getByRole( 'radiogroup', { name: 'Finish' } );
+		const matte = finishes.getByRole( 'radio', { name: 'Matte' } );
+		const glossy = finishes.getByRole( 'radio', { name: 'Glossy' } );
+
+		await expect( skuBlock ).toBeHidden();
+		await matte.click();
+		await expect( skuBlock ).toBeVisible();
+		await expect( sku ).toHaveText( variationSku );
+		await glossy.click();
+		await expect( skuBlock ).toBeHidden();
+		await matte.click();
+		await expect( sku ).toHaveText( variationSku );
+		await matte.click();
+		await expect( skuBlock ).toBeHidden();
+	} );
+
 	test( 'allows adding 3rd-party product types to cart when using PHP templates', async ( {
 		page,
 		pageObject,

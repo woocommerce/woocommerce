@@ -16,6 +16,9 @@
 			"type": "boolean",
 			"default": false
 		},
+		"hideWhenUnavailable": {
+			"type": "boolean"
+		},
 		"prefix": {
 			"type": "string",
 			"default": "SKU:",
