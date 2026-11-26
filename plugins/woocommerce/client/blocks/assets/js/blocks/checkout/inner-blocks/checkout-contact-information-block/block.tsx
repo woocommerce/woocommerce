@@ -16,12 +16,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { checkoutStore } from '@woocommerce/block-data';
 import { CONTACT_FORM_KEYS } from '@woocommerce/block-settings';
 import { Form } from '@woocommerce/base-components/cart-checkout';
-import { useToggleCollapse } from '@woocommerce/base-hooks';
-
-/**
- * Internal dependencies
- */
-import CreatePassword from './create-password';
 
 const guestCheckoutNoticeId = 'wc-guest-checkout-notice';
 
@@ -32,50 +26,25 @@ const CreateAccountUI = (): React.ReactElement | null => {
 			shouldCreateAccount: store.getShouldCreateAccount(),
 		};
 	} );
-	const { __internalSetShouldCreateAccount, __internalSetCustomerPassword } =
-		useDispatch( checkoutStore );
+	const { __internalSetShouldCreateAccount } = useDispatch( checkoutStore );
 
-	// Work out what fields need to be displayed for the current shopper.
-	const allowGuestCheckout = getSetting( 'checkoutAllowsGuest', false );
-	const allowSignup = getSetting( 'checkoutAllowsSignup', false );
-	const generatePassword = getSetting( 'generatePassword', false );
-	const showCreateAccountCheckbox = allowGuestCheckout && allowSignup;
-	const showCreateAccountPassword = generatePassword
-		? false
-		: ( showCreateAccountCheckbox && shouldCreateAccount ) ||
-			! allowGuestCheckout;
-
-	// The checkbox grows the password field in and collapses it out.
-	const passwordCollapse = useToggleCollapse( showCreateAccountPassword, () =>
-		document.querySelector< HTMLElement >(
-			'.wc-block-components-address-form__password:not([data-wc-collapse-copy])'
-		)
-	);
-
-	if (
-		! allowGuestCheckout &&
-		! showCreateAccountCheckbox &&
-		! showCreateAccountPassword
-	) {
+	if ( ! getSetting( 'checkoutAllowsGuest', false ) ) {
 		return null;
 	}
 
 	return (
 		<>
-			{ allowGuestCheckout && (
-				<p
-					id={ guestCheckoutNoticeId }
-					className="wc-block-checkout__guest-checkout-notice"
-				>
-					{ __(
-						'You are currently checking out as a guest.',
-						'woocommerce'
-					) }
-				</p>
-			) }
-			{ showCreateAccountCheckbox && (
+			<p
+				id={ guestCheckoutNoticeId }
+				className="wc-block-checkout__guest-checkout-notice"
+			>
+				{ __(
+					'You are currently checking out as a guest.',
+					'woocommerce'
+				) }
+			</p>
+			{ getSetting( 'checkoutAllowsSignup', false ) && (
 				<CheckboxControl
-					ref={ passwordCollapse.triggerRef }
 					className="wc-block-checkout__create-account"
 					label={ sprintf(
 						/* translators: Store name */
@@ -84,13 +53,10 @@ const CreateAccountUI = (): React.ReactElement | null => {
 					) }
 					checked={ shouldCreateAccount }
 					onChange={ ( value ) => {
-						passwordCollapse.onToggle();
 						void __internalSetShouldCreateAccount( value );
-						void __internalSetCustomerPassword( '' );
 					} }
 				/>
 			) }
-			{ showCreateAccountPassword && <CreatePassword /> }
 		</>
 	);
 };

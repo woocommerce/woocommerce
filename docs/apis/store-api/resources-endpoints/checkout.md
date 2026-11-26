@@ -156,7 +156,7 @@ POST /wc/store/v1/checkout
 | `customer_note`     | string |    No    | Note added to the order by the customer during checkout.            |
 | `payment_method`    | string |   Yes    | The ID of the payment method being used to process the payment.     |
 | `payment_data`      | array  |    No    | Data to pass through to the payment method when processing payment. |
-| `customer_password` | string |    No    | Optionally define a password for new accounts.                      |
+| `customer_password` | string |    No    | Ignored. New accounts always get a generated password.              |
 | `expected_total`    | string |    No    | Total the shopper confirmed, in minor units. See note below.        |
 
 `expected_total` is a string in the smallest unit of the store currency (e.g. cents), matching the cart `totals.total_price` format. When provided, the order is rejected with a `409` (`woocommerce_rest_checkout_total_mismatch`) if the total the server calculates for the request no longer matches it, and the refreshed cart is returned so the client can display the updated total. Omit it to skip the check — e.g. for flows that cannot know the final total up front, such as some express payment methods.

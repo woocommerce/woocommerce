@@ -54,7 +54,6 @@ class WC_Settings_Accounts_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_enable_signup_and_login_from_checkout' => 'checkbox',
 			'woocommerce_enable_myaccount_registration'    => 'checkbox',
 			'woocommerce_registration_generate_username'   => 'checkbox',
-			'woocommerce_registration_generate_password'   => 'checkbox',
 			'woocommerce_erasure_request_removes_order_data' => 'checkbox',
 			'woocommerce_erasure_request_removes_download_data' => 'checkbox',
 			'woocommerce_allow_bulk_remove_personal_data'  => 'checkbox',
@@ -77,6 +76,26 @@ class WC_Settings_Accounts_Test extends WC_Settings_Unit_Test_Case {
 		}
 
 		$this->assertEquals( $expected, $setting_ids_and_types );
+	}
+
+	/**
+	 * @testdox The removed generated-password option always reads "yes" and reports that it is deprecated once per request.
+	 */
+	public function test_generate_password_option_always_reads_yes(): void {
+		$this->setExpectedDeprecated( 'get_option' );
+		$notices = 0;
+		$count   = static function ( $function_name ) use ( &$notices ): void {
+			if ( 'get_option' === $function_name ) {
+				++$notices;
+			}
+		};
+		add_action( 'deprecated_argument_run', $count );
+
+		update_option( 'woocommerce_registration_generate_password', 'no' );
+		get_option( 'woocommerce_registration_generate_password' );
+
+		$this->assertSame( 'yes', get_option( 'woocommerce_registration_generate_password' ), 'Extensions read this option, so it should say passwords are generated.' );
+		$this->assertSame( 1, $notices, 'Extensions read the option on every page, so the notice should fire once.' );
 	}
 
 	/**

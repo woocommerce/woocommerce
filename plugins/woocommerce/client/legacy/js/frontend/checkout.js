@@ -362,8 +362,6 @@ jQuery( function ( $ ) {
 			$( 'div.create-account' ).hide();
 
 			if ( $( this ).is( ':checked' ) ) {
-				// Ensure password is not pre-populated.
-				$( '#account_password' ).val( '' );
 				$( 'div.create-account' ).slideDown();
 			}
 		},

@@ -914,7 +914,7 @@ function wc_get_privacy_policy_text( $type = '' ) {
 			break;
 		case 'registration':
 			/* translators: %s privacy policy page name and link */
-			$text = get_option( 'woocommerce_registration_privacy_policy_text', sprintf( __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ) );
+			$text = get_option( 'woocommerce_registration_privacy_policy_text', sprintf( __( 'By creating an account you agree to our %s.', 'woocommerce' ), '[privacy_policy]' ) );
 			break;
 	}
 

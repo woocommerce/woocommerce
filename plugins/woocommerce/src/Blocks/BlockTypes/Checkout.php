@@ -169,11 +169,6 @@ class Checkout extends AbstractBlock {
 	protected function get_block_type_script( $key = null ) {
 		$dependencies = [];
 
-		// Load password strength meter script asynchronously if needed.
-		if ( ! is_user_logged_in() && 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
-			$dependencies[] = 'zxcvbn-async';
-		}
-
 		$checkout_fields = Package::container()->get( CheckoutFields::class );
 		// Load schema parser asynchronously if we need it.
 		if ( Validation::has_field_schema( $checkout_fields->get_additional_fields() ) ) {
@@ -445,7 +440,6 @@ class Checkout extends AbstractBlock {
 				'woocommerce_tax_display_cart', // This one is autoloaded, but we add it here for clarity.
 				'woocommerce_tax_total_display',
 				'woocommerce_ship_to_destination',
-				'woocommerce_registration_generate_password',
 				'pickup_location_pickup_locations',
 			)
 		);
@@ -468,7 +462,6 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_cart' ) );
 		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
 		$this->asset_data_registry->add( 'forcedBillingAddress', 'billing_only' === get_option( 'woocommerce_ship_to_destination' ) );
-		$this->asset_data_registry->add( 'generatePassword', filter_var( get_option( 'woocommerce_registration_generate_password' ), FILTER_VALIDATE_BOOLEAN ) );
 		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled() );
 		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled() );
 		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled() );

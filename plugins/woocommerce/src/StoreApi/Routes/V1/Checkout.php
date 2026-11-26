@@ -95,7 +95,7 @@ class Checkout extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => array_merge(
 					[
-						'payment_data'      => [
+						'payment_data'   => [
 							'description' => __( 'Data to pass through to the payment method when processing payment.', 'woocommerce' ),
 							'type'        => 'array',
 							'items'       => [
@@ -110,11 +110,7 @@ class Checkout extends AbstractCartRoute {
 								],
 							],
 						],
-						'customer_password' => [
-							'description' => __( 'Customer password for new accounts, if applicable.', 'woocommerce' ),
-							'type'        => 'string',
-						],
-						'expected_total'    => [
+						'expected_total' => [
 							'description'       => __( 'The order total the shopper confirmed on the client, as a string in the smallest unit of the store currency (e.g. cents), matching the cart `totals.total_price` format. When provided, the order is rejected if the total calculated on the server no longer matches it, protecting the shopper from being charged an unexpected amount.', 'woocommerce' ),
 							'type'              => 'string',
 							// Digits only. The value is compared as an integer, so decimals or stray characters would silently weaken the check.
@@ -1177,7 +1173,7 @@ class Checkout extends AbstractCartRoute {
 			$customer_id = wc_create_new_customer(
 				$request['billing_address']['email'],
 				'',
-				$request['customer_password'],
+				'',
 				[
 					'first_name' => $request['billing_address']['first_name'],
 					'last_name'  => $request['billing_address']['last_name'],

@@ -138,23 +138,6 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 			array(
 				'title'             => __( 'Account creation options', 'woocommerce' ),
-				'desc'              => __( 'Send password setup link (recommended)', 'woocommerce' ),
-				'desc_tip'          => __( 'New users receive an email to set up their password.', 'woocommerce' ),
-				'id'                => 'woocommerce_registration_generate_password',
-				'abilities'         => array(
-					'read'  => true,
-					'write' => true,
-				),
-				'default'           => 'yes',
-				'type'              => 'checkbox',
-				'checkboxgroup'     => 'start',
-				'autoload'          => false,
-				'custom_attributes' => array(
-					'disabled-tooltip' => __( 'Enable an account creation method to use this feature.', 'woocommerce' ),
-				),
-			),
-			array(
-				'title'             => __( 'Account creation options', 'woocommerce' ),
 				'desc'              => __( 'Generate account login (recommended)', 'woocommerce' ),
 				'desc_tip'          => __( 'Generate a login for the account using first and/or last name. If neither is usable (e.g. invalid or missing) the email address will be used. If this option is unchecked, customers will need to set a username during account creation', 'woocommerce' ),
 				'id'                => 'woocommerce_registration_generate_username',
@@ -164,7 +147,6 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				),
 				'default'           => 'yes',
 				'type'              => 'checkbox',
-				'checkboxgroup'     => 'end',
 				'autoload'          => false,
 				'custom_attributes' => array(
 					'disabled-tooltip' => __( 'Enable an account creation method to use this feature.', 'woocommerce' ),
@@ -225,7 +207,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'write' => true,
 				),
 				/* translators: %s privacy policy page name and link */
-				'default'   => sprintf( __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ),
+				'default'   => sprintf( __( 'By creating an account you agree to our %s.', 'woocommerce' ), '[privacy_policy]' ),
 				'type'      => 'textarea',
 				'css'       => 'min-width: 50%; height: 75px;',
 			),
@@ -356,15 +338,6 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					return 'woocommerce_registration_generate_username' !== $setting['id'];
 				},
 			);
-			$account_settings = array_map(
-				function ( $setting ) {
-					if ( 'woocommerce_registration_generate_password' === $setting['id'] ) {
-						unset( $setting['checkboxgroup'] );
-					}
-					return $setting;
-				},
-				$account_settings
-			);
 		} else {
 			$account_settings = array_map(
 				function ( $setting ) {
@@ -419,8 +392,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				document.getElementById("woocommerce_enable_signup_from_checkout_for_subscriptions")
 			];
 			const inputs = [
-				document.getElementById("woocommerce_registration_generate_username"),
-				document.getElementById("woocommerce_registration_generate_password")
+				document.getElementById("woocommerce_registration_generate_username")
 			];
 			checkboxes.forEach(cb => cb && cb.addEventListener("change", function() {
 				const isChecked = checkboxes.some(cb => cb && cb.checked);

@@ -2808,6 +2808,25 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Creating an account ignores a customer_password sent by the client and generates the password.
+	 */
+	public function test_checkout_create_account_ignores_customer_password(): void {
+		WC()->session->set_customer_session_cookie( true );
+		WC()->session->save_data();
+		$request = $this->build_checkout_post_request();
+		$request->set_param( 'create_account', true );
+		$request->set_param( 'customer_password', 'chosen-Password-123' );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+		$customer = get_user_by( 'id', $data['customer_id'] );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertInstanceOf( \WP_User::class, $customer, 'The account should be created.' );
+		$this->assertFalse( wp_check_password( 'chosen-Password-123', $customer->user_pass, $customer->ID ), 'The posted password should be ignored.' );
+	}
+
+	/**
 	 * Test account creation options.
 	 */
 	public function test_checkout_invalid_address_data() {

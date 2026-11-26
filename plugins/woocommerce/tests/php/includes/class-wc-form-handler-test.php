@@ -135,6 +135,30 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox My Account registration gives a new account a generated password, even if a password is posted.
+	 */
+	public function test_process_registration_generates_the_password(): void {
+		wp_set_current_user( 0 );
+		update_option( 'woocommerce_enable_myaccount_registration', 'yes' );
+		add_filter( 'woocommerce_registration_auth_new_customer', '__return_false' );
+		add_filter( 'pre_wp_mail', '__return_true' );
+
+		$_POST = array(
+			'register'                   => 'Register',
+			'email'                      => 'registration-generated@example.com',
+			'password'                   => 'chosen-Password-123',
+			'woocommerce-register-nonce' => wp_create_nonce( 'woocommerce-register' ),
+		);
+
+		WC_Form_Handler::process_registration();
+
+		$customer = get_user_by( 'email', 'registration-generated@example.com' );
+		$this->assertInstanceOf( WP_User::class, $customer, 'The account should be created.' );
+		$this->assertFalse( wp_check_password( 'chosen-Password-123', $customer->user_pass, $customer->ID ), 'A posted password should be ignored.' );
+		$this->assertTrue( wc_has_notice( 'Your account was created successfully and a password has been sent to your email address.' ), 'The notice should point to the email.' );
+	}
+
+	/**
 	 * Order statuses when the pay form is posted, and whether pay_action() should take each one on.
 	 *
 	 * @return array<string, array{0: string, 1: bool}>

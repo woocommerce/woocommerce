@@ -205,23 +205,15 @@ test.describe( 'Shopper (guest) → Order Confirmation → Create Account', () =
 			page.getByText( 'Create an account with' )
 		).toBeVisible();
 
-		// Configure so password field is visible.
-		await requestUtils.rest( {
-			method: 'PUT',
-			path: 'wc/v3/settings/account/woocommerce_registration_generate_password',
-			data: { value: 'no' },
-		} );
-		await page.reload();
-
-		// Check visible form elements.
+		// The password is generated, so the form only asks to confirm.
 		await expect(
-			page.getByText( 'Set a password for john.doe@test.com' )
+			page.getByText( 'We’ll email you a link to set your password.' )
 		).toBeVisible();
+		await expect(
+			page.getByLabel( 'Password', { exact: true } )
+		).toBeHidden();
 
-		// Fill out the form and test creation works.
-		await page
-			.getByLabel( 'Password', { exact: true } )
-			.fill( 'V3ryStrongP@ssw0rd123!' );
+		// Test creation works.
 		await page.getByRole( 'button', { name: 'Create account' } ).click();
 		await page.waitForURL( /\/checkout\/order-received\// );
 

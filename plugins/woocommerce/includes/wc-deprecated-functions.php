@@ -1405,6 +1405,29 @@ add_filter( 'pre_option_woocommerce_api_enabled', function() {
 } );
 
 /**
+ * Generated account passwords.
+ *
+ * New accounts always get a generated password, so this setting was removed. Extensions still read the option, so it always returns `yes`.
+ * The deprecation notice fires once per request, because some extensions read the option on every page.
+ *
+ * @deprecated 11.5.0
+ * @return string Always 'yes'.
+ */
+add_filter(
+	'pre_option_woocommerce_registration_generate_password',
+	function () {
+		static $notified = false;
+
+		if ( ! $notified ) {
+			$notified = true;
+			wc_deprecated_argument( 'get_option', '11.5.0', 'The woocommerce_registration_generate_password option is deprecated. It always returns "yes".' );
+		}
+
+		return 'yes';
+	}
+);
+
+/**
  * Legacy noindex output for transactional pages.
  *
  * @since 3.2.0

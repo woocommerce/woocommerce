@@ -1318,18 +1318,6 @@ test.describe( 'Settings API tests: CRUD', () => {
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
-						id: 'woocommerce_registration_generate_password',
-						label: 'Account creation options',
-						description: 'Send password setup link (recommended)',
-						type: 'checkbox',
-						default: 'yes',
-						value: 'yes',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
 						id: 'woocommerce_erasure_request_removes_order_data',
 						label: 'Account erasure requests',
 						description:
@@ -1380,9 +1368,9 @@ test.describe( 'Settings API tests: CRUD', () => {
 						description: '',
 						type: 'textarea',
 						default:
-							'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our [privacy_policy].',
+							'By creating an account you agree to our [privacy_policy].',
 						tip: 'Optionally add some text about your store privacy policy to show on account registration forms.',
-						value: 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our [privacy_policy].',
+						value: 'By creating an account you agree to our [privacy_policy].',
 					} ),
 				] )
 			);

@@ -359,16 +359,6 @@ class WC_Checkout {
 			);
 		}
 
-		if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
-			$this->fields['account']['account_password'] = array(
-				'type'         => 'password',
-				'label'        => __( 'Create account password', 'woocommerce' ),
-				'required'     => true,
-				'placeholder'  => esc_attr__( 'Password', 'woocommerce' ),
-				'autocomplete' => 'new-password',
-			);
-		}
-
 		/**
 		 * Sets the fields used during checkout.
 		 *
@@ -1177,9 +1167,7 @@ class WC_Checkout {
 							$value = wc_sanitize_textarea( $value );
 							break;
 						case 'password':
-							if ( $data['createaccount'] && 'account_password' === $key ) {
-								$value = wp_slash( $value ); // Passwords are encrypted with slashes on account creation, so we need to slash here too.
-							}
+							// Leave passwords from custom fields as entered: wc_clean() would change them.
 							break;
 						default:
 							$value = wc_clean( $value );
@@ -1755,11 +1743,10 @@ class WC_Checkout {
 
 		if ( ! is_user_logged_in() && ( $this->is_registration_required() || ! empty( $data['createaccount'] ) ) ) {
 			$username    = ! empty( $data['account_username'] ) ? $data['account_username'] : '';
-			$password    = ! empty( $data['account_password'] ) ? $data['account_password'] : '';
 			$customer_id = wc_create_new_customer(
 				$data['billing_email'],
 				$username,
-				$password,
+				'',
 				array(
 					'first_name' => ! empty( $data['billing_first_name'] ) ? $data['billing_first_name'] : '',
 					'last_name'  => ! empty( $data['billing_last_name'] ) ? $data['billing_last_name'] : '',

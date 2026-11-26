@@ -127,14 +127,21 @@ export const __internalSetCustomerId = ( customerId: number ) => ( {
 } );
 
 /**
- * Set the customer password
+ * @deprecated Checkout no longer sets a password for new accounts. Customers set it from the new account email.
  *
- * @param customerPassword Account password for the customer when creating accounts
+ * @param      _customerPassword Ignored. Kept so existing callers still type-check.
  */
-export const __internalSetCustomerPassword = ( customerPassword: string ) => ( {
-	type: types.SET_CUSTOMER_PASSWORD,
-	customerPassword,
-} );
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const __internalSetCustomerPassword = ( _customerPassword?: string ) => {
+	deprecated( '__internalSetCustomerPassword', {
+		plugin: 'WooCommerce',
+		version: '11.5.0',
+		hint: 'Checkout no longer sets a password for new accounts.',
+	} );
+	return {
+		type: types.SET_CUSTOMER_PASSWORD,
+	};
+};
 
 /**
  * Whether to use the shipping address as the billing address

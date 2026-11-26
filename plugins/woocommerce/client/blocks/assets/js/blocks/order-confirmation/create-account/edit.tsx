@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
-import type { TemplateArray, BlockAttributes } from '@wordpress/blocks';
+import type { TemplateArray } from '@wordpress/blocks';
 import {
 	InnerBlocks,
 	useBlockProps,
@@ -14,14 +14,9 @@ import { SITE_TITLE } from '@woocommerce/settings/default-constants';
 import {
 	Disabled,
 	PanelBody,
-	ToggleControl,
 	// `Link` from `@wordpress/ui` isn't available to this package yet.
 	// eslint-disable-next-line @wordpress/use-recommended-components
 	ExternalLink,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToolsPanel as ToolsPanel,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 
 /**
@@ -75,13 +70,9 @@ type EditProps = {
 	attributes: {
 		hasDarkControls: boolean;
 	};
-	setAttributes: ( attrs: BlockAttributes ) => void;
 };
 
-export const Edit = ( {
-	attributes,
-	setAttributes,
-}: EditProps ): JSX.Element | null => {
+export const Edit = ( { attributes }: EditProps ): JSX.Element | null => {
 	const className = clsx( 'wc-block-order-confirmation-create-account', {
 		'has-dark-controls': attributes.hasDarkControls,
 	} );
@@ -93,8 +84,6 @@ export const Edit = ( {
 	if ( ! isEnabled ) {
 		return null;
 	}
-
-	const generatePassword = getSetting( 'registrationGeneratePassword', true );
 
 	return (
 		<div { ...blockProps }>
@@ -112,46 +101,6 @@ export const Edit = ( {
 			<Disabled>
 				<Form isEditor={ true } />
 			</Disabled>
-			{ ! generatePassword && (
-				<InspectorControls>
-					<ToolsPanel
-						label={ __( 'Style', 'woocommerce' ) }
-						resetAll={ () => {
-							setAttributes( { hasDarkControls: false } );
-						} }
-					>
-						<ToolsPanelItem
-							hasValue={ () =>
-								attributes.hasDarkControls === true
-							}
-							label={ __( 'Dark mode inputs', 'woocommerce' ) }
-							onDeselect={ () =>
-								setAttributes( { hasDarkControls: false } )
-							}
-							isShownByDefault
-						>
-							<ToggleControl
-								__nextHasNoMarginBottom
-								label={ __(
-									'Dark mode inputs',
-									'woocommerce'
-								) }
-								help={ __(
-									'Inputs styled specifically for use on dark background colors.',
-									'woocommerce'
-								) }
-								checked={ attributes.hasDarkControls }
-								onChange={ () =>
-									setAttributes( {
-										hasDarkControls:
-											! attributes.hasDarkControls,
-									} )
-								}
-							/>
-						</ToolsPanelItem>
-					</ToolsPanel>
-				</InspectorControls>
-			) }
 			<InspectorControls>
 				<PanelBody>
 					<p>
