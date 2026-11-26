@@ -234,6 +234,11 @@ CSS;
 		$overlay_mode     = $this->get_overlay_mode( $attributes );
 		$has_overlay      = 'off' !== $overlay_mode;
 		$overlay_position = isset( $attributes['overlayPosition'] ) && 'right' === $attributes['overlayPosition'] ? 'right' : 'left';
+		$is_button_style  = isset( $attributes['overlayButtonStyle'] ) && 'button' === $attributes['overlayButtonStyle'];
+		$button_classes   = array( 'wc-block-product-filters__open-overlay' );
+		if ( $is_button_style ) {
+			$button_classes[] = wp_theme_get_element_class_name( 'button' );
+		}
 
 		$state               = wp_interactivity_state( 'woocommerce/product-filters' );
 		$filter_empty_states = $state['filterEmptyStates'][ $product_filters_key ] ?? array();
@@ -272,7 +277,7 @@ CSS;
 			<?php if ( $has_overlay ) : ?>
 				<button
 					type="button"
-					class="wc-block-product-filters__open-overlay"
+					class="<?php echo esc_attr( implode( ' ', $button_classes ) ); ?>"
 					data-wp-init="callbacks.initOverlay"
 					data-wp-on--click="actions.openOverlay"
 				>

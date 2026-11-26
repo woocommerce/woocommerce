@@ -13,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Content;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Block_Template;
 use WP_Block_Type_Registry;
@@ -686,6 +687,14 @@ class Content_Renderer {
 			$layout['contentSize'],
 			$layout['wideSize'] ?? $layout['contentSize']
 		);
+
+		// Paragraph blocks are each wrapped in their own table, so this only reaches paragraphs
+		// in one chunk of HTML (Classic, Custom HTML, shortcodes), which content.css resets to margin 0.
+		// get_styles() has already resolved spacing presets, so only a single length is accepted here.
+		$block_gap = Html_Processing_Helper::sanitize_dimension_value( $this->theme_controller->get_styles()['spacing']['blockGap'] ?? null );
+		if ( '' !== $block_gap ) {
+			$styles .= sprintf( 'p + p { margin-top: %s; }', $block_gap );
+		}
 
 		// Get styles from theme.
 		$styles              .= $this->theme_controller->get_stylesheet_for_rendering();

@@ -110,6 +110,22 @@ final class ArgumentValidator {
 	}
 
 	/**
+	 * Collecting {@see self::validate_bounded_string()}: the value, or null when refused.
+	 *
+	 * @param string $key        Field name.
+	 * @param mixed  $value      Caller value.
+	 * @param int    $max_length Most characters allowed.
+	 */
+	public function get_bounded_string( string $key, $value, int $max_length ): ?string {
+		try {
+			return self::validate_bounded_string( $key, $value, $max_length );
+		} catch ( InvalidInputException $e ) {
+			$this->add( $e );
+			return null;
+		}
+	}
+
+	/**
 	 * Collecting {@see self::validate_extension_slug()}: the slug, or null when refused.
 	 *
 	 * @param string $key   Field name.
@@ -354,6 +370,24 @@ final class ArgumentValidator {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Validate and return a non-empty string of at most `$max_length` characters, for a value
+	 * matched against a column of that width. No trimming: the caller trims when it needs to.
+	 *
+	 * @param string $key        Field name.
+	 * @param mixed  $value      Caller value.
+	 * @param int    $max_length Most characters allowed.
+	 * @throws InvalidInputException If the value is missing, empty, not a string or too long.
+	 */
+	public static function validate_bounded_string( string $key, $value, int $max_length ): string {
+		$string = self::validate_non_empty_string( $key, $value );
+		if ( mb_strlen( $string ) > $max_length ) {
+			throw self::get_invalid_input( ValidationErrorCode::TOO_LONG, $key, sprintf( 'must be at most %d characters', $max_length ), array( 'max' => $max_length ) );
+		}
+
+		return $string;
 	}
 
 	/**

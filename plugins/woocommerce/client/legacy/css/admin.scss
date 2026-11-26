@@ -8153,6 +8153,14 @@ table.bar_chart {
 		padding-top: 20px;
 	}
 
+	// Plain-text values: line up with the label text. Stacked mobile layouts already do.
+	@media screen and (min-width: 783px) {
+
+		.woocommerce table.form-table td.forminp-static {
+			padding-top: 25px;
+		}
+	}
+
 	.woocommerce table.form-table textarea {
 		padding: 6px 8px;
 	}
