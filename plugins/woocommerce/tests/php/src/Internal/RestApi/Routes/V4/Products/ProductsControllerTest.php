@@ -73,11 +73,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass() {
-		self::$administrator_id = self::factory()->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		self::$administrator_id = self::create_super_admin();
 
 		self::with_direct_product_attribute_lookup_updates(
 			static function () {

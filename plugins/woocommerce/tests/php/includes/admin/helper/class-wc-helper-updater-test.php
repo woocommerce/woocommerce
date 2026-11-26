@@ -1223,6 +1223,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->prepare_plugins_screen();
+		set_current_screen( 'plugins' );
 		delete_site_transient( 'update_plugins' );
 		$this->set_subscriptions( array() );
 
@@ -2057,10 +2058,15 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	private function prepare_plugins_screen(): void {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin_id = self::create_super_admin();
 		$admin    = new WP_User( $admin_id );
 		$admin->add_cap( 'update_plugins' );
 		wp_set_current_user( $admin_id );
+
+		// On multisite, Core renders plugin update rows only on the network Plugins screen.
+		if ( is_multisite() ) {
+			set_current_screen( 'plugins-network' );
+		}
 
 		wp_cache_set(
 			'plugins',

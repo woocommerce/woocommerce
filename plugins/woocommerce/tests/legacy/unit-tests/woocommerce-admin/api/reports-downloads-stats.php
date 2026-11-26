@@ -25,11 +25,7 @@ class WC_Admin_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case 
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user = self::create_super_admin();
 	}
 
 	/**

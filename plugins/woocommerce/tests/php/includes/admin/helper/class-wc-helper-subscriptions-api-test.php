@@ -168,7 +168,7 @@ class WC_Helper_Subscriptions_API_Test extends \WC_Unit_Test_Case {
 	public function test_administrator_can_activate_plugin(): void {
 		$product_key = $this->stage_inactive_plugin_subscription();
 
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin_id = self::create_super_admin();
 		wp_set_current_user( $admin_id );
 
 		$response = $this->dispatch_activate( $product_key );
@@ -249,7 +249,7 @@ class WC_Helper_Subscriptions_API_Test extends \WC_Unit_Test_Case {
 	 * @param bool   $expected Whether the user may request install links.
 	 */
 	public function test_install_url_requires_install_plugins( string $role, bool $expected ): void {
-		wp_set_current_user( self::factory()->user->create( array( 'role' => $role ) ) );
+		wp_set_current_user( 'administrator' === $role ? self::create_super_admin() : self::factory()->user->create( array( 'role' => $role ) ) );
 
 		$route   = rest_get_server()->get_routes()['/wc/v3/marketplace/subscriptions/install-url'][0];
 		$request = new WP_REST_Request( 'GET', '/wc/v3/marketplace/subscriptions/install-url' );

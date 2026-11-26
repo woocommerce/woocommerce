@@ -166,7 +166,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		$gateways->payment_gateways = array();
 		$gateways->init();
 
-		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$this->store_admin_id = self::create_super_admin();
 		wp_set_current_user( $this->store_admin_id );
 
 		$this->current_time = 1234567890;
@@ -351,6 +351,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			'manage_woocommerce' => false,
 			'install_plugins'    => false,
 		);
+		// Super admins skip the user_has_cap filter on multisite.
+		revoke_super_admin( $this->store_admin_id );
 		add_filter( 'user_has_cap', $filter_callback );
 
 		// Act.
@@ -373,6 +375,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			'manage_woocommerce' => true,
 			'install_plugins'    => false,
 		);
+		// Super admins skip the user_has_cap filter on multisite.
+		revoke_super_admin( $this->store_admin_id );
 		add_filter( 'user_has_cap', $filter_callback );
 
 		// Act.

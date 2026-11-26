@@ -123,13 +123,7 @@ class WC_Product_Download_Test extends WC_Unit_Test_Case {
 				'user_pass'  => 'x',
 			)
 		);
-		$admin_user     = wp_insert_user(
-			array(
-				'user_login' => uniqid(),
-				'role'       => 'administrator',
-				'user_pass'  => 'x',
-			)
-		);
+		$admin_user     = self::create_super_admin();
 		$ebook_url      = 'https://external.site/books/ultimate-guide-to-stuff.pdf';
 		$podcast_url    = 'https://external.site/podcasts/ultimate-guide-to-stuff.mp3';
 
@@ -158,13 +152,7 @@ class WC_Product_Download_Test extends WC_Unit_Test_Case {
 		$dynamic_filepath = 'https://fast.reliable.external.fileserver.com/bucket-123/textbook.pdf';
 
 		// We select an admin user because we wish to automatically add Approved Directory rules.
-		$admin_user = wp_insert_user(
-			array(
-				'user_login' => uniqid(),
-				'role'       => 'administrator',
-				'user_pass'  => 'x',
-			)
-		);
+		$admin_user = self::create_super_admin();
 		wp_set_current_user( $admin_user );
 
 		add_shortcode(

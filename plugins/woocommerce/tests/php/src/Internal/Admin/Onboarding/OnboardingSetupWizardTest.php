@@ -50,7 +50,7 @@ class OnboardingSetupWizardTest extends WC_Unit_Test_Case {
 	 * @param \WP_UnitTest_Factory $factory Test fixture factory.
 	 */
 	public static function wpSetUpBeforeClass( $factory ): void {
-		self::$admin_id        = $factory->user->create( array( 'role' => 'administrator' ) );
+		self::$admin_id        = self::create_super_admin();
 		self::$subscriber_id   = $factory->user->create( array( 'role' => 'subscriber' ) );
 		self::$shop_manager_id = $factory->user->create( array( 'role' => 'shop_manager' ) );
 	}

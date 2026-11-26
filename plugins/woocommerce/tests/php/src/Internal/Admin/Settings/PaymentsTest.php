@@ -51,7 +51,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$this->store_admin_id = self::create_super_admin();
 		wp_set_current_user( $this->store_admin_id );
 
 		$this->mock_providers = $this->getMockBuilder( PaymentsProviders::class )
@@ -718,7 +718,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 
 		$first_user_result = $this->sut->get_payment_providers( 'US' );
 
-		$second_user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$second_user_id = self::create_super_admin();
 		wp_set_current_user( $second_user_id );
 		$second_user_result = $this->sut->get_payment_providers( 'US' );
 		$this->sut->get_payment_providers( 'US' );
@@ -751,6 +751,8 @@ class PaymentsTest extends WC_Unit_Test_Case {
 			$allcaps['install_plugins'] = false;
 			return $allcaps;
 		};
+		// Super admins skip the user_has_cap filter on multisite.
+		revoke_super_admin( $this->store_admin_id );
 		add_filter( 'user_has_cap', $deny_install_plugins );
 		$without_capability = $this->sut->get_payment_providers( 'US' );
 		remove_filter( 'user_has_cap', $deny_install_plugins );

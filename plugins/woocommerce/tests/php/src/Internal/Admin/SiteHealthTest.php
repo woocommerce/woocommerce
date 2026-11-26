@@ -460,7 +460,7 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 			wp_set_current_user( 0 );
 			$this->assertSame( 401, rest_do_request( $request )->get_status(), 'Visitors should not be able to run the check.' );
 
-			wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+			wp_set_current_user( self::create_super_admin() );
 			$response = rest_do_request( $request );
 			$this->assertSame( 200, $response->get_status(), 'Users who can view Site Health checks should get the result.' );
 			$this->assertSame( 'woocommerce_uploads_directory_protection', $response->get_data()['test'] ?? null, 'The response should be the Site Health result.' );

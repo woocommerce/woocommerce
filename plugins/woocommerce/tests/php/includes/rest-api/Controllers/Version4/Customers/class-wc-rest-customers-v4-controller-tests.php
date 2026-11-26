@@ -44,11 +44,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
 	 */
 	public static function wpSetUpBeforeClass( $factory ): void {
-		self::$administrator_id = $factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		self::$administrator_id = self::create_super_admin();
 	}
 
 	/**

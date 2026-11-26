@@ -1747,6 +1747,9 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test UPDATE endpoint with reset_download_permissions action.
 	 */
 	public function test_orders_update_with_reset_download_permissions_action(): void {
+		// Only super admins can add new download directories on multisite.
+		wp_set_current_user( self::create_super_admin() );
+
 		// Create a downloadable product.
 		$product  = WC_Helper_Product::create_downloadable_product(
 			array(

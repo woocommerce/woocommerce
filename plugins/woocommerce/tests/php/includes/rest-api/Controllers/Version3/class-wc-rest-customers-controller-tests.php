@@ -30,7 +30,7 @@ class WC_REST_Customers_Controller_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut             = new WC_REST_Customers_Controller();
-		$this->admin_id        = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->admin_id        = self::create_super_admin();
 		$this->shop_manager_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
 		$this->editor_id       = self::factory()->user->create( array( 'role' => 'editor' ) );
 		$this->customer_id     = self::factory()->user->create( array( 'role' => 'customer' ) );
