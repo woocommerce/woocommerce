@@ -358,7 +358,7 @@ class WC_Checkout {
 		}
 
 		// A username cannot change once the account exists, so a retry in the same session does not ask for it.
-		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) && ! wc_get_container()->get( NewCustomerSession::class )->has_unverified_customer() ) {
+		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) && ! wc_get_container()->get( NewCustomerSession::class )->has_unclaimed_customer() ) {
 			$this->fields['account']['account_username'] = array(
 				'type'         => 'text',
 				'label'        => __( 'Account username', 'woocommerce' ),

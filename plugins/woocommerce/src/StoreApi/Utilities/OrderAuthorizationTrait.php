@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 
 /**
@@ -33,10 +34,12 @@ trait OrderAuthorizationTrait {
 
 			// If the order belongs to a registered customer, check if the current user is the owner.
 			if ( $order_customer_id ) {
-				// If current user is the order owner, allow access, otherwise reject with an error.
 				if ( get_current_user_id() === $order_customer_id ) {
 					return true;
-				} else {
+				}
+
+				// The shopper has no password for an unclaimed new account, so its order gets the guest order checks below.
+				if ( ! wc_get_container()->get( NewCustomerSession::class )->is_unclaimed_customer_order( $order ) ) {
 					throw new RouteException( 'woocommerce_rest_invalid_user', esc_html__( 'This order belongs to a different customer.', 'woocommerce' ), 403 );
 				}
 			}

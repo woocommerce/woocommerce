@@ -10,8 +10,8 @@ use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
  *
  * The order received shortcode and the order confirmation blocks share these rules. Every visitor needs the order key.
  * A logged in owner then sees the order. Other orders that belong to a customer need a login. A guest sees a guest
- * order for a short time after checkout, and after that unlocks it by entering the billing email address. A new account
- * has no password until its owner confirms the email address, so its order is treated like a guest order until then.
+ * order for a short time after checkout, and after that unlocks it by entering the billing email address. The shopper
+ * has no password for a new account until they claim it, so its order is treated like a guest order until then.
  *
  * @since 11.5.0
  */
@@ -85,8 +85,9 @@ class OrderReceivedAccess {
 	/**
 	 * Whether a guest can unlock the order details by entering the order's billing email address.
 	 *
-	 * Guests can unlock guest orders while guest checkout is on. They can also unlock the order of a new account that has
-	 * no password yet, because stores without guest checkout create these accounts too. Other customer orders need a login.
+	 * Guests can unlock guest orders while guest checkout is on. They can also unlock the order of a new account the
+	 * shopper has not claimed yet, because stores without guest checkout create these accounts too. Other customer
+	 * orders need a login.
 	 *
 	 * @since 11.5.0
 	 *
@@ -100,7 +101,7 @@ class OrderReceivedAccess {
 		}
 
 		if ( $order->get_customer_id() ) {
-			return ! $this->needs_login( $order );
+			return $this->new_customer_session->is_unclaimed_customer_order( $order );
 		}
 
 		return 'yes' === get_option( 'woocommerce_enable_guest_checkout' );
@@ -164,13 +165,13 @@ class OrderReceivedAccess {
 	/**
 	 * Whether the order belongs to a customer account that a visitor has to log in to.
 	 *
-	 * A new account has no password until its owner confirms the email address, so its order does not need a login.
+	 * The shopper has no password for a new account until they claim it, so its order does not need a login.
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @return bool
 	 */
 	private function needs_login( \WC_Order $order ): bool {
-		return $order->get_customer_id() > 0 && ! $this->new_customer_session->is_unconfirmed_new_account_order( $order );
+		return $order->get_customer_id() > 0 && ! $this->new_customer_session->is_unclaimed_customer_order( $order );
 	}
 
 	/**

@@ -149,14 +149,17 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 			return new \WP_Error( 'email_mismatch', __( 'The email address provided does not match the email address on this order.', 'woocommerce' ) );
 		}
 
-		// The new account email has a link to set the password, which also verifies the email address.
-		$customer_id = wc_get_container()->get( NewCustomerSession::class )->create_customer(
+		// The new account email has a link to set the password. The order is paid, so the session does not keep the account.
+		$new_customer_session = wc_get_container()->get( NewCustomerSession::class );
+		$customer_id          = $new_customer_session->create_customer(
 			$user_email,
 			[
 				'first_name' => $order->get_billing_first_name(),
 				'last_name'  => $order->get_billing_last_name(),
 				'source'     => 'delayed-account-creation',
-			]
+			],
+			'',
+			false
 		);
 
 		if ( is_wp_error( $customer_id ) ) {
@@ -165,7 +168,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 
 		// Associate customer with the order.
 		$order->set_customer_id( $customer_id );
-		wc_get_container()->get( NewCustomerSession::class )->mark_order_created_customer( $order, $customer_id );
+		$new_customer_session->mark_order_created_customer( $order, $customer_id );
 		$order->save();
 
 		// Associate addresses from the order with the customer.

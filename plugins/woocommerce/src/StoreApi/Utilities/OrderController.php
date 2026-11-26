@@ -138,7 +138,7 @@ class OrderController {
 		$order->set_currency( get_woocommerce_currency() );
 		$order->set_prices_include_tax( wc_prices_include_tax() );
 		// A shopper who created an account at checkout stays logged out, so keep that account on the order.
-		if ( ! wc_get_container()->get( NewCustomerSession::class )->is_unverified_new_customer_order( $order ) ) {
+		if ( ! wc_get_container()->get( NewCustomerSession::class )->is_session_customer_order( $order ) ) {
 			$order->set_customer_id( get_current_user_id() );
 		}
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );

@@ -1667,6 +1667,7 @@ class WC_Form_Handler {
 			$username = 'no' === get_option( 'woocommerce_registration_generate_username' ) && isset( $_POST['username'] ) ? wp_unslash( $_POST['username'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$password = ''; // Kept for the woocommerce_process_registration_errors filter.
 			$email    = wp_unslash( $_POST['email'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$redirect = '';
 
 			try {
 				$validation_error  = new WP_Error();
@@ -1718,10 +1719,33 @@ class WC_Form_Handler {
 					'',
 					'New customers are no longer logged in after registration. They set a password from the new account email first. The return value is ignored.'
 				);
+
+				$default_redirect = wc_get_raw_referer() ? wc_get_raw_referer() : wc_get_page_permalink( 'myaccount' );
+
+				/**
+				 * Filters where to send a customer after registration.
+				 *
+				 * The customer is not logged in after registration, and stays on the registration page by default. Return a
+				 * different URL to send them there instead.
+				 *
+				 * @since 2.0.6
+				 *
+				 * @param string $redirect Redirect URL.
+				 */
+				$filtered_redirect = apply_filters( 'woocommerce_registration_redirect', $default_redirect );
+
+				if ( $filtered_redirect !== $default_redirect ) {
+					$redirect = $filtered_redirect;
+				}
 			} catch ( Exception $e ) {
 				if ( $e->getMessage() ) {
 					wc_add_notice( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . $e->getMessage(), 'error' );
 				}
+			}
+
+			if ( $redirect ) {
+				wp_safe_redirect( wp_validate_redirect( $redirect, wc_get_page_permalink( 'myaccount' ) ) );
+				exit;
 			}
 		}
 	}

@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\OrderReviews;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use WC_Order;
 use WP_Post;
 
@@ -831,7 +832,8 @@ class Endpoint {
 	/**
 	 * Whether the visitor has to sign in before the form is shown, because the
 	 * order belongs to a registered customer. `order_received` and the Store API
-	 * ask the same of those orders.
+	 * ask the same of those orders. The shopper has no password for an unclaimed
+	 * new account, so its order is reviewed like a guest order.
 	 *
 	 * @since 11.4.0
 	 *
@@ -840,6 +842,10 @@ class Endpoint {
 	 */
 	public static function requires_owner_login( WC_Order $order ): bool {
 		if ( ! $order->get_customer_id() || is_user_logged_in() ) {
+			return false;
+		}
+
+		if ( wc_get_container()->get( NewCustomerSession::class )->is_unclaimed_customer_order( $order ) ) {
 			return false;
 		}
 

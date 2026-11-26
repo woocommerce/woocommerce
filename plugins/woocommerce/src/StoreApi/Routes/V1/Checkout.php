@@ -1171,7 +1171,8 @@ class Checkout extends AbstractCartRoute {
 		$order = $this->get_order_or_throw();
 
 		if ( $this->should_create_customer_account( $request ) ) {
-			$customer_id = wc_get_container()->get( NewCustomerSession::class )->create_customer(
+			$new_customer_session = wc_get_container()->get( NewCustomerSession::class );
+			$customer_id          = $new_customer_session->create_customer(
 				(string) ( $request['billing_address']['email'] ?? '' ),
 				[
 					'first_name' => $request['billing_address']['first_name'],
@@ -1190,8 +1191,11 @@ class Checkout extends AbstractCartRoute {
 
 			// Associate customer with the order. The shopper stays logged out until they set a password.
 			$order->set_customer_id( $customer_id );
-			wc_get_container()->get( NewCustomerSession::class )->mark_order_created_customer( $order, $customer_id );
+			$new_customer_session->mark_order_created_customer( $order, $customer_id );
 			wc_log_order_step( '[Store API #6::process_customer] Created new customer', array( 'customer_id' => $customer_id ) );
+		} else {
+			// A retry can untick "Create an account", so drop the account an earlier attempt put on the order.
+			$order->set_customer_id( get_current_user_id() );
 		}
 
 		// Persist customer address data to account.

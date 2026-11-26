@@ -636,8 +636,8 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 					break;
 				}
 
-				// An order that created an unconfirmed account has no password to log in with, so a logged out shopper can pay for it like a guest order.
-				if ( 0 === $user_id && $order instanceof WC_Order && wc_get_container()->get( NewCustomerSession::class )->is_unconfirmed_new_account_order( $order ) ) {
+				// The shopper has no password for an unclaimed new account, so a logged out shopper can pay for its order like a guest order.
+				if ( 0 === $user_id && $order instanceof WC_Order && wc_get_container()->get( NewCustomerSession::class )->is_unclaimed_customer_order( $order ) ) {
 					$allcaps['pay_for_order'] = true;
 				}
 				break;
@@ -655,6 +655,12 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 
 				if ( $order && $user_id === $order->get_user_id() ) {
 					$allcaps['cancel_order'] = true;
+					break;
+				}
+
+				// Like paying, a logged out shopper can cancel an unclaimed new account's order the way they would a guest order.
+				if ( 0 === $user_id && $order instanceof WC_Order && wc_get_container()->get( NewCustomerSession::class )->is_unclaimed_customer_order( $order ) ) {
+					$allcaps['cancel_order'] = true;
 				}
 				break;
 			case 'download_file':
@@ -662,6 +668,13 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$download = $args[2];
 
 				if ( $download && $user_id === $download->get_user_id() ) {
+					$allcaps['download_file'] = true;
+					break;
+				}
+
+				// Like a guest order, a logged out shopper can download from an unclaimed new account's order.
+				$order = 0 === $user_id && $download instanceof WC_Customer_Download ? wc_get_order( $download->get_order_id() ) : false;
+				if ( $order instanceof WC_Order && wc_get_container()->get( NewCustomerSession::class )->is_unclaimed_customer_order( $order ) ) {
 					$allcaps['download_file'] = true;
 				}
 				break;
