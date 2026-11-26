@@ -521,12 +521,15 @@ export function sanitizeDisplayLayout(
 
 	if ( displayLayout?.type === LayoutOptions.CAROUSEL ) {
 		const carouselColumns =
-			displayLayout?.carouselColumns ?? DEFAULT_CAROUSEL_COLUMNS;
+			typeof displayLayout?.carouselColumns === 'number' &&
+			Number.isFinite( displayLayout?.carouselColumns )
+				? displayLayout?.carouselColumns
+				: DEFAULT_CAROUSEL_COLUMNS;
 		return {
 			type: displayLayout.type,
 			carouselColumns: Math.min(
 				MAX_CAROUSEL_COLUMNS,
-				Math.max( 1, Math.round( carouselColumns ) )
+				Math.max( 1, carouselColumns )
 			),
 			shrinkColumns: displayLayout?.shrinkColumns ?? true,
 		};
