@@ -21,6 +21,7 @@ import type {
 import type { ApiErrorResponse } from './api-error-response';
 export interface StoreCartItemQuantity {
 	isPendingDelete: boolean;
+	isPendingQuantity: boolean;
 	quantity: number;
 	setItemQuantity: React.Dispatch< React.SetStateAction< number > >;
 	removeItem: () => Promise< boolean >;

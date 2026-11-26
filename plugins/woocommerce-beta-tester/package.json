@@ -11,8 +11,9 @@
 	"version": "4.0.0",
 	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
 	"devDependencies": {
-		"@types/react": "18.3.x",
-		"@types/react-dom": "18.3.x",
+		"@types/prop-types": "catalog:types",
+		"@types/react": "catalog:types",
+		"@types/react-dom": "catalog:types",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
@@ -29,7 +30,6 @@
 		"uglify-js": "^3.17.4"
 	},
 	"dependencies": {
-		"@types/prop-types": "^15.7.11",
 		"@woocommerce/data": "workspace:*",
 		"@woocommerce/remote-logging": "workspace:*",
 		"@wordpress/api-fetch": "catalog:wp-min",

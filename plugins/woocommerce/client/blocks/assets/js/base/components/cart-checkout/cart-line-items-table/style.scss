@@ -123,6 +123,11 @@ table.wc-block-cart-items {
 			@include font-small-locked;
 			text-align: right;
 			line-height: 1.4;
+
+			.wc-block-cart-item__total-skeleton {
+				display: inline-block;
+				vertical-align: middle;
+			}
 		}
 
 		@include motion-dim(".is-disabled") {

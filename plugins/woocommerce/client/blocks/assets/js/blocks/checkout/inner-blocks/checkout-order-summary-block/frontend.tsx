@@ -4,7 +4,10 @@
 import { exitingProps } from '@woocommerce/base-hooks';
 import { TotalsFooterItem } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import {
+	useSettledOrderSummaryValue,
+	useStoreCart,
+} from '@woocommerce/base-context/hooks';
 import { animateCollapse, whenAnimationsEnd } from '@woocommerce/base-utils';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
@@ -63,7 +66,10 @@ const FrontendBlock = ( {
 	} );
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
-	const totalPrice = parseInt( cartTotals.total_price, 10 );
+	// The total changes when the totals skeletons end, not before.
+	const totalPrice = useSettledOrderSummaryValue(
+		parseInt( cartTotals.total_price, 10 )
+	);
 	const isToggleShown = hasContainerWidth && ! isLarge;
 
 	// After a tap, the content collapses inline before it moves to the checkout actions. Closing because the shopper

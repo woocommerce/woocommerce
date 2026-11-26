@@ -3,6 +3,7 @@
  */
 import {
 	useContainerWidthContext,
+	useSettledOrderSummaryValue,
 	useStoreCart,
 } from '@woocommerce/base-context';
 import type { CartItem } from '@woocommerce/types';
@@ -31,14 +32,14 @@ const OrderSummary = ( {
 	const showSkeleton = cartIsLoading || hasPendingItemsOperations;
 	const contentRef = useRef< HTMLDivElement | null >( null );
 	const onItemsShow = useListEntrance( contentRef );
+	// The item prices change when the totals skeletons end, not before.
+	const items = useSettledOrderSummaryValue( cartItems );
 
 	return (
 		<DelayedContentWithSkeleton
 			isLoading={ showSkeleton }
 			skeleton={
-				<CartLineItemsCheckoutSkeleton
-					rows={ cartItems?.length || 2 }
-				/>
+				<CartLineItemsCheckoutSkeleton rows={ items?.length || 2 } />
 			}
 			onShow={ onItemsShow }
 		>
@@ -51,7 +52,7 @@ const OrderSummary = ( {
 					className="wc-block-components-order-summary__content"
 					ref={ contentRef }
 				>
-					{ cartItems.map( ( cartItem ) => {
+					{ items.map( ( cartItem ) => {
 						return (
 							<OrderSummaryItem
 								disableProductDescriptions={
