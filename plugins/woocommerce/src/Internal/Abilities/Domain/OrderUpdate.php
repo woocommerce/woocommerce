@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * The WooCommerce order update ability. It runs the steps of ActionableAbility.
  * Every change stays in memory until save(), so a refusal from a later change
- * or from a validator saves nothing.
+ * saves nothing.
  */
 class OrderUpdate extends ActionableAbility {
 
@@ -83,6 +83,15 @@ class OrderUpdate extends ActionableAbility {
 	}
 
 	/**
+	 * The ability writes no extension fields and runs no validators for now, with the feature on or off.
+	 *
+	 * @return bool
+	 */
+	protected function is_extensible(): bool {
+		return false;
+	}
+
+	/**
 	 * Load the order to change.
 	 *
 	 * @param array $input Ability input.
@@ -113,7 +122,6 @@ class OrderUpdate extends ActionableAbility {
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
 	 * @return null|\WP_Error
-	 * @throws \WC_Data_Exception When the order class has not adopted a stage method.
 	 */
 	public function change( $subject, array $input ) {
 		$this->removed_product_lines = array();
@@ -157,9 +165,8 @@ class OrderUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Save the order, recalculate it with the feature off, and change the product
-	 * stock of the changed lines in the same way as the order screen. Validators have already run, so a refused
-	 * change never reaches the stock. A removed line restores its stock before
+	 * Save the order, recalculate it, and change the product
+	 * stock of the changed lines in the same way as the order screen. A removed line restores its stock before
 	 * the save, because the save deletes the line that holds the reduced amount. After a successful save, one
 	 * order note lists the stock changes, in the same format as the order screen.
 	 *
@@ -232,15 +239,14 @@ class OrderUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Remove, change and add lines in memory, then recalculate the totals
-	 * without saving. Coupons apply again after a product is added, because
+	 * Remove and change lines in memory, and check the new lines. save() adds the new lines and
+	 * recalculates the totals. Coupons apply again after a product is added, because
 	 * they were applied before the new line existed. Every refused line comes
 	 * back in one error, and then nothing is recalculated.
 	 *
 	 * @param \WC_Order $order Order.
 	 * @param array     $input Ability input.
 	 * @return null|\WP_Error
-	 * @throws \WC_Data_Exception When the order class has not adopted a stage method.
 	 */
 	private function change_lines( \WC_Order $order, array $input ): ?\WP_Error {
 		$refused = new \WP_Error();
@@ -291,7 +297,7 @@ class OrderUpdate extends ActionableAbility {
 			return $refused;
 		}
 
-		$this->stage_line_totals( $order, $product_added );
+		$this->recalculate_line_totals_after_save( $order, $product_added );
 
 		return null;
 	}

@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
-use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
@@ -39,8 +38,7 @@ class OrderCreate extends ActionableAbility {
 	public const CREATED_VIA = 'ability';
 
 	/**
-	 * Status that the input sent, or the default status. With the feature off, save() applies it once the order
-	 * has an ID.
+	 * Status that the input sent, or the default status. save() applies it once the order has an ID.
 	 *
 	 * @var string
 	 */
@@ -100,6 +98,15 @@ class OrderCreate extends ActionableAbility {
 	}
 
 	/**
+	 * The ability writes no extension fields and runs no validators for now, with the feature on or off.
+	 *
+	 * @return bool
+	 */
+	protected function is_extensible(): bool {
+		return false;
+	}
+
+	/**
 	 * Build an order in memory with the store defaults that wc_create_order() sets.
 	 *
 	 * @param array $input Ability input.
@@ -115,12 +122,11 @@ class OrderCreate extends ActionableAbility {
 	}
 
 	/**
-	 * Set the customer, addresses and lines in memory, then the status. Every refusal comes back in one error.
+	 * Set the customer, addresses and lines in memory. save() sets the status. Every refusal comes back in one error.
 	 *
 	 * @param \WC_Order $subject New order.
 	 * @param array     $input   Ability input.
 	 * @return null|\WP_Error
-	 * @throws \WC_Data_Exception When the order class has not adopted a stage method.
 	 */
 	public function change( $subject, array $input ) {
 		$this->reset_line_changes();
@@ -174,29 +180,20 @@ class OrderCreate extends ActionableAbility {
 		}
 
 		if ( ! empty( $input['line_items'] ) || ! empty( $input['shipping_lines'] ) ) {
-			$this->stage_line_totals( $subject, ! empty( $input['line_items'] ) );
-		}
-
-		// Not a manual change, as in REST and wc_create_order(): a new order has no ID for woocommerce_order_edit_status.
-		if ( ExtensibleAbilities::is_enabled() && $subject->get_status() !== $this->status ) {
-			$subject->stage_status( $this->status );
+			$this->recalculate_line_totals_after_save( $subject, ! empty( $input['line_items'] ) );
 		}
 
 		return null;
 	}
 
 	/**
-	 * Save the order. With the feature off, the order saves as pending with its lines, is recalculated with the
-	 * methods that save, and then moves to its status with WC_Order::update_status(), which needs an order ID.
+	 * Save the order. The order saves as pending with its lines, is recalculated with the methods that save,
+	 * and then moves to its status with WC_Order::update_status(), which needs an order ID.
 	 *
 	 * @param \WC_Order $subject New order.
 	 * @return null|\WP_Error
 	 */
 	public function save( $subject ) {
-		if ( ExtensibleAbilities::is_enabled() ) {
-			return parent::save( $subject );
-		}
-
 		$added = $this->add_queued_products( $subject );
 		$saved = parent::save( $subject );
 		if ( is_wp_error( $saved ) ) {

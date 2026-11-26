@@ -7,15 +7,15 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
-use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Orders\ItemQuantityLimits;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Address and line rules of the abilities that write an order, as the order screen applies them. Every
- * change stays in memory until the ability saves. A class that uses this trait also uses OrderAbilityTrait.
+ * Address and line rules of the abilities that write an order, as the order screen applies them. The address
+ * and line changes stay in memory until the ability saves. The new product lines and the totals wait for the
+ * save, which uses the order methods that save. A class that uses this trait also uses OrderAbilityTrait.
  */
 trait OrderEditTrait {
 
@@ -30,15 +30,13 @@ trait OrderEditTrait {
 
 	/**
 	 * Whether recalculate_saved_order() recalculates with the methods that save, and which ones.
-	 * Only with the feature off, when no validator needs to see the new totals.
 	 *
 	 * @var string|null `coupons`, `totals` or null.
 	 */
 	private ?string $recalculate_after_save = null;
 
 	/**
-	 * Product lines for add_queued_products(), with the feature off. WC_Order::add_product() runs the rules of
-	 * an order class that has not adopted stage_product_item(), as order-update-status does with update_status().
+	 * Product lines for add_queued_products(), which adds them with WC_Order::add_product().
 	 *
 	 * @var array<int, array{0: \WC_Product, 1: int}>
 	 */
@@ -54,37 +52,18 @@ trait OrderEditTrait {
 	}
 
 	/**
-	 * Recalculate the totals in memory after the lines changed. Coupons apply again after a product is
-	 * added, because they were applied before the new line existed. With the feature off, the totals wait
-	 * for recalculate_saved_order(), which uses the methods that save.
+	 * Leave the totals for recalculate_saved_order() after the lines changed. Coupons apply again after a
+	 * product is added, because they were applied before the new line existed.
 	 *
 	 * @param \WC_Order $order         Order.
 	 * @param bool      $product_added Whether a product line was added.
-	 * @throws \WC_Data_Exception When the order class has not adopted a stage method.
 	 */
-	private function stage_line_totals( \WC_Order $order, bool $product_added ): void {
-		$recalculate_coupons = $product_added && ! empty( $order->get_items( 'coupon' ) );
-
-		if ( ! ExtensibleAbilities::is_enabled() ) {
-			$this->recalculate_after_save = $recalculate_coupons ? 'coupons' : 'totals';
-			return;
-		}
-
-		if ( $recalculate_coupons ) {
-			if ( $order->get_prices_include_tax() ) {
-				$order->stage_taxes();
-			}
-
-			$order->stage_recalculated_coupons();
-
-			return;
-		}
-
-		$order->stage_totals();
+	private function recalculate_line_totals_after_save( \WC_Order $order, bool $product_added ): void {
+		$this->recalculate_after_save = $product_added && ! empty( $order->get_items( 'coupon' ) ) ? 'coupons' : 'totals';
 	}
 
 	/**
-	 * Add the product lines that add_product_line() left for the save with the feature off.
+	 * Add the product lines that add_product_line() left for the save.
 	 * WC_Order::add_product() saves each line right away.
 	 *
 	 * @param \WC_Order $order Order.
@@ -103,7 +82,7 @@ trait OrderEditTrait {
 	}
 
 	/**
-	 * Recalculate the saved order with the methods that save, when stage_line_totals() left it for later.
+	 * Recalculate the saved order with the methods that save, when recalculate_line_totals_after_save() left it for later.
 	 * Each step is checked on its own, because the next save clears the error of a failed one.
 	 *
 	 * @param \WC_Order $order Saved order.
@@ -195,13 +174,11 @@ trait OrderEditTrait {
 	}
 
 	/**
-	 * Add a product line in memory. With the feature off, the line waits for add_queued_products(), so an order
-	 * class that has not adopted stage_product_item() keeps working.
+	 * Check a new product line. The line waits for add_queued_products(), which adds it on save.
 	 *
 	 * @param \WC_Order $order Order.
 	 * @param array     $line  Product line input.
 	 * @return null|\WP_Error
-	 * @throws \WC_Data_Exception With the feature on, when the order class has not adopted stage_product_item().
 	 */
 	private function add_product_line( \WC_Order $order, array $line ): ?\WP_Error {
 		$product  = wc_get_product( $line['product_id'] );
@@ -231,12 +208,7 @@ trait OrderEditTrait {
 			return self::quantity_error( $exception );
 		}
 
-		if ( ! ExtensibleAbilities::is_enabled() ) {
-			$this->products_to_add[] = array( $product, $quantity );
-			return null;
-		}
-
-		$this->changed_product_lines[] = $order->stage_product_item( $product, $quantity, array( 'order' => $order ) );
+		$this->products_to_add[] = array( $product, $quantity );
 
 		return null;
 	}

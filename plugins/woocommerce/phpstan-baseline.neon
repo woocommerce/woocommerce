@@ -12643,7 +12643,7 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this                     Order object\.\)\: Unexpected token "\$this", expected variable at offset 189 on line 5$#'
+			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this                     Order object\.\)\: Unexpected token "\$this", expected variable at offset 193 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
@@ -12655,7 +12655,7 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 187 on line 6$#'
+			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 197 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
@@ -12708,11 +12708,6 @@ parameters:
 			count: 1
 			path: includes/class-wc-order.php
 
-		-
-			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
-			identifier: argument.type
-			count: 4
-			path: includes/class-wc-order.php
 
 		-
 			message: '#^Parameter \#2 \$transition of method WC_Order\:\:add_status_transition_note\(\) expects bool, array given\.$#'
@@ -25388,11 +25383,6 @@ parameters:
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-orders-v2-controller.php
 
-		-
-			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-orders-v2-controller.php
 
 		-
 			message: '#^Property WC_REST_Orders_V2_Controller\:\:\$request \(array\) does not accept WP_REST_Request\.$#'
@@ -33623,11 +33613,6 @@ parameters:
 			count: 1
 			path: includes/wc-order-functions.php
 
-		-
-			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-order-functions.php
 
 		-
 			message: '#^Parameter \#2 \$value of method WC_Data\:\:update_meta_data\(\) expects array\|string, \(float\|int\) given\.$#'
@@ -34229,11 +34214,6 @@ parameters:
 			count: 1
 			path: includes/wc-stock-functions.php
 
-		-
-			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-stock-functions.php
 
 		-
 			message: '#^Parameter \#2 \$stock_quantity of function wc_update_product_stock expects int\|null, float\|int given\.$#'
@@ -51547,11 +51527,6 @@ parameters:
 			count: 1
 			path: src/Checkout/Helpers/ReserveStock.php
 
-		-
-			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
 
 		-
 			message: '#^Parameter \#2 \$stock_quantity of method Automattic\\WooCommerce\\Checkout\\Helpers\\ReserveStock\:\:reserve_stock_for_product\(\) expects int, float\|int given\.$#'
@@ -60964,11 +60939,6 @@ parameters:
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Orders/ActionController.php
 
-		-
-			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/ActionController.php
 
 		-
 			message: '#^Cannot access property \$max_num_pages on array\|object\.$#'
@@ -61486,11 +61456,6 @@ parameters:
 			count: 4
 			path: src/Internal/RestApi/Routes/V4/Orders/UpdateUtils.php
 
-		-
-			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/UpdateUtils.php
 
 		-
 			message: '#^Parameter \$item of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\UpdateUtils\:\:maybe_set_item_meta_data\(\) has invalid type Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\WC_Order_Item\.$#'
