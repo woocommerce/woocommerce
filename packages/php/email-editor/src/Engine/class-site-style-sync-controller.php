@@ -152,9 +152,13 @@ class Site_Style_Sync_Controller {
 		$blog_id = get_current_blog_id();
 		if ( null === $this->site_theme || $blog_id !== $this->site_theme_blog_id ) {
 			$site_changed = null !== $this->site_theme_blog_id && $blog_id !== $this->site_theme_blog_id;
-			// Core keeps theme.json data for the whole request, even across switch_to_blog(), so it may belong to another site.
-			if ( is_multisite() && ( $site_changed || ms_is_switched() ) ) {
-				WP_Theme_JSON_Resolver::clean_cached_data();
+			if ( is_multisite() ) {
+				if ( $site_changed || ms_is_switched() ) {
+					Theme_Json_Cache::clean();
+				}
+				if ( ms_is_switched() ) {
+					Theme_Json_Cache::clean_on_next_blog_switch();
+				}
 			}
 			$this->site_theme_blog_id = $blog_id;
 

@@ -375,6 +375,16 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Fill core's cache of the current site's global styles, as rendering a page or an email does.
+	 *
+	 * After core clears its cache, its first read doesn't record the registered blocks, so the next read rebuilds once. After two reads the cache stays.
+	 */
+	protected function fillCoreUserDataCache(): void {
+		WP_Theme_JSON_Resolver::get_user_data();
+		WP_Theme_JSON_Resolver::get_user_data();
+	}
+
+	/**
 	 * Save the email styles (the email editor's Styles panel) on the current site.
 	 *
 	 * @param array $styles Theme.json styles.

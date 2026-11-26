@@ -1464,7 +1464,10 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		$this->controller->get_theme();
 		switch_to_blog( $other_site_id );
 		$other_site_theme = $this->controller->get_theme();
-		$this->fill_core_user_data_cache();
+		restore_current_blog();
+		// Another switch that doesn't use the email editor leaves the other site's data in core's cache, so get_theme() has to notice the site change itself.
+		switch_to_blog( $other_site_id );
+		$this->fillCoreUserDataCache();
 		restore_current_blog();
 		$main_site_theme = $this->controller->get_theme();
 
@@ -1472,6 +1475,25 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		$this->assertSame( '#3c2b1a', $other_site_theme->get_data()['styles']['color']['text'] ?? null, 'The other site should get its own site styles.' );
 		$this->assertInstanceOf( WP_Theme_JSON::class, $main_site_theme );
 		$this->assertSame( '#1a2b3c', $main_site_theme->get_data()['styles']['color']['text'] ?? null, 'The main site should get its own site styles back after restore_current_blog().' );
+	}
+
+	/**
+	 * Test loading another site's theme leaves none of its data in core's cache after restore_current_blog().
+	 *
+	 * @group ms-required
+	 */
+	public function test_get_theme_while_switched_leaves_no_other_site_data_in_core_after_restore(): void {
+		$this->skipWithoutMultisite();
+		$this->saveSiteStyles( array( 'color' => array( 'text' => '#1a2b3c' ) ) );
+		$other_site_id = $this->createSite();
+		switch_to_blog( $other_site_id );
+		$this->saveSiteStyles( array( 'color' => array( 'text' => '#3c2b1a' ) ) );
+		$this->controller->get_theme();
+		$this->fillCoreUserDataCache();
+		restore_current_blog();
+
+		$user_styles = WP_Theme_JSON_Resolver::get_user_data()->get_raw_data()['styles'] ?? array();
+		$this->assertSame( '#1a2b3c', $user_styles['color']['text'] ?? null, 'The site that switched should get its own site styles back.' );
 	}
 
 	/**
@@ -1486,7 +1508,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		switch_to_blog( $other_site_id );
 		$this->saveSiteStyles( array( 'color' => array( 'text' => '#3c2b1a' ) ) );
 		restore_current_blog();
-		$this->fill_core_user_data_cache();
+		$this->fillCoreUserDataCache();
 
 		switch_to_blog( $other_site_id );
 		$other_site_theme = $this->controller->get_theme();
@@ -1508,16 +1530,6 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 				return new WP_Theme_JSON( $theme_data, 'theme' );
 			}
 		);
-	}
-
-	/**
-	 * Fill core's cache of the current site's global styles, as rendering a page or an email does.
-	 *
-	 * After core clears its cache, its first read doesn't record the registered blocks, so the next read rebuilds once. After two reads the cache stays.
-	 */
-	private function fill_core_user_data_cache(): void {
-		WP_Theme_JSON_Resolver::get_user_data();
-		WP_Theme_JSON_Resolver::get_user_data();
 	}
 
 	/**

@@ -65,15 +65,31 @@ class Renderer_Multisite_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test rendering for another site leaves none of that site's theme data in core's cache.
+	 * Test the site that switched gets its own theme data back, even when the other site's data was read after the render.
 	 */
-	public function testItLeavesNoOtherSiteThemeDataInCoreCache(): void {
+	public function testItLeavesNoOtherSiteThemeDataInCoreCacheAfterRestore(): void {
 		switch_to_blog( $this->other_site_id );
 		$this->renderEmail();
+		$this->fillCoreUserDataCache();
 		restore_current_blog();
 
 		$user_styles = WP_Theme_JSON_Resolver::get_user_data()->get_raw_data()['styles'] ?? array();
 		$this->assertSame( '#1a2b3c', $user_styles['color']['text'] ?? null, 'The site that switched should get its own site styles back.' );
+	}
+
+	/**
+	 * Test several renders for the same switched site keep core's cache between them.
+	 */
+	public function testItKeepsCoreCacheBetweenRendersForSameSite(): void {
+		switch_to_blog( $this->other_site_id );
+		$this->renderEmail();
+		$this->fillCoreUserDataCache();
+		$user_data_before = WP_Theme_JSON_Resolver::get_user_data();
+		$this->renderEmail();
+		$user_data_after = WP_Theme_JSON_Resolver::get_user_data();
+		restore_current_blog();
+
+		$this->assertSame( $user_data_before, $user_data_after, 'Core should not rebuild its cache for a second render of the same site.' );
 	}
 
 	/**
