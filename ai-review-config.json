@@ -12,7 +12,7 @@
 		"security": {
 			"file": ".ai/review/personas/security.md",
 			"engine": "codex",
-			"model": "gpt-6.2-sol",
+			"model": "gpt-6.2-astra",
 			"triggers": [
 				"**/*.php",
 				"**/*.js",
