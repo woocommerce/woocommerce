@@ -3,7 +3,8 @@
  */
 import clsx from 'clsx';
 import { Children } from '@wordpress/element';
-import type { ReactNode } from 'react';
+import { exitingProps } from '@woocommerce/base-hooks';
+import type { ReactNode, Ref } from 'react';
 
 /**
  * Internal dependencies
@@ -15,18 +16,26 @@ export interface TotalsWrapperProps {
 	/* If this TotalsWrapper is being used to wrap a Slot */
 	slotWrapper?: boolean;
 	className?: string;
+	/* A ref to the wrapper element, such as for motion. */
+	elementRef?: Ref< HTMLDivElement >;
+	/* Set while the row animates out. The row is inert and hidden from assistive technology. */
+	isExiting?: boolean;
 }
 
 const TotalsWrapper = ( {
 	children,
 	slotWrapper = false,
 	className,
+	elementRef,
+	isExiting = false,
 }: TotalsWrapperProps ): JSX.Element | null => {
 	return Children.count( children ) ? (
 		<div
+			ref={ elementRef }
 			className={ clsx( className, 'wc-block-components-totals-wrapper', {
 				'slot-wrapper': slotWrapper,
 			} ) }
+			{ ...exitingProps( isExiting ) }
 		>
 			{ children }
 		</div>

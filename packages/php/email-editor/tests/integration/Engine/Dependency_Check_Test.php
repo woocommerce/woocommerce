@@ -38,8 +38,8 @@ class Dependency_Check_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test the editor's dependencies are met from the minimum WordPress version on.
 	 *
-	 * @testWith ["6.6.2", false]
-	 *           ["6.7", true]
+	 * @testWith ["6.9.4", false]
+	 *           ["7.0", true]
 	 *           ["7.1", true]
 	 *
 	 * @param string $wp_version WordPress version.

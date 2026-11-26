@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Gallery block: screen readers now read only the large image on screen, not every image in the gallery.

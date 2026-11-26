@@ -42,7 +42,6 @@ use Automattic\WooCommerce\Internal\Email\EmailLogger;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\MenuIcons;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
-use Automattic\WooCommerce\Internal\Admin\Screens\AdminScreens;
 use Automattic\WooCommerce\Internal\Admin\Screens\Settings\ChequeSettings;
 use Automattic\WooCommerce\Internal\Admin\Screens\Settings\SettingsScreen;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -424,7 +423,6 @@ final class WooCommerce {
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
-		$container->get( AdminScreens::class );
 		$container->get( ChequeSettings::class );
 		$container->get( SettingsScreen::class );
 		$container->get( AbilitiesTracking::class );
@@ -485,6 +483,8 @@ final class WooCommerce {
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Webhooks\WebhookTopicNotices::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Webhooks\WebhookScheduledActionArgs::class )->register();
 
 		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
 		\WC_Admin_Reports::register_orders_hook_handlers();

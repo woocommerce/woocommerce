@@ -7,7 +7,6 @@
 	"license": "GPL-2.0-or-later",
 	"repository": "woocommerce/woocommerce",
 	"private": true,
-	"types": "dist/index.d.ts",
 	"scripts": {
 		"analyzer": "node -r ts-node/register ./src/commands/analyzer/index.ts",
 		"lint": "eslint .",
@@ -16,11 +15,10 @@
 	},
 	"dependencies": {
 		"@actions/core": "^2.0.3",
-		"@commander-js/extra-typings": "^10.0.3",
-		"@oclif/core": "^2.15.0",
+		"@commander-js/extra-typings": "catalog:tooling",
 		"@tsconfig/node16": "^1.0.4",
 		"@woocommerce/monorepo-utils": "workspace:*",
-		"commander": "^9.5.0",
+		"commander": "catalog:tooling",
 		"dotenv": "^10.0.0",
 		"simple-git": "catalog:tooling"
 	},

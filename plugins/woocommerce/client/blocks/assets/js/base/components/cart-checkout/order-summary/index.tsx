@@ -3,10 +3,13 @@
  */
 import {
 	useContainerWidthContext,
+	useSettledOrderSummaryValue,
 	useStoreCart,
 } from '@woocommerce/base-context';
 import type { CartItem } from '@woocommerce/types';
 import clsx from 'clsx';
+import { useRef } from '@wordpress/element';
+import { useListEntrance } from '@woocommerce/base-hooks';
 import { CartLineItemsCheckoutSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
 import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 /**
@@ -27,23 +30,29 @@ const OrderSummary = ( {
 	const { isLarge } = useContainerWidthContext();
 	const { cartIsLoading, hasPendingItemsOperations } = useStoreCart();
 	const showSkeleton = cartIsLoading || hasPendingItemsOperations;
+	const contentRef = useRef< HTMLDivElement | null >( null );
+	const onItemsShow = useListEntrance( contentRef );
+	// The item prices change when the totals skeletons end, not before.
+	const items = useSettledOrderSummaryValue( cartItems );
 
 	return (
 		<DelayedContentWithSkeleton
 			isLoading={ showSkeleton }
 			skeleton={
-				<CartLineItemsCheckoutSkeleton
-					rows={ cartItems?.length || 2 }
-				/>
+				<CartLineItemsCheckoutSkeleton rows={ items?.length || 2 } />
 			}
+			onShow={ onItemsShow }
 		>
 			<div
 				className={ clsx( 'wc-block-components-order-summary', {
 					'is-large': isLarge,
 				} ) }
 			>
-				<div className="wc-block-components-order-summary__content">
-					{ cartItems.map( ( cartItem ) => {
+				<div
+					className="wc-block-components-order-summary__content"
+					ref={ contentRef }
+				>
+					{ items.map( ( cartItem ) => {
 						return (
 							<OrderSummaryItem
 								disableProductDescriptions={

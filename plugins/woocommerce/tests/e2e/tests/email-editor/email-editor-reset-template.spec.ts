@@ -12,7 +12,7 @@ import {
 	disableEmailEditor,
 	resetWCTransactionalEmail,
 } from './helpers/enable-email-editor-feature';
-import { accessTheEmailEditor } from '../../utils/email';
+import { accessTheEmailEditor, waitForEditorSaved } from '../../utils/email';
 import { locks } from '../../fixtures/fixtures';
 
 /**
@@ -101,9 +101,7 @@ test.describe(
 				.getByRole( 'button', { name: 'Save', exact: true } )
 				.click();
 
-			// Wait for the save to complete
-			// eslint-disable-next-line playwright/no-wait-for-timeout -- wait for content to be saved
-			await page.waitForTimeout( 1000 );
+			await waitForEditorSaved( page );
 
 			// Verify the customization is present
 			await expect( editorFrame.getByText( uniqueText ) ).toBeVisible();
@@ -145,17 +143,24 @@ test.describe(
 				.getByRole( 'button', { name: 'Reset', exact: true } )
 				.click();
 
-			// Wait for the reset operation to complete
-			// eslint-disable-next-line playwright/no-wait-for-timeout -- wait for reset to complete
-			await page.waitForTimeout( 2000 );
+			// The editor marks the template as reset before the server deletes
+			// the custom copy, so wait for the server to serve the default one.
+			await expect
+				.poll( () =>
+					page.evaluate( async () => {
+						const id = window.wp.data
+							.select( 'core/editor' )
+							.getCurrentPostId();
+						const savedTemplate = await window.wp.apiFetch( {
+							path: `/wp/v2/templates/${ id }?context=edit`,
+						} );
+						return savedTemplate.source;
+					} )
+				)
+				.not.toBe( 'custom' );
 
 			// Verify the custom content is gone (template is reset)
-			const editorFrameAfterReset = page
-				.frameLocator( 'iframe[name="editor-canvas"]' )
-				.first();
-			await expect(
-				editorFrameAfterReset.getByText( uniqueText )
-			).toBeHidden();
+			await expect( editorFrame.getByText( uniqueText ) ).toBeHidden();
 
 			// Verify Save button is disabled (no changes to save)
 			await expect(
