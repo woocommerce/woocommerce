@@ -81,7 +81,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const productUrl = `/?p=${ id }`;
 		const skuBlock = page.locator( '.wp-block-woocommerce-product-sku' );
 		const sku = skuBlock.locator( '.sku' );
-		const unavailableSku = skuBlock.getByText( 'N/A', { exact: true } );
 		const hideSku = page.getByRole( 'checkbox', {
 			name: 'Hide SKU when unavailable',
 		} );
@@ -90,7 +89,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await page.goto( productUrl );
 			const finish = page.getByLabel( 'Finish', { exact: true } );
 
-			await expect( unavailableSku ).toHaveCount( 0 );
+			await expect( sku ).toHaveText( '' );
 			await expect( skuBlock ).toBeHidden();
 			await finish.selectOption( { label: 'Matte' } );
 			await expect( skuBlock ).toBeVisible();
@@ -117,12 +116,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await page.goto( productUrl );
 			const finish = page.getByLabel( 'Finish', { exact: true } );
-			await expect( unavailableSku ).toBeVisible();
+			await expect( sku ).toHaveText( 'N/A' );
 			await finish.selectOption( { label: 'Matte' } );
 			await expect( sku ).toHaveText( variationSku );
-			await expect( unavailableSku ).toBeHidden();
 			await finish.selectOption( { label: 'Glossy' } );
-			await expect( unavailableSku ).toBeVisible();
+			await expect( sku ).toHaveText( 'N/A' );
 		} );
 
 		await pageObject.updateSingleProductTemplate();
@@ -165,12 +163,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			} );
 
 			await page.goto( productUrl );
-			await expect( unavailableSku ).toBeVisible();
+			await expect( sku ).toHaveText( 'N/A' );
 			await matte.click();
 			await expect( sku ).toHaveText( variationSku );
-			await expect( unavailableSku ).toBeHidden();
 			await glossy.click();
-			await expect( unavailableSku ).toBeVisible();
+			await expect( sku ).toHaveText( 'N/A' );
 		} );
 	} );
 
@@ -372,9 +369,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await page.goto( '/product/hoodie/' );
-		await expect(
-			page.locator( '.wc-block-components-product-sku__fallback' )
-		).toHaveCount( 0 );
 
 		await test.step( 'increase and reduce quantity buttons work even when no variation is selected', async () => {
 			const increaseQuantityButton = page.getByLabel(
