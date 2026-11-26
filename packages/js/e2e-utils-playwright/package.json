@@ -72,8 +72,8 @@
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.63.0",
-		"@types/jest": "catalog:tooling",
-		"@types/node": "^24.1.0",
+		"@types/jest": "catalog:types",
+		"@types/node": "catalog:types",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",

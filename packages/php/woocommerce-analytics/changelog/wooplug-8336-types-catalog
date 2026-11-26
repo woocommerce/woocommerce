@@ -1,0 +1,3 @@
+Significance: patch
+Type: changed
+Comment: Use the shared catalog for Jest typings. Production code is unaffected.

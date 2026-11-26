@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,6 +21,11 @@ defined( 'ABSPATH' ) || exit;
  * Order item product class.
  */
 class WC_Order_Item_Product extends WC_Order_Item {
+
+	/**
+	 * Meta key for the backordered quantity on an order item.
+	 */
+	const BACKORDER_META_KEY = 'Backordered';
 
 	/**
 	 * Legacy values.
@@ -282,7 +288,12 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function set_backorder_meta() {
 		$product = $this->get_product();
 		if ( $product && $product->backorders_require_notification() && $product->is_on_backorder( $this->get_quantity() ) ) {
-			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $this ), $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
+			$legacy_backorder_meta_key = OrderUtil::get_legacy_backorder_meta_key( $this );
+			if ( self::BACKORDER_META_KEY !== $legacy_backorder_meta_key ) {
+				$this->delete_meta_data( $legacy_backorder_meta_key );
+			}
+
+			$this->add_meta_data( self::BACKORDER_META_KEY, (string) ( $this->get_quantity() - max( 0, $product->get_stock_quantity() ) ), true );
 		}
 	}
 
@@ -534,25 +545,40 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function get_formatted_meta_data( $hideprefix = '_', $include_all = false ) {
 		$formatted_meta = parent::get_formatted_meta_data( $hideprefix, $include_all );
 
+		if ( ! is_array( $formatted_meta ) ) {
+			return $formatted_meta;
+		}
+
 		$order = $this->get_order();
 
 		if ( $order && $order->has_status( OrderStatus::COMPLETED ) ) {
-			/**
-			 * Filter the backorder meta key.
-			 * Make sure to use the same filter as used in set_backorder_meta().
-			 *
-			 * @param string $backorder_meta_key The backorder meta key.
-			 * @param WC_Order_Item_Product $item The order item product.
-			 * @since 9.9.0
-			 * @return string
-			 */
-			$backorder_meta_key = apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $this );
+			// Older orders may have stored this note under the site's translated word for "Backordered" at the time.
+			$legacy_backorder_meta_key = OrderUtil::get_legacy_backorder_meta_key( $this );
 
 			foreach ( $formatted_meta as $meta_id => $meta ) {
-				if ( isset( $meta->key ) && $meta->key === $backorder_meta_key ) {
+				if ( isset( $meta->key ) && ( self::BACKORDER_META_KEY === $meta->key || $legacy_backorder_meta_key === $meta->key ) ) {
 					unset( $formatted_meta[ $meta_id ] );
 				}
 			}
+
+			return $formatted_meta;
+		}
+
+		foreach ( $formatted_meta as $meta ) {
+			/**
+			 * Formatted meta entry.
+			 *
+			 * @var \stdClass $meta
+			 */
+			if ( ! isset( $meta->key ) || self::BACKORDER_META_KEY !== $meta->key ) {
+				continue;
+			}
+
+			// Leave the label alone if woocommerce_order_item_display_meta_key already customized it. That filter gets the final say on the displayed label.
+			if ( self::BACKORDER_META_KEY === $meta->display_key ) {
+				$meta->display_key = OrderUtil::get_legacy_backorder_meta_key( $this );
+			}
+			break;
 		}
 
 		return $formatted_meta;
