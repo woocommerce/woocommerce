@@ -1676,4 +1676,25 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$order->save();
 		$this->assertSame( array( true ), $processed->getValue( $sut ) );
 	}
+
+	/**
+	 * @testdox A webhook on a hook about an item of a staged refund processes the hook only after the refund is saved.
+	 */
+	public function test_a_webhook_on_a_staged_refund_item_hook_waits_for_the_save(): void {
+		$sut = $this->create_active_webhook( 'action.woocommerce_order_item_after_calculate_taxes' );
+		$sut->save();
+		$sut->enqueue();
+		$item   = new WC_Order_Item_Product();
+		$refund = new WC_Order_Refund();
+		$refund->add_item( $item );
+		$processed = new ReflectionProperty( WC_Webhook::class, 'processed' );
+		$processed->setAccessible( true );
+
+		$refund->mark_staged();
+		$refund->stage_taxes();
+		$this->assertSame( array(), $processed->getValue( $sut ), 'The webhook waits for the save' );
+
+		$refund->save();
+		$this->assertSame( array( $item ), $processed->getValue( $sut ) );
+	}
 }

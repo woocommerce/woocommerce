@@ -146,7 +146,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Check extra hook arguments before processing the webhook. When the last argument is true and the hook is about
 	 * an order marked as staged, the webhook processes the hook after the order is saved, and never when the change is
-	 * refused.
+	 * refused. A hook whose arguments hold no order object, such as woocommerce_order_item_needs_processing, is
+	 * processed when it fires.
 	 *
 	 * @since 11.4.0
 	 * @internal
@@ -170,7 +171,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
-	 * The order that hook arguments are about: an order, the order of an order item, or the order of a WC_Discounts.
+	 * The order that hook arguments are about: an order or refund, the order or refund that holds an order item, or the
+	 * object of a WC_Discounts.
 	 *
 	 * @param array $args Hook arguments.
 	 * @return WC_Abstract_Order|null
@@ -178,7 +180,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	private static function get_hook_order( array $args ): ?WC_Abstract_Order {
 		foreach ( $args as $value ) {
 			$value = $value instanceof WC_Discounts ? $value->get_object() : $value;
-			$value = $value instanceof WC_Order_Item ? $value->get_order() : $value;
+			$value = $value instanceof WC_Order_Item ? $value->get_holder() : $value;
 			if ( $value instanceof WC_Abstract_Order ) {
 				return $value;
 			}

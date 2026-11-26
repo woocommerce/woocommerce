@@ -91,7 +91,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	private $order;
 
 	/**
-	 * The order or refund that holds the item, for is_staged_unsaved(). Unlike $order, it can hold a refund.
+	 * The order or refund that holds the item, for get_holder() and is_staged_unsaved(). Unlike $order, it can hold a refund.
 	 *
 	 * @var null|\WeakReference<\WC_Abstract_Order>
 	 */
@@ -216,6 +216,18 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	}
 
 	/**
+	 * Get the order or refund object that holds the item, without loading it. Unlike get_order(), it can return a
+	 * refund.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 * @return WC_Abstract_Order|null The object that holds the item, or null when none does.
+	 */
+	public function get_holder(): ?WC_Abstract_Order {
+		return $this->holder ? $this->holder->get() : null;
+	}
+
+	/**
 	 * Whether the order of the item is staged and not saved yet. Reads the order object that holds the item, and
 	 * never loads the order.
 	 *
@@ -223,7 +235,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return bool
 	 */
 	protected function is_staged_unsaved(): bool {
-		$order = $this->holder ? $this->holder->get() : null;
+		$order = $this->get_holder();
 		return null !== $order && $order->is_staged_unsaved();
 	}
 
