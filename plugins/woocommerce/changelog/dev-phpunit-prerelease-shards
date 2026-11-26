@@ -1,3 +1,3 @@
 Significance: patch
 Type: dev
-Comment: Split the PHP 7.4 WordPress pre-release PHPUnit check into two CI jobs to reduce timeouts.
+Comment: Shard the stable and pre-release PHP 7.4 PHPUnit checks to reduce CI timeouts.
