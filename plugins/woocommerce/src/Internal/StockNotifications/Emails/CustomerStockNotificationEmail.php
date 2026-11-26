@@ -16,13 +16,6 @@ use WC_Email;
 class CustomerStockNotificationEmail extends WC_Email {
 
 	/**
-	 * Unsubscribe key for the email being sent. The caller's save persists its hash.
-	 *
-	 * @var string
-	 */
-	private $unsubscribe_key = '';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -191,16 +184,8 @@ class CustomerStockNotificationEmail extends WC_Email {
 			'button_text'      => $button_text,
 			'button_link'      => $button_link,
 			'account_link'     => $account_link,
-			'unsubscribe_link' => UtmHelper::add_email_utm_params(
-				add_query_arg(
-					array(
-						'email_link_action'     => EmailActionController::ACTION_UNSUBSCRIBE,
-						'email_link_action_key' => $this->unsubscribe_key,
-						'notification_id'       => $notification->get_id(),
-					),
-					home_url( '/' )
-				)
-			),
+			// The sign-up is sent with this email, so there's nothing left to unsubscribe from. Kept empty for template overrides.
+			'unsubscribe_link' => '',
 			'is_guest'         => $is_guest,
 		);
 	}
@@ -250,7 +235,6 @@ class CustomerStockNotificationEmail extends WC_Email {
 	public function prepare_email( Notification $notification ): void {
 		$this->object                         = $notification;
 		$this->recipient                      = $notification->get_user_email();
-		$this->unsubscribe_key                = $notification->get_unsubscribe_key( false );
 		$product                              = $notification->get_product();
 		$this->placeholders['{product_name}'] = preg_replace( $this->plain_search, $this->plain_replace, $product->get_name() );
 		$this->placeholders['{site_title}']   = preg_replace( $this->plain_search, $this->plain_replace, $this->get_blogname() );

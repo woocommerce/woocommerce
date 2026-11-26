@@ -306,7 +306,7 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not save the notification while sending the stock email, and should not link to unsubscribe.
+	 * @testdox Should not save the notification or create an unsubscribe key while sending the stock email.
 	 */
 	public function test_send_stock_notification_email_does_not_save_or_link_to_unsubscribe() {
 		$notification = $this->build_notification();
@@ -322,6 +322,7 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( 0, $updates );
 		$this->assertCount( 1, $this->sent_messages );
 		$this->assertStringNotContainsString( 'email_link_action=unsubscribe', $this->sent_messages[0] );
+		$this->assertEmpty( $notification->get_meta( 'unsubscribe_action_key' ), 'The stock email must not create an unsubscribe key.' );
 	}
 
 	/**
