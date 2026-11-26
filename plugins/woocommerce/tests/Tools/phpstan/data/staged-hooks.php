@@ -38,5 +38,14 @@ class Staged_Hooks_Fixture extends WC_Data {
 		 * @param bool                 $staged Staged.
 		 */
 		$this->apply_staged_filters( 'right_filter', $flag, $this );
+
+		/**
+		 * $staged typed as one value.
+		 *
+		 * @param bool                 $flag   Flag.
+		 * @param Staged_Hooks_Fixture $object Object.
+		 * @param false                $staged Staged.
+		 */
+		$this->do_staged_action( 'staged_false', $flag, $this );
 	}
 }

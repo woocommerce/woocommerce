@@ -48,6 +48,7 @@ final class StagedHookDocsRuleTest extends RuleTestCase {
 			array(
 				array( 'Expected 3 @param tags, found 2.', 20 ),
 				array( '@param int $flag does not accept actual type of parameter: bool.', 29 ),
+				array( '@param false $staged does not accept actual type of parameter: bool.', 49 ),
 			)
 		);
 	}

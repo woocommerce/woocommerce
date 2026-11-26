@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Testing\Tools\phpstan;
 
 use PhpParser\Node;
 use PhpParser\Node\Arg;
-use PhpParser\Node\Expr\ConstFetch;
+use PhpParser\Node\Expr\Cast\Bool_;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Identifier;
@@ -25,7 +25,7 @@ use SzepeViktor\PHPStan\WordPress\HookDocsRule;
 /**
  * Checks the docblock of a hook that WC_Data::do_staged_action() or apply_staged_filters() fires, with the hook
  * docblock rule of phpstan-wordpress. The rule gets the do_action() or apply_filters() call that the wrapper makes,
- * with $staged as the last argument and the same docblock.
+ * with $staged as the last argument, typed bool, and the same docblock.
  *
  * @implements Rule<MethodCall>
  */
@@ -75,7 +75,7 @@ final class StagedHookDocsRule implements Rule {
 		}
 
 		$args   = $node->getArgs();
-		$args[] = new Arg( new ConstFetch( new Name( 'false' ) ) );
+		$args[] = new Arg( new Bool_( new FuncCall( new Name( 'mt_rand' ) ) ) );
 		$call   = new FuncCall( new Name( self::WRAPPERS[ $node->name->toString() ] ), $args, $node->getAttributes() );
 
 		return $this->hook_docs_rule->processNode( $call, $scope );
