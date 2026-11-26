@@ -626,7 +626,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Giving up after a finished batch removes failure rows that batch wrote for products the last report never covered.
+	 * @testdox Giving up after a finished batch removes failure rows that batch wrote for products the last report never covered, and keeps rows a save wrote while the scan ran.
 	 */
 	public function test_give_up_drops_failure_rows_the_last_report_did_not_cover(): void {
 		$ids = $this->create_products( ProductScan::BATCH_SIZE + 1 );
@@ -637,6 +637,10 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		// The scan walks newest products first, so the first batch covers the last id created, not $ids[0].
 		$covered = (int) end( $ids );
 		$this->assertNotEmpty( ProductFailures::stored( $covered ), 'The finished batch wrote failure rows' );
+		// The first product created is left for the next batch. A save checks it now.
+		$saved = (int) $ids[0];
+		$this->assertSame( array(), ProductFailures::stored( $saved ), 'The first batch did not reach it' );
+		ProductFailures::store( $saved, array() );
 
 		$crash = static function (): void {
 			throw new \RuntimeException( 'Fatal on the next batch' );
@@ -654,6 +658,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
 		$this->assertSame( array(), ProductFailures::stored( $covered ), 'Rows the abandoned scan added are removed' );
+		$this->assertSame( array( ProductFailures::CHECKED ), ProductFailures::stored( $saved ), 'Rows the save wrote stay' );
 		$this->assertSame( 7, get_option( AgentReadiness::REPORT_OPTION )['products'] );
 	}
 
