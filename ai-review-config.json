@@ -1,4 +1,7 @@
 {
+	"auto_review": {
+		"on": "never"
+	},
 	"personas": {
 		"general": {
 			"enabled": false
