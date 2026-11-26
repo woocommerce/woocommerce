@@ -23,6 +23,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		'core/columns',
 		'core/column',
 		'core/heading',
+		'core/image',
 		'core/paragraph',
 		'core/list',
 		'core/list-item',
@@ -288,6 +289,34 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test columns whose saved widths add up to more than 100% are shrunk to fit the email, images included.
+	 */
+	public function testItShrinksColumnsThatAddUpToMoreThanTheEmailWidth(): void {
+		$column        = '<!-- wp:column {"width":"100%"} --><div class="wp-block-column" style="flex-basis:100%"><!-- wp:image {"sizeSlug":"large"} --><figure class="wp-block-image size-large"><img src="https://example.com/image.jpg" alt=""/></figure><!-- /wp:image --></div><!-- /wp:column -->';
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:columns --><div class="wp-block-columns">' . $column . $column . '</div><!-- /wp:columns -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+
+		preg_match_all( '/<td[^>]*class="[^"]*wp-block-column[^"]*"[^>]*width="([^"]+)"/', $rendered['html'], $column_widths );
+		preg_match_all( '/<img(?=[^>]*example\.com\/image\.jpg)[^>]*width="(\d+)"/', $rendered['html'], $image_widths );
+		$this->assertCount( 2, $column_widths[1] );
+		$this->assertCount( 2, $image_widths[1] );
+
+		$this->assertMatchesRegularExpression( '/^\d+$/', $column_widths[1][0], 'The column cell declares the shrunk width in whole pixels, not the saved 100%.' );
+		$column_width = (float) $column_widths[1][0];
+		$this->assertSame( $column_widths[1][0], $column_widths[1][1] );
+		$this->assertLessThanOrEqual( 660, $column_width * 2, 'Both columns fit within the 660px email.' );
+		$this->assertLessThanOrEqual( $column_width, (float) $image_widths[1][0], 'The image is no wider than its column.' );
+		$this->assertLessThanOrEqual( $column_width, (float) $image_widths[1][1], 'The image is no wider than its column.' );
+	}
+
+	/**
 	 * Test a site palette color email clients can’t render is left out of the sent email.
 	 *
 	 * Twenty Twenty-Five defines `accent-6` as color-mix(). A block reaches a palette color by its
@@ -405,6 +434,56 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$button_style = $this->extractBlockStyle( $rendered['html'], 'button-test', 'td' );
 		$this->assertStringContainsString( 'background-color: #65574e', $button_style );
 		$this->assertStringContainsString( 'color: #ffffff', $button_style );
+	}
+
+	/**
+	 * A block can carry a string `style` attribute instead of a style object (Calendly saves "style":"inline").
+	 * The renderer treats it as absent, so the email renders instead of throwing and falling back to the legacy design.
+	 *
+	 * @dataProvider string_style_attribute_provider
+	 *
+	 * @param string $post_content Block markup with a paragraph that has a string `style` attribute.
+	 * @param string $expected_style A declaration the paragraph still gets from its other attributes.
+	 */
+	public function testItRendersAParagraphWithAStringStyleAttribute( string $post_content, string $expected_style ): void {
+		$email_post_id = $this->factory->post->create( array( 'post_content' => $post_content ) );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+
+		$this->assertStringContainsString( $expected_style, $this->extractBlockStyle( $rendered['html'], 'string-style', 'td' ) );
+	}
+
+	/**
+	 * One case per reader that merges or writes to the block's style.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function string_style_attribute_provider(): array {
+		return array(
+			'text color (Styles_Helper)'                 => array(
+				'<!-- wp:paragraph {"style":"inline","textColor":"luminous-vivid-orange"} --><p class="string-style has-luminous-vivid-orange-color has-text-color">Book a call</p><!-- /wp:paragraph -->',
+				'color: #ff6900',
+			),
+			'font size preset (Typography_Preprocessor)' => array(
+				'<!-- wp:paragraph {"style":"inline","fontSize":"large"} --><p class="string-style has-large-font-size">Book a call</p><!-- /wp:paragraph -->',
+				'font-size: 24px',
+			),
+			'string typography with a font size preset'  => array(
+				'<!-- wp:paragraph {"style":{"typography":"inline"},"fontSize":"large"} --><p class="string-style has-large-font-size">Book a call</p><!-- /wp:paragraph -->',
+				'font-size: 24px',
+			),
+			'quote with string typography'               => array(
+				'<!-- wp:quote {"style":{"typography":"inline"}} --><blockquote class="wp-block-quote"><!-- wp:paragraph {"fontSize":"large"} --><p class="string-style has-large-font-size">Book a call</p><!-- /wp:paragraph --></blockquote><!-- /wp:quote -->',
+				'font-size: 24px',
+			),
+			'paragraph in a quote (Quote_Preprocessor)'  => array(
+				'<!-- wp:quote {"style":{"typography":{"fontSize":"18px"}}} --><blockquote class="wp-block-quote" style="font-size:18px"><!-- wp:paragraph {"style":"inline"} --><p class="string-style">Book a call</p><!-- /wp:paragraph --></blockquote><!-- /wp:quote -->',
+				'font-size: 18px',
+			),
+		);
 	}
 
 	/**

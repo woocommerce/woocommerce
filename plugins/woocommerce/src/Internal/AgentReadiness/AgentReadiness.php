@@ -31,6 +31,21 @@ class AgentReadiness {
 	public const REPORT_OPTION = 'woocommerce_agent_readiness_report';
 
 	/**
+	 * Option holding the progress of a scan that runs in batches.
+	 */
+	public const SCAN_OPTION = 'woocommerce_agent_readiness_scan';
+
+	/**
+	 * Report field naming the scan that stored it. Removed before the report is read.
+	 */
+	private const REPORT_SCAN_ID = 'scan_id';
+
+	/**
+	 * Times one batch is tried before the scan gives up.
+	 */
+	public const MAX_ATTEMPTS = 3;
+
+	/**
 	 * Store-wide conditions.
 	 *
 	 * @var StoreConditions
@@ -212,70 +227,139 @@ class AgentReadiness {
 	}
 
 	/**
-	 * Run every check over the catalog.
+	 * Run every check over the catalog, in this request, without storing anything.
 	 *
-	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,sales:array{days:int,orders:int,imported:bool}|null}
+	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,bestsellers_first:bool,bestsellers_count:int,pages_best_seller?:bool,sales:array{days:int,orders:int,imported:bool}|null}
 	 */
 	public function get_report(): array {
-		return $this->build_report();
+		$scan  = $this->start_scan();
+		$total = count( $scan['ids'] );
+		while ( $scan['position'] < $total ) {
+			$scan = $this->scan_batch( $scan, null );
+		}
+		$report = $this->finish_scan( $scan );
+		unset( $report['shared_gtins'] );
+		return $report;
 	}
 
 	/**
-	 * Run every check over the catalog.
+	 * Start a scan: the rules, the sales period and the products to test, before any is tested.
+	 * Each later step runs from what this returns, so a scan can go on in another request.
 	 *
-	 * @param callable|null $on_tested Called with each product id and its failures.
-	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,sales:array{days:int,orders:int,imported:bool}|null,shared_gtins?:array<int,string>}
+	 * @return array{ids:array<int,int>,position:int,sales:array{days:int,since:string,orders:int,imported:bool,total:float}|null,ranked:bool,best_seller:int,bestsellers_first:bool,bestsellers_count:int,scan:array<string,mixed>}
 	 */
-	private function build_report( ?callable $on_tested = null ): array {
-		// Rebuild the rules and the scan for each report: a long-running process may have fetched a new rules file or changed GTINs since.
+	private function start_scan(): array {
+		// Rebuild the rules for each scan: a long-running process may have fetched a new rules file since.
 		$this->active_rules = null;
 		$this->product_scan = null;
-		$active             = $this->get_active_rules();
-		$rules              = $active['rules'];
-		$channel_rules      = $active['channel_rules'];
+		$sales              = $this->product_sales->last_days();
+		$ranked             = null !== $sales && $sales['imported'] && $sales['orders'] >= ProductSales::MIN_ORDERS && $sales['total'] > 0;
+		$since              = null === $sales ? '' : $sales['since'];
+		// The seller ids are a second query, so a store the scan will not rank never groups its sales.
+		$best_sellers = $ranked ? $this->product_sales->more_top_products( $since, 0, ProductSales::TOP_PRODUCTS ) : array();
+		$product_scan = new ProductScan();
+		$more         = $ranked && count( $best_sellers ) >= ProductScan::PRODUCT_LIMIT
+			? function ( int $offset, int $limit ) use ( $since ): array {
+				return $this->product_sales->more_top_products( $since, $offset, $limit );
+			}
+			: null;
+		$ids          = $product_scan->start_best_sellers_first( $best_sellers, $more );
+		// Only the best seller's id is kept, for the page checks at finish.
+		$best_seller = (int) ( $best_sellers[0] ?? 0 );
+		return array(
+			'ids'               => $ids,
+			'position'          => 0,
+			// The period and totals only: each batch reads its own products' sales, so the whole store's are never kept.
+			'sales'             => null === $sales ? null : array(
+				'days'     => $sales['days'],
+				'since'    => $sales['since'],
+				'orders'   => $sales['orders'],
+				'imported' => $sales['imported'],
+				'total'    => $sales['total'],
+			),
+			'ranked'            => $ranked,
+			'best_seller'       => $best_seller,
+			// Whether a catalog over the limit was listed with its bestsellers first, and how many of those led the list.
+			'bestsellers_first' => $product_scan->best_sellers_first(),
+			'bestsellers_count' => $product_scan->bestsellers_count(),
+			'scan'              => $product_scan->state(),
+		);
+	}
 
-		$sales  = $this->product_sales->last_days();
-		$scan   = new ProductScan();
-		$ranked = null !== $sales && $sales['imported'] && $sales['orders'] >= ProductSales::MIN_ORDERS && $sales['total'] > 0;
-		if ( $ranked ) {
-			$scan->use_sales( $sales['by_product'], $sales['by_variation'] );
+	/**
+	 * Test the next batch of products.
+	 *
+	 * @param array<string, mixed> $scan               What start_scan() or the last batch returned.
+	 * @param callable|null        $on_tested          Called with each product id and its failures.
+	 * @param bool                 $skip_unloadable    When true, products that fail to load are skipped (last attempt).
+	 * @param array<int, int>      $skipped_unloadable Filled with ids skipped when $skip_unloadable is true.
+	 * @return array<string, mixed> The scan with this batch added.
+	 */
+	private function scan_batch( array $scan, ?callable $on_tested, bool $skip_unloadable = false, array &$skipped_unloadable = array() ): array {
+		$active       = $this->get_active_rules();
+		$product_ids  = array_slice( $scan['ids'], $scan['position'], ProductScan::BATCH_SIZE );
+		$product_scan = ProductScan::from_state( $scan['scan'] );
+		if ( $scan['ranked'] ) {
+			$sales = $this->product_sales->for_products( $product_ids, $scan['sales']['since'] );
+			$product_scan->use_sales( $sales['by_product'], $sales['by_variation'] );
 		}
-		if ( null === $on_tested ) {
-			$scan->evaluate( $rules, $channel_rules, self::PRODUCT_IDS_LIMIT );
-		} else {
-			$scan->evaluate_each( $rules, $channel_rules, self::PRODUCT_IDS_LIMIT, $on_tested );
-		}
+		$product_scan->test( $product_ids, $active['rules'], $active['channel_rules'], self::PRODUCT_IDS_LIMIT, $on_tested, $skip_unloadable, $skipped_unloadable );
+		$scan['position'] += count( $product_ids );
+		$scan['scan']      = $product_scan->state();
+		return $scan;
+	}
+
+	/**
+	 * Build the report once every batch is tested. The store output checks request the store's own pages, so they run here, once.
+	 *
+	 * @param array<string, mixed> $scan The scan after its last batch.
+	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,bestsellers_first:bool,bestsellers_count:int,pages_best_seller:bool,sales:array{days:int,orders:int,imported:bool}|null,shared_gtins?:array<int,string>}
+	 */
+	private function finish_scan( array $scan ): array {
+		$active       = $this->get_active_rules();
+		$product_scan = ProductScan::from_state( $scan['scan'] );
+		$sales        = $scan['sales'];
 
 		$checks = array();
-		foreach ( $rules as $id => $rule ) {
-			$result   = $scan->result( $id );
+		foreach ( $active['rules'] as $id => $rule ) {
+			$result   = $product_scan->result( $id );
 			$checks[] = array(
 				'id'          => $id,
 				'label'       => $rule->label(),
 				'why'         => $rule->why(),
 				'fix'         => $rule->fix(),
-				'channels'    => $channel_rules[ $id ],
+				'channels'    => $active['channel_rules'][ $id ],
 				'count'       => $result['count'],
 				'product_ids' => $result['product_ids'],
 				// Share of the store's sales on the products that fail; null without enough sales to compare.
-				'sales_share' => $ranked ? self::share( $result['sales'] / $sales['total'] ) : null,
+				'sales_share' => $scan['ranked'] ? self::share( $result['sales'] / $sales['total'] ) : null,
 				'fix_url'     => admin_url( 'edit.php?post_type=product' ),
 			);
 		}
 
-		$responses = $this->store_output_checks->responses();
+		$responses   = $this->store_output_checks->responses();
+		$best_seller = (int) ( $scan['best_seller'] ?? 0 );
+		if ( $best_seller > 0 ) {
+			// Page checks read the best seller's page first. Only the id is kept from start(); the amount is unused.
+			$responses->use_sales( array( $best_seller => 1.0 ) );
+		}
 
 		$report = array(
 			'generated_at'        => gmdate( 'c' ),
-			'products'            => $scan->products(),
-			'available'           => $scan->available(),
-			'hidden_from_catalog' => $scan->hidden_from_catalog(),
-			'unsupported_types'   => $scan->unsupported_types(),
+			'products'            => $product_scan->products(),
+			'available'           => $product_scan->available(),
+			'hidden_from_catalog' => $product_scan->hidden_from_catalog(),
+			'unsupported_types'   => $product_scan->unsupported_types(),
 			'store_checks'        => array_merge( $this->store_conditions->all(), $this->store_output_checks->all_for( $responses ) ),
 			'declared'            => $this->declared_to_agents->all( $responses ),
-			'channels'            => $scan->channel_totals(),
+			// Whether the product pages the page checks read start with the best seller, or with the newest product.
+			'pages_best_seller'   => $responses->starts_with_best_seller(),
+			'channels'            => $product_scan->channel_totals(),
 			'checks'              => $checks,
-			'truncated'           => $scan->truncated(),
+			'truncated'           => $product_scan->truncated(),
+			// On a scan that stopped at the limit: whether bestsellers led, and how many of the checked products they are.
+			'bestsellers_first'   => ! empty( $scan['bestsellers_first'] ),
+			'bestsellers_count'   => (int) ( $scan['bestsellers_count'] ?? 0 ),
 			// How sales shares were measured: null while Analytics is off.
 			'sales'               => null === $sales ? null : array(
 				'days'     => $sales['days'],
@@ -283,9 +367,9 @@ class AgentReadiness {
 				'imported' => $sales['imported'],
 			),
 		);
-		if ( null !== $on_tested && null !== $scan->shared_gtins() ) {
+		if ( null !== $product_scan->shared_gtins() ) {
 			// Stored for checks of one product, so a save doesn't read every published product.
-			$report['shared_gtins'] = $scan->shared_gtins();
+			$report['shared_gtins'] = $product_scan->shared_gtins();
 		}
 		return $report;
 	}
@@ -310,7 +394,7 @@ class AgentReadiness {
 		if ( ! is_array( $report ) ) {
 			return null;
 		}
-		unset( $report['shared_gtins'] );
+		unset( $report['shared_gtins'], $report[ self::REPORT_SCAN_ID ] );
 		return self::with_saved_products( $report );
 	}
 
@@ -393,7 +477,7 @@ class AgentReadiness {
 	 *
 	 * @param array<string, mixed>|null                                                                                                               $report Stored report.
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>|null $live   Store conditions already read, or null to read them.
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string,source?:string}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,skipped?:bool,no_product?:bool,seen_at?:string,source?:string,product?:int}>
 	 */
 	public function get_store_checks( ?array $report, ?array $live = null ): array {
 		$checks   = $live ?? $this->store_conditions->all();
@@ -406,20 +490,24 @@ class AgentReadiness {
 				continue;
 			}
 			$checks[] = array(
-				'id'       => (string) $check['id'],
-				'ok'       => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
-				'blocks'   => (string) ( $check['blocks'] ?? '' ),
-				'group'    => (string) ( $check['group'] ?? '' ),
-				'level'    => StoreConditions::LEVEL_RECOMMENDED,
-				'name'     => (string) $check['name'],
-				'label'    => (string) ( $check['label'] ?? '' ),
-				'why'      => (string) ( $check['why'] ?? '' ),
-				'fix'      => (string) ( $check['fix'] ?? '' ),
-				'fix_url'  => (string) ( $check['fix_url'] ?? '' ),
-				'conflict' => ! empty( $check['conflict'] ),
-				'pending'  => ! empty( $check['pending'] ),
-				'seen_at'  => (string) ( $check['seen_at'] ?? '' ),
-				'source'   => sanitize_text_field( (string) ( $check['source'] ?? '' ) ),
+				'id'         => (string) $check['id'],
+				'ok'         => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
+				'blocks'     => (string) ( $check['blocks'] ?? '' ),
+				'group'      => (string) ( $check['group'] ?? '' ),
+				'level'      => StoreConditions::LEVEL_RECOMMENDED,
+				'name'       => (string) $check['name'],
+				'label'      => (string) ( $check['label'] ?? '' ),
+				'why'        => (string) ( $check['why'] ?? '' ),
+				'fix'        => (string) ( $check['fix'] ?? '' ),
+				'fix_url'    => (string) ( $check['fix_url'] ?? '' ),
+				'conflict'   => ! empty( $check['conflict'] ),
+				'pending'    => ! empty( $check['pending'] ),
+				'skipped'    => ! empty( $check['skipped'] ),
+				'no_product' => ! empty( $check['no_product'] ),
+				'seen_at'    => (string) ( $check['seen_at'] ?? '' ),
+				'source'     => sanitize_text_field( (string) ( $check['source'] ?? '' ) ),
+				// The product whose page failed, so the found line can name it.
+				'product'    => absint( $check['product'] ?? 0 ),
 			);
 		}
 		return $checks;
@@ -440,25 +528,207 @@ class AgentReadiness {
 	}
 
 	/**
-	 * Run the report and store it. Not autoloaded: only the readiness screens read it.
+	 * Run the report and store it, in this request. Not autoloaded: only the readiness screens read it.
 	 *
 	 * @return array<string, mixed>
 	 */
 	public function refresh_report(): array {
-		// Captured before the scan. A product saved while it runs is absent here, so its new rows stay.
-		$had_rows = ProductFailures::stored_product_ids();
-		$tested   = array();
-		$report   = $this->build_report(
-			static function ( int $product_id, array $failures ) use ( &$tested ): void {
-				$tested[] = $product_id;
-				ProductFailures::store( $product_id, $failures );
-			}
-		);
-		ProductFailures::keep_only( $had_rows, $tested );
-		$report['failures_stored'] = true;
-		update_option( self::REPORT_OPTION, $report, false );
-		unset( $report['shared_gtins'] );
+		$chain = $this->start_refresh();
+		// Each call tests one batch, then the last one stores the report.
+		do {
+			$more = $this->continue_refresh( $chain );
+		} while ( $more );
+		$report = (array) get_option( self::REPORT_OPTION, array() );
+		unset( $report['shared_gtins'], $report[ self::REPORT_SCAN_ID ] );
 		return $report;
+	}
+
+	/**
+	 * Start a scan that runs one batch per call to continue_refresh(), replacing any scan
+	 * in progress. Its progress is kept in SCAN_OPTION, so each batch can run in its own
+	 * background action.
+	 *
+	 * @return string The scan's id, for continue_refresh().
+	 */
+	public function start_refresh(): string {
+		// Drop rows a replaced scan wrote for products the last report never covered.
+		$previous = get_option( self::SCAN_OPTION );
+		if ( is_array( $previous ) ) {
+			$this->abandon_refresh( $previous );
+		}
+		// Taken first, so a save while the product list is read still counts as during the scan.
+		$rows_as_of = microtime( true );
+		$state      = array_merge(
+			$this->start_scan(),
+			array(
+				'id'         => wp_generate_uuid4(),
+				'attempts'   => 0,
+				'rows_as_of' => $rows_as_of,
+				// Taken before the scan. A product saved while it runs is absent here, so its new rows stay.
+				'had_rows'   => ProductFailures::stored_product_ids(),
+				// Product ids evaluated, plus unloadable ids skipped on the last attempt so keep_only leaves their rows.
+				'tested'     => array(),
+			)
+		);
+		update_option( self::SCAN_OPTION, $state, false );
+		return $state['id'];
+	}
+
+	/**
+	 * Test the next batch of the scan in progress, or, once every batch is tested, store the report.
+	 * A batch that ends early is tried again from where the last one stopped, up to MAX_ATTEMPTS times.
+	 *
+	 * @param string $chain The id start_refresh() returned.
+	 * @return bool True while there is more to do; false once the report is stored, or when $chain is not the scan in progress.
+	 */
+	public function continue_refresh( string $chain ): bool {
+		if ( ! $this->is_current( $chain ) ) {
+			return false;
+		}
+		$state = (array) get_option( self::SCAN_OPTION );
+		if ( $state['attempts'] >= self::MAX_ATTEMPTS ) {
+			// The same batch failed every time: give up and keep the last report rather than loop.
+			$this->abandon_refresh( $state );
+			return false;
+		}
+		++$state['attempts'];
+		update_option( self::SCAN_OPTION, $state, false );
+
+		if ( $state['position'] < count( $state['ids'] ) ) {
+			// Collect first, then store only if this chain is still current: a replaced scan must not write failure rows.
+			// On the last attempt, skip products that still fail to load so one broken product cannot freeze every scan.
+			$written            = array();
+			$skipped_unloadable = array();
+			$skip_unloadable    = $state['attempts'] >= self::MAX_ATTEMPTS;
+			$state              = $this->scan_batch(
+				$state,
+				static function ( int $product_id, array $failures ) use ( &$written ): void {
+					$written[ $product_id ] = $failures;
+				},
+				$skip_unloadable,
+				$skipped_unloadable
+			);
+			if ( ! $this->is_current( $chain ) ) {
+				return false;
+			}
+			// ProductScan flushes the runtime cache after the batch; prime again before the store loop.
+			_prime_post_caches( array_map( 'intval', array_keys( $written ) ), true, true );
+			foreach ( $written as $product_id => $failures ) {
+				ProductFailures::store( (int) $product_id, $failures, false );
+			}
+			// Skipped unloadable ids count as tested so keep_only() leaves their existing rows alone.
+			$state['tested'] = array_values(
+				array_unique(
+					array_merge(
+						array_map( 'intval', (array) ( $state['tested'] ?? array() ) ),
+						array_map( 'intval', array_keys( $written ) ),
+						array_map( 'intval', $skipped_unloadable )
+					)
+				)
+			);
+			if ( $skipped_unloadable ) {
+				wc_get_logger()->warning(
+					sprintf(
+						'Agent readiness skipped %d product(s) that failed to load on the last attempt: %s',
+						count( $skipped_unloadable ),
+						implode( ', ', $skipped_unloadable )
+					),
+					array( 'source' => 'agent-readiness' )
+				);
+			}
+			$state['attempts'] = 0;
+			// A scan that replaced this one while the rows were stored keeps its own progress.
+			if ( ! $this->is_current( $chain ) ) {
+				return false;
+			}
+			update_option( self::SCAN_OPTION, $state, false );
+			return true;
+		}
+
+		$report                         = $this->finish_scan( $state );
+		$report['failures_stored']      = true;
+		$report[ self::REPORT_SCAN_ID ] = $chain;
+		if ( ! $this->is_current( $chain ) ) {
+			return false;
+		}
+		// Store the report first. A failed write leaves the previous report and the rows it counts.
+		if ( false === update_option( self::REPORT_OPTION, $report, false ) ) {
+			return true;
+		}
+		if ( ! $this->is_current( $chain ) ) {
+			return false;
+		}
+		$this->keep_tested_rows( $state );
+		// Re-check before deleting: a replacement scan must keep its own progress.
+		if ( ! $this->is_current( $chain ) ) {
+			return false;
+		}
+		delete_option( self::SCAN_OPTION );
+		return false;
+	}
+
+	/**
+	 * Whether a scan is still the one in progress. A new scan replaces it while a batch
+	 * runs, and that batch must not write over the new scan's progress.
+	 *
+	 * @phpstan-impure
+	 *
+	 * @param string $chain Scan id.
+	 */
+	private function is_current( string $chain ): bool {
+		$state = get_option( self::SCAN_OPTION );
+		return is_array( $state ) && ( $state['id'] ?? '' ) === $chain;
+	}
+
+	/**
+	 * Stop the scan in progress, if any, keeping the last stored report.
+	 */
+	public function cancel_refresh(): void {
+		$state = get_option( self::SCAN_OPTION );
+		if ( is_array( $state ) ) {
+			$this->abandon_refresh( $state );
+			return;
+		}
+		delete_option( self::SCAN_OPTION );
+	}
+
+	/**
+	 * End a scan without storing a report. Removes failure rows it wrote for products the
+	 * previous report never covered, so the Products list stays aligned with that report.
+	 * Rows a save wrote while the scan ran stay, as when a scan finishes.
+	 * A scan whose report is already stored only finishes that cleanup.
+	 *
+	 * @param array{id?:string,ids?:array<int,int>,had_rows?:array<int,int>,tested?:array<int,int>,rows_as_of?:float} $state Scan progress.
+	 */
+	private function abandon_refresh( array $state ): void {
+		$stored  = get_option( self::REPORT_OPTION );
+		$scan_id = (string) ( $state['id'] ?? '' );
+		if ( is_array( $stored ) && '' !== $scan_id && ( $stored[ self::REPORT_SCAN_ID ] ?? '' ) === $scan_id ) {
+			$this->keep_tested_rows( $state );
+			delete_option( self::SCAN_OPTION );
+			return;
+		}
+		$had_rows = array_map( 'intval', (array) ( $state['had_rows'] ?? array() ) );
+		$ids      = array_map( 'intval', (array) ( $state['ids'] ?? array() ) );
+		// Only products that have rows now: a scan can list thousands that never got any.
+		ProductFailures::forget_unless_written_since(
+			array_values( array_intersect( array_diff( $ids, $had_rows ), ProductFailures::stored_product_ids() ) ),
+			isset( $state['rows_as_of'] ) ? (float) $state['rows_as_of'] : null
+		);
+		delete_option( self::SCAN_OPTION );
+	}
+
+	/**
+	 * Drop rows the scan did not test, keeping rows saved while it ran.
+	 *
+	 * @param array{had_rows?:array<int,int>,tested?:array<int,int>,rows_as_of?:float} $state Scan progress.
+	 */
+	private function keep_tested_rows( array $state ): void {
+		ProductFailures::keep_only(
+			array_map( 'intval', (array) ( $state['had_rows'] ?? array() ) ),
+			array_map( 'intval', (array) ( $state['tested'] ?? array() ) ),
+			isset( $state['rows_as_of'] ) ? (float) $state['rows_as_of'] : null
+		);
 	}
 
 	/**

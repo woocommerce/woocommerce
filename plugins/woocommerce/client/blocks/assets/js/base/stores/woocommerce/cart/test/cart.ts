@@ -20,12 +20,13 @@ const mockState = {
 	nonce: 'test-nonce-123',
 } as Store[ 'state' ];
 const mockActions = {} as Store[ 'actions' ];
+const mockOtherStates: Record< string, object > = {};
 
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		getConfig: jest.fn(),
-		store: jest.fn( ( _name, definition ) => {
+		store: jest.fn( ( name: string, definition ) => {
 			// The `woocommerce` store is assembled from several `store()`
 			// calls, one per file, which the library merges into one store.
 			// Mirror that: merge each call's `state` descriptors (e.g. the
@@ -34,11 +35,19 @@ jest.mock(
 			// `actions` into one object that every call returns. Actions
 			// registered by one file are then reachable from the others, and a
 			// spy assigned to the object replaces the action for all of them.
+			// Other namespaces (e.g. `woocommerce/products`) keep their own state.
+			const state =
+				name === 'woocommerce'
+					? mockState
+					: ( mockOtherStates[ name ] ??= {} );
 			if ( definition?.state ) {
 				Object.defineProperties(
-					mockState,
+					state,
 					Object.getOwnPropertyDescriptors( definition.state )
 				);
+			}
+			if ( name !== 'woocommerce' ) {
+				return { state, actions: mockActions };
 			}
 			if ( definition?.actions ) {
 				Object.defineProperties(

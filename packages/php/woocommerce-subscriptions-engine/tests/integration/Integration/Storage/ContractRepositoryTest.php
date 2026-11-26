@@ -979,21 +979,21 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox find_cycle_history returns a window of cycles newest first.
+	 * @testdox find_cycles returns a window of cycles newest first.
 	 */
-	public function test_find_cycle_history_pages_newest_first(): void {
+	public function test_find_cycles_pages_newest_first(): void {
 		$id = $this->insert_released( $this->make_contract() );
 
 		for ( $n = 1; $n <= 3; $n++ ) {
 			$this->append_cycle_locked( $this->make_cycle( $id, $n, $n, sprintf( '2026-%02d-15 00:00:00', 6 + $n ), sprintf( '2026-%02d-15 00:00:00', 7 + $n ) ) );
 		}
 
-		$page = $this->sut->find_cycle_history( $id, Cycle::KIND_BILLING, 2, 0 );
+		$page = $this->sut->find_cycles( $id, Cycle::KIND_BILLING, 2, 0 );
 		$this->assertCount( 2, $page );
 		$this->assertSame( 3, $page[0]->get_sequence_no() );
 		$this->assertSame( 2, $page[1]->get_sequence_no() );
 
-		$next = $this->sut->find_cycle_history( $id, Cycle::KIND_BILLING, 2, 2 );
+		$next = $this->sut->find_cycles( $id, Cycle::KIND_BILLING, 2, 2 );
 		$this->assertCount( 1, $next );
 		$this->assertSame( 1, $next[0]->get_sequence_no() );
 	}
@@ -1070,6 +1070,18 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox find_due throws on a failed scan instead of reading as "nothing due".
+	 */
+	public function test_find_due_throws_on_a_failed_scan(): void {
+		$this->fail_next_query( '/^\s*SELECT id, extension_slug, next_payment_gmt/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read due contracts' );
+
+		$this->sut->find_due( new \DateTimeImmutable( '2026-08-01 00:00:00', new \DateTimeZone( 'UTC' ) ), 10, array( self::OWNER ) );
+	}
+
+	/**
 	 * @testdox find_due selects a due contract whose stored status is not registered.
 	 */
 	public function test_find_due_selects_a_contract_with_an_unregistered_stored_status(): void {
@@ -1114,6 +1126,23 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 		$this->assertSame( '2026-06-15 00:00:00', $contract->get_next_payment_gmt(), 'The waiting contract keeps its due moment.' );
+	}
+
+	/**
+	 * @testdox find_due matches the owner exactly: a contract of a slug differing only in case is not selected.
+	 */
+	public function test_find_due_skips_a_case_variant_owner(): void {
+		global $wpdb;
+
+		$now     = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$owned   = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$variant = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		// The facades refuse such a slug; the row stands for data written around them.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'extension_slug' => strtoupper( self::OWNER ) ), array( 'id' => $variant ) );
+
+		$this->assertSame( array( $owned ), $this->due_ids( $now, 50 ) );
+		$this->assertSame( array( $variant ), $this->due_ids( $now, 50, array( strtoupper( self::OWNER ) ) ) );
 	}
 
 	/**
@@ -1400,7 +1429,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			$this->assertStringContainsString( 'longer than the column allows', $e->getMessage() );
 		}
 		$this->assertNull( $over_long->get_id(), 'Nothing is inserted.' );
-		$this->assertSame( array(), $this->sut->find_cycle_history( $id, str_repeat( 'k', 21 ) ) );
+		$this->assertSame( array(), $this->sut->find_cycles( $id, str_repeat( 'k', 21 ) ) );
 
 		$fits = $this->make_cycle_of_kind( $id, str_repeat( 'k', 20 ) );
 		$this->append_cycle_locked( $fits );
@@ -1591,13 +1620,13 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @param int $contract_id Contract id.
 	 */
 	private function find_newest_cycle( int $contract_id ): ?Cycle {
-		$history = $this->sut->find_cycle_history( $contract_id, Cycle::KIND_BILLING, 1 );
+		$cycles = $this->sut->find_cycles( $contract_id, Cycle::KIND_BILLING, 1 );
 
-		return $history[0] ?? null;
+		return $cycles[0] ?? null;
 	}
 
 	/**
-	 * Read a billing cycle by id through its chain history.
+	 * Read a billing cycle by id through its chain.
 	 *
 	 * @param int $cycle_id Cycle id.
 	 */
@@ -1608,7 +1637,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$contract_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT contract_id FROM {$table} WHERE id = %d", $cycle_id ) );
 
-		foreach ( $this->sut->find_cycle_history( $contract_id ) as $cycle ) {
+		foreach ( $this->sut->find_cycles( $contract_id ) as $cycle ) {
 			if ( $cycle->get_id() === $cycle_id ) {
 				return $cycle;
 			}
@@ -1659,9 +1688,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( 'legacy-x', $head->get_status()->get_value() );
 
-		$history = $this->sut->find_cycle_history( $id );
-		$this->assertCount( 1, $history );
-		$this->assertSame( 'legacy-x', $history[0]->get_status()->get_value() );
+		$cycles = $this->sut->find_cycles( $id );
+		$this->assertCount( 1, $cycles );
+		$this->assertSame( 'legacy-x', $cycles[0]->get_status()->get_value() );
 	}
 
 	/**
@@ -1929,6 +1958,197 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox query throws on a failed read instead of returning no contracts.
+	 */
+	public function test_query_throws_on_a_failed_read(): void {
+		$this->insert_released( $this->make_contract() );
+
+		$this->fail_next_query( '/^\s*SELECT\s+\*,\s*\(\s*lock_token.*LIMIT \d+ OFFSET/s' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read contracts' );
+
+		$this->sut->query();
+	}
+
+	/**
+	 * @testdox count throws on a failed read, filtered or not, instead of counting zero.
+	 * @dataProvider provide_count_args
+	 *
+	 * @param array<string, mixed> $args Count args.
+	 */
+	public function test_count_throws_on_a_failed_read( array $args ): void {
+		$this->insert_released( $this->make_contract() );
+
+		$this->fail_next_query( '/^\s*SELECT COUNT\(\*\) FROM \S*subscription_contracts WHERE/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to count contracts' );
+
+		$this->sut->count( $args );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_count_args(): array {
+		return array(
+			'unfiltered' => array( array() ),
+			'filtered'   => array( array( 'status' => ContractStatus::ACTIVE ) ),
+		);
+	}
+
+	/**
+	 * @testdox find_by_origin_order throws on a failed read instead of finding no contract.
+	 */
+	public function test_find_by_origin_order_throws_on_a_failed_read(): void {
+		$this->insert_released( $this->make_contract() );
+
+		$this->fail_next_query( '/WHERE origin_order_id = \d+/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read the contracts of order 1001' );
+
+		$this->sut->find_by_origin_order( 1001 );
+	}
+
+	/**
+	 * @testdox find_cycles throws on a failed read instead of returning an empty chain.
+	 */
+	public function test_find_cycles_throws_on_a_failed_read(): void {
+		$id = $this->insert_released( $this->make_contract() );
+		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
+
+		$this->fail_next_query( '/^\s*SELECT \* FROM \S*subscription_cycles WHERE contract_id = \d+ AND kind/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( "Failed to read the cycles of contract {$id}" );
+
+		$this->sut->find_cycles( $id );
+	}
+
+	/**
+	 * @testdox find_cycles_by_order_id throws on a failed read instead of finding no cycle.
+	 */
+	public function test_find_cycles_by_order_id_throws_on_a_failed_read(): void {
+		$id = $this->insert_released( $this->make_contract() );
+		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', null, null, 5005 ) );
+
+		$this->fail_next_query( '/^\s*SELECT \* FROM \S*subscription_cycles WHERE order_id = \d+/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read the cycles of order 5005' );
+
+		$this->sut->find_cycles_by_order_id( 5005 );
+	}
+
+	/**
+	 * @testdox count_by_status throws on a failed read instead of counting zero per status.
+	 */
+	public function test_count_by_status_throws_on_a_failed_read(): void {
+		$this->insert_released( $this->make_contract() );
+
+		$this->fail_next_query( '/SELECT status, COUNT\(\*\) AS total/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to count contracts by status' );
+
+		$this->sut->count_by_status();
+	}
+
+	/**
+	 * @testdox count_items_by_contract throws on a failed read instead of counting zero items.
+	 */
+	public function test_count_items_by_contract_throws_on_a_failed_read(): void {
+		$id = $this->insert_released( $this->make_contract() );
+
+		$this->fail_next_query( '/SELECT contract_id, COUNT\(\*\) AS total/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to count contract items' );
+
+		$this->sut->count_items_by_contract( array( $id ) );
+	}
+
+	/**
+	 * @testdox find throws when a child read fails after the row read, instead of returning a partial contract.
+	 * @dataProvider provide_failing_child_reads
+	 *
+	 * @param string $pattern Regex of the child read to break.
+	 * @param string $message Expected message prefix.
+	 */
+	public function test_find_throws_on_a_failed_child_read( string $pattern, string $message ): void {
+		$id       = $this->insert_released( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$this->seed_plan_snapshot( $contract, array( 'selling_plan_id' => 7 ) );
+
+		$this->fail_next_query( $pattern );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( $message );
+
+		$this->sut->find( $id );
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function provide_failing_child_reads(): array {
+		return array(
+			'items'         => array( '/^\s*SELECT \* FROM \S*contract_items WHERE contract_id/', 'Failed to read the items of contract' ),
+			'addresses'     => array( '/^\s*SELECT \* FROM \S*contract_addresses WHERE contract_id/', 'Failed to read the addresses of contract' ),
+			'plan snapshot' => array( '/^\s*SELECT payload, schema_version FROM \S*subscription_snapshots WHERE id = /', 'Failed to read snapshot' ),
+		);
+	}
+
+	/**
+	 * @testdox A cycle read throws when its snapshot read fails, instead of a cycle without its snapshot.
+	 * @dataProvider provide_failing_cycle_snapshot_reads
+	 *
+	 * @param int $skip Snapshot reads to let through first: 0 breaks the plan snapshot, 1 the items snapshot.
+	 */
+	public function test_cycle_read_throws_on_a_failed_snapshot_read( int $skip ): void {
+		$id           = $this->insert_released( $this->make_contract() );
+		$snapshot_ids = $this->seed_cycle_snapshots( $id );
+		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$snapshot_ids ) );
+
+		$this->fail_next_query( '/^\s*SELECT payload, schema_version FROM \S*subscription_snapshots WHERE id = /', $skip );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( "Failed to read snapshot {$snapshot_ids[ $skip ]}:" );
+
+		$this->sut->find_cycles( $id );
+	}
+
+	/**
+	 * @return array<string, array{0: int}>
+	 */
+	public function provide_failing_cycle_snapshot_reads(): array {
+		return array(
+			'plan snapshot'  => array( 0 ),
+			'items snapshot' => array( 1 ),
+		);
+	}
+
+	/**
+	 * @testdox A list read throws when its plan snapshot batch read fails, instead of contracts without plan terms.
+	 */
+	public function test_list_read_throws_on_a_failed_snapshot_batch_read(): void {
+		$id       = $this->insert_released( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$this->seed_plan_snapshot( $contract, array( 'selling_plan_id' => 7 ) );
+
+		$this->fail_next_query( '/FROM \S*subscription_snapshots\s+WHERE id IN/' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read plan snapshots' );
+
+		$this->sut->query();
+	}
+
+	/**
 	 * @testdox Multiple non-counting cycles (count = null) coexist in one chain.
 	 */
 	public function test_multiple_null_count_cycles_coexist(): void {
@@ -1939,10 +2159,10 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->append_cycle_locked( $this->make_cycle( $id, 1, null, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
 		$this->append_cycle_locked( $this->make_cycle( $id, 2, null, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
 
-		$history = $this->sut->find_cycle_history( $id );
-		$this->assertCount( 2, $history );
-		$this->assertNull( $history[0]->get_count() );
-		$this->assertNull( $history[1]->get_count() );
+		$cycles = $this->sut->find_cycles( $id );
+		$this->assertCount( 2, $cycles );
+		$this->assertNull( $cycles[0]->get_count() );
+		$this->assertNull( $cycles[1]->get_count() );
 	}
 
 	/**
@@ -2199,7 +2419,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'cancel', $e->get_operation() );
 		}
-		$this->assertCount( 1, $this->sut->find_cycle_history( $id ), 'Nothing is appended.' );
+		$this->assertCount( 1, $this->sut->find_cycles( $id ), 'Nothing is appended.' );
 
 		try {
 			$this->sut->transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::BILLED, array(), $lock );
@@ -2221,7 +2441,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->sut->append_cycle( $cycle, $lock );
 
 		$this->assertNotNull( $cycle->get_id() );
-		$this->assertCount( 1, $this->sut->find_cycle_history( $id ) );
+		$this->assertCount( 1, $this->sut->find_cycles( $id ) );
 	}
 
 	/**
@@ -2571,10 +2791,36 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( '1', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE creation_key = %s AND extension_slug = %s", 'order:42', 'lite' ) ) );
 
 		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'other-ext', 'order:42' ), 'checkout' ), 'Another extension may use the same key.' );
+		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'LITE', 'order:42' ), 'checkout' ), 'An owner differing only in case is another extension.' );
 		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', 'Order:42' ), 'checkout' ), 'Keys differing only in case are distinct.' );
 		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', 'ördér:42' ), 'checkout' ), 'Keys differing only in accents are distinct.' );
 		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', null ), 'checkout' ) );
 		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', null ), 'checkout' ), 'Null keys never collide.' );
+	}
+
+	/**
+	 * @testdox acquire_lock matches the owner exactly: a slug differing only in case takes no lock.
+	 */
+	public function test_acquire_lock_matches_the_owner_exactly(): void {
+		$id = $this->insert_released( $this->keyed_contract( 'lite', null ) );
+
+		$this->assertNull( $this->sut->acquire_lock( $id, 'LITE', 'test' ) );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'] );
+
+		$lock = $this->sut->acquire_lock( $id, 'lite', 'test' );
+		$this->assertNotNull( $lock );
+		$lock->release();
+	}
+
+	/**
+	 * @testdox The creation-key fallback read matches the owner exactly.
+	 */
+	public function test_creation_key_fallback_read_matches_the_owner_exactly(): void {
+		$this->insert_released( $this->keyed_contract( 'lite', 'order:43' ) );
+
+		$this->assertTrue( $this->call_private( $this->sut, 'has_creation_key', 'lite', 'order:43' ) );
+		$this->assertFalse( $this->call_private( $this->sut, 'has_creation_key', 'LITE', 'order:43' ) );
+		$this->assertFalse( $this->call_private( $this->sut, 'has_creation_key', 'lite', 'ORDER:43' ) );
 	}
 
 	/**

@@ -179,19 +179,46 @@ const nonCoreSpecs = [
  * serial resets wipe the data of the parallel workers.
  */
 const blocksSerialSpecs = [
-	// Switch the active theme, which every other spec renders with.
+	// Switch the active theme. It is a site-wide setting, and every spec
+	// renders with the active theme, so a test lock cannot isolate the switch.
+
+	// Activates `theme-with-woo-templates` and saves its Single Product
+	// template and Add to Cart + Options template part.
 	'**/tests/blocks/add-to-cart-with-options/add-to-cart-with-options.block_theme_with_templates.spec.ts',
-	'**/tests/blocks/cart/cart-checkout-block-notices.shopper.block_theme.spec.ts',
+	// Activates three child themes of the block theme to check their notices,
+	// and makes the Cart Shortcode page the cart page.
+	'**/tests/blocks/cart/cart-checkout-block-notices-child-themes.shopper.block_theme.spec.ts',
+	// Activates Storefront and three of its child themes to check notices in a
+	// classic theme, and makes the Cart Shortcode page the cart page.
 	'**/tests/blocks/cart/cart-checkout-block-notices.shopper.classic_theme.spec.ts',
+	// Activates Storefront to check the Mini-Cart drawer with the classic AJAX
+	// add-to-cart button.
 	'**/tests/blocks/mini-cart/mini-cart.classic_theme.spec.ts',
+	// Activates Storefront to check the Product Button block in a classic
+	// theme.
 	'**/tests/blocks/product-button/product-button.classic_theme.spec.ts',
+	// Activates Storefront to check which block styles a classic theme loads.
 	'**/tests/blocks/style.classic_theme.spec.ts',
+	// Activates `theme-with-woo-templates` and saves its template for one
+	// product.
 	'**/tests/blocks/templates/single-product-template.block_theme_with_templates.spec.ts',
+	// Saves each site-wide WooCommerce template and template part. The
+	// template part priority tests also activate `theme-with-woo-templates`.
 	'**/tests/blocks/templates/template-customization.block_theme.spec.ts',
+	// Activates `theme-with-woo-templates` and saves each of its WooCommerce
+	// templates.
 	'**/tests/blocks/templates/template-customization.block_theme_with_templates.spec.ts',
+	// Activates a Storefront child theme that has block template parts, and
+	// saves its Mini-Cart template part.
 	'**/tests/blocks/templates/template-part-customization.classic_theme_with_template_parts.spec.ts',
+	// Activates two Storefront child themes with block template part support,
+	// and saves the Mini-Cart template part.
 	'**/tests/blocks/templates/template-part-customization.classic_theme_with_template_parts_support.spec.ts',
+	// Activates `theme-with-woo-templates`, and saves the site-wide Single
+	// Product, Product Catalog and Products by Category templates.
 	'**/tests/blocks/templates/template-priority.block_theme.spec.ts',
+	// Activates Storefront, because only a classic theme has the widget
+	// editor.
 	'**/tests/blocks/widget-area/widget-area.classic_theme.spec.ts',
 
 	// Save site-wide templates, template parts or pages (single product, product
@@ -199,18 +226,16 @@ const blocksSerialSpecs = [
 	// `wc_blocks_use_blockified_product_grid_block_as_template` option. Every
 	// spec that visits those pages reads them.
 	'**/tests/blocks/add-to-cart-with-options/add-to-cart-with-options.block_theme.spec.ts',
-	'**/tests/blocks/attributes-filter/attribute-filter.block_theme.spec.ts',
+	'**/tests/blocks/attributes-filter/attribute-filter-classic-template.block_theme.spec.ts',
 	'**/tests/blocks/cart-store/cart-line-identity.block_theme.spec.ts',
 	'**/tests/blocks/checkout/checkout-block.merchant.block_theme.spec.ts',
 	'**/tests/blocks/classic-template/classic-template-blockified-option.block_theme.spec.ts',
 	'**/tests/blocks/mini-cart/mini-cart-block.shopper.block_theme.spec.ts',
 	'**/tests/blocks/mini-cart/mini-cart-header-colors.block_theme.spec.ts',
 	'**/tests/blocks/page-content-wrapper/page-content-wrapper-page-edit.block_theme.spec.ts',
-	'**/tests/blocks/price-filter/price-filter.block_theme.spec.ts',
+	'**/tests/blocks/price-filter/price-filter-classic-template.block_theme.spec.ts',
 	'**/tests/blocks/product-collection/product-collection-site-templates.block_theme.spec.ts',
-	'**/tests/blocks/product-filters/active-filter-frontend.block_theme.spec.ts',
-	'**/tests/blocks/product-filters/attribute-filter-frontend.block_theme.spec.ts',
-	'**/tests/blocks/product-filters/product-filters-frontend.block_theme.spec.ts',
+	'**/tests/blocks/product-filters/product-filters-shop.block_theme.spec.ts',
 	'**/tests/blocks/products/products.block_theme.spec.ts',
 	'**/tests/blocks/rating-filter/rating-filter.block_theme.spec.ts',
 	'**/tests/blocks/stock-filter/stock-filter.block_theme.spec.ts',
@@ -244,15 +269,10 @@ const blocksSerialSpecs = [
 	// stops working.
 	'**/tests/blocks/templates/shop-page.block_theme.spec.ts',
 
-	// Place orders, which change the Best Sellers ranking. Some also add to the
-	// cart as the admin user, whose cart all workers share.
-	'**/tests/blocks/cart/cart-checkout-block-coupons.shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.guest-shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.merchant.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/checkout-block-locale-hide-country.block_theme.spec.ts',
-
-	// Create or edit products and categories that catalog specs count.
+	// Creates a visible $10 product with limited stock, which the Product
+	// Collection block needs to show it. While it exists, it changes product
+	// counts that catalog specs check, such as the single product under $10 in
+	// `inspector-controls`.
 	'**/tests/blocks/product-collection/product-collection-errors.block_theme.spec.ts',
 ];
 

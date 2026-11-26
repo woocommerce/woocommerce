@@ -83,6 +83,8 @@ class UcpSwitch {
 			// Plain and index.php permalinks are served from the static file. Write it now so the address exists as soon as UCP is on.
 			if ( $enable ) {
 				$this->ucp_discovery->maybe_sync_file();
+				// Checked again: the address is only known to load once the file is written, and a failed write is silent.
+				$failing = $this->store_conditions->failing_required();
 			}
 			\WC_Tracks::record_event( 'agentic_commerce_ucp_toggled', array( 'enabled' => $enable ? 'yes' : 'no' ) );
 		}

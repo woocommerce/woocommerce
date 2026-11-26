@@ -35,6 +35,27 @@ final class ReserveStock {
 	private const MAX_OWN_ORDERS = 10;
 
 	/**
+	 * Internal statuses whose holds have always counted as held stock.
+	 *
+	 * The reserved stock query keeps them as a literal pair. See get_status_clause().
+	 */
+	private const LEGACY_COUNTED_ORDER_STATUSES = array(
+		'wc-' . OrderStatus::CHECKOUT_DRAFT,
+		OrderInternalStatus::PENDING,
+	);
+
+	/**
+	 * Internal statuses an order can still be resumed and paid from.
+	 *
+	 * Only holds on these orders are ever excluded as the shopper's own. A paid
+	 * order's hold keeps counting until wc_reduce_stock_levels() releases it.
+	 */
+	private const UNPAID_ORDER_STATUSES = array(
+		...self::LEGACY_COUNTED_ORDER_STATUSES,
+		OrderInternalStatus::FAILED,
+	);
+
+	/**
 	 * Is stock reservation enabled?
 	 *
 	 * @var boolean
@@ -232,6 +253,35 @@ final class ReserveStock {
 	}
 
 	/**
+	 * Lower an order's hold on one product by the quantity just taken from stock.
+	 *
+	 * Must run right after the decrement so the units are not counted twice.
+	 *
+	 * @internal
+	 * @since 11.3.1
+	 *
+	 * @param int       $order_id   Order holding the stock.
+	 * @param int       $product_id Stock-managed product ID.
+	 * @param int|float $quantity   Quantity that was taken from stock.
+	 */
+	public function lower_held_stock_for_product( int $order_id, int $product_id, $quantity ): void {
+		global $wpdb;
+
+		if ( ! $this->is_enabled() || $quantity <= 0 ) {
+			return;
+		}
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->wc_reserved_stock} SET `stock_quantity` = GREATEST( 0, `stock_quantity` - %f ) WHERE `order_id` = %d AND `product_id` = %d",
+				$quantity,
+				$order_id,
+				$product_id
+			)
+		);
+	}
+
+	/**
 	 * Reserve stock for a product by inserting rows into the DB.
 	 *
 	 * @throws ReserveStockException If a row cannot be inserted.
@@ -298,14 +348,14 @@ final class ReserveStock {
 	private function get_query_for_reserved_stock( $product_id, $exclude_order_id ): string {
 		global $wpdb;
 
-		$pending = OrderInternalStatus::PENDING;
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$join         = "{$wpdb->prefix}wc_orders orders ON stock_table.`order_id` = orders.id";
-			$where_status = "orders.status IN ( 'wc-checkout-draft', '$pending' )";
+			$join          = "{$wpdb->prefix}wc_orders orders ON stock_table.`order_id` = orders.id";
+			$status_column = 'orders.status';
 		} else {
-			$join         = "{$wpdb->posts} posts ON stock_table.`order_id` = posts.ID";
-			$where_status = "posts.post_status IN ( 'wc-checkout-draft', '$pending' )";
+			$join          = "{$wpdb->posts} posts ON stock_table.`order_id` = posts.ID";
+			$status_column = 'posts.post_status';
 		}
+		$where_status = $this->get_status_clause( $status_column, $this->get_counted_order_statuses() );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$query = $wpdb->prepare(
@@ -322,13 +372,16 @@ final class ReserveStock {
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		$query .= $this->get_stale_own_holds_exclusion_clause( $product_id, $exclude_order_id );
+		$query .= $this->get_stale_own_holds_exclusion_clause( $product_id, $exclude_order_id, $status_column );
 
 		/**
 		 * Filter: woocommerce_query_for_reserved_stock
 		 * Allows to filter the query for getting reserved stock of a product.
 		 *
 		 * @since 4.5.0
+		 * @since 11.3.1 Holds are counted for failed, processing, on-hold and completed orders too, until
+		 *               the hold is released or expires. Use the woocommerce_reserved_stock_order_statuses
+		 *               filter to change the counted statuses instead of editing this query.
 		 * @param string $query            The query for getting reserved stock of a product.
 		 * @param int    $product_id       Product ID.
 		 * @param int    $exclude_order_id Order to exclude from the results.
@@ -337,13 +390,94 @@ final class ReserveStock {
 	}
 
 	/**
+	 * Builds the status condition of the reserved stock query.
+	 *
+	 * The two statuses counted before 11.3.1 are kept as the literal
+	 * `IN ( 'wc-checkout-draft', 'wc-pending' )`, with any further statuses in a
+	 * second IN list, because woocommerce_query_for_reserved_stock callbacks are
+	 * known to string-replace that literal to add their own statuses.
+	 *
+	 * @param string   $status_column Status column of the joined order table.
+	 * @param string[] $statuses      Internal order statuses to count.
+	 * @return string SQL condition.
+	 */
+	private function get_status_clause( string $status_column, array $statuses ): string {
+		$legacy_statuses = self::LEGACY_COUNTED_ORDER_STATUSES;
+		$extra_statuses  = array_values( array_diff( $statuses, $legacy_statuses ) );
+
+		if ( count( array_intersect( $legacy_statuses, $statuses ) ) !== count( $legacy_statuses ) ) {
+			return "$status_column IN ( " . $this->quote_status_list( $statuses ) . ' )';
+		}
+
+		$clause = "$status_column IN ( " . $this->quote_status_list( $legacy_statuses ) . ' )';
+
+		if ( empty( $extra_statuses ) ) {
+			return $clause;
+		}
+
+		return "( $clause OR $status_column IN ( " . $this->quote_status_list( $extra_statuses ) . ' ) )';
+	}
+
+	/**
+	 * Quotes and escapes a list of statuses for use inside an SQL IN list.
+	 *
+	 * @param string[] $statuses Statuses.
+	 * @return string Comma-separated quoted statuses.
+	 */
+	private function quote_status_list( array $statuses ): string {
+		return "'" . implode( "', '", array_map( 'esc_sql', $statuses ) ) . "'";
+	}
+
+	/**
+	 * Returns the internal order statuses whose stock holds count as held stock.
+	 *
+	 * Payment writes the new status before stock is reduced, so holds on paid statuses
+	 * stay counted until wc_reduce_stock_levels() releases them. Failed is counted because
+	 * checkout resumes a failed order and reserves again without changing its status.
+	 *
+	 * @return string[] Internal (prefixed) order statuses.
+	 */
+	private function get_counted_order_statuses(): array {
+		$default_statuses = array(
+			...self::LEGACY_COUNTED_ORDER_STATUSES,
+			OrderInternalStatus::FAILED,
+			OrderInternalStatus::PROCESSING,
+			OrderInternalStatus::ON_HOLD,
+			OrderInternalStatus::COMPLETED,
+		);
+
+		/**
+		 * Filters the internal order statuses whose stock holds count as held stock.
+		 *
+		 * A custom status that is paid before its stock is reduced should be added here so
+		 * its hold keeps counting until wc_reduce_stock_levels() releases it. Statuses not
+		 * listed stop counting as soon as the order enters them.
+		 *
+		 * @since 11.3.1
+		 *
+		 * @param string[] $statuses Internal order statuses, e.g. 'wc-processing'. Unprefixed slugs are accepted.
+		 */
+		$statuses = apply_filters( 'woocommerce_reserved_stock_order_statuses', $default_statuses );
+
+		if ( ! is_array( $statuses ) ) {
+			return $default_statuses;
+		}
+
+		$statuses = array_filter( array_map( 'strval', array_filter( $statuses, 'is_scalar' ) ) );
+		$statuses = array_values( array_unique( array_map( fn( $status ) => 0 === strpos( $status, 'wc-' ) ? $status : 'wc-' . $status, $statuses ) ) );
+
+		return empty( $statuses ) ? $default_statuses : $statuses;
+	}
+
+	/**
 	 * Builds a SQL clause excluding the current shopper's stale stock holds.
 	 *
-	 * @param int $product_id       Product whose reserved stock is being counted.
-	 * @param int $exclude_order_id Order already excluded by the caller.
+	 * @param int    $product_id       Product whose reserved stock is being counted.
+	 * @param int    $exclude_order_id Order already excluded by the caller.
+	 * @param string $status_column    Status column of the order table joined by the caller.
 	 * @return string SQL clause, or an empty string when no holds qualify.
 	 */
-	private function get_stale_own_holds_exclusion_clause( $product_id, $exclude_order_id ): string {
+	private function get_stale_own_holds_exclusion_clause( $product_id, $exclude_order_id, string $status_column ): string {
 		global $wpdb;
 
 		/**
@@ -374,15 +508,21 @@ final class ReserveStock {
 			return '';
 		}
 
-		$placeholders = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
+		$placeholders    = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
+		$unpaid_statuses = $this->quote_status_list( self::UNPAID_ORDER_STATUSES );
 
 		// The `timestamp` column records when the hold was first placed, so it
 		// measures the age of the shopper's attempt rather than of the last write.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The interpolated value contains only generated %d placeholders.
+		// The status check is applied here rather than when collecting the ids:
+		// the session list and the per-request customer memo can still name an
+		// order after it has been paid, and its hold must keep counting until
+		// wc_reduce_stock_levels() releases it.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Interpolated values are generated %d placeholders, a column name and constant statuses.
 		return $wpdb->prepare(
 			"
 			AND NOT (
 				stock_table.`order_id` IN ( $placeholders )
+				AND $status_column IN ( $unpaid_statuses )
 				AND stock_table.`timestamp` < ( NOW() - INTERVAL %d MINUTE )
 			)
 			",
@@ -486,8 +626,8 @@ final class ReserveStock {
 	 * Returns order ids of a signed-in customer that could be holding stock, newest first.
 	 *
 	 * Covers a shopper whose session pointers were lost (new device, cleared
-	 * cookies, lapsed session). The statuses match the ones the reserved stock
-	 * query counts.
+	 * cookies, lapsed session). Only unpaid statuses are listed to keep the lookup
+	 * small; get_stale_own_holds_exclusion_clause() enforces the same rule in SQL.
 	 *
 	 * @param int $customer_id Customer ID.
 	 * @return int[]
@@ -501,7 +641,7 @@ final class ReserveStock {
 		$order_ids = wc_get_orders(
 			array(
 				'customer' => $customer_id,
-				'status'   => array( OrderStatus::CHECKOUT_DRAFT, OrderStatus::PENDING ),
+				'status'   => array( OrderStatus::CHECKOUT_DRAFT, OrderStatus::PENDING, OrderStatus::FAILED ),
 				'limit'    => self::MAX_OWN_ORDERS,
 				'orderby'  => 'date',
 				'order'    => 'DESC',

@@ -34,6 +34,7 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 			array( SchemaInstaller::TABLE_CONTRACT_META ),
 			array( SchemaInstaller::TABLE_CYCLES ),
 			array( SchemaInstaller::TABLE_SNAPSHOTS ),
+			array( SchemaInstaller::TABLE_CONTRACT_HISTORY ),
 		);
 	}
 
@@ -291,10 +292,10 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The schema version is 2.8.0 (contract lock).
+	 * @testdox The schema version is 2.10.0 (contract history table).
 	 */
-	public function test_schema_version_is_2_8_0(): void {
-		$this->assertSame( '2.8.0', SchemaInstaller::get_version() );
+	public function test_schema_version_is_2_10_0(): void {
+		$this->assertSame( '2.10.0', SchemaInstaller::get_version() );
 	}
 
 	/**
@@ -380,6 +381,34 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 
 		$this->assertIsArray( $row );
 		$this->assertSame( $wpdb->charset . '_bin', $row['Collation'] ?? null );
+	}
+
+	/**
+	 * @testdox The owner column of the $logical table compares binary, in the table charset.
+	 * @dataProvider provide_owner_tables
+	 *
+	 * @param string $logical Logical table identifier.
+	 */
+	public function test_owner_column_is_binary_collated( string $logical ): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( $logical );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW FULL COLUMNS FROM {$table} LIKE %s", 'extension_slug' ), ARRAY_A );
+
+		$this->assertIsArray( $row );
+		$this->assertSame( $wpdb->charset . '_bin', $row['Collation'] ?? null );
+	}
+
+	/**
+	 * @return array<string, array{0: string}>
+	 */
+	public function provide_owner_tables(): array {
+		return array(
+			'plans'     => array( SchemaInstaller::TABLE_PLANS ),
+			'contracts' => array( SchemaInstaller::TABLE_CONTRACTS ),
+			'cycles'    => array( SchemaInstaller::TABLE_CYCLES ),
+		);
 	}
 
 	/**
@@ -652,6 +681,52 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 			array( 'parent_id' ),
 			$this->index_columns( $table, 'parent' )
 		);
+	}
+
+	/**
+	 * @testdox The contract history table has its columns, with a nullable cycle, key and payload.
+	 */
+	public function test_contract_history_table_columns(): void {
+		global $wpdb;
+
+		$table    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_HISTORY );
+		$expected = array(
+			'id'               => 'NO',
+			'contract_id'      => 'NO',
+			'cycle_id'         => 'YES',
+			'type'             => 'NO',
+			'creation_key'     => 'YES',
+			'payload'          => 'YES',
+			'date_created_gmt' => 'NO',
+		);
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows    = $wpdb->get_results( "SHOW FULL COLUMNS FROM {$table}", ARRAY_A );
+		$actual  = array();
+		$collate = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			if ( is_array( $row ) ) {
+				$field             = Coercion::coerce_string( $row['Field'] ?? null );
+				$actual[ $field ]  = Coercion::coerce_string( $row['Null'] ?? null );
+				$collate[ $field ] = $row['Collation'] ?? null;
+			}
+		}
+
+		$this->assertSame( $expected, $actual );
+		$this->assertSame( $wpdb->charset . '_bin', $collate['creation_key'], 'The creation key compares binary.' );
+	}
+
+	/**
+	 * @testdox The contract history table keys reads by contract and makes the creation key unique per contract.
+	 */
+	public function test_contract_history_table_indexes(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_HISTORY );
+
+		$this->assertEqualsCanonicalizing( array( 'PRIMARY', 'contract', 'creation' ), $this->index_names( $table ) );
+		$this->assertSame( array( 'contract_id' ), $this->index_columns( $table, 'contract' ) );
+		$this->assertFalse( $this->index_is_unique( $table, 'contract' ) );
+		$this->assertSame( array( 'contract_id', 'creation_key' ), $this->index_columns( $table, 'creation' ) );
+		$this->assertTrue( $this->index_is_unique( $table, 'creation' ) );
 	}
 
 	/**

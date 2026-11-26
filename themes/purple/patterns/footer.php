@@ -13,7 +13,7 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"name":"Footer","patternName":"purple/footer","description":"A footer pattern with social links and navigation.","categories":["footer","purple"]},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Footer', 'Pattern title', 'purple' ) ); ?>,"patternName":"purple/footer","description":"A footer pattern with social links and navigation.","categories":["footer","purple"]},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|30","left":"var:preset|spacing|50"}}}} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"40%","layout":{"type":"default"}} -->
 <div class="wp-block-column" style="flex-basis:40%"><!-- wp:site-title {"level":0} /-->
@@ -41,10 +41,10 @@
 <!-- /wp:heading -->
 
 <!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical"}} -->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Cardigans', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Sweaters', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Shirts', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Accessories', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'Cardigans', 'purple' ) ); ?>,"url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'Sweaters', 'purple' ) ); ?>,"url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'Shirts', 'purple' ) ); ?>,"url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'Accessories', 'purple' ) ); ?>,"url":"#"} /-->
 <!-- /wp:navigation --></div>
 <!-- /wp:column -->
 
@@ -54,10 +54,10 @@
 <!-- /wp:heading -->
 
 <!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical"}} -->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'About', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Contact us', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'FAQs', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Blog', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'About', 'purple' ) ); ?>,"url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'Contact us', 'purple' ) ); ?>,"url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'FAQs', 'purple' ) ); ?>,"url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'Blog', 'purple' ) ); ?>,"url":"#"} /-->
 <!-- /wp:navigation --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
@@ -83,9 +83,9 @@
 <!-- /wp:group -->
 
 <!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|30"},"typography":{"lineHeight":"1.71"}},"fontSize":"small","layout":{"type":"flex","flexWrap":"nowrap"}} -->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Shipping & returns', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Privacy policy', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Terms & conditions', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'Shipping & returns', 'purple' ) ); ?>,"url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'Privacy policy', 'purple' ) ); ?>,"url":"#"} /-->
+<!-- wp:navigation-link {"label":<?php echo purple_block_attribute_string( esc_html__( 'Terms & conditions', 'purple' ) ); ?>,"url":"#"} /-->
 <!-- /wp:navigation --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->

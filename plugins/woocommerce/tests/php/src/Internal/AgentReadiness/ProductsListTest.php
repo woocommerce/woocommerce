@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
-use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductFailures;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductsList;
@@ -36,7 +35,6 @@ class ProductsListTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		StoreOutputChecksTest::block_requests();
-		update_option( 'woocommerce_feature_' . AgenticCommerceSettings::FEATURE_ID . '_enabled', 'yes' );
 		$this->readiness = wc_get_container()->get( AgentReadiness::class );
 		$this->sut       = wc_get_container()->get( ProductsList::class );
 	}
@@ -47,7 +45,6 @@ class ProductsListTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_all_filters( 'pre_http_request' );
 		delete_option( AgentReadiness::REPORT_OPTION );
-		delete_option( 'woocommerce_feature_' . AgenticCommerceSettings::FEATURE_ID . '_enabled' );
 		unset( $_GET[ ProductsList::FILTER_PARAM ] );
 		parent::tearDown();
 	}
@@ -327,6 +324,32 @@ class ProductsListTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The Products list says when it shows only the products from an AI shopping health link, and links to all products.
+	 */
+	public function test_filter_notice(): void {
+		$notice                    = function (): string {
+			ob_start();
+			$this->sut->filter_notice();
+			return (string) ob_get_clean();
+		};
+		$GLOBALS['current_screen'] = \WP_Screen::get( 'edit-product' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		try {
+			$this->assertSame( '', $notice(), 'No notice on the usual list' );
+
+			$_GET[ ProductsList::FILTER_PARAM ] = 'missing_images';
+			$html                               = $notice();
+			$this->assertStringContainsString( 'Showing only products from AI shopping health.', $html );
+			$this->assertStringContainsString( 'Show all products</a>', $html );
+			$this->assertStringContainsString( 'href="' . esc_url( admin_url( 'edit.php?post_type=product' ) ) . '"', $html, 'The link drops the filter' );
+
+			$GLOBALS['current_screen'] = \WP_Screen::get( 'edit-post' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$this->assertSame( '', $notice(), 'Only on the Products list' );
+		} finally {
+			unset( $GLOBALS['current_screen'], $_GET[ ProductsList::FILTER_PARAM ] );
+		}
+	}
+
+	/**
 	 * @testdox The filter limits the main Products list query, and only there.
 	 */
 	public function test_filter_query(): void {
@@ -355,13 +378,6 @@ class ProductsListTest extends WC_Unit_Test_Case {
 			$other->set( 'post_type', 'product' );
 			$this->sut->apply_filter( $other );
 			$this->assertSame( '', $other->get( 'meta_query' ) );
-
-			update_option( 'woocommerce_feature_' . AgenticCommerceSettings::FEATURE_ID . '_enabled', 'no' );
-			$off = new \WP_Query();
-			$off->set( 'post_type', 'product' );
-			$wp_the_query = $off; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			$this->sut->apply_filter( $off );
-			$this->assertSame( '', $off->get( 'meta_query' ), 'The filter stays off with the feature flag' );
 		} finally {
 			// A failed assertion must not leave the next test on an admin products screen.
 			list( $pagenow, $wp_the_query ) = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited

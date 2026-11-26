@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Internal\RestApiControllerBase;
 
 /**
  * Controller for the REST endpoints associated to the receipt rendering engine.
- * The endpoints require the read_shop_order capability for the order at hand.
+ * The endpoints require the same permission as reading an order through the REST API.
  */
 class ReceiptRenderingRestController extends RestApiControllerBase {
 
@@ -34,7 +34,7 @@ class ReceiptRenderingRestController extends RestApiControllerBase {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => fn( $request ) => $this->run( $request, 'create_order_receipt' ),
-					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'read_shop_order', $request->get_param( 'id' ) ),
+					'permission_callback' => fn( $request ) => $this->check_post_type_permission( $request, 'shop_order', 'read', (int) $request->get_param( 'id' ) ),
 					'args'                => $this->get_args_for_create_order_receipt(),
 					'schema'              => $this->get_schema_for_get_and_post_order_receipt(),
 				),
@@ -48,7 +48,7 @@ class ReceiptRenderingRestController extends RestApiControllerBase {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => fn( $request ) => $this->run( $request, 'get_order_receipt' ),
-					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'read_shop_order', $request->get_param( 'id' ) ),
+					'permission_callback' => fn( $request ) => $this->check_post_type_permission( $request, 'shop_order', 'read', (int) $request->get_param( 'id' ) ),
 					'args'                => $this->get_args_for_get_order_receipt(),
 					'schema'              => $this->get_schema_for_get_and_post_order_receipt(),
 				),

@@ -33,6 +33,18 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	private array $requests = array();
 
 	/**
+	 * A rules file that names one check, so every other bundled check is left out.
+	 */
+	private const BRAND_ONLY = array(
+		'missing_brand' => array(
+			'google' => array(
+				'field'  => 'brand',
+				'effect' => 'not_listable',
+			),
+		),
+	);
+
+	/**
 	 * Body and status the next request answers with.
 	 *
 	 * @var array{body:string,code:int}
@@ -57,6 +69,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( RemoteRules::OPTION );
+		delete_option( 'woocommerce_show_marketplace_suggestions' );
 		parent::tearDown();
 	}
 
@@ -127,14 +140,55 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With no URL set nothing is fetched and the bundled rules apply.
+	 * @testdox With no URL set nothing is fetched, a copy stored earlier is removed and the bundled rules apply.
 	 */
 	public function test_no_url_makes_no_request(): void {
+		$this->serve( self::BRAND_ONLY );
+		$this->assertTrue( $this->sut->refresh(), 'A copy is stored first' );
+		$this->assertArrayNotHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'The stored file is the list' );
+		$this->requests = array();
+		remove_all_filters( 'woocommerce_agent_readiness_rules_url' );
 		add_filter( 'woocommerce_agent_readiness_rules_url', '__return_empty_string' );
+
 		$this->assertFalse( $this->sut->refresh() );
 		$this->assertSame( array(), $this->requests );
 		$this->assertSame( array(), $this->sut->channel_rules() );
 		$this->assertArrayHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'With no file, the bundled checks run' );
+	}
+
+	/**
+	 * @testdox With marketplace suggestions turned off the WooCommerce.com file isn't fetched, and a copy stored earlier is removed so the bundled checks run; a URL set by the filter is still fetched.
+	 */
+	public function test_suggestions_opt_out_skips_the_published_file(): void {
+		$this->serve( self::BRAND_ONLY );
+		$this->assertTrue( $this->sut->refresh(), 'A copy is stored first' );
+		$this->assertArrayNotHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'The stored file is the list' );
+		remove_all_filters( 'woocommerce_agent_readiness_rules_url' );
+		$this->requests = array();
+		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
+
+		$this->assertFalse( $this->sut->refresh() );
+		$this->assertSame( array(), $this->requests, 'Nothing is fetched from WooCommerce.com' );
+		$this->assertFalse( $this->sut->has_stored_file(), 'The stored copy is removed' );
+		$this->assertSame( '', $this->sut->version() );
+		$this->assertArrayHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'A bundled check the old file left out runs again' );
+
+		$this->serve( self::BRAND_ONLY );
+		$this->assertTrue( $this->sut->refresh(), 'A URL set by the filter is still fetched' );
+		$this->assertCount( 1, $this->requests );
+	}
+
+	/**
+	 * @testdox A file from a URL set by the filter stays stored with marketplace suggestions turned off.
+	 */
+	public function test_suggestions_opt_out_keeps_a_file_from_a_filtered_url(): void {
+		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
+		$this->serve( self::BRAND_ONLY );
+		$this->assertTrue( $this->sut->refresh() );
+		$this->answer['code'] = 500;
+
+		$this->assertFalse( $this->sut->refresh(), 'The fetch fails' );
+		$this->assertTrue( $this->sut->has_stored_file(), 'The last good copy stays' );
 	}
 
 	/**
@@ -663,19 +717,19 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->serve(
 			$channels,
 			array(
-				'refund_returns_page' => array( 'required' => true ),
-				'search_visible'      => array( 'required' => false ),
-				'launched'            => array(
+				'guest_checkout'   => array( 'required' => true ),
+				'search_visible'   => array( 'required' => false ),
+				'launched'         => array(
 					'required' => false,
 					'off'      => true,
 				),
-				'order_emails'        => array(
+				'order_emails'     => array(
 					'off'   => true,
 					'label' => 'Ignored',
 				),
-				'llms_txt_present'    => array( 'off' => true ),
-				'terms_page'          => array( 'required' => 'yes' ),
-				'privacy_page'        => 'required',
+				'llms_txt_present' => array( 'off' => true ),
+				'terms_page'       => array( 'required' => 'yes' ),
+				'privacy_page'     => 'required',
 			)
 		);
 		$this->assertTrue( $this->sut->refresh() );
@@ -683,7 +737,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( 'off' => true ), RemoteRules::store_check( 'order_emails' ), 'Only required and off are kept' );
 		$this->assertSame( array(), RemoteRules::store_check( 'terms_page' ), 'A value that is not true or false is dropped' );
 		$this->assertSame( array(), RemoteRules::store_check( 'privacy_page' ) );
-		$this->assertTrue( StoreConditions::shows_required( $step( 'refund_returns_page' ) ) );
+		$this->assertTrue( StoreConditions::shows_required( $step( 'guest_checkout' ) ) );
 		$this->assertFalse( StoreConditions::shows_required( $step( 'search_visible' ) ), 'The file can drop a bundled Required step' );
 		$this->assertTrue( StoreConditions::shows_required( $step( 'payment_method' ) ), 'A step the map leaves out keeps its bundled level' );
 		$this->assertTrue( StoreConditions::shows_required( $step( 'launched', StoreConditions::LEVEL_REQUIRED ) ), 'A required condition stays Required' );
@@ -714,9 +768,9 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 
 		$this->serve( $channels );
 		$this->assertTrue( $this->sut->refresh() );
-		$this->assertSame( array(), RemoteRules::store_check( 'refund_returns_page' ) );
+		$this->assertSame( array(), RemoteRules::store_check( 'guest_checkout' ) );
 		$this->assertTrue( StoreConditions::shows_required( $step( 'search_visible' ) ), 'Without the map, the bundled list applies' );
-		$this->assertFalse( StoreConditions::shows_required( $step( 'refund_returns_page' ) ) );
+		$this->assertFalse( StoreConditions::shows_required( $step( 'guest_checkout' ) ) );
 		$this->assertContains( 'order_emails', array_column( wc_get_container()->get( StoreConditions::class )->all(), 'id' ) );
 	}
 
@@ -730,9 +784,9 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $file['checks'] );
 		$this->assertMatchesRegularExpression( '/^\d{4}-\d{2}-\d{2}$/', $file['version'], 'The version is the date of the last change' );
 		$this->assertSame(
-			array_fill_keys( StoreConditions::SHOWN_REQUIRED, array( 'required' => true ) ),
+			array_fill_keys( StoreConditions::SHOWN_REQUIRED, array( 'required' => true ) ) + array( 'pages_public' => array( 'required' => false ) ),
 			$file['store_checks'],
-			'The shipped file marks the bundled Required steps and turns nothing off, so the first publish changes nothing'
+			'The shipped file marks the bundled Required steps, and store pages that need a login as not Required, and turns nothing off, so the first publish changes nothing'
 		);
 
 		$rules  = ( new AgentReadiness() )->get_default_rules();

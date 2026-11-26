@@ -17,14 +17,18 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Plan repository.
+ *
+ * @internal Storage behind the `Api\` facades, not a supported extension surface. Arguments are
+ *           validated once, at the public boundary: owner slugs and other values arrive validated
+ *           and are not checked again here.
  */
 final class PlanRepository {
 
 	/**
-	 * SQL condition on the `p` alias: the plan's owner is exactly the bound slug. The binary cast
-	 * makes the match case-sensitive, as the engine's PHP comparisons of the owner are.
+	 * SQL condition on the `p` alias: the plan's owner is exactly the bound slug. The column's
+	 * binary collation makes the match case-sensitive, as the engine's PHP comparisons of the owner are.
 	 */
-	private const OWNER_MATCH = 'p.extension_slug = CAST(%s AS BINARY)';
+	private const OWNER_MATCH = 'p.extension_slug = %s';
 
 	/**
 	 * Policy columns stored as JSON.
@@ -92,6 +96,7 @@ final class PlanRepository {
 	 * @param int         $id             Plan id.
 	 * @param string|null $extension_slug Owning extension slug to scope the read to; null reads any extension.
 	 * @return Plan|null Hydrated plan, or null if not found (also when it belongs to another extension).
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a missing plan.
 	 */
 	public function find( int $id, ?string $extension_slug = null ): ?Plan {
 		global $wpdb;
@@ -109,6 +114,9 @@ final class PlanRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 		$row = $wpdb->get_row( $sql, ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( sprintf( 'Failed to read plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
+		}
 
 		if ( null === $row ) {
 			return null;
@@ -132,6 +140,7 @@ final class PlanRepository {
 	 *
 	 * @param array<string, mixed> $args Query args.
 	 * @return array<int, Plan>
+	 * @throws \RuntimeException If the read fails: a failed read must not look like no plans.
 	 */
 	public function query( array $args = array() ): array {
 		global $wpdb;
@@ -151,6 +160,9 @@ final class PlanRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table}{$where_sql} {$order} LIMIT %d OFFSET %d", $params ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( sprintf( 'Failed to read plans: %s', esc_html( $wpdb->last_error ) ) );
+		}
 		if ( ! is_array( $rows ) ) {
 			return array();
 		}
@@ -172,6 +184,7 @@ final class PlanRepository {
 	 * Supported args are the filter args accepted by query().
 	 *
 	 * @param array<string, mixed> $args Query args.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a zero count.
 	 */
 	public function count( array $args = array() ): int {
 		global $wpdb;
@@ -190,6 +203,9 @@ final class PlanRepository {
 		} else {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 			$result = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table}{$where_sql}", $where_params ) );
+		}
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( sprintf( 'Failed to count plans: %s', esc_html( $wpdb->last_error ) ) );
 		}
 
 		return (int) $result;
@@ -224,40 +240,30 @@ final class PlanRepository {
 			throw new \RuntimeException( 'Cannot update a plan that has no extension slug.' );
 		}
 
-		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 		$row     = $this->get_row_data( $plan );
 		$columns = array();
 		foreach ( $fields as $field ) {
 			if ( 'extension_slug' === $field || ! array_key_exists( $field, $row ) ) {
 				throw new \InvalidArgumentException( esc_html( sprintf( 'Cannot update plan field "%s".', $field ) ) );
 			}
-			if ( is_string( $row[ $field ] ) ) {
-				ColumnFit::assert_fits_column( $table, $field, $row[ $field ] );
-			}
 			$columns[ $field ] = $row[ $field ];
 		}
 
-		$now = gmdate( 'Y-m-d H:i:s' );
+		$now                         = gmdate( 'Y-m-d H:i:s' );
+		$columns['date_updated_gmt'] = $now;
 
-		$set    = array();
-		$values = array();
-		foreach ( array_merge( $columns, array( 'date_updated_gmt' => $now ) ) as $column => $value ) {
-			if ( null === $value ) {
-				$set[] = "`{$column}` = NULL";
-			} else {
-				$set[]    = "`{$column}` = %s";
-				$values[] = $value;
-			}
-		}
-		$values[] = $id;
-		$values[] = $extension_slug;
-
-		$sql = "UPDATE {$table} p SET " . implode( ', ', $set ) . ' WHERE p.id = %d AND ' . self::OWNER_MATCH;
-
-		// Not `$wpdb->update()`: its WHERE cannot express the binary owner match. Column names come
-		// from the plan's own row data; every value is a placeholder.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
-		$updated = $wpdb->query( $wpdb->prepare( $sql, $values ) );
+		// A value that does not fit its column makes `$wpdb->update()` return false, so nothing is written.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$updated = $wpdb->update(
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
+			$columns,
+			array(
+				'id'             => $id,
+				'extension_slug' => $extension_slug,
+			),
+			null,
+			array( '%d', '%s' )
+		);
 
 		if ( false === $updated ) {
 			throw new \RuntimeException( sprintf( 'Failed to update plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
@@ -304,14 +310,13 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Delete a plan and its meta rows by id and (optionally) extension slug.
-	 * Most usages from applications should specify the extension slug
-	 * to guard against cross-application operations.
+	 * Delete a plan and its meta rows by id. With `$extension_slug` the delete is scoped to that
+	 * owner: a plan of another extension is not deleted. Callers pass a validated slug.
 	 *
 	 * A failed delete throws, so a caller's transaction can roll back.
 	 *
 	 * @param int         $id             Plan id.
-	 * @param string|null $extension_slug Extension slug for the plan.
+	 * @param string|null $extension_slug Owner to scope the delete to, or null for any owner.
 	 * @return bool True when a row was removed.
 	 * @throws \RuntimeException If the plan row or its meta rows fail to delete.
 	 */
@@ -553,6 +558,7 @@ final class PlanRepository {
 	 * @param bool   $single  With a key: return the first value only.
 	 * @return mixed Empty key: `array<string, array<int, mixed>>` of all keys. Key + `$single`:
 	 *               the first value, or '' when absent. Key only: the list of values (`[]` when absent).
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public function get_meta( int $plan_id, string $key = '', bool $single = false ) {
 		if ( '' === $key ) {
@@ -783,6 +789,7 @@ final class PlanRepository {
 	 * @param int    $plan_id Plan id.
 	 * @param string $key     Meta key.
 	 * @return array<int, mixed>
+	 * @throws \RuntimeException If the read fails.
 	 */
 	private function find_meta_values( int $plan_id, string $key ): array {
 		$values = array();
@@ -799,6 +806,7 @@ final class PlanRepository {
 	 * @param int         $plan_id Plan id.
 	 * @param string|null $key     Meta key, or null for every key.
 	 * @return array<int, array{meta_key: string, meta_value: string}>
+	 * @throws \RuntimeException If the read fails: a failed read must not look like an absent key.
 	 */
 	private function find_meta_rows( int $plan_id, ?string $key ): array {
 		global $wpdb;
@@ -813,6 +821,9 @@ final class PlanRepository {
 			// slow-meta-query heuristic does not apply.
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE plan_id = %d AND meta_key = %s ORDER BY id ASC", $plan_id, $key ), ARRAY_A );
+		}
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( sprintf( 'Failed to read plan meta for plan %d: %s', (int) $plan_id, esc_html( $wpdb->last_error ) ) );
 		}
 
 		$result = array();
