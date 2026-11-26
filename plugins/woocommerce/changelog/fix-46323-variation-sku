@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show variation SKUs when the parent product has no SKU and let merchants show “N/A” when no SKU is available.
