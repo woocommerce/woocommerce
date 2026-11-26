@@ -10880,18 +10880,6 @@ parameters:
 			path: includes/class-wc-discounts.php
 
 		-
-			message: '#^Call to an undefined method object\:\:is_valid_for_cart\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-discounts.php
-
-		-
-			message: '#^Call to an undefined method object\:\:is_valid_for_product\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-discounts.php
-
-		-
 			message: '#^Cannot access property \$name on WP_Error\|WP_Term\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -10960,12 +10948,6 @@ parameters:
 		-
 			message: '#^Method WC_Discounts\:\:set_items_from_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-discounts.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Discounts     \$this The discounts instance\.\)\: Unexpected token "\$this", expected variable at offset 393 on line 9$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-discounts.php
 
@@ -12638,25 +12620,7 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this                     Order object\.\)\: Unexpected token "\$this", expected variable at offset 189 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wc-order.php
-
-		-
 			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this                  Order object\.\)\: Unexpected token "\$this", expected variable at offset 151 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wc-order.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 187 on line 6$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wc-order.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 192 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
