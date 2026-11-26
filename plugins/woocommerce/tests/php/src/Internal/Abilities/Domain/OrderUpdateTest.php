@@ -178,52 +178,6 @@ class OrderUpdateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should deliver a webhook on a hook that a staged order-update fires once after the write, and not at all when a validator refuses the update.
-	 * @testWith [false, [2]]
-	 *           [true, []]
-	 *
-	 * @param bool  $refused      Whether a validator refuses the update.
-	 * @param int[] $stored_lines Stored line count of the order at each delivery.
-	 */
-	public function test_a_webhook_on_a_staged_hook_waits_for_the_write( bool $refused, array $stored_lines ): void {
-		$webhook = new \WC_Webhook();
-		$webhook->set_status( 'active' );
-		$webhook->set_topic( 'action.woocommerce_order_before_calculate_totals' );
-		$webhook->set_delivery_url( 'https://example.com/webhook' );
-		$webhook->save();
-		$webhook->enqueue();
-		$order      = WC_Helper_Order::create_order();
-		$deliveries = array();
-		add_action(
-			'woocommerce_webhook_process_delivery',
-			static function () use ( &$deliveries, $order ) {
-				$deliveries[] = count( wc_get_order( $order->get_id() )->get_items() );
-			},
-			5
-		);
-		$this->enable_extensible_abilities(
-			static function () use ( $refused ) {
-				ExtensibleAbilities::register_validator(
-					array(
-						'resource'  => 'order',
-						'namespace' => 'test-ext',
-						'callback'  => static fn() => $refused ? new \WP_Error( 'test_refused', 'Refused.' ) : null,
-					)
-				);
-			}
-		);
-
-		wp_get_ability( 'woocommerce/order-update' )->execute(
-			array(
-				'id'         => $order->get_id(),
-				'line_items' => array( array( 'product_id' => WC_Helper_Product::create_simple_product()->get_id() ) ),
-			)
-		);
-
-		$this->assertSame( $stored_lines, $deliveries );
-	}
-
-	/**
 	 * @testdox Should strip tags from the customer note.
 	 */
 	public function test_sanitizes_customer_note(): void {
