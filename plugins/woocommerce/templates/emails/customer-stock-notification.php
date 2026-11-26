@@ -63,13 +63,12 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 		echo esc_html( __( 'You have received this message because your e-mail address was used to sign up for stock notifications on our store.', 'woocommerce' ) );
 		echo ' ';
 
-		// Retain the legacy link ID for email styles and template overrides.
 		if ( $account_link ) {
 			if ( $is_guest ) {
 				esc_html_e( 'Create an account or log in with this email address to manage your notifications.', 'woocommerce' );
 				echo ' ';
 			}
-			printf( '<a href="%1$s" id="notification__unsubscribe_link">%2$s</a>', esc_url( $account_link ), esc_html__( 'Manage notifications', 'woocommerce' ) );
+			printf( '<a href="%1$s" id="notification__manage_link">%2$s</a>', esc_url( $account_link ), esc_html__( 'Manage notifications', 'woocommerce' ) );
 		}
 		?>
 		<br><br>

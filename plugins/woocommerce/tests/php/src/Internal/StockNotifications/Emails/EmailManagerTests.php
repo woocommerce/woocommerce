@@ -356,41 +356,45 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should link recipients to account management, and offer guests an unsubscribe link only in the sign-up confirmation email.
-	 * @testWith [false, false, "stock-notifications"]
-	 *           [true, false, "stock-notifications"]
-	 *           [false, false, "restock-alerts"]
-	 *           [true, false, "restock-alerts"]
-	 *           [false, true, "stock-notifications"]
-	 *           [true, true, "stock-notifications"]
-	 *           [false, false, ""]
-	 *           [true, false, ""]
-	 *           [false, true, ""]
-	 *           [true, true, ""]
-	 *           [false, false, "stock-notifications", true]
-	 *           [true, false, "stock-notifications", true]
-	 *           [false, false, "restock-alerts", true]
-	 *           [true, false, "restock-alerts", true]
-	 *           [false, true, "stock-notifications", true]
-	 *           [true, true, "stock-notifications", true]
-	 *           [false, false, "", true]
-	 *           [true, false, "", true]
-	 *           [false, true, "", true]
-	 *           [true, true, "", true]
-	 *           [false, true, "stock-notifications", false, true]
-	 *           [true, true, "stock-notifications", false, true]
-	 *           [false, true, "stock-notifications", true, true]
-	 *           [true, true, "stock-notifications", true, true]
-	 *           [false, true, "", false, true]
-	 *           [true, true, "", true, true]
+	 * @testdox Should show the manage link when the account page is reachable, and unsubscribe only in the signed-up email for guests or when it isn't.
+	 * @testWith [false, false, "stock-notifications", false, false, true, false]
+	 *           [false, false, "restock-alerts", false, false, true, false]
+	 *           [false, false, "", false, false, false, false]
+	 *           [false, true, "stock-notifications", false, false, false, false]
+	 *           [false, true, "", false, false, false, false]
+	 *           [false, true, "stock-notifications", false, true, true, false]
+	 *           [false, true, "", false, true, false, false]
+	 *           [true, false, "stock-notifications", false, false, true, false]
+	 *           [true, false, "restock-alerts", false, false, true, false]
+	 *           [true, false, "", false, false, false, true]
+	 *           [true, true, "stock-notifications", false, false, false, true]
+	 *           [true, true, "", false, false, false, true]
+	 *           [true, true, "stock-notifications", false, true, true, true]
+	 *           [true, true, "", false, true, false, true]
+	 *           [false, false, "stock-notifications", true, false, true, false]
+	 *           [false, false, "restock-alerts", true, false, true, false]
+	 *           [false, false, "", true, false, false, false]
+	 *           [false, true, "stock-notifications", true, false, false, false]
+	 *           [false, true, "", true, false, false, false]
+	 *           [false, true, "stock-notifications", true, true, true, false]
+	 *           [false, true, "", true, true, false, false]
+	 *           [true, false, "stock-notifications", true, false, true, false]
+	 *           [true, false, "restock-alerts", true, false, true, false]
+	 *           [true, false, "", true, false, false, true]
+	 *           [true, true, "stock-notifications", true, false, false, true]
+	 *           [true, true, "", true, false, false, true]
+	 *           [true, true, "stock-notifications", true, true, true, true]
+	 *           [true, true, "", true, true, false, true]
 	 *
-	 * @param bool   $verified Whether to render the confirmation email.
-	 * @param bool   $guest Whether the signup belongs to a guest.
-	 * @param string $endpoint The configured account endpoint.
-	 * @param bool   $plain_text Whether to render the plain-text email instead of HTML.
-	 * @param bool   $registration Whether customers can create an account on the My Account page.
+	 * @param bool   $verified           Whether to render the signed-up email instead of the back-in-stock email.
+	 * @param bool   $guest              Whether the signup belongs to a guest.
+	 * @param string $endpoint           The configured account endpoint.
+	 * @param bool   $plain_text         Whether to render the plain-text email instead of HTML.
+	 * @param bool   $registration       Whether customers can create an account on the My Account page.
+	 * @param bool   $expect_manage      Whether the email should link to the notifications page.
+	 * @param bool   $expect_unsubscribe Whether the email should have an unsubscribe link.
 	 */
-	public function test_email_footer_links( bool $verified, bool $guest, string $endpoint, bool $plain_text = false, bool $registration = false ): void {
+	public function test_email_footer_links( bool $verified, bool $guest, string $endpoint, bool $plain_text, bool $registration, bool $expect_manage, bool $expect_unsubscribe ): void {
 		update_option( MyAccountEndpoint::ENDPOINT_OPTION, $endpoint );
 		update_option( 'woocommerce_enable_myaccount_registration', $registration ? 'yes' : 'no' );
 		new MyAccountEndpoint();
@@ -406,52 +410,52 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$sut->prepare_email( $notification );
 		$notification->save();
 		$content = $plain_text ? $sut->get_content_plain() : $sut->get_content_html();
+		$prompt  = 'Create an account or log in with this email address to manage your notifications.';
 
-		$can_manage      = '' !== $endpoint && ( ! $guest || $registration );
-		$can_unsubscribe = $verified && ( $guest || ! $can_manage );
-		$prompt          = 'Create an account or log in with this email address to manage your notifications.';
-
-		if ( $can_manage ) {
-			$link = $this->get_footer_link( $content, 'Manage notifications', $plain_text );
-			parse_str( (string) wp_parse_url( $link, PHP_URL_QUERY ), $query );
-			$this->assertSame( wc_get_account_endpoint_url( $endpoint ), remove_query_arg( array( 'utm_source', 'utm_medium' ), $link ) );
+		$manage_links = $this->get_links( $content, '/(?<!back-in-)stock-notifications|restock-alerts/' );
+		if ( $expect_manage ) {
+			$this->assertCount( 1, $manage_links, 'The email must link to the notifications page once.' );
+			parse_str( (string) wp_parse_url( $manage_links[0], PHP_URL_QUERY ), $query );
+			$this->assertSame( wc_get_account_endpoint_url( $endpoint ), remove_query_arg( array( 'utm_source', 'utm_medium' ), $manage_links[0] ) );
 			$this->assertSame( 'back-in-stock-notifications', $query['utm_source'] );
 			$this->assertSame( 'email', $query['utm_medium'] );
+			$this->assertStringContainsString( 'Manage notifications', $content );
 		} else {
+			$this->assertSame( array(), $manage_links, 'The email must not link to the notifications page.' );
 			$this->assertStringNotContainsString( 'Manage notifications', $content );
 		}
-		if ( $guest && $can_manage ) {
+		if ( $guest && $expect_manage ) {
 			$this->assertStringContainsString( $prompt, $content );
 		} else {
 			$this->assertStringNotContainsString( $prompt, $content );
 		}
 
-		if ( $can_unsubscribe ) {
-			$link = $this->get_footer_link( $content, 'unsubscribe', $plain_text );
-			parse_str( (string) wp_parse_url( $link, PHP_URL_QUERY ), $query );
-			$this->assertSame( 'unsubscribe', $query['email_link_action'] );
+		$unsubscribe_links = $this->get_links( $content, '/email_link_action=unsubscribe/' );
+		if ( $expect_unsubscribe ) {
+			$this->assertCount( 1, $unsubscribe_links, 'The email must have one unsubscribe link.' );
+			parse_str( (string) wp_parse_url( $unsubscribe_links[0], PHP_URL_QUERY ), $query );
 			$this->assertTrue( ( new Notification( $notification->get_id() ) )->check_unsubscribe_key( $query['email_link_action_key'] ), 'The unsubscribe link must contain the persisted unsubscribe key.' );
 			$this->assertSame( (string) $notification->get_id(), $query['notification_id'] );
 		} else {
-			$this->assertStringNotContainsString( 'email_link_action=unsubscribe', $content );
+			$this->assertSame( array(), $unsubscribe_links, 'The email must not have an unsubscribe link.' );
 			$this->assertStringNotContainsString( 'To stop receiving these messages,', $content );
 		}
 	}
 
 	/**
-	 * Find a footer link by its label in an HTML or plain-text email.
+	 * Find the URLs in an HTML or plain-text email that match a pattern.
 	 *
-	 * @param string $content    The email content.
-	 * @param string $label      The link text in HTML, or the start of its line in plain text.
-	 * @param bool   $plain_text Whether the content is plain text.
-	 * @return string The decoded link URL.
+	 * @param string $content The email content.
+	 * @param string $pattern Regex the decoded URL must match.
+	 * @return string[] The matching, decoded URLs.
 	 */
-	private function get_footer_link( string $content, string $label, bool $plain_text ): string {
-		$pattern = $plain_text
-			? '/' . preg_quote( $label, '/' ) . ': (https?:\/\/\S+)$/mi'
-			: '/<a href="([^"]+)"[^>]*>' . ( 'unsubscribe' === $label ? 'click here' : preg_quote( $label, '/' ) ) . '<\/a>/';
-		$this->assertSame( 1, preg_match( $pattern, $content, $matches ), "The footer must contain the {$label} link." );
-		return html_entity_decode( $matches[1], ENT_QUOTES );
+	private function get_links( string $content, string $pattern ): array {
+		preg_match_all( '#https?://[^\s"<]+#', $content, $matches );
+		$urls = array_map(
+			fn( $url ) => html_entity_decode( $url, ENT_QUOTES ),
+			$matches[0]
+		);
+		return array_values( array_unique( array_filter( $urls, fn( $url ) => 1 === preg_match( $pattern, $url ) ) ) );
 	}
 
 	/**

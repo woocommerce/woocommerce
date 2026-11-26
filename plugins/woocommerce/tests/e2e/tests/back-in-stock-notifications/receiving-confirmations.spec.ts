@@ -155,8 +155,7 @@ test.describe(
 				'email'
 			);
 
-			// A guest signup gets the unsubscribe wording in the footer, not
-			// the account-management one.
+			// A guest can cancel the active signup in one click.
 			await openEmailInMailLog(
 				page,
 				email,
@@ -164,7 +163,7 @@ test.describe(
 			);
 			await expect(
 				bisEmailBody( page ).locator( 'body' )
-			).toContainText( BIS_EMAIL_FOOTER.guest );
+			).toContainText( BIS_EMAIL_FOOTER.unsubscribe );
 		} );
 
 		test( 'following the unsubscribe link cancels the notification', async ( {
@@ -206,7 +205,56 @@ test.describe(
 			await expect( row.getByText( /Cancelled/i ) ).toBeVisible();
 		} );
 
-		test( "a logged-in customer's confirmation email offers account management instead of unsubscribing", async ( {
+		test( 'an unsubscribe link with a tampered key changes nothing', async ( {
+			page,
+			product,
+			browser,
+		} ) => {
+			const email = uniqueGuestEmail( 'bis-confirm-bad-key' );
+
+			await signUpAsGuest( browser, product.permalink, email );
+
+			const verifyLink = await getEmailLinkById(
+				page,
+				email,
+				bisEmailSubject.verify( product.name ),
+				BIS_EMAIL_LINKS.actionButton
+			);
+			await page.goto( verifyLink );
+
+			const unsubscribeLink = await getEmailLinkById(
+				page,
+				email,
+				bisEmailSubject.verified( product.name ),
+				BIS_EMAIL_LINKS.unsubscribe
+			);
+
+			await page.goto( corruptEmailLinkKey( unsubscribeLink ) );
+
+			// A rejected key changes nothing, but the shopper is told why.
+			await expect(
+				page.getByText( bisNotice.unsubscribeLinkInvalid, {
+					exact: true,
+				} )
+			).toBeVisible();
+
+			await page.goto( bisAdminListUrl( product.id ) );
+			const row = page
+				.getByRole( 'row' )
+				.filter( { has: page.getByText( email, { exact: true } ) } );
+			await expect( row ).toHaveCount( 1 );
+			await expect( row.getByText( /Cancelled/i ) ).toHaveCount( 0 );
+
+			// Positive control: the untouched link is accepted, so the page
+			// above rejected the link because of the key and not because the
+			// link is broken.
+			await page.goto( unsubscribeLink );
+			await expect(
+				page.getByText( bisNotice.unsubscribed( email, product.name ) )
+			).toBeVisible();
+		} );
+
+		test( "a logged-in customer's signed-up email offers account management instead of unsubscribing", async ( {
 			page,
 			product,
 			browser,
@@ -232,12 +280,12 @@ test.describe(
 			// The templates fork on whether the signup belongs to an account;
 			// every other email test signs up as a guest, so this is the only
 			// place the account branch renders.
-			await expect( body ).toContainText( BIS_EMAIL_FOOTER.loggedIn );
-			await expect( body ).not.toContainText( BIS_EMAIL_FOOTER.guest );
+			await expect( body ).toContainText( BIS_EMAIL_FOOTER.manage );
+			await expect( body ).not.toContainText( BIS_EMAIL_FOOTER.unsubscribe );
 
 			// Account management must not cancel the notification.
 			const accountLink = bisEmailBody( page ).locator(
-				`a${ BIS_EMAIL_LINKS.unsubscribe }`
+				`a${ BIS_EMAIL_LINKS.manage }`
 			);
 			await expect( accountLink ).toHaveAttribute(
 				'href',

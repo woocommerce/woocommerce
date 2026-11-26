@@ -229,7 +229,7 @@ class EmailManager {
 			color: <?php echo esc_attr( $text ); ?>;
 		}
 		#notification__unsubscribe_link,
-		#notification__footer a {
+		#notification__manage_link {
 			color: <?php echo esc_attr( $text ); ?>;
 		}
 		#notification__product__price .screen-reader-text {

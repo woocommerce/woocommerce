@@ -61,19 +61,18 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 		// The sign-up is still active, so guests, and anyone who can't reach their account, can cancel it in one click.
 		if ( $is_guest || ! $account_link ) {
 			// translators: %1$s placeholder is the unsubscribe link, %2$s placeholder is the Unsubscribe text link.
-			$unsubscribe_link_tag = sprintf( '<a href="%1$s">%2$s</a>', esc_url( $unsubscribe_link ), _x( 'click here', 'unsubscribe cta for stock notifications for guests', 'woocommerce' ) );
+			$unsubscribe_link_tag = sprintf( '<a href="%1$s" id="notification__unsubscribe_link">%2$s</a>', esc_url( $unsubscribe_link ), _x( 'click here', 'unsubscribe cta for stock notifications for guests', 'woocommerce' ) );
 			// translators: %s placeholder is the text part from above.
 			echo wp_kses_post( sprintf( __( 'To stop receiving these messages, %s to unsubscribe.', 'woocommerce' ), $unsubscribe_link_tag ) );
 			echo ' ';
 		}
 
-		// Retain the legacy link ID for email styles and template overrides.
 		if ( $account_link ) {
 			if ( $is_guest ) {
 				esc_html_e( 'Create an account or log in with this email address to manage your notifications.', 'woocommerce' );
 				echo ' ';
 			}
-			printf( '<a href="%1$s" id="notification__unsubscribe_link">%2$s</a>', esc_url( $account_link ), esc_html__( 'Manage notifications', 'woocommerce' ) );
+			printf( '<a href="%1$s" id="notification__manage_link">%2$s</a>', esc_url( $account_link ), esc_html__( 'Manage notifications', 'woocommerce' ) );
 		}
 		?>
 		<br><br>
