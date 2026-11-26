@@ -19,18 +19,14 @@
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
 		"watch:build:project:assets": "grunt watch",
-		"test:js": "wp-scripts test-unit-jest --config jest.config.json"
+		"test:js": "wp-scripts test-unit-jest --config jest.config.js"
 	},
 	"devDependencies": {
-		"@babel/core": "catalog:tooling",
-		"@babel/preset-typescript": "catalog:tooling",
 		"@types/node": "^24.1.0",
-		"@wordpress/babel-preset-default": "next",
 		"@wordpress/browserslist-config": "catalog:tooling",
 		"@wordpress/jest-preset-default": "catalog:tooling",
 		"@wordpress/scripts": "catalog:tooling",
 		"@wordpress/stylelint-config": "catalog:tooling",
-		"babel-jest": "catalog:tooling",
 		"chokidar": "^3.6.0",
 		"eslint": "catalog:tooling",
 		"globals": "^16.5.0",

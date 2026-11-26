@@ -4089,18 +4089,9 @@ importers:
         specifier: github:woocommerce/sourcebuster-js#b28980f98d8ed3f35ac84974e603a6c3bd103752
         version: https://codeload.github.com/woocommerce/sourcebuster-js/tar.gz/b28980f98d8ed3f35ac84974e603a6c3bd103752
     devDependencies:
-      '@babel/core':
-        specifier: catalog:tooling
-        version: 7.29.7(supports-color@10.2.2)
-      '@babel/preset-typescript':
-        specifier: catalog:tooling
-        version: 7.25.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2)
       '@types/node':
         specifier: ^24.1.0
         version: 24.12.2
-      '@wordpress/babel-preset-default':
-        specifier: next
-        version: 8.55.1-next.v.202609171837.0(supports-color@10.2.2)
       '@wordpress/browserslist-config':
         specifier: catalog:tooling
         version: 6.55.1-next.v.202609171837.0
@@ -4113,9 +4104,6 @@ importers:
       '@wordpress/stylelint-config':
         specifier: catalog:tooling
         version: 23.42.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(postcss@8.5.33)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@16.26.1(supports-color@10.2.2)(typescript@5.7.3)))(stylelint@16.26.1(supports-color@10.2.2)(typescript@5.7.3))
-      babel-jest:
-        specifier: catalog:tooling
-        version: 30.5.2(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2)
       chokidar:
         specifier: ^3.6.0
         version: 3.6.0
@@ -29068,22 +29056,6 @@ snapshots:
       - supports-color
 
   '@wordpress/babel-preset-default@8.51.0(supports-color@10.2.2)':
-    dependencies:
-      '@babel/core': 7.29.7(supports-color@10.2.2)
-      '@babel/plugin-syntax-import-attributes': 7.28.6(@babel/core@7.29.7(supports-color@10.2.2))
-      '@babel/plugin-transform-react-jsx': 7.28.6(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2)
-      '@babel/plugin-transform-runtime': 7.29.0(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2)
-      '@babel/preset-env': 7.25.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2)
-      '@babel/preset-typescript': 7.25.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2)
-      '@wordpress/browserslist-config': 6.56.0
-      '@wordpress/warning': 3.57.0
-      browserslist: 4.29.5
-      core-js: 3.49.0
-      react: 18.3.1
-    transitivePeerDependencies:
-      - supports-color
-
-  '@wordpress/babel-preset-default@8.55.1-next.v.202609171837.0(supports-color@10.2.2)':
     dependencies:
       '@babel/core': 7.29.7(supports-color@10.2.2)
       '@babel/plugin-syntax-import-attributes': 7.28.6(@babel/core@7.29.7(supports-color@10.2.2))

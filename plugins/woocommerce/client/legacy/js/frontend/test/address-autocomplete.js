@@ -237,6 +237,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 
 		// Attempt to modify should throw in strict mode
 		expect( () => {
+			'use strict';
 			window.wc.addressAutocomplete.providers[ 'test-provider' ].newProp =
 				'test';
 		} ).toThrow( TypeError );
