@@ -292,10 +292,10 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The schema version is 2.10.0 (contract history table).
+	 * @testdox The schema version is 2.11.0 (contract address email index).
 	 */
-	public function test_schema_version_is_2_10_0(): void {
-		$this->assertSame( '2.10.0', SchemaInstaller::get_version() );
+	public function test_schema_version_is_2_11_0(): void {
+		$this->assertSame( '2.11.0', SchemaInstaller::get_version() );
 	}
 
 	/**
@@ -727,6 +727,24 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$this->assertFalse( $this->index_is_unique( $table, 'contract' ) );
 		$this->assertSame( array( 'contract_id', 'creation_key' ), $this->index_columns( $table, 'creation' ) );
 		$this->assertTrue( $this->index_is_unique( $table, 'creation' ) );
+	}
+
+	/**
+	 * @testdox The contract addresses table keys the address email read on a 191-character email prefix.
+	 */
+	public function test_contract_addresses_email_index(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES );
+
+		$this->assertEqualsCanonicalizing( array( 'PRIMARY', 'email' ), $this->index_names( $table ) );
+		$this->assertSame( array( 'email' ), $this->index_columns( $table, 'email' ) );
+		$this->assertFalse( $this->index_is_unique( $table, 'email' ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( "SHOW INDEX FROM {$table} WHERE Key_name = 'email'", ARRAY_A );
+		$this->assertIsArray( $row );
+		$this->assertSame( 191, Coercion::coerce_int( $row['Sub_part'] ?? null ), 'The index covers a 191-character prefix.' );
 	}
 
 	/**

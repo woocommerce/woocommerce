@@ -301,6 +301,116 @@ class ContractHistoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox delete_history() deletes every entry of the contract under the caller's lock and returns the count.
+	 */
+	public function test_delete_history_deletes_under_the_lock(): void {
+		$other = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$this->add_entries( $this->id, array( 'a', 'b' ) );
+		$this->add_entries( $other, array( 'c' ) );
+		$lock = $this->take_lock( $this->id, 'erase' );
+
+		$this->assertSame( 2, Contracts::delete_history( $this->id, array( 'extension_slug' => self::EXTENSION_SLUG ), $lock ) );
+		$this->assertSame( array(), Contracts::get_history( $this->id ) );
+		$this->assertSame( array( 'c' ), $this->types( Contracts::get_history( $other ) ) );
+		$this->assertSame( 0, Contracts::delete_history( $this->id, array( 'extension_slug' => self::EXTENSION_SLUG ), $lock ), 'A second delete finds nothing.' );
+		$this->assertSame( 'erase', $this->get_lock_holder( $this->id )['operation'], 'The caller keeps its lock.' );
+	}
+
+	/**
+	 * @testdox delete_history() refuses a lock for another contract or for another extension and deletes nothing.
+	 */
+	public function test_delete_history_refuses_a_lock_for_another_contract_or_extension(): void {
+		$other   = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$foreign = $this->create_released( array( 'extension_slug' => 'another-extension' ) )->get_id();
+		$this->add_entries( $this->id, array( 'a' ) );
+		$this->add_entries( $foreign, array( 'b' ), 'another-extension' );
+		$args = array( 'extension_slug' => self::EXTENSION_SLUG );
+
+		try {
+			Contracts::delete_history( $this->id, $args, $this->take_lock( $other, 'erase' ) );
+			$this->fail( 'Expected a lock for another contract to be refused.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertStringContainsString( "not contract {$this->id}", $e->getMessage() );
+		}
+
+		try {
+			Contracts::delete_history( $foreign, $args, $this->take_lock( $foreign, 'erase' ) );
+			$this->fail( 'Expected a lock of another extension to be refused.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertStringContainsString( 'another extension', $e->getMessage() );
+		}
+
+		$this->assertCount( 1, Contracts::get_history( $this->id ) );
+		$this->assertCount( 1, Contracts::get_history( $foreign ) );
+	}
+
+	/**
+	 * @testdox delete_history() reports a missing, ill-typed or malformed extension_slug and deletes nothing.
+	 * @dataProvider provide_invalid_delete_owners
+	 *
+	 * @param array<string, mixed> $args     Arguments.
+	 * @param array<int, mixed>    $expected Expected error.
+	 */
+	public function test_delete_history_reports_an_invalid_owner( array $args, array $expected ): void {
+		$this->add_entries( $this->id, array( 'a' ) );
+		$lock = $this->take_lock( $this->id, 'erase' );
+
+		$this->assert_validation_errors(
+			function () use ( $args, $lock ): void {
+				Contracts::delete_history( $this->id, $args, $lock );
+			},
+			array( $expected )
+		);
+
+		$this->assertCount( 1, Contracts::get_history( $this->id ) );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>, 1: array<int, mixed>}>
+	 */
+	public function provide_invalid_delete_owners(): array {
+		return array(
+			'missing'   => array( array(), array( ValidationErrorCode::REQUIRED, 'extension_slug' ) ),
+			'not text'  => array( array( 'extension_slug' => 5 ), array( ValidationErrorCode::INVALID_TYPE, 'extension_slug', array( 'type' => 'string' ) ) ),
+			'malformed' => array( array( 'extension_slug' => 'Acme Subs' ), array( ValidationErrorCode::INVALID_PATTERN, 'extension_slug', array( 'pattern' => ArgumentValidator::SLUG_PATTERN ) ) ),
+		);
+	}
+
+	/**
+	 * @testdox delete_history() ignores unknown keys with a notice.
+	 */
+	public function test_delete_history_ignores_unknown_keys(): void {
+		$this->setExpectedIncorrectUsage( Contracts::class . '::delete_history' );
+		$this->add_entries( $this->id, array( 'a', 'b' ) );
+		$args = array(
+			'extension_slug' => self::EXTENSION_SLUG,
+			'type'           => 'a',
+		);
+
+		$this->assertSame( 2, Contracts::delete_history( $this->id, $args, $this->take_lock( $this->id, 'erase' ) ), 'The unknown type filter is ignored.' );
+	}
+
+	/**
+	 * Add entries of the given types to a contract, without a lock.
+	 *
+	 * @param int                $contract_id    Contract id.
+	 * @param array<int, string> $types          Entry types, oldest first.
+	 * @param string             $extension_slug The contract's owner.
+	 */
+	private function add_entries( int $contract_id, array $types, string $extension_slug = self::EXTENSION_SLUG ): void {
+		foreach ( $types as $type ) {
+			$view = Contracts::add_history_entry(
+				$contract_id,
+				array(
+					'extension_slug' => $extension_slug,
+					'type'           => $type,
+				)
+			);
+			$this->assertNotNull( $view );
+		}
+	}
+
+	/**
 	 * The types of entry views, in order.
 	 *
 	 * @param array<int, HistoryEntryView> $views Views.
