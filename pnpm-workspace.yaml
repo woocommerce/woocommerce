@@ -76,18 +76,22 @@ catalogs:
         '@babel/preset-react': 7.25.7
         '@babel/preset-typescript': 7.25.7
         '@babel/runtime': 7.25.7
+        '@commander-js/extra-typings': ^10.0.3
         # Keep direct Jest packages on 29.5.x; WordPress scripts manages its own test runner.
         '@jest/globals': 29.5.x
-        '@types/jest': 29.5.x
+        '@oclif/core': ^4.13.5
+        '@wordpress/browserslist-config': next
         '@wordpress/build': 0.24.0
         '@wordpress/env': 12.0.0
         '@wordpress/prettier-config': 4.56.0
         '@wordpress/postcss-plugins-preset': 5.56.0
         '@wordpress/scripts': 35.0.0
         '@wordpress/stylelint-config': ^23.14.0
+        axios: ^1.18.0
         babel-jest: 29.5.x
         babel-loader: 9.2.x
         babel-plugin-transform-react-remove-prop-types: 0.4.24
+        commander: ^10.0.1
         copy-webpack-plugin: 14.0.x
         css-loader: 6.11.x
         eslint: ^10.0.0
@@ -102,6 +106,7 @@ catalogs:
         postcss-loader: 4.3.x
         prettier: npm:wp-prettier@3.9.6
         rimraf: 5.0.5
+        sass: 1.69.5
         sass-loader: 10.5.x
         simple-git: ^4.0.2
         stylelint: ^16.9.0
@@ -109,6 +114,20 @@ catalogs:
         typescript: 5.7.x
         webpack: 5.112.2
         webpack-cli: 5.1.x
+
+    # Shared type declarations. `@types/wordpress__*` stay in `wp-min`.
+    types:
+        '@types/debug': ^4.1.12
+        # Keep in sync with Jest in `tooling`.
+        '@types/jest': 29.5.x
+        '@types/lodash': ^4.14.202
+        '@types/node': ^24.1.0
+        '@types/prop-types': ^15.7.11
+        '@types/qs': ^6.9.10
+        '@types/react': 18.3.x
+        '@types/react-dom': 18.3.x
+        '@types/react-transition-group': ^4.4.10
+        '@types/semver': ^7.5.6
 
 packages:
     - 'packages/js/*'
@@ -132,7 +151,7 @@ packages:
 
 # Dependency resolution (migrated from the `pnpm` field of package.json)
 overrides:
-    '@types/react': 18.3.x
+    '@types/react': 'catalog:types'
     # Patch exact Colord 2.9.3 pins without changing other versions; remove when their parents use patched releases.
     'colord@2.9.3': 2.9.4
     '@wordpress/data-controls>@wordpress/api-fetch': 'catalog:wp-min'
@@ -141,7 +160,7 @@ overrides:
     # @automattic/components 2.x lists react-router-dom but never imports it; drop once it is on 5.x.
     '@automattic/components>react-router-dom': ~7.18.5
     react-resize-aware: 3.1.1
-    sass: 1.69.5
+    sass: 'catalog:tooling'
 
 patchedDependencies:
     '@wordpress/edit-site@5.15.0': bin/patches/@wordpress__edit-site@5.15.0.patch

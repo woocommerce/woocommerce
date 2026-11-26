@@ -51,3 +51,25 @@
 		display: none;
 	}
 }
+
+// Only the blocks that use motion animate the panel.
+:where(.wp-block-woocommerce-cart, .wp-block-woocommerce-checkout) {
+	// The gap under the button opens and closes with the content, at the same speed.
+	.wc-block-components-panel__button {
+		@include motion-transition($move: margin-bottom, $easing: balanced);
+
+		&[aria-expanded="false"] {
+			transition: motion-hold(margin-bottom);
+			@include motion-transition($move: margin-bottom, $duration: md, $easing: balanced);
+		}
+
+		// A key press applies immediately, as the content does.
+		&[data-wc-instant] {
+			transition: none;
+		}
+	}
+
+	.wc-block-components-panel__content {
+		@include motion-collapse;
+	}
+}

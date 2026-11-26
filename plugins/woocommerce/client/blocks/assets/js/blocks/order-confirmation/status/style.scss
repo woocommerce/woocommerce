@@ -33,3 +33,25 @@
 		}
 	}
 }
+
+// The sections rise in, 50ms apart, when the page loads. Fixed steps, not `nth-child`, because themes wrap and reorder
+// these blocks. Billing settles one step after shipping. This lives in Status because Status starts the template.
+$wc-order-confirmation-steps: (
+	"status": 0,
+	"status-description": 1,
+	"summary": 1,
+	"create-account": 2,
+	"totals-wrapper": 3,
+	"downloads-wrapper": 4,
+	"shipping-wrapper": 5,
+	"billing-wrapper": 6,
+	"additional-information": 6,
+	"additional-fields-wrapper": 6,
+);
+
+@each $name, $step in $wc-order-confirmation-steps {
+	.wc-block-order-confirmation-#{$name}:not(.editor-styles-wrapper *) {
+		--wc-motion-index: #{$step};
+		@include motion-enter($delay: motion-stagger-delay());
+	}
+}

@@ -87,7 +87,7 @@
 	"private": true,
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
-		"@types/lodash": "^4.14.202",
+		"@types/lodash": "catalog:types",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",

@@ -14,6 +14,9 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\Webhooks\WebhookCaptureRules;
+use Automattic\WooCommerce\Internal\Webhooks\WebhookObservers;
+use Automattic\WooCommerce\Internal\Webhooks\WebhookPayloadRedactor;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
@@ -116,7 +119,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$this->enqueued_blog_id = get_current_blog_id();
 
 			foreach ( $hooks as $hook ) {
-				add_action( $hook, array( $this, 'process' ) );
+				WebhookCaptureRules::subscribe( $hook, array( $this, 'process' ), array( $this, 'process_with_context' ) );
 			}
 		}
 	}
@@ -130,13 +133,45 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return mixed $arg Returns the argument in case the webhook was hooked into a filter.
 	 */
 	public function process( $arg ) {
+		$hook = current_filter();
+		if ( $hook && ( WebhookObservers::is_suppressed( $hook ) || ! WebhookCaptureRules::allows_argument( $hook, $arg ) ) ) {
+			return $arg;
+		}
 
-		// Verify that webhook should be processed for delivery.
+		WebhookObservers::without_observers( fn() => $this->dispatch_delivery( $arg ) );
+
+		return $arg;
+	}
+
+	/**
+	 * Check extra hook arguments before processing the webhook.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @param mixed $arg        First hook argument.
+	 * @param mixed ...$context Extra hook arguments.
+	 * @return mixed The first hook argument.
+	 */
+	public function process_with_context( $arg, ...$context ) {
+		$hook = current_filter();
+		if ( $hook && ! WebhookCaptureRules::allows_context( $hook, $context ) ) {
+			return $arg;
+		}
+
+		return $this->process( $arg );
+	}
+
+	/**
+	 * Check whether to deliver the webhook and dispatch it when allowed.
+	 *
+	 * @param mixed $arg First hook argument.
+	 */
+	private function dispatch_delivery( $arg ): void {
 		if ( ! $this->should_deliver( $arg ) ) {
 			return;
 		}
 
-		// Mark this $arg as processed to ensure it doesn't get processed again within the current request.
 		$this->processed[] = $arg;
 
 		/**
@@ -146,8 +181,6 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		 * @hooked wc_webhook_process_delivery - 10
 		 */
 		do_action( 'woocommerce_webhook_process_delivery', $this, $arg );
-
-		return $arg;
 	}
 
 	/**
@@ -383,6 +416,16 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @param mixed $arg First hook argument.
 	 */
 	public function deliver( $arg ) {
+		$topic = WebhookObservers::without_observers( fn() => $this->get_topic() );
+		WebhookObservers::during_delivery( $topic, fn() => $this->deliver_request( $arg ) );
+	}
+
+	/**
+	 * Send a webhook and record the outcome.
+	 *
+	 * @param mixed $arg First hook argument.
+	 */
+	private function deliver_request( $arg ): void {
 		$start_time = microtime( true );
 		$payload    = $this->build_payload( $arg );
 
@@ -406,7 +449,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		 *
 		 * @since 3.3.0
 		 * @param array $http_args The HTTP arguments.
-		 * @param mixed $arg The first hook argument.
+		 * @param mixed $arg The first hook argument, redacted for background delivery of custom action topics.
 		 * @param int   $webhook_id The webhook ID.
 		 * @return array The filtered HTTP arguments.
 		 */
@@ -491,19 +534,21 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$resource = $this->get_resource();
 			$event    = $this->get_event();
 
+			$payload_arg = WebhookPayloadRedactor::redact_for_payload( $this->get_topic(), $resource, $resource_id );
+
 			// If a resource has been deleted, just include the ID in the payload.
 			$payload = array(
-				'id' => $resource_id,
+				'id' => $payload_arg,
 			);
 
 			if ( 'deleted' !== $event ) {
 				$api_version = $this->get_api_version();
 
 				if ( in_array( $api_version, wc_get_webhook_rest_api_versions(), true ) ) {
-					$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
+					$payload = $this->get_wp_api_payload( $resource, $payload_arg, $event );
 				} elseif ( 'legacy_v3' === $api_version && WC()->legacy_rest_api_is_available() ) {
 					wc_deprecated_function( 'Webhook delivery via the Legacy REST API', '9.0.0', 'editing the webhook to use a current API version' );
-					$payload = wc()->api->get_webhook_api_payload( $resource, $resource_id, $event );
+					$payload = wc()->api->get_webhook_api_payload( $resource, $payload_arg, $event );
 				} else {
 					throw new \Exception( esc_html__( 'Unsupported webhook API version. Please edit this webhook to use a current REST API version.', 'woocommerce' ) );
 				}
@@ -739,33 +784,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * Send a test ping to the delivery URL, sent when the webhook is first created.
 	 *
 	 * @since  2.2.0
-	 * @uses   self::stage_delivery_ping()
 	 * @return bool|WP_Error
 	 */
 	public function deliver_ping() {
-		$result = $this->write_through(
-			function () {
-				return $this->stage_delivery_ping();
-			}
-		);
-
-		if ( true === $result ) {
-			$this->save();
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Send a test ping to the delivery URL and, when it succeeds, clear the pending delivery flag in memory.
-	 * The next save() writes it. deliver_ping() calls this method, then save().
-	 *
-	 * @since  11.4.0
-	 * @return bool|WP_Error True when the ping succeeded, an error otherwise.
-	 */
-	public function stage_delivery_ping() {
-		$this->refuse_unstaged_override( 'deliver_ping', 'stage_delivery_ping' );
-
 		$args = array(
 			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', Constants::get_constant( 'WC_VERSION' ), $GLOBALS['wp_version'] ),
 			'body'       => 'webhook_id=' . $this->get_id(),
@@ -796,6 +817,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		}
 
 		$this->set_pending_delivery( false );
+		$this->save();
 
 		return true;
 	}

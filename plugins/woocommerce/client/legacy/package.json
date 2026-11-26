@@ -22,7 +22,8 @@
 		"test:js": "wp-scripts test-unit-js --config jest.config.json"
 	},
 	"devDependencies": {
-		"@types/node": "^24.1.0",
+		"@types/node": "catalog:types",
+		"@wordpress/browserslist-config": "catalog:tooling",
 		"@wordpress/scripts": "catalog:tooling",
 		"@wordpress/stylelint-config": "catalog:tooling",
 		"chokidar": "^3.6.0",
@@ -41,7 +42,7 @@
 		"jest-fixed-jsdom": "catalog:tooling",
 		"jquery": "3.7.1",
 		"jquery4": "npm:jquery@4.0.0",
-		"sass": "^1.69.5",
+		"sass": "catalog:tooling",
 		"stylelint": "catalog:tooling"
 	},
 	"dependencies": {
