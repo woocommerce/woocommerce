@@ -85,7 +85,7 @@ class ProductPageIntegration {
 		$this->rendered[ $product->get_id() ] = true;
 
 		wp_enqueue_script( 'wc-back-in-stock-form' );
-		$this->render_form( $product );
+		$this->render_form( $product, $this->is_visible_on_load( $product ) );
 	}
 
 	/**
@@ -108,8 +108,11 @@ class ProductPageIntegration {
 		}
 
 		// The product isn't marked as rendered, as the block's output can be discarded.
+		// Like the block's variation selector, which isn't rendered when the product can't be bought.
+		$is_visible = ! $product->is_type( 'variable' ) || AddToCartWithOptionsUtils::is_not_purchasable_product( $product );
+
 		ob_start();
-		$this->render_form( $product );
+		$this->render_form( $product, $is_visible );
 
 		return $this->add_interactivity_to_form( $block_content, (string) ob_get_clean(), $product );
 	}
@@ -132,14 +135,12 @@ class ProductPageIntegration {
 			return $block_content . $form;
 		}
 
-		// The block renders no variation selector when the product can't be bought, so offer sign-ups for the parent.
-		if ( AddToCartWithOptionsUtils::is_not_purchasable_product( $product ) ) {
-			$html->remove_attribute( 'hidden' );
-
-			return $block_content . $html->get_updated_html();
-		}
-
 		wp_enqueue_script_module( self::SCRIPT_MODULE );
+
+		$signed_up_variation_ids = json_decode( (string) $html->get_attribute( 'data-bis-signed-up-variations' ), true );
+		if ( is_array( $signed_up_variation_ids ) ) {
+			wp_interactivity_state( self::SCRIPT_MODULE, array( 'signedUpVariationIds' => $signed_up_variation_ids ) );
+		}
 
 		// The store namespace matches the script module ID.
 		$html->set_attribute( 'data-wp-interactive', self::SCRIPT_MODULE );
@@ -155,6 +156,13 @@ class ProductPageIntegration {
 				$html->set_attribute( 'data-wp-bind--value', 'woocommerce/products::state.productInContext.id' );
 				break;
 			}
+		}
+
+		// A new pass, as the loop above can leave the first one at the end of the markup.
+		$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
+		if ( $html->next_tag( array( 'class_name' => 'wc_bis_already_signed_up' ) ) ) {
+			$html->set_attribute( 'data-wp-interactive', self::SCRIPT_MODULE );
+			$html->set_attribute( 'data-wp-bind--hidden', '!state.isSignedUpNoticeVisible' );
 		}
 
 		$form = $html->get_updated_html();
@@ -214,10 +222,11 @@ class ProductPageIntegration {
 	/**
 	 * Render the form.
 	 *
-	 * @param WC_Product $product Product object.
+	 * @param WC_Product $product    Product object.
+	 * @param bool       $is_visible Whether the form is visible on page load, rather than revealed by JS for a selected variation.
 	 * @return void
 	 */
-	private function render_form( WC_Product $product ): void {
+	private function render_form( WC_Product $product, bool $is_visible ): void {
 
 		// Check if requires account.
 		if ( Config::requires_account() && ! is_user_logged_in() ) {
@@ -225,14 +234,14 @@ class ProductPageIntegration {
 			return;
 		}
 
-		if ( $this->is_visible_on_load( $product ) ) {
+		if ( $is_visible ) {
 			$notification = $this->get_current_user_signups( array( $product->get_id() ) )[ $product->get_id() ] ?? null;
 			if ( $notification instanceof Notification ) {
 				$this->display_already_signed_up( $product, $notification );
 				return;
 			}
 
-			$this->display_form( $product );
+			$this->print_form( $product, true );
 			return;
 		}
 
@@ -421,7 +430,7 @@ class ProductPageIntegration {
 	}
 
 	/**
-	 * Whether the form is visible on page load, rather than revealed by JS for a selected variation.
+	 * Whether the classic form is visible on page load, rather than revealed by JS for a selected variation.
 	 *
 	 * @param WC_Product $product Product object.
 	 * @return bool

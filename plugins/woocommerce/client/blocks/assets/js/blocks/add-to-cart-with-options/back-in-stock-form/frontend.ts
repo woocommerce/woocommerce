@@ -23,30 +23,53 @@ const { state: productsState } = store< ProductsStore >(
 
 export type BackInStockFormStore = {
 	state: {
+		signedUpVariationIds: number[];
 		isVisible: boolean;
+		isSignedUpNoticeVisible: boolean;
 		selectedAttributeValue: string;
 	};
+};
+
+// Whether the selected variation can't be bought.
+const isOutOfStock = (): boolean => {
+	const variation = productsState.productVariationInContext;
+
+	return (
+		!! variation && ! ( variation.is_in_stock && variation.is_purchasable )
+	);
+};
+
+// Whether the shopper already signed up for the selected variation.
+const isSignedUp = (): boolean => {
+	const variation = productsState.productVariationInContext;
+
+	return !! variation && state.signedUpVariationIds.includes( variation.id );
 };
 
 /**
  * Drives the Back in Stock form rendered after the Add to Cart + Options block
  * of a variable product, see templates/single-product/back-in-stock-form.php.
  */
-store< BackInStockFormStore >(
+const { state } = store< BackInStockFormStore >(
 	'woocommerce/back-in-stock-form',
 	{
 		state: {
 			/**
-			 * Whether the selected variation can't be bought, so shoppers
-			 * can sign up for it.
+			 * Out of stock variations the shopper already signed up for,
+			 * set by the server.
+			 */
+			signedUpVariationIds: [],
+			/**
+			 * Whether shoppers can sign up for the selected variation.
 			 */
 			get isVisible(): boolean {
-				const variation = productsState.productVariationInContext;
-
-				return (
-					!! variation &&
-					! ( variation.is_in_stock && variation.is_purchasable )
-				);
+				return isOutOfStock() && ! isSignedUp();
+			},
+			/**
+			 * Whether the "already joined" notice replaces the form.
+			 */
+			get isSignedUpNoticeVisible(): boolean {
+				return isOutOfStock() && isSignedUp();
 			},
 			/**
 			 * Selected value of the attribute in context, read from the
