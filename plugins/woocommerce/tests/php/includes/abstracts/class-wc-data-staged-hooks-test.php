@@ -494,7 +494,7 @@ class WC_Data_Staged_Hooks_Test extends WC_Unit_Test_Case {
 			$cache->setValue( $order, false );
 		}
 
-		$new_product = WC_Helper_Product::create_simple_product();
+		$new_product = 'stage_product_item' === $name ? WC_Helper_Product::create_simple_product() : null;
 		$calls       = array(
 			'stage_order_items_removal'  => static fn() => $order->stage_order_items_removal( 'fee' ),
 			'stage_coupon'               => static fn() => $order->stage_coupon(
