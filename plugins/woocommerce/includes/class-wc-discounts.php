@@ -109,9 +109,9 @@ class WC_Discounts {
 
 		$this->object = $order;
 
-		foreach ( $order->get_items() as $order_item ) {
+		foreach ( $order->get_items() as $stored_key => $order_item ) {
 			$item           = new stdClass();
-			$item->key      = $order_item->get_id();
+			$item->key      = $order_item->get_id() ? $order_item->get_id() : $stored_key;
 			$item->object   = $order_item;
 			$item->product  = $order_item->get_product();
 			$item->quantity = $order_item->get_quantity();
@@ -121,7 +121,7 @@ class WC_Discounts {
 				$item->price += wc_add_number_precision_deep( $order_item->get_subtotal_tax() );
 			}
 
-			$this->items[ $order_item->get_id() ] = $item;
+			$this->items[ $item->key ] = $item;
 		}
 
 		uasort( $this->items, array( $this, 'sort_by_price' ) );

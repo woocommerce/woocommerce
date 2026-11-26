@@ -1726,4 +1726,22 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$this->assertEquals( 15.0, $order_item->get_total(), 'Total should be $15 preserving manual discount' );
 		$this->assertEquals( 15.0, $order->get_total(), 'Order total should be $15 preserving manual discount' );
 	}
+
+	/**
+	 * @testdox Should keep every line of an order whose lines are not saved yet.
+	 */
+	public function test_set_items_from_order_keeps_unsaved_lines() {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		foreach ( array( 1, 2 ) as $quantity ) {
+			$item = new WC_Order_Item_Product();
+			$item->set_product( $product );
+			$item->set_quantity( $quantity );
+			$order->add_item( $item );
+		}
+
+		$discounts = new WC_Discounts( $order );
+
+		$this->assertCount( 2, $discounts->get_items() );
+	}
 }
