@@ -94,8 +94,8 @@
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
 		"@babel/runtime": "catalog:tooling",
-		"@types/jest": "catalog:tooling",
-		"@types/qs": "^6.9.10",
+		"@types/jest": "catalog:types",
+		"@types/qs": "catalog:types",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
