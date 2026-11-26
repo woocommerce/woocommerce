@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a Waiting for stock column to the Analytics Stock report when Back in stock notifications is enabled.

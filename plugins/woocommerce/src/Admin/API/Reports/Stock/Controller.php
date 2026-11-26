@@ -135,6 +135,18 @@ class Controller extends GenericController implements ExportableInterface {
 		remove_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10 );
 		remove_filter( 'posts_clauses', array( __CLASS__, 'add_wp_query_orderby' ), 10 );
 
+		/**
+		 * Fires after a page of stock report products is loaded, before its items are prepared.
+		 *
+		 * Lets code that adds fields to the report load their data with one query per page.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param WP_REST_Request $request  The request.
+		 * @param array           $products The products on this page.
+		 */
+		do_action( 'woocommerce_analytics_stock_report_products_loaded', $request, $query_results['objects'] );
+
 		$objects = array();
 		foreach ( $query_results['objects'] as $object ) {
 			$data      = $this->prepare_item_for_response( $object, $request );
@@ -275,6 +287,29 @@ class Controller extends GenericController implements ExportableInterface {
 				$args['orderby'] = " wc_product_meta_lookup.sku {$order}, wc_product_meta_lookup.product_id {$order} ";
 				break;
 		}
+
+		/**
+		 * Filters the stock report's JOIN clauses, like `woocommerce_analytics_clauses_join_{context}` in the other reports.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param string[] $clauses  The JOIN clauses.
+		 * @param object   $wp_query The stock report `WP_Query`.
+		 */
+		$join = apply_filters( 'woocommerce_analytics_clauses_join_stock', array( $args['join'] ), $wp_query );
+
+		/**
+		 * Filters the stock report's ORDER BY clauses, like `woocommerce_analytics_clauses_order_by_{context}` in the other reports.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param string[] $clauses  The ORDER BY clauses, without the `ORDER BY` keyword.
+		 * @param object   $wp_query The stock report `WP_Query`.
+		 */
+		$order_by = apply_filters( 'woocommerce_analytics_clauses_order_by_stock', array( $args['orderby'] ), $wp_query );
+
+		$args['join']    = is_array( $join ) ? implode( ' ', $join ) : $args['join'];
+		$args['orderby'] = is_array( $order_by ) ? implode( ' ', $order_by ) : $args['orderby'];
 
 		return $args;
 	}
