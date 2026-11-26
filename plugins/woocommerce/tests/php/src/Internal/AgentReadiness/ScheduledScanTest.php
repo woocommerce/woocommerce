@@ -207,6 +207,101 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The daily run is scheduled for the store's night slot: within a day, between 1:00 and 5:00 on the store's clock, at the same minute each time.
+	 */
+	public function test_daily_run_is_scheduled_at_night_in_site_time(): void {
+		try {
+			update_option( 'timezone_string', 'Pacific/Auckland' );
+
+			$this->sut->run();
+			$next = as_next_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP );
+
+			$this->assertIsInt( $next );
+			$this->assertSame( ScheduledScan::next_daily_run(), $next );
+			foreach ( array( '2026-11-25 10:00', '2026-11-25 23:30', '2026-11-26 00:30', '2026-11-26 04:59' ) as $local ) {
+				$now  = ( new \DateTimeImmutable( $local, wp_timezone() ) )->getTimestamp();
+				$slot = ScheduledScan::next_daily_run( $now );
+				$hour = (int) wp_date( 'G', $slot );
+				$this->assertGreaterThanOrEqual( ScheduledScan::NIGHT_FROM, $hour, $local );
+				$this->assertLessThan( ScheduledScan::NIGHT_TO, $hour, $local );
+				$this->assertGreaterThanOrEqual( $now + ScheduledScan::MIN_GAP, $slot, 'A check late at night is not followed by another within hours: ' . $local );
+				$this->assertLessThanOrEqual( $now + DAY_IN_SECONDS + ScheduledScan::MIN_GAP, $slot, $local );
+				$this->assertSame( wp_date( 'H:i', ScheduledScan::next_daily_run() ), wp_date( 'H:i', $slot ), 'The same minute each night' );
+			}
+		} finally {
+			delete_option( 'timezone_string' );
+		}
+	}
+
+	/**
+	 * @testdox A catalog over the limit lists its best sellers first, most sales first, then the newest changes; one that fits keeps the newest change first.
+	 */
+	public function test_catalog_over_the_limit_lists_best_sellers_first(): void {
+		$ids    = $this->create_products( 3 );
+		$hidden = WC_Helper_Product::create_simple_product();
+		$hidden->set_catalog_visibility( 'hidden' );
+		$hidden->save();
+		$by_change = ( new ProductScan() )->start();
+		$sellers   = array( $ids[1], $hidden->get_id(), $ids[0] );
+
+		$this->assertSame( $by_change, ( new ProductScan() )->start_best_sellers_first( $sellers ), 'Every product is checked, so the order stays' );
+
+		$recent = range( 900001, 900001 + ProductScan::PRODUCT_LIMIT );
+		$many   = static function ( $posts, $query ) use ( $recent ) {
+			return ProductScan::PRODUCT_LIMIT + 1 === (int) $query->get( 'posts_per_page' ) ? $recent : $posts;
+		};
+		add_filter( 'posts_pre_query', $many, 10, 2 );
+		try {
+			$scan   = new ProductScan();
+			$listed = $scan->start_best_sellers_first( $sellers );
+			$plain  = ( new ProductScan() )->start();
+			$unseen = new ProductScan();
+			$unseen->start_best_sellers_first( array( $hidden->get_id() ) );
+		} finally {
+			remove_filter( 'posts_pre_query', $many, 10 );
+		}
+
+		$this->assertTrue( $scan->truncated() );
+		$this->assertTrue( $scan->best_sellers_first() );
+		$this->assertSame( 2, $scan->bestsellers_count() );
+		$this->assertCount( ProductScan::PRODUCT_LIMIT, $listed );
+		$this->assertSame( array( $ids[1], $ids[0], 900001 ), array_slice( $listed, 0, 3 ), 'Best sellers in sales order, without the hidden one, then the newest changes' );
+		$this->assertSame( array_slice( $recent, 0, ProductScan::PRODUCT_LIMIT ), $plain, 'Without sales to rank by, the newest changes only' );
+		$this->assertFalse( $unseen->best_sellers_first(), 'No best seller the scan checks, so the list is the newest changes' );
+		$this->assertSame( 0, $unseen->bestsellers_count() );
+	}
+
+	/**
+	 * @testdox A full page of sellers the scan cannot check is followed by the next page, which then leads the list.
+	 */
+	public function test_next_seller_page_leads_when_the_first_page_is_ineligible(): void {
+		$seller = WC_Helper_Product::create_simple_product();
+		$recent = range( 900001, 900001 + ProductScan::PRODUCT_LIMIT );
+		$first  = range( 8000001, 8000001 + ProductScan::PRODUCT_LIMIT - 1 );
+		$many   = static function ( $posts, $query ) use ( $recent ) {
+			return ProductScan::PRODUCT_LIMIT + 1 === (int) $query->get( 'posts_per_page' ) ? $recent : $posts;
+		};
+		$offset = 0;
+		$more   = static function ( int $next_offset, int $limit ) use ( $seller, &$offset ): array {
+			unset( $limit );
+			$offset = $next_offset;
+			return array( $seller->get_id() );
+		};
+		add_filter( 'posts_pre_query', $many, 10, 2 );
+		try {
+			$scan   = new ProductScan();
+			$listed = $scan->start_best_sellers_first( $first, $more );
+		} finally {
+			remove_filter( 'posts_pre_query', $many, 10 );
+		}
+
+		$this->assertSame( ProductScan::PRODUCT_LIMIT, $offset );
+		$this->assertTrue( $scan->best_sellers_first() );
+		$this->assertSame( 1, $scan->bestsellers_count() );
+		$this->assertSame( array( $seller->get_id(), 900001 ), array_slice( $listed, 0, 2 ) );
+	}
+
+	/**
 	 * @testdox A run fetches the rules file before scanning, so the new rules shape the report.
 	 */
 	public function test_run_fetches_rules_before_scanning(): void {
@@ -284,6 +379,122 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertCount( 1, $this->pending( ScheduledScan::DAILY_HOOK ) );
+	}
+
+	/**
+	 * @testdox A daily run does not scan when the saved switch is off, even while this request still has the old value cached.
+	 */
+	public function test_daily_run_skips_when_the_saved_switch_is_off(): void {
+		update_option( ScheduledScan::DAILY_OPTION, 'no', false );
+		$this->cache_daily_checks_as_on();
+		$this->assertTrue( ScheduledScan::daily_enabled(), 'This request still has daily checks cached as on' );
+
+		$this->run_daily_hook();
+
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::NEXT_HOOK, null, ScheduledScan::GROUP ) );
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+		$this->assertNull( wc_get_container()->get( AgentReadiness::class )->get_cached_report() );
+	}
+
+	/**
+	 * @testdox The daily run still scans when the switch is on.
+	 */
+	public function test_daily_run_scans_when_the_switch_is_on(): void {
+		WC_Helper_Product::create_simple_product();
+
+		$this->run_daily_hook();
+
+		$this->assertTrue( $this->sut->is_pending() );
+		$this->assertCount( 1, $this->pending( ScheduledScan::DAILY_HOOK ) );
+	}
+
+	/**
+	 * @testdox A next run queued as the switch is turned off is dropped, even when this request cached the old value during the queue.
+	 */
+	public function test_daily_run_queued_as_the_switch_turns_off_is_dropped(): void {
+		update_option( ScheduledScan::DAILY_OPTION, 'yes', false );
+		WC_Helper_Product::create_simple_product();
+		$flipped = false;
+		$flip    = function ( $action_id ) use ( &$flipped ) {
+			if ( $flipped ) {
+				return;
+			}
+			$action = \ActionScheduler::store()->fetch_action( (int) $action_id );
+			if ( ScheduledScan::DAILY_HOOK !== $action->get_hook() ) {
+				return;
+			}
+			$flipped = true;
+			update_option( ScheduledScan::DAILY_OPTION, 'no', false );
+			$this->cache_daily_checks_as_on();
+		};
+		add_action( 'action_scheduler_stored_action', $flip );
+
+		try {
+			$this->sut->run();
+		} finally {
+			remove_action( 'action_scheduler_stored_action', $flip );
+		}
+
+		$this->assertTrue( $flipped, 'The switch turned off while the next run was queued' );
+		$this->assertTrue( ScheduledScan::daily_enabled(), 'This request still has daily checks cached as on' );
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+	}
+
+	/**
+	 * @testdox Turning daily checks on while the first check is running keeps the next run that check already queued.
+	 */
+	public function test_enabling_daily_checks_during_the_first_scan_keeps_its_next_run(): void {
+		delete_option( AgentReadiness::REPORT_OPTION );
+		WC_Helper_Product::create_simple_product();
+
+		$this->sut->run();
+		$queued = as_next_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP );
+
+		$this->assertNull( wc_get_container()->get( AgentReadiness::class )->get_cached_report() );
+		$this->assertTrue( $this->sut->is_pending() );
+		$this->assertIsInt( $queued );
+		$this->sut->set_daily_enabled( true );
+
+		$this->assertSame( $queued, as_next_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+	}
+
+	/**
+	 * Run the daily scan the way Action Scheduler does, so the callback can tell it from a check run by hand.
+	 */
+	private function run_daily_hook(): void {
+		$callback = array( $this->sut, 'run' );
+		$added    = false === has_action( ScheduledScan::DAILY_HOOK, $callback );
+		if ( $added ) {
+			add_action( ScheduledScan::DAILY_HOOK, $callback );
+		}
+		try {
+			do_action( ScheduledScan::DAILY_HOOK );
+		} finally {
+			if ( $added ) {
+				remove_action( ScheduledScan::DAILY_HOOK, $callback );
+			}
+		}
+	}
+
+	/**
+	 * Leave this request's option caches saying daily checks are on, whatever the database row says.
+	 */
+	private function cache_daily_checks_as_on(): void {
+		wp_cache_set( ScheduledScan::DAILY_OPTION, 'yes', 'options' );
+
+		$alloptions = wp_cache_get( 'alloptions', 'options' );
+		if ( ! is_array( $alloptions ) ) {
+			$alloptions = array();
+		}
+		$alloptions[ ScheduledScan::DAILY_OPTION ] = 'yes';
+		wp_cache_set( 'alloptions', $alloptions, 'options' );
+
+		$notoptions = wp_cache_get( 'notoptions', 'options' );
+		if ( ! is_array( $notoptions ) ) {
+			$notoptions = array();
+		}
+		$notoptions[ ScheduledScan::DAILY_OPTION ] = true;
+		wp_cache_set( 'notoptions', $notoptions, 'options' );
 	}
 
 	/**
@@ -415,7 +626,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Giving up after a finished batch removes failure rows that batch wrote for products the last report never covered.
+	 * @testdox Giving up after a finished batch removes failure rows that batch wrote for products the last report never covered, and keeps rows a save wrote while the scan ran.
 	 */
 	public function test_give_up_drops_failure_rows_the_last_report_did_not_cover(): void {
 		$ids = $this->create_products( ProductScan::BATCH_SIZE + 1 );
@@ -426,6 +637,10 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		// The scan walks newest products first, so the first batch covers the last id created, not $ids[0].
 		$covered = (int) end( $ids );
 		$this->assertNotEmpty( ProductFailures::stored( $covered ), 'The finished batch wrote failure rows' );
+		// The first product created is left for the next batch. A save checks it now.
+		$saved = (int) $ids[0];
+		$this->assertSame( array(), ProductFailures::stored( $saved ), 'The first batch did not reach it' );
+		ProductFailures::store( $saved, array() );
 
 		$crash = static function (): void {
 			throw new \RuntimeException( 'Fatal on the next batch' );
@@ -443,6 +658,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
 		$this->assertSame( array(), ProductFailures::stored( $covered ), 'Rows the abandoned scan added are removed' );
+		$this->assertSame( array( ProductFailures::CHECKED ), ProductFailures::stored( $saved ), 'Rows the save wrote stay' );
 		$this->assertSame( 7, get_option( AgentReadiness::REPORT_OPTION )['products'] );
 	}
 

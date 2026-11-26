@@ -144,15 +144,48 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertSame( 200, $response->get_status() );
-		$this->assertMatchesRegularExpression( '/^AISalesReadiness_[a-z0-9.-]+_\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.txt$/', $data['filename'] );
+		$this->assertMatchesRegularExpression( '/^AIShoppingHealth_[a-z0-9.-]+_\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.txt$/', $data['filename'] );
 		$this->assertStringContainsString( 'Site: ' . home_url(), $data['text'] );
 		$this->assertStringContainsString( 'WooCommerce version: ' . WC_VERSION, $data['text'] );
 		$this->assertStringContainsString( 'Last checked: Not checked yet', $data['text'] );
+		$this->assertStringContainsString( "\nDaily checks: On\n", $data['text'], 'Support sees whether the store is checked each day' );
+		update_option( ScheduledScan::DAILY_OPTION, 'no' );
+		$this->assertStringContainsString( "\nDaily checks: Off\n", $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'] );
+		delete_option( ScheduledScan::DAILY_OPTION );
 		$this->assertStringContainsString( "AI shopping: Off\nStore visibility: Live", $data['text'] );
 		$this->assertStringContainsString( "### Store checks ###\n\nNot checked yet", $data['text'] );
 		$this->assertStringContainsString( '(launched)', $data['text'], 'Setup steps are read now, so they show before the first check.' );
 		$this->assertStringNotContainsString( '### Product checks ###', $data['text'] );
 		$this->assertFalse( as_has_scheduled_action( ScheduledScan::RUN_NOW_HOOK ), 'The download must not queue a check.' );
+	}
+
+	/**
+	 * @testdox The support report is named after the page, and with no products checked it says so instead of marking every product check passed.
+	 */
+	public function test_support_report_with_no_products(): void {
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => '2026-11-18T10:42:00+00:00',
+				'products'     => 0,
+				'store_checks' => array(),
+				'checks'       => array(
+					array(
+						'id'    => 'missing_images',
+						'label' => 'Products with no main image',
+						'count' => 0,
+					),
+				),
+			),
+			false
+		);
+		$text = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
+
+		$this->assertStringStartsWith( "### AI shopping health ###\n", $text );
+		$this->assertStringEndsWith( "\nNo products to check.\n", $text, 'After the Product checks heading and the app totals' );
+		$this->assertStringNotContainsString( 'missing_images', $text, 'A count of 0 with nothing checked is not a pass' );
+		$privacy = array_values( array_filter( explode( "\n", $text ), static fn( string $line ): bool => false !== strpos( $line, '(privacy_page)' ) ) );
+		$this->assertStringStartsWith( 'Privacy policy page is selected and published (privacy_page):', $privacy[0] ?? '', 'The step is done only once the page is published' );
 	}
 
 	/**
@@ -382,7 +415,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 			false
 		);
 		$text = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/support-report' ) )->get_data()['text'];
-		$this->assertStringContainsString( "### Store checks ###\n\nYour store wasn’t live at the last check. These checks run at the next daily check, or you can run the check again now.", $text );
+		$this->assertStringContainsString( "### Store checks ###\n\nYour store wasn’t live at the last check. If your store is live now, these checks run at the next daily check. To run them now, select Check again.", $text );
 		$this->assertStringNotContainsString( 'Your hosting setup blocked', $text );
 		$this->assertStringContainsString( 'Open Graph tags (open_graph_tags): Not checked yet. Your store wasn’t live at the last check.', $text, 'Each check says so too, as on the page' );
 		$this->assertStringContainsString( 'Shipping details (product_shipping_schema): Not available yet', $text, 'A check a coming update builds is still not available' );
@@ -594,6 +627,40 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox When the discovery file can't be written as UCP turns on, POST ucp answers needs attention, not active.
+	 */
+	public function test_turning_ucp_on_reports_a_failed_discovery_write(): void {
+		if ( is_multisite() ) {
+			$this->markTestSkipped( 'Multisite never writes the discovery file.' );
+		}
+		global $wp_rewrite;
+		StoreConditionsTest::make_store_ready();
+		$wp_rewrite->set_permalink_structure( '' );
+		// A folder where the file goes: its parent is writable, so the switch is allowed, but the write fails.
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/ucp';
+		wp_mkdir_p( $path );
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- The failed write warns, as on a real server.
+		set_error_handler( static fn( int $severity ): bool => E_WARNING === $severity );
+
+		try {
+			$response = $this->dispatch_ucp( true );
+		} finally {
+			restore_error_handler();
+			foreach ( array( $path, dirname( $path ) ) as $dir ) {
+				if ( is_dir( $dir ) ) {
+					rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+				}
+			}
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['enabled'] );
+		$this->assertSame( UcpSwitch::STATUS_NEEDS_ATTENTION, $response->get_data()['status'] );
+		$this->assertContains( 'ucp_discovery', $response->get_data()['failing_checks'] );
+	}
+
+	/**
 	 * @testdox A user without manage_woocommerce can't switch UCP.
 	 */
 	public function test_ucp_switch_requires_manage_woocommerce(): void {
@@ -603,6 +670,54 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 403, $this->dispatch_ucp( true )->get_status() );
 		$this->assertSame( 'no', get_option( 'woocommerce_feature_ucp_enabled' ) );
+	}
+
+	/**
+	 * @testdox POST daily-checks turns the daily check off, which removes the scheduled run, and on again, which schedules it for a checked store.
+	 */
+	public function test_daily_checks_switch(): void {
+		\WC_Helper_Product::create_simple_product();
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+		$scheduled = wc_get_container()->get( ScheduledScan::class );
+		$scheduled->set_daily_enabled( true );
+		$this->assertIsInt( as_next_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+
+		$response = $this->dispatch_daily_checks( false );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertFalse( $response->get_data()['enabled'] );
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+
+		$scheduled->run();
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ), 'A check run by hand does not bring the daily one back' );
+
+		$response = $this->dispatch_daily_checks( true );
+		$this->assertTrue( $response->get_data()['enabled'] );
+		$this->assertSame( ScheduledScan::next_daily_run(), as_next_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+	}
+
+	/**
+	 * @testdox Before the first check, turning daily checks on queues nothing, and a user without manage_woocommerce can't change the setting.
+	 */
+	public function test_daily_checks_switch_before_first_check_and_permission(): void {
+		delete_option( AgentReadiness::REPORT_OPTION );
+
+		$this->assertTrue( $this->dispatch_daily_checks( true )->get_data()['enabled'] );
+		$this->assertFalse( as_has_scheduled_action( ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP ) );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+		$this->assertSame( 403, $this->dispatch_daily_checks( false )->get_status() );
+		$this->assertTrue( ScheduledScan::daily_enabled() );
+	}
+
+	/**
+	 * Send POST wc/v3/agent-readiness/daily-checks.
+	 *
+	 * @param bool $enabled Whether to check the store every day.
+	 */
+	private function dispatch_daily_checks( bool $enabled ): \WP_REST_Response {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/daily-checks' );
+		$request->set_param( 'enabled', $enabled );
+		return $this->server->dispatch( $request );
 	}
 
 	/**
