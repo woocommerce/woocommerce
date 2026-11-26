@@ -594,8 +594,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$offset = (int) $request->get_param( 'offset' );
 		$last   = $session->last_chunk();
 		if ( null !== $last && $offset === $last['offset'] ) {
-			$this->complete_finished_import( $session );
-			return $this->build_run_response( $session, $last['rows'] );
+			return $this->complete_finished_import( $session ) ?? $this->build_run_response( $session, $last['rows'] );
 		}
 		if ( $session->done() || $offset !== $session->processed() ) {
 			return new WP_Error(
@@ -651,8 +650,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			);
 		}
 
-		$this->complete_finished_import( $session );
-		return $this->build_run_response( $session, (array) ( $chunk['rows'] ?? array() ) );
+		return $this->complete_finished_import( $session ) ?? $this->build_run_response( $session, (array) ( $chunk['rows'] ?? array() ) );
 	}
 
 	/**
@@ -692,6 +690,19 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				)
 			);
 		}
+
+		// The caller only asks for a chunk while rows are expected, so a chunk without rows
+		// means the reader stopped early. Nothing was written and the same chunk can be sent again.
+		if ( 0 === (int) ( $chunk['consumed'] ?? 0 ) ) {
+			return new WP_Error(
+				'woocommerce_fulfillments_import_chunk_failed',
+				__( 'The CSV file ended before all of its rows were read. Please try again, or upload the file again.', 'woocommerce' ),
+				array(
+					'status' => WP_Http::INTERNAL_SERVER_ERROR,
+					'reason' => 'unexpected_eof',
+				)
+			);
+		}
 		return $chunk;
 	}
 
@@ -702,10 +713,19 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 * logged: the rows are imported and recorded, so it cannot turn the request into an error.
 	 *
 	 * @param ImportSession $session Session after its chunk was recorded.
+	 * @return WP_Error|null The error when a finished import could not be marked completed. The
+	 *                       chunk is recorded, so the same offset can be sent again to complete it.
 	 */
-	private function complete_finished_import( ImportSession $session ): void {
+	private function complete_finished_import( ImportSession $session ): ?WP_Error {
 		if ( ! $session->complete() ) {
-			return;
+			if ( $session->done() && ! $session->completed() ) {
+				return new WP_Error(
+					'woocommerce_fulfillments_import_progress_failed',
+					__( 'The end of the import could not be saved. Please try again.', 'woocommerce' ),
+					array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+				);
+			}
+			return null;
 		}
 
 		$hook_depth = count( $GLOBALS['wp_current_filter'] );
@@ -728,6 +748,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				array( 'source' => 'fulfillments-importer' )
 			);
 		}
+		return null;
 	}
 
 	/**

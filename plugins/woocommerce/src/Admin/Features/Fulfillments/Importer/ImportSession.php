@@ -843,15 +843,17 @@ final class ImportSession {
 	}
 
 	/**
-	 * Whether every data row has been processed.
+	 * Whether every data row the prepare step counted has been processed.
+	 *
+	 * The end of the file alone does not end the import: a reader that stops before the
+	 * counted rows hit a read failure, and the rows it did not reach are still expected.
 	 *
 	 * @since 11.5.0
 	 *
 	 * @return bool
 	 */
 	public function done(): bool {
-		$last = $this->last_chunk();
-		return $this->processed() >= $this->total() || ( null !== $last && $last['eof'] );
+		return $this->processed() >= $this->total();
 	}
 
 	/**
@@ -871,7 +873,8 @@ final class ImportSession {
 	 * The record itself is kept until it expires or the user's next upload replaces it, so
 	 * a request that repeats the last chunk can still be answered. The flag is stored
 	 * first: when that fails the file and its scheduled cleanup stay, and a later call
-	 * can complete the session. The cleanup is unscheduled once the file is gone.
+	 * can complete the session. The cleanup is unscheduled once the file and its
+	 * attachment are gone.
 	 *
 	 * @since 11.5.0
 	 *
@@ -889,9 +892,18 @@ final class ImportSession {
 			return false;
 		}
 
-		// A file that could not be deleted keeps its scheduled cleanup, which removes it later.
-		self::delete_staged_file( $this->file(), $this->attachment_id() );
-		if ( ! file_exists( $this->file() ) ) {
+		// The import is completed either way. A file or attachment that could not be deleted
+		// keeps the scheduled cleanup, which tries again after the session has expired.
+		try {
+			self::delete_staged_file( $this->file(), $this->attachment_id() );
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'The staged file of fulfillments import session %1$s could not be released: %2$s', $this->token, $e->getMessage() ),
+				array( 'source' => 'fulfillments-importer' )
+			);
+		}
+		$attachment_left = $this->attachment_id() > 0 && null !== get_post( $this->attachment_id() );
+		if ( ! file_exists( $this->file() ) && ! $attachment_left ) {
 			$this->unschedule_cleanup();
 		}
 		return true;

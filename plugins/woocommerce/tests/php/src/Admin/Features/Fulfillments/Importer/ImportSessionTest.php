@@ -749,11 +749,12 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox done() is true once every row is processed or the reader reached the end of the file.
+	 * @testdox done() is true once every row the prepare step counted is processed, not when the reader stops early.
 	 *
 	 * @testWith [41, false, false]
 	 *           [42, false, true]
-	 *           [10, true, true]
+	 *           [42, true, true]
+	 *           [10, true, false]
 	 *
 	 * @param int  $consumed Rows the recorded chunk consumed, of the 42 in the session.
 	 * @param bool $eof      Whether the chunk reached the end of the file.
@@ -830,5 +831,40 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $completed, 'The import is completed whether or not the file could be deleted' );
 		$this->assertFileExists( $file );
 		$this->assertIsInt( as_next_scheduled_action( ImportSession::CLEANUP_HOOK, $this->cleanup_args( $session ), self::CLEANUP_GROUP ), 'The cleanup stays scheduled for the file that is left' );
+	}
+
+	/**
+	 * @testdox complete() completes the session and keeps the cleanup when deleting the staged attachment throws.
+	 */
+	public function test_complete_survives_a_cleanup_that_throws(): void {
+		$file          = $this->make_staged_file();
+		$attachment_id = wp_insert_attachment( array( 'post_mime_type' => 'text/csv' ), $file );
+		$session       = ImportSession::create( 94, $file, ',', array( 'order_number' ), 1, false, true, $attachment_id );
+		$this->assertTrue( $session->record_chunk( 0, $this->chunk_result( 1, 1, 30, true ) ) );
+		add_action(
+			'delete_attachment',
+			function () {
+				throw new \RuntimeException( 'A listener failed while the attachment was deleted.' );
+			}
+		);
+
+		$this->assertTrue( $session->complete(), 'The session is completed although its file could not be released' );
+		$this->assertTrue( ImportSession::load( 94, $session->token() )->completed() );
+		$this->assertIsInt( as_next_scheduled_action( ImportSession::CLEANUP_HOOK, $this->cleanup_args( $session ), self::CLEANUP_GROUP ), 'The cleanup stays scheduled for what is left' );
+	}
+
+	/**
+	 * @testdox complete() keeps the cleanup when the staged attachment could not be deleted.
+	 */
+	public function test_complete_keeps_the_cleanup_when_the_attachment_is_left(): void {
+		$file          = $this->make_staged_file();
+		$attachment_id = wp_insert_attachment( array( 'post_mime_type' => 'text/csv' ), $file );
+		$session       = ImportSession::create( 95, $file, ',', array( 'order_number' ), 1, false, true, $attachment_id );
+		$this->assertTrue( $session->record_chunk( 0, $this->chunk_result( 1, 1, 30, true ) ) );
+		add_filter( 'pre_delete_attachment', '__return_false' );
+
+		$this->assertTrue( $session->complete() );
+		$this->assertNotNull( get_post( $attachment_id ), 'The attachment is still there' );
+		$this->assertIsInt( as_next_scheduled_action( ImportSession::CLEANUP_HOOK, $this->cleanup_args( $session ), self::CLEANUP_GROUP ), 'The cleanup stays scheduled for the attachment that is left' );
 	}
 }

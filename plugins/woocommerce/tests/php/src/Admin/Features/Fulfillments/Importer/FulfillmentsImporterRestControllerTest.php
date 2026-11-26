@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsCsvI
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsImporterRestController;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\ImportSession;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Data_Store;
 use WC_Order;
@@ -53,6 +52,13 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @var FulfillmentsImporterRestController
 	 */
 	private FulfillmentsImporterRestController $sut;
+
+	/**
+	 * Product shared by the orders of one test; created with the first order.
+	 *
+	 * @var \WC_Product|null
+	 */
+	private ?\WC_Product $product = null;
 
 	/**
 	 * Mapping of the three-column CSV the run tests stage.
@@ -357,6 +363,20 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Create an order with one line item, which is all the importer reads from it.
+	 *
+	 * @return int Order ID.
+	 */
+	private function make_order(): int {
+		if ( null === $this->product ) {
+			$this->product = \WC_Helper_Product::create_simple_product();
+		}
+		$order = wc_create_order();
+		$order->add_product( $this->product, 1 );
+		return $order->save();
+	}
+
+	/**
 	 * Stage a CSV with one row per new order and open a session over it.
 	 *
 	 * @param int  $rows            Number of orders and data rows.
@@ -369,7 +389,7 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 		$order_ids = array();
 		$csv       = "order_number,tracking_number,shipment_provider\n";
 		for ( $i = 1; $i <= $rows; $i++ ) {
-			$order_ids[] = OrderHelper::create_order()->get_id();
+			$order_ids[] = $this->make_order();
 			$csv        .= end( $order_ids ) . ",RUN-{$i},ups\n";
 		}
 		$file    = $this->make_staged_file( $csv );
@@ -1307,45 +1327,69 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 		list( $small, ) = $this->make_run_session( 2 );
 		$this->run_chunk( $small->token(), 0 );
 		wp_cache_flush();
-		$before = $wpdb->num_queries;
-		$this->run_chunk( $small->token(), 0 );
+		$before       = $wpdb->num_queries;
+		$two_rows     = $this->run_chunk( $small->token(), 0 );
 		$for_two_rows = $wpdb->num_queries - $before;
 
 		list( $large, ) = $this->make_run_session( 8 );
 		$this->run_chunk( $large->token(), 0 );
 		wp_cache_flush();
-		$before = $wpdb->num_queries;
-		$this->run_chunk( $large->token(), 0 );
+		$before         = $wpdb->num_queries;
+		$eight_rows     = $this->run_chunk( $large->token(), 0 );
 		$for_eight_rows = $wpdb->num_queries - $before;
 
+		$this->assertCount( 2, array_column( $two_rows['rows'], 'order_edit_url' ), 'The first measured request answers its two rows with edit URLs' );
+		$this->assertCount( 8, array_column( $eight_rows['rows'], 'order_edit_url' ), 'The second measured request answers its eight rows with edit URLs' );
 		$this->assertLessThan( 6, $for_eight_rows - $for_two_rows, 'Six more rows in the answered chunk must cost fewer than six more queries' );
 	}
 
 	/**
-	 * @testdox handle_run completes the import on a repeated request when the first one could not store the completed flag.
+	 * @testdox handle_run answers 500 when the completed flag cannot be stored, and the repeated request completes the import.
 	 */
 	public function test_run_completes_on_a_repeated_request_when_the_first_could_not(): void {
-		list( $session, )     = $this->make_run_session( 1 );
-		$file                 = $session->file();
-		$lose_completed_write = function ( $value, $old ) {
+		list( $session, $order_ids ) = $this->make_run_session( 1 );
+		$file                        = $session->file();
+		$lose_completed_write        = function ( $value, $old ) {
 			return ! empty( $value['completed'] ) ? $old : $value;
 		};
-		$transient_filter     = 'pre_update_option__transient_wc_fulfillment_import_' . get_current_user_id() . '_' . $session->token();
+		$transient_filter            = 'pre_update_option__transient_wc_fulfillment_import_' . get_current_user_id() . '_' . $session->token();
 		add_filter( $transient_filter, $lose_completed_write, 10, 2 );
 
 		$last = $this->run_chunk( $session->token(), 0 );
 
-		$this->assertTrue( $last['done'], 'The rows are imported, so the response still reports the end' );
-		$this->assertArrayHasKey( 'summary', $last );
+		$this->assert_run_error( 'woocommerce_fulfillments_import_progress_failed', 500, $last );
 		$this->assertSame( 0, did_action( 'woocommerce_fulfillments_csv_import_completed' ), 'An import that is not marked completed does not fire the action' );
 		$this->assertFileExists( $file, 'The file stays with its scheduled cleanup until the session is completed' );
+		$this->assertCount( 1, $this->fulfillments_of( $order_ids[0] ), 'The row of the chunk is imported and recorded' );
 
 		remove_filter( $transient_filter, $lose_completed_write, 10 );
 		$repeated = $this->run_chunk( $session->token(), 0 );
 
-		$this->assertSame( $last, $repeated, 'The repeated request gets the same response' );
+		$this->assertTrue( $repeated['done'], 'The repeated request reports the end from the recorded chunk' );
+		$this->assertSame( 1, $repeated['counts']['created'], 'The repeated request does not import the row again' );
 		$this->assertSame( 1, did_action( 'woocommerce_fulfillments_csv_import_completed' ), 'The repeated request completes the import' );
 		$this->assertFileDoesNotExist( $file );
+	}
+
+	/**
+	 * @testdox handle_run does not end the import when the file ends before the rows the prepare step counted.
+	 */
+	public function test_run_does_not_end_the_import_when_the_file_ends_early(): void {
+		$order_id = $this->make_order();
+		$file     = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n{$order_id},SHORT-1,ups\n" );
+		// A reader that stops early looks like a file with fewer rows than the session counted.
+		$session = ImportSession::create( get_current_user_id(), $file, ',', array( 'order_number', 'tracking_number', 'shipment_provider' ), 3, false, true );
+
+		$first  = $this->run_chunk( $session->token(), 0 );
+		$second = $this->run_chunk( $session->token(), 1 );
+
+		$this->assertIsArray( $first );
+		$this->assertFalse( $first['done'], 'One of three rows is not the end of the import' );
+		$this->assertSame( 1, $first['processed'] );
+		$this->assert_run_error( 'woocommerce_fulfillments_import_chunk_failed', 500, $second );
+		$this->assertSame( 'unexpected_eof', $second->get_error_data()['reason'] );
+		$this->assertFileExists( $file, 'The staged file is kept while rows are still expected' );
+		$this->assertSame( 0, did_action( 'woocommerce_fulfillments_csv_import_completed' ) );
 	}
 
 	/**
@@ -1713,7 +1757,7 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox The run route imports a chunk when dispatched through the REST server, with a mapping that skips a column.
 	 */
 	public function test_rest_run_route_imports_a_chunk(): void {
-		$order_id = OrderHelper::create_order()->get_id();
+		$order_id = $this->make_order();
 		$file     = $this->make_staged_file( "order_number,note,tracking_number,shipment_provider\n{$order_id},fragile,REST-1,ups\n" );
 		$session  = ImportSession::create( get_current_user_id(), $file, ',', array( 'order_number', 'note', 'tracking_number', 'shipment_provider' ), 1, false, true );
 		$request  = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );
@@ -1791,8 +1835,8 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox A file goes from handle_prepare through handle_run to the end, and a new prepare then replaces the completed session.
 	 */
 	public function test_prepare_then_run_imports_the_file_and_the_next_prepare_replaces_it(): void {
-		$first_order  = OrderHelper::create_order()->get_id();
-		$second_order = OrderHelper::create_order()->get_id();
+		$first_order  = $this->make_order();
+		$second_order = $this->make_order();
 		$file         = $this->make_staged_file( "Order ID,Tracking Number,Carrier\n{$first_order},JOINT-1,ups\n\n{$second_order},JOINT-2,ups\n" );
 
 		$prepared = $this->prepare_with_staged_file( $file, $this->make_attachment( $file ) );
@@ -1803,6 +1847,7 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 			$offset = $chunk['processed'];
 		} while ( ! $chunk['done'] && ++$requests < 5 );
 
+		$this->assertTrue( $chunk['done'], 'The import ends within the expected number of requests' );
 		$this->assertSame( $prepared['total'], $chunk['processed'], 'The run processes exactly the rows the prepare step counted' );
 		$this->assertSame( 2, $chunk['counts']['created'] );
 		$this->assertSame( 'JOINT-2', $this->fulfillments_of( $second_order )[0]->get_tracking_number() );
