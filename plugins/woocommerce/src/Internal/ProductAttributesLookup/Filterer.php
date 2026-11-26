@@ -165,9 +165,9 @@ class Filterer {
 		if ( 'or' === $query_type && ! $use_lookup_table ) {
 			// Without the lookup table, WC_Query::get_tax_query() adds the shopper's selection as a tax clause.
 			// Drop only that clause, so other options keep their counts and an attribute archive's own term still applies.
-			$chosen_terms = \WC_Query::get_layered_nav_chosen_attributes()[ $taxonomy ]['terms'] ?? array();
+			// WC_Query sets include_children to false on the selection; the archive clause keeps the default true.
 			foreach ( $tax_query as $key => $query ) {
-				if ( is_array( $query ) && $taxonomy === $query['taxonomy'] && $chosen_terms === $query['terms'] && empty( $query['include_children'] ) ) {
+				if ( is_array( $query ) && $taxonomy === $query['taxonomy'] && false === ( $query['include_children'] ?? true ) ) {
 					unset( $tax_query[ $key ] );
 				}
 			}
