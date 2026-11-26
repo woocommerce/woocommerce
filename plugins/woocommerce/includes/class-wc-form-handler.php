@@ -832,13 +832,11 @@ class WC_Form_Handler {
 			$order_id  = absint( $wp->query_vars['order-pay'] );
 			$order     = wc_get_order( $order_id );
 
-			if ( ! $order instanceof WC_Order || $order_id !== $order->get_id() ) {
+			if ( ! $order instanceof WC_Order ) {
 				return;
 			}
-			if ( ! hash_equals( $order->get_order_key(), $order_key ) ) {
-				return;
-			}
-			if ( $order->needs_payment() ) {
+
+			if ( $order_id === $order->get_id() && hash_equals( $order->get_order_key(), $order_key ) && $order->needs_payment() ) {
 
 				do_action( 'woocommerce_before_pay_action', $order );
 
