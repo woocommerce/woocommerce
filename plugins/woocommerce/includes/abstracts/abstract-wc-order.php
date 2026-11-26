@@ -339,6 +339,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 3.0.0
 	 * @return int order ID
+	 * @throws Throwable What a callback queued by a stage method throws, or an Error from the hooks around the write.
 	 */
 	public function save() {
 		if ( ! $this->data_store ) {
@@ -395,6 +396,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					)
 				)
 			);
+		} catch ( Throwable $e ) {
+			$this->requeue_deferred_actions( $deferred_actions, true );
+			throw $e;
 		}
 
 		$this->run_deferred_actions( $deferred_actions, true );

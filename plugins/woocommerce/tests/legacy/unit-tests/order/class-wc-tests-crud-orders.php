@@ -1488,6 +1488,60 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Hooks around the order write whose listener throws an Error.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function provide_errors_around_the_write(): array {
+		return array(
+			'before the write' => array( 'woocommerce_before_order_object_save' ),
+			'after the write'  => array( 'woocommerce_after_order_object_save' ),
+		);
+	}
+
+	/**
+	 * @testdox An Error around the write keeps the payment that a staged hook listener staged, for the next save.
+	 * @dataProvider provide_errors_around_the_write
+	 *
+	 * @param string $hook Hook whose listener throws an Error once.
+	 */
+	public function test_error_around_the_write_keeps_the_work_queued_by_a_staged_hook_listener( string $hook ): void {
+		$order = new WC_Order();
+		$order->save();
+		$fired = did_action( 'woocommerce_payment_complete' );
+		$pre   = did_action( 'woocommerce_pre_payment_complete' );
+		$pay   = static function () use ( &$pay, $order ) {
+			remove_action( 'woocommerce_order_edit_status', $pay );
+			$order->stage_payment_complete();
+		};
+		$throw = static function () use ( &$throw, $hook ) {
+			remove_action( $hook, $throw );
+			throw new Error( 'Listener failed.' );
+		};
+		add_action( 'woocommerce_order_edit_status', $pay );
+		add_action( $hook, $throw );
+
+		$order->stage_status( OrderStatus::ON_HOLD, '', true );
+		$caught = null;
+		try {
+			$order->save();
+		} catch ( Error $e ) {
+			$caught = $e;
+		} finally {
+			remove_action( 'woocommerce_order_edit_status', $pay );
+			remove_action( $hook, $throw );
+		}
+		$this->assertInstanceOf( Error::class, $caught, 'save() should pass on the Error.' );
+		$order->save();
+		$order->save();
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertSame( 1, count( array_keys( $notes, 'Payment complete.', true ) ) );
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );
+		$this->assertSame( 1, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+	}
+
+	/**
 	 * Run a callback while a listener makes every order write fail.
 	 *
 	 * @param callable $callback Callback to run.
