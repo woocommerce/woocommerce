@@ -373,16 +373,20 @@ final class ArgumentValidator {
 	}
 
 	/**
-	 * Validate and return a non-empty string of at most `$max_length` characters, for a value
-	 * matched against a column of that width.
+	 * Validate and return a string, trimmed, of 1 to `$max_length` characters, for a value matched
+	 * against a column of that width. A blank value is refused as required: the default collations
+	 * ignore trailing spaces, so it would match stored empty values.
 	 *
 	 * @param string $key        Field name.
 	 * @param mixed  $value      Caller value.
-	 * @param int    $max_length Most characters allowed.
-	 * @throws InvalidInputException If the value is missing, empty, not a string or too long.
+	 * @param int    $max_length Most characters allowed after trimming.
+	 * @throws InvalidInputException If the value is missing, empty, blank, not a string or too long.
 	 */
 	public static function validate_bounded_string( string $key, $value, int $max_length ): string {
-		$string = self::validate_non_empty_string( $key, $value );
+		$string = trim( self::validate_non_empty_string( $key, $value ) );
+		if ( '' === $string ) {
+			throw self::get_invalid_input( ValidationErrorCode::REQUIRED, $key, 'must not be blank' );
+		}
 		if ( mb_strlen( $string ) > $max_length ) {
 			throw self::get_invalid_input( ValidationErrorCode::TOO_LONG, $key, sprintf( 'must be at most %d characters', $max_length ), array( 'max' => $max_length ) );
 		}

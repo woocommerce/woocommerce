@@ -1337,8 +1337,10 @@ final class ContractRepository {
 
 	/**
 	 * Contracts of `$extension_slug` with a billing or shipping address whose email equals `$email`,
-	 * newest first, each once. The match uses the addresses table's collation (case-insensitive on
-	 * default installs) through its `email` index. Row-only reads, plan terms batch-hydrated.
+	 * newest first, each once. The match uses the addresses table's collation through its `email`
+	 * index: on default installs (`utf8mb4_unicode_520_ci`) case- and accent-insensitive (`é` = `e`,
+	 * `ß` = `ss`), trailing spaces ignored. The value is matched as given: the facade trims it.
+	 * Row-only reads, plan terms batch-hydrated.
 	 *
 	 * @param string $email          The address email to match.
 	 * @param string $extension_slug The owning extension.
@@ -2340,11 +2342,12 @@ final class ContractRepository {
 
 	/**
 	 * The lock holder when `$lock` is no longer held, read on the database clock; null only when it
-	 * is held. A contract that is gone reads as not held, with `exists` false.
+	 * is held. One read gives both facts from the same row. A contract that is gone reads as not
+	 * held, with `exists` false.
 	 *
 	 * @param ContractLock $lock The caller's lock.
 	 * @return array{exists: bool, operation: ?string}|null
-	 * @throws \RuntimeException If a read fails.
+	 * @throws \RuntimeException If the read fails.
 	 */
 	private function find_lost_lock_holder( ContractLock $lock ): ?array {
 		global $wpdb;
@@ -2352,15 +2355,28 @@ final class ContractRepository {
 		$contract_id = $lock->get_contract_id();
 		$contracts   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$holds_lock  = self::HOLDS_LOCK;
+		$lock_live   = self::LOCK_LIVE;
 
-		$holder = $this->get_lock_holder( $contract_id );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-		$held = $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$contracts} WHERE id = %d AND {$holds_lock}", $contract_id, $lock->get_state()->get_token() ) );
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT ( {$holds_lock} ) AS held, {$lock_live} AS live, lock_operation FROM {$contracts} WHERE id = %d", $lock->get_state()->get_token(), $contract_id ), ARRAY_A );
 		if ( '' !== $wpdb->last_error ) {
 			throw new \RuntimeException( esc_html( sprintf( 'Failed to check the lock on contract %d: %s', $contract_id, $wpdb->last_error ) ) );
 		}
 
-		return null === $held ? $holder : null;
+		if ( ! is_array( $row ) ) {
+			return array(
+				'exists'    => false,
+				'operation' => null,
+			);
+		}
+		if ( ! empty( $row['held'] ) ) {
+			return null;
+		}
+
+		return array(
+			'exists'    => true,
+			'operation' => ! empty( $row['live'] ) ? Coercion::coerce_nullable_string( $row['lock_operation'] ?? null ) : null,
+		);
 	}
 
 	/**

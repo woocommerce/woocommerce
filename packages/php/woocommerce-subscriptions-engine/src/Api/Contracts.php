@@ -12,10 +12,11 @@
  *
  * One lock per contract ({@see self::lock()}): every write runs under a lock, the caller's or,
  * for an update or meta write made without one, an internal one the engine takes for that call.
- * Every contract write is owner-scoped where its lock is taken. Cycle writes and the history delete
- * require the caller's lock. A write is refused with {@see ContractLockedException} while another operation holds the
- * lock. One exception: a history entry ({@see self::add_history_entry()}) is fenced by the caller's
- * lock when one is passed, and is otherwise a plain owner-scoped insert that no held lock refuses.
+ * Every contract write is owner-scoped where its lock is taken. Cycle writes and the history
+ * delete require the caller's lock. A write is refused with {@see ContractLockedException} while
+ * another operation holds the lock. One exception: a history entry
+ * ({@see self::add_history_entry()}) is fenced by the caller's lock when one is passed, and is
+ * otherwise a plain owner-scoped insert that no held lock refuses.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */
@@ -192,6 +193,7 @@ final class Contracts {
 
 	/**
 	 * Width of the stored address email column, the longest email {@see self::list_for_address_email()} can match.
+	 * Keep in step with `email VARCHAR(320)` of the contract addresses table in `SchemaInstaller`.
 	 */
 	private const ADDRESS_EMAIL_MAX_LENGTH = 320;
 
@@ -741,10 +743,12 @@ final class Contracts {
 	/**
 	 * List an extension's contracts with a billing or shipping address whose email equals `$email`,
 	 * newest first, each once. Owner-scoped: `extension_slug` is required, so one extension never
-	 * reads another's contracts by email. The match follows the database collation (case-insensitive
-	 * on default installs). Views carry no items or addresses. Unknown keys get `_doing_it_wrong()`.
+	 * reads another's contracts by email. The email is trimmed, then matched under the addresses
+	 * table's collation (`utf8mb4_unicode_520_ci` on default installs): case- and accent-insensitive
+	 * (`é` = `e`, `ß` = `ss`), trailing spaces ignored. Views carry no items or addresses. Unknown
+	 * keys get `_doing_it_wrong()`.
 	 *
-	 * @param string               $email  The address email to match (1-320 characters, not blank, as stored; no format check).
+	 * @param string               $email  The address email to match (1-320 characters once trimmed; no format check).
 	 * @param int                  $limit  Maximum contracts to return.
 	 * @param int                  $offset Contracts to skip (for paging).
 	 * @param array<string, mixed> $args   `extension_slug` (required, the owning extension; `any` is refused).
@@ -756,12 +760,8 @@ final class Contracts {
 	public static function list_for_address_email( string $email, int $limit = 20, int $offset = 0, array $args = array() ): array {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::LIST_FOR_ADDRESS_EMAIL_KEYS );
 
-		$validator = new ArgumentValidator();
-		$email     = $validator->get_bounded_string( 'email', $email, self::ADDRESS_EMAIL_MAX_LENGTH );
-		// The default collations ignore trailing spaces, so a blank email would match stored empty ones.
-		if ( null !== $email && '' === trim( $email ) ) {
-			$validator->add( new InvalidInputException( ValidationErrorCode::REQUIRED, 'email', '"email" must not be blank.' ) );
-		}
+		$validator      = new ArgumentValidator();
+		$email          = $validator->get_bounded_string( 'email', $email, self::ADDRESS_EMAIL_MAX_LENGTH );
 		$limit          = (int) $validator->get_non_negative_int( 'limit', $limit );
 		$offset         = (int) $validator->get_non_negative_int( 'offset', $offset );
 		$extension_slug = (string) $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] ?? null );
@@ -927,7 +927,7 @@ final class Contracts {
 	 * @return int The number of entries deleted; 0 when the contract has none.
 	 * @throws ValidationException      If `extension_slug` is missing or invalid.
 	 * @throws InvalidArgumentException If the lock is for another contract or another extension.
-	 * @throws ContractLockedException  If `$lock` was lost.
+	 * @throws ContractLockedException  If `$lock` was lost, including when the contract no longer exists.
 	 * @throws \RuntimeException        If the delete fails.
 	 */
 	public static function delete_history( int $contract_id, array $args, ContractLock $lock ): int {

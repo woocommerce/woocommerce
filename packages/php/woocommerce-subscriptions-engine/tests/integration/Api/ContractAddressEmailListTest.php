@@ -102,6 +102,18 @@ class ContractAddressEmailListTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox list_for_address_email() trims the email, so leading and trailing spaces match alike.
+	 */
+	public function test_trims_the_email(): void {
+		$id   = $this->seed( array( 'billing' => self::EMAIL ) );
+		$args = array( 'extension_slug' => self::EXTENSION_SLUG );
+
+		foreach ( array( ' ' . self::EMAIL, self::EMAIL . ' ', "\t" . self::EMAIL . "\n" ) as $email ) {
+			$this->assertSame( array( $id ), $this->ids( Contracts::list_for_address_email( $email, 20, 0, $args ) ), 'Matched once trimmed: ' . wp_json_encode( $email ) );
+		}
+	}
+
+	/**
 	 * @testdox list_for_address_email() refuses an email longer than the 320-character column and accepts one at the limit.
 	 */
 	public function test_refuses_an_email_longer_than_the_column(): void {

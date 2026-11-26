@@ -94,6 +94,18 @@ class ContractAddressEmailReadTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox An email longer than the 191-character index prefix matches only its full value, not another sharing the prefix.
+	 */
+	public function test_a_long_email_matches_its_full_value_past_the_index_prefix(): void {
+		$local = str_repeat( 'a', 200 );
+		$id    = $this->seed( array( 'billing' => $local . '@example.com' ) );
+		$this->seed( array( 'billing' => $local . '@example.org' ) );
+
+		$this->assertSame( array( $id ), $this->ids( $this->sut->find_by_address_email( $local . '@example.com', self::OWNER, 20, 0 ) ) );
+		$this->assertSame( array(), $this->sut->find_by_address_email( $local . '@example.net', self::OWNER, 20, 0 ), 'Sharing the first 191 characters is not a match.' );
+	}
+
+	/**
 	 * @testdox Pages with limit and offset over the de-duplicated set.
 	 */
 	public function test_pages_with_limit_and_offset(): void {

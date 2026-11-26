@@ -344,6 +344,7 @@ final class SchemaInstaller {
 		// One billing + one shipping address per contract: composite PK on
 		// (contract_id, address_type). `email` keys the owner-scoped address email read on a
 		// 191-character prefix: 191 utf8mb4 characters (4 bytes each) fit the 767-byte index limit.
+		// Keep the `email` width in step with Api\Contracts::ADDRESS_EMAIL_MAX_LENGTH.
 		$contract_addresses_sql = "CREATE TABLE {$contract_addresses} (
   contract_id BIGINT UNSIGNED NOT NULL,
   address_type VARCHAR(20) NOT NULL,
