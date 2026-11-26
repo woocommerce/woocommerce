@@ -667,13 +667,22 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		$order = WC_Helper_Order::create_order();
-		$order->update_status( 'completed' );
+		$order->update_status( OrderStatus::COMPLETED );
 		$refund = wc_create_refund(
 			array(
 				'order_id' => $order->get_id(),
 				'amount'   => 10,
 			)
 		);
+
+		// The fixture has 4 items at 10 plus 10 shipping. Check it independently of the shared builder.
+		$order_data = OrdersStatsDataStore::get_order_stats_row_data( $order );
+		foreach ( array( 'order_id', 'date_created', 'date_created_gmt', 'num_items_sold', 'total_sales', 'net_total', 'status', 'customer_id', 'returning_customer' ) as $column ) {
+			$this->assertArrayHasKey( $column, $order_data, "The row should include {$column}." );
+		}
+		$this->assertSame( 4, (int) $order_data['num_items_sold'], 'The row should count the fixture items.' );
+		$this->assertEquals( 50, (float) $order_data['total_sales'], 'The row should carry the fixture total.' );
+		$this->assertEquals( 40, (float) $order_data['net_total'], 'The net total should leave out shipping.' );
 
 		foreach ( array( $order, $refund ) as $object ) {
 			$data = OrdersStatsDataStore::get_order_stats_row_data( $object );
@@ -835,5 +844,76 @@ class DataStoreTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( $order ), 'An excluded record has no row.' );
 		$this->assertSame( -1, OrdersStatsDataStore::update( $order ), 'update() should skip an excluded record.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() returns false when the import exclusion check fails, as update() then writes nothing.
+	 */
+	public function test_get_order_stats_row_data_returns_false_when_exclusion_check_fails(): void {
+		global $wpdb;
+
+		$order = WC_Helper_Order::create_order();
+		$wpdb->delete( "{$wpdb->prefix}wc_order_stats", array( 'order_id' => $order->get_id() ) );
+		add_filter(
+			'woocommerce_analytics_orders_import_where_clauses',
+			static function ( $clauses ) {
+				$clauses[] = 'no_such_column_for_this_test = 1';
+				return $clauses;
+			}
+		);
+
+		$suppress = $wpdb->suppress_errors();
+		$data     = OrdersStatsDataStore::get_order_stats_row_data( $order );
+		$updated  = OrdersStatsDataStore::update( $order );
+		$wpdb->suppress_errors( $suppress );
+
+		$this->assertFalse( $data, 'A failed exclusion check should not produce a row.' );
+		$this->assertFalse( $updated, 'update() should report the failed check and write nothing.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() returns false for a trashed order Analytics does not hold yet.
+	 */
+	public function test_get_order_stats_row_data_returns_false_for_trashed_order_not_imported(): void {
+		global $wpdb;
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::TRASH );
+		$order->save();
+		$wpdb->delete( "{$wpdb->prefix}wc_order_stats", array( 'order_id' => $order->get_id() ) );
+		$trashed = wc_get_order( $order->get_id() );
+		$this->assertInstanceOf( \WC_Order::class, $trashed, 'The trashed order should still load.' );
+		$this->assertSame( OrderStatus::TRASH, $trashed->get_status(), 'The order should be in the trash.' );
+
+		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( $trashed ), 'The import skips this order, so it has no row.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() does not add a customer for a guest order without a billing email.
+	 */
+	public function test_get_order_stats_row_data_does_not_add_customer_for_guest_without_email(): void {
+		global $wpdb;
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( '' );
+		$order->save();
+		$wpdb->delete( "{$wpdb->prefix}wc_order_stats", array( 'order_id' => $order->get_id() ) );
+
+		$customer_count = static function () use ( $wpdb ) {
+			return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_customer_lookup" );
+		};
+		$before = $customer_count();
+
+		$first  = OrdersStatsDataStore::get_order_stats_row_data( wc_get_order( $order->get_id() ) );
+		$second = OrdersStatsDataStore::get_order_stats_row_data( wc_get_order( $order->get_id() ) );
+
+		$this->assertSame( $before, $customer_count(), 'Reading the row should not add a customer that nothing could find again.' );
+		$this->assertEmpty( $first['customer_id'], 'The row should have no customer before the import.' );
+		$this->assertEmpty( $second['customer_id'], 'A second read should not add one either.' );
+
+		OrdersStatsDataStore::update( wc_get_order( $order->get_id() ) );
+
+		$this->assertSame( $before + 1, $customer_count(), 'The import should add the one customer.' );
+		$this->assertNotEmpty( OrdersStatsDataStore::get_order_stats_row_data( wc_get_order( $order->get_id() ) )['customer_id'], 'After the import, the row should use that customer.' );
 	}
 }

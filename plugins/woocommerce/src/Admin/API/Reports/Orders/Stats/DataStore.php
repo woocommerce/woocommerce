@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Enums\OrderItemType;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
@@ -606,16 +607,21 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @since 11.5.0
 	 *
 	 * @param WC_Order|WC_Order_Refund $order Order or refund to build the row for.
-	 * @return array|false Row data keyed by column name, or false when the order is not tracked in analytics.
+	 * @return array|false Row data keyed by column name, or false when the Analytics import would not store a row for it.
 	 */
 	public static function get_order_stats_row_data( $order ) {
 		$date_created = self::get_tracked_order_date_created( $order );
-		if ( ! $date_created ) {
+		if ( ! $date_created || ! in_array( $order->get_type(), array( 'shop_order', 'shop_order_refund' ), true ) ) {
 			return false;
 		}
 
 		// update() writes no row for records the import conditions exclude, nor when that check fails.
 		if ( false !== OrdersScheduler::is_excluded_from_import( (int) $order->get_id() ) ) {
+			return false;
+		}
+
+		// The import skips trashed records Analytics does not hold yet, so that no customer lookup row is left behind.
+		if ( OrderStatus::TRASH === $order->get_status() && ! self::has_stats_row( (int) $order->get_id() ) ) {
 			return false;
 		}
 
@@ -660,7 +666,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return mixed Row data, or whatever the filter returned.
 	 */
 	private static function build_order_stats_row( $order, WC_DateTime $date_created, bool $for_update ) {
-		$customer_id = method_exists( $order, 'get_report_customer_id' ) ? $order->get_report_customer_id() : self::get_report_customer_id( $order );
+		$customer_id = $for_update ? self::get_report_customer_id( $order ) : self::get_existing_or_new_customer_id( $order );
 
 		if ( $for_update && method_exists( $order, 'is_returning_customer' ) ) {
 			$returning_customer = $order->is_returning_customer();
@@ -711,7 +717,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 */
 		$data = apply_filters( 'woocommerce_analytics_update_order_stats_data', $data, $order );
 
-		// update() has always passed a non-array result straight to $wpdb->replace(), so only the read path rejects it.
+		// update() has never rejected a non-array result, so only the read path does.
 		if ( ! $for_update && ! is_array( $data ) ) {
 			return false;
 		}
@@ -773,14 +779,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Get the customer lookup ID for an order or refund, as Overrides\Order and Overrides\OrderRefund do.
+	 * Get the customer lookup ID for an order or refund, creating the customer if missing.
 	 *
-	 * Used when the caller passes a plain order, since wc_get_order() only returns those classes once OrdersScheduler is set up.
+	 * Uses the order's own get_report_customer_id() when it has one. A plain order, which wc_get_order() returns
+	 * until OrdersScheduler is set up, gets the same lookup as Overrides\Order and Overrides\OrderRefund.
 	 *
 	 * @param WC_Order|WC_Order_Refund $order Order or refund.
 	 * @return int|bool Customer ID, or false when there is none.
 	 */
 	private static function get_report_customer_id( $order ) {
+		if ( method_exists( $order, 'get_report_customer_id' ) ) {
+			return $order->get_report_customer_id();
+		}
+
 		if ( $order instanceof WC_Order_Refund ) {
 			$order = wc_get_order( $order->get_parent_id() );
 			if ( ! $order instanceof WC_Order ) {
@@ -789,6 +800,45 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		return CustomersDataStore::get_or_create_customer_from_order( $order );
+	}
+
+	/**
+	 * Get the customer lookup ID for the read path, creating the customer only when it can be found again.
+	 *
+	 * A guest order without a billing email has nothing to match a new customer on, so each read and the later import
+	 * would each add one. For those, only a customer already linked through the order's stats row is used.
+	 *
+	 * @param WC_Order|WC_Order_Refund $order Order or refund.
+	 * @return int|bool Customer ID, or false when there is none.
+	 */
+	private static function get_existing_or_new_customer_id( $order ) {
+		if ( $order instanceof WC_Order_Refund ) {
+			$customer_order = wc_get_order( $order->get_parent_id() );
+		} else {
+			// get_or_create_customer_from_order() reloads plain orders, so check the saved data it will use.
+			$customer_order = $order instanceof Order ? $order : wc_get_order( $order->get_id() );
+		}
+
+		if ( $customer_order instanceof WC_Order && ! $customer_order->get_customer_id() && ! $customer_order->get_billing_email( 'edit' ) ) {
+			return CustomersDataStore::get_existing_customer_id_from_order( $customer_order );
+		}
+
+		return self::get_report_customer_id( $order );
+	}
+
+	/**
+	 * Check whether an order or refund already has a row in the order stats table.
+	 *
+	 * @param int $order_id Order or refund ID.
+	 * @return bool
+	 */
+	private static function has_stats_row( int $order_id ): bool {
+		global $wpdb;
+
+		$table_name = self::get_db_table_name();
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name is not user input.
+		return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT order_id FROM {$table_name} WHERE order_id = %d LIMIT 1", $order_id ) );
 	}
 
 	/**
@@ -1036,8 +1086,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Check to see if an order's customer has made previous orders or not
 	 *
-	 * @param WC_Order  $order WC_Order object.
-	 * @param int|false $customer_id Customer ID. Optional.
+	 * @param WC_Order      $order WC_Order object.
+	 * @param int|bool|null $customer_id Customer ID, as the customer lookups return it. Optional.
 	 * @return bool
 	 */
 	public static function is_returning_customer( $order, $customer_id = null ) {
