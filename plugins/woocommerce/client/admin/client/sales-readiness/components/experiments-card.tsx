@@ -3,14 +3,13 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { Button } from '@wordpress/components';
-import { createInterpolateElement, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 
-import { Badge, Card, Link, Text } from '@wordpress/ui';
+import { Badge, Card, Text } from '@wordpress/ui';
 
 /**
  * Internal dependencies
  */
-import { safeHref } from '../safe-href';
 import type { ExperimentsCardView } from '../types';
 import { ErrorNotice } from './error-notice';
 
@@ -19,29 +18,32 @@ export const EXPERIMENTS_PATH =
 
 /**
  * The AI tools Overview card for Features for AI assistants, laid out like a checklist row: the title
- * and description, with a button to turn them on beside them. Once they're on, the description says so
- * and links to the Features page, where they're turned off.
+ * and description, with a button beside them that turns them on or off. The Features page has the
+ * same setting.
  */
 export const ExperimentsCard = ( { card }: { card: ExperimentsCardView } ) => {
 	const [ enabled, setEnabled ] = useState( card.enabled );
 	const [ saving, setSaving ] = useState( false );
-	const [ failed, setFailed ] = useState( false );
-	const featuresHref = safeHref( card.on.href );
+	// The error for the change that failed, cleared on the next try.
+	const [ error, setError ] = useState< string | null >( null );
+	const state = enabled ? card.on : card.off;
 
-	const turnOn = async () => {
+	const toggle = async () => {
+		const next = ! enabled;
 		setSaving( true );
-		setFailed( false );
+		setError( null );
 		try {
 			const response = await apiFetch< { enabled: boolean } >( {
 				path: EXPERIMENTS_PATH,
 				method: 'POST',
+				data: { enabled: next },
 			} );
-			if ( ! response?.enabled ) {
-				throw new Error( 'not enabled' );
+			if ( response?.enabled !== next ) {
+				throw new Error( 'not changed' );
 			}
-			setEnabled( true );
+			setEnabled( next );
 		} catch {
-			setFailed( true );
+			setError( state.error );
 		} finally {
 			setSaving( false );
 		}
@@ -64,32 +66,20 @@ export const ExperimentsCard = ( { card }: { card: ExperimentsCardView } ) => {
 							variant="body-md"
 							className="wc-sales-readiness__muted"
 						>
-							{ enabled
-								? createInterpolateElement( card.on.text, {
-										link: featuresHref ? (
-											<Link href={ featuresHref } />
-										) : (
-											<span />
-										),
-									} )
-								: card.text }
+							{ state.text }
 						</Text>
 					</div>
-					{ ! enabled && (
-						<Button
-							variant="secondary"
-							size="compact"
-							disabled={ saving }
-							isBusy={ saving }
-							onClick={ () => void turnOn() }
-						>
-							{ card.button }
-						</Button>
-					) }
+					<Button
+						variant="secondary"
+						size="compact"
+						disabled={ saving }
+						isBusy={ saving }
+						onClick={ () => void toggle() }
+					>
+						{ state.button }
+					</Button>
 				</div>
-				{ failed && (
-					<ErrorNotice message={ card.error } reload={ false } />
-				) }
+				{ error && <ErrorNotice message={ error } reload={ false } /> }
 			</Card.Content>
 		</Card.Root>
 	);

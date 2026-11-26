@@ -400,11 +400,11 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The Overview's Features for AI assistants card: a button to turn them on, or once they're on, a
-	 * description that says so and links to the Features page to turn them off. Null for a user who can't
+	 * The Overview's Features for AI assistants card: a description and a button to turn them on, or once
+	 * they're on, a description that says so and a button to turn them off. Null for a user who can't
 	 * manage WooCommerce.
 	 *
-	 * @return array{title:string,badge:array{intent:string,text:string},text:string,enabled:bool,button:string,on:array{text:string,href:string},error:string}|null
+	 * @return array{title:string,badge:array{intent:string,text:string},enabled:bool,off:array{text:string,button:string,error:string},on:array{text:string,button:string,error:string}}|null
 	 */
 	private function experiments_card(): ?array {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -413,15 +413,17 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		return array(
 			'title'   => __( 'Features for AI assistants', 'woocommerce' ),
 			'badge'   => self::badge_data( array( 'off', __( 'Experimental', 'woocommerce' ) ) ),
-			'text'    => __( 'Try newer standards for AI assistants before they settle, such as WebMCP and Markdown versions of your pages.', 'woocommerce' ),
 			'enabled' => $this->features_controller->feature_is_enabled( AiAssistantExperiments::FEATURE_NAME ),
-			'button'  => __( 'Turn on', 'woocommerce' ),
-			'on'      => array(
-				/* translators: <link> and </link> wrap the path to the Features page. */
-				'text' => __( 'You’re trying newer standards for AI assistants, such as WebMCP and Markdown versions of your pages. You can turn them off in <link>Settings > Advanced > Features</link>.', 'woocommerce' ),
-				'href' => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ),
+			'off'     => array(
+				'text'   => __( 'Try newer standards for AI assistants before they settle, such as WebMCP and Markdown versions of your pages.', 'woocommerce' ),
+				'button' => __( 'Turn on', 'woocommerce' ),
+				'error'  => __( 'We couldn’t turn on features for AI assistants. Try again.', 'woocommerce' ),
 			),
-			'error'   => __( 'We couldn’t turn on features for AI assistants. Try again.', 'woocommerce' ),
+			'on'      => array(
+				'text'   => __( 'You’re trying newer standards for AI assistants, such as WebMCP and Markdown versions of your pages.', 'woocommerce' ),
+				'button' => __( 'Turn off', 'woocommerce' ),
+				'error'  => __( 'We couldn’t turn off features for AI assistants. Try again.', 'woocommerce' ),
+			),
 		);
 	}
 

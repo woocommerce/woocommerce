@@ -569,33 +569,62 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox POST ai-assistant-experiments turns the Features for AI assistants feature on, and succeeds when it's already on.
+	 * @testdox POST ai-assistant-experiments turns Features for AI assistants on, and succeeds when they're already on.
 	 */
 	public function test_ai_assistant_experiments_turned_on(): void {
 		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-assistant-experiments' ) );
+		$response = $this->dispatch_experiments( true );
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( array( 'enabled' => true ), $response->get_data() );
 		$this->assertSame( 'yes', get_option( 'woocommerce_feature_ai_assistant_experiments_enabled' ) );
-
-		$again = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-assistant-experiments' ) );
-		$this->assertSame( 200, $again->get_status(), 'Already on still counts as on' );
+		$this->assertSame( 200, $this->dispatch_experiments( true )->get_status(), 'Already on still counts as on' );
 	}
 
 	/**
-	 * @testdox When the Features for AI assistants option can't be saved, POST ai-assistant-experiments answers with an error.
+	 * @testdox POST ai-assistant-experiments turns Features for AI assistants off, and succeeds when they're already off.
 	 */
-	public function test_ai_assistant_experiments_failed_save(): void {
-		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
+	public function test_ai_assistant_experiments_turned_off(): void {
+		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'yes' );
+
+		$response = $this->dispatch_experiments( false );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array( 'enabled' => false ), $response->get_data() );
+		$this->assertSame( 'no', get_option( 'woocommerce_feature_ai_assistant_experiments_enabled' ) );
+		$this->assertSame( 200, $this->dispatch_experiments( false )->get_status(), 'Already off still counts as off' );
+	}
+
+	/**
+	 * @testdox When the option can't be saved, POST ai-assistant-experiments answers with an error that names the change.
+	 *
+	 * @testWith [true, "no", "We couldn’t turn on features for AI assistants. Try again."]
+	 *           [false, "yes", "We couldn’t turn off features for AI assistants. Try again."]
+	 *
+	 * @param bool   $enable  Whether the request turns them on.
+	 * @param string $current The option before the request.
+	 * @param string $message The expected error message.
+	 */
+	public function test_ai_assistant_experiments_failed_save( bool $enable, string $current, string $message ): void {
+		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', $current );
 		add_filter( 'pre_update_option_woocommerce_feature_ai_assistant_experiments_enabled', static fn( $value, $old_value ) => $old_value, 10, 2 );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-assistant-experiments' ) );
+		$response = $this->dispatch_experiments( $enable );
 
 		$this->assertSame( 500, $response->get_status() );
-		$this->assertSame( 'woocommerce_ai_assistant_experiments_not_enabled', $response->get_data()['code'] );
-		$this->assertSame( 'no', get_option( 'woocommerce_feature_ai_assistant_experiments_enabled' ) );
+		$this->assertSame( 'woocommerce_ai_assistant_experiments_not_changed', $response->get_data()['code'] );
+		$this->assertSame( $message, $response->get_data()['message'] );
+		$this->assertSame( $current, get_option( 'woocommerce_feature_ai_assistant_experiments_enabled' ) );
+	}
+
+	/**
+	 * @testdox POST ai-assistant-experiments needs the enabled parameter.
+	 */
+	public function test_ai_assistant_experiments_requires_enabled(): void {
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-assistant-experiments' ) );
+
+		$this->assertSame( 400, $response->get_status() );
 	}
 
 	/**
@@ -605,10 +634,19 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-assistant-experiments' ) );
-
-		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 403, $this->dispatch_experiments( true )->get_status() );
 		$this->assertSame( 'no', get_option( 'woocommerce_feature_ai_assistant_experiments_enabled' ) );
+	}
+
+	/**
+	 * Send POST wc/v3/agent-readiness/ai-assistant-experiments.
+	 *
+	 * @param bool $enabled Whether to turn them on.
+	 */
+	private function dispatch_experiments( bool $enabled ): \WP_REST_Response {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ai-assistant-experiments' );
+		$request->set_param( 'enabled', $enabled );
+		return $this->server->dispatch( $request );
 	}
 
 	/**

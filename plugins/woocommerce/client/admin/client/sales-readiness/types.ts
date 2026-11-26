@@ -96,17 +96,21 @@ export interface Declared {
 	}[];
 }
 
+/** One state of the Features for AI assistants card: its description, button and error. */
+export interface ExperimentsCardState {
+	text: string;
+	button: string;
+	/** Shown when the button's change fails. */
+	error: string;
+}
+
 /** The Features for AI assistants card on the AI tools Overview. */
 export interface ExperimentsCardView {
 	title: string;
 	badge: ViewBadge;
-	text: string;
 	enabled: boolean;
-	/** Turns them on. */
-	button: string;
-	/** The description once they're on: wraps the path to the Features page in <link></link>. */
-	on: { text: string; href: string };
-	error: string;
+	off: ExperimentsCardState;
+	on: ExperimentsCardState;
 }
 
 export interface ShoppingCard {

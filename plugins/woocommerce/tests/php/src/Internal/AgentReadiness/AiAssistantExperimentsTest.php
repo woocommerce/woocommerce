@@ -122,9 +122,9 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox While the feature is off, the AI tools Overview card offers to turn it on.
+	 * @testdox The AI tools Overview card has a description and a button for each state.
 	 */
-	public function test_overview_card_offers_to_turn_on_while_off(): void {
+	public function test_overview_card_copy(): void {
 		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', 'no' );
 
 		$card = $this->overview_card();
@@ -137,12 +137,23 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 			),
 			$card['badge']
 		);
-		$this->assertSame( 'Try newer standards for AI assistants before they settle, such as WebMCP and Markdown versions of your pages.', $card['text'] );
 		$this->assertFalse( $card['enabled'] );
-		$this->assertSame( 'Turn on', $card['button'] );
-		$this->assertSame( 'You’re trying newer standards for AI assistants, such as WebMCP and Markdown versions of your pages. You can turn them off in <link>Settings > Advanced > Features</link>.', $card['on']['text'] );
-		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ), $card['on']['href'] );
-		$this->assertSame( 'We couldn’t turn on features for AI assistants. Try again.', $card['error'] );
+		$this->assertSame(
+			array(
+				'text'   => 'Try newer standards for AI assistants before they settle, such as WebMCP and Markdown versions of your pages.',
+				'button' => 'Turn on',
+				'error'  => 'We couldn’t turn on features for AI assistants. Try again.',
+			),
+			$card['off']
+		);
+		$this->assertSame(
+			array(
+				'text'   => 'You’re trying newer standards for AI assistants, such as WebMCP and Markdown versions of your pages.',
+				'button' => 'Turn off',
+				'error'  => 'We couldn’t turn off features for AI assistants. Try again.',
+			),
+			$card['on']
+		);
 	}
 
 	/**
