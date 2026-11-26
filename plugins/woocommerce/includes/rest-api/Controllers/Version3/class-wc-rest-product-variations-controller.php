@@ -234,7 +234,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				if ( ! array_key_exists( 'term_id', $attribute ) ) {
 					continue;
 				}
-				$taxonomy                  = ! empty( $attribute['id'] ) ? wc_attribute_taxonomy_name_by_id( absint( $attribute['id'] ) ) : sanitize_title( is_string( $attribute['name'] ?? null ) ? $attribute['name'] : '' );
+				$taxonomy                  = ! empty( $attribute['id'] ) ? wc_attribute_taxonomy_name_by_id( absint( $attribute['id'] ) ) : wc_sanitize_taxonomy_name( is_string( $attribute['name'] ?? null ) ? $attribute['name'] : '' );
 				$attribute_terms[ $index ] = $this->get_attribute_term( $attribute['term_id'], $taxonomy );
 			}
 		}
