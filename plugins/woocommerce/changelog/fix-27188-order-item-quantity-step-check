@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix an order item's cost changing when a decimal quantity is saved on a store that only allows whole quantities.
