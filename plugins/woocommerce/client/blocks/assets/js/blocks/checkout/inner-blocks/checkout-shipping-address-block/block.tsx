@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
-import { useEffectOnce } from 'usehooks-ts';
+import { Fragment, useEffect } from '@wordpress/element';
 import {
 	useCheckoutAddress,
 	useEditorContext,
@@ -17,6 +16,7 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { BillingAddress } from '@woocommerce/settings';
 import { getSetting } from '@woocommerce/settings';
 import { emptyAddressFields } from '@woocommerce/base-utils';
+import { useToggleCollapse } from '@woocommerce/base-hooks';
 import type { CartResponseBillingAddress } from '@woocommerce/types';
 
 /**
@@ -79,11 +79,18 @@ const Block = (): JSX.Element => {
 	};
 
 	// Run this on first render to ensure addresses sync if needed (this is not re-ran when toggling the checkbox).
-	useEffectOnce( () => {
+	useEffect( () => {
 		if ( useShippingAsBilling ) {
 			syncBillingWithShipping();
 		}
-	} );
+		// The address should only be initialized on mount.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
+
+	// The checkbox collapses the billing section out and grows it in.
+	const billingCollapse = useToggleCollapse( ! useShippingAsBilling, () =>
+		document.getElementById( 'billing-fields' )
+	);
 
 	const WrapperComponent = isEditor ? Noninteractive : Fragment;
 	const noticeContext = useShippingAsBilling
@@ -97,10 +104,12 @@ const Block = (): JSX.Element => {
 				<CustomerAddress />
 			</WrapperComponent>
 			<CheckboxControl
+				ref={ billingCollapse.triggerRef }
 				className="wc-block-checkout__use-address-for-billing"
 				label={ __( 'Use same address for billing', 'woocommerce' ) }
 				checked={ useShippingAsBilling }
 				onChange={ ( checked: boolean ) => {
+					billingCollapse.onToggle();
 					setUseShippingAsBilling( checked );
 					if ( checked ) {
 						syncBillingWithShipping();

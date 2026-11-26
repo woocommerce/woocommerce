@@ -1019,6 +1019,73 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return order item fields on shipping, fee and coupon lines, and list a field with object_types only on its kind of line.
+	 */
+	public function test_order_item_fields_are_returned_on_every_kind_of_line(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'order_item',
+						'namespace'     => 'test-ext',
+						'field'         => 'fee_reason',
+						'output_schema' => array( 'type' => 'string' ),
+						'object_types'  => array( 'fee' ),
+						'get_callback'  => static fn() => 'packaging',
+					)
+				);
+			}
+		);
+		$order    = \WC_Helper_Order::create_order();
+		$fee      = new \WC_Order_Item_Fee();
+		$shipping = new \WC_Order_Item_Shipping();
+		$coupon   = new \WC_Order_Item_Coupon();
+		$fee->set_props(
+			array(
+				'name'  => 'Packaging',
+				'total' => '2',
+			)
+		);
+		$shipping->set_method_title( 'Courier' );
+		$coupon->set_code( 'save5' );
+		foreach ( array( $fee, $shipping, $coupon ) as $item ) {
+			$order->add_item( $item );
+		}
+		$order->save();
+
+		$listed = $this->run_ability(
+			'woocommerce/orders-query',
+			array(
+				'id'                 => $order->get_id(),
+				'include_line_items' => true,
+				'include_lines'      => true,
+			)
+		)['orders'][0];
+		$schema = $this->get_output_schema( 'woocommerce/orders-query' )['properties']['orders']['items']['properties'];
+
+		$this->assertSame(
+			array(
+				'test-ext' => array(
+					'gift'       => 'item-' . $fee->get_id(),
+					'fee_reason' => 'packaging',
+				),
+			),
+			$listed['fee_lines'][0]['extensions']
+		);
+		$shipping_line = current( wp_list_filter( $listed['shipping_lines'], array( 'id' => $shipping->get_id() ) ) );
+		$this->assertSame( array( 'test-ext' => array( 'gift' => 'item-' . $shipping->get_id() ) ), $shipping_line['extensions'] );
+		$this->assertSame( array( 'test-ext' => array( 'gift' => 'item-' . $coupon->get_id() ) ), $listed['coupon_lines'][0]['extensions'] );
+		$this->assertArrayNotHasKey( 'fee_reason', $listed['line_items'][0]['extensions']['test-ext'] );
+		$this->assertArrayHasKey( 'fee_reason', $schema['fee_lines']['items']['properties']['extensions']['properties']['test-ext']['properties'] );
+		foreach ( array( 'line_items', 'shipping_lines', 'coupon_lines' ) as $key ) {
+			$this->assertArrayNotHasKey( 'fee_reason', $schema[ $key ]['items']['properties']['extensions']['properties']['test-ext']['properties'], $key );
+			$this->assertArrayHasKey( 'gift', $schema[ $key ]['items']['properties']['extensions']['properties']['test-ext']['properties'], $key );
+		}
+		$this->assertArrayNotHasKey( 'extensions', $schema['tax_lines']['items']['properties'], 'Tax lines have no extension fields.' );
+	}
+
+	/**
 	 * @testdox Should call the $resource_name prime callbacks of each extension once with the full list, in registration order.
 	 * @dataProvider provide_list_abilities
 	 *
@@ -1183,15 +1250,32 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should call the order and order item prime callbacks once with every order and every product line.
+	 * @testdox Should call the order and order item prime callbacks once with every order and every product, shipping, fee and coupon line, including a fee a filter adds.
 	 */
 	public function test_prime_callbacks_get_orders_and_line_items(): void {
 		$product = \WC_Helper_Product::create_simple_product();
 		$orders  = array( wc_create_order(), wc_create_order() );
 		foreach ( $orders as $order ) {
 			$order->add_product( $product );
+			$order->add_item( new \WC_Order_Item_Fee() );
+			$order->add_item( new \WC_Order_Item_Shipping() );
+			$order->add_item( new \WC_Order_Item_Coupon() );
+			$order->add_item( new \WC_Order_Item_Tax() );
 			$order->save();
 		}
+		$added_fee = new \WC_Order_Item_Fee();
+		$added_fee->save();
+		$this->add_test_filter(
+			'woocommerce_order_get_items',
+			static function ( $items, $order, $types ) use ( $added_fee, $orders ) {
+				if ( array( 'fee' ) === $types && $order->get_id() === $orders[0]->get_id() ) {
+					$items[ $added_fee->get_id() ] = $added_fee;
+				}
+				return $items;
+			},
+			10,
+			3
+		);
 		$calls = array();
 		foreach ( array( 'order', 'order_item' ) as $resource_name ) {
 			$this->register_prime(
@@ -1208,11 +1292,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			array(
 				'per_page'           => 2,
 				'include_line_items' => true,
+				'include_lines'      => true,
 			)
 		);
 
-		$item_ids = array_merge( ...array_map( static fn( \WC_Order $order ) => array_keys( $order->get_items() ), $orders ) );
-		$this->assertCount( 2, $item_ids );
+		$item_ids   = array_merge( ...array_map( static fn( \WC_Order $order ) => array_keys( $order->get_items( array( 'line_item', 'shipping', 'fee', 'coupon' ) ) ), $orders ) );
+		$item_ids[] = $added_fee->get_id();
+		$this->assertCount( 9, $item_ids );
 		$this->assertCount( 1, $calls['order'] );
 		$this->assertEqualsCanonicalizing( array_map( static fn( \WC_Order $order ) => $order->get_id(), $orders ), $calls['order'][0] );
 		$this->assertCount( 1, $calls['order_item'] );
@@ -1415,6 +1501,182 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		ExtensibleAbilities::register_resource( 'late_resource' );
 
 		$this->assertFalse( ExtensibleAbilities::is_resource_registered( 'late_resource' ) );
+	}
+
+	/**
+	 * @testdox Should list the order emails of extensions in order-send-email, send them in their statuses only, send a store email without a billing email, and refuse an unknown email naming the valid ones.
+	 */
+	public function test_order_send_email_sends_the_order_emails_of_extensions(): void {
+		$this->register_order_emails();
+		$on_hold_order = \WC_Helper_Order::create_order();
+		$on_hold_order->set_status( OrderStatus::ON_HOLD );
+		$on_hold_order->set_billing_email( 'customer@example.com' );
+		$on_hold_order->save();
+		$pending_order = \WC_Helper_Order::create_order();
+		$mails         = array();
+		$capture       = static function ( $short_circuit, $atts ) use ( &$mails ) {
+			$mails[] = $atts;
+			return true;
+		};
+		add_filter( 'pre_wp_mail', $capture, 10, 2 );
+
+		$schema  = $this->get_ability( 'woocommerce/order-send-email' )['input_schema']['properties']['email'];
+		$on_hold = $this->run_ability(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => $on_hold_order->get_id(),
+				'email' => 'test-ext:on-hold',
+			)
+		);
+		$note    = $this->run_ability(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => $pending_order->get_id(),
+				'email' => 'test-ext:note',
+			)
+		);
+		add_filter( 'woocommerce_order_get_billing_email', '__return_empty_string' );
+		$new_order = $this->run_ability(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => $pending_order->get_id(),
+				'email' => 'test-ext:new-order',
+			)
+		);
+		remove_filter( 'woocommerce_order_get_billing_email', '__return_empty_string' );
+		$mismatch = $this->run_ability_response(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => $pending_order->get_id(),
+				'email' => 'test-ext:on-hold',
+			)
+		);
+		$unknown  = wp_get_ability( 'woocommerce/order-send-email' )->execute(
+			array(
+				'id'    => $pending_order->get_id(),
+				'email' => 'test-ext:missing',
+			)
+		);
+		remove_filter( 'pre_wp_mail', $capture );
+
+		$this->assertSame( array( 'invoice', 'processing', 'completed', 'test-ext:on-hold', 'test-ext:note', 'test-ext:new-order' ), $schema['enum'] );
+		$this->assertStringContainsString( 'test-ext:on-hold: Tells the customer that the order is on hold. Statuses: on-hold, failed.', $schema['description'] );
+		$this->assertStringContainsString( 'test-ext:note: Sends a reminder note. Statuses: any.', $schema['description'] );
+		$this->assertSame( 'test-ext:on-hold', $on_hold['email'] );
+		$this->assertSame( 'test-ext:note', $note['email'] );
+		$this->assertSame( 'test-ext:new-order', $new_order['email'] );
+		$this->assertCount( 3, $mails );
+		$this->assertSame( 'customer@example.com', $mails[0]['to'] );
+		$this->assertStringContainsString( 'Pay the second payment.', $mails[1]['message'] );
+		$this->assertSame( get_option( 'admin_email' ), $mails[2]['to'] );
+		$this->assertSame( 'woocommerce_ability_order_email_status_mismatch', $mismatch->get_data()['code'] );
+		$this->assertStringContainsString( 'on-hold, failed', $mismatch->get_data()['message'] );
+		$this->assertSame( 'ability_invalid_input', $unknown->get_error_code() );
+		$this->assertStringContainsString( 'test-ext:on-hold', $unknown->get_error_message() );
+		$this->assertStringContainsString( 'test-ext:note', $unknown->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should point to the logs, not the mail setup, when the trigger callback of an order email throws.
+	 */
+	public function test_order_send_email_reports_a_throwing_trigger_callback(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'        => 'test-ext',
+						'email'            => 'broken',
+						'email_class'      => 'WC_Email_Customer_Note',
+						'description'      => 'Throws before it sends.',
+						'trigger_callback' => static function () {
+							throw new \RuntimeException( 'Broken template.' );
+						},
+					)
+				);
+			}
+		);
+
+		$result = $this->run_ability_response(
+			'woocommerce/order-send-email',
+			array(
+				'id'    => \WC_Helper_Order::create_order()->get_id(),
+				'email' => 'test-ext:broken',
+			)
+		);
+
+		$this->assertSame( 'woocommerce_ability_order_email_send_failed', $result->get_data()['code'] );
+		$this->assertStringContainsString( 'WooCommerce > Status > Logs', $result->get_data()['message'] );
+	}
+
+	/**
+	 * @testdox Should refuse an order email that is already registered, and keep the first one.
+	 */
+	public function test_an_order_email_registered_twice_is_refused(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_order_email' );
+		$this->register_order_emails();
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'   => 'test-ext',
+						'email'       => 'on-hold',
+						'email_class' => 'WC_Email_Customer_Invoice',
+						'description' => 'Another email.',
+					)
+				);
+			}
+		);
+
+		$this->get_ability( 'woocommerce/order-send-email' );
+
+		$this->assertSame( 'WC_Email_Customer_On_Hold_Order', ExtensibleAbilities::get_order_emails()['test-ext:on-hold']['email_class'] );
+	}
+
+	/**
+	 * Register three order emails of an extension: one sent with the default trigger in two statuses,
+	 * one whose trigger takes other arguments, sent in any status, and a store email sent in any status.
+	 */
+	private function register_order_emails(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'   => 'test-ext',
+						'email'       => 'on-hold',
+						'email_class' => 'WC_Email_Customer_On_Hold_Order',
+						'description' => 'Tells the customer that the order is on hold.',
+						'statuses'    => array( 'wc-on-hold', OrderStatus::FAILED ),
+					)
+				);
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'        => 'test-ext',
+						'email'            => 'note',
+						'email_class'      => 'WC_Email_Customer_Note',
+						'description'      => 'Sends a reminder note.',
+						'trigger_callback' => static function ( \WC_Email $email, \WC_Order $order ) {
+							$email->trigger(
+								array(
+									'order_id'      => $order->get_id(),
+									'customer_note' => 'Pay the second payment.',
+								)
+							);
+						},
+					)
+				);
+				ExtensibleAbilities::register_order_email(
+					array(
+						'namespace'   => 'test-ext',
+						'email'       => 'new-order',
+						'email_class' => 'WC_Email_New_Order',
+						'description' => 'Tells the store about the order.',
+					)
+				);
+			}
+		);
 	}
 
 	/**
@@ -7612,7 +7874,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'validators', 'syncs', 'primes', 'filters' ) as $property ) {
+		foreach ( array( 'fields', 'validators', 'syncs', 'primes', 'filters', 'order_emails' ) as $property ) {
 			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );

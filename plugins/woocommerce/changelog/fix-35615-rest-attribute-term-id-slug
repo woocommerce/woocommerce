@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+REST API: set product and variation attribute terms by ID, so terms that share a name are no longer mixed up.

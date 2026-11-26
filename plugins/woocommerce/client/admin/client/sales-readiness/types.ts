@@ -114,6 +114,8 @@ export interface ReadinessView {
 	checked_note: string | null;
 	/** False before the first check. */
 	checked: boolean;
+	/** Whether the store is checked every day. */
+	daily_checks: boolean;
 	run: {
 		label: string;
 		pending: boolean;

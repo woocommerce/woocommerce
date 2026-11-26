@@ -2,12 +2,12 @@
  * External dependencies
  */
 import {
-	test,
+	test as base,
 	expect,
-	Admin,
+	guestFile,
 	BlockData,
 	BLOCK_THEME_SLUG,
-	RequestUtils,
+	WPTemplate,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -20,6 +20,7 @@ import {
 	getProductsNameFromProductQuery,
 	insertProductsQuery,
 } from './utils';
+import { locks } from '../../../fixtures/fixtures';
 
 const blockData: BlockData = {
 	name: 'core/query',
@@ -31,44 +32,34 @@ const blockData: BlockData = {
 	},
 };
 
-const templates = {
-	'archive-product': {
-		templateTitle: 'Product Catalog',
-		slug: 'archive-product',
-		frontendPage: '/shop/',
-		legacyBlockName: 'woocommerce/legacy-template',
-	},
-};
+const CATEGORY_PAGE = '/product-category/clothing/tshirts/';
+const LEGACY_BLOCK_NAME = 'woocommerce/legacy-template';
 
-const classicTemplateComparisonRoutes = {
-	'archive-product': {
-		testTitle:
-			'Products block matches the classic template block on the shop page',
-		templateTitle: 'Product Catalog',
-		slug: 'archive-product',
-		frontendPage: '/shop/',
-		legacyBlockName: 'woocommerce/legacy-template',
-		needsCreation: false,
+const test = base.extend< { categoryTemplate: WPTemplate } >( {
+	// A template for the Tshirts category only, so no other page changes.
+	categoryTemplate: async ( { requestUtils }, use ) => {
+		// A stopped run can leave the template, and a second one gets a
+		// different slug, which the Tshirts page does not use.
+		await requestUtils
+			.rest( {
+				method: 'DELETE',
+				path: `/wp/v2/templates/${ BLOCK_THEME_SLUG }//taxonomy-product_cat-tshirts`,
+				params: { force: true },
+			} )
+			.catch( ( error ) => {
+				if ( error?.code !== 'rest_template_not_found' ) {
+					throw error;
+				}
+			} );
+		const template = ( await requestUtils.createTemplate( 'wp_template', {
+			slug: 'taxonomy-product_cat-tshirts',
+			title: 'Products by Category: Tshirts',
+			content: '',
+		} ) ) as WPTemplate;
+		await use( template );
+		await requestUtils.revertTemplate( 'wp_template', template.id );
 	},
-	'taxonomy-product_cat': {
-		testTitle:
-			'Products block matches the classic template block on a product category archive',
-		templateTitle: 'Products by Category',
-		slug: 'taxonomy-product_cat',
-		frontendPage: '/product-category/tshirts/',
-		legacyBlockName: 'woocommerce/legacy-template',
-		needsCreation: true,
-	},
-	'product-search-results': {
-		testTitle:
-			'Products block matches the classic template block on product search results',
-		templateTitle: 'Product Search Results',
-		slug: 'product-search-results',
-		frontendPage: '/?s=shirt&post_type=product',
-		legacyBlockName: 'woocommerce/legacy-template',
-		needsCreation: false,
-	},
-};
+} );
 
 test.describe( `${ blockData.name } Block `, () => {
 	test( 'when Inherits Query From Template other options are hidden, show up otherwise', async ( {
@@ -76,6 +67,7 @@ test.describe( `${ blockData.name } Block `, () => {
 		editor,
 		page,
 	} ) => {
+		// This test does not save the template.
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
 			postType: 'wp_template',
@@ -101,54 +93,52 @@ test.describe( `${ blockData.name } Block `, () => {
 		await expect( advancedFilterOption ).toBeVisible();
 		await expect( inheritQueryFromTemplateOption ).toBeVisible();
 	} );
-
-	test( 'product button should add product to the cart when inheriting query from template', async ( {
-		admin,
-		editor,
-		page,
-		frontendUtils,
-	} ) => {
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-		await editor.setContent( '' );
-		await insertProductsQuery( editor );
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-		await frontendUtils.goToShop();
-
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart: “Single”',
-		} );
-		await addToCartButton.click();
-		await expect( addToCartButton ).toHaveText( '1 in cart' );
-		const cartLink = page.getByRole( 'link', { name: 'View cart' } );
-		await expect( cartLink ).toBeVisible();
-	} );
 } );
 
-for ( const {
-	templateTitle,
-	slug,
-	frontendPage,
-	legacyBlockName,
-} of Object.values( templates ) ) {
-	test.describe( `${ templateTitle } template`, () => {
-		test( 'Product Collection matches with classic template block', async ( {
-			admin,
-			editor,
-			page,
-		} ) => {
+test.describe(
+	'Tshirts category template',
+	{ lock: locks.TSHIRTS_CATEGORY_TEMPLATE },
+	() => {
+		test.beforeEach( async ( { admin, editor, categoryTemplate } ) => {
 			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_SLUG }//${ slug }`,
+				postId: categoryTemplate.id,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );
-			await editor.setContent( '' );
 			await insertProductsQuery( editor );
+		} );
+
+		test( 'product button should add product to the cart when inheriting query from template', async ( {
+			editor,
+			browser,
+		} ) => {
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+
+			// A guest cart, because all workers share the admin cart.
+			const guestContext = await browser.newContext( {
+				storageState: guestFile,
+			} );
+			const guestPage = await guestContext.newPage();
+			await guestPage.goto( CATEGORY_PAGE );
+
+			const addToCartButton = guestPage.getByRole( 'button', {
+				name: 'Add to cart: “Polo”',
+			} );
+			await addToCartButton.click();
+			await expect( addToCartButton ).toHaveText( '1 in cart' );
+			const cartLink = guestPage.getByRole( 'link', {
+				name: 'View cart',
+			} );
+			await expect( cartLink ).toBeVisible();
+			await guestContext.close();
+		} );
+
+		test( 'Product Collection matches with classic template block', async ( {
+			editor,
+			page,
+		} ) => {
 			await page
 				.getByRole( 'button', {
 					name: 'Upgrade to Product Collection',
@@ -171,7 +161,7 @@ for ( const {
 			};
 			await expectProductCollectionQuery();
 
-			await editor.insertBlock( { name: legacyBlockName } );
+			await editor.insertBlock( { name: LEGACY_BLOCK_NAME } );
 			await editor.canvas.locator( 'body' ).click();
 
 			await editor.saveSiteEditorEntities( {
@@ -181,7 +171,7 @@ for ( const {
 			await editor.canvas.locator( 'body' ).waitFor();
 			await expectProductCollectionQuery();
 
-			await page.goto( frontendPage );
+			await page.goto( CATEGORY_PAGE );
 
 			const classicProducts =
 				await getProductsNameFromClassicTemplate( page );
@@ -192,65 +182,19 @@ for ( const {
 			expect( productCollectionProducts.length ).toBeGreaterThan( 1 );
 			expect( classicProducts ).toEqual( productCollectionProducts );
 		} );
-	} );
-}
 
-const openRouteTemplateForEditing = async (
-	admin: Admin,
-	requestUtils: RequestUtils,
-	{
-		templateTitle,
-		slug,
-		needsCreation,
-	}: { templateTitle: string; slug: string; needsCreation: boolean }
-) => {
-	if ( needsCreation ) {
-		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug,
-			title: templateTitle,
-			content: '',
-		} );
-
-		await admin.visitSiteEditor( {
-			postId: template.id,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-		return;
-	}
-
-	await admin.visitSiteEditor( {
-		postId: `${ BLOCK_THEME_SLUG }//${ slug }`,
-		postType: 'wp_template',
-		canvas: 'edit',
-	} );
-};
-
-for ( const {
-	testTitle,
-	templateTitle,
-	slug,
-	frontendPage,
-	legacyBlockName,
-	needsCreation,
-} of Object.values( classicTemplateComparisonRoutes ) ) {
-	test.describe( `${ templateTitle } template, Products block`, () => {
-		test( testTitle, async ( { admin, editor, page, requestUtils } ) => {
-			await openRouteTemplateForEditing( admin, requestUtils, {
-				templateTitle,
-				slug,
-				needsCreation,
-			} );
-			await editor.setContent( '' );
-			await insertProductsQuery( editor );
-			await editor.insertBlock( { name: legacyBlockName } );
+		test( 'Products block matches the classic template block on a product category archive', async ( {
+			editor,
+			page,
+		} ) => {
+			await editor.insertBlock( { name: LEGACY_BLOCK_NAME } );
 			await editor.canvas.locator( 'body' ).click();
 
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
 			} );
 
-			await page.goto( frontendPage );
+			await page.goto( CATEGORY_PAGE );
 			await expect(
 				page.locator( '.woocommerce-loop-product__title' ).first()
 			).toBeVisible();
@@ -263,5 +207,5 @@ for ( const {
 			expect( classicProducts.length ).toBeGreaterThan( 1 );
 			expect( classicProducts ).toEqual( productQueryProducts );
 		} );
-	} );
-}
+	}
+);

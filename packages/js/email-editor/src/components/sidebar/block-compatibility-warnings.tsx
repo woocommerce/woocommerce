@@ -30,7 +30,7 @@ export function BlockCompatibilityWarnings(): JSX.Element {
 			'border',
 			false
 		) ||
-		// We can remove the check for __experimentalBorder after we support WordPress 6.8+.
+		// Core blocks and core's border support still use the __experimentalBorder key.
 		hasBlockSupport(
 			selectedBlock?.name,
 			// @ts-expect-error Border is not yet supported in the types

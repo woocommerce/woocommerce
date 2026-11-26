@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
 use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use WC_Unit_Test_Case;
 
@@ -137,6 +138,7 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $checks['guest_checkout']['ok'] );
 		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['guest_checkout']['level'] );
 		$this->assertFalse( StoreConditions::shows_required( $checks['guest_checkout'] ), 'AI assistants can still build carts without guest checkout' );
+		$this->assertSame( 'With guest checkout off, AI assistants can’t check out for shoppers. They can still find your products and build carts.', $checks['guest_checkout']['why'], 'Creating an account at checkout doesn\'t help: the store serves no checkout to assistants' );
 	}
 
 	/**
@@ -324,6 +326,18 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 			if ( is_dir( $dir ) ) {
 				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
 			}
+		}
+	}
+
+	/**
+	 * @testdox The texts in the report call them AI assistants, as the pages do.
+	 */
+	public function test_report_texts_say_ai_assistants(): void {
+		StoreOutputChecksTest::block_requests();
+		$checks = array_merge( wc_get_container()->get( StoreConditions::class )->all(), wc_get_container()->get( StoreOutputChecks::class )->all() );
+		$this->assertGreaterThan( 30, count( $checks ) );
+		foreach ( $checks as $check ) {
+			$this->assertDoesNotMatchRegularExpression( '/\\bagents?\\b/i', (string) ( $check['why'] ?? '' ), $check['id'] );
 		}
 	}
 }

@@ -28,9 +28,7 @@
 		"uglify-js": "^3.17.4"
 	},
 	"dependencies": {
-		"@emotion/react": "^11.11.1",
 		"@types/prop-types": "^15.7.11",
-		"@woocommerce/components": "workspace:*",
 		"@woocommerce/data": "workspace:*",
 		"@woocommerce/remote-logging": "workspace:*",
 		"@wordpress/api-fetch": "catalog:wp-min",

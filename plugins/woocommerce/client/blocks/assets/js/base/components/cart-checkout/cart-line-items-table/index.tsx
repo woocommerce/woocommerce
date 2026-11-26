@@ -8,11 +8,13 @@ import { createRef, useEffect, useRef } from '@wordpress/element';
 import type { RefObject } from 'react';
 import { CartLineItemsCartSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
 import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
+import { useListEntrance } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
  */
 import CartLineItemRow from './cart-line-item-row';
+import { useRowRemovalMotion } from './use-row-removal-motion';
 import './style.scss';
 
 interface CartLineItemsTableProps {
@@ -35,7 +37,13 @@ const CartLineItemsTable = ( {
 	className,
 }: CartLineItemsTableProps ): JSX.Element => {
 	const tableRef = useRef< HTMLTableElement | null >( null );
+	const bodyRef = useRef< HTMLTableSectionElement | null >( null );
+	const onRowsShow = useListEntrance( bodyRef );
 	const rowRefs = useRef( setRefs( lineItems ) );
+	const onClickCapture = useRowRemovalMotion(
+		tableRef,
+		lineItems.map( ( { key } ) => key )
+	);
 	useEffect( () => {
 		rowRefs.current = setRefs( lineItems );
 	}, [ lineItems ] );
@@ -60,6 +68,7 @@ const CartLineItemsTable = ( {
 		<DelayedContentWithSkeleton
 			isLoading={ isLoading }
 			skeleton={ <CartLineItemsCartSkeleton /> }
+			onShow={ onRowsShow }
 		>
 			<>
 				{ lineItems.map( ( lineItem, i ) => {
@@ -86,6 +95,7 @@ const CartLineItemsTable = ( {
 			className={ clsx( 'wc-block-cart-items', className ) }
 			ref={ tableRef }
 			tabIndex={ -1 }
+			onClickCapture={ onClickCapture }
 		>
 			<caption className="screen-reader-text">
 				<h2>{ __( 'Products in cart', 'woocommerce' ) }</h2>
@@ -116,7 +126,7 @@ const CartLineItemsTable = ( {
 					</th>
 				</tr>
 			</thead>
-			<tbody>{ products }</tbody>
+			<tbody ref={ bodyRef }>{ products }</tbody>
 		</table>
 	);
 };

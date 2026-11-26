@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Require WordPress 7.0 or newer and remove the code that kept the editor working on WordPress 6.7 and 6.8.

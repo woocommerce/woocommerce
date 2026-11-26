@@ -781,6 +781,7 @@ class Html_Processing_Helper_Test extends \Email_Editor_Unit_Test {
 			'50%'    => '50%',      // Percentage.
 			'2em'    => '2em',      // Em units.
 			'1.5rem' => '1.5rem',   // Rem units.
+			'.5rem'  => '.5rem',    // No leading zero.
 			'100vh'  => '100vh',    // Viewport height.
 			'50vw'   => '50vw',     // Viewport width.
 			'12pt'   => '12pt',     // Points.
