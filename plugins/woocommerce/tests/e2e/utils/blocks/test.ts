@@ -15,6 +15,7 @@ import {
 	MiniCartUtils,
 	PageUtils,
 	PerformanceUtils,
+	PostCompiler,
 	RequestUtils,
 	ShippingUtils,
 	WPTemplate,
@@ -139,6 +140,13 @@ const test = base.extend<
 			sourceProductSlug: string,
 			options?: { content?: string }
 		) => Promise< ProductTemplate >;
+		createHiddenProduct: (
+			data: Record< string, unknown >
+		) => Promise< { id: number } >;
+		createPost: (
+			name: string,
+			data?: unknown
+		) => ReturnType< PostCompiler[ 'compile' ] >;
 	},
 	{
 		requestUtils: RequestUtils;
@@ -357,6 +365,82 @@ const test = base.extend<
 				} )
 			)
 		);
+	},
+	// Creates a product for a test that places orders. Hidden from the catalog
+	// and dated in the past, it stays out of Best Sellers, New Arrivals and
+	// catalog counts. After the test, it deletes the orders for the product,
+	// including checkout drafts, then the product.
+	createHiddenProduct: async ( { requestUtils }, use ) => {
+		const productIds: number[] = [];
+
+		await use( async ( data ) => {
+			const product = await requestUtils.rest< { id: number } >( {
+				method: 'POST',
+				path: 'wc/v3/products',
+				data: {
+					catalog_visibility: 'hidden',
+					date_created: '2020-01-01T00:00:00',
+					...data,
+				},
+			} );
+			productIds.push( product.id );
+			return product;
+		} );
+
+		const results = await Promise.allSettled(
+			productIds.map( async ( productId ) => {
+				try {
+					// `any` leaves out checkout drafts.
+					const orders = await requestUtils.rest< { id: number }[] >(
+						{
+							path: 'wc/v3/orders',
+							params: {
+								product: productId,
+								status: 'pending,processing,on-hold,completed,cancelled,refunded,failed,checkout-draft',
+								per_page: 100,
+							},
+						}
+					);
+					await Promise.all(
+						orders.map( ( { id } ) =>
+							requestUtils.rest( {
+								method: 'DELETE',
+								path: `wc/v3/orders/${ id }`,
+								params: { force: true },
+							} )
+						)
+					);
+				} finally {
+					await requestUtils.rest( {
+						method: 'DELETE',
+						path: `wc/v3/products/${ productId }`,
+						params: { force: true },
+					} );
+				}
+			} )
+		);
+		for ( const result of results ) {
+			if ( result.status === 'rejected' ) {
+				// eslint-disable-next-line no-console
+				console.warn( 'Test cleanup failed:', result.reason );
+			}
+		}
+	},
+	// Publishes a post from `content-templates/blocks/post_<name>.handlebars`
+	// and deletes it after the test.
+	createPost: async ( { requestUtils, cleanup }, use ) => {
+		await use( async ( name, data ) => {
+			const compiler = await requestUtils.createPostFromFile( name );
+			const post = await compiler.compile( data );
+			cleanup( () =>
+				requestUtils.rest( {
+					method: 'DELETE',
+					path: `/wp/v2/posts/${ post.id }`,
+					params: { force: true },
+				} )
+			);
+			return post;
+		} );
 	},
 	requestUtils: [
 		async ( {}, use, workerInfo ) => {

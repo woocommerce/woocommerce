@@ -8,6 +8,7 @@
  * @version 2.0.0
  */
 
+use Automattic\WooCommerce\Internal\CustomerEmailVerification\VerificationController;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
 
 defined( 'ABSPATH' ) || exit;
@@ -72,6 +73,11 @@ class WC_Shortcode_My_Account {
 		if ( wc_get_container()->get( OrderWithdrawalController::class )->is_endpoint_request() ) {
 			// Order withdrawal is an EU regulation requirement which needs standalone access.
 			wc_get_container()->get( OrderWithdrawalController::class )->render_view();
+			return;
+		}
+
+		// Email confirmation links show one form on its own, logged in or out.
+		if ( wc_get_container()->get( VerificationController::class )->render_confirm_form() ) {
 			return;
 		}
 

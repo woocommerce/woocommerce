@@ -1313,6 +1313,52 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Leaves the WPCOM authorization URL out of the WooPayments onboarding steps.
+	 */
+	public function test_get_payment_providers_leaves_out_woopayments_wpcom_authorization_url(): void {
+		// The store is registered with WPCOM, but no user has connected their account yet.
+		$this->mock_wpcom_connection_manager = $this->getMockBuilder( WPCOM_Connection_Manager::class )
+													->onlyMethods( array( 'is_connected', 'has_connected_owner', 'is_connection_owner' ) )
+													->getMock();
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
+		$this->mock_wpcom_connection_manager->method( 'has_connected_owner' )->willReturn( false );
+		$this->setup_legacy_proxy_mocks();
+		$this->reinitialize_services_and_controller();
+
+		$authorization_requested = false;
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_wpcom_connection_authorization' => function () use ( &$authorization_requested ) {
+						$authorization_requested = true;
+						return array(
+							'success' => true,
+							'errors'  => array(),
+							'url'     => 'https://wordpress.com/auth?secret=some_secret',
+						);
+					},
+				),
+			)
+		);
+		$this->mock_payment_gateways();
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
+		$request->set_param( 'location', 'US' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$providers  = array_column( $response->get_data()['providers'], null, 'id' );
+		$steps      = array_column( $providers['woocommerce_payments']['onboarding']['steps'], null, 'id' );
+		$wpcom_step = $steps[ WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION ];
+		$this->assertSame( WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED, $wpcom_step['status'] );
+		$this->assertArrayHasKey( 'start', $wpcom_step['actions'] );
+		$this->assertArrayNotHasKey( 'auth', $wpcom_step['actions'] );
+		$this->assertFalse( $authorization_requested, 'The providers list should not generate the authorization URL' );
+		$this->assertStringNotContainsString( 'some_secret', (string) wp_json_encode( $response->get_data() ) );
+	}
+
+	/**
 	 * Test setting the country.
 	 */
 	public function test_set_country() {

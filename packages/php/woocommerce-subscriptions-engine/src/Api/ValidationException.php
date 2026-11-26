@@ -116,10 +116,22 @@ final class ValidationException extends InvalidArgumentException {
 					return sprintf( __( 'Must be less than or equal to %d.', 'woocommerce' ), $max );
 				}
 				break;
+			case ValidationErrorCode::TOO_LONG:
+				if ( null !== $max ) {
+					/* translators: %d: most characters allowed. */
+					return sprintf( _n( 'Must be at most %d character.', 'Must be at most %d characters.', $max, 'woocommerce' ), $max );
+				}
+				break;
 			case ValidationErrorCode::NOT_IN_ENUM:
 				if ( isset( $params['allowed'] ) && is_array( $params['allowed'] ) ) {
 					/* translators: %l: list of allowed values, such as "day, week, and month". */
 					return wp_sprintf( __( 'Must be one of %l.', 'woocommerce' ), array_values( array_filter( $params['allowed'], 'is_string' ) ) );
+				}
+				break;
+			case ValidationErrorCode::INVALID_PATTERN:
+				if ( isset( $params['pattern'] ) && is_string( $params['pattern'] ) ) {
+					/* translators: %s: the required format, as a regular expression. */
+					return sprintf( __( 'Must match the pattern %s.', 'woocommerce' ), $params['pattern'] );
 				}
 				break;
 			case ValidationErrorCode::NOT_REGISTERED:

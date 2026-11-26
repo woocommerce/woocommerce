@@ -222,7 +222,7 @@ class Html_Processing_Helper {
 		$sanitized_value = self::sanitize_css_value( $value );
 
 		// Additional validation for dimension-specific units.
-		if ( ! empty( $sanitized_value ) && preg_match( '/^(\d+(?:\.\d+)?)(px|em|rem|%|vh|vw|ex|ch|in|cm|mm|pt|pc)$/', $sanitized_value ) ) {
+		if ( ! empty( $sanitized_value ) && preg_match( '/^(\d*\.?\d+)(px|em|rem|%|vh|vw|ex|ch|in|cm|mm|pt|pc)$/', $sanitized_value ) ) {
 			return $sanitized_value;
 		}
 
@@ -719,6 +719,24 @@ class Html_Processing_Helper {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Convert HTML to plain text for single-line fields such as a subject or preheader. Unlike
+	 * wp_strip_all_tags(), a "<" that does not start a tag keeps the text after it, and entities are decoded.
+	 *
+	 * @param string $html HTML or text.
+	 * @return string Plain text.
+	 */
+	public static function get_plain_text( string $html ): string {
+		$processor = new \WP_HTML_Tag_Processor( $html );
+		$text      = '';
+		while ( $processor->next_token() ) {
+			if ( '#text' === $processor->get_token_type() ) {
+				$text .= $processor->get_modifiable_text();
+			}
+		}
+		return trim( $text );
 	}
 
 	/**

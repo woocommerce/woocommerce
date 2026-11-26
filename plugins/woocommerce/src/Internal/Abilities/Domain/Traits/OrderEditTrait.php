@@ -19,6 +19,9 @@ defined( 'ABSPATH' ) || exit;
  */
 trait OrderEditTrait {
 
+	use AddressInputTrait;
+	use PaymentGatewayAbilityTrait;
+
 	/**
 	 * Product lines that change() added or gave a new quantity, for a stock change after the save.
 	 *
@@ -138,95 +141,6 @@ trait OrderEditTrait {
 	}
 
 	/**
-	 * Check the sent fields of an address against the order, then set the fields
-	 * that pass. A bad country keeps the saved country, state and postcode, because
-	 * the state and postcode checks depend on the country.
-	 *
-	 * @param \WC_Order $order   Order.
-	 * @param string    $type    Address type: billing or shipping.
-	 * @param array     $address Address fields to change.
-	 * @return null|\WP_Error
-	 */
-	private static function set_address( \WC_Order $order, string $type, array $address ): ?\WP_Error {
-		$address = wc_clean( $address );
-		$refused = new \WP_Error();
-		if ( ! empty( $address['email'] ) && ! is_email( $address['email'] ) ) {
-			$refused->merge_from(
-				self::address_error(
-					$type,
-					'email',
-					__( 'The billing email is not a valid email address. Send a valid address.', 'woocommerce' )
-				)
-			);
-			unset( $address['email'] );
-		}
-
-		$country  = $address['country'] ?? $order->{"get_{$type}_country"}();
-		$state    = $address['state'] ?? $order->{"get_{$type}_state"}();
-		$postcode = $address['postcode'] ?? $order->{"get_{$type}_postcode"}();
-
-		if ( '' !== $country && ! array_key_exists( $country, WC()->countries->get_countries() ) ) {
-			$refused->merge_from(
-				self::address_error(
-					$type,
-					'country',
-					/* translators: %s: country sent by the client. */
-					sprintf( __( '"%s" is not a valid country. Send an ISO 3166-1 alpha-2 country code, such as PT.', 'woocommerce' ), $country )
-				)
-			);
-			unset( $address['country'], $address['state'], $address['postcode'] );
-		} else {
-			$states = WC()->countries->get_states( $country );
-
-			if ( '' !== $state && ! empty( $states ) && ! array_key_exists( $state, $states ) ) {
-				$refused->merge_from(
-					self::address_error(
-						$type,
-						'state',
-						/* translators: 1: state sent by the client or kept from the order, 2: country code, 3: comma-separated state codes. */
-						sprintf( __( '"%1$s" is not a state of %2$s. Send the state with one of these codes: %3$s.', 'woocommerce' ), $state, $country, implode( ', ', array_keys( $states ) ) )
-					)
-				);
-				unset( $address['state'] );
-			}
-
-			if ( '' !== $postcode && '' !== $country ) {
-				if ( ! \WC_Validation::is_postcode( $postcode, $country ) ) {
-					$refused->merge_from(
-						self::address_error(
-							$type,
-							'postcode',
-							/* translators: 1: postcode sent by the client or kept from the order, 2: country code. */
-							sprintf( __( '"%1$s" is not a valid postcode for %2$s. Send a postcode in the format of that country.', 'woocommerce' ), $postcode, $country )
-						)
-					);
-					unset( $address['postcode'] );
-				} elseif ( isset( $address['postcode'] ) ) {
-					$address['postcode'] = wc_format_postcode( $postcode, $country );
-				}
-			}
-		}
-
-		foreach ( $address as $key => $value ) {
-			$order->{"set_{$type}_{$key}"}( $value );
-		}
-
-		return $refused->has_errors() ? $refused : null;
-	}
-
-	/**
-	 * Build the error for an address field.
-	 *
-	 * @param string $type    Address type: billing or shipping.
-	 * @param string $field   Address field.
-	 * @param string $message What is wrong and what to send.
-	 * @return \WP_Error
-	 */
-	private static function address_error( string $type, string $field, string $message ): \WP_Error {
-		return new \WP_Error( "woocommerce_ability_order_{$type}_{$field}_invalid", $message, array( 'status' => 400 ) );
-	}
-
-	/**
 	 * Change a shipping line in memory, or add a new one when the line has no ID.
 	 *
 	 * @param \WC_Order $order Order.
@@ -279,6 +193,55 @@ trait OrderEditTrait {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Set the payment method and its title in memory. Only an enabled gateway is accepted. Nothing is charged
+	 * or captured: the gateway only names how the order was paid. The gateway the order already has changes
+	 * nothing, so a title that a gateway set for this order stays.
+	 *
+	 * @param \WC_Order $order      Order.
+	 * @param string    $gateway_id Gateway ID sent by the client.
+	 * @return null|\WP_Error
+	 */
+	private static function set_payment_method( \WC_Order $order, string $gateway_id ): ?\WP_Error {
+		if ( '' !== $gateway_id && $order->get_payment_method() === $gateway_id ) {
+			return null;
+		}
+
+		$enabled = array_filter(
+			WC()->payment_gateways()->payment_gateways(),
+			static fn( $gateway ) => $gateway instanceof \WC_Payment_Gateway && 'yes' === $gateway->enabled
+		);
+
+		if ( ! isset( $enabled[ $gateway_id ] ) ) {
+			if ( empty( $enabled ) ) {
+				/* translators: %s: payment gateway ID sent by the client. */
+				$message = sprintf( __( '"%s" is not an enabled payment gateway, and the store has no enabled payment gateways. Enable one with the woocommerce/payment-gateway-update ability, or leave out payment_method.', 'woocommerce' ), $gateway_id );
+			} else {
+				/* translators: 1: payment gateway ID sent by the client, 2: comma-separated list of gateway IDs. */
+				$message = sprintf( __( '"%1$s" is not an enabled payment gateway. Send one of: %2$s.', 'woocommerce' ), $gateway_id, implode( ', ', array_map( 'strval', array_keys( $enabled ) ) ) );
+			}
+
+			return new \WP_Error( 'woocommerce_ability_order_payment_method_invalid', $message, array( 'status' => 400 ) );
+		}
+
+		$order->set_payment_method( $gateway_id );
+		$order->set_payment_method_title( self::get_payment_gateway_title( $enabled[ $gateway_id ] ) );
+
+		return null;
+	}
+
+	/**
+	 * Input schema of payment_method, shared by order-create and order-update.
+	 *
+	 * @return array<string, string>
+	 */
+	private static function get_payment_method_input_schema(): array {
+		return array(
+			'type'        => 'string',
+			'description' => __( 'ID of an enabled payment gateway, such as bacs or cheque, to record how the order was paid. Sets the payment method title from the gateway. Nothing is charged. Use the woocommerce/payment-gateways-query ability to list the gateways.', 'woocommerce' ),
+		);
 	}
 
 	/**
@@ -351,21 +314,5 @@ trait OrderEditTrait {
 	 */
 	private static function quantity_error( \Exception $exception ): \WP_Error {
 		return new \WP_Error( 'woocommerce_ability_order_line_item_quantity_invalid', $exception->getMessage(), array( 'status' => 400 ) );
-	}
-
-	/**
-	 * Get the input schema of an address.
-	 *
-	 * @param array<int, string> $fields Address fields.
-	 * @return array
-	 */
-	private static function get_address_input_schema( array $fields ): array {
-		return array(
-			'type'                 => 'object',
-			'description'          => __( 'Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.', 'woocommerce' ),
-			'properties'           => array_fill_keys( $fields, array( 'type' => 'string' ) ),
-			'additionalProperties' => false,
-			'minProperties'        => 1,
-		);
 	}
 }

@@ -162,6 +162,35 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox get_meta throws on a failed read instead of reading the key as absent.
+	 * @dataProvider provide_get_meta_shapes
+	 *
+	 * @param string $key    Meta key; empty for every key.
+	 * @param bool   $single Return the first value only.
+	 */
+	public function test_get_meta_throws_on_a_failed_read( string $key, bool $single ): void {
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'one' );
+
+		$this->fail_next_query( '/^\s*SELECT meta_key, meta_value FROM \S*selling_plan_meta/' );
+
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( "Failed to read plan meta for plan {$this->id}" );
+
+		$this->sut->get_meta( $this->id, $key, $single );
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: bool}>
+	 */
+	public function provide_get_meta_shapes(): array {
+		return array(
+			'every key'    => array( '', false ),
+			'one key'      => array( 'note', false ),
+			'single value' => array( 'note', true ),
+		);
+	}
+
+	/**
 	 * @testdox arrays round-trip through serialization.
 	 */
 	public function test_arrays_round_trip_through_serialization(): void {
@@ -311,7 +340,7 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 
 		// The UPDATE changes no row, so update_fields() reads whether the plan exists.
 		$change_nothing = static function ( string $query ) use ( $plans ): string {
-			return 0 === strpos( $query, "UPDATE {$plans} p " ) ? $query . ' AND 0 = 1' : $query;
+			return 0 === strpos( $query, "UPDATE `{$plans}` SET " ) ? $query . ' AND 0 = 1' : $query;
 		};
 		add_filter( 'query', $change_nothing );
 
@@ -333,7 +362,7 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 */
 	public function provide_failing_plan_update_queries(): array {
 		return array(
-			'update'                  => array( 'UPDATE {plans} p ', 'Failed to update plan' ),
+			'update'                  => array( 'UPDATE `{plans}` SET ', 'Failed to update plan' ),
 			'existence read after it' => array( 'SELECT p.id FROM {plans} p ', 'Failed to read plan' ),
 		);
 	}

@@ -74,20 +74,30 @@ class WebhookHandler {
 			return;
 		}
 
-		// Skip if the payment is already processed.
-		$paypal_status = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true );
-		if ( in_array( $paypal_status, array( PayPalConstants::STATUS_COMPLETED, PayPalConstants::STATUS_APPROVED ), true ) ) {
+		$paypal_order_id         = $event['resource']['id'] ?? null;
+		$current_paypal_order_id = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, true );
+		if ( $current_paypal_order_id && $paypal_order_id !== $current_paypal_order_id ) {
+			\WC_Gateway_Paypal::log( 'Ignoring approval for a replaced PayPal attempt. Order ID: ' . $order->get_id() );
 			return;
 		}
 
-		$status          = $event['resource']['status'] ?? null;
-		$paypal_order_id = $event['resource']['id'] ?? null;
+		// Skip if the payment is already processed.
+		$paypal_status = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true );
+		if ( PayPalConstants::STATUS_COMPLETED === $paypal_status ) {
+			if ( PayPalConstants::STATUS_APPROVED === ( $event['resource']['status'] ?? null ) ) {
+				PayPalHelper::update_addresses_in_order( $order, $event['resource'] );
+			}
+			return;
+		}
+		if ( PayPalConstants::STATUS_APPROVED === $paypal_status ) {
+			return;
+		}
+
+		$status = $event['resource']['status'] ?? null;
 		if ( PayPalConstants::STATUS_APPROVED === $status ) {
 			\WC_Gateway_Paypal::log( 'PayPal payment approved. Order ID: ' . $order->get_id() );
 			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $status );
-			// Clear the shipping callback token by setting it to an empty string.
-			// This is done to prevent the token from being used again for the same order.
-			// We are not deleting the meta key as we use the existence of the meta key to determine if the token was ever generated for this order.
+			// Shipping updates are no longer allowed after approval.
 			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, '' );
 			$order->save();
 			$order->add_order_note(
@@ -101,6 +111,9 @@ class WebhookHandler {
 
 			// Update the addresses in the order with the addresses from the PayPal order details.
 			PayPalHelper::update_addresses_in_order( $order, $event['resource'] );
+			if ( 'yes' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESS_REVIEW, true ) ) {
+				return;
+			}
 
 			// Authorize or capture the payment after approval.
 			$paypal_intent = $event['resource']['intent'] ?? null;
@@ -152,7 +165,16 @@ class WebhookHandler {
 		$order->set_transaction_id( $transaction_id );
 		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_ID, $transaction_id );
 		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $status );
-		$order->payment_complete();
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, '' );
+		if ( 'yes' !== $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESS_REVIEW, true ) ) {
+			$requires_address_confirmation = $order->needs_shipping() && 'yes' !== $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, true );
+			if ( ! $requires_address_confirmation ) {
+				$order->payment_complete();
+			} elseif ( $order->has_status( array( OrderStatus::PENDING, OrderStatus::CHECKOUT_DRAFT, OrderStatus::FAILED ) ) ) {
+				$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_AWAITING_ADDRESS, 'yes' );
+				$order->update_status( OrderStatus::ON_HOLD, __( 'PayPal captured the payment. Waiting for delivery address confirmation before fulfilling the order.', 'woocommerce' ) );
+			}
+		}
 		$order->add_order_note(
 			sprintf(
 				/* translators: %1$s: Transaction ID */

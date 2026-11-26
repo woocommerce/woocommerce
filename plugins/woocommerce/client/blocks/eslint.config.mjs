@@ -168,7 +168,6 @@ const coreModules = [
 	'dotenv',
 	'lodash/kebabCase',
 	'lodash',
-	'prop-types',
 	'react',
 	'requireindex',
 	'react-transition-group',

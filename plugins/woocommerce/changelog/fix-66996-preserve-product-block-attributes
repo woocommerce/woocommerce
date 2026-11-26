@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep each product block's own settings when moving several blocks at once in the editor, and undo the move in one step.

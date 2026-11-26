@@ -20,10 +20,10 @@
 		"typescript": "catalog:tooling"
 	},
 	"dependencies": {
-		"@commander-js/extra-typings": "^0.1.0",
+		"@commander-js/extra-typings": "catalog:tooling",
 		"@octokit/rest": "^19.0.13",
 		"@woocommerce/monorepo-utils": "workspace:*",
-		"commander": "9.4.0",
+		"commander": "catalog:tooling",
 		"dotenv": "^15.0.1",
 		"ejs": "^3.1.9",
 		"lodash.shuffle": "^4.2.0",

@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { Breadcrumbs, Page } from '@wordpress/admin-ui';
+import { Notice } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Spinner } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -11,6 +12,7 @@ import { Spinner } from '@wordpress/components';
 import './sales-readiness.scss';
 import { useReadinessView } from './use-readiness-view';
 import { CheckedCard } from './components/checked-card';
+import { ComingSoonNotice } from './components/coming-soon-notice';
 import { ErrorNotice } from './components/error-notice';
 import { FixFirstCard } from './components/fix-first';
 import { DeclaredCard, SectionCard } from './components/section-card';
@@ -20,8 +22,16 @@ import { DeclaredCard, SectionCard } from './components/section-card';
  * merchant question with the checks from the last scan, and what the store shares with agents.
  */
 export default function SalesReadiness() {
-	const { view, error, reload, running, runCheck } =
-		useReadinessView( 'page' );
+	const {
+		view,
+		error,
+		reload,
+		running,
+		runCheck,
+		setDailyChecks,
+		savingDailyChecks,
+	} = useReadinessView( 'page' );
+	const [ downloadError, setDownloadError ] = useState( '' );
 
 	return (
 		<Page
@@ -32,7 +42,7 @@ export default function SalesReadiness() {
 						{
 							label:
 								view?.title ??
-								__( 'AI sales readiness', 'woocommerce' ),
+								__( 'AI shopping health', 'woocommerce' ),
 						},
 					] }
 				/>
@@ -42,14 +52,30 @@ export default function SalesReadiness() {
 		>
 			<div className="wc-sales-readiness__content">
 				{ error && <ErrorNotice message={ error } reload={ reload } /> }
-				{ ! view && ! error && <Spinner /> }
+				{ downloadError && (
+					<Notice
+						status="error"
+						onRemove={ () => setDownloadError( '' ) }
+					>
+						{ downloadError }
+					</Notice>
+				) }
 				{ view && (
 					<>
 						<CheckedCard
 							view={ view }
 							running={ running }
 							onRun={ runCheck }
+							onDownloadError={ setDownloadError }
+							onDailyChecks={ setDailyChecks }
+							savingDailyChecks={ savingDailyChecks }
 						/>
+						{ view.coming_soon && (
+							<ComingSoonNotice
+								notice={ view.coming_soon }
+								surface="page"
+							/>
+						) }
 						{ view.fix_first && (
 							<FixFirstCard fixFirst={ view.fix_first } />
 						) }

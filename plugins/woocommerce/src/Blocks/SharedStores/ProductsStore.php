@@ -100,6 +100,9 @@ class ProductsStore {
 	 * wp_interactivity_state() at call time, they only need to be
 	 * registered once regardless of how many products are added.
 	 *
+	 * It also makes the raw data readable from the `woocommerce` store as
+	 * `state.products` and `state.productVariations`, without a copy.
+	 *
 	 * @return void
 	 */
 	private static function register_getters(): void {
@@ -108,6 +111,16 @@ class ProductsStore {
 		}
 
 		self::$getters_registered = true;
+
+		// Temporary: until every block reads product data from `woocommerce`,
+		// that store reads it from `woocommerce/products` through these views.
+		wp_interactivity_state(
+			'woocommerce',
+			array(
+				'products'          => new ProductDataView( 'products' ),
+				'productVariations' => new ProductDataView( 'productVariations' ),
+			)
+		);
 
 		wp_interactivity_state(
 			self::$store_namespace,

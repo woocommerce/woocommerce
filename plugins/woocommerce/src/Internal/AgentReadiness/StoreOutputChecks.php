@@ -29,6 +29,11 @@ defined( 'ABSPATH' ) || exit;
 class StoreOutputChecks {
 
 	/**
+	 * Option holding the running counts of catalog search checks, read by the tracker snapshot.
+	 */
+	public const SEARCH_COUNTS_OPTION = 'woocommerce_agent_readiness_ucp_search_counts';
+
+	/**
 	 * Coming soon mode helper.
 	 *
 	 * @var ComingSoonHelper
@@ -59,7 +64,7 @@ class StoreOutputChecks {
 	 * A likely conflict also names the address where it was seen. It doesn't name a plugin: any list of
 	 * plugins goes stale, and several can change the same output.
 	 *
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,seen_at:string,source:string,product:int}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,no_product:bool,seen_at:string,source:string,product:int}>
 	 */
 	public function all(): array {
 		return $this->all_for( $this->responses() );
@@ -71,7 +76,7 @@ class StoreOutputChecks {
 	 * @since 11.4.0
 	 *
 	 * @param StoreResponses $responses Responses of the scan.
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,seen_at:string,source:string,product:int}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,no_product:bool,seen_at:string,source:string,product:int}>
 	 */
 	public function all_for( StoreResponses $responses ): array {
 		// The home page first: when it can't be reached, no other request is made.
@@ -101,40 +106,65 @@ class StoreOutputChecks {
 			if ( 'ucp_profile_version' === $check['id'] && false === $ok ) {
 				$source = self::served_version( $responses );
 			}
-			if ( 'ucp_endpoints_live' === $check['id'] && false === $ok ) {
-				$source = self::search_seen( $responses );
-			}
 			if ( 'llms_txt_present' === $check['id'] ) {
 				$source = $this->llms_txt_source( $responses, $ok );
 			}
+			if ( 'open_graph_tags' === $check['id'] && false === $ok ) {
+				// Which page lacks the tags picks the found line: home, product or both. A failing product page is named.
+				$source = self::open_graph_missing( $responses );
+				$failed = 'home' === $source ? null : $responses->product();
+			}
 			$seen_at = $conflict ? self::seen_at( (string) ( $check['seen_at'] ?? '' ), $responses ) : '';
+			// A 5xx is couldn't check, not failed, and support still needs to see what the store answered and where.
+			if ( 'ucp_endpoints_live' === $check['id'] && true !== $ok && ! $pending ) {
+				$source  = self::search_seen( $responses );
+				$seen_at = '' !== $source ? self::catalog_search_url( $responses ) : '';
+			}
 			if ( 'llms_txt_links_resolve' === $check['id'] && false === $ok ) {
 				// Where the file comes from picks the fix, and the broken link is named.
 				$source  = $this->llms_txt_source( $responses, true );
 				$seen_at = $this->broken_llms_link;
 			}
 			$results[] = array(
-				'id'       => $check['id'],
-				'ok'       => $ok,
-				'blocks'   => $check['blocks'],
-				'group'    => $check['group'],
-				'level'    => StoreConditions::LEVEL_RECOMMENDED,
-				'name'     => $check['name'],
-				'label'    => $check['label'],
-				'why'      => $check['why'],
-				'fix'      => ReadinessCopy::llms_txt_source( $source )['fix'] ?? $check['fix'],
-				'fix_url'  => $check['fix_url'],
-				'conflict' => $conflict,
-				'pending'  => $pending,
-				'skipped'  => $skipped,
-				'seen_at'  => $seen_at,
-				'source'   => $source,
+				'id'         => $check['id'],
+				'ok'         => $ok,
+				'blocks'     => $check['blocks'],
+				'group'      => $check['group'],
+				'level'      => StoreConditions::LEVEL_RECOMMENDED,
+				'name'       => $check['name'],
+				'label'      => $check['label'],
+				'why'        => $check['why'],
+				'fix'        => ReadinessCopy::llms_txt_source( $source )['fix'] ?? $check['fix'],
+				'fix_url'    => $check['fix_url'],
+				'conflict'   => $conflict,
+				'pending'    => $pending,
+				'skipped'    => $skipped,
+				// Not checked rather than couldn't check: the check reads a product page and there was no product to open.
+				'no_product' => $this->take_no_product_page() && null === $ok,
+				'seen_at'    => $seen_at,
+				'source'     => $source,
 				// The product whose page failed, 0 when the check doesn't read product pages or didn't fail on one.
-				'product'  => null === $failed ? 0 : $failed->get_id(),
+				'product'    => null === $failed ? 0 : $failed->get_id(),
 			);
 			$responses->focus( null );
 		}
 		return $results;
+	}
+
+	/**
+	 * Which page the Open Graph check failed on: 'home', 'product' or 'both'. The product page is the
+	 * one in focus, the sample's first that failed.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private static function open_graph_missing( StoreResponses $responses ): string {
+		$missing = static fn( ?array $page ): bool => null !== $page && ! ( self::has_open_graph( $page['body'], 'og:title' ) && self::has_open_graph( $page['body'], 'og:image' ) );
+		$home    = $missing( $responses->home_page() );
+		$product = $missing( $responses->product_page() );
+		if ( $home && $product ) {
+			return 'both';
+		}
+		return $home ? 'home' : 'product';
 	}
 
 	/**
@@ -193,6 +223,13 @@ class StoreOutputChecks {
 	 * @var string
 	 */
 	private string $broken_llms_link = '';
+
+	/**
+	 * Whether the check being run needed a product page and the scan had no product to open.
+	 *
+	 * @var bool
+	 */
+	private bool $no_product_page = false;
 
 	/**
 	 * Organization and the subtypes stores use for themselves.
@@ -349,7 +386,7 @@ class StoreOutputChecks {
 				'name'    => __( 'Pages let search and AI answers quote them', 'woocommerce' ),
 				'label'   => __( 'Pages ask search and AI answers not to quote them', 'woocommerce' ),
 				'why'     => __( 'A nosnippet or max-snippet robots rule keeps AI answers from quoting your pages, so your products get left out.', 'woocommerce' ),
-				'fix'     => __( 'Remove nosnippet and max-snippet from the robots settings in your SEO plugin, or ask your host about an X-Robots-Tag header.', 'woocommerce' ),
+				'fix'     => __( 'Remove nosnippet and max-snippet from the robots settings in your SEO plugin, or ask your hosting provider about an X-Robots-Tag header.', 'woocommerce' ),
 				'fix_url' => '',
 			),
 			array(
@@ -371,7 +408,7 @@ class StoreOutputChecks {
 				'name'    => __( 'Pages let search and AI crawlers index them', 'woocommerce' ),
 				'label'   => __( 'Pages ask search and AI crawlers not to index them', 'woocommerce' ),
 				'why'     => __( 'A noindex, noai or noimageai robots rule keeps your pages and products out of search and AI answers.', 'woocommerce' ),
-				'fix'     => __( 'Remove noindex, noai and noimageai from the robots settings in your SEO plugin, or ask your host about an X-Robots-Tag header.', 'woocommerce' ),
+				'fix'     => __( 'Remove noindex, noai and noimageai from the robots settings in your SEO plugin, or ask your hosting provider about an X-Robots-Tag header.', 'woocommerce' ),
 				'fix_url' => '',
 			),
 			array(
@@ -575,7 +612,7 @@ class StoreOutputChecks {
 			'name'     => __( 'Store serves its UCP profile', 'woocommerce' ),
 			'label'    => __( 'UCP profile isn\'t served', 'woocommerce' ),
 			'why'      => __( 'Agents read /.well-known/ucp to find your catalog. UCP is on, but visitors don\'t get the profile.', 'woocommerce' ),
-			'fix'      => __( 'Save Settings > Permalinks to refresh the rules. If it still fails, ask your host whether caching or a firewall blocks /.well-known/ucp.', 'woocommerce' ),
+			'fix'      => __( 'Save Settings > Permalinks to refresh the rules. If it still fails, ask your hosting provider whether caching or a firewall blocks /.well-known/ucp.', 'woocommerce' ),
 			'fix_url'  => admin_url( 'options-permalink.php' ),
 			'conflict' => true,
 			'seen_at'  => home_url( '/.well-known/ucp' ),
@@ -602,7 +639,7 @@ class StoreOutputChecks {
 			'name'    => __( 'UCP endpoint answers', 'woocommerce' ),
 			'label'   => __( 'UCP endpoint is blocked or doesn\'t answer', 'woocommerce' ),
 			'why'     => __( 'Agents search your catalog and build carts through this endpoint; when it\'s blocked they can\'t find your products.', 'woocommerce' ),
-			'fix'     => __( 'Ask your host or security plugin to allow requests to the WordPress REST API under /wp-json/wc/ucp/.', 'woocommerce' ),
+			'fix'     => __( 'Ask your hosting provider or security plugin to allow requests to the WordPress REST API under /wp-json/wc/ucp/.', 'woocommerce' ),
 			'fix_url' => '',
 		);
 		$checks[] = array(
@@ -655,7 +692,8 @@ class StoreOutputChecks {
 	 * The robots.txt crawlers get. '' when the store answered that there is none.
 	 * Null when it could not be read: the request failed, or the body is a page.
 	 *
-	 * Loaded from the host root, also when WordPress is in a subdirectory.
+	 * Loaded from the host root, also when WordPress is in a subdirectory. With plain permalinks
+	 * WordPress answers /robots.txt with a page, so crawlers get no rules: that reads as none.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
@@ -667,8 +705,11 @@ class StoreOutputChecks {
 		if ( in_array( $response['status'], array( 404, 410 ), true ) ) {
 			return '';
 		}
+		if ( ! str_starts_with( ltrim( $response['body'] ), '<' ) ) {
+			return $response['body'];
+		}
 		// A theme or a login wall that answers every URL with a page is not a robots.txt.
-		return str_starts_with( ltrim( $response['body'] ), '<' ) ? null : $response['body'];
+		return '' === (string) get_option( 'permalink_structure' ) ? '' : null;
 	}
 
 	/**
@@ -685,7 +726,8 @@ class StoreOutputChecks {
 		);
 		$defaults = array( '/sitemap_index.xml', '/sitemap.xml' );
 		if ( function_exists( 'wp_sitemaps_get_server' ) && wp_sitemaps_get_server()->sitemaps_enabled() ) {
-			$defaults[] = '/wp-sitemap.xml';
+			// /?sitemap=index with plain permalinks.
+			$defaults[] = (string) get_sitemap_url( 'index' );
 		}
 		return array_values( array_unique( array_merge( $listed, $defaults ) ) );
 	}
@@ -775,6 +817,16 @@ class StoreOutputChecks {
 		if ( false === stripos( $xml, '<sitemapindex' ) ) {
 			return array();
 		}
+		return self::loc_urls( $xml );
+	}
+
+	/**
+	 * The decoded URL in each loc element.
+	 *
+	 * @param string $xml Sitemap body.
+	 * @return array<int, string>
+	 */
+	private static function loc_urls( string $xml ): array {
 		$urls   = array();
 		$offset = 0;
 		$start  = stripos( $xml, '<loc>', $offset );
@@ -801,6 +853,9 @@ class StoreOutputChecks {
 	 * @param callable       $test      Test, given the Product items.
 	 */
 	private function with_products( StoreResponses $responses, callable $test ): ?bool {
+		if ( $this->without_product( $responses ) ) {
+			return null;
+		}
 		$page = $responses->product_page();
 		if ( null === $page ) {
 			return null;
@@ -868,8 +923,34 @@ class StoreOutputChecks {
 	 * @param callable       $test      Test, given the HTML.
 	 */
 	private function on_product_page( StoreResponses $responses, callable $test ): ?bool {
+		if ( $this->without_product( $responses ) ) {
+			return null;
+		}
 		$page = $responses->product_page();
 		return null === $page ? null : (bool) $test( $page['body'] );
+	}
+
+	/**
+	 * Whether the scan has no product to open. If so, marks the check being run as waiting for one
+	 * (Not checked yet) rather than couldn't check. Every check that reads the product page calls this first.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private function without_product( StoreResponses $responses ): bool {
+		if ( null !== $responses->product() ) {
+			return false;
+		}
+		$this->no_product_page = true;
+		return true;
+	}
+
+	/**
+	 * Whether the check just run needed a product page with no product to open, then clear it for the next check.
+	 */
+	private function take_no_product_page(): bool {
+		$needed                = $this->no_product_page;
+		$this->no_product_page = false;
+		return $needed;
 	}
 
 	/**
@@ -1376,7 +1457,8 @@ class StoreOutputChecks {
 	/**
 	 * Whether a Product item, a variant or one of their offers has a BuyAction potentialAction.
 	 * Null without one when WooCommerce wouldn't print it: it links only a simple product, or a chosen
-	 * variation, that can be bought now (the conditions of WC_Structured_Data::get_product_checkout_url()).
+	 * variation, that can be bought now (the conditions of WC_Structured_Data::get_product_checkout_url()),
+	 * and prints no offer at all for a product without a price.
 	 *
 	 * @param array<int, array<string, mixed>> $products Product items.
 	 * @param \WC_Product|null                 $scanned  The scanned product.
@@ -1392,7 +1474,7 @@ class StoreOutputChecks {
 				}
 			}
 		}
-		if ( null !== $scanned && ( ! $scanned->is_type( ProductType::SIMPLE ) || ( ! $scanned->is_visible() && CatalogVisibility::SEARCH !== $scanned->get_catalog_visibility() ) || ! $scanned->is_publicly_viewable() || ! $scanned->is_purchasable() || ! $scanned->is_in_stock() || ! $scanned->has_enough_stock( 1 ) ) ) {
+		if ( null !== $scanned && ( '' === $scanned->get_price() || ! $scanned->is_type( ProductType::SIMPLE ) || ( ! $scanned->is_visible() && CatalogVisibility::SEARCH !== $scanned->get_catalog_visibility() ) || ! $scanned->is_publicly_viewable() || ! $scanned->is_purchasable() || ! $scanned->is_in_stock() || ! $scanned->has_enough_stock( 1 ) ) ) {
 			return null;
 		}
 		return false;
@@ -1407,10 +1489,79 @@ class StoreOutputChecks {
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private static function ucp_endpoint_answers( StoreResponses $responses ): ?bool {
-		$url    = self::catalog_search_url( $responses );
-		$answer = self::endpoint_answer( $responses->post_json( $url, array() ) );
+		$url            = self::catalog_search_url( $responses );
+		$first_response = $responses->post_json( $url, array() );
+		$first          = self::endpoint_answer( $first_response );
 		// Asked once more before it fails, so one slow or briefly refused request doesn't mark AI shopping as broken.
-		return true === $answer ? true : self::endpoint_answer( $responses->post_json_again( $url, array() ) );
+		$answer = true === $first ? true : self::endpoint_answer( $responses->post_json_again( $url, array() ) );
+		if ( $responses->can_request( $url ) ) {
+			// The first answer is read before the retry replaces it, so a recovery still says what was in the way.
+			$first_seen = self::seen_from( $first_response );
+			$recovered  = true === $answer && true !== $first ? $first_seen : '';
+			$seen       = true === $answer ? '' : self::search_seen( $responses );
+			self::count_search_answer( $first, $answer, $seen, $recovered );
+		}
+		return $answer;
+	}
+
+	/**
+	 * Add one catalog search check to the running counts the tracker snapshot sends, so we can see
+	 * how often stores fail it, and whether the retry helps.
+	 *
+	 * @param bool|null $first     The first answer: true when it was the JSON, null when the store didn't answer.
+	 * @param bool|null $answer    The result after the retry.
+	 * @param string    $seen      What the store last answered, such as `403 text/html`, when the check didn't pass.
+	 * @param string    $recovered What the first try answered when the retry got past it.
+	 */
+	private static function count_search_answer( ?bool $first, ?bool $answer, string $seen, string $recovered ): void {
+		$counts          = self::search_counts();
+		$counts['since'] = '' === $counts['since'] ? gmdate( 'Y-m-d' ) : $counts['since'];
+		++$counts['checks'];
+		if ( true !== $first ) {
+			++$counts['first_try_failed'];
+		}
+		if ( false === $answer ) {
+			++$counts['failed'];
+		} elseif ( null === $answer ) {
+			++$counts['no_answer'];
+		}
+		$today = gmdate( 'Y-m-d' );
+		if ( '' !== $seen ) {
+			$counts['last_seen']    = $seen;
+			$counts['last_seen_on'] = $today;
+		}
+		if ( '' !== $recovered ) {
+			$counts['last_recovered']    = $recovered;
+			$counts['last_recovered_on'] = $today;
+		}
+		update_option( self::SEARCH_COUNTS_OPTION, $counts, false );
+	}
+
+	/**
+	 * Running counts of catalog search checks since `since`. `first_try_failed` includes `failed`
+	 * and `no_answer` (a 5xx or none, shown as couldn't check). The retry recovered
+	 * `first_try_failed - failed - no_answer`. `last_seen` / `last_seen_on` are what the store last
+	 * answered when one didn't pass, and the day. `last_recovered` / `last_recovered_on` are what the
+	 * first try answered when the retry got past it, and the day.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return array{since:string,checks:int,first_try_failed:int,failed:int,no_answer:int,last_seen:string,last_seen_on:string,last_recovered:string,last_recovered_on:string}
+	 */
+	public static function search_counts(): array {
+		$stored = get_option( self::SEARCH_COUNTS_OPTION, array() );
+		$stored = is_array( $stored ) ? $stored : array();
+		return array(
+			'since'             => is_string( $stored['since'] ?? null ) ? $stored['since'] : '',
+			'checks'            => (int) ( $stored['checks'] ?? 0 ),
+			'first_try_failed'  => (int) ( $stored['first_try_failed'] ?? 0 ),
+			'failed'            => (int) ( $stored['failed'] ?? 0 ),
+			'no_answer'         => (int) ( $stored['no_answer'] ?? 0 ),
+			'last_seen'         => is_string( $stored['last_seen'] ?? null ) ? $stored['last_seen'] : '',
+			'last_seen_on'      => is_string( $stored['last_seen_on'] ?? null ) ? $stored['last_seen_on'] : '',
+			'last_recovered'    => is_string( $stored['last_recovered'] ?? null ) ? $stored['last_recovered'] : '',
+			'last_recovered_on' => is_string( $stored['last_recovered_on'] ?? null ) ? $stored['last_recovered_on'] : '',
+		);
 	}
 
 	/**
@@ -1424,17 +1575,30 @@ class StoreOutputChecks {
 
 	/**
 	 * The status and content type of the last answer from catalog search, such as `403 text/html`,
-	 * so a failed check says what was in the way. Empty when the store didn't answer.
+	 * so a failed check says what was in the way. Only a known media type is kept. Empty when the store didn't answer.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private static function search_seen( StoreResponses $responses ): string {
-		$response = $responses->post_json( self::catalog_search_url( $responses ), array() );
+		return self::seen_from( $responses->post_json( self::catalog_search_url( $responses ), array() ) );
+	}
+
+	/**
+	 * Status and content type from one catalog search answer, such as `403 text/html`. Only a known
+	 * media type is kept. Empty when there was no answer.
+	 *
+	 * @param array{status:int,body:string,headers:array<string,string>,truncated:bool}|null $response Response.
+	 */
+	private static function seen_from( ?array $response ): string {
 		if ( null === $response ) {
 			return '';
 		}
-		$type = strtolower( trim( explode( ';', $response['headers']['content-type'] ?? '' )[0] ) );
-		return trim( $response['status'] . ' ' . sanitize_text_field( $type ) );
+		$type = strtolower( trim( explode( ';', (string) ( $response['headers']['content-type'] ?? '' ) )[0] ) );
+		$type = sanitize_text_field( $type );
+		if ( ! in_array( $type, array( 'text/html', 'text/plain', 'application/json', 'application/problem+json' ), true ) ) {
+			$type = '';
+		}
+		return trim( $response['status'] . ' ' . $type );
 	}
 
 	/**
@@ -1650,8 +1814,8 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether a sitemap index names a product sitemap (product-sitemap.xml,
-	 * wp-sitemap-posts-product-1.xml), or a urlset lists a product page. A category
-	 * sitemap and a page that isn't a sitemap never count.
+	 * wp-sitemap-posts-product-1.xml, or ?sitemap-subtype=product), or a urlset lists a product page.
+	 * A category sitemap and a page that isn't a sitemap never count.
 	 *
 	 * @param string $xml Sitemap body.
 	 */
@@ -1662,9 +1826,35 @@ class StoreOutputChecks {
 		if ( 1 === preg_match( '#<loc>[^<]*(?:product-sitemap|wp-sitemap-posts-product-)[^<]*\.xml\s*</loc>#i', $xml ) ) {
 			return true;
 		}
+		if ( '' === (string) get_option( 'permalink_structure' ) && self::plain_permalink_names_products( $xml ) ) {
+			return true;
+		}
 		// The fixed part of the product base, before a tag such as %product_cat%.
 		$base = trim( (string) strtok( (string) ( wc_get_permalink_structure()['product_base'] ?? '' ), '%' ), '/' );
 		return '' !== $base && 1 === preg_match( '#<loc>[^<]*/' . preg_quote( $base, '#' ) . '/[^<]+</loc>#i', $xml );
+	}
+
+	/**
+	 * Whether a plain-permalink sitemap names products. The product sitemap's subtype is
+	 * `product`, and a product page has a `product` query argument, in any position.
+	 *
+	 * @param string $xml Sitemap body.
+	 */
+	private static function plain_permalink_names_products( string $xml ): bool {
+		foreach ( self::loc_urls( $xml ) as $url ) {
+			$query = wp_parse_url( $url, PHP_URL_QUERY );
+			if ( ! is_string( $query ) || '' === $query ) {
+				continue;
+			}
+			$args = array();
+			wp_parse_str( $query, $args );
+			$subtype = $args['sitemap-subtype'] ?? '';
+			$product = $args['product'] ?? '';
+			if ( ( is_string( $subtype ) && 'product' === $subtype ) || ( is_string( $product ) && '' !== $product ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -1724,7 +1914,21 @@ class StoreOutputChecks {
 	 */
 	private static function store_page_urls( StoreResponses $responses ): array {
 		$product = $responses->product();
-		return array_values( array_filter( array( home_url( '/' ), wc_get_page_permalink( 'shop', '' ), null === $product ? '' : (string) $product->get_permalink() ) ) );
+		$shop    = wc_get_page_permalink( 'shop', '' );
+		$query   = wp_parse_url( $shop, PHP_URL_QUERY );
+		$args    = array();
+		if ( is_string( $query ) ) {
+			wp_parse_str( $query, $args );
+		}
+		// wc_template_redirect sends /?page_id=<shop> to the product archive. A front page, a filtered permalink, or a missing page has no page_id, so it stays.
+		$page_id = isset( $args['page_id'] ) && is_scalar( $args['page_id'] ) ? (int) $args['page_id'] : 0;
+		if ( 0 < $page_id && wc_get_page_id( 'shop' ) === $page_id && '' === (string) get_option( 'permalink_structure' ) ) {
+			$archive = get_post_type_archive_link( 'product' );
+			if ( is_string( $archive ) && '' !== $archive ) {
+				$shop = $archive;
+			}
+		}
+		return array_values( array_filter( array( home_url( '/' ), $shop, null === $product ? '' : (string) $product->get_permalink() ) ) );
 	}
 
 	/**
@@ -1811,7 +2015,8 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether every image has an alt attribute. An empty alt marks a decorative image and counts;
-	 * images hidden from assistive technology don't need one.
+	 * images hidden from assistive technology don't need one, nor do templates whose alt a script
+	 * fills in, such as the Mini-Cart block's empty item images.
 	 *
 	 * @param string $html Page HTML.
 	 */
@@ -1829,7 +2034,8 @@ class StoreOutputChecks {
 			// A tracking pixel or an image hidden from assistive technology needs no alt.
 			$pixel  = '1' === (string) $tags->get_attribute( 'width' ) && '1' === (string) $tags->get_attribute( 'height' );
 			$hidden = 'true' === strtolower( (string) $tags->get_attribute( 'aria-hidden' ) ) || in_array( strtolower( (string) $tags->get_attribute( 'role' ) ), array( 'presentation', 'none' ), true );
-			if ( ! $pixel && ! $hidden ) {
+			$bound  = null !== $tags->get_attribute( 'data-wp-bind--alt' );
+			if ( ! $pixel && ! $hidden && ! $bound ) {
 				return false;
 			}
 		}
@@ -2076,6 +2282,9 @@ class StoreOutputChecks {
 	 */
 	private function reviews_marked_up( StoreResponses $responses ): ?bool {
 		// The passes below load no page. Without a product page the rest of the card couldn't run, so neither does this.
+		if ( $this->without_product( $responses ) ) {
+			return null;
+		}
 		if ( null === $responses->product_page() ) {
 			return null;
 		}

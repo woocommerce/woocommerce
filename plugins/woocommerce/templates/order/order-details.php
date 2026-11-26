@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.9.0
+ * @version 11.3.1
  *
  * @var bool $show_downloads Controls whether the downloads table should be rendered.
  */
@@ -38,8 +38,9 @@ $actions            = array_filter(
 	ARRAY_FILTER_USE_KEY
 );
 
-// We make sure the order belongs to the user. This will also be true if the user is a guest, and the order belongs to a guest (userID === 0).
-$show_customer_details = $order->get_user_id() === get_current_user_id();
+// Guest orders also reach this template from the order tracking form, so a logged-out visitor needs the order key to see the address.
+$order_key             = isset( $_GET['key'] ) && is_string( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Bearer-style order key, compared with hash_equals().
+$show_customer_details = $order->get_user_id() === get_current_user_id() && ( is_user_logged_in() || ( $order instanceof WC_Order && hash_equals( $order->get_order_key(), $order_key ) ) );
 
 if ( $show_downloads ) {
 	wc_get_template(

@@ -132,7 +132,11 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			 * @param WC_Email_Customer_POS_Refunded_Order $email Email object.
 			 * @since 3.7.0
 			 */
-			return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
+			$subject = apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
+			if ( $this->block_email_editor_enabled ) {
+				$subject = $this->personalizer->personalize_transactional_rich_text_as_plain_text( $subject, $this );
+			}
+			return $subject;
 		}
 
 		/**
@@ -319,7 +323,10 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
 			$this->form_fields = array(
 				'subject_full'       => array(
-					'abilities'   => array( 'read' => true ),
+					'abilities'   => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'title'       => __( 'Full refund subject', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -328,7 +335,10 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'default'     => '',
 				),
 				'subject_partial'    => array(
-					'abilities'   => array( 'read' => true ),
+					'abilities'   => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'title'       => __( 'Partial refund subject', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -337,7 +347,10 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'default'     => '',
 				),
 				'heading_full'       => array(
-					'abilities'   => array( 'read' => true ),
+					'abilities'   => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'title'       => __( 'Full refund email heading', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -346,7 +359,10 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'default'     => '',
 				),
 				'heading_partial'    => array(
-					'abilities'   => array( 'read' => true ),
+					'abilities'   => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'title'       => __( 'Partial refund email heading', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -355,7 +371,10 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'default'     => '',
 				),
 				'additional_content' => array(
-					'abilities'   => array( 'read' => true ),
+					'abilities'   => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'title'       => __( 'Additional content', 'woocommerce' ),
 					'description' => __( 'Text to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
 					'css'         => 'width:400px; height: 75px;',
@@ -365,7 +384,10 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'desc_tip'    => true,
 				),
 				'email_type'         => array(
-					'abilities'   => array( 'read' => true ),
+					'abilities'   => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'title'       => __( 'Email type', 'woocommerce' ),
 					'type'        => 'select',
 					'description' => __( 'Choose which format of email to send.', 'woocommerce' ),

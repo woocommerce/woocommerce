@@ -522,6 +522,27 @@ a.added_to_cart {
 }
 
 /**
+* Customer emails
+*/
+// Block themes print customer emails in <address> so wptexturize() leaves them unchanged. Show them like the text they replace.
+.woocommerce-message address,
+.wc-block-components-notice-banner address {
+	display: inline;
+	margin: 0;
+	font-style: normal;
+}
+
+.woocommerce-order-withdrawal-content__review-row address {
+	margin: 0;
+	font-style: normal;
+}
+
+address.woocommerce-order-withdrawal-content__note {
+	margin-block: 1em;
+	font-style: normal;
+}
+
+/**
 * Store notice
 */
 p.demo_store,

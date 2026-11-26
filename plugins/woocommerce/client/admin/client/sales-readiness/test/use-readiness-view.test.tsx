@@ -11,6 +11,7 @@ import {
 	POLL_FOR_MS,
 	POLL_MS,
 	SCAN_PATH,
+	DAILY_CHECKS_PATH,
 	useReadinessView,
 } from '../use-readiness-view';
 import { RunStatus } from '../components/run-status';
@@ -190,6 +191,91 @@ describe( 'useReadinessView', () => {
 			expect.anything()
 		);
 	} );
+
+	it( 'saves the daily check switch and reads the view again; a failed save puts the switch back', async () => {
+		mockFetch
+			.mockResolvedValueOnce( { ...view( false ), daily_checks: true } )
+			.mockResolvedValueOnce( { enabled: false } )
+			.mockResolvedValueOnce( { ...view( false ), daily_checks: false } )
+			.mockRejectedValueOnce( new Error( 'offline' ) );
+		const { result } = renderHook( () => useReadinessView( 'page' ) );
+		await act( async () => jest.advanceTimersByTime( 0 ) );
+
+		await act( async () => result.current.setDailyChecks( false ) );
+		expect( mockFetch ).toHaveBeenCalledWith( {
+			path: DAILY_CHECKS_PATH,
+			method: 'POST',
+			data: { enabled: false },
+		} );
+		expect( result.current.view?.daily_checks ).toBe( false );
+		expect( result.current.error ).toBeNull();
+
+		await act( async () => result.current.setDailyChecks( true ) );
+		expect( result.current.view?.daily_checks ).toBe( false );
+		expect( result.current.error ).toBe(
+			'Automatic daily checks weren’t turned on. Try again in a few minutes.'
+		);
+
+		mockFetch.mockRejectedValueOnce( new Error( 'offline' ) );
+		await act( async () => result.current.setDailyChecks( false ) );
+		expect( result.current.error ).toBe(
+			'Automatic daily checks weren’t turned off. Try again in a few minutes.'
+		);
+	} );
+
+	it( 'keeps the saved daily check when an older view read returns later', async () => {
+		let finishStale: ( value: unknown ) => void = () => {};
+		mockFetch
+			.mockResolvedValueOnce( { ...view( true ), daily_checks: true } )
+			.mockImplementationOnce(
+				() =>
+					new Promise( ( resolve ) => {
+						finishStale = resolve;
+					} )
+			)
+			.mockResolvedValueOnce( { enabled: false } )
+			.mockResolvedValueOnce( {
+				...view( false ),
+				daily_checks: false,
+			} );
+		const { result } = renderHook( () => useReadinessView( 'page' ) );
+		await act( async () => jest.advanceTimersByTime( 0 ) );
+
+		await act( async () => jest.advanceTimersByTime( POLL_MS ) );
+		await act( async () => result.current.setDailyChecks( false ) );
+		expect( result.current.view?.daily_checks ).toBe( false );
+
+		await act( async () => {
+			finishStale( { ...view( false ), daily_checks: true } );
+		} );
+		expect( result.current.view?.daily_checks ).toBe( false );
+		expect( result.current.error ).toBeNull();
+	} );
+
+	it( 'waits for a view read to finish before polling again, and shows that result', async () => {
+		let finishPoll: ( value: unknown ) => void = () => {};
+		mockFetch.mockResolvedValueOnce( view( true ) ).mockImplementationOnce(
+			() =>
+				new Promise( ( resolve ) => {
+					finishPoll = resolve;
+				} )
+		);
+		const { result } = renderHook( () => useReadinessView( 'page' ) );
+		await act( async () => jest.advanceTimersByTime( 0 ) );
+		expect( result.current.view?.run.pending ).toBe( true );
+
+		await act( async () => jest.advanceTimersByTime( POLL_MS ) );
+		await act( async () => jest.advanceTimersByTime( POLL_MS * 3 ) );
+		// The first load, then one poll. Later ticks wait for that poll.
+		expect( viewCalls() ).toBe( 2 );
+		expect( result.current.view?.run.pending ).toBe( true );
+
+		await act( async () => {
+			finishPoll( view( false, 'Check again' ) );
+		} );
+		expect( result.current.view?.run.label ).toBe( 'Check again' );
+		expect( result.current.view?.run.pending ).toBe( false );
+	} );
 } );
 
 describe( 'RunStatus', () => {
@@ -203,11 +289,11 @@ describe( 'RunStatus', () => {
 
 	it( 'shows no spinner while a check runs, only its message for screen readers', () => {
 		const { container } = render(
-			<RunStatus run={ run( true, false, 'Checking your store.' ) } />
+			<RunStatus run={ run( true, false, 'Checking your store' ) } />
 		);
 		expect( container.querySelector( '.components-spinner' ) ).toBeNull();
 		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
-			'Checking your store.'
+			'Checking your store'
 		);
 		expect(
 			container.querySelector( '.wc-sales-readiness__muted' )

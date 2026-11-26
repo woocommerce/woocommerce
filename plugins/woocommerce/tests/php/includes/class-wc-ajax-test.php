@@ -1944,6 +1944,44 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Customer search escapes HTML in customer names.
+	 *
+	 * @throws Automattic\WooCommerce\Internal\DependencyManagement\ContainerException If the LegacyProxy cannot be retrieved.
+	 */
+	public function test_json_search_customers_escapes_html_in_names(): void {
+		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+
+		try {
+			$legacy_proxy->reset();
+			$legacy_proxy->register_function_mocks(
+				array(
+					'check_ajax_referer' => fn () => true,
+				)
+			);
+
+			$customer = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
+			$customer->set_first_name( 'Test' );
+			$customer->set_last_name( '<img src=x onerror=alert(1)>' );
+			$customer->save();
+
+			wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+			$_GET['term'] = $customer->get_id();
+
+			$response = $this->do_ajax( 'woocommerce_json_search_customers' );
+		} finally {
+			unset( $_GET['term'] );
+			wp_set_current_user( 0 );
+			$legacy_proxy->reset();
+		}
+
+		$this->assertSame(
+			sprintf( 'Test &lt;img src=x onerror=alert(1)&gt; (#%1$d &ndash; test1@example.com)', $customer->get_id() ),
+			$response[ $customer->get_id() ],
+			'Customer search results should contain escaped names.'
+		);
+	}
+
+	/**
 	 * Describe JSON search, particularly as it relates to handling searches for users in a
 	 * multisite context (it should generally not be possible to retrieve information about
 	 * users who have not been added to the current blog).
@@ -3842,6 +3880,43 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		} finally {
 			unset( WC()->session->reload_checkout_for_nonce );
 			$_POST = $original_post;
+		}
+	}
+
+	/**
+	 * @testdox A checkout update converts posted state names to state codes before calculating totals.
+	 */
+	public function test_update_order_review_converts_state_names_to_codes(): void {
+		$original_post     = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the AJAX fixture.
+		$original_customer = clone WC()->customer;
+		$product           = null;
+
+		try {
+			WC()->cart->empty_cart();
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$_POST = array(
+				'security'  => wp_create_nonce( 'update-order-review' ),
+				'post_data' => '',
+				'country'   => 'US',
+				'state'     => 'Hawaii',
+				's_country' => 'US',
+				's_state'   => 'ıL',
+			);
+
+			$this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertSame( 'HI', WC()->customer->get_billing_state(), 'The billing state name should be stored as its code.' );
+			$this->assertSame( 'IL', WC()->customer->get_shipping_state(), 'The shipping state spelling should be stored as its code.' );
+		} finally {
+			wc_clear_notices();
+			WC()->cart->empty_cart();
+			if ( $product instanceof WC_Product ) {
+				$product->delete( true );
+			}
+			WC()->customer = $original_customer;
+			$_POST         = $original_post;
 		}
 	}
 

@@ -54,7 +54,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	/**
 	 * Answer requests by path from the home URL; a null response fails like a timeout, and any other path is a 404.
 	 *
-	 * @param array<string, array{0:int,1:string}|null> $responses Status and body by path.
+	 * @param array<string, array{0:int,1:string,2?:array<string,string>}|null> $responses Status, body and headers by path.
 	 */
 	private function serve( array $responses ): void {
 		add_filter(
@@ -67,7 +67,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 				}
 				$response = $responses[ $path ] ?? array( 404, '' );
 				return array(
-					'headers'  => array(),
+					'headers'  => new \WpOrg\Requests\Utility\CaseInsensitiveDictionary( $response[2] ?? array() ),
 					'body'     => $response[1],
 					'response' => array(
 						'code'    => $response[0],
@@ -88,6 +88,31 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	 */
 	private function results(): array {
 		return array_column( $this->sut->all(), 'ok', 'id' );
+	}
+
+	/**
+	 * @testdox A product page check, page HTML or JSON-LD, with no product to open is marked no_product; one whose product page didn't load, or a home page check, is not.
+	 */
+	public function test_product_page_check_without_a_product_is_no_product(): void {
+		$this->serve( array( '/' => array( 200, '<html><head><meta name="viewport" content="width=device-width"></head><body></body></html>' ) ) );
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertNull( $checks['canonical_url']['ok'] );
+		$this->assertTrue( $checks['canonical_url']['no_product'], 'No product, so the check waits for one' );
+		$this->assertNull( $checks['product_jsonld_present']['ok'] );
+		$this->assertTrue( $checks['product_jsonld_present']['no_product'], 'A JSON-LD check waits for a product too' );
+		$this->assertNull( $checks['product_review_markup']['ok'] );
+		$this->assertTrue( $checks['product_review_markup']['no_product'], 'So does the review markup check' );
+		$this->assertFalse( $checks['viewport_meta']['no_product'], 'A home page check does not need a product' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$this->serve( array( self::path_of( $product ) => null ) );
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertNull( $checks['canonical_url']['ok'] );
+		$this->assertFalse( $checks['canonical_url']['no_product'], 'The product page timed out: that is couldn\'t check' );
+		$this->assertNull( $checks['product_jsonld_present']['ok'] );
+		$this->assertFalse( $checks['product_jsonld_present']['no_product'], 'A JSON-LD check on a page that timed out is couldn\'t check' );
+		$this->assertNull( $checks['product_review_markup']['ok'] );
+		$this->assertFalse( $checks['product_review_markup']['no_product'] );
 	}
 
 	/**
@@ -115,6 +140,182 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertTrue( $this->results()['sitemap_lists_products'] );
+	}
+
+	/**
+	 * @testdox With plain permalinks, /robots.txt answers with a page and the sitemap is at /?sitemap=index: both checks still run.
+	 */
+	public function test_plain_permalinks(): void {
+		$this->set_permalink_structure( '' );
+		// The shop page redirects to the product archive only when the product type has one.
+		$product_type = get_post_type_object( 'product' );
+		$had_archive  = $product_type ? $product_type->has_archive : false;
+		if ( $product_type ) {
+			$product_type->has_archive = true;
+		}
+		try {
+			$product = \WC_Helper_Product::create_simple_product();
+			$shop    = wp_insert_post(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_title'  => 'Shop',
+				)
+			);
+			update_option( 'woocommerce_shop_page_id', $shop );
+			$page = array( 200, '<!doctype html><title>Shop</title>' );
+			$this->serve(
+				array(
+					'/robots.txt'             => $page,
+					'/'                       => $page,
+					'/?post_type=product'     => $page,
+					self::path_of( $product ) => $page,
+					'/?sitemap=index'         => array( 200, '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=posts&amp;sitemap-subtype=product_cat&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ),
+					'/?sitemap=posts&sitemap-subtype=product_cat&paged=1' => array( 200, '<urlset><url><loc>' . home_url( '/?product=beanie' ) . '</loc><lastmod>2026-11-01</lastmod></url></urlset>' ),
+					"/?page_id=$shop"         => array( 302, '', array( 'location' => home_url( '/?post_type=product' ) ) ),
+				)
+			);
+
+			$results = $this->results();
+			$this->assertTrue( $results['sitemap_lists_products'] );
+			$this->assertTrue( $results['sitemap_lastmod'] );
+			$this->assertTrue( $results['pages_public'] );
+
+			$this->assertFalse( $this->names_products_in( '<urlset><url><loc>' . home_url( '/?product_cat=hats' ) . '</loc></url></urlset>' ) );
+			$this->assertTrue( $this->names_products_in( '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=posts&amp;sitemap-subtype=product&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ) );
+			$this->assertFalse( $this->names_products_in( '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=taxonomies&amp;sitemap-subtype=product_brand&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ) );
+			$this->assertTrue( $this->names_products_in( '<urlset><url><loc>' . home_url( '/?product=beanie&amp;lang=fr' ) . '</loc></url></urlset>' ) );
+		} finally {
+			if ( $product_type ) {
+				$product_type->has_archive = $had_archive;
+			}
+		}
+	}
+
+	/**
+	 * @testdox With plain permalinks, a page at /robots.txt counts as no robots file, so a missing sitemap fails.
+	 */
+	public function test_plain_permalinks_html_robots_is_no_file(): void {
+		$this->set_permalink_structure( '' );
+		$this->serve( array( '/robots.txt' => array( 200, '<!doctype html><title>Home</title>' ) ) );
+
+		$this->assertFalse( $this->results()['sitemap_lists_products'] );
+	}
+
+	/**
+	 * @testdox With plain permalinks and no product archive, the shop page itself is what gets checked.
+	 */
+	public function test_plain_permalinks_shop_without_archive(): void {
+		$this->set_permalink_structure( '' );
+		$product_type = get_post_type_object( 'product' );
+		$had_archive  = $product_type ? $product_type->has_archive : false;
+		try {
+			$shop = wp_insert_post(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_title'  => 'Shop',
+				)
+			);
+			update_option( 'woocommerce_shop_page_id', $shop );
+			// A block theme registers a product archive. This case is the shop page with that archive off.
+			if ( $product_type ) {
+				$product_type->has_archive = false;
+			}
+			$this->serve(
+				array(
+					'/'                   => array( 200, '<!doctype html><title>Home</title>' ),
+					"/?page_id=$shop"     => array( 302, '', array( 'location' => site_url( '/wp-login.php' ) ) ),
+					'/wp-login.php'       => array( 200, '<html>Log in</html>' ),
+					'/?post_type=product' => array( 200, '<!doctype html><title>Shop</title>' ),
+				)
+			);
+
+			$this->assertFalse( $this->results()['pages_public'] );
+		} finally {
+			if ( $product_type ) {
+				$product_type->has_archive = $had_archive;
+			}
+		}
+	}
+
+	/**
+	 * @testdox With plain permalinks, the shop as the front page is not replaced by the product archive.
+	 */
+	public function test_plain_permalinks_front_page_shop(): void {
+		$this->set_permalink_structure( '' );
+		$product_type = get_post_type_object( 'product' );
+		$had_archive  = $product_type ? $product_type->has_archive : false;
+		if ( $product_type ) {
+			$product_type->has_archive = true;
+		}
+		try {
+			$shop = wp_insert_post(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_title'  => 'Shop',
+				)
+			);
+			update_option( 'woocommerce_shop_page_id', $shop );
+			update_option( 'show_on_front', 'page' );
+			update_option( 'page_on_front', $shop );
+			$this->serve(
+				array(
+					'/'                   => array( 200, '<!doctype html><title>Home</title>' ),
+					'/?post_type=product' => array( 302, '', array( 'location' => site_url( '/wp-login.php' ) ) ),
+					'/wp-login.php'       => array( 200, '<html>Log in</html>' ),
+				)
+			);
+
+			$this->assertTrue( $this->results()['pages_public'] );
+		} finally {
+			if ( $product_type ) {
+				$product_type->has_archive = $had_archive;
+			}
+		}
+	}
+
+	/**
+	 * @testdox With plain permalinks, a custom shop permalink is the page that is checked.
+	 */
+	public function test_plain_permalinks_custom_shop_permalink(): void {
+		$this->set_permalink_structure( '' );
+		$shop = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Shop',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop );
+		add_filter(
+			'woocommerce_get_shop_page_permalink',
+			static function () {
+				return home_url( '/?custom-shop=1' );
+			}
+		);
+		$this->serve(
+			array(
+				'/'                   => array( 200, '<!doctype html><title>Home</title>' ),
+				'/?custom-shop=1'     => array( 302, '', array( 'location' => site_url( '/wp-login.php' ) ) ),
+				'/wp-login.php'       => array( 200, '<html>Log in</html>' ),
+				'/?post_type=product' => array( 200, '<!doctype html><title>Shop</title>' ),
+			)
+		);
+
+		$this->assertFalse( $this->results()['pages_public'] );
+	}
+
+	/**
+	 * Whether the sitemap check passes when /?sitemap=index serves this XML and nothing else answers.
+	 *
+	 * @param string $xml Sitemap XML.
+	 */
+	private function names_products_in( string $xml ): bool {
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( '/?sitemap=index' => array( 200, $xml ) ) );
+		return true === $this->results()['sitemap_lists_products'];
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Convert ISO-8859-1 tax rate CSV data to UTF-8 without the utf8_encode() function, which is deprecated in PHP 8.2.

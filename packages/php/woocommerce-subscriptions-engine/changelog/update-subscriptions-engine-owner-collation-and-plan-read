@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Validate owner slugs and make owner matching exact in the unreleased subscriptions engine, and throw on failed plan reads; no changelog entry needed.
+

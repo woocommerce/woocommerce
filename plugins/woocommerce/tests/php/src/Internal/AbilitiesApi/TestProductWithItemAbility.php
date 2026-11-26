@@ -20,6 +20,13 @@ class TestProductWithItemAbility extends TestProductRenameAbility {
 	public static string $item_resource = 'order_item';
 
 	/**
+	 * The order item of the call.
+	 *
+	 * @var \WC_Order_Item_Product
+	 */
+	private \WC_Order_Item_Product $item;
+
+	/**
 	 * Rename the product in memory, and return a new order item as a secondary object of the `$item_resource` resource.
 	 *
 	 * @param \WC_Product $subject Product.
@@ -28,6 +35,18 @@ class TestProductWithItemAbility extends TestProductRenameAbility {
 	 */
 	public function change( $subject, array $input ) {
 		parent::change( $subject, $input );
-		return array( array( new \WC_Order_Item_Product(), array(), self::$item_resource ) );
+		$this->item = new \WC_Order_Item_Product();
+		return array( array( $this->item, $input['item_extensions'] ?? array(), self::$item_resource ) );
+	}
+
+	/**
+	 * Save the product, then the order item.
+	 *
+	 * @param \WC_Product $subject Product.
+	 * @return null|\WP_Error
+	 */
+	protected function save( $subject ) {
+		$this->item->save();
+		return parent::save( $subject );
 	}
 }
