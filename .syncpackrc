@@ -43,6 +43,7 @@
 			],
 			"dependencies": [
 				"@types/debug",
+				"@types/jest",
 				"@types/lodash",
 				"@types/node",
 				"@types/prop-types",
@@ -144,7 +145,6 @@
 				"@commander-js/extra-typings",
 				"@jest/globals",
 				"@oclif/core",
-				"@types/jest",
 				"@wordpress/browserslist-config",
 				"@wordpress/env",
 				"@wordpress/postcss-plugins-preset",

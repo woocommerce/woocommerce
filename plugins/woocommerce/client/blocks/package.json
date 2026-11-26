@@ -107,7 +107,7 @@
 		"@testing-library/react": "15.0.7",
 		"@testing-library/user-event": "14.5.2",
 		"@types/gtag.js": "0.0.10",
-		"@types/jest": "catalog:tooling",
+		"@types/jest": "catalog:types",
 		"@types/jquery": "3.5.14",
 		"@types/lodash": "4.14.182",
 		"@types/prop-types": "catalog:types",

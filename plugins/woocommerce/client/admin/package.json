@@ -137,7 +137,7 @@
 		"@testing-library/user-event": "13.5.0",
 		"@types/cookie": "^0.4.1",
 		"@types/debug": "catalog:types",
-		"@types/jest": "catalog:tooling",
+		"@types/jest": "catalog:types",
 		"@types/lodash": "catalog:types",
 		"@types/node": "catalog:types",
 		"@types/qs": "catalog:types",

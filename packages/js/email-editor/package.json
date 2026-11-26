@@ -127,7 +127,7 @@
 		"@testing-library/react": "^16.x.x",
 		"@testing-library/user-event": "13.5.0",
 		"@types/history": "^4.7.11",
-		"@types/jest": "catalog:tooling",
+		"@types/jest": "catalog:types",
 		"@types/js-cookie": "^3.0.2",
 		"@types/lodash": "catalog:types",
 		"@types/node": "catalog:types",

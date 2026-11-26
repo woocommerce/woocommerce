@@ -60,7 +60,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
-		"@types/jest": "catalog:tooling",
+		"@types/jest": "catalog:types",
 		"@types/node": "catalog:types",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",

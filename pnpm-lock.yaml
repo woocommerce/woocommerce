@@ -229,9 +229,6 @@ catalogs:
     '@oclif/core':
       specifier: ^4.13.5
       version: 4.13.5
-    '@types/jest':
-      specifier: 29.5.x
-      version: 29.5.14
     '@wordpress/browserslist-config':
       specifier: next
       version: 6.43.1-next.v.202604091042.0
@@ -335,6 +332,9 @@ catalogs:
     '@types/debug':
       specifier: ^4.1.12
       version: 4.1.12
+    '@types/jest':
+      specifier: 29.5.x
+      version: 29.5.14
     '@types/lodash':
       specifier: ^4.14.202
       version: 4.17.24
@@ -915,7 +915,7 @@ importers:
         specifier: ^1.6.4
         version: 1.9.0
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/lodash':
         specifier: catalog:types
@@ -1010,7 +1010,7 @@ importers:
         specifier: catalog:tooling
         version: 7.29.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/node':
         specifier: catalog:types
@@ -1074,7 +1074,7 @@ importers:
         specifier: catalog:tooling
         version: 7.29.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/react':
         specifier: 18.3.x
@@ -1156,7 +1156,7 @@ importers:
         specifier: ^16.x.x
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/prop-types':
         specifier: catalog:types
@@ -1304,7 +1304,7 @@ importers:
         specifier: ^16.x.x
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/lodash':
         specifier: catalog:types
@@ -1389,7 +1389,7 @@ importers:
         specifier: catalog:tooling
         version: 7.29.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/lodash':
         specifier: catalog:types
@@ -1490,7 +1490,7 @@ importers:
         specifier: ^1.63.0
         version: 1.63.0
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/node':
         specifier: catalog:types
@@ -1644,7 +1644,7 @@ importers:
         specifier: ^4.7.11
         version: 4.7.11
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/js-cookie':
         specifier: ^3.0.2
@@ -1817,7 +1817,7 @@ importers:
         specifier: 13.5.0
         version: 13.5.0(@testing-library/dom@10.4.1)
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/react-transition-group':
         specifier: catalog:types
@@ -1917,7 +1917,7 @@ importers:
         specifier: ^0.6.0
         version: 0.6.0
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/node':
         specifier: catalog:types
@@ -1975,7 +1975,7 @@ importers:
         specifier: catalog:tooling
         version: 7.29.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@woocommerce/eslint-config':
         specifier: workspace:*
@@ -2233,7 +2233,7 @@ importers:
         specifier: catalog:tooling
         version: 7.25.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/qs':
         specifier: catalog:types
@@ -2352,7 +2352,7 @@ importers:
         specifier: catalog:tooling
         version: 7.25.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/lodash':
         specifier: catalog:types
@@ -2437,7 +2437,7 @@ importers:
         specifier: ^16.x.x
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/react':
         specifier: 18.3.x
@@ -2525,7 +2525,7 @@ importers:
         specifier: catalog:types
         version: 4.1.12
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/node':
         specifier: catalog:types
@@ -2580,7 +2580,7 @@ importers:
         specifier: ^2.0.4
         version: 2.4.0
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/trusted-types':
         specifier: ^2.0.7
@@ -2644,7 +2644,7 @@ importers:
         specifier: catalog:tooling
         version: 7.29.7
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/react':
         specifier: 18.3.x
@@ -2702,7 +2702,7 @@ importers:
         specifier: catalog:types
         version: 4.1.12
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/node':
         specifier: catalog:types
@@ -2792,7 +2792,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/jquery':
         specifier: 3.5.33
@@ -3065,7 +3065,7 @@ importers:
         version: 18.3.1(react@18.3.1)
     devDependencies:
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/react':
         specifier: 18.3.x
@@ -3378,7 +3378,7 @@ importers:
         specifier: catalog:types
         version: 4.1.12
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/lodash':
         specifier: catalog:types
@@ -3763,7 +3763,7 @@ importers:
         specifier: 0.0.10
         version: 0.0.10
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/jquery':
         specifier: 3.5.14
@@ -4179,7 +4179,7 @@ importers:
         version: 4.0.2
     devDependencies:
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/node':
         specifier: catalog:types
@@ -4320,7 +4320,7 @@ importers:
         version: 4.0.2
     devDependencies:
       '@types/jest':
-        specifier: catalog:tooling
+        specifier: catalog:types
         version: 29.5.14
       '@types/node':
         specifier: catalog:types
