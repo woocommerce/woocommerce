@@ -131,7 +131,6 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$data = array(
 			'status'            => $webhook->get_status( 'edit' ),
 			'name'              => $webhook->get_name( 'edit' ),
-			'user_id'           => $webhook->get_user_id( 'edit' ),
 			'secret'            => $webhook->get_secret( 'edit' ),
 			'topic'             => $webhook->get_topic( 'edit' ),
 			'date_modified'     => $date_modified,
@@ -146,6 +145,11 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		// isn't applied twice.
 		if ( $trigger ) {
 			$data['delivery_url'] = $webhook->get_delivery_url( 'edit' );
+		}
+
+		// Save the author with the URL. An unrelated save may hold an older author.
+		if ( $trigger || isset( $changes['user_id'] ) ) {
+			$data['user_id'] = $webhook->get_user_id( 'edit' );
 		}
 
 		$wpdb->update(
