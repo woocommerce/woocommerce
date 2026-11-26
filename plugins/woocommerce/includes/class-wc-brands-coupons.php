@@ -21,7 +21,13 @@ class WC_Brands_Coupons {
 	public function __construct() {
 		// Coupon validation and error handling.
 		add_filter( 'woocommerce_coupon_is_valid', array( $this, 'is_coupon_valid' ), 10, 3 );
-		add_filter( 'woocommerce_coupon_is_valid_for_product', array( $this, 'is_valid_for_product' ), 10, 5 );
+		// Accepts $staged without new parameters on is_valid_for_product(), which keeps its public signature.
+		add_filter(
+			'woocommerce_coupon_is_valid_for_product',
+			fn( $valid, $product, $coupon, $values = array(), $staged = false ) => $this->is_valid_for_product( $valid, $product, $coupon ), // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The method only reads the product and the coupon, so a staged order works the same.
+			10,
+			5
+		);
 		add_filter( 'woocommerce_coupon_error', array( $this, 'brand_exclusion_error' ), 10, 2 );
 	}
 
@@ -96,11 +102,9 @@ class WC_Brands_Coupons {
 	 * @param  bool       $valid   Whether the product should get the coupon's discounts.
 	 * @param  WC_Product $product WC Product Object.
 	 * @param  WC_Coupon  $coupon  Coupon object.
-	 * @param  mixed      $values  Cart item or order item. Not used.
-	 * @param  bool       $staged  Whether the order is staged and not saved yet. Not used: the method only reads the product and the coupon.
 	 * @return bool       $valid
 	 */
-	public function is_valid_for_product( $valid, $product, $coupon, $values = array(), $staged = false ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Accepts $staged, see the docblock.
+	public function is_valid_for_product( $valid, $product, $coupon ) {
 
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			return $valid;

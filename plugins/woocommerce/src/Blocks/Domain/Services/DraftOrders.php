@@ -44,7 +44,13 @@ class DraftOrders {
 		add_filter( 'woocommerce_register_shop_order_post_statuses', [ $this, 'register_draft_order_post_status' ] );
 		add_filter( 'woocommerce_analytics_excluded_order_statuses', [ $this, 'append_draft_order_post_status' ] );
 		add_filter( 'woocommerce_valid_order_statuses_for_payment', [ $this, 'append_draft_order_post_status' ], 999 );
-		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', [ $this, 'append_draft_order_post_status' ], 999, 3 );
+		// Accepts $staged without new parameters on append_draft_order_post_status(), which keeps its public signature.
+		add_filter(
+			'woocommerce_valid_order_statuses_for_payment_complete',
+			fn( $statuses, $order = null, $staged = false ) => $this->append_draft_order_post_status( $statuses ), // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The method does not read the order, so a staged order works the same.
+			999,
+			3
+		);
 		// Hook into the query to retrieve My Account orders so draft status is excluded.
 		add_action( 'woocommerce_my_account_my_orders_query', [ $this, 'delete_draft_order_post_status_from_args' ] );
 		add_action( self::DRAFT_CLEANUP_EVENT_HOOK, [ $this, 'delete_expired_draft_orders' ] );
@@ -158,14 +164,12 @@ class DraftOrders {
 	/**
 	 * Append draft status to a list of statuses.
 	 *
-	 * @param array          $statuses Array of statuses.
-	 * @param \WC_Order|null $order    Order. Not used.
-	 * @param bool           $staged   Whether the order is staged and not saved yet. Not used: the method does not read the order.
+	 * @param array $statuses Array of statuses.
 	 * @internal
 
 	 * @return array
 	 */
-	public function append_draft_order_post_status( $statuses, $order = null, $staged = false ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Accepts $staged, see the docblock.
+	public function append_draft_order_post_status( $statuses ) {
 		$statuses[] = self::STATUS;
 		return $statuses;
 	}

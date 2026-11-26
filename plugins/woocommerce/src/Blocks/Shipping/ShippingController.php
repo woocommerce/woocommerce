@@ -77,7 +77,13 @@ class ShippingController {
 		add_filter( 'woocommerce_local_pickup_methods', array( $this, 'register_local_pickup_method' ) );
 		add_filter( 'woocommerce_order_hide_shipping_address', array( $this, 'hide_shipping_address_for_local_pickup' ), 10 );
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'filter_taxable_address' ) );
-		add_filter( 'woocommerce_order_get_tax_location', array( $this, 'filter_order_tax_location' ), 10, 3 );
+		// Accepts $staged without a new parameter on filter_order_tax_location(), which keeps its public signature.
+		add_filter(
+			'woocommerce_order_get_tax_location',
+			fn( $location, $order, $staged = false ) => $this->filter_order_tax_location( $location, $order ), // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The method only reads the order object, so a staged order works the same.
+			10,
+			3
+		);
 		add_filter( 'woocommerce_shipping_settings', array( $this, 'remove_shipping_settings' ) );
 		add_filter( 'woocommerce_shipping_packages', array( $this, 'filter_shipping_packages' ) );
 		add_filter( 'pre_update_option_woocommerce_pickup_location_settings', array( $this, 'flush_cache' ) );
@@ -492,10 +498,9 @@ class ShippingController {
 	 *
 	 * @param array              $location Tax location with 'country', 'state', 'postcode' and 'city' keys.
 	 * @param \WC_Abstract_Order $order    Order the tax location is being resolved for.
-	 * @param bool               $staged   Whether the order is staged and not saved yet. Not used: the method only reads the order object.
 	 * @return array
 	 */
-	public function filter_order_tax_location( $location, $order, $staged = false ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Accepts $staged, see the docblock.
+	public function filter_order_tax_location( $location, $order ) {
 		if ( ! $order instanceof \WC_Abstract_Order ) {
 			return $location;
 		}
