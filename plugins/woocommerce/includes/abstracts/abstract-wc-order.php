@@ -264,7 +264,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Orders use cache mode. A cached copy keeps its meta IDs, so it does not insert its meta again on save.
 	 * Each copy gets its own meta, item, and date objects, so a change to one copy does not reach the others.
 	 * A copy starts without the staged callbacks and coupons, so a save of the copy does not run them for the
-	 * original order.
+	 * original order, and without the staged mark.
 	 *
 	 * Eventually, Core should stop unsetting meta IDs in WC_Data::__clone() for every subclass, and make
 	 * duplication an explicit operation. Duplicating an object does not need to hook into __clone().
@@ -275,6 +275,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		parent::__clone();
 		$this->deferred_actions = array();
 		$this->staged_coupons   = array();
+		$this->staged_unsaved   = false;
 		foreach ( $this->items as $group => $items ) {
 			foreach ( $items as $key => $item ) {
 				$mode = $item->get_clone_mode();

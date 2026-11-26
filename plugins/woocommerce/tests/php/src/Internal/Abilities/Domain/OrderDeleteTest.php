@@ -3,9 +3,11 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Tests\Internal\Abilities\ExtensibleAbilitiesTestTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Unit_Test_Case;
 
@@ -13,6 +15,7 @@ use WC_Unit_Test_Case;
  * Tests for the order-delete ability.
  */
 class OrderDeleteTest extends WC_Unit_Test_Case {
+	use ExtensibleAbilitiesTestTrait;
 	use HPOSToggleTrait;
 
 	/**
@@ -114,6 +117,37 @@ class OrderDeleteTest extends WC_Unit_Test_Case {
 		$this->assertSame( 409, $second->get_error_data()['status'] );
 		$this->assertSame( OrderStatus::TRASH, $trashed );
 		$this->assertSame( 'deleted', $deleted['status'] );
+	}
+
+	/**
+	 * @testdox Should trash an order with the feature on while a woocommerce_order_item_needs_processing listener does not accept $staged, also when a sync reads the trashed copy.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $sync Whether a sync calls needs_processing() on the trashed copy.
+	 */
+	public function test_trashes_an_order_while_a_listener_does_not_accept_staged( bool $sync ): void {
+		$order = OrderHelper::create_order();
+		add_filter( 'woocommerce_order_item_needs_processing', static fn( $needs_processing ) => $needs_processing, 10, 3 );
+		$this->enable_extensible_abilities(
+			static function () use ( $sync ) {
+				if ( $sync ) {
+					ExtensibleAbilities::register_sync(
+						array(
+							'resource'  => 'order',
+							'namespace' => 'test-ext',
+							'callback'  => static function ( array $saved, array $context ) {
+								$context['trashed'][0]->needs_processing();
+							},
+						)
+					);
+				}
+			}
+		);
+
+		$this->execute( array( 'id' => $order->get_id() ) );
+
+		$this->assertSame( OrderStatus::TRASH, wc_get_order( $order->get_id() )->get_status() );
 	}
 
 	/**

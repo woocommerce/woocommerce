@@ -38,7 +38,7 @@ abstract class WC_Data {
 
 	/**
 	 * Whether the object is marked as staged: it holds changes that are not saved yet and that a validator can still
-	 * refuse. mark_staged() sets it, and save() clears it.
+	 * refuse. mark_staged() sets it, and save() and delete() clear it.
 	 *
 	 * @since 11.4.0
 	 * @var bool
@@ -210,7 +210,7 @@ abstract class WC_Data {
 	/**
 	 * Mark the object as staged: it holds changes that are not saved yet and that a validator can still refuse. A
 	 * caller that changes the object, validates it and then saves it calls this before the first change. save()
-	 * clears the mark.
+	 * and delete() clear the mark.
 	 *
 	 * @internal
 	 * @since 11.4.0
@@ -394,11 +394,13 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Delete an object, set the ID to 0, and return result.
+	 * Delete an object, set the ID to 0, and return result. Like save(), it clears the staged mark, and puts it back
+	 * when the delete throws.
 	 *
 	 * @since  2.6.0
 	 * @param  bool $force_delete Should the date be deleted permanently.
 	 * @return bool result
+	 * @throws Throwable When the delete fails.
 	 */
 	public function delete( $force_delete = false ) {
 		/**
@@ -415,7 +417,14 @@ abstract class WC_Data {
 			return $check;
 		}
 		if ( $this->data_store ) {
-			$this->data_store->delete( $this, array( 'force_delete' => $force_delete ) );
+			$staged_unsaved       = $this->staged_unsaved;
+			$this->staged_unsaved = false;
+			try {
+				$this->data_store->delete( $this, array( 'force_delete' => $force_delete ) );
+			} catch ( Throwable $e ) {
+				$this->staged_unsaved = $staged_unsaved;
+				throw $e;
+			}
 			$this->set_id( 0 );
 			return true;
 		}

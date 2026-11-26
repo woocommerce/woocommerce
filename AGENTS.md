@@ -244,7 +244,7 @@ Database migrations live in `WC_Install::$db_updates`. Read that class for the c
 
 A stage method (`stage_*()` on a `WC_Data` class, for example `WC_Abstract_Order::stage_totals()`) changes the object in memory and does not save. Its saving method, for example `calculate_totals()`, runs it through `write_through()` and saves as before. A new stage method starts with `$this->refuse_unstaged_override( 'saving_method', 'stage_method' )`.
 
-A caller that stages, validates and then saves marks the object first with `WC_Data::mark_staged()`; `ActionableAbility` does this for every ability. Stage methods do not mark the object. `save()` clears the mark.
+A caller that stages, validates and then saves marks the object first with `WC_Data::mark_staged()`; `ActionableAbility` does this for every ability. Stage methods do not mark the object. `save()` and `delete()` clear the mark, and a clone of an order is not marked.
 
 A hook needs the listener check when it can fire on a staged call, fires before the write, and passes the staged object or one of its children (the order or an order item, also inside the discount items that `WC_Discounts` builds for an order). Fire it through the wrapper, with the hook name and arguments written once:
 
