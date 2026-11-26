@@ -595,8 +595,8 @@ class ExtensibleAbilities {
 	 * no extension fields. For example, a validator refuses a product change that
 	 * would break a subscription plan.
 	 *
-	 * Core's product abilities run validators. Core's order abilities keep their
-	 * trunk write for now, so validators for `order` run only in the
+	 * Core's product abilities run validators. Core's order abilities run no
+	 * validators and no syncs for now, so validators for `order` run only in the
 	 * ActionableAbility classes of extensions.
 	 *
 	 * @since 11.3.0
