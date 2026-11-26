@@ -1759,6 +1759,47 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A staged payment to a custom status fires its payment hook once when a status listener's save fails.
+	 */
+	public function test_staged_payment_complete_survives_a_failed_save_in_a_status_listener(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+		add_filter(
+			'wc_order_statuses',
+			static function ( $statuses ) {
+				return $statuses + array( 'wc-custom-paid' => 'Custom paid' );
+			}
+		);
+		add_filter(
+			'woocommerce_payment_complete_order_status',
+			static function () {
+				return 'custom-paid';
+			}
+		);
+		$failed = false;
+		add_action(
+			'woocommerce_order_status_custom-paid',
+			function ( $order_id, $listened_order ) use ( &$failed ) {
+				if ( ! $failed ) {
+					$failed = true;
+					$this->save_with_failed_write( $listened_order );
+				}
+			},
+			10,
+			2
+		);
+
+		$order->stage_payment_complete( '12345' );
+		$order->save();
+		$order->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertCount( 1, array_keys( $notes, 'Payment complete.', true ) );
+	}
+
+	/**
 	 * @testdox update_taxes() does not write the tax items when the order write fails.
 	 */
 	public function test_update_taxes_does_not_write_tax_items_when_the_write_fails(): void {

@@ -420,12 +420,14 @@ class WC_Order extends WC_Abstract_Order {
 		parent::save();
 		if ( null === $this->get_last_save_error() ) {
 			// Decide a staged payment from the written status, before the status listeners can change it.
+			$paid = null;
 			if ( isset( $deferred_actions['payment_complete'] ) ) {
-				$paid_status = $deferred_actions['payment_complete']['args'][0];
-
-				$deferred_actions['payment_complete']['args'] = array( $this->has_status( $paid_status ) || $this->is_paid() );
+				$paid = $this->has_status( $deferred_actions['payment_complete']['args'][0] ) || $this->is_paid();
 			}
 			$this->status_transition();
+			if ( null !== $paid && null === $this->get_last_save_error() ) {
+				$deferred_actions['payment_complete']['args'] = array( $paid );
+			}
 		}
 
 		$this->run_deferred_actions( $deferred_actions, true );
