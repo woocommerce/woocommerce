@@ -18,6 +18,7 @@
 		"test:unit": "composer run-script test:unit",
 		"test:php:ci": "pnpm test:unit && pnpm test:integration",
 		"test:integration": "composer run-script test:integration",
+		"test:integration:multisite": "composer run-script test:integration:multisite",
 		"test:update-email-snapshots": "wp-env run tests-cli --env-cwd=wp-content/plugins/email-editor env UPDATE_EMAIL_SNAPSHOTS=1 ./vendor/bin/phpunit --configuration phpunit-integration.xml.dist --filter Renderer_Snapshot_Test",
 		"build:composer-package": "bash tasks/build-package.sh"
 	},
@@ -83,6 +84,34 @@
 						"start": "env:test",
 						"config": {
 							"phpVersion": "7.4",
+							"wpVersion": "latest"
+						}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "PHP: 8.1 WP: latest (multisite)",
+					"testType": "unit:php",
+					"command": "test:integration:multisite",
+					"changes": [
+						"composer.json",
+						"composer.lock",
+						"**/*.php",
+						"phpunit*.xml.dist",
+						".wp-env.json",
+						"src/**/*.css",
+						"src/**/*.json",
+						"src/**/*.html",
+						"tests/**/*.html",
+						"tests/**/*.txt"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "8.1",
 							"wpVersion": "latest"
 						}
 					},

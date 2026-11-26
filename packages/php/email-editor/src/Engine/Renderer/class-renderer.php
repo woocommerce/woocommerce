@@ -17,6 +17,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use WP_Style_Engine;
+use WP_Theme_JSON_Resolver;
 
 /**
  * Class Renderer
@@ -179,6 +180,10 @@ class Renderer {
 			);
 		} finally {
 			$this->content_renderer->restore_rendering_context( $previous_rendering_context );
+			// Rendering loaded this site's theme.json data into core's cache, which survives restore_current_blog().
+			if ( is_multisite() && ms_is_switched() ) {
+				WP_Theme_JSON_Resolver::clean_cached_data();
+			}
 		}
 	}
 
