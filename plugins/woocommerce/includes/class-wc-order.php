@@ -302,7 +302,8 @@ class WC_Order extends WC_Abstract_Order {
 			 *
 			 * @param int    $order_id       Order ID.
 			 * @param string $transaction_id Transaction ID of the order.
-			 * @since 1.3.0
+			 * @since 1.2.2
+			 * @since 6.8.0 Passes $transaction_id.
 			 */
 			do_action( 'woocommerce_payment_complete', $order_id, $transaction_id );
 		};
