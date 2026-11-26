@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests/src/util/index.js';
 import { render } from '@testing-library/react';
 import type { ComponentType } from 'react';
 
