@@ -14,7 +14,7 @@ This guide uses these terms:
 
 - **Animate what the shopper does.** A click or a tap animates. Content that loads with the page appears immediately, apart from the lists in the next rule. A later change that the shopper's action causes can animate, such as a totals row, a notice, or an error.
 - **Where appropriate, list items stagger on first load.** The items of a list, such as cart items, order summary items, or the order confirmation sections, can rise in 50ms apart when the page first shows them. They do not stagger again, such as after an update, a new item, or a key press. Lists of options, such as shipping or payment methods, appear immediately.
-- **Keyboard changes apply immediately.** A shopper can press keys quickly, for example to move through options. After a key press, content that shows, hides, or swaps does not animate.
+- **Keyboard changes apply immediately.** A shopper can press keys quickly, for example to move through options. After a key press, content that shows, hides, or swaps does not animate. Field errors are the exception: they follow the field, so they grow in and collapse after Tab or typing too.
 - **Content moves to make space.** Content that appears grows from nothing, and the content below moves down. Content that goes collapses, and the content below moves up. Nothing jumps.
 - **One change, one movement.** When one action changes many things, the content below moves one time, in one direction.
 - **Motion follows the selection.** When the shopper picks another option in a row of options, such as Ship or Pickup, the selection slides to the new option. Content that the choice swaps moves the same way: the old content leaves in that direction, and the new content follows from the other side.
@@ -130,7 +130,7 @@ Do these checks by hand for each change, also with reduced motion:
 
 - **Change and reverse.** Do the change, then do the reverse. The content below moves in one direction each time, and nothing jumps.
 - **Interruption.** Reverse the change 80–150ms after it starts. The motion turns around from its current position.
-- **Keyboard.** Use Tab, Space, Enter, or the arrow keys. The change applies immediately.
+- **Keyboard.** Use Tab, Space, Enter, or the arrow keys. The change applies immediately, apart from field errors.
 - **Late content.** Content that loads after the change, such as rates or totals, does not jump.
 - **First time.** Open the element for the first time on the page, with the smallest input that opens it. It must stay open. Motion makes an existing flicker easy to see, so fix the cause.
 - **Settled.** About 1 second after each change, the blocks have no attributes, inline styles, copies of content, or running animations that the motion added, and no console errors.
