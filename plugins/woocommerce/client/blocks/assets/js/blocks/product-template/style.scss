@@ -145,12 +145,12 @@ $carousel-narrow-columns: 2;
 }
 
 .is-product-collection-layout-carousel {
-	container-type: inline-size;
-	container-name: carousel;
 	overflow-x: auto;
 	scrollbar-width: none;
 	scroll-snap-type: x mandatory;
 	position: relative; // Create new stacking context
+	container-type: inline-size;
+	container-name: carousel;
 
 	.wc-block-product {
 		box-sizing: border-box;
