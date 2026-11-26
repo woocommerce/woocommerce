@@ -520,7 +520,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 
 		return $this->with_run_lock(
 			$user_id,
-			fn( string $lock ) => $this->handle_run_locked( $request, $user_id, $lock )
+			fn( array $lock ) => $this->handle_run_locked( $request, $user_id, $lock )
 		);
 	}
 
@@ -533,7 +533,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 * @param callable $callback Receives the lock value and returns the result.
 	 * @return mixed The result of the callback, or a WP_Error when the lock could not be taken.
 	 *
-	 * @phpstan-param callable(string): T $callback
+	 * @phpstan-param callable(array{table:string, name:string, value:string}): T $callback
 	 * @phpstan-return T|WP_Error
 	 */
 	private function with_run_lock( int $user_id, callable $callback ) {
@@ -553,9 +553,9 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		// Without this the next request would get a 409 until the lock expires.
 		$state = (object) array( 'locked' => true );
 		register_shutdown_function(
-			function () use ( $state, $user_id, $lock ) {
+			function () use ( $state, $lock ) {
 				if ( $state->locked ) {
-					$this->release_run_lock( $user_id, $lock );
+					$this->release_run_lock( $lock );
 				}
 			}
 		);
@@ -563,7 +563,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		try {
 			return $callback( $lock );
 		} finally {
-			$this->release_run_lock( $user_id, $lock );
+			$this->release_run_lock( $lock );
 			$state->locked = false;
 		}
 	}
@@ -579,12 +579,16 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @param WP_REST_Request $request The incoming JSON request.
 	 * @param int             $user_id Current user ID.
-	 * @param string          $lock    Value acquire_run_lock() returned.
+	 * @param array           $lock    Lock acquire_run_lock() returned.
 	 * @return array|WP_Error
+	 *
+	 * @phpstan-param array{table:string, name:string, value:string} $lock
 	 */
-	private function handle_run_locked( WP_REST_Request $request, int $user_id, string $lock ) {
+	private function handle_run_locked( WP_REST_Request $request, int $user_id, array $lock ) {
+		// The session is written again as soon as it is loaded, so it cannot expire before this
+		// chunk is recorded, and the progress checked below is the stored one, not an older copy.
 		$session = ImportSession::load( $user_id, (string) $request->get_param( 'token' ) );
-		if ( ! $session instanceof ImportSession ) {
+		if ( ! $session instanceof ImportSession || ! $session->keep_alive() ) {
 			return $this->token_invalid_error();
 		}
 
@@ -602,9 +606,10 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		}
 
 		if ( $this->staged_file_changed( $session ) ) {
-			// The session's scheduled cleanup goes with it, so the file is removed here.
-			ImportSession::delete_staged_file( $session->file(), $session->attachment_id() );
+			// The session's scheduled cleanup goes with it, so the file is removed here. A file
+			// that cannot be deleted now gets a cleanup scheduled again.
 			$session->delete();
+			$session->release_staged_file();
 			return new WP_Error(
 				'woocommerce_fulfillments_import_file_changed',
 				__( 'The uploaded CSV file was changed or removed. Please upload it again.', 'woocommerce' ),
@@ -617,11 +622,6 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			return $frozen;
 		}
 
-		// Nothing is written yet, so a session that expired since it was loaded ends here.
-		if ( ! $session->keep_alive() ) {
-			return $this->token_invalid_error();
-		}
-
 		$chunk = $this->import_next_chunk( $session, (int) $request->get_param( 'limit' ) );
 		if ( $chunk instanceof WP_Error ) {
 			return $chunk;
@@ -630,7 +630,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		// Only a chunk that outlived the lock gets here without it. The request that took
 		// the lock over is importing the same rows and records them, so this one must not.
 		// The rows of this chunk are written, so the caller is not told it can simply resend.
-		if ( ! $this->holds_run_lock( $user_id, $lock ) ) {
+		if ( ! $this->holds_run_lock( $lock ) ) {
 			wc_get_logger()->warning(
 				sprintf( 'A fulfillments import chunk of user %d ended without its lock, so its rows may have been imported twice.', $user_id ),
 				array( 'source' => 'fulfillments-importer' )
@@ -868,63 +868,81 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	/**
 	 * Lock the import of a user with an option row, as WC_Install::create_lock() does, taking over an expired lock.
 	 *
+	 * The lock remembers the options table it was taken in. A callback that runs during the
+	 * import can leave another site switched in, and the check and the release must still
+	 * reach the row of the site that holds the lock.
+	 *
 	 * @param int $user_id User ID.
-	 * @return string|false|null The lock value to release it with, null while another request holds the lock, or false on a database error.
+	 * @return array|false|null The lock to check and release, null while another request holds it, or false on a database error.
+	 *
+	 * @phpstan-return array{table:string, name:string, value:string}|false|null
 	 */
 	private function acquire_run_lock( int $user_id ) {
 		global $wpdb;
 
+		$table   = $wpdb->options;
 		$name    = self::RUN_LOCK_PREFIX . $user_id;
 		$expires = time() + self::RUN_LOCK_TTL;
 
+		// The table name in the lock queries is $wpdb->options as it was when the lock was taken.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		// INSERT IGNORE affects no rows while another request holds the lock, so contention is not logged as a DB error.
 		$locked = $wpdb->query(
-			$wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %d, 'no')", $name, $expires )
+			$wpdb->prepare( "INSERT IGNORE INTO {$table} (option_name, option_value, autoload) VALUES (%s, %d, 'no')", $name, $expires )
 		);
 		if ( 0 === $locked ) {
 			$locked = $wpdb->query(
-				$wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = %d WHERE option_name = %s AND option_value < %d", $expires, $name, time() )
+				$wpdb->prepare( "UPDATE {$table} SET option_value = %d WHERE option_name = %s AND option_value < %d", $expires, $name, time() )
 			);
 		}
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		if ( false === $locked ) {
 			return false;
 		}
+		if ( ! $locked ) {
+			return null;
+		}
 
-		return $locked ? (string) $expires : null;
+		return array(
+			'table' => $table,
+			'name'  => $name,
+			'value' => (string) $expires,
+		);
 	}
 
 	/**
-	 * Whether the lock row of the user still holds the value of this request.
+	 * Whether the lock row still holds the value of this request.
 	 *
 	 * A read that fails counts as a lost lock: the caller cannot confirm it is alone.
 	 *
-	 * @param int    $user_id User ID.
-	 * @param string $lock    Value acquire_run_lock() returned.
+	 * @param array $lock Lock acquire_run_lock() returned.
 	 * @return bool
+	 *
+	 * @phpstan-param array{table:string, name:string, value:string} $lock
 	 */
-	private function holds_run_lock( int $user_id, string $lock ): bool {
+	private function holds_run_lock( array $lock ): bool {
 		global $wpdb;
 
-		return $wpdb->get_var(
-			$wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", self::RUN_LOCK_PREFIX . $user_id )
-		) === $lock;
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table is $wpdb->options as it was when the lock was taken.
+		$value = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$lock['table']} WHERE option_name = %s", $lock['name'] ) );
+		return $value === $lock['value'];
 	}
 
 	/**
-	 * Release the lock of a user, unless another request took it over after it expired.
+	 * Release a lock, unless another request took it over after it expired.
 	 *
-	 * @param int    $user_id User ID.
-	 * @param string $lock    Value acquire_run_lock() returned.
+	 * @param array $lock Lock acquire_run_lock() returned.
+	 *
+	 * @phpstan-param array{table:string, name:string, value:string} $lock
 	 */
-	private function release_run_lock( int $user_id, string $lock ): void {
+	private function release_run_lock( array $lock ): void {
 		global $wpdb;
 
-		$released = $wpdb->query(
-			$wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", self::RUN_LOCK_PREFIX . $user_id, $lock )
-		);
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table is $wpdb->options as it was when the lock was taken.
+		$released = $wpdb->query( $wpdb->prepare( "DELETE FROM {$lock['table']} WHERE option_name = %s AND option_value = %s", $lock['name'], $lock['value'] ) );
 		if ( false === $released ) {
 			wc_get_logger()->warning(
-				sprintf( 'The fulfillments import lock of user %d could not be released and blocks that user until it expires.', $user_id ),
+				sprintf( 'The fulfillments import lock %s could not be released and blocks that user until it expires.', $lock['name'] ),
 				array( 'source' => 'fulfillments-importer' )
 			);
 		}

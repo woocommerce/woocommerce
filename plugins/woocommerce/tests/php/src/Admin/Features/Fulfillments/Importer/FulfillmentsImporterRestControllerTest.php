@@ -1744,17 +1744,22 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox handle_run imports nothing when the session expired after it was loaded.
+	 * @testdox handle_run imports nothing when the session expired right after it was loaded.
 	 */
 	public function test_run_imports_nothing_when_the_session_expired_after_it_was_loaded(): void {
 		list( $session, $order_ids ) = $this->make_run_session( 2 );
 		$this->run_chunk( $session->token(), 0, 1 );
-		// The upload directory is read during the staged-file check, after the session is loaded.
+		$transient = 'wc_fulfillment_import_' . get_current_user_id() . '_' . $session->token();
+		$expired   = false;
+		// The first read is the one that loads the session; the record is gone for the next one.
 		add_filter(
-			'upload_dir',
-			function ( $uploads ) use ( $session ) {
-				delete_transient( 'wc_fulfillment_import_' . get_current_user_id() . '_' . $session->token() );
-				return $uploads;
+			'transient_' . $transient,
+			function ( $value ) use ( &$expired, $transient ) {
+				if ( ! $expired ) {
+					$expired = true;
+					delete_transient( $transient );
+				}
+				return $value;
 			}
 		);
 
@@ -1762,6 +1767,93 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assert_run_error( 'woocommerce_fulfillments_import_token_invalid', 400, $response );
 		$this->assertCount( 0, $this->fulfillments_of( $order_ids[1] ), 'No row is written for a session that cannot record it' );
+	}
+
+	/**
+	 * @testdox handle_run checks the offset against the progress it imports from, not against a copy loaded earlier.
+	 */
+	public function test_run_does_not_import_from_progress_another_request_recorded(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 2 );
+		$transient                   = 'wc_fulfillment_import_' . get_current_user_id() . '_' . $session->token();
+		$recorded                    = false;
+		// While this request holds its copy, another one stores the settings and records the first row.
+		add_filter(
+			'transient_' . $transient,
+			function ( $value ) use ( &$recorded, $session ) {
+				if ( ! $recorded ) {
+					$recorded = true;
+					$other    = ImportSession::load( get_current_user_id(), $session->token() );
+					$other->freeze_run_settings( array_values( self::RUN_MAPPING ), false, true );
+					$other->record_chunk(
+						0,
+						array(
+							'consumed'    => 1,
+							'byte_offset' => 60,
+							'rows'        => array(
+								array(
+									'row'    => 2,
+									'status' => 'created',
+								),
+							),
+						)
+					);
+				}
+				return $value;
+			}
+		);
+
+		$response = $this->run_chunk( $session->token(), 0, 1 );
+
+		$this->assertIsArray( $response, 'The offset is the one of the chunk the other request recorded, so its record answers' );
+		$this->assertSame( 1, $response['processed'] );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[0] ), 'This request imports nothing for an offset that is already recorded' );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[1] ), 'This request does not import the next row under the old offset' );
+	}
+
+	/**
+	 * @testdox handle_run keeps a cleanup scheduled for a changed staged file it could not delete.
+	 */
+	public function test_run_keeps_a_cleanup_for_a_changed_file_it_could_not_delete(): void {
+		$file    = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n1,CHG-1,ups\n" );
+		$session = $this->make_session( $file );
+		touch( $file, $session->file_mtime() + 10 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Test fixture write.
+		// An empty path from this filter makes wp_delete_file() leave the file in place.
+		add_filter( 'wp_delete_file', '__return_empty_string' );
+
+		$response = $this->run_chunk( $session->token(), 0 );
+		// Removed before tearDown() deletes the fixture through the same function.
+		remove_filter( 'wp_delete_file', '__return_empty_string' );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_file_changed', 409, $response );
+		$this->assertNull( ImportSession::load( get_current_user_id(), $session->token() ), 'The session is ended either way' );
+		$this->assertFileExists( $file );
+		$this->assertIsInt(
+			as_next_scheduled_action( ImportSession::CLEANUP_HOOK, array( get_current_user_id(), $session->token(), $file, 0 ), 'woocommerce-fulfillments-importer' ),
+			'A cleanup stays scheduled for the file that is left'
+		);
+	}
+
+	/**
+	 * @testdox handle_run releases its lock in the options table it took it from, whatever a callback leaves behind.
+	 */
+	public function test_run_releases_the_lock_in_the_table_it_was_taken_from(): void {
+		global $wpdb;
+		list( $session, ) = $this->make_run_session( 1 );
+		$options_table    = $wpdb->options;
+		// A callback that switched to another site and did not switch back leaves another options table.
+		add_action(
+			'woocommerce_fulfillments_csv_import_completed',
+			function () use ( $wpdb ) {
+				$wpdb->options = $wpdb->prefix . 'options_of_another_site';
+			}
+		);
+		$suppressed = $wpdb->suppress_errors( true );
+
+		$this->run_chunk( $session->token(), 0 );
+
+		$wpdb->options = $options_table;
+		$wpdb->suppress_errors( $suppressed );
+		$this->assertNull( $this->run_lock_value(), 'The lock is released on the site that holds it' );
 	}
 
 	/**

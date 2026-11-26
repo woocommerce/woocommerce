@@ -907,6 +907,15 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $session->keep_alive() );
 		$this->assertGreaterThanOrEqual( time() + HOUR_IN_SECONDS - MINUTE_IN_SECONDS, (int) get_option( $timeout_option ), 'The session has a full hour again' );
 
+		update_option( $timeout_option, time() + 5 );
+		$keep_old_timeout = function ( $value, $old ) {
+			unset( $value );
+			return $old;
+		};
+		add_filter( 'pre_update_option_' . $timeout_option, $keep_old_timeout, 10, 2 );
+		$this->assertFalse( $session->keep_alive(), 'A lifetime that was not renewed is reported' );
+		remove_filter( 'pre_update_option_' . $timeout_option, $keep_old_timeout, 10 );
+
 		$copy = ImportSession::load( 98, $session->token() );
 		$session->delete();
 		$this->assertFalse( $copy->keep_alive(), 'A session that is gone is refused' );

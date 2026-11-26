@@ -2060,6 +2060,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $imports ? null : 'unexpected_eof', $chunk['error']['code'] ?? null );
 		$this->assertCount( $imports ? 1 : 0, $this->fulfillments_of( $first ), 'A chunk that ended early writes none of its rows' );
+		$this->assertCount( $imports ? 1 : 0, $this->fulfillments_of( $second ), 'Its last row is not written either' );
 	}
 
 	/**

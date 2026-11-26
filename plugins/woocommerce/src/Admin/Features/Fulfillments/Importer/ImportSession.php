@@ -846,19 +846,25 @@ final class ImportSession {
 	 * Write the stored session again so it does not expire while a chunk is imported.
 	 *
 	 * A session expires an hour after its last write. A chunk that starts just before
-	 * that would write its rows and then find no session to record them on.
+	 * that would write its rows and then find no session to record them on. The stored
+	 * payload replaces this copy, so the caller checks the progress after this call.
 	 *
 	 * @since 11.5.0
 	 *
-	 * @return bool False when the session is gone or could not be stored.
+	 * @return bool False when the session is gone, could not be stored, or did not get its lifetime renewed.
 	 */
 	public function keep_alive(): bool {
-		$stored = get_transient( self::PREFIX . $this->user_id . '_' . $this->token );
+		$payload_key = self::PREFIX . $this->user_id . '_' . $this->token;
+		$stored      = get_transient( $payload_key );
 		if ( ! is_array( $stored ) ) {
 			return false;
 		}
 		$this->data = $stored;
-		return $this->persist();
+		if ( ! $this->persist() ) {
+			return false;
+		}
+		// set_transient() does not report a failed timeout write, so the lifetime is read back.
+		return self::remaining_ttl( $payload_key ) > self::TTL - MINUTE_IN_SECONDS;
 	}
 
 	/**
