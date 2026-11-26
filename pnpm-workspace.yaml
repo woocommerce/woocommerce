@@ -83,8 +83,7 @@ catalogs:
         '@wordpress/browserslist-config': next
         '@wordpress/build': 0.24.0
         '@wordpress/env': 12.0.0
-        # Keep the Blocks preset to preserve its console assertions.
-        '@wordpress/jest-preset-default': 12.43.1-next.v.202604091042.0
+        '@wordpress/jest-preset-default': 14.2.0
         '@wordpress/prettier-config': 4.56.0
         '@wordpress/postcss-plugins-preset': 5.56.0
         '@wordpress/scripts': 37.2.0

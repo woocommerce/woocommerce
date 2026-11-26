@@ -1,4 +1,4 @@
-const preset = require( '@wordpress/jest-preset-default/jest-preset.js' );
+const preset = require( '@wordpress/jest-preset-default' );
 
 module.exports = {
 	...preset,

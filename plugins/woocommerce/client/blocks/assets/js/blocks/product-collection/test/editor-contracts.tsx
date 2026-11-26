@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import {
 	createBlock,
 	getCategories,
@@ -418,8 +417,7 @@ describe( 'generic archive previews', () => {
 } );
 
 describe( 'default catalog order control', () => {
-	it( 'writes the selected default order to the site entity', async () => {
-		const user = userEvent.setup();
+	it( 'writes the selected default order to the site entity', () => {
 		const coreSelectors = select( coreStore );
 		const coreActions = dispatch( coreStore );
 		const getEditedEntityRecord = jest
@@ -438,11 +436,11 @@ describe( 'default catalog order control', () => {
 					trackInteraction={ trackInteraction }
 				/>
 			);
-			await user.selectOptions(
+			fireEvent.change(
 				screen.getByRole( 'combobox', {
 					name: 'Default sort by',
 				} ),
-				'price-desc'
+				{ target: { value: 'price-desc' } }
 			);
 
 			expect( editEntityRecord ).toHaveBeenCalledWith(

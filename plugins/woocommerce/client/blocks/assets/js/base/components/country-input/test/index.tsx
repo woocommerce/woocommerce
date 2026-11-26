@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from '@wordpress/element';
 import { allSettings } from '@woocommerce/settings';
 
@@ -122,7 +121,7 @@ describe( 'CountryInput', () => {
 		expect( screen.getByLabelText( 'Country/Region' ) ).toHaveValue( 'US' );
 	} );
 
-	it( 'lets the user pick the only allowed country when the saved one is unavailable', async () => {
+	it( 'lets the user pick the only allowed country when the saved one is unavailable', () => {
 		const onChange = jest.fn();
 		const ControlledCountryInput = () => {
 			const [ country, setCountry ] = useState( 'GB' );
@@ -143,7 +142,7 @@ describe( 'CountryInput', () => {
 		const select = screen.getByLabelText( 'Country/Region' );
 		expect( select ).toHaveValue( 'GB' );
 
-		await userEvent.selectOptions( select, 'US' );
+		fireEvent.change( select, { target: { value: 'US' } } );
 
 		expect( onChange ).toHaveBeenCalledTimes( 1 );
 		expect( onChange ).toHaveBeenCalledWith( 'US' );

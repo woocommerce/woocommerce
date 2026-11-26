@@ -579,6 +579,10 @@ function makeKeyedLine( overrides: Partial< CartItem > = {} ): CartItem {
 }
 
 describe( 'WooCommerce Cart Interactivity API Store', () => {
+	beforeEach( () => {
+		( getConfig as jest.Mock ).mockReturnValue( {} );
+	} );
+
 	afterEach( () => {
 		jest.clearAllMocks();
 		// `getConfig` may have been given a per-test `mockReturnValue` (e.g. to
@@ -2440,8 +2444,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			);
 			await flushMicrotasks();
 
-			( speak as jest.Mock ).mockImplementation( () => {
-				throw new Error( 'a11y unavailable' );
+			const announcementError = new Error( 'a11y unavailable' );
+			( speak as jest.Mock ).mockImplementationOnce( () => {
+				throw announcementError;
 			} );
 
 			const { events, cleanup } = captureSyncEvents();
@@ -2457,6 +2462,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( outcome ).toEqual( { success: true } );
 			expect( events ).toHaveLength( 1 );
 			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 2 );
+			expect( console ).toHaveErroredWith( announcementError );
 
 			cleanup();
 		} );
