@@ -66,6 +66,12 @@
 .wc-block-product-categories__button {
 	display: flex;
 
+	// Double-class for specificity, so it wins default button styles.
+	&.wc-block-product-categories__button {
+		align-items: center;
+		padding: 0 0.5em;
+	}
+
 	svg {
 		fill: currentColor;
 		outline: none;
