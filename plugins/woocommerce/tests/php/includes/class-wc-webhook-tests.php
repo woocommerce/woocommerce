@@ -1644,19 +1644,34 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A webhook on a hook that passes $staged does not refuse a staged change, and processes the hook once the order is saved.
+	 * @testdox A webhook on a hook that passes $staged does not refuse a staged change, and processes the hook only after a save writes the order.
+	 * @testWith ["woocommerce_order_before_calculate_totals"]
+	 *           ["woocommerce_order_after_calculate_totals"]
+	 *
+	 * @param string $hook Hook of the webhook topic.
 	 */
-	public function test_a_webhook_on_a_staged_hook_does_not_refuse_a_staged_change(): void {
-		$sut = $this->create_active_webhook( 'action.woocommerce_order_before_calculate_totals' );
+	public function test_a_webhook_on_a_staged_hook_does_not_refuse_a_staged_change( string $hook ): void {
+		$sut = $this->create_active_webhook( 'action.' . $hook );
 		$sut->save();
 		$sut->enqueue();
 		$order     = WC_Helper_Order::create_order();
 		$processed = new ReflectionProperty( WC_Webhook::class, 'processed' );
 		$processed->setAccessible( true );
+		$fail_write = true;
+		add_action(
+			'woocommerce_before_order_object_save',
+			static function () use ( &$fail_write ) {
+				if ( $fail_write ) {
+					$fail_write = false;
+					throw new Exception( 'The write failed.' );
+				}
+			}
+		);
 
 		$order->mark_staged();
 		$order->stage_totals();
-		$this->assertSame( array(), $processed->getValue( $sut ), 'The webhook waits for the save' );
+		$order->save();
+		$this->assertSame( array(), $processed->getValue( $sut ), 'The webhook waits for a save that writes the order' );
 
 		$order->save();
 		$this->assertSame( array( true ), $processed->getValue( $sut ) );

@@ -60,6 +60,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	private $deferred_actions = array();
 
 	/**
+	 * Whether save() runs the pre-write callbacks of an order that was marked as staged. save() clears the mark
+	 * before it runs them, so defer_to_save_when_staged() reads this too.
+	 *
+	 * @var bool
+	 */
+	private $saving_staged = false;
+
+	/**
 	 * Saving methods and their stage methods, in the order the stage methods call each other. For example,
 	 * stage_recalculated_coupons() calls stage_totals().
 	 *
@@ -353,7 +361,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$deferred_actions = $this->take_deferred_actions();
 		try {
+			$this->saving_staged = $staged_unsaved;
 			$this->run_deferred_actions( $deferred_actions, false );
+			$this->saving_staged = false;
+			$deferred_actions    = array_merge( $deferred_actions, $this->take_after_save_actions() );
 
 			try {
 				/**
@@ -403,6 +414,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				);
 			}
 		} finally {
+			$this->saving_staged = false;
 			if ( ! $persisted ) {
 				$this->staged_unsaved = $staged_unsaved;
 			}
@@ -464,7 +476,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Leave a callback to run after the next save() writes the order, when the order is marked as staged. Otherwise
+	 * Leave a callback to run after the next save() writes the order, when the order is marked as staged. A callback
+	 * left while save() runs the pre-write callbacks of a staged order runs after the write of that save. Otherwise
 	 * leave nothing and return false, so the caller runs the callback itself. A change that is refused is never
 	 * saved, so its callback never runs.
 	 *
@@ -475,7 +488,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return bool Whether the callback waits for the save.
 	 */
 	public function defer_to_save_when_staged( string $key, callable $callback ): bool {
-		if ( ! $this->is_staged_unsaved() ) {
+		if ( ! $this->is_staged_unsaved() && ! $this->saving_staged ) {
 			return false;
 		}
 
