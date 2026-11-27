@@ -343,6 +343,45 @@ class MiniCart extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for the displayStyle attribute.
+	 *
+	 * @return array<string, array{0: string, 1: bool, 2: bool}>
+	 */
+	public function provider_display_style(): array {
+		return array(
+			'default (no attribute)' => array( '', true, false ),
+			'icon_only'              => array( ',"displayStyle":"icon_only"', true, false ),
+			'text_only'              => array( ',"displayStyle":"text_only"', false, true ),
+			'icon_and_text'          => array( ',"displayStyle":"icon_and_text"', true, true ),
+			'invalid value'          => array( ',"displayStyle":"foo"', true, false ),
+		);
+	}
+
+	/**
+	 * @testdox Should render the icon and the "Cart" text label according to the displayStyle attribute.
+	 *
+	 * @dataProvider provider_display_style
+	 *
+	 * @param string $attrs          Serialized block attributes.
+	 * @param bool   $expects_icon   Whether the icon should be rendered.
+	 * @param bool   $expects_label  Whether the text label should be rendered.
+	 */
+	public function test_display_style_controls_icon_and_label( string $attrs, bool $expects_icon, bool $expects_label ): void {
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"always"' . $attrs . '} /-->' );
+		$output = render_block( $block[0] );
+
+		$icon_processor = new \WP_HTML_Tag_Processor( $output );
+		$this->assertSame( $expects_icon, $icon_processor->next_tag( array( 'class_name' => 'wc-block-mini-cart__quantity-badge' ) ), 'Icon visibility should match the display style.' );
+
+		$label_processor = new \WP_HTML_Tag_Processor( $output );
+		$this->assertSame( $expects_label, $label_processor->next_tag( array( 'class_name' => 'wc-block-mini-cart__label' ) ), 'Text label visibility should match the display style.' );
+
+		$button_processor = new \WP_HTML_Tag_Processor( $output );
+		$button_processor->next_tag( array( 'class_name' => 'wc-block-mini-cart__button' ) );
+		$this->assertSame( 'state.buttonAriaLabel', $button_processor->get_attribute( 'data-wp-bind--aria-label' ), 'The button should keep its accessible name.' );
+	}
+
+	/**
 	 * Test that mini-cart does not render for logged-out users when coming soon mode is enabled for store pages only.
 	 *
 	 * @return void
