@@ -285,8 +285,8 @@ class ProductPageIntegration {
 	/**
 	 * Get the logged-in shopper's active sign-ups for products, keyed by product ID, when personalization is enabled.
 	 *
-	 * Like My Account, only sign-ups made while logged in count. A pending sign-up, or one made as a guest with the
-	 * same email, keeps the form: submitting it activates the sign-up or resends its verification e-mail.
+	 * Like My Account, only active sign-ups made while logged in count. Pending ones, and guest sign-ups with the
+	 * same email, keep the form.
 	 *
 	 * @param int[] $product_ids Product IDs.
 	 * @return array<int, Notification>
