@@ -5,7 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import {
 	__experimentalItemGroup as ItemGroup,
 	__experimentalItem as Item,
-	__experimentalNavigatorButton as NavigatorButton,
+	Navigator,
 	FlexItem,
 } from '@wordpress/components';
 import { Stack, Text } from '@wordpress/ui';
@@ -40,7 +40,7 @@ function ElementItem( { element, label }: { element: string; label: string } ) {
 
 	return (
 		<Item>
-			<NavigatorButton
+			<Navigator.Button
 				path={ `/typography/${ element }` }
 				aria-label={ navigationButtonLabel }
 				onClick={ () =>
@@ -74,7 +74,7 @@ function ElementItem( { element, label }: { element: string; label: string } ) {
 					</FlexItem>
 					<FlexItem>{ label }</FlexItem>
 				</Stack>
-			</NavigatorButton>
+			</Navigator.Button>
 		</Item>
 	);
 }

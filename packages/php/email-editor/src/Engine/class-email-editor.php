@@ -292,6 +292,7 @@ class Email_Editor {
 			'show_in_rest'           => true, // Important to enable Gutenberg editor.
 			'default_rendering_mode' => 'template-locked',
 			'publicly_queryable'     => true,  // required by the preview in new tab feature.
+			'randomable'             => false, // Keep emails out of the /random/ URL added in WordPress 7.2.
 		);
 	}
 

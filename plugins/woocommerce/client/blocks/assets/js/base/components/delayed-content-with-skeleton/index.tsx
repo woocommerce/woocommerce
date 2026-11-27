@@ -1,9 +1,17 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
+import { useLayoutEffect, useState } from '@wordpress/element';
 import { useReducedMotion } from '@wordpress/compose';
 import type { ReactNode } from 'react';
+
+// Long enough that a skeleton does not flash, short enough that it does not hold the page.
+const MIN_DISPLAY_TIME = 300;
+
+declare global {
+	// eslint-disable-next-line no-var
+	var wcBlocksSkeletonPhaseStart: number | undefined;
+}
 
 export interface DelayedContentWithSkeletonProps {
 	/**
@@ -20,50 +28,65 @@ export interface DelayedContentWithSkeletonProps {
 	 * The skeleton component to show while loading
 	 */
 	skeleton: ReactNode;
+
+	/**
+	 * Runs after the content shows, in place of the skeleton or on mount
+	 */
+	onShow?: () => void;
 }
 
 /**
- * Component that ensures skeleton children are displayed for a minimum duration
- * to prevent jarring quick flashes when content loads fast
+ * Whether to show a skeleton: while `isLoading`, and until `MIN_DISPLAY_TIME` after the loading phase started. The
+ * start is shared, so skeletons that start during a phase end with the others. It is on
+ * `globalThis` because each script bundle has its own copy of this module. With reduced motion there is no minimum.
+ */
+export const useDelayedSkeleton = ( isLoading: boolean ): boolean => {
+	const isReducedMotion = useReducedMotion();
+	const [ isHeld, setIsHeld ] = useState( false );
+
+	// A layout effect, so a skeleton whose minimum has passed ends in the same frame as its loading.
+	useLayoutEffect( () => {
+		const now = Date.now();
+		const phaseStart = globalThis.wcBlocksSkeletonPhaseStart ?? 0;
+		if ( isLoading ) {
+			if ( now - phaseStart >= MIN_DISPLAY_TIME ) {
+				globalThis.wcBlocksSkeletonPhaseStart = now;
+			}
+			setIsHeld( ! isReducedMotion );
+			return;
+		}
+		if ( isReducedMotion ) {
+			setIsHeld( false );
+			return;
+		}
+		const timer = setTimeout(
+			() => setIsHeld( false ),
+			Math.max( 0, phaseStart + MIN_DISPLAY_TIME - now )
+		);
+		return () => clearTimeout( timer );
+	}, [ isLoading, isReducedMotion ] );
+
+	return isLoading || isHeld;
+};
+
+/**
+ * Shows a skeleton while content loads, and for a short minimum time so that it does not flash.
  */
 export const DelayedContentWithSkeleton = ( {
 	children,
 	isLoading,
 	skeleton,
+	onShow,
 }: DelayedContentWithSkeletonProps ): JSX.Element => {
-	const disableMotion = useReducedMotion();
-	const [ showSkeleton, setShowSkeleton ] = useState( isLoading );
-	const [ startTime, setStartTime ] = useState< number | null >( null );
+	const showSkeleton = useDelayedSkeleton( isLoading );
 
-	useEffect( () => {
-		// If motion is disabled, just sync with isLoading state
-		if ( disableMotion ) {
-			setShowSkeleton( isLoading );
-			return;
+	useLayoutEffect( () => {
+		if ( ! showSkeleton ) {
+			onShow?.();
 		}
-
-		// For motion-enabled, use the delay logic
-		const MIN_DISPLAY_TIME = 2000;
-		let timer: ReturnType< typeof setTimeout >;
-
-		if ( isLoading ) {
-			setShowSkeleton( true );
-			setStartTime( Date.now() );
-		} else if ( startTime ) {
-			const elapsed = Date.now() - startTime;
-			const remainingTime = Math.max( 0, MIN_DISPLAY_TIME - elapsed );
-			timer = setTimeout( () => {
-				setShowSkeleton( false );
-				setStartTime( null );
-			}, remainingTime );
-		}
-
-		return () => {
-			if ( timer ) {
-				clearTimeout( timer );
-			}
-		};
-	}, [ isLoading, startTime, disableMotion ] );
+		// Only when the skeleton ends, not when the callback changes.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ showSkeleton ] );
 
 	return <>{ showSkeleton ? skeleton : children }</>;
 };

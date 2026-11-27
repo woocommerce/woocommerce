@@ -979,21 +979,21 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox find_cycle_history returns a window of cycles newest first.
+	 * @testdox find_cycles returns a window of cycles newest first.
 	 */
-	public function test_find_cycle_history_pages_newest_first(): void {
+	public function test_find_cycles_pages_newest_first(): void {
 		$id = $this->insert_released( $this->make_contract() );
 
 		for ( $n = 1; $n <= 3; $n++ ) {
 			$this->append_cycle_locked( $this->make_cycle( $id, $n, $n, sprintf( '2026-%02d-15 00:00:00', 6 + $n ), sprintf( '2026-%02d-15 00:00:00', 7 + $n ) ) );
 		}
 
-		$page = $this->sut->find_cycle_history( $id, Cycle::KIND_BILLING, 2, 0 );
+		$page = $this->sut->find_cycles( $id, Cycle::KIND_BILLING, 2, 0 );
 		$this->assertCount( 2, $page );
 		$this->assertSame( 3, $page[0]->get_sequence_no() );
 		$this->assertSame( 2, $page[1]->get_sequence_no() );
 
-		$next = $this->sut->find_cycle_history( $id, Cycle::KIND_BILLING, 2, 2 );
+		$next = $this->sut->find_cycles( $id, Cycle::KIND_BILLING, 2, 2 );
 		$this->assertCount( 1, $next );
 		$this->assertSame( 1, $next[0]->get_sequence_no() );
 	}
@@ -1429,7 +1429,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			$this->assertStringContainsString( 'longer than the column allows', $e->getMessage() );
 		}
 		$this->assertNull( $over_long->get_id(), 'Nothing is inserted.' );
-		$this->assertSame( array(), $this->sut->find_cycle_history( $id, str_repeat( 'k', 21 ) ) );
+		$this->assertSame( array(), $this->sut->find_cycles( $id, str_repeat( 'k', 21 ) ) );
 
 		$fits = $this->make_cycle_of_kind( $id, str_repeat( 'k', 20 ) );
 		$this->append_cycle_locked( $fits );
@@ -1620,13 +1620,13 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @param int $contract_id Contract id.
 	 */
 	private function find_newest_cycle( int $contract_id ): ?Cycle {
-		$history = $this->sut->find_cycle_history( $contract_id, Cycle::KIND_BILLING, 1 );
+		$cycles = $this->sut->find_cycles( $contract_id, Cycle::KIND_BILLING, 1 );
 
-		return $history[0] ?? null;
+		return $cycles[0] ?? null;
 	}
 
 	/**
-	 * Read a billing cycle by id through its chain history.
+	 * Read a billing cycle by id through its chain.
 	 *
 	 * @param int $cycle_id Cycle id.
 	 */
@@ -1637,7 +1637,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$contract_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT contract_id FROM {$table} WHERE id = %d", $cycle_id ) );
 
-		foreach ( $this->sut->find_cycle_history( $contract_id ) as $cycle ) {
+		foreach ( $this->sut->find_cycles( $contract_id ) as $cycle ) {
 			if ( $cycle->get_id() === $cycle_id ) {
 				return $cycle;
 			}
@@ -1688,9 +1688,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( 'legacy-x', $head->get_status()->get_value() );
 
-		$history = $this->sut->find_cycle_history( $id );
-		$this->assertCount( 1, $history );
-		$this->assertSame( 'legacy-x', $history[0]->get_status()->get_value() );
+		$cycles = $this->sut->find_cycles( $id );
+		$this->assertCount( 1, $cycles );
+		$this->assertSame( 'legacy-x', $cycles[0]->get_status()->get_value() );
 	}
 
 	/**
@@ -2013,9 +2013,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox find_cycle_history throws on a failed read instead of returning an empty chain.
+	 * @testdox find_cycles throws on a failed read instead of returning an empty chain.
 	 */
-	public function test_find_cycle_history_throws_on_a_failed_read(): void {
+	public function test_find_cycles_throws_on_a_failed_read(): void {
 		$id = $this->insert_released( $this->make_contract() );
 		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
 
@@ -2024,7 +2024,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->expectException( \RuntimeException::class );
 		$this->expectExceptionMessage( "Failed to read the cycles of contract {$id}" );
 
-		$this->sut->find_cycle_history( $id );
+		$this->sut->find_cycles( $id );
 	}
 
 	/**
@@ -2118,7 +2118,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->expectException( \RuntimeException::class );
 		$this->expectExceptionMessage( "Failed to read snapshot {$snapshot_ids[ $skip ]}:" );
 
-		$this->sut->find_cycle_history( $id );
+		$this->sut->find_cycles( $id );
 	}
 
 	/**
@@ -2159,10 +2159,10 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->append_cycle_locked( $this->make_cycle( $id, 1, null, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
 		$this->append_cycle_locked( $this->make_cycle( $id, 2, null, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
 
-		$history = $this->sut->find_cycle_history( $id );
-		$this->assertCount( 2, $history );
-		$this->assertNull( $history[0]->get_count() );
-		$this->assertNull( $history[1]->get_count() );
+		$cycles = $this->sut->find_cycles( $id );
+		$this->assertCount( 2, $cycles );
+		$this->assertNull( $cycles[0]->get_count() );
+		$this->assertNull( $cycles[1]->get_count() );
 	}
 
 	/**
@@ -2419,7 +2419,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'cancel', $e->get_operation() );
 		}
-		$this->assertCount( 1, $this->sut->find_cycle_history( $id ), 'Nothing is appended.' );
+		$this->assertCount( 1, $this->sut->find_cycles( $id ), 'Nothing is appended.' );
 
 		try {
 			$this->sut->transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::BILLED, array(), $lock );
@@ -2441,7 +2441,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->sut->append_cycle( $cycle, $lock );
 
 		$this->assertNotNull( $cycle->get_id() );
-		$this->assertCount( 1, $this->sut->find_cycle_history( $id ) );
+		$this->assertCount( 1, $this->sut->find_cycles( $id ) );
 	}
 
 	/**

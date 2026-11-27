@@ -3,7 +3,12 @@
  */
 import clsx from 'clsx';
 import { withInstanceId } from '@wordpress/compose';
-import { useMemo } from '@wordpress/element';
+import { useLayoutEffect, useMemo, useRef } from '@wordpress/element';
+import {
+	animateCollapse,
+	collapseCopy,
+	removeCollapseCopies,
+} from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -42,11 +47,27 @@ const RadioControlAccordion = ( {
 		return options.findIndex( ( option ) => option.value === selected );
 	}, [ options, selected ] );
 
+	// After a click or tap, the new content grows in while the space of the old content collapses. The old content
+	// unmounts at once, so its payment handlers stop, and only an empty box takes its place: gateway scripts could
+	// find a copy of their fields. Key presses and changes in code apply immediately.
+	const rootRef = useRef< HTMLDivElement >( null );
+	const contentRef = useRef< HTMLDivElement >( null );
+	const animateRef = useRef( false );
+	useLayoutEffect( () => {
+		// Space that an earlier click still collapses, in any option, goes too.
+		if ( ! animateRef.current ) {
+			removeCollapseCopies( rootRef.current );
+		}
+		animateCollapse( contentRef.current, true, animateRef.current );
+		animateRef.current = false;
+	}, [ selected ] );
+
 	if ( ! options.length ) {
 		return null;
 	}
 	return (
 		<div
+			ref={ rootRef }
 			className={ clsx(
 				'wc-block-components-radio-control',
 				{
@@ -82,6 +103,15 @@ const RadioControlAccordion = ( {
 							checked={ checked }
 							option={ option }
 							onChange={ ( value ) => {
+								// Arrow keys leave focus visible on the radio. A click does not.
+								animateRef.current = ! document
+									.getElementById( `${ name }-${ value }` )
+									?.matches( ':focus-visible' );
+								if ( animateRef.current ) {
+									collapseCopy( contentRef.current, {
+										empty: true,
+									} );
+								}
 								onChange( value );
 								if ( typeof option.onChange === 'function' ) {
 									option.onChange( value );
@@ -90,6 +120,7 @@ const RadioControlAccordion = ( {
 						/>
 						{ hasOptionContent && checked && (
 							<div
+								ref={ contentRef }
 								id={ `${ name }-${ option.value }__content` }
 								className={ clsx(
 									'wc-block-components-radio-control-accordion-content',

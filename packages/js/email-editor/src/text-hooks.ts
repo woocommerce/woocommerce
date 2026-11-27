@@ -22,6 +22,15 @@ export const initTextHooks = (): void => {
 					__i18n_text_domain__
 				),
 			},
+		// Shown by "Edit" in core's Template panel from WordPress 7.2.
+		'Editing template. Changes made here affect all posts and pages that use the template.':
+			{
+				domain: 'default',
+				replacementText: __(
+					'Editing template. Changes made here affect all emails that use the template.',
+					__i18n_text_domain__
+				),
+			},
 	};
 
 	addFilterForEmail(

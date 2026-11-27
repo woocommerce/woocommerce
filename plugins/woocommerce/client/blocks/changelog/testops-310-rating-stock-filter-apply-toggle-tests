@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Add unit tests for the Filter by Rating and Filter by Stock Apply button toggles; tests only, no production change.

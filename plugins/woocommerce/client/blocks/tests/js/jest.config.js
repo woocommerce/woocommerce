@@ -134,7 +134,8 @@ module.exports = {
 		'<rootDir>/tests/js/config/msw-setup.js',
 	],
 	testPathIgnorePatterns: [
-		'<rootDir>/bin/',
+		// The tests of the stylelint plugins run with the others.
+		'<rootDir>/bin/(?!stylelint-plugins/test/)',
 		'<rootDir>/build/',
 		'<rootDir>/docs/',
 		'<rootDir>/node_modules/',

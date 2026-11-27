@@ -4,6 +4,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import React, { createElement } from '@wordpress/element';
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 
 /**
  * Internal dependencies
@@ -16,28 +17,20 @@ const ThrowError = () => {
 };
 
 describe( 'ErrorBoundary', () => {
+	const reloadMock = mockBrowserLocation( 'reload' );
+
 	function onError( event: Event ) {
 		// Note: this will swallow reports about unhandled errors!
 		// Use with extreme caution.
 		event.preventDefault();
 	}
 
-	// Mock window.location.reload by using a global variable
-	const originalLocation = window.location;
-
 	beforeAll( () => {
 		// Opt Out of the jsdom error messages
 		window.addEventListener( 'error', onError );
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore - Ignore TS error for deleting window.location
-		delete window.location;
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore - Ignore TS error for assigning window.location
-		window.location = { reload: jest.fn() };
 	} );
 
 	afterAll( () => {
-		window.location = originalLocation;
 		window.removeEventListener( 'error', onError );
 	} );
 
@@ -64,12 +57,6 @@ describe( 'ErrorBoundary', () => {
 	} );
 
 	it( 'refreshes the page when Reload Page button is clicked', () => {
-		const reloadMock = jest.fn();
-		Object.defineProperty( window.location, 'reload', {
-			configurable: true,
-			value: reloadMock,
-		} );
-
 		render(
 			<ErrorBoundary>
 				<ThrowError />

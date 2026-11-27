@@ -467,7 +467,8 @@ class WC_Checkout {
 			return $order_id;
 		}
 
-		$order = null;
+		$order          = null;
+		$is_order_saved = false;
 
 		try {
 			$order_id = absint( WC()->session->get( 'order_awaiting_payment' ) );
@@ -585,7 +586,8 @@ class WC_Checkout {
 			do_action( 'woocommerce_checkout_create_order', $order, $data );
 
 			// Save the order.
-			$order_id = $order->save();
+			$order_id       = $order->save();
+			$is_order_saved = true;
 
 			// This acquires the lock for a new order, or confirms ownership of a resumed order.
 			if ( ! OrderController::lock_order( $order_id ) ) {
@@ -629,7 +631,9 @@ class WC_Checkout {
 			return $order_id;
 		} catch ( Exception $e ) {
 			if ( $order instanceof WC_Order ) {
-				wc_release_coupons_for_order( $order );
+				// Until it is saved, the order holds this attempt's changes, such as a resumed order's staged item removals.
+				// Saving its meta would write them on HPOS, so release the coupon holds without saving the order.
+				wc_release_coupons_for_order( $order, $is_order_saved );
 				/**
 				 * Action hook fired when an order is discarded due to Exception.
 				 *

@@ -22,8 +22,15 @@ import { DeclaredCard, SectionCard } from './components/section-card';
  * merchant question with the checks from the last scan, and what the store shares with agents.
  */
 export default function SalesReadiness() {
-	const { view, error, reload, running, runCheck } =
-		useReadinessView( 'page' );
+	const {
+		view,
+		error,
+		reload,
+		running,
+		runCheck,
+		setDailyChecks,
+		savingDailyChecks,
+	} = useReadinessView( 'page' );
 	const [ downloadError, setDownloadError ] = useState( '' );
 
 	return (
@@ -60,6 +67,8 @@ export default function SalesReadiness() {
 							running={ running }
 							onRun={ runCheck }
 							onDownloadError={ setDownloadError }
+							onDailyChecks={ setDailyChecks }
+							savingDailyChecks={ savingDailyChecks }
 						/>
 						{ view.coming_soon && (
 							<ComingSoonNotice

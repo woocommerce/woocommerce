@@ -162,3 +162,19 @@ export async function ensureEmailEditorSettingsPanelIsOpened( page: Page ) {
 			.click();
 	}
 }
+
+/**
+ * Waits until the editor has finished saving and nothing is left to save.
+ *
+ * @param page The Playwright page.
+ */
+export async function waitForEditorSaved( page: Page ) {
+	await expect
+		.poll( () =>
+			page.evaluate( () => {
+				const editor = window.wp.data.select( 'core/editor' );
+				return ! editor.isSavingPost() && ! editor.isEditedPostDirty();
+			} )
+		)
+		.toBe( true );
+}

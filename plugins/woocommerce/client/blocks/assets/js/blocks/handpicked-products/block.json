@@ -78,6 +78,11 @@
 			"default": false
 		}
 	},
+	"editorStyle": "wc-blocks-editor-style",
+	"style": [
+		"wc-blocks-style",
+		"wc-blocks-style-all-products"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

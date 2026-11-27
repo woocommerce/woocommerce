@@ -10,6 +10,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests/src/util/index.js';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 /**
@@ -20,6 +21,8 @@ import {
 	normalizeEmailTypePayload,
 	type EmailType,
 } from '../settings-email-listing-slotfill';
+
+const setHref = mockBrowserLocation( 'href' );
 
 const recordEventMock = jest.fn();
 
@@ -321,29 +324,11 @@ describe( 'EditTemplateButton — lazy post creation', () => {
 		'../settings-email-listing-data'
 	) as { recreateEmailPostRequest: jest.Mock };
 
-	const originalLocation = window.location;
-
-	beforeAll( () => {
-		// jsdom throws on real navigation; replace location with a writable stub.
-		Object.defineProperty( window, 'location', {
-			writable: true,
-			value: { ...originalLocation, href: '' },
-		} );
-	} );
-
-	afterAll( () => {
-		Object.defineProperty( window, 'location', {
-			writable: true,
-			value: originalLocation,
-		} );
-	} );
-
 	beforeEach( () => {
 		recordEventMock.mockClear();
 		recreateEmailPostRequest.mockReset();
 		createErrorNoticeMock.mockClear();
 		window.sessionStorage.clear();
-		window.location.href = '';
 	} );
 
 	it( 'links directly to the template editor when editTemplateUrl is provided', () => {
@@ -394,7 +379,7 @@ describe( 'EditTemplateButton — lazy post creation', () => {
 		);
 
 		await waitFor( () => {
-			expect( window.location.href ).toBe(
+			expect( setHref ).toHaveBeenCalledWith(
 				`https://example.com/wp-admin/post.php?post=42&action=edit&template=${ encodeURIComponent(
 					TEMPLATE_ID
 				) }`
@@ -421,7 +406,7 @@ describe( 'EditTemplateButton — lazy post creation', () => {
 		await waitFor( () => {
 			expect( createErrorNoticeMock ).toHaveBeenCalled();
 		} );
-		expect( window.location.href ).toBe( '' );
+		expect( setHref ).not.toHaveBeenCalled();
 		expect(
 			screen.getByRole( 'button', { name: 'Edit template' } )
 		).toBeEnabled();

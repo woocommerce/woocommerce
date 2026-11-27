@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve custom topic webhooks: stricter topic checks, cleaner payloads, and no self-triggered deliveries.

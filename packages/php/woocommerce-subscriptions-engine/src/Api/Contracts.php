@@ -12,9 +12,11 @@
  *
  * One lock per contract ({@see self::lock()}): every write runs under a lock, the caller's or,
  * for an update or meta write made without one, an internal one the engine takes for that call.
- * Every contract write is owner-scoped where its lock is taken, and no write path skips the lock.
- * Cycle writes require the caller's lock. A write is refused with {@see ContractLockedException}
- * while another operation holds the lock.
+ * Every contract write is owner-scoped where its lock is taken. Cycle writes and the history
+ * delete require the caller's lock. A write is refused with {@see ContractLockedException} while
+ * another operation holds the lock. One exception: a history entry
+ * ({@see self::add_history_entry()}) is fenced by the caller's lock when one is passed, and is
+ * otherwise a plain owner-scoped insert that no held lock refuses.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */
@@ -26,8 +28,10 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\HistoryEntryView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\HistoryEntry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
@@ -136,6 +140,39 @@ final class Contracts {
 	);
 
 	/**
+	 * Keys accepted by {@see self::add_history_entry()}, as a key map: the `extension_slug` that
+	 * scopes the write (not an entry field) and the entry fields.
+	 *
+	 * @var array<string, true>
+	 */
+	private const HISTORY_ENTRY_KEYS = array(
+		'extension_slug' => true,
+		'type'           => true,
+		'cycle_id'       => true,
+		'payload'        => true,
+		'creation_key'   => true,
+	);
+
+	/**
+	 * Keys accepted by {@see self::get_history()}, as a key map.
+	 *
+	 * @var array<string, true>
+	 */
+	private const HISTORY_READ_KEYS = array(
+		'limit'  => true,
+		'offset' => true,
+	);
+
+	/**
+	 * Keys accepted by {@see self::delete_history()}, as a key map.
+	 *
+	 * @var array<string, true>
+	 */
+	private const HISTORY_DELETE_KEYS = array(
+		'extension_slug' => true,
+	);
+
+	/**
 	 * Keys accepted by {@see self::list_for_customer()}, as a key map.
 	 *
 	 * @var array<string, true>
@@ -144,6 +181,21 @@ final class Contracts {
 		'status'         => true,
 		'extension_slug' => true,
 	);
+
+	/**
+	 * Keys accepted by {@see self::list_for_address_email()}, as a key map.
+	 *
+	 * @var array<string, true>
+	 */
+	private const LIST_FOR_ADDRESS_EMAIL_KEYS = array(
+		'extension_slug' => true,
+	);
+
+	/**
+	 * Width of the stored address email column, the longest email {@see self::list_for_address_email()} can match.
+	 * Keep in step with `email VARCHAR(320)` of the contract addresses table in `SchemaInstaller`.
+	 */
+	private const ADDRESS_EMAIL_MAX_LENGTH = 320;
 
 	/**
 	 * Take the contract's lock for `$operation`, for the synchronous section of this request.
@@ -687,6 +739,53 @@ final class Contracts {
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
+	/**
+	 * List an extension's contracts with a billing or shipping address whose email equals `$email`,
+	 * newest first, each once. Owner-scoped: `extension_slug` is required, so one extension never
+	 * reads another's contracts by email. The email is trimmed, then matched under the addresses
+	 * table's collation (`utf8mb4_unicode_520_ci` on default installs): case- and accent-insensitive
+	 * (`é` = `e`, `ß` = `ss`), trailing spaces ignored. Views carry no items or addresses. Unknown
+	 * keys get `_doing_it_wrong()`.
+	 *
+	 * @param string               $email  The address email to match (1-320 characters once trimmed; no format check).
+	 * @param int                  $limit  Maximum contracts to return.
+	 * @param int                  $offset Contracts to skip (for paging).
+	 * @param array<string, mixed> $args   `extension_slug` (required, the owning extension; `any` is refused).
+	 * @return array<int, ContractView> The matching contracts, newest first.
+	 * @throws ValidationException If `$email` is empty, blank or too long, `$limit` or `$offset` is negative, or
+	 *                             `extension_slug` is missing, invalid or `any`, with every error reported.
+	 * @throws \RuntimeException   If the read fails.
+	 */
+	public static function list_for_address_email( string $email, int $limit = 20, int $offset = 0, array $args = array() ): array {
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::LIST_FOR_ADDRESS_EMAIL_KEYS );
+
+		// The email is trimmed before matching: the default collations ignore trailing spaces but not leading ones,
+		// and a blank value would match stored empty emails, so it is refused as required.
+		$validator      = new ArgumentValidator();
+		$email          = $validator->get_bounded_string( 'email', trim( $email ), self::ADDRESS_EMAIL_MAX_LENGTH );
+		$limit          = (int) $validator->get_non_negative_int( 'limit', $limit );
+		$offset         = (int) $validator->get_non_negative_int( 'offset', $offset );
+		$extension_slug = (string) $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		if ( 'any' === $extension_slug ) {
+			$validator->add(
+				new InvalidInputException(
+					ValidationErrorCode::INVALID_VALUE,
+					'extension_slug',
+					'"extension_slug" must not be "any": name the owning extension.'
+				)
+			);
+		}
+		try {
+			$validator->throw_errors();
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+		}
+
+		return self::views( ( new ContractRepository() )->find_by_address_email( (string) $email, $extension_slug, $limit, $offset ) );
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
 	/**
 	 * Fetch a contract a customer owns - the customer portal's ownership-checked read.
 	 *
@@ -729,7 +828,124 @@ final class Contracts {
 			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
 		}
 
-		return self::cycle_views( ( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit, $offset ) );
+		return self::cycle_views( ( new ContractRepository() )->find_cycles( $contract_id, Cycle::KIND_BILLING, $limit, $offset ) );
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
+	/**
+	 * Add an entry to a contract's history: a record the owning extension writes on its own command.
+	 * The engine writes no entries itself and gives types and payloads no meaning; the history table
+	 * is its generic per-contract record store, history being its first use. With `$lock` the write is
+	 * fenced by it; without one it is a plain owner-scoped insert that no held lock refuses. A taken
+	 * `creation_key` is a lost race and returns null. Unknown keys get `_doing_it_wrong()`.
+	 *
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $args        `extension_slug` (required, the expected owner), `type`
+	 *                                          (required, 1-64 of `[a-z0-9_-]`), `cycle_id` (a cycle of
+	 *                                          this contract), `payload` (array, stored as JSON) and
+	 *                                          `creation_key` (1-100 characters, trimmed, unique per contract).
+	 * @param ContractLock|null    $lock        The caller's lock on this contract, or null for an unlocked insert.
+	 * @return HistoryEntryView|null The new entry; null when the creation key is taken.
+	 * @throws ValidationException      If a required key is missing or a value is invalid, every error reported.
+	 * @throws InvalidArgumentException If no contract of that extension has the id, the cycle is not one of
+	 *                                  this contract's, or the lock is for another contract or extension.
+	 * @throws ContractLockedException  If `$lock` was passed and has been lost.
+	 * @throws \RuntimeException        If the write fails.
+	 */
+	public static function add_history_entry( int $contract_id, array $args, ?ContractLock $lock = null ): ?HistoryEntryView {
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::HISTORY_ENTRY_KEYS );
+
+		$validator      = new ArgumentValidator();
+		$extension_slug = (string) $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		$entry_args     = array(
+			'contract_id'  => $contract_id,
+			'type'         => $validator->get_slug( 'type', $filtered_args['type'] ?? null ),
+			'cycle_id'     => $validator->get_nullable_id( 'cycle_id', $filtered_args['cycle_id'] ?? null ),
+			'payload'      => $validator->get_nullable_array( 'payload', $filtered_args['payload'] ?? null ),
+			'creation_key' => $validator->get_nullable_string( 'creation_key', $filtered_args['creation_key'] ?? null ),
+		);
+		try {
+			$validator->throw_errors();
+			$entry = HistoryEntry::create( $entry_args );
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+		}
+
+		$stored = ( new ContractRepository() )->add_history_entry( $entry, $extension_slug, $lock );
+		if ( null === $stored ) {
+			return null;
+		}
+
+		return HistoryEntryView::from_entry( $stored );
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
+	/**
+	 * A window of a contract's history, newest first. Reads work across extensions. Unknown keys
+	 * get `_doing_it_wrong()`.
+	 *
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $args        `limit` (default 20) and `offset` (default 0), non-negative.
+	 * @return array<int, HistoryEntryView> Entries newest first; empty for an unknown contract.
+	 * @throws ValidationException If `limit` or `offset` is invalid, both reported.
+	 * @throws \RuntimeException   If the read fails.
+	 */
+	public static function get_history( int $contract_id, array $args = array() ): array {
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::HISTORY_READ_KEYS );
+
+		$validator = new ArgumentValidator();
+		$limit     = (int) $validator->get_non_negative_int( 'limit', $filtered_args['limit'] ?? 20 );
+		$offset    = (int) $validator->get_non_negative_int( 'offset', $filtered_args['offset'] ?? 0 );
+		try {
+			$validator->throw_errors();
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+		}
+
+		$entries = ( new ContractRepository() )->find_history( $contract_id, $limit, $offset );
+
+		return array_map(
+			static function ( HistoryEntry $entry ): HistoryEntryView {
+				return HistoryEntryView::from_entry( $entry );
+			},
+			$entries
+		);
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
+	/**
+	 * Delete every history entry of a contract of the given extension, under the caller's lock. The
+	 * engine deletes no entry on its own; the owner decides when (for example a privacy erasure). An
+	 * entry added without a lock is not held back by the lock, so one may land right after the delete.
+	 * Unknown keys get `_doing_it_wrong()`.
+	 *
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $args        `extension_slug` (required, the expected owner).
+	 * @param ContractLock         $lock        The caller's lock on this contract, from {@see self::lock()},
+	 *                                          {@see self::create()} or the due handler's context.
+	 * @return int The number of entries deleted; 0 when the contract has none.
+	 * @throws ValidationException      If `extension_slug` is missing or invalid.
+	 * @throws InvalidArgumentException If the lock is for another contract or another extension.
+	 * @throws ContractLockedException  If `$lock` was lost, including when the contract no longer exists.
+	 * @throws \RuntimeException        If the delete fails.
+	 */
+	public static function delete_history( int $contract_id, array $args, ContractLock $lock ): int {
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::HISTORY_DELETE_KEYS );
+
+		$validator      = new ArgumentValidator();
+		$extension_slug = (string) $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		try {
+			$validator->throw_errors();
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+		}
+
+		ContractRepository::assert_lock_owner( $lock, $extension_slug );
+
+		return ( new ContractRepository() )->delete_history( $contract_id, $lock );
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 

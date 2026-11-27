@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { recordEvent } from '@woocommerce/tracks';
@@ -19,16 +20,7 @@ import {
 import { getAdminSetting } from '~/utils/admin-settings';
 import { useCreateProductByType } from '../use-create-product-by-type';
 
-// Mock window.location
-const mockLocation = {
-	href: '',
-	assign: jest.fn(),
-};
-
-Object.defineProperty( window, 'location', {
-	value: mockLocation,
-	writable: true,
-} );
+const setHref = mockBrowserLocation( 'href' );
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -72,9 +64,6 @@ describe( 'Products', () => {
 		} );
 		// @ts-expect-error -- outdated type definition
 		removeAllFilters( SETUP_TASKLIST_PRODUCTS_AFTER_FILTER );
-
-		// Reset location.href
-		mockLocation.href = '';
 	} );
 
 	it( 'should render default products types when onboardingData.profile.productType is null', () => {
@@ -316,16 +305,13 @@ describe( 'Products', () => {
 	} );
 
 	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
-		mockLocation.href = 'test';
-		Object.defineProperty( global.window, 'location', {
-			value: mockLocation,
-		} );
-
 		const { getByText } = render( <Products /> );
 
 		await userEvent.click( getByText( 'the WooCommerce Marketplace' ) );
-		expect( mockLocation.href ).toContain(
-			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
+		expect( setHref ).toHaveBeenCalledWith(
+			expect.stringContaining(
+				'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
+			)
 		);
 	} );
 

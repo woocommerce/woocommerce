@@ -18,5 +18,9 @@
 		"typography": {
 			"fontSize": true
 		}
-	}
+	},
+	"style": [
+		"wc-blocks-style",
+		"file:../reviews-by-product.css"
+	]
 }

@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import { Fragment } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { render, waitFor } from '@testing-library/react';
@@ -15,6 +16,8 @@ import {
 	getWcsLabelPurchaseConfigs,
 } from '../../wcs-api.js';
 import { ShippingBanner } from '../index.js';
+
+const reload = mockBrowserLocation( 'reload' );
 
 jest.mock( '../../wcs-api.js' );
 
@@ -173,15 +176,8 @@ describe( 'Create shipping label button', () => {
 	const activatePlugins = jest.fn().mockReturnValue( {
 		success: true,
 	} );
-	delete window.location; // jsdom won't allow to rewrite window.location unless deleted first
-	window.location = {
-		href: 'http://wcship.test/wp-admin/post.php?post=1000&action=edit',
-		reload: jest.fn(),
-	};
-
 	beforeEach( () => {
 		acceptWcsTos.mockClear();
-		window.location.reload.mockClear();
 	} );
 
 	it( 'should install WooCommerce Shipping when button is clicked', async () => {
@@ -261,7 +257,7 @@ describe( 'Create shipping label button', () => {
 
 		await userEvent.click( reloadButton );
 
-		expect( window.location.reload ).toHaveBeenCalledWith( true );
+		expect( reload ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	it( 'should show a setup error when accepting the TOS after activation fails', async () => {
@@ -1018,6 +1014,6 @@ describe( 'If incompatible WCS&T is active', () => {
 		);
 		await userEvent.click( reloadButton );
 
-		expect( window.location.reload ).toHaveBeenCalledWith( true );
+		expect( reload ).toHaveBeenCalledTimes( 1 );
 	} );
 } );

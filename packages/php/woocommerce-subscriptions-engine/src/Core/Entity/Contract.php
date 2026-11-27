@@ -879,16 +879,10 @@ final class Contract {
 	 * @param mixed $creation_key Creation key to check.
 	 */
 	private static function get_creation_key_error( $creation_key ): ?InvalidInputException {
-		if ( null === $creation_key ) {
-			return null;
-		}
-
-		if ( ! is_string( $creation_key ) ) {
-			return new InvalidInputException( ValidationErrorCode::INVALID_TYPE, 'creation_key', 'Contract: creation_key must be a string.', array( 'type' => 'string' ) );
-		}
-
-		if ( '' === $creation_key || mb_strlen( $creation_key ) > 100 ) {
-			return new InvalidInputException( ValidationErrorCode::INVALID_VALUE, 'creation_key', 'Contract: creation_key must be 1-100 characters.' );
+		try {
+			ArgumentValidator::validate_creation_key( $creation_key );
+		} catch ( InvalidInputException $e ) {
+			return $e;
 		}
 
 		return null;

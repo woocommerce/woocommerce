@@ -302,6 +302,10 @@ See [the theme CLI README](tools/theme-cli/README.md) and the selected theme's R
 
 ## Block Development
 
+### Motion
+
+Before adding or changing motion (transitions, animations, layout changes) in blocks or the components they share, read the [Motion guide](plugins/woocommerce/client/blocks/docs/contributors/motion.md). It has the rules, tokens, helpers, techniques, and how to test motion.
+
 ### Block Styling
 
 Prefer Core Block Supports. For explicit style generation, use `wp_style_engine_get_styles()`. Avoid new `StyleAttributesUtils` usages; migrate existing ones when touched, preserving rendered styles.

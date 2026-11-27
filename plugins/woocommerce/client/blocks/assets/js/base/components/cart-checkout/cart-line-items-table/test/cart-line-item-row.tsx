@@ -4,6 +4,7 @@
 import { render, screen } from '@testing-library/react';
 import type { CartItem } from '@woocommerce/types';
 import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
+import { useStoreCartItemQuantity } from '@woocommerce/base-context/hooks';
 
 /**
  * Internal dependencies
@@ -243,5 +244,40 @@ describe( 'CartLineItemRow — Save for later visibility', () => {
 		expect(
 			screen.queryByRole( 'button', { name: /save for later/i } )
 		).not.toBeInTheDocument();
+	} );
+} );
+
+describe( 'CartLineItemRow — line total', () => {
+	const mockQuantity = ( isPendingQuantity: boolean ) =>
+		jest.mocked( useStoreCartItemQuantity ).mockReturnValue( {
+			quantity: 1,
+			setItemQuantity: jest.fn(),
+			removeItem: jest.fn(),
+			isPendingDelete: false,
+			isPendingQuantity,
+			cartItemQuantityErrors: [],
+		} );
+
+	beforeEach( () => {
+		setSettings( {} );
+	} );
+
+	it( 'shows the saved line total', () => {
+		mockQuantity( false );
+		const { container } = renderRow();
+
+		expect(
+			container.querySelector( '.wc-block-cart-item__total' )
+		).toHaveTextContent( '$10.00' );
+	} );
+
+	it( 'shows a skeleton instead of the line total while a new quantity saves', () => {
+		mockQuantity( true );
+		const { container } = renderRow();
+
+		expect(
+			container.querySelector( '.wc-block-cart-item__total' )
+		).not.toHaveTextContent( '$10.00' );
+		expect( screen.getByLabelText( /loading price/i ) ).toBeInTheDocument();
 	} );
 } );
