@@ -165,7 +165,7 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 	 */
 	public function test_uses_the_filtered_default_status( bool $enabled ): void {
 		$this->set_feature( $enabled );
-		add_filter( 'woocommerce_default_order_status', static fn() => OrderStatus::ON_HOLD );
+		add_filter( 'woocommerce_default_order_status', static fn( $status = '', $staged = null ) => OrderStatus::ON_HOLD, 10, 2 );
 		$product = WC_Helper_Product::create_simple_product(
 			true,
 			array(

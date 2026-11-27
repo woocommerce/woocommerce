@@ -33,36 +33,53 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 	private $products = array();
 
 	/**
-	 * Rows: stage method and the state of the order.
+	 * Rows: stage method or ability, and the state of the order.
 	 *
 	 * @return array
 	 */
 	public function provide_rows(): array {
 		$rows = array();
-		foreach ( array( 'stage_status', 'stage_product_item', 'stage_taxes', 'stage_recalculated_coupons', 'stage_totals', 'stage_payment_complete', 'stage_payment_complete_invalid_status' ) as $method ) {
+		foreach ( array( 'stage_status', 'stage_product_item', 'stage_taxes', 'stage_recalculated_coupons', 'stage_totals', 'stage_totals_cogs', 'stage_payment_complete', 'stage_payment_complete_invalid_status' ) as $method ) {
 			foreach ( array( 'new', 'existing' ) as $state ) {
 				$rows[ "$method $state" ] = array( $method, $state );
 			}
 		}
+		foreach ( array( 'ability_order_update', 'ability_order_update_status' ) as $method ) {
+			$rows[ "$method existing" ] = array( $method, 'existing' );
+		}
+		$rows['ability_order_create new'] = array( 'ability_order_create', 'new' );
 		return $rows;
 	}
 
 	/**
-	 * @testdox Every action about the staged order that a stage method fires goes through do_staged_action(), and a listener without $staged refuses the call before it runs.
+	 * @testdox Every action and filter that the staged order or one of its items fires about itself goes through the staged wrappers, and a listener without $staged refuses the call.
 	 * @dataProvider provide_rows
 	 *
-	 * @param string $method Stage method.
+	 * @param string $method Stage method or ability.
 	 * @param string $state  new or existing.
 	 */
-	public function test_every_action_of_a_staged_call_is_wrapped( string $method, string $state ): void {
-		list( $wrapped, $unwrapped, $outside ) = $this->record( $method, $state );
+	public function test_every_hook_of_a_staged_call_is_wrapped( string $method, string $state ): void {
+		$hooks = $this->record( $method, $state );
 
-		self::log_row( $method, $state, $wrapped, $unwrapped, $outside );
+		self::log_row( $method, $state, $hooks );
 
-		$this->assertSame( array(), $unwrapped, 'These actions about the staged order fire without do_staged_action(): ' . wp_json_encode( $unwrapped ) );
+		$unwrapped = array();
+		foreach ( $hooks as $key => $hook ) {
+			if ( $hook['inside'] && ! $hook['wrapped'] && ! $hook['getter_g0'] ) {
+				$unwrapped[ $key ] = $hook;
+			}
+			if ( $hook['wrapped'] && $hook['bad_staged'] ) {
+				$unwrapped[ $key ] = $hook;
+			}
+		}
+		$this->assertSame( array(), $unwrapped, 'These hooks of the staged order fire without the staged wrappers: ' . wp_json_encode( $unwrapped ) );
 
-		foreach ( $wrapped as $hook => $count ) {
-			$this->assert_old_listener_refuses( $method, $state, $hook, $count );
+		$checked = array();
+		foreach ( $hooks as $hook ) {
+			if ( $hook['wrapped'] && $hook['marked'] && ! isset( $checked[ $hook['hook'] ] ) ) {
+				$checked[ $hook['hook'] ] = true;
+				$this->assert_old_listener_refuses( $method, $state, $hook['hook'], $hook['type'], $hook['count'] );
+			}
 		}
 	}
 
@@ -220,74 +237,197 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Run a row with a spy on all hooks while the order is marked.
+	 * Hook names that WooCommerce fires only when a listener exists (has_action() or has_filter() with a literal name).
 	 *
-	 * @param string $method Stage method.
+	 * @return string[]
+	 */
+	private static function guarded_hook_names(): array {
+		static $names = null;
+		if ( null === $names ) {
+			$names = array();
+			$root  = dirname( __DIR__, 4 );
+			foreach ( array( 'includes', 'src' ) as $dir ) {
+				foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( "$root/$dir", FilesystemIterator::SKIP_DOTS ) ) as $file ) {
+					if ( 'php' === $file->getExtension() && preg_match_all( "/has_(?:action|filter)\\(\\s*'([a-z0-9_]+)'/", (string) file_get_contents( $file->getPathname() ), $m ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions
+						$names = array_merge( $names, $m[1] );
+					}
+				}
+			}
+			$names = array_values( array_unique( $names ) );
+		}
+		return $names;
+	}
+
+	/**
+	 * Add a listener that accepts every argument to each hook that fires only when a listener exists.
+	 */
+	private static function add_guard_listeners(): void {
+		foreach ( self::guarded_hook_names() as $name ) {
+			add_filter( $name, array( self::class, 'pass_through' ), 10, 99 );
+		}
+	}
+
+	/**
+	 * Remove the listeners of add_guard_listeners().
+	 */
+	private static function remove_guard_listeners(): void {
+		foreach ( self::guarded_hook_names() as $name ) {
+			remove_filter( $name, array( self::class, 'pass_through' ), 10 );
+		}
+	}
+
+	/**
+	 * A listener that changes nothing.
+	 *
+	 * @param mixed $value First argument.
+	 * @return mixed
+	 */
+	public static function pass_through( $value = null ) {
+		return $value;
+	}
+
+	/**
+	 * Whether the object is marked, read without firing a hook.
+	 *
+	 * @param mixed $data_object Object.
+	 * @return bool
+	 */
+	private static function is_marked( $data_object ): bool {
+		if ( ! $data_object instanceof WC_Data ) {
+			return false;
+		}
+		$property = new ReflectionProperty( WC_Data::class, 'staged_mark' );
+		$property->setAccessible( true );
+		return (bool) $property->getValue( $data_object );
+	}
+
+	/**
+	 * Run a row with a spy on all hooks. For each hook fired while an order is marked, record where it fires, and
+	 * whether each boundary puts it inside.
+	 *
+	 * Owner boundary ("inside"): the method that fires the hook runs on the marked order, or on one of its items. An
+	 * item is the order's when it links to it, or when its order ID is the order's ID (items being read).
+	 * Old boundary ("inside_old"): the call is in a WooCommerce file, and the caller object or an argument is the
+	 * order, a linked item, the order ID or an item ID.
+	 *
+	 * @param string $method Stage method or ability.
 	 * @param string $state  Order state.
-	 * @return array{0: array<string, int>, 1: array<string, string>, 2: array<string, string>} Wrapped actions with their argument count, unwrapped actions inside the boundary with their call site, and actions outside the boundary with their call site.
+	 * @return array<string, array> Keyed by hook and call site.
 	 */
 	private function record( string $method, string $state ): array {
 		$order      = $this->create_order( $state );
-		$wrapped    = array();
-		$unwrapped  = array();
-		$outside    = array();
+		$hooks      = array();
 		$plugin_dir = wp_normalize_path( dirname( __DIR__, 4 ) ) . '/';
 		$busy       = false;
-		$spy        = static function ( string $hook, ...$args ) use ( $order, &$wrapped, &$unwrapped, &$outside, $plugin_dir, &$busy ) {
+		$current    = null;
+		$fire_fns   = array( 'do_action', 'do_action_ref_array', 'apply_filters', 'apply_filters_ref_array' );
+		$getters    = array( 'WC_Data::get_prop', 'WC_Data::get_meta', 'WC_Order::get_address_prop' );
+		$spy        = static function ( string $hook, ...$args ) use ( &$hooks, &$busy, &$current, $plugin_dir, $fire_fns, $getters ) {
 			if ( $busy ) {
 				return;
 			}
 			$busy   = true;
-			$frames = debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT, 12 ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- The caller tells how the hook was fired.
+			$frames = debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT, 14 ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- The caller tells how the hook was fired.
 			foreach ( $frames as $index => $frame ) {
-				if ( in_array( $frame['function'], array( 'apply_filters', 'apply_filters_ref_array' ), true ) ) {
-					break;
-				}
-				if ( ! in_array( $frame['function'], array( 'do_action', 'do_action_ref_array' ), true ) ) {
+				if ( ! in_array( $frame['function'], $fire_fns, true ) ) {
 					continue;
 				}
-				$caller = $frames[ $index + 1 ] ?? array();
-				$site   = str_replace( $plugin_dir, '', wp_normalize_path( $frame['file'] ?? '' ) ) . ':' . ( $frame['line'] ?? 0 );
-				$args   = 'do_action_ref_array' === $frame['function'] ? (array) ( $args[0] ?? array() ) : $args;
-				if ( 'do_staged_action' === ( $caller['function'] ?? '' ) ) {
-					$wrapped[ $hook ] = count( $args );
-					if ( end( $args ) !== $order ) {
-						$unwrapped[ $hook ] = 'passes a $staged that is not the staged order';
-					}
-				} elseif ( 0 !== strpos( wp_normalize_path( $frame['file'] ?? '' ), $plugin_dir ) ) {
-					$outside[ $hook ] = $site;
-				} elseif ( self::is_about( $order, $caller['object'] ?? null, $args ) ) {
-					$unwrapped[ $hook ] = $site;
-				} else {
-					$outside[ $hook ] = $site;
+				$type    = 0 === strpos( $frame['function'], 'do_action' ) ? 'action' : 'filter';
+				$caller  = $frames[ $index + 1 ] ?? array();
+				$wrapped = in_array( $caller['function'] ?? '', array( 'do_staged_action', 'apply_staged_filters' ), true );
+				$method  = $wrapped ? ( $frames[ $index + 2 ] ?? array() ) : $caller;
+				$site_fr = $wrapped ? ( $frames[ $index + 1 ] ?? array() ) : $frame;
+				$object  = $method['object'] ?? null;
+				$args    = '_ref_array' === substr( $frame['function'], -10 ) ? (array) ( $args[0] ?? array() ) : $args;
+
+				// The order that is marked now: the caller object, the order of a linked item, or one of the arguments.
+				if ( null !== $current && ! self::is_marked( $current ) ) {
+					$current = null;
 				}
+				foreach ( array_merge( array( $object ), $args ) as $value ) {
+					if ( $value instanceof WC_Abstract_Order && self::is_marked( $value ) ) {
+						$current = $value;
+					} elseif ( $value instanceof WC_Order_Item && self::item_order( $value ) && self::is_marked( self::item_order( $value ) ) ) {
+						$current = self::item_order( $value );
+					}
+				}
+				if ( null === $current ) {
+					break;
+				}
+
+				$file     = wp_normalize_path( $site_fr['file'] ?? '' );
+				$site     = str_replace( $plugin_dir, '', $file ) . ':' . ( $site_fr['line'] ?? 0 );
+				$linked   = $object instanceof WC_Order_Item && self::item_order( $object ) === $current;
+				$unlinked = $object instanceof WC_Order_Item && ! $linked && $current->get_id() > 0 && (int) $object->get_order_id( 'edit' ) === $current->get_id();
+				$inside   = $object === $current || $linked || $unlinked;
+				$in_wc    = 0 === strpos( $file, $plugin_dir );
+				$old      = $in_wc && self::is_about( $current, $object, $args );
+				$fn       = ( $method['class'] ?? '' ) . '::' . ( $method['function'] ?? '' );
+				$getter   = in_array( $fn, $getters, true );
+				$key      = "$hook $site";
+				$entry    = $hooks[ $key ] ?? array(
+					'hook'       => $hook,
+					'type'       => $type,
+					'site'       => $site,
+					'function'   => $fn,
+					'object'     => is_object( $object ) ? get_class( $object ) : null,
+					'inside'     => false,
+					'inside_old' => false,
+					'wrapped'    => false,
+					'getter'     => $getter,
+					'getter_g0'  => $getter && ! WC_Data::staged_getter_filters(),
+					'marked'     => false,
+					'unlinked'   => false,
+					'bad_staged' => false,
+					'count'      => 0,
+					'fired'      => 0,
+				);
+				++$entry['fired'];
+				$entry['inside']     = $entry['inside'] || $inside;
+				$entry['inside_old'] = $entry['inside_old'] || $old;
+				$entry['unlinked']   = $entry['unlinked'] || $unlinked;
+				if ( $wrapped ) {
+					$entry['wrapped'] = true;
+					$entry['count']   = count( $args );
+					$last             = end( $args );
+					if ( $last === $current ) {
+						$entry['marked'] = true;
+					} elseif ( ! ( null === $last && ( $unlinked || ! $inside ) ) ) {
+						$entry['bad_staged'] = true;
+					}
+				}
+				$hooks[ $key ] = $entry;
 				break;
 			}
 			$busy = false;
 		};
 
-		$order->set_staged( true );
+		self::add_guard_listeners();
 		add_action( 'all', $spy );
 		try {
-			$this->call( $order, $method );
+			$this->call( $order, $method, true );
 		} finally {
 			remove_action( 'all', $spy );
+			self::remove_guard_listeners();
 			$order->set_staged( false );
 		}
+		// The guard listeners make deprecated hooks fire. That is expected here.
+		$this->caught_deprecated = array();
 
-		return array( $wrapped, $unwrapped, $outside );
+		ksort( $hooks );
+		return $hooks;
 	}
 
 	/**
 	 * Whether an action is about the staged order: the code that fires it runs on the order or one of its items, or
 	 * one of its arguments is the order, one of its items, the order ID or an item ID.
 	 *
-	 * @param WC_Order    $order  Staged order.
-	 * @param object|null $caller Object whose method called do_action(), or null for a function or a static method.
-	 * @param array       $args   Action arguments.
+	 * @param WC_Abstract_Order $order  Staged order.
+	 * @param object|null       $caller Object whose method called do_action(), or null for a function or a static method.
+	 * @param array             $args   Action arguments.
 	 * @return bool
 	 */
-	private static function is_about( WC_Order $order, $caller, array $args ): bool {
+	private static function is_about( WC_Abstract_Order $order, $caller, array $args ): bool {
 		foreach ( array_merge( array( $caller ), $args ) as $value ) {
 			if ( $value === $order || ( $value instanceof WC_Order_Item && self::item_order( $value ) === $order ) ) {
 				return true;
@@ -303,7 +443,7 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 	 * The order instance an item links to, read without loading anything.
 	 *
 	 * @param WC_Order_Item $item Item.
-	 * @return WC_Order|null
+	 * @return WC_Abstract_Order|null
 	 */
 	private static function item_order( WC_Order_Item $item ) {
 		$property = new ReflectionProperty( WC_Order_Item::class, 'order' );
@@ -315,11 +455,11 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 	/**
 	 * Whether an ID is the ID of an item that the order holds in memory, read without loading anything.
 	 *
-	 * @param WC_Order $order Order.
-	 * @param int      $id    ID.
+	 * @param WC_Abstract_Order $order Order.
+	 * @param int               $id    ID.
 	 * @return bool
 	 */
-	private static function is_item_id( WC_Order $order, int $id ): bool {
+	private static function is_item_id( WC_Abstract_Order $order, int $id ): bool {
 		$property = new ReflectionProperty( WC_Abstract_Order::class, 'items' );
 		$property->setAccessible( true );
 		foreach ( $property->getValue( $order ) as $items ) {
@@ -333,45 +473,59 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Run the row again with a listener that accepts one argument less than the action passes, and assert the
-	 * call is refused before the listener runs, with a message that names the action.
+	 * Run the row again with a listener that accepts one argument less than the hook passes, and assert the call is
+	 * refused with a message that names the hook.
 	 *
-	 * @param string $method Stage method.
+	 * @param string $method Stage method or ability.
 	 * @param string $state  Order state.
-	 * @param string $hook   Action name.
+	 * @param string $hook   Hook name.
+	 * @param string $type   action or filter.
 	 * @param int    $count  Number of arguments, $staged included.
 	 */
-	private function assert_old_listener_refuses( string $method, string $state, string $hook, int $count ): void {
+	private function assert_old_listener_refuses( string $method, string $state, string $hook, string $type, int $count ): void {
 		$order    = $this->create_order( $state );
-		$ran      = false;
-		$listener = static function () use ( &$ran ) {
-			$ran = true;
+		$listener = static function ( $value = null ) {
+			return $value;
 		};
-		add_action( $hook, $listener, 10, $count - 1 );
+		add_filter( $hook, $listener, 10, $count - 1 );
 
 		$refusal = null;
-		$order->set_staged( true );
 		try {
-			$this->call( $order, $method );
+			$refusal = $this->call( $order, $method, true );
 		} catch ( WC_Data_Exception $e ) {
-			$refusal = $e;
+			$refusal = $e->getMessage();
 		} finally {
 			$order->set_staged( false );
-			remove_action( $hook, $listener, 10 );
+			remove_filter( $hook, $listener, 10 );
+		}
+		$this->caught_deprecated = array();
+		if ( $refusal instanceof WP_Error ) {
+			$refusal = $refusal->get_error_message();
 		}
 
-		$this->assertInstanceOf( WC_Data_Exception::class, $refusal, "$hook: a listener without \$staged did not refuse $method ($state)" );
-		$this->assertStringContainsString( $hook . ' action', $refusal->getMessage() );
-		$this->assertFalse( $ran, "$hook: the listener ran" );
+		$this->assertIsString( $refusal, "$hook: a listener without \$staged did not refuse $method ($state)" );
+		$this->assertStringContainsString( $hook . ' hook', $refusal );
 	}
 
 	/**
-	 * Call the stage method of a row.
+	 * Call the stage method of a row on the marked order, or run the ability of a row.
 	 *
 	 * @param WC_Order $order  Order.
-	 * @param string   $method Stage method.
+	 * @param string   $method Stage method or ability.
+	 * @param bool     $mark   Whether to mark the order before a stage method.
+	 * @return mixed The error message of a refused ability call, or null.
 	 */
-	private function call( WC_Order $order, string $method ): void {
+	private function call( WC_Order $order, string $method, bool $mark = false ) {
+		if ( 0 === strpos( $method, 'ability_' ) ) {
+			return $this->run_ability( $order, $method );
+		}
+		if ( 'stage_totals_cogs' === $method ) {
+			update_option( 'woocommerce_feature_cost_of_goods_sold_enabled', 'yes' );
+		}
+		if ( 'stage_payment_complete_invalid_status' === $method ) {
+			$order->set_status( OrderStatus::COMPLETED );
+		}
+		$order->set_staged( $mark );
 		switch ( $method ) {
 			case 'stage_status':
 				$order->stage_status( OrderStatus::PROCESSING, 'Staged', true );
@@ -380,30 +534,69 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 				$order->stage_product_item( $this->products[1], 2, array( 'order' => $order ) );
 				break;
 			case 'stage_payment_complete':
+			case 'stage_payment_complete_invalid_status':
 				$order->stage_payment_complete( 'txn' );
 				break;
-			case 'stage_payment_complete_invalid_status':
-				$order->set_status( OrderStatus::COMPLETED );
-				$order->stage_payment_complete( 'txn' );
+			case 'stage_totals_cogs':
+				$order->stage_totals();
 				break;
 			default:
 				$order->$method();
 		}
+		return null;
 	}
 
 	/**
-	 * Append a row's recorded actions to a JSON lines file when STAGED_ACTIONS_LOG is set, for the spike report.
+	 * Run the order ability of a row with the feature on.
 	 *
-	 * @param string $method    Stage method.
-	 * @param string $state     Order state.
-	 * @param array  $wrapped   Wrapped actions.
-	 * @param array  $unwrapped Unwrapped actions inside the boundary.
-	 * @param array  $outside   Actions outside the boundary.
+	 * @param WC_Order $order  Order (saved, or new for order-create).
+	 * @param string   $method Ability row.
+	 * @return string|null The error message when the call is refused.
 	 */
-	private static function log_row( string $method, string $state, array $wrapped, array $unwrapped, array $outside ): void {
-		$file = getenv( 'STAGED_ACTIONS_LOG' );
+	private function run_ability( WC_Order $order, string $method ) {
+		if ( ! ExtensibleAbilities::is_enabled() ) {
+			$this->enable_extensible_abilities();
+		}
+		wp_set_current_user( 1 );
+		$product = $this->products[1]->get_id();
+		switch ( $method ) {
+			case 'ability_order_update':
+				$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+					array(
+						'id'         => $order->get_id(),
+						'line_items' => array( array( 'product_id' => $product, 'quantity' => 1 ) ),
+					)
+				);
+				break;
+			case 'ability_order_update_status':
+				$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
+					array(
+						'id'     => $order->get_id(),
+						'status' => OrderStatus::PROCESSING,
+					)
+				);
+				break;
+			default:
+				$result = wp_get_ability( 'woocommerce/order-create' )->execute(
+					array( 'line_items' => array( array( 'product_id' => $product, 'quantity' => 1 ) ) )
+				);
+		}
+		return is_wp_error( $result ) ? $result->get_error_message() : null;
+	}
+
+	/**
+	 * Append a row's recorded hooks to a JSON lines file when STAGED_HOOKS_LOG is set, for the spike report.
+	 *
+	 * @param string $method Stage method or ability.
+	 * @param string $state  Order state.
+	 * @param array  $hooks  Recorded hooks.
+	 */
+	private static function log_row( string $method, string $state, array $hooks ): void {
+		$file = getenv( 'STAGED_HOOKS_LOG' );
 		if ( $file ) {
-			file_put_contents( $file, wp_json_encode( compact( 'method', 'state', 'wrapped', 'unwrapped', 'outside' ) ) . "\n", FILE_APPEND ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			$g1    = WC_Data::staged_getter_filters();
+			$hooks = array_values( $hooks );
+			file_put_contents( $file, wp_json_encode( compact( 'method', 'state', 'g1', 'hooks' ) ) . "\n", FILE_APPEND ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		}
 	}
 
@@ -428,6 +621,8 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 			WC_Helper_Coupon::create_coupon( 'staged10', array( 'discount_type' => 'percent', 'coupon_amount' => '10' ) );
 		}
 
+		// needs_processing() caches its answer for a new order under the key of ID 0.
+		wp_cache_delete( 'order-needs-processing-0', 'orders' );
 		$order = new WC_Order();
 		$order->set_billing_country( 'US' );
 		$line = new WC_Order_Item_Product();
