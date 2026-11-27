@@ -602,7 +602,7 @@ CREATE TABLE $meta_table_name (
 			return array_map(
 				function ( $result ) use ( $meta_data ) {
 					$notification = new Notification();
-					$notification->set_object_read( false );
+					$notification->set_defaults();
 					$this->set_props_from_row( $notification, $result );
 					$notification->init_meta_data( $this->filter_raw_meta_data( $notification, $meta_data[ $notification->get_id() ] ?? array() ) );
 					$notification->set_object_read( true );
