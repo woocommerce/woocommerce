@@ -371,6 +371,21 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should show the "already joined" notice from the classic hook to a customer signed up for a parent product when out of stock items are hidden.
+	 */
+	public function test_already_joined_notice_replaces_classic_form_for_parent_when_out_of_stock_items_are_hidden(): void {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$this->log_in_customer_signed_up_for( $this->create_and_visit_out_of_stock_variable_product() );
+
+		ob_start();
+		do_action( 'woocommerce_after_add_to_cart_form' );
+		$markup = ob_get_clean();
+
+		$this->assertStringContainsString( 'You have already joined this waitlist.', $markup, 'The notice should render.' );
+		$this->assertStringNotContainsString( 'wc_bis_form', $markup, 'The form should not render.' );
+	}
+
+	/**
 	 * @testdox Should show the "already joined" notice after the Add to Cart + Options block to a customer signed up for a parent product no variation of which can be bought.
 	 */
 	public function test_already_joined_notice_replaces_block_form_for_parent_when_no_variation_can_be_bought(): void {
