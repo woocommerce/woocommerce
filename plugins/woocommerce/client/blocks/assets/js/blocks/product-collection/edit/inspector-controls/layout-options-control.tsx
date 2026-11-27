@@ -20,6 +20,7 @@ import {
  */
 import { DisplayLayoutControlProps, LayoutOptions } from '../../types';
 import { getDefaultDisplayLayout, sanitizeDisplayLayout } from '../../utils';
+import { DEFAULT_CAROUSEL_COLUMNS } from '../../constants';
 
 const getHelpText = ( layoutOptions: LayoutOptions ) => {
 	switch ( layoutOptions ) {
@@ -52,6 +53,12 @@ const LayoutOptionsControl = ( props: DisplayLayoutControlProps ) => {
 					: {} ),
 				...props.displayLayout,
 				type: nextType,
+				...( nextType === LayoutOptions.CAROUSEL
+					? {
+							carouselColumns: DEFAULT_CAROUSEL_COLUMNS,
+							shrinkColumns: true,
+						}
+					: {} ),
 			} ),
 		} );
 	};
