@@ -199,6 +199,73 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox OR counts respect the attribute archive when the lookup table is enabled.
+	 *
+	 * @testWith [true, true]
+	 *           [true, false]
+	 *           [false, true]
+	 *           [false, false]
+	 *
+	 * @param bool $use_lookup Whether to use the attribute lookup table.
+	 * @param bool $cache_counts Whether to cache counts.
+	 */
+	public function test_or_counts_scope_attribute_archive_with_lookup_table( bool $use_lookup, bool $cache_counts ): void {
+		global $wp_the_query;
+
+		$this->set_use_lookup_table( $use_lookup );
+		add_filter( 'woocommerce_layered_nav_count_maybe_cache', static fn() => $cache_counts );
+		$this->create_product_attribute( 'FacetModel', array( 'Alpha', 'Beta', 'Shared' ) );
+		$this->create_simple_product( array( 'FacetModel' => array( 'Alpha', 'Shared' ) ), true );
+		$this->create_simple_product( array( 'FacetModel' => array( 'Alpha' ) ), true );
+		$this->create_simple_product( array( 'FacetModel' => array( 'Beta', 'Shared' ) ), true );
+
+		$terms = wp_list_pluck(
+			get_terms(
+				array(
+					'taxonomy'   => 'pa_facetmodel',
+					'hide_empty' => false,
+				)
+			),
+			'term_id',
+			'name'
+		);
+		$sut   = wc_get_container()->get( Filterer::class );
+
+		// The legacy query counts across both archives in this fixture. Archive scoping applies only with the lookup table enabled.
+		foreach ( array( 'alpha', 'beta', 'alpha' ) as $archive ) {
+			\WC_Query::reset_chosen_attributes();
+			$wp_the_query->query(
+				array(
+					'post_type' => 'product',
+					'taxonomy'  => 'pa_facetmodel',
+					'term'      => $archive,
+				)
+			);
+			$counts = $sut->get_filtered_term_product_counts( array_values( $terms ), 'pa_facetmodel', 'or' );
+			$this->assertSame( $use_lookup ? 1 : 2, $counts[ $terms['Shared'] ], 'Only lookup table counts restrict Shared to the current archive.' );
+			$this->assertSame( ! $use_lookup || 'alpha' === $archive ? 2 : 0, $counts[ $terms['Alpha'] ] ?? 0, 'Lookup table counts exclude Alpha on the Beta archive.' );
+			$this->assertSame( ! $use_lookup || 'beta' === $archive ? 1 : 0, $counts[ $terms['Beta'] ] ?? 0, 'Lookup table counts exclude Beta on the Alpha archive.' );
+		}
+
+		$_GET['filter_facetmodel']     = 'shared';
+		$_GET['query_type_facetmodel'] = 'or';
+		\WC_Query::reset_chosen_attributes();
+		$wp_the_query->query(
+			array(
+				'post_type' => 'product',
+				'taxonomy'  => 'pa_facetmodel',
+				'term'      => 'alpha',
+			)
+		);
+		$this->assertSame( 1, $wp_the_query->found_posts, 'Selecting Shared returns the matching product on the Alpha archive.' );
+		$parse_count = did_action( 'parse_tax_query' );
+		$counts      = $sut->get_filtered_term_product_counts( array_values( $terms ), 'pa_facetmodel', 'or' );
+		$this->assertSame( $parse_count, did_action( 'parse_tax_query' ), 'Counting must not invoke taxonomy query callbacks again.' );
+		$this->assertSame( 2, $counts[ $terms['Alpha'] ], 'OR counts ignore the Shared selection.' );
+		$this->assertSame( $use_lookup ? 0 : 1, $counts[ $terms['Beta'] ] ?? 0, 'Only lookup table counts exclude the unrelated model after selection.' );
+	}
+
+	/**
 	 * Save a product and delete any lookup table data that may have been automatically inserted
 	 * (for the purposes of unit testing we want to insert this data manually)
 	 *
