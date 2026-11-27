@@ -74,10 +74,10 @@ class ShippingController {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'admin_footer', array( $this, 'hydrate_client_settings' ), 0 );
 		add_action( 'woocommerce_load_shipping_methods', array( $this, 'register_local_pickup' ) );
-		add_filter( 'woocommerce_local_pickup_methods', array( $this, 'register_local_pickup_method' ) );
+		add_filter( 'woocommerce_local_pickup_methods', array( $this, 'register_local_pickup_method' ), 10, 2 );
 		add_filter( 'woocommerce_order_hide_shipping_address', array( $this, 'hide_shipping_address_for_local_pickup' ), 10 );
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'filter_taxable_address' ) );
-		add_filter( 'woocommerce_order_get_tax_location', array( $this, 'filter_order_tax_location' ), 10, 2 );
+		add_filter( 'woocommerce_order_get_tax_location', array( $this, 'filter_order_tax_location' ), 10, 3 );
 		add_filter( 'woocommerce_shipping_settings', array( $this, 'remove_shipping_settings' ) );
 		add_filter( 'woocommerce_shipping_packages', array( $this, 'filter_shipping_packages' ) );
 		add_filter( 'pre_update_option_woocommerce_pickup_location_settings', array( $this, 'flush_cache' ) );
@@ -409,7 +409,7 @@ class ShippingController {
 	 * @param array $methods Shipping method ids.
 	 * @return array
 	 */
-	public function register_local_pickup_method( $methods ) {
+	public function register_local_pickup_method( $methods, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Spike: accepts $staged.
 		$methods[] = 'pickup_location';
 		return $methods;
 	}
@@ -494,7 +494,7 @@ class ShippingController {
 	 * @param \WC_Abstract_Order $order    Order the tax location is being resolved for.
 	 * @return array
 	 */
-	public function filter_order_tax_location( $location, $order ) {
+	public function filter_order_tax_location( $location, $order, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Spike: accepts $staged.
 		if ( ! $order instanceof \WC_Abstract_Order ) {
 			return $location;
 		}

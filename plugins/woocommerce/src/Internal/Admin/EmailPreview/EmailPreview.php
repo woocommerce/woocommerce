@@ -338,7 +338,7 @@ class EmailPreview {
 	 * @param WC_Product|null $product Order item product.
 	 * @return WC_Product
 	 */
-	public function get_dummy_product_when_not_set( $product ) {
+	public function get_dummy_product_when_not_set( $product, $item = null, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Spike: accepts $staged.
 		if ( $product ) {
 			return $product;
 		}
@@ -639,7 +639,7 @@ class EmailPreview {
 		add_filter( 'woocommerce_order_needs_shipping_address', array( $this, 'enable_shipping_address' ), 10, 3 );
 		// Email templates fetch product from the database to show additional information, which are not
 		// saved in WC_Order_Item_Product. This filter enables fetching that data also in email preview.
-		add_filter( 'woocommerce_order_item_product', array( $this, 'get_dummy_product_when_not_set' ), 10, 1 );
+		add_filter( 'woocommerce_order_item_product', array( $this, 'get_dummy_product_when_not_set' ), 10, 3 );
 		// Enable email preview mode - this way transient values are fetched for live preview.
 		add_filter( 'woocommerce_is_email_preview', array( $this, 'enable_preview_mode' ) );
 		// Use placeholder image included in WooCommerce files.

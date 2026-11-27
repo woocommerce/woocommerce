@@ -47,6 +47,13 @@ abstract class WC_Data {
 	protected $staged_mark = false;
 
 	/**
+	 * Whether the hooks this object fires about itself pass $staged. True for orders and order items.
+	 *
+	 * @var bool
+	 */
+	protected $staged_hooks = false;
+
+	/**
 	 * ID for this object.
 	 *
 	 * @since 3.0.0
@@ -256,9 +263,41 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Refuse a staged change when a listener of the action accepts fewer arguments than the action passes.
+	 * Apply a filter about this object with $staged as its last argument, like do_staged_action().
 	 *
-	 * @param string $hook      Action name.
+	 * @param string $hook    Filter name.
+	 * @param mixed  $value   Value to filter.
+	 * @param mixed  ...$args Other filter arguments, without $staged.
+	 * @return mixed
+	 * @throws WC_Data_Exception When a listener does not accept $staged on a marked object.
+	 */
+	protected function apply_staged_filters( string $hook, $value, ...$args ) {
+		$staged = $this->get_staged_object();
+		$args[] = $staged;
+		if ( null !== $staged ) {
+			self::refuse_listeners_without_staged( $hook, count( $args ) + 1 );
+		}
+		return apply_filters( $hook, $value, ...$args );
+	}
+
+	/**
+	 * Whether get_prop() and get_meta() of orders and order items pass $staged to their filters (variant G1), or not
+	 * (variant G0). Spike switch: the WC_STAGED_GETTER_FILTERS constant, or the environment variable of that name.
+	 *
+	 * @return bool
+	 */
+	public static function staged_getter_filters(): bool {
+		static $on = null;
+		if ( null === $on ) {
+			$on = defined( 'WC_STAGED_GETTER_FILTERS' ) ? (bool) WC_STAGED_GETTER_FILTERS : (bool) getenv( 'WC_STAGED_GETTER_FILTERS' );
+		}
+		return $on;
+	}
+
+	/**
+	 * Refuse a staged change when a listener of the hook accepts fewer arguments than the hook passes.
+	 *
+	 * @param string $hook      Hook name.
 	 * @param int    $arg_count Number of arguments, $staged included.
 	 * @throws WC_Data_Exception When a listener does not accept $staged.
 	 */
@@ -282,8 +321,8 @@ abstract class WC_Data {
 		throw new WC_Data_Exception(
 			'woocommerce_data_staging_unsupported',
 			sprintf(
-				/* translators: 1: action name, 2: comma-separated list of PHP callbacks, 3: number of arguments. */
-				__( 'This change cannot be staged, because code on the %1$s action does not support staged changes: %2$s. Each callback needs to accept $staged as its last argument, registered with %3$d accepted arguments.', 'woocommerce' ),
+				/* translators: 1: hook name, 2: comma-separated list of PHP callbacks, 3: number of arguments. */
+				__( 'This change cannot be staged, because code on the %1$s hook does not support staged changes: %2$s. Each callback needs to accept $staged as its last argument, registered with %3$d accepted arguments.', 'woocommerce' ),
 				$hook,
 				implode( ', ', $names ),
 				$arg_count
@@ -587,7 +626,7 @@ abstract class WC_Data {
 		}
 
 		if ( 'view' === $context ) {
-			$value = apply_filters( $this->get_hook_prefix() . $key, $value, $this );
+			$value = $this->staged_hooks && self::staged_getter_filters() ? $this->apply_staged_filters( $this->get_hook_prefix() . $key, $value, $this ) : apply_filters( $this->get_hook_prefix() . $key, $value, $this );
 		}
 
 		return $value;
@@ -1109,7 +1148,7 @@ abstract class WC_Data {
 			$value = array_key_exists( $prop, $this->changes ) ? $this->changes[ $prop ] : $this->data[ $prop ];
 
 			if ( 'view' === $context ) {
-				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
+				$value = $this->staged_hooks && self::staged_getter_filters() ? $this->apply_staged_filters( $this->get_hook_prefix() . $prop, $value, $this ) : apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
 			}
 		}
 

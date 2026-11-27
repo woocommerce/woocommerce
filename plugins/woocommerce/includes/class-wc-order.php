@@ -255,7 +255,7 @@ class WC_Order extends WC_Abstract_Order {
 		 * @param WC_Order $this                     Order object.
 		 * @since 2.7.0
 		 */
-		$valid_completed_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', OrderStatus::PAYMENT_COMPLETE_STATUSES, $this );
+		$valid_completed_statuses = $this->apply_staged_filters( 'woocommerce_valid_order_statuses_for_payment_complete', OrderStatus::PAYMENT_COMPLETE_STATUSES, $this );
 		if ( ! $this->has_status( $valid_completed_statuses ) ) {
 			/**
 			 * Fires when payment completes for an order whose status payment cannot complete.
@@ -283,7 +283,7 @@ class WC_Order extends WC_Abstract_Order {
 		 * @param WC_Order $this          Order object.
 		 * @since 2.7.0
 		 */
-		$next_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
+		$next_status = $this->apply_staged_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
 
 		$transaction_id = $this->get_transaction_id();
 		$payment_method = $this->get_payment_method_title();
@@ -480,7 +480,7 @@ class WC_Order extends WC_Abstract_Order {
 			 * @param WC_Order $this          Order object.
 			 * @since 2.7.0
 			 */
-			$payment_completed_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
+			$payment_completed_status = $this->apply_staged_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
 
 			if ( $this->has_status( $payment_completed_status ) ) {
 				// If payment complete status is reached, set paid now.
@@ -787,7 +787,7 @@ class WC_Order extends WC_Abstract_Order {
 				 * @param string   $value The address property value.
 				 * @param WC_Order $order The order object being read.
 				 */
-				$value = apply_filters( $this->get_hook_prefix() . $address_type . '_' . $prop, $value, $this );
+				$value = self::staged_getter_filters() ? $this->apply_staged_filters( $this->get_hook_prefix() . $address_type . '_' . $prop, $value, $this ) : apply_filters( $this->get_hook_prefix() . $address_type . '_' . $prop, $value, $this );
 			}
 		}
 		return $value;
@@ -1102,7 +1102,7 @@ class WC_Order extends WC_Abstract_Order {
 			 * @param WC_Order $this          Order object.
 			 * @since 3.0.0
 			 */
-			&& $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this ) ) ) {
+			&& $this->has_status( $this->apply_staged_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this ) ) ) {
 			// In view context, return a date if missing.
 			$date_paid = $this->get_date_created( 'edit' );
 		}
@@ -1847,7 +1847,7 @@ class WC_Order extends WC_Abstract_Order {
 		 * @param WC_Order $this        Order object.
 		 * @since 2.7.0
 		 */
-		return apply_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( OrderStatus::PENDING, OrderStatus::ON_HOLD, OrderStatus::AUTO_DRAFT ), true ), $this );
+		return $this->apply_staged_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( OrderStatus::PENDING, OrderStatus::ON_HOLD, OrderStatus::AUTO_DRAFT ), true ), $this );
 	}
 
 	/**
@@ -2028,7 +2028,7 @@ class WC_Order extends WC_Abstract_Order {
 							 * @param int         $order_id
 							 * @return bool
 							 */
-							$custom_needs_processing = (bool) apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $order_id );
+							$custom_needs_processing = (bool) $this->apply_staged_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $order_id );
 							if ( $custom_needs_processing ) {
 								$needs_processing = 1;
 								break;

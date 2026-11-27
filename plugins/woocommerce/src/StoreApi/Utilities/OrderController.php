@@ -100,7 +100,7 @@ class OrderController {
 			);
 		}
 
-		add_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
+		add_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ), 10, 2 );
 
 		try {
 			$order = new \WC_Order();
@@ -1303,7 +1303,7 @@ class OrderController {
 	 *
 	 * @return string
 	 */
-	public function default_order_status() {
+	public function default_order_status( $status = '', $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed, Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Spike: accepts $staged.
 		return 'checkout-draft';
 	}
 

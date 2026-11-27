@@ -45,6 +45,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $clone_mode = self::CLONE_MODE_CACHE;
 
 	/**
+	 * Hooks about the order pass $staged.
+	 *
+	 * @var bool
+	 */
+	protected $staged_hooks = true;
+
+	/**
 	 * The exception that stopped the last save(), or null when the last save() wrote the order.
 	 *
 	 * @var Exception|null
@@ -717,7 +724,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			 *
 			 * @param string $status Default status.
 			 */
-			$status = apply_filters( 'woocommerce_default_order_status', OrderStatus::PENDING );
+			$status = $this->apply_staged_filters( 'woocommerce_default_order_status', OrderStatus::PENDING );
 		}
 		return $status;
 	}
@@ -1317,7 +1324,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 *
 		 * @param array<string, string> $item_types_to_group The default mapping.
 		 */
-		return (array) apply_filters(
+		return (array) $this->apply_staged_filters(
 			'woocommerce_order_type_to_group',
 			$this->item_types_to_group
 		);
@@ -1370,7 +1377,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}//end if
 		}
 
-		return apply_filters( 'woocommerce_order_get_items', $items, $this, $types );
+		return $this->apply_staged_filters( 'woocommerce_order_get_items', $items, $this, $types );
 	}
 
 	/**
@@ -2237,7 +2244,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			 *
 			 * @since 3.2.0
 			 */
-			$coupon_object = apply_filters( 'woocommerce_order_recalculate_coupons_coupon_object', $coupon_object, $coupon_code, $coupon_item, $this );
+			$coupon_object = $this->apply_staged_filters( 'woocommerce_order_recalculate_coupons_coupon_object', $coupon_object, $coupon_code, $coupon_item, $this );
 
 			if ( $coupon_object ) {
 				$discounts->apply_coupon( $coupon_object, false );
@@ -2618,7 +2625,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 * @since 6.8.0
 		 * @param boolean apply_base_tax Whether apply base tax for local pickup. Default true.
 		 */
-		$apply_base_tax = true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true );
+		$apply_base_tax = true === $this->apply_staged_filters( 'woocommerce_apply_base_tax_for_local_pickup', true );
 
 		/**
 		 * Filters local pickup shipping methods.
@@ -2626,7 +2633,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 * @since 6.8.0
 		 * @param string[] $local_pickup_methods Local pickup shipping method IDs.
 		 */
-		$local_pickup_methods = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
+		$local_pickup_methods = $this->apply_staged_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
 
 		$shipping_method_ids = ArrayUtil::select( $this->get_shipping_methods(), 'get_method_id', ArrayUtil::SELECT_BY_OBJECT_METHOD );
 
@@ -2643,7 +2650,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$args['city']     = WC()->countries->get_base_city();
 		}
 
-		return apply_filters( 'woocommerce_order_get_tax_location', $args, $this );
+		return $this->apply_staged_filters( 'woocommerce_order_get_tax_location', $args, $this );
 	}
 
 	/**
@@ -2687,7 +2694,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 * @param bool              $is_vat_exempt Whether the order is exempt from VAT.
 		 * @param WC_Abstract_Order $order         Order instance.
 		 */
-		return (bool) apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
+		return (bool) $this->apply_staged_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
 	}
 
 	/**
@@ -3471,7 +3478,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return bool
 	 */
 	public function has_status( $status ) {
-		return apply_filters( 'woocommerce_order_has_status', ( is_array( $status ) && in_array( $this->get_status(), $status, true ) ) || $this->get_status() === $status, $this, $status );
+		return $this->apply_staged_filters( 'woocommerce_order_has_status', ( is_array( $status ) && in_array( $this->get_status(), $status, true ) ) || $this->get_status() === $status, $this, $status );
 	}
 
 	/**
@@ -3587,7 +3594,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 * @param float $value The value originally calculated.
 		 * @param WC_Abstract_Order $order The order for which the value is calculated.
 		 */
-		$cogs_value = apply_filters( 'woocommerce_calculated_order_cogs_value', $cogs_value, $this );
+		$cogs_value = $this->apply_staged_filters( 'woocommerce_calculated_order_cogs_value', $cogs_value, $this );
 
 		$this->set_cogs_total_value( $cogs_value );
 

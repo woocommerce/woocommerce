@@ -68,7 +68,7 @@ class WC_Shortcode_Order_Tracking {
 						add_filter( 'woocommerce_order_downloads_table_show_downloads', '__return_false', PHP_INT_MAX );
 						add_filter( 'woocommerce_my_account_my_orders_actions', '__return_empty_array', PHP_INT_MAX );
 						add_filter( 'woocommerce_purchase_note_order_statuses', '__return_empty_array', PHP_INT_MAX );
-						add_filter( 'woocommerce_order_get_customer_note', '__return_empty_string', PHP_INT_MAX );
+						add_filter( 'woocommerce_order_get_customer_note', '__return_empty_string', PHP_INT_MAX, 3 );
 					}
 
 					wc_get_template(

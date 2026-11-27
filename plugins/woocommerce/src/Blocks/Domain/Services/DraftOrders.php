@@ -44,7 +44,7 @@ class DraftOrders {
 		add_filter( 'woocommerce_register_shop_order_post_statuses', [ $this, 'register_draft_order_post_status' ] );
 		add_filter( 'woocommerce_analytics_excluded_order_statuses', [ $this, 'append_draft_order_post_status' ] );
 		add_filter( 'woocommerce_valid_order_statuses_for_payment', [ $this, 'append_draft_order_post_status' ], 999 );
-		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', [ $this, 'append_draft_order_post_status' ], 999 );
+		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', [ $this, 'append_draft_order_post_status' ], 999, 3 );
 		// Hook into the query to retrieve My Account orders so draft status is excluded.
 		add_action( 'woocommerce_my_account_my_orders_query', [ $this, 'delete_draft_order_post_status_from_args' ] );
 		add_action( self::DRAFT_CLEANUP_EVENT_HOOK, [ $this, 'delete_expired_draft_orders' ] );
@@ -163,7 +163,7 @@ class DraftOrders {
 
 	 * @return array
 	 */
-	public function append_draft_order_post_status( $statuses ) {
+	public function append_draft_order_post_status( $statuses, $order = null, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Spike: accepts $staged.
 		$statuses[] = self::STATUS;
 		return $statuses;
 	}
