@@ -12,6 +12,8 @@ use WC_Settings_Advanced;
 use WC_Settings_Products;
 use WP_REST_Request;
 
+require_once dirname( __DIR__, 4 ) . '/includes/settings/class-wc-settings-unit-test-case.php';
+
 /**
  * SettingsControllerTests data tests.
  */
