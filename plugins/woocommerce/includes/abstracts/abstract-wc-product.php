@@ -1745,12 +1745,19 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Delete the product, set its ID to 0, and return result.
 	 *
+	 * Returns false when the object has no ID, for example after a previous delete() call. Load the product again with
+	 * wc_get_product() to permanently delete a product that this object moved to the trash.
+	 *
 	 * @param  bool $force_delete Should the product be deleted permanently.
 	 * @return bool result
 	 */
 	public function delete( $force_delete = false ) {
 		$product_id = $this->get_id();
-		$deleted    = parent::delete( $force_delete );
+		if ( ! $product_id ) {
+			return false;
+		}
+
+		$deleted = parent::delete( $force_delete );
 
 		if ( $deleted ) {
 			$this->maybe_defer_product_sync();
