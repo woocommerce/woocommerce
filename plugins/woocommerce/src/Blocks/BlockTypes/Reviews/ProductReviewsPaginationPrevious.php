@@ -2,11 +2,14 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes\Reviews;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 
 /**
  * ProductReviewsPaginationPrevious class.
  */
 class ProductReviewsPaginationPrevious extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -67,26 +70,6 @@ class ProductReviewsPaginationPrevious extends AbstractBlock {
 			$arrow_classes   = "wp-block-woocommerce-product-reviews-pagination-previous-arrow is-arrow-$arrow_attribute";
 			return "<span class='$arrow_classes' aria-hidden='true'>$arrow</span>";
 		}
-		return null;
-	}
-
-	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @see $this->register_block_type()
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string|null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return string|null
-	 */
-	protected function get_block_type_style() {
 		return null;
 	}
 }

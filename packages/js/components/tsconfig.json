@@ -23,9 +23,6 @@
 	],
 	"references": [
 		{
-			"path": "../csv-export"
-		},
-		{
 			"path": "../currency"
 		},
 		{

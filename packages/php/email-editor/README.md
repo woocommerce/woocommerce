@@ -6,6 +6,13 @@ This package covers functionality for bootstrapping the email editor JS applicat
 
 You can locate the JS package in [`packages/js/email-editor`](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/email-editor)
 
+## Requirements
+
+- WordPress 7.0 or newer
+- PHP 7.4 or newer
+
+Call `Dependency_Check::are_dependencies_met()` before you initialize the editor. It returns `false` on an older WordPress version.
+
 ## Workflow Commands
 
 Note: The package is developed in [the WooCommerce monorepo](https://github.com/woocommerce/woocommerce/tree/trunk/packages/php/email-editor).

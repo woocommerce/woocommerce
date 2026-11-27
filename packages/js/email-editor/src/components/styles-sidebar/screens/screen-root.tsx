@@ -6,7 +6,7 @@ import { typography, color, background, layout } from '@wordpress/icons';
 import {
 	__experimentalItemGroup as ItemGroup,
 	__experimentalItem as Item,
-	__experimentalNavigatorButton as NavigatorButton,
+	Navigator,
 	Icon,
 	FlexItem,
 } from '@wordpress/components';
@@ -35,7 +35,7 @@ export function ScreenRoot(): JSX.Element {
 				</Card.Content>
 			</Card.Root>
 			<ItemGroup>
-				<NavigatorButton
+				<Navigator.Button
 					path="/typography"
 					onClick={ () =>
 						recordEvent( 'styles_sidebar_navigation_click', {
@@ -51,8 +51,8 @@ export function ScreenRoot(): JSX.Element {
 							</FlexItem>
 						</Stack>
 					</Item>
-				</NavigatorButton>
-				<NavigatorButton
+				</Navigator.Button>
+				<Navigator.Button
 					path="/colors"
 					onClick={ () =>
 						recordEvent( 'styles_sidebar_navigation_click', {
@@ -68,9 +68,9 @@ export function ScreenRoot(): JSX.Element {
 							</FlexItem>
 						</Stack>
 					</Item>
-				</NavigatorButton>
+				</Navigator.Button>
 				{ hasBackgroundScreen && (
-					<NavigatorButton
+					<Navigator.Button
 						path="/background"
 						onClick={ () =>
 							recordEvent( 'styles_sidebar_navigation_click', {
@@ -86,9 +86,9 @@ export function ScreenRoot(): JSX.Element {
 								</FlexItem>
 							</Stack>
 						</Item>
-					</NavigatorButton>
+					</Navigator.Button>
 				) }
-				<NavigatorButton
+				<Navigator.Button
 					path="/layout"
 					onClick={ () =>
 						recordEvent( 'styles_sidebar_navigation_click', {
@@ -104,7 +104,7 @@ export function ScreenRoot(): JSX.Element {
 							</FlexItem>
 						</Stack>
 					</Item>
-				</NavigatorButton>
+				</Navigator.Button>
 			</ItemGroup>
 		</Stack>
 	);

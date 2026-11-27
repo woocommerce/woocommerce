@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Cart items, Checkout order summary items and order confirmation details now rise in as they first load, and the empty cart rises in when the last item is removed.

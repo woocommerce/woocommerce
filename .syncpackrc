@@ -26,13 +26,38 @@
 			"isBanned": true
 		},
 		{
+			"label": "block-library pins @types/lodash 4.14.182 until its remaining lodash use is removed",
 			"dependencies": [
-				"@types/node"
+				"@types/lodash"
+			],
+			"packages": [
+				"@woocommerce/block-library"
+			],
+			"isIgnored": true
+		},
+		{
+			"label": "Shared type declarations",
+			"dependencyTypes": [
+				"prod",
+				"dev",
+				"pnpmOverrides"
+			],
+			"dependencies": [
+				"@types/debug",
+				"@types/jest",
+				"@types/lodash",
+				"@types/node",
+				"@types/prop-types",
+				"@types/qs",
+				"@types/react",
+				"@types/react-dom",
+				"@types/react-transition-group",
+				"@types/semver"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^24.1.0"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [
@@ -108,7 +133,8 @@
 			"label": "Shared build tooling",
 			"dependencyTypes": [
 				"prod",
-				"dev"
+				"dev",
+				"pnpmOverrides"
 			],
 			"dependencies": [
 				"@babel/cli",
@@ -118,15 +144,20 @@
 				"@babel/preset-react",
 				"@babel/preset-typescript",
 				"@babel/runtime",
+				"@commander-js/extra-typings",
 				"@jest/globals",
-				"@types/jest",
+				"@oclif/core",
+				"@wordpress/browserslist-config",
 				"@wordpress/env",
+				"@wordpress/jest-preset-default",
 				"@wordpress/postcss-plugins-preset",
 				"@wordpress/prettier-config",
 				"@wordpress/scripts",
+				"axios",
 				"babel-jest",
 				"babel-loader",
 				"babel-plugin-transform-react-remove-prop-types",
+				"commander",
 				"copy-webpack-plugin",
 				"css-loader",
 				"eslint",
@@ -141,6 +172,7 @@
 				"postcss-loader",
 				"prettier",
 				"rimraf",
+				"sass",
 				"sass-loader",
 				"simple-git",
 				"ts-jest",
@@ -373,9 +405,7 @@
 			"dependencies": [
 				"@wordpress/babel-plugin-import-jsx-pragma",
 				"@wordpress/babel-preset-default",
-				"@wordpress/browserslist-config",
 				"@wordpress/dependency-extraction-webpack-plugin",
-				"@wordpress/jest-preset-default",
 				"@wordpress/postcss-themes"
 			],
 			"packages": [

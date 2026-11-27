@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\PaymentMode;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
@@ -28,6 +29,13 @@ class WC_Order extends WC_Abstract_Order {
 	 * @var bool|array
 	 */
 	protected $status_transition = false;
+
+	/**
+	 * Whether set_payment_mode() was called on this object since the last gateway switch was saved.
+	 *
+	 * @var bool
+	 */
+	private $payment_mode_recorded = false;
 
 	/**
 	 * Whether set_status() leaves woocommerce_order_edit_status to the next save(). stage_status() sets it.
@@ -281,7 +289,7 @@ class WC_Order extends WC_Abstract_Order {
 
 		$this->save_if_writing_through();
 
-		$add_note    = function () use ( $payment_complete_note ) {
+		$add_note = function () use ( $payment_complete_note ) {
 			try {
 				$this->add_order_note( $payment_complete_note, 0, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
 			} catch ( Exception $e ) {
@@ -294,19 +302,31 @@ class WC_Order extends WC_Abstract_Order {
 				);
 			}
 		};
-		$action_args = array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
-		$save_error  = $this->writing_through ? $this->get_last_save_error() : null;
+
+		$order_id         = $this->get_id();
+		$payment_complete = static function () use ( $order_id, $transaction_id ) {
+			/**
+			 * Fires after the payment of an order is completed and the order is saved.
+			 *
+			 * @param int    $order_id       Order ID.
+			 * @param string $transaction_id Transaction ID of the order.
+			 * @since 1.2.2
+			 * @since 6.8.0 Passes $transaction_id.
+			 */
+			do_action( 'woocommerce_payment_complete', $order_id, $transaction_id );
+		};
+		$save_error       = $this->writing_through ? $this->get_last_save_error() : null;
 		if ( null !== $save_error ) {
 			$paid_status = $this->get_status();
 			$this->defer_to_save(
 				'payment_complete',
-				function () use ( $paid_status, $add_note, $action_args ) {
+				function () use ( $paid_status, $add_note, $payment_complete ) {
 					if ( ! $this->has_status( $paid_status ) && ! $this->is_paid() ) {
 						return;
 					}
 					$add_note();
 					try {
-						call_user_func_array( 'do_action', $action_args );
+						$payment_complete();
 					} catch ( Exception $e ) {
 						wc_get_logger()->error(
 							sprintf( 'Error completing payment for order #%d', $this->get_id() ),
@@ -324,7 +344,7 @@ class WC_Order extends WC_Abstract_Order {
 			throw $save_error;
 		}
 		$this->write_or_defer( 'payment_complete_note', $add_note, array(), true );
-		$this->write_or_defer( 'payment_complete', 'do_action', $action_args, true );
+		$this->write_or_defer( 'payment_complete', $payment_complete, array(), true );
 
 		return true;
 	}
@@ -408,6 +428,7 @@ class WC_Order extends WC_Abstract_Order {
 		$this->run_deferred_actions( $deferred_actions, false );
 
 		$this->maybe_set_user_billing_email();
+		$this->maybe_clear_payment_mode();
 		parent::save();
 		if ( null === $this->get_last_save_error() ) {
 			$this->status_transition();
@@ -416,6 +437,24 @@ class WC_Order extends WC_Abstract_Order {
 		$this->run_deferred_actions( $deferred_actions, true );
 
 		return $this->get_id();
+	}
+
+	/**
+	 * Clear the payment mode when a saved order moves to another gateway, so a mode from a failed attempt doesn't
+	 * carry over to a retry. A mode set on this object covers one switch, since gateways such as WooPayments move
+	 * the order to another of their own IDs after charging.
+	 */
+	private function maybe_clear_payment_mode(): void {
+		if ( ! $this->get_id() || ! array_key_exists( 'payment_method', $this->changes ) || $this->changes['payment_method'] === $this->data['payment_method'] ) {
+			return;
+		}
+
+		if ( $this->payment_mode_recorded ) {
+			$this->payment_mode_recorded = false;
+			return;
+		}
+
+		$this->delete_meta_data( '_wc_payment_mode' );
 	}
 
 	/**
@@ -2785,6 +2824,43 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function is_created_via( $modus ) {
 		return apply_filters( 'woocommerce_order_is_created_via', $modus === $this->get_created_via(), $this, $modus );
+	}
+
+	/**
+	 * Get whether the order was paid in test or live mode, as recorded by its payment gateway.
+	 *
+	 * @since 11.5.0
+	 * @return string One of the PaymentMode constants, or an empty string when the gateway didn't record it.
+	 */
+	public function get_payment_mode() {
+		$mode = $this->get_meta( '_wc_payment_mode' );
+		return in_array( $mode, array( PaymentMode::TEST, PaymentMode::LIVE ), true ) ? $mode : '';
+	}
+
+	/**
+	 * Record whether the order is paid in test or live mode.
+	 *
+	 * Payment gateways should call this when they choose test or live credentials for a charge, before saving the order.
+	 * WooCommerce never sets it, so an order whose gateway doesn't call it has no payment mode. Saving the order with
+	 * another gateway clears the mode, unless this was called on the same object before that switch. That includes
+	 * changes after payment, such as an admin edit or a REST update, so a cleared mode can only count a test order as live.
+	 *
+	 * @since 11.5.0
+	 * @param string $mode One of the PaymentMode constants, or an empty string to clear it.
+	 * @throws WC_Data_Exception When the mode is not valid.
+	 * @return void
+	 */
+	public function set_payment_mode( $mode ) {
+		if ( '' === $mode ) {
+			$this->delete_meta_data( '_wc_payment_mode' );
+			$this->payment_mode_recorded = true;
+			return;
+		}
+		if ( ! in_array( $mode, array( PaymentMode::TEST, PaymentMode::LIVE ), true ) ) {
+			$this->error( 'order_invalid_payment_mode', __( 'Invalid payment mode.', 'woocommerce' ) );
+		}
+		$this->update_meta_data( '_wc_payment_mode', $mode );
+		$this->payment_mode_recorded = true;
 	}
 
 	/**

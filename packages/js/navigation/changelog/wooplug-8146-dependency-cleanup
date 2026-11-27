@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove the unused `@wordpress/api-fetch`, `@wordpress/components`, `@wordpress/compose`, and `@wordpress/notices` dependencies. If your code imports one directly, add it to your own dependencies.

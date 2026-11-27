@@ -178,6 +178,8 @@ export const useStoreCartItemQuantity = (
 
 	return {
 		isPendingDelete: isPending.delete,
+		// From the first change to the quantity until the server has saved it.
+		isPendingQuantity: quantity !== cartItemQuantity || isPending.quantity,
 		quantity,
 		setItemQuantity: setQuantity,
 		removeItem,

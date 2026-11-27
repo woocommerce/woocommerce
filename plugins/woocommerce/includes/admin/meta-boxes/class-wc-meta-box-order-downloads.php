@@ -103,7 +103,22 @@ class WC_Meta_Box_Order_Downloads {
 				if ( ! isset( $permission_ids[ $i ] ) ) {
 					continue;
 				}
-				$download = new WC_Customer_Download( $permission_ids[ $i ] );
+
+				try {
+					$download = new WC_Customer_Download( $permission_ids[ $i ] );
+				} catch ( Exception $e ) {
+					// Permission row no longer exists, e.g. revoked between page load and save, so skip it.
+					wc_get_logger()->notice(
+						'Skipped a download permission that no longer exists while saving an order.',
+						array(
+							'error'         => $e->getMessage(),
+							'permission_id' => $permission_ids[ $i ],
+							'order_id'      => $post_id,
+						)
+					);
+					continue;
+				}
+
 				$download->set_downloads_remaining( wc_clean( $downloads_remaining[ $i ] ) );
 				$download->set_access_expires( array_key_exists( $i, $access_expires ) && '' !== $access_expires[ $i ] ? strtotime( $access_expires[ $i ] ) : '' );
 				$download->save();

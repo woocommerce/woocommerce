@@ -55,10 +55,15 @@ class ReportCSVEmail extends \WC_Email {
 	public function __construct() {
 		$this->placeholders['{report_date_range}'] = '';
 
-		$this->id             = 'admin_report_export_download';
-		$this->template_base  = WC()->plugin_path() . '/includes/react-admin/emails/';
-		$this->template_html  = 'html-admin-report-export-download.php';
-		$this->template_plain = 'plain-admin-report-export-download.php';
+		$this->id                     = 'admin_report_export_download';
+		$this->title                  = __( 'Analytics report download', 'woocommerce' );
+		$this->description            = __( 'Sent to the person who exports an Analytics report, with a link to download it.', 'woocommerce' );
+		$this->supports_cc_bcc        = false;
+		$this->manual                 = true;
+		$this->template_base          = WC()->plugin_path() . '/includes/react-admin/emails/';
+		$this->template_html          = 'html-admin-report-export-download.php';
+		$this->template_plain         = 'plain-admin-report-export-download.php';
+		$this->template_block_content = 'block-content-admin-report-export-download.php';
 
 		/**
 		 * Used to customise report email labels.
@@ -91,14 +96,53 @@ class ReportCSVEmail extends \WC_Email {
 	}
 
 	/**
-	 * This email has no user-facing settings.
+	 * Initialise settings form fields.
+	 *
+	 * The email has no on/off or format setting: an emailed export has no other way to reach the merchant.
+	 * Its block design doesn't use the heading or additional content, so those settings are left out too.
 	 */
-	public function init_form_fields() {}
+	public function init_form_fields() {
+		parent::init_form_fields();
+		unset( $this->form_fields['enabled'], $this->form_fields['email_type'], $this->form_fields['heading'], $this->form_fields['additional_content'] );
+	}
 
 	/**
-	 * This email has no user-facing settings.
+	 * The email is always sent when a merchant exports a report by email.
+	 *
+	 * @return bool
 	 */
-	public function init_settings() {}
+	public function is_enabled() {
+		/**
+		 * Filters whether the email is enabled and will be sent.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param bool      $enabled Whether the email is enabled.
+		 * @param mixed     $object  The object the email is about.
+		 * @param \WC_Email $email   The email.
+		 */
+		return apply_filters( 'woocommerce_email_enabled_' . $this->id, true, $this->object, $this );
+	}
+
+	/**
+	 * Fill the email with a sample Orders report for the email preview.
+	 *
+	 * @since 11.5.0
+	 * @return void
+	 */
+	public function prepare_for_preview() {
+		$this->report_type                   = $this->report_labels['orders'] ?? __( 'Orders', 'woocommerce' );
+		$this->placeholders['{report_name}'] = $this->report_type;
+		$this->download_url                  = 'https://example.com/report-download';
+		$this->set_report_date_range(
+			ReportExporter::get_export_date_range_label(
+				array(
+					'after'  => wp_date( 'Y-m-d', strtotime( 'first day of last month' ) ),
+					'before' => wp_date( 'Y-m-d', strtotime( 'last day of last month' ) ),
+				)
+			)
+		);
+	}
 
 	/**
 	 * Return email type.
@@ -147,6 +191,28 @@ class ReportCSVEmail extends \WC_Email {
 				'date_range'    => $this->report_date_range,
 				'download_url'  => $this->download_url,
 				'email_heading' => $this->get_heading(),
+				'sent_to_admin' => true,
+				'plain_text'    => false,
+				'email'         => $this,
+				'retention'     => $this->get_retention_period(),
+			),
+			'',
+			$this->template_base
+		);
+	}
+
+	/**
+	 * Get block editor email template content.
+	 *
+	 * @return string
+	 */
+	public function get_block_editor_email_template_content() {
+		return wc_get_template_html(
+			$this->template_block_content,
+			array(
+				'report_name'   => $this->report_type,
+				'date_range'    => $this->report_date_range,
+				'download_url'  => $this->download_url,
 				'sent_to_admin' => true,
 				'plain_text'    => false,
 				'email'         => $this,

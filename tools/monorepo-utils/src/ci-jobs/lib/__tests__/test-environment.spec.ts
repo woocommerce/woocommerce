@@ -140,7 +140,7 @@ describe( 'Test Environment', () => {
 						wpVersion: '1.0',
 					} );
 
-				expect( expectation ).rejects.toThrowError(
+				await expect( expectation ).rejects.toThrow(
 					/Failed to parse WP version/
 				);
 			} );
@@ -162,7 +162,7 @@ describe( 'Test Environment', () => {
 						wpVersion: 'latest-10',
 					} );
 
-				expect( expectation ).rejects.toThrowError(
+				await expect( expectation ).rejects.toThrow(
 					/Failed to parse WP version/
 				);
 			} );

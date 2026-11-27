@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\EmailPreview;
 
+use Automattic\WooCommerce\Admin\ReportCSVEmail;
 use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Throwable;
@@ -230,6 +231,9 @@ class EmailPreview {
 			}
 			if ( 'WC_Email_Customer_Refunded_Order' === $email_type ) {
 				$this->email->partial_refund = false;
+			}
+			if ( $this->email instanceof ReportCSVEmail ) {
+				$this->email->prepare_for_preview();
 			}
 			$this->email->set_object( $object );
 		}

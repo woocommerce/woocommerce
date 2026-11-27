@@ -59,6 +59,8 @@ if ( ! class_exists( 'WC_Email_Customer_Order_Withdrawal_Requested', false ) ) :
 			$this->formatter      = new OrderWithdrawalEmailDataFormatter();
 
 			parent::__construct();
+
+			$this->template_block_content = 'emails/block/general-block-content-for-order-withdrawal-emails.php';
 		}
 
 		/**
@@ -136,6 +138,23 @@ if ( ! class_exists( 'WC_Email_Customer_Order_Withdrawal_Requested', false ) ) :
 					'sent_to_admin'      => false,
 					'plain_text'         => false,
 					'email'              => $this,
+				)
+			);
+		}
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'detail_rows'   => $this->formatter->get_detail_rows( $this->withdrawal_data, $this->submitted_at ),
+					'sent_to_admin' => false,
+					'plain_text'    => false,
+					'email'         => $this,
 				)
 			);
 		}

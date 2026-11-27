@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep emails out of the /random/ link that WordPress 7.2 adds, so visitors are not sent to an email page.

@@ -416,6 +416,34 @@ describe( 'TotalsDiscount', () => {
 			expect( removeButton ).toBeDisabled();
 		} );
 
+		it( 'should disable remove buttons, without the loading mask, when disabled is true', () => {
+			const props = {
+				...defaultProps,
+				cartCoupons: [
+					{
+						code: 'COUPON1',
+						label: 'Test Coupon',
+						totals: {
+							...defaultCouponTotals,
+							total_discount: '500',
+							total_discount_tax: '0',
+						},
+					},
+				],
+				values: {
+					total_discount: '500',
+					total_discount_tax: '0',
+				},
+				disabled: true,
+			};
+			render( <TotalsDiscount { ...props } /> );
+
+			expect(
+				screen.getByLabelText( 'Remove coupon "Test Coupon"' )
+			).toBeDisabled();
+			expect( screen.getByTestId( 'not-loading' ) ).toBeInTheDocument();
+		} );
+
 		it( 'should not call removeCoupon when button is disabled', async () => {
 			const user = userEvent.setup();
 			const mockRemoveCoupon = jest.fn();

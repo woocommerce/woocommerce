@@ -225,20 +225,56 @@ const blocksSerialSpecs = [
 	// archive, header, cart, checkout), or the
 	// `wc_blocks_use_blockified_product_grid_block_as_template` option. Every
 	// spec that visits those pages reads them.
+
+	// Saves the Single Product template and the Add to Cart + Options template
+	// part for variable products, creates and changes visible products,
+	// activates two test plugins, and turns off AJAX add to cart and turns on
+	// the redirect to the cart.
 	'**/tests/blocks/add-to-cart-with-options/add-to-cart-with-options.block_theme.spec.ts',
+	// Sets the option to false and saves the Product Catalog template, to check
+	// the Filter by Attribute block with the classic template on `/shop`.
 	'**/tests/blocks/attributes-filter/attribute-filter-classic-template.block_theme.spec.ts',
+	// Makes Beanie sold individually, activates a test plugin, and saves the
+	// Single Product template.
 	'**/tests/blocks/cart-store/cart-line-identity.block_theme.spec.ts',
+	// Saves the Checkout page template. A post with a Checkout block is not the
+	// checkout page, so it cannot replace this template. Also places orders for
+	// Polo.
 	'**/tests/blocks/checkout/checkout-block.merchant.block_theme.spec.ts',
+	// Sets the option to false, to check that the Product Catalog template
+	// then has the classic template block.
 	'**/tests/blocks/classic-template/classic-template-blockified-option.block_theme.spec.ts',
+	// Saves the header template part, creates a visible $10 product, and
+	// changes the tax settings `woocommerce_prices_include_tax` and
+	// `woocommerce_tax_display_cart`.
 	'**/tests/blocks/mini-cart/mini-cart-block.shopper.block_theme.spec.ts',
+	// Saves the header template part, which every frontend page shows. Its
+	// only test is skipped.
 	'**/tests/blocks/mini-cart/mini-cart-header-colors.block_theme.spec.ts',
+	// Edits the content of the Cart and Checkout pages.
 	'**/tests/blocks/page-content-wrapper/page-content-wrapper-page-edit.block_theme.spec.ts',
+	// Sets the option to false and saves the Product Catalog template, to check
+	// the Filter by Price block with the classic template on `/shop`.
 	'**/tests/blocks/price-filter/price-filter-classic-template.block_theme.spec.ts',
+	// Saves the Product Catalog and Product Search Results templates and the
+	// templates for all categories and all tags, and changes the default
+	// catalog order and the number of products per page.
 	'**/tests/blocks/product-collection/product-collection-site-templates.block_theme.spec.ts',
+	// Saves the Product Catalog template and checks term counts on `/shop`,
+	// which only stay the same in a serial run.
 	'**/tests/blocks/product-filters/product-filters-shop.block_theme.spec.ts',
-	'**/tests/blocks/products/products.block_theme.spec.ts',
-	'**/tests/blocks/rating-filter/rating-filter.block_theme.spec.ts',
-	'**/tests/blocks/stock-filter/stock-filter.block_theme.spec.ts',
+	// Saves the Product Catalog and Product Search Results templates. No
+	// narrower template can change only one of these pages.
+	'**/tests/blocks/products/products-site-templates.block_theme.spec.ts',
+	// Sets the option to false and saves the Product Catalog template, to check
+	// the Filter by Rating block with the classic template on `/shop`.
+	'**/tests/blocks/rating-filter/rating-filter-classic-template.block_theme.spec.ts',
+	// Sets the option to false and saves the Product Catalog template, to check
+	// the Filter by Stock block with the classic template on `/shop`.
+	'**/tests/blocks/stock-filter/stock-filter-classic-template.block_theme.spec.ts',
+	// Saves the Single Product template under the plugin template ID and
+	// renames the `wp_theme` term of the plugin. Only a site-wide template has
+	// this ID.
 	'**/tests/blocks/templates/legacy-templates.block_theme.spec.ts',
 
 	// Turn off AJAX add to cart, which every Product Button reads.
@@ -255,6 +291,9 @@ const blocksSerialSpecs = [
 	'**/tests/blocks/cart/cart-checkout-block-taxes.shopper.block_theme.spec.ts',
 	// Switches the site language, which every spec reads.
 	'**/tests/blocks/cart/cart-checkout-block-translations.shopper.block_theme.spec.ts',
+	// Turns on Back in Stock Notifications sign-ups, which adds a form to every
+	// out-of-stock product page.
+	'**/tests/blocks/add-to-cart-with-options/back-in-stock-form.block_theme.spec.ts',
 	// Changes local pickup, shipping methods, "Hide shipping costs until an
 	// address is entered" and the countries the store ships to, and saves the
 	// Checkout page template. Most tests also place orders, some for Beanie,
@@ -268,12 +307,6 @@ const blocksSerialSpecs = [
 	// Changes the shop page slug, so the `shop/` URL that other specs visit
 	// stops working.
 	'**/tests/blocks/templates/shop-page.block_theme.spec.ts',
-
-	// Creates a visible $10 product with limited stock, which the Product
-	// Collection block needs to show it. While it exists, it changes product
-	// counts that catalog specs check, such as the single product under $10 in
-	// `inspector-controls`.
-	'**/tests/blocks/product-collection/product-collection-errors.block_theme.spec.ts',
 ];
 
 export default defineConfig< { resetDatabaseAfterEachTest: boolean } >( {

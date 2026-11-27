@@ -184,10 +184,15 @@ const SidebarSettings = ( {
 				>
 					{ woocommerce_email_data.recipient === null ? (
 						<p className="woocommerce-email-editor-recipients-help">
-							{ __(
-								'This email is sent to Customer.',
-								'woocommerce'
-							) }
+							{ woocommerce_email_data.is_customer_email === false
+								? __(
+										'This email is sent to the person who requested it.',
+										'woocommerce'
+									)
+								: __(
+										'This email is sent to Customer.',
+										'woocommerce'
+									) }
 						</p>
 					) : (
 						<TextControl

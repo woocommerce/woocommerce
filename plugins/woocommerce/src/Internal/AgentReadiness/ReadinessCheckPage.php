@@ -307,14 +307,19 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		} elseif ( $pending ) {
 			$message = __( 'Checking your store', 'woocommerce' );
 		}
-		$truncated = null;
+		$truncated   = null;
+		$sample_note = null;
 		if ( null !== $report && ! empty( $report['truncated'] ) ) {
-			$available = (int) ( $report['available'] ?? 0 );
-			$truncated = $available > ProductScan::PRODUCT_LIMIT
-				/* translators: 1: number of products checked, 2: number of products in the store. */
-				? sprintf( __( 'Product checks covered the %1$s products you updated most recently, out of %2$s. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ), number_format_i18n( $available ) )
-				/* translators: %s: number of products checked. Reports from before the total was stored. */
-				: sprintf( __( 'Product checks covered the %s products you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
+			$available   = (int) ( $report['available'] ?? 0 );
+			$with_total  = $available > ProductScan::PRODUCT_LIMIT;
+			$sample_note = self::truncated_copy(
+				$with_total,
+				$with_total && (int) ( $report['bestsellers_count'] ?? 0 ) >= ProductScan::PRODUCT_LIMIT,
+				$with_total && ! empty( $report['bestsellers_first'] )
+			);
+			$truncated   = $with_total
+				? sprintf( $sample_note['checked'], number_format_i18n( ProductScan::PRODUCT_LIMIT ), number_format_i18n( $available ) )
+				: sprintf( $sample_note['checked'], number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
 		}
 		return array(
 			'title'        => __( 'AI shopping health', 'woocommerce' ),
@@ -322,6 +327,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'last_checked' => self::last_checked( $report ),
 			'checked_note' => $truncated,
 			'checked'      => null !== $report,
+			// Whether the store is checked every day; the merchant can turn it off on the page.
+			'daily_checks' => ScheduledScan::daily_enabled(),
 			'run'          => array(
 				'label'   => null === $report ? __( 'Check your store', 'woocommerce' ) : __( 'Check again', 'woocommerce' ),
 				'pending' => $pending,
@@ -342,16 +349,54 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'overview'     => array(
 				'shopping' => $this->shopping_card( $checks ),
 				// After the description, when the last check stopped at the product limit.
-				'based_on' => null === $truncated ? null : sprintf(
-					/* translators: %s: number of products checked. */
-					__( 'Based on your %s most recently changed products.', 'woocommerce' ),
-					number_format_i18n( ProductScan::PRODUCT_LIMIT )
-				),
+				'based_on' => null === $sample_note ? null : sprintf( $sample_note['based_on'], number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
 				'view_all' => array(
 					'href' => self::url(),
 					'text' => __( 'View all checks', 'woocommerce' ),
 				),
 			),
+		);
+	}
+
+	/**
+	 * The checked note and the "based on" line when a scan stopped at the product limit.
+	 * Bestsellers fill the note on their own when they take every slot.
+	 *
+	 * @param bool $with_total  Whether the report stored how many products the store has.
+	 * @param bool $only_sellers Whether bestsellers fill every checked slot.
+	 * @param bool $then_recent  Whether bestsellers lead and recently changed products follow.
+	 * @return array{checked:string,based_on:string}
+	 */
+	private static function truncated_copy( bool $with_total, bool $only_sellers, bool $then_recent ): array {
+		if ( ! $with_total ) {
+			return array(
+				/* translators: %s: number of products checked. Reports from before the total was stored. */
+				'checked'  => __( 'Product checks covered the %s products you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ),
+				/* translators: %s: number of products checked. */
+				'based_on' => __( 'Based on your %s most recently changed products.', 'woocommerce' ),
+			);
+		}
+		if ( $only_sellers ) {
+			return array(
+				/* translators: 1: number of products checked, 2: number of products in the store. */
+				'checked'  => __( 'Product checks covered %1$s of your %2$s products: your bestsellers. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ),
+				/* translators: %s: number of products checked. */
+				'based_on' => __( 'Based on your %s bestsellers.', 'woocommerce' ),
+			);
+		}
+		if ( $then_recent ) {
+			return array(
+				/* translators: 1: number of products checked, 2: number of products in the store. */
+				'checked'  => __( 'Product checks covered %1$s of your %2$s products: your bestsellers first, then the ones you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ),
+				/* translators: %s: number of products checked. */
+				'based_on' => __( 'Based on %s products: your bestsellers first, then the ones you changed most recently.', 'woocommerce' ),
+			);
+		}
+		return array(
+			/* translators: 1: number of products checked, 2: number of products in the store. */
+			'checked'  => __( 'Product checks covered the %1$s products you updated most recently, out of %2$s. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ),
+			/* translators: %s: number of products checked. */
+			'based_on' => __( 'Based on your %s most recently changed products.', 'woocommerce' ),
 		);
 	}
 
@@ -364,13 +409,15 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @return array{title:string,badge:array{intent:string,text:string}|null,text:string,button:array{href:string,text:string}}
 	 */
 	private function shopping_card( array $checks ): array {
-		$enabled  = UcpUtils::is_enabled();
-		$left     = count( self::open_steps( $checks ) );
+		$enabled = UcpUtils::is_enabled();
+		// As the Setup checklist's badge: the required steps while any is left, then the optional ones.
+		$required = count( array_filter( self::open_steps( $checks ), array( StoreConditions::class, 'shows_required' ) ) );
+		$left     = $required > 0 ? $required : count( self::open_steps( $checks ) );
 		$badge    = $this->shopping_badge( $checks );
 		$blocked  = array() !== $this->store_conditions->failing_required( $checks );
 		$can_shop = $enabled && ! $blocked;
 		// As in the design: Continue setup while a required step is left, as the Setup checklist counts them, otherwise View settings.
-		$button = array() !== array_filter( self::open_steps( $checks ), array( StoreConditions::class, 'shows_required' ) ) ? __( 'Continue setup', 'woocommerce' ) : __( 'View settings', 'woocommerce' );
+		$button = $required > 0 ? __( 'Continue setup', 'woocommerce' ) : __( 'View settings', 'woocommerce' );
 		$set_up = $enabled || false !== get_option( $this->features_controller->feature_enable_option_name( UcpUtils::FEATURE_ID ) );
 		if ( ! $set_up ) {
 			$text   = __( 'Let shoppers find and buy your products through AI assistants.', 'woocommerce' );
@@ -568,10 +615,10 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		}
 		if ( wp_date( 'Y-m-d', $time ) === wp_date( 'Y-m-d' ) ) {
 			/* translators: %s: time of day, such as 10:42 am. */
-			return sprintf( __( 'Last checked today at %s. Checks run each day.', 'woocommerce' ), wp_date( (string) get_option( 'time_format' ), $time ) );
+			return sprintf( __( 'Last checked today at %s.', 'woocommerce' ), wp_date( (string) get_option( 'time_format' ), $time ) );
 		}
 		/* translators: 1: date, such as November 3, 2026. 2: time of day, such as 10:42 am. */
-		return sprintf( __( 'Last checked %1$s at %2$s. Checks run each day.', 'woocommerce' ), wp_date( (string) get_option( 'date_format' ), $time ), wp_date( (string) get_option( 'time_format' ), $time ) );
+		return sprintf( __( 'Last checked %1$s at %2$s.', 'woocommerce' ), wp_date( (string) get_option( 'date_format' ), $time ), wp_date( (string) get_option( 'time_format' ), $time ) );
 	}
 
 
@@ -792,9 +839,19 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		}
 		// Checked in coming soon mode, then the store went live: nothing was blocked; the checks haven't run since.
 		if ( false === $was_live ) {
-			return array( __( 'Your store wasn’t live at the last check', 'woocommerce' ), __( 'These checks run at the next daily check, or you can run the check again now.', 'woocommerce' ) );
+			return array(
+				__( 'Your store wasn’t live at the last check', 'woocommerce' ),
+				ScheduledScan::daily_enabled()
+					? __( 'If your store is live now, these checks run at the next daily check. To run them now, select Check again.', 'woocommerce' )
+					: __( 'If your store is live now, select Check again to run these checks.', 'woocommerce' ),
+			);
 		}
-		return array( __( 'Your pages couldn’t be checked', 'woocommerce' ), __( 'Your hosting setup blocked the check from opening them. Checks run again each day. If this keeps happening, contact your hosting provider.', 'woocommerce' ) );
+		return array(
+			__( 'Your pages couldn’t be checked', 'woocommerce' ),
+			ScheduledScan::daily_enabled()
+				? __( 'Your hosting setup blocked the check from opening them. Checks run again each day. If this keeps happening, contact your hosting provider.', 'woocommerce' )
+				: __( 'Your hosting setup blocked the check from opening them. Select Check again to try again later. If this keeps happening, contact your hosting provider.', 'woocommerce' ),
+		);
 	}
 
 	/**
@@ -821,12 +878,22 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			return array( true, __( 'Launch your store to run this check.', 'woocommerce' ) );
 		}
 		if ( false === $was_live ) {
-			return array( true, __( 'Your store wasn’t live at the last check. This check runs at the next daily check, or you can run the check again now.', 'woocommerce' ) );
+			return array(
+				true,
+				ScheduledScan::daily_enabled()
+					? __( 'Your store wasn’t live at the last check. If it’s live now, this check runs at the next daily check, or select Check again to run it now.', 'woocommerce' )
+					: __( 'Your store wasn’t live at the last check. If it’s live now, select Check again to run this check.', 'woocommerce' ),
+			);
 		}
 		if ( ! empty( $check['no_product'] ) ) {
 			return array( true, __( 'This check needs a product page. It runs once you have a published product that AI assistants can see.', 'woocommerce' ) );
 		}
-		return array( false, __( 'This check couldn’t run. It runs again each day, or you can run the check again now.', 'woocommerce' ) );
+		return array(
+			false,
+			ScheduledScan::daily_enabled()
+				? __( 'This check couldn’t run. It runs again each day, or select Check again to run it now.', 'woocommerce' )
+				: __( 'This check couldn’t run. Select Check again to try again.', 'woocommerce' ),
+		);
 	}
 
 	/**
@@ -974,12 +1041,28 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'link'   => $item['link'],
 			);
 		}
+		// Count Required setup steps only, as the Setup checklist does. A step that blocks listing
+		// still joins when the rules file does not mark it Required, and a card with none of them
+		// keeps the ranking line. A scanned check is not a setup step and keeps that line too.
+		$setup_ids  = array_column( array_filter( $checks, array( self::class, 'is_setup_step' ) ), 'id' );
+		$setup_only = array() === array_diff( array_column( $items, 'id' ), $setup_ids );
+		$required   = $setup_only ? count( array_filter( $items, static fn( array $item ): bool => 0 === $item['tier'] ) ) : 0;
 		return array(
 			'title'   => __( 'Fix first', 'woocommerce' ),
-			'ranking' => self::ranking_text( $report, $items ),
-			'link'    => self::ranking_link( $report ),
+			'ranking' => $required > 0 ? self::required_steps_summary( $required ) : self::ranking_text( $report, $items ),
+			'link'    => $required > 0 ? null : self::ranking_link( $report ),
 			'items'   => $list,
 		);
+	}
+
+	/**
+	 * How many required setup steps are left, as the Setup checklist and a Fix first card with only setup steps say it.
+	 *
+	 * @param int $required Number of failing required setup steps.
+	 */
+	public static function required_steps_summary( int $required ): string {
+		/* translators: %d: number of failing required setup steps. */
+		return sprintf( _n( 'Finish %d required step to get your store ready for AI shopping.', 'Finish %d required steps to get your store ready for AI shopping.', $required, 'woocommerce' ), $required );
 	}
 
 	/**
@@ -1407,7 +1490,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'id'       => $id,
 				'title'    => $group[0],
 				'badge'    => self::badge_data( $cant && array() === $rows ? ( $waiting ? self::waiting_badge() : self::cant_check_badge() ) : self::group_badge( $checks, $waiting ) ),
-				'note'     => $ucp_off && ! $ucp_only ? self::ucp_off_note() : ( 'understand' === $id ? self::sample_note( $report ) : null ),
+				// In coming soon mode the row says why nothing ran; the AI shopping note waits until the store is live.
+				'note'     => $ucp_off && ! $ucp_only && $launched ? self::ucp_off_note() : ( 'understand' === $id ? self::sample_note( $report ) : null ),
 				'channels' => array(),
 				'rows'     => $cant ? array_merge( $rows, array( self::cant_check_row( $launched, $was_live ) ) ) : $rows,
 				'folded'   => self::check_rows( array_values( $folded ), $launched, $was_live ),

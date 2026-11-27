@@ -71,9 +71,9 @@
 	},
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
-		"@types/debug": "^4.1.12",
-		"@types/jest": "catalog:tooling",
-		"@types/node": "^24.1.0",
+		"@types/debug": "catalog:types",
+		"@types/jest": "catalog:types",
+		"@types/node": "catalog:types",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",

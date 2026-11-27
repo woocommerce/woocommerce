@@ -190,6 +190,9 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 */
 	protected function tearDown(): void {
 		try {
+			// Resets wc_log_order_step()'s static state between tests.
+			wc_log_order_step( 'Test cleanup', null, true );
+
 			$this->remove_inserted_tax_rates();
 
 			remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
@@ -7067,6 +7070,97 @@ class Checkout extends \WP_Test_REST_TestCase {
 		);
 		$this->assertCount( 1, $orders, 'Exactly one order should exist.' );
 		$this->assertTrue( $orders[0]->has_status( OrderStatus::PENDING ), 'The order never took payment, so it must be left awaiting payment.' );
+	}
+
+	/**
+	 * Checkout failures and whether the debug log should survive each one.
+	 *
+	 * @return array<string, array{\Throwable, int, string, bool}>
+	 */
+	public function provider_checkout_failures_and_expected_debug_log_outcome(): array {
+		return array(
+			'unexpected server error'                  => array(
+				new \Error( 'Extension raised an engine error while taking payment.' ),
+				500,
+				'woocommerce_rest_unknown_server_error',
+				true,
+			),
+			'ordinary client error (declined payment)' => array(
+				new \Exception( 'Card declined.' ),
+				400,
+				'woocommerce_rest_checkout_process_payment_error',
+				false,
+			),
+		);
+	}
+
+	/**
+	 * @testdox The place-order debug log is kept only for an unexpected server error, not an ordinary client error: $_dataName.
+	 * @dataProvider provider_checkout_failures_and_expected_debug_log_outcome
+	 *
+	 * @param \Throwable $failure         The failure raised while the gateway is taking payment.
+	 * @param int        $expected_status The HTTP status the checkout should fail with.
+	 * @param string     $expected_code   The REST error code the checkout should fail with.
+	 * @param bool       $log_is_kept     Whether the debug log trail should survive this failure.
+	 */
+	public function test_debug_log_kept_only_for_unexpected_server_errors( \Throwable $failure, int $expected_status, string $expected_code, bool $log_is_kept ) {
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function () use ( $failure ) {
+				throw $failure;
+			},
+			998
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertSame( $expected_status, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $expected_code, $response->get_data()['code'] );
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$this->assertCount( 1, $orders, 'Exactly one order should exist.' );
+
+		if ( $log_is_kept ) {
+			$this->assertStringStartsWith( 'place-order-debug-', $orders[0]->get_meta( '_debug_log_source' ), 'The debug log trail must be kept for an unexpected server error, not cleared.' );
+			$this->assertEmpty( $orders[0]->get_meta( '_debug_log_source_pending_deletion' ), 'The debug log must not be scheduled for deletion on an unexpected server error.' );
+		} else {
+			$this->assertEmpty( $orders[0]->get_meta( '_debug_log_source' ), 'The debug log trail must be cleared for an ordinary client error.' );
+			$this->assertStringStartsWith( 'place-order-debug-', $orders[0]->get_meta( '_debug_log_source_pending_deletion' ), 'The debug log must be scheduled for deletion on an ordinary client error.' );
+		}
+	}
+
+	/**
+	 * @testdox The place-order debug log is kept when a gateway reports an error without throwing.
+	 */
+	public function test_debug_log_kept_when_gateway_reports_error_without_throwing() {
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context, &$payment_result ) {
+				$payment_result->set_status( 'error' );
+			},
+			998,
+			2
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertSame( 500, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$this->assertCount( 1, $orders, 'Exactly one order should exist.' );
+
+		$this->assertStringStartsWith( 'place-order-debug-', $orders[0]->get_meta( '_debug_log_source' ), 'The debug log trail must be kept when a gateway reports an error, not cleared.' );
+		$this->assertEmpty( $orders[0]->get_meta( '_debug_log_source_pending_deletion' ), 'The debug log must not be scheduled for deletion when a gateway reports an error.' );
 	}
 
 	/**

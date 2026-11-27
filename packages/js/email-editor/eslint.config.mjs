@@ -18,7 +18,6 @@ export default [
 			],
 			'import/resolver': {
 				node: {},
-				webpack: {},
 				typescript: {},
 			},
 		},

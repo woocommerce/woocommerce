@@ -53,6 +53,10 @@
 		"overlayPosition": {
 			"type": "string",
 			"enum": [ "left", "right" ]
+		},
+		"overlayButtonStyle": {
+			"type": "string",
+			"enum": [ "plain", "button" ]
 		}
 	},
 	"example": {},

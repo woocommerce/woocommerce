@@ -3,7 +3,7 @@
  */
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
 import { useState, Fragment, useCallback, useEffect } from '@wordpress/element';
-import { usePrevious } from '@woocommerce/base-hooks';
+import { usePrevious, useToggleCollapse } from '@woocommerce/base-hooks';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@ariakit/react';
 import { getFieldLabel } from '@woocommerce/blocks-checkout';
@@ -50,6 +50,21 @@ const AddressLine2Field = ( {
 		}
 	}, [ value ] );
 
+	// The field grows from the height of the "+ Add" link that a click replaced, so that the content below moves in one
+	// direction.
+	const fieldCollapse = useToggleCollapse(
+		Boolean( isFieldVisible ),
+		() =>
+			( props?.id &&
+				document
+					.getElementById( props.id )
+					?.closest< HTMLElement >(
+						'.wc-block-components-address-form__address_2'
+					) ) ||
+			null,
+		{ growFromTrigger: true }
+	);
+
 	return (
 		<Fragment>
 			{ isFieldVisible ? (
@@ -70,7 +85,10 @@ const AddressLine2Field = ( {
 						className={
 							'wc-block-components-address-form__address_2-toggle'
 						}
-						onClick={ () => setIsFieldVisible( true ) }
+						onClick={ ( event ) => {
+							fieldCollapse.onToggle( event );
+							setIsFieldVisible( true );
+						} }
 					>
 						{ sprintf(
 							// translators: %s: address 2 field label.

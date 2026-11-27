@@ -232,7 +232,10 @@
 					"name": "PHP: 7.4 WP: latest - 1",
 					"testType": "unit:php",
 					"command": "test:php:env",
-					"shardingArguments": [],
+					"shardingArguments": [
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main-includes",
+						"--testsuite=wc-phpunit-main-other"
+					],
 					"onlyForDependencies": [
 						"@woocommerce/email-editor-config"
 					],
@@ -268,7 +271,10 @@
 					"optional": true,
 					"testType": "unit:php",
 					"command": "test:php:env",
-					"shardingArguments": [],
+					"shardingArguments": [
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main-includes",
+						"--testsuite=wc-phpunit-main-other"
+					],
 					"onlyForDependencies": [],
 					"changes": [
 						"tests/legacy/**",
@@ -1556,10 +1562,9 @@
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
-		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "catalog:wp-min",
 		"@wordpress/env": "catalog:tooling",
-		"axios": "^0.34.0",
+		"axios": "catalog:tooling",
 		"config": "3.3.7",
 		"dotenv": "^10.0.0",
 		"eslint": "catalog:tooling",
