@@ -208,6 +208,17 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		return $order ?? wc_get_order( $this->get_order_id() );
 	}
 
+	/**
+	 * The marked order that holds this item: the order instance the item links to, when it is marked. An item with
+	 * no link to its order instance gets null, as on the saving path.
+	 *
+	 * @return WC_Data|null
+	 */
+	protected function get_staged_object() {
+		$order = $this->order ? $this->order->get() : null;
+		return null !== $order && $order->staged_mark ? $order : null;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -303,7 +314,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$this->set_taxes( false );
 		}
 
-		do_action( 'woocommerce_order_item_after_calculate_taxes', $this, $calculate_tax_for );
+		$this->do_mapped_action( 'woocommerce_order_item_after_calculate_taxes', array( $this, $calculate_tax_for ), $calculate_tax_for );
 
 		return true;
 	}

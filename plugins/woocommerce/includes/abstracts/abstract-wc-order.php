@@ -2153,6 +2153,49 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function recalculate_coupons() {
+		$this->apply_coupons_to_items();
+
+		// Recalculate totals and taxes.
+		$this->calculate_totals( true );
+	}
+
+	/**
+	 * Apply all coupons in this order again to all line items and recalculate totals and taxes in memory, like
+	 * recalculate_coupons(), but do not save.
+	 *
+	 * @since 11.5.0
+	 * @return void
+	 * @throws WC_Data_Exception When the class has not adopted a stage method, or a listener is on an action that does not fire for staged changes.
+	 */
+	public function stage_recalculated_coupons() {
+		$this->refuse_unstaged_overrides( self::staged_methods_from( 'recalculate_coupons' ) );
+		$this->apply_coupons_to_items();
+		$this->stage_totals( true );
+	}
+
+	/**
+	 * Saving methods and their stage methods, from the given saving method to the end of the chain of calls.
+	 * For example, stage_recalculated_coupons() calls stage_totals(), which calls stage_taxes().
+	 *
+	 * @param string $method First saving method.
+	 * @return array<string, string>
+	 */
+	private static function staged_methods_from( string $method ): array {
+		$chain = array(
+			'recalculate_coupons' => 'stage_recalculated_coupons',
+			'calculate_totals'    => 'stage_totals',
+			'calculate_taxes'     => 'stage_taxes',
+			'update_taxes'        => 'stage_tax_items',
+		);
+		return array_slice( $chain, (int) array_search( $method, array_keys( $chain ), true ), null, true );
+	}
+
+	/**
+	 * Reset the line totals and apply the coupons of the order again, in memory.
+	 *
+	 * @return void
+	 */
+	private function apply_coupons_to_items() {
 		// Reset line item totals.
 		foreach ( $this->get_items() as $item ) {
 			$item->set_total( $item->get_subtotal() );
@@ -2203,9 +2246,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$this->set_coupon_discount_amounts( $discounts );
 		$this->set_item_discount_amounts( $discounts );
-
-		// Recalculate totals and taxes.
-		$this->calculate_totals( true );
 	}
 
 	/**
@@ -2371,6 +2411,51 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return int
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
+		list( $item, $args ) = $this->build_product_item( $product, $qty, $args );
+		$item->set_order_id( $this->get_id() );
+		$item->save();
+		$this->add_item( $item );
+		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '3.0', 'woocommerce_new_order_item action instead' );
+		wp_cache_delete( 'order-needs-processing-' . $this->get_id(), 'orders' );
+		return $item->get_id();
+	}
+
+	/**
+	 * Build a product line item and add it to the order in memory, like add_product(), but do not save the item.
+	 * The next save() of the order writes it.
+	 *
+	 * @since 11.5.0
+	 * @param  WC_Product $product Product object.
+	 * @param  int        $qty Quantity to add.
+	 * @param  array      $args Args for the added product, including an optional tax location for its price.
+	 * @return WC_Order_Item_Product The item, without an ID.
+	 * @throws WC_Data_Exception When the class has not adopted the stage method, or a listener is on an action that does not fire for staged changes.
+	 */
+	public function stage_product_item( $product, $qty = 1, $args = array() ) {
+		$this->refuse_unstaged_overrides( array( 'add_product' => 'stage_product_item' ) );
+
+		list( $item, $args ) = $this->build_product_item( $product, $qty, $args );
+		$item->set_order_id( $this->get_id() );
+		$this->add_item( $item );
+		// The deprecated action has no new name. On the staged path a listener on it refuses the change.
+		if ( null !== $this->get_staged_object() ) {
+			self::refuse_old_listeners( 'woocommerce_order_add_product', null );
+		} else {
+			wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '3.0', 'woocommerce_new_order_item action instead' );
+		}
+		wp_cache_delete( 'order-needs-processing-' . $this->get_id(), 'orders' );
+		return $item;
+	}
+
+	/**
+	 * Build a product line item for add_product() and stage_product_item(), without saving it.
+	 *
+	 * @param  WC_Product $product Product object.
+	 * @param  int        $qty Quantity to add.
+	 * @param  array      $args Args for the added product.
+	 * @return array{0: WC_Order_Item_Product, 1: array} The item, and the args after the defaults.
+	 */
+	private function build_product_item( $product, $qty, $args ) {
 		if ( $product ) {
 			$order = ArrayUtil::get_value_or_default( $args, 'order' );
 			$total = wc_get_price_excluding_tax(
@@ -2416,12 +2501,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Order_Item_Product::class );
 		$item->set_props( $args );
 		$item->set_backorder_meta();
-		$item->set_order_id( $this->get_id() );
-		$item->save();
-		$this->add_item( $item );
-		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '3.0', 'woocommerce_new_order_item action instead' );
-		wp_cache_delete( 'order-needs-processing-' . $this->get_id(), 'orders' );
-		return $item->get_id();
+
+		return array( $item, $args );
 	}
 
 	/*
@@ -2623,7 +2704,32 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function calculate_taxes( $args = array() ) {
-		do_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
+		$this->calculate_item_taxes( $args );
+		$this->update_taxes();
+	}
+
+	/**
+	 * Calculate the taxes of the items and update the tax items in memory, like calculate_taxes(), but do not save.
+	 *
+	 * @since 11.5.0
+	 * @param array $args Override the tax location.
+	 * @return void
+	 * @throws WC_Data_Exception When the class has not adopted a stage method, or a listener is on an action that does not fire for staged changes.
+	 */
+	public function stage_taxes( $args = array() ) {
+		$this->refuse_unstaged_overrides( self::staged_methods_from( 'calculate_taxes' ) );
+		$this->calculate_item_taxes( $args );
+		$this->stage_tax_items();
+	}
+
+	/**
+	 * Calculate the taxes of the line, fee and shipping items in memory.
+	 *
+	 * @param array $args Override the tax location.
+	 * @return void
+	 */
+	private function calculate_item_taxes( $args ) {
+		$this->do_mapped_action( 'woocommerce_order_before_calculate_taxes', array( $args, $this ), $args );
 
 		$calculate_tax_for  = $this->get_tax_location( $args );
 		$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
@@ -2656,8 +2762,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$item->set_taxes( false );
 			}
 		}
-
-		$this->update_taxes();
 	}
 
 	/**
@@ -2681,6 +2785,31 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function update_taxes() {
+		$this->set_tax_items( true );
+		$this->save();
+	}
+
+	/**
+	 * Update the tax items of the order from the item taxes in memory, like update_taxes(), but do not save.
+	 * The next save() writes the changed tax items with the other items of the order.
+	 *
+	 * @since 11.5.0
+	 * @return void
+	 * @throws WC_Data_Exception When the class has not adopted the stage method.
+	 */
+	protected function stage_tax_items() {
+		$this->refuse_unstaged_overrides( array( 'update_taxes' => 'stage_tax_items' ) );
+		$this->set_tax_items( false );
+	}
+
+	/**
+	 * Update the tax items of the order from the item taxes. update_taxes() saves each kept tax item at the
+	 * point where it always did; stage_tax_items() leaves them to the order save.
+	 *
+	 * @param bool $save_kept_items Whether to save each kept tax item right away.
+	 * @return void
+	 */
+	private function set_tax_items( bool $save_kept_items ) {
 		$cart_taxes     = array();
 		$shipping_taxes = array();
 		$existing_taxes = $this->get_taxes();
@@ -2729,7 +2858,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
 
 			$saved_rate_ids[] = $tax_rate_id;
-			$tax->save();
+			if ( $save_kept_items ) {
+				$tax->save();
+			}
 		}
 
 		$new_rate_ids = wp_parse_id_list( array_diff( array_keys( $cart_taxes + $shipping_taxes ), $saved_rate_ids ) );
@@ -2752,7 +2883,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$this->set_shipping_tax( array_sum( $shipping_taxes ) );
 		$this->set_cart_tax( array_sum( $cart_taxes ) );
-		$this->save();
 	}
 
 	/**
@@ -2791,12 +2921,52 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float calculated grand total.
 	 */
 	public function calculate_totals( $and_taxes = true ) {
-		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
+		$sums = $this->sum_totals_before_taxes( $and_taxes );
+
+		// Calculate taxes for items, shipping, discounts. Note; this also triggers save().
+		if ( $and_taxes ) {
+			$this->calculate_taxes();
+		}
+
+		$this->set_totals_after_taxes( $and_taxes, $sums );
+
+		$this->save();
+
+		return $this->get_total();
+	}
+
+	/**
+	 * Calculate totals, and taxes when asked, in memory, like calculate_totals(), but do not save.
+	 *
+	 * @since 11.5.0
+	 * @param  bool $and_taxes Calc taxes if true.
+	 * @return float calculated grand total.
+	 * @throws WC_Data_Exception When the class has not adopted a stage method, or a listener is on an action that does not fire for staged changes.
+	 */
+	public function stage_totals( $and_taxes = true ) {
+		$this->refuse_unstaged_overrides( $and_taxes ? self::staged_methods_from( 'calculate_totals' ) : array( 'calculate_totals' => 'stage_totals' ) );
+
+		$sums = $this->sum_totals_before_taxes( $and_taxes );
+		if ( $and_taxes ) {
+			$this->stage_taxes();
+		}
+		$this->set_totals_after_taxes( $and_taxes, $sums );
+
+		return $this->get_total();
+	}
+
+	/**
+	 * The first part of calculate_totals(), before the taxes: fire the before action, set the shipping total,
+	 * cap negative fees, and return the sums the second part needs.
+	 *
+	 * @param bool $and_taxes Whether the taxes are calculated too.
+	 * @return array{fees_total: float, cart_subtotal: float, cart_total: float, price_decimals: int}
+	 */
+	private function sum_totals_before_taxes( $and_taxes ): array {
+		$this->do_mapped_action( 'woocommerce_order_before_calculate_totals', array( $and_taxes, $this ), $and_taxes );
 
 		$fees_total        = 0;
 		$shipping_total    = 0;
-		$cart_subtotal_tax = 0;
-		$cart_total_tax    = 0;
 		$price_decimals    = wc_get_price_decimals();
 
 		$cart_subtotal = $this->get_cart_subtotal_for_order();
@@ -2823,10 +2993,29 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$fees_total += (float) $item->get_total();
 		}
 
-		// Calculate taxes for items, shipping, discounts. Note; this also triggers save().
-		if ( $and_taxes ) {
-			$this->calculate_taxes();
-		}
+		return array(
+			'fees_total'     => $fees_total,
+			'cart_subtotal'  => $cart_subtotal,
+			'cart_total'     => $cart_total,
+			'price_decimals' => $price_decimals,
+		);
+	}
+
+	/**
+	 * The second part of calculate_totals(), after the taxes: set the discount and order totals, the cost of
+	 * goods, and fire the after action.
+	 *
+	 * @param bool  $and_taxes Whether the taxes were calculated too.
+	 * @param array $sums      Sums from sum_totals_before_taxes().
+	 * @return void
+	 */
+	private function set_totals_after_taxes( $and_taxes, array $sums ) {
+		$fees_total        = $sums['fees_total'];
+		$cart_subtotal     = $sums['cart_subtotal'];
+		$cart_total        = $sums['cart_total'];
+		$price_decimals    = $sums['price_decimals'];
+		$cart_subtotal_tax = 0;
+		$cart_total_tax    = 0;
 
 		// Sum taxes again so we can work out how much tax was discounted. This uses original values, not those possibly rounded to 2dp.
 		foreach ( $this->get_items() as $item ) {
@@ -2856,11 +3045,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 * @param WC_Abstract_Order $order     Order object.
 		 * @since 3.3.0
 		 */
-		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
-
-		$this->save();
-
-		return $this->get_total();
+		$this->do_mapped_action( 'woocommerce_order_after_calculate_totals', array( $and_taxes, $this ), $and_taxes );
 	}
 
 	/**
