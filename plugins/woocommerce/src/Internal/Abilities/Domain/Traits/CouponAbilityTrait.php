@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -44,12 +46,12 @@ trait CouponAbilityTrait {
 	}
 
 	/**
-	 * Get the schema for a single coupon in a response.
+	 * Get the schema for a single coupon in a response, with the fields extensions register on coupons.
 	 *
 	 * @return array
 	 */
 	protected static function get_coupon_output_schema(): array {
-		return array(
+		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'                          => array( 'type' => 'integer' ),
@@ -125,6 +127,7 @@ trait CouponAbilityTrait {
 			),
 			'additionalProperties' => false,
 		);
+		return ExtensibleAbilities::add_fields_schema( $schema, 'coupon' );
 	}
 
 	/**
@@ -330,9 +333,9 @@ trait CouponAbilityTrait {
 	 * Format a coupon for ability output.
 	 *
 	 * @param \WC_Coupon $coupon Coupon object.
-	 * @return array
+	 * @return array|\WP_Error The error of an extension field that failed.
 	 */
-	protected static function format_coupon_for_response( \WC_Coupon $coupon ): array {
+	protected static function format_coupon_for_response( \WC_Coupon $coupon ) {
 		$usage_limit          = $coupon->get_usage_limit();
 		$usage_limit_per_user = $coupon->get_usage_limit_per_user();
 
@@ -390,11 +393,12 @@ trait CouponAbilityTrait {
 				$output['expiry']['last_valid_day'] = $local->modify( '-1 day' )->format( 'Y-m-d' );
 			}
 		}
-		return array_filter(
+		$output = array_filter(
 			$output,
 			static function ( $value ) {
 				return null !== $value;
 			}
 		);
+		return ExtensibleAbilities::add_fields_to_object( $output, 'coupon', $coupon );
 	}
 }

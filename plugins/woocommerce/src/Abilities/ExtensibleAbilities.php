@@ -373,8 +373,8 @@ class ExtensibleAbilities {
 	 *     Filter arguments.
 	 *
 	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query`,
-	 *                               `orders-query`, `customers-query` and `product-terms-query` apply the filters
-	 *                               of `product`, `order`, `customer` and `product_term`. A `product_term`
+	 *                               `orders-query`, `customers-query`, `coupons-query` and `product-terms-query` apply
+	 *                               the filters of `product`, `order`, `customer`, `coupon` and `product_term`. A `product_term`
 	 *                               `meta_query` reads term meta. A `customer` filter returns only `include_ids`, which are
 	 *                               user IDs, so it matches registered customers only. The list ability
 	 *                               of another resource must call `get_query_args()` and `add_query_filters_schema()` itself.

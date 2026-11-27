@@ -1198,6 +1198,20 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					return array( 'product_ids' => array( $product ) );
 				},
 			),
+			'coupon'         => array(
+				'coupon',
+				'woocommerce/coupons-query',
+				'coupons',
+				static function (): array {
+					$ids = array();
+					foreach ( array( 'prime-one', 'prime-two' ) as $code ) {
+						$coupon = new \WC_Coupon();
+						$coupon->set_code( $code );
+						$ids[] = $coupon->save();
+					}
+					return array( 'include' => $ids );
+				},
+			),
 			'order_refund'   => array(
 				'order_refund',
 				'woocommerce/order-refunds-query',
