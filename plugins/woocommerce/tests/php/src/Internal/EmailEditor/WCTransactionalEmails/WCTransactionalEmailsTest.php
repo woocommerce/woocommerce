@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\EmailEditor\WCTransactionalEmails;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 
 /**
@@ -67,6 +68,25 @@ class WCTransactionalEmailsTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $emails );
 		$this->assertContains( 'customer_new_account', $emails );
 		$this->assertNotContains( 'custom_email', $emails );
+	}
+
+	/**
+	 * @testdox The back-in-stock emails are listed on a site that still turns the feature on with the alpha constant.
+	 */
+	public function test_stock_notification_emails_are_listed_with_the_alpha_constant(): void {
+		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'no' );
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+
+		try {
+			$emails = WCTransactionalEmails::get_core_transactional_emails();
+		} finally {
+			Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
+		}
+
+		$this->assertContains( 'customer_stock_notification', $emails );
+		$this->assertContains( 'customer_stock_notification_verify', $emails );
+		$this->assertContains( 'customer_stock_notification_verified', $emails );
 	}
 
 	/**

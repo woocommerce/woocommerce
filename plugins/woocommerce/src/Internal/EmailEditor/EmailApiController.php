@@ -79,6 +79,7 @@ class EmailApiController {
 		return array(
 			'enabled'                => is_null( $enabled ) ? $email->is_enabled() : 'yes' === $enabled,
 			'is_manual'              => $email->is_manual(),
+			'is_customer_email'      => $email->is_customer_email(),
 			'subject'                => $email->get_option( 'subject' ),
 			'subject_full'           => $email->get_option( 'subject_full' ), // For customer_refunded_order email type because it has two different subjects.
 			'subject_partial'        => $email->get_option( 'subject_partial' ),

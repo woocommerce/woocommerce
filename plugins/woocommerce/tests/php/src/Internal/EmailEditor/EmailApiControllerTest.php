@@ -309,6 +309,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$mock_email->method( 'supports_cc_bcc' )->willReturn( true );
+		$mock_email->method( 'is_customer_email' )->willReturn( true );
 		$mock_email->method( 'get_default_subject' )->willReturn( 'Default Subject' );
 		$mock_email->method( 'get_form_fields' )->willReturn(
 			array(
@@ -328,6 +329,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$result    = $controller->get_email_data( $post_data );
 		$this->assertNull( $result['recipient'] );
 		$this->assertNull( $result['send_on_unpaid_timeout'] );
+		$this->assertTrue( $result['is_customer_email'], 'The editor needs this to say who receives an email without a recipient field.' );
 	}
 
 	/**
