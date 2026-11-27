@@ -126,7 +126,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 			$this->set_taxes( false );
 		}
 
-		do_action( 'woocommerce_order_item_fee_after_calculate_taxes', $this, $calculate_tax_for );
+		$this->do_mapped_action( 'woocommerce_order_item_fee_after_calculate_taxes', array( $this, $calculate_tax_for ), $calculate_tax_for );
 
 		return true;
 	}

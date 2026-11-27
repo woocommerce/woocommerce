@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Orders\ItemQuantityLimits;
 
@@ -14,8 +15,9 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Address and line rules of the abilities that write an order, as the order screen applies them. The address
- * and line changes stay in memory until the ability saves. The new product lines and the totals wait for the
- * save, which uses the order methods that save. A class that uses this trait also uses OrderAbilityTrait.
+ * and line changes stay in memory until the ability saves. With the extensible_abilities feature on, the new
+ * product lines and the totals are staged in memory too. With it off, they wait for the save, which uses the
+ * order methods that save. A class that uses this trait also uses OrderAbilityTrait.
  */
 trait OrderEditTrait {
 
@@ -56,13 +58,28 @@ trait OrderEditTrait {
 	 * Leave the totals for recalculate_saved_order() after the lines changed. Coupons apply again after a
 	 * product is added, because they were applied before the new line existed.
 	 *
+	 * With the feature on, recalculate in memory with the stage methods instead.
+	 *
 	 * @param \WC_Order $order         Order.
 	 * @param bool      $product_added Whether a product line was added.
+	 * @throws \WC_Data_Exception When the order class has not adopted a stage method, or a listener is on an action that does not fire for staged changes.
 	 */
 	private function stage_line_totals( \WC_Order $order, bool $product_added ): void {
 		$recalculate_coupons = $product_added && ! empty( $order->get_items( 'coupon' ) );
 
-		$this->recalculate_after_save = $recalculate_coupons ? 'coupons' : 'totals';
+		if ( ! ExtensibleAbilities::is_enabled() ) {
+			$this->recalculate_after_save = $recalculate_coupons ? 'coupons' : 'totals';
+			return;
+		}
+
+		if ( $recalculate_coupons && $order->get_prices_include_tax() ) {
+			$order->stage_taxes();
+		}
+		if ( $recalculate_coupons ) {
+			$order->stage_recalculated_coupons();
+		} else {
+			$order->stage_totals();
+		}
 	}
 
 	/**
@@ -226,7 +243,8 @@ trait OrderEditTrait {
 	}
 
 	/**
-	 * Check a new product line. The line waits for add_queued_products(), which adds it on save.
+	 * Check a new product line. With the feature on, stage it on the order. With it off, the line waits for
+	 * add_queued_products(), which adds it on save.
 	 *
 	 * @param \WC_Order $order Order.
 	 * @param array     $line  Product line input.
@@ -260,7 +278,11 @@ trait OrderEditTrait {
 			return self::quantity_error( $exception );
 		}
 
-		$this->products_to_add[] = array( $product, $quantity );
+		if ( ExtensibleAbilities::is_enabled() ) {
+			$this->changed_product_lines[] = $order->stage_product_item( $product, $quantity, array( 'order' => $order ) );
+		} else {
+			$this->products_to_add[] = array( $product, $quantity );
+		}
 
 		return null;
 	}

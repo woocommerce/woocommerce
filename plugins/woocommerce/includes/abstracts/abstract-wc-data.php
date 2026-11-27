@@ -40,6 +40,13 @@ abstract class WC_Data {
 	const CLONE_MODE_CACHE = 'cache';
 
 	/**
+	 * Whether the object holds staged changes that are not saved yet. set_staged() sets it.
+	 *
+	 * @var bool
+	 */
+	protected $staged_mark = false;
+
+	/**
 	 * ID for this object.
 	 *
 	 * @since 3.0.0
@@ -203,6 +210,167 @@ abstract class WC_Data {
 			foreach ( $this->{$set} as $prop => $value ) {
 				if ( $value instanceof DateTime ) {
 					$this->{$set}[ $prop ] = clone $value;
+				}
+			}
+		}
+		$this->staged_mark = false;
+	}
+
+	/**
+	 * Mark the object as staged, or remove the mark. Only the code that stages a change and then saves it sets
+	 * the mark: it marks the object before the first change and removes the mark right before the save.
+	 *
+	 * @internal
+	 * @since 11.5.0
+	 * @param bool $staged Whether the object holds staged changes that are not saved yet.
+	 */
+	public function set_staged( bool $staged ): void {
+		$this->staged_mark = $staged;
+	}
+
+	/**
+	 * The marked object that holds the staged change: this object when it is marked, or null.
+	 *
+	 * @return WC_Data|null
+	 */
+	protected function get_staged_object() {
+		return $this->staged_mark ? $this : null;
+	}
+
+	/**
+	 * Fire an action about this object under its old name and under its new name, which ends in _v2.
+	 *
+	 * The new name gets this object, whether the change is staged, and the other arguments. On the saving path the
+	 * old name fires first with its old arguments. On the staged path the old name does not fire: a listener on it
+	 * refuses the change before anything fires.
+	 *
+	 * @param string $hook     Old action name.
+	 * @param array  $old_args Arguments of the old action.
+	 * @param mixed  ...$args  Arguments of the new action after the object and the staged flag.
+	 * @throws WC_Data_Exception When the old action has a listener on a marked object.
+	 */
+	protected function do_mapped_action( string $hook, array $old_args, ...$args ): void {
+		$staged = null !== $this->get_staged_object();
+		if ( $staged ) {
+			self::refuse_old_listeners( $hook, $hook . '_v2' );
+		} else {
+			if ( defined( 'WC_NOTICE_OLD_STAGED_HOOKS' ) && WC_NOTICE_OLD_STAGED_HOOKS && has_action( $hook ) ) {
+				wc_deprecated_hook( $hook, '11.5.0', $hook . '_v2' );
+			}
+			/**
+			 * Fires the old action with its old arguments. Each mapped action is documented where it is called.
+			 *
+			 * @since 11.5.0
+			 *
+			 * @param mixed ...$old_args Arguments of the old action.
+			 */
+			do_action( $hook, ...$old_args );
+		}
+		/**
+		 * Fires the new action, whose name ends in _v2. Each mapped action is documented where it is called.
+		 *
+		 * @since 11.5.0
+		 *
+		 * @param WC_Data $this    The object the action is about.
+		 * @param bool    $staged  Whether the change is staged and not saved yet.
+		 * @param mixed   ...$args Other arguments of the new action.
+		 */
+		do_action( $hook . '_v2', $this, $staged, ...$args );
+	}
+
+	/**
+	 * Refuse a staged change when an action that does not fire on the staged path has a listener.
+	 *
+	 * @param string      $hook     Old action name.
+	 * @param string|null $new_hook The action to listen to instead, or null when there is none.
+	 * @throws WC_Data_Exception When the action has a listener.
+	 */
+	protected static function refuse_old_listeners( string $hook, $new_hook ): void {
+		global $wp_filter;
+
+		$names = array();
+		foreach ( isset( $wp_filter[ $hook ] ) ? $wp_filter[ $hook ]->callbacks : array() as $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				$names[] = self::callback_name( $callback['function'] );
+			}
+		}
+
+		if ( empty( $names ) ) {
+			return;
+		}
+
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- A plain text message for a client, built from PHP names.
+		throw new WC_Data_Exception(
+			'woocommerce_data_staging_unsupported',
+			sprintf(
+				/* translators: 1: action name, 2: comma-separated list of PHP callbacks, 3: what to do instead. */
+				__( 'This change cannot be staged, because code listens to the %1$s action, which does not fire for staged changes: %2$s. %3$s', 'woocommerce' ),
+				$hook,
+				implode( ', ', $names ),
+				null === $new_hook
+					/* translators: %s: action name. */
+					? sprintf( __( 'The %s action has no replacement for staged changes.', 'woocommerce' ), $hook )
+					/* translators: %s: action name. */
+					: sprintf( __( 'Listen to %s instead, which fires for saved and staged changes.', 'woocommerce' ), $new_hook )
+			),
+			400
+		);
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+	}
+
+	/**
+	 * Readable name of a hook callback.
+	 *
+	 * @param mixed $callback Hook callback.
+	 * @return string
+	 */
+	private static function callback_name( $callback ): string {
+		if ( is_string( $callback ) ) {
+			return $callback;
+		}
+		if ( is_array( $callback ) && isset( $callback[0], $callback[1] ) ) {
+			return ( is_object( $callback[0] ) ? get_class( $callback[0] ) : (string) $callback[0] ) . '::' . $callback[1];
+		}
+		if ( $callback instanceof Closure ) {
+			$function = new ReflectionFunction( $callback );
+			$file     = wp_normalize_path( (string) $function->getFileName() );
+			$content  = wp_normalize_path( WP_CONTENT_DIR ) . '/';
+			$file     = 0 === strpos( $file, $content ) ? substr( $file, strlen( $content ) ) : wp_basename( $file );
+			return sprintf( 'a closure in %1$s on line %2$d', $file, $function->getStartLine() );
+		}
+
+		return is_object( $callback ) ? get_class( $callback ) . '::__invoke' : '';
+	}
+
+	/**
+	 * Refuse a stage method when the object's class overrides one of the saving methods without overriding its
+	 * stage method too, because staging would skip the rules of that override.
+	 *
+	 * @param array<string, string> $methods Saving method => stage method, for the stage method and the ones it calls.
+	 * @throws WC_Data_Exception When a class has not adopted a stage method.
+	 */
+	protected function refuse_unstaged_overrides( array $methods ): void {
+		foreach ( $methods as $method => $stage_method ) {
+			for ( $class_name = get_class( $this ); $class_name; $class_name = get_parent_class( $class_name ) ) {
+				$declares_method = ( new ReflectionMethod( $class_name, $method ) )->class === $class_name;
+				$declares_stage  = ( new ReflectionMethod( $class_name, $stage_method ) )->class === $class_name;
+				if ( $declares_method && ! $declares_stage ) {
+					// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- A plain text message for a client, built from PHP names.
+					throw new WC_Data_Exception(
+						'woocommerce_data_staging_unsupported',
+						sprintf(
+							/* translators: 1: PHP class name, 2: method that the class overrides, 3: method that the class needs to override. */
+							__( 'This object does not support this change yet. The class %1$s overrides %2$s() and needs to override %3$s() too.', 'woocommerce' ),
+							$class_name,
+							$method,
+							$stage_method
+						),
+						400
+					);
+					// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				}
+				if ( $declares_stage ) {
+					break;
 				}
 			}
 		}

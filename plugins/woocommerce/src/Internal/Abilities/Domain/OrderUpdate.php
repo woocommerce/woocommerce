@@ -83,15 +83,6 @@ class OrderUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * The ability writes no extension fields and runs no validators for now, with the feature on or off.
-	 *
-	 * @return bool
-	 */
-	protected function is_extensible(): bool {
-		return false;
-	}
-
-	/**
 	 * Load the order to change.
 	 *
 	 * @param array $input Ability input.

@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
@@ -98,15 +99,6 @@ class OrderCreate extends ActionableAbility {
 	}
 
 	/**
-	 * The ability writes no extension fields and runs no validators for now, with the feature on or off.
-	 *
-	 * @return bool
-	 */
-	protected function is_extensible(): bool {
-		return false;
-	}
-
-	/**
 	 * Build an order in memory with the store defaults that wc_create_order() sets.
 	 *
 	 * @param array $input Ability input.
@@ -186,6 +178,11 @@ class OrderCreate extends ActionableAbility {
 
 		if ( ! empty( $input['line_items'] ) || ! empty( $input['shipping_lines'] ) ) {
 			$this->stage_line_totals( $subject, ! empty( $input['line_items'] ) );
+		}
+
+		// With the feature on, the status is staged, so save() finds it set. Not a manual change, as in REST and wc_create_order().
+		if ( ExtensibleAbilities::is_enabled() && $subject->get_status() !== $this->status ) {
+			$subject->stage_status( $this->status );
 		}
 
 		return null;

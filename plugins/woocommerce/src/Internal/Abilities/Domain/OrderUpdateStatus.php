@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 
@@ -15,7 +16,9 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * The WooCommerce order update status ability. It runs the steps of
- * ActionableAbility. change() calls WC_Order::update_status(), which also saves.
+ * ActionableAbility. With the extensible_abilities feature on, change() stages the status with
+ * WC_Order::stage_status(), so validators see it before the save. With it off, change() calls
+ * WC_Order::update_status(), which also saves.
  */
 class OrderUpdateStatus extends ActionableAbility {
 
@@ -70,15 +73,6 @@ class OrderUpdateStatus extends ActionableAbility {
 	}
 
 	/**
-	 * The ability writes no extension fields and runs no validators for now, with the feature on or off.
-	 *
-	 * @return bool
-	 */
-	protected function is_extensible(): bool {
-		return false;
-	}
-
-	/**
 	 * Load the order to change.
 	 *
 	 * @param array $input Ability input.
@@ -89,8 +83,8 @@ class OrderUpdateStatus extends ActionableAbility {
 	}
 
 	/**
-	 * Check the new status, and change it with WC_Order::update_status(), which
-	 * also saves. No field or validator runs before the save, so save() does nothing.
+	 * Check the new status, and stage it as a manual change with the feature on. With the feature off, change
+	 * it with WC_Order::update_status(), which also saves, so save() does nothing.
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
@@ -119,17 +113,22 @@ class OrderUpdateStatus extends ActionableAbility {
 			);
 		}
 
+		if ( ExtensibleAbilities::is_enabled() ) {
+			$subject->stage_status( $status, self::get_note( $input ), true );
+			return null;
+		}
+
 		return self::update_status( $subject, $status, self::get_note( $input ) );
 	}
 
 	/**
-	 * Save the order. change() already saved it through WC_Order::update_status().
+	 * Save the order. With the feature off, change() already saved it through WC_Order::update_status().
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @return null|\WP_Error
 	 */
 	public function save( $subject ) {
-		return null;
+		return ExtensibleAbilities::is_enabled() ? parent::save( $subject ) : null;
 	}
 
 	/**
