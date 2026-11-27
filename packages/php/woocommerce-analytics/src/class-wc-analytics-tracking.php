@@ -560,7 +560,7 @@ class WC_Analytics_Tracking {
 		 * is discarded, because the server re-asserts its own value below. Names a
 		 * callback introduces are not reserved and are kept.
 		 *
-		 * It also runs daily from cron with an empty `$event_name`, and the scalar properties it adds
+		 * It also runs hourly from cron with an empty `$event_name`, and the scalar properties it adds
 		 * then are replayed on every event the proxy speed module records, for all visitors.
 		 *
 		 * @module woocommerce-analytics

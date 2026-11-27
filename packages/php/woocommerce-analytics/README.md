@@ -113,7 +113,7 @@ register filters and cannot read them:
     answering itself, so the `403` always comes from one place.
 -   `woocommerce_analytics_speed_module_event_props` holds the scalar properties
     that `jetpack_woocommerce_analytics_event_props` callbacks added at the last
-    daily cron run, for the speed module to replay. It is deleted once proxy
+    hourly cron run, for the speed module to replay. It is deleted once proxy
     tracking is off.
 
 **The filter must resolve to the same value for every request on a site, and must
@@ -313,7 +313,7 @@ Called from an MU-plugin, it serves on `muplugins_loaded`, when a `wp_consent_co
 
 The module serves only while proxy tracking was on at the last `init`, and otherwise leaves the request to the REST route. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route too, which applies the consent check.
 
-Plugin callbacks on `jetpack_woocommerce_analytics_event_props` have not registered when the module serves, so it adds the scalar properties they returned at the last daily `woocommerce_analytics_record_speed_module_event_props` cron run, which has no user logged in. A new or changed callback reaches these events up to a day later. With `ALTERNATE_WP_CRON`, cron runs inside a visitor's request, so only a run from WP-CLI records. A property that depends on the event, the visitor or the request only reaches events the REST route records, unless it comes from an MU-plugin callback, which still runs.
+Plugin callbacks on `jetpack_woocommerce_analytics_event_props` have not registered when the module serves, so it adds the scalar properties they returned at the last hourly `woocommerce_analytics_record_speed_module_event_props` cron run, which has no user logged in. A new or changed callback, or a value it returns, reaches these events up to an hour later. With `ALTERNATE_WP_CRON`, cron runs inside a visitor's request, so only a run from WP-CLI records. A property that depends on the event, the visitor or the request only reaches events the REST route records, unless it comes from an MU-plugin callback, which still runs.
 
 `woocommerce_analytics_auto_install_proxy_speed_module` is deprecated and has no effect.
 

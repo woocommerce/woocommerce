@@ -395,7 +395,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	 * Deactivation is the only cleanup a host runs, so it also stops what the speed module would replay on reactivation.
 	 */
 	public function test_maybe_remove_proxy_speed_module_stops_the_event_props_record(): void {
-		wp_schedule_event( time(), 'daily', Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK );
+		wp_schedule_event( time(), 'hourly', Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK );
 		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION, array( 'host' => 'ecommplan' ) );
 
 		Woocommerce_Analytics::maybe_remove_proxy_speed_module();
@@ -517,8 +517,13 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 	/**
 	 * A callback that fails in cron, where there is no cart or session, keeps the last record and the current user.
+	 *
+	 * @dataProvider provide_failing_event_props_callbacks
+	 *
+	 * @param callable $callback The failing callback.
 	 */
-	public function test_a_failing_event_props_callback_keeps_the_last_record(): void {
+	#[DataProvider( 'provide_failing_event_props_callbacks' )]
+	public function test_a_failing_event_props_callback_keeps_the_last_record( $callback ): void {
 		add_filter( 'wp_doing_cron', '__return_true' );
 		update_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, 'yes' );
 		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION, array( 'host' => 'ecommplan' ) );
@@ -529,12 +534,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 			)
 		);
 		wp_set_current_user( $user_id );
-		add_filter(
-			'jetpack_woocommerce_analytics_event_props',
-			function () {
-				throw new \RuntimeException( 'No session in cron.' );
-			}
-		);
+		add_filter( 'jetpack_woocommerce_analytics_event_props', $callback );
 		$error_log = ini_set( 'error_log', '/dev/null' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 
 		try {
@@ -545,6 +545,22 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		$this->assertSame( array( 'host' => 'ecommplan' ), get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION ) );
 		$this->assertSame( $user_id, get_current_user_id() );
+	}
+
+	/**
+	 * Ways an event props callback fails.
+	 *
+	 * @return array
+	 */
+	public static function provide_failing_event_props_callbacks(): array {
+		return array(
+			'a throw'           => array(
+				function () {
+					throw new \RuntimeException( 'No session in cron.' );
+				},
+			),
+			'a non-array value' => array( '__return_null' ),
+		);
 	}
 
 	/**
@@ -576,13 +592,13 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Test that the daily record is scheduled while proxy tracking is on, and cleared with its row once it is off.
+	 * Test that the hourly record is scheduled while proxy tracking is on, and cleared with its row once it is off.
 	 */
 	public function test_sync_schedules_the_event_props_record_while_proxy_tracking_is_on(): void {
 		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
 		Woocommerce_Analytics::sync_proxy_tracking_state();
 
-		$this->assertNotFalse( wp_next_scheduled( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK ) );
+		$this->assertSame( 'hourly', wp_get_schedule( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK ) );
 
 		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION, array( 'host' => 'ecommplan' ) );
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );

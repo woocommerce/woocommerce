@@ -58,7 +58,7 @@ class Woocommerce_Analytics {
 	const PROXY_TRACKING_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_enabled';
 
 	/**
-	 * What `jetpack_woocommerce_analytics_event_props` callbacks add to every event, recorded daily for the
+	 * What `jetpack_woocommerce_analytics_event_props` callbacks add to every event, recorded hourly for the
 	 * speed module, which answers before they register.
 	 *
 	 * @since 0.19.1
@@ -68,7 +68,7 @@ class Woocommerce_Analytics {
 	const PROXY_SPEED_MODULE_EVENT_PROPS_OPTION = 'woocommerce_analytics_speed_module_event_props';
 
 	/**
-	 * Daily cron hook that records the event props the speed module replays.
+	 * Hourly cron hook that records the event props the speed module replays.
 	 *
 	 * @since 0.19.1
 	 *
@@ -321,7 +321,7 @@ class Woocommerce_Analytics {
 	}
 
 	/**
-	 * Keep the daily record of the speed module's event props scheduled while proxy tracking is on.
+	 * Keep the hourly record of the speed module's event props scheduled while proxy tracking is on.
 	 *
 	 * @since 0.19.1
 	 *
@@ -335,7 +335,7 @@ class Woocommerce_Analytics {
 		}
 
 		if ( false === wp_next_scheduled( self::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK ) ) {
-			wp_schedule_event( time(), 'daily', self::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK );
+			wp_schedule_event( time(), 'hourly', self::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK );
 		}
 	}
 
@@ -377,6 +377,7 @@ class Woocommerce_Analytics {
 
 		if ( 'yes' === get_option( self::PROXY_TRACKING_ENABLED_OPTION ) ) {
 			$user_id = get_current_user_id();
+			$error   = null;
 			wp_set_current_user( 0 );
 
 			try {
@@ -385,16 +386,24 @@ class Woocommerce_Analytics {
 				/** This filter is documented in src/class-wc-analytics-tracking.php */
 				$filtered = apply_filters( 'jetpack_woocommerce_analytics_event_props', $base, '', true );
 			} catch ( \Throwable $e ) {
+				$error = $e->getMessage();
+			}
+
+			wp_set_current_user( $user_id );
+
+			if ( null === $error && ! is_array( $filtered ) ) {
+				$error = 'a callback returned ' . gettype( $filtered ) . ' instead of an array';
+			}
+
+			if ( null !== $error ) {
 				// Keep the last record, and let the rest of the cron run continue.
-				error_log( 'WooCommerce Analytics: Could not record the event props for the proxy speed module: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( 'WooCommerce Analytics: Could not record the event props for the proxy speed module: ' . $error ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 				return;
-			} finally {
-				wp_set_current_user( $user_id );
 			}
 
 			// Sanitizing strips the common properties, which are all reserved, and bounds what is left.
 			$props = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::sanitize_client_properties(
-				array_filter( is_array( $filtered ) ? $filtered : array(), 'is_scalar' )
+				array_filter( $filtered, 'is_scalar' )
 			);
 		}
 
