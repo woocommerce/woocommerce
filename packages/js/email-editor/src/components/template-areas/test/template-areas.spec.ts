@@ -36,6 +36,16 @@ const createSelect =
 						? [ 'content' ]
 						: [],
 				getBlockOrder: ( id: string ) => tree[ id ] ?? [],
+				// Blocks in the fixtures are groups unless their ID says otherwise.
+				getBlockName: ( id: string ) =>
+					[
+						'logo',
+						'powered-by',
+						'site-title',
+						'paragraph',
+					].includes( id )
+						? `core/${ id }`
+						: 'core/group',
 				getBlockParents: ( id: string ) => {
 					const parents: string[] = [];
 					let parent = parentOf( id );
@@ -68,7 +78,7 @@ const createSelect =
 	};
 
 describe( 'getTemplateAreaClientIds', () => {
-	it( 'returns the template blocks around the content, at every level', () => {
+	it( 'returns the template groups around the content, at every level', () => {
 		// The MailPoet newsletter template: a wrapper group with the header,
 		// the content, the footer and the "Powered by" block.
 		const select = createSelect( {
@@ -80,7 +90,19 @@ describe( 'getTemplateAreaClientIds', () => {
 		expect( getTemplateAreaClientIds( select as never ) ).toEqual( [
 			'header',
 			'footer',
-			'powered-by',
+		] );
+	} );
+
+	it( 'keeps template blocks that are not groups locked, so their content cannot be edited from the email', () => {
+		// The WooCommerce template puts the site title next to the content.
+		const select = createSelect( {
+			'': [ 'wrapper' ],
+			wrapper: [ 'site-title', 'content-group', 'footer' ],
+			'content-group': [ 'content' ],
+		} );
+
+		expect( getTemplateAreaClientIds( select as never ) ).toEqual( [
+			'footer',
 		] );
 	} );
 

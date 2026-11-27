@@ -12,11 +12,13 @@ import { store as editorStore } from '@wordpress/editor';
 import { storeName } from '../../store';
 
 /**
- * Returns the template blocks around the email content: at each level from the
- * root down to the post content block, every sibling of that path.
+ * Returns the template groups around the email content: at each level from the
+ * root down to the post content block, every sibling group of that path. Only
+ * groups qualify, as core only does this for template parts: their own content
+ * can't be edited, while a block like the site title would become editable.
  */
 export function getTemplateAreaClientIds( select: SelectFunction ): string[] {
-	const { getBlocksByName, getBlockOrder, getBlockParents } =
+	const { getBlocksByName, getBlockName, getBlockOrder, getBlockParents } =
 		select( blockEditorStore );
 	const [ postContentId ] = getBlocksByName( 'core/post-content' );
 
@@ -28,7 +30,9 @@ export function getTemplateAreaClientIds( select: SelectFunction ): string[] {
 
 	return path.flatMap( ( clientId, index ) =>
 		getBlockOrder( index === 0 ? '' : path[ index - 1 ] ).filter(
-			( siblingId ) => siblingId !== clientId
+			( siblingId ) =>
+				siblingId !== clientId &&
+				getBlockName( siblingId ) === 'core/group'
 		)
 	);
 }
