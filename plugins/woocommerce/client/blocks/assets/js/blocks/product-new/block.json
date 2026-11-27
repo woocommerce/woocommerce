@@ -90,6 +90,7 @@
 			"default": "date"
 		}
 	},
+	"editorStyle": "wc-blocks-editor-style",
 	"style": [
 		"wc-blocks-style",
 		"wc-blocks-style-all-products"
