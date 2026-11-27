@@ -41,6 +41,7 @@ export type EmailEditorSettings = EditorSettings &
 		isPreviewMode: boolean;
 		allowedIframeStyleHandles?: string[];
 		styles?: EmailBuiltStyles[];
+		readOnlySiteIdentityBlocks?: boolean;
 	};
 
 export type EmailTheme = Omit< GlobalStylesConfig, 'styles' > & {

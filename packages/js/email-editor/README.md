@@ -50,11 +50,12 @@ Make sure to set up the required data on `window.WooCommerceEmailEditor` before 
 
 The `editor_settings` object (or `config.editorSettings` when using `ExperimentalEmailEditor`) accepts all standard WordPress block editor settings plus the following email-editor-specific options:
 
-| Setting                  | Type      | Default | Description                                                                                                                                                          |
-| ------------------------ | --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `isFullScreenForced`     | `boolean` | `false` | When `true`, the editor is always rendered in fullscreen mode and the user cannot toggle it off. The "More menu" is hidden and a back button is shown in the header. |
-| `displaySendEmailButton` | `boolean` | `false` | When `true`, a "Send" button is displayed in the editor header, allowing users to publish/send the email directly from the editor.                                   |
-| `disableSnackbarNotices` | `boolean` | `false` | When `true`, the editor does not render its own snackbar notices. Pinned and validation notices are unaffected.                                                      |
+| Setting                      | Type      | Default | Description                                                                                                                                                                                                                                                   |
+| ---------------------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `isFullScreenForced`         | `boolean` | `false` | When `true`, the editor is always rendered in fullscreen mode and the user cannot toggle it off. The "More menu" is hidden and a back button is shown in the header.                                                                                          |
+| `displaySendEmailButton`     | `boolean` | `false` | When `true`, a "Send" button is displayed in the editor header, allowing users to publish/send the email directly from the editor.                                                                                                                            |
+| `disableSnackbarNotices`     | `boolean` | `false` | When `true`, the editor does not render its own snackbar notices. Pinned and validation notices are unaffected.                                                                                                                                               |
+| `readOnlySiteIdentityBlocks` | `boolean` | `false` | When `true`, the Site Title and Site Logo blocks show the site's title and logo but can't change them, so saving an email never changes site settings. Users can transform them into a Heading or Image block to use a different title or image in the email. |
 
 ## Exports
 
