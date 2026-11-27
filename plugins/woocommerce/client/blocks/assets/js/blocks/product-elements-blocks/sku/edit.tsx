@@ -43,7 +43,7 @@ const Edit = ( {
 			{ ! isDescendentOfQueryLoop &&
 				! attributes.isDescendantOfAllProducts && (
 					<InspectorControls>
-						<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+						<PanelBody title={ __( 'SKU display', 'woocommerce' ) }>
 							<ToggleControl
 								label={ __(
 									'Show N/A when the SKU is missing',
