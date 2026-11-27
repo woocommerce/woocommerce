@@ -104,10 +104,14 @@ export const getLineRounding = (
 	);
 	const line = getShownLineTotal( totals, includeTax );
 	const unitAt = unit * 10 ** ( precision - priceCurrency.minorUnit );
+	// Some extensions allow fractional quantities (e.g. 0.28). Scale the quantity to a whole number too, so every product
+	// below is exact: 150 × 0.28 in floats is 42.00000000000001.
+	const quantityScale = ( String( quantity ).split( '.' )[ 1 ] || '' ).length;
+	const quantityAt = Math.round( quantity * 10 ** quantityScale );
 
 	if (
-		unitAt * quantity ===
-		line * 10 ** ( precision - currency.minorUnit )
+		unitAt * quantityAt ===
+		line * 10 ** ( precision - currency.minorUnit + quantityScale )
 	) {
 		return null;
 	}
@@ -123,8 +127,9 @@ export const getLineRounding = (
 	}
 
 	// The exact line total, rounded half up to the currency's minor unit.
-	const lineStep = 10 ** ( exactMinorUnit - currency.minorUnit );
-	const exactLine = exact * quantity;
+	const lineStep =
+		10 ** ( exactMinorUnit + quantityScale - currency.minorUnit );
+	const exactLine = exact * quantityAt;
 	let roundedLine = Math.floor( exactLine / lineStep );
 	if ( exactLine - roundedLine * lineStep >= lineStep / 2 ) {
 		roundedLine++;

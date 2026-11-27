@@ -39,6 +39,7 @@ describe( 'RoundedTotalInfo', () => {
 		expect( button ).toHaveAttribute( 'aria-expanded', 'false' );
 		expect( button ).toHaveAttribute( 'popovertargetaction', 'show' );
 		expect( button.getAttribute( 'popovertarget' ) ).toBe( tooltip.id );
+		expect( button ).toHaveAccessibleDescription( NOTE );
 		expect( tooltip ).toHaveAttribute( 'popover', 'auto' );
 		expect( tooltip ).toHaveAttribute( 'role', 'tooltip' );
 		expect( tooltip ).toHaveTextContent( NOTE );

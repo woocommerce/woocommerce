@@ -86,6 +86,7 @@ describe( 'getLineRoundingNote', () => {
 		${ 'the unit price × quantity is the line total' } | ${ { price: 199, raw: 1990000, quantity: 3, net: 597 } }                     | ${ false }
 		${ 'a unit price with more decimals adds up' }     | ${ { price: 1995, priceMinorUnit: 3, raw: 1995000, quantity: 2, net: 399 } } | ${ false }
 		${ 'nothing explains the line and it has no tax' } | ${ { price: 200, raw: 2000000, quantity: 2, net: 399 } }                     | ${ false }
+		${ 'a fractional quantity adds up' }               | ${ { price: 150, raw: 1500000, quantity: 0.28, net: 42 } }                   | ${ false }
 	`( 'returns null when $description', ( { item, includeTax } ) => {
 		expect(
 			getLineRoundingNote( lineItem( item ), includeTax, VAT )
@@ -106,6 +107,7 @@ describe( 'getLineRoundingNote', () => {
 		${ 'tax rounded per line, shown without tax' }       | ${ { price: 21, raw: 210000, quantity: 3, net: 62, tax: 13 } }                             | ${ false } | ${ 'Rounded to £0.62 after taking VAT off the line.' }
 		${ 'a currency without decimals' }                   | ${ { money: JPY, price: 1995, priceMinorUnit: 1, raw: 199500000, quantity: 1, net: 200 } } | ${ false } | ${ 'Rounded to ¥200 from 1 unit priced ¥199.5.' }
 		${ 'a currency with its own separators and suffix' } | ${ { money: EUR, price: 199, raw: 1992000, quantity: 3, net: 498, tax: 100 } }             | ${ true }  | ${ 'Rounded to 5,98 € from 3 units priced 1,992 € (incl. VAT), shown as 1,99 € in your cart.' }
+		${ 'a fractional quantity rounded half up' }         | ${ { price: 150, raw: 1500000, quantity: 0.29, net: 44 } }                                 | ${ false } | ${ 'Rounded to £0.44 from 0.29 units priced £1.50.' }
 	`( 'explains $description', ( { item, includeTax, note } ) => {
 		expect( getLineRoundingNote( lineItem( item ), includeTax, VAT ) ).toBe(
 			note

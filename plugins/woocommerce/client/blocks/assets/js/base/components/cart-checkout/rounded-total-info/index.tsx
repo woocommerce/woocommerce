@@ -46,6 +46,7 @@ const RoundedTotalInfo = ( {
 				type="button"
 				className="wc-rounded-total-info__button"
 				aria-expanded="false"
+				aria-describedby={ tooltipId }
 				{ ...buttonPopoverAttributes }
 			>
 				<svg

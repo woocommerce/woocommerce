@@ -245,7 +245,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 											<span data-wp-text="state.lineItemTotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value notranslate" translate="no"></span>
 										</span>
 										<span class="wc-rounded-total-info" hidden data-wp-bind--hidden="!state.hasLineRoundingNote">
-											<button type="button" class="wc-rounded-total-info__button" data-wp-bind--popovertarget="state.lineRoundingTooltipId" popovertargetaction="show" aria-expanded="false">
+											<button type="button" class="wc-rounded-total-info__button" data-wp-bind--popovertarget="state.lineRoundingTooltipId" data-wp-bind--aria-describedby="state.lineRoundingTooltipId" popovertargetaction="show" aria-expanded="false">
 												<?php echo RoundedTotalNote::get_icon_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static SVG markup. ?>
 												<span class="wc-rounded-total-info__amount"><span data-wp-text="state.lineItemTotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value notranslate" translate="no"></span></span>
 												<span class="wc-rounded-total-info__label"><?php esc_html_e( 'Rounding details', 'woocommerce' ); ?></span>
