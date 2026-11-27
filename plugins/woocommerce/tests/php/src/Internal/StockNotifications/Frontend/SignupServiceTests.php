@@ -867,12 +867,13 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 		$user_id  = $this->factory->user->create();
 		$products = array_map(
 			fn() => WC_Helper_Product::create_simple_product()->get_id(),
-			range( 1, 3 )
+			range( 1, 4 )
 		);
 		$signups  = array(
 			array( $products[0], $user_id, NotificationStatus::ACTIVE ),
 			array( $products[1], $user_id, NotificationStatus::PENDING ),
 			array( $products[2], $this->factory->user->create(), NotificationStatus::ACTIVE ),
+			array( $products[3], $user_id, NotificationStatus::ACTIVE ),
 		);
 		foreach ( $signups as list( $product_id, $signup_user_id, $status ) ) {
 			$notification = new Notification();
@@ -882,7 +883,8 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 			$notification->save();
 		}
 
-		$this->assertSame( array( $products[0] ), array_keys( $this->sut->get_user_signups_for_products( $user_id, $products ) ) );
-		$this->assertSame( array(), $this->sut->get_user_signups_for_products( 0, $products ) );
+		$requested = array_slice( $products, 0, 3 );
+		$this->assertSame( array( $products[0] ), array_keys( $this->sut->get_user_signups_for_products( $user_id, $requested ) ) );
+		$this->assertSame( array(), $this->sut->get_user_signups_for_products( 0, $requested ) );
 	}
 }

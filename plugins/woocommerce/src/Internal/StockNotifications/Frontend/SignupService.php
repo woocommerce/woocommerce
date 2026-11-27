@@ -293,6 +293,8 @@ class SignupService {
 	/**
 	 * Get a user's active sign-ups for products, keyed by product ID.
 	 *
+	 * @since 11.5.0
+	 *
 	 * @param int   $user_id     User ID.
 	 * @param int[] $product_ids Product IDs.
 	 * @return array<int, Notification>
