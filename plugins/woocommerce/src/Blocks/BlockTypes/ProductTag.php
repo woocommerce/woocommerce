@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  * ProductTag class.
  */
 class ProductTag extends AbstractProductGrid {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *

@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  * AllProducts class.
  */
 class AllProducts extends AbstractBlock {
+	// No EnableBlockJsonAssetsTrait: get_block_type_style() registers wc-blocks-style-all-products, which the grid blocks depend on.
+
 	/**
 	 * Block name.
 	 *
