@@ -229,8 +229,12 @@ Tests exist to catch regressions, not to raise a coverage number. A test that pa
 - Weak assertions (`assertNotNull`, unqualified `assertTrue`) where a specific expected value would actually catch a regression
 - Mocking so many of the SUT's related helpers or classes that you end up checking the mock's pre-set return value, not the SUT's own logic
 - A near-duplicate of another test, added just to "cover one more case," that doesn't touch any new code path
+- Asserting how the code works instead of what it produces: the text of a SQL query, query or call counts captured through a filter, or the order of internal calls. These break on a harmless refactor and keep passing if the bug returns another way. Assert observable outcomes instead, such as stored data, return values, recorded database errors (`$EZSQL_ERROR`), or fired hooks.
+- Calling a private or protected method through reflection when a public entry point reaches it. Test through the path production uses, so the test also covers the checks around that method.
 
 **Before adding a test, ask:** if the implementation had a bug, would this test actually fail? If you can't think of a bug this test would catch, it isn't worth adding.
+
+**For a bug fix, check it, don't just reason about it:** run the new test with the fix reverted and confirm it fails, then restore the fix. The state a test asserts on can be reset between the bug and the assertion. For example, the next `$wpdb` query clears `$wpdb->last_error`, so an assertion on it can pass with or without the fix.
 
 ## Group Similar Tests with `@testWith` or a Data Provider
 
