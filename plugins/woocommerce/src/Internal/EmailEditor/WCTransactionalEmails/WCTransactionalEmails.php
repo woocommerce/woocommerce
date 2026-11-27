@@ -79,7 +79,7 @@ class WCTransactionalEmails {
 			$emails[] = 'order_withdrawal_requested';
 		}
 
-		if ( FeaturesUtil::feature_is_enabled( StockNotifications::FEATURE_NAME ) ) {
+		if ( StockNotifications::is_enabled_before_init() ) {
 			$emails = array_merge( $emails, EmailManager::$email_ids );
 		}
 
