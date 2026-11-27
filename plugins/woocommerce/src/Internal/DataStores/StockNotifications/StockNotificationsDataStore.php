@@ -198,7 +198,7 @@ CREATE TABLE $meta_table_name (
 	}
 
 	/**
-	 * Get the table row for a notification's props, like `OrdersTableDataStore::get_db_row_from_order()`.
+	 * Get the table row for a notification's props.
 	 *
 	 * @param Notification $notification The notification.
 	 * @param bool         $only_changes Whether to consider only changes in the notification for generating the row.
@@ -216,7 +216,7 @@ CREATE TABLE $meta_table_name (
 			}
 
 			$value = $changes[ $details['name'] ];
-			// Keep NULL in nullable columns such as cancellation_source; the 'string' type would store ''.
+			// Keep NULL in nullable columns such as cancellation_source.
 			$row[ $column ]        = null === $value ? null : $this->database_util->format_object_value_for_db( $value, $details['type'] );
 			$row_format[ $column ] = $this->database_util->get_wpdb_format_for_type( $details['type'] );
 		}
@@ -377,7 +377,6 @@ CREATE TABLE $meta_table_name (
 				$notification->set_date_modified( time() );
 			}
 
-			// Write only the changed columns, so a save from a stale object can't overwrite newer values in the others.
 			$row    = $this->get_db_row_from_notification( $notification, true );
 			$result = $wpdb->update( $this->get_table_name(), $row['data'], array( 'id' => $notification->get_id() ), $row['format'], array( '%d' ) );
 
