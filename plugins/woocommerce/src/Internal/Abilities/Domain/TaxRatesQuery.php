@@ -107,11 +107,11 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * List tax rates.
 	 *
 	 * @param array $input Ability input.
-	 * @return array
+	 * @return array|\WP_Error
 	 *
 	 * @since 11.4.0
 	 */
-	public static function execute( array $input ): array {
+	public static function execute( array $input ) {
 		global $wpdb;
 
 		$page     = $input['page'] ?? 1;
@@ -127,13 +127,7 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 		if ( isset( $input['class'] ) ) {
 			$tax_class = self::get_stored_tax_class( $input['class'] );
 			if ( null === $tax_class ) {
-				return array(
-					'rates'       => array(),
-					'total'       => 0,
-					'total_pages' => 0,
-					'page'        => $page,
-					'per_page'    => $per_page,
-				);
+				return self::get_tax_class_not_found_error( $input['class'] );
 			}
 			$conditions[] = $wpdb->prepare( 'tax_rate_class = %s', $tax_class );
 		}

@@ -305,7 +305,7 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should page tax rates in the order of the tax settings, and return none for an unknown class.
+	 * @testdox Should page tax rates in the order of the tax settings.
 	 */
 	public function test_tax_rates_are_paged(): void {
 		$ids = array();
@@ -319,22 +319,35 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 			);
 		}
 
-		$first   = $this->run_ability( 'woocommerce/tax-rates-query', array( 'per_page' => 2 ) );
-		$second  = $this->run_ability(
+		$first  = $this->run_ability( 'woocommerce/tax-rates-query', array( 'per_page' => 2 ) );
+		$second = $this->run_ability(
 			'woocommerce/tax-rates-query',
 			array(
 				'per_page' => 2,
 				'page'     => 2,
 			)
 		);
-		$unknown = $this->run_ability( 'woocommerce/tax-rates-query', array( 'class' => 'no-such-class' ) );
 
 		$this->assertSame( array( $ids[0], $ids[1] ), array_column( $first['rates'], 'id' ) );
 		$this->assertSame( array( $ids[2] ), array_column( $second['rates'], 'id' ) );
 		$this->assertSame( 3, $first['total'] );
 		$this->assertSame( 2, $first['total_pages'] );
-		$this->assertSame( array(), $unknown['rates'] );
-		$this->assertSame( 0, $unknown['total'] );
+	}
+
+	/**
+	 * @testdox Should distinguish a class with no rates from an unknown class and list valid alternatives.
+	 */
+	public function test_tax_rates_validate_the_class_filter(): void {
+		$empty = $this->run_ability( 'woocommerce/tax-rates-query', array( 'class' => 'Reduced rate' ) );
+		$this->assertSame( array(), $empty['rates'] );
+		$this->assertSame( 0, $empty['total'] );
+
+		$error = $this->run_ability( 'woocommerce/tax-rates-query', array( 'class' => 'reduced-rat' ) );
+		$this->assertWPError( $error );
+		$this->assertSame( 'woocommerce_ability_tax_rate_class_not_found', $error->get_error_code() );
+		$this->assertSame( 400, $error->get_error_data()['status'] );
+		$this->assertStringContainsString( 'standard', $error->get_error_message() );
+		$this->assertStringContainsString( 'reduced-rate', $error->get_error_message() );
 	}
 
 	/**
