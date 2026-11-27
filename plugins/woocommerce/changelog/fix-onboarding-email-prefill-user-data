@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent an error in the setup wizard's email prefill when the WordPress.com account details could not be loaded.

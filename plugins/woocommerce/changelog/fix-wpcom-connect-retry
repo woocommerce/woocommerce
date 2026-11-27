@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Retry the WordPress.com connection when a merchant clicks Connect again soon after a failed attempt.
