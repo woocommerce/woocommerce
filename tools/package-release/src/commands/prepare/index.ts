@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Args, Command, Flags, ux } from '@oclif/core';
-import { writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { execSync } from 'child_process';
 
 /**
@@ -97,29 +97,20 @@ export default class PackagePrepare extends Command {
 		packages: Array< string >,
 		initialRelease?: boolean
 	) {
-		packages.forEach( async ( name ) => {
+		for ( const name of packages ) {
 			ux.action.start( `Preparing ${ name }` );
 
 			try {
 				if ( hasValidChangelogs( name ) ) {
 					validateChangelogEntries( name );
-					let nextVersion = getNextVersion( name );
-					if ( nextVersion ) {
-						writeChangelog( name );
-					} else {
-						if ( initialRelease ) {
-							// @todo: When the composer.json versioning is "wordpress" as is for plugins, this value needs to be 1.0
-							nextVersion = '1.0.0';
-						} else {
-							throw new Error(
-								`Error reading version number for ${ name }. Check that a Changelog file exists and has a version number. If making an initial release, pass the --initialRelease flag.`
-							);
-						}
-
-						writeChangelog( name, nextVersion );
+					const nextVersion = getNextVersion( name );
+					if ( ! nextVersion && ! initialRelease ) {
+						throw new Error(
+							`Error reading version number for ${ name }. Check that a Changelog file exists and has a version number. If making an initial release, pass the --initialRelease flag.`
+						);
 					}
 
-					this.bumpPackageVersion( name, nextVersion );
+					this.preparePackage( name, nextVersion ?? undefined );
 
 					ux.action.stop();
 				} else {
@@ -132,16 +123,16 @@ export default class PackagePrepare extends Command {
 					this.error( e.message );
 				}
 			}
-		} );
+		}
 	}
 
 	/**
-	 * Update the version number in package.json.
+	 * Update a package's version files and write its changelog.
 	 *
-	 * @param {string} name    Package name.
-	 * @param {string} version Next version.
+	 * @param {string} name        Package name.
+	 * @param {string} nextVersion Next version, if the package has a prior release.
 	 */
-	private bumpPackageVersion( name: string, version: string ) {
+	private preparePackage( name: string, nextVersion?: string ) {
 		try {
 			const filepath = getFilepathFromPackageName( name );
 			const packageType = getPackageType( name );
@@ -160,11 +151,47 @@ export default class PackagePrepare extends Command {
 				);
 			}
 
+			const lockFilepath = `${ filepath }/composer.lock`;
+			const originalManifest = readFileSync( jsonFilepath );
+			const originalLockfile =
+				packageType === 'php' && existsSync( lockFilepath )
+					? readFileSync( lockFilepath )
+					: null;
+			// @todo: When the composer.json versioning is "wordpress" as is for plugins, this value needs to be 1.0
+			const version = nextVersion ?? '1.0.0';
 			json.version = version;
 			writeFileSync(
 				jsonFilepath,
 				JSON.stringify( json, null, '\t' ) + '\n'
 			);
+
+			try {
+				if ( originalLockfile ) {
+					execSync(
+						'composer update --lock --no-install --no-scripts --no-plugins --no-interaction',
+						{ cwd: filepath, stdio: 'inherit' }
+					);
+				}
+				writeChangelog( name, nextVersion ? undefined : version );
+			} catch ( error ) {
+				for ( const [ path, contents ] of [
+					[ jsonFilepath, originalManifest ],
+					[ lockFilepath, originalLockfile ],
+				] as const ) {
+					if ( contents === null ) {
+						continue;
+					}
+
+					try {
+						writeFileSync( path, contents );
+					} catch ( restoreError ) {
+						this.warn(
+							`Can't restore ${ path }. ${ String( restoreError ) }`
+						);
+					}
+				}
+				throw error;
+			}
 
 			// if preparing a php package and the package is used in the woocommerce plugin
 			// also update the version in the plugin's composer.json and composer.lock
@@ -192,7 +219,7 @@ export default class PackagePrepare extends Command {
 				}
 			}
 		} catch ( e ) {
-			this.error( `Can't bump version for ${ name }.` );
+			this.error( `Can't prepare ${ name }. ${ String( e ) }` );
 		}
 	}
 }

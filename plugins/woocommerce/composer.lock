@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f0e8a17de0be2b5097d0b4e7c74fbfb8",
+    "content-hash": "fcf14b557b3ef88bdcd12dc30afbc321",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1165,7 +1165,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/blueprint",
-                "reference": "f996d43977196b9670d783b58c167243950876d3"
+                "reference": "06ff21a0122d280b8b46a9f188c4af283e89ce4d"
             },
             "require": {
                 "opis/json-schema": "^2.3"
@@ -5302,11 +5302,11 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-refactor/64839-admin-blocks-build-packages",
+            "version": "dev-trunk",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",
-                "reference": "a453d8512de88aa25c97ff84d3acebd3ea7b8a21"
+                "reference": "c2d82d3c13cd2a9c662bfce46f407b676a2f2348"
             },
             "require": {
                 "composer-plugin-api": "^2.0"
