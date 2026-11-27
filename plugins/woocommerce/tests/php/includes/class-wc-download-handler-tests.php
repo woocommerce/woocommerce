@@ -1084,6 +1084,110 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Download links should ignore permissions for a different order, including missing orders.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $missing_order Whether the competing permission references a missing order.
+	 */
+	public function test_download_product_uses_permission_for_resolved_order( bool $missing_order ): void {
+		list( $product, $order ) = $this->build_downloadable_product_and_order_one(
+			array(
+				array(
+					'name' => 'Protected download',
+					'file' => $this->woocommerce_upload_url( 'protected-download.pdf' ),
+				),
+			)
+		);
+		$data_store              = WC_Data_Store::load( 'customer-download' );
+		$download                = current( $data_store->get_downloads( array( 'order_id' => $order->get_id() ) ) );
+		$download->set_downloads_remaining( 5 );
+		$download->save();
+
+		$other_order = WC_Helper_Order::create_order();
+		$other_id    = $other_order->get_id();
+		if ( $missing_order ) {
+			$other_order->delete( true );
+		}
+
+		$other_download = new WC_Customer_Download();
+		$other_download->set_props(
+			array(
+				'product_id'          => $product->get_id(),
+				'download_id'         => $download->get_download_id(),
+				'order_id'            => $other_id,
+				'order_key'           => $order->get_order_key(),
+				'user_email'          => $download->get_user_email(),
+				'downloads_remaining' => 10,
+			)
+		);
+		$other_download->save();
+
+		$order_item = current( $order->get_items() );
+		$this->assert_download_url_is_authorized( $order_item->get_item_download_url( $download->get_download_id() ) );
+
+		$download       = new WC_Customer_Download( $download->get_id() );
+		$other_download = new WC_Customer_Download( $other_download->get_id() );
+		$this->assertSame( 4, $download->get_downloads_remaining(), 'Only the resolved order permission should be consumed.' );
+		$this->assertSame( 10, $other_download->get_downloads_remaining(), 'The competing permission must remain untouched.' );
+	}
+
+	/**
+	 * @testdox An email download link should reject a missing order even when a matching permission remains.
+	 */
+	public function test_download_product_rejects_permission_without_order(): void {
+		list( $product, $order ) = $this->build_downloadable_product_and_order_one(
+			array(
+				array(
+					'name' => 'Protected download',
+					'file' => $this->woocommerce_upload_url( 'protected-download.pdf' ),
+				),
+			)
+		);
+		$download                = current( WC_Data_Store::load( 'customer-download' )->get_downloads( array( 'order_id' => $order->get_id() ) ) );
+		$order_id                = $order->get_id();
+		$order_key               = $order->get_order_key();
+		$email                   = $download->get_user_email();
+		$file_id                 = $download->get_download_id();
+		$order->delete( true );
+
+		$orphan = new WC_Customer_Download();
+		$orphan->set_props(
+			array(
+				'product_id'          => $product->get_id(),
+				'download_id'         => $file_id,
+				'order_id'            => $order_id,
+				'order_key'           => $order_key,
+				'user_email'          => $email,
+				'downloads_remaining' => 5,
+			)
+		);
+		$orphan->save();
+
+		self::remove_download_handlers();
+		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve request state for this download authorization test.
+		try {
+			$_GET    = array(
+				'download_file' => $product->get_id(),
+				'order'         => $order_key,
+				'email'         => $email,
+				'key'           => $file_id,
+			);
+			$message = '';
+			try {
+				WC_Download_Handler::download_product();
+			} catch ( WPDieException $e ) {
+				$message = $e->getMessage();
+			}
+			$this->assertStringContainsString( 'Invalid order.', $message, 'A permission must not authorize a missing order.' );
+			$orphan = new WC_Customer_Download( $orphan->get_id() );
+			$this->assertSame( 5, $orphan->get_downloads_remaining(), 'Rejected downloads must not consume the orphan permission.' );
+		} finally {
+			$_GET = $original_get;
+			self::restore_download_handlers();
+		}
+	}
+
+	/**
 	 * Values which are present in the request but empty after sanitization.
 	 *
 	 * @return array<string, array<string>>
