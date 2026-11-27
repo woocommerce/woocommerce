@@ -45,7 +45,8 @@ function getErrorMessage( error: unknown, fallback: string ): string {
  * Render and save one settings entity using WordPress entity and form APIs.
  */
 function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
-	const { kind, name, label, section } = config;
+	const { kind, name, label } = config;
+	const section = config.meta?.section;
 	const { record, editedRecord, hasEdits, edit, save } =
 		useEntityRecord< SettingsRecord >( kind, name, name );
 	const isNarrow = useViewportMatch( 'medium', '<' );
