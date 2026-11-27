@@ -11,6 +11,7 @@ import type { BackInStockFormStore } from '../frontend';
 type BlockContext = { selectedAttributes?: SelectedAttributes[] };
 
 let mockBlockContext: BlockContext | undefined;
+let mockSignedUpVariationIds: number[];
 let mockRegisteredStore: BackInStockFormStore;
 
 const mockProductsState = {
@@ -30,7 +31,10 @@ jest.mock(
 		getContext: jest.fn( ( namespace?: string ) =>
 			namespace === 'woocommerce/add-to-cart-with-options'
 				? mockBlockContext
-				: { attribute: 'Size' }
+				: {
+						attribute: 'Size',
+						signedUpVariationIds: mockSignedUpVariationIds,
+					}
 		),
 	} ),
 	{ virtual: true }
@@ -42,6 +46,7 @@ describe( 'Back in Stock form store', () => {
 	beforeEach( () => {
 		jest.resetModules();
 		mockBlockContext = undefined;
+		mockSignedUpVariationIds = [];
 		mockProductsState.productVariationInContext = null;
 
 		return import( '../frontend' );
@@ -90,7 +95,7 @@ describe( 'Back in Stock form store', () => {
 	] )(
 		'shows the form ($form) or the "already joined" notice ($notice) for variation $variation when variation 7 is joined',
 		( { variation, form, notice } ) => {
-			mockRegisteredStore.state.signedUpVariationIds = [ 7 ];
+			mockSignedUpVariationIds = [ 7 ];
 			mockProductsState.productVariationInContext = variation;
 
 			expect( mockRegisteredStore.state.isVisible ).toBe( form );
@@ -99,12 +104,6 @@ describe( 'Back in Stock form store', () => {
 			);
 		}
 	);
-
-	it( 'leaves the signed-up variations to the server', () => {
-		expect( mockRegisteredStore.state ).not.toHaveProperty(
-			'signedUpVariationIds'
-		);
-	} );
 
 	it( 'reads the selected attribute value from the Add to Cart + Options context', () => {
 		expect( mockRegisteredStore.state.selectedAttributeValue ).toBe( '' );

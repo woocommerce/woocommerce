@@ -23,13 +23,16 @@ const { state: productsState } = store< ProductsStore >(
 
 export type BackInStockFormStore = {
 	state: {
-		// Out of stock variations the shopper already signed up for. Set by the server only,
-		// as a client default would overwrite the server's value when the store registers.
-		signedUpVariationIds?: number[];
 		isVisible: boolean;
 		isSignedUpNoticeVisible: boolean;
 		selectedAttributeValue: string;
 	};
+};
+
+// Set by the server on the form and on the "already joined" notice.
+type BackInStockFormContext = {
+	// Out of stock variations the shopper already signed up for.
+	signedUpVariationIds: number[];
 };
 
 // Whether the selected variation can't be bought.
@@ -47,7 +50,9 @@ const isSignedUp = (): boolean => {
 
 	return (
 		!! variation &&
-		( state.signedUpVariationIds ?? [] ).includes( variation.id )
+		getContext< BackInStockFormContext >().signedUpVariationIds.includes(
+			variation.id
+		)
 	);
 };
 
@@ -55,7 +60,7 @@ const isSignedUp = (): boolean => {
  * Drives the Back in Stock form rendered after the Add to Cart + Options block
  * of a variable product, see templates/single-product/back-in-stock-form.php.
  */
-const { state } = store< BackInStockFormStore >(
+store< BackInStockFormStore >(
 	'woocommerce/back-in-stock-form',
 	{
 		state: {

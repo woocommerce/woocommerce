@@ -146,12 +146,11 @@ class ProductPageIntegration {
 		wp_enqueue_script_module( self::SCRIPT_MODULE );
 
 		$signed_up_variation_ids = json_decode( (string) $html->get_attribute( 'data-bis-signed-up-variations' ), true );
-		if ( is_array( $signed_up_variation_ids ) ) {
-			wp_interactivity_state( self::SCRIPT_MODULE, array( 'signedUpVariationIds' => $signed_up_variation_ids ) );
-		}
+		$context                 = (string) wp_json_encode( array( 'signedUpVariationIds' => is_array( $signed_up_variation_ids ) ? $signed_up_variation_ids : array() ) );
 
 		// The store namespace matches the script module ID.
 		$html->set_attribute( 'data-wp-interactive', self::SCRIPT_MODULE );
+		$html->set_attribute( 'data-wp-context', $context );
 		$html->set_attribute( 'data-wp-bind--hidden', '!state.isVisible' );
 
 		$form_id = wp_unique_id( 'wc-bis-form-' );
@@ -170,6 +169,7 @@ class ProductPageIntegration {
 		$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
 		if ( $html->next_tag( array( 'class_name' => 'wc_bis_already_signed_up' ) ) ) {
 			$html->set_attribute( 'data-wp-interactive', self::SCRIPT_MODULE );
+			$html->set_attribute( 'data-wp-context', $context );
 			$html->set_attribute( 'data-wp-bind--hidden', '!state.isSignedUpNoticeVisible' );
 		}
 

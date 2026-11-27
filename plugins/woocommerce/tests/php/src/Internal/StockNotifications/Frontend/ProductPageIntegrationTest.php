@@ -454,17 +454,18 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
-		$state = wp_interactivity_state( 'woocommerce/back-in-stock-form' );
-		$this->assertSame( array( $out_of_stock_id ), $state['signedUpVariationIds'] ?? null, 'The store should know the joined variations.' );
+		$context = wp_json_encode( array( 'signedUpVariationIds' => array( $out_of_stock_id ) ) );
 
 		$html = new \WP_HTML_Tag_Processor( $markup );
 		$this->assertTrue( $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ), 'The form should render.' );
 		$this->assertSame( '!state.isVisible', $html->get_attribute( 'data-wp-bind--hidden' ), 'The store should show and hide the form.' );
+		$this->assertSame( $context, $html->get_attribute( 'data-wp-context' ), 'The form should know the joined variations.' );
 
 		$this->assertTrue( $html->next_tag( array( 'class_name' => 'wc_bis_already_signed_up' ) ), 'The notice should render after the form.' );
 		$this->assertNotNull( $html->get_attribute( 'hidden' ), 'The notice should stay hidden until a joined variation is chosen.' );
 		$this->assertSame( 'woocommerce/back-in-stock-form', $html->get_attribute( 'data-wp-interactive' ), 'The notice should be driven by the Interactivity API.' );
 		$this->assertSame( '!state.isSignedUpNoticeVisible', $html->get_attribute( 'data-wp-bind--hidden' ), 'The store should show and hide the notice.' );
+		$this->assertSame( $context, $html->get_attribute( 'data-wp-context' ), 'The notice should know the joined variations.' );
 	}
 
 	/**
