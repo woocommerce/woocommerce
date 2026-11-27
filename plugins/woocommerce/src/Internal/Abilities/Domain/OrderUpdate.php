@@ -221,14 +221,14 @@ class OrderUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * The ability output for the saved order. It includes the lines, so the
-	 * client gets the IDs of the lines it added.
+	 * The ability output for the stored order, so it shows what the syncs wrote.
+	 * It includes the lines, so the client gets the IDs of the lines it added.
 	 *
 	 * @param \WC_Order $subject Saved order.
 	 * @return array|\WP_Error
 	 */
 	public function prepare_response( $subject ) {
-		$order = self::format_order_for_response( $subject, array( 'line_items', 'lines' ) );
+		$order = self::format_saved_order_for_response( $subject, array( 'line_items', 'lines' ) );
 		if ( is_wp_error( $order ) ) {
 			return $order;
 		}

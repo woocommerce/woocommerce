@@ -437,14 +437,16 @@ trait OrderAbilityTrait {
 
 	/**
 	 * Format an order after a save, retaining the saved object if reloading fails.
+	 * The reload picks up what the syncs wrote to storage, which the saved object does not reflect.
 	 *
-	 * @param \WC_Order $order Saved order object.
+	 * @param \WC_Order $order    Saved order object.
+	 * @param string[]  $includes Optional parts, as for format_order_for_response().
 	 * @return array|\WP_Error
 	 */
-	protected static function format_saved_order_for_response( \WC_Order $order ) {
+	protected static function format_saved_order_for_response( \WC_Order $order, array $includes = array() ) {
 		$stored = wc_get_order( $order->get_id() );
 
-		return self::format_order_for_response( $stored instanceof \WC_Order ? $stored : $order, array() );
+		return self::format_order_for_response( $stored instanceof \WC_Order ? $stored : $order, $includes );
 	}
 
 	/**

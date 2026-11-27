@@ -238,8 +238,7 @@ class OrderCreate extends ActionableAbility {
 	 * @return array|\WP_Error
 	 */
 	public function prepare_response( $subject ) {
-		$stored = wc_get_order( $subject->get_id() );
-		$order  = self::format_order_for_response( $stored instanceof \WC_Order ? $stored : $subject, array( 'line_items', 'lines' ) );
+		$order = self::format_saved_order_for_response( $subject, array( 'line_items', 'lines' ) );
 		if ( is_wp_error( $order ) ) {
 			return $order;
 		}

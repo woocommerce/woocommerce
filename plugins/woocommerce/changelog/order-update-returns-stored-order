@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show what extensions saved during an order update in the order-update ability response, instead of the old values.

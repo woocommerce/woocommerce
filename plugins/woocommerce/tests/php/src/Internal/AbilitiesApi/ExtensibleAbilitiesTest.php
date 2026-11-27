@@ -6277,6 +6277,92 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return from order-update what a sync stored without the changed order object.
+	 */
+	public function test_order_update_returns_what_a_sync_stored(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'order',
+						'namespace'     => 'test-ext',
+						'field'         => 'priority',
+						'output_schema' => array( 'type' => 'string' ),
+						'get_callback'  => static fn( \WC_Order $order ) => (string) $order->get_meta( '_test_priority' ),
+					)
+				);
+			}
+		);
+		$this->register_sync(
+			'order',
+			'test-ext',
+			static function ( array $saved ) {
+				$stored = wc_get_order( $saved[0]->get_id() );
+				$stored->update_meta_data( '_test_priority', 'synced' );
+				$stored->save();
+				return null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$order = \WC_Helper_Order::create_order();
+
+		$output = $this->run_ability(
+			'woocommerce/order-update',
+			array(
+				'id'            => $order->get_id(),
+				'customer_note' => 'Leave at the door.',
+			)
+		);
+
+		$this->assertSame( 'synced', $output['order']['extensions']['test-ext']['priority'] );
+		$this->assertSame( 'Leave at the door.', wc_get_order( $order->get_id() )->get_customer_note() );
+	}
+
+	/**
+	 * @testdox Should return from product-update what a sync stored on the product and its variations without the changed objects.
+	 */
+	public function test_product_update_returns_what_a_sync_stored(): void {
+		// register_test_fields() registers the test-ext.code field, read from _test_code, for products and variations.
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $saved ) {
+				foreach ( $saved as $object ) {
+					$stored = wc_get_product( $object->get_id() );
+					$stored->update_meta_data( '_test_code', 'synced-' . $object->get_id() );
+					$stored->save();
+				}
+				return null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$variation_id = $created['product']['variation_ids'][0];
+
+		// Writing a field loads each object's meta, so a response from the changed objects would miss the sync's values.
+		$output = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $created['product']['id'],
+				'extensions' => array( 'test-ext' => array( 'color' => 'red' ) ),
+				'variations' => array(
+					array(
+						'id'         => $variation_id,
+						'extensions' => array( 'test-ext' => array( 'color' => 'red' ) ),
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 'synced-' . $created['product']['id'], $output['product']['extensions']['test-ext']['code'] );
+		$this->assertSame( $variation_id, $output['variations'][0]['id'] );
+		$this->assertSame( 'synced-' . $variation_id, $output['variations'][0]['extensions']['test-ext']['code'] );
+	}
+
+	/**
 	 * @testdox Should create an order with an extension field in one save, show validators the sent status, and create nothing when a validator refuses.
 	 */
 	public function test_order_create_writes_extension_fields_and_runs_validators(): void {
