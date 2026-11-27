@@ -259,7 +259,7 @@ class Controller extends GenericController implements ExportableInterface {
 		global $wpdb;
 
 		$orderby = $wp_query->get( 'orderby' );
-		$order   = esc_sql( $wp_query->get( 'order' ) ? $wp_query->get( 'order' ) : 'desc' );
+		$order   = 'ASC' === strtoupper( (string) $wp_query->get( 'order' ) ) ? 'ASC' : 'DESC';
 
 		switch ( $orderby ) {
 			case 'stock_quantity':
@@ -268,7 +268,7 @@ class Controller extends GenericController implements ExportableInterface {
 				break;
 			case 'stock_status':
 				$args['join']    = self::append_product_sorting_table_join( $args['join'] );
-				$args['orderby'] = " wc_product_meta_lookup.stock_status {$order}, wc_product_meta_lookup.stock_quantity {$order} ";
+				$args['orderby'] = " wc_product_meta_lookup.stock_status {$order}, wc_product_meta_lookup.stock_quantity {$order}, wc_product_meta_lookup.product_id {$order} ";
 				break;
 			case 'sku':
 				$args['join']    = self::append_product_sorting_table_join( $args['join'] );
