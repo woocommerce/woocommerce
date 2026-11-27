@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an "Attribute N used for variations" column to the product CSV import and export, so the setting can be set directly.
