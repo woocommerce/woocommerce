@@ -259,7 +259,7 @@ abstract class WC_Data {
 		if ( null !== $staged ) {
 			self::refuse_listeners_without_staged( $hook, count( $args ) );
 		}
-		do_action( $hook, ...$args );
+		do_action( $hook, ...$args ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Fires a hook that the caller names; the caller documents it.
 	}
 
 	/**
@@ -277,7 +277,7 @@ abstract class WC_Data {
 		if ( null !== $staged ) {
 			self::refuse_listeners_without_staged( $hook, count( $args ) + 1 );
 		}
-		return apply_filters( $hook, $value, ...$args );
+		return apply_filters( $hook, $value, ...$args ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Applies a filter that the caller names; the caller documents it.
 	}
 
 	/**
@@ -626,7 +626,7 @@ abstract class WC_Data {
 		}
 
 		if ( 'view' === $context ) {
-			$value = $this->staged_hooks && self::staged_getter_filters() ? $this->apply_staged_filters( $this->get_hook_prefix() . $key, $value, $this ) : apply_filters( $this->get_hook_prefix() . $key, $value, $this );
+			$value = $this->staged_hooks && self::staged_getter_filters() ? $this->apply_staged_filters( $this->get_hook_prefix() . $key, $value, $this ) : apply_filters( $this->get_hook_prefix() . $key, $value, $this ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Dynamic getter filter, named by the meta key.
 		}
 
 		return $value;
@@ -1148,7 +1148,7 @@ abstract class WC_Data {
 			$value = array_key_exists( $prop, $this->changes ) ? $this->changes[ $prop ] : $this->data[ $prop ];
 
 			if ( 'view' === $context ) {
-				$value = $this->staged_hooks && self::staged_getter_filters() ? $this->apply_staged_filters( $this->get_hook_prefix() . $prop, $value, $this ) : apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
+				$value = $this->staged_hooks && self::staged_getter_filters() ? $this->apply_staged_filters( $this->get_hook_prefix() . $prop, $value, $this ) : apply_filters( $this->get_hook_prefix() . $prop, $value, $this ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Dynamic getter filter, named by the prop.
 			}
 		}
 

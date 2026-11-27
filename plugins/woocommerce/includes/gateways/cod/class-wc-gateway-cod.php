@@ -169,9 +169,10 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @param  string         $status Current order status.
 	 * @param  int            $order_id Order ID.
 	 * @param  WC_Order|false $order Order object.
+	 * @param  WC_Data|null   $staged Staged object, or null outside a staged write.
 	 * @return string
 	 */
-	public function change_payment_complete_order_status( $status, $order_id = 0, $order = false, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Spike: accepts $staged.
+	public function change_payment_complete_order_status( $status, $order_id = 0, $order = false, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- The listener must accept $staged to run on a staged order.
 		if ( $order && self::ID === $order->get_payment_method() ) {
 			$status = OrderStatus::COMPLETED;
 		}

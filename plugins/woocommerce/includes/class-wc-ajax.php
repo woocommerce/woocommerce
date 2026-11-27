@@ -1367,7 +1367,7 @@ class WC_AJAX {
 				$use_editor_tax_location = null;
 				if ( ! empty( $tax_location['country'] ) ) {
 					$editor_tax_location     = $order->get_taxable_location( $tax_location );
-					$use_editor_tax_location = function ( $location, $location_order, $staged = null ) use ( $order, $editor_tax_location ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Spike: accepts $staged.
+					$use_editor_tax_location = function ( $location, $location_order, $staged = null ) use ( $order, $editor_tax_location ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- The listener must accept $staged to run on a staged order.
 						return $location_order->get_id() === $order->get_id() ? $editor_tax_location : $location;
 					};
 					add_filter( 'woocommerce_order_get_tax_location', $use_editor_tax_location, PHP_INT_MAX, 3 );

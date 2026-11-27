@@ -158,12 +158,14 @@ class DraftOrders {
 	/**
 	 * Append draft status to a list of statuses.
 	 *
-	 * @param array $statuses Array of statuses.
+	 * @param array          $statuses Array of statuses.
+	 * @param \WC_Order|null $order    Order the statuses are for.
+	 * @param \WC_Data|null  $staged   Staged object, or null outside a staged write.
 	 * @internal
 
 	 * @return array
 	 */
-	public function append_draft_order_post_status( $statuses, $order = null, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Spike: accepts $staged.
+	public function append_draft_order_post_status( $statuses, $order = null, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- The listener must accept all filter arguments up to $staged to run on a staged order.
 		$statuses[] = self::STATUS;
 		return $statuses;
 	}

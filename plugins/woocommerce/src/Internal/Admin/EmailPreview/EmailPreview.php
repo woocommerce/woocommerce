@@ -335,10 +335,12 @@ class EmailPreview {
 	/**
 	 * Return a dummy product when the product is not set in email classes.
 	 *
-	 * @param WC_Product|null $product Order item product.
+	 * @param WC_Product|null     $product Order item product.
+	 * @param \WC_Order_Item|null $item    Order item.
+	 * @param \WC_Data|null       $staged  Staged object, or null outside a staged write.
 	 * @return WC_Product
 	 */
-	public function get_dummy_product_when_not_set( $product, $item = null, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Spike: accepts $staged.
+	public function get_dummy_product_when_not_set( $product, $item = null, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- The listener must accept all filter arguments up to $staged to run on a staged order.
 		if ( $product ) {
 			return $product;
 		}

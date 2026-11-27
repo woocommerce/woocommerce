@@ -406,10 +406,11 @@ class ShippingController {
 	/**
 	 * Declares the Pickup Location shipping method as a Local Pickup method for WooCommerce.
 	 *
-	 * @param array $methods Shipping method ids.
+	 * @param array         $methods Shipping method ids.
+	 * @param \WC_Data|null $staged  Staged object, or null outside a staged write.
 	 * @return array
 	 */
-	public function register_local_pickup_method( $methods, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Spike: accepts $staged.
+	public function register_local_pickup_method( $methods, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- The listener must accept $staged to run on a staged order.
 		$methods[] = 'pickup_location';
 		return $methods;
 	}
@@ -492,9 +493,10 @@ class ShippingController {
 	 *
 	 * @param array              $location Tax location with 'country', 'state', 'postcode' and 'city' keys.
 	 * @param \WC_Abstract_Order $order    Order the tax location is being resolved for.
+	 * @param \WC_Data|null      $staged   Staged object, or null outside a staged write.
 	 * @return array
 	 */
-	public function filter_order_tax_location( $location, $order, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Spike: accepts $staged.
+	public function filter_order_tax_location( $location, $order, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- The listener must accept $staged to run on a staged order.
 		if ( ! $order instanceof \WC_Abstract_Order ) {
 			return $location;
 		}

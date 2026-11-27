@@ -1301,9 +1301,11 @@ class OrderController {
 	/**
 	 * Changes default order status to draft for orders created via this API.
 	 *
+	 * @param string        $status Default order status.
+	 * @param \WC_Data|null $staged Staged object, or null outside a staged write.
 	 * @return string
 	 */
-	public function default_order_status( $status = '', $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed, Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Spike: accepts $staged.
+	public function default_order_status( $status = '', $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- The listener must accept all filter arguments up to $staged to run on a staged order.
 		return 'checkout-draft';
 	}
 
