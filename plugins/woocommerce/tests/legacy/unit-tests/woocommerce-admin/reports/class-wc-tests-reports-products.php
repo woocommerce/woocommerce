@@ -528,6 +528,71 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that a full refund after fractional partial refunds leaves the line at zero units.
+	 *
+	 * Lookup rows store the quantity as a whole number, so two refunds of half a unit store zero units each.
+	 */
+	public function test_populate_fractional_partial_refunds_then_full_refund() {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Allow decimal quantities as a decimal stock setup does.
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		try {
+			$product = new WC_Product_Simple();
+			$product->set_name( 'Test Product' );
+			$product->set_regular_price( 25 );
+			$product->save();
+
+			$order = new WC_Order();
+			$item  = new WC_Order_Item_Product();
+			$item->set_product( $product );
+			$item->set_quantity( 4 );
+			$item->set_subtotal( 100 );
+			$item->set_total( 100 );
+			$order->add_item( $item );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->calculate_totals( false );
+			$order->save();
+
+			for ( $i = 0; $i < 2; $i++ ) {
+				wc_create_refund(
+					array(
+						'amount'     => 12.5,
+						'order_id'   => $order->get_id(),
+						'line_items' => array(
+							$item->get_id() => array(
+								'qty'          => 0.5,
+								'refund_total' => 12.5,
+							),
+						),
+					)
+				);
+			}
+			WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+			$order = wc_get_order( $order->get_id() );
+			$order->set_status( OrderStatus::REFUNDED );
+			$order->save();
+			WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+			$units = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					'SELECT SUM( product_qty ) FROM %i WHERE product_id = %d',
+					$wpdb->prefix . 'wc_order_product_lookup',
+					$product->get_id()
+				)
+			);
+			$this->assertSame( 0, $units );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+	}
+
+	/**
 	 * Tests that re-syncing a full refund removes an earlier row for a line that has nothing left to refund.
 	 */
 	public function test_resync_full_refund_removes_row_for_line_with_nothing_left() {

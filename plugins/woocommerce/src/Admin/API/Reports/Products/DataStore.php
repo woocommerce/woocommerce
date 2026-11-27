@@ -603,7 +603,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$parent_order    = wc_get_order( $parent_order_id );
 			$order_items     = $parent_order->get_items();
 
-			// Sum what earlier refunds took from each line, rounding each like the rows those refunds wrote.
+			// Sum what earlier refunds took from each line, read and rounded like the rows those refunds wrote,
+			// which store the quantity as a whole number.
 			if ( $parent_order instanceof \WC_Order ) {
 				foreach ( $parent_order->get_refunds() as $prior_refund ) {
 					foreach ( $prior_refund->get_items() as $refunded_item ) {
@@ -611,8 +612,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 							continue;
 						}
 						$refunded_item_id                        = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
-						$prior_refunded_qty[ $refunded_item_id ] = ( $prior_refunded_qty[ $refunded_item_id ] ?? 0 ) + $refunded_item->get_quantity();
-						$prior_refunded_net[ $refunded_item_id ] = ( $prior_refunded_net[ $refunded_item_id ] ?? 0 ) + round( (float) $refunded_item->get_total(), $decimals );
+						$prior_refunded_qty[ $refunded_item_id ] = ( $prior_refunded_qty[ $refunded_item_id ] ?? 0 ) + (int) $refunded_item->get_quantity( 'edit' );
+						$prior_refunded_net[ $refunded_item_id ] = ( $prior_refunded_net[ $refunded_item_id ] ?? 0 ) + round( (float) $refunded_item->get_total( 'edit' ), $decimals );
 					}
 				}
 			}
@@ -642,7 +643,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					continue;
 				}
 
-				$product_qty = -abs( $product_qty + ( $prior_refunded_qty[ $order_item_id ] ?? 0 ) );
+				$product_qty = -abs( (int) $product_qty + ( $prior_refunded_qty[ $order_item_id ] ?? 0 ) );
 
 				// Set coupon amount to 0 for full refunds without line items.
 				$coupon_amount = 0;
