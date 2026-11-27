@@ -60,6 +60,7 @@
 		@include font-size(regular, 0.9em);
 		color: currentColor;
 		cursor: pointer;
+		font-feature-settings: "case";
 		font-style: normal;
 		font-weight: normal;
 		min-width: 30px;
