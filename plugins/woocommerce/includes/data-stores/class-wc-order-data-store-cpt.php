@@ -636,6 +636,27 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		/**
+		 * Filters the maximum number of order IDs returned by an order search.
+		 *
+		 * The limit is applied before the search results filter runs, so that filter can still add or remove IDs.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param int    $limit Maximum number of order IDs to return. Any negative value means no limit, and 0 returns no results. Default -1.
+		 * @param string $term  Search term.
+		 */
+		$limit = apply_filters( 'woocommerce_order_search_limit', -1, $term );
+		$limit = is_numeric( $limit ) ? max( -1, (int) $limit ) : -1;
+
+		if ( $limit >= 0 ) {
+			if ( $limit > 0 ) {
+				// Keep the newest matches.
+				rsort( $order_ids, SORT_NUMERIC );
+			}
+			$order_ids = array_slice( $order_ids, 0, $limit );
+		}
+
+		/**
 		 * Filter the order ids to be returned.
 		 *
 		 * @since 3.0.0

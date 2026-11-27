@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Caches\OrderCountCache;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Class Functions.
@@ -1976,6 +1977,71 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		// Should return nothing when searching for nonexistent term.
 		$this->assertEmpty( wc_order_search( 'Nonexistent term' ) );
+	}
+
+	/**
+	 * @testdox wc_order_search() returns every match by default and applies the filtered limit before the results filter.
+	 *
+	 * @since 11.4.0
+	 */
+	public function test_wc_order_search_limit() {
+		$orders = array(
+			$this->create_order(),
+			$this->create_order(),
+			$this->create_order(),
+		);
+		foreach ( $orders as $index => $order ) {
+			$order->set_date_created( sprintf( '2025-01-%02d 00:00:00', $index + 1 ) );
+			$order->save();
+		}
+
+		$order_ids    = array_map(
+			static function ( $order ) {
+				return $order->get_id();
+			},
+			$orders
+		);
+		$newest_first = array_reverse( $order_ids );
+
+		$search_limit         = 2;
+		$limit_search_results = static function () use ( &$search_limit ) {
+			return $search_limit;
+		};
+
+		$this->assertEqualsCanonicalizing( $order_ids, wc_order_search( 'Jeroen' ), 'The search should not be limited by default' );
+
+		add_filter( 'woocommerce_order_search_limit', $limit_search_results );
+		try {
+			$this->assertSame( array( $order_ids[2], $order_ids[1] ), wc_order_search( 'Jeroen' ), 'A positive limit should cap the results' );
+
+			$search_results_filter = OrderUtil::custom_orders_table_usage_is_enabled()
+				? 'woocommerce_cot_shop_order_search_results'
+				: 'woocommerce_shop_order_search_results';
+			$append_search_result  = static function ( $search_results ) use ( $order_ids ) {
+				$search_results[] = $order_ids[0];
+				return $search_results;
+			};
+			add_filter( $search_results_filter, $append_search_result );
+			try {
+				$this->assertSame( $newest_first, wc_order_search( 'Jeroen' ), 'IDs added by the results filter should not be cut by the limit' );
+			} finally {
+				remove_filter( $search_results_filter, $append_search_result );
+			}
+
+			$search_limit = 0;
+			$this->assertSame( array(), wc_order_search( 'Jeroen' ), 'A limit of 0 should return no results' );
+
+			$search_limit = -1;
+			$this->assertEqualsCanonicalizing( $order_ids, wc_order_search( 'Jeroen' ), 'A limit of -1 should mean no limit' );
+
+			$search_limit = -2;
+			$this->assertEqualsCanonicalizing( $order_ids, wc_order_search( 'Jeroen' ), 'Any negative limit should mean no limit' );
+
+			$search_limit = 'not a number';
+			$this->assertEqualsCanonicalizing( $order_ids, wc_order_search( 'Jeroen' ), 'A non-numeric limit should mean no limit' );
+		} finally {
+			remove_filter( 'woocommerce_order_search_limit', $limit_search_results );
+		}
 	}
 
 	/**
