@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Internal\Cart\RoundedTotalNote;
+
 /**
  * MiniCartProductsTableBlock class.
  */
@@ -73,8 +75,28 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 				'increaseQuantityLabel'    => $increase_quantity_label,
 				'quantityDescriptionLabel' => $quantity_description_label,
 				'removeFromCartLabel'      => $remove_from_cart_label,
+				// Rounding details for line totals that don't add up from the price shown. Script modules can't load
+				// translations with plurals yet, so these name the unit price rather than "3 units".
+				'roundingNoteTemplates'    => array(
+					/* translators: 1: line total, e.g. £5.98. 2: exact unit price, e.g. "£1.992 (incl. VAT)". 3: unit price the cart shows, e.g. £1.99. */
+					'unitPriceShownAs' => __( 'Rounded to %1$s from a unit price of %2$s, shown as %3$s in your cart.', 'woocommerce' ),
+					/* translators: 1: line total, e.g. £0.41. 2: exact unit price as the cart shows it, e.g. £0.207. */
+					'unitPrice'        => __( 'Rounded to %1$s from a unit price of %2$s.', 'woocommerce' ),
+					/* translators: 1: line total, e.g. £0.74. 2: "VAT" or "Tax". */
+					'taxAdded'         => __( 'Rounded to %1$s after adding %2$s to the line.', 'woocommerce' ),
+					/* translators: 1: line total, e.g. £0.62. 2: "VAT" or "Tax". */
+					'taxRemoved'       => __( 'Rounded to %1$s after taking %2$s off the line.', 'woocommerce' ),
+				),
+				'taxLabels'                => array(
+					'tax'      => WC()->countries->tax_or_vat(),
+					'included' => WC()->countries->inc_tax_or_vat(),
+					'excluded' => WC()->countries->ex_tax_or_vat(),
+				),
 			)
 		);
+
+		wp_enqueue_script( RoundedTotalNote::ASSET_HANDLE );
+		wp_enqueue_style( RoundedTotalNote::ASSET_HANDLE );
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
@@ -219,7 +241,16 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 							<td class="wc-block-cart-item__total">
 								<div class="wc-block-cart-item__total-price-and-sale-badge-wrapper">
 									<span class="price wc-block-components-product-price">
-										<span data-wp-text="state.lineItemTotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value notranslate" translate="no">
+										<span data-wp-bind--hidden="state.hasLineRoundingNote">
+											<span data-wp-text="state.lineItemTotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value notranslate" translate="no"></span>
+										</span>
+										<span class="wc-rounded-total-info" hidden data-wp-bind--hidden="!state.hasLineRoundingNote">
+											<button type="button" class="wc-rounded-total-info__button" data-wp-bind--popovertarget="state.lineRoundingTooltipId" popovertargetaction="show" aria-expanded="false">
+												<?php echo RoundedTotalNote::get_icon_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static SVG markup. ?>
+												<span class="wc-rounded-total-info__amount"><span data-wp-text="state.lineItemTotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value notranslate" translate="no"></span></span>
+												<span class="wc-rounded-total-info__label"><?php esc_html_e( 'Rounding details', 'woocommerce' ); ?></span>
+											</button>
+											<span class="wc-rounded-total-info__tooltip" popover="auto" role="tooltip" data-wp-bind--id="state.lineRoundingTooltipId" data-wp-text="state.lineRoundingNote"></span>
 										</span>
 									</span>
 									<div

@@ -34,6 +34,7 @@ import {
 	renderEntryFieldHTML,
 } from './utils/item-data';
 import type { ItemData, CartItemDataAttr } from './utils/item-data';
+import { getLineRounding } from '../../base/utils/rounded-total-calculation';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -54,10 +55,23 @@ const {
 	increaseQuantityLabel,
 	quantityDescriptionLabel,
 	removeFromCartLabel,
+	roundingNoteTemplates,
+	taxLabels,
 } = getConfig( 'woocommerce/mini-cart-products-table-block' );
 const { itemsInCartTextTemplate } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
 );
+
+/**
+ * Fill a translated template's numbered placeholders (%1$s, %2$s, …). Split and join, so a "$" in a price isn't read
+ * as a replacement pattern.
+ */
+const fillTemplate = ( template: string, values: string[] ): string =>
+	values.reduce(
+		( text, value, index ) =>
+			text.split( `%${ index + 1 }$s` ).join( value ),
+		template
+	);
 
 type ScalePriceArgs = {
 	price: number;
@@ -743,6 +757,77 @@ const { state: cartItemState } = store(
 				}
 
 				return price;
+			},
+
+			// Why the line total isn't the unit price shown × quantity, e.g. "Rounded to £5.98 from a unit price of
+			// £1.992 (incl. VAT), shown as £1.99 in your cart."; empty when it adds up.
+			get lineRoundingNote(): string {
+				const rounding = roundingNoteTemplates
+					? getLineRounding(
+							cartItemState.cartItem,
+							Boolean( displayCartPriceIncludingTax ),
+							currency as Currency
+						)
+					: null;
+
+				if ( ! rounding ) {
+					return '';
+				}
+
+				const {
+					line,
+					currency: lineCurrency,
+					hasTax,
+					units,
+				} = rounding;
+				const lineText = formatPriceWithCurrency( line, lineCurrency );
+
+				if ( ! units ) {
+					return fillTemplate(
+						displayCartPriceIncludingTax
+							? roundingNoteTemplates.taxAdded
+							: roundingNoteTemplates.taxRemoved,
+						[ lineText, taxLabels.tax ]
+					);
+				}
+
+				let exactText = formatPriceWithCurrency(
+					units.exact,
+					lineCurrency,
+					{ minorUnit: units.exactMinorUnit }
+				);
+				if ( hasTax ) {
+					exactText += ` ${
+						displayCartPriceIncludingTax
+							? taxLabels.included
+							: taxLabels.excluded
+					}`;
+				}
+
+				return units.shown === null
+					? fillTemplate( roundingNoteTemplates.unitPrice, [
+							lineText,
+							exactText,
+						] )
+					: fillTemplate( roundingNoteTemplates.unitPriceShownAs, [
+							lineText,
+							exactText,
+							formatPriceWithCurrency(
+								units.shown,
+								lineCurrency,
+								{
+									minorUnit: units.shownMinorUnit,
+								}
+							),
+						] );
+			},
+
+			get hasLineRoundingNote(): boolean {
+				return cartItemState.lineRoundingNote !== '';
+			},
+
+			get lineRoundingTooltipId(): string {
+				return `wc-mini-cart-rounding-${ cartItemState.cartItem.key }`;
 			},
 
 			get isProductHiddenFromCatalog(): boolean {

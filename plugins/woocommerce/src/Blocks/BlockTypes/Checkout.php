@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\Validation;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
+use Automattic\WooCommerce\Internal\Cart\RoundedTotalNote;
 
 /**
  * Checkout class.
@@ -466,6 +467,18 @@ class Checkout extends AbstractBlock {
 		);
 		$this->asset_data_registry->add( 'checkoutShowLoginReminder', filter_var( get_option( 'woocommerce_enable_checkout_login_reminder' ), FILTER_VALIDATE_BOOLEAN ) );
 		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_cart' ) );
+		$this->asset_data_registry->add( 'taxRoundAtSubtotal', 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) );
+		$this->asset_data_registry->add(
+			'taxLabels',
+			array(
+				'tax'      => WC()->countries->tax_or_vat(),
+				'included' => WC()->countries->inc_tax_or_vat(),
+				'excluded' => WC()->countries->ex_tax_or_vat(),
+			)
+		);
+		// Rounding details on totals that don't add up from the prices shown (see RoundedTotalInfo).
+		wp_enqueue_script( RoundedTotalNote::ASSET_HANDLE );
+		wp_enqueue_style( RoundedTotalNote::ASSET_HANDLE );
 		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
 		$this->asset_data_registry->add( 'forcedBillingAddress', 'billing_only' === get_option( 'woocommerce_ship_to_destination' ) );
 		$this->asset_data_registry->add( 'generatePassword', filter_var( get_option( 'woocommerce_registration_generate_password' ), FILTER_VALIDATE_BOOLEAN ) );
