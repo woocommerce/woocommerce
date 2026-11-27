@@ -29,6 +29,13 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Interactivity API state before the test, as rendering the block adds to it.
+	 *
+	 * @var array
+	 */
+	private $interactivity_state;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -53,6 +60,8 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		$this->init_stock_notifications_services();
 
 		$this->sut = wc_get_container()->get( ProductPageIntegration::class );
+
+		$this->interactivity_state = $this->interactivity_state_data()->getValue( wp_interactivity() );
 	}
 
 	/**
@@ -60,10 +69,23 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
+			$this->interactivity_state_data()->setValue( wp_interactivity(), $this->interactivity_state );
 			$this->restore_stock_notifications_feature_option();
 		} finally {
 			parent::tearDown();
 		}
+	}
+
+	/**
+	 * Get the Interactivity API's private state property.
+	 *
+	 * @return \ReflectionProperty
+	 */
+	private function interactivity_state_data(): \ReflectionProperty {
+		$property = new \ReflectionProperty( \WP_Interactivity_API::class, 'state_data' );
+		$property->setAccessible( true );
+
+		return $property;
 	}
 
 	/**
