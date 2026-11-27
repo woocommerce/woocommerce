@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.19.1 - 2026-11-27
+### Fixed
+- Keep the properties that plugins add through `jetpack_woocommerce_analytics_event_props` on events the proxy speed module records. [#71531]
+
 ## 0.19.0 - 2026-11-27
 ### Changed
 - Let hosts run the proxy speed module from their own platform code, and stop writing the speed module MU-plugin into sites. The `woocommerce_analytics_auto_install_proxy_speed_module` filter is deprecated. [#71301]
