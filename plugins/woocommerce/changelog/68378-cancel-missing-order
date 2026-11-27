@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show an "Invalid order." notice instead of a fatal error when a cancel order link points to an order that no longer exists.
