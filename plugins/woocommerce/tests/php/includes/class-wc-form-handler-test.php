@@ -2117,7 +2117,11 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 'chosen-username', $user->user_login, 'The store asks for a username, so the posted one should be used.' );
 		$this->assertFalse( wp_check_password( 'ignored-Password-123!', $user->user_pass, $user->ID ), 'A posted password should be ignored.' );
 		$this->assertTrue( (bool) get_user_option( 'default_password_nag', $user->ID ), 'The account should have a generated password.' );
-		$this->assertStringContainsString( 'for a link to set your password.', wp_json_encode( wc_get_notices( 'success' ) ), 'The customer should be told to check their email.' );
+		ob_start();
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\Customers\AccountCreatedConfirmation::class )->output_after_registration();
+		$confirmation = (string) ob_get_clean();
+		$this->assertStringContainsString( 'Check <strong>register-new@example.test</strong> for a link to set your password.', $confirmation, 'The customer should be told which inbox to check.' );
+		$this->assertEmpty( wc_get_notices( 'success' ), 'The confirmation replaces the success notice.' );
 		$this->assertArrayNotHasKey( 'email', $_POST, 'The form should be empty after a successful registration.' ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 	}
 

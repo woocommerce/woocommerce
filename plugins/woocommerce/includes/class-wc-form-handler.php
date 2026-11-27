@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Customers\AccountCreatedConfirmation;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 
 defined( 'ABSPATH' ) || exit;
@@ -1689,14 +1690,6 @@ class WC_Form_Handler {
 					throw new Exception( $new_customer->get_error_message() );
 				}
 
-				wc_add_notice(
-					sprintf(
-						/* translators: %s: customer email address */
-						__( 'Your account has been created. Check %s for a link to set your password.', 'woocommerce' ),
-						'<strong>' . esc_html( sanitize_email( $email ) ) . '</strong>'
-					)
-				);
-
 				// The shopper stays on the same page, so empty the form to avoid a second submit for the same email.
 				unset( $_POST['email'], $_POST['username'] );
 
@@ -1736,6 +1729,18 @@ class WC_Form_Handler {
 
 				if ( $filtered_redirect !== $default_redirect ) {
 					$redirect = $filtered_redirect;
+
+					// The confirmation box only shows on this page, so a notice carries the message to the next one.
+					wc_add_notice(
+						sprintf(
+							/* translators: %s: customer email address */
+							__( 'Your account has been created. Check %s for a link to set your password.', 'woocommerce' ),
+							'<strong>' . esc_html( sanitize_email( $email ) ) . '</strong>'
+						)
+					);
+				} else {
+					// Shown above the forms, the same as on the order received page.
+					wc_get_container()->get( AccountCreatedConfirmation::class )->show_after_registration( sanitize_email( $email ) );
 				}
 			} catch ( Exception $e ) {
 				if ( $e->getMessage() ) {

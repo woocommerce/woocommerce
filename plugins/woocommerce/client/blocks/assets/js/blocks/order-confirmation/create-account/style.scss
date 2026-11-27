@@ -11,6 +11,8 @@
 	margin-top: $gap-larger !important;
 	margin-bottom: $gap-larger !important;
 	background: rgba(0, 0, 0, 0.04);
+	// Tint from the text colour so the box stays visible on dark themes.
+	background: color-mix(in srgb, currentColor 4%, transparent);
 	box-sizing: border-box;
 
 	> div {
@@ -78,7 +80,6 @@
 
 	.wc-block-order-confirmation-create-account-success {
 		text-align: center;
-		padding: $gap-larger 0;
 
 		> :first-child {
 			margin-top: 0 !important;
@@ -86,6 +87,19 @@
 		> :last-child {
 			margin-bottom: 0 !important;
 		}
+	}
+
+	.wc-block-order-confirmation-create-account-success__title {
+		font-weight: 600;
+	}
+
+	.wc-block-order-confirmation-create-account-success__detail {
+		@include font-size(small);
+		margin-top: $gap-smallest;
+	}
+
+	.wc-block-order-confirmation-create-account-success__title + .wc-block-order-confirmation-create-account-success__detail {
+		margin-top: $gap-smaller;
 	}
 
 	.wc-block-order-confirmation-create-account-button {
