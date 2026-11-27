@@ -1286,3 +1286,71 @@ test( 'keeps the table locked and Save off until overlapping removals have both 
 	await expect( methodRow( page, 'Flat rate' ) ).toHaveCount( 1 );
 	await expect( flatRate ).toHaveAttribute( 'data-enabled', 'no' );
 } );
+
+// Regression: the settings modal wrote the formatted cost back into the method, so opening it again
+// without a reload formatted the cost twice. With "." as the thousands separator, 6.500 was read as
+// 6.5 and shown (and saved) as 7, with one more currency symbol in front of the field on every open.
+test( 'shows a flat rate cost formatted once each time its settings are re-opened and saves it unchanged', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	const methodsPath = `${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`;
+	const isFlatRate = ( method: { method_id: string } ) =>
+		method.method_id === 'flat_rate';
+
+	const seeded = await restApi.get( methodsPath );
+	const seededFlatRate = seeded.data.find( isFlatRate );
+	await restApi.put( `${ methodsPath }/${ seededFlatRate.instance_id }`, {
+		settings: { cost: '6500' },
+	} );
+
+	await openZone( page, zone.name );
+
+	// Only this page gets the currency, so the store settings and the other tests stay as they are.
+	await page.evaluate( () => {
+		const { wc } = window as unknown as {
+			wc: { wcSettings: { CURRENCY: Record< string, unknown > } };
+		};
+
+		Object.assign( wc.wcSettings.CURRENCY, {
+			precision: 0,
+			decimalSeparator: ',',
+			thousandSeparator: '.',
+		} );
+	} );
+
+	const modal = page.locator( '.wc-backbone-modal' );
+	const costField = modal.locator( '#woocommerce_flat_rate_cost' );
+	// The symbol is added right before the field, and shipping class costs get their own.
+	const currencySymbol = costField
+		.locator( '..' )
+		.locator( '.wc-shipping-zone-method-currency' );
+	const editLink = methodRow( page, 'Flat rate' ).locator(
+		'a.wc-shipping-zone-method-settings'
+	);
+
+	await editLink.click();
+	await expect( costField ).toHaveValue( '6.500' );
+	await expect( currencySymbol ).toHaveCount( 1 );
+	await modal.locator( '.modal-close-link' ).click();
+	await expect( modal ).toHaveCount( 0 );
+
+	// No reload in between, so this open reads the same method as the first one.
+	await editLink.click();
+	await expect( costField ).toHaveValue( '6.500' );
+	await expect( currencySymbol ).toHaveCount( 1 );
+
+	const saveResponse = page.waitForResponse(
+		( response ) =>
+			new URL( response.url() ).searchParams.get( 'action' ) ===
+			SAVE_SETTINGS_ACTION
+	);
+	await page.locator( '#btn-ok' ).click();
+	expect( ( await ( await saveResponse ).json() ).success ).toBe( true );
+	await expect( modal ).toHaveCount( 0 );
+
+	const methods = await restApi.get( methodsPath );
+	const savedFlatRate = methods.data.find( isFlatRate );
+	expect( savedFlatRate.settings.cost.value ).toBe( '6500' );
+} );
