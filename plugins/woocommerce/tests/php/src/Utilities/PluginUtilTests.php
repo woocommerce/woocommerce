@@ -34,6 +34,15 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Clears the feature definitions registered on the container's controller during tests.
+	 */
+	public function tearDown(): void {
+		$this->reset_container_resolutions();
+
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox `get_all_active_valid_plugins` gets the active plugins *that actually exist* and returns them
 	 *          as a list of absolute file paths.
 	 *
@@ -247,30 +256,24 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 	public function test_get_items_considered_incompatible() {
 		$this->reset_container_resolutions();
 
-		add_action(
-			'woocommerce_register_feature_definitions',
-			function ( $features_controller ) {
-				$features = array(
-					'test_feature_1' => array(
-						'name'                         => 'Test feature 1',
-						'default_plugin_compatibility' => 'incompatible',
-					),
-					'test_feature_2' => array(
-						'name'                         => 'Test feature 2',
-						'default_plugin_compatibility' => 'compatible',
-					),
-					'test_feature_3' => array(
-						'name'                         => 'Test feature 3',
-						'default_plugin_compatibility' => 'compatible',
-					),
-				);
-
-				foreach ( $features as $slug => $definition ) {
-					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
-				}
-			},
-			20
+		$features            = array(
+			'test_feature_1' => array(
+				'name'                         => 'Test feature 1',
+				'default_plugin_compatibility' => 'incompatible',
+			),
+			'test_feature_2' => array(
+				'name'                         => 'Test feature 2',
+				'default_plugin_compatibility' => 'compatible',
+			),
+			'test_feature_3' => array(
+				'name'                         => 'Test feature 3',
+				'default_plugin_compatibility' => 'compatible',
+			),
 		);
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		foreach ( $features as $slug => $definition ) {
+			$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
+		}
 
 		$plugin_compatibility_info = array(
 			'compatible'   => array(
