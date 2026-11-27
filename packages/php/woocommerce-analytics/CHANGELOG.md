@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.19.0 - 2026-11-27
+### Changed
+- Let hosts run the proxy speed module from their own platform code, and stop writing the speed module MU-plugin into sites. The `woocommerce_analytics_auto_install_proxy_speed_module` filter is deprecated. [#71301]
+
+### Fixed
+- Count each product once in the products_count analytics property, regardless of quantity, and omit the price property for products without a price. [#70800]
+- Stop tracking shoppers who denied statistics consent when the consent plugin sets no consent type. [#70846]
+
 ## 0.18.1 - 2026-10-21
 ### Changed
 - Stop loading the stats.wp.com tracking script and its referrer cookies when analytics proxy tracking is enabled. [#70010]
