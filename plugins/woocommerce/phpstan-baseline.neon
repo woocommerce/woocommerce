@@ -10051,12 +10051,6 @@ parameters:
 			path: includes/class-wc-cart.php
 
 		-
-			message: '#^Parameter \#1 \$price of function wc_price expects float, float\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-cart.php
-
-		-
 			message: '#^Parameter \#1 \$stock_quantity of function wc_format_stock_quantity_for_display expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 3

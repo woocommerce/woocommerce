@@ -20,9 +20,9 @@ import {
 import { getSetting } from '@woocommerce/settings';
 import { useMemo } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
-import { CartItem, isString } from '@woocommerce/types';
-import { calculateSaleAmount } from '@woocommerce/base-utils';
-import { dinero, transformScale, toSnapshot } from 'dinero.js';
+import { CartItem } from '@woocommerce/types';
+import { calculateLineSaleAmount } from '@woocommerce/base-utils';
+import { dinero, toSnapshot } from 'dinero.js';
 import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 
 /**
@@ -80,34 +80,17 @@ const OrderSummaryItem = ( {
 		arg,
 	} );
 
-	const rawPrecision = isString( prices.raw_prices.precision )
-		? parseInt( prices.raw_prices.precision, 10 )
-		: prices.raw_prices.precision;
-
-	const regularPriceSingle = toSnapshot(
-		transformScale(
-			dinero( {
-				amount: parseInt( prices.raw_prices.regular_price, 10 ),
-				currency: USD,
-				scale: rawPrecision,
-			} ),
-			priceCurrency.minorUnit
-		)
-	).amount;
-	const priceSingle = toSnapshot(
-		transformScale(
-			dinero( {
-				amount: parseInt( prices.raw_prices.price, 10 ),
-				currency: USD,
-				scale: rawPrecision,
-			} ),
-			priceCurrency.minorUnit
-		)
-	).amount;
+	// Use the prices the server rounded, so the summary shows the same unit price as the product page and the cart.
+	const regularPriceSingle = parseInt( prices.regular_price, 10 );
+	const priceSingle = parseInt( prices.price, 10 );
 	const totalsCurrency = getCurrencyFromPriceResponse( totals );
 
+	const includeTax = getSetting< boolean >(
+		'displayCartPricesIncludingTax',
+		false
+	);
 	let lineSubtotal = parseInt( totals.line_subtotal, 10 );
-	if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
+	if ( includeTax ) {
 		lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
 	}
 	const subtotalPrice = toSnapshot(
@@ -118,9 +101,10 @@ const OrderSummaryItem = ( {
 		} )
 	).amount;
 
-	const saleAmountSingle = calculateSaleAmount(
-		prices,
-		priceCurrency.minorUnit
+	const lineSaleAmount = calculateLineSaleAmount(
+		cartItem,
+		totalsCurrency.minorUnit,
+		includeTax
 	);
 
 	const subtotalPriceFormat = applyCheckoutFilter( {
@@ -266,8 +250,8 @@ const OrderSummaryItem = ( {
 						price={ subtotalPrice }
 					/>
 					<ProductSaleBadge
-						currency={ priceCurrency }
-						saleAmount={ saleAmountSingle * quantity }
+						currency={ totalsCurrency }
+						saleAmount={ lineSaleAmount }
 						format={ saleBadgePriceFormat }
 					/>
 				</div>

@@ -5,6 +5,7 @@ import { store, getContext, getConfig } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import { formatPriceWithCurrency } from '@woocommerce/price-format/utils/currency';
+import type { Currency } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -24,6 +25,7 @@ const { state: productsState } = store< ProductsStore >(
 type SaleBadgeConfig = {
 	saleBadgePercentageTemplate: string;
 	saleBadgeScreenReaderTemplate: string;
+	storePriceDecimals?: number;
 };
 
 type SaleBadgeContext = {
@@ -75,7 +77,7 @@ const { state } = store(
 						String( discount.percentage )
 					);
 				} else {
-					value = formatPriceWithCurrency( discount.amount, {
+					const priceCurrency = {
 						code: prices.currency_code,
 						symbol: prices.currency_symbol,
 						minorUnit: prices.currency_minor_unit,
@@ -83,7 +85,19 @@ const { state } = store(
 						thousandSeparator: prices.currency_thousand_separator,
 						prefix: prices.currency_prefix,
 						suffix: prices.currency_suffix,
-					} );
+					} as Currency;
+					// Prices shown as entered can have more decimals than the store's (£0.317 − £0.207), so drop zeros
+					// past the store's decimals: £0.11, not £0.110.
+					value = formatPriceWithCurrency(
+						discount.amount,
+						{
+							...priceCurrency,
+							minorUnit:
+								config.storePriceDecimals ??
+								prices.currency_minor_unit,
+						},
+						{ minorUnit: prices.currency_minor_unit }
+					);
 				}
 				return `${ context.prefix }${ value }${ context.suffix }`;
 			},

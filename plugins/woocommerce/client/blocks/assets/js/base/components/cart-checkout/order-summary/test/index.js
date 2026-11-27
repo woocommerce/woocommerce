@@ -74,9 +74,10 @@ describe( 'Order Summary', () => {
 			/>
 		);
 
+		// The unit price and the line subtotal both show $0.00.
 		expect(
-			screen.getByText( textContentMatcher( '$0.00' ), visibleOnly )
-		).toBeInTheDocument();
+			screen.getAllByText( textContentMatcher( '$0.00' ), visibleOnly )
+		).toHaveLength( 2 );
 	} );
 
 	it( 'renders the product name as plain text in the screen reader price', () => {

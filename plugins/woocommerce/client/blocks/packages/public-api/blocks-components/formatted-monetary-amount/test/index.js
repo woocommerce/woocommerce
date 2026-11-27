@@ -265,6 +265,47 @@ describe( 'FormattedMonetaryAmount', () => {
 		} );
 	} );
 
+	describe( 'prices with more decimals than the store', () => {
+		/** @type {import('@woocommerce/types').Currency} */
+		const currency = {
+			code: 'EUR',
+			symbol: '€',
+			thousandSeparator: '.',
+			decimalSeparator: ',',
+			minorUnit: 3,
+			prefix: '',
+			suffix: ' €',
+		};
+
+		test.each`
+			value     | expected
+			${ 2100 } | ${ '2,10 €' }
+			${ 1995 } | ${ '1,995 €' }
+			${ 230 }  | ${ '0,23 €' }
+		`(
+			'drops zeros beyond the store’s 2 decimals: $value shows as "$expected"',
+			( { value, expected } ) => {
+				const { container } = render(
+					<FormattedMonetaryAmount
+						value={ value }
+						currency={ currency }
+					/>
+				);
+				expect( container ).toHaveTextContent( expected );
+			}
+		);
+
+		test( 'keeps every decimal of a currency other than the store’s', () => {
+			const { container } = render(
+				<FormattedMonetaryAmount
+					value={ 2100 }
+					currency={ { ...currency, code: 'KWD' } }
+				/>
+			);
+			expect( container ).toHaveTextContent( '2,100 €' );
+		} );
+	} );
+
 	describe( 'markup', () => {
 		/** @type {import('@woocommerce/types').Currency} */
 		const eurCurrency = {

@@ -411,6 +411,72 @@ class CartItems extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Cart item prices shown as entered keep their decimals, with the minor unit to match; totals stay at the store's.
+	 * @testWith ["yes", "incl", "GB", "0.207", "", 2, "207", "207", "207", 3, 41, "207000"]
+	 *           ["yes", "incl", "GB", "2.10", "1.995", 2, "1995", "2100", "1995", 3, 399, "1995000"]
+	 *           ["no", "incl", "GB", "1.66", "", 3, "199", "199", "199", 2, 598, "1992000"]
+	 *           ["yes", "incl", "NL", "0.207", "", 2, "21", "21", "21", 2, 42, "208725"]
+	 *
+	 * @param string $prices_include_tax    Whether prices are entered including tax (yes/no).
+	 * @param string $display               Cart tax display (incl/excl).
+	 * @param string $country               Customer country (GB 20%, NL 21%).
+	 * @param string $regular_price         Regular price as entered.
+	 * @param string $sale_price            Sale price as entered.
+	 * @param int    $quantity              Quantity in the cart.
+	 * @param string $price                 Expected price.
+	 * @param string $regular               Expected regular price.
+	 * @param string $sale                  Expected sale price.
+	 * @param int    $minor_unit            Expected minor unit of the prices.
+	 * @param int    $line_total            Expected line total with tax, in the store's minor unit.
+	 * @param string $raw_price             Expected raw price, precision 6.
+	 */
+	public function test_cart_item_prices_keep_entered_decimals( string $prices_include_tax, string $display, string $country, string $regular_price, string $sale_price, int $quantity, string $price, string $regular, string $sale, int $minor_unit, int $line_total, string $raw_price ): void {
+		$customer_country = WC()->customer->get_billing_country();
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'GB' );
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
+		update_option( 'woocommerce_tax_display_cart', $display );
+		$rates = array(
+			'GB' => '20.0000',
+			'NL' => '21.0000',
+		);
+		foreach ( $rates as $rate_country => $rate ) {
+			\WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => $rate_country,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => 'VAT',
+					'tax_rate_priority' => '1',
+					'tax_rate_order'    => '1',
+				)
+			);
+		}
+		WC()->customer->set_billing_country( $country );
+
+		$product = ( new FixtureData() )->get_simple_product(
+			array(
+				'regular_price' => $regular_price,
+				'sale_price'    => $sale_price,
+			)
+		);
+		wc_empty_cart();
+		$key = wc()->cart->add_to_cart( $product->get_id(), $quantity );
+
+		$data = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/items/' . $key ) )->get_data();
+		WC()->customer->set_billing_country( $customer_country );
+
+		$this->assertSame( $price, $data['prices']->price, 'Price' );
+		$this->assertSame( $regular, $data['prices']->regular_price, 'Regular price' );
+		$this->assertSame( $sale, $data['prices']->sale_price, 'Sale price' );
+		$this->assertSame( $minor_unit, $data['prices']->currency_minor_unit, 'Prices minor unit' );
+		$this->assertSame( $raw_price, $data['prices']->raw_prices['price'], 'Raw price' );
+		$this->assertSame( 6, $data['prices']->raw_prices['precision'], 'Raw prices precision' );
+		$this->assertSame( $line_total, (int) $data['totals']->line_subtotal + (int) $data['totals']->line_subtotal_tax, 'Line total' );
+		$this->assertSame( 2, $data['totals']->currency_minor_unit, 'Totals minor unit' );
+	}
+
+	/**
 	 * @testdox Cart lines include a null parent item key by default, declared in the schema as a readonly string or null.
 	 */
 	public function test_parent_item_key_is_null_by_default() {

@@ -215,18 +215,19 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Percentage rounding and unchanged amount-mode cases.
+	 * Percentage rounding and amount-mode cases, including a sale price entered with extra decimals.
 	 *
 	 * @return array
 	 */
 	public function provider_percentage_badge_rounding(): array {
 		return array(
-			'simple zero'     => array( 'simple', '996', 'percentage', '' ),
-			'simple half'     => array( 'simple', '995', 'percentage', '1%' ),
-			'variable zero'   => array( 'variable', '996', 'percentage', '' ),
-			'variable half'   => array( 'variable', '995', 'percentage', 'Up to 1%' ),
-			'simple amount'   => array( 'simple', '996', 'amount', '$4.00' ),
-			'variable amount' => array( 'variable', '996', 'amount', 'Up to $4.00' ),
+			'simple zero'             => array( 'simple', '996', 'percentage', '' ),
+			'simple half'             => array( 'simple', '995', 'percentage', '1%' ),
+			'variable zero'           => array( 'variable', '996', 'percentage', '' ),
+			'variable half'           => array( 'variable', '995', 'percentage', 'Up to 1%' ),
+			'simple amount'           => array( 'simple', '996', 'amount', '$4.00' ),
+			'variable amount'         => array( 'variable', '996', 'amount', 'Up to $4.00' ),
+			'simple entered decimals' => array( 'simple', '999.995', 'amount', '$0.005' ),
 		);
 	}
 

@@ -2,6 +2,8 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\Cart\PriceDisplayPrecision;
 
 /**
  * ProductSaleBadge class.
@@ -72,6 +74,7 @@ class ProductSaleBadge extends AbstractBlock {
 
 		if ( in_array( $badge_content, array( 'amount', 'percentage' ), true ) ) {
 			$amount                  = 0;
+			$amount_decimals         = wc_get_price_decimals();
 			$percentage              = 0;
 			$has_different_discounts = false;
 
@@ -95,6 +98,13 @@ class ProductSaleBadge extends AbstractBlock {
 				if ( 'amount' === $badge_content ) {
 					$regular = wc_get_price_to_display( $product, array( 'price' => $regular ) );
 					$price   = wc_get_price_to_display( $product, array( 'price' => $price ) );
+
+					// Match the prices shown, which keep the decimals they were entered with, e.g. £2.10 − £1.995 saves £0.105.
+					$including_tax   = TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_shop' );
+					$amount_decimals = max(
+						PriceDisplayPrecision::get_decimals( $product, $including_tax, $product->get_regular_price() ),
+						PriceDisplayPrecision::get_decimals( $product, $including_tax )
+					);
 				}
 				if ( $regular > 0 && $price < $regular ) {
 					$amount     = $regular - $price;
@@ -109,7 +119,7 @@ class ProductSaleBadge extends AbstractBlock {
 				$value = 'percentage' === $badge_content
 					/* translators: %s: discount percentage. %% is the percent sign. */
 					? sprintf( __( '%s%%', 'woocommerce' ), round( $percentage * 100 ) )
-					: html_entity_decode( wp_strip_all_tags( wc_price( $amount ) ), ENT_QUOTES, get_bloginfo( 'charset' ) );
+					: html_entity_decode( wp_strip_all_tags( wc_price( $amount, array( 'decimals' => $amount_decimals ) ) ), ENT_QUOTES, get_bloginfo( 'charset' ) );
 
 				if ( $has_different_discounts ) {
 					/* translators: %s: largest discount across variations. */
@@ -160,6 +170,8 @@ class ProductSaleBadge extends AbstractBlock {
 					'saleBadgePercentageTemplate'   => sprintf( __( '%s%%', 'woocommerce' ), '%s' ),
 					/* translators: %s: sale badge text. */
 					'saleBadgeScreenReaderTemplate' => sprintf( __( 'Product on sale: %s', 'woocommerce' ), '%s' ),
+					// A variation's prices can have more decimals than the store's (e.g. £0.207); savings drop zeros past these.
+					'storePriceDecimals'            => wc_get_price_decimals(),
 				)
 			);
 			wp_interactivity_state(

@@ -14,6 +14,8 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\Cart\PriceDisplayPrecision;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
 use Automattic\WooCommerce\Internal\ProductCustoms\CustomsDataValidator;
@@ -2180,6 +2182,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the price in html format.
 	 *
+	 * A price the shopper sees as entered keeps the decimals it was entered with, e.g. £0.207.
+	 *
 	 * @param string $deprecated Deprecated param.
 	 *
 	 * @return string
@@ -2187,10 +2191,27 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_price_html( $deprecated = '' ) {
 		if ( '' === $this->get_price() ) {
 			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
-		} elseif ( $this->is_on_sale() ) {
-			$price = wc_format_sale_price( wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_price_to_display( $this ) ) . $this->get_price_suffix();
 		} else {
-			$price = wc_price( wc_get_price_to_display( $this ) ) . $this->get_price_suffix();
+			$including_tax = TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_shop' );
+			// Round off float noise first, like the cart, so £1.41 less 20% VAT (1.1749999…) shows as £1.18, not £1.17.
+			$active_price    = round( (float) wc_get_price_to_display( $this ), wc_get_rounding_precision() );
+			$active_decimals = PriceDisplayPrecision::get_decimals( $this, $including_tax );
+
+			if ( $this->is_on_sale() ) {
+				$regular_price    = round( (float) wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_rounding_precision() );
+				$regular_decimals = PriceDisplayPrecision::get_decimals( $this, $including_tax, $this->get_regular_price() );
+
+				// Pass formatted prices only when they need more decimals than the store's, so filters keep getting numbers.
+				if ( max( $regular_decimals, $active_decimals ) > wc_get_price_decimals() ) {
+					$price = wc_format_sale_price( wc_price( $regular_price, array( 'decimals' => $regular_decimals ) ), wc_price( $active_price, array( 'decimals' => $active_decimals ) ) );
+				} else {
+					$price = wc_format_sale_price( $regular_price, $active_price );
+				}
+
+				$price .= $this->get_price_suffix();
+			} else {
+				$price = wc_price( $active_price, array( 'decimals' => $active_decimals ) ) . $this->get_price_suffix();
+			}
 		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
