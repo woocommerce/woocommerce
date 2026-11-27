@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 
@@ -15,8 +16,9 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * The WooCommerce order update status ability. It runs the steps of
- * ActionableAbility. change() stages the status with WC_Order::stage_status(), so validators see the new
- * status before the save.
+ * ActionableAbility. With the extensible_abilities feature on, change() stages the status with
+ * WC_Order::stage_status(), so validators see it before the save. With it off, change() calls
+ * WC_Order::update_status(), which also saves.
  */
 class OrderUpdateStatus extends ActionableAbility {
 
@@ -81,7 +83,8 @@ class OrderUpdateStatus extends ActionableAbility {
 	}
 
 	/**
-	 * Check the new status, and stage it with WC_Order::stage_status(), as a manual change.
+	 * Check the new status, and stage it as a manual change with the feature on. With the feature off, change
+	 * it with WC_Order::update_status(), which also saves, so save() does nothing.
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
@@ -110,7 +113,51 @@ class OrderUpdateStatus extends ActionableAbility {
 			);
 		}
 
-		$subject->stage_status( $status, self::get_note( $input ), true );
+		if ( ExtensibleAbilities::is_enabled() ) {
+			$subject->stage_status( $status, self::get_note( $input ), true );
+			return null;
+		}
+
+		return self::update_status( $subject, $status, self::get_note( $input ) );
+	}
+
+	/**
+	 * Save the order. With the feature off, change() already saved it through WC_Order::update_status().
+	 *
+	 * @param \WC_Order $subject Order.
+	 * @return null|\WP_Error
+	 */
+	public function save( $subject ) {
+		return ExtensibleAbilities::is_enabled() ? parent::save( $subject ) : null;
+	}
+
+	/**
+	 * Change the status with WC_Order::update_status(), as a manual change. The
+	 * order's own rules run, and the order is saved.
+	 *
+	 * @param \WC_Order $order  Order.
+	 * @param string    $status New status, without the wc- prefix.
+	 * @param string    $note   Status change note.
+	 * @return null|\WP_Error
+	 */
+	private static function update_status( \WC_Order $order, string $status, string $note ): ?\WP_Error {
+		try {
+			$updated = $order->update_status( $status, $note, true );
+		} catch ( \Exception $e ) {
+			return new \WP_Error(
+				'woocommerce_order_status_update_failed',
+				$e->getMessage(),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! $updated ) {
+			return new \WP_Error(
+				'woocommerce_order_status_update_failed',
+				__( 'Failed to update order status.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
 
 		return null;
 	}

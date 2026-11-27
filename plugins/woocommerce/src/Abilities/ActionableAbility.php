@@ -226,7 +226,7 @@ abstract class ActionableAbility extends Ability {
 		}
 
 		$refused = new \WP_Error();
-		$subject->set_staged( true );
+		$subject->set_staged( $enabled );
 		try {
 			$changed = $this->change( $subject, $input );
 		} catch ( \WC_Data_Exception $e ) {

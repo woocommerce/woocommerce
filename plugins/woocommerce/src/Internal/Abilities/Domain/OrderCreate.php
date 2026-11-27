@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
@@ -179,12 +180,49 @@ class OrderCreate extends ActionableAbility {
 			$this->stage_line_totals( $subject, ! empty( $input['line_items'] ) );
 		}
 
-		// Not a manual change, as in REST and wc_create_order(): a new order has no ID for woocommerce_order_edit_status.
-		if ( $subject->get_status() !== $this->status ) {
+		// With the feature on, the status is staged, so save() finds it set. Not a manual change, as in REST and wc_create_order().
+		if ( ExtensibleAbilities::is_enabled() && $subject->get_status() !== $this->status ) {
 			$subject->stage_status( $this->status );
 		}
 
 		return null;
+	}
+
+	/**
+	 * Save the order. The order saves as pending with its lines, is recalculated with the methods that save,
+	 * and then moves to its status with WC_Order::update_status(), which needs an order ID.
+	 *
+	 * @param \WC_Order $subject New order.
+	 * @return null|\WP_Error
+	 */
+	public function save( $subject ) {
+		$added = $this->add_queued_products( $subject );
+		$saved = parent::save( $subject );
+		if ( is_wp_error( $saved ) ) {
+			foreach ( $added as $item ) {
+				$item->delete();
+			}
+			return $saved;
+		}
+
+		$recalculated = $this->recalculate_saved_order( $subject );
+		if ( is_wp_error( $recalculated ) ) {
+			foreach ( $added as $item ) {
+				$item->delete();
+			}
+			return $recalculated;
+		}
+
+		if ( $subject->get_status() === $this->status ) {
+			return null;
+		}
+
+		// The error rolls back the pending order that parent::save() wrote.
+		return $subject->update_status( $this->status ) ? null : new \WP_Error(
+			'woocommerce_order_status_update_failed',
+			__( 'The order was not created, because its status could not be set.', 'woocommerce' ),
+			array( 'status' => 500 )
+		);
 	}
 
 	/**

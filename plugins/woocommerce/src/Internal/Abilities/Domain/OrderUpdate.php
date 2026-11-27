@@ -180,9 +180,25 @@ class OrderUpdate extends ActionableAbility {
 			}
 		}
 
+		$added = $this->add_queued_products( $subject );
+
 		$saved = parent::save( $subject );
+
 		if ( is_wp_error( $saved ) ) {
+			foreach ( $added as $item ) {
+				$item->delete();
+			}
 			return $saved;
+		}
+
+		$this->changed_product_lines = array_merge( $this->changed_product_lines, $added );
+
+		$recalculated = $this->recalculate_saved_order( $subject );
+		if ( is_wp_error( $recalculated ) ) {
+			foreach ( $added as $item ) {
+				$item->delete();
+			}
+			return $recalculated;
 		}
 
 		if ( in_array( $subject->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true ) ) {
