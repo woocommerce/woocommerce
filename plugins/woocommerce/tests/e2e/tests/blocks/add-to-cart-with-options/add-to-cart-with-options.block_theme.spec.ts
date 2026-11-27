@@ -116,6 +116,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await page.goto( productUrl );
 			const finish = page.getByLabel( 'Finish', { exact: true } );
+			await expect( sku ).toBeVisible();
 			await expect( sku ).toHaveText( 'N/A' );
 			await finish.selectOption( { label: 'Matte' } );
 			await expect( sku ).toHaveText( variationSku );
@@ -124,9 +125,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await pageObject.updateSingleProductTemplate();
-		await pageObject.setVariationSelectorAttributes( {
-			optionStyle: 'chips',
-		} );
 		await editor.selectBlocks(
 			await editor.getBlockByName( 'woocommerce/product-sku' )
 		);
@@ -163,6 +161,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			} );
 
 			await page.goto( productUrl );
+			await expect( sku ).toBeVisible();
 			await expect( sku ).toHaveText( 'N/A' );
 			await matte.click();
 			await expect( sku ).toHaveText( variationSku );

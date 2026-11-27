@@ -72,18 +72,34 @@ class ProductSKU extends AbstractBlock {
 			return '';
 		}
 
+		$styles_and_classes     = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$interactive_attributes = '';
+		$sku_text               = $product_sku;
 		if ( $is_interactive ) {
-			wp_enqueue_script_module( 'woocommerce/product-elements' );
-		}
-
-		$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-		$sku_text           = $product_sku;
-		if ( '' === $product_sku ) {
+			$fallback_text = '';
 			if ( $attributes['hideWhenUnavailable'] ?? true ) {
 				$styles_and_classes['classes'] .= ' wc-block-components-product-sku--hide-when-unavailable';
 			} else {
-				$sku_text = __( 'N/A', 'woocommerce' );
+				$fallback_text = __( 'N/A', 'woocommerce' );
 			}
+
+			$sku_text = '' === $product_sku ? $fallback_text : $product_sku;
+
+			wp_enqueue_script_module( 'woocommerce/product-sku' );
+			wp_interactivity_state(
+				'woocommerce/product-sku',
+				array(
+					'skuText' => static function () {
+						return wp_interactivity_get_context()['initialSkuText'] ?? '';
+					},
+				)
+			);
+			$interactive_attributes = 'data-wp-interactive="woocommerce/product-sku" data-wp-text="state.skuText" ' . wp_interactivity_data_wp_context(
+				array(
+					'initialSkuText' => $sku_text,
+					'fallbackText'   => $fallback_text,
+				)
+			);
 		}
 
 		$prefix = isset( $attributes['prefix'] ) ? wp_kses_post( ( $attributes['prefix'] ) ) : __( 'SKU: ', 'woocommerce' );
@@ -95,10 +111,6 @@ class ProductSKU extends AbstractBlock {
 		if ( ! empty( $suffix ) ) {
 			$suffix = sprintf( '<span class="wp-block-post-terms__suffix">%s</span>', $suffix );
 		}
-
-		$interactive_attributes = $is_interactive
-			? 'data-wp-interactive="woocommerce/products" data-wp-text="state.productSkuInContext" ' . wp_interactivity_data_wp_context( array( 'skuFallback' => $sku_text ) )
-			: '';
 
 		return sprintf(
 			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta wp-block-post-terms %1$s" style="%2$s">
