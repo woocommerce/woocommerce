@@ -135,7 +135,6 @@
 			line-height: 1;
 			width: 100%;
 			border: none;
-			padding-right: 40px;
 			position: relative;
 			color: $gray-600;
 			font-size: 13px;
@@ -175,4 +174,9 @@
 		outline: 2px solid var(--wp-admin-theme-color, #007cba) !important;
 		outline-offset: -4px;
 	}
+}
+
+// Outranks WordPress core's input[type="text"] padding, so the clear button has room.
+.components-country-select-control__search .components-country-select-control__search--input {
+	padding-right: 40px;
 }
