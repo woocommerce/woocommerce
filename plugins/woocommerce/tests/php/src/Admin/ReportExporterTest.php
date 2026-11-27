@@ -814,6 +814,13 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$this->assertCount( 4, $this->recorded_actions( $export_hook ), 'The last page must not queue another one.' );
 		$this->assertSame( $this->report_skus(), $this->exported_skus( 'chain' ), 'Every row must be exported, in report order.' );
 
+		$request = new \WP_REST_Request( 'GET', '/wc-analytics/reports/stock' );
+		$request->set_param( 'per_page', 100 );
+		$report_ids = array_column( rest_do_request( $request )->get_data(), 'id' );
+		$sorted_ids = $report_ids;
+		sort( $sorted_ids );
+		$this->assertSame( $sorted_ids, $report_ids, 'Products with the same stock status and quantity must be listed by product ID, so every page sees the same order.' );
+
 		$next_pages = wp_list_filter( $this->queue->get_methods_called(), array( 'hook' => $export_hook ) );
 		$this->assertSame(
 			array( 'schedule_single', 'add', 'add', 'add' ),
