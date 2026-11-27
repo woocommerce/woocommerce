@@ -17,7 +17,6 @@ import {
 	test,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
-import { clearFilters, setFilterValue } from '../../utils/filters';
 import { setOption } from '../../utils/options';
 
 /**
@@ -144,7 +143,7 @@ test.describe(
 				).toHaveAttribute( 'href', /stock-notifications/ );
 			} );
 
-			test( 'a repeated signup surfaces the "already joined" notice', async ( {
+			test( 'a signed-up shopper sees the "already joined" notice instead of the form on load', async ( {
 				page,
 				product,
 			} ) => {
@@ -158,32 +157,22 @@ test.describe(
 					page.getByText( bisNotice.success( product.name ) )
 				).toBeVisible();
 
-				// Submitting the form a second time (the "already joined"
-				// notice only renders as a form-submit response; the cached
-				// state shown on page reload is behind the off-by-default
-				// `woocommerce_customer_stock_notifications_personalization_enabled`
-				// filter).
 				await page.goto( product.permalink );
-				await signUpOnProductPage( page );
 				await expect(
 					page.getByText( bisNotice.alreadyJoined )
 				).toBeVisible();
+				await expect(
+					page.getByRole( 'button', { name: /Notify me/i } )
+				).toHaveCount( 0 );
 			} );
 
 			test( 'a missing nonce is rejected once nonce checks are on', async ( {
 				page,
 				product,
 			} ) => {
-				// Core only verifies the signup nonce when personalization is
-				// on and the shopper is logged in (or an account is required),
-				// so guest forms survive HTML caching. Turn personalization on
-				// through the test helper's filter cookie to reach that branch.
-				await setFilterValue(
-					page,
-					'woocommerce_customer_stock_notifications_personalization_enabled',
-					true
-				);
-
+				// Core verifies the signup nonce for logged-in shoppers while
+				// personalization is on, the default, so guest forms survive
+				// HTML caching.
 				await page.goto( product.permalink );
 
 				// Blank the nonce the form posts, the way a stale cached page
@@ -206,8 +195,6 @@ test.describe(
 				await expect(
 					page.getByText( bisNotice.success( product.name ) )
 				).toBeVisible();
-
-				await clearFilters( page );
 			} );
 		} );
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Turn on Back in Stock personalization by default. Sites that cache pages for logged-in shoppers should return false from woocommerce_customer_stock_notifications_personalization_enabled.

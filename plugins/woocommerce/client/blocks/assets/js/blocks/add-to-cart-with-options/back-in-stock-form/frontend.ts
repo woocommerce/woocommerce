@@ -24,8 +24,36 @@ const { state: productsState } = store< ProductsStore >(
 export type BackInStockFormStore = {
 	state: {
 		isVisible: boolean;
+		isSignedUpNoticeVisible: boolean;
 		selectedAttributeValue: string;
 	};
+};
+
+// Set by the server on the form and on the "already joined" notice.
+type BackInStockFormContext = {
+	// Out of stock variations the shopper already signed up for.
+	signedUpVariationIds: number[];
+};
+
+// Whether the selected variation can't be bought.
+const isOutOfStock = (): boolean => {
+	const variation = productsState.productVariationInContext;
+
+	return (
+		!! variation && ! ( variation.is_in_stock && variation.is_purchasable )
+	);
+};
+
+// Whether the shopper already signed up for the selected variation.
+const isSignedUp = (): boolean => {
+	const variation = productsState.productVariationInContext;
+
+	return (
+		!! variation &&
+		getContext< BackInStockFormContext >().signedUpVariationIds.includes(
+			variation.id
+		)
+	);
 };
 
 /**
@@ -37,16 +65,16 @@ store< BackInStockFormStore >(
 	{
 		state: {
 			/**
-			 * Whether the selected variation can't be bought, so shoppers
-			 * can sign up for it.
+			 * Whether shoppers can sign up for the selected variation.
 			 */
 			get isVisible(): boolean {
-				const variation = productsState.productVariationInContext;
-
-				return (
-					!! variation &&
-					! ( variation.is_in_stock && variation.is_purchasable )
-				);
+				return isOutOfStock() && ! isSignedUp();
+			},
+			/**
+			 * Whether the "already joined" notice replaces the form.
+			 */
+			get isSignedUpNoticeVisible(): boolean {
+				return isOutOfStock() && isSignedUp();
 			},
 			/**
 			 * Selected value of the attribute in context, read from the

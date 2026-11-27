@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoin
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupService;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use WC_Product;
+use WC_Product_Variation;
 
 /**
  * Class for integrating with the product page.
@@ -85,9 +86,14 @@ class ProductPageIntegration {
 		}
 
 		global $product;
-		if ( is_a( $product, 'WC_Product' ) ) {
-			$this->maybe_render_product_form( $product );
+		if ( ! is_a( $product, 'WC_Product' ) || ! $this->should_render_form( $product ) ) {
+			return;
 		}
+
+		$this->rendered[ $product->get_id() ] = true;
+
+		wp_enqueue_script( 'wc-back-in-stock-form' );
+		$this->render_form( $product, $this->is_visible_on_load( $product ) );
 	}
 
 	/**
@@ -105,12 +111,16 @@ class ProductPageIntegration {
 
 		// Only the block for the product being viewed, not those in related products, upsells or other products' Single Product blocks.
 		$product = $product_id && get_queried_object_id() === $product_id ? wc_get_product( $product_id ) : null;
-		if ( '' === $block_content || ! $product ) {
+		if ( '' === $block_content || ! $product || ! $this->should_render_form( $product ) ) {
 			return $block_content;
 		}
 
+		// The product isn't marked as rendered, as the block's output can be discarded.
+		// The block shows no variation selector when the product can't be bought, so offer sign-ups for the parent.
+		$is_visible = ! $product->is_type( 'variable' ) || AddToCartWithOptionsUtils::is_not_purchasable_product( $product );
+
 		ob_start();
-		$this->maybe_render_product_form( $product, true );
+		$this->render_form( $product, $is_visible );
 
 		return $this->add_interactivity_to_form( $block_content, (string) ob_get_clean(), $product );
 	}
@@ -133,17 +143,14 @@ class ProductPageIntegration {
 			return $block_content . $form;
 		}
 
-		// The block renders no variation selector when the product can't be bought, so offer sign-ups for the parent.
-		if ( AddToCartWithOptionsUtils::is_not_purchasable_product( $product ) ) {
-			$html->remove_attribute( 'hidden' );
-
-			return $block_content . $html->get_updated_html();
-		}
-
 		wp_enqueue_script_module( self::SCRIPT_MODULE );
+
+		$signed_up_variation_ids = json_decode( (string) $html->get_attribute( 'data-bis-signed-up-variations' ), true );
+		$context                 = (string) wp_json_encode( array( 'signedUpVariationIds' => is_array( $signed_up_variation_ids ) ? $signed_up_variation_ids : array() ) );
 
 		// The store namespace matches the script module ID.
 		$html->set_attribute( 'data-wp-interactive', self::SCRIPT_MODULE );
+		$html->set_attribute( 'data-wp-context', $context );
 		$html->set_attribute( 'data-wp-bind--hidden', '!state.isVisible' );
 
 		$form_id = wp_unique_id( 'wc-bis-form-' );
@@ -156,6 +163,14 @@ class ProductPageIntegration {
 				$html->set_attribute( 'data-wp-bind--value', 'woocommerce/products::state.productInContext.id' );
 				break;
 			}
+		}
+
+		// A new pass, as the loop above can leave the first one at the end of the markup.
+		$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
+		if ( $html->next_tag( array( 'class_name' => 'wc_bis_already_signed_up' ) ) ) {
+			$html->set_attribute( 'data-wp-interactive', self::SCRIPT_MODULE );
+			$html->set_attribute( 'data-wp-context', $context );
+			$html->set_attribute( 'data-wp-bind--hidden', '!state.isSignedUpNoticeVisible' );
 		}
 
 		$form = $html->get_updated_html();
@@ -184,49 +199,19 @@ class ProductPageIntegration {
 	}
 
 	/**
-	 * Render the BIS form for a product when it is eligible for sign-ups.
+	 * Whether a product page should get the BIS form, or the notice shown in its place.
 	 *
-	 * @param WC_Product $product  Product object.
-	 * @param bool       $is_block Whether the form renders for the Add to Cart + Options block.
-	 * @return void
+	 * @param WC_Product $product Product object.
+	 * @return bool
 	 */
-	private function maybe_render_product_form( WC_Product $product, bool $is_block = false ): void {
-
-		if ( ! Config::allows_signups() || ! is_product() ) {
-			return;
-		}
-
-		if ( isset( $this->rendered[ $product->get_id() ] ) ) {
-			return;
-		}
-
-		// The block doesn't mark the product as rendered, as its output can be discarded.
-		if ( ! $is_block ) {
-			$this->rendered[ $product->get_id() ] = true;
-		}
-
-		$is_variable = $product->is_type( 'variable' );
-		// Check if the product is in stock.
-		// Hint: This is negative logic. If the product is eligible for notifications, skip rendering.
-		// We avoid checking for variable products here because we want to render the form for out of stock variations.
-		if ( ! $is_variable && $this->eligibility_service->is_stock_status_eligible( $product->get_stock_status() ) ) {
-			return;
-		}
-
-		if ( ! $this->eligibility_service->is_product_eligible( $product ) ) {
-			return;
-		}
-
-		if ( ! $this->eligibility_service->product_allows_signups( $product ) ) {
-			return;
-		}
-
-		// The block is driven by the Interactivity API, see add_interactivity_to_form().
-		if ( ! $is_block ) {
-			wp_enqueue_script( 'wc-back-in-stock-form' );
-		}
-
-		$this->render_form( $product );
+	private function should_render_form( WC_Product $product ): bool {
+		return Config::allows_signups()
+			&& is_product()
+			&& ! isset( $this->rendered[ $product->get_id() ] )
+			// A variable product is checked per variation, any other product must be out of stock.
+			&& ( $product->is_type( 'variable' ) || ! $this->eligibility_service->is_stock_status_eligible( $product->get_stock_status() ) )
+			&& $this->eligibility_service->is_product_eligible( $product )
+			&& $this->eligibility_service->product_allows_signups( $product );
 	}
 
 	/**
@@ -245,10 +230,11 @@ class ProductPageIntegration {
 	/**
 	 * Render the form.
 	 *
-	 * @param WC_Product $product Product object.
+	 * @param WC_Product $product    Product object.
+	 * @param bool       $is_visible Whether the form is visible on page load, rather than revealed by JS for a selected variation.
 	 * @return void
 	 */
-	private function render_form( WC_Product $product ): void {
+	private function render_form( WC_Product $product, bool $is_visible ): void {
 
 		// Check if requires account.
 		if ( Config::requires_account() && ! is_user_logged_in() ) {
@@ -256,17 +242,72 @@ class ProductPageIntegration {
 			return;
 		}
 
-		// Check if already signed up.
-		if ( $this->is_personalization_enabled() && is_user_logged_in() ) {
-			$user         = \get_user_by( 'id', \get_current_user_id() );
-			$notification = $this->signup_service->is_already_signed_up( $product->get_id(), $user->ID, $user->user_email );
+		if ( $is_visible ) {
+			$notification = $this->get_current_user_signups( array( $product->get_id() ) )[ $product->get_id() ] ?? null;
 			if ( $notification instanceof Notification ) {
-				$this->display_already_signed_up( $product, $notification );
+				// The sign-up request already shows its own notice.
+				if ( ! isset( $_POST['wc_bis_register'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+					$this->display_already_signed_up( $product, $notification );
+				}
 				return;
+			}
+
+			$this->print_form( $product, true );
+			return;
+		}
+
+		// JS points a variable product's hidden form at the selected variation, and shows the
+		// "already joined" notice instead for the variations listed on the form.
+		$signups = $this->get_current_user_variation_signups( $product );
+		$this->print_form( $product, false, array_keys( $signups ) );
+
+		if ( $signups ) {
+			echo '<div class="wc_bis_already_signed_up" data-bis-product-id="' . absint( $product->get_id() ) . '" hidden>';
+			$this->display_already_signed_up( $product, reset( $signups ) );
+			echo '</div>';
+		}
+	}
+
+	/**
+	 * Get the logged-in shopper's active sign-ups for a variable product's variations, keyed by variation ID.
+	 *
+	 * In stock variations and those with 'any' attributes are skipped: a sign-up for 'any' attributes also
+	 * stores the chosen values, which aren't known until the shopper picks them.
+	 *
+	 * @param WC_Product $product Variable product.
+	 * @return array<int, Notification>
+	 */
+	private function get_current_user_variation_signups( WC_Product $product ): array {
+		$signups = array();
+		foreach ( $this->get_current_user_signups( $product->get_children() ) as $variation_id => $notification ) {
+			$variation = wc_get_product( $variation_id );
+			if (
+				$variation instanceof WC_Product_Variation
+				&& ! $this->eligibility_service->is_stock_status_eligible( $variation->get_stock_status() )
+				&& ! in_array( '', $variation->get_variation_attributes(), true )
+			) {
+				$signups[ $variation_id ] = $notification;
 			}
 		}
 
-		$this->display_form( $product );
+		return $signups;
+	}
+
+	/**
+	 * Get the logged-in shopper's active sign-ups for products, keyed by product ID, when personalization is enabled.
+	 *
+	 * Like My Account, only active sign-ups made while logged in count. Pending ones, and guest sign-ups with the
+	 * same email, keep the form.
+	 *
+	 * @param int[] $product_ids Product IDs.
+	 * @return array<int, Notification>
+	 */
+	private function get_current_user_signups( array $product_ids ): array {
+		if ( ! $product_ids || ! is_user_logged_in() || ! self::is_personalization_enabled() ) {
+			return array();
+		}
+
+		return $this->signup_service->get_user_signups_for_products( get_current_user_id(), $product_ids );
 	}
 
 	/**
@@ -327,11 +368,11 @@ class ProductPageIntegration {
 
 		// The endpoint can be switched off from Settings > Advanced, leaving nowhere to link to.
 		if ( '' === MyAccountEndpoint::get_endpoint_slug() ) {
-			wc_print_notice( __( 'You have already joined the waitlist!', 'woocommerce' ), 'notice' );
+			wc_print_notice( __( 'You have already joined this waitlist.', 'woocommerce' ), 'notice' );
 			return;
 		}
 
-		$text = __( 'You have already joined the waitlist! Click {manage_account_link} to manage your notifications.', 'woocommerce' );
+		$text = __( 'You have already joined this waitlist. Click {manage_account_link} to manage your notifications.', 'woocommerce' );
 		$text = str_replace( '{manage_account_link}', '<a href="' . esc_url( wc_get_account_endpoint_url( MyAccountEndpoint::ENDPOINT ) ) . '">' . _x( 'here', 'back in stock form', 'woocommerce' ) . '</a>', $text );
 		wc_print_notice( $text, 'notice' );
 	}
@@ -343,6 +384,18 @@ class ProductPageIntegration {
 	 * @return void
 	 */
 	public function display_form( WC_Product $product ): void {
+		$this->print_form( $product, $this->is_visible_on_load( $product ) );
+	}
+
+	/**
+	 * Print the form.
+	 *
+	 * @param WC_Product $product                 Product object.
+	 * @param bool       $is_visible              Whether the form is visible on page load.
+	 * @param int[]      $signed_up_variation_ids Variations the shopper already joined, listed on the form for JS.
+	 * @return void
+	 */
+	private function print_form( WC_Product $product, bool $is_visible, array $signed_up_variation_ids = array() ): void {
 
 		$button_class = implode(
 			' ',
@@ -355,26 +408,41 @@ class ProductPageIntegration {
 			)
 		);
 
-		// When a variable has no purchasable variations, allow for signups on the parent product.
-		$is_visible = ! $product->is_type( 'variable' ) || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $product->has_purchasable_variations() );
-
-		wc_get_template(
-			'single-product/back-in-stock-form.php',
-			array(
-				'product_id'       => $product->get_parent_id() ? $product->get_parent_id() : $product->get_id(),
-				// Kept so template overrides that still read it don't raise an undefined-variable warning.
-				'show_checkbox'    => false,
-				'show_email_field' => ! is_user_logged_in() && ! Config::requires_account(),
-				'button_class'     => $button_class,
-				'is_visible'       => $is_visible,
-			)
+		$args = array(
+			'product_id'       => $product->get_parent_id() ? $product->get_parent_id() : $product->get_id(),
+			// Kept so template overrides that still read it don't raise an undefined-variable warning.
+			'show_checkbox'    => false,
+			'show_email_field' => ! is_user_logged_in() && ! Config::requires_account(),
+			'button_class'     => $button_class,
+			'is_visible'       => $is_visible,
 		);
+
+		// Added to the rendered markup, so template overrides get it too.
+		$html = new \WP_HTML_Tag_Processor( wc_get_template_html( 'single-product/back-in-stock-form.php', $args ) );
+		if ( $signed_up_variation_ids && $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ) ) {
+			$html->set_attribute( 'data-bis-signed-up-variations', (string) wp_json_encode( $signed_up_variation_ids ) );
+		}
+
+		echo $html->get_updated_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Template markup, the attribute is escaped by the tag processor.
+	}
+
+	/**
+	 * Whether the classic form is visible on page load, rather than revealed by JS for a selected variation.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return bool
+	 */
+	private function is_visible_on_load( WC_Product $product ): bool {
+		// When a variable has no purchasable variations, allow for signups on the parent product.
+		return ! $product->is_type( 'variable' ) || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $product->has_purchasable_variations() );
 	}
 
 	/**
 	 * Whether personalization is enabled.
 	 *
 	 * Personalization includes checking if the user is already signed up and displaying the 'already signed up' message.
+	 * It only changes the output for logged-in shoppers, whose pages full-page caches don't serve from cache. Sites
+	 * that cache logged-in pages across users can turn it off with the filter.
 	 *
 	 * @return bool True if personalization is enabled, false otherwise.
 	 */
@@ -383,11 +451,14 @@ class ProductPageIntegration {
 		/**
 		 * Filter whether personalization is enabled while rendering the form.
 		 *
+		 * Defaults to true since 11.5.0. This also turns on the nonce check for logged-in sign-ups,
+		 * see `woocommerce_customer_stock_notifications_requires_nonce_check`.
+		 *
 		 * @since 10.2.0
 		 *
 		 * @param bool $enabled Whether personalization is enabled.
 		 * @return bool
 		 */
-		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_personalization_enabled', false );
+		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_personalization_enabled', true );
 	}
 }

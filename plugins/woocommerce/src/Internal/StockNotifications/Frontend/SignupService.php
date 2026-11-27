@@ -291,6 +291,37 @@ class SignupService {
 	}
 
 	/**
+	 * Get a user's active sign-ups for products, keyed by product ID.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param int   $user_id     User ID.
+	 * @param int[] $product_ids Product IDs.
+	 * @return array<int, Notification>
+	 */
+	public function get_user_signups_for_products( int $user_id, array $product_ids ): array {
+		if ( $user_id <= 0 || ! $product_ids ) {
+			return array();
+		}
+
+		$notifications = NotificationQuery::get_notifications(
+			array(
+				'status'     => NotificationStatus::ACTIVE,
+				'product_id' => $product_ids,
+				'user_id'    => $user_id,
+				'return'     => 'objects',
+			)
+		);
+
+		$signups = array();
+		foreach ( $notifications as $notification ) {
+			$signups[ $notification->get_product_id() ] ??= $notification;
+		}
+
+		return $signups;
+	}
+
+	/**
 	 * Parse the request data from a given source.
 	 *
 	 * @param array $source The source data, e.g. $_POST or $_REQUEST.

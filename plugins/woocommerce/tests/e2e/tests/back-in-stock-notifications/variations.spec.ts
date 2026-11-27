@@ -9,6 +9,7 @@ import {
 	BIS_FEATURE_OPTION,
 	bisEmailBody,
 	bisEmailSubject,
+	bisNotice,
 	bisFormLocator,
 	bisTargetProductInput,
 	escapeRegExp,
@@ -98,6 +99,36 @@ test.describe(
 				);
 
 				await expect( form ).toBeHidden();
+			} );
+
+			test( 'a logged-in shopper who joined a variation sees the notice when selecting it', async ( {
+				page,
+				variableProduct,
+			} ) => {
+				const { outOfStockVariation } = variableProduct;
+				await page.goto( variableProduct.permalink );
+				await selectVariation(
+					page,
+					variableProduct,
+					outOfStockVariation
+				);
+				await signUpOnProductPage( page );
+				// Let the sign-up finish before navigating away.
+				await expect(
+					page.getByText( /You have successfully signed up/ )
+				).toBeVisible();
+
+				await page.goto( variableProduct.permalink );
+				await selectVariation(
+					page,
+					variableProduct,
+					outOfStockVariation
+				);
+
+				await expect(
+					page.getByText( bisNotice.alreadyJoined )
+				).toBeVisible();
+				await expect( bisFormLocator( page ) ).toBeHidden();
 			} );
 
 			test( 'signing up for an out-of-stock variation confirms the variation by name', async ( {
