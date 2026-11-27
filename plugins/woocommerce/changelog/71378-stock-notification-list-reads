@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Load stock notification lists with fewer database queries in the admin, My Account, and REST API.

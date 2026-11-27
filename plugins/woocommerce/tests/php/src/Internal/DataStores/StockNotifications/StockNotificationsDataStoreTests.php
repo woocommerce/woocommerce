@@ -975,6 +975,40 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox query() returning objects should build them from the fetched rows and load all meta in one query.
+	 */
+	public function test_query_objects_does_not_read_each_notification(): void {
+		global $wpdb;
+
+		$ids = array();
+		for ( $i = 1; $i <= 3; $i++ ) {
+			$notification = new Notification();
+			$notification->set_product_id( 1 );
+			$notification->set_user_email( "test{$i}@test.com" );
+			$notification->add_meta_data( 'test_meta', "value_{$i}" );
+			$notification->save();
+			$ids[] = $notification->get_id();
+		}
+
+		$queries_before = $wpdb->num_queries;
+		$notifications  = $this->data_store->query(
+			array(
+				'product_id' => 1,
+				'return'     => 'objects',
+			)
+		);
+
+		$this->assertSame( 2, $wpdb->num_queries - $queries_before, 'Expected one query for the rows and one for their meta.' );
+		$this->assertCount( 3, $notifications );
+		foreach ( $notifications as $index => $notification ) {
+			$this->assertSame( $ids[ $index ], $notification->get_id() );
+			$this->assertSame( 'value_' . ( $index + 1 ), $notification->get_meta( 'test_meta' ) );
+			$this->assertEquals( ( new Notification( $ids[ $index ] ) )->get_data(), $notification->get_data() );
+			$this->assertEmpty( $notification->get_changes() );
+		}
+	}
+
+	/**
 	 * @testdox notification_exists_by_email() should match a stored lowercase row from mixed-case input.
 	 */
 	public function test_notification_exists_by_email_is_case_insensitive(): void {

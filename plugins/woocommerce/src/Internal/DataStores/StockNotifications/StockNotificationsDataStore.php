@@ -250,25 +250,36 @@ CREATE TABLE $meta_table_name (
 			throw new \Exception( 'Stock notification not found' );
 		}
 
-		$notification->set_props(
-			array(
-				'id'                  => $data->id,
-				'product_id'          => $data->product_id,
-				'user_id'             => $data->user_id,
-				'user_email'          => $data->user_email,
-				'status'              => $data->status,
-				'date_created'        => wc_string_to_timestamp( $data->date_created_gmt ),
-				'date_modified'       => wc_string_to_timestamp( $data->date_modified_gmt ),
-				'date_confirmed'      => wc_string_to_timestamp( $data->date_confirmed_gmt ),
-				'date_last_attempt'   => wc_string_to_timestamp( $data->date_last_attempt_gmt ),
-				'date_notified'       => wc_string_to_timestamp( $data->date_notified_gmt ),
-				'date_cancelled'      => wc_string_to_timestamp( $data->date_cancelled_gmt ),
-				'cancellation_source' => $data->cancellation_source,
-			)
-		);
+		$this->set_props_from_row( $notification, (array) $data );
 
 		$notification->read_meta_data();
 		$notification->set_object_read( true );
+	}
+
+	/**
+	 * Set a notification's props from a row of the notifications table.
+	 *
+	 * @param Notification $notification The data object to populate.
+	 * @param array        $row          The table row.
+	 * @return void
+	 */
+	private function set_props_from_row( Notification $notification, array $row ): void {
+		$notification->set_props(
+			array(
+				'id'                  => $row['id'],
+				'product_id'          => $row['product_id'],
+				'user_id'             => $row['user_id'],
+				'user_email'          => $row['user_email'],
+				'status'              => $row['status'],
+				'date_created'        => wc_string_to_timestamp( $row['date_created_gmt'] ),
+				'date_modified'       => wc_string_to_timestamp( $row['date_modified_gmt'] ),
+				'date_confirmed'      => wc_string_to_timestamp( $row['date_confirmed_gmt'] ),
+				'date_last_attempt'   => wc_string_to_timestamp( $row['date_last_attempt_gmt'] ),
+				'date_notified'       => wc_string_to_timestamp( $row['date_notified_gmt'] ),
+				'date_cancelled'      => wc_string_to_timestamp( $row['date_cancelled_gmt'] ),
+				'cancellation_source' => $row['cancellation_source'],
+			)
+		);
 	}
 
 	/**
@@ -586,10 +597,16 @@ CREATE TABLE $meta_table_name (
 		}
 
 		if ( 'objects' === $args['return'] ) {
+			$meta_data = $this->data_store_meta->get_meta_data_for_object_ids( array_map( 'absint', array_column( $results, 'id' ) ) );
 
 			return array_map(
-				function ( $result ) {
-					return new Notification( $result );
+				function ( $result ) use ( $meta_data ) {
+					$notification = new Notification();
+					$notification->set_object_read( false );
+					$this->set_props_from_row( $notification, $result );
+					$notification->init_meta_data( $this->filter_raw_meta_data( $notification, $meta_data[ $notification->get_id() ] ?? array() ) );
+					$notification->set_object_read( true );
+					return $notification;
 				},
 				$results
 			);
