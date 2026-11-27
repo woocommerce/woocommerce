@@ -44,6 +44,13 @@ class WC_Form_Handler {
 	private static $cancel_order_redirect_pending = false;
 
 	/**
+	 * Whether add_expired_form_notice() has already passed its notice to wc_add_notice() in this request.
+	 *
+	 * @var bool
+	 */
+	private static $expired_form_notice_added = false;
+
+	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
@@ -1522,7 +1529,17 @@ class WC_Form_Handler {
 			$valid_nonce = wp_verify_nonce( $nonce_value, 'woocommerce-login' );
 		}
 
-		if ( isset( $_POST['login'], $_POST['username'], $_POST['password'] ) && is_string( $_POST['username'] ) && is_string( $_POST['password'] ) && $valid_nonce ) {
+		$submitted = isset( $_POST['login'], $_POST['username'], $_POST['password'] ) && is_string( $_POST['username'] ) && is_string( $_POST['password'] );
+
+		if ( $submitted && ! $valid_nonce ) {
+			// A form loaded while logged out fails its nonce check once the customer has logged in, for example in another tab.
+			if ( ! is_user_logged_in() ) {
+				self::add_expired_form_notice( 'woocommerce-login-nonce' );
+			}
+			return;
+		}
+
+		if ( $submitted ) {
 
 			try {
 				$creds = array(
@@ -1582,6 +1599,7 @@ class WC_Form_Handler {
 			$nonce_value = wc_get_var( $_REQUEST['woocommerce-lost-password-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
 
 			if ( ! wp_verify_nonce( $nonce_value, 'lost_password' ) ) {
+				self::add_expired_form_notice( 'woocommerce-lost-password-nonce' );
 				return;
 			}
 
@@ -1602,6 +1620,9 @@ class WC_Form_Handler {
 		$nonce_value = wc_get_var( $_REQUEST['woocommerce-reset-password-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
 
 		if ( ! wp_verify_nonce( $nonce_value, 'reset_password' ) ) {
+			if ( isset( $_POST['wc_reset_password'] ) ) {
+				self::add_expired_form_notice( 'woocommerce-reset-password-nonce' );
+			}
 			return;
 		}
 
@@ -1658,7 +1679,17 @@ class WC_Form_Handler {
 		$nonce_value = isset( $_POST['_wpnonce'] ) ? wp_unslash( $_POST['_wpnonce'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$nonce_value = isset( $_POST['woocommerce-register-nonce'] ) ? wp_unslash( $_POST['woocommerce-register-nonce'] ) : $nonce_value; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		if ( isset( $_POST['register'], $_POST['email'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-register' ) ) {
+		$submitted = isset( $_POST['register'], $_POST['email'] );
+
+		if ( $submitted && ! wp_verify_nonce( $nonce_value, 'woocommerce-register' ) ) {
+			// A form loaded while logged out fails its nonce check once the customer has logged in, for example in another tab.
+			if ( ! is_user_logged_in() ) {
+				self::add_expired_form_notice( 'woocommerce-register-nonce' );
+			}
+			return;
+		}
+
+		if ( $submitted ) {
 			if ( 'yes' !== get_option( 'woocommerce_enable_myaccount_registration' ) ) {
 				wc_add_notice( __( 'Registration is disabled.', 'woocommerce' ), 'error' );
 				return;
@@ -1715,6 +1746,30 @@ class WC_Form_Handler {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Tell the customer to resubmit a My Account form whose nonce check failed, for example because the page
+	 * holding the form came from a cache older than the nonce lifetime.
+	 *
+	 * @param string $nonce_field Name of the form's own nonce field.
+	 */
+	private static function add_expired_form_notice( string $nonce_field ): void {
+		// Other plugins can post the same field names, so only forms that carry WooCommerce's own nonce field get the notice.
+		if ( ! isset( $_REQUEST[ $nonce_field ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only checks that the field exists; its value already failed verification.
+			return;
+		}
+
+		$message = __( 'Your session has expired. Please try again.', 'woocommerce' );
+
+		// wc_has_notice() alone misses the notice once a woocommerce_add_error filter has changed its text,
+		// so the flag keeps it to one per request.
+		if ( self::$expired_form_notice_added || wc_has_notice( $message, 'error' ) ) {
+			return;
+		}
+
+		self::$expired_form_notice_added = true;
+		wc_add_notice( $message, 'error' );
 	}
 }
 

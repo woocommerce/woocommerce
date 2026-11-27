@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show an error instead of silently reloading the page when a My Account login, registration or password form has expired.
