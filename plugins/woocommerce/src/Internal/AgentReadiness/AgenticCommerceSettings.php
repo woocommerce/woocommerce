@@ -130,8 +130,9 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 			wp_die( esc_html__( 'Sorry, you are not allowed to connect this store.', 'woocommerce' ), 403 );
 		}
 		check_admin_referer( self::CONNECT_ACTION );
+		// The merchant clicked Connect, so registration is forced past the connection package's backoff.
 		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- wordpress_com_https_url() allows only https on wordpress.com and jetpack.wordpress.com.
-		wp_redirect( self::connect_redirect() );
+		wp_redirect( self::connect_redirect( true ) );
 		exit;
 	}
 
@@ -140,11 +141,13 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 * when the site can't be registered or that URL is not https on WordPress.com.
 	 *
 	 * @since 11.4.0
+	 * @since 11.5.0 Added the `$force` parameter.
+	 *
+	 * @param bool $force Whether the merchant asked to connect. See JetpackConnection::get_authorization_url().
 	 */
-	public static function connect_redirect(): string {
+	public static function connect_redirect( bool $force = false ): string {
 		self::ensure_jetpack_activation_source();
-		// Only a merchant's click reaches this, so registration is forced past the connection package's backoff.
-		$result    = JetpackConnection::get_authorization_url( add_query_arg( self::CONNECT_RESULT, 'connected', self::url() ), 'woocommerce-core-profiler', true );
+		$result    = JetpackConnection::get_authorization_url( add_query_arg( self::CONNECT_RESULT, 'connected', self::url() ), 'woocommerce-core-profiler', $force );
 		$candidate = ! empty( $result['success'] ) && is_string( $result['url'] ?? null ) ? $result['url'] : '';
 		$url       = self::wordpress_com_https_url( $candidate );
 		return '' !== $url ? $url : add_query_arg( self::CONNECT_RESULT, 'error', self::url() );
