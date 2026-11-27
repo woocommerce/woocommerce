@@ -21,11 +21,7 @@
 <!-- wp:heading {"level":3,"metadata":{"blockVisibility":{"viewport":{"mobile":false,"tablet":false}}},"style":{"margin":{"top":"0","bottom":"0"},"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|50"}},"typography":{"lineHeight":1.6,"fontStyle":"normal","fontWeight":"400"}},"fontSize":"medium"} -->
 <h3 class="wp-block-heading has-medium-font-size" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--50);font-style:normal;font-weight:400;line-height:1.6"><?php esc_html_e( 'Filter by:', 'purple' );?></h3>
 <!-- /wp:heading -->
-<?php
-// TODO: Remove the Product Filters spacing override in theme.json once WooCommerce
-// PR #67870 ships: https://github.com/woocommerce/woocommerce/pull/67870.
-?>
-<!-- wp:woocommerce/product-filters {"style":{"position":{"type":"sticky","top":"var(--wp--preset--spacing--10)"}}} -->
+<!-- wp:woocommerce/product-filters {"style":{"spacing":{"blockGap":"0"}}} -->
 <div class="wp-block-woocommerce-product-filters wc-block-product-filters"><!-- wp:woocommerce/product-filter-price -->
 <div class="wp-block-woocommerce-product-filter-price"><!-- wp:accordion {"style":{"spacing":{"blockGap":"0"},"@mobile":{"spacing":{"margin":{"top":"var:preset|spacing|30"}}},"@tablet":{"spacing":{"margin":{"top":"var:preset|spacing|30"}}}}} -->
 <div role="group" class="wp-block-accordion"><!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"},"top":[],"right":[],"left":[]},"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
