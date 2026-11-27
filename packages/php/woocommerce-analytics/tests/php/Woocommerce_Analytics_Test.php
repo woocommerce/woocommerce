@@ -490,17 +490,27 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 			)
 		);
 		wp_set_current_user( $user_id );
+		$_COOKIE['wca_visitor'] = 'shopper';
 		add_filter(
 			'jetpack_woocommerce_analytics_event_props',
 			function ( $props ) {
-				return array_merge( $props, array( 'recorded_user' => get_current_user_id() ) );
+				return array_merge(
+					$props,
+					array(
+						'recorded_user'   => get_current_user_id(),
+						'recorded_cookie' => $_COOKIE['wca_visitor'] ?? 'none',
+					)
+				);
 			}
 		);
 
 		Woocommerce_Analytics::record_speed_module_event_props();
+		$cookie = $_COOKIE['wca_visitor'] ?? null;
+		unset( $_COOKIE['wca_visitor'] );
 
 		$this->assertSame( $expected, get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION ) );
 		$this->assertSame( $user_id, get_current_user_id(), 'The current user must be restored.' );
+		$this->assertSame( 'shopper', $cookie, 'The cookies must be restored.' );
 	}
 
 	/**
@@ -510,7 +520,13 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	 */
 	public static function provide_record_contexts(): array {
 		return array(
-			'cron'        => array( true, array( 'recorded_user' => 0 ) ),
+			'cron'        => array(
+				true,
+				array(
+					'recorded_user'   => 0,
+					'recorded_cookie' => 'none',
+				),
+			),
 			'a page view' => array( false, false ),
 		);
 	}

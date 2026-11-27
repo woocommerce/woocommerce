@@ -358,8 +358,8 @@ class Woocommerce_Analytics {
 	/**
 	 * Record what `jetpack_woocommerce_analytics_event_props` callbacks add to every event, for the speed module to replay.
 	 *
-	 * Runs only from a cron request or WP-CLI, with no user logged in, so nothing a visitor sent is replayed onto
-	 * other visitors' events. Only scalar properties within the client bounds are kept.
+	 * Runs only from a cron request or WP-CLI, with no user logged in and no cookies, so nothing a visitor sent is
+	 * replayed onto other visitors' events. Only scalar properties within the client bounds are kept.
 	 *
 	 * @since 0.19.1
 	 *
@@ -368,7 +368,7 @@ class Woocommerce_Analytics {
 	public static function record_speed_module_event_props() {
 		$in_cli = defined( 'WP_CLI' ) && WP_CLI;
 
-		// Anywhere else, ALTERNATE_WP_CRON included, runs inside a visitor's request, whose cookies a callback could read.
+		// Anywhere else, ALTERNATE_WP_CRON included, runs inside a visitor's page view, with their session already loaded.
 		if ( ! $in_cli && ( ! wp_doing_cron() || ( defined( 'ALTERNATE_WP_CRON' ) && ALTERNATE_WP_CRON ) ) ) {
 			return;
 		}
@@ -377,8 +377,11 @@ class Woocommerce_Analytics {
 
 		if ( 'yes' === get_option( self::PROXY_TRACKING_ENABLED_OPTION ) ) {
 			$user_id = get_current_user_id();
+			$cookies = $_COOKIE;
 			$error   = null;
 			wp_set_current_user( 0 );
+			// Anyone can request wp-cron.php, with cookies a callback could read.
+			$_COOKIE = array();
 
 			try {
 				$base = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::get_page_common_properties();
@@ -389,6 +392,7 @@ class Woocommerce_Analytics {
 				$error = $e->getMessage();
 			}
 
+			$_COOKIE = $cookies;
 			wp_set_current_user( $user_id );
 
 			if ( null === $error && ! is_array( $filtered ) ) {
