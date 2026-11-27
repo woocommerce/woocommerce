@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { resolveSelect, withDispatch, withSelect } from '@wordpress/data';
 import { onboardingStore } from '@woocommerce/data';
 
 /**
@@ -22,16 +22,19 @@ export class Connect extends Component {
 		this.state = {
 			isAwaitingRedirect: false,
 			isRedirecting: false,
+			isRetrying: false,
 		};
 
 		this.connectJetpack = this.connectJetpack.bind( this );
+		this.retryConnection = this.retryConnection.bind( this );
 		props.setIsPending( false );
 	}
 
 	componentDidUpdate( prevProps ) {
 		const { createNotice, error, onError, isRequesting } = this.props;
 
-		if ( error && error !== prevProps.error ) {
+		// A retry reports its own outcome.
+		if ( error && error !== prevProps.error && ! this.state.isRetrying ) {
 			if ( onError ) {
 				onError();
 			}
@@ -60,6 +63,52 @@ export class Connect extends Component {
 		this.setState( { isAwaitingRedirect: true } );
 	}
 
+	async retryConnection() {
+		const {
+			requestJetpackAuthUrl,
+			redirectUrl,
+			from,
+			onConnect,
+			createNotice,
+		} = this.props;
+
+		if ( ! requestJetpackAuthUrl ) {
+			window.location.reload();
+			return;
+		}
+
+		this.setState( { isRetrying: true } );
+		let response;
+		try {
+			// The merchant asked to retry, so force registration past the connection package's backoff.
+			// The URL fetched on render stays unforced.
+			response = await requestJetpackAuthUrl( {
+				redirectUrl: redirectUrl || window.location.href,
+				from,
+				force: true,
+			} );
+		} catch {
+			// A failed request is reported below like an unsuccessful one.
+			response = null;
+		}
+
+		if ( response?.success && response.url ) {
+			if ( onConnect ) {
+				onConnect();
+			}
+			this.setState( { isRedirecting: true } );
+			window.location = response.url;
+			return;
+		}
+
+		this.setState( { isRetrying: false } );
+		createNotice(
+			'error',
+			response?.errors?.[ 0 ] ||
+				__( 'Error requesting connection URL.', 'woocommerce' )
+		);
+	}
+
 	render() {
 		const { error, onSkip, skipText, onAbort, abortText } = this.props;
 
@@ -67,8 +116,9 @@ export class Connect extends Component {
 			<Fragment>
 				{ error ? (
 					<Button
+						isBusy={ this.state.isRetrying }
 						isPrimary
-						onClick={ () => window.location.reload() }
+						onClick={ this.retryConnection }
 					>
 						{ __( 'Retry', 'woocommerce' ) }
 					</Button>
@@ -151,6 +201,10 @@ Connect.propTypes = {
 	 * Source identifier for the connection.
 	 */
 	from: PropTypes.string,
+	/**
+	 * Requests the authorization URL; Retry uses it to force a fresh registration.
+	 */
+	requestJetpackAuthUrl: PropTypes.func,
 };
 
 Connect.defaultProps = {
@@ -191,6 +245,8 @@ export default compose(
 
 		return {
 			createNotice,
+			requestJetpackAuthUrl: ( query ) =>
+				resolveSelect( onboardingStore ).getJetpackAuthUrl( query ),
 		};
 	} )
 )( Connect );
