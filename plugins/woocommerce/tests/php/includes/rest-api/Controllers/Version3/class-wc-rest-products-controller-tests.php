@@ -3454,7 +3454,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A malformed attribute rejects only its batch item and preserves its saved product data.
+	 * @testdox Non-array attributes are skipped while valid attributes and other batch items are saved.
 	 * @testWith [null]
 	 *           [false]
 	 *           [42]
@@ -3462,9 +3462,10 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	 *
 	 * @param mixed $invalid_attribute Non-array attribute entry.
 	 */
-	public function test_batch_update_continues_after_non_array_attribute( $invalid_attribute ): void {
-		list( $attribute, $term_id ) = $this->create_attribute_with_duplicate_term_names();
-		$product_attribute           = new WC_Product_Attribute();
+	public function test_batch_update_skips_non_array_attribute( $invalid_attribute ): void {
+		list( $attribute, $term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+
+		$product_attribute = new WC_Product_Attribute();
 		$product_attribute->set_id( $attribute['attribute_id'] );
 		$product_attribute->set_name( $attribute['attribute_taxonomy'] );
 		$product_attribute->set_options( array( $term_id ) );
@@ -3473,8 +3474,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_attributes( array( $product_attribute ) );
 		$product->save();
-		$original_name = $product->get_name();
-		$after         = WC_Helper_Product::create_simple_product();
+		$after = WC_Helper_Product::create_simple_product();
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
 		$request->set_body_params(
@@ -3486,8 +3486,18 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 					),
 					array(
 						'id'         => $product->get_id(),
-						'name'       => 'Must not be saved',
-						'attributes' => array( $invalid_attribute ),
+						'name'       => 'Updated with valid attributes',
+						'attributes' => array(
+							$invalid_attribute,
+							array(
+								'id'       => $attribute['attribute_id'],
+								'term_ids' => array( $second_term_id ),
+							),
+							array(
+								'name'    => 'Probe color',
+								'options' => array( 'Green' ),
+							),
+						),
 					),
 					array(
 						'id'   => $after->get_id(),
@@ -3502,12 +3512,15 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertCount( 3, $data['update'] );
 		$this->assertSame( $before->get_id(), $data['update'][0]['id'] );
-		$this->assertSame( 'woocommerce_rest_invalid_attribute', $data['update'][1]['error']['code'] );
-		$this->assertSame( 400, $data['update'][1]['error']['data']['status'] );
+		$this->assertArrayNotHasKey( 'error', $data['update'][1], 'The malformed attribute should not reject the product update.' );
+		$this->assertSame( $product->get_id(), $data['update'][1]['id'] );
+		$this->assertSame( array( 'Green' ), $data['update'][1]['attributes'][1]['options'] );
 		$this->assertSame( $after->get_id(), $data['update'][2]['id'] );
 		$this->assertSame( 'Updated before invalid item', wc_get_product( $before->get_id() )->get_name() );
-		$this->assertSame( $original_name, wc_get_product( $product->get_id() )->get_name() );
-		$this->assertSame( array( $term_id ), wc_get_product_terms( $product->get_id(), $attribute['attribute_taxonomy'], array( 'fields' => 'ids' ) ) );
+		$saved_product = wc_get_product( $product->get_id() );
+		$this->assertSame( 'Updated with valid attributes', $saved_product->get_name() );
+		$this->assertSame( array( 'Green' ), $saved_product->get_attributes()['probe-color']->get_options(), 'The valid custom attribute should be persisted.' );
+		$this->assertSame( array( $second_term_id ), wc_get_product_terms( $product->get_id(), $attribute['attribute_taxonomy'], array( 'fields' => 'ids' ) ), 'The valid global attribute term ID should be persisted.' );
 		$this->assertSame( 'Updated after invalid item', wc_get_product( $after->get_id() )->get_name() );
 	}
 
