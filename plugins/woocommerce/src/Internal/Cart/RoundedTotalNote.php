@@ -40,6 +40,11 @@ class RoundedTotalNote implements RegisterHooksInterface {
 		add_filter( 'woocommerce_cart_item_subtotal', array( $this, 'add_cart_item_subtotal_note' ), 999, 2 );
 		add_filter( 'woocommerce_widget_cart_item_quantity', array( $this, 'add_mini_cart_item_quantity_note' ), 999, 2 );
 		add_filter( 'woocommerce_cart_subtotal', array( $this, 'add_cart_subtotal_note' ), 999, 2 );
+		// These surfaces refresh their totals over AJAX, which returns HTML but not the asset queue, so load the
+		// assets with them even when nothing needs a note yet (e.g. an empty Mini-Cart).
+		add_action( 'woocommerce_before_mini_cart', array( $this, 'enqueue_assets' ) );
+		add_action( 'woocommerce_before_cart', array( $this, 'enqueue_assets' ) );
+		add_action( 'woocommerce_review_order_before_cart_contents', array( $this, 'enqueue_assets' ) );
 	}
 
 	/**
@@ -53,6 +58,16 @@ class RoundedTotalNote implements RegisterHooksInterface {
 
 		wp_register_script( self::ASSET_HANDLE, $this->get_asset_url( 'assets/js/frontend/rounded-total-info' . $suffix . '.js' ), array(), $version, array( 'strategy' => 'defer' ) );
 		wp_register_style( self::ASSET_HANDLE, $this->get_asset_url( 'assets/css/rounded-total-info.css' ), array(), $version );
+	}
+
+	/**
+	 * Enqueue the tooltip script and style.
+	 *
+	 * @internal
+	 */
+	public function enqueue_assets(): void {
+		wp_enqueue_script( self::ASSET_HANDLE );
+		wp_enqueue_style( self::ASSET_HANDLE );
 	}
 
 	/**
@@ -254,14 +269,13 @@ class RoundedTotalNote implements RegisterHooksInterface {
 			return $amount_html;
 		}
 
-		wp_enqueue_script( self::ASSET_HANDLE );
-		wp_enqueue_style( self::ASSET_HANDLE );
+		$this->enqueue_assets();
 
 		$id          = wp_unique_id( 'wc-rounded-total-info-' );
 		$amount_safe = ! $this->has_interactive_content( $amount_html );
 
 		return sprintf(
-			'<span class="wc-rounded-total-info"><button type="button" class="wc-rounded-total-info__button" popovertarget="%1$s" popovertargetaction="show" aria-expanded="false">%2$s%3$s<span class="wc-rounded-total-info__label">%4$s</span></button><span id="%1$s" class="wc-rounded-total-info__tooltip" popover="auto" role="tooltip">%5$s</span>%6$s</span>',
+			'<span class="wc-rounded-total-info"><button type="button" class="wc-rounded-total-info__button" popovertarget="%1$s" popovertargetaction="show" aria-expanded="false" aria-describedby="%1$s">%2$s%3$s<span class="wc-rounded-total-info__label">%4$s</span></button><span id="%1$s" class="wc-rounded-total-info__tooltip" popover="auto" role="tooltip">%5$s</span>%6$s</span>',
 			esc_attr( $id ),
 			self::get_icon_html(),
 			$amount_safe ? '<span class="wc-rounded-total-info__amount">' . $amount_html . '</span>' : '',

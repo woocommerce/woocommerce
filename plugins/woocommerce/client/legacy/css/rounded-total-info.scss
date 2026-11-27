@@ -156,6 +156,15 @@
 	}
 }
 
+// Opened from the keyboard: show and hide at once, as keyboard changes apply immediately.
+.wc-rounded-total-info__tooltip[data-instant] {
+	transition: none;
+
+	&:popover-open {
+		animation: none;
+	}
+}
+
 // Without the Popover API, keep the note for screen readers and hide it visually.
 @supports not selector(:popover-open) {
 

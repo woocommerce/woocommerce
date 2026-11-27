@@ -71,12 +71,17 @@
 		var size = tooltip.getBoundingClientRect();
 		var above = anchor.top - size.height - GAP;
 		var left = anchor.left + anchor.width / 2 - size.width / 2;
-		tooltip.setAttribute(
-			'data-placement',
-			above >= EDGE ? 'above' : 'below'
-		);
-		tooltip.style.top =
-			( above >= EDGE ? above : anchor.bottom + GAP ) + 'px';
+		var fitsAbove = above >= EDGE;
+		var top = fitsAbove ? above : anchor.bottom + GAP;
+		if ( ! fitsAbove ) {
+			// No room below either (a short landscape screen): keep it inside the viewport.
+			top = Math.max(
+				EDGE,
+				Math.min( top, window.innerHeight - size.height - EDGE )
+			);
+		}
+		tooltip.setAttribute( 'data-placement', fitsAbove ? 'above' : 'below' );
+		tooltip.style.top = top + 'px';
 		tooltip.style.left =
 			Math.max(
 				EDGE,
@@ -84,11 +89,17 @@
 			) + 'px';
 	}
 
-	function show( button ) {
+	// Opened from the keyboard, the tooltip shows and hides without motion (the stylesheet checks data-instant).
+	function show( button, instant ) {
 		var tooltip = getTooltip( button );
 		clearTimeout( closeTimer );
 		if ( ! tooltip ) {
 			return;
+		}
+		if ( instant ) {
+			tooltip.setAttribute( 'data-instant', '' );
+		} else {
+			tooltip.removeAttribute( 'data-instant' );
 		}
 		// Coming back while it fades out: keep it open.
 		tooltip.removeAttribute( 'data-closing' );
@@ -143,11 +154,21 @@
 		} );
 	}
 
-	// A short delay lets the pointer move from the button onto the tooltip. A tooltip opened by a click or tap stays.
+	// A short delay lets the pointer move from the button onto the tooltip. A tooltip opened by a click or tap stays, and
+	// so does one whose button still has focus or the pointer (e.g. the pointer leaves a button focused from the keyboard).
 	function closeSoon( tooltip ) {
 		clearTimeout( closeTimer );
 		if ( tooltip && ! tooltip.hasAttribute( 'data-pinned' ) ) {
 			closeTimer = setTimeout( function () {
+				var button = getButton( tooltip );
+				if (
+					button &&
+					( button === document.activeElement ||
+						button.matches( ':hover' ) ||
+						tooltip.matches( ':hover' ) )
+				) {
+					return;
+				}
 				hide( tooltip );
 			}, CLOSE_DELAY );
 		}
@@ -181,7 +202,7 @@
 	document.addEventListener( 'focusin', function ( event ) {
 		var button = event.target.closest && event.target.closest( BUTTON );
 		if ( button ) {
-			show( button );
+			show( button, button.matches( ':focus-visible' ) );
 		}
 	} );
 
@@ -214,6 +235,8 @@
 				isOpen
 			);
 			if ( open.length ) {
+				// Cancel the key too, so a native <dialog> around the tooltip doesn't also close.
+				event.preventDefault();
 				event.stopPropagation();
 				open.forEach( function ( tooltip ) {
 					tooltip.hidePopover();

@@ -94,9 +94,22 @@ class RoundedTotalNoteTest extends WC_Unit_Test_Case {
 		$id = substr( $html, strpos( $html, 'popovertarget="' ) + 15 );
 		$id = substr( $id, 0, (int) strpos( $id, '"' ) );
 		$this->assertNotEmpty( $id );
-		$this->assertStringContainsString( 'popovertargetaction="show" aria-expanded="false"><svg class="wc-rounded-total-info__icon"', $html );
+		$this->assertStringContainsString( 'popovertargetaction="show" aria-expanded="false" aria-describedby="' . $id . '"><svg class="wc-rounded-total-info__icon"', $html );
 		$this->assertStringContainsString( 'aria-hidden="true"', $html );
 		$this->assertStringContainsString( '</svg><span class="wc-rounded-total-info__amount">ROW</span><span class="wc-rounded-total-info__label">Rounding details</span></button><span id="' . $id . '" class="wc-rounded-total-info__tooltip" popover="auto" role="tooltip">Rounded to £5.98 from 3 units priced £1.992 (incl. VAT), shown as £1.99 in your cart.</span></span>', $html );
+		$this->assertTrue( wp_script_is( 'wc-rounded-total-info', 'enqueued' ), 'Script enqueued' );
+		$this->assertTrue( wp_style_is( 'wc-rounded-total-info', 'enqueued' ), 'Style enqueued' );
+	}
+
+	/**
+	 * @testdox Loads the assets with a classic Mini-Cart, even an empty one, so totals added later over AJAX work too.
+	 */
+	public function test_enqueues_assets_with_classic_mini_cart(): void {
+		wp_dequeue_script( 'wc-rounded-total-info' );
+		wp_dequeue_style( 'wc-rounded-total-info' );
+
+		do_action( 'woocommerce_before_mini_cart' );
+
 		$this->assertTrue( wp_script_is( 'wc-rounded-total-info', 'enqueued' ), 'Script enqueued' );
 		$this->assertTrue( wp_style_is( 'wc-rounded-total-info', 'enqueued' ), 'Style enqueued' );
 	}
