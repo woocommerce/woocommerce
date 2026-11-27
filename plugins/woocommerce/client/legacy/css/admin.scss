@@ -6614,6 +6614,12 @@ img.help_tip {
 	text-decoration: none;
 }
 
+// An order item price rounded from a more exact one, which the tooltip shows.
+.tips.wc-order-item-rounded-price {
+	text-decoration: underline dotted;
+	text-underline-offset: 0.25em;
+}
+
 img.tips {
 	padding: 5px 0 0;
 }
