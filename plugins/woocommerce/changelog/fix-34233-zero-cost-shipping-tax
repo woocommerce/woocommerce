@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show a 0.00 tax amount for free and zero-cost shipping lines on new orders, instead of a dash in the order edit screen.
