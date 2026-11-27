@@ -368,6 +368,9 @@ export default defineConfig< { resetDatabaseAfterEachTest: boolean } >( {
 			name: 'blocks-serial',
 			testDir: `${ TESTS_ROOT_PATH }/tests/blocks`,
 			testMatch: blocksSerialSpecs,
+			// Lets `--shard` split a spec file between shards. With one worker,
+			// the tests still run one at a time.
+			fullyParallel: true,
 			dependencies: [ 'blocks setup' ],
 			workers: 1,
 			use: {
@@ -379,6 +382,8 @@ export default defineConfig< { resetDatabaseAfterEachTest: boolean } >( {
 			name: 'blocks-parallel',
 			testDir: `${ TESTS_ROOT_PATH }/tests/blocks`,
 			testIgnore: blocksSerialSpecs,
+			// Lets `--shard` split a spec file between shards.
+			fullyParallel: true,
 			dependencies: [ 'blocks setup' ],
 			use: {
 				...devices[ 'Desktop Chrome' ],
