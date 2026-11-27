@@ -502,7 +502,7 @@ final class WC_Cart_Totals {
 	 * penny more or less (20.7p charged as 20p). Runs after any change for the customer's tax rate, so that price is
 	 * rounded once too. Lines aren't rounded when tax is rounded at subtotal level.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 * @param stdClass $item Item to round the price of.
 	 * @return stdClass
 	 */

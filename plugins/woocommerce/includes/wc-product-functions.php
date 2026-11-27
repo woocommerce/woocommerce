@@ -1556,7 +1556,7 @@ function wc_get_product_term_ids( $product_id, $taxonomy ) {
  * For a given product, and optionally price/qty, work out the price with tax included, based on store settings.
  *
  * @since  3.0.0
- * @since  11.4.0 Added the `round` argument.
+ * @since  11.5.0 Added the `round` argument.
  * @param  WC_Product $product WC_Product object.
  * @param  array      $args Optional arguments: `qty`, `price`, and `round` (default true). Pass `round` false to get the
  *                          exact price before rounding to the store's decimals, e.g. £1.66 + 20% VAT returns 1.992, not 1.99.
@@ -1642,7 +1642,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
  * For a given product, and optionally price/qty, work out the price with tax excluded, based on store settings.
  *
  * @since  3.0.0
- * @since  11.4.0 Added the `round` argument.
+ * @since  11.5.0 Added the `round` argument.
  * @param  WC_Product $product WC_Product object.
  * @param  array      $args Optional quantity, price, order, and tax location arguments, and `round` (default true). When
  *                          prices include tax, the line price is rounded to the store's decimals before tax is taken off,
