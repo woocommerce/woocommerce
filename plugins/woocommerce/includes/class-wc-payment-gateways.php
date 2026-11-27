@@ -107,6 +107,10 @@ class WC_Payment_Gateways {
 		$ordering  = (array) get_option( 'woocommerce_gateway_order' );
 		$order_end = 999;
 
+		// Start from an empty list so a re-init overwrites, rather than appends to, the previous gateways.
+		$this->payment_gateways = array();
+		$overflow               = array();
+
 		// Load gateways in order.
 		foreach ( $load_gateways as $gateway ) {
 			if ( is_string( $gateway ) && class_exists( $gateway ) ) {
@@ -125,17 +129,39 @@ class WC_Payment_Gateways {
 				continue;
 			}
 
+			$position = null;
 			if ( isset( $ordering[ $gateway->id ] ) && is_numeric( $ordering[ $gateway->id ] ) ) {
+				// Use the saved position, moving to the next free one if another gateway has the same number.
+				$position = (int) $ordering[ $gateway->id ];
+				while ( isset( $this->payment_gateways[ $position ] ) && $position < PHP_INT_MAX ) {
+					++$position;
+				}
+				// Keep the gateway aside, to append after sorting, if no free integer position is left.
+				if ( isset( $this->payment_gateways[ $position ] ) ) {
+					$overflow[] = $gateway;
+					continue;
+				}
+			}
+
+			if ( null !== $position ) {
 				// Add in position.
-				$this->payment_gateways[ $ordering[ $gateway->id ] ] = $gateway;
+				$this->payment_gateways[ $position ] = $gateway;
 			} else {
-				// Add to end of the array.
+				// Add to end of the array, skipping any position already taken.
+				while ( isset( $this->payment_gateways[ $order_end ] ) ) {
+					++$order_end;
+				}
 				$this->payment_gateways[ $order_end ] = $gateway;
 				++$order_end;
 			}
 		}
 
 		ksort( $this->payment_gateways );
+
+		// Gateways that found no free position go last.
+		if ( ! empty( $overflow ) ) {
+			$this->payment_gateways = array_merge( $this->payment_gateways, $overflow );
+		}
 
 		add_action( 'wc_payment_gateways_initialized', array( $this, 'on_payment_gateways_initialized' ) );
 		/**
