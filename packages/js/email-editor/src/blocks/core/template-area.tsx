@@ -6,7 +6,6 @@ import { BlockControls } from '@wordpress/block-editor';
 import { ToolbarButton } from '@wordpress/components';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { select, useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
@@ -23,43 +22,34 @@ import { EditTemplateModal } from '../../components/sidebar/edit-template-modal'
 import { recordEvent } from '../../events';
 import { storeName } from '../../store';
 
-type NavigateToEntityRecord = ( params: {
-	postId: number | string;
-	postType: string;
-} ) => void;
-
 function TemplateAreaToolbar() {
-	const { template, onNavigateToEntityRecord } = useSelect(
-		( select ) => ( {
-			template: select( storeName ).getCurrentTemplate(),
-			onNavigateToEntityRecord: (
-				select( editorStore ).getEditorSettings() as {
-					onNavigateToEntityRecord?: NavigateToEntityRecord;
-				}
-			 ).onNavigateToEntityRecord,
-		} ),
+	const template = useSelect(
+		( select ) => select( storeName ).getCurrentTemplate(),
 		[]
 	);
+	const [ isModalOpen, setIsModalOpen ] = useState( false );
 
 	return (
-		<BlockControls group="other">
-			<span className="woocommerce-email-editor-template-area__label">
-				{ template?.title }
-			</span>
-			<ToolbarButton
-				onClick={ () => {
-					recordEvent( 'template_area_edit_template_clicked', {
-						templateId: template?.id,
-					} );
-					onNavigateToEntityRecord?.( {
-						postId: template?.id,
-						postType: 'wp_template',
-					} );
-				} }
-			>
-				{ __( 'Edit template', __i18n_text_domain__ ) }
-			</ToolbarButton>
-		</BlockControls>
+		<>
+			<BlockControls group="other">
+				<span className="woocommerce-email-editor-template-area__label">
+					{ template?.title }
+				</span>
+				<ToolbarButton
+					onClick={ () => {
+						recordEvent( 'template_area_edit_template_clicked', {
+							templateId: template?.id,
+						} );
+						setIsModalOpen( true );
+					} }
+				>
+					{ __( 'Edit template', __i18n_text_domain__ ) }
+				</ToolbarButton>
+			</BlockControls>
+			{ isModalOpen && (
+				<EditTemplateModal close={ () => setIsModalOpen( false ) } />
+			) }
+		</>
 	);
 }
 

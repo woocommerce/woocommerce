@@ -51,8 +51,6 @@ jest.mock( '../../../config-tools/filters', () => ( {
 	addFilterForEmail: jest.fn(),
 } ) );
 
-const onNavigateToEntityRecord = jest.fn();
-
 const BlockEdit = () => <p>Block content</p>;
 const BlockListBlock = ( { className, wrapperProps } ) => (
 	<div
@@ -73,22 +71,20 @@ describe( 'template area tools', () => {
 					id: 'theme//newsletter',
 					title: 'Newsletter',
 				} ),
-				getEditorSettings: () => ( { onNavigateToEntityRecord } ),
 			} ) )
 		);
 	} );
 
-	it( 'shows the template name and an Edit template button for a template area', () => {
+	it( 'shows the template name and an Edit template button that asks before opening the template', () => {
 		( useIsTemplateArea as jest.Mock ).mockReturnValue( true );
 
 		render( <ToolbarBlockEdit clientId="header" /> );
 		fireEvent.click( screen.getByText( 'Edit template' ) );
 
 		expect( screen.getByText( 'Newsletter' ) ).toBeInTheDocument();
-		expect( onNavigateToEntityRecord ).toHaveBeenCalledWith( {
-			postId: 'theme//newsletter',
-			postType: 'wp_template',
-		} );
+		expect(
+			screen.getByText( 'Confirm editing the template' )
+		).toBeInTheDocument();
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'template_area_edit_template_clicked',
 			{ templateId: 'theme//newsletter' }
