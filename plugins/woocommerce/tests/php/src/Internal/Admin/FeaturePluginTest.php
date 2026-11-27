@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin;
 use Automattic\WooCommerce\Admin\ReportExporter;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WC_Unit_Test_Case;
 
@@ -166,6 +167,26 @@ class FeaturePluginTest extends WC_Unit_Test_Case {
 		$this->assertSame( 10, has_action( 'wc_admin_daily', $cleanup_callback ), 'Existing exports should still expire.' );
 		$this->assertFalse( has_action( $export_hook, $scheduler_callback ), 'Export generation should stay disabled.' );
 		$this->assertFalse( has_action( $scheduler_hook, $scheduler_callback ), 'Export scheduling should stay disabled.' );
+	}
+
+	/**
+	 * @testdox The recurring order import is unscheduled when Analytics is disabled.
+	 */
+	public function test_recurring_order_import_is_unscheduled_when_analytics_is_disabled(): void {
+		$batch_hook = OrdersScheduler::get_action( OrdersScheduler::PROCESS_PENDING_ORDERS_BATCH_ACTION );
+
+		$this->assertIsString( $batch_hook, 'The batch import hook should be defined.' );
+
+		remove_action( 'action_scheduler_ensure_recurring_actions', array( OrdersScheduler::class, 'schedule_recurring_batch_processor' ) );
+		OrdersScheduler::schedule_recurring_batch_processor();
+		$this->assertTrue( as_has_scheduled_action( $batch_hook, array(), OrdersScheduler::$group ), 'The batch import should be scheduled before Analytics is disabled.' );
+
+		update_option( Analytics::TOGGLE_OPTION_NAME, 'no' );
+
+		FeaturePlugin::instance()->includes();
+		do_action( 'action_scheduler_ensure_recurring_actions' );
+
+		$this->assertFalse( as_has_scheduled_action( $batch_hook, array(), OrdersScheduler::$group ), 'The batch import has no callback without Analytics, so it should not stay scheduled.' );
 	}
 
 	/**

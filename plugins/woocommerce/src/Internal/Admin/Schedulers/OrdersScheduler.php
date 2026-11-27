@@ -570,6 +570,18 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
+	 * Unschedule the recurring batch processor for order imports.
+	 *
+	 * @internal
+	 */
+	public static function unschedule_recurring_batch_processor(): void {
+		$action_hook = self::get_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
+		if ( null !== $action_hook ) {
+			as_unschedule_all_actions( $action_hook, array(), static::$group ?? '' );
+		}
+	}
+
+	/**
 	 * Handle changes to the scheduled import option.
 	 *
 	 * When switching from scheduled to immediate import,
@@ -586,11 +598,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	public static function handle_scheduled_import_option_change( $old_value, $new_value ) {
 		// If switching from scheduled to immediate import.
 		if ( 'yes' === $old_value && 'no' === $new_value ) {
-			// Unschedule the recurring batch processor.
-			$action_hook = self::get_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
-			if ( null !== $action_hook ) {
-				as_unschedule_all_actions( $action_hook, array(), static::$group ?? '' );
-			}
+			self::unschedule_recurring_batch_processor();
 
 			// Schedule an immediate catchup batch to process all orders up to now.
 			// This ensures no orders are missed during the transition.
