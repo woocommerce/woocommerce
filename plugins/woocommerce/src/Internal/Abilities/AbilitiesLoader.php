@@ -165,6 +165,8 @@ class AbilitiesLoader {
 		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
 		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
 
+		add_filter( 'posts_join', array( OrdersQuery::class, 'join_search_matches' ), 10, 2 );
+
 		self::$initialized = true;
 	}
 
