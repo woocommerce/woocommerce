@@ -29,8 +29,68 @@ class WC_Admin_Reports {
 	 * Register the hook handlers for integrating with admin.
 	 */
 	public static function register_hook_handlers() {
-		add_filter( 'woocommerce_after_dashboard_status_widget_parameter', array( __CLASS__, 'get_report_instance' ) );
-		add_filter( 'woocommerce_dashboard_status_widget_reports', array( __CLASS__, 'replace_dashboard_status_widget_reports' ) );
+		add_filter( 'woocommerce_after_dashboard_status_widget_parameter', array( __CLASS__, 'get_status_widget_report_instance' ) );
+		add_filter( 'woocommerce_dashboard_status_widget_reports', array( __CLASS__, 'maybe_replace_dashboard_status_widget_reports' ) );
+	}
+
+	/**
+	 * Fill in legacy sales data for the dashboard status widget, but only when another callback is hooked to the filter.
+	 *
+	 * Those callbacks were written against the legacy data, for example to adjust `report_data->net_sales`.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 *
+	 * @param mixed $status_widget_reports The data to display in the status widget.
+	 * @return mixed
+	 */
+	public static function maybe_replace_dashboard_status_widget_reports( $status_widget_reports ) {
+		if ( ! self::has_other_callbacks( 'woocommerce_dashboard_status_widget_reports' ) || ! is_array( $status_widget_reports ) ) {
+			return $status_widget_reports;
+		}
+
+		return self::replace_dashboard_status_widget_reports( $status_widget_reports );
+	}
+
+	/**
+	 * Provide a legacy report to the status widget hooks, but only when another callback can receive it.
+	 *
+	 * That is a listener on `woocommerce_after_dashboard_status_widget`, or another callback on this filter.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 *
+	 * @param mixed $reports The value passed to `woocommerce_after_dashboard_status_widget`.
+	 * @return mixed
+	 */
+	public static function get_status_widget_report_instance( $reports ) {
+		if ( ! has_action( 'woocommerce_after_dashboard_status_widget' ) && ! self::has_other_callbacks( 'woocommerce_after_dashboard_status_widget_parameter' ) ) {
+			return $reports;
+		}
+
+		return self::get_report_instance();
+	}
+
+	/**
+	 * Check whether a hook has callbacks besides the one of this class that is running it.
+	 *
+	 * @param string $hook_name Hook name.
+	 * @return bool
+	 */
+	private static function has_other_callbacks( string $hook_name ): bool {
+		global $wp_filter;
+
+		$hook = $wp_filter[ $hook_name ] ?? null;
+		if ( ! $hook instanceof WP_Hook ) {
+			return false;
+		}
+
+		$callback_count = 0;
+		foreach ( $hook->callbacks as $callbacks ) {
+			$callback_count += count( $callbacks );
+		}
+
+		return $callback_count > 1;
 	}
 
 	/**
@@ -89,6 +149,8 @@ class WC_Admin_Reports {
 
 	/**
 	 * Filter handler for replacing the data of the status widget on the Dashboard page.
+	 *
+	 * Core only calls this when another callback is hooked to `woocommerce_dashboard_status_widget_reports`.
 	 *
 	 * @param array $status_widget_reports The data to display in the status widget.
 	 */

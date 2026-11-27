@@ -5,11 +5,11 @@ Author: Automattic
 Author URI: https://automattic.com/
 Description: Purple is a WooCommerce starter theme made for the Site Editor and modern commerce. Its clean styles and adaptable color system suit any catalog: fashion and clothing, jewelry, beauty, home decor, food and drink, or digital downloads. Commerce-ready templates and curated patterns cover the storefront from product pages and filterable shop views to cart and checkout. Ten color palettes and ten font pairings make it easy to match your brand in a click, and the theme works well with Jetpack blocks, supports RTL languages, and is fully translation-ready. Whether you’re launching your first online store or refreshing an established one, Purple is a versatile foundation for selling with WordPress and WooCommerce.
 Requires at least: 7.1
-Tested up to: 7.1
+Tested up to: 7.2
 Requires PHP: 7.4
-WC requires at least: 11.1
-WC tested up to: 11.2
-Version: 1.0.3
+WC requires at least: 11.2
+WC tested up to: 11.3
+Version: 1.1.0
 License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: purple
@@ -30,6 +30,26 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 body {
 	--wc-form-border-color: var(--wp--preset--color--theme-6);
 	--wc-form-border-radius: 0;
+}
+
+@supports (appearance: base-select) {
+	select:not([multiple], [size]) {
+		appearance: base-select;
+		align-items: center;
+		gap: var(--wp--preset--spacing--10);
+	}
+
+	select:not([multiple], [size])::picker-icon {
+		forced-color-adjust: preserve-parent-color;
+		background-color: currentColor;
+		block-size: 0.42rem;
+		content: "";
+		inline-size: 0.75rem;
+		margin-block-start: -1px;
+		mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%275.25 8.25 13.5 7.5%27 fill=%27none%27%3E%3Cpolyline points=%276 9 12 15 18 9%27 stroke=%27%23000%27 stroke-width=%271.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E");
+		mask-repeat: no-repeat;
+		mask-size: contain;
+	}
 }
 
 /* ==========================================================================

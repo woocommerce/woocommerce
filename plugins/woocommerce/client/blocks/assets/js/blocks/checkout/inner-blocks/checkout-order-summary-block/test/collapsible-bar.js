@@ -408,4 +408,86 @@ describe( 'Checkout Order Summary placement', () => {
 			orderExtension
 		);
 	} );
+
+	describe( 'motion', () => {
+		// Jest has no transitions. In the fake, an element runs one transition while it has the attribute of
+		// `animateCollapse`, until `finish` ends it.
+		let finish;
+		beforeEach( () => {
+			let isRunning = true;
+			let resolveFinished;
+			const transition = {
+				playState: 'running',
+				finished: new Promise( ( resolve ) => {
+					resolveFinished = resolve;
+				} ),
+				effect: { getComputedTiming: () => ( { endTime: 200 } ) },
+			};
+			HTMLElement.prototype.getAnimations = function () {
+				return isRunning && this.hasAttribute( 'data-wc-collapse' )
+					? [ transition ]
+					: [];
+			};
+			finish = async () => {
+				isRunning = false;
+				await act( async () => resolveFinished() );
+			};
+		} );
+
+		afterEach( () => {
+			delete HTMLElement.prototype.getAnimations;
+		} );
+
+		it( 'keeps tapped content inline and inert while it collapses, then moves it and leaves nothing behind', async () => {
+			const { container } = renderWithSlot( 'is-medium' );
+			const title = screen.getByRole( 'button', {
+				name: /Order summary/,
+			} );
+			const inlineSummary = container.querySelector(
+				'.wc-block-components-checkout-order-summary__content'
+			);
+			const summaryContent = screen.getByTestId( 'summary-content' );
+
+			fireEvent.click( title, { detail: 1 } );
+			expect( inlineSummary ).toHaveAttribute( 'data-wc-collapse', 'in' );
+
+			fireEvent.click( title, { detail: 1 } );
+			expect( title ).toHaveAttribute( 'aria-expanded', 'false' );
+			expect( inlineSummary ).toContainElement( summaryContent );
+			expect( inlineSummary ).toHaveClass( 'is-open' );
+			expect( inlineSummary ).toHaveAttribute( 'inert' );
+			expect( inlineSummary ).toHaveAttribute(
+				'data-wc-collapse',
+				'out'
+			);
+
+			await finish();
+			expect(
+				container.querySelector( '.checkout-order-summary-block-fill' )
+			).toContainElement( summaryContent );
+			expect( inlineSummary ).not.toHaveClass( 'is-open' );
+			expect( inlineSummary ).not.toHaveAttribute( 'inert' );
+			expect( inlineSummary ).not.toHaveAttribute( 'data-wc-collapse' );
+			expect( inlineSummary ).not.toHaveAttribute( 'style' );
+		} );
+
+		it( 'applies a key press immediately', () => {
+			const { container } = renderWithSlot( 'is-medium' );
+			const title = screen.getByRole( 'button', {
+				name: /Order summary/,
+			} );
+			const inlineSummary = container.querySelector(
+				'.wc-block-components-checkout-order-summary__content'
+			);
+
+			fireEvent.keyDown( title, { key: 'Enter' } );
+			expect( inlineSummary ).not.toHaveAttribute( 'data-wc-collapse' );
+
+			fireEvent.keyDown( title, { key: 'Enter' } );
+			expect(
+				container.querySelector( '.checkout-order-summary-block-fill' )
+			).toContainElement( screen.getByTestId( 'summary-content' ) );
+			expect( inlineSummary ).not.toHaveAttribute( 'inert' );
+		} );
+	} );
 } );

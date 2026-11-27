@@ -19,6 +19,26 @@ import { setOption } from '../../utils/options';
 // WP 7.2 renamed "Preview in new tab" to "Preview" with an "(opens in a new tab)" icon label.
 const PREVIEW_IN_NEW_TAB = /^Preview (in new tab|\(opens in a new tab\))$/;
 
+// Reads the version from the admin body class of the site under test, for example
+// `branch-7-2`, or `branch-7` for 7.0. `getInstalledWordPressVersion()` asks the
+// local wp-env container, which doesn't exist when the suite runs against a remote site.
+const isWordPressAtLeast = async (
+	page: Page,
+	major: number,
+	minor: number
+) => {
+	const branch = await page.evaluate( () =>
+		document.body.className
+			.match( /\bbranch-(\d+)(?:-(\d+))?\b/ )
+			?.slice( 1 )
+	);
+	expect( branch ).toBeDefined();
+	const [ siteMajor, siteMinor ] = ( branch ?? [] ).map( ( part ) =>
+		Number( part ?? 0 )
+	);
+	return siteMajor > major || ( siteMajor === major && siteMinor >= minor );
+};
+
 test.describe(
 	'WooCommerce Email Editor Core',
 	{ lock: locks.EMAIL_FEATURE_FLAGS },
@@ -114,6 +134,78 @@ test.describe(
 					.contentFrame()
 					.getByLabel( 'Block: Heading' )
 			).toContainText( `New order: #[woocommerce/order-number]` );
+		} );
+
+		test( 'Hides core menu items that change the site', async ( {
+			page,
+		} ) => {
+			await accessAndTrackEmailPost( page );
+
+			// Each hidden item is checked after a visible item of the same menu, so a
+			// menu that failed to open can't pass as hidden.
+			await page.getByRole( 'button', { name: 'Options' } ).click();
+			await expect(
+				page.getByRole( 'menuitem', { name: 'Keyboard shortcuts' } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'menuitem', { name: 'Preferences' } )
+			).toBeHidden();
+
+			// WP 7.2 moved the panels into a "Panels" submenu that opens on hover.
+			// Before 7.2 "Panels" is the label of a group in the menu itself.
+			await page
+				.getByRole( 'menuitem', { name: 'Panels' } )
+				.or( page.getByText( 'Panels', { exact: true } ) )
+				.first()
+				.hover();
+			await expect(
+				page.getByRole( 'menuitemcheckbox', { name: 'Email styles' } )
+			).toBeVisible();
+			// The site's Global Styles, which would change the storefront. Core only
+			// adds the item for block themes.
+			await expect(
+				page.getByRole( 'menuitemcheckbox', {
+					name: 'Styles',
+					exact: true,
+				} )
+			).toBeHidden();
+		} );
+
+		test( 'Core Template panel edits the email template only', async ( {
+			page,
+		} ) => {
+			await accessAndTrackEmailPost( page );
+			test.skip(
+				! ( await isWordPressAtLeast( page, 7, 2 ) ),
+				'Core renders the Template panel from WordPress 7.2.'
+			);
+
+			const templatePanelToggle = page.getByRole( 'button', {
+				name: /^Template:/,
+			} );
+			await templatePanelToggle.click();
+			const templatePanel = page
+				.locator( '.components-panel__body' )
+				.filter( { has: templatePanelToggle } );
+			const editButton = templatePanel.getByRole( 'button', {
+				name: 'Edit',
+				exact: true,
+			} );
+			await expect( editButton ).toBeVisible();
+			// "Create new" would add a site template, not an email template.
+			await expect(
+				templatePanel.getByRole( 'button', { name: 'Create new' } )
+			).toBeHidden();
+
+			// Core's notice talks about posts and pages; the email editor rewords it.
+			await editButton.click();
+			await expect(
+				page
+					.locator( '.components-snackbar' )
+					.filter( { hasText: 'Editing template.' } )
+			).toContainText(
+				'Changes made here affect all emails that use the template.'
+			);
 		} );
 
 		test( 'Can preview in new tab', async ( { page } ) => {
@@ -270,6 +362,35 @@ test.describe(
 			// stays a merge: it is harmless, and removing it would be a behavior
 			// change in a title this batch does not otherwise touch.
 			await enableEmailEditor( baseURL );
+
+			// WooCommerce's own categories fit on one row, so mock extra ones in the
+			// REST response, as if extensions had registered them.
+			const extraCategories = [
+				'Subscriber',
+				'Subscription',
+				'Membership',
+				'Booking',
+				'Coupon',
+				'Affiliate',
+			];
+			await page.route(
+				/v1(\/|%2F)personalization_tags/,
+				async ( route ) => {
+					const response = await route.fetch();
+					const tags = await response.json();
+					const extraTags = extraCategories.map( ( category ) => ( {
+						...tags[ 0 ],
+						name: `${ category } tag`,
+						token: `[e2e/${ category.toLowerCase() }-tag]`,
+						category,
+					} ) );
+					await route.fulfill( {
+						response,
+						json: [ ...tags, ...extraTags ],
+					} );
+				}
+			);
+
 			await accessAndTrackEmailPost( page );
 			const canvas = page
 				.locator( 'iframe[name="editor-canvas"]' )
@@ -302,11 +423,31 @@ test.describe(
 				.getByRole( 'button', { name: 'Personalization Tags' } );
 			await expect( personalizationTagsButton ).toBeVisible();
 
-			// Set a URL personalization tag as the button link.
 			await personalizationTagsButton.click();
 			await expect(
 				page.getByRole( 'heading', { name: 'Personalization Tags' } )
 			).toBeVisible();
+
+			// Every category stays visible, with no sideways scrolling.
+			const modal = page.locator(
+				'.woocommerce-personalization-tags-modal'
+			);
+			for ( const category of [ 'All', ...extraCategories ] ) {
+				await expect(
+					modal.getByRole( 'menuitem', {
+						name: category,
+						exact: true,
+					} )
+				).toBeInViewport( { ratio: 1 } );
+			}
+			const horizontalOverflow = await modal
+				.locator( '.components-modal__content' )
+				.evaluate(
+					( element ) => element.scrollWidth - element.clientWidth
+				);
+			expect( horizontalOverflow ).toBeLessThanOrEqual( 0 );
+
+			// Set a URL personalization tag as the button link.
 			await page
 				.locator(
 					'.woocommerce-personalization-tags-modal-category-group-item'

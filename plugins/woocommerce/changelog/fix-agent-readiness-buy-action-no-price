@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+AI shopping health no longer fails the buy action check for a product without a price, which shows no buy link.

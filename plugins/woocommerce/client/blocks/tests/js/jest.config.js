@@ -106,6 +106,12 @@ module.exports = {
 		'@woocommerce/test-utils/msw': 'tests/js/config/msw-setup.js',
 		'^@woocommerce/entities/(.*)$': 'packages/internal/entities/$1',
 		'^@woocommerce/entities$': 'packages/internal/entities',
+		'^@woocommerce/stores/woocommerce$':
+			'assets/js/base/stores/woocommerce/index',
+		'^@woocommerce/stores/woocommerce/products$':
+			'assets/js/base/stores/products',
+		'^@woocommerce/stores/woocommerce/shopper-lists$':
+			'assets/js/base/stores/shopper-lists',
 		'@woocommerce/stores/(.*)$': 'assets/js/base/stores/$1',
 		'^react$': '<rootDir>/node_modules/react',
 		'^react-dom$': '<rootDir>/node_modules/react-dom',
@@ -128,7 +134,8 @@ module.exports = {
 		'<rootDir>/tests/js/config/msw-setup.js',
 	],
 	testPathIgnorePatterns: [
-		'<rootDir>/bin/',
+		// The tests of the stylelint plugins run with the others.
+		'<rootDir>/bin/(?!stylelint-plugins/test/)',
 		'<rootDir>/build/',
 		'<rootDir>/docs/',
 		'<rootDir>/node_modules/',

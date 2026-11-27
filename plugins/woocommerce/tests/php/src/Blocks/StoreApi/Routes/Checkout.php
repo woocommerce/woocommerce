@@ -64,6 +64,14 @@ class Checkout extends \WP_Test_REST_TestCase {
 	private $paypal_gateway_before_test;
 
 	/**
+	 * $_COOKIE before the test. filter_woocommerce_set_cookie_enabled() writes the cookies the
+	 * checkout sets, such as the session and login cookies, into it.
+	 *
+	 * @var array<string, string>
+	 */
+	private $cookies_before_test = array();
+
+	/**
 	 * Tax rate IDs inserted by the current test, removed in tearDown().
 	 *
 	 * @var int[]
@@ -126,6 +134,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
+		$this->cookies_before_test = $_COOKIE;
 		add_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4 );
 
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
@@ -181,18 +190,15 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 */
 	protected function tearDown(): void {
 		try {
+			// Resets wc_log_order_step()'s static state between tests.
+			wc_log_order_step( 'Test cleanup', null, true );
+
 			$this->remove_inserted_tax_rates();
 
 			remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 
-			remove_all_filters( 'woocommerce_get_country_locale' );
-			remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
-			remove_all_filters( 'wc_order_statuses' );
-			remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
-			remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
-			remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
-
 			update_option( 'woocommerce_ship_to_countries', 'all' );
+			update_option( 'woocommerce_ship_to_destination', 'billing' );
 			update_option( 'woocommerce_allowed_countries', 'all' );
 			update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 			update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
@@ -220,6 +226,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 				$this->invalidate_checkout_option_caches();
 				WC()->payment_gateways()->payment_gateways = $this->payment_gateways_before_test;
 				\WC_Gateway_Paypal::set_instance( $this->paypal_gateway_before_test );
+				$_COOKIE = $this->cookies_before_test;
 			}
 		}
 	}
@@ -1273,6 +1280,612 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * Turns on taxes based on the shipping address, with a rate for Ontario and Alberta and none for Canada as a whole.
+	 */
+	private function add_canada_tax_rates() {
+		$this->set_taxes_based_on( 'shipping' );
+		$rates = array(
+			'ON' => '13.0000',
+			'AB' => '5.0000',
+		);
+
+		foreach ( $rates as $state => $rate ) {
+			$this->inserted_tax_rate_ids[] = WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => 'CA',
+					'tax_rate_state'    => $state,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => "$state tax",
+					'tax_rate_priority' => '1',
+					'tax_rate_compound' => '0',
+					'tax_rate_shipping' => '1',
+					'tax_rate_order'    => '1',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Toronto address used by the address merge tests.
+	 *
+	 * @param array $overrides Fields to change; a null value removes the field from the address.
+	 * @return array
+	 */
+	private function get_toronto_address( array $overrides = array() ) {
+		$address = array_merge(
+			array(
+				'first_name' => 'Guest',
+				'last_name'  => 'Shopper',
+				'company'    => '',
+				'address_1'  => '100 Queen St W',
+				'address_2'  => '',
+				'city'       => 'Toronto',
+				'state'      => 'ON',
+				'postcode'   => 'M5H 2N2',
+				'country'    => 'CA',
+				'email'      => 'testaccount@test.com',
+				'phone'      => '',
+			),
+			$overrides
+		);
+
+		return array_filter( $address, fn( $value ) => null !== $value );
+	}
+
+	/**
+	 * Dispatches a checkout request with the given addresses.
+	 *
+	 * @param array      $billing  Billing address.
+	 * @param array|null $shipping Shipping address, or null to leave it out.
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_checkout_with_addresses( array $billing, ?array $shipping ) {
+		$params = array(
+			'billing_address' => (object) $billing,
+			'payment_method'  => WC_Gateway_BACS::ID,
+		);
+		if ( null !== $shipping ) {
+			$params['shipping_address'] = (object) $shipping;
+		}
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( $params );
+
+		return rest_get_server()->dispatch( $request );
+	}
+
+	/**
+	 * Sets the session customer's billing and shipping country and state.
+	 *
+	 * @param string $country Country code.
+	 * @param string $state   State.
+	 */
+	private function set_session_customer_location( string $country, string $state ) {
+		WC()->customer->set_billing_location( $country, $state, '', '' );
+		WC()->customer->set_shipping_location( $country, $state, '', '' );
+		WC()->customer->save();
+	}
+
+	/**
+	 * @testdox Checkout should store the state code when the address names the state and leaves out the country.
+	 */
+	public function test_checkout_converts_state_name_when_country_is_omitted() {
+		$this->add_canada_tax_rates();
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$address = $this->get_toronto_address(
+			array(
+				'state'   => 'Ontario',
+				'country' => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertSame( 'ON', $order->get_shipping_state() );
+		$this->assertSame( 'ON', $order->get_billing_state() );
+		$this->assertGreaterThan( 0, (float) $order->get_total_tax(), 'The Ontario rate must apply.' );
+	}
+
+	/**
+	 * @testdox Checkout should reject an unknown state when the address leaves out the country, without changing the session.
+	 */
+	public function test_checkout_rejects_unknown_state_when_country_is_omitted() {
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$address = $this->get_toronto_address(
+			array(
+				'state'   => 'Nowhere',
+				'country' => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertSame( 'ON', WC()->customer->get_shipping_state(), 'A rejected request must not change the session customer.' );
+	}
+
+	/**
+	 * @testdox Checkout should reject a postcode that is not valid for the session country when the address leaves out the country.
+	 */
+	public function test_checkout_rejects_invalid_postcode_when_country_is_omitted() {
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$address = $this->get_toronto_address(
+			array(
+				'postcode' => 'NOTAZIP',
+				'country'  => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertSame( '', WC()->customer->get_shipping_postcode(), 'A rejected request must not change the session customer.' );
+	}
+
+	/**
+	 * @testdox Checkout should format the postcode for the session country when the address leaves out the country.
+	 */
+	public function test_checkout_formats_postcode_when_country_is_omitted() {
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$address = $this->get_toronto_address(
+			array(
+				'postcode' => 'm5h2n2',
+				'country'  => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertSame( 'M5H 2N2', $order->get_shipping_postcode() );
+		$this->assertSame( 'M5H 2N2', $order->get_billing_postcode() );
+	}
+
+	/**
+	 * @testdox Checkout should store the state code when the address leaves out the state and the session holds its name.
+	 */
+	public function test_checkout_converts_session_state_name_when_state_is_omitted() {
+		$this->add_canada_tax_rates();
+		// The classic update_order_review handler stores the state as posted.
+		$this->set_session_customer_location( 'CA', 'Ontario' );
+		$address = $this->get_toronto_address( array( 'state' => null ) );
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'ON', wc_get_order( $response->get_data()['order_id'] )->get_shipping_state() );
+	}
+
+	/**
+	 * @testdox Checkout should reject a state of "0".
+	 */
+	public function test_checkout_rejects_state_zero() {
+		$address = $this->get_toronto_address( array( 'state' => '0' ) );
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Checkout should store the state code for a country code sent in lower case.
+	 */
+	public function test_checkout_formats_state_for_lowercase_country() {
+		$address = $this->get_toronto_address(
+			array(
+				'city'     => 'Chicago',
+				'state'    => 'ıl',
+				'postcode' => '60601',
+				'country'  => 'us',
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertSame( 'US', $order->get_shipping_country() );
+		$this->assertSame( 'IL', $order->get_shipping_state() );
+	}
+
+	/**
+	 * @testdox Checkout should accept a complete address when the session holds stale values for another country.
+	 */
+	public function test_checkout_accepts_full_address_over_stale_session_values() {
+		WC()->customer->set_props(
+			array(
+				'billing_country'   => 'GB',
+				'billing_postcode'  => 'NOTAZIP',
+				'billing_phone'     => 'abc',
+				'shipping_country'  => 'GB',
+				'shipping_postcode' => 'NOTAZIP',
+				'shipping_phone'    => 'abc',
+			)
+		);
+		WC()->customer->save();
+		$address = $this->get_toronto_address();
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+	}
+
+	/**
+	 * @testdox Checkout should not validate stale session fields that the address leaves out, other than the country, state and postcode.
+	 */
+	public function test_checkout_ignores_stale_session_fields_left_out_of_the_address() {
+		WC()->customer->set_props(
+			array(
+				'billing_country'   => 'CA',
+				'billing_state'     => 'ON',
+				'billing_postcode'  => 'M5H 2N2',
+				'billing_phone'     => 'abc',
+				'shipping_country'  => 'CA',
+				'shipping_state'    => 'ON',
+				'shipping_postcode' => 'M5H 2N2',
+				'shipping_phone'    => 'abc',
+			)
+		);
+		WC()->customer->save();
+		$address = $this->get_toronto_address(
+			array(
+				'postcode' => null,
+				'phone'    => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+	}
+
+	/**
+	 * @testdox Checkout should reject a session postcode that is not valid for the country when the $param leaves out the postcode, without changing the session.
+	 * @testWith ["billing_address"]
+	 *           ["shipping_address"]
+	 *
+	 * @param string $param The address that leaves out the postcode.
+	 */
+	public function test_checkout_rejects_session_postcode_not_valid_for_the_country( string $param ) {
+		WC()->customer->set_props(
+			array(
+				'billing_country'   => 'CA',
+				'billing_state'     => 'ON',
+				'billing_postcode'  => 'NOTAZIP',
+				'shipping_country'  => 'CA',
+				'shipping_state'    => 'ON',
+				'shipping_postcode' => 'NOTAZIP',
+			)
+		);
+		WC()->customer->save();
+		$addresses           = array(
+			'billing_address'  => $this->get_toronto_address(),
+			'shipping_address' => $this->get_toronto_address(),
+		);
+		$addresses[ $param ] = $this->get_toronto_address( array( 'postcode' => null ) );
+
+		$response = $this->dispatch_checkout_with_addresses( $addresses['billing_address'], $addresses['shipping_address'] );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertArrayHasKey( $param, $response->get_data()['data']['details'] );
+		$this->assertSame( 'NOTAZIP', WC()->customer->get_billing_postcode(), 'A rejected request must not save the billing address.' );
+		$this->assertSame( 'NOTAZIP', WC()->customer->get_shipping_postcode(), 'A rejected request must not save the shipping address.' );
+	}
+
+	/**
+	 * @testdox Checkout should reject a postcode saved for a country with no postcode rule when the address changes the country and leaves out the postcode.
+	 */
+	public function test_checkout_rejects_session_postcode_saved_for_another_country() {
+		$location = array(
+			'country'  => 'AE',
+			'state'    => '',
+			'postcode' => 'NOTAZIP',
+		);
+		$request  = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $location,
+				'shipping_address' => (object) $location,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+
+		$address  = $this->get_toronto_address( array( 'postcode' => null ) );
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertSame( 'AE', WC()->customer->get_shipping_country(), 'A rejected request must not change the session customer.' );
+	}
+
+	/**
+	 * @testdox Checkout should format a session postcode for the country when the address leaves out the postcode.
+	 */
+	public function test_checkout_formats_session_postcode_when_postcode_is_omitted() {
+		WC()->customer->set_billing_location( 'CA', 'ON', 'm5h2n2', '' );
+		WC()->customer->set_shipping_location( 'CA', 'ON', 'm5h2n2', '' );
+		WC()->customer->save();
+		$address = $this->get_toronto_address( array( 'postcode' => null ) );
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertSame( 'M5H 2N2', $order->get_shipping_postcode() );
+		$this->assertSame( 'M5H 2N2', $order->get_billing_postcode() );
+	}
+
+	/**
+	 * @testdox Checkout should ignore a stale session shipping address when the cart needs no shipping.
+	 */
+	public function test_checkout_without_shipping_ignores_stale_session_shipping() {
+		wc_empty_cart();
+		WC()->cart->add_to_cart( $this->products[2]->get_id(), 1 );
+		WC()->customer->set_shipping_location( 'CA', 'Nowhere', '', '' );
+		WC()->customer->save();
+
+		$response = $this->dispatch_checkout_with_addresses( $this->get_toronto_address(), null );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'ON', wc_get_order( $response->get_data()['order_id'] )->get_shipping_state() );
+	}
+
+	/**
+	 * @testdox Checkout should send error details with a rejected address, so the Checkout block can show a notice.
+	 */
+	public function test_checkout_rejected_address_includes_error_details() {
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$address = $this->get_toronto_address(
+			array(
+				'state'   => 'Nowhere',
+				'country' => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$data = $response->get_data()['data'];
+		$this->assertArrayHasKey( 'details', $data, 'The Checkout block builds its notices from details.' );
+		$this->assertArrayHasKey( 'billing_address', $data['details'] );
+		$this->assertArrayHasKey( 'message', $data['details']['billing_address'] );
+		$this->assertStringContainsString( 'NOWHERE', $data['details']['billing_address']['message'] );
+	}
+
+	/**
+	 * @testdox Checkout should reject an invalid $invalid_param without saving the other, valid address to the session.
+	 * @testWith ["billing_address"]
+	 *           ["shipping_address"]
+	 *
+	 * @param string $invalid_param The address that gets the invalid state.
+	 */
+	public function test_checkout_rejects_one_invalid_address_without_saving_the_other( string $invalid_param ) {
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$addresses = array(
+			'billing_address'  => $this->get_toronto_address(
+				array(
+					'city'     => 'Montreal',
+					'state'    => 'QC',
+					'postcode' => 'H2Y 1C6',
+				)
+			),
+			'shipping_address' => $this->get_toronto_address(
+				array(
+					'city'     => 'Montreal',
+					'state'    => 'QC',
+					'postcode' => 'H2Y 1C6',
+				)
+			),
+		);
+
+		$addresses[ $invalid_param ] = $this->get_toronto_address(
+			array(
+				'state'   => 'Nowhere',
+				'country' => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $addresses['billing_address'], $addresses['shipping_address'] );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertArrayHasKey( $invalid_param, $response->get_data()['data']['details'] );
+		$this->assertSame( 'ON', WC()->customer->get_billing_state(), 'A rejected request must not save the billing address.' );
+		$this->assertSame( 'ON', WC()->customer->get_shipping_state(), 'A rejected request must not save the shipping address.' );
+	}
+
+	/**
+	 * @testdox Checkout should copy a partial billing address to shipping when the cart needs no shipping, ignoring the session shipping address.
+	 */
+	public function test_checkout_without_shipping_derives_shipping_from_partial_billing() {
+		wc_empty_cart();
+		WC()->cart->add_to_cart( $this->products[2]->get_id(), 1 );
+		WC()->customer->set_billing_location( 'CA', 'ON', '', '' );
+		WC()->customer->set_shipping_location( 'CA', 'Nowhere', '', '' );
+		WC()->customer->save();
+
+		$response = $this->dispatch_checkout_with_addresses( $this->get_toronto_address( array( 'state' => null ) ), null );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'ON', wc_get_order( $response->get_data()['order_id'] )->get_shipping_state() );
+	}
+
+	/**
+	 * @testdox Checkout should reject a partial address whose session state is not valid for the posted country, like cart/update-customer does.
+	 */
+	public function test_checkout_rejects_partial_address_with_session_state_invalid_for_new_country() {
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$berlin  = array(
+			'address_1' => 'Unter den Linden 1',
+			'city'      => 'Berlin',
+			'postcode'  => '10115',
+			'country'   => 'DE',
+		);
+		$address = $this->get_toronto_address( array_merge( $berlin, array( 'state' => null ) ) );
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertStringContainsString( '(ON)', wp_json_encode( $response->get_data() ) );
+
+		// The Checkout block always sends the state, blank for Germany unless the shopper picks one.
+		$address  = $this->get_toronto_address( array_merge( $berlin, array( 'state' => '' ) ) );
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertSame( '', wc_get_order( $response->get_data()['order_id'] )->get_shipping_state() );
+	}
+
+	/**
+	 * @testdox Checkout should still save an additional address field posted as "0".
+	 */
+	public function test_checkout_persists_additional_address_field_zero() {
+		$field_id = 'plugin-namespace/unit-number';
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => $field_id,
+				'label'    => 'Unit number',
+				'location' => 'address',
+				'type'     => 'text',
+				'required' => false,
+			)
+		);
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+
+		try {
+			$address = $this->get_toronto_address( array( $field_id => '0' ) );
+
+			$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+			$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+			$order = wc_get_order( $response->get_data()['order_id'] );
+			$this->assertSame( '0', $checkout_fields->get_field_from_object( $field_id, $order, 'billing' ) );
+		} finally {
+			$checkout_fields->deregister_checkout_field( $field_id );
+		}
+	}
+
+	/**
+	 * @testdox Checkout should ship to the billing address when the store ships to the billing address only, whatever shipping address the request sends.
+	 */
+	public function test_shipping_address_is_ignored_when_store_ships_to_billing_only() {
+		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
+		$this->assertTrue( WC()->cart->needs_shipping(), 'Test cart is expected to need shipping.' );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $this->get_fallback_billing_address(),
+				'shipping_address' => (object) $this->get_fallback_shipping_address(),
+				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertInstanceOf( \WC_Order::class, $order );
+		$this->assertEquals( 'Billing', $order->get_shipping_first_name() );
+		$this->assertEquals( '10 Billing Street', $order->get_shipping_address_1() );
+		$this->assertEquals( 'Cambridge', $order->get_shipping_city() );
+		$this->assertEquals( 'CB24 1AB', $order->get_shipping_postcode() );
+	}
+
+	/**
+	 * @testdox Checkout should not keep session shipping values the request's billing address leaves out when the store ships to the billing address only.
+	 */
+	public function test_session_shipping_values_are_replaced_when_store_ships_to_billing_only() {
+		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
+
+		WC()->customer->set_billing_company( 'Billing Company' );
+		WC()->customer->set_shipping_company( 'Session Company' );
+		WC()->customer->set_shipping_address_2( 'Session Flat 2' );
+
+		$billing_address = $this->get_fallback_billing_address();
+		unset( $billing_address['company'], $billing_address['address_2'] );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $billing_address,
+				'shipping_address' => (object) $billing_address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertInstanceOf( \WC_Order::class, $order );
+		$this->assertEquals( 'Billing Company', $order->get_shipping_company() );
+		$this->assertEquals( '', $order->get_shipping_address_2() );
+		$this->assertEquals( '10 Billing Street', $order->get_shipping_address_1() );
+	}
+
+	/**
+	 * @testdox Updating the customer should set the shipping address to the billing address when the store ships to the billing address only.
+	 */
+	public function test_cart_update_customer_uses_billing_address_when_store_ships_to_billing_only() {
+		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $this->get_fallback_billing_address(),
+				'shipping_address' => (object) $this->get_fallback_shipping_address(),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$response_shipping_address = (array) $response->get_data()['shipping_address'];
+		$this->assertSame( '10 Billing Street', $response_shipping_address['address_1'] );
+		$this->assertSame( 'Cambridge', $response_shipping_address['city'] );
+		$this->assertSame( '10 Billing Street', WC()->customer->get_shipping_address_1() );
+		$this->assertSame( 'Cambridge', WC()->customer->get_shipping_city() );
+	}
+
+	/**
+	 * @testdox Updating the customer should keep a different shipping address when the store does not ship to the billing address only.
+	 */
+	public function test_cart_update_customer_keeps_shipping_address_by_default() {
+		$this->assertFalse( wc_ship_to_billing_address_only() );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $this->get_fallback_billing_address(),
+				'shipping_address' => (object) $this->get_fallback_shipping_address(),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$this->assertSame( '20 Shipping Street', WC()->customer->get_shipping_address_1() );
+		$this->assertSame( 'Oxford', WC()->customer->get_shipping_city() );
+	}
+
+	/**
 	 * Ensure that orders can be placed with virtual products.
 	 */
 	public function test_virtual_product_post_data() {
@@ -1881,7 +2494,6 @@ class Checkout extends \WP_Test_REST_TestCase {
 		add_action( 'woocommerce_store_api_checkout_update_order_from_request', array( $action_callback, 'do_callback' ), 10, 2 );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
-		remove_action( 'woocommerce_store_api_checkout_update_order_from_request', array( $action_callback, 'do_callback' ), 10, 2 );
 	}
 
 	/**
@@ -2299,6 +2911,81 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertEquals( 400, $status, print_r( $data, true ) );
 		$this->assertEquals( 'woocommerce_rest_invalid_shipping_option', $data['code'], print_r( $data, true ) );
 		$this->assertEquals( 'Sorry, this order requires a shipping option.', $data['message'], print_r( $data, true ) );
+	}
+
+	/**
+	 * A town of "0" is a value, so the cart must rate the address and the order must carry a
+	 * shipping line. On trunk this same request stores an order with no shipping line at all.
+	 * The guard is not exercised here, by design: once the address rates, it returns immediately.
+	 *
+	 * @testdox A shipping city of "0" is checked out with shipping charged.
+	 */
+	public function test_checkout_charges_shipping_for_a_city_of_zero() {
+		$fixtures = new FixtureData();
+
+		// Load bearing: setUp() enables pickup, and with it on, show_shipping() returns before it
+		// ever looks at the address, so the cart would rate "0" on trunk too and this regression
+		// test would quietly stop testing anything.
+		$fixtures->shipping_remove_pickup_location();
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+
+		// setUp() adds the rate instance but leaves it free, and a free rate cannot show the
+		// difference between charging shipping and skipping it.
+		$zone_methods = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
+		$flat_rate    = reset( $zone_methods );
+
+		$flat_rate->instance_settings['cost'] = '25.00';
+		update_option( $flat_rate->get_instance_option_key(), $flat_rate->instance_settings );
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping()->load_shipping_methods();
+
+		// Rate a complete address first, so a chosen method sits in the session the way the block
+		// checkout leaves it before the shopper submits.
+		wc()->customer->set_shipping_country( 'US' );
+		wc()->customer->set_shipping_state( 'CA' );
+		wc()->customer->set_shipping_city( 'San Francisco' );
+		wc()->customer->set_shipping_postcode( '94103' );
+		wc()->cart->calculate_totals();
+
+		$packages = wc()->shipping()->get_packages();
+		$rates    = array_keys( $packages[0]['rates'] ?? array() );
+		$this->assertNotEmpty( $rates, 'The store must offer a rate, or this test proves nothing.' );
+		wc()->session->set( 'chosen_shipping_methods', array( $rates[0] ) );
+
+		wc()->session->set_customer_session_cookie( true );
+		wc()->session->save_data();
+
+		$address = array(
+			'first_name' => 'Gina',
+			'last_name'  => 'Guest',
+			'company'    => '',
+			'address_1'  => '17 Private Lane',
+			'address_2'  => '',
+			'city'       => '0',
+			'state'      => 'CA',
+			'postcode'   => '94103',
+			'country'    => 'US',
+			'email'      => 'gina.guest@example.test',
+			'phone'      => '',
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => $address,
+				'shipping_address' => $address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+
+		$order = wc_get_order( $data['order_id'] );
+		$this->assertCount( 1, $order->get_items( 'shipping' ), 'A town of "0" must still be charged shipping.' );
+		$this->assertGreaterThan( 0, (float) $order->get_shipping_total(), 'The shipping total must not be zero.' );
 	}
 
 	/**
@@ -2737,6 +3424,69 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Existing order payment should check the shipping country against the order's shipping line, with an empty cart.
+	 *
+	 * @dataProvider provide_pay_for_order_shipping_methods
+	 *
+	 * @param string $method_id       Method id of the order's shipping line.
+	 * @param bool   $expect_rejected Whether the shipping country should be rejected.
+	 */
+	public function test_checkout_order_rejects_shipping_country_the_store_does_not_ship_to( string $method_id, bool $expect_rejected ) {
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'US' ) );
+		wc_empty_cart();
+
+		// A merchant-created order with no address yet, so the shopper fills in the first one.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_address( array_fill_keys( array( 'city', 'state', 'postcode', 'country' ), '' ) );
+		foreach ( $order->get_shipping_methods() as $shipping_line ) {
+			$shipping_line->set_method_id( $method_id );
+			$shipping_line->save();
+		}
+		$order->save();
+
+		$response = $this->dispatch_pay_for_order_request(
+			$order,
+			array(
+				'city'     => 'WooCity',
+				'state'    => 'NY',
+				'postcode' => '12345',
+				'country'  => 'US',
+			),
+			array(
+				'address_1' => 'Hauptstr. 1',
+				'city'      => 'Berlin',
+				'state'     => '',
+				'postcode'  => '10115',
+				'country'   => 'DE',
+			)
+		);
+
+		$stored_order = wc_get_order( $order->get_id() );
+		if ( $expect_rejected ) {
+			$this->assertEquals( 400, $response->get_status() );
+			$this->assertEquals( 'woocommerce_rest_invalid_address_country', $response->get_data()['code'] );
+			$this->assertEquals( OrderStatus::PENDING, $stored_order->get_status() );
+			$this->assertEquals( '', $stored_order->get_shipping_country() );
+		} else {
+			$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+			$this->assertEquals( 'DE', $stored_order->get_shipping_country() );
+		}
+	}
+
+	/**
+	 * Shipping methods on a pay-for-order order and whether a country the store does not ship to should be rejected.
+	 *
+	 * @return array<string, array{0: string, 1: bool}>
+	 */
+	public function provide_pay_for_order_shipping_methods(): array {
+		return array(
+			'flat rate'       => array( 'flat_rate', true ),
+			'pickup location' => array( 'pickup_location', false ),
+		);
+	}
+
+	/**
 	 * Returns a destination in a different shipping zone and tax location to the fixture's US address.
 	 *
 	 * @return array
@@ -2753,15 +3503,23 @@ class Checkout extends \WP_Test_REST_TestCase {
 	/**
 	 * Dispatches a pay-for-order request as the guest the order belongs to.
 	 *
-	 * Both addresses default to the one the order already carries and the payment method to one the guard
-	 * accepts, so a test states only the fields it changes.
+	 * Both addresses default to the one the order already carries and the payment method to bank transfer,
+	 * which the guard accepts, so a test states only what it changes.
 	 *
-	 * @param \WC_Order  $order    Order being paid for.
-	 * @param array      $billing  Billing fields to override.
-	 * @param array|null $shipping Shipping fields to override, or null to leave the shipping address out.
+	 * @param \WC_Order  $order                  Order being paid for.
+	 * @param array      $billing                Billing fields to override.
+	 * @param array|null $shipping               Shipping fields to override, or null to leave the shipping address out.
+	 * @param bool       $merge_existing_billing Whether to merge the stored billing address into the request.
+	 * @param string     $payment_method        Payment method to pay with, bank transfer by default.
 	 * @return \WP_REST_Response
 	 */
-	private function dispatch_pay_for_order_request( \WC_Order $order, array $billing = array(), ?array $shipping = array() ) {
+	private function dispatch_pay_for_order_request(
+		\WC_Order $order,
+		array $billing = array(),
+		?array $shipping = array(),
+		bool $merge_existing_billing = true,
+		string $payment_method = WC_Gateway_BACS::ID
+	) {
 		$address = $order->get_address( 'billing' );
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -2772,8 +3530,8 @@ class Checkout extends \WP_Test_REST_TestCase {
 			)
 		);
 		$body = array(
-			'billing_address' => array_merge( $address, $billing ),
-			'payment_method'  => WC_Gateway_BACS::ID,
+			'billing_address' => $merge_existing_billing ? array_merge( $address, $billing ) : $billing,
+			'payment_method'  => $payment_method,
 		);
 		if ( null !== $shipping ) {
 			$body['shipping_address'] = array_merge( $address, $shipping );
@@ -2804,6 +3562,64 @@ class Checkout extends \WP_Test_REST_TestCase {
 	private function set_taxes_based_on( string $group ) {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_tax_based_on', $group );
+	}
+
+	/**
+	 * Makes shipping unavailable through the global setting or by removing every method.
+	 *
+	 * @param bool $disable_shipping Whether to disable shipping globally.
+	 * @return \Closure|null Shipping method count filter to remove, or null when shipping is disabled.
+	 */
+	private function make_shipping_unavailable( bool $disable_shipping ): ?\Closure {
+		if ( $disable_shipping ) {
+			update_option( 'woocommerce_ship_to_countries', 'disabled' );
+			return null;
+		}
+
+		$no_methods = static function () {
+			return array(
+				'version'  => \WC_Cache_Helper::get_transient_version( 'shipping' ),
+				'legacy'   => 0,
+				'enabled'  => 0,
+				'disabled' => 0,
+			);
+		};
+		add_filter( 'pre_transient_wc_shipping_method_count', $no_methods );
+
+		return $no_methods;
+	}
+
+	/**
+	 * @testdox Existing order payment refuses a checkout-draft order, which has not passed checkout validation, and leaves it a draft.
+	 */
+	public function test_checkout_order_rejects_checkout_draft_order(): void {
+		$order = $this->create_pay_for_order_with_shipping_address();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+
+		$this->assertTrue( $order->needs_payment(), 'Baseline: needs_payment() is still true for a draft, so the route has to refuse it explicitly.' );
+
+		$response = $this->dispatch_pay_for_order_request( $order );
+
+		$this->assertTrue( $response->is_error(), 'A draft must not be accepted for payment: ' . print_r( $response->get_data(), true ) );
+		$this->assertSame( 'invalid_order_update_status', $response->get_data()['code'], 'A draft must be refused as an order that cannot be paid for.' );
+		$this->assertSame( 400, $response->get_status(), 'A refused draft is a client error, not a server error.' );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CHECKOUT_DRAFT ), 'A refused draft must stay a draft.' );
+	}
+
+	/**
+	 * @testdox Existing order payment refuses an order that no longer needs payment with a 400.
+	 */
+	public function test_checkout_order_rejects_order_not_needing_payment_with_400(): void {
+		$order = $this->create_pay_for_order_with_shipping_address();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$response = $this->dispatch_pay_for_order_request( $order );
+
+		$this->assertSame( 'invalid_order_update_status', $response->get_data()['code'], 'A paid order must be refused as an order that cannot be paid for.' );
+		$this->assertSame( 400, $response->get_status(), 'A refused order is a client error, not a server error.' );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::PROCESSING ), 'A refused order must keep its status.' );
 	}
 
 	/**
@@ -2868,6 +3684,290 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
 		$this->assertEquals( 'GB', wc_get_order( $order->get_id() )->get_shipping_country() );
+	}
+
+	/**
+	 * @testdox Existing order payment should reject a state of "0" as the first address of an order that holds none.
+	 */
+	public function test_checkout_order_rejects_state_zero_on_order_without_address() {
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_address( array_fill_keys( array( 'city', 'state', 'postcode', 'country' ), '' ) );
+		$order->save();
+
+		$address = array(
+			'city'     => 'Toronto',
+			'state'    => '0',
+			'postcode' => 'M5H 2N2',
+			'country'  => 'CA',
+		);
+
+		$response = $this->dispatch_pay_for_order_request( $order, $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertSame( '', wc_get_order( $order->get_id() )->get_billing_state() );
+	}
+
+	/**
+	 * @testdox Existing order payment should tax an order that ships nothing and holds no address at its billing address.
+	 */
+	public function test_checkout_order_taxes_virtual_order_without_address_at_billing() {
+		$this->set_taxes_based_on( 'shipping' );
+		$this->enable_taxes_with_us_ca_rate();
+
+		// A shipping extension may decide from the submitted address, so the hook must see billing after it is set.
+		add_filter(
+			'woocommerce_order_needs_shipping',
+			static function ( $needs_shipping, $filtered_order ) {
+				return 'US' !== $filtered_order->get_billing_country() || $needs_shipping;
+			},
+			10,
+			2
+		);
+
+		// A merchant-created order for a virtual product, awaiting the shopper's details.
+		$virtual_product = \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$order           = \WC_Helper_Order::create_order( 0, $virtual_product );
+		$order->set_billing_address(
+			array(
+				'city'     => '',
+				'state'    => 'CA',
+				'postcode' => '94103',
+				'country'  => '',
+			)
+		);
+		$order->save();
+
+		add_filter(
+			'woocommerce_get_order_address',
+			static function ( $address, $address_type ) {
+				if ( 'billing' === $address_type ) {
+					$address['postcode'] = 'FILTERED';
+				}
+				return $address;
+			},
+			10,
+			2
+		);
+
+		$billing = array(
+			'city'    => 'San Francisco',
+			'country' => 'US',
+			'email'   => $order->get_billing_email(),
+		);
+
+		// The shipping address of an order that ships nothing is not validated, so it must not set the tax.
+		$response = $this->dispatch_pay_for_order_request( $order, $billing, $this->get_different_destination(), false );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'US', $stored_order->get_shipping_country() );
+		$this->assertEquals( 'CA', $stored_order->get_shipping_state() );
+		$this->assertEquals( '94103', $stored_order->get_shipping_postcode() );
+		$this->assertEquals( 4.0, (float) $stored_order->get_total_tax() );
+	}
+
+	/**
+	 * @testdox Existing order address updates should re-check shipping needs after copying billing to shipping.
+	 */
+	public function test_existing_order_address_update_rechecks_shipping_needs_after_copying_billing() {
+		$virtual_product = \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$order           = \WC_Helper_Order::create_order( 0, $virtual_product );
+		$billing         = $order->get_address( 'billing' );
+		$shipping        = array_merge( $billing, $this->get_different_destination() );
+		$order->set_billing_country( '' );
+		$order->save();
+
+		$shipping_countries = array();
+		add_filter(
+			'woocommerce_order_needs_shipping',
+			static function ( $needs_shipping, $filtered_order ) use ( &$shipping_countries ) {
+				$shipping_countries[] = $filtered_order->get_shipping_country();
+				return 'US' === $filtered_order->get_shipping_country() || $needs_shipping;
+			},
+			10,
+			2
+		);
+
+		( new OrderController() )->update_existing_order_addresses( $order, $billing, $shipping );
+
+		$this->assertSame( array( 'GB', 'US' ), $shipping_countries );
+	}
+
+	/**
+	 * @testdox Existing order payment should keep the shipping address of a physical order with a shipping line when shipping is unavailable.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $disable_shipping Whether to disable shipping globally instead of removing every method.
+	 */
+	public function test_checkout_order_keeps_physical_order_shipping_with_shipping_line_when_shipping_is_unavailable( bool $disable_shipping ) {
+		$no_methods = $this->make_shipping_unavailable( $disable_shipping );
+
+		// A merchant-created order for a physical product with a manual shipping line and no address yet.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_country( '' );
+		$order->save();
+		$this->assertFalse( $order->needs_shipping() );
+
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'country' => 'US' ), $this->get_different_destination() );
+		if ( null !== $no_methods ) {
+			remove_filter( 'pre_transient_wc_shipping_method_count', $no_methods );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'GB', wc_get_order( $order->get_id() )->get_shipping_country() );
+	}
+
+	/**
+	 * @testdox Existing order payment should tax a physical order without a shipping line at billing when shipping is unavailable.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $disable_shipping Whether to disable shipping globally instead of removing every method.
+	 */
+	public function test_checkout_order_taxes_physical_order_without_shipping_line_at_billing_when_shipping_is_unavailable( bool $disable_shipping ) {
+		$this->set_taxes_based_on( 'shipping' );
+		$this->enable_taxes_with_us_ca_rate();
+		$no_methods = $this->make_shipping_unavailable( $disable_shipping );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->remove_order_items( 'shipping' );
+		$order->set_shipping_total( 0 );
+		$order->set_billing_country( '' );
+		$order->save();
+		$this->assertFalse( $order->needs_shipping() );
+		$this->assertCount( 0, $order->get_shipping_methods() );
+
+		$response = $this->dispatch_pay_for_order_request(
+			$order,
+			array(
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '94103',
+			),
+			$this->get_different_destination()
+		);
+		if ( null !== $no_methods ) {
+			remove_filter( 'pre_transient_wc_shipping_method_count', $no_methods );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'US', $stored_order->get_shipping_country() );
+		$this->assertEquals( 'CA', $stored_order->get_shipping_state() );
+		$this->assertEquals( '94103', $stored_order->get_shipping_postcode() );
+		$this->assertEquals( 4.0, (float) $stored_order->get_total_tax() );
+	}
+
+	/**
+	 * @testdox Existing order payment should tax a virtual order with a shipping line at billing when shipping is unavailable.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $disable_shipping Whether to disable shipping globally instead of removing every method.
+	 */
+	public function test_checkout_order_taxes_virtual_order_with_shipping_line_at_billing_when_shipping_is_unavailable( bool $disable_shipping ) {
+		$this->set_taxes_based_on( 'shipping' );
+		$this->enable_taxes_with_us_ca_rate();
+		$no_methods = $this->make_shipping_unavailable( $disable_shipping );
+
+		$virtual_product = \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$order           = \WC_Helper_Order::create_order( 0, $virtual_product );
+		$order->set_billing_country( '' );
+		$order->save();
+		$this->assertFalse( $order->needs_shipping() );
+		$this->assertCount( 1, $order->get_shipping_methods() );
+
+		$response = $this->dispatch_pay_for_order_request(
+			$order,
+			array(
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '94103',
+			),
+			$this->get_different_destination()
+		);
+		if ( null !== $no_methods ) {
+			remove_filter( 'pre_transient_wc_shipping_method_count', $no_methods );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'US', $stored_order->get_shipping_country() );
+		$this->assertEquals( 'CA', $stored_order->get_shipping_state() );
+		$this->assertEquals( '94103', $stored_order->get_shipping_postcode() );
+		$this->assertEquals( 4.0, (float) $stored_order->get_total_tax() );
+	}
+
+	/**
+	 * @testdox Existing order payment should keep the shipping address of a mixed order when shipping is unavailable.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $disable_shipping Whether to disable shipping globally instead of removing every method.
+	 */
+	public function test_checkout_order_keeps_mixed_order_shipping_when_shipping_is_unavailable( bool $disable_shipping ) {
+		$no_methods = $this->make_shipping_unavailable( $disable_shipping );
+
+		$virtual_product  = \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$physical_product = \WC_Helper_Product::create_simple_product();
+		$order            = \WC_Helper_Order::create_order( 0, $virtual_product );
+		$order->add_product( $physical_product );
+		$order->set_billing_country( '' );
+		$order->calculate_totals( false );
+
+		$items = array_values( $order->get_items() );
+		$this->assertCount( 2, $items );
+		$this->assertFalse( $items[0]->get_product()->needs_shipping() );
+		$this->assertTrue( $items[1]->get_product()->needs_shipping() );
+		$this->assertFalse( $order->needs_shipping() );
+		$this->assertCount( 1, $order->get_shipping_methods() );
+
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'country' => 'US' ), $this->get_different_destination() );
+		if ( null !== $no_methods ) {
+			remove_filter( 'pre_transient_wc_shipping_method_count', $no_methods );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'GB', wc_get_order( $order->get_id() )->get_shipping_country() );
+	}
+
+	/**
+	 * @testdox Existing order payment should ship a filtered physical order to billing when an enabled or disabled shipping method exists.
+	 * @testWith [1, 0]
+	 *           [0, 1]
+	 *
+	 * @param int $enabled_methods  Number of enabled shipping methods.
+	 * @param int $disabled_methods Number of disabled shipping methods.
+	 */
+	public function test_checkout_order_ships_filtered_physical_order_to_billing_with_shipping_methods( int $enabled_methods, int $disabled_methods ) {
+		$method_counts = static function () use ( $enabled_methods, $disabled_methods ) {
+			return array(
+				'version'  => \WC_Cache_Helper::get_transient_version( 'shipping' ),
+				'legacy'   => 0,
+				'enabled'  => $enabled_methods,
+				'disabled' => $disabled_methods,
+			);
+		};
+		add_filter( 'pre_transient_wc_shipping_method_count', $method_counts );
+
+		$this->assertSame( 1, wc_get_shipping_method_count( true ) );
+		$this->assertSame( $enabled_methods, wc_get_shipping_method_count( false, true ) );
+		add_filter( 'woocommerce_order_needs_shipping', '__return_false' );
+
+		// A merchant-created order for a physical product that an extension says ships nothing, with no address yet.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_country( '' );
+		$order->save();
+
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'country' => 'US' ), $this->get_different_destination() );
+		remove_filter( 'woocommerce_order_needs_shipping', '__return_false' );
+		remove_filter( 'pre_transient_wc_shipping_method_count', $method_counts );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'US', wc_get_order( $order->get_id() )->get_shipping_country() );
 	}
 
 	/**
@@ -3216,6 +4316,187 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$stored_order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'GB', $stored_order->get_billing_country() );
 		$this->assertEquals( 'US', $stored_order->get_shipping_country() );
+	}
+
+	/**
+	 * Enables an offline gateway with the shipping restrictions from its settings screen.
+	 *
+	 * @param string $gateway_id         Gateway ID.
+	 * @param array  $enable_for_methods Shipping methods the gateway is enabled for, or empty for all.
+	 * @param bool   $enable_for_virtual Whether the gateway accepts orders that need no shipping.
+	 */
+	private function restrict_offline_gateway( string $gateway_id, array $enable_for_methods, bool $enable_for_virtual = true ) {
+		update_option(
+			"woocommerce_{$gateway_id}_settings",
+			array_merge(
+				(array) get_option( "woocommerce_{$gateway_id}_settings", array() ),
+				array(
+					'enabled'            => 'yes',
+					'enable_for_methods' => $enable_for_methods,
+					'enable_for_virtual' => $enable_for_virtual ? 'yes' : 'no',
+				)
+			)
+		);
+		WC()->payment_gateways()->init();
+	}
+
+	/**
+	 * @testdox Existing order payment should refuse an offline gateway the store does not enable for the order's shipping method.
+	 * @testWith ["cod"]
+	 *           ["bacs"]
+	 *           ["cheque"]
+	 *
+	 * @param string $gateway_id Gateway ID.
+	 */
+	public function test_checkout_order_refuses_gateway_not_enabled_for_order_shipping_method( string $gateway_id ) {
+		$this->restrict_offline_gateway( $gateway_id, array( 'local_pickup' ) );
+
+		// The order ships by flat rate, and the cart of the session paying it is unrelated to it.
+		$order = \WC_Helper_Order::create_order( 0 );
+		wc_empty_cart();
+
+		$response = $this->dispatch_pay_for_order_request( $order, array(), null, true, $gateway_id );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_checkout_payment_method_disabled', $response->get_data()['code'] );
+		$this->assertEquals( OrderStatus::PENDING, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Existing order payment should refuse a gateway the order's shipping method excludes when the pay endpoint is renamed.
+	 */
+	public function test_checkout_order_refuses_gateway_not_enabled_for_order_shipping_method_with_renamed_pay_endpoint() {
+		update_option( 'woocommerce_checkout_pay_endpoint', 'pay' );
+		WC()->query->init_query_vars();
+
+		try {
+			$this->restrict_offline_gateway( 'cod', array( 'local_pickup' ) );
+
+			$order = \WC_Helper_Order::create_order( 0 );
+			wc_empty_cart();
+
+			$response = $this->dispatch_pay_for_order_request( $order, array(), null, true, 'cod' );
+
+			$this->assertEquals( 400, $response->get_status() );
+			$this->assertEquals( 'woocommerce_rest_checkout_payment_method_disabled', $response->get_data()['code'] );
+		} finally {
+			delete_option( 'woocommerce_checkout_pay_endpoint' );
+			WC()->query->init_query_vars();
+		}
+	}
+
+	/**
+	 * @testdox Existing order payment should refuse a gateway that does not accept virtual orders for an order that needs no shipping.
+	 */
+	public function test_checkout_order_refuses_gateway_not_enabled_for_virtual_order() {
+		$this->restrict_offline_gateway( 'cod', array(), false );
+
+		$order = \WC_Helper_Order::create_order( 0, \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) ) );
+		foreach ( array_keys( $order->get_shipping_methods() ) as $item_id ) {
+			$order->remove_item( $item_id );
+		}
+		$order->calculate_totals();
+
+		// The cart of the session holds physical products, which must not make the order count as shipped.
+		$response = $this->dispatch_pay_for_order_request( $order, array(), null, true, 'cod' );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_checkout_payment_method_disabled', $response->get_data()['code'] );
+		$this->assertEquals( OrderStatus::PENDING, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Existing order payment should accept an offline gateway the store enables for the order's shipping method.
+	 */
+	public function test_checkout_order_accepts_gateway_enabled_for_order_shipping_method() {
+		$this->restrict_offline_gateway( 'cod', array( 'flat_rate_shipping' ) );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		wc_empty_cart();
+
+		$response = $this->dispatch_pay_for_order_request( $order, array(), null, true, 'cod' );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( OrderStatus::PROCESSING, $stored_order->get_status() );
+		$this->assertEquals( 'cod', $stored_order->get_payment_method() );
+	}
+
+	/**
+	 * @testdox Existing order payment should restore the order-pay endpoint after the request.
+	 */
+	public function test_checkout_order_restores_order_pay_endpoint() {
+		$order = \WC_Helper_Order::create_order( 0 );
+
+		$response = $this->dispatch_pay_for_order_request( $order, array(), null );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertFalse( is_wc_endpoint_url( 'order-pay' ) );
+		$this->assertSame( '', get_query_var( 'order-pay' ) );
+	}
+
+	/**
+	 * @testdox Existing order payment should check each order's own shipping method when batched, and restore the order-pay endpoint after the batch.
+	 */
+	public function test_checkout_order_checks_each_batched_order_shipping_method() {
+		$this->restrict_offline_gateway( 'cod', array( 'local_pickup' ) );
+
+		$flat_rate_order = \WC_Helper_Order::create_order( 0 );
+		$pickup_order    = \WC_Helper_Order::create_order( 0 );
+		foreach ( $pickup_order->get_shipping_methods() as $shipping_item ) {
+			$shipping_item->set_method_id( 'local_pickup' );
+			$shipping_item->save();
+		}
+		wc_empty_cart();
+
+		$nonce       = wp_create_nonce( 'wc_store_api' );
+		$subrequests = array();
+		foreach ( array( $flat_rate_order, $pickup_order ) as $order ) {
+			$subrequests[] = array(
+				'method'  => 'POST',
+				'path'    => '/wc/store/v1/checkout/' . $order->get_id(),
+				'headers' => array( 'Nonce' => $nonce ),
+				'body'    => array(
+					'key'             => $order->get_order_key(),
+					'billing_email'   => $order->get_billing_email(),
+					'billing_address' => $order->get_address( 'billing' ),
+					'payment_method'  => 'cod',
+				),
+			);
+		}
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
+		$request->set_header( 'Nonce', $nonce );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'requests' => $subrequests ) ) );
+
+		$responses = rest_get_server()->dispatch( $request )->get_data()['responses'];
+
+		$this->assertEquals( 400, $responses[0]['status'], 'Cash on delivery is refused for the flat rate order.' );
+		$this->assertEquals( 'woocommerce_rest_checkout_payment_method_disabled', $responses[0]['body']['code'] );
+		$this->assertEquals( OrderStatus::PENDING, wc_get_order( $flat_rate_order->get_id() )->get_status() );
+		$this->assertEquals( 200, $responses[1]['status'], 'Cash on delivery is accepted for the local pickup order: ' . wp_json_encode( $responses[1]['body'] ) );
+		$this->assertEquals( OrderStatus::PROCESSING, wc_get_order( $pickup_order->get_id() )->get_status() );
+		$this->assertFalse( is_wc_endpoint_url( 'order-pay' ) );
+		$this->assertSame( '', get_query_var( 'order-pay' ) );
+	}
+
+	/**
+	 * @testdox Existing order payment should refuse a guest's own checkout draft even with a gateway the shipping method excludes.
+	 */
+	public function test_checkout_order_refuses_gateway_not_enabled_for_checkout_draft_shipping_method() {
+		$this->restrict_offline_gateway( 'cod', array( 'local_pickup' ) );
+
+		// What a refused checkout leaves behind: the guest's own draft, which they hold the key to.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_status( 'checkout-draft' );
+		$order->save();
+		wc_empty_cart();
+
+		$response = $this->dispatch_pay_for_order_request( $order, array(), null, true, 'cod' );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'invalid_order_update_status', $response->get_data()['code'] );
+		$this->assertEquals( 'checkout-draft', wc_get_order( $order->get_id() )->get_status() );
 	}
 
 	/**
@@ -4432,6 +5713,612 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Checkout does not reuse a pending order from the session when the shipping destination moves but the total does not.
+	 * @testWith [{"city": "Other City"}]
+	 *           [{"city": "London", "state": "", "postcode": "SW1A 1AA", "country": "GB"}]
+	 *
+	 * @param array $destination Shipping address fields the checkout request changes.
+	 */
+	public function test_post_does_not_reuse_pending_order_from_session_when_shipping_destination_changes( array $destination ): void {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$order          = $this->create_pending_order_for_us_customer();
+		$original_total = $order->get_total();
+
+		$this->assertTrue( $order->needs_payment(), 'Baseline: the placed order must still need payment.' );
+		$this->assertTrue( $this->get_draft_order_checker()->is_draft( $order ), 'Baseline: the order is the session draft while its destination matches the customer.' );
+		$this->assertSame( $order->get_id(), (int) WC()->session->get( 'store_api_draft_order' ), 'Baseline: the session must point at the placed order.' );
+
+		$request = $this->build_valid_post_request();
+		$posted  = array_merge( $request->get_param( 'shipping_address' ), $destination );
+		$request->set_param( 'shipping_address', $posted );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$new_order = wc_get_order( (int) $response->get_data()['order_id'] );
+		$this->assertNotSame( $order->get_id(), $new_order->get_id(), 'Checkout must place a new order rather than readdress the placed one.' );
+		$this->assertSame( $original_total, $new_order->get_total(), 'The total must not change, so only the destination check can stop reuse.' );
+		$this->assertSame( array( $posted['country'], $posted['city'] ), array( $new_order->get_shipping_country(), $new_order->get_shipping_city() ), 'The new order should ship to the posted destination.' );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $order->has_status( OrderStatus::PENDING ), 'The placed order should stay pending.' );
+		$this->assertSame( array( 'US', 'Test City' ), array( $order->get_shipping_country(), $order->get_shipping_city() ), 'The placed order must keep the destination it was rated for.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a placed pending order once the customer moves to a destination in another shipping zone.
+	 */
+	public function test_placed_order_is_not_reused_when_shipping_destination_changes(): void {
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+
+		$this->assertTrue( $order->needs_payment(), 'Baseline: the placed order must still need payment.' );
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its destination matches the customer.' );
+
+		// Move the customer without recalculating, so the cart hash stays the same.
+		$destination = $this->get_different_destination();
+		WC()->customer->set_shipping_city( $destination['city'] );
+		WC()->customer->set_shipping_state( $destination['state'] );
+		WC()->customer->set_shipping_postcode( $destination['postcode'] );
+		WC()->customer->set_shipping_country( $destination['country'] );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the destination check can change the outcome.' );
+		$this->assertFalse( $checker->is_draft( $order ), 'A placed order whose destination moved to another zone must not be reused as the session draft.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order when a change cannot alter the shipping rate: the street line, the city's letter case, the postcode spacing or the billing address.
+	 */
+	public function test_placed_order_is_reused_when_rate_location_is_unchanged(): void {
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+
+		// Apply the changes one at a time so a failure points at the one that wrongly forced a fresh order.
+		WC()->customer->set_shipping_address_1( '456 Other Ave' );
+		$this->assertTrue( $checker->is_draft( $order ), 'A changed street line cannot alter the rate, so the order must still be reused.' );
+
+		WC()->customer->set_shipping_city( 'TEST CITY' );
+		$this->assertTrue( $checker->is_draft( $order ), 'A change of city letter case must not force a fresh order.' );
+
+		WC()->customer->set_shipping_postcode( '940 16' );
+		$this->assertTrue( $checker->is_draft( $order ), 'A change of postcode spacing must not force a fresh order.' );
+
+		WC()->customer->set_billing_country( 'GB' );
+		$this->assertTrue( $checker->is_draft( $order ), 'A billing-only change must not force a fresh order while tax follows the shipping address.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order when the cart needs no shipping, whatever the destination.
+	 */
+	public function test_placed_order_is_reused_when_cart_needs_no_shipping(): void {
+		wc_empty_cart();
+		WC()->cart->add_to_cart( $this->products[2]->get_id(), 1 );
+		$this->assertFalse( WC()->cart->needs_shipping(), 'Test cart is expected to not need shipping.' );
+
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+
+		WC()->customer->set_shipping_country( 'GB' );
+
+		$this->assertTrue( $checker->is_draft( $order ), 'A cart with nothing to ship has no destination to protect, so the order must still be reused.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a placed pending order when only the shipping $field changes.
+	 * @testWith ["country", "GB"]
+	 *           ["state", "NY"]
+	 *           ["postcode", "10001"]
+	 *           ["city", "Other City"]
+	 *
+	 * @param string $field Destination field to change.
+	 * @param string $value New value for that field.
+	 */
+	public function test_placed_order_is_not_reused_when_one_destination_field_changes( string $field, string $value ): void {
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its destination matches the customer.' );
+
+		WC()->customer->{"set_shipping_{$field}"}( $value );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the destination check can change the outcome.' );
+		$this->assertFalse( $checker->is_draft( $order ), "A placed order must not be reused once only its shipping {$field} changes." );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() takes the billing address as the destination of a placed order without a shipping address, and stops reusing it when that moves.
+	 */
+	public function test_placed_order_without_shipping_address_is_checked_against_billing(): void {
+		$checker = $this->get_draft_order_checker();
+
+		WC()->customer->set_shipping_country( '' );
+		WC()->customer->set_billing_city( 'Test City' );
+		WC()->customer->set_billing_state( 'CA' );
+		WC()->customer->set_billing_postcode( '94016' );
+		WC()->customer->set_billing_country( 'US' );
+		$order = $this->create_session_order_from_cart( OrderStatus::PENDING );
+
+		$this->assertSame( '', $order->get_shipping_country(), 'Baseline: the order must have no shipping address, so its billing address is the destination.' );
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its billing destination matches the customer.' );
+
+		WC()->customer->set_billing_state( 'NY' );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the destination check can change the outcome.' );
+		$this->assertFalse( $checker->is_draft( $order ), 'Moving the billing address must stop reuse when it is the only destination.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a zero-total pending order when the customer moves, since only checkout, which recalculates it, can place it.
+	 */
+	public function test_zero_total_order_is_reused_when_shipping_destination_changes(): void {
+		$checker = $this->get_draft_order_checker();
+		$this->apply_full_discount_coupon();
+		$order = $this->create_pending_order_for_us_customer();
+
+		$this->assertSame( 0.0, (float) $order->get_total(), 'The coupon must take the order to a zero total, which is the case this test covers.' );
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the zero-total order is the session draft while its destination matches the customer.' );
+
+		$destination = $this->get_different_destination();
+		WC()->customer->set_shipping_city( $destination['city'] );
+		WC()->customer->set_shipping_state( $destination['state'] );
+		WC()->customer->set_shipping_postcode( $destination['postcode'] );
+		WC()->customer->set_shipping_country( $destination['country'] );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the destination check could change the outcome.' );
+		$this->assertTrue( $checker->is_draft( $order ), 'A zero-total order, such as a renewal, must stay the session draft when the address changes.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a zero-total order that a filter makes payable once the customer moves, as it would a priced order.
+	 */
+	public function test_zero_total_order_made_payable_is_not_reused_when_shipping_destination_changes(): void {
+		add_filter( 'woocommerce_order_needs_payment', '__return_true' );
+		$checker = $this->get_draft_order_checker();
+		$this->apply_full_discount_coupon();
+		$order = $this->create_pending_order_for_us_customer();
+
+		$this->assertSame( 0.0, (float) $order->get_total(), 'The coupon must take the order to a zero total, which is the case this test covers.' );
+		$this->assertTrue( $order->needs_payment(), 'Baseline: the filter must make the zero-total order payable through pay-for-order.' );
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its destination matches the customer.' );
+
+		WC()->customer->set_shipping_country( 'GB' );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the destination check can change the outcome.' );
+		$this->assertFalse( $checker->is_draft( $order ), 'A zero-total order that can be paid must get the same destination check as a priced one.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() lets a placed order created via $created_via with billing country $billing_country take a first address only if it has none and did not come from the Store API.
+	 * @testWith ["admin", "", true]
+	 *           ["store-api", "", false]
+	 *           ["admin", "US", false]
+	 *
+	 * @param string $created_via     Where the order was created.
+	 * @param string $billing_country Billing country left on the order; any country means it already has an address.
+	 * @param bool   $reused          Whether the order should still be reused.
+	 */
+	public function test_order_without_address_takes_its_first_one_unless_from_the_store_api( string $created_via, string $billing_country, bool $reused ): void {
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+
+		$address = array();
+		foreach ( array( 'billing', 'shipping' ) as $type ) {
+			foreach ( array( 'country', 'state', 'postcode', 'city', 'address_1' ) as $field ) {
+				$address[ "{$type}_{$field}" ] = '';
+			}
+		}
+		$order->set_props( $address );
+		$order->set_billing_country( $billing_country );
+		$order->set_created_via( $created_via );
+		$order->save();
+
+		$this->assertSame( $billing_country, $order->get_billing_country() . $order->get_shipping_country(), 'Baseline: the order must carry only the billing country under test.' );
+		$this->assertTrue( WC()->cart->needs_shipping(), 'Baseline: the cart needs shipping, so the destination check applies.' );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must match so only the address checks decide.' );
+		$this->assertSame( $reused, $checker->is_draft( $order ), $reused ? 'An order made outside the Store API with no address may take its first one, as on the pay-for-order page.' : 'A Store API order always has an address, so one without must not be reused for a new destination.' );
+	}
+
+	/**
+	 * @testdox GET checkout keeps an order made outside the Store API that awaits its first address as the session draft, and gives it the customer's address.
+	 */
+	public function test_get_checkout_reuses_an_order_awaiting_its_first_address(): void {
+		$order = $this->create_pending_order_for_us_customer();
+
+		$address = array();
+		foreach ( array( 'billing', 'shipping' ) as $type ) {
+			foreach ( array( 'country', 'state', 'postcode', 'city', 'address_1' ) as $field ) {
+				$address[ "{$type}_{$field}" ] = '';
+			}
+		}
+		$order->set_props( $address );
+		$order->set_created_via( 'admin' );
+		$order->save();
+
+		$response = $this->dispatch_store_api_request( 'POST', '/wc/store/v1/cart/update-customer', array( 'shipping_address' => (object) $this->get_fallback_shipping_address() ) );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'Baseline: the cart total must not change, so only the address checks decide reuse.' );
+
+		$response = $this->dispatch_store_api_request( 'GET', '/wc/store/v1/checkout' );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $order->get_id(), (int) $response->get_data()['order_id'], 'An order made outside the Store API with no address must stay the session draft, as on the pay-for-order page.' );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( array( 'GB', 'Oxford' ), array( $order->get_shipping_country(), $order->get_shipping_city() ), 'GET checkout should give the reused order the shipping address the customer entered.' );
+	}
+
+	/**
+	 * @testdox GET checkout does not reuse a placed pending order once the customer moves to another destination, and leaves its address and total alone.
+	 */
+	public function test_get_checkout_does_not_reuse_a_placed_order_after_a_destination_change(): void {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$order = $this->create_pending_order_for_us_customer();
+		$total = $order->get_total();
+
+		$response = $this->dispatch_store_api_request( 'POST', '/wc/store/v1/cart/update-customer', array( 'shipping_address' => (object) $this->get_fallback_shipping_address() ) );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'Baseline: the cart total must not change, so only the destination check can stop reuse.' );
+
+		$response = $this->dispatch_store_api_request( 'GET', '/wc/store/v1/checkout' );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 0, (int) $response->get_data()['order_id'], 'GET checkout must answer with a draft response, not the placed order.' );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'US', $order->get_shipping_country(), 'The placed order must keep the destination it was rated for.' );
+		$this->assertSame( $total, $order->get_total(), 'The placed order\'s total must not change.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a placed pending order once the billing address moves to another tax location on a store that taxes on billing, but not for a change that cannot alter the rate.
+	 */
+	public function test_placed_order_is_not_reused_when_billing_tax_location_changes(): void {
+		$this->set_taxes_based_on( 'billing' );
+		$this->give_customer_us_billing_address();
+
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its tax location matches the customer.' );
+
+		WC()->customer->set_billing_address_1( '456 Other Ave' );
+		$this->assertTrue( $checker->is_draft( $order ), 'A changed billing street line cannot alter the tax, so the order must still be reused.' );
+
+		// Move the billing address without recalculating, so the cart hash stays the same.
+		WC()->customer->set_billing_state( 'NY' );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the tax location check can change the outcome.' );
+		$this->assertFalse( $checker->is_draft( $order ), 'A placed order whose billing tax location moved must not be reused as the session draft.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order when the billing address moves but tax follows the shipping address.
+	 */
+	public function test_placed_order_is_reused_when_billing_moves_and_tax_follows_shipping(): void {
+		$this->set_taxes_based_on( 'shipping' );
+		$this->give_customer_us_billing_address();
+
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+
+		WC()->customer->set_billing_state( 'NY' );
+
+		$this->assertTrue( $checker->is_draft( $order ), 'A billing change cannot alter tax worked out on the shipping address, so the order must still be reused.' );
+	}
+
+	/**
+	 * @testdox GET checkout does not reuse a placed pending order once the customer's billing address moves to another tax location on a store that taxes on billing.
+	 */
+	public function test_get_checkout_does_not_reuse_a_placed_order_after_a_billing_tax_location_change(): void {
+		$this->set_taxes_based_on( 'billing' );
+		$this->give_customer_us_billing_address();
+		$order = $this->create_pending_order_for_us_customer();
+
+		// Move the customer's billing address the way a My Account address save does: without touching the cart.
+		WC()->customer->set_billing_state( 'NY' );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'Baseline: the cart hash must still match, so only the tax location check can stop reuse.' );
+
+		$response = $this->dispatch_store_api_request( 'GET', '/wc/store/v1/checkout' );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 0, (int) $response->get_data()['order_id'], 'GET checkout must answer with a draft response, not the placed order.' );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'CA', $order->get_billing_state(), 'The placed order must keep the billing address it was taxed for.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a placed pending order when the customer clears only the shipping country.
+	 */
+	public function test_placed_order_is_not_reused_when_shipping_country_is_cleared(): void {
+		$checker = $this->get_draft_order_checker();
+
+		// Billing matches the shipping country, so on the unfixed code the order's US shipping would wrongly match
+		// the customer's US billing once the shipping country is cleared.
+		$this->give_customer_us_billing_address();
+		$order = $this->create_pending_order_for_us_customer();
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its destination matches the customer.' );
+
+		// Clear only the shipping country, leaving billing in place. The order's shipping lines are still rated for
+		// the old country, so reuse must stop rather than fall back to the matching billing destination.
+		WC()->customer->set_shipping_country( '' );
+
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart hash must stay the same so only the destination check can change the outcome.' );
+		$this->assertFalse( $checker->is_draft( $order ), 'Clearing the shipping country must stop reuse; billing is not a fallback once a shipping address was set.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() does not reuse a placed pending order when the tax location filter returns a non-array for the $side.
+	 * @testWith ["order"]
+	 *           ["readdressed copy"]
+	 *
+	 * @param string $side Which of the two compared tax locations the filter replaces with a non-array.
+	 */
+	public function test_placed_order_is_not_reused_when_tax_location_is_not_an_array( string $side ): void {
+		$this->set_taxes_based_on( 'shipping' );
+
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_us_customer();
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its tax location matches the customer.' );
+
+		// Runs after core's own callback on this filter. The order is compared by identity; the readdressed copy is a clone.
+		add_filter(
+			'woocommerce_order_get_tax_location',
+			static function ( $location, $filtered_order ) use ( $order, $side ) {
+				$is_order = $filtered_order === $order;
+				$replace  = 'order' === $side ? $is_order : ! $is_order;
+
+				return $replace ? 'not-an-array' : $location;
+			},
+			PHP_INT_MAX,
+			2
+		);
+
+		$this->assertFalse( $checker->is_draft( $order ), "A tax location that is not an array on the {$side} must stop reuse rather than reach locations_differ()." );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order in $country when the session fills the customer's empty billing state with the default location's state on the next request.
+	 * @testWith ["GB", "SW1A 1AA"]
+	 *           ["FR", "75001"]
+	 *
+	 * @param string $country  Country of the customer and the order: one with free-text states, one with none.
+	 * @param string $postcode Postcode of the customer and the order.
+	 */
+	public function test_placed_order_is_reused_when_session_fills_empty_billing_state( string $country, string $postcode ): void {
+		$this->set_taxes_based_on( 'billing' );
+		$order = $this->create_pending_order_for_customer_without_state( $country, $postcode );
+
+		$this->reload_customer_from_session();
+
+		$this->assertSame( 'CA', WC()->customer->get_billing_state(), 'Baseline: the session must fill the empty billing state with the shop state.' );
+		$this->assertSame( '', $order->get_billing_state(), 'Baseline: the placed order must have no billing state.' );
+		$this->assertTrue( $this->get_draft_order_checker()->is_draft( $order ), 'A state the session filled in is not a move to another tax location, so the order must still be reused.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order when the default state reaches the shipping address of a customer who left the state empty.
+	 */
+	public function test_placed_order_is_reused_when_default_state_reaches_shipping_address(): void {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$order = $this->create_pending_order_for_customer_without_state( 'GB', 'SW1A 1AA' );
+
+		$this->reload_customer_from_session();
+		// A client that sends the billing address as the shipping address passes the filled-in state along.
+		WC()->customer->set_shipping_state( WC()->customer->get_billing_state() );
+
+		$this->assertSame( 'CA', WC()->customer->get_shipping_state(), 'Baseline: the customer must carry the shop state as the shipping state.' );
+		$this->assertTrue( $this->get_draft_order_checker()->is_draft( $order ), 'A state the session filled in is not a move to another destination, so the order must still be reused.' );
+	}
+
+	/**
+	 * @testdox Checkout reuses a placed pending order when the retry sends back the billing state the session filled in.
+	 */
+	public function test_post_reuses_pending_order_when_request_returns_session_default_state(): void {
+		$this->set_taxes_based_on( 'billing' );
+		$order = $this->create_pending_order_for_customer_without_state( 'GB', 'SW1A 1AA' );
+
+		$this->reload_customer_from_session();
+
+		$cart          = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) )->get_data();
+		$billing_state = ( (array) $cart['billing_address'] )['state'];
+		$this->assertSame( 'CA', $billing_state, 'Baseline: the cart response must hand the client the filled-in billing state.' );
+
+		$address = array(
+			'address_1' => '1 High St',
+			'city'      => 'Test City',
+			'postcode'  => 'SW1A 1AA',
+			'country'   => 'GB',
+		);
+		$request = $this->build_valid_post_request();
+		$request->set_param( 'billing_address', array_merge( $request->get_param( 'billing_address' ), $address, array( 'state' => $billing_state ) ) );
+		$request->set_param( 'shipping_address', array_merge( $request->get_param( 'shipping_address' ), $address, array( 'state' => '' ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $order->get_id(), (int) $response->get_data()['order_id'], 'A retry from the same address must pay the placed order rather than place a second one.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order that took the session's default state on an earlier retry when the customer sends none.
+	 */
+	public function test_placed_order_is_reused_when_only_the_order_has_the_default_state(): void {
+		$this->set_taxes_based_on( 'billing' );
+		$order = $this->create_pending_order_for_customer_without_state( 'GB', 'SW1A 1AA' );
+		$order->set_billing_state( 'CA' );
+		$order->save();
+
+		$this->assertSame( '', WC()->customer->get_billing_state(), 'Baseline: the customer must have no billing state.' );
+		$this->assertTrue( $this->get_draft_order_checker()->is_draft( $order ), 'The default state is read as empty on the order too, so the order must still be reused.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order when the default location changes after the session filled in the state.
+	 */
+	public function test_placed_order_is_reused_when_default_location_changes_after_fill(): void {
+		$this->set_taxes_based_on( 'billing' );
+		$order = $this->create_pending_order_for_customer_without_state( 'GB', 'SW1A 1AA' );
+
+		$this->reload_customer_from_session();
+		// As when geolocation resolves the visitor on a later request.
+		add_filter(
+			'woocommerce_customer_default_location_array',
+			static fn() => array(
+				'country' => 'GB',
+				'state'   => '',
+			)
+		);
+
+		$this->assertSame( 'CA', WC()->customer->get_billing_state(), 'Baseline: the customer must keep the state filled in from the shop base.' );
+		$this->assertTrue( $this->get_draft_order_checker()->is_draft( $order ), 'A state filled in from the shop base is still read as empty once the default location is another one.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() keeps reusing a placed pending order when the filled-in state comes from a filtered default location.
+	 */
+	public function test_placed_order_is_reused_when_filled_state_comes_from_filtered_default(): void {
+		add_filter( 'woocommerce_customer_default_location', static fn() => 'US:NY' );
+		$this->set_taxes_based_on( 'billing' );
+		$order = $this->create_pending_order_for_customer_without_state( 'GB', 'SW1A 1AA' );
+
+		$this->reload_customer_from_session();
+
+		$this->assertSame( 'NY', WC()->customer->get_billing_state(), 'Baseline: the session must fill the empty billing state from the filtered default.' );
+		$this->assertTrue( $this->get_draft_order_checker()->is_draft( $order ), 'A state filled in from the default location is read as empty when it is not the shop base state either.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a placed pending order with no billing state when the customer in $country gets the state $state on a shop based in $base.
+	 * @testWith ["US:CA", "GB", "SW1A 1AA", "KENT"]
+	 *           ["US:WA", "AU", "2000", "WA"]
+	 *           ["GB:KENT", "GB", "SW1A 1AA", "KENT"]
+	 *
+	 * @param string $base     Shop base location, which is the default customer location.
+	 * @param string $country  Country of the customer and the order.
+	 * @param string $postcode Postcode of the customer and the order.
+	 * @param string $state    Billing state the customer gets after the order is placed.
+	 */
+	public function test_placed_order_is_not_reused_when_state_is_not_a_session_default( string $base, string $country, string $postcode, string $state ): void {
+		$this->set_taxes_based_on( 'billing' );
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_customer_without_state( $country, $postcode, $base );
+
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: the order is the session draft while its tax location matches the customer.' );
+
+		WC()->customer->set_billing_state( $state );
+
+		$this->assertFalse( $checker->is_draft( $order ), 'Only the default state on another country, where it is not one of its states, is read as empty; any other state is a move.' );
+	}
+
+	/**
+	 * @testdox is_valid_draft_order() stops reusing a placed pending order when the customer gets the shop state and their country code is stored in lowercase.
+	 */
+	public function test_placed_order_is_not_reused_when_country_differs_from_base_only_in_case(): void {
+		$this->set_taxes_based_on( 'billing' );
+		$checker = $this->get_draft_order_checker();
+		$order   = $this->create_pending_order_for_customer_without_state( 'NZ', '1010', 'NZ:AUK' );
+
+		WC()->customer->set_billing_country( 'nz' );
+		$this->assertTrue( $checker->is_draft( $order ), 'Baseline: a country code that differs only in case is the same tax location.' );
+
+		WC()->customer->set_billing_state( 'AUK' );
+
+		$this->assertFalse( $checker->is_draft( $order ), 'The shop state on the shop country is a real state whatever the case of the country code, so it is a move.' );
+	}
+
+	/**
+	 * Gives the customer a US billing address matching the shipping address create_pending_order_for_us_customer() sets.
+	 */
+	private function give_customer_us_billing_address(): void {
+		WC()->customer->set_billing_address_1( '123 Test St' );
+		WC()->customer->set_billing_city( 'Test City' );
+		WC()->customer->set_billing_state( 'CA' );
+		WC()->customer->set_billing_postcode( '94016' );
+		WC()->customer->set_billing_country( 'US' );
+	}
+
+	/**
+	 * Dispatches a Store API request with a valid nonce.
+	 *
+	 * @param string $method HTTP method.
+	 * @param string $route  Route path.
+	 * @param array  $body   Body parameters.
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_store_api_request( string $method, string $route, array $body = array() ): \WP_REST_Response {
+		$request = new \WP_REST_Request( $method, $route );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( $body );
+
+		return rest_get_server()->dispatch( $request );
+	}
+
+	/**
+	 * Returns an object that exposes DraftOrderTrait::is_valid_draft_order() as is_draft().
+	 *
+	 * @return object
+	 */
+	private function get_draft_order_checker() {
+		return new class() {
+			use \Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
+
+			/**
+			 * Expose the protected check for the test.
+			 *
+			 * @param \WC_Order $order_object Order to check.
+			 * @return bool
+			 */
+			public function is_draft( $order_object ): bool {
+				return $this->is_valid_draft_order( $order_object );
+			}
+		};
+	}
+
+	/**
+	 * Gives the customer a US shipping address and places a pending order for it from the cart.
+	 *
+	 * @return \WC_Order
+	 */
+	private function create_pending_order_for_us_customer(): \WC_Order {
+		WC()->customer->set_shipping_address_1( '123 Test St' );
+		WC()->customer->set_shipping_city( 'Test City' );
+		WC()->customer->set_shipping_state( 'CA' );
+		WC()->customer->set_shipping_postcode( '94016' );
+		WC()->customer->set_shipping_country( 'US' );
+
+		return $this->create_session_order_from_cart( OrderStatus::PENDING );
+	}
+
+	/**
+	 * Gives the customer a billing and shipping address in the given country with no state and places a pending
+	 * order for it from the cart, on a shop whose default customer location is its base address.
+	 *
+	 * @param string $country  Country code.
+	 * @param string $postcode Postcode.
+	 * @param string $base     Shop base location.
+	 * @return \WC_Order
+	 */
+	private function create_pending_order_for_customer_without_state( string $country, string $postcode, string $base = 'US:CA' ): \WC_Order {
+		update_option( 'woocommerce_default_country', $base );
+		update_option( 'woocommerce_default_customer_address', 'base' );
+
+		foreach ( array( 'billing', 'shipping' ) as $type ) {
+			WC()->customer->{"set_{$type}_address_1"}( '1 High St' );
+			WC()->customer->{"set_{$type}_city"}( 'Test City' );
+			WC()->customer->{"set_{$type}_state"}( '' );
+			WC()->customer->{"set_{$type}_postcode"}( $postcode );
+			WC()->customer->{"set_{$type}_country"}( $country );
+		}
+
+		return $this->create_session_order_from_cart( OrderStatus::PENDING );
+	}
+
+	/**
+	 * Saves the customer to the session and reads it back, as the next request does.
+	 */
+	private function reload_customer_from_session(): void {
+		WC()->customer->save();
+		WC()->customer = new \WC_Customer( get_current_user_id(), true );
+	}
+
+	/**
 	 * Apply a 100% coupon to the cart, taking its total to zero.
 	 */
 	private function apply_full_discount_coupon(): void {
@@ -5186,6 +7073,97 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * Checkout failures and whether the debug log should survive each one.
+	 *
+	 * @return array<string, array{\Throwable, int, string, bool}>
+	 */
+	public function provider_checkout_failures_and_expected_debug_log_outcome(): array {
+		return array(
+			'unexpected server error'                  => array(
+				new \Error( 'Extension raised an engine error while taking payment.' ),
+				500,
+				'woocommerce_rest_unknown_server_error',
+				true,
+			),
+			'ordinary client error (declined payment)' => array(
+				new \Exception( 'Card declined.' ),
+				400,
+				'woocommerce_rest_checkout_process_payment_error',
+				false,
+			),
+		);
+	}
+
+	/**
+	 * @testdox The place-order debug log is kept only for an unexpected server error, not an ordinary client error: $_dataName.
+	 * @dataProvider provider_checkout_failures_and_expected_debug_log_outcome
+	 *
+	 * @param \Throwable $failure         The failure raised while the gateway is taking payment.
+	 * @param int        $expected_status The HTTP status the checkout should fail with.
+	 * @param string     $expected_code   The REST error code the checkout should fail with.
+	 * @param bool       $log_is_kept     Whether the debug log trail should survive this failure.
+	 */
+	public function test_debug_log_kept_only_for_unexpected_server_errors( \Throwable $failure, int $expected_status, string $expected_code, bool $log_is_kept ) {
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function () use ( $failure ) {
+				throw $failure;
+			},
+			998
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertSame( $expected_status, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $expected_code, $response->get_data()['code'] );
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$this->assertCount( 1, $orders, 'Exactly one order should exist.' );
+
+		if ( $log_is_kept ) {
+			$this->assertStringStartsWith( 'place-order-debug-', $orders[0]->get_meta( '_debug_log_source' ), 'The debug log trail must be kept for an unexpected server error, not cleared.' );
+			$this->assertEmpty( $orders[0]->get_meta( '_debug_log_source_pending_deletion' ), 'The debug log must not be scheduled for deletion on an unexpected server error.' );
+		} else {
+			$this->assertEmpty( $orders[0]->get_meta( '_debug_log_source' ), 'The debug log trail must be cleared for an ordinary client error.' );
+			$this->assertStringStartsWith( 'place-order-debug-', $orders[0]->get_meta( '_debug_log_source_pending_deletion' ), 'The debug log must be scheduled for deletion on an ordinary client error.' );
+		}
+	}
+
+	/**
+	 * @testdox The place-order debug log is kept when a gateway reports an error without throwing.
+	 */
+	public function test_debug_log_kept_when_gateway_reports_error_without_throwing() {
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context, &$payment_result ) {
+				$payment_result->set_status( 'error' );
+			},
+			998,
+			2
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertSame( 500, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$this->assertCount( 1, $orders, 'Exactly one order should exist.' );
+
+		$this->assertStringStartsWith( 'place-order-debug-', $orders[0]->get_meta( '_debug_log_source' ), 'The debug log trail must be kept when a gateway reports an error, not cleared.' );
+		$this->assertEmpty( $orders[0]->get_meta( '_debug_log_source_pending_deletion' ), 'The debug log must not be scheduled for deletion when a gateway reports an error.' );
+	}
+
+	/**
 	 * @testdox An Error raised inside a status transition after the gateway moved the order on is recovered.
 	 */
 	public function test_error_raised_inside_a_status_transition_after_the_gateway_ran_is_recovered() {
@@ -5431,5 +7409,115 @@ class Checkout extends \WP_Test_REST_TestCase {
 		);
 		$this->assertArrayHasKey( 'payment_result', $data );
 		$this->assertSame( 'success', $data['payment_result']['payment_status'], 'Recovery must still report success on the result the response uses.' );
+	}
+
+	/**
+	 * @testdox A legacy gateway that adds an error notice and returns nothing shows that notice to the shopper.
+	 */
+	public function test_legacy_gateway_returning_nothing_shows_its_error_notice() {
+		$this->use_bacs_gateway_returning_nothing( 'The test gateway declined the card.' );
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status(), 'Unexpected response: ' . print_r( $data, true ) );
+		$this->assertSame( 'woocommerce_rest_checkout_process_payment_error', $data['code'] );
+		$this->assertSame( 'The test gateway declined the card.', $data['message'] );
+	}
+
+	/**
+	 * @testdox A legacy gateway that returns nothing without a notice ends the checkout as a failed payment.
+	 */
+	public function test_legacy_gateway_returning_nothing_without_a_notice_fails_the_payment() {
+		$this->use_bacs_gateway_returning_nothing( null );
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status(), 'Unexpected response: ' . print_r( $data, true ) );
+		$this->assertArrayHasKey( 'payment_result', $data );
+		$this->assertSame( 'failure', $data['payment_result']['payment_status'] );
+	}
+
+	/**
+	 * @testdox A legacy gateway that takes payment and then returns nothing still completes the checkout.
+	 */
+	public function test_legacy_gateway_returning_nothing_after_taking_payment_completes_the_checkout() {
+		$this->use_bacs_gateway_returning_nothing( 'An error the paid shopper should not see later.', true );
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), 'Unexpected response: ' . print_r( $data, true ) );
+		$this->assertArrayHasKey( 'payment_result', $data );
+		$this->assertSame( 'success', $data['payment_result']['payment_status'] );
+		$this->assertSame( 0, wc_notice_count( 'error' ), 'The gateway notice should not stay queued for a later page.' );
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $data['order_id'] ) ), 'content' );
+		$this->assertNotEmpty(
+			array_filter(
+				$notes,
+				function ( $note ) {
+					return false !== strpos( $note, 'The bacs payment method returned no result.' );
+				}
+			),
+			'The order note should name the gateway that returned no result.'
+		);
+	}
+
+	/**
+	 * Replaces BACS with a gateway whose process_payment() returns nothing, as legacy gateways do when they bail out early.
+	 *
+	 * @param string|null $notice           Error notice the gateway adds before returning, or null for none.
+	 * @param bool        $complete_payment Whether the gateway marks the order paid before returning.
+	 */
+	private function use_bacs_gateway_returning_nothing( ?string $notice, bool $complete_payment = false ): void {
+		$gateway = new class( $notice, $complete_payment ) extends WC_Gateway_BACS {
+			/**
+			 * Error notice to add, or null for none.
+			 *
+			 * @var string|null
+			 */
+			private $notice;
+
+			/**
+			 * Whether to mark the order paid before returning.
+			 *
+			 * @var bool
+			 */
+			private $complete_payment;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param string|null $notice           Error notice to add, or null for none.
+			 * @param bool        $complete_payment Whether to mark the order paid before returning.
+			 */
+			public function __construct( ?string $notice, bool $complete_payment ) {
+				parent::__construct();
+				$this->notice           = $notice;
+				$this->complete_payment = $complete_payment;
+			}
+
+			/**
+			 * Marks the order paid and adds the error notice when asked, then returns nothing.
+			 *
+			 * @param int $order_id Order ID.
+			 */
+			public function process_payment( $order_id ) {
+				if ( $this->complete_payment ) {
+					wc_get_order( $order_id )->payment_complete();
+				}
+				if ( null !== $this->notice ) {
+					wc_add_notice( $this->notice, 'error' );
+				}
+			}
+		};
+
+		foreach ( WC()->payment_gateways()->payment_gateways as $key => $existing ) {
+			if ( WC_Gateway_BACS::ID === $existing->id ) {
+				WC()->payment_gateways()->payment_gateways[ $key ] = $gateway;
+			}
+		}
 	}
 }

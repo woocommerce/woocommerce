@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+// eslint-disable-next-line @wordpress/use-recommended-components -- Keep the existing task card layout.
 import { Card, CardBody, Spinner } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
@@ -184,13 +185,6 @@ export const Tax = ( { onComplete, query, task }: TaxProps ) => {
 		return allPartners.filter( ( partner ) => partner.isVisible );
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- the partner list shouldn't be changing in the middle of interaction. for some reason the country is becoming null in a re-render and causing unexpected behaviour
 	}, [] );
-
-	const { auto } = query;
-	useEffect( () => {
-		if ( auto === 'true' ) {
-			void onAutomate();
-		}
-	}, [ auto, onAutomate ] );
 
 	useEffect( () => {
 		if ( query.partner ) {

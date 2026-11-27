@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
+use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 
 /**
@@ -100,7 +101,7 @@ class CartRemoveItem extends AbstractCartRoute {
 	protected function maybe_release_stock() {
 		$draft_order_id = $this->get_draft_order_id();
 
-		if ( ! $draft_order_id ) {
+		if ( ! $draft_order_id || ! OrderController::lock_order( $draft_order_id, 0 ) ) {
 			return;
 		}
 

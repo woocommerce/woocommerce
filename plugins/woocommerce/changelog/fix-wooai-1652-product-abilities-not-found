@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product abilities now answer an unknown product ID with "Product not found." instead of a permission error.

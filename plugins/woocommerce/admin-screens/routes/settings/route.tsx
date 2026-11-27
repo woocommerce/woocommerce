@@ -8,10 +8,8 @@ import { notFound } from '@wordpress/route';
 /**
  * Internal dependencies
  */
-import chequeFields from '../../entity-fields/cheque';
-import { ENTITY_KIND, getCoreEntities, getSection } from './entities';
+import { getCoreEntities, getSection } from './entities';
 import type { SettingsEntityConfig } from './entities';
-import { registerEntityFields } from './entity-fields';
 
 interface RouteParams {
 	params: { section?: string; page?: string };
@@ -31,7 +29,6 @@ function getPageConfig( {
 export const route = {
 	beforeLoad: async ( context: RouteParams ) => {
 		await dispatch( coreStore ).addEntities( getCoreEntities() );
-		registerEntityFields( ENTITY_KIND, 'cheque', chequeFields );
 		if ( ! getPageConfig( context ) ) {
 			throw notFound();
 		}

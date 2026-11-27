@@ -2,11 +2,14 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes\Reviews;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 
 /**
  * ProductReviewsTitle class.
  */
 class ProductReviewsTitle extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -107,16 +110,5 @@ class ProductReviewsTitle extends AbstractBlock {
 			$wrapper_attributes,
 			$reviews_title
 		);
-	}
-
-	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @see $this->register_block_type()
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string|null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }

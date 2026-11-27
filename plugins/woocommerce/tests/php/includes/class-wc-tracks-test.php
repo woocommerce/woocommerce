@@ -22,21 +22,15 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 	 * @testdox Server details retain only shared allowlisted query parameters.
 	 */
 	public function test_server_details_retain_only_shared_allowlisted_query_parameters(): void {
-		$server_snapshot = $_SERVER;
+		$_SERVER['REQUEST_SCHEME'] = 'https';
+		$_SERVER['HTTP_HOST']      = 'example.com';
+		$_SERVER['REQUEST_URI']    = '/wp-json/wc/v3/products?utm_source=google&orderby=price&aff=partner&utm_campaign=spring&per_page=20';
+		$_SERVER['HTTP_REFERER']   = 'https://example.com/wp-admin/admin.php?page=wc-admin&utm_medium=referral#activity';
 
-		try {
-			$_SERVER['REQUEST_SCHEME'] = 'https';
-			$_SERVER['HTTP_HOST']      = 'example.com';
-			$_SERVER['REQUEST_URI']    = '/wp-json/wc/v3/products?utm_source=google&orderby=price&aff=partner&utm_campaign=spring&per_page=20';
-			$_SERVER['HTTP_REFERER']   = 'https://example.com/wp-admin/admin.php?page=wc-admin&utm_medium=referral#activity';
+		$details = WC_Tracks::get_server_details();
 
-			$details = WC_Tracks::get_server_details();
-
-			$this->assertSame( 'https://example.com/wp-json/wc/v3/products?utm_source=google&aff=partner&utm_campaign=spring', $details['_dl'] );
-			$this->assertSame( 'https://example.com/wp-admin/admin.php?page=wc-admin&utm_medium=referral', $details['_dr'] );
-		} finally {
-			$_SERVER = $server_snapshot;
-		}
+		$this->assertSame( 'https://example.com/wp-json/wc/v3/products?utm_source=google&aff=partner&utm_campaign=spring', $details['_dl'] );
+		$this->assertSame( 'https://example.com/wp-admin/admin.php?page=wc-admin&utm_medium=referral', $details['_dr'] );
 	}
 
 	/**
@@ -230,7 +224,6 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 		);
 		$this->assertContains( 'store_id', array_keys( $properties ) );
 		$this->assertEquals( $store_id, $properties['store_id'] );
-		delete_option( \WC_Install::STORE_ID_OPTION );
 	}
 
 	/**
@@ -284,9 +277,6 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 		// Third call should get fresh data with the new store ID.
 		$third_call = \WC_Tracks::get_blog_details( get_current_user_id() );
 		$this->assertEquals( $new_store_id, $third_call['store_id'] );
-
-		// Clean up.
-		delete_option( \WC_Install::STORE_ID_OPTION );
 	}
 
 	/**

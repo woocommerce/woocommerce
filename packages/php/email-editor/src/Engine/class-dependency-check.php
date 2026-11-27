@@ -15,7 +15,7 @@ class Dependency_Check {
 	/**
 	 * Minimum WordPress version required for the email editor.
 	 */
-	public const MIN_WP_VERSION = '6.7';
+	public const MIN_WP_VERSION = '7.0';
 
 	/**
 	 * Checks if all dependencies are met.

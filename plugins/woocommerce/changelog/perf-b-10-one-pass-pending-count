@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Show pending order synchronization counts faster when high-performance order storage is selected.

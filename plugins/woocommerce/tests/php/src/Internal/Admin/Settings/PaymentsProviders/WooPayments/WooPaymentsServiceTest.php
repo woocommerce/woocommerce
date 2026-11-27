@@ -207,17 +207,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clear the version constant setUp() sets, which would otherwise outlive the class.
-	 */
-	public function tearDown(): void {
-		try {
-			Constants::clear_single_constant( 'WCPAY_VERSION_NUMBER' );
-		} finally {
-			parent::tearDown();
-		}
-	}
-
-	/**
 	 * Test get onboarding details when the extension is NOT active.
 	 */
 	public function test_get_onboarding_details_throws_when_extension_not_active(): void {
@@ -1042,13 +1031,51 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		// Act.
-		$result = $this->sut->get_onboarding_details( $location, $rest_path );
+		$result = $this->sut->get_onboarding_details( $location, $rest_path, null, true );
 
 		// Assert.
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'steps', $result );
 		$this->assertCount( count( $expected_steps ), $result['steps'] );
 		$this->assertEquals( $expected_steps, $result['steps'] );
+	}
+
+	/**
+	 * @testdox Should leave the WPCOM authorization URL out of the onboarding details unless asked to include it.
+	 */
+	public function test_get_onboarding_details_steps_without_wpcom_authorization_url(): void {
+		// The store is registered with WPCOM, but no user has connected their account yet.
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
+		$this->mock_wpcom_connection_manager->method( 'has_connected_owner' )->willReturn( false );
+		$authorization_requested = false;
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_wpcom_connection_authorization' => function () use ( &$authorization_requested ) {
+						$authorization_requested = true;
+						return array(
+							'success' => true,
+							'errors'  => array(),
+							'url'     => 'https://wordpress.com/auth?query=some_query',
+						);
+					},
+				),
+			)
+		);
+		$rest_path = '/rest/path/to/onboarding/';
+
+		$result = $this->sut->get_onboarding_details( 'US', $rest_path );
+
+		$steps      = array_column( $result['steps'], null, 'id' );
+		$wpcom_step = $steps[ WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION ];
+		$this->assertSame( WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED, $wpcom_step['status'] );
+		$this->assertSame( array(), $wpcom_step['errors'] );
+		$this->assertSame(
+			array( 'start', 'check', 'clean' ),
+			array_keys( $wpcom_step['actions'] ),
+			'Only the authorization URL action should be left out'
+		);
+		$this->assertFalse( $authorization_requested, 'The authorization URL should not be generated when it is not included' );
 	}
 
 	/**

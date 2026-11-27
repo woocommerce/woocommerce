@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\PaymentMode;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -589,6 +591,43 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Test orders by gateway count only paid orders recorded as test, and the gateway totals still count all orders.
+	 */
+	public function test_get_tracking_data_orders_by_gateway_payment_mode(): void {
+		$orders = array(
+			array( WC_Gateway_BACS::ID, OrderStatus::PROCESSING, 10, PaymentMode::TEST ),
+			array( WC_Gateway_BACS::ID, OrderStatus::COMPLETED, 20, PaymentMode::LIVE ),
+			array( WC_Gateway_BACS::ID, OrderStatus::PENDING, 40, PaymentMode::TEST ),
+			array( WC_Gateway_COD::ID, OrderStatus::COMPLETED, 80, '' ),
+			array( WC_Gateway_COD::ID, OrderStatus::PROCESSING, 160, PaymentMode::TEST ),
+		);
+		foreach ( $orders as list( $payment_method, $status, $total, $mode ) ) {
+			$order = wc_create_order( array( 'status' => $status ) );
+			$order->set_payment_method( $payment_method );
+			$order->set_total( $total );
+			$order->set_payment_mode( $mode );
+			$order->save();
+		}
+
+		$tracking_data = WC_Tracker::get_tracking_data();
+
+		$this->assertEquals(
+			array(
+				'gateway_bacs_USD_count' => 1,
+				'gateway_bacs_USD_total' => 10,
+				'gateway_cod_USD_count'  => 1,
+				'gateway_cod_USD_total'  => 160,
+			),
+			$tracking_data['test_orders_by_gateway'],
+			'Only paid orders recorded as test should be counted, per gateway'
+		);
+		$this->assertEquals( 2, $tracking_data['orders']['gateway_bacs_USD_count'], 'Gateway counts should include test orders' );
+		$this->assertEquals( 30, $tracking_data['orders']['gateway_bacs_USD_total'], 'Gateway totals should include test orders' );
+		$this->assertEquals( 2, $tracking_data['orders']['gateway_cod_USD_count'], 'Orders without a payment mode should keep counting' );
+		$this->assertEquals( 240, $tracking_data['orders']['gateway_cod_USD_total'], 'Gateway totals should include orders without a payment mode' );
+	}
+
+	/**
 	 * Persist the order matrix read by the tracker aggregate queries.
 	 *
 	 * @param string[] $statuses        Order statuses.
@@ -780,7 +819,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$tracking_data = WC_Tracker::get_tracking_data();
 		$this->assertArrayHasKey( 'store_id', $tracking_data );
 		$this->assertEquals( '12345', $tracking_data['store_id'] );
-		delete_option( \WC_Install::STORE_ID_OPTION );
 	}
 
 	/**
@@ -792,7 +830,27 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$tracking_data = WC_Tracker::get_tracking_data();
 		$this->assertArrayHasKey( 'admin_install_timestamp', $tracking_data['settings'] );
 		$this->assertEquals( $tracking_data['settings']['admin_install_timestamp'], $time );
-		delete_option( 'woocommerce_admin_install_timestamp' );
+	}
+
+	/**
+	 * @testdox Tracker data includes the number of customers with stored Application Passwords.
+	 */
+	public function test_customer_application_password_user_count(): void {
+		$get_user_counts = new ReflectionMethod( WC_Tracker::class, 'get_user_counts' );
+		$get_user_counts->setAccessible( true );
+		$initial_count = $get_user_counts->invoke( null )['customer_application_password_users'];
+
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$admin_id    = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$empty_id    = self::factory()->user->create( array( 'role' => 'customer' ) );
+
+		$this->assertIsArray( WP_Application_Passwords::create_new_application_password( $customer_id, array( 'name' => 'Customer credential' ) ) );
+		$this->assertIsArray( WP_Application_Passwords::create_new_application_password( $admin_id, array( 'name' => 'Administrator credential' ) ) );
+		update_user_meta( $empty_id, WP_Application_Passwords::USERMETA_KEY_APPLICATION_PASSWORDS, array() );
+
+		$updated_count = $get_user_counts->invoke( null )['customer_application_password_users'];
+
+		$this->assertSame( $initial_count + 1, $updated_count, 'Only current customers with a stored credential should be counted' );
 	}
 
 	/**
@@ -806,8 +864,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 * @testDox Test woocommerce_allow_tracking related data is included in tracking snapshot.
 	 */
 	public function test_tracking_data_woocommerce_allow_tracking() {
-		$current_woocommerce_allow_tracking = get_option( 'woocommerce_allow_tracking', 'no' );
-
 		// Clear everything.
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		delete_option( 'woocommerce_allow_tracking_last_modified' );
@@ -848,11 +904,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $tracking_data['woocommerce_allow_tracking'], 'yes' );
 		$this->assertGreaterThanOrEqual( $before, (int) $tracking_data['woocommerce_allow_tracking_last_modified'] );
 		$this->assertEquals( $first_optin, (int) $tracking_data['woocommerce_allow_tracking_first_optin'] );
-
-		// Restore everything as it was.
-		update_option( 'woocommerce_allow_tracking', $current_woocommerce_allow_tracking );
-		delete_option( 'woocommerce_allow_tracking_last_modified' );
-		delete_option( 'woocommerce_allow_tracking_first_optin' );
 	}
 
 	/**

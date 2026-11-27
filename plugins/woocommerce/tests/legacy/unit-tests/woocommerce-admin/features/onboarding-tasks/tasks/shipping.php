@@ -42,17 +42,6 @@ class WC_Admin_Tests_OnboardingTasks_Task_Shipping extends WC_Unit_Test_Case {
 
 
 	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		remove_filter( 'woocommerce_admin_features', array( $this, 'turn_on_smart_shipping_defaults_feature' ), 1 );
-
-		delete_option( OnboardingProfile::DATA_OPTION );
-	}
-
-
-	/**
 	 * Filter to enable shipping-smart-defaults feature.
 	 *
 	 * @param  array $features Array of active features.

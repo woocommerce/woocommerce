@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the "Backordered" note on order items from breaking when a translation changes.

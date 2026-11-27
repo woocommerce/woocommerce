@@ -1,6 +1,7 @@
 /*
  * Styles for the email editor.
  */
+
 /*
  * Flex layout used for buttons block for email editor.
  */
@@ -80,13 +81,6 @@
 .wp-block-table figcaption {
 	/* Center-align table captions like core WordPress */
 	text-align: center;
-}
-
-/* Ensure bold formatting shows up in table cells and captions in the editor */
-.wp-block-table td strong,
-.wp-block-table th strong,
-.wp-block-table figcaption strong {
-	font-weight: bold;
 }
 
 /*

@@ -26,6 +26,7 @@ use Automattic\WooCommerce\Admin\ReportsSync;
 use Automattic\WooCommerce\Internal\Admin\CategoryLookup;
 use Automattic\WooCommerce\Internal\Admin\Events;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\Onboarding;
+use Automattic\WooCommerce\Internal\Admin\Screens\AdminScreens;
 
 /**
  * Feature plugin main class.
@@ -108,6 +109,10 @@ class FeaturePlugin {
 	 */
 	public function on_plugins_loaded() {
 		$this->hooks();
+
+		// The screen loader needs the admin feature filter registered by hooks().
+		wc_get_container()->get( AdminScreens::class )->handle_init();
+
 		$this->includes();
 	}
 

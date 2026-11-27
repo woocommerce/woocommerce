@@ -83,9 +83,6 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 		WCEmailTemplateSyncTracker::set_event_recorder( null );
 		WCEmailTemplateSyncRegistry::reset_cache();
 
-		remove_all_filters( 'woocommerce_transactional_emails_for_block_editor' );
-		remove_all_filters( 'woocommerce_email_content_post_data' );
-
 		// Clear any dedup transients written by the tests so a re-run starts clean.
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery

@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Speed up saving variable products that have no parent download files.

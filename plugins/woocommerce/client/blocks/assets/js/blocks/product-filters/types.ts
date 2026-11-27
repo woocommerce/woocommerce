@@ -56,11 +56,13 @@ export type ProductFiltersContext = {
 // ----------------------------------------
 export type OverlayMode = 'off' | 'mobile' | 'always';
 
+export type OverlayButtonStyle = 'plain' | 'button';
+
 export type BlockAttributes = {
 	productId?: string;
-	isPreview: boolean;
 	overlayMode?: OverlayMode;
 	overlayPosition?: 'left' | 'right';
+	overlayButtonStyle?: OverlayButtonStyle;
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;

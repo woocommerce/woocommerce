@@ -547,6 +547,18 @@ class PlansTest extends EngineIntegrationTestCase {
 			)
 		);
 		$this->assertNull( Plans::update( $id, array( 'extension_slug' => 'other-extension' ) ), 'A fieldless update is scoped too.' );
+		$this->assert_validation_errors(
+			function () use ( $id ): void {
+				Plans::update(
+					$id,
+					array(
+						'extension_slug' => strtoupper( self::OWNER ),
+						'name'           => 'Hijacked',
+					)
+				);
+			},
+			array( array( ValidationErrorCode::INVALID_PATTERN, 'extension_slug' ) )
+		);
 
 		$this->assertSame( 0, $validated, 'The validate action never sees a plan of another extension.' );
 		$this->assertSame( $before, $this->stored( $id )->to_storage() );
@@ -1038,9 +1050,9 @@ class PlansTest extends EngineIntegrationTestCase {
 	public function test_meta_methods_round_trip(): void {
 		$id = $this->create();
 
-		$this->assertIsInt( Plans::add_meta( $id, 'note', 'one' ) );
-		$this->assertNull( Plans::add_meta( $id, 'note', 'two', true ) );
-		$this->assertTrue( Plans::update_meta( $id, 'flag', array( 'a' => 1 ) ) );
+		$this->assertIsInt( Plans::add_meta( $id, self::OWNER, 'note', 'one' ) );
+		$this->assertNull( Plans::add_meta( $id, self::OWNER, 'note', 'two', true ) );
+		$this->assertTrue( Plans::update_meta( $id, self::OWNER, 'flag', array( 'a' => 1 ) ) );
 		$this->assertSame( array( 'one' ), Plans::get_meta( $id, 'note' ) );
 		$this->assertSame( array( 'a' => 1 ), Plans::get_meta( $id, 'flag', true ) );
 		$this->assertSame(
@@ -1050,7 +1062,7 @@ class PlansTest extends EngineIntegrationTestCase {
 			),
 			Plans::get_meta( $id )
 		);
-		$this->assertTrue( Plans::delete_meta( $id, 'note' ) );
+		$this->assertTrue( Plans::delete_meta( $id, self::OWNER, 'note' ) );
 		$this->assertSame( '', Plans::get_meta( $id, 'note', true ) );
 	}
 
@@ -1058,17 +1070,17 @@ class PlansTest extends EngineIntegrationTestCase {
 	 * @testdox meta reads for a missing plan are empty.
 	 */
 	public function test_meta_reads_for_a_missing_plan_are_empty(): void {
-		$this->assertFalse( Plans::delete_meta( 999999, 'note' ) );
+		$this->assertFalse( Plans::delete_meta( 999999, self::OWNER, 'note' ) );
 		$this->assertSame( '', Plans::get_meta( 999999, 'note', true ) );
 		$this->assertSame( array(), Plans::get_meta( 999999 ) );
 	}
 
 	/**
-	 * @testdox meta writes do not look up the plan.
+	 * @testdox meta writes scope by the owner in the write statement itself, with no read first.
 	 */
-	public function test_meta_writes_do_not_look_up_the_plan(): void {
+	public function test_meta_writes_scope_by_owner_in_the_write_statement(): void {
 		$id = $this->create();
-		Plans::add_meta( $id, 'note', 'one' );
+		Plans::add_meta( $id, self::OWNER, 'flag', 'off' );
 
 		$queries = array();
 		$capture = static function ( $query ) use ( &$queries ) {
@@ -1077,18 +1089,40 @@ class PlansTest extends EngineIntegrationTestCase {
 		};
 		add_filter( 'query', $capture );
 		try {
-			Plans::add_meta( $id, 'note', 'two' );
-			Plans::update_meta( $id, 'flag', 'on' );
+			Plans::add_meta( $id, self::OWNER, 'note', 'one' );
+			Plans::update_meta( $id, self::OWNER, 'flag', 'on' );
+			Plans::delete_meta( $id, self::OWNER, 'note' );
 		} finally {
 			remove_filter( 'query', $capture );
 		}
 
-		$plans_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$this->assertCount( 3, $queries, 'One statement per write.' );
+		$this->assertStringStartsWith( 'INSERT INTO', $queries[0] );
+		$this->assertStringStartsWith( 'UPDATE', $queries[1] );
+		$this->assertStringStartsWith( 'DELETE', $queries[2] );
 		foreach ( $queries as $query ) {
-			$this->assertDoesNotMatchRegularExpression( '/\\b' . preg_quote( $plans_table, '/' ) . '\\b/', $query, 'A meta write reads only the meta table.' );
+			$this->assertStringContainsString( 'p.extension_slug = ', $query, 'Each write matches the owner.' );
 		}
-		$this->assertSame( array( 'one', 'two' ), Plans::get_meta( $id, 'note' ) );
 		$this->assertSame( 'on', Plans::get_meta( $id, 'flag', true ) );
+	}
+
+	/**
+	 * @testdox meta writes report an empty owner and an empty key together.
+	 */
+	public function test_meta_writes_report_owner_and_key_errors_together(): void {
+		$id = $this->create();
+
+		foreach ( array( 'add_meta', 'update_meta', 'delete_meta' ) as $method ) {
+			$this->assert_validation_errors(
+				static function () use ( $id, $method ): void {
+					Plans::{$method}( $id, '', '', 'x' );
+				},
+				array(
+					array( ValidationErrorCode::REQUIRED, 'extension_slug' ),
+					array( ValidationErrorCode::REQUIRED, 'key' ),
+				)
+			);
+		}
 	}
 
 	/**
@@ -1096,20 +1130,11 @@ class PlansTest extends EngineIntegrationTestCase {
 	 */
 	public function test_deleting_a_plan_removes_its_meta(): void {
 		$id = $this->create();
-		Plans::add_meta( $id, 'note', 'one' );
+		Plans::add_meta( $id, self::OWNER, 'note', 'one' );
 
 		$this->assertTrue( ( new PlanRepository() )->delete( $id ) );
 
 		$this->assertSame( array(), Plans::get_meta( $id, 'note' ) );
-	}
-
-	/**
-	 * @testdox an empty meta key is rejected.
-	 */
-	public function test_an_empty_meta_key_is_rejected(): void {
-		$this->expectException( InvalidArgumentException::class );
-
-		Plans::add_meta( $this->create(), '', 'x' );
 	}
 
 	/**
@@ -1147,6 +1172,60 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'opaque' => true ), $plan->get_pricing_policy() );
 		$this->assertNull( Plans::get( 999999 ) );
 		$this->assertNull( Plans::get( 0 ) );
+	}
+
+	/**
+	 * @testdox update and get throw on a failed plan read instead of reporting the plan missing.
+	 */
+	public function test_update_and_get_throw_on_a_failed_plan_read(): void {
+		$id = $this->create();
+
+		$this->fail_next_query( '/^\s*SELECT p\.\* FROM \S*selling_plans p /' );
+		try {
+			Plans::update(
+				$id,
+				array(
+					'extension_slug' => self::OWNER,
+					'name'           => 'Renamed',
+				)
+			);
+			$this->fail( 'Expected update() to throw.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( "Failed to read plan {$id}", $e->getMessage() );
+		}
+
+		$this->fail_next_query( '/^\s*SELECT \* FROM \S*selling_plans WHERE id/' );
+		try {
+			Plans::get( $id );
+			$this->fail( 'Expected get() to throw.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( "Failed to read plan {$id}", $e->getMessage() );
+		}
+
+		$this->assertSame( 'Monthly', $this->stored( $id )->get_name() );
+	}
+
+	/**
+	 * @testdox list and get_meta throw on a failed read instead of returning an empty value.
+	 */
+	public function test_list_and_get_meta_throw_on_a_failed_read(): void {
+		$id = $this->create();
+
+		$this->fail_next_query( '/^\s*SELECT \* FROM \S*selling_plans\b.* LIMIT /s' );
+		try {
+			Plans::list();
+			$this->fail( 'Expected list() to throw.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Failed to read plans', $e->getMessage() );
+		}
+
+		$this->fail_next_query( '/^\s*SELECT meta_key, meta_value FROM \S*selling_plan_meta/' );
+		try {
+			Plans::get_meta( $id, 'note', true );
+			$this->fail( 'Expected get_meta() to throw.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( "Failed to read plan meta for plan {$id}", $e->getMessage() );
+		}
 	}
 
 	/**

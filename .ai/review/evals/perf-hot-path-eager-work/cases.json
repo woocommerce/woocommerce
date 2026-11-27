@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G27A-v4",
+			"path": "plugins/woocommerce/includes/class-wc-eval-27.php",
+			"before": {
+				"file": "fixtures/G27A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G27A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-27.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    $ids = get_posts( array( 'post_type' => 'product', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids' ) );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G27B-v4",
+			"path": "plugins/woocommerce/includes/class-wc-eval-27.php",
+			"before": {
+				"file": "fixtures/G27B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G27B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-27.php",
+						"lines": [
+							4,
+							5
+						],
+						"anchor": "    if ( ! is_checkout() ) { return; }"
+					}
+				]
+			}
+		},
+		{
+			"id": "G27C-v4",
+			"path": "plugins/woocommerce/includes/class-wc-eval-27.php",
+			"before": {
+				"code": "<?php\n/* Authenticated asset-inventory admin screen. The shipped asset directories contain release files; renderer accepts CSS and JS paths. */\nfunction wc_asset_inventory_screen() { $files = glob( WC_ABSPATH . 'assets/css/*.css' ) ?: array(); render_inventory_table( $files ); } add_action( 'load-woocommerce_page_asset-inventory', 'wc_asset_inventory_screen' );\n"
+			},
+			"after": {
+				"code": "<?php\n/* Authenticated asset-inventory admin screen. The shipped asset directories contain release files; renderer accepts CSS and JS paths. */\nfunction wc_asset_inventory_screen() { $files = glob( WC_ABSPATH . 'assets/css/*.css' ) ?: array(); $files = array_merge( $files, glob( WC_ABSPATH . 'assets/js/*.js' ) ?: array() ); render_inventory_table( $files ); } add_action( 'load-woocommerce_page_asset-inventory', 'wc_asset_inventory_screen' );\n"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G27D-v4",
+			"path": "plugins/woocommerce/includes/class-wc-eval-27.php",
+			"before": {
+				"code": "<?php\nfinal class WC_Eval_Mailer_Service {\n    private $emails = null;\n    public function get_emails() {\n        if ( null === $this->emails ) { $this->emails = WC()->mailer()->get_emails(); }\n        return $this->emails;\n    }\n}\nadd_action( 'init', static function() { $GLOBALS['wc_eval_mailer'] = new WC_Eval_Mailer_Service(); } );\n"
+			},
+			"after": {
+				"code": "<?php\nfinal class WC_Eval_Mailer_Service {\n    private $load;\n    private $emails = null;\n    public function __construct() {\n        $this->load = 'load_emails';\n    }\n    private function load_emails() {\n        if ( null === $this->emails ) { $this->emails = WC()->mailer()->get_emails(); }\n        return $this->emails;\n    }\n    public function get_emails() { return $this->{$this->load}(); }\n}\nadd_action( 'init', static function() { $GLOBALS['wc_eval_mailer'] = new WC_Eval_Mailer_Service(); } );\n"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

@@ -117,7 +117,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</label>
 				</th>
 				<td class="forminp">
-					<input name="webhook_delivery_url" id="webhook_delivery_url" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_delivery_url() ); ?>" />
+					<?php // esc_attr() keeps entities such as &amp; as they are, so the browser would decode them and send back a different URL. esc_textarea() encodes them again. ?>
+					<input name="webhook_delivery_url" id="webhook_delivery_url" type="text" class="input-text regular-input" value="<?php echo esc_textarea( $webhook->get_delivery_url() ); ?>" />
 				</td>
 			</tr>
 			<tr valign="top">
@@ -163,6 +164,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</select>
 				</td>
 			</tr>
+			<?php if ( $webhook->get_id() ) : ?>
+				<tr valign="top">
+					<th scope="row" class="titledesc">
+						<span class="wc-settings-radio-title">
+							<?php esc_html_e( 'Author', 'woocommerce' ); ?>
+							<?php echo wc_help_tip( __( 'Payloads are built as this user. Changing the delivery URL makes you the author.', 'woocommerce' ) ); ?>
+						</span>
+					</th>
+					<td class="forminp forminp-static">
+						<?php
+						$webhook_author = get_userdata( $webhook->get_user_id() );
+
+						if ( $webhook_author ) {
+							/* translators: 1: user display name, 2: username */
+							$webhook_author_label = sprintf( __( '%1$s (%2$s)', 'woocommerce' ), $webhook_author->display_name, $webhook_author->user_login );
+							$webhook_author_link  = get_edit_user_link( $webhook_author->ID );
+
+							echo $webhook_author_link ? '<a href="' . esc_url( $webhook_author_link ) . '">' . esc_html( $webhook_author_label ) . '</a>' : esc_html( $webhook_author_label );
+						} else {
+							esc_html_e( 'None', 'woocommerce' );
+						}
+						?>
+					</td>
+				</tr>
+			<?php endif; ?>
 		</tbody>
 	</table>
 
@@ -186,7 +212,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<th scope="row" class="titledesc">
 							<?php esc_html_e( 'Created at', 'woocommerce' ); ?>
 						</th>
-						<td class="forminp">
+						<td class="forminp forminp-static">
 							<?php echo esc_html( date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $webhook->get_date_created()->date( 'Y-m-d H:i:s' ) ) ) ); ?>
 						</td>
 					</tr>
@@ -195,7 +221,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<th scope="row" class="titledesc">
 							<?php esc_html_e( 'Created at', 'woocommerce' ); ?>
 						</th>
-						<td class="forminp">
+						<td class="forminp forminp-static">
 							<?php echo esc_html( date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $webhook->get_date_created()->date( 'Y-m-d H:i:s' ) ) ) ); ?>
 						</td>
 					</tr>
@@ -203,7 +229,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<th scope="row" class="titledesc">
 							<?php esc_html_e( 'Updated at', 'woocommerce' ); ?>
 						</th>
-						<td class="forminp">
+						<td class="forminp forminp-static">
 							<?php echo esc_html( date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $webhook->get_date_modified()->date( 'Y-m-d H:i:s' ) ) ) ); ?>
 						</td>
 					</tr>
@@ -216,11 +242,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php
 						if ( $webhook->get_id() ) :
 							$delete_url = wp_nonce_url(
-								add_query_arg(
+								WC_Admin_Webhooks::get_list_url(
 									array(
 										'delete' => $webhook->get_id(),
-									),
-									admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' )
+									)
 								),
 								'delete-webhook'
 							);

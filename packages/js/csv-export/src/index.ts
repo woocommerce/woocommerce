@@ -1,8 +1,3 @@
-/**
- * External dependencies
- */
-import { saveAs } from 'browser-filesaver'; // TODO: Replace this with https://www.npmjs.com/package/file-saver since browser-filesaver is not maintained anymore.
-
 export type Header = {
 	label: string;
 	key: string;
@@ -38,7 +33,7 @@ function escapeCSVValue( value: string | number ) {
 			String.fromCharCode( 0x0d ), // carriage return
 		].includes( stringValue.charAt( 0 ) )
 	) {
-		stringValue = '"\'' + stringValue + '"';
+		stringValue = '"\'' + stringValue.replace( /"/g, '""' ) + '"';
 	} else if ( stringValue.match( /[,"\s]/ ) ) {
 		stringValue = '"' + stringValue.replace( /"/g, '""' ) + '"';
 	}
@@ -137,7 +132,16 @@ export function generateCSVFileName(
  * @param {string} content  Contents of the file to download
  */
 export function downloadCSVFile( fileName: string, content: BlobPart ) {
-	const blob = new Blob( [ content ], { type: 'text/csv;charset=utf-8' } );
+	// Preserve the UTF-8 byte order mark so spreadsheet apps read the encoding correctly.
+	const blob = new Blob( [ '\uFEFF', content ], {
+		type: 'text/csv;charset=utf-8',
+	} );
+	const url = URL.createObjectURL( blob );
+	const link = document.createElement( 'a' );
+	link.href = url;
+	link.download = fileName || 'download';
+	link.click();
 
-	saveAs( blob, fileName );
+	// Browsers can begin reading the URL after the click handler has returned.
+	setTimeout( () => URL.revokeObjectURL( url ), 40_000 );
 }

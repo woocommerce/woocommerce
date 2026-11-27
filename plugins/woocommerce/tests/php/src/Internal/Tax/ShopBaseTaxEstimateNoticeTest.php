@@ -293,14 +293,10 @@ class ShopBaseTaxEstimateNoticeTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_matched_rates', $break_rates );
 
-		try {
-			$notice = $this->sut->get_notice();
+		$notice = $this->sut->get_notice();
 
-			$this->assertStringContainsString( 'your store base address', $notice['estimate'] );
-			$this->assertStringContainsString( 'Standard rate: &ndash;', $notice['estimate'] );
-		} finally {
-			remove_filter( 'woocommerce_matched_rates', $break_rates );
-		}
+		$this->assertStringContainsString( 'your store base address', $notice['estimate'] );
+		$this->assertStringContainsString( 'Standard rate: &ndash;', $notice['estimate'] );
 	}
 
 	/**

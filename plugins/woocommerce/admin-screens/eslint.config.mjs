@@ -31,6 +31,14 @@ const rulesOf = ( configs ) =>
 	Object.assign( {}, ...configs.map( ( config ) => config.rules ?? {} ) );
 
 export default [
+	{
+		// wp-build transpiles each package into these folders.
+		ignores: [
+			'packages/*/build/',
+			'packages/*/build-module/',
+			'packages/*/build-types/',
+		],
+	},
 	...woocommerce.map( escalateWarnings ),
 	{
 		files: [ '**/*.ts', '**/*.tsx' ],

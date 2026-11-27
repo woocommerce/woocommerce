@@ -23,6 +23,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		'core/columns',
 		'core/column',
 		'core/heading',
+		'core/image',
 		'core/paragraph',
 		'core/list',
 		'core/list-item',
@@ -34,6 +35,13 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * @var Renderer
 	 */
 	private $renderer;
+
+	/**
+	 * Block types replaced in setUp.
+	 *
+	 * @var array<\WP_Block_Type|false>
+	 */
+	private array $original_block_types = array();
 
 	/**
 	 * Set up before each test
@@ -50,16 +58,31 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		foreach ( self::USED_CORE_BLOCKS as $block ) {
 			$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( $block );
 			$this->assertInstanceOf( \WP_Block_Type::class, $block_type );
-			$settings = array(
+			$settings                     = array(
 				'title'    => $block_type->title,
 				'name'     => $block_type->name,
 				'category' => $block_type->category,
 				'supports' => $block_type->supports ?? array(),
 			);
-			\WP_Block_Type_Registry::get_instance()->unregister( $block );
-			$settings = $initializer->update_block_settings( $settings );
+			$this->original_block_types[] = \WP_Block_Type_Registry::get_instance()->unregister( $block );
+			$settings                     = $initializer->update_block_settings( $settings );
 			register_block_type( $block, $settings );
 		}
+	}
+
+	/**
+	 * Put back the block types replaced in setUp, so later tests see the real ones.
+	 */
+	public function tearDown(): void {
+		$registry = \WP_Block_Type_Registry::get_instance();
+		foreach ( $this->original_block_types as $block_type ) {
+			if ( $block_type instanceof \WP_Block_Type ) {
+				$registry->unregister( $block_type->name );
+				$registry->register( $block_type );
+			}
+		}
+		$this->original_block_types = array();
+		parent::tearDown();
 	}
 
 	/**
@@ -263,6 +286,204 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$style    = $this->extractBlockStyle( $rendered['html'], 'wp-block-column-test', 'td' );
 		$this->assertStringContainsString( 'color: #ff6900', $style ); // luminous-vivid-orange is #ff6900.
 		$this->assertStringContainsString( 'background-color: #000', $style ); // black is #000.
+	}
+
+	/**
+	 * Test columns whose saved widths add up to more than 100% are shrunk to fit the email, images included.
+	 */
+	public function testItShrinksColumnsThatAddUpToMoreThanTheEmailWidth(): void {
+		$column        = '<!-- wp:column {"width":"100%"} --><div class="wp-block-column" style="flex-basis:100%"><!-- wp:image {"sizeSlug":"large"} --><figure class="wp-block-image size-large"><img src="https://example.com/image.jpg" alt=""/></figure><!-- /wp:image --></div><!-- /wp:column -->';
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:columns --><div class="wp-block-columns">' . $column . $column . '</div><!-- /wp:columns -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+
+		preg_match_all( '/<td[^>]*class="[^"]*wp-block-column[^"]*"[^>]*width="([^"]+)"/', $rendered['html'], $column_widths );
+		preg_match_all( '/<img(?=[^>]*example\.com\/image\.jpg)[^>]*width="(\d+)"/', $rendered['html'], $image_widths );
+		$this->assertCount( 2, $column_widths[1] );
+		$this->assertCount( 2, $image_widths[1] );
+
+		$this->assertMatchesRegularExpression( '/^\d+$/', $column_widths[1][0], 'The column cell declares the shrunk width in whole pixels, not the saved 100%.' );
+		$column_width = (float) $column_widths[1][0];
+		$this->assertSame( $column_widths[1][0], $column_widths[1][1] );
+		$this->assertLessThanOrEqual( 660, $column_width * 2, 'Both columns fit within the 660px email.' );
+		$this->assertLessThanOrEqual( $column_width, (float) $image_widths[1][0], 'The image is no wider than its column.' );
+		$this->assertLessThanOrEqual( $column_width, (float) $image_widths[1][1], 'The image is no wider than its column.' );
+	}
+
+	/**
+	 * Test a site palette color email clients can’t render is left out of the sent email.
+	 *
+	 * Twenty Twenty-Five defines `accent-6` as color-mix(). A block reaches a palette color by its
+	 * slug, by its `has-*` class and by its preset variable, so the test checks the final HTML
+	 * rather than one lookup.
+	 */
+	public function testItLeavesOutSitePaletteColorsEmailClientsCannotRender(): void {
+		add_filter(
+			'woocommerce_email_editor_site_theme',
+			static function () {
+				return new \WP_Theme_JSON(
+					array(
+						'version'  => 3,
+						'settings' => array(
+							'color' => array(
+								'palette' => array(
+									array(
+										'slug'  => 'accent-6',
+										'name'  => 'Accent 6',
+										'color' => 'color-mix(in srgb, currentColor 20%, transparent)',
+									),
+									array(
+										'slug'  => 'accent-1',
+										'name'  => 'Accent 1',
+										'color' => '#ffee58',
+									),
+								),
+							),
+						),
+					),
+					'theme'
+				);
+			}
+		);
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:paragraph {"textColor":"accent-6"} --><p class="text-test has-accent-6-color has-text-color">Text</p><!-- /wp:paragraph -->
+				<!-- wp:paragraph {"backgroundColor":"accent-6"} --><p class="background-test has-accent-6-background-color has-background">Background</p><!-- /wp:paragraph -->
+				<!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|accent-6"}}}}} --><p class="has-link-color"><a class="link-test" href="https://example.com">Link</a></p><!-- /wp:paragraph -->
+				<!-- wp:paragraph {"textColor":"accent-1"} --><p class="control-test has-accent-1-color has-text-color">Control</p><!-- /wp:paragraph -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+
+		$this->assertStringNotContainsString( 'color-mix', $rendered['html'], 'A color email clients cannot render should not be sent.' );
+		$this->assertStringNotContainsString( 'color', $this->extractBlockStyle( $rendered['html'], 'text-test', 'p' ), 'The text should keep the surrounding color.' );
+		$this->assertStringNotContainsString( 'background', $this->extractBlockStyle( $rendered['html'], 'background-test', 'td' ), 'The block should keep the surrounding background.' );
+		$this->assertStringNotContainsString( 'color', $this->extractBlockStyle( $rendered['html'], 'link-test', 'a' ), 'The link should not point at a color the email does not have.' );
+		$this->assertStringContainsString( 'color: #ffee58', $this->extractBlockStyle( $rendered['html'], 'control-test', 'p' ), 'A hex palette color should still be inlined.' );
+	}
+
+	/**
+	 * Test site colors that point at a palette color still reach the sent email.
+	 *
+	 * A palette color can name another one, and a site style can name one of core’s colors, as the
+	 * button text of Twenty Twenty-Four’s Fossil style does.
+	 */
+	public function testItKeepsSiteColorsThatPointAtAPaletteColor(): void {
+		add_filter(
+			'woocommerce_email_editor_site_theme',
+			static function () {
+				return new \WP_Theme_JSON(
+					array(
+						'version'  => 3,
+						'settings' => array(
+							'color' => array(
+								'palette' => array(
+									array(
+										'slug'  => 'contrast',
+										'name'  => 'Contrast',
+										'color' => '#111111',
+									),
+									array(
+										'slug'  => 'primary',
+										'name'  => 'Primary',
+										'color' => 'var(--wp--preset--color--contrast)',
+									),
+								),
+							),
+						),
+						'styles'   => array(
+							'elements' => array(
+								'button' => array(
+									'color' => array(
+										'text'       => 'var(--wp--preset--color--white)',
+										'background' => '#65574e',
+									),
+								),
+							),
+						),
+					),
+					'theme'
+				);
+			}
+		);
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:paragraph {"textColor":"primary"} --><p class="alias-test has-primary-color has-text-color">Text</p><!-- /wp:paragraph -->
+				<!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|primary"}}}}} --><p class="has-link-color"><a class="alias-link-test" href="https://example.com">Link</a></p><!-- /wp:paragraph -->
+				<!-- wp:button --><div class="wp-block-button button-test"><a class="wp-block-button__link wp-element-button">Button</a></div><!-- /wp:button -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+
+		$this->assertStringContainsString( 'color: #111111', $this->extractBlockStyle( $rendered['html'], 'alias-test', 'p' ) );
+		$this->assertStringContainsString( 'color: #111111', $this->extractBlockStyle( $rendered['html'], 'alias-link-test', 'a' ), 'A link color that points at the alias should resolve too.' );
+		$button_style = $this->extractBlockStyle( $rendered['html'], 'button-test', 'td' );
+		$this->assertStringContainsString( 'background-color: #65574e', $button_style );
+		$this->assertStringContainsString( 'color: #ffffff', $button_style );
+	}
+
+	/**
+	 * A block can carry a string `style` attribute instead of a style object (Calendly saves "style":"inline").
+	 * The renderer treats it as absent, so the email renders instead of throwing and falling back to the legacy design.
+	 *
+	 * @dataProvider string_style_attribute_provider
+	 *
+	 * @param string $post_content Block markup with a paragraph that has a string `style` attribute.
+	 * @param string $expected_style A declaration the paragraph still gets from its other attributes.
+	 */
+	public function testItRendersAParagraphWithAStringStyleAttribute( string $post_content, string $expected_style ): void {
+		$email_post_id = $this->factory->post->create( array( 'post_content' => $post_content ) );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+
+		$this->assertStringContainsString( $expected_style, $this->extractBlockStyle( $rendered['html'], 'string-style', 'td' ) );
+	}
+
+	/**
+	 * One case per reader that merges or writes to the block's style.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function string_style_attribute_provider(): array {
+		return array(
+			'text color (Styles_Helper)'                 => array(
+				'<!-- wp:paragraph {"style":"inline","textColor":"luminous-vivid-orange"} --><p class="string-style has-luminous-vivid-orange-color has-text-color">Book a call</p><!-- /wp:paragraph -->',
+				'color: #ff6900',
+			),
+			'font size preset (Typography_Preprocessor)' => array(
+				'<!-- wp:paragraph {"style":"inline","fontSize":"large"} --><p class="string-style has-large-font-size">Book a call</p><!-- /wp:paragraph -->',
+				'font-size: 24px',
+			),
+			'string typography with a font size preset'  => array(
+				'<!-- wp:paragraph {"style":{"typography":"inline"},"fontSize":"large"} --><p class="string-style has-large-font-size">Book a call</p><!-- /wp:paragraph -->',
+				'font-size: 24px',
+			),
+			'quote with string typography'               => array(
+				'<!-- wp:quote {"style":{"typography":"inline"}} --><blockquote class="wp-block-quote"><!-- wp:paragraph {"fontSize":"large"} --><p class="string-style has-large-font-size">Book a call</p><!-- /wp:paragraph --></blockquote><!-- /wp:quote -->',
+				'font-size: 24px',
+			),
+			'paragraph in a quote (Quote_Preprocessor)'  => array(
+				'<!-- wp:quote {"style":{"typography":{"fontSize":"18px"}}} --><blockquote class="wp-block-quote" style="font-size:18px"><!-- wp:paragraph {"style":"inline"} --><p class="string-style">Book a call</p><!-- /wp:paragraph --></blockquote><!-- /wp:quote -->',
+				'font-size: 18px',
+			),
+		);
 	}
 
 	/**

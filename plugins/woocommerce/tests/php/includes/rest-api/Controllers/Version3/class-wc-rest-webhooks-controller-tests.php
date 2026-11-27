@@ -351,6 +351,90 @@ class WC_REST_Webhooks_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Changing another user's webhook delivery URL makes the editor its author, while other edits keep the original author.
+	 *
+	 * @testWith [{"delivery_url": "https://example.com/shop-manager-receiver"}, true]
+	 *           [{"name": "Renamed by the shop manager"}, false]
+	 *           [{"name": "Sent back whole", "delivery_url": "https://example.com/admin-integration"}, false]
+	 *
+	 * @param array $changes          The fields the shop manager updates.
+	 * @param bool  $editor_is_author Whether the shop manager should become the author.
+	 */
+	public function test_payload_is_built_as_whoever_set_the_delivery_url( array $changes, bool $editor_is_author ): void {
+		$admin_id        = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$shop_manager_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		$customer_id     = self::factory()->user->create( array( 'role' => 'customer' ) );
+		update_user_meta( $customer_id, 'loyalty_token', 'fixture-value' );
+
+		$webhook = new WC_Webhook();
+		$webhook->set_user_id( $admin_id );
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'customer.created' );
+		$webhook->set_delivery_url( self::PING_URL_PREFIX . 'admin-integration' );
+		$webhook->save();
+
+		wp_set_current_user( $shop_manager_id );
+		$response = $this->do_rest_request( 'webhooks/' . $webhook->get_id(), 'PUT', $changes );
+		$this->assertSame( 200, $response->get_status() );
+
+		$webhook   = wc_get_webhook( $webhook->get_id() );
+		$meta_keys = wp_list_pluck( $webhook->build_payload( $customer_id )['meta_data'] ?? array(), 'key' );
+
+		$this->assertSame( $editor_is_author ? $shop_manager_id : $admin_id, $webhook->get_user_id(), 'Unexpected webhook author after the edit.' );
+		$this->assertSame( ! $editor_is_author, in_array( 'loyalty_token', $meta_keys, true ), 'The payload should be built as the current author of the webhook.' );
+	}
+
+	/**
+	 * @testdox Sending back the filtered URL preserves the stored URL and author.
+	 */
+	public function test_filtered_delivery_url_round_trip_keeps_author(): void {
+		$admin_id        = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$shop_manager_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		$stored_url      = self::PING_URL_PREFIX . 'admin-integration';
+		$webhook         = new WC_Webhook();
+		$webhook->set_user_id( $admin_id );
+		$webhook->set_topic( 'customer.created' );
+		$webhook->set_delivery_url( $stored_url );
+		$webhook->save();
+
+		wp_set_current_user( $shop_manager_id );
+		$path = 'webhooks/' . $webhook->get_id();
+		add_filter( 'woocommerce_webhook_delivery_url', static fn( $url ) => add_query_arg( 'source', 'store', $url ) );
+		$read = $this->do_rest_get_request( $path );
+		$this->assertSame( 200, $read->get_status() );
+		$delivery_url = $read->get_data()['delivery_url'];
+		$this->assertSame( $stored_url . '?source=store', $delivery_url );
+
+		$response = $this->do_rest_request( $path, 'PUT', array( 'delivery_url' => $delivery_url ) );
+		$this->assertSame( 200, $response->get_status() );
+		$saved = wc_get_webhook( $webhook->get_id() );
+		$this->assertSame( $stored_url, $saved->get_data()['delivery_url'] );
+		$this->assertSame( $admin_id, $saved->get_user_id() );
+	}
+
+	/**
+	 * @testdox Changing the delivery URL without a logged-in user keeps the existing author.
+	 */
+	public function test_delivery_url_change_without_a_user_keeps_the_author(): void {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+
+		$webhook = new WC_Webhook();
+		$webhook->set_user_id( $admin_id );
+		$webhook->set_topic( 'customer.created' );
+		$webhook->set_delivery_url( self::PING_URL_PREFIX . 'admin-integration' );
+		$webhook->save();
+
+		// Code that grants REST access to scheduled tasks lets a request through with no user.
+		wp_set_current_user( 0 );
+		add_filter( 'woocommerce_rest_check_permissions', '__return_true' );
+
+		$response = $this->do_rest_request( 'webhooks/' . $webhook->get_id(), 'PUT', array( 'delivery_url' => self::PING_URL_PREFIX . 'scheduled-task' ) );
+		$this->assertSame( 200, $response->get_status() );
+
+		$this->assertSame( $admin_id, wc_get_webhook( $webhook->get_id() )->get_user_id() );
+	}
+
+	/**
 	 * Create webhooks, returning their IDs in creation order.
 	 *
 	 * @param int $count How many webhooks to create.

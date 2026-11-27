@@ -25,6 +25,12 @@
 				font-weight: inherit;
 				display: block;
 			}
+
+			// The email value is an <address>, which browsers show in italics.
+			> address.wc-block-order-confirmation-summary-list-item__value {
+				font-style: inherit;
+				margin: 0;
+			}
 		}
 
 		@media (max-width: #{$break-small}) {

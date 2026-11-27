@@ -84,15 +84,6 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_layered_nav_count_cache_max_entries' );
-
-		$attribute_ids_by_name = wc_get_attribute_taxonomy_ids();
-		foreach ( array_keys( $attribute_ids_by_name ) as $attribute_name ) {
-			$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
-			$taxonomy_name  = wc_attribute_taxonomy_name( $attribute_name );
-			unregister_taxonomy( $taxonomy_name );
-		}
-
 		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 		\WC_Query::reset_chosen_attributes();
 		parent::tearDown();
@@ -355,7 +346,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$main_product_in_stock = ! empty(
 				array_filter(
 					$data['variations'],
-					function( $variation ) {
+					function ( $variation ) {
 						return $variation['in_stock'];
 					}
 				)
@@ -618,7 +609,11 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		} finally {
 			remove_filter( 'woocommerce_get_filtered_term_product_counts_query', $scope_to_owned_products );
 		}
-		$this->assertEqualsCanonicalizing( $expected, $term_counts );
+		$this->assertCount( count( $expected ), $term_counts, 'Only the expected terms should be counted.' );
+		foreach ( $expected as $term_id => $count ) {
+			$this->assertArrayHasKey( $term_id, $term_counts, 'The expected term ID must be present.' );
+			$this->assertSame( $count, $term_counts[ $term_id ], 'The count must belong to the expected term ID.' );
+		}
 	}
 
 	/**
@@ -1605,5 +1600,103 @@ class FiltererTest extends \WC_Unit_Test_Case {
 
 		$this->assert_counters( 'Color', $expected_to_be_visible ? array( 'Blue' ) : array() );
 		$this->assert_counters( 'Size', $expected_to_be_visible ? array( 'Medium' ) : array() );
+	}
+
+	/**
+	 * @testdox Counts respect OR selections on other attributes.
+	 *
+	 * @testWith ["or"]
+	 *           ["and"]
+	 *
+	 * @param string $query_type The query type of the widget being counted.
+	 */
+	public function test_counts_respect_other_or_attributes( string $query_type ): void {
+		$this->set_use_lookup_table( true );
+		$this->create_product_attribute( 'FacetColor', array( 'Red', 'Blue', 'Green' ) );
+		$this->create_product_attribute( 'FacetSize', array( 'Small', 'Large' ) );
+		$this->create_simple_product(
+			array(
+				'FacetColor' => array( 'Red' ),
+				'FacetSize'  => array( 'Small' ),
+			),
+			true
+		);
+		$this->create_simple_product(
+			array(
+				'FacetColor' => array( 'Blue' ),
+				'FacetSize'  => array( 'Small' ),
+			),
+			true
+		);
+		$this->create_simple_product(
+			array(
+				'FacetColor' => array( 'Green' ),
+				'FacetSize'  => array( 'Large' ),
+			),
+			true
+		);
+
+		$this->do_product_request( array( 'FacetSize' => array( 'Small' ) ), array( 'FacetSize' => 'or' ) );
+		$this->assert_counters( 'FacetColor', array( 'Red', 'Blue' ), $query_type );
+
+		\WC_Query::reset_chosen_attributes();
+		$this->do_product_request(
+			array(
+				'FacetSize'  => array( 'Small' ),
+				'FacetColor' => array( 'Red' ),
+			),
+			array(
+				'FacetSize'  => 'or',
+				'FacetColor' => 'or',
+			)
+		);
+		$this->assert_counters( 'FacetColor', 'or' === $query_type ? array( 'Red', 'Blue' ) : array( 'Red' ), $query_type );
+
+		unset( $_GET['filter_facetcolor'], $_GET['query_type_facetcolor'] );
+		\WC_Query::reset_chosen_attributes();
+		$this->do_product_request( array( 'FacetSize' => array( 'Large' ) ), array( 'FacetSize' => 'or' ) );
+		$this->assert_counters( 'FacetColor', array( 'Green' ), $query_type );
+	}
+
+	/**
+	 * @testdox Other OR selections use the selected variation's stock when counting products.
+	 *
+	 * @testWith [true, ["Blue"]]
+	 *           [false, ["Blue", "Green"]]
+	 *
+	 * @param bool     $hide_out_of_stock Whether to hide out-of-stock variations.
+	 * @param string[] $expected_colors Colors available after selecting Small.
+	 */
+	public function test_other_or_counts_respect_variation_stock( bool $hide_out_of_stock, array $expected_colors ): void {
+		$this->set_use_lookup_table( true );
+		$this->set_hide_out_of_stock_items( $hide_out_of_stock );
+		$this->create_product_attribute( 'FacetColor', array( 'Blue', 'Green' ) );
+		$this->create_product_attribute( 'FacetSize', array( 'Small', 'Medium', 'Large' ) );
+		$this->create_simple_product(
+			array(
+				'FacetColor' => array( 'Blue' ),
+				'FacetSize'  => array( 'Small' ),
+			),
+			true
+		);
+		$this->create_variable_product(
+			array(
+				'variation_attributes'     => array( 'FacetSize' => array( 'Small', 'Large' ) ),
+				'non_variation_attributes' => array( 'FacetColor' => array( 'Green' ) ),
+				'variations'               => array(
+					array(
+						'in_stock'            => false,
+						'defining_attributes' => array( 'FacetSize' => 'Small' ),
+					),
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array( 'FacetSize' => 'Large' ),
+					),
+				),
+			)
+		);
+
+		$this->do_product_request( array( 'FacetSize' => array( 'Small', 'Medium' ) ), array( 'FacetSize' => 'or' ) );
+		$this->assert_counters( 'FacetColor', $expected_colors, 'or' );
 	}
 }

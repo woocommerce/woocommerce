@@ -47,14 +47,6 @@ class ShopperListsControllerTests extends WC_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		if ( null !== $this->sut ) {
-			$endpoint = $this->sut->get_wishlist_endpoint();
-			remove_filter( 'woocommerce_get_query_vars', array( $this->sut, 'add_wishlist_query_var' ) );
-			remove_filter( 'woocommerce_account_menu_items', array( $this->sut, 'add_wishlist_menu_item' ) );
-			remove_filter( 'woocommerce_endpoint_' . $endpoint . '_title', array( $this->sut, 'wishlist_endpoint_title' ) );
-			remove_action( 'woocommerce_account_' . $endpoint . '_endpoint', array( $this->sut, 'render_wishlist_endpoint' ) );
-		}
-
 		foreach ( array_keys( self::LIST_OPTIONS ) as $slug ) {
 			$this->disable_list( $slug );
 		}

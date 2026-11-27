@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Explain on the delete user screen what happens to webhooks that are attributed to another user.

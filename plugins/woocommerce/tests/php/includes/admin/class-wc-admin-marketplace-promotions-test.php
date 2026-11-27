@@ -33,22 +33,11 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 	);
 
 	/**
-	 * Callback registered on option_active_plugins by tests that need a plugin to read as active.
-	 *
-	 * @var callable|null
-	 */
-	private $active_plugins_filter = null;
-
-	/**
 	 * Clean up state between tests.
 	 */
 	public function tearDown(): void {
 		delete_transient( WC_Admin_Marketplace_Promotions::TRANSIENT_NAME );
 		delete_option( 'woocommerce_allow_tracking' );
-		if ( null !== $this->active_plugins_filter ) {
-			remove_filter( 'option_active_plugins', $this->active_plugins_filter );
-			$this->active_plugins_filter = null;
-		}
 		$this->reset_orders_promo_cache();
 		wp_set_current_user( 0 );
 
@@ -180,11 +169,10 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 		// Force WooCommerce itself to read as an active plugin, then include its slug in the
 		// exclusion list. This proves not[ or[ plugins_activated... ] ] suppresses when ANY
 		// listed plugin is active (the encoding that a single plugins_activated list would get wrong).
-		// The callback is stored so tearDown removes only it, not unrelated filters on the hook.
-		$this->active_plugins_filter = static function (): array {
+		$active_plugins_filter = static function (): array {
 			return array( 'woocommerce/woocommerce.php' );
 		};
-		add_filter( 'option_active_plugins', $this->active_plugins_filter );
+		add_filter( 'option_active_plugins', $active_plugins_filter );
 
 		$rules    = $this->pilot_rules();
 		$rules[3] = $this->add_on_exclusion_rule( array( 'woocommerce' ) );

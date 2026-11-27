@@ -2,11 +2,14 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes\Reviews;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 
 /**
  * ProductReviewsPaginationNumbers class.
  */
 class ProductReviewsPaginationNumbers extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -54,25 +57,5 @@ class ProductReviewsPaginationNumbers extends AbstractBlock {
 			$wrapper_attributes,
 			$content
 		);
-	}
-
-	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @see $this->register_block_type()
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string|null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return string|null
-	 */
-	protected function get_block_type_style() {
-		return null;
 	}
 }

@@ -6,15 +6,17 @@
  * The contract is the live source of truth. A chain is NOT a stored entity: it is
  * the pair `(contract_id, kind)`, with its head and counters derived from the cycle
  * rows. The entity never carries a cycle graph in memory, so cycles are reached
- * through purpose-built reads ({@see self::find_cycle_history()}, etc.), appended one at a
+ * through purpose-built reads ({@see self::find_cycles()}, etc.), appended one at a
  * time ({@see self::append_cycle()}) and changed only through compare-and-set writes
  * ({@see self::transition_cycle()}). Cycle snapshot ids are stored as given and their
  * value objects attached on read. Meta is read and written only through the meta methods.
  *
  * Every update, meta write, cycle write and child write runs under the per-contract lock
  * ({@see ContractLock}): the caller's, or an internal one taken for an update or meta write made
- * without one; each child-table write fences its lock itself. The exception is {@see self::delete()},
- * the discard of a contract its creator still holds locked. No transactions, no object cache.
+ * without one; each child-table write fences its lock itself. Two exceptions: {@see self::delete()},
+ * the discard of a contract its creator still holds locked, and a history entry added without a
+ * lock ({@see self::add_history_entry()}), a single owner-scoped insert no held lock refuses. No
+ * transactions, no object cache.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage
  */
@@ -31,6 +33,8 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\HistoryEntry;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
@@ -41,6 +45,10 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Live contract repository with targeted cycle access.
+ *
+ * @internal Storage behind the `Api\` facades, not a supported extension surface. Arguments are
+ *           validated once, at the public boundary: owner slugs and other values arrive validated
+ *           and are not checked again here.
  */
 final class ContractRepository {
 
@@ -74,6 +82,17 @@ final class ContractRepository {
 	 * SQL condition: the contract row carries the live lock with the bound token.
 	 */
 	private const HOLDS_LOCK = 'lock_token = %s AND locked_until_gmt > UTC_TIMESTAMP()';
+
+	/**
+	 * {@see self::HOLDS_LOCK} on a contract row joined as `c`.
+	 */
+	private const C_HOLDS_LOCK = 'c.lock_token = %s AND c.locked_until_gmt > UTC_TIMESTAMP()';
+
+	/**
+	 * SQL condition: the row's owner is exactly the bound slug. The column's binary collation makes
+	 * the match case-sensitive, as the engine's PHP comparisons of the owner are.
+	 */
+	private const OWNER_MATCH = 'extension_slug = %s';
 
 	/**
 	 * Contract columns a lock may be conditioned on ({@see self::acquire_lock()}), mapped to the
@@ -110,7 +129,7 @@ final class ContractRepository {
 			return null;
 		}
 
-		$lock = new ContractLock( (int) $contract->get_id(), $operation, $token );
+		$lock = new ContractLock( (int) $contract->get_id(), (string) $contract->get_extension_slug(), $operation, $token );
 
 		$this->insert_children_or_discard( $contract, $lock );
 
@@ -185,7 +204,7 @@ final class ContractRepository {
 				continue;
 			}
 			if ( is_string( $value ) ) {
-				self::assert_fits_column( $table, $column, $value );
+				ColumnFit::assert_fits_column( $table, $column, $value );
 			}
 			$placeholders[] = '%s';
 			$values[]       = (string) $value;
@@ -310,7 +329,7 @@ final class ContractRepository {
 	 *
 	 * @param int $id Contract id.
 	 * @return Contract|null Hydrated contract, or null if not found.
-	 * @throws \RuntimeException If the contract row read fails.
+	 * @throws \RuntimeException If the contract row or a child read fails: a failed child read must not look like a contract without it.
 	 */
 	public function find( int $id ): ?Contract {
 		$row = $this->find_contract_row( $id );
@@ -333,6 +352,7 @@ final class ContractRepository {
 	 * @param int $contract_id Contract id.
 	 * @param int $customer_id Customer that must own the contract.
 	 * @return Contract|null Hydrated contract when owned by `$customer_id`, else null.
+	 * @throws \RuntimeException If the row or a child read fails: a failed read must not look like "not yours".
 	 */
 	public function find_for_customer( int $contract_id, int $customer_id ): ?Contract {
 		global $wpdb;
@@ -342,6 +362,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT {$select} FROM {$table} WHERE id = %d AND customer_id = %d", $contract_id, $customer_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
 		if ( ! is_array( $row ) ) {
 			return null;
 		}
@@ -354,6 +377,7 @@ final class ContractRepository {
 	 * items and addresses - the one full-read construction path.
 	 *
 	 * @param array<string, mixed> $row Contract row.
+	 * @throws \RuntimeException If a child read fails.
 	 */
 	private function hydrate_row( array $row ): Contract {
 		$id = Coercion::coerce_int( $row['id'] ?? 0 );
@@ -416,6 +440,7 @@ final class ContractRepository {
 	 *     @type string $search  A numeric term matches contract id or origin order id; a text term matches the owning customer.
 	 * }
 	 * @return array<int, Contract> Contracts in the requested order.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like no contracts.
 	 */
 	public function query( array $args = array() ): array {
 		global $wpdb;
@@ -452,6 +477,9 @@ final class ContractRepository {
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read contracts: %s', $wpdb->last_error ) ) );
+		}
 
 		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
 	}
@@ -566,6 +594,7 @@ final class ContractRepository {
 	 * the views count the whole store, not the current page).
 	 *
 	 * @return array<string, int> Status => count, every registered status present.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like zero counts.
 	 */
 	public function count_by_status(): array {
 		global $wpdb;
@@ -574,6 +603,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( "SELECT status, COUNT(*) AS total FROM {$table} GROUP BY status", ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to count contracts by status: %s', $wpdb->last_error ) ) );
+		}
 
 		// Seed every registered status at 0 so the map is complete and stably ordered.
 		$counts = array();
@@ -604,6 +636,7 @@ final class ContractRepository {
 	 *
 	 * @param array<string, mixed> $args Query args (only `status` and `search` are read).
 	 * @return int The matching contract count.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a zero count.
 	 */
 	public function count( array $args = array() ): int {
 		global $wpdb;
@@ -620,6 +653,9 @@ final class ContractRepository {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 			$total = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}", $params ) );
 		}
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to count contracts: %s', $wpdb->last_error ) ) );
+		}
 
 		return Coercion::coerce_int( $total );
 	}
@@ -633,6 +669,7 @@ final class ContractRepository {
 	 *
 	 * @param array<int, int> $contract_ids Contract ids to count items for.
 	 * @return array<int, int> Contract id => line-item count, one entry per requested id.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like zero items.
 	 */
 	public function count_items_by_contract( array $contract_ids ): array {
 		// Keep only scalar, positive ids (this is a public entry point): casting an object or
@@ -662,6 +699,9 @@ final class ContractRepository {
 		// The id placeholders join dynamically, so the sniff sees none in the literal.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT contract_id, COUNT(*) AS total FROM {$table} WHERE contract_id IN ({$placeholders}) GROUP BY contract_id", $ids ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to count contract items: %s', $wpdb->last_error ) ) );
+		}
 
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( ! is_array( $row ) ) {
@@ -683,6 +723,7 @@ final class ContractRepository {
 	 *
 	 * @param array<int, mixed> $rows Fetched rows (non-arrays are skipped).
 	 * @return array<int, Contract> Contracts in row order.
+	 * @throws \RuntimeException If the snapshot read fails.
 	 */
 	private function contracts_from_rows( array $rows ): array {
 		$clean_rows = array();
@@ -720,6 +761,7 @@ final class ContractRepository {
 	 * @param int                $limit  Maximum rows to return (the batch size).
 	 * @param array<int, string> $owners Owner slugs whose contracts may be selected.
 	 * @return array<int, array{id: int, extension_slug: string, next_payment_gmt: string}> Due rows, least recently locked first, then oldest-due.
+	 * @throws \RuntimeException If the scan fails: a failed scan must not look like "nothing due".
 	 */
 	public function find_due( DateTimeImmutable $now, int $limit, array $owners ): array {
 		if ( $limit < 1 ) {
@@ -761,13 +803,8 @@ final class ContractRepository {
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
-		// A failed scan otherwise reads exactly like "nothing due" and dispatch stalls
-		// store-wide with no signal; the return stays empty either way.
 		if ( '' !== $wpdb->last_error ) {
-			wc_get_logger()->error(
-				sprintf( 'ContractRepository::find_due(): due-index scan failed - due dispatch may stall until this is fixed. %s', $wpdb->last_error ),
-				array( 'source' => self::LOG_SOURCE )
-			);
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read due contracts: %s', $wpdb->last_error ) ) );
 		}
 
 		$result = array();
@@ -787,20 +824,22 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Take the contract's lock for `$operation`: one conditional UPDATE that lands only while
-	 * no live lock is held (an expired one is taken over) and every condition holds, stamped on
-	 * the database clock.
+	 * Take the contract's lock for `$operation`: one conditional UPDATE that lands only on a contract
+	 * of `$extension_slug`, while no live lock is held (an expired one is taken over) and every
+	 * condition holds, stamped on the database clock. Every contract write is owner-scoped here.
 	 *
-	 * @param int                  $contract_id Contract id.
-	 * @param string               $operation   Operation label, 1-64 of `[a-z0-9_-]`.
-	 * @param array<string, mixed> $conditions  Contract column => the value the caller read: a
-	 *                                          scalar must equal it, null requires NULL. Columns:
-	 *                                          {@see self::LOCK_CONDITION_COLUMNS}.
-	 * @return ContractLock|null The lock, or null when the contract is locked, missing or a condition fails.
+	 * @param int                  $contract_id    Contract id.
+	 * @param string               $extension_slug The expected owning extension.
+	 * @param string               $operation      Operation label, 1-64 of `[a-z0-9_-]`.
+	 * @param array<string, mixed> $conditions     Contract column => the value the caller read: a
+	 *                                             scalar must equal it, null requires NULL. Columns:
+	 *                                             {@see self::LOCK_CONDITION_COLUMNS}.
+	 * @return ContractLock|null The lock, or null when the contract is locked, missing, of another
+	 *                           extension, or a condition fails.
 	 * @throws \InvalidArgumentException If `$operation` is not a valid label, or a condition column or value is not accepted.
 	 * @throws \RuntimeException If the write fails.
 	 */
-	public function acquire_lock( int $contract_id, string $operation, array $conditions = array() ): ?ContractLock {
+	public function acquire_lock( int $contract_id, string $extension_slug, string $operation, array $conditions = array() ): ?ContractLock {
 		global $wpdb;
 
 		self::assert_operation( $operation );
@@ -808,11 +847,12 @@ final class ContractRepository {
 
 		$table        = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$no_live_lock = self::NO_LIVE_LOCK;
+		$owner_match  = self::OWNER_MATCH;
 		$token        = self::new_token();
-		$values       = array_merge( array( $token, ContractLock::TTL_SECONDS, $operation, $contract_id ), $condition_values );
+		$values       = array_merge( array( $token, ContractLock::TTL_SECONDS, $operation, $contract_id, $extension_slug ), $condition_values );
 
 		$sql = "UPDATE {$table} SET lock_token = %s, locked_until_gmt = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), lock_operation = %s
-			WHERE id = %d{$condition_sql} AND {$no_live_lock}";
+			WHERE id = %d AND {$owner_match}{$condition_sql} AND {$no_live_lock}";
 
 		// Fixed SQL fragments only; every value is a placeholder.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -822,29 +862,36 @@ final class ContractRepository {
 			throw new \RuntimeException( esc_html( sprintf( 'Failed to lock contract %d: %s', $contract_id, $wpdb->last_error ) ) );
 		}
 
-		return 1 === $updated ? new ContractLock( $contract_id, $operation, $token ) : null;
+		return 1 === $updated ? new ContractLock( $contract_id, $extension_slug, $operation, $token ) : null;
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Whether the contract exists and who holds its lock, read on the database clock. The
 	 * operation is set only while the lock is live. Writes use it to shape errors only (it may
-	 * lag on a replica), never to decide that a write landed.
+	 * lag on a replica), never to decide that a write landed. With `$extension_slug`, a contract
+	 * of another extension reads as missing.
 	 *
-	 * @param int $contract_id Contract id.
+	 * @param int         $contract_id    Contract id.
+	 * @param string|null $extension_slug The expected owning extension; null reads any contract.
 	 * @return array{exists: bool, operation: ?string}
 	 * @throws \RuntimeException If the read fails.
 	 */
-	private function get_lock_holder( int $contract_id ): array {
+	private function get_lock_holder( int $contract_id, ?string $extension_slug = null ): array {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
 		$lock_live = self::LOCK_LIVE;
 		$sql       = "SELECT {$lock_live} AS live, lock_operation FROM {$table} WHERE id = %d";
+		$values    = array( $contract_id );
+		if ( null !== $extension_slug ) {
+			$sql     .= ' AND ' . self::OWNER_MATCH;
+			$values[] = $extension_slug;
+		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
-		$row = $wpdb->get_row( $wpdb->prepare( $sql, $contract_id ), ARRAY_A );
+		$row = $wpdb->get_row( $wpdb->prepare( $sql, $values ), ARRAY_A );
 		if ( '' !== $wpdb->last_error ) {
 			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the lock on contract %d: %s', $contract_id, $wpdb->last_error ) ) );
 		}
@@ -939,7 +986,7 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Fence a child-table write (cycles, meta, items, addresses) made with `$lock`; within 60 s
+	 * Fence a child-table write (cycles, meta, items, addresses, history) made with `$lock`; within 60 s
 	 * of the lock's last database stamp it costs no query. Past that, the lock is extended once when
 	 * the local estimate gives 120 s or less left; otherwise it is re-verified on the database clock
 	 * and trusted for up to 60 s more, extended once with 60 s or less left, and refused once the
@@ -994,21 +1041,24 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Take the internal lock for a write made without one: null when the contract does not exist.
+	 * Take the internal lock for a write made without one: null when no contract of
+	 * `$extension_slug` has the id (a contract of another extension reads as missing, also while
+	 * another operation holds its lock).
 	 *
 	 * @internal Public for {@see \Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts::update()}, which holds it across its read and write.
 	 *
-	 * @param int $contract_id Contract id.
+	 * @param int    $contract_id    Contract id.
+	 * @param string $extension_slug The expected owning extension.
 	 * @throws ContractLockedException If another operation holds the lock.
 	 * @throws \RuntimeException If the lock write or the holder read fails.
 	 */
-	public function acquire_internal_lock( int $contract_id ): ?ContractLock {
-		$lock = $this->acquire_lock( $contract_id, self::INTERNAL_LOCK_OPERATION );
+	public function acquire_internal_lock( int $contract_id, string $extension_slug ): ?ContractLock {
+		$lock = $this->acquire_lock( $contract_id, $extension_slug, self::INTERNAL_LOCK_OPERATION );
 		if ( null !== $lock ) {
 			return $lock;
 		}
 
-		$holder = $this->get_lock_holder( $contract_id );
+		$holder = $this->get_lock_holder( $contract_id, $extension_slug );
 		if ( ! $holder['exists'] ) {
 			return null;
 		}
@@ -1068,6 +1118,34 @@ final class ContractRepository {
 	}
 
 	/**
+	 * Refuse a lock whose contract is not of the expected extension. In memory: the owner was
+	 * matched when the lock was taken and no contract write changes it.
+	 *
+	 * @internal Public for {@see \Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts}, which passes the caller's lock and expected owner.
+	 *
+	 * @param ContractLock $lock           The lock.
+	 * @param string       $extension_slug The expected owning extension.
+	 * @throws \InvalidArgumentException If the lock is for a contract of another extension.
+	 */
+	public static function assert_lock_owner( ContractLock $lock, string $extension_slug ): void {
+		if ( $lock->get_state()->get_extension_slug() !== $extension_slug ) {
+			throw new \InvalidArgumentException( 'The lock is for a contract of another extension.' );
+		}
+	}
+
+	/**
+	 * Refuse a meta write for a contract id no contract of `$extension_slug` has.
+	 *
+	 * @param int    $contract_id    Contract id.
+	 * @param string $extension_slug The expected owning extension.
+	 * @return never
+	 * @throws \InvalidArgumentException Always.
+	 */
+	private static function throw_not_found( int $contract_id, string $extension_slug ): void {
+		throw new \InvalidArgumentException( esc_html( sprintf( 'No contract of extension "%s" has id %d.', $extension_slug, $contract_id ) ) );
+	}
+
+	/**
 	 * Throw a conflict carrying the contract's current lock holder, if any.
 	 *
 	 * @param int $contract_id Contract id.
@@ -1096,7 +1174,7 @@ final class ContractRepository {
 	 * @throws \InvalidArgumentException If the label is not a valid slug.
 	 */
 	private static function assert_operation( string $operation ): void {
-		if ( 1 !== preg_match( '/^[a-z0-9_-]{1,64}$/D', $operation ) ) {
+		if ( ! ArgumentValidator::is_slug( $operation ) ) {
 			throw new \InvalidArgumentException( 'A lock operation label must be 1-64 lowercase letters, digits, underscores or hyphens.' );
 		}
 	}
@@ -1190,8 +1268,12 @@ final class ContractRepository {
 	 *     @type string|string[] $status Optional status filter: one status or a list of them
 	 *                                   ({@see ContractStatus}). Unregistered values are dropped;
 	 *                                   ignored when none remain.
+	 *     @type string $extension_slug Optional owner filter: only contracts of this extension
+	 *                                  (binary, case-sensitive match, as the lock and write
+	 *                                  guards use). Absent: every extension.
 	 * }
 	 * @return array<int, Contract> Contracts the customer owns, newest first.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like no contracts.
 	 */
 	public function find_by_customer_id( int $customer_id, ?array $args = null ): array {
 		global $wpdb;
@@ -1213,14 +1295,21 @@ final class ContractRepository {
 		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$select = self::CONTRACT_SELECT;
 
-		// One query for both shapes: the optional status filter joins the WHERE, and
-		// every value is a placeholder (table names cannot be bound, so the table is
+		// One query for every shape: the optional status and owner filters join the WHERE,
+		// and every value is a placeholder (table names cannot be bound, so the table is
 		// interpolated).
 		$where  = 'customer_id = %d';
 		$params = array( $customer_id );
 		if ( array() !== $statuses ) {
 			$where .= ' AND status IN (' . implode( ', ', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
 			$params = array_merge( $params, $statuses );
+		}
+		// A present key always applies and never widens to every owner: the value binds as a
+		// string, so a non-scalar or false binds '' and matches nothing (no contract can own
+		// an empty slug), and any other scalar binds its string form as an exact owner.
+		if ( array_key_exists( 'extension_slug', $args ) ) {
+			$where   .= ' AND ' . self::OWNER_MATCH;
+			$params[] = Coercion::coerce_string( $args['extension_slug'] );
 		}
 		$params[] = $limit;
 		$params[] = $offset;
@@ -1239,6 +1328,58 @@ final class ContractRepository {
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the contracts of customer %d: %s', $customer_id, $wpdb->last_error ) ) );
+		}
+
+		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
+	}
+
+	/**
+	 * Contracts of `$extension_slug` with a billing or shipping address whose email equals `$email`,
+	 * newest first, each once. The match uses the addresses table's collation through its `email`
+	 * index: on default installs (`utf8mb4_unicode_520_ci`) case- and accent-insensitive (`é` = `e`,
+	 * `ß` = `ss`), trailing spaces ignored. The value is matched as given: the facade trims it.
+	 * Row-only reads, plan terms batch-hydrated.
+	 *
+	 * @param string $email          The address email to match.
+	 * @param string $extension_slug The owning extension.
+	 * @param int    $limit          Maximum contracts to return.
+	 * @param int    $offset         Contracts to skip (for paging).
+	 * @return array<int, Contract> Contracts newest first.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like no contracts.
+	 */
+	public function find_by_address_email( string $email, string $extension_slug, int $limit, int $offset ): array {
+		global $wpdb;
+
+		$contracts   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$addresses   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES );
+		$select      = self::CONTRACT_SELECT;
+		$owner_match = self::OWNER_MATCH;
+
+		// A subquery, not a join: a contract with the email on both addresses is returned once. The
+		// owner placeholder comes from OWNER_MATCH, so the sniff cannot count it.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT {$select}
+				FROM {$contracts}
+				WHERE {$owner_match}
+				AND id IN ( SELECT contract_id FROM {$addresses} WHERE email = %s )
+				ORDER BY id DESC
+				LIMIT %d OFFSET %d",
+				$extension_slug,
+				$email,
+				$limit,
+				$offset
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		if ( '' !== $wpdb->last_error ) {
+			// The message leaves the email out: exception messages end up in logs.
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the contracts of extension "%s" by address email: %s', $extension_slug, $wpdb->last_error ) ) );
+		}
 
 		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
 	}
@@ -1249,6 +1390,7 @@ final class ContractRepository {
 	 *
 	 * @param int $order_id Origin order id.
 	 * @return array<int, Contract>
+	 * @throws \RuntimeException If the read fails: a failed read must not look like an order without contracts.
 	 */
 	public function find_by_origin_order( int $order_id ): array {
 		global $wpdb;
@@ -1258,12 +1400,15 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT {$select} FROM {$table} WHERE origin_order_id = %d ORDER BY id ASC", $order_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the contracts of order %d: %s', $order_id, $wpdb->last_error ) ) );
+		}
 
 		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
 	}
 
 	/**
-	 * Delete a contract and its child, cycle and snapshot rows. Takes no lock: it is the
+	 * Delete a contract and its child, cycle, snapshot and history rows. Takes no lock: it is the
 	 * engine-internal discard of a contract its creator still holds locked.
 	 *
 	 * @param int $id Contract id.
@@ -1278,6 +1423,7 @@ final class ContractRepository {
 			SchemaInstaller::TABLE_CONTRACT_ITEMS,
 			SchemaInstaller::TABLE_CONTRACT_ADDRESSES,
 			SchemaInstaller::TABLE_CONTRACT_META,
+			SchemaInstaller::TABLE_CONTRACT_HISTORY,
 		) as $child ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->delete( SchemaInstaller::get_table_name( $child ), array( 'contract_id' => $id ) );
@@ -1291,31 +1437,31 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Add a meta row for a contract, like `add_post_meta()`, under `$lock` or, without one, under
-	 * an internal lock taken for the call. With `$unique` the insert checks the key is absent.
+	 * Add a meta row for a contract of `$extension_slug`, like `add_post_meta()`, under `$lock` or,
+	 * without one, under an internal lock taken for the call. With `$unique` the insert checks the
+	 * key is absent.
 	 *
-	 * @param int               $contract_id Contract id.
-	 * @param string            $key         Meta key.
-	 * @param mixed             $value       Meta value; serialized when not scalar.
-	 * @param bool              $unique      When true, add nothing if the key already exists.
-	 * @param ContractLock|null $lock        The caller's lock on this contract, or null.
+	 * @param int               $contract_id    Contract id.
+	 * @param string            $extension_slug The expected owning extension.
+	 * @param string            $key            Meta key.
+	 * @param mixed             $value          Meta value; serialized when not scalar.
+	 * @param bool              $unique         When true, add nothing if the key already exists.
+	 * @param ContractLock|null $lock           The caller's lock on this contract, or null.
 	 * @return int|null The new meta row id, or null when `$unique` and the key exists.
-	 * @throws \InvalidArgumentException If `$key` is empty, the contract does not exist, or the lock is for another contract.
+	 * @throws \InvalidArgumentException If no contract of that extension has the id, or the lock is for another contract or extension.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
-	 * @throws \RuntimeException If the insert fails.
+	 * @throws \RuntimeException If the key is longer than the meta_key column (255 characters), or the insert fails.
 	 */
-	public function add_meta( int $contract_id, string $key, $value, bool $unique = false, ?ContractLock $lock = null ): ?int {
-		if ( '' === $key ) {
-			throw new \InvalidArgumentException( 'Contract meta key must not be empty.' );
-		}
-
+	public function add_meta( int $contract_id, string $extension_slug, string $key, $value, bool $unique = false, ?ContractLock $lock = null ): ?int {
 		if ( null !== $lock ) {
+			self::assert_lock_for( $lock, $contract_id );
+			self::assert_lock_owner( $lock, $extension_slug );
 			return $this->add_meta_row( $contract_id, $key, $value, $unique, $lock );
 		}
 
-		$internal_lock = $this->acquire_internal_lock( $contract_id );
+		$internal_lock = $this->acquire_internal_lock( $contract_id, $extension_slug );
 		if ( null === $internal_lock ) {
-			throw new \InvalidArgumentException( esc_html( sprintf( 'Contract %d does not exist.', $contract_id ) ) );
+			self::throw_not_found( $contract_id, $extension_slug );
 		}
 		try {
 			return $this->add_meta_row( $contract_id, $key, $value, $unique, $internal_lock );
@@ -1361,14 +1507,16 @@ final class ContractRepository {
 	 * @return int|null The new meta row id, or null when nothing was inserted.
 	 * @throws \InvalidArgumentException If the lock is for another contract.
 	 * @throws ContractLockedException If the lock was lost.
-	 * @throws \RuntimeException If the insert fails.
+	 * @throws \RuntimeException If the key does not fit the meta_key column, or the insert fails.
 	 */
 	private function insert_meta_row( int $contract_id, string $key, $value, ContractLock $lock ): ?int {
 		global $wpdb;
 
+		$meta = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		ColumnFit::assert_fits_column( $meta, 'meta_key', $key );
+
 		$this->fence_child_write( $lock, $contract_id );
 
-		$meta      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
 		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1410,33 +1558,32 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Update a contract's meta rows for `$key`, like `update_post_meta()`, under `$lock` or, without
-	 * one, under an internal lock taken for the call: rewrites every row for the key, or only the
-	 * rows holding `$prev_value`, and adds the key when it has no row.
+	 * Update the meta rows for `$key` of a contract of `$extension_slug`, like `update_post_meta()`,
+	 * under `$lock` or, without one, under an internal lock taken for the call: rewrites every row
+	 * for the key, or only the rows holding `$prev_value`, and adds the key when it has no row.
 	 *
-	 * @param int               $contract_id Contract id.
-	 * @param string            $key         Meta key.
-	 * @param mixed             $value       New value; serialized when not scalar.
-	 * @param mixed             $prev_value  Only update rows holding this value; null updates all rows for the key.
-	 *                                       Any other value ('' and false included) matches literally.
-	 * @param ContractLock|null $lock        The caller's lock on this contract, or null.
+	 * @param int               $contract_id    Contract id.
+	 * @param string            $extension_slug The expected owning extension.
+	 * @param string            $key            Meta key.
+	 * @param mixed             $value          New value; serialized when not scalar.
+	 * @param mixed             $prev_value     Only update rows holding this value; null updates all rows for the key.
+	 *                                          Any other value ('' and false included) matches literally.
+	 * @param ContractLock|null $lock           The caller's lock on this contract, or null.
 	 * @return bool True when a row was added or at least one row changed.
-	 * @throws \InvalidArgumentException If `$key` is empty, the contract does not exist, or the lock is for another contract.
+	 * @throws \InvalidArgumentException If no contract of that extension has the id, or the lock is for another contract or extension.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
-	 * @throws \RuntimeException If a write fails.
+	 * @throws \RuntimeException If the key is longer than the meta_key column (255 characters), or a write fails.
 	 */
-	public function update_meta( int $contract_id, string $key, $value, $prev_value = null, ?ContractLock $lock = null ): bool {
-		if ( '' === $key ) {
-			throw new \InvalidArgumentException( 'Contract meta key must not be empty.' );
-		}
-
+	public function update_meta( int $contract_id, string $extension_slug, string $key, $value, $prev_value = null, ?ContractLock $lock = null ): bool {
 		if ( null !== $lock ) {
+			self::assert_lock_for( $lock, $contract_id );
+			self::assert_lock_owner( $lock, $extension_slug );
 			return $this->update_meta_value( $contract_id, $key, $value, $prev_value, $lock );
 		}
 
-		$internal_lock = $this->acquire_internal_lock( $contract_id );
+		$internal_lock = $this->acquire_internal_lock( $contract_id, $extension_slug );
 		if ( null === $internal_lock ) {
-			throw new \InvalidArgumentException( esc_html( sprintf( 'Contract %d does not exist.', $contract_id ) ) );
+			self::throw_not_found( $contract_id, $extension_slug );
 		}
 		try {
 			return $this->update_meta_value( $contract_id, $key, $value, $prev_value, $internal_lock );
@@ -1515,30 +1662,29 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Delete a contract's meta rows for `$key`, like `delete_post_meta()`, under `$lock` or, without
-	 * one, under an internal lock taken for the call.
+	 * Delete the meta rows for `$key` of a contract of `$extension_slug`, like `delete_post_meta()`,
+	 * under `$lock` or, without one, under an internal lock taken for the call.
 	 *
-	 * @param int               $contract_id Contract id.
-	 * @param string            $key         Meta key.
-	 * @param mixed             $value       Only delete rows holding this value; null deletes every row for the key.
-	 *                                       Any other value ('' and false included) matches literally.
-	 * @param ContractLock|null $lock        The caller's lock on this contract, or null.
-	 * @return bool True when at least one row was deleted (false for a missing contract).
-	 * @throws \InvalidArgumentException If `$key` is empty, or the lock is for another contract.
+	 * @param int               $contract_id    Contract id.
+	 * @param string            $extension_slug The expected owning extension.
+	 * @param string            $key            Meta key.
+	 * @param mixed             $value          Only delete rows holding this value; null deletes every row for the key.
+	 *                                          Any other value ('' and false included) matches literally.
+	 * @param ContractLock|null $lock           The caller's lock on this contract, or null.
+	 * @return bool True when at least one row was deleted (false when no contract of that extension has the id).
+	 * @throws \InvalidArgumentException If the lock is for another contract or extension.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
 	 * @throws \RuntimeException If the delete fails.
 	 */
-	public function delete_meta( int $contract_id, string $key, $value = null, ?ContractLock $lock = null ): bool {
-		if ( '' === $key ) {
-			throw new \InvalidArgumentException( 'Contract meta key must not be empty.' );
-		}
-
+	public function delete_meta( int $contract_id, string $extension_slug, string $key, $value = null, ?ContractLock $lock = null ): bool {
 		if ( null !== $lock ) {
+			self::assert_lock_for( $lock, $contract_id );
+			self::assert_lock_owner( $lock, $extension_slug );
 			$deleted = $this->delete_meta_rows( $contract_id, $key, $value, $lock );
 			return $deleted > 0;
 		}
 
-		$internal_lock = $this->acquire_internal_lock( $contract_id );
+		$internal_lock = $this->acquire_internal_lock( $contract_id, $extension_slug );
 		if ( null === $internal_lock ) {
 			return false;
 		}
@@ -1651,7 +1797,7 @@ final class ContractRepository {
 		// Checked first so an over-long value is refused with its column named.
 		foreach ( $columns as $column => $value ) {
 			if ( is_string( $value ) ) {
-				self::assert_fits_column( $table, $column, $value );
+				ColumnFit::assert_fits_column( $table, $column, $value );
 			}
 		}
 
@@ -1867,22 +2013,25 @@ final class ContractRepository {
 	}
 
 	/**
-	 * A window of a chain's cycle history, newest first - the paginated read for
-	 * history screens.
+	 * A window of a chain's cycles, newest first - the paginated cycle read.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
 	 * @param int    $limit       Maximum rows to return.
 	 * @param int    $offset      Rows to skip (for paging).
 	 * @return array<int, Cycle> Cycles newest first.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like an empty chain.
 	 */
-	public function find_cycle_history( int $contract_id, string $kind = Cycle::KIND_BILLING, int $limit = 20, int $offset = 0 ): array {
+	public function find_cycles( int $contract_id, string $kind = Cycle::KIND_BILLING, int $limit = 20, int $offset = 0 ): array {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d AND kind = %s ORDER BY sequence_no DESC LIMIT %d OFFSET %d", $contract_id, $kind, $limit, $offset ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the cycles of contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
 
 		$cycles = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
@@ -1894,6 +2043,210 @@ final class ContractRepository {
 		return $cycles;
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
+	/**
+	 * Add a history entry to a contract of `$extension_slug` in one `INSERT ... SELECT`. With `$lock`
+	 * the insert is fenced by it; without one it is scoped by the owner and takes no lock, so no held
+	 * lock refuses it (an append-only insert has nothing to read-modify-write). A cycle must be one of
+	 * the contract's, checked in the same statement. A taken `creation_key` returns null.
+	 *
+	 * @param HistoryEntry      $entry          The new entry.
+	 * @param string            $extension_slug The expected owning extension.
+	 * @param ContractLock|null $lock           The caller's lock on this contract, or null.
+	 * @return HistoryEntry|null The stored entry with its id and creation time; null when the key is taken.
+	 * @throws \InvalidArgumentException If no contract of that extension has the id, the cycle is not one
+	 *                                   of its cycles, or the lock is for another contract or extension.
+	 * @throws ContractLockedException If `$lock` was lost.
+	 * @throws \RuntimeException If the insert fails.
+	 */
+	public function add_history_entry( HistoryEntry $entry, string $extension_slug, ?ContractLock $lock = null ): ?HistoryEntry {
+		global $wpdb;
+
+		$contract_id = $entry->get_contract_id();
+		$cycle_id    = $entry->get_cycle_id();
+		if ( null !== $lock ) {
+			self::assert_lock_owner( $lock, $extension_slug );
+			$this->fence_child_write( $lock, $contract_id );
+		}
+
+		$history   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_HISTORY );
+		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$cycles    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$columns   = $entry->to_storage();
+		$now       = current_time( 'mysql', true );
+		// HistoryEntry::create() refused a payload that cannot be encoded, so this encode succeeds.
+		$payload = null === $columns['payload'] ? null : wp_json_encode( $columns['payload'] );
+
+		$select = array( 'c.id', null === $cycle_id ? 'NULL' : 'y.id', '%s' );
+		$values = array( $columns['type'] );
+		foreach ( array( $columns['creation_key'], $payload ) as $value ) {
+			$select[] = null === $value ? 'NULL' : '%s';
+			if ( null !== $value ) {
+				$values[] = $value;
+			}
+		}
+		$select[] = '%s';
+		$values[] = $now;
+
+		$join = '';
+		if ( null !== $cycle_id ) {
+			$join     = " JOIN {$cycles} y ON y.id = %d AND y.contract_id = c.id";
+			$values[] = $cycle_id;
+		}
+		$where    = 'c.id = %d';
+		$values[] = $contract_id;
+		if ( null === $lock ) {
+			$where   .= ' AND c.' . self::OWNER_MATCH;
+			$values[] = $extension_slug;
+		}
+		$select_list = implode( ', ', $select );
+
+		// A duplicate creation key is an expected outcome, so `$wpdb` must not print or log it;
+		// every failure is still read from `last_error` and thrown below.
+		$suppressed = $wpdb->suppress_errors( true );
+		try {
+			// Table names and the select list are built here, never from input; every value is a placeholder.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$inserted = $wpdb->query( $wpdb->prepare( "INSERT INTO {$history} ( contract_id, cycle_id, type, creation_key, payload, date_created_gmt ) SELECT {$select_list} FROM {$contracts} c{$join} WHERE {$where}", $values ) );
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+		}
+
+		if ( false === $inserted ) {
+			$db_error  = $wpdb->last_error;
+			$duplicate = self::get_duplicate_key_result();
+			if ( null === $duplicate && null !== $columns['creation_key'] ) {
+				$duplicate = $this->has_history_creation_key( $contract_id, $columns['creation_key'] );
+			}
+			// The only UNIQUE index an entry can hit is `creation`, and only with a key.
+			if ( true === $duplicate && null !== $columns['creation_key'] ) {
+				return null;
+			}
+			if ( null !== $lock ) {
+				$this->throw_if_lock_lost( $lock );
+			}
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to add a history entry to contract %d: %s', $contract_id, $db_error ) ) );
+		}
+		if ( 1 !== (int) $inserted ) {
+			self::throw_history_target_not_found( $contract_id, $extension_slug, $cycle_id );
+		}
+
+		$columns['id']               = (int) $wpdb->insert_id;
+		$columns['date_created_gmt'] = $now;
+		// Hydrate from the stored JSON, so the returned entry matches a fresh read.
+		$columns['payload'] = $payload;
+
+		return HistoryEntry::from_storage( $columns );
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * Whether the contract already has a history entry with this creation key: the fallback when
+	 * the driver gives no error number. A failed read reads as false, so the caller reports its
+	 * own insert failure.
+	 *
+	 * @param int    $contract_id  Contract id.
+	 * @param string $creation_key Creation key.
+	 */
+	private function has_history_creation_key( int $contract_id, string $creation_key ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_HISTORY );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$found = $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$table} WHERE contract_id = %d AND creation_key = %s LIMIT 1", $contract_id, $creation_key ) );
+
+		return null !== $found;
+	}
+
+	/**
+	 * Refuse a history insert that selected no row: the contract of that extension is missing or,
+	 * when a cycle is named, the cycle may not be one of its cycles.
+	 *
+	 * @param int      $contract_id    Contract id.
+	 * @param string   $extension_slug The expected owning extension.
+	 * @param int|null $cycle_id       The entry's cycle id, or null.
+	 * @return never
+	 * @throws \InvalidArgumentException Always.
+	 */
+	private static function throw_history_target_not_found( int $contract_id, string $extension_slug, ?int $cycle_id ): void {
+		if ( null === $cycle_id ) {
+			self::throw_not_found( $contract_id, $extension_slug );
+		}
+		throw new \InvalidArgumentException( esc_html( sprintf( 'No contract of extension "%s" has id %d, or cycle %d is not one of its cycles.', $extension_slug, $contract_id, $cycle_id ) ) );
+	}
+
+	/**
+	 * A window of a contract's history, newest first (insertion order).
+	 *
+	 * @param int $contract_id Contract id.
+	 * @param int $limit       Maximum entries to return.
+	 * @param int $offset      Entries to skip (for paging).
+	 * @return array<int, HistoryEntry> Entries newest first; empty for an unknown contract.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like an empty history.
+	 */
+	public function find_history( int $contract_id, int $limit = 20, int $offset = 0 ): array {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_HISTORY );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d ORDER BY id DESC LIMIT %d OFFSET %d", $contract_id, $limit, $offset ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the history of contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
+
+		$entries = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			if ( is_array( $row ) ) {
+				$entries[] = HistoryEntry::from_storage( Coercion::coerce_string_keyed( $row ) );
+			}
+		}
+
+		return $entries;
+	}
+
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
+	/**
+	 * Delete every history entry of a contract in one statement that deletes only while the caller's
+	 * lock is held on the database clock, so a caller that lost its lock after the fence cannot delete
+	 * entries a later holder wrote. The fence still refuses a lock for another contract or one already
+	 * known lost before any delete runs. The facade checks the lock's owner ({@see self::assert_lock_owner()}).
+	 *
+	 * @param int          $contract_id Contract id.
+	 * @param ContractLock $lock        The caller's lock on this contract.
+	 * @return int The number of entries deleted; 0 only once the lock is confirmed held and the contract has none.
+	 * @throws \InvalidArgumentException If the lock is for another contract.
+	 * @throws ContractLockedException If the lock was lost.
+	 * @throws \RuntimeException If the delete, or the lock check after an empty delete, fails.
+	 */
+	public function delete_history( int $contract_id, ContractLock $lock ): int {
+		global $wpdb;
+
+		$this->fence_child_write( $lock, $contract_id );
+
+		$history    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_HISTORY );
+		$contracts  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$holds_lock = self::C_HOLDS_LOCK;
+
+		// Table names and the lock predicate are constants; every value is a placeholder.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$deleted = $wpdb->query( $wpdb->prepare( "DELETE h FROM {$history} h JOIN {$contracts} c ON c.id = h.contract_id WHERE h.contract_id = %d AND {$holds_lock}", $contract_id, $lock->get_state()->get_token() ) );
+		if ( false === $deleted ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to delete the history of contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
+		// No row deleted: an empty history, or a lock lost since the fence, which must not read as empty.
+		if ( 0 === (int) $deleted ) {
+			$holder = $this->find_lost_lock_holder( $lock );
+			if ( null !== $holder ) {
+				throw self::locked_exception( $contract_id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
+			}
+		}
+
+		return (int) $deleted;
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
 	/**
 	 * All cycles linked to `$order_id`, across kinds and contracts. `order_id` is a
 	 * non-1:1 reference (an aggregate order may serve many cycles), so this returns
@@ -1901,6 +2254,7 @@ final class ContractRepository {
 	 *
 	 * @param int $order_id WooCommerce order id.
 	 * @return array<int, Cycle> Cycles linked to the order, newest first.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like an order that bills no cycle.
 	 */
 	public function find_cycles_by_order_id( int $order_id ): array {
 		global $wpdb;
@@ -1909,6 +2263,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d ORDER BY id DESC", $order_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the cycles of order %d: %s', $order_id, $wpdb->last_error ) ) );
+		}
 
 		$cycles = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
@@ -1926,6 +2283,7 @@ final class ContractRepository {
 	 *
 	 * @param array<string, mixed> $row Cycle row.
 	 * @return Cycle The hydrated cycle.
+	 * @throws \RuntimeException If a snapshot read fails.
 	 */
 	private function hydrate_cycle( array $row ): Cycle {
 		$cycle = Cycle::from_storage( $row );
@@ -1963,31 +2321,62 @@ final class ContractRepository {
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
-	 * After a failed child insert, report a lost lock instead of the database error: throws when
-	 * `$lock` is no longer held. Returns when it is held, or the check fails, so the caller
-	 * throws its own error.
+	 * After a failed child insert, report a lost lock: throws when `$lock` is no longer held on an
+	 * existing contract. Returns when it is held, the contract is gone, or the check fails, so the
+	 * caller goes on with its own error.
 	 *
 	 * @param ContractLock $lock The caller's lock.
 	 * @throws ContractLockedException If the lock was lost.
 	 */
 	private function throw_if_lock_lost( ContractLock $lock ): void {
+		try {
+			$holder = $this->find_lost_lock_holder( $lock );
+		} catch ( \RuntimeException $e ) {
+			return;
+		}
+
+		if ( null !== $holder && $holder['exists'] ) {
+			throw self::locked_exception( $lock->get_contract_id(), $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
+		}
+	}
+
+	/**
+	 * The lock holder when `$lock` is no longer held, read on the database clock; null only when it
+	 * is held. One read gives both facts from the same row. A contract that is gone reads as not
+	 * held, with `exists` false.
+	 *
+	 * @param ContractLock $lock The caller's lock.
+	 * @return array{exists: bool, operation: ?string}|null
+	 * @throws \RuntimeException If the read fails.
+	 */
+	private function find_lost_lock_holder( ContractLock $lock ): ?array {
 		global $wpdb;
 
 		$contract_id = $lock->get_contract_id();
 		$contracts   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$holds_lock  = self::HOLDS_LOCK;
-		try {
-			$holder = $this->get_lock_holder( $contract_id );
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-			$held = $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$contracts} WHERE id = %d AND {$holds_lock}", $contract_id, $lock->get_state()->get_token() ) );
-		} catch ( \RuntimeException $e ) {
-			return;
+		$lock_live   = self::LOCK_LIVE;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT ( {$holds_lock} ) AS held, {$lock_live} AS live, lock_operation FROM {$contracts} WHERE id = %d", $lock->get_state()->get_token(), $contract_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to check the lock on contract %d: %s', $contract_id, $wpdb->last_error ) ) );
 		}
 
-		if ( '' !== $wpdb->last_error || ! $holder['exists'] || null !== $held ) {
-			return;
+		if ( ! is_array( $row ) ) {
+			return array(
+				'exists'    => false,
+				'operation' => null,
+			);
 		}
-		throw self::locked_exception( $contract_id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
+		if ( ! empty( $row['held'] ) ) {
+			return null;
+		}
+
+		return array(
+			'exists'    => true,
+			'operation' => ! empty( $row['live'] ) ? Coercion::coerce_nullable_string( $row['lock_operation'] ?? null ) : null,
+		);
 	}
 
 	/**
@@ -1995,6 +2384,7 @@ final class ContractRepository {
 	 *
 	 * @param int|null $snapshot_id Snapshot row id, or null.
 	 * @return PlanSnapshot|null The decoded value object, or null.
+	 * @throws \RuntimeException If the read fails.
 	 */
 	private function find_plan_snapshot( ?int $snapshot_id ): ?PlanSnapshot {
 		$decoded = $this->find_snapshot_payload( $snapshot_id );
@@ -2012,6 +2402,7 @@ final class ContractRepository {
 	 *
 	 * @param array<int, int> $snapshot_ids Snapshot row ids (deduplicated by the caller or not - the IN() dedupes).
 	 * @return array<int, PlanSnapshot> Decoded value objects keyed by snapshot row id.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like contracts without plan terms.
 	 */
 	private function find_plan_snapshots( array $snapshot_ids ): array {
 		global $wpdb;
@@ -2036,6 +2427,9 @@ final class ContractRepository {
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read plan snapshots: %s', $wpdb->last_error ) ) );
+		}
 
 		$snapshots = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
@@ -2058,6 +2452,7 @@ final class ContractRepository {
 	 *
 	 * @param int|null $snapshot_id Snapshot row id, or null.
 	 * @return ItemsSnapshot|null The decoded value object, or null.
+	 * @throws \RuntimeException If the read fails.
 	 */
 	private function find_items_snapshot( ?int $snapshot_id ): ?ItemsSnapshot {
 		$decoded = $this->find_snapshot_payload( $snapshot_id );
@@ -2073,6 +2468,7 @@ final class ContractRepository {
 	 *
 	 * @param int|null $snapshot_id Snapshot row id, or null.
 	 * @return array{payload: array<int|string, mixed>, schema_version: int}|null
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a missing snapshot.
 	 */
 	private function find_snapshot_payload( ?int $snapshot_id ): ?array {
 		global $wpdb;
@@ -2085,6 +2481,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT payload, schema_version FROM {$table} WHERE id = %d", $snapshot_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read snapshot %d: %s', $snapshot_id, $wpdb->last_error ) ) );
+		}
 
 		if ( null === $row ) {
 			return null;
@@ -2154,7 +2553,7 @@ final class ContractRepository {
 
 		foreach ( $columns as $column => $value ) {
 			if ( is_string( $value ) ) {
-				self::assert_fits_column( $table, $column, $value );
+				ColumnFit::assert_fits_column( $table, $column, $value );
 			}
 		}
 
@@ -2185,33 +2584,6 @@ final class ContractRepository {
 		}
 
 		return (int) $updated;
-	}
-
-	/**
-	 * Refuse a string longer than its column, measured the way `$wpdb` measures it
-	 * (characters for CHAR/VARCHAR, bytes for TEXT/BLOB types). A column whose length
-	 * `$wpdb` cannot read (non-MySQL, or a non-string type such as DATETIME) is not checked.
-	 *
-	 * @param string $table  Prefixed table name.
-	 * @param string $column Column name.
-	 * @param string $value  Value about to be written.
-	 * @throws \RuntimeException If the value is longer than the column.
-	 */
-	private static function assert_fits_column( string $table, string $column, string $value ): void {
-		global $wpdb;
-
-		$length = $wpdb->get_col_length( $table, $column );
-		if ( ! is_array( $length ) ) {
-			return;
-		}
-
-		$max  = Coercion::coerce_int( $length['length'] ?? 0 );
-		$size = 'byte' === ( $length['type'] ?? '' ) ? strlen( $value ) : mb_strlen( $value, 'UTF-8' );
-		if ( $max > 0 && $size > $max ) {
-			throw new \RuntimeException(
-				esc_html( sprintf( 'Failed to write %s: the value for "%s" is longer than the column allows (%d).', $table, $column, $max ) )
-			);
-		}
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
@@ -2288,7 +2660,7 @@ final class ContractRepository {
 					continue;
 				}
 				if ( is_string( $value ) ) {
-					self::assert_fits_column( $table, $column, $value );
+					ColumnFit::assert_fits_column( $table, $column, $value );
 				}
 				$placeholders[] = '%s';
 				$values[]       = (string) $value;
@@ -2422,6 +2794,7 @@ final class ContractRepository {
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return array<int, array<string, mixed>>
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a contract without items.
 	 */
 	private function find_items( int $contract_id ): array {
 		global $wpdb;
@@ -2430,6 +2803,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d ORDER BY id ASC", $contract_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the items of contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
 
 		return Coercion::coerce_list_of_arrays( $rows );
 	}
@@ -2439,6 +2815,7 @@ final class ContractRepository {
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return array<string, array<string, mixed>>
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a contract without addresses.
 	 */
 	private function find_addresses( int $contract_id ): array {
 		global $wpdb;
@@ -2447,6 +2824,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d", $contract_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the addresses of contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
 
 		$by_type = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {

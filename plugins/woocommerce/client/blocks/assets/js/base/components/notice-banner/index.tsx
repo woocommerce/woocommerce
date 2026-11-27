@@ -4,13 +4,13 @@
 import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { Icon, close } from '@wordpress/icons';
+import { Button } from '@ariakit/react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import { getDefaultPoliteness, getStatusIcon } from './utils';
-import Button from '../button';
 import { useSpokenMessage } from '../../hooks';
 
 export interface NoticeBannerProps {
@@ -22,6 +22,8 @@ export interface NoticeBannerProps {
 	spokenMessage?: string | React.ReactNode;
 	status: 'success' | 'error' | 'info' | 'warning' | 'default';
 	summary?: string;
+	// A ref to the banner element, for example so that a transition can wait for its animations.
+	containerRef?: React.Ref< HTMLDivElement >;
 }
 
 /**
@@ -38,6 +40,7 @@ const NoticeBanner = ( {
 	isDismissible = true,
 	politeness = getDefaultPoliteness( status ),
 	summary,
+	containerRef,
 }: NoticeBannerProps ) => {
 	useSpokenMessage( spokenMessage, politeness );
 
@@ -53,6 +56,7 @@ const NoticeBanner = ( {
 
 	return (
 		<div
+			ref={ containerRef }
 			role={
 				status === 'error' ||
 				status === 'warning' ||
@@ -80,10 +84,9 @@ const NoticeBanner = ( {
 			</div>
 			{ !! isDismissible && (
 				<Button
-					className="wc-block-components-notice-banner__dismiss"
+					className="wc-block-components-button wc-block-components-notice-banner__dismiss contained"
 					aria-label={ __( 'Dismiss this notice', 'woocommerce' ) }
 					onClick={ dismiss }
-					removeTextWrap
 				>
 					<Icon icon={ close } />
 				</Button>

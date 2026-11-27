@@ -46,10 +46,6 @@
 		"forcePageReload"
 	],
 	"attributes": {
-		"isPreview": {
-			"type": "boolean",
-			"default": false
-		},
 		"overlayMode": {
 			"type": "string",
 			"enum": [ "off", "mobile", "always" ]
@@ -57,13 +53,13 @@
 		"overlayPosition": {
 			"type": "string",
 			"enum": [ "left", "right" ]
+		},
+		"overlayButtonStyle": {
+			"type": "string",
+			"enum": [ "plain", "button" ]
 		}
 	},
-	"example": {
-		"attributes": {
-			"isPreview": true
-		}
-	},
+	"example": {},
 	"viewScriptModule": "woocommerce/product-filters",
 	"style": "file:../woocommerce/product-filters-style.css",
 	"editorStyle": "file:../woocommerce/product-filters-editor.css"
