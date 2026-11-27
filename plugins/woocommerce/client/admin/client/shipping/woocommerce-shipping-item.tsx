@@ -3,7 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
-import { Button, ExternalLink } from '@wordpress/components';
+import { Button } from '@wordpress/components';
+import { Link } from '@wordpress/ui';
 import { Pill } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -16,7 +17,7 @@ import WooIcon from './woo-icon.svg';
 const WOOCOMMERCE_SHIPPING_PLUGIN_SLUG = 'woocommerce-shipping';
 
 export type ShippingPartnerTrackingProps = {
-	context: 'settings';
+	context: 'settings' | 'order';
 	country: string;
 	plugins: string;
 };
@@ -45,10 +46,12 @@ const WooCommerceShippingItem = ( {
 		};
 
 		recordEvent( 'shipping_partner_click', trackingBase );
-		recordEvent( 'settings_shipping_recommendation_setup_click', {
-			plugin: WOOCOMMERCE_SHIPPING_PLUGIN_SLUG,
-			action: isPluginInstalled ? 'activate' : 'install',
-		} );
+		if ( tracking?.context !== 'order' ) {
+			recordEvent( 'settings_shipping_recommendation_setup_click', {
+				plugin: WOOCOMMERCE_SHIPPING_PLUGIN_SLUG,
+				action: isPluginInstalled ? 'activate' : 'install',
+			} );
+		}
 
 		const action = isPluginInstalled ? onActivateClick : onInstallClick;
 		const eventName = isPluginInstalled
@@ -67,7 +70,7 @@ const WooCommerceShippingItem = ( {
 						: __(
 								'WooCommerce Shipping is installed!',
 								'woocommerce'
-							),
+						  ),
 					{}
 				);
 			},
@@ -100,9 +103,12 @@ const WooCommerceShippingItem = ( {
 						'woocommerce'
 					) }
 					<br />
-					<ExternalLink href="https://woocommerce.com/woocommerce-shipping/">
+					<Link
+						openInNewTab
+						href="https://woocommerce.com/woocommerce-shipping/"
+					>
 						{ __( 'Learn more', 'woocommerce' ) }
-					</ExternalLink>
+					</Link>
 				</span>
 			</div>
 			<div className="woocommerce-list__item-after">
