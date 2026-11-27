@@ -246,6 +246,18 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The email has no settings its block design doesn't use: on/off, format, heading and additional content.
+	 */
+	public function test_email_has_only_the_settings_its_block_design_uses(): void {
+		$fields = ( new ReportCSVEmail() )->get_form_fields();
+
+		$this->assertArrayHasKey( 'subject', $fields );
+		foreach ( array( 'enabled', 'email_type', 'heading', 'additional_content' ) as $key ) {
+			$this->assertArrayNotHasKey( $key, $fields, "The \"$key\" setting has no effect on this email." );
+		}
+	}
+
+	/**
 	 * @testdox The email is manual, so the email list and the editor show it as "Manual" without an on/off control.
 	 */
 	public function test_email_is_manual(): void {

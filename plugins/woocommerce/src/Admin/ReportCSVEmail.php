@@ -99,10 +99,11 @@ class ReportCSVEmail extends \WC_Email {
 	 * Initialise settings form fields.
 	 *
 	 * The email has no on/off or format setting: an emailed export has no other way to reach the merchant.
+	 * Its block design doesn't use the heading or additional content, so those settings are left out too.
 	 */
 	public function init_form_fields() {
 		parent::init_form_fields();
-		unset( $this->form_fields['enabled'], $this->form_fields['email_type'] );
+		unset( $this->form_fields['enabled'], $this->form_fields['email_type'], $this->form_fields['heading'], $this->form_fields['additional_content'] );
 	}
 
 	/**
