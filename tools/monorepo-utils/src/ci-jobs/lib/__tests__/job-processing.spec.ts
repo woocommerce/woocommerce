@@ -1220,6 +1220,88 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
+		it.each< [ string, string[] ] >( [
+			[ 'configs/rules.js', [ 'first', 'second', 'direct' ] ],
+			[ 'README.md', [] ],
+		] )(
+			'should schedule every config consumer for a plugin-only change to %s',
+			async ( file, expected ) => {
+				const eslintConfig = {
+					name: '@woocommerce/eslint-config',
+					path: 'packages/js/eslint-config',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint as const,
+								changes: [ /config.js$/ ],
+								ignore: [ /[.]md$/ ],
+								command: 'lint-config',
+								events: [],
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: '@woocommerce/eslint-plugin',
+							path: 'packages/js/eslint-plugin',
+							dependencies: [],
+						},
+					],
+				};
+				const jobs = await createJobsForChanges(
+					{
+						name: 'root',
+						path: '',
+						dependencies: [ 'first', 'second', 'direct' ].map(
+							( name ) => ( {
+								name,
+								path: name,
+								ciConfig: {
+									jobs: [
+										{
+											type: JobType.Lint as const,
+											changes: [ /test.js$/ ],
+											ignore: [ /[.]md$/ ],
+											command: 'lint',
+											events: [],
+										},
+										{
+											type: JobType.Test as const,
+											testType: 'unit',
+											name: 'Default',
+											changes: [ /test.js$/ ],
+											ignore: [ /[.]md$/ ],
+											command: 'test',
+											shardingArguments: [],
+											events: [],
+										},
+									],
+								},
+								dependencies:
+									name === 'direct'
+										? [
+												eslintConfig,
+												...eslintConfig.dependencies,
+											]
+										: [ eslintConfig ],
+							} )
+						),
+					},
+					{ '@woocommerce/eslint-plugin': [ file ] },
+					{}
+				);
+
+				expect(
+					jobs.lint
+						.map( ( job ) => job.projectName )
+						.filter( ( project ) => project !== eslintConfig.name )
+				).toEqual( expected );
+				expect( jobs.test.map( ( job ) => job.projectName ) ).toEqual(
+					expected
+				);
+			}
+		);
+
 		it( 'should not force lint job for ignored shared ESLint project changes', async () => {
 			const jobs = await createJobsForChanges(
 				{

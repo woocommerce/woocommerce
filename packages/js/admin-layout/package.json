@@ -72,11 +72,9 @@
 	"devDependencies": {
 		"@types/react": "catalog:types",
 		"@woocommerce/eslint-config": "workspace:*",
-		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
-		"jest-cli": "catalog:tooling",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
 		"rimraf": "catalog:tooling",

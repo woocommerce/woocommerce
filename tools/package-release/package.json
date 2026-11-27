@@ -33,7 +33,6 @@
 		"@types/node": "catalog:types",
 		"@types/semver": "catalog:types",
 		"@woocommerce/eslint-config": "workspace:*",
-		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "catalog:tooling",
 		"oclif": "^4.23.30",
 		"shx": "^0.3.4",

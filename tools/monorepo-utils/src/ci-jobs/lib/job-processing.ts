@@ -15,10 +15,9 @@ import { TestEnvVars, parseTestEnvConfig } from './test-environment';
 /**
  * Projects whose contents define every consumer's effective ESLint rule set.
  */
-const SHARED_ESLINT_PROJECTS = [
-	'@woocommerce/eslint-plugin',
-	'@woocommerce/eslint-config',
-];
+const ESLINT_PLUGIN_PROJECT = '@woocommerce/eslint-plugin';
+const ESLINT_CONFIG_PROJECT = '@woocommerce/eslint-config';
+const SHARED_ESLINT_PROJECTS = [ ESLINT_PLUGIN_PROJECT, ESLINT_CONFIG_PROJECT ];
 
 /**
  * The change facts collected for a dependency while traversing the graph.
@@ -387,6 +386,29 @@ async function createJobsForProject(
 	// Projects that don't have any CI configuration don't have any potential jobs for us to check for.
 	if ( ! node.ciConfig ) {
 		return newJobs;
+	}
+
+	// ESLint config consumers get the shared plugin through the config package.
+	// Keep the plugin's file changes visible to their jobs after removing the direct dependency.
+	const config = node.dependencies.find(
+		( dependency ) => dependency.name === ESLINT_CONFIG_PROJECT
+	);
+	if (
+		config?.dependencies.some(
+			( dependency ) => dependency.name === ESLINT_PLUGIN_PROJECT
+		) &&
+		! dependencyInfos.some(
+			( dependency ) => dependency.name === ESLINT_PLUGIN_PROJECT
+		)
+	) {
+		dependencyInfos.push( {
+			name: ESLINT_PLUGIN_PROJECT,
+			changedFiles:
+				changes === true
+					? []
+					: ( changes[ ESLINT_PLUGIN_PROJECT ] ?? [] ),
+			spawnsJobs: false,
+		} );
 	}
 
 	for ( const jobConfig of node.ciConfig.jobs ) {

@@ -280,9 +280,6 @@ catalogs:
     jest-circus:
       specifier: 29.5.x
       version: 29.5.0
-    jest-cli:
-      specifier: 29.5.x
-      version: 29.5.0
     jest-environment-jsdom:
       specifier: 29.5.x
       version: 29.5.0
@@ -558,9 +555,6 @@ importers:
       lodash:
         specifier: ^4.18.1
         version: 4.18.1
-      wp-textdomain:
-        specifier: 1.0.1
-        version: 1.0.1
     devDependencies:
       '@babel/preset-env':
         specifier: catalog:tooling
@@ -574,9 +568,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:packages/js/eslint-plugin
       '@woocommerce/monorepo-utils':
         specifier: workspace:*
         version: link:tools/monorepo-utils
@@ -631,9 +622,6 @@ importers:
       prettier:
         specifier: catalog:tooling
         version: wp-prettier@3.9.6
-      regenerator-runtime:
-        specifier: ^0.13.11
-        version: 0.13.11
       rimraf:
         specifier: catalog:tooling
         version: 5.0.5
@@ -674,9 +662,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -684,9 +669,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       react:
@@ -927,18 +909,12 @@ importers:
       '@types/prop-types':
         specifier: catalog:types
         version: 15.7.15
-      '@types/testing-library__jest-dom':
-        specifier: ^5.14.9
-        version: 5.14.9
       '@types/wordpress__viewport':
         specifier: catalog:wp-min
         version: 5.5.3(react@18.3.1)
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -958,9 +934,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -1022,9 +995,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -1035,9 +1005,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -1086,9 +1053,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -1099,9 +1063,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -1165,18 +1126,12 @@ importers:
       '@types/prop-types':
         specifier: catalog:types
         version: 15.7.15
-      '@types/testing-library__jest-dom':
-        specifier: ^5.14.9
-        version: 5.14.9
       '@woocommerce/data':
         specifier: workspace:*
         version: link:../data
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -1199,9 +1154,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -1328,9 +1280,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -1341,9 +1290,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -1407,9 +1353,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -1423,9 +1366,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -1453,16 +1393,10 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       eslint:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       rimraf:
@@ -1502,9 +1436,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -1515,9 +1446,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       ts-jest:
@@ -1680,9 +1608,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -1696,9 +1621,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -1826,15 +1748,9 @@ importers:
       '@types/react-transition-group':
         specifier: catalog:types
         version: 4.4.12(@types/react@18.3.28)
-      '@types/testing-library__jest-dom':
-        specifier: ^5.14.9
-        version: 5.14.9
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -1851,9 +1767,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -1935,9 +1848,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -1948,9 +1858,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -1984,9 +1891,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -1997,9 +1901,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -2084,9 +1985,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@wordpress/core-data':
         specifier: 7.33.9
         version: 7.33.9(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@3.6.0)(esbuild@0.28.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
@@ -2136,9 +2034,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -2164,9 +2059,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -2245,9 +2137,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -2258,9 +2147,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -2309,9 +2195,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -2319,9 +2202,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       react:
@@ -2364,9 +2244,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -2377,9 +2254,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -2452,9 +2326,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -2471,9 +2342,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -2537,9 +2405,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -2553,9 +2418,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -2580,9 +2442,6 @@ importers:
       '@babel/core':
         specifier: catalog:tooling
         version: 7.29.7
-      '@types/dompurify':
-        specifier: ^2.0.4
-        version: 2.4.0
       '@types/jest':
         specifier: catalog:types
         version: 29.5.14
@@ -2602,9 +2461,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -2668,9 +2524,6 @@ importers:
       jest:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
         specifier: catalog:tooling
         version: 29.5.0
@@ -2714,9 +2567,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
@@ -2727,9 +2577,6 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: catalog:tooling
-        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-cli:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
@@ -2974,9 +2821,6 @@ importers:
         specifier: ^15.8.1
         version: 15.8.1
     devDependencies:
-      '@types/prop-types':
-        specifier: catalog:types
-        version: 15.7.15
       '@types/react':
         specifier: 18.3.x
         version: 18.3.28
@@ -2989,9 +2833,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../../packages/js/eslint-plugin
       '@wordpress/env':
         specifier: catalog:tooling
         version: 12.0.0(@types/node@24.12.2)
@@ -3113,12 +2954,6 @@ importers:
       '@automattic/components':
         specifier: ~2.2.1
         version: 2.2.1(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(@wordpress/data@10.57.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@automattic/explat-client':
-        specifier: ^0.0.5
-        version: 0.0.5
-      '@automattic/explat-client-react-helpers':
-        specifier: ^0.0.6
-        version: 0.0.6
       '@automattic/interpolate-components':
         specifier: ^1.2.1
         version: 1.2.1(@types/react@18.3.28)(react@18.3.1)
@@ -3399,9 +3234,6 @@ importers:
       '@types/react-transition-group':
         specifier: catalog:types
         version: 4.4.12(@types/react@18.3.28)
-      '@types/testing-library__jest-dom':
-        specifier: ^5.14.9
-        version: 5.14.9
       '@types/tinymce':
         specifier: ^4.6.9
         version: 4.6.9
@@ -3423,9 +3255,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../../../../packages/js/eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../../../../packages/js/internal-build
@@ -3612,9 +3441,6 @@ importers:
       '@paypal/react-paypal-js':
         specifier: ^8.8.3
         version: 8.9.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@preact/signals':
-        specifier: ^1.3.0
-        version: 1.3.4(preact@10.29.1)
       '@woocommerce/email-editor':
         specifier: workspace:*
         version: link:../../../../packages/js/email-editor
@@ -3693,9 +3519,6 @@ importers:
       postcode-validator:
         specifier: 3.9.2
         version: 3.9.2
-      preact:
-        specifier: ^10.24.2
-        version: 10.29.1
       react-number-format:
         specifier: 5.4.5
         version: 5.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3736,9 +3559,6 @@ importers:
       '@bartekbp/typescript-checkstyle':
         specifier: 5.0.0
         version: 5.0.0
-      '@playwright/test':
-        specifier: ^1.63.0
-        version: 1.63.0
       '@storybook/addon-a11y':
         specifier: 10.6.5
         version: 10.6.5(storybook@10.6.5(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))
@@ -3805,9 +3625,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../../tools/eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../../../../packages/js/eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../../../../packages/js/internal-build
@@ -3844,18 +3661,12 @@ importers:
       '@wordpress/date':
         specifier: catalog:wp-min
         version: 5.33.1
-      '@wordpress/dependency-extraction-webpack-plugin':
-        specifier: next
-        version: 6.43.1-next.v.202604091042.0(webpack@5.112.2)
       '@wordpress/dom':
         specifier: catalog:wp-min
         version: 4.33.1
       '@wordpress/dom-ready':
         specifier: catalog:wp-min
         version: 4.33.1
-      '@wordpress/e2e-test-utils-playwright':
-        specifier: catalog:wp-min
-        version: 1.33.2(patch_hash=0a3df7448f0a035981fcb1ecddf9c699450bcfe7c1f6c334d6cdfea5db1e0d52)(@playwright/test@1.63.0)
       '@wordpress/editor':
         specifier: catalog:wp-min
         version: 14.33.11(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
@@ -3892,9 +3703,6 @@ importers:
       '@wordpress/patterns':
         specifier: catalog:wp-min
         version: 2.33.9(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.4.0)(esbuild@0.27.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
-      '@wordpress/postcss-plugins-preset':
-        specifier: catalog:tooling
-        version: 5.56.0(postcss@8.5.26)
       '@wordpress/postcss-themes':
         specifier: next
         version: 6.43.1-next.v.202604091042.0(postcss@8.5.26)
@@ -3943,9 +3751,6 @@ importers:
       copy-webpack-plugin:
         specifier: catalog:tooling
         version: 14.0.0(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
-      core-js:
-        specifier: 3.25.0
-        version: 3.25.0
       css-loader:
         specifier: catalog:tooling
         version: 6.11.0(webpack@5.112.2)
@@ -3967,9 +3772,6 @@ importers:
       eslint-import-resolver-webpack:
         specifier: ^0.13.11
         version: 0.13.11(eslint-plugin-import@2.32.0)(webpack@5.112.2)
-      eslint-plugin-playwright:
-        specifier: ^2.10.5
-        version: 2.10.5(eslint@10.7.0(jiti@2.6.1))
       eslint-plugin-storybook:
         specifier: 10.6.5
         version: 10.6.5(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3)
@@ -4018,9 +3820,6 @@ importers:
       msw:
         specifier: 2.10.4
         version: 2.10.4(@types/node@24.12.2)(typescript@5.7.3)
-      playwright-ctrf-json-reporter:
-        specifier: 0.0.27
-        version: 0.0.27
       postcss:
         specifier: catalog:tooling
         version: 8.5.26
@@ -4036,9 +3835,6 @@ importers:
       react:
         specifier: 18.3.x
         version: 18.3.1
-      react-docgen:
-        specifier: 5.4.3
-        version: 5.4.3
       react-dom:
         specifier: 18.3.x
         version: 18.3.1(react@18.3.1)
@@ -4048,9 +3844,6 @@ importers:
       rimraf:
         specifier: catalog:tooling
         version: 5.0.5
-      rtlcss:
-        specifier: 4.3.x
-        version: 4.3.0
       sass-loader:
         specifier: catalog:tooling
         version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
@@ -4191,9 +3984,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../../packages/js/eslint-plugin
       eslint:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
@@ -4332,9 +4122,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../../packages/js/eslint-plugin
       copy-webpack-plugin:
         specifier: catalog:tooling
         version: 14.0.0(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
@@ -4387,9 +4174,6 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../../packages/js/eslint-plugin
       eslint:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
@@ -8991,9 +8775,6 @@ packages:
   '@types/dom-webcodecs@0.1.13':
     resolution: {integrity: sha512-O5hkiFIcjjszPIYyUSyvScyvrBoV3NOEEZx/pMlsu44TKzWNkLVBBxnxJz42in5n3QIolYOcBYFCPZZ0h8SkwQ==}
 
-  '@types/dompurify@2.4.0':
-    resolution: {integrity: sha512-IDBwO5IZhrKvHFUl+clZxgf3hn2b/lU6H1KaBShPkQyGJUQ0xwebezIPSuiyGwfz1UzJWQl4M7BDxtHtCCPlTg==}
-
   '@types/ejs@3.1.5':
     resolution: {integrity: sha512-nv+GSx77ZtXiJzwKdsASqi+YQ5Z7vwHsTP0JY2SiQgjGckkBRKZnk8nIM+7oUZ1VCtuTz0+By4qVR7fqzp/Dfg==}
 
@@ -9233,9 +9014,6 @@ packages:
 
   '@types/tedious@4.0.14':
     resolution: {integrity: sha512-KHPsfX/FoVbUGbyYvk1q9MMQHLPeRZhRJZdO45Q4YjvFkv4hMNghCWTvy7rdKessBsmtz4euWCWAB6/tVpI1Iw==}
-
-  '@types/testing-library__jest-dom@5.14.9':
-    resolution: {integrity: sha512-FSYhIjFlfOpGSRyVoMBMuS3ws5ehFQODymf3vlI7U1K8c7PHwWwFY7VREfmsuzHSOnoKs/9/Y983ayOs7eRzqw==}
 
   '@types/tinymce@4.6.9':
     resolution: {integrity: sha512-pDxBUlV4v1jgJ97SlnVOSyf3KUy3OQ3s5Ddpfh1L9M5lXlBmX7TJ2OLSozx1WBxp91acHvYPWDwz2U/kMM1oxQ==}
@@ -12757,9 +12535,6 @@ packages:
 
   core-js-pure@3.49.0:
     resolution: {integrity: sha512-XM4RFka59xATyJv/cS3O3Kml72hQXUeGRuuTmMYFxwzc9/7C8OYTaIR/Ji+Yt8DXzsFLNhat15cE/JP15HrCgw==}
-
-  core-js@3.25.0:
-    resolution: {integrity: sha512-CVU1xvJEfJGhyCpBrzzzU1kjCfgsGUxhEvwUV2e/cOedYWHdmluamx+knDnmhqALddMG16fZvIqvs9aijsHHaA==}
 
   core-js@3.49.0:
     resolution: {integrity: sha512-es1U2+YTtzpwkxVLwAFdSpaIMyQaq0PBgm3YD1W3Qpsn1NAmO3KSgZfu+oGSWVu6NvLHoHCV/aYcsE5wiB7ALg==}
@@ -26672,10 +26447,6 @@ snapshots:
 
   '@types/dom-webcodecs@0.1.13': {}
 
-  '@types/dompurify@2.4.0':
-    dependencies:
-      '@types/trusted-types': 2.0.7
-
   '@types/ejs@3.1.5': {}
 
   '@types/eslint@9.6.1':
@@ -26930,10 +26701,6 @@ snapshots:
   '@types/tedious@4.0.14':
     dependencies:
       '@types/node': 24.12.2
-
-  '@types/testing-library__jest-dom@5.14.9':
-    dependencies:
-      '@types/jest': 29.5.14
 
   '@types/tinymce@4.6.9':
     dependencies:
@@ -35173,8 +34940,6 @@ snapshots:
       browserslist: 4.29.5
 
   core-js-pure@3.49.0: {}
-
-  core-js@3.25.0: {}
 
   core-js@3.49.0: {}
 

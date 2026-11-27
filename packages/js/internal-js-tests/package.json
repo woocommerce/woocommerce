@@ -67,7 +67,6 @@
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
 		"@woocommerce/eslint-config": "workspace:*",
-		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/core-data": "catalog:wp-min",
@@ -77,7 +76,6 @@
 		"babel-jest": "catalog:tooling",
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
-		"jest-cli": "catalog:tooling",
 		"jest-environment-jsdom": "catalog:tooling",
 		"lib0": "0.2.x",
 		"react": "18.3.x",
