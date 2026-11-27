@@ -1,4 +1,4 @@
-Significance: patch
-Type: dev
-Comment: Update email editor E2E test for the new sidebar Edit template link; no production change.
+Significance: minor
+Type: update
 
+Make it easier to find how to edit the email template in the block email editor.
