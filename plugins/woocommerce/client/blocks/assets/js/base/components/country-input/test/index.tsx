@@ -142,6 +142,10 @@ describe( 'CountryInput', () => {
 		const select = screen.getByLabelText( 'Country/Region' );
 		expect( select ).toHaveValue( 'GB' );
 
+		expect( select ).toBeEnabled();
+		expect(
+			screen.getByRole( 'option', { name: 'United States (US)' } )
+		).toBeEnabled();
 		fireEvent.change( select, { target: { value: 'US' } } );
 
 		expect( onChange ).toHaveBeenCalledTimes( 1 );
