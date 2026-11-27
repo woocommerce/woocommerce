@@ -314,6 +314,34 @@ describe( 'Add to Cart + Options variation selector store', () => {
 		);
 	} );
 
+	it( 'enables an option when the variation holds a different selected attribute as any', () => {
+		mockProductsState.mainProductInContext = {
+			id: 100,
+			type: 'variable',
+			variations: [
+				variation( 101, [
+					{ name: 'Color', value: 'red' },
+					{ name: 'Size', value: null },
+				] ),
+			],
+		};
+		mockContext = {
+			...mockContext,
+			name: 'Color',
+			selectedAttributes: [
+				{ attribute: 'Color', value: 'blue' },
+				{ attribute: 'Size', value: 'large' },
+			],
+			variationAttributeOptions: [
+				{ id: 'color-red', label: 'Red', value: 'red' },
+			],
+		};
+
+		expect( getRegisteredStore().state.selectableItems[ 0 ].disabled ).toBe(
+			false
+		);
+	} );
+
 	it( 'updates the selected variation ID and reports missing or unavailable matches', () => {
 		const selectedAttributes = [ { attribute: 'Color', value: 'blue' } ];
 		mockProductsState.mainProductInContext = {
