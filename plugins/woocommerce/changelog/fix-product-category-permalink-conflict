@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Warn when shared product and category permalink bases can make a category archive unavailable.
