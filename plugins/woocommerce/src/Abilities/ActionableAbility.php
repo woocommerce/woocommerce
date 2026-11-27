@@ -226,6 +226,7 @@ abstract class ActionableAbility extends Ability {
 		}
 
 		$refused = new \WP_Error();
+		$subject->set_staged( true );
 		try {
 			$changed = $this->change( $subject, $input );
 		} catch ( \WC_Data_Exception $e ) {
@@ -241,6 +242,7 @@ abstract class ActionableAbility extends Ability {
 		foreach ( (array) $changed as $secondary ) {
 			$resource_name = $secondary[2] ?? $this->get_resource();
 			if ( $enabled && ! ExtensibleAbilities::is_resource_registered( $resource_name ) ) {
+				$subject->set_staged( false );
 				wc_doing_it_wrong(
 					get_class( $this ) . '::change',
 					sprintf(
@@ -266,6 +268,7 @@ abstract class ActionableAbility extends Ability {
 			}
 			$fields = $writes ? $this->prepare_fields( $secondary[1], $resource_name ) : array();
 			if ( is_wp_error( $fields ) ) {
+				$subject->set_staged( false );
 				return $fields;
 			}
 			$objects[] = array( $secondary[0], $fields, $resource_name );
@@ -299,6 +302,7 @@ abstract class ActionableAbility extends Ability {
 				$refused
 			);
 		}
+		$subject->set_staged( false );
 		if ( $core_refused || $refused->has_errors() ) {
 			return self::join_refusals( $refused );
 		}

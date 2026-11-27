@@ -208,6 +208,16 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		return $order ?? wc_get_order( $this->get_order_id() );
 	}
 
+	/**
+	 * Whether hooks about this item fire on a staged change: the order instance that holds the item is marked.
+	 *
+	 * @return bool
+	 */
+	protected function is_staged_for_hooks(): bool {
+		$order = $this->order ? $this->order->get() : null;
+		return null !== $order && $order->staged_mark;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -303,7 +313,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$this->set_taxes( false );
 		}
 
-		do_action( 'woocommerce_order_item_after_calculate_taxes', $this, $calculate_tax_for );
+		$this->do_staged_action( 'woocommerce_order_item_after_calculate_taxes', $this, $calculate_tax_for );
 
 		return true;
 	}

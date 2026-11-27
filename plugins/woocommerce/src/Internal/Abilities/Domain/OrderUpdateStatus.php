@@ -15,7 +15,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * The WooCommerce order update status ability. It runs the steps of
- * ActionableAbility. change() calls WC_Order::update_status(), which also saves.
+ * ActionableAbility. change() stages the status with WC_Order::stage_status(), so validators see the new
+ * status before the save.
  */
 class OrderUpdateStatus extends ActionableAbility {
 
@@ -70,15 +71,6 @@ class OrderUpdateStatus extends ActionableAbility {
 	}
 
 	/**
-	 * The ability writes no extension fields and runs no validators for now, with the feature on or off.
-	 *
-	 * @return bool
-	 */
-	protected function is_extensible(): bool {
-		return false;
-	}
-
-	/**
 	 * Load the order to change.
 	 *
 	 * @param array $input Ability input.
@@ -89,8 +81,7 @@ class OrderUpdateStatus extends ActionableAbility {
 	}
 
 	/**
-	 * Check the new status, and change it with WC_Order::update_status(), which
-	 * also saves. No field or validator runs before the save, so save() does nothing.
+	 * Check the new status, and stage it with WC_Order::stage_status(), as a manual change.
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
@@ -119,46 +110,7 @@ class OrderUpdateStatus extends ActionableAbility {
 			);
 		}
 
-		return self::update_status( $subject, $status, self::get_note( $input ) );
-	}
-
-	/**
-	 * Save the order. change() already saved it through WC_Order::update_status().
-	 *
-	 * @param \WC_Order $subject Order.
-	 * @return null|\WP_Error
-	 */
-	public function save( $subject ) {
-		return null;
-	}
-
-	/**
-	 * Change the status with WC_Order::update_status(), as a manual change. The
-	 * order's own rules run, and the order is saved.
-	 *
-	 * @param \WC_Order $order  Order.
-	 * @param string    $status New status, without the wc- prefix.
-	 * @param string    $note   Status change note.
-	 * @return null|\WP_Error
-	 */
-	private static function update_status( \WC_Order $order, string $status, string $note ): ?\WP_Error {
-		try {
-			$updated = $order->update_status( $status, $note, true );
-		} catch ( \Exception $e ) {
-			return new \WP_Error(
-				'woocommerce_order_status_update_failed',
-				$e->getMessage(),
-				array( 'status' => 400 )
-			);
-		}
-
-		if ( ! $updated ) {
-			return new \WP_Error(
-				'woocommerce_order_status_update_failed',
-				__( 'Failed to update order status.', 'woocommerce' ),
-				array( 'status' => 500 )
-			);
-		}
+		$subject->stage_status( $status, self::get_note( $input ), true );
 
 		return null;
 	}

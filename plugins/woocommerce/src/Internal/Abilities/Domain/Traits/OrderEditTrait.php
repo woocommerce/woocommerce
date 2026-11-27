@@ -13,9 +13,8 @@ use Automattic\WooCommerce\Internal\Admin\Orders\ItemQuantityLimits;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Address and line rules of the abilities that write an order, as the order screen applies them. The address
- * and line changes stay in memory until the ability saves. The new product lines and the totals wait for the
- * save, which uses the order methods that save. A class that uses this trait also uses OrderAbilityTrait.
+ * Address and line rules of the abilities that write an order, as the order screen applies them. Every
+ * change stays in memory until the ability saves. A class that uses this trait also uses OrderAbilityTrait.
  */
 trait OrderEditTrait {
 
@@ -30,95 +29,30 @@ trait OrderEditTrait {
 	private array $changed_product_lines = array();
 
 	/**
-	 * Whether recalculate_saved_order() recalculates with the methods that save, and which ones.
-	 *
-	 * @var string|null `coupons`, `totals` or null.
-	 */
-	private ?string $recalculate_after_save = null;
-
-	/**
-	 * Product lines for add_queued_products(), which adds them with WC_Order::add_product().
-	 *
-	 * @var array<int, array{0: \WC_Product, 1: int}>
-	 */
-	private array $products_to_add = array();
-
-	/**
 	 * Forget the line changes of an earlier call, since the ability object is reused.
 	 */
 	private function reset_line_changes(): void {
-		$this->changed_product_lines  = array();
-		$this->recalculate_after_save = null;
-		$this->products_to_add        = array();
+		$this->changed_product_lines = array();
 	}
 
 	/**
-	 * Leave the totals for recalculate_saved_order() after the lines changed. Coupons apply again after a
-	 * product is added, because they were applied before the new line existed.
+	 * Recalculate the totals in memory after the lines changed. Coupons apply again after a product is
+	 * added, because they were applied before the new line existed.
 	 *
 	 * @param \WC_Order $order         Order.
 	 * @param bool      $product_added Whether a product line was added.
+	 * @throws \WC_Data_Exception When the order class has not adopted a stage method, or a listener does not accept $staged.
 	 */
 	private function stage_line_totals( \WC_Order $order, bool $product_added ): void {
-		$recalculate_coupons = $product_added && ! empty( $order->get_items( 'coupon' ) );
-
-		$this->recalculate_after_save = $recalculate_coupons ? 'coupons' : 'totals';
-	}
-
-	/**
-	 * Add the product lines that add_product_line() left for the save.
-	 * WC_Order::add_product() saves each line right away.
-	 *
-	 * @param \WC_Order $order Order.
-	 * @return array<int, \WC_Order_Item_Product> The added lines, to delete when the order save fails.
-	 */
-	private function add_queued_products( \WC_Order $order ): array {
-		$added = array();
-		foreach ( $this->products_to_add as list( $product, $quantity ) ) {
-			$item = $order->get_item( $order->add_product( $product, $quantity, array( 'order' => $order ) ), false );
-			if ( $item instanceof \WC_Order_Item_Product ) {
-				$added[] = $item;
-			}
-		}
-
-		return $added;
-	}
-
-	/**
-	 * Recalculate the saved order with the methods that save, when stage_line_totals() left it for later.
-	 * Each step is checked on its own, because the next save clears the error of a failed one.
-	 *
-	 * @param \WC_Order $order Saved order.
-	 * @return null|\WP_Error
-	 */
-	private function recalculate_saved_order( \WC_Order $order ): ?\WP_Error {
-		$steps = array();
-		if ( 'coupons' === $this->recalculate_after_save ) {
+		if ( $product_added && ! empty( $order->get_items( 'coupon' ) ) ) {
 			if ( $order->get_prices_include_tax() ) {
-				$steps[] = array( $order, 'calculate_taxes' );
+				$order->stage_taxes();
 			}
-			$steps[] = array( $order, 'recalculate_coupons' );
-		} elseif ( 'totals' === $this->recalculate_after_save ) {
-			$steps[] = array( $order, 'calculate_totals' );
+			$order->stage_recalculated_coupons();
+			return;
 		}
 
-		foreach ( $steps as $step ) {
-			$step();
-			$error = $order->get_last_save_error();
-			if ( null !== $error ) {
-				wc_get_logger()->error(
-					sprintf( 'Ability "%s" failed to save the recalculated order: %s', $this->get_name(), $error->getMessage() ),
-					array( 'source' => 'woocommerce-abilities' )
-				);
-				return new \WP_Error(
-					'woocommerce_ability_save_failed',
-					__( 'The change could not be saved.', 'woocommerce' ),
-					array( 'status' => 500 )
-				);
-			}
-		}
-
-		return null;
+		$order->stage_totals();
 	}
 
 	/**
@@ -226,7 +160,7 @@ trait OrderEditTrait {
 	}
 
 	/**
-	 * Check a new product line. The line waits for add_queued_products(), which adds it on save.
+	 * Add a product line in memory.
 	 *
 	 * @param \WC_Order $order Order.
 	 * @param array     $line  Product line input.
@@ -260,7 +194,7 @@ trait OrderEditTrait {
 			return self::quantity_error( $exception );
 		}
 
-		$this->products_to_add[] = array( $product, $quantity );
+		$this->changed_product_lines[] = $order->stage_product_item( $product, $quantity, array( 'order' => $order ) );
 
 		return null;
 	}

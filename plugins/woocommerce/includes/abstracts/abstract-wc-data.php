@@ -40,6 +40,13 @@ abstract class WC_Data {
 	const CLONE_MODE_CACHE = 'cache';
 
 	/**
+	 * Whether the object holds staged changes that are not saved yet. set_staged() sets it.
+	 *
+	 * @var bool
+	 */
+	protected $staged_mark = false;
+
+	/**
 	 * ID for this object.
 	 *
 	 * @since 3.0.0
@@ -203,6 +210,141 @@ abstract class WC_Data {
 			foreach ( $this->{$set} as $prop => $value ) {
 				if ( $value instanceof DateTime ) {
 					$this->{$set}[ $prop ] = clone $value;
+				}
+			}
+		}
+		$this->staged_mark = false;
+	}
+
+	/**
+	 * Mark the object as staged, or remove the mark. Only the code that stages a change and then saves it sets
+	 * the mark: it marks the object before the first change and removes the mark right before the save.
+	 *
+	 * @internal
+	 * @since 11.5.0
+	 * @param bool $staged Whether the object holds staged changes that are not saved yet.
+	 */
+	public function set_staged( bool $staged ): void {
+		$this->staged_mark = $staged;
+	}
+
+	/**
+	 * Whether hooks about this object fire on a staged change.
+	 *
+	 * @return bool
+	 */
+	protected function is_staged_for_hooks(): bool {
+		return $this->staged_mark;
+	}
+
+	/**
+	 * Fire an action about this object with $staged as its last argument. On a marked object, refuse the change
+	 * before the action fires when a listener accepts fewer arguments than the action passes.
+	 *
+	 * @param string $hook    Action name.
+	 * @param mixed  ...$args Action arguments, without $staged.
+	 * @throws WC_Data_Exception When a listener does not accept $staged on a marked object.
+	 */
+	protected function do_staged_action( string $hook, ...$args ): void {
+		$staged = $this->is_staged_for_hooks();
+		$args[] = $staged;
+		if ( $staged ) {
+			self::refuse_listeners_without_staged( $hook, count( $args ) );
+		}
+		do_action( $hook, ...$args );
+	}
+
+	/**
+	 * Refuse a staged change when a listener of the action accepts fewer arguments than the action passes.
+	 *
+	 * @param string $hook      Action name.
+	 * @param int    $arg_count Number of arguments, $staged included.
+	 * @throws WC_Data_Exception When a listener does not accept $staged.
+	 */
+	private static function refuse_listeners_without_staged( string $hook, int $arg_count ): void {
+		global $wp_filter;
+
+		$names = array();
+		foreach ( isset( $wp_filter[ $hook ] ) ? $wp_filter[ $hook ]->callbacks : array() as $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				if ( (int) $callback['accepted_args'] < $arg_count ) {
+					$names[] = self::callback_name( $callback['function'] );
+				}
+			}
+		}
+
+		if ( empty( $names ) ) {
+			return;
+		}
+
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- A plain text message for a client, built from PHP names.
+		throw new WC_Data_Exception(
+			'woocommerce_data_staging_unsupported',
+			sprintf(
+				/* translators: 1: action name, 2: comma-separated list of PHP callbacks, 3: number of arguments. */
+				__( 'This change cannot be staged, because code on the %1$s action does not support staged changes: %2$s. Each callback needs to accept $staged as its last argument, registered with %3$d accepted arguments.', 'woocommerce' ),
+				$hook,
+				implode( ', ', $names ),
+				$arg_count
+			),
+			400
+		);
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+	}
+
+	/**
+	 * Readable name of a hook callback.
+	 *
+	 * @param mixed $callback Hook callback.
+	 * @return string
+	 */
+	private static function callback_name( $callback ): string {
+		if ( is_string( $callback ) ) {
+			return $callback;
+		}
+		if ( is_array( $callback ) && isset( $callback[0], $callback[1] ) ) {
+			return ( is_object( $callback[0] ) ? get_class( $callback[0] ) : (string) $callback[0] ) . '::' . $callback[1];
+		}
+		if ( $callback instanceof Closure ) {
+			$function = new ReflectionFunction( $callback );
+			$file     = wp_normalize_path( (string) $function->getFileName() );
+			$content  = wp_normalize_path( WP_CONTENT_DIR ) . '/';
+			$file     = 0 === strpos( $file, $content ) ? substr( $file, strlen( $content ) ) : wp_basename( $file );
+			return sprintf( 'a closure in %1$s on line %2$d', $file, $function->getStartLine() );
+		}
+
+		return is_object( $callback ) ? get_class( $callback ) . '::__invoke' : '';
+	}
+
+	/**
+	 * Refuse a stage method when the object's class overrides one of the saving methods without overriding its
+	 * stage method too, because staging would skip the rules of that override.
+	 *
+	 * @param array<string, string> $methods Saving method => stage method, for the stage method and the ones it calls.
+	 * @throws WC_Data_Exception When a class has not adopted a stage method.
+	 */
+	protected function refuse_unstaged_overrides( array $methods ): void {
+		foreach ( $methods as $method => $stage_method ) {
+			for ( $class_name = get_class( $this ); $class_name; $class_name = get_parent_class( $class_name ) ) {
+				$declares_method = ( new ReflectionMethod( $class_name, $method ) )->class === $class_name;
+				$declares_stage  = ( new ReflectionMethod( $class_name, $stage_method ) )->class === $class_name;
+				if ( $declares_method && ! $declares_stage ) {
+					// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- A plain text message for a client, built from PHP names.
+					throw new WC_Data_Exception(
+						'woocommerce_data_staging_unsupported',
+						sprintf(
+							/* translators: 1: PHP class name, 2: method that the class overrides, 3: method that the class needs to override. */
+							__( 'This object does not support this change yet. The class %1$s overrides %2$s() and needs to override %3$s() too.', 'woocommerce' ),
+							$class_name,
+							$method,
+							$stage_method
+						),
+						400
+					);
+					// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				}
+				if ( $declares_stage ) {
+					break;
 				}
 			}
 		}
