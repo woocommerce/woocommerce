@@ -126,7 +126,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 							'default'           => 'woocommerce-onboarding',
 						),
 						'force'        => array(
-							'description' => 'Whether the merchant asked to connect, so registration skips the backoff after an earlier failure',
+							'description' => 'Whether the merchant asked to connect. Registration then runs even in offline mode and without waiting after an earlier failure, including any Retry-After window.',
 							'type'        => 'boolean',
 							'required'    => false,
 							'default'     => false,

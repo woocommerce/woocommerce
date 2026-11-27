@@ -35,9 +35,9 @@ class JetpackConnection {
 	/**
 	 * Get the authorization URL for the Jetpack connection.
 	 *
-	 * Pass `$force` only when a merchant asked to connect: it skips the Jetpack connection package's
-	 * offline mode check and its backoff after an earlier failed registration. Package versions
-	 * without the `$force` parameter ignore it.
+	 * Pass `$force` only when a merchant asked to connect. It makes the Jetpack connection package
+	 * register even in offline mode and without waiting after an earlier failed registration,
+	 * including any Retry-After window WordPress.com asked for. Older package versions ignore it.
 	 *
 	 * @param mixed  $redirect_url Redirect URL.
 	 * @param string $from         From parameter.

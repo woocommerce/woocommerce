@@ -171,7 +171,8 @@ export function* getProductTypes() {
 export function* getJetpackAuthUrl( query: {
 	redirectUrl: string;
 	from?: string;
-	// Only for a merchant's click: registration then skips the backoff after an earlier failure.
+	// Only when the merchant asked to connect: registration then runs even in offline mode and without
+	// waiting after an earlier failure, including any Retry-After window WordPress.com asked for.
 	force?: boolean;
 } ) {
 	try {
