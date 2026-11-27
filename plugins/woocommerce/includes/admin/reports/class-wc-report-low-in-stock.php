@@ -55,7 +55,23 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 			)
 		);
 
-		$this->items     = $wpdb->get_results( $wpdb->prepare( "SELECT SQL_CALC_FOUND_ROWS posts.ID as id, posts.post_parent as parent {$query_from} ORDER BY posts.post_title DESC LIMIT %d, %d;", ( $current_page - 1 ) * $per_page, $per_page ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$this->max_items = $wpdb->get_var( 'SELECT FOUND_ROWS();' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$this->items = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT posts.ID as id, posts.post_parent as parent {$query_from}
+				ORDER BY posts.post_title DESC
+				LIMIT %d, %d;",
+				( $current_page - 1 ) * $per_page,
+				$per_page
+			)
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$this->max_items = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(%d) FROM (
+					SELECT posts.ID as id, posts.post_parent as parent {$query_from}
+				) AS low_stock_results",
+				1
+			)
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 }
