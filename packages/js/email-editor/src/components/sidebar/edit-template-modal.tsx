@@ -60,6 +60,8 @@ export function EditTemplateModal( { close } ) {
 								postId: template.id,
 								postType: 'wp_template',
 							} );
+							// Callers can stay mounted while the template is open.
+							close();
 						} }
 						disabled={ ! template.id || ! onNavigateToEntityRecord }
 					>

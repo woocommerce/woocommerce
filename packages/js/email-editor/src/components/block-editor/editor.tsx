@@ -45,6 +45,7 @@ import { PublishSave } from '../../hacks/publish-save';
 import { EditorNotices } from '../notices';
 import { BlockCompatibilityWarnings } from '../sidebar';
 import { BackButtonContent } from '../header/back-button-content';
+import { TemplateAreaEditingMode } from '../template-areas';
 import { TemplateCanvasAffordance } from '../template-canvas-affordance';
 import { recordEventOnce } from '../../events';
 
@@ -201,6 +202,7 @@ export function InnerEditor( {
 					<EditorKeyboardShortcutsRegister />
 					<PostLockedModal />
 					<TemplateSelection />
+					<TemplateAreaEditingMode />
 					<TemplateCanvasAffordance />
 					<StylesSidebar />
 					<SendPreview />

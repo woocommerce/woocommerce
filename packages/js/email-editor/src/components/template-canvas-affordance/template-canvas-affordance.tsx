@@ -19,6 +19,7 @@ import { Icon, layout } from '@wordpress/icons';
  */
 import { storeName } from '../../store';
 import { recordEvent } from '../../events';
+import { EditTemplateModal } from '../sidebar/edit-template-modal';
 
 const SLOT_ID = 'woocommerce-email-editor-template-area-affordance-slot';
 const STYLE_ID = 'woocommerce-email-editor-template-area-affordance-style';
@@ -168,7 +169,12 @@ function getTemplateTarget( canvasDocument: Document ): Element | null {
 		'[data-type="core/site-logo"], [data-type="core/site-title"], .wp-block-site-logo, .wp-block-site-title'
 	);
 
-	if ( ! templateBlock ) {
+	// A site logo or title inside a template group gets the template area
+	// toolbar instead (see the template-areas component).
+	if (
+		! templateBlock ||
+		templateBlock.closest( '.is-email-template-area' )
+	) {
 		return null;
 	}
 
@@ -193,6 +199,7 @@ function createSlot( canvasDocument: Document ): HTMLDivElement {
 
 export function TemplateCanvasAffordance() {
 	const [ isActive, setIsActive ] = useState( false );
+	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	const [ portalSlot, setPortalSlot ] = useState< HTMLDivElement | null >(
 		null
 	);
@@ -374,18 +381,11 @@ export function TemplateCanvasAffordance() {
 	const activate = useCallback( () => setIsActive( true ), [] );
 
 	const handleEditTemplate = useCallback( () => {
-		if ( ! template?.id || ! onNavigateToEntityRecord ) {
-			return;
-		}
-
 		recordEvent( 'template_canvas_affordance_edit_template_clicked', {
-			templateId: template.id,
+			templateId: template?.id,
 		} );
-		onNavigateToEntityRecord( {
-			postId: template.id,
-			postType: 'wp_template',
-		} );
-	}, [ onNavigateToEntityRecord, template?.id ] );
+		setIsModalOpen( true );
+	}, [ template?.id ] );
 
 	// Gutenberg’s block list installs capture-phase pointerdown/mousedown
 	// handlers on the canvas to start block selection and drag gestures. If it
@@ -440,41 +440,48 @@ export function TemplateCanvasAffordance() {
 
 	const toolbarId = `${ SLOT_ID }-toolbar`;
 
-	return createPortal(
+	return (
 		<>
-			<button
-				ref={ frameRef }
-				type="button"
-				className={
-					isActive
-						? 'woocommerce-email-editor-template-area-affordance__frame is-active'
-						: 'woocommerce-email-editor-template-area-affordance__frame'
-				}
-				aria-label={ __( 'Template area', 'woocommerce' ) }
-				aria-expanded={ isActive }
-				aria-controls={ isActive ? toolbarId : undefined }
-				style={ position.frame }
-			/>
-			{ isActive && (
-				<div
-					id={ toolbarId }
-					className="woocommerce-email-editor-template-area-affordance"
-					style={ position.toolbar }
-				>
-					<span className="woocommerce-email-editor-template-area-affordance__label">
-						<Icon icon={ layout } size={ 24 } />
-						<span>{ __( 'Template', 'woocommerce' ) }</span>
-					</span>
-					<Button
-						ref={ buttonRef }
-						className="woocommerce-email-editor-template-area-affordance__button"
-						variant="tertiary"
-					>
-						{ __( 'Edit template', 'woocommerce' ) }
-					</Button>
-				</div>
+			{ createPortal(
+				<>
+					<button
+						ref={ frameRef }
+						type="button"
+						className={
+							isActive
+								? 'woocommerce-email-editor-template-area-affordance__frame is-active'
+								: 'woocommerce-email-editor-template-area-affordance__frame'
+						}
+						aria-label={ __( 'Template area', 'woocommerce' ) }
+						aria-expanded={ isActive }
+						aria-controls={ isActive ? toolbarId : undefined }
+						style={ position.frame }
+					/>
+					{ isActive && (
+						<div
+							id={ toolbarId }
+							className="woocommerce-email-editor-template-area-affordance"
+							style={ position.toolbar }
+						>
+							<span className="woocommerce-email-editor-template-area-affordance__label">
+								<Icon icon={ layout } size={ 24 } />
+								<span>{ __( 'Template', 'woocommerce' ) }</span>
+							</span>
+							<Button
+								ref={ buttonRef }
+								className="woocommerce-email-editor-template-area-affordance__button"
+								variant="tertiary"
+							>
+								{ __( 'Edit template', 'woocommerce' ) }
+							</Button>
+						</div>
+					) }
+				</>,
+				portalSlot
 			) }
-		</>,
-		portalSlot
+			{ isModalOpen && (
+				<EditTemplateModal close={ () => setIsModalOpen( false ) } />
+			) }
+		</>
 	);
 }

@@ -3,7 +3,7 @@ import '../../test/__mocks__/setup-shared-mocks';
 /**
  * External dependencies
  */
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
@@ -38,6 +38,10 @@ jest.mock( '@wordpress/components', () => {
 jest.mock( '@wordpress/icons', () => ( {
 	Icon: () => <span data-testid="template-area-icon" />,
 	layout: 'layout',
+} ) );
+
+jest.mock( '../../sidebar/edit-template-modal', () => ( {
+	EditTemplateModal: () => <div>Confirm editing the template</div>,
 } ) );
 
 jest.mock( '../../../events', () => ( {
@@ -326,7 +330,25 @@ describe( 'TemplateCanvasAffordance', () => {
 		).not.toBeInTheDocument();
 	} );
 
-	it( 'navigates to the current template when edit template is clicked', async () => {
+	it( 'does not render when the site title sits in a template area that has its own toolbar', async () => {
+		const iframe = addEditorCanvas();
+		iframe.contentDocument
+			?.querySelector( '[data-block="template-header"]' )
+			?.classList.add( 'is-email-template-area' );
+		setupUseSelectMock();
+
+		render( <TemplateCanvasAffordance /> );
+
+		await new Promise( ( resolve ) => setTimeout( resolve, 50 ) );
+
+		expect(
+			iframe.contentDocument?.getElementById(
+				'woocommerce-email-editor-template-area-affordance-slot'
+			)
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'asks before opening the template when edit template is clicked', async () => {
 		const iframe = addEditorCanvas();
 		const { onNavigateToEntityRecord } = setupUseSelectMock();
 
@@ -356,10 +378,10 @@ describe( 'TemplateCanvasAffordance', () => {
 			'template_canvas_affordance_edit_template_clicked',
 			{ templateId: template.id }
 		);
-		expect( onNavigateToEntityRecord ).toHaveBeenCalledWith( {
-			postId: template.id,
-			postType: 'wp_template',
-		} );
+		expect(
+			await screen.findByText( 'Confirm editing the template' )
+		).toBeInTheDocument();
+		expect( onNavigateToEntityRecord ).not.toHaveBeenCalled();
 	} );
 
 	it( 'does not render while editing a template', async () => {

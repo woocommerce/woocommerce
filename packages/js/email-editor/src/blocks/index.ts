@@ -30,6 +30,7 @@ import { filterSetUrlAttribute } from './core/block-edit';
 import { enhanceSocialLinksBlock } from './core/social-links';
 import { enhanceSiteLogoBlock } from './core/site-logo';
 import { enableFullWidthBlocks } from './core/full-width';
+import { enableTemplateAreaTools } from './core/template-area';
 import { enableProductImageAlignment } from './woocommerce/product-image';
 
 export { getAllowedBlockNames } from './utils';
@@ -57,6 +58,7 @@ export function initBlocks() {
 	enhanceSocialLinksBlock();
 	enhanceSiteLogoBlock();
 	enableFullWidthBlocks();
+	enableTemplateAreaTools();
 	enableProductImageAlignment();
 	removeBlockStylesFromAllBlocks();
 }

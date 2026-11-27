@@ -37,14 +37,14 @@ async function switchToTemplateEditingMode( page: Page ) {
 			.click();
 	}
 
-	// Click the "Woo Email Template" button to open dropdown
-	await page.getByRole( 'button', { name: 'Template actions' } ).click();
-
-	// Click "Edit template" in the dropdown
-	await page.getByRole( 'menuitem', { name: 'Edit template' } ).click();
-
-	// Click "Edit template" button in the modal
+	// Click the "Edit template" link in the sidebar
 	await page
+		.getByRole( 'button', { name: 'Edit template', exact: true } )
+		.click();
+
+	// Confirm in the modal
+	await page
+		.getByRole( 'dialog' )
 		.getByRole( 'button', { name: 'Edit template', exact: true } )
 		.click();
 

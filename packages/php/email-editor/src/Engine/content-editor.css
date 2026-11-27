@@ -181,3 +181,24 @@ ol {
 .block-editor-iframe__body {
 	overflow-x: auto;
 }
+
+/*
+ * Template blocks around the email content get a purple outline on hover and
+ * selection, the color core uses for template parts. The first rule draws the
+ * outline where core draws none; the second recolors core's own outline.
+ */
+.block-editor-block-list__block.is-email-template-area.is-hovered::after,
+.block-editor-block-list__block.is-email-template-area.is-selected::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	pointer-events: none;
+	outline: var(--wp-admin-border-width-focus, 2px) solid var(--wp-block-synced-color, #7a00df);
+	outline-offset: calc(-1 * var(--wp-admin-border-width-focus, 2px));
+}
+
+.is-outline-mode .block-editor-block-list__block:not(.remove-outline).is-email-template-area.is-hovered:not(.is-selected)::after,
+.is-outline-mode .block-editor-block-list__block:not(.remove-outline):not(.rich-text).is-email-template-area.is-selected::after {
+	outline-color: var(--wp-block-synced-color, #7a00df);
+}

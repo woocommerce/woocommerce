@@ -2,6 +2,7 @@
  * External dependencies
  */
 import {
+	Button,
 	PanelRow,
 	Flex,
 	FlexItem,
@@ -48,17 +49,11 @@ export function TemplateSelection() {
 							{ __( 'Template', __i18n_text_domain__ ) }
 						</FlexItem>
 						<FlexItem>
-							{ ! (
-								templates?.length > 1 || canUpdateTemplates
-							) && <b>{ template?.title }</b> }
-							{ ( templates?.length > 1 ||
-								canUpdateTemplates ) && (
+							{ templates?.length > 1 ? (
 								<DropdownMenu
 									icon={ null }
 									text={ template?.title }
-									toggleProps={ {
-										variant: 'tertiary',
-									} }
+									toggleProps={ { variant: 'tertiary' } }
 									label={ __(
 										'Template actions',
 										__i18n_text_domain__
@@ -75,50 +70,44 @@ export function TemplateSelection() {
 									}
 								>
 									{ ( { onClose } ) => (
-										<>
-											{ canUpdateTemplates && (
-												<MenuItem
-													onClick={ () => {
-														recordEvent(
-															'sidebar_template_actions_edit_template_clicked'
-														);
-														setEditTemplateModalOpen(
-															true
-														);
-														onClose();
-													} }
-												>
-													{ __(
-														'Edit template',
-														__i18n_text_domain__
-													) }
-												</MenuItem>
+										<MenuItem
+											onClick={ () => {
+												recordEvent(
+													'sidebar_template_actions_swap_template_clicked'
+												);
+												setSelectTemplateModalOpen(
+													true
+												);
+												onClose();
+											} }
+										>
+											{ __(
+												'Swap template',
+												__i18n_text_domain__
 											) }
-
-											{ templates?.length > 1 && (
-												<MenuItem
-													onClick={ () => {
-														recordEvent(
-															'sidebar_template_actions_swap_template_clicked'
-														);
-														setSelectTemplateModalOpen(
-															true
-														);
-														onClose();
-													} }
-												>
-													{ __(
-														'Swap template',
-														__i18n_text_domain__
-													) }
-												</MenuItem>
-											) }
-										</>
+										</MenuItem>
 									) }
 								</DropdownMenu>
+							) : (
+								<b>{ template?.title }</b>
 							) }
 						</FlexItem>
 					</Flex>
+				</PanelRow>
+			) }
+			{ template && canUpdateTemplates && (
+				<PanelRow>
+					<Button
+						variant="link"
+						onClick={ () => {
+							recordEvent(
+								'sidebar_template_actions_edit_template_clicked'
+							);
+							setEditTemplateModalOpen( true );
+						} }
+					>
+						{ __( 'Edit template', __i18n_text_domain__ ) }
+					</Button>
 				</PanelRow>
 			) }
 			{ isEditTemplateModalOpen && (
