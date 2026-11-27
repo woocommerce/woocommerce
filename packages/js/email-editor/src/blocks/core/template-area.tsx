@@ -24,7 +24,7 @@ import { storeName } from '../../store';
 
 function TemplateAreaToolbar() {
 	const template = useSelect(
-		( select ) => select( storeName ).getCurrentTemplate(),
+		( sel ) => sel( storeName ).getCurrentTemplate(),
 		[]
 	);
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
