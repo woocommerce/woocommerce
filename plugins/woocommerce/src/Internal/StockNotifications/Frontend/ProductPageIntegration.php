@@ -454,6 +454,9 @@ class ProductPageIntegration {
 		/**
 		 * Filter whether personalization is enabled while rendering the form.
 		 *
+		 * Defaults to true since 11.5.0. This also turns on the nonce check for logged-in sign-ups,
+		 * see `woocommerce_customer_stock_notifications_requires_nonce_check`.
+		 *
 		 * @since 10.2.0
 		 *
 		 * @param bool $enabled Whether personalization is enabled.
