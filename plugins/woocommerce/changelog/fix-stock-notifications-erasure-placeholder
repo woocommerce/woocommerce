@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Delete unconfirmed back-in-stock sign-ups on personal data erasure, and give each erased customer their own placeholder email instead of a shared one.

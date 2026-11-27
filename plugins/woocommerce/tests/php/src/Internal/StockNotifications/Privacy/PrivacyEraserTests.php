@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Privacy\PrivacyEraser;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 
 /**
@@ -18,6 +19,11 @@ use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsF
 class PrivacyEraserTests extends \WC_Unit_Test_Case {
 
 	use StockNotificationsFeatureTrait;
+
+	/**
+	 * Pattern of the random placeholder email an erasure gives anonymized sign-ups.
+	 */
+	private const ANONYMOUS_EMAIL_PATTERN = '/^deleted-[a-z0-9]{12}@site\.invalid$/';
 
 	/**
 	 * Set up the test.
@@ -41,7 +47,10 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 	public function test_privacy_eraser_makes_data_anonymous() {
 		$notification = new Notification();
 		$notification->set_user_email( 'jon@doe.com' );
+		$notification->set_user_id( 5 );
 		$notification->set_product_id( 1 );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->update_meta_data( 'unsubscribe_action_key', 'abc' );
 		$notification_id = $notification->save();
 
 		$response = PrivacyEraser::erase_notification_data( 'jon@doe.com' );
@@ -50,7 +59,11 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 
 		$anonymous_notification = new Notification( $notification_id );
 
-		$this->assertEquals( $anonymous_notification->get_user_email(), wp_privacy_anonymize_data( 'email', '' ) );
+		$this->assertMatchesRegularExpression( self::ANONYMOUS_EMAIL_PATTERN, $anonymous_notification->get_user_email() );
+		$this->assertStringNotContainsString( 'jon', $anonymous_notification->get_user_email() );
+		$this->assertSame( 0, $anonymous_notification->get_user_id() );
+		$this->assertSame( 'yes', $anonymous_notification->get_meta( '_anonymized' ) );
+		$this->assertSame( '', $anonymous_notification->get_meta( 'unsubscribe_action_key' ) );
 		$this->assertEquals( NotificationStatus::CANCELLED, $anonymous_notification->get_status() );
 		$this->assertEquals( NotificationCancellationSource::PRIVACY, $anonymous_notification->get_cancellation_source() );
 		$this->assertNotNull( $anonymous_notification->get_date_cancelled() );
@@ -89,7 +102,75 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		PrivacyEraser::erase_notification_data( 'jon@doe.com' );
 
 		$this->assertSame( array( array( $notification_id, 'jon@doe.com', 'jon@doe.com', 5, NotificationStatus::ACTIVE ) ), $erased );
-		$this->assertSame( array( array( $notification_id, NotificationStatus::ACTIVE, NotificationStatus::CANCELLED, wp_privacy_anonymize_data( 'email', '' ) ) ), $status_changes );
+		$this->assertCount( 1, $status_changes );
+		$this->assertSame( array( $notification_id, NotificationStatus::ACTIVE, NotificationStatus::CANCELLED ), array_slice( $status_changes[0], 0, 3 ) );
+		$this->assertMatchesRegularExpression( self::ANONYMOUS_EMAIL_PATTERN, $status_changes[0][3] );
+	}
+
+	/**
+	 * @testdox Should delete a pending notification instead of anonymizing and cancelling it.
+	 */
+	public function test_privacy_eraser_deletes_pending_notification(): void {
+		$notification = new Notification();
+		$notification->set_user_email( 'jon@doe.com' );
+		$notification->set_product_id( 1 );
+		$notification->set_status( NotificationStatus::PENDING );
+		$notification_id = $notification->save();
+
+		$before_remove = array();
+		add_action(
+			'woocommerce_privacy_before_remove_stock_notification_personal_data',
+			function ( $id, $original_email ) use ( &$before_remove ) {
+				$before_remove[] = array( $id, $original_email );
+			},
+			10,
+			2
+		);
+		$deleted = array();
+		add_action(
+			'woocommerce_delete_stock_notification',
+			function ( $id ) use ( &$deleted ) {
+				$deleted[] = $id;
+			}
+		);
+		$status_changes = 0;
+		add_action(
+			'woocommerce_stock_notification_status_changed',
+			function () use ( &$status_changes ) {
+				++$status_changes;
+			}
+		);
+
+		$response = PrivacyEraser::erase_notification_data( 'jon@doe.com' );
+
+		$this->assertTrue( $response['items_removed'] );
+		$this->assertSame( array( 'Removed back-in-stock notification for product id: 1' ), $response['messages'] );
+		$this->assertSame( array( array( $notification_id, 'jon@doe.com' ) ), $before_remove );
+		$this->assertSame( array( $notification_id ), $deleted );
+		$this->assertSame( 0, $status_changes, 'A deleted pending sign-up should not be reported as cancelled.' );
+		$this->assertSame( 0, NotificationQuery::count_notifications( array( 'customer' => array( 'jon@doe.com' ) ) ), 'The pending sign-up should no longer exist.' );
+	}
+
+	/**
+	 * @testdox Should give each erased customer a different placeholder email.
+	 */
+	public function test_privacy_eraser_uses_distinct_placeholder_per_erasure(): void {
+		$ids = array();
+		foreach ( array( 'jon@doe.com', 'jane@doe.com' ) as $email ) {
+			$notification = new Notification();
+			$notification->set_user_email( $email );
+			$notification->set_product_id( 1 );
+			$notification->set_status( NotificationStatus::SENT );
+			$ids[] = $notification->save();
+
+			PrivacyEraser::erase_notification_data( $email );
+		}
+
+		$first  = ( new Notification( $ids[0] ) )->get_user_email();
+		$second = ( new Notification( $ids[1] ) )->get_user_email();
+		$this->assertMatchesRegularExpression( self::ANONYMOUS_EMAIL_PATTERN, $first );
+		$this->assertMatchesRegularExpression( self::ANONYMOUS_EMAIL_PATTERN, $second );
+		$this->assertNotSame( $first, $second );
 	}
 
 	/**
@@ -113,7 +194,7 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( $date_notified->getTimestamp(), $updated->get_date_notified()->getTimestamp() );
 		$this->assertNull( $updated->get_cancellation_source() );
 		$this->assertNull( $updated->get_date_cancelled() );
-		$this->assertEquals( wp_privacy_anonymize_data( 'email', '' ), $updated->get_user_email() );
+		$this->assertMatchesRegularExpression( self::ANONYMOUS_EMAIL_PATTERN, $updated->get_user_email() );
 		$this->assertSame( 0, $updated->get_user_id() );
 		$this->assertEquals( 'yes', $updated->get_meta( '_anonymized' ) );
 	}
@@ -134,7 +215,7 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$updated = new Notification( $notification_id );
 		$this->assertEquals( NotificationStatus::CANCELLED, $updated->get_status() );
 		$this->assertEquals( NotificationCancellationSource::USER, $updated->get_cancellation_source() );
-		$this->assertEquals( wp_privacy_anonymize_data( 'email', '' ), $updated->get_user_email() );
+		$this->assertMatchesRegularExpression( self::ANONYMOUS_EMAIL_PATTERN, $updated->get_user_email() );
 	}
 
 	/**
@@ -144,6 +225,7 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$notification = new Notification();
 		$notification->set_user_email( 'jon@doe.com' );
 		$notification->set_product_id( 1 );
+		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification_id = $notification->save();
 
 		$response = PrivacyEraser::erase_notification_data( 'Jon@Doe.COM' );
@@ -163,11 +245,13 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$user_notification->set_user_id( $user_id );
 		$user_notification->set_user_email( 'old@doe.com' );
 		$user_notification->set_product_id( 1 );
+		$user_notification->set_status( NotificationStatus::ACTIVE );
 		$user_notification_id = $user_notification->save();
 
 		$guest_notification = new Notification();
 		$guest_notification->set_user_email( 'new@doe.com' );
 		$guest_notification->set_product_id( 2 );
+		$guest_notification->set_status( NotificationStatus::ACTIVE );
 		$guest_notification_id = $guest_notification->save();
 
 		$other_notification = new Notification();
@@ -188,6 +272,7 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$current_notification->set_user_id( $user_id );
 		$current_notification->set_user_email( 'new@doe.com' );
 		$current_notification->set_product_id( 4 );
+		$current_notification->set_status( NotificationStatus::ACTIVE );
 		$current_notification_id = $current_notification->save();
 
 		$response = PrivacyEraser::erase_notification_data( 'new@doe.com' );
@@ -198,10 +283,14 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$erased_user_notification = new Notification( $user_notification_id );
 		$this->assertSame( NotificationStatus::CANCELLED, $erased_user_notification->get_status() );
 		$this->assertSame( 0, $erased_user_notification->get_user_id() );
-		$this->assertSame( wp_privacy_anonymize_data( 'email', '' ), $erased_user_notification->get_user_email() );
+		$this->assertMatchesRegularExpression( self::ANONYMOUS_EMAIL_PATTERN, $erased_user_notification->get_user_email() );
 
-		$this->assertSame( NotificationStatus::CANCELLED, ( new Notification( $guest_notification_id ) )->get_status() );
-		$this->assertSame( NotificationStatus::CANCELLED, ( new Notification( $current_notification_id ) )->get_status() );
+		$erased_guest_notification   = new Notification( $guest_notification_id );
+		$erased_current_notification = new Notification( $current_notification_id );
+		$this->assertSame( NotificationStatus::CANCELLED, $erased_guest_notification->get_status() );
+		$this->assertSame( NotificationStatus::CANCELLED, $erased_current_notification->get_status() );
+		$this->assertSame( $erased_user_notification->get_user_email(), $erased_guest_notification->get_user_email(), 'All of a customer\'s rows should share one placeholder.' );
+		$this->assertSame( $erased_user_notification->get_user_email(), $erased_current_notification->get_user_email(), 'All of a customer\'s rows should share one placeholder.' );
 
 		$untouched_notification = new Notification( $other_notification_id );
 		$this->assertNotSame( NotificationStatus::CANCELLED, $untouched_notification->get_status() );
@@ -421,6 +510,7 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$mine = new Notification();
 		$mine->set_user_email( 'jon@doe.com' );
 		$mine->set_product_id( 1 );
+		$mine->set_status( NotificationStatus::ACTIVE );
 		$mine_id = $mine->save();
 
 		$other = new Notification();
