@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Honor the Gallery block’s Crop images to fit setting for mixed-shape rows in emails.
+Honor the Gallery block’s Crop images to fit setting for mixed-shape rows in emails. The `woocommerce_email_editor_gallery_cropped_image_url` filter now also runs for those rows, with a ratio taken from the row’s tallest image (such as `683/1024`). It skips rows where fewer than two image ratios can be read, or where the ratios differ by 1% or less.
