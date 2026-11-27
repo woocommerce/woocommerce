@@ -165,11 +165,15 @@ Once state is populated and a current product is set, blocks read from it either
 
 The derived getters are registered on the PHP side via `ProductsStore::register_getters()`, so bindings resolve during server render — no client-side flash during hydration.
 
-```html
-<span data-wp-interactive="woocommerce/products" data-wp-text="state.productInContext.stock_availability.text"></span>
+From `ProductSKU.php`:
+
+```php
+$interactive_attributes = $is_interactive
+    ? 'data-wp-interactive="woocommerce/products" data-wp-text="state.productInContext.sku"'
+    : '';
 ```
 
-Any `ProductResponseItem` field except `images` can be bound the same way, e.g. `state.productInContext.price_html`, `state.productInContext.sku`, `state.mainProductInContext.name`. The `images` field is temporarily left out of the store's state, on both the server and the client.
+Any `ProductResponseItem` field except `images` can be bound the same way, e.g. `state.productInContext.price_html`, `state.productInContext.stock_availability.text`, `state.mainProductInContext.name`. The `images` field is temporarily left out of the store's state, on both the server and the client.
 
 #### From JS (client)
 
