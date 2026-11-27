@@ -9,6 +9,8 @@ namespace Automattic\Woocommerce_Analytics;
 
 use Automattic\Woocommerce_Analytics;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use WorDBless\BaseTestCase;
 
 /**
@@ -390,6 +392,19 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Deactivation is the only cleanup a host runs, so it also stops what the speed module would replay on reactivation.
+	 */
+	public function test_maybe_remove_proxy_speed_module_stops_the_event_props_record(): void {
+		wp_schedule_event( time(), 'daily', Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK );
+		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION, array( 'host' => 'ecommplan' ) );
+
+		Woocommerce_Analytics::maybe_remove_proxy_speed_module();
+
+		$this->assertFalse( wp_next_scheduled( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK ) );
+		$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION ) );
+	}
+
+	/**
 	 * The speed module runs at MU-plugin stage, where no plugin has registered a
 	 * callback on the proxy tracking filter yet, so it cannot ask `Features` and
 	 * has to read a persisted answer instead.
@@ -498,6 +513,66 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 			'cron'        => array( true, array( 'recorded_user' => 0 ) ),
 			'a page view' => array( false, false ),
 		);
+	}
+
+	/**
+	 * A callback that fails in cron, where there is no cart or session, keeps the last record and the current user.
+	 */
+	public function test_a_failing_event_props_callback_keeps_the_last_record(): void {
+		add_filter( 'wp_doing_cron', '__return_true' );
+		update_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, 'yes' );
+		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION, array( 'host' => 'ecommplan' ) );
+		$user_id = wp_insert_user(
+			array(
+				'user_login' => 'wca-record-failure',
+				'user_pass'  => 'password',
+			)
+		);
+		wp_set_current_user( $user_id );
+		add_filter(
+			'jetpack_woocommerce_analytics_event_props',
+			function () {
+				throw new \RuntimeException( 'No session in cron.' );
+			}
+		);
+		$error_log = ini_set( 'error_log', '/dev/null' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+
+		try {
+			Woocommerce_Analytics::record_speed_module_event_props();
+		} finally {
+			ini_set( 'error_log', (string) $error_log ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		}
+
+		$this->assertSame( array( 'host' => 'ecommplan' ), get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION ) );
+		$this->assertSame( $user_id, get_current_user_id() );
+	}
+
+	/**
+	 * With ALTERNATE_WP_CRON, cron runs inside a visitor's request, so that visitor's cookie must not be recorded.
+	 *
+	 * The constant cannot be undefined, so this runs in its own process.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	#[RunInSeparateProcess]
+	#[PreserveGlobalState( false )]
+	public function test_alternate_wp_cron_does_not_record(): void {
+		define( 'ALTERNATE_WP_CRON', true );
+		add_filter( 'wp_doing_cron', '__return_true' );
+		update_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, 'yes' );
+		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION, array( 'host' => 'ecommplan' ) );
+		$_COOKIE['visitor'] = 'shopper-a';
+		add_filter(
+			'jetpack_woocommerce_analytics_event_props',
+			function ( $props ) {
+				return array_merge( $props, array( 'visitor' => $_COOKIE['visitor'] ?? '' ) );
+			}
+		);
+
+		Woocommerce_Analytics::record_speed_module_event_props();
+
+		$this->assertSame( array( 'host' => 'ecommplan' ), get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION ) );
 	}
 
 	/**

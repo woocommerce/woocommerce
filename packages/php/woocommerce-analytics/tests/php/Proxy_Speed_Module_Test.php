@@ -356,7 +356,7 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Callbacks on the event props filter have not registered here, so what they added at the last init is replayed.
+	 * Plugin callbacks on the event props filter have not registered here, so what cron last recorded is replayed.
 	 */
 	public function test_replays_the_recorded_event_props_over_the_client_value(): void {
 		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
@@ -366,12 +366,52 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 
 		$method->invoke( null, '{"event_name":"product_view","properties":{"host":"forged"}}' );
 
+		$this->assertSame( 'ecommplan', $this->get_queued_pixel_props()['host'] ?? null );
+	}
+
+	/**
+	 * An MU-plugin callback still runs here, so its live value wins over what cron recorded from it.
+	 */
+	public function test_an_mu_plugin_callback_keeps_its_live_value_over_the_record(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		update_option(
+			Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION,
+			array(
+				'host'     => 'ecommplan',
+				'mu_event' => 'recorded',
+			)
+		);
+		add_filter(
+			'jetpack_woocommerce_analytics_event_props',
+			function ( $props, $event_name ) {
+				return array_merge( $props, array( 'mu_event' => $event_name ) );
+			},
+			10,
+			2
+		);
+		$method = new \ReflectionMethod( Proxy_Speed_Module::class, 'handle_events' );
+		$method->setAccessible( true );
+
+		$method->invoke( null, '{"event_name":"product_view","properties":{"host":"forged"}}' );
+
+		$props = $this->get_queued_pixel_props();
+		$this->assertSame( 'woocommerceanalytics_product_view', $props['mu_event'] ?? null );
+		$this->assertSame( 'ecommplan', $props['host'] ?? null );
+	}
+
+	/**
+	 * Read the properties of the one queued pixel.
+	 *
+	 * @return array
+	 */
+	private function get_queued_pixel_props(): array {
 		$queue = ( new \ReflectionClass( WC_Analytics_Tracking::class ) )->getProperty( 'pixel_batch_queue' );
 		$queue->setAccessible( true );
 		$pixels = $queue->getValue();
 		$this->assertCount( 1, $pixels );
 		parse_str( (string) wp_parse_url( $pixels[0], PHP_URL_QUERY ), $props );
-		$this->assertSame( 'ecommplan', $props['host'] ?? null );
+
+		return $props;
 	}
 
 	/**

@@ -99,7 +99,7 @@ request-derived values and the session cookie.
 Invalid event names and oversized pixel URLs return an error. Events beyond the
 batch limit are ignored.
 
-Two options carry this state, because the speed module runs before plugins
+Three options carry this state, because the speed module runs before plugins
 register filters and cannot read them:
 
 -   `woocommerce_analytics_proxy_tracking_ever_enabled` is sticky and decides
@@ -111,6 +111,10 @@ register filters and cannot read them:
     `init` for the speed module (see "Server-Side Optimizations"). Only an explicit
     `yes` lets it serve; otherwise it falls through to the REST route rather than
     answering itself, so the `403` always comes from one place.
+-   `woocommerce_analytics_speed_module_event_props` holds the scalar properties
+    that `jetpack_woocommerce_analytics_event_props` callbacks added at the last
+    daily cron run, for the speed module to replay. It is deleted once proxy
+    tracking is off.
 
 **The filter must resolve to the same value for every request on a site, and must
 be registered before `init` priority 20.** A value that varies by cohort,
@@ -307,7 +311,9 @@ if ( class_exists( \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::class )
 
 Called from an MU-plugin, it serves on `muplugins_loaded`, when a `wp_consent_cookie_prefix` filter from any MU-plugin is already registered. Called from a plugin's main file, it serves at once, so it also sees that filter from the plugins that load before it, but not from those after. A call after `plugins_loaded` is refused with a `_doing_it_wrong()` notice.
 
-The module serves only while proxy tracking was on at the last `init`, and otherwise leaves the request to the REST route. Callbacks on `jetpack_woocommerce_analytics_event_props` have not registered when it serves, so it replays the scalar properties they add, recorded by a daily `woocommerce_analytics_record_speed_module_event_props` cron run with no user logged in. With `ALTERNATE_WP_CRON`, that run happens inside a visitor's request, whose request data a callback could still read. A property that depends on the event, the visitor or the request only reaches events the REST route records. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route too, which applies the consent check.
+The module serves only while proxy tracking was on at the last `init`, and otherwise leaves the request to the REST route. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route too, which applies the consent check.
+
+Plugin callbacks on `jetpack_woocommerce_analytics_event_props` have not registered when the module serves, so it adds the scalar properties they returned at the last daily `woocommerce_analytics_record_speed_module_event_props` cron run, which has no user logged in. A new or changed callback reaches these events up to a day later. With `ALTERNATE_WP_CRON`, cron runs inside a visitor's request, so only a run from WP-CLI records. A property that depends on the event, the visitor or the request only reaches events the REST route records, unless it comes from an MU-plugin callback, which still runs.
 
 `woocommerce_analytics_auto_install_proxy_speed_module` is deprecated and has no effect.
 
