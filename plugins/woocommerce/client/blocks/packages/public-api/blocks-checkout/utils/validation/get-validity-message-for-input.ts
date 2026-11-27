@@ -27,12 +27,13 @@ export const getFieldLabel = ( label: string | undefined ) => {
 const defaultValidityMessage =
 	( label: string | undefined, inputElement: HTMLInputElement ) =>
 	( validity: ValidityState ): string | undefined => {
-		const fieldLabel = getFieldLabel( label );
-		let message = sprintf(
-			/* translators: %s field label */
-			__( 'Please enter a valid %s', 'woocommerce' ),
-			fieldLabel
-		);
+		let message = label
+			? sprintf(
+					/* translators: %s: field label exactly as shown to the shopper, e.g. "City" or "CEP". */
+					__( 'Please enter a valid value for %s', 'woocommerce' ),
+					label
+				)
+			: __( 'Please enter a valid value', 'woocommerce' );
 
 		if ( inputElement.type === 'checkbox' ) {
 			message = __(

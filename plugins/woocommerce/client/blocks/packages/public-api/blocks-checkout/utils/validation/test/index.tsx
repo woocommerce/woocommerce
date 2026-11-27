@@ -35,7 +35,35 @@ describe( 'getValidityMessageForInput', () => {
 			textInputElement
 		);
 
-		expect( validityMessage ).toBe( 'Please enter a valid test' );
+		expect( validityMessage ).toBe( 'Please enter a valid value for Test' );
+	} );
+	it( 'Keeps the label casing as displayed', async () => {
+		render( <input type="text" required data-testid="custom-input" /> );
+
+		const textInputElement = screen.getByTestId(
+			'custom-input'
+		) as HTMLInputElement;
+
+		const validityMessage = getValidityMessageForInput(
+			'CEP',
+			textInputElement
+		);
+
+		expect( validityMessage ).toBe( 'Please enter a valid value for CEP' );
+	} );
+	it( 'Returns a generic error message if the input has no label', async () => {
+		render( <input type="text" required data-testid="custom-input" /> );
+
+		const textInputElement = screen.getByTestId(
+			'custom-input'
+		) as HTMLInputElement;
+
+		expect(
+			getValidityMessageForInput( undefined, textInputElement )
+		).toBe( 'Please enter a valid value' );
+		expect( getValidityMessageForInput( '', textInputElement ) ).toBe(
+			'Please enter a valid value'
+		);
 	} );
 	it( 'Returns a custom error if set, rather than a new message', async () => {
 		render(
