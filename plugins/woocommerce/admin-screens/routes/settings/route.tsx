@@ -8,7 +8,7 @@ import { notFound } from '@wordpress/route';
 /**
  * Internal dependencies
  */
-import { getCoreEntities, getSection } from './entities';
+import { getCoreEntities, getEntityKind } from './entities';
 import type { SettingsEntityConfig } from './entities';
 
 interface RouteParams {
@@ -18,12 +18,13 @@ interface RouteParams {
 function getPageConfig( {
 	params,
 }: RouteParams ): SettingsEntityConfig | undefined {
-	const section = getSection( params.section );
-	if ( ! section || ! params.page ) {
+	if ( ! params.section || ! params.page ) {
 		return undefined;
 	}
-	return select( coreStore ).getEntityConfig( section.kind, params.page ) as
-		SettingsEntityConfig | undefined;
+	return select( coreStore ).getEntityConfig(
+		getEntityKind( params.section ),
+		params.page
+	) as SettingsEntityConfig | undefined;
 }
 
 export const route = {

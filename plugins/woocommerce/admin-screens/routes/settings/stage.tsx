@@ -19,8 +19,8 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
-import { getSection } from './entities';
-import type { SettingsEntityConfig, SettingsSection } from './entities';
+import { getEntityKind } from './entities';
+import type { SettingsEntityConfig } from './entities';
 import { getEntityFields, getEntityFieldsStatus } from './entity-fields';
 import type { SettingsField, SettingsRecord } from './types';
 import './style.scss';
@@ -44,14 +44,8 @@ function getErrorMessage( error: unknown, fallback: string ): string {
 /**
  * Render and save one settings entity using WordPress entity and form APIs.
  */
-function SettingsForm( {
-	section,
-	config,
-}: {
-	section: SettingsSection;
-	config: SettingsEntityConfig;
-} ) {
-	const { kind, name, label } = config;
+function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
+	const { kind, name, label, section } = config;
 	const { record, editedRecord, hasEdits, edit, save } =
 		useEntityRecord< SettingsRecord >( kind, name, name );
 	const isNarrow = useViewportMatch( 'medium', '<' );
@@ -110,7 +104,15 @@ function SettingsForm( {
 	const hasLoadError = !! loadError;
 	const isReady = ! hasLoadError && !! data && !! form && hasFields;
 	// Breadcrumbs link through the router, which only leaves the screen for an absolute URL.
-	const sectionUrl = new URL( section.url, window.location.href ).toString();
+	const breadcrumbs = section
+		? [
+				{
+					label: section.label,
+					to: new URL( section.url, window.location.href ).toString(),
+				},
+				{ label },
+			]
+		: [ { label } ];
 	const formActions = (
 		<Stack direction="row" gap="sm" justify="end">
 			<Button
@@ -140,14 +142,7 @@ function SettingsForm( {
 	return (
 		<Page
 			ariaLabel={ label }
-			breadcrumbs={
-				<Breadcrumbs
-					items={ [
-						{ label: section.label, to: sectionUrl },
-						{ label },
-					] }
-				/>
-			}
+			breadcrumbs={ <Breadcrumbs items={ breadcrumbs } /> }
 			showSidebarToggle={ false }
 			hasPadding
 			// The Page header doesn't wrap its actions, so they move below the form on small screens.
@@ -206,13 +201,13 @@ function SettingsForm( {
 }
 
 /**
- * Show the settings entity whose name matches the route, from the entity kind of the route's area.
+ * Show the settings entity whose kind and name match the route's area and page.
  */
 function SettingsStage() {
-	const { section: slug, page }: { section?: string; page?: string } =
-		useParams( { strict: false } );
-	const section = getSection( slug );
-	const kind = section?.kind;
+	const { section, page }: { section?: string; page?: string } = useParams( {
+		strict: false,
+	} );
+	const kind = section ? getEntityKind( section ) : undefined;
 	const config = useSelect(
 		( select ) =>
 			kind && page
@@ -221,12 +216,8 @@ function SettingsStage() {
 				: undefined,
 		[ kind, page ]
 	);
-	return section && config ? (
-		<SettingsForm
-			key={ config.name }
-			section={ section }
-			config={ config }
-		/>
+	return config ? (
+		<SettingsForm key={ config.name } config={ config } />
 	) : null;
 }
 
