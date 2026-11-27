@@ -19,7 +19,7 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
-import { ENTITY_KIND } from './entities';
+import { getEntityKind } from './entities';
 import type { SettingsEntityConfig } from './entities';
 import { getEntityFields, getEntityFieldsStatus } from './entity-fields';
 import type { SettingsField, SettingsRecord } from './types';
@@ -46,6 +46,7 @@ function getErrorMessage( error: unknown, fallback: string ): string {
  */
 function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 	const { kind, name, label } = config;
+	const section = config.meta?.section;
 	const { record, editedRecord, hasEdits, edit, save } =
 		useEntityRecord< SettingsRecord >( kind, name, name );
 	const isNarrow = useViewportMatch( 'medium', '<' );
@@ -104,10 +105,15 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 	const hasLoadError = !! loadError;
 	const isReady = ! hasLoadError && !! data && !! form && hasFields;
 	// Breadcrumbs link through the router, which only leaves the screen for an absolute URL.
-	const paymentsUrl = new URL(
-		'admin.php?page=wc-settings&tab=checkout',
-		window.location.href
-	).toString();
+	const breadcrumbs = section
+		? [
+				{
+					label: section.label,
+					to: new URL( section.url, window.location.href ).toString(),
+				},
+				{ label },
+			]
+		: [ { label } ];
 	const formActions = (
 		<Stack direction="row" gap="sm" justify="end">
 			<Button
@@ -137,17 +143,7 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 	return (
 		<Page
 			ariaLabel={ label }
-			breadcrumbs={
-				<Breadcrumbs
-					items={ [
-						{
-							label: __( 'Payments', 'woocommerce' ),
-							to: paymentsUrl,
-						},
-						{ label },
-					] }
-				/>
-			}
+			breadcrumbs={ <Breadcrumbs items={ breadcrumbs } /> }
 			showSidebarToggle={ false }
 			hasPadding
 			// The Page header doesn't wrap its actions, so they move below the form on small screens.
@@ -206,17 +202,20 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 }
 
 /**
- * Show the settings entity whose name matches the route, as registered with addEntities().
+ * Show the settings entity whose kind and name match the route's area and page.
  */
 function SettingsStage() {
-	const { page }: { page?: string } = useParams( { strict: false } );
+	const { section, page }: { section?: string; page?: string } = useParams( {
+		strict: false,
+	} );
+	const kind = section ? getEntityKind( section ) : undefined;
 	const config = useSelect(
 		( select ) =>
-			page
-				? ( select( coreStore ).getEntityConfig( ENTITY_KIND, page ) as
+			kind && page
+				? ( select( coreStore ).getEntityConfig( kind, page ) as
 						SettingsEntityConfig | undefined )
 				: undefined,
-		[ page ]
+		[ kind, page ]
 	);
 	return config ? (
 		<SettingsForm key={ config.name } config={ config } />

@@ -3,11 +3,21 @@
  */
 import { __ } from '@wordpress/i18n';
 
-export const ENTITY_KIND = 'woo_settings_payments';
+const ENTITY_KIND_PREFIX = 'woo_settings_';
 
 /**
- * A core-data entity config for a settings page. The page's URL segment is the entity name and
- * its record ID, and its fields are registered on the server from `packages/entity-fields/`.
+ * The entity kind for a settings area's URL segment, such as `woo_settings_payments` for `payments`.
+ */
+export function getEntityKind( section: string ): string {
+	return ENTITY_KIND_PREFIX + section;
+}
+
+export const ENTITY_KIND = getEntityKind( 'payments' );
+
+/**
+ * A core-data entity config for a settings page, at `/settings/$section/$page`. The kind holds the
+ * area's segment and the name is the page's segment and record ID. `meta.section` is the area's label
+ * and wp-admin URL for the first breadcrumb. Fields are registered on the server from `packages/entity-fields/`.
  */
 export interface SettingsEntityConfig {
 	kind: string;
@@ -16,6 +26,7 @@ export interface SettingsEntityConfig {
 	key: string;
 	label: string;
 	getTitle: () => string;
+	meta?: { section?: { label: string; url: string } };
 }
 
 /**
@@ -30,6 +41,12 @@ export function getCoreEntities(): SettingsEntityConfig[] {
 			key: 'id',
 			label: __( 'Check payments', 'woocommerce' ),
 			getTitle: () => __( 'Check payments', 'woocommerce' ),
+			meta: {
+				section: {
+					label: __( 'Payments', 'woocommerce' ),
+					url: 'admin.php?page=wc-settings&tab=checkout',
+				},
+			},
 		},
 	];
 }

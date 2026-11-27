@@ -8,16 +8,31 @@ import { notFound } from '@wordpress/route';
 /**
  * Internal dependencies
  */
-import { ENTITY_KIND, getCoreEntities } from './entities';
+import { getCoreEntities, getEntityKind } from './entities';
+import type { SettingsEntityConfig } from './entities';
+
+interface RouteParams {
+	params: { section?: string; page?: string };
+}
+
+function getPageConfig( {
+	params,
+}: RouteParams ): SettingsEntityConfig | undefined {
+	if ( ! params.section || ! params.page ) {
+		return undefined;
+	}
+	return select( coreStore ).getEntityConfig(
+		getEntityKind( params.section ),
+		params.page
+	) as SettingsEntityConfig | undefined;
+}
 
 export const route = {
-	beforeLoad: async ( { params }: { params: { page?: string } } ) => {
+	beforeLoad: async ( context: RouteParams ) => {
 		await dispatch( coreStore ).addEntities( getCoreEntities() );
-		if (
-			! params.page ||
-			! select( coreStore ).getEntityConfig( ENTITY_KIND, params.page )
-		) {
+		if ( ! getPageConfig( context ) ) {
 			throw notFound();
 		}
 	},
+	title: ( context: RouteParams ) => getPageConfig( context )?.label,
 };
