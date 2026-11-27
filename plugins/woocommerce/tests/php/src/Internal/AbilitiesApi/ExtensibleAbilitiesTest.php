@@ -4614,6 +4614,90 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should pass the syncs an order that a plugin deletes during a forced delete, once, along with the order and its refund, and leave out one that survives.
+	 *
+	 * @dataProvider provider_plugin_deletes
+	 *
+	 * @param bool $hpos          Whether to use the custom orders table.
+	 * @param bool $sync          Whether HPOS and posts storage sync.
+	 * @param bool $with_store    Whether the plugin deletes through the order store, or with wp_delete_post().
+	 * @param bool $other_is_gone Whether the plugin's delete removes the other order.
+	 */
+	public function test_the_syncs_see_an_order_that_a_plugin_deletes_with_the_order( bool $hpos, bool $sync, bool $with_store, bool $other_is_gone ): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( $hpos );
+		$sync ? $this->enable_cot_sync() : $this->disable_cot_sync();
+
+		try {
+			$order_id  = \WC_Helper_Order::create_order()->get_id();
+			$refund_id = wc_create_refund(
+				array(
+					'order_id' => $order_id,
+					'amount'   => 1,
+				)
+			)->get_id();
+			$other_id  = \WC_Helper_Order::create_order()->get_id();
+			$deleted   = array();
+			add_action(
+				'woocommerce_delete_order',
+				static function ( $deleted_id ) use ( $order_id, $other_id, $with_store ) {
+					$other = wc_get_order( $other_id );
+					if ( $order_id !== (int) $deleted_id || ! $other ) {
+						return;
+					}
+					if ( $with_store ) {
+						$other->delete( true );
+					} else {
+						wp_delete_post( $other_id, true );
+					}
+				}
+			);
+			$this->register_sync(
+				'order',
+				'test-ext',
+				static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+					unset( $saved, $ability );
+					$deleted = array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $context['deleted'] );
+				}
+			);
+			$this->reset_registries();
+			AbilitiesLoader::init_extensions();
+
+			$result = $this->run_ability(
+				'woocommerce/order-delete',
+				array(
+					'id'    => $order_id,
+					'force' => true,
+				)
+			);
+
+			$this->assertSame( 'deleted', $result['status'] );
+			$this->assertSame( $other_is_gone, ! wc_get_order( $other_id ) );
+			$this->assertSame( $other_is_gone ? array( $order_id, $refund_id, $other_id ) : array( $order_id, $refund_id ), $deleted );
+		} finally {
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * Storage, sync, how a plugin deletes another order, and whether that order is gone afterwards.
+	 * With HPOS and no sync, wp_delete_post() removes only the placeholder post.
+	 *
+	 * @return array<string, array{0: bool, 1: bool, 2: bool, 3: bool}>
+	 */
+	public function provider_plugin_deletes(): array {
+		return array(
+			'posts, order store'               => array( false, false, true, true ),
+			'posts, wp_delete_post()'          => array( false, false, false, true ),
+			'HPOS, order store'                => array( true, false, true, true ),
+			'HPOS with sync, wp_delete_post()' => array( true, true, false, true ),
+			'HPOS, wp_delete_post() keeps it'  => array( true, false, false, false ),
+		);
+	}
+
+	/**
 	 * Order storage modes.
 	 *
 	 * @return array<string, array{0: bool}>
