@@ -250,25 +250,51 @@ CREATE TABLE $meta_table_name (
 			throw new \Exception( 'Stock notification not found' );
 		}
 
-		$notification->set_props(
-			array(
-				'id'                  => $data->id,
-				'product_id'          => $data->product_id,
-				'user_id'             => $data->user_id,
-				'user_email'          => $data->user_email,
-				'status'              => $data->status,
-				'date_created'        => wc_string_to_timestamp( $data->date_created_gmt ),
-				'date_modified'       => wc_string_to_timestamp( $data->date_modified_gmt ),
-				'date_confirmed'      => wc_string_to_timestamp( $data->date_confirmed_gmt ),
-				'date_last_attempt'   => wc_string_to_timestamp( $data->date_last_attempt_gmt ),
-				'date_notified'       => wc_string_to_timestamp( $data->date_notified_gmt ),
-				'date_cancelled'      => wc_string_to_timestamp( $data->date_cancelled_gmt ),
-				'cancellation_source' => $data->cancellation_source,
-			)
-		);
+		$this->set_notification_props_from_data( $notification, (array) $data );
 
 		$notification->read_meta_data();
 		$notification->set_object_read( true );
+	}
+
+	/**
+	 * Initialize a notification object from a row of the notifications table and its meta, without reading it again.
+	 *
+	 * @param Notification $notification The data object to initialize.
+	 * @param array        $data         A row of notification data from the database.
+	 * @param array        $meta_data    The notification's raw meta data rows.
+	 * @return void
+	 */
+	protected function init_notification_record( Notification $notification, array $data, array $meta_data ): void {
+		$notification->set_defaults();
+		$this->set_notification_props_from_data( $notification, $data );
+		$notification->init_meta_data( $this->filter_raw_meta_data( $notification, $meta_data ) );
+		$notification->set_object_read( true );
+	}
+
+	/**
+	 * Set a notification's props from a row of the notifications table.
+	 *
+	 * @param Notification $notification The data object to populate.
+	 * @param array        $data         A row of notification data from the database.
+	 * @return void
+	 */
+	protected function set_notification_props_from_data( Notification $notification, array $data ): void {
+		$notification->set_props(
+			array(
+				'id'                  => $data['id'],
+				'product_id'          => $data['product_id'],
+				'user_id'             => $data['user_id'],
+				'user_email'          => $data['user_email'],
+				'status'              => $data['status'],
+				'date_created'        => wc_string_to_timestamp( $data['date_created_gmt'] ),
+				'date_modified'       => wc_string_to_timestamp( $data['date_modified_gmt'] ),
+				'date_confirmed'      => wc_string_to_timestamp( $data['date_confirmed_gmt'] ),
+				'date_last_attempt'   => wc_string_to_timestamp( $data['date_last_attempt_gmt'] ),
+				'date_notified'       => wc_string_to_timestamp( $data['date_notified_gmt'] ),
+				'date_cancelled'      => wc_string_to_timestamp( $data['date_cancelled_gmt'] ),
+				'cancellation_source' => $data['cancellation_source'],
+			)
+		);
 	}
 
 	/**
@@ -586,10 +612,13 @@ CREATE TABLE $meta_table_name (
 		}
 
 		if ( 'objects' === $args['return'] ) {
+			$meta_data = $this->data_store_meta->get_meta_data_for_object_ids( array_map( 'absint', array_column( $results, 'id' ) ) );
 
 			return array_map(
-				function ( $result ) {
-					return new Notification( $result );
+				function ( $result ) use ( $meta_data ) {
+					$notification = new Notification();
+					$this->init_notification_record( $notification, $result, $meta_data[ (int) $result['id'] ] ?? array() );
+					return $notification;
 				},
 				$results
 			);
