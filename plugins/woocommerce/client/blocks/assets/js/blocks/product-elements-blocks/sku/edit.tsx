@@ -49,7 +49,7 @@ const Edit = ( {
 									'Hide SKU when unavailable',
 									'woocommerce'
 								) }
-								checked={ attributes.hideWhenUnavailable ?? true }
+								checked={ attributes.hideWhenUnavailable }
 								onChange={ ( hideWhenUnavailable ) =>
 									setAttributes( { hideWhenUnavailable } )
 								}
