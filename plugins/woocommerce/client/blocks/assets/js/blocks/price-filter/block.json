@@ -39,6 +39,7 @@
 			"default": 3
 		}
 	},
+	"editorStyle": "wc-blocks-editor-style",
 	"style": [
 		"wc-blocks-style",
 		"file:../price-filter.css"

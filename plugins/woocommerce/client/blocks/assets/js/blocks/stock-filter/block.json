@@ -48,6 +48,7 @@
 			"default": false
 		}
 	},
+	"editorStyle": "wc-blocks-editor-style",
 	"style": [
 		"wc-blocks-style",
 		"wc-blocks-packages-style",
