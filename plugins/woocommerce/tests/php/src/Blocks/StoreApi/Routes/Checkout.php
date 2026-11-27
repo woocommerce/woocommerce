@@ -5333,6 +5333,41 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Checkout prices the order with the posted payment method, not the one left in the session, and reuses that order on retry.
+	 */
+	public function test_post_prices_order_with_posted_payment_method(): void {
+		$this->restrict_offline_gateway( 'cod', array() );
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( $cart ) {
+				if ( 'cod' === WC()->session->get( 'chosen_payment_method' ) ) {
+					$cart->add_fee( 'Cash on delivery fee', 5 );
+				}
+			}
+		);
+		WC()->session->set( 'chosen_payment_method', 'cod' );
+		$fail_payment = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException( 'woocommerce_rest_checkout_payment_failed', 'Forced failure', 400 );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $fail_payment );
+
+		$first_response = rest_get_server()->dispatch( $this->build_place_order_request() );
+		$first_order    = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+
+		$this->assertSame( 400, $first_response->get_status(), print_r( $first_response->get_data(), true ) );
+		$this->assertInstanceOf( \WC_Order::class, $first_order );
+		$this->assertSame( 'bacs', $first_order->get_payment_method() );
+		$this->assertSame( array(), $first_order->get_fees(), 'The order must not carry the fee of the gateway left in the session.' );
+
+		remove_action( 'woocommerce_store_api_checkout_order_processed', $fail_payment );
+
+		$second_response = rest_get_server()->dispatch( $this->build_place_order_request() );
+
+		$this->assertSame( 200, $second_response->get_status(), print_r( $second_response->get_data(), true ) );
+		$this->assertSame( $first_order->get_id(), (int) $second_response->get_data()['order_id'], 'The retry must reuse the pending order.' );
+	}
+
+	/**
 	 * @testdox Checkout stops when the draft order could not be saved.
 	 */
 	public function test_post_rejects_draft_order_when_save_fails(): void {
