@@ -406,6 +406,38 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cron schedule labels are not translated before init, but the schedules stay registered.
+	 */
+	public function test_cron_schedules_are_not_translated_before_init(): void {
+		global $wp_actions;
+
+		$translate = fn( $translation ) => 'translated:' . $translation;
+		add_filter( 'gettext', $translate );
+
+		$original_init_count = $wp_actions['init'] ?? null;
+		unset( $wp_actions['init'] );
+
+		try {
+			$early = WC_Install::cron_schedules( array() );
+		} finally {
+			if ( null !== $original_init_count ) {
+				$wp_actions['init'] = $original_init_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the init action count after simulating a pre-init call.
+			}
+		}
+
+		$late = WC_Install::cron_schedules( array() );
+		remove_filter( 'gettext', $translate );
+
+		$this->assertSame( 'Monthly', $early['monthly']['display'] );
+		$this->assertSame( 'Every 15 Days', $early['fifteendays']['display'] );
+		$this->assertSame( MONTH_IN_SECONDS, $early['monthly']['interval'] );
+		$this->assertSame( 15 * DAY_IN_SECONDS, $early['fifteendays']['interval'] );
+
+		$this->assertSame( 'translated:Monthly', $late['monthly']['display'] );
+		$this->assertSame( 'translated:Every 15 Days', $late['fifteendays']['display'] );
+	}
+
+	/**
 	 * @testdox Stores already on 11.3 schedule the MPN schema migration when upgrading.
 	 */
 	public function test_mpn_migration_is_scheduled_after_113(): void {
