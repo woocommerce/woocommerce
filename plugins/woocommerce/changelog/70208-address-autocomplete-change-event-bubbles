@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix address autocomplete on the classic checkout not notifying themes and plugins that sync the filled address fields.
