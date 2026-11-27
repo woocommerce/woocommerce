@@ -176,9 +176,9 @@ final class TransactAccountManager {
 	public function get_transact_account_data( string $account_type ) {
 		$cache_key = $this->get_cache_key( $account_type );
 
-		// Get transact account from cache. If not found, fetch/create it.
+		// A cached false value represents a failed lookup that should not be retried yet.
 		$transact_account = $this->get_transact_account_from_cache( $cache_key );
-		if ( empty( $transact_account ) ) {
+		if ( null === $transact_account ) {
 			$transact_account = 'merchant' === $account_type ? $this->fetch_merchant_account() : $this->fetch_provider_account();
 
 			// Fetch failed.
@@ -190,7 +190,7 @@ final class TransactAccountManager {
 			$this->update_transact_account_cache( $cache_key, $transact_account );
 		}
 
-		return $transact_account;
+		return $transact_account ? $transact_account : null;
 	}
 
 	/**
@@ -237,11 +237,13 @@ final class TransactAccountManager {
 		);
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			$this->cache_failed_lookup( 'merchant', $response );
 			return null;
 		}
 
 		$response_data = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( empty( $response_data['public_id'] ) ) {
+			$this->cache_failed_lookup( 'merchant', $response );
 			return null;
 		}
 
@@ -273,6 +275,7 @@ final class TransactAccountManager {
 		);
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			$this->cache_failed_lookup( 'provider', $response );
 			return false;
 		}
 
@@ -364,6 +367,38 @@ final class TransactAccountManager {
 			array(
 				'account' => $account_data,
 				'expiry'  => $expires,
+			)
+		);
+	}
+
+	/**
+	 * Cache a failed lookup so gateway initialization does not repeatedly block on the API.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string          $account_type The type of account (merchant or provider).
+	 * @param array|\WP_Error $response The failed API response.
+	 */
+	private function cache_failed_lookup( string $account_type, $response ): void {
+		$cache_key = $this->get_cache_key( $account_type );
+		if ( null === $cache_key ) {
+			return;
+		}
+
+		$cached_data = get_option( $cache_key, array() );
+		$retry_delay = min( HOUR_IN_SECONDS, max( 5 * MINUTE_IN_SECONDS, ( $cached_data['retry_delay'] ?? 0 ) * 2 ) );
+
+		// Invalid credentials need intervention; retrying on every page load cannot repair them.
+		if ( 401 === wp_remote_retrieve_response_code( $response ) ) {
+			$retry_delay = DAY_IN_SECONDS;
+		}
+
+		update_option(
+			$cache_key,
+			array(
+				'account'     => false,
+				'expiry'      => time() + $retry_delay,
+				'retry_delay' => $retry_delay,
 			)
 		);
 	}
