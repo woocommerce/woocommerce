@@ -58,7 +58,7 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 
 		update_site_option(
 			'active_sitewide_plugins',
-			array( 'test3/test3.php' )
+			array( 'test3/test3.php' => time() )
 		);
 
 		$active_valid_plugins = $this->sut->get_all_active_valid_plugins();

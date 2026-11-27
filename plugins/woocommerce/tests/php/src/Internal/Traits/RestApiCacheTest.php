@@ -888,9 +888,16 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 	 */
 	private function get_all_cache_keys(): array {
 		global $wp_object_cache;
-		return isset( $wp_object_cache->cache[ self::CACHE_GROUP ] )
-			? array_keys( $wp_object_cache->cache[ self::CACHE_GROUP ] )
-			: array();
+		if ( ! isset( $wp_object_cache->cache[ self::CACHE_GROUP ] ) ) {
+			return array();
+		}
+
+		// On multisite, the object cache stores keys of non-global groups with a "<blog id>:" prefix.
+		$blog_prefix = is_multisite() ? get_current_blog_id() . ':' : '';
+		return array_map(
+			static fn( $key ) => substr( (string) $key, strlen( $blog_prefix ) ),
+			array_keys( $wp_object_cache->cache[ self::CACHE_GROUP ] )
+		);
 	}
 
 	/**

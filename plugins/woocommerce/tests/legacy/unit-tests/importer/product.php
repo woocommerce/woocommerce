@@ -156,7 +156,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 */
 	public function test_import_for_admin_users() {
 		// In most cases, an admin user will run the import.
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::create_super_admin() );
 		$results = $this->get_importer()->import();
 
 		$this->assertEquals( 0, count( $results['failed'] ) );

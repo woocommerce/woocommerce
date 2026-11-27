@@ -71,7 +71,7 @@ class InstallJPAndWCSPluginsTest extends WC_Unit_Test_Case {
 	 * @testdox Should not throw NoteActionForbiddenException when triggered by a user with the install_plugins capability (e.g. administrator).
 	 */
 	public function test_install_jp_and_wcs_plugins_does_not_throw_for_admin_with_cap(): void {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin_id = self::create_super_admin();
 		wp_set_current_user( $admin_id );
 
 		$this->assertTrue(

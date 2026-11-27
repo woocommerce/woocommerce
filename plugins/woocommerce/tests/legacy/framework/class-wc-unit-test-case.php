@@ -101,6 +101,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private $mailer_before_rebuild = false;
 
 	/**
+	 * Users that create_super_admin() made super admins, revoked after the class.
+	 *
+	 * @var int[]
+	 */
+	private static $super_admin_ids = array();
+
+	/**
 	 * Enable synchronous product attribute lookup updates for test fixtures.
 	 *
 	 * Calls can be nested; the filter is removed once every enable has been
@@ -589,6 +596,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	public static function tearDownAfterClass(): void {
 		self::enable_direct_product_attribute_lookup_updates();
 		try {
+			self::revoke_super_admins();
 			self::clear_hpos_orders();
 			parent::tearDownAfterClass();
 		} finally {
@@ -677,6 +685,51 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 */
 	public function login_as_administrator() {
 		return $this->login_as_role( 'administrator' );
+	}
+
+	/**
+	 * Create an administrator with every capability an administrator has on a single site.
+	 *
+	 * On multisite, capabilities such as `install_plugins`, `update_plugins`, `edit_users` and `manage_sites`
+	 * belong to super admins only, so there the user is also made a super admin.
+	 *
+	 * @return int The id of the user created.
+	 */
+	protected static function create_super_admin(): int {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+
+		if ( is_multisite() ) {
+			grant_super_admin( $user_id );
+			self::$super_admin_ids[] = $user_id;
+		}
+
+		return $user_id;
+	}
+
+	/**
+	 * Assert that wp_delete_user() removed a user. On multisite, it only removes the user from the current site.
+	 *
+	 * @param int    $user_id The id of the user.
+	 * @param string $message The failure message.
+	 */
+	protected function assert_user_deleted( int $user_id, string $message = '' ): void {
+		if ( is_multisite() ) {
+			$this->assertFalse( is_user_member_of_blog( $user_id ), $message );
+		} else {
+			$this->assertFalse( get_userdata( $user_id ), $message );
+		}
+	}
+
+	/**
+	 * Revoke the super admins that create_super_admin() made in class fixtures, which the test rollback doesn't cover.
+	 *
+	 * The class teardown deletes those users with SQL, which would leave their logins in the network's super admin list.
+	 */
+	private static function revoke_super_admins(): void {
+		foreach ( self::$super_admin_ids as $user_id ) {
+			revoke_super_admin( $user_id );
+		}
+		self::$super_admin_ids = array();
 	}
 
 	/**

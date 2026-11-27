@@ -265,7 +265,7 @@ class McpEndpointRemovalTest extends WC_Unit_Test_Case {
 	 * @param bool $plugin_installed Whether the MCP Adapter plugin should appear to be installed.
 	 */
 	private function set_up_removed_notice_conditions( bool $adapter_loaded, bool $plugin_installed = false ): void {
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::create_super_admin() );
 		update_option( 'woocommerce_feature_mcp_integration_enabled', 'yes' );
 		$this->register_legacy_proxy_function_mocks(
 			array(

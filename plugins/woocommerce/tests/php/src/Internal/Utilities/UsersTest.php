@@ -11,6 +11,46 @@ use WC_Unit_Test_Case;
 
 class UsersTest extends WC_Unit_Test_Case {
 	/**
+	 * Subsite used by test_get_last_customer_order().
+	 *
+	 * @var int
+	 */
+	private static $last_order_subsite;
+
+	/**
+	 * Subsite used by test_get_user_in_current_site().
+	 *
+	 * @var int
+	 */
+	private static $independent_subsite;
+
+	/**
+	 * Create the subsites once, because installing WooCommerce on them runs DDL, which the test transaction can't hold.
+	 *
+	 * @param \WP_UnitTest_Factory $factory The WordPress test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		if ( ! is_multisite() ) {
+			return;
+		}
+
+		self::$last_order_subsite  = self::make_network_site( $factory, '/site-1/' );
+		self::$independent_subsite = self::make_network_site( $factory, '/independently-operated-site-within-network/' );
+	}
+
+	/**
+	 * Delete the subsites.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		if ( ! is_multisite() ) {
+			return;
+		}
+
+		wp_delete_site( self::$last_order_subsite );
+		wp_delete_site( self::$independent_subsite );
+	}
+
+	/**
 	 * Within a multisite network, the same order IDs can be re-used across multiple blogs. This test describes our
 	 * management of this problem, in relation to our caching of the last order placed by each user.
 	 *
@@ -22,7 +62,7 @@ class UsersTest extends WC_Unit_Test_Case {
 		$this->skipWithoutMultisite();
 
 		$customer = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' )->get_id();
-		$subsite  = $this->make_network_site( '/site-1/' );
+		$subsite  = self::$last_order_subsite;
 
 		// Create some network-wide user meta data, and repeat using the equivalent network-aware functionality from
 		// the Users utility.
@@ -68,7 +108,6 @@ class UsersTest extends WC_Unit_Test_Case {
 			'Deletion of site-specific user meta follows the same rules as delete_user_meta when a previous value is provided.'
 		);
 
-		wp_delete_site( $subsite );
 		restore_current_blog();
 	}
 
@@ -98,7 +137,7 @@ class UsersTest extends WC_Unit_Test_Case {
 		);
 
 		// We create and switch to a new site within the network. Initially, neither test user is added to this site.
-		$subsite = $this->make_network_site( '/independently-operated-site-within-network/' );
+		$subsite = self::$independent_subsite;
 		switch_to_blog( $subsite );
 
 		$this->assertWPError(
@@ -127,23 +166,19 @@ class UsersTest extends WC_Unit_Test_Case {
 			'An active user can see customers who do not belong to the current site if the legacy woocommerce_network_wide_customers mode is enabled.'
 		);
 
-		wp_delete_site( $subsite );
 		restore_current_blog();
 	}
 
 	/**
-	 * Creates a new subsite on the network.
+	 * Creates a new subsite on the network, with WooCommerce installed.
 	 *
-	 * This work is expensive, so should probably be moved to the bootstrap phase (if we detect the tests are running in
-	 * a multisite environment) and we can re-use the schema instead of recreating them. Currently, though, this is one
-	 * of the only areas where we require this.
-	 *
-	 * @param string $path Subsite blog path.
+	 * @param \WP_UnitTest_Factory $factory The WordPress test factory.
+	 * @param string               $path    Subsite blog path.
 	 *
 	 * @return int
 	 */
-	private function make_network_site( string $path ): int {
-		$blog_id = $this->factory->blog->create(
+	private static function make_network_site( $factory, string $path ): int {
+		$blog_id = $factory->blog->create(
 			array(
 				'path' => $path,
 			)

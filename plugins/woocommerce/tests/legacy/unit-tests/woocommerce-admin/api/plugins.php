@@ -37,11 +37,7 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 		$this->delete_test_plugin();
 
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user = self::create_super_admin();
 	}
 
 	/**

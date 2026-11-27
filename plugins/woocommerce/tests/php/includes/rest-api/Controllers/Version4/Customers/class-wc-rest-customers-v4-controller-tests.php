@@ -44,11 +44,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
 	 */
 	public static function wpSetUpBeforeClass( $factory ): void {
-		self::$administrator_id = $factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		self::$administrator_id = self::create_super_admin();
 	}
 
 	/**
@@ -435,8 +431,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $response_data['id'], $customer_id );
 
 		// Check the customer was actually deleted.
-		$customer_check = new WC_Customer( $customer_id );
-		$this->assertEmpty( $customer_check->get_id() );
+		$this->assert_user_deleted( $customer_id );
 	}
 
 	/**

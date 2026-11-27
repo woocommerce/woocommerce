@@ -202,6 +202,9 @@ class OrderAttributionTest extends WP_UnitTestCase {
 				'role' => 'administrator',
 			)
 		);
+		if ( is_multisite() ) {
+			grant_super_admin( $admin_user );
+		}
 		wp_set_current_user( $admin_user );
 		update_option( 'woocommerce_show_marketplace_suggestions', 'yes' );
 		$this->assertTrue( \WC_Marketplace_Suggestions::allow_suggestions() );

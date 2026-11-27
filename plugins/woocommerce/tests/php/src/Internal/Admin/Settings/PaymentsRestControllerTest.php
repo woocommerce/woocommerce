@@ -57,7 +57,7 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$this->store_admin_id = self::create_super_admin();
 		wp_set_current_user( $this->store_admin_id );
 
 		$this->mock_service = $this->getMockBuilder( Payments::class )->getMock();
@@ -92,6 +92,8 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 			'manage_woocommerce' => false,
 			'install_plugins'    => false,
 		);
+		// Super admins skip the user_has_cap filter on multisite.
+		revoke_super_admin( $this->store_admin_id );
 		add_filter( 'user_has_cap', $filter_callback );
 
 		// Act.
@@ -114,6 +116,8 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 			'manage_woocommerce' => true,
 			'install_plugins'    => false,
 		);
+		// Super admins skip the user_has_cap filter on multisite.
+		revoke_super_admin( $this->store_admin_id );
 		add_filter( 'user_has_cap', $filter_callback );
 
 		$this->mock_providers();

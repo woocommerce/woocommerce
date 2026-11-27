@@ -72,8 +72,11 @@ class WC_Tests_User_Functions extends WC_Unit_Test_Case {
 	 * Test the logic of wc_modify_map_meta_cap.
 	 *
 	 * @since 3.4.6
+	 * @group ms-excluded
 	 */
 	public function test_wc_modify_map_meta_cap() {
+		$this->skipWithMultisite();
+
 		$password = wp_generate_password();
 
 		$admin_id = wp_insert_user(
@@ -131,8 +134,11 @@ class WC_Tests_User_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox A shop manager cannot edit a customer who also has a custom role.
+	 * @group ms-excluded
 	 */
 	public function test_shop_manager_cannot_edit_customer_with_extra_custom_role() {
+		$this->skipWithMultisite();
+
 		$options_role = 'test_manage_options_role';
 		add_role(
 			$options_role,
@@ -180,8 +186,11 @@ class WC_Tests_User_Functions extends WC_Unit_Test_Case {
 	 * @see https://github.com/woocommerce/woocommerce/issues/65171
 	 *
 	 * @param int $invalid_id A user ID that does not correspond to an existing user.
+	 * @group ms-excluded
 	 */
 	public function test_wc_modify_map_meta_cap_invalid_user_id( $invalid_id ) {
+		$this->skipWithMultisite();
+
 		$password = wp_generate_password();
 
 		$manager_id = wp_insert_user(
@@ -205,8 +214,11 @@ class WC_Tests_User_Functions extends WC_Unit_Test_Case {
 	 * Test wc_shop_manager_has_capability function.
 	 *
 	 * @since 3.5.4
+	 * @group ms-excluded
 	 */
 	public function test_wc_shop_manager_has_capability() {
+		$this->skipWithMultisite();
+
 		$password = wp_generate_password();
 
 		$manager_id = wp_insert_user(

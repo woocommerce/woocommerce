@@ -38,11 +38,7 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 
 		// Register an administrator user and log in.
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user = self::create_super_admin();
 		wp_set_current_user( $this->user );
 
 		// Clear any existing cache first.

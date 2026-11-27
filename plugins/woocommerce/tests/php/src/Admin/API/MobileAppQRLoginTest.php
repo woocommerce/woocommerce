@@ -1047,7 +1047,7 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->admin_id );
 		$prep = $this->prepare_exchange_token();
 
-		wp_delete_user( $this->admin_id );
+		self::delete_user( $this->admin_id );
 		// Avoid double-delete in tearDown().
 		$this->admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 

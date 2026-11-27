@@ -76,7 +76,7 @@ class Html_Order_Refund_Test extends WC_Unit_Test_Case {
 	public function test_omits_attribution_when_the_refunding_user_was_deleted(): void {
 		$user_id = self::factory()->user->create();
 		$refund  = $this->create_refund_attributed_to( $user_id );
-		wp_delete_user( $user_id );
+		self::delete_user( $user_id );
 
 		$markup = $this->render_refund_row( $refund );
 

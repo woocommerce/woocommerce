@@ -453,7 +453,11 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * Creating an API Key with too long of a description should report failure.
 	 */
 	public function test_create_api_key_long_description_failure() {
-		$this->_setRole( 'administrator' );
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		if ( is_multisite() ) {
+			grant_super_admin( $admin_id );
+		}
+		wp_set_current_user( $admin_id );
 
 		$description  = 'This_description_is_really_very_long_and_is_meant_to_exceed_the_database_column_length_of_200_characters_';
 		$description .= $description;
@@ -1906,7 +1910,11 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @param string $expected_result_name Expected product name in the response.
 	 */
 	public function test_json_search_products_returns_plain_text_names( string $search_term, string $product_name, string $expected_result_name ): void {
-		$this->_setRole( 'administrator' );
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		if ( is_multisite() ) {
+			grant_super_admin( $admin_id );
+		}
+		wp_set_current_user( $admin_id );
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( $product_name );

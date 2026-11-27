@@ -40,7 +40,7 @@ class WC_Admin_Settings_View_Test extends WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_admin_features', array( $this, 'get_mocked_admin_features' ), self::HOOK_PRIORITY );
 
-		$this->admin_user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->admin_user_id = self::create_super_admin();
 		wp_set_current_user( $this->admin_user_id );
 		update_option( 'woocommerce_show_marketplace_suggestions', 'yes' );
 		update_option( 'woocommerce_default_country', 'US:CA' );

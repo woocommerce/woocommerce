@@ -104,8 +104,10 @@
 		"test:metrics:ci:unified-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes && pnpm test:metrics:ci",
 		"test:php:env": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm test:php:env:run",
 		"test:php:env:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm test:php:env:run:hpos-off",
+		"test:php:env:multisite": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm test:php:env:run:multisite",
 		"test:php:env:run": "pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
 		"test:php:env:run:hpos-off": "pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli env DISABLE_HPOS=1 tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
+		"test:php:env:run:multisite": "pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli env WP_MULTISITE=1 tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
 		"test:php:env:watch": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli vendor/bin/phpunit-watcher watch --verbose",
 		"test:plugincheck": "pnpm wp-env:e2e run cli wp plugin check ${PLUGIN_SLUG:-woocommerce}",
 		"test:unit": "pnpm test:php",
@@ -860,6 +862,38 @@
 						"pull_request",
 						"push",
 						"php-unit-php-8.5-wp-latest-hpos-off"
+					]
+				},
+				{
+					"name": "PHP: 8.5 WP: latest (multisite)",
+					"testType": "unit:php",
+					"command": "test:php:env:multisite",
+					"shardingArguments": [],
+					"onlyForDependencies": [],
+					"changes": [
+						"client/admin/config/*.json",
+						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
+						"i18n/postcode-validation-rules.json",
+						"composer.json",
+						"composer.lock",
+						"**/*.php",
+						".wp-env.test.json",
+						"phpunit.xml",
+						"client/blocks/assets/js/**/block.json",
+						"client/blocks/bin/copy-blocks-json.sh",
+						"tests/php/bin/run-phpunit.sh",
+						"tests/php/bin/test-env-setup.sh"
+					],
+					"testEnv": {
+						"start": "env:test --debug",
+						"config": {
+							"phpVersion": "8.5",
+							"wpVersion": "latest"
+						}
+					},
+					"events": [
+						"nightly-checks",
+						"php-unit-php-8.5-wp-latest-multisite"
 					]
 				},
 				{

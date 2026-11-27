@@ -46,7 +46,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		parent::set_up();
 
 		self::enable_direct_product_attribute_lookup_updates();
-		$this->admin_user           = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->admin_user           = self::create_super_admin();
 		$this->shop_manager_user    = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
 		$this->download_directories = wc_get_container()->get( Download_Directories::class );
 

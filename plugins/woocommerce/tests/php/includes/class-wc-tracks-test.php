@@ -95,7 +95,7 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 	 * Test role properties for administrator
 	 */
 	public function test_role_properties_for_administrator() {
-		$user = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$user = self::create_super_admin();
 		wp_set_current_user( $user );
 
 		$properties = \WC_Tracks::get_properties( 'test_event', array() );
@@ -127,10 +127,10 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 	 * Test role properties for non-sequential roles.
 	 */
 	public function test_role_properties_for_non_sequential_roles() {
-		$user = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+		$user = self::create_super_admin();
 		wp_set_current_user( $user );
 		$current_user = wp_get_current_user();
-		$current_user->add_role( 'administrator' );
+		$current_user->add_role( 'shop_manager' );
 		// Mock the roles to be an associative array to simulate the scenario where the roles are not sequential.
 		$current_user->roles = array(
 			2 => 'administrator',

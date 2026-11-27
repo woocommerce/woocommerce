@@ -63,7 +63,7 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 	 * @testdox admin_redirects() only triggers the plugin install with a valid nonce for an allowed plugin slug.
 	 */
 	public function test_install_plugin_redirect_requires_valid_nonce(): void {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin_id = self::create_super_admin();
 		wp_set_current_user( $admin_id );
 
 		// Missing/invalid nonce: falls back to the search page.
