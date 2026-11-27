@@ -4,7 +4,6 @@
 import type { CartItem } from '@woocommerce/types';
 import {
 	dinero,
-	subtract,
 	multiply,
 	transformScale,
 	toSnapshot,
@@ -13,46 +12,14 @@ import {
 import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 
 /**
- * Calculate the per-unit sale amount from raw prices.
- *
- * @param prices          Cart item prices containing raw_prices.
- * @param targetPrecision The target currency minor unit precision.
- * @return Per-unit sale amount as a number, or 0 if no discount.
- */
-export function calculateSaleAmount(
-	prices: CartItem[ 'prices' ],
-	targetPrecision: number
-): number {
-	const rawPrecision =
-		typeof prices.raw_prices.precision === 'string'
-			? parseInt( prices.raw_prices.precision, 10 )
-			: prices.raw_prices.precision;
-
-	const regular = dinero( {
-		amount: parseInt( prices.raw_prices.regular_price, 10 ),
-		currency: USD,
-		scale: rawPrecision,
-	} );
-
-	const purchase = dinero( {
-		amount: parseInt( prices.raw_prices.price, 10 ),
-		currency: USD,
-		scale: rawPrecision,
-	} );
-
-	return toSnapshot(
-		transformScale( subtract( regular, purchase ), targetPrecision )
-	).amount;
-}
-
-/**
  * Calculate how much a cart line saves: its regular price for the whole quantity minus what the line costs.
  *
  * Working from the line, rather than multiplying a rounded per-unit saving, keeps the saving consistent with the line
  * total (e.g. 2 × £2.10 at 5% off saves £0.21, not 2 × £0.10).
  *
- * Whether the item is discounted is decided in the minor unit of its prices, which can have more decimals than the
- * totals when a price is shown as entered (e.g. £0.207); the saving is in the totals' minor unit.
+ * Whether the item is discounted is decided by the unit prices shown, each in the minor unit of its prices (which can
+ * have more decimals than the totals, e.g. £0.207), so a crossed-out price always comes with a saving. The saving is in
+ * the totals' minor unit.
  *
  * @param item            Cart item.
  * @param item.prices     Item prices, including raw prices.
@@ -74,10 +41,10 @@ export function calculateLineSaleAmount(
 	targetPrecision: number,
 	includeTax: boolean
 ): number {
-	const pricesPrecision = Number.isInteger( item.prices.currency_minor_unit )
-		? item.prices.currency_minor_unit
-		: targetPrecision;
-	if ( calculateSaleAmount( item.prices, pricesPrecision ) <= 0 ) {
+	if (
+		parseInt( item.prices.regular_price, 10 ) <=
+		parseInt( item.prices.price, 10 )
+	) {
 		return 0;
 	}
 
