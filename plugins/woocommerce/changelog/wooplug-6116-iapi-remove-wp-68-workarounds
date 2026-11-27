@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Remove Interactivity API workarounds for WordPress 6.8 bugs, now that WordPress 7.0 is the minimum.
+

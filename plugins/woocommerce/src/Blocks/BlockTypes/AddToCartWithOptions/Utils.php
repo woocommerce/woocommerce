@@ -125,26 +125,7 @@ class Utils {
 				'variationId' => null,
 			);
 
-			$products_context = 'woocommerce/products::' . wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
-
-			// This moves the `woocommerce/products` context to a nested `div`,
-			// as multiple context directives are not supported in the same
-			// element in WordPress 6.8. Once WooCommerce drops support for
-			// WordPress 6.8, this code can be refactored.
-			if (
-				$processor->next_tag(
-					array(
-						'tag_name'   => 'div',
-						'class_name' => 'quantity',
-					)
-				)
-			) {
-				$processor->set_attribute( 'data-wp-context', $products_context );
-			} else {
-				// If filtered markup omits the `div.quantity`, reinitialize the
-				// processor so the input bindings below still execute.
-				$processor = new \WP_HTML_Tag_Processor( $quantity_html );
-			}
+			$wrapper_attributes['data-wp-context---products'] = 'woocommerce/products::' . wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 		}
 
 		if (
