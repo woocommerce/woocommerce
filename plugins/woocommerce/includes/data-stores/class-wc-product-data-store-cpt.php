@@ -702,7 +702,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$download->set_name( $meta_value['name'] ? $meta_value['name'] : wc_get_filename_from_url( $meta_value['file'] ) );
 
 				/**
-				 * Filter for the path of the downloadable file.
+				 * Filters the path of a downloadable file.
+				 *
+				 * This filter runs in multiple contexts, including product reads and REST API writes, and may affect values shown in the admin. For temporary or request-specific paths in the standard customer download flow, use the `woocommerce_download_product_filepath` filter instead.
 				 *
 				 * @since 2.1.0
 				 *
