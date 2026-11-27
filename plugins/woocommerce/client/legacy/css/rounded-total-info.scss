@@ -1,0 +1,171 @@
+/**
+ * Rounding details for cart totals: a total that doesn't add up from the prices shown is a button with an info icon
+ * and the underlined amount. It opens a tooltip (see assets/js/frontend/rounded-total-info.js). Used by the classic
+ * cart and the Cart, Checkout and Mini-Cart blocks.
+ */
+.wc-rounded-total-info {
+	display: inline;
+	white-space: nowrap;
+
+	// The Mini-Cart block hides it on lines that add up.
+	&[hidden] {
+		display: none;
+	}
+}
+
+.wc-rounded-total-info__button {
+	all: unset;
+	display: inline-flex;
+	// Align on the amount's baseline so the total lines up with the text around it; the icon centres on that line.
+	align-items: baseline;
+	gap: 0.25em;
+	color: inherit;
+	cursor: help;
+	white-space: nowrap;
+
+	&:focus-visible {
+		outline: 2px solid currentcolor;
+		outline-offset: 2px;
+		border-radius: 2px;
+	}
+}
+
+.wc-rounded-total-info__icon {
+	flex: none;
+	align-self: center;
+	inline-size: 1em;
+	block-size: 1em;
+	opacity: 0.7;
+	transition: opacity 0.12s;
+}
+
+// Underline the price itself. The classic cart's total can be followed by a label such as "(incl. VAT)", so there only
+// the price element is underlined, not the label or the space before it. The blocks' price can be inline-block (the
+// Mini-Cart), which an underline on its parent doesn't reach, so it's underlined directly too.
+.wc-rounded-total-info__amount:not(:has(.woocommerce-Price-amount)),
+.wc-rounded-total-info__amount .woocommerce-Price-amount,
+.wc-rounded-total-info__amount .wc-block-formatted-money-amount {
+	text-decoration: underline dotted;
+	text-decoration-color: currentcolor;
+	text-decoration-color: var(--wc-rounded-total-info-underline, currentcolor);
+	text-decoration-thickness: 1.5px;
+	text-underline-offset: 0.25em;
+	transition: text-decoration-color 0.12s;
+}
+
+.wc-rounded-total-info__button {
+	// 60% keeps the dotted underline at 3:1 or more against the page on light and dark themes (e.g. TT25 Midnight).
+	--wc-rounded-total-info-underline: color-mix(in srgb, currentcolor 60%, transparent);
+
+	&:hover,
+	&[aria-expanded="true"] {
+		--wc-rounded-total-info-underline: currentcolor;
+
+		.wc-rounded-total-info__icon {
+			opacity: 1;
+		}
+	}
+}
+
+.wc-rounded-total-info__label {
+	position: absolute;
+	inline-size: 1px;
+	block-size: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+// The browser shows the popover in the top layer; the script sets its top and left.
+.wc-rounded-total-info__tooltip {
+	position: fixed;
+	inset: auto;
+	box-sizing: border-box;
+	max-inline-size: min(16rem, calc(100vw - 8px));
+	margin: 0;
+	padding: 0.5em 0.75em;
+	// The theme's text on the surface behind the total (the script copies it into the variable), tinted with the text
+	// colour like WooCommerce's tinted boxes. A tooltip floats over content, so the surface keeps it opaque.
+	border: 1px solid color-mix(in srgb, currentcolor 20%, transparent);
+	border-radius: 4px;
+	background:
+		linear-gradient(color-mix(in srgb, currentcolor 7%, transparent), color-mix(in srgb, currentcolor 7%, transparent)),
+		var(--wc-rounded-total-info-surface, Canvas);
+	color: inherit;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+	font-size: 0.875rem;
+	font-weight: 400;
+	line-height: 1.4;
+	letter-spacing: normal;
+	text-align: start;
+	text-decoration: none;
+	text-transform: none;
+	// It sits inside the total in the page, so reset what it would inherit from it.
+	white-space: normal;
+	// Closed state, and the closing transition: fade out and drop back. `display` and `overlay` keep it in the top layer
+	// while it fades (Chrome); elsewhere the script sets data-closing and waits for the fade before hiding it.
+	opacity: 0;
+	transition-property: opacity, transform, display, overlay;
+	transition-duration: 0.12s;
+	transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+	transition-behavior: allow-discrete;
+
+	@media (prefers-reduced-motion: no-preference) {
+		transform: translateY(var(--wc-rounded-total-info-rise, 4px));
+	}
+
+	// Placed below the button: come down from it instead.
+	&[data-placement="below"] {
+		--wc-rounded-total-info-rise: -4px;
+	}
+}
+
+// Open: fade in and rise into place. A keyframe animation runs each time the popover is shown. (`@starting-style` would
+// do the same, but the classic assets minifier, clean-css 5, drops it.)
+.wc-rounded-total-info__tooltip:popover-open:not([data-closing]) {
+	opacity: 1;
+	transform: none;
+	animation: wc-rounded-total-info-in 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes wc-rounded-total-info-in {
+
+	from {
+		opacity: 0;
+		transform: translateY(var(--wc-rounded-total-info-rise, 4px));
+	}
+}
+
+@keyframes wc-rounded-total-info-fade-in {
+
+	from {
+		opacity: 0;
+	}
+}
+
+// Reduced motion: a short fade, no movement.
+@media (prefers-reduced-motion: reduce) {
+
+	.wc-rounded-total-info__tooltip {
+		transition-duration: 0.1s;
+	}
+
+	.wc-rounded-total-info__tooltip:popover-open:not([data-closing]) {
+		animation-name: wc-rounded-total-info-fade-in;
+		animation-duration: 0.1s;
+	}
+}
+
+// Without the Popover API, keep the note for screen readers and hide it visually.
+@supports not selector(:popover-open) {
+
+	.wc-rounded-total-info__tooltip {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		border: 0;
+	}
+}

@@ -166,7 +166,7 @@ defined( 'ABSPATH' ) || exit;
 				if ( wc_tax_enabled() ) {
 					$tax_text  = wc_prices_include_tax()
 						? __( 'incl. tax', 'woocommerce' )
-						: __( 'ex. tax', 'woocommerce' );
+						: __( 'excl. tax', 'woocommerce' );
 					$tax_label = ' (' . $tax_text . ')';
 				}
 

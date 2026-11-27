@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Explain classic cart line totals that don't add up from the prices shown with an info icon, and say "excl. VAT" instead of "ex. VAT".

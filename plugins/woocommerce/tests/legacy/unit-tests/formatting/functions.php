@@ -603,7 +603,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		// Ex tax label.
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>1,111.17</bdi></span> <small class="woocommerce-Price-taxLabel tax_label">(ex. tax)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>1,111.17</bdi></span> <small class="woocommerce-Price-taxLabel tax_label">(excl. tax)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
 	}
 
 	/**
