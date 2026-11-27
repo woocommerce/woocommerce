@@ -28,6 +28,15 @@
 			margin-right: $grid-unit-05;
 		}
 	}
+	// Amber picked for 3:1 contrast on white; there's no warning token that dark yet.
+	.woocommerce-email-listing-status-warning-icon {
+		display: inline-flex;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: #bd8600;
+		cursor: help;
+	}
 	.woocommerce-email-listing-recipients {
 		white-space: wrap;
 	}

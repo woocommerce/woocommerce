@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Customers;
 
 use Automattic\WooCommerce\Internal\Customers\AccountCreatedConfirmation;
+use Automattic\WooCommerce\Internal\Customers\NewAccountEmailWarning;
 use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use WC_Unit_Test_Case;
 
@@ -39,7 +40,7 @@ class AccountCreatedConfirmationTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new AccountCreatedConfirmation();
-		$this->sut->init( wc_get_container()->get( NewCustomerSession::class ) );
+		$this->sut->init( wc_get_container()->get( NewCustomerSession::class ), new NewAccountEmailWarning() );
 		$this->email            = WC()->mailer()->get_emails()['WC_Email_Customer_New_Account'];
 		$this->original_enabled = $this->email->enabled;
 		$this->email->enabled   = 'yes';

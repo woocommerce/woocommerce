@@ -26,6 +26,13 @@ class AccountCreatedConfirmation {
 	private NewCustomerSession $new_customer_session;
 
 	/**
+	 * Checks whether the store sends the New account email.
+	 *
+	 * @var NewAccountEmailWarning
+	 */
+	private NewAccountEmailWarning $new_account_email;
+
+	/**
 	 * Email address of the account registered from My Account in this request.
 	 *
 	 * @var string
@@ -45,10 +52,12 @@ class AccountCreatedConfirmation {
 	 *
 	 * @internal
 	 *
-	 * @param NewCustomerSession $new_customer_session Tracks the account created at checkout.
+	 * @param NewCustomerSession     $new_customer_session Tracks the account created at checkout.
+	 * @param NewAccountEmailWarning $new_account_email    Checks whether the store sends the New account email.
 	 */
-	final public function init( NewCustomerSession $new_customer_session ): void {
+	final public function init( NewCustomerSession $new_customer_session, NewAccountEmailWarning $new_account_email ): void {
 		$this->new_customer_session = $new_customer_session;
+		$this->new_account_email    = $new_account_email;
 	}
 
 	/**
@@ -100,7 +109,7 @@ class AccountCreatedConfirmation {
 	public function render( string $email ): string {
 		$lost_password_link = '<a href="' . esc_url( wc_lostpassword_url() ) . '">';
 
-		if ( $this->new_account_email_is_enabled() ) {
+		if ( $this->new_account_email->is_email_enabled() ) {
 			$details = array(
 				sprintf(
 					/* translators: %s: customer email address */
@@ -142,17 +151,5 @@ class AccountCreatedConfirmation {
 		wp_enqueue_style( self::STYLE_HANDLE );
 
 		echo '<div class="wc-block-order-confirmation-create-account wc-account-created-confirmation">' . $this->render( $email ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render() escapes its output.
-	}
-
-	/**
-	 * Whether the store sends the New account email, which carries the link to set the password.
-	 *
-	 * @return bool
-	 */
-	private function new_account_email_is_enabled(): bool {
-		$emails = WC()->mailer()->get_emails();
-		$email  = $emails['WC_Email_Customer_New_Account'] ?? null;
-
-		return $email instanceof \WC_Email && $email->is_enabled();
 	}
 }

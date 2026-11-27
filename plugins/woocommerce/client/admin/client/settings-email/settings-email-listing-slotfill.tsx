@@ -91,6 +91,8 @@ export type EmailType = {
 	recipients: Recipients;
 	enabled: boolean;
 	manual: boolean;
+	/** Why this email's status needs the merchant's attention, or null. */
+	status_warning?: string | null;
 	link?: string;
 	status?: EmailStatus;
 	/**

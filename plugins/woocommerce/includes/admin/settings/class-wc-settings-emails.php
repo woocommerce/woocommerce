@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransact
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
+use Automattic\WooCommerce\Internal\Customers\NewAccountEmailWarning;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -521,8 +522,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 */
 	public function email_notification_setting() {
 		// Define emails that can be customised here.
-		$mailer          = WC()->mailer();
-		$email_templates = $mailer->get_emails();
+		$mailer                    = WC()->mailer();
+		$email_templates           = $mailer->get_emails();
+		$new_account_email_warning = wc_get_container()->get( NewAccountEmailWarning::class );
 
 		?>
 		<tr valign="top">
@@ -603,6 +605,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 											echo '<span class="status-manual tips" data-tip="' . esc_attr__( 'Manually sent', 'woocommerce' ) . '">' . esc_html__( 'Manual', 'woocommerce' ) . '</span>';
 										} elseif ( $email->is_enabled() ) {
 											echo '<span class="status-enabled tips" data-tip="' . esc_attr__( 'Enabled', 'woocommerce' ) . '">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+										} elseif ( 'customer_new_account' === $email->id && $new_account_email_warning->should_warn() ) {
+											$warning = $new_account_email_warning->get_status_message();
+											echo '<span class="status-disabled-warning tips" tabindex="0" data-tip="' . esc_attr( $warning ) . '">' . esc_html( $warning ) . '</span>';
 										} else {
 											echo '<span class="status-disabled tips" data-tip="' . esc_attr__( 'Disabled', 'woocommerce' ) . '">-</span>';
 										}
@@ -657,6 +662,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$email_types            = array();
 		$post_id_for_template   = null;
 		$block_editor_email_ids = WCTransactionalEmails::get_transactional_emails();
+
+		$new_account_email_warning = wc_get_container()->get( NewAccountEmailWarning::class );
 		foreach ( $emails as $email_key => $email ) {
 			$post_id     = $email_post_manager->get_email_template_post_id( $email->id );
 			$sync_config = WCEmailTemplateSyncRegistry::get_email_sync_config( $email->id );
@@ -693,6 +700,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'file_template_preview_url' => $file_template_preview_url,
 				'enabled'                   => $email->is_enabled(),
 				'manual'                    => $email->is_manual(),
+				// The list shows this only while the email is disabled, so it stays right after toggling the email.
+				'status_warning'            => 'customer_new_account' === $email->id && $new_account_email_warning->customers_can_create_accounts() ? $new_account_email_warning->get_status_message() : null,
 				'current_version'           => '' !== $current_version ? $current_version : null,
 				'template_status'           => '' !== $template_status ? $template_status : null,
 				'template_version'          => '' !== $template_version ? $template_version : null,
