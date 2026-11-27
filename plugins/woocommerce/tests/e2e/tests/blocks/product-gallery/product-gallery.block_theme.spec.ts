@@ -254,6 +254,37 @@ test.describe( `${ blockData.name }`, () => {
 				);
 			} ).toPass( { timeout: 1_000 } );
 		} );
+
+		test( 'should lazy-load the dialog images so a closed dialog does not fetch them on load', async ( {
+			page,
+			editor,
+			pageObject,
+			beanieTemplate,
+		} ) => {
+			await pageObject.addProductGalleryBlock( { cleanContent: false } );
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+
+			await page.goto( beanieTemplate.productUrl );
+
+			const dialogImages = page
+				.getByRole( 'dialog' )
+				.locator(
+					'img[data-wp-watch="callbacks.toggleImageVisibility"]'
+				);
+
+			const imageCount = await dialogImages.count();
+			expect( imageCount ).toBeGreaterThan( 0 );
+
+			for ( let i = 0; i < imageCount; i++ ) {
+				await expect( dialogImages.nth( i ) ).toHaveAttribute(
+					'loading',
+					'lazy'
+				);
+			}
+		} );
 	} );
 
 	test.describe( 'open pop-up when clicked option', () => {
