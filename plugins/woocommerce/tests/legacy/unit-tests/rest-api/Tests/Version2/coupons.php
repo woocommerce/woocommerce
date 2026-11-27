@@ -102,6 +102,7 @@ class WC_Tests_API_Coupons_V2 extends WC_REST_Unit_Test_Case {
 				'minimum_amount'              => '0.00',
 				'maximum_amount'              => '0.00',
 				'email_restrictions'          => array(),
+				'auto_apply'                  => false,
 				'used_by'                     => array(),
 				'meta_data'                   => array(),
 				'_links'                      => array(
@@ -171,6 +172,7 @@ class WC_Tests_API_Coupons_V2 extends WC_REST_Unit_Test_Case {
 				'minimum_amount'              => '0.00',
 				'maximum_amount'              => '0.00',
 				'email_restrictions'          => array(),
+				'auto_apply'                  => false,
 				'used_by'                     => array(),
 				'meta_data'                   => array(),
 			),
@@ -247,6 +249,7 @@ class WC_Tests_API_Coupons_V2 extends WC_REST_Unit_Test_Case {
 				'minimum_amount'              => '0.00',
 				'maximum_amount'              => '0.00',
 				'email_restrictions'          => array(),
+				'auto_apply'                  => false,
 				'used_by'                     => array(),
 				'meta_data'                   => array(),
 			),
@@ -468,7 +471,7 @@ class WC_Tests_API_Coupons_V2 extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 28, count( $properties ) );
+		$this->assertEquals( 29, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'code', $properties );
 		$this->assertArrayHasKey( 'status', $properties );
@@ -495,6 +498,7 @@ class WC_Tests_API_Coupons_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'minimum_amount', $properties );
 		$this->assertArrayHasKey( 'maximum_amount', $properties );
 		$this->assertArrayHasKey( 'email_restrictions', $properties );
+		$this->assertArrayHasKey( 'auto_apply', $properties );
 		$this->assertArrayHasKey( 'used_by', $properties );
 	}
 }

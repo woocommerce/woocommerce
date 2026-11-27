@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Move the coupon auto-apply setting to the Usage restriction panel, alongside the restrictions that decide which carts it applies to, and say in the description that a coupon with no restrictions applies to every cart.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add Store API coverage for auto-applied coupons: the individual-use yield in both directions, the refused removal, and the is_removable flag.

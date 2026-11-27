@@ -2,6 +2,11 @@
 	list-style: none;
 	margin: $gap-smallest 0 0;
 	padding: 0;
+
+	// Auto-applied coupons have no 16px remove button, so match its height to keep chips the same size.
+	.wc-block-components-chip:not(.is-removable) .wc-block-components-chip__text {
+		line-height: 16px;
+	}
 }
 
 // The mask only dims the coupons while one is removed. Its minimum height, which makes room for a spinner, would make
