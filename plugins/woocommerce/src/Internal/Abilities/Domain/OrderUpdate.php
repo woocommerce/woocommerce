@@ -302,7 +302,7 @@ class OrderUpdate extends ActionableAbility {
 			return $refused;
 		}
 
-		$this->recalculate_line_totals_after_save( $order, $product_added );
+		$this->stage_line_totals( $order, $product_added );
 
 		return null;
 	}

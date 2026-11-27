@@ -615,9 +615,8 @@ class ExtensibleAbilities {
 	 * no extension fields. For example, a validator refuses a product change that
 	 * would break a subscription plan.
 	 *
-	 * Core's product abilities run validators. Core's order abilities run no
-	 * validators and no syncs for now, so validators for `order` run only in the
-	 * ActionableAbility classes of extensions.
+	 * Core's product abilities and order-delete run validators. The other order
+	 * abilities of Core run none for now.
 	 *
 	 * @since 11.3.0
 	 *
@@ -1052,7 +1051,7 @@ class ExtensibleAbilities {
 	 * The schema of the `extensions` input of a resource. It lists the fields
 	 * that have an input schema, each as declared, and says
 	 * which object types a field with `object_types` applies to. ActionableAbility adds it to the input schema of every
-	 * ability. An ability that writes other objects of the resource in the same
+	 * ability that takes extensions. An ability that writes other objects of the resource in the same
 	 * call, such as the variations of a product, adds it to their input too.
 	 *
 	 * @since 11.4.0

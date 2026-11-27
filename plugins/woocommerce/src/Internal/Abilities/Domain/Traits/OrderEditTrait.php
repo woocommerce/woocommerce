@@ -59,8 +59,10 @@ trait OrderEditTrait {
 	 * @param \WC_Order $order         Order.
 	 * @param bool      $product_added Whether a product line was added.
 	 */
-	private function recalculate_line_totals_after_save( \WC_Order $order, bool $product_added ): void {
-		$this->recalculate_after_save = $product_added && ! empty( $order->get_items( 'coupon' ) ) ? 'coupons' : 'totals';
+	private function stage_line_totals( \WC_Order $order, bool $product_added ): void {
+		$recalculate_coupons = $product_added && ! empty( $order->get_items( 'coupon' ) );
+
+		$this->recalculate_after_save = $recalculate_coupons ? 'coupons' : 'totals';
 	}
 
 	/**
@@ -83,7 +85,7 @@ trait OrderEditTrait {
 	}
 
 	/**
-	 * Recalculate the saved order with the methods that save, when recalculate_line_totals_after_save() left it for later.
+	 * Recalculate the saved order with the methods that save, when stage_line_totals() left it for later.
 	 * Each step is checked on its own, because the next save clears the error of a failed one.
 	 *
 	 * @param \WC_Order $order Saved order.

@@ -134,15 +134,6 @@ class OrderDelete extends ActionableAbility {
 	}
 
 	/**
-	 * The ability runs no validators and no syncs for now, with the feature on or off.
-	 *
-	 * @return bool
-	 */
-	protected function is_extensible(): bool {
-		return false;
-	}
-
-	/**
 	 * Load the order and check that it can be trashed when the call does not force a delete.
 	 *
 	 * @param array $input Ability input.

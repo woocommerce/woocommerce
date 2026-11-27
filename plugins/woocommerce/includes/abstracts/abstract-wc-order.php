@@ -2849,13 +2849,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->calculate_cogs_total_value();
 		}
 
-		/**
-		 * Fires after the order totals are calculated.
-		 *
-		 * @param bool              $and_taxes Whether the taxes were calculated too.
-		 * @param WC_Abstract_Order $order     Order object.
-		 * @since 3.3.0
-		 */
 		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
 
 		$this->save();

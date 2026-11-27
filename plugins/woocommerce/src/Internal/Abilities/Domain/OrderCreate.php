@@ -185,7 +185,7 @@ class OrderCreate extends ActionableAbility {
 		}
 
 		if ( ! empty( $input['line_items'] ) || ! empty( $input['shipping_lines'] ) ) {
-			$this->recalculate_line_totals_after_save( $subject, ! empty( $input['line_items'] ) );
+			$this->stage_line_totals( $subject, ! empty( $input['line_items'] ) );
 		}
 
 		return null;
