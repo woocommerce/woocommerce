@@ -228,8 +228,4 @@ export class FrontendUtils {
 		await locator.press( 'End' );
 		await locator.press( 'Shift+Home' );
 	}
-
-	async gotoMyAccount() {
-		await this.page.goto( '/my-account' );
-	}
 }
