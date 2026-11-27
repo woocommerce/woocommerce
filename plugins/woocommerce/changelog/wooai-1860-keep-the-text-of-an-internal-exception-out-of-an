@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep internal error details out of the response when a WooCommerce ability fails during its change step.
