@@ -12,8 +12,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Refunds\Schema;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Schema for the refund preview response, shared by the wc/v3 and wc/v4 preview endpoints.
- * Standalone (no V4 AbstractSchema parent) so wc/v3 does not depend on the v4 route tree.
+ * Schema for the refund preview response.
  *
  * @since 11.3.0
  */

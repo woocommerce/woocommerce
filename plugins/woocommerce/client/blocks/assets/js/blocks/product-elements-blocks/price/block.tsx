@@ -2,7 +2,6 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { ProductEntityResponse } from '@woocommerce/entities';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
@@ -13,8 +12,6 @@ import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { CurrencyCode } from '@woocommerce/type-defs/currency';
 import type { HTMLAttributes } from 'react';
-import type { Currency, ProductResponseItem } from '@woocommerce/types';
-import { SITE_CURRENCY } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -24,9 +21,7 @@ import type { BlockAttributes } from './types';
 type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & {
 		isAdmin: boolean;
-		isExperimentalWcRestApiV4Enabled: boolean;
 		isDescendentOfSingleProductTemplate: boolean;
-		product: ProductResponseItem | ProductEntityResponse | undefined;
 	};
 
 interface PriceProps {
@@ -43,52 +38,16 @@ interface PriceProps {
 	price_range: null | { min_amount: string; max_amount: string };
 }
 
-/**
- * Converts a price string from the Admin API format to the Store API format.
- *
- * The Admin API returns prices as decimal numbers (e.g., "12.99"), while the Store API
- * expects prices as integers representing the smallest currency unit (e.g., "1299" for $12.99).
- * This function multiplies the price by 100 to convert from decimal to minor units.
- *
- * @param priceString The price as a string from the Admin API (e.g., "12.99")
- * @param currency    The currency object
- * @param fallback    The fallback value if priceString is null/undefined (defaults to "0")
- * @return The price converted to minor units as a string (e.g., "1299")
- */
-export const convertAdminPriceToStoreApiFormat = (
-	priceString: string | null | undefined,
-	currency: Currency,
-	fallback = '0'
-) => {
-	const multiplier = 10 ** currency.minorUnit;
-	return Math.round(
-		Number.parseFloat( priceString ?? fallback ) * multiplier
-	).toString();
-};
-
 export const Block = ( props: Props ): JSX.Element | null => {
 	const {
 		className,
 		textAlign,
 		isDescendentOfSingleProductTemplate,
 		isAdmin,
-		product: productData,
-		isExperimentalWcRestApiV4Enabled,
 	} = props;
 
 	const { parentName, parentClassName } = useInnerBlockLayoutContext();
-	const { product } = useProductDataContext(
-		/**
-		 * This block can depend on the core-data package only when the experimental WC Rest API feature flag is enabled because
-		 * it depends on experimental fields: https://github.com/woocommerce/woocommerce/pull/60101
-		 */
-		isExperimentalWcRestApiV4Enabled
-			? {
-					isAdmin,
-					product: productData,
-				}
-			: undefined
-	);
+	const { product } = useProductDataContext();
 
 	const isDescendentOfAllProductsBlock =
 		parentName === 'woocommerce/all-products';
@@ -147,49 +106,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		return productPriceComponent;
 	}
 
-	let prices: PriceProps = product?.prices ?? {};
+	const prices: PriceProps = product?.prices ?? {};
 	const currency = showPricePreview
 		? getCurrencyFromPriceResponse()
 		: getCurrencyFromPriceResponse( prices );
-
-	if ( isExperimentalWcRestApiV4Enabled ) {
-		prices = {
-			price: convertAdminPriceToStoreApiFormat(
-				product?.price,
-				currency
-			),
-			...( product?.sale_price
-				? {
-						sale_price: convertAdminPriceToStoreApiFormat(
-							product?.sale_price,
-							currency
-						),
-					}
-				: {} ),
-			...( product?.regular_price
-				? {
-						regular_price: convertAdminPriceToStoreApiFormat(
-							product?.regular_price,
-							currency
-						),
-					}
-				: {} ),
-			currency_minor_unit: SITE_CURRENCY.minorUnit,
-			price_range:
-				product?.max_price && product?.min_price
-					? {
-							min_amount: convertAdminPriceToStoreApiFormat(
-								product.min_price,
-								currency
-							),
-							max_amount: convertAdminPriceToStoreApiFormat(
-								product.max_price,
-								currency
-							),
-						}
-					: null,
-		};
-	}
 
 	const pricePreview = '5000';
 	const isOnSale = prices.price !== prices.regular_price;

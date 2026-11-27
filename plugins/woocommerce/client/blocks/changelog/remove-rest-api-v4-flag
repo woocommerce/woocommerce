@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Drop the experimental rest-api-v4 flag from product blocks. No production change.

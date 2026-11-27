@@ -8,7 +8,6 @@ import { dispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { PRODUCT_ENTITY } from '../../internal/entities/product/constants';
-import { SETTINGS_ENTITY } from '../../internal/entities/settings/constants';
 
 const registered: string[] = [];
 
@@ -21,11 +20,12 @@ export const registerProductEntity = () => {
 	registered.push( PRODUCT_ENTITY.name );
 };
 
-export const registerSettingsEntity = () => {
-	if ( registered.includes( SETTINGS_ENTITY.name ) ) {
-		return;
-	}
-	const { addEntities } = dispatch( coreStore );
-	void addEntities( [ SETTINGS_ENTITY ] );
-	registered.push( SETTINGS_ENTITY.name );
-};
+/**
+ * No-op. The v4 settings REST endpoints it depended on were removed.
+ *
+ * Kept exported so the deprecated `wc.wcEntities.registerSettingsEntity()` compatibility
+ * wrapper does not fatal.
+ *
+ * @deprecated Since WooCommerce 11.5.0. Will be removed in a future version.
+ */
+export const registerSettingsEntity = () => {};

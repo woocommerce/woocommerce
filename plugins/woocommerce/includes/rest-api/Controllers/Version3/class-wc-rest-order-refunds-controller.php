@@ -77,8 +77,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * Preview a refund without creating it.
 	 *
 	 * Returns server-computed refund totals and per-line breakdowns for the
-	 * requested line items, using the same calculation engine as the wc/v4
-	 * refunds endpoints, so clients do not have to replicate tax, rounding,
+	 * requested line items, so clients do not have to replicate tax, rounding,
 	 * and currency-precision logic.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -241,10 +240,6 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	/**
 	 * Get the argument schema for the preview route's line_items parameter.
 	 *
-	 * Shared with the wc/v4 preview endpoint (including the line_item_id key
-	 * naming) so clients can send the same payload to both API versions and
-	 * the accepted shape cannot drift between them.
-	 *
 	 * Note the two deliberate differences from this controller's create
 	 * endpoint: the preview keys lines by `line_item_id` where the create
 	 * uses `id`, and the preview's `refund_total` is tax-inclusive where the
@@ -331,11 +326,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	}
 
 	/**
-	 * Get the shared refund calculation engine.
-	 *
-	 * DataUtils is the calculation/validation engine shared with the wc/v4
-	 * refunds endpoints; using it here keeps wc/v3 and wc/v4 refund math
-	 * identical.
+	 * Get the refund calculation engine.
 	 *
 	 * @return DataUtils
 	 */
@@ -346,15 +337,15 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	/**
 	 * Prefix a shared-engine error code with `woocommerce_rest_`.
 	 *
-	 * DataUtils emits unprefixed codes (the wc/v4 convention). The wc/v3 surface
-	 * uses `woocommerce_rest_*`, so errors crossing into a v3 response are
-	 * renamed at this boundary. Codes that already carry the prefix pass through
+	 * DataUtils emits unprefixed codes. The wc/v3 surface uses
+	 * `woocommerce_rest_*`, so errors crossing into a v3 response are renamed
+	 * at this boundary. Codes that already carry the prefix pass through
 	 * unchanged, and the message and data (including the HTTP status) are kept.
 	 * An unprefixed engine error whose data carries no HTTP status is backfilled
-	 * with 400, the same default the wc/v4 envelope applies, so it is not served
-	 * as a 500. An already-prefixed code returns untouched above and so misses
-	 * that backfill, which leaves no gap: every prefixed error reaching this
-	 * endpoint is built by normalize_line_item() with an explicit status.
+	 * with 400, so it is not served as a 500. An already-prefixed code returns
+	 * untouched above and so misses that backfill, which leaves no gap: every
+	 * prefixed error reaching this endpoint is built by normalize_line_item()
+	 * with an explicit status.
 	 *
 	 * @param WP_Error $error The error whose code should be prefixed.
 	 *
@@ -369,9 +360,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 
 		// Every DataUtils error site attaches array data; the guard below is here
 		// so a non-array payload cannot turn the $data['status'] write into a
-		// fatal. Replacing such a payload rather than nesting it mirrors the wc/v4
-		// envelope, which likewise reads a status only out of array data and drops
-		// the rest, so both versions answer an identical error identically.
+		// fatal. Replacing such a payload rather than nesting it keeps the error
+		// data a flat array, matching every other DataUtils error site.
 		$data = $error->get_error_data();
 		if ( ! is_array( $data ) ) {
 			$data = array();
@@ -553,13 +543,12 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	/**
 	 * Create a refund with server-computed per-line totals (compute_totals mode).
 	 *
-	 * Mirrors the wc/v4 refund creation pipeline: line items may omit refund_total
-	 * (computed from quantity at the order's stored unit price, tax-inclusive,
-	 * clamped to the remaining refundable amount), input is validated against the
-	 * order's refund history, and the refund amount is derived from the line items
-	 * unless an explicit amount override is supplied. Validation follows the same
-	 * rules as the wc/v4 creation endpoint; error codes are prefixed with
-	 * `woocommerce_rest_` at this v3 boundary like the rest of the v3 surface.
+	 * Line items may omit refund_total (computed from quantity at the order's
+	 * stored unit price, tax-inclusive, clamped to the remaining refundable
+	 * amount), input is validated against the order's refund history, and the
+	 * refund amount is derived from the line items unless an explicit amount
+	 * override is supplied. Error codes are prefixed with `woocommerce_rest_`
+	 * at this v3 boundary like the rest of the v3 surface.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_Error|WC_Data The created refund, or WP_Error object on failure.

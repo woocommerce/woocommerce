@@ -7,8 +7,6 @@ import {
 	useBlockProps,
 } from '@wordpress/block-editor';
 import type { BlockAlignment } from '@wordpress/blocks';
-import { isExperimentalWcRestApiV4Enabled } from '@woocommerce/block-settings';
-import { useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -60,10 +58,6 @@ const PriceEdit = ( {
 		isDescendentOfSingleProductTemplate = false;
 	}
 
-	const isExperimentalWcRestApiEnabled = isExperimentalWcRestApiV4Enabled();
-
-	const { product } = useProduct( context.postId );
-
 	return (
 		<>
 			<BlockControls>
@@ -75,33 +69,13 @@ const PriceEdit = ( {
 				/>
 			</BlockControls>
 			<div { ...blockProps }>
-				{
-					// If experimental WC API is not available we must fallback to "old" way of fetching product data.
-					// Once it's available everywhere we can remove this fallback.
-					isExperimentalWcRestApiEnabled ? (
-						<Block
-							{ ...blockAttrs }
-							isDescendentOfSingleProductTemplate={
-								isDescendentOfSingleProductTemplate
-							}
-							isAdmin={ true }
-							product={ product }
-							isExperimentalWcRestApiV4Enabled={
-								isExperimentalWcRestApiEnabled
-							}
-						/>
-					) : (
-						<Block
-							{ ...blockAttrs }
-							isDescendentOfSingleProductTemplate={
-								isDescendentOfSingleProductTemplate
-							}
-							product={ undefined }
-							isAdmin={ false }
-							isExperimentalWcRestApiV4Enabled={ false }
-						/>
-					)
-				}
+				<Block
+					{ ...blockAttrs }
+					isDescendentOfSingleProductTemplate={
+						isDescendentOfSingleProductTemplate
+					}
+					isAdmin={ false }
+				/>
 			</div>
 		</>
 	);

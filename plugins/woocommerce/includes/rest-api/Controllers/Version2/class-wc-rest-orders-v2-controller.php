@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\RestApi\OrderLineItemValidationTrait;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\OrderLineMetaValidator;
+use Automattic\WooCommerce\Internal\RestApi\Orders\OrderLineMetaValidator;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
