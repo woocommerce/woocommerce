@@ -12253,12 +12253,6 @@ parameters:
 			path: includes/class-wc-order-item-product.php
 
 		-
-			message: '#^Parameter \#2 \$value of method WC_Data\:\:add_meta_data\(\) expects array\|string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
 			message: '#^Method WC_Order_Item_Shipping\:\:set_instance_id\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -15465,12 +15459,6 @@ parameters:
 		-
 			message: '#^Access to private property WooCommerce\:\:\$api\.$#'
 			identifier: property.private
-			count: 1
-			path: includes/class-wc-webhook.php
-
-		-
-			message: '#^Action callback returns mixed but should not return anything\.$#'
-			identifier: return.void
 			count: 1
 			path: includes/class-wc-webhook.php
 
@@ -20162,12 +20150,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Abstract_Legacy_Order\:\:update_status\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/legacy/abstract-wc-legacy-order.php
-
-		-
-			message: '#^Call to an undefined method object\:\:add_meta_data\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: includes/legacy/abstract-wc-legacy-order.php

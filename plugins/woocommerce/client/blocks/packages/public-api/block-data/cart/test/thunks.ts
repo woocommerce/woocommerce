@@ -199,7 +199,17 @@ describe( 'changeCartItemQuantity', () => {
 			10
 		)( { dispatch: mockDispatch, select: mockSelect } as never );
 
-		await Promise.all( [ promise1, promise2 ] );
+		await promise1;
+		// The aborted request leaves the item pending for the newer request.
+		expect( mockDispatch.itemIsPendingQuantity ).not.toHaveBeenCalledWith(
+			'item-1',
+			false
+		);
+		await promise2;
+		expect( mockDispatch.itemIsPendingQuantity ).toHaveBeenCalledWith(
+			'item-1',
+			false
+		);
 
 		// First signal should be aborted
 		expect( abortSignals[ 0 ].aborted ).toBe( true );

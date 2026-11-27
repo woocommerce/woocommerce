@@ -4,6 +4,7 @@
 import { AddressAutocompleteResult } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
 import { sanitizeHTML } from '@woocommerce/sanitize';
+import { exitingProps } from '@woocommerce/base-hooks';
 
 /**
  * Get highlighted label parts based on matches returned by `search` results.
@@ -67,12 +68,17 @@ export const Suggestions = ( {
 	selectedSuggestion,
 	addressType,
 	onSuggestionClick,
+	isExiting = false,
+	containerRef,
 }: {
 	suggestions: AddressAutocompleteResult[];
 	branding?: string;
 	selectedSuggestion: number;
 	addressType: string;
 	onSuggestionClick: ( suggestionId: string ) => void;
+	// The list stays mounted while it animates out after it closes.
+	isExiting?: boolean;
+	containerRef?: React.Ref< HTMLDivElement >;
 } ) => {
 	if ( ! suggestions ) {
 		return null;
@@ -82,9 +88,12 @@ export const Suggestions = ( {
 
 	return (
 		<div
+			ref={ containerRef }
 			className="wc-block-components-address-autocomplete-suggestions"
 			role="region"
 			aria-live="polite"
+			{ ...exitingProps( isExiting ) }
+			{ ...( isExiting && { 'data-wc-exiting': '' } ) }
 		>
 			<ul
 				className="suggestions-list"

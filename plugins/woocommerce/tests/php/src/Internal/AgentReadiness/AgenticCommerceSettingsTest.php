@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
+use Automattic\WooCommerce\Internal\AgentReadiness\SupportReport;
 use WC_Admin_Settings;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -300,7 +301,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The page shows the three counts from the stored report, the switch and failing checks.
+	 * @testdox The page shows the three catalog counts as they stand now, the switch and failing checks.
 	 */
 	public function test_output_with_report_and_failing_checks(): void {
 		remove_all_filters( 'pre_option_home' );
@@ -319,7 +320,30 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$stored['products']  = ProductScan::PRODUCT_LIMIT;
 		$stored['available'] = 8400;
 		update_option( AgentReadiness::REPORT_OPTION, $stored );
-		$this->assertSame( '8,400', array_column( $this->shopping()['visibility']['counts'], 'count', 'id' )[ ProductScan::COUNT_AVAILABLE ], 'The whole catalog, like the other two, not only the products the scan stopped at' );
+		WC_Helper_Product::create_simple_product();
+		$hidden = WC_Helper_Product::create_simple_product();
+		$hidden->set_catalog_visibility( 'hidden' );
+		$hidden->save();
+		$now = array_column( $this->shopping()['visibility']['counts'], 'count', 'id' );
+		$this->assertSame( '2', $now[ ProductScan::COUNT_AVAILABLE ], 'Counted now, as the list the card links to: a product added since the last check counts, whatever the stored report says' );
+		$this->assertSame( '1', $now[ ProductScan::COUNT_HIDDEN ] );
+		$this->assertSame( '1', $now[ ProductScan::COUNT_UNSUPPORTED ] );
+		$expected_counts = array(
+			ProductScan::COUNT_AVAILABLE   => 2,
+			ProductScan::COUNT_HIDDEN      => 1,
+			ProductScan::COUNT_UNSUPPORTED => 1,
+		);
+		foreach ( $expected_counts as $count => $expected ) {
+			$listed = new \WP_Query(
+				array(
+					'post_type'   => 'product',
+					'post_status' => 'publish',
+					'fields'      => 'ids',
+					'tax_query'   => ProductScan::count_query( $count ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				)
+			);
+			$this->assertSame( $expected, $listed->found_posts, 'The list the ' . $count . ' card links to has as many products as the card says' );
+		}
 		$this->assertSame( '1', $counts[ ProductScan::COUNT_UNSUPPORTED ]['count'] );
 		$this->assertMatchesRegularExpression( "#^AI assistants can find these products, but shoppers can't buy them through an assistant yet\\.#", $counts[ ProductScan::COUNT_UNSUPPORTED ]['tip'], 'The tip says what not supported means' );
 		$this->assertSame( '', $counts[ ProductScan::COUNT_AVAILABLE ]['tip'], 'Visible needs no tip' );
@@ -434,6 +458,26 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'turned off'          => array( 'every_step', 'no', '#^AI shopping is off\.$#', null, 'View settings', '#^Your store is ready for AI shopping\. Turn it on to let AI assistants find your products\.$#' ),
 			'off, steps left'     => array( 'coming_soon', 'no', '#^AI shopping is off\.$#', 'Needs attention', 'Continue setup', '#^Finish \d+ required steps? to get your store ready for AI shopping\.$#' ),
 		);
+	}
+
+	/**
+	 * @testdox With a required and an optional step left, the card, the Setup checklist and the support download count the required one.
+	 */
+	public function test_required_step_left_reads_the_same_everywhere(): void {
+		$this->make_every_step_pass();
+		$this->turn_off_order_emails();
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+
+		$shopping = $this->shopping( true );
+		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'Order emails are shown as Required and don\'t block the switch' );
+		$this->assertSame( '1 step left', $shopping['checklist']['badge']['text'] );
+		$this->assertSame( 'AI assistants can shop your store. 1 step left.', $this->view()['overview']['shopping']['text'], 'The card counts what the checklist badge counts, not the optional step too' );
+		$this->assertStringContainsString( "\nAI shopping: On, with required steps left\n", wc_get_container()->get( SupportReport::class )->text(), 'As the page\'s Needs attention badge' );
+
+		foreach ( array( 'WC_Email_Customer_Processing_Order', 'WC_Email_Customer_Completed_Order' ) as $email ) {
+			WC()->mailer()->get_emails()[ $email ]->enabled = 'yes';
+		}
+		$this->assertStringContainsString( "\nAI shopping: On\n", wc_get_container()->get( SupportReport::class )->text(), 'With only the optional step left' );
 	}
 
 	/**
@@ -677,7 +721,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'fix_url' => '',
 		);
 		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( true ), $sitemap, $robots ) ), false );
-		$this->assertSame( 'This check couldn’t run. It runs again each day, or you can run the check again now.', $this->row( 'Add a sitemap that lists your products' )['text'], 'Titled by what the check looks for, not as if it passed' );
+		$this->assertSame( 'This check couldn’t run. It runs again each day, or select Check again to run it now.', $this->row( 'Add a sitemap that lists your products' )['text'], 'Titled by what the check looks for, not as if it passed' );
 
 		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( true ), $sitemap, array( 'ok' => null ) + $robots ) ), false );
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
@@ -685,6 +729,16 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( 'Your pages couldn’t be checked' ), array_column( $card['rows'], 'title' ), 'One row for the card, not one per check' );
 		$this->assertFalse( $card['rows'][0]['waiting'], 'Screen readers hear Couldn\'t check' );
 		$this->assertSame( 'Your hosting setup blocked the check from opening them. Checks run again each day. If this keeps happening, contact your hosting provider.', $card['rows'][0]['text'] );
+		$this->assertTrue( $this->view()['daily_checks'] );
+
+		update_option( ScheduledScan::DAILY_OPTION, 'no' );
+		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
+		$this->assertSame( 'Your hosting setup blocked the check from opening them. Select Check again to try again later. If this keeps happening, contact your hosting provider.', $card['rows'][0]['text'], 'With daily checks off, no line says they run each day' );
+		$this->assertFalse( $this->view()['daily_checks'] );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( true ), $sitemap, $robots ) ), false );
+		$this->assertSame( 'This check couldn’t run. Select Check again to try again.', $this->row( 'Add a sitemap that lists your products' )['text'] );
+		delete_option( ScheduledScan::DAILY_OPTION );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( true ), $sitemap, array( 'ok' => null ) + $robots ) ), false );
 
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
@@ -698,7 +752,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $launched( false ), $sitemap, array( 'ok' => null ) + $robots ) ), false );
 		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
 		$this->assertSame( 'Your store wasn’t live at the last check', $card['rows'][0]['title'] );
-		$this->assertSame( 'These checks run at the next daily check, or you can run the check again now.', $card['rows'][0]['text'] );
+		$this->assertSame( 'If your store is live now, these checks run at the next daily check. To run them now, select Check again.', $card['rows'][0]['text'] );
+		update_option( ScheduledScan::DAILY_OPTION, 'no' );
+		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
+		$this->assertSame( 'If your store is live now, select Check again to run these checks.', $card['rows'][0]['text'], 'With daily checks off, the line still says the merchant can run the check' );
+		delete_option( ScheduledScan::DAILY_OPTION );
 		$this->assertSame( 'Not checked yet', $card['badge']['text'], 'The checks wait for the next run after launch' );
 		$this->assertTrue( $card['rows'][0]['waiting'], 'Screen readers hear Not checked yet' );
 	}
@@ -725,7 +783,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		list( $badge, $by_id ) = $rows();
 		$this->assertSame( 'Not checked yet', $badge );
 		$this->assertTrue( $by_id['sitemap_lists_products']['waiting'], 'Screen readers hear Not checked yet' );
-		$this->assertSame( 'Your store wasn’t live at the last check. This check runs at the next daily check, or you can run the check again now.', $by_id['sitemap_lists_products']['text'] );
+		$this->assertSame( 'Your store wasn’t live at the last check. If it’s live now, this check runs at the next daily check, or select Check again to run it now.', $by_id['sitemap_lists_products']['text'] );
+		update_option( ScheduledScan::DAILY_OPTION, 'no' );
+		$by_id = $rows()[1];
+		$this->assertSame( 'Your store wasn’t live at the last check. If it’s live now, select Check again to run this check.', $by_id['sitemap_lists_products']['text'] );
+		delete_option( ScheduledScan::DAILY_OPTION );
 
 		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $check( 'launched', true, array( 'group' => 'access' ) ), $check( 'canonical_url', null, array( 'no_product' => true ) ), $check( 'robots_txt', true ) ) ), false );
 		list( $badge, $by_id ) = $rows();
@@ -1601,6 +1663,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Some checks only run when AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', $access['note'] );
 		$this->assertNull( $access['empty'] );
 		$this->assertCount( 2, $access['folded'], 'The passed checks stay, as in the design' );
+
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		$this->assertNull( array_column( $this->view()['sections'], null, 'id' )['access']['note'], 'In coming soon mode the store has to go live first, so the AI shopping note waits' );
 	}
 
 	/**
@@ -1655,7 +1720,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( 'date_format', 'F j, Y' );
 		update_option( 'time_format', 'g:i a' );
 		update_option( 'timezone_string', 'UTC' );
-		$this->assertSame( 'Last checked November 18, 2026 at 9:14 am. Checks run each day.', $last->invoke( null, array( 'generated_at' => '2026-11-18T09:14:00+00:00' ) ), 'An earlier day reads as a date, then at and the time' );
+		$this->assertSame( 'Last checked November 18, 2026 at 9:14 am.', $last->invoke( null, array( 'generated_at' => '2026-11-18T09:14:00+00:00' ) ), 'An earlier day reads as a date, then at and the time' );
 		$this->assertNotNull( $view['fix_first'], 'When it last ran, Fix first, then a card per question' );
 		$brand = $this->row( 'Add a brand to ' . $product->get_name() );
 		$this->assertSame( 'ChatGPT only lists products that have a brand. In Google and Copilot, a brand makes products easier to find.', $brand['text'], 'One failing product is named in the title; the text says why a brand matters' );
@@ -1687,6 +1752,30 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			sprintf( 'Based on your %s most recently changed products.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
 			$this->view()['overview']['based_on'],
 			'The AI tools card says it after its description'
+		);
+
+		$stored['bestsellers_first'] = true;
+		update_option( AgentReadiness::REPORT_OPTION, $stored );
+		$this->assertSame(
+			sprintf( 'Product checks covered %s of your 8,400 products: your bestsellers first, then the ones you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['checked_note'],
+			'A scan that took bestsellers first says so'
+		);
+		$this->assertSame(
+			sprintf( 'Based on %s products: your bestsellers first, then the ones you changed most recently.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['overview']['based_on']
+		);
+
+		$stored['bestsellers_count'] = ProductScan::PRODUCT_LIMIT;
+		update_option( AgentReadiness::REPORT_OPTION, $stored );
+		$this->assertSame(
+			sprintf( 'Product checks covered %s of your 8,400 products: your bestsellers. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['checked_note'],
+			'A scan filled by bestsellers does not claim recently changed products were checked'
+		);
+		$this->assertSame(
+			sprintf( 'Based on your %s bestsellers.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['overview']['based_on']
 		);
 	}
 
@@ -1825,10 +1914,14 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Required for AI shopping', $items['payment_method']['tier'] );
 		$this->assertSame( 'Required for AI shopping', $items['order_emails']['tier'] );
 		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'None blocks the switch' );
+		$fix_first = $this->view()['fix_first'];
+		$this->assertSame( 'Finish 3 required steps to get your store ready for AI shopping.', $fix_first['ranking'], 'With only setup steps nothing is ranked, so the card counts them as the Setup checklist does' );
+		$this->assertNull( $fix_first['link'], 'and offers no way to rank by sales' );
 
 		update_option( 'woocommerce_enable_guest_checkout', 'no' );
 		$shopping = $this->shopping();
 		$this->assertStringStartsWith( 'Finish 3 required steps', $shopping['checklist']['summary'] );
+		$this->assertSame( '3 steps left', $shopping['checklist']['badge']['text'], 'The badge counts the required steps, as the summary does, not the optional one too' );
 		$this->assertSame( array( 'payment_method', 'search_visible', 'order_emails', 'guest_checkout' ), array_column( $shopping['checklist']['steps'], 'id' ), 'They come before the optional guest checkout step' );
 		$this->assertSame( array( 'required', 'required', 'required', 'open' ), array_column( $shopping['checklist']['steps'], 'state' ), 'All three stay Required (WOOAI-1681)' );
 		foreach ( array(
@@ -1841,6 +1934,51 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			$this->assertSame( $copy[1], $step['link']['text'], $copy[0] . ': the button says where it goes, as in the design' );
 		}
 		$this->assertFalse( $shopping['ucp']['blocked'], 'None keeps the switch from being turned on' );
+	}
+
+	/**
+	 * @testdox A setup-only Fix first card counts the Required steps, and keeps the ranking line when the rules file marks the only one optional.
+	 */
+	public function test_fix_first_setup_line_counts_required_steps_only(): void {
+		$this->make_every_step_pass();
+		update_option( 'blog_public', '0' );
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			$this->restore[]  = array( $gateway, $gateway->enabled );
+			$gateway->enabled = 'no';
+		}
+		update_option(
+			RemoteRules::OPTION,
+			array(
+				'store_checks' => array(
+					'search_visible' => array( 'required' => false ),
+				),
+			),
+			false
+		);
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+				'sales'        => null,
+			),
+			false
+		);
+
+		$fix_first = $this->view()['fix_first'];
+		$items     = array_column( $fix_first['items'], null, 'id' );
+		$this->assertSame( 'Finish 1 required step to get your store ready for AI shopping.', $fix_first['ranking'], 'The optional search step is on the card and is not counted' );
+		$this->assertNull( $fix_first['link'], 'The required-steps line has no ranking link' );
+		$this->assertSame( 'Required', $items['payment_method']['badge']['text'] );
+		$this->assertNull( $items['search_visible']['badge'], 'The rules file left this step off the Required list' );
+		$this->assertStringStartsWith( 'Finish 1 required step', $this->shopping()['checklist']['summary'] );
+
+		$this->make_every_step_pass();
+		update_option( 'blog_public', '0' );
+		$fix_first = $this->view()['fix_first'];
+		$this->assertSame( array( 'search_visible' ), array_column( $fix_first['items'], 'id' ) );
+		$this->assertSame( 'Start with the fixes that affect the most products.', $fix_first['ranking'], 'No required step is left, so the card does not say to finish required steps' );
+		$this->assertSame( 'Turn on Analytics to see which fixes affect the most sales.', $fix_first['link']['text'] );
 	}
 
 	/**
@@ -1971,6 +2109,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$view  = $this->view();
 		$items = array_column( $view['fix_first']['items'], 'tier', 'id' );
 		$this->assertSame( 'Required for AI shopping', $items['ucp_profile'] );
+		$this->assertStringStartsNotWith( 'Finish', $view['fix_first']['ranking'], 'A required check the scan read is not a setup step, so the card keeps its ranking line' );
 		$this->assertArrayNotHasKey( 'ucp_endpoints_live', $items, 'Catalog search can fail now and then with nothing changed, so it is not Required' );
 		$this->assertArrayNotHasKey( 'ucp_profile_version', $items, 'A different version is likely another plugin, not a blocker' );
 		$rows = array_column( array_column( $view['sections'], null, 'id' )['access']['rows'], null, 'id' );

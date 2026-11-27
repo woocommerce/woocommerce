@@ -159,6 +159,29 @@ describe( 'PaymentMethods: asking the shopper to select a payment method', () =>
 		).toBeNull();
 	} );
 
+	it( 'does not show an error that belongs to another field', async () => {
+		await seedStoreWithNothingSelected();
+		act( () => {
+			dispatch( paymentStore ).__internalSetActivePaymentMethod( 'bacs' );
+			// An extension field with an empty `errorId` stores its error under ''.
+			dispatch( validationStore ).setValidationErrors( {
+				'': { message: 'Another field error', hidden: false },
+			} );
+		} );
+
+		render( <PaymentMethods /> );
+		await screen.findByRole( 'radio', {
+			name: ( name ) => name.startsWith( 'bacs' ),
+		} );
+
+		expect(
+			screen.queryByText( 'Another field error' )
+		).not.toBeInTheDocument();
+		act( () => {
+			dispatch( validationStore ).clearValidationError( '' );
+		} );
+	} );
+
 	it( 'does not register the error while an express method is active', async () => {
 		await seedStoreWithNothingSelected( { withExpress: true } );
 		act( () => {

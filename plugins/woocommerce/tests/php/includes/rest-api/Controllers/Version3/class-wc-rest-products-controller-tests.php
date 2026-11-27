@@ -3346,4 +3346,181 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertSame( $fields['description'], $post->post_content, 'The stored description should keep its backslash.' );
 		$this->assertSame( $fields['short_description'], $post->post_excerpt, 'The stored short description should keep its backslash.' );
 	}
+
+	/**
+	 * @testdox Global attribute terms can be set by ID, so terms that share a name are not mixed up.
+	 */
+	public function test_create_product_with_attribute_term_ids(): void {
+		list( $attribute, , $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params(
+			array(
+				'name'       => 'Trousers',
+				'attributes' => array(
+					array(
+						'id'       => $attribute['attribute_id'],
+						'term_ids' => array( $second_term_id ),
+						'options'  => array( 'Green' ),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$terms = wc_get_product_terms( $response->get_data()['id'], $attribute['attribute_taxonomy'], array( 'fields' => 'slugs' ) );
+		$this->assertSame( array( 'trousers-green' ), $terms );
+	}
+
+	/**
+	 * @testdox An unknown attribute term ID is rejected instead of clearing the product's terms.
+	 */
+	public function test_create_product_with_unknown_attribute_term_id_fails(): void {
+		list( $attribute ) = $this->create_attribute_with_duplicate_term_names();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params(
+			array(
+				'name'       => 'Trousers',
+				'attributes' => array(
+					array(
+						'id'       => $attribute['attribute_id'],
+						'term_ids' => array( PHP_INT_MAX ),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_attribute_term_id', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox An invalid attribute term ID is rejected instead of selecting a different term.
+	 * @testWith ["negative"]
+	 *           ["fractional"]
+	 *           ["scalar"]
+	 *           ["null"]
+	 *           ["unknown_attribute"]
+	 *           ["missing_attribute"]
+	 *
+	 * @param string $scenario Invalid term-ID payload to submit.
+	 */
+	public function test_batch_update_product_rejects_negative_attribute_term_id( string $scenario ): void {
+		list( $attribute, $first_term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+		$taxonomy = $attribute['attribute_taxonomy'];
+
+		$product_attribute = new WC_Product_Attribute();
+		$product_attribute->set_id( $attribute['attribute_id'] );
+		$product_attribute->set_name( $taxonomy );
+		$product_attribute->set_options( array( $second_term_id ) );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_attributes( array( $product_attribute ) );
+		$product->save();
+
+		$unknown_term = 'unknown_attribute' === $scenario ? $this->factory->term->create( array( 'taxonomy' => 'product_cat' ) ) : 0;
+		$term_ids     = array(
+			'negative'          => array( -$first_term_id ),
+			'fractional'        => array( $first_term_id + 0.5 ),
+			'scalar'            => $first_term_id,
+			'null'              => null,
+			'unknown_attribute' => array( $unknown_term ),
+			'missing_attribute' => array( $first_term_id ),
+		)[ $scenario ];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'         => $product->get_id(),
+						'attributes' => array(
+							array(
+								'id'       => 'unknown_attribute' === $scenario ? PHP_INT_MAX : ( 'missing_attribute' === $scenario ? 0 : $attribute['attribute_id'] ),
+								'name'     => 'Color',
+								'term_ids' => $term_ids,
+							),
+						),
+					),
+				),
+			)
+		);
+		$data = $this->server->dispatch( $request )->get_data();
+
+		$this->assertSame( 'woocommerce_rest_invalid_attribute_term_id', $data['update'][0]['error']['code'] ?? null, 'The invalid term ID should be rejected.' );
+		$this->assertSame( array( $second_term_id ), wc_get_product_terms( $product->get_id(), $taxonomy, array( 'fields' => 'ids' ) ), 'The product terms should not change.' );
+	}
+
+	/**
+	 * @testdox A malformed attribute rejects only its batch item and preserves its saved product data.
+	 * @testWith [null]
+	 *           [false]
+	 *           [42]
+	 *           ["invalid"]
+	 *
+	 * @param mixed $invalid_attribute Non-array attribute entry.
+	 */
+	public function test_batch_update_continues_after_non_array_attribute( $invalid_attribute ): void {
+		list( $attribute, $term_id ) = $this->create_attribute_with_duplicate_term_names();
+		$product_attribute           = new WC_Product_Attribute();
+		$product_attribute->set_id( $attribute['attribute_id'] );
+		$product_attribute->set_name( $attribute['attribute_taxonomy'] );
+		$product_attribute->set_options( array( $term_id ) );
+
+		$before  = WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_attributes( array( $product_attribute ) );
+		$product->save();
+		$original_name = $product->get_name();
+		$after         = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'   => $before->get_id(),
+						'name' => 'Updated before invalid item',
+					),
+					array(
+						'id'         => $product->get_id(),
+						'name'       => 'Must not be saved',
+						'attributes' => array( $invalid_attribute ),
+					),
+					array(
+						'id'   => $after->get_id(),
+						'name' => 'Updated after invalid item',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 3, $data['update'] );
+		$this->assertSame( $before->get_id(), $data['update'][0]['id'] );
+		$this->assertSame( 'woocommerce_rest_invalid_attribute', $data['update'][1]['error']['code'] );
+		$this->assertSame( 400, $data['update'][1]['error']['data']['status'] );
+		$this->assertSame( $after->get_id(), $data['update'][2]['id'] );
+		$this->assertSame( 'Updated before invalid item', wc_get_product( $before->get_id() )->get_name() );
+		$this->assertSame( $original_name, wc_get_product( $product->get_id() )->get_name() );
+		$this->assertSame( array( $term_id ), wc_get_product_terms( $product->get_id(), $attribute['attribute_taxonomy'], array( 'fields' => 'ids' ) ) );
+		$this->assertSame( 'Updated after invalid item', wc_get_product( $after->get_id() )->get_name() );
+	}
+
+	/**
+	 * Creates a global attribute with two terms that share the name "Green" but have different slugs.
+	 *
+	 * @return array{0: array, 1: int, 2: int} Attribute data, first term ID, second term ID.
+	 */
+	private function create_attribute_with_duplicate_term_names(): array {
+		$attribute = WC_Helper_Product::create_attribute( 'color', array() );
+		$first     = wp_insert_term( 'Green', $attribute['attribute_taxonomy'], array( 'slug' => 'shirts-green' ) );
+		$second    = wp_insert_term( 'Green', $attribute['attribute_taxonomy'], array( 'slug' => 'trousers-green' ) );
+
+		return array( $attribute, $first['term_id'], $second['term_id'] );
+	}
 }

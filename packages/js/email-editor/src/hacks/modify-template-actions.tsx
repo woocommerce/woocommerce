@@ -43,18 +43,8 @@ const modifyActionsForPostType = ( postType: string ) => {
  * - Replaces Gutenberg's reset action with custom implementation
  */
 function modifyTemplateActions() {
-	// Available in WordPress 6.8+
 	addActionForEmail(
 		'core.registerPostTypeSchema',
-		'woocommerce-email-editor/modify-template-actions',
-		( postType ) => {
-			modifyActionsForPostType( postType );
-		}
-	);
-
-	// Support for WordPress 6.7+
-	addActionForEmail(
-		'core.registerPostTypeActions',
 		'woocommerce-email-editor/modify-template-actions',
 		( postType ) => {
 			modifyActionsForPostType( postType );

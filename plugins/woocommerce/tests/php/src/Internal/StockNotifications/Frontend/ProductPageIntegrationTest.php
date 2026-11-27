@@ -127,15 +127,44 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not render the form inside the Add to Cart + Options block so it keeps its Interactivity API form.
+	 * @testdox Should render an interactive form after the Add to Cart + Options block so it keeps its Interactivity API form.
 	 */
-	public function test_form_is_not_rendered_inside_add_to_cart_with_options_block(): void {
+	public function test_interactive_form_is_rendered_after_add_to_cart_with_options_block(): void {
 		$product_id = $this->create_and_visit_variable_product();
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertStringContainsString( 'data-wp-on--submit', $markup, 'The Add to Cart + Options block should keep its Interactivity API form when sign-ups are enabled.' );
-		$this->assertStringNotContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should not render inside the Add to Cart + Options block.' );
+		$this->assertSame( 1, substr_count( $markup, 'class="wc_bis_form"' ), 'The Back in Stock form should render once.' );
+		$this->assertGreaterThan( strpos( $markup, '</form>' ), strpos( $markup, 'class="wc_bis_form"' ), 'The Back in Stock form should render outside the block form.' );
+
+		// The attribute inputs sit inside the block form, to read its selected attributes.
+		$block_form = new \WP_HTML_Tag_Processor( substr( $markup, 0, strpos( $markup, '</form>' ) ) );
+		$this->assertTrue( $block_form->next_tag( array( 'class_name' => 'wc-block-add-to-cart-with-options' ) ), 'The block form should render.' );
+		$attribute_input = null;
+		while ( $block_form->next_tag( 'input' ) ) {
+			if ( 'attribute_pa_color' === $block_form->get_attribute( 'name' ) ) {
+				$attribute_input = array(
+					'form'  => $block_form->get_attribute( 'form' ),
+					'value' => $block_form->get_attribute( 'data-wp-bind--value' ),
+				);
+			}
+		}
+		$this->assertSame( 'state.selectedAttributeValue', $attribute_input['value'] ?? null, 'The block form should hold the chosen attributes.' );
+
+		$html = new \WP_HTML_Tag_Processor( $markup );
+		$html->next_tag( array( 'class_name' => 'wc_bis_form' ) );
+		$this->assertNotNull( $html->get_attribute( 'hidden' ), 'The form should stay hidden until an out of stock variation is chosen.' );
+		$this->assertSame( 'woocommerce/back-in-stock-form', $html->get_attribute( 'data-wp-interactive' ), 'The form should be driven by the Interactivity API.' );
+
+		$html->next_tag( 'form' );
+		$this->assertSame( $html->get_attribute( 'id' ), $attribute_input['form'] ?? '', 'The attribute inputs should be posted with the Back in Stock form.' );
+
+		$bound_inputs = array();
+		while ( $html->next_tag( 'input' ) ) {
+			$bound_inputs[ $html->get_attribute( 'name' ) ] = $html->get_attribute( 'data-wp-bind--value' );
+		}
+		$this->assertSame( 'woocommerce/products::state.productInContext.id', $bound_inputs['wc_bis_product_id'] ?? null, 'The form should target the chosen variation.' );
 	}
 
 	/**
@@ -149,18 +178,101 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		$markup = ob_get_clean();
 
 		$this->assertStringContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should render when the hook fires from a classic template.' );
+		$this->assertStringNotContainsString( 'data-wp-', $markup, 'The classic form should not carry Interactivity API directives.' );
 	}
 
 	/**
-	 * @testdox Should not render the form for an out of stock simple product inside the Add to Cart + Options block.
+	 * @testdox Should render a visible form for an out of stock simple product after the Add to Cart + Options block.
 	 */
-	public function test_form_is_not_rendered_for_simple_product_inside_add_to_cart_with_options_block(): void {
+	public function test_form_is_rendered_for_simple_product_after_add_to_cart_with_options_block(): void {
 		$product_id = $this->create_and_visit_out_of_stock_simple_product();
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertStringContainsString( 'data-wp-on--submit', $markup, 'The Add to Cart + Options block should keep its Interactivity API form for an out of stock simple product.' );
-		$this->assertStringNotContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should not render inside the Add to Cart + Options block for a simple product.' );
+		$this->assertGreaterThan( strpos( $markup, '</form>' ), strpos( $markup, 'class="wc_bis_form"' ), 'The Back in Stock form should render outside the block form.' );
+
+		$form = substr( $markup, strpos( $markup, '<div class="wc_bis_form"' ) );
+		$html = new \WP_HTML_Tag_Processor( $form );
+		$this->assertTrue( $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ), 'The Back in Stock form should render.' );
+		$this->assertNull( $html->get_attribute( 'hidden' ), 'The form should be visible.' );
+		$this->assertStringNotContainsString( 'woocommerce/back-in-stock-form', $form, 'A simple product form needs no Interactivity API store.' );
+	}
+
+	/**
+	 * @testdox Should render a visible form for the parent product when no variation can be bought, as the block shows no variation selector.
+	 */
+	public function test_form_is_rendered_for_parent_when_no_variation_can_be_bought(): void {
+		$fixtures         = new FixtureData();
+		$variable_product = $fixtures->get_variable_product(
+			array(),
+			array( $fixtures->get_product_attribute( 'color', array( 'red', 'blue' ) ) )
+		);
+		$product_id       = $variable_product->get_id();
+		foreach ( array( 'red-slug', 'blue-slug' ) as $color ) {
+			$fixtures->get_variation_product(
+				$product_id,
+				array( 'pa_color' => $color ),
+				array(
+					'regular_price' => 10,
+					'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
+				)
+			);
+		}
+		\WC_Product_Variable::sync( $product_id );
+		$this->go_to( get_permalink( $product_id ) );
+		$GLOBALS['product'] = wc_get_product( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertSame( 1, substr_count( $markup, 'class="wc_bis_form"' ), 'The Back in Stock form should render once.' );
+		$this->assertStringNotContainsString( 'form="wc-bis-form-', $markup, 'Without a variation selector there are no attributes to post.' );
+
+		$html = new \WP_HTML_Tag_Processor( $markup );
+		$html->next_tag( array( 'class_name' => 'wc_bis_form' ) );
+		$this->assertNull( $html->get_attribute( 'hidden' ), 'The form should be visible.' );
+		$this->assertNull( $html->get_attribute( 'data-wp-interactive' ), 'The form needs no Interactivity API store.' );
+
+		$posted_product_id = null;
+		while ( $html->next_tag( 'input' ) ) {
+			if ( 'wc_bis_product_id' === $html->get_attribute( 'name' ) ) {
+				$posted_product_id = $html->get_attribute( 'value' );
+			}
+		}
+		$this->assertSame( (string) $product_id, $posted_product_id, 'The sign-up should be for the parent product.' );
+	}
+
+	/**
+	 * @testdox Should not render the form for an Add to Cart + Options block of another product than the one being viewed.
+	 */
+	public function test_form_is_not_rendered_for_add_to_cart_with_options_block_of_another_product(): void {
+		$this->create_and_visit_out_of_stock_simple_product();
+		$other_product_id = ( new FixtureData() )->get_simple_product(
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
+			)
+		)->get_id();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $other_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringNotContainsString( 'wc_bis_form', $markup, 'Blocks for other products, e.g. in related products, should not get a Back in Stock form.' );
+	}
+
+	/**
+	 * @testdox Should not render a second form after the Add to Cart + Options block when the classic hook already rendered one.
+	 */
+	public function test_form_is_not_rendered_twice_when_classic_hook_rendered_it_first(): void {
+		$product_id = $this->create_and_visit_out_of_stock_simple_product();
+
+		ob_start();
+		do_action( 'woocommerce_simple_add_to_cart' );
+		$classic_markup = ob_get_clean();
+
+		$block_markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringContainsString( 'wc_bis_form', $classic_markup, 'The classic hook should render the form.' );
+		$this->assertStringNotContainsString( 'wc_bis_form', $block_markup, 'The block should not render a second form for the same product.' );
 	}
 
 	/**

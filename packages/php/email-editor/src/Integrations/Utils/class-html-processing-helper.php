@@ -222,7 +222,7 @@ class Html_Processing_Helper {
 		$sanitized_value = self::sanitize_css_value( $value );
 
 		// Additional validation for dimension-specific units.
-		if ( ! empty( $sanitized_value ) && preg_match( '/^(\d+(?:\.\d+)?)(px|em|rem|%|vh|vw|ex|ch|in|cm|mm|pt|pc)$/', $sanitized_value ) ) {
+		if ( ! empty( $sanitized_value ) && preg_match( '/^(\d*\.?\d+)(px|em|rem|%|vh|vw|ex|ch|in|cm|mm|pt|pc)$/', $sanitized_value ) ) {
 			return $sanitized_value;
 		}
 

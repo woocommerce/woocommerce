@@ -144,11 +144,11 @@
 
 <!-- wp:group {"style":{"spacing":{"margin":{"top":"var:preset|spacing|30","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--30);margin-bottom:0"><!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
-<!-- wp:query-pagination-previous {"label":"<?php esc_html_e( 'Previous', 'purple' );?>"} /-->
+<!-- wp:query-pagination-previous {"label":<?php echo purple_block_attribute_string( __( 'Previous', 'purple' ) ); ?>} /-->
 
 <!-- wp:query-pagination-numbers /-->
 
-<!-- wp:query-pagination-next {"label":"<?php esc_html_e( 'Next', 'purple' );?>"} /-->
+<!-- wp:query-pagination-next {"label":<?php echo purple_block_attribute_string( __( 'Next', 'purple' ) ); ?>} /-->
 <!-- /wp:query-pagination --></div>
 <!-- /wp:group -->
 

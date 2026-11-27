@@ -47,13 +47,13 @@
 		"react-dom": "18.3.x"
 	},
 	"devDependencies": {
-		"@types/jest": "catalog:tooling",
-		"@types/react": "18.3.x",
+		"@types/jest": "catalog:types",
+		"@types/react": "catalog:types",
 		"@typescript-eslint/eslint-plugin": "^8.63.0",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"@wordpress/browserslist-config": "next",
+		"@wordpress/browserslist-config": "catalog:tooling",
 		"@wordpress/build": "catalog:tooling",
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",

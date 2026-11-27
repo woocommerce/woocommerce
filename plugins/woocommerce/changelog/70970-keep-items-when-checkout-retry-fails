@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep an unpaid order's items unchanged when a classic checkout retry fails on stores using HPOS.

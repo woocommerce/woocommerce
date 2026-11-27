@@ -12,7 +12,7 @@
  * Version: 0.0.1
  * Author: Automattic
  * Author URI: https://woocommerce.com
- * Requires at least: 6.7
+ * Requires at least: 7.0
  * Requires PHP: 7.4
  */
 

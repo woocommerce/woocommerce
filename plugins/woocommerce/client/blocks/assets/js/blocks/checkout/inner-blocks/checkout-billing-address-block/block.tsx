@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { Fragment } from '@wordpress/element';
-import { useEffectOnce } from 'usehooks-ts';
+import { Fragment, useEffect } from '@wordpress/element';
 import {
 	useCheckoutAddress,
 	useEditorContext,
@@ -27,7 +26,7 @@ const Block = (): JSX.Element => {
 	const { isEditor } = useEditorContext();
 
 	// Syncs shipping address with billing address if "Force shipping to the customer billing address" is enabled.
-	useEffectOnce( () => {
+	useEffect( () => {
 		if ( useBillingAsShipping ) {
 			const { email, ...addressValues } = billingAddress;
 			const syncValues: Partial< ShippingAddress > = {
@@ -44,7 +43,9 @@ const Block = (): JSX.Element => {
 
 			setShippingAddress( syncValues );
 		}
-	} );
+		// The address should only be initialized on mount.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
 
 	const WrapperComponent = isEditor ? Noninteractive : Fragment;
 	const noticeContext = useBillingAsShipping
