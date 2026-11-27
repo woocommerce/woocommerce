@@ -497,10 +497,10 @@ const { state: cartItemState } = store(
 						cartItemState.cartItem.prices.raw_prices.precision,
 					outputDecimals: cartItemState.currency.minorUnit,
 				} );
-				const totalLineItemDiscount = Math.max(
-					0,
-					regularLinePrice - linePrice
-				);
+				// Only when the unit prices shown differ, like the Cart block, so a saving never sits next to two equal prices.
+				const totalLineItemDiscount = cartItemState.cartItemHasDiscount
+					? Math.max( 0, regularLinePrice - linePrice )
+					: 0;
 
 				const price = formatPriceWithCurrency(
 					totalLineItemDiscount,
@@ -534,11 +534,12 @@ const { state: cartItemState } = store(
 				return price;
 			},
 
+			// Compare the prices as shown (each in its own minor unit), so a difference beyond what's shown isn't a sale.
 			get cartItemHasDiscount(): boolean {
-				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
+				const { prices } = cartItemState.cartItem;
 				return (
-					parseInt( rawPrices.regular_price, 10 ) >
-					parseInt( rawPrices.price, 10 )
+					parseInt( prices.regular_price, 10 ) >
+					parseInt( prices.price, 10 )
 				);
 			},
 

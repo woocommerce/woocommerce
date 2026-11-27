@@ -44,10 +44,15 @@ class MoneyFormatter implements FormatterInterface {
 		$value = floatval( $value );
 
 		// Remove the price decimal points for rounding purposes. Round to WooCommerce's rounding precision first, so float
-		// noise doesn't decide the result: 4.975 is stored as 4.97499999… and would otherwise round to 497, not 498.
-		$decimals = absint( $options['decimals'] );
-		$value    = round( $value * pow( 10, $decimals ), max( 0, wc_get_rounding_precision() - $decimals ) );
-		$value    = round( $value, 0, $options['rounding_mode'] );
+		// noise doesn't decide the result: 4.975 is stored as 4.97499999… and would otherwise round to 497, not 498. Skip
+		// that when the precision has no digits beyond the decimals, so the rounding mode below still applies.
+		$decimals     = absint( $options['decimals'] );
+		$extra_digits = wc_get_rounding_precision() - $decimals;
+		$value        = $value * pow( 10, $decimals );
+		if ( $extra_digits > 0 ) {
+			$value = round( $value, $extra_digits );
+		}
+		$value = round( $value, 0, $options['rounding_mode'] );
 
 		// This ensures returning the value as a string without decimal points ready for price parsing.
 		return wc_format_decimal( $value, 0, true );

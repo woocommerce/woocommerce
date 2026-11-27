@@ -3,8 +3,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Cart;
 
-use Automattic\WooCommerce\Utilities\NumberUtil;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -112,8 +110,10 @@ final class PriceDisplayPrecision {
 			return 0;
 		}
 
+		// PHP's round(), not NumberUtil::round(), which first rounds to WC_ROUNDING_PRECISION and so drops digits from
+		// stores with more decimals than that allows.
 		$precision = wc_get_rounding_precision();
-		$digits    = rtrim( number_format( NumberUtil::round( (float) $price, $precision ), $precision, '.', '' ), '0' );
+		$digits    = rtrim( number_format( round( (float) $price, $precision ), $precision, '.', '' ), '0' );
 		$dot       = strpos( $digits, '.' );
 
 		return false === $dot ? 0 : strlen( $digits ) - $dot - 1;

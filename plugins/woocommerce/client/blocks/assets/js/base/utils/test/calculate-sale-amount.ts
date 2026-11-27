@@ -93,4 +93,15 @@ describe( 'calculateLineSaleAmount', () => {
 			)
 		).toBe( 0 );
 	} );
+
+	it( 'handles a fractional quantity, which some extensions allow', () => {
+		// £1.510001 × 0.5 is £0.7550005, so £0.76 against a £0.50 line.
+		expect(
+			calculateLineSaleAmount(
+				item( '1510001', '1000000', 0.5, '50' ),
+				2,
+				false
+			)
+		).toBe( 26 );
+	} );
 } );

@@ -82,6 +82,9 @@ export function calculateLineSaleAmount(
 	}
 
 	const { raw_prices: rawPrices } = item.prices;
+	// Dinero only multiplies by whole numbers, so pass a fractional quantity (allowed by some extensions) as a scaled amount.
+	const quantityScale = ( String( item.quantity ).split( '.' )[ 1 ] || '' )
+		.length;
 	const regularLine = toSnapshot(
 		transformScale(
 			multiply(
@@ -93,7 +96,10 @@ export function calculateLineSaleAmount(
 							? parseInt( rawPrices.precision, 10 )
 							: rawPrices.precision,
 				} ),
-				item.quantity
+				{
+					amount: Math.round( item.quantity * 10 ** quantityScale ),
+					scale: quantityScale,
+				}
 			),
 			targetPrecision,
 			halfUp

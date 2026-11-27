@@ -63,6 +63,18 @@ class TestMoneyFormatter extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Keeps the requested rounding mode when the internal rounding precision is lowered to the decimals.
+	 */
+	public function test_format_rounding_mode_with_lowered_precision() {
+		$precision = fn() => 2;
+		add_filter( 'woocommerce_internal_rounding_precision', $precision );
+		$half_down = $this->formatter->format( 4.975, array( 'rounding_mode' => PHP_ROUND_HALF_DOWN ) );
+		remove_filter( 'woocommerce_internal_rounding_precision', $precision );
+
+		$this->assertEquals( '497', $half_down );
+	}
+
+	/**
 	 * Test formatting for int overflow values.
 	 */
 	public function test_format_int_overflow() {
