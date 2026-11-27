@@ -1,8 +1,10 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
+import { PanelBody, ToggleControl } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import EditProductLink from '@woocommerce/editor-components/edit-product-link';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 
@@ -38,6 +40,23 @@ const Edit = ( {
 
 	return (
 		<>
+			{ ! isDescendentOfQueryLoop &&
+				! attributes.isDescendantOfAllProducts && (
+					<InspectorControls>
+						<PanelBody title={ __( 'SKU display', 'woocommerce' ) }>
+							<ToggleControl
+								label={ __(
+									'Show N/A when the SKU is missing',
+									'woocommerce'
+								) }
+								checked={ attributes.showWhenUndefined }
+								onChange={ ( showWhenUndefined ) =>
+									setAttributes( { showWhenUndefined } )
+								}
+							/>
+						</PanelBody>
+					</InspectorControls>
+				) }
 			<EditProductLink />
 			<div
 				{ ...blockProps }

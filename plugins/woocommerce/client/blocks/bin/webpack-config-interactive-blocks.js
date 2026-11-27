@@ -47,6 +47,8 @@ const entries = {
 	// skip loading variation-only label logic.
 	'woocommerce/product-sale-badge':
 		'./assets/js/blocks/product-elements-blocks/sale-badge/frontend.ts',
+	'woocommerce/product-sku':
+		'./assets/js/blocks/product-elements-blocks/sku/frontend.ts',
 	// Add to cart with options quantity selector frontend module used by the
 	// Product Quantity block and the Grouped Product Selector block.
 	'woocommerce/add-to-cart-with-options-quantity-selector':

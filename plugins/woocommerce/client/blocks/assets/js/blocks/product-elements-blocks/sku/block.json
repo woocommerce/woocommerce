@@ -16,6 +16,10 @@
 			"type": "boolean",
 			"default": false
 		},
+		"showWhenUndefined": {
+			"type": "boolean",
+			"default": false
+		},
 		"prefix": {
 			"type": "string",
 			"default": "SKU:",
