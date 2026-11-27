@@ -222,8 +222,7 @@ store< BlockStore >(
 				// `attribute_pa_color`) plus a display label under
 				// `attribute` (e.g. "Color"); the cart matches by the
 				// slug-form, so override `attribute` with `raw_attribute`.
-				// Same swap mini-cart's `changeQuantity` does. Empty for
-				// simple products.
+				// Empty for simple products.
 				const variation = listItem.variation.map(
 					( { raw_attribute: rawAttribute, value, attribute } ) => ( {
 						attribute: rawAttribute || attribute,
@@ -241,8 +240,7 @@ store< BlockStore >(
 					// sum the cart ourselves.
 					const outcome = ( yield cartActions.addCartItem( {
 						id: listItem.id,
-						quantityToAdd: listItem.quantity,
-						type: isVariation ? 'variation' : 'simple',
+						quantity: listItem.quantity,
 						...( isVariation && { variation } ),
 					} ) ) as AddCartItemOutcome;
 

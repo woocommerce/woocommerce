@@ -10,7 +10,13 @@ import type { SelectedAttributes } from '../types';
 import type { OptimisticCartItem } from './types';
 import { doesCartItemMatchAttributes } from '../../../utils/variations/does-cart-item-match-attributes';
 
-// Guard to distinguish between optimistic and cart items.
+/**
+ * Tells a Store API cart line apart from an optimistic one. Every Store API
+ * line carries a `name`; an optimistic line does not.
+ *
+ * @param item The cart line to test.
+ * @return `true` when the line is a Store API cart line.
+ */
 export function isCartItem(
 	item: OptimisticCartItem | CartItem
 ): item is CartItem {
@@ -34,7 +40,7 @@ export function lineMatchesProduct(
 	id: number,
 	variation?: CartVariationItem[] | SelectedAttributes[]
 ): boolean {
-	if ( item.type === 'variation' ) {
+	if ( isCartItem( item ) && item.type === 'variation' ) {
 		if (
 			id !== item.id ||
 			! item.variation ||

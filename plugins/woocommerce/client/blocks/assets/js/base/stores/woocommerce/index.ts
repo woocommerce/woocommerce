@@ -15,7 +15,7 @@ export type { WooCommerceConfig, SelectedAttributes } from './types';
 export type { ProductDataState } from './products';
 export type {
 	OptimisticCartItem,
-	ClientCartItem,
+	AddCartItemPayload,
 	AddCartItemError,
 	AddCartItemOutcome,
 	Store,

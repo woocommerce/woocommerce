@@ -510,6 +510,21 @@ class MiniCart extends \WC_Unit_Test_Case {
 	/**
 	 * Cart/checkout constants defined by other tests cannot be reset in this process.
 	 *
+	 * @testdox Should refresh the cart through the woocommerce store's refreshCart action on cart events.
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_cart_events_call_the_refresh_cart_action(): void {
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		$this->assertStringContainsString( 'data-wp-on-document--wc-blocks_added_to_cart="woocommerce::actions.refreshCart"', $output );
+		$this->assertStringContainsString( 'data-wp-on-document--wc-blocks_removed_from_cart="woocommerce::actions.refreshCart"', $output );
+	}
+
+	/**
+	 * Cart/checkout constants defined by other tests cannot be reset in this process.
+	 *
 	 * @testdox Should keep the closed drawer out of the tab order and the accessibility tree.
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
