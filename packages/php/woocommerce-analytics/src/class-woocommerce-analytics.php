@@ -268,7 +268,9 @@ class Woocommerce_Analytics {
 	 */
 	public static function sync_proxy_tracking_state() {
 		// One query covers both, so sites without these rows do not pay a query each.
-		wp_prime_option_caches( array( self::PROXY_TRACKING_ENABLED_OPTION, self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
+		if ( function_exists( 'wp_prime_option_caches' ) ) {
+			wp_prime_option_caches( array( self::PROXY_TRACKING_ENABLED_OPTION, self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
+		}
 
 		// A leftover MU-plugin keeps answering while this is yes, even after proxy tracking is turned off.
 		if ( false !== get_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) ) {
