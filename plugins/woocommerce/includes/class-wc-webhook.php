@@ -692,6 +692,12 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		if ( $failures > apply_filters( 'woocommerce_max_webhook_delivery_failures', 5 ) ) {
 			$this->set_status( 'disabled' );
 
+			/**
+			 * Fires when a webhook is disabled after too many consecutive failed deliveries.
+			 *
+			 * @param int $webhook_id Webhook ID.
+			 * @since 2.2.0
+			 */
 			do_action( 'woocommerce_webhook_disabled_due_delivery_failures', $this->get_id() );
 		} else {
 			$this->set_failure_count( ++$failures );

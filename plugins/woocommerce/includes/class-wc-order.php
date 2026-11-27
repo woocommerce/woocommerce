@@ -149,6 +149,13 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		try {
+			/**
+			 * Fires before the payment of an order is completed.
+			 *
+			 * @param int    $order_id       Order ID.
+			 * @param string $transaction_id Transaction ID passed to payment_complete().
+			 * @since 2.1.0
+			 */
 			do_action( 'woocommerce_pre_payment_complete', $this->get_id(), $transaction_id );
 
 			if ( WC()->session ) {
@@ -191,8 +198,23 @@ class WC_Order extends WC_Abstract_Order {
 				$this->add_order_note( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
 				$this->save();
 
+				/**
+				 * Fires after the payment of an order is completed and the order is saved.
+				 *
+				 * @param int    $order_id       Order ID.
+				 * @param string $transaction_id Transaction ID of the order.
+				 * @since 1.2.2
+				 * @since 6.8.0 Passes $transaction_id.
+				 */
 				do_action( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
 			} else {
+				/**
+				 * Fires when payment completes for an order whose status payment cannot complete.
+				 *
+				 * @param int    $order_id       Order ID.
+				 * @param string $transaction_id Transaction ID passed to payment_complete().
+				 * @since 2.1.0
+				 */
 				do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id(), $transaction_id );
 			}
 		} catch ( Exception $e ) {
@@ -355,6 +377,13 @@ class WC_Order extends WC_Abstract_Order {
 			);
 
 			if ( $manual_update ) {
+				/**
+				 * Fires for a manual status change of an order, before the change is written.
+				 *
+				 * @since 3.0.0
+				 * @param int    $order_id Order ID.
+				 * @param string $status   New status, without the wc- prefix.
+				 */
 				do_action( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] );
 			}
 
