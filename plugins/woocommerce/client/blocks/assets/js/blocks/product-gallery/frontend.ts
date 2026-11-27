@@ -269,17 +269,23 @@ const toggleImageVisibility = ( element: HTMLElement ) => {
 	}
 
 	const imageId = Number.parseInt( imageIdValue, 10 );
-	const { imageData } = getContext();
+	const { imageData, selectedImageId } = getContext();
 	const visibleIndex = imageData.indexOf( imageId );
 	const isVisible = visibleIndex >= 0;
 	const closestWrapper = element.closest(
 		`${ SELECTORS.largeImageWrapper }, ${ SELECTORS.thumbnail }`
 	) as HTMLElement | null;
 	const visibilityTarget = closestWrapper || element;
+	const largeImageSlide = element.closest( SELECTORS.largeImageWrapper );
 
 	visibilityTarget.hidden = ! isVisible;
 	visibilityTarget.style.order = isVisible ? String( visibleIndex ) : '';
-	element.setAttribute( 'aria-hidden', isVisible ? 'false' : 'true' );
+
+	// Only the slide on screen is exposed to screen readers. The thumbnails and arrows reach the rest.
+	largeImageSlide?.setAttribute(
+		'aria-hidden',
+		imageId === selectedImageId ? 'false' : 'true'
+	);
 };
 
 /**

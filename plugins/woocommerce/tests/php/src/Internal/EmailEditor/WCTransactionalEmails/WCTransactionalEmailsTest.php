@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\EmailEditor\WCTransactionalEmails;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 
 /**
@@ -70,19 +71,30 @@ class WCTransactionalEmailsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The back-in-stock emails are listed on a site that still turns the feature on with the alpha constant.
+	 */
+	public function test_stock_notification_emails_are_listed_with_the_alpha_constant(): void {
+		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'no' );
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+
+		try {
+			$emails = WCTransactionalEmails::get_core_transactional_emails();
+		} finally {
+			Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
+		}
+
+		$this->assertContains( 'customer_stock_notification', $emails );
+		$this->assertContains( 'customer_stock_notification_verify', $emails );
+		$this->assertContains( 'customer_stock_notification_verified', $emails );
+	}
+
+	/**
 	 * @testdox Deprecated init_email_templates() is a no-op that triggers a deprecation notice.
 	 */
 	public function testDeprecatedInitEmailTemplatesIsNoop(): void {
 		$this->setExpectedDeprecated( WCTransactionalEmails::class . '::init_email_templates' );
 
 		( new WCTransactionalEmails() )->init_email_templates();
-	}
-
-	/**
-	 * Cleanup after test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 	}
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore extension product and coupon tabs whose panels appear outside the standard tab container.

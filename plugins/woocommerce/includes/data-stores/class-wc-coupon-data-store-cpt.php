@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
+use Automattic\WooCommerce\Internal\DataStores\PostDataSlashing;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -52,6 +53,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		'maximum_amount',
 		'customer_email',
 		'_used_by',
+		'_used_by_email',
 		'_edit_lock',
 		'_edit_last',
 	);
@@ -82,22 +84,29 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$coupon->set_date_created( time() );
 		}
 
-		$coupon_id = wp_insert_post(
-			apply_filters(
-				'woocommerce_new_coupon_data',
-				array(
-					'post_type'     => 'shop_coupon',
-					'post_status'   => $coupon->get_status( 'edit' ) ? $coupon->get_status( 'edit' ) : 'publish',
-					'post_author'   => get_current_user_id(),
-					'post_title'    => $coupon->get_code( 'edit' ),
-					'post_content'  => '',
-					'post_excerpt'  => $coupon->get_description( 'edit' ),
-					'post_date'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getOffsetTimestamp() ),
-					'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getTimestamp() ),
-				)
-			),
-			true
+		/**
+		 * Filters the post data used to create a coupon.
+		 *
+		 * Values are unslashed. They are slashed before being passed to wp_insert_post().
+		 *
+		 * @since 3.0.0
+		 * @param array $data Post data for wp_insert_post().
+		 */
+		$post_data = apply_filters(
+			'woocommerce_new_coupon_data',
+			array(
+				'post_type'     => 'shop_coupon',
+				'post_status'   => $coupon->get_status( 'edit' ) ? $coupon->get_status( 'edit' ) : 'publish',
+				'post_author'   => get_current_user_id(),
+				'post_title'    => $coupon->get_code( 'edit' ),
+				'post_content'  => '',
+				'post_excerpt'  => $coupon->get_description( 'edit' ),
+				'post_date'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getOffsetTimestamp() ),
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getTimestamp() ),
+			)
 		);
+
+		$coupon_id = wp_insert_post( PostDataSlashing::slash( $post_data ), true );
 
 		if ( $coupon_id ) {
 			$coupon->set_id( $coupon_id );
@@ -215,7 +224,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $coupon->get_id() ) );
 				clean_post_cache( $coupon->get_id() );
 			} else {
-				wp_update_post( array_merge( array( 'ID' => $coupon->get_id() ), $post_data ) );
+				wp_update_post( PostDataSlashing::slash( array_merge( array( 'ID' => $coupon->get_id() ), $post_data ) ) );
 			}
 			$coupon->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}
@@ -402,6 +411,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 
 		if ( $used_by ) {
 			$this->add_coupon_used_by( $coupon, $used_by, $coupon_held_key_for_user );
+			$this->add_used_by_emails( $coupon, $used_by, $order );
 			$coupon->set_used_by( (array) get_post_meta( $coupon->get_id(), '_used_by' ) );
 		}
 
@@ -443,6 +453,205 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	}
 
 	/**
+	 * Record the emails behind a use counted under a user ID, as `<user id>:<email>` rows.
+	 *
+	 * A use by a logged in customer is stored as their user ID only. Recording the account email and the
+	 * order's billing email at the time of the use lets per-user limits still find it after the customer
+	 * edits either one.
+	 *
+	 * @param WC_Coupon     $coupon  Coupon object.
+	 * @param string|int    $used_by User ID or billing email the use was counted under.
+	 * @param WC_Order|null $order   Order the use belongs to, if known.
+	 * @return void
+	 */
+	private function add_used_by_emails( $coupon, $used_by, $order = null ) {
+		$user_id = is_numeric( $used_by ) ? (int) $used_by : 0;
+		if ( 0 >= $user_id || 0 >= $coupon->get_usage_limit_per_user() ) {
+			return;
+		}
+
+		$emails = array();
+		$user   = get_userdata( $user_id );
+		if ( $user ) {
+			$emails[] = $user->user_email;
+		}
+		if ( $order instanceof WC_Order ) {
+			$emails[] = $order->get_billing_email();
+		}
+		$emails = array_unique( array_filter( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) ) );
+
+		$existing = (array) get_post_meta( $coupon->get_id(), '_used_by_email', false );
+		foreach ( $emails as $email ) {
+			$value = $user_id . ':' . $email;
+			if ( ! in_array( $value, $existing, true ) ) {
+				add_post_meta( $coupon->get_id(), '_used_by_email', $value );
+			}
+		}
+
+		$this->refresh_coupon_data( $coupon );
+	}
+
+	/**
+	 * Remove the email records of a user once none of their uses remain on the coupon.
+	 *
+	 * @param WC_Coupon  $coupon  Coupon object.
+	 * @param string|int $used_by User ID or billing email the use was counted under.
+	 * @return void
+	 */
+	private function maybe_remove_used_by_emails( $coupon, $used_by ) {
+		global $wpdb;
+
+		$user_id = is_numeric( $used_by ) ? (int) $used_by : 0;
+		if ( 0 >= $user_id ) {
+			return;
+		}
+
+		$remaining_uses = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT( meta_id ) FROM $wpdb->postmeta WHERE post_id = %d AND meta_key = '_used_by' AND meta_value = %s;",
+				$coupon->get_id(),
+				(string) $user_id
+			)
+		);
+		if ( 0 < $remaining_uses ) {
+			return;
+		}
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM $wpdb->postmeta WHERE post_id = %d AND meta_key = '_used_by_email' AND meta_value LIKE %s;",
+				$coupon->get_id(),
+				$wpdb->esc_like( $user_id . ':' ) . '%'
+			)
+		);
+		$this->refresh_coupon_data( $coupon );
+	}
+
+	/**
+	 * Add the user IDs whose recorded uses of the coupon were tied to any of the emails in a list of aliases.
+	 *
+	 * @since 11.4.0
+	 * @param WC_Coupon $coupon  Coupon object.
+	 * @param array     $aliases User IDs and emails.
+	 * @return array The aliases plus any recorded user IDs, without duplicates.
+	 */
+	public function add_recorded_user_ids_to_aliases( $coupon, array $aliases ): array {
+		global $wpdb;
+
+		$emails = array_values(
+			array_unique(
+				array_filter(
+					array_map(
+						fn( $alias ) => strtolower( sanitize_email( (string) $alias ) ),
+						array_filter( $aliases, fn( $alias ) => ! is_numeric( $alias ) )
+					)
+				)
+			)
+		);
+		if ( ! $emails || ! $coupon->get_id() ) {
+			return array_values( array_unique( array_filter( $aliases ) ) );
+		}
+
+		// LIKE instead of SUBSTRING_INDEX keeps this portable to the SQLite integration.
+		$conditions = implode( ' OR ', array_fill( 0, count( $emails ), 'meta_value LIKE %s' ) );
+		$patterns   = array_map( fn( $email ) => '%:' . $wpdb->esc_like( $email ), $emails );
+		$records    = $wpdb->get_col(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The condition list is built from the count of emails.
+				"SELECT meta_value FROM $wpdb->postmeta WHERE post_id = %d AND meta_key = '_used_by_email' AND ( $conditions );",
+				array_merge( array( $coupon->get_id() ), $patterns )
+			)
+		);
+
+		foreach ( $records as $record ) {
+			list( $user_id, $email ) = array_pad( explode( ':', (string) $record, 2 ), 2, '' );
+			if ( 0 < (int) $user_id && in_array( $email, $emails, true ) ) {
+				$aliases[] = (int) $user_id;
+			}
+		}
+
+		return array_values( array_unique( array_filter( $aliases ) ) );
+	}
+
+	/**
+	 * Remove the email records of a person from all coupons.
+	 *
+	 * Removes records holding the email, and all records of the user ID when one is given.
+	 *
+	 * @since 11.4.0
+	 * @param string $email   Email address.
+	 * @param int    $user_id User ID, or 0 when the email has no account.
+	 * @return int Number of records removed.
+	 */
+	public function remove_used_by_email_records( string $email, int $user_id = 0 ): int {
+		global $wpdb;
+
+		$email    = strtolower( sanitize_email( $email ) );
+		$patterns = array();
+		if ( $email ) {
+			$patterns[] = '%:' . $wpdb->esc_like( $email );
+		}
+		if ( 0 < $user_id ) {
+			$patterns[] = $wpdb->esc_like( $user_id . ':' ) . '%';
+		}
+		if ( ! $patterns ) {
+			return 0;
+		}
+
+		$conditions = implode( ' OR ', array_fill( 0, count( $patterns ), 'meta_value LIKE %s' ) );
+		$records    = $wpdb->get_results(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The condition list is built from the count of patterns.
+				"SELECT meta_id, post_id, meta_value FROM $wpdb->postmeta WHERE meta_key = '_used_by_email' AND ( $conditions );",
+				$patterns
+			)
+		);
+
+		$removed = 0;
+		foreach ( $records as $record ) {
+			list( $record_user_id, $record_email ) = array_pad( explode( ':', (string) $record->meta_value, 2 ), 2, '' );
+			$matches_user                          = 0 < $user_id && (int) $record_user_id === $user_id;
+			$matches_email                         = $email && strtolower( $record_email ) === $email;
+			if ( ( $matches_user || $matches_email ) && delete_metadata_by_mid( 'post', (int) $record->meta_id ) ) {
+				wp_cache_delete( WC_Data::generate_meta_cache_key( (int) $record->post_id, 'coupons' ), 'coupons' );
+				++$removed;
+			}
+		}
+
+		return $removed;
+	}
+
+	/**
+	 * Get the number of uses and current holds of a coupon by a list of user IDs and emails.
+	 *
+	 * Emails also match uses counted under a user ID when that use was recorded with the email.
+	 *
+	 * @since 11.4.0
+	 * @param WC_Coupon $coupon  Coupon object.
+	 * @param array     $aliases User IDs and emails.
+	 * @return int
+	 */
+	public function get_usage_by_aliases( $coupon, array $aliases ): int {
+		global $wpdb;
+
+		$aliases = array_map( 'strval', $this->add_recorded_user_ids_to_aliases( $coupon, $aliases ) );
+		if ( ! $aliases ) {
+			return 0;
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $aliases ), '%s' ) );
+		$usage_count  = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The placeholder list is built from the count of aliases.
+				"SELECT COUNT( meta_id ) FROM $wpdb->postmeta WHERE post_id = %d AND meta_key = '_used_by' AND meta_value IN ( $placeholders );",
+				array_merge( array( $coupon->get_id() ), $aliases )
+			)
+		);
+
+		return $usage_count + (int) $this->get_tentative_usages_for_user( $coupon->get_id(), $aliases );
+	}
+
+	/**
 	 * Decrease usage count for current coupon.
 	 *
 	 * @since 3.0.0
@@ -467,6 +676,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			);
 			if ( $meta_id ) {
 				delete_metadata_by_mid( 'post', $meta_id );
+				$this->maybe_remove_used_by_emails( $coupon, $used_by );
 				$coupon->set_used_by( (array) get_post_meta( $coupon->get_id(), '_used_by' ) );
 				$this->refresh_coupon_data( $coupon );
 			}

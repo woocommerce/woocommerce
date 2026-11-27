@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show every attribute option on the product page when an "Any" variation has no stored value for that attribute.

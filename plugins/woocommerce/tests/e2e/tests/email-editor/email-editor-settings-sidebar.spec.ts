@@ -16,6 +16,7 @@ import {
 	accessTheEmailEditor,
 	ensureEmailEditorSettingsPanelIsOpened,
 	openEmailPostInEditor,
+	waitForEditorSaved,
 } from '../../utils/email';
 import { locks } from '../../fixtures/fixtures';
 
@@ -71,17 +72,7 @@ test.describe(
 			await expect(
 				page.locator( '.editor-post-status__toggle' )
 			).toContainText( 'Inactive' );
-			await expect
-				.poll( () =>
-					page.evaluate( () => {
-						const editor = window.wp.data.select( 'core/editor' );
-						return (
-							! editor.isSavingPost() &&
-							! editor.isEditedPostDirty()
-						);
-					} )
-				)
-				.toBe( true );
+			await waitForEditorSaved( page );
 			await page.reload();
 			await expect(
 				page.locator( '.editor-post-status__toggle' )

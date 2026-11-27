@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "11.4.0",
+	"version": "11.5.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -102,8 +102,10 @@
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
 		"test:metrics:ci": "../../.github/workflows/scripts/run-metrics.sh",
 		"test:metrics:ci:unified-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes && pnpm test:metrics:ci",
-		"test:php:env": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
-		"test:php:env:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli env DISABLE_HPOS=1 tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
+		"test:php:env": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm test:php:env:run",
+		"test:php:env:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm test:php:env:run:hpos-off",
+		"test:php:env:run": "pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
+		"test:php:env:run:hpos-off": "pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli env DISABLE_HPOS=1 tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
 		"test:php:env:watch": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli vendor/bin/phpunit-watcher watch --verbose",
 		"test:plugincheck": "pnpm wp-env:e2e run cli wp plugin check ${PLUGIN_SLUG:-woocommerce}",
 		"test:unit": "pnpm test:php",
@@ -123,7 +125,7 @@
 		"watch:build:project:packages": "node ./bin/watch-packages.mjs",
 		"wp-env": "wp-env",
 		"wp-env:e2e": "wp-env --config .wp-env.e2e.json",
-		"wp-env:test": "wp-env --config .wp-env.test.json"
+		"wp-env:test": "wp-env --config \"${WC_TEST_ENV_CONFIG:-.wp-env.test.json}\""
 	},
 	"lint-staged": {
 		"*.php": [
@@ -148,7 +150,11 @@
 				"changes": [
 					"composer.lock",
 					"**/*.php",
-					"**/*.js"
+					"**/*.{js,jsx,ts,tsx}"
+				],
+				"ignore": [
+					"client/admin/client/**/*.{js,jsx,ts,tsx}",
+					"client/blocks/{assets,packages,tests}/**/*.{js,jsx,ts,tsx}"
 				]
 			},
 			"tests": [
@@ -157,7 +163,9 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [],
-					"onlyForDependencies": [],
+					"onlyForDependencies": [
+						"@woocommerce/email-editor-config"
+					],
 					"changes": [
 						"client/admin/config/*.json",
 						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
@@ -169,7 +177,8 @@
 						"phpunit.xml",
 						"client/blocks/assets/js/**/block.json",
 						"client/blocks/bin/copy-blocks-json.sh",
-						"tests/php/bin/run-phpunit.sh"
+						"tests/php/bin/run-phpunit.sh",
+						"tests/php/bin/test-env-setup.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -189,7 +198,9 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [],
-					"onlyForDependencies": [],
+					"onlyForDependencies": [
+						"@woocommerce/email-editor-config"
+					],
 					"changes": [
 						"client/admin/config/*.json",
 						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
@@ -201,7 +212,8 @@
 						"phpunit.xml",
 						"client/blocks/assets/js/**/block.json",
 						"client/blocks/bin/copy-blocks-json.sh",
-						"tests/php/bin/run-phpunit.sh"
+						"tests/php/bin/run-phpunit.sh",
+						"tests/php/bin/test-env-setup.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -220,8 +232,13 @@
 					"name": "PHP: 7.4 WP: latest - 1",
 					"testType": "unit:php",
 					"command": "test:php:env",
-					"shardingArguments": [],
-					"onlyForDependencies": [],
+					"shardingArguments": [
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main-includes",
+						"--testsuite=wc-phpunit-main-other"
+					],
+					"onlyForDependencies": [
+						"@woocommerce/email-editor-config"
+					],
 					"changes": [
 						"client/admin/config/*.json",
 						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
@@ -233,7 +250,8 @@
 						"phpunit.xml",
 						"client/blocks/assets/js/**/block.json",
 						"client/blocks/bin/copy-blocks-json.sh",
-						"tests/php/bin/run-phpunit.sh"
+						"tests/php/bin/run-phpunit.sh",
+						"tests/php/bin/test-env-setup.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -253,7 +271,10 @@
 					"optional": true,
 					"testType": "unit:php",
 					"command": "test:php:env",
-					"shardingArguments": [],
+					"shardingArguments": [
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main-includes",
+						"--testsuite=wc-phpunit-main-other"
+					],
 					"onlyForDependencies": [],
 					"changes": [
 						"tests/legacy/**",
@@ -262,7 +283,8 @@
 						"phpunit.xml",
 						"client/blocks/assets/js/**/block.json",
 						"client/blocks/bin/copy-blocks-json.sh",
-						"tests/php/bin/run-phpunit.sh"
+						"tests/php/bin/run-phpunit.sh",
+						"tests/php/bin/test-env-setup.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -824,7 +846,8 @@
 						"phpunit.xml",
 						"client/blocks/assets/js/**/block.json",
 						"client/blocks/bin/copy-blocks-json.sh",
-						"tests/php/bin/run-phpunit.sh"
+						"tests/php/bin/run-phpunit.sh",
+						"tests/php/bin/test-env-setup.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -1535,13 +1558,13 @@
 		"@typescript-eslint/eslint-plugin": "^8.63.0",
 		"@typescript-eslint/parser": "^8.63.0",
 		"@woocommerce/e2e-utils-playwright": "workspace:*",
+		"@woocommerce/email-editor-config": "workspace:*",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
-		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "catalog:wp-min",
 		"@wordpress/env": "catalog:tooling",
-		"axios": "^0.34.0",
+		"axios": "catalog:tooling",
 		"config": "3.3.7",
 		"dotenv": "^10.0.0",
 		"eslint": "catalog:tooling",

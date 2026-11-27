@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\ReportCSVEmail;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -328,6 +329,8 @@ class WC_Emails {
 		// Enable custom partially refunded order email for the block email editor.
 		if ( FeaturesUtil::feature_is_enabled( 'block_email_editor' ) ) {
 			$this->emails['WC_Email_Customer_Partially_Refunded_Order'] = include __DIR__ . '/emails/class-wc-email-customer-partially-refunded-order.php';
+			// The Analytics report export email is sent by ReportExporter; it is listed here only so it can be edited in the block email editor.
+			$this->emails['WC_Email_Admin_Report_Export_Download'] = new ReportCSVEmail();
 		}
 
 		/**
@@ -967,7 +970,8 @@ class WC_Emails {
 		$result = preg_replace( '/<br\/?>/i', ', ', $result );
 		remove_filter(
 			'woocommerce_formatted_address_force_country_display',
-			array( $this, 'get_store_address_force_country_display' )
+			array( $this, 'get_store_address_force_country_display' ),
+			5
 		);
 		return $result;
 	}

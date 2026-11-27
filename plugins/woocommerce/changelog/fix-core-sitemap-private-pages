@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Exclude Cart, Checkout, My Account, and Review Order pages from the WordPress sitemap.

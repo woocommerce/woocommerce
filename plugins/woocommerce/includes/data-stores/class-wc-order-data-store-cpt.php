@@ -521,7 +521,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					return $query_part;
 				}
 				$meta_query[] = $query_part;
-			} elseif ( is_email( $value ) ) {
+			} elseif ( is_string( $value ) && is_email( $value ) ) {
 				$meta_query['customer_emails']['value'][] = sanitize_email( $value );
 			} elseif ( is_numeric( $value ) ) {
 				$meta_query['customer_ids']['value'][] = strval( absint( $value ) );
@@ -722,6 +722,73 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
+	}
+
+	/**
+	 * Clears the "coupon usage counted" flag, if it is still set and the stored order status still matches the order object.
+	 *
+	 * The check and the write are one database update, so the flag is cleared by at most one call.
+	 *
+	 * @since 11.3.1
+	 *
+	 * @internal For use by wc_update_coupon_usage_counts() only.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool True if this call cleared the flag.
+	 */
+	public function clear_recorded_coupon_usage_counts( $order ): bool {
+		global $wpdb;
+
+		$order_id = $order->get_id();
+		$status   = $order->get_status( 'edit' );
+		if ( ! $order_id || ! $status ) {
+			return false;
+		}
+
+		// Whether a status is stored with the "wc-" prefix depends on the post statuses registered when the order was saved.
+		$cleared = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->postmeta} SET meta_value = 'no'
+				WHERE post_id = %d AND meta_key = '_recorded_coupon_usage_counts' AND meta_value IN ( 'yes', 'true', '1' )
+				AND EXISTS ( SELECT 1 FROM {$wpdb->posts} WHERE ID = %d AND post_status IN ( %s, %s ) )",
+				$order_id,
+				$order_id,
+				$status,
+				'wc-' . $status
+			)
+		);
+
+		if ( (int) $cleared < 1 ) {
+			return false;
+		}
+
+		// The update above skips the meta cache, and the setter below finds nothing to change, so it would keep a stale 'yes' cached.
+		wp_cache_delete( $order_id, 'post_meta' );
+		$this->set_recorded_coupon_usage_counts( $order, false );
+		return true;
+	}
+
+	/**
+	 * Reads the "coupon usage counted" flag straight from the database, skipping the meta cache.
+	 *
+	 * @since 11.3.1
+	 *
+	 * @internal For use by WC_Abstract_Order::remove_coupon() only.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	public function get_stored_recorded_coupon_usage_counts( $order ): bool {
+		global $wpdb;
+
+		$value = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_recorded_coupon_usage_counts' ORDER BY meta_id ASC LIMIT 1",
+				$order->get_id()
+			)
+		);
+
+		return wc_string_to_bool( (string) $value );
 	}
 
 	/**
@@ -985,7 +1052,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'date_paid'      => '_date_paid',
 		);
 		foreach ( $date_queries as $query_var_key => $db_key ) {
-			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
+			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] && array() !== $query_vars[ $query_var_key ] ) {
 
 				// Remove any existing meta queries for the same keys to prevent conflicts.
 				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );

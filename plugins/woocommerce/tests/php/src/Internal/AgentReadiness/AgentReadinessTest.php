@@ -1,0 +1,484 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
+
+use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
+use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
+use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreResponses;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
+use WC_Helper_Product;
+use WC_Unit_Test_Case;
+
+/**
+ * Tests for the agent readiness report.
+ */
+class AgentReadinessTest extends WC_Unit_Test_Case {
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var AgentReadiness
+	 */
+	private $sut;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		// Report tests stay offline: store output checks would load the test site's pages.
+		StoreOutputChecksTest::block_requests();
+		// Orders other tests left in the Analytics tables would count toward the sales share.
+		\WC_Helper_Reports::reset_stats_dbs();
+		$store_conditions = new StoreConditions();
+		$store_conditions->init( new ComingSoonHelper() );
+		$output_checks = new StoreOutputChecks();
+		$output_checks->init( new ComingSoonHelper() );
+		$this->sut = new AgentReadiness();
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules(), wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ), new \Automattic\WooCommerce\Internal\AgentReadiness\ProductSales() );
+	}
+
+	/**
+	 * @testdox Store output checks follow the store conditions in the report, recommended, with null for couldn't check or a check that throws.
+	 */
+	public function test_report_includes_store_output_checks(): void {
+		$output_checks = new class() extends StoreOutputChecks {
+			/**
+			 * Two checks: one the store couldn't load, one that throws.
+			 */
+			protected function checks(): array {
+				$check = static fn( string $id, callable $test ): array => array(
+					'id'      => $id,
+					'test'    => $test,
+					'blocks'  => 'listing',
+					'group'   => 'find',
+					'name'    => $id,
+					'label'   => $id,
+					'why'     => '',
+					'fix'     => '',
+					'fix_url' => '',
+				);
+				return array(
+					$check( 'unreachable', static fn( StoreResponses $responses ): ?bool => null === $responses->get( '/robots.txt' ) ? null : true ),
+					$check(
+						'throws',
+						static function (): bool {
+							throw new \RuntimeException( 'Broken plugin output' );
+						}
+					),
+				);
+			}
+		};
+		$output_checks->init( new ComingSoonHelper() );
+		$store_conditions = new StoreConditions();
+		$store_conditions->init( new ComingSoonHelper() );
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules(), wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ), new \Automattic\WooCommerce\Internal\AgentReadiness\ProductSales() );
+		add_filter( 'pre_http_request', static fn() => new \WP_Error( 'http_request_failed', 'Timed out' ) );
+
+		$checks = array_column( $this->sut->get_report()['store_checks'], null, 'id' );
+
+		$this->assertSame( 'launched', array_key_first( $checks ) );
+		foreach ( array( 'unreachable', 'throws' ) as $id ) {
+			$this->assertArrayHasKey( 'ok', $checks[ $id ] );
+			$this->assertNull( $checks[ $id ]['ok'] );
+			$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks[ $id ]['level'] );
+		}
+		$this->assertNotContains( 'unreachable', $store_conditions->failing_required( array_values( $checks ) ) );
+	}
+
+	/**
+	 * @testdox The report has the shared shape with store checks, channel totals and checks.
+	 */
+	public function test_report_shape(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$report = $this->sut->get_report();
+
+		$this->assertSame( array( 'generated_at', 'products', 'available', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'declared', 'pages_best_seller', 'channels', 'checks', 'truncated', 'bestsellers_first', 'bestsellers_count', 'sales' ), array_keys( $report ) );
+		$this->assertFalse( $report['truncated'] );
+		$this->assertSame( 0, $report['bestsellers_count'] );
+		$this->assertSame( array( 'id', 'ok', 'blocks', 'group', 'level', 'name', 'label', 'why', 'fix', 'fix_url' ), array_keys( $report['store_checks'][0] ) );
+		$this->assertSame( array( 'chatgpt', 'google', 'copilot' ), array_keys( $report['channels'] ) );
+		$this->assertSame(
+			array( 'name', 'spec', 'url', 'listable', 'not_listable', 'with_gaps', 'complete' ),
+			array_keys( $report['channels']['chatgpt'] )
+		);
+
+		$checks = array_column( $report['checks'], null, 'id' );
+		$this->assertSame(
+			array( 'id', 'label', 'why', 'fix', 'channels', 'count', 'product_ids', 'sales_share', 'fix_url' ),
+			array_keys( $checks['missing_brand'] )
+		);
+		$this->assertSame( 1, $checks['missing_brand']['count'] );
+		$this->assertSame( array( $product->get_id() ), $checks['missing_brand']['product_ids'] );
+		$this->assertSame( ReadinessRule::EFFECT_NOT_LISTABLE, $checks['missing_brand']['channels']['chatgpt']['effect'] );
+
+		$this->assertSame( 1, $report['products'] );
+		$this->assertSame( 1, $report['channels']['chatgpt']['not_listable'], 'No brand and no image keep the product off ChatGPT' );
+		$this->assertSame( 0, $report['channels']['chatgpt']['listable'] );
+	}
+
+	/**
+	 * @testdox The rules filter can drop a check and change an effect; invalid entries are ignored.
+	 */
+	public function test_rules_filter(): void {
+		WC_Helper_Product::create_simple_product();
+		add_filter(
+			'woocommerce_agent_readiness_rules',
+			static function ( $rules ) {
+				unset( $rules['missing_brand'] );
+				$rules['missing_gtin']['google']['effect']   = 'not_listable';
+				$rules['missing_gtin']['bing']               = array(
+					'field'  => 'gtin',
+					'effect' => 'gaps',
+				);
+				$rules['title_too_long']['google']['effect'] = 'rejected';
+				$rules['uncategorised']                      = array(
+					'bing' => array(
+						'field'  => 'category',
+						'effect' => 'gaps',
+					),
+				);
+				return $rules;
+			}
+		);
+
+		$report = $this->sut->get_report();
+		$checks = array_column( $report['checks'], null, 'id' );
+
+		$this->assertArrayNotHasKey( 'missing_brand', $checks );
+		$this->assertSame( ReadinessRule::EFFECT_NOT_LISTABLE, $checks['missing_gtin']['channels']['google']['effect'] );
+		$this->assertArrayNotHasKey( 'bing', $checks['missing_gtin']['channels'] );
+		$this->assertSame( array( 'chatgpt', 'copilot', 'google' ), array_values( array_intersect( array( 'chatgpt', 'copilot', 'google' ), array_keys( $checks['missing_gtin']['channels'] ) ) ), 'Channels the filter left alone are kept' );
+		$this->assertArrayNotHasKey( 'google', $checks['title_too_long']['channels'] );
+		$this->assertArrayNotHasKey( 'uncategorised', $checks, 'A check with no valid channel left does not run' );
+	}
+
+	/**
+	 * @testdox The cached report is stored by refresh_report.
+	 */
+	public function test_refresh_report_caches(): void {
+		$this->assertNull( $this->sut->get_cached_report() );
+
+		$report = $this->sut->refresh_report();
+
+		$this->assertSame( $report, $this->sut->get_cached_report() );
+	}
+
+	/**
+	 * @testdox get_failing_check_ids returns the ids of the checks a product fails.
+	 */
+	public function test_get_failing_check_ids(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'description' => 'A sturdy mug.' ) );
+
+		$issues = $this->sut->get_failing_check_ids( $product );
+
+		$this->assertContains( 'missing_brand', $issues );
+		$this->assertContains( 'missing_images', $issues );
+		$this->assertNotContains( 'missing_product_text', $issues );
+		$this->assertNotContains( 'missing_regular_price', $issues );
+	}
+
+	/**
+	 * @testdox get_failing_check_ids judges a variation by its parent and skips products the scan leaves out.
+	 */
+	public function test_get_failing_check_ids_follows_scan_coverage(): void {
+		$variable  = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $variable->get_children()[0] );
+		$grouped   = WC_Helper_Product::create_grouped_product();
+		$draft     = WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) );
+
+		$this->assertSame( $this->sut->get_failing_check_ids( $variable ), $this->sut->get_failing_check_ids( $variation ), 'A variation should get its parent\'s issues' );
+		$this->assertContains( 'missing_brand', $this->sut->get_failing_check_ids( $variation ) );
+		$this->assertSame( array(), $this->sut->get_failing_check_ids( $grouped ), 'Grouped products are not scanned' );
+		$this->assertSame( array(), $this->sut->get_failing_check_ids( $draft ), 'Unpublished products are not scanned' );
+
+		$hidden = WC_Helper_Product::create_variation_product();
+		$hidden->set_catalog_visibility( 'hidden' );
+		$hidden->save();
+		$this->assertSame( array(), $this->sut->get_failing_check_ids( wc_get_product( $hidden->get_children()[0] ) ), 'Nor a hidden product\'s variations' );
+	}
+
+	/**
+	 * @testdox check_product gives each failing check's channel map for that product and its status per channel.
+	 */
+	public function test_check_product(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'description' => 'A sturdy mug.' ) );
+		$product->update_meta_data( '_wc_gla_brand', 'Acme' );
+		$product->save();
+
+		$result = $this->sut->check_product( $product );
+
+		$this->assertSame( $product->get_id(), $result['product_id'] );
+		$this->assertArrayHasKey( 'missing_brand', $result['checks'] );
+		$this->assertArrayNotHasKey( 'google', $result['checks']['missing_brand'], 'The per-product map, not the check\'s default one' );
+		$this->assertArrayNotHasKey( 'missing_product_text', $result['checks'] );
+		$this->assertSame( 'not_listable', $result['statuses']['chatgpt'], 'No image keeps it off every channel' );
+		$this->assertSame( array_keys( $result['checks'] ), $this->sut->get_failing_check_ids( $product ) );
+	}
+
+	/**
+	 * @testdox A failing check that applies to none of the product's channels is not reported, in the scan or for one product.
+	 */
+	public function test_check_with_no_channel_for_the_product_is_left_out(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->update_meta_data( '_wc_gla_brand', 'Acme' );
+		$product->save();
+		add_filter(
+			'woocommerce_agent_readiness_rules',
+			static function ( $rules ) {
+				$rules['missing_brand'] = array_intersect_key( $rules['missing_brand'], array( 'google' => true ) );
+				return $rules;
+			}
+		);
+
+		$checks = array_column( $this->sut->get_report()['checks'], null, 'id' );
+		$result = $this->sut->check_product( $product );
+
+		$this->assertSame( 0, $checks['missing_brand']['count'], 'The Google brand covers the only channel left' );
+		$this->assertArrayNotHasKey( 'missing_brand', $result['checks'] );
+		$this->assertNotContains( 'missing_brand', $this->sut->get_failing_check_ids( $product ) );
+	}
+
+	/**
+	 * @testdox A share is kept between 0 and 1 and rounded to 4 places, and any sales at all keep at least 0.01%.
+	 */
+	public function test_share_rounding(): void {
+		$share = new \ReflectionMethod( AgentReadiness::class, 'share' );
+		$share->setAccessible( true );
+
+		$this->assertSame( 0.0001, $share->invoke( null, 90 / 2000000 ), 'Small sales are not "No sales"' );
+		$this->assertSame( 0.0, $share->invoke( null, 0.0 ) );
+		$this->assertSame( 0.0, $share->invoke( null, -0.2 ), 'Refunds in the period can make a product\'s sales negative' );
+		$this->assertSame( 1.0, $share->invoke( null, 1.3 ), 'Other products\' refunds can make one product\'s share exceed 1' );
+		$this->assertSame( 0.1235, $share->invoke( null, 0.123456 ) );
+	}
+
+	/**
+	 * @testdox Each check carries the share of the last 90 days' sales on its failing products, from Analytics, once there are enough orders to rank by.
+	 */
+	public function test_report_sales_share(): void {
+		update_option( 'woocommerce_analytics_enabled', 'yes' );
+		if ( ! taxonomy_exists( 'product_brand' ) ) {
+			register_taxonomy( 'product_brand', 'product' );
+		}
+		$branded   = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$unbranded = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 30 ) );
+		wp_set_object_terms( $branded->get_id(), 'Acme', 'product_brand' );
+		$place_order = function () use ( $branded, $unbranded ): void {
+			$order = wc_create_order();
+			$order->add_product( $branded, 1 );
+			$order->add_product( $unbranded, 1 );
+			$order->set_status( 'completed' );
+			$order->calculate_totals();
+			$order->save();
+			\Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::sync_order( $order->get_id() );
+			\Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::sync_order_products( $order->get_id() );
+		};
+		for ( $i = 1; $i < \Automattic\WooCommerce\Internal\AgentReadiness\ProductSales::MIN_ORDERS; $i++ ) {
+			$place_order();
+		}
+
+		$report = $this->sut->get_report();
+		$this->assertNull( array_column( $report['checks'], null, 'id' )['missing_brand']['sales_share'], 'Too few orders to rank by' );
+		$this->assertSame( 19, $report['sales']['orders'] );
+
+		$place_order();
+		$report = $this->sut->get_report();
+		$checks = array_column( $report['checks'], null, 'id' );
+
+		$this->assertSame( 1, $checks['missing_brand']['count'] );
+		$this->assertEqualsWithDelta( 0.75, $checks['missing_brand']['sales_share'], 0.0001, '30 of 40 in sales has no brand' );
+		$this->assertSame( 90, $report['sales']['days'] );
+		$this->assertSame( 20, $report['sales']['orders'] );
+	}
+
+	/**
+	 * @testdox A check a variable product fails through some variations counts only their sales; a check on the whole product counts all of it.
+	 */
+	public function test_report_sales_share_of_failing_variations(): void {
+		update_option( 'woocommerce_analytics_enabled', 'yes' );
+		$variable = WC_Helper_Product::create_variation_product();
+		$children = array_map( 'wc_get_product', $variable->get_children() );
+		$image_id = self::factory()->attachment->create_object( 'mug.jpg', 0, array( 'post_mime_type' => 'image/jpeg' ) );
+		foreach ( array_slice( $children, 1 ) as $child ) {
+			$child->set_image_id( $image_id );
+			$child->save();
+		}
+		for ( $i = 0; $i < \Automattic\WooCommerce\Internal\AgentReadiness\ProductSales::MIN_ORDERS; $i++ ) {
+			$order = wc_create_order();
+			$order->add_product( $children[0], 1 );
+			$order->add_product( $children[1], 1 );
+			$order->set_status( 'completed' );
+			$order->calculate_totals();
+			$order->save();
+			\Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::sync_order( $order->get_id() );
+			\Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::sync_order_products( $order->get_id() );
+		}
+		$first  = (float) $children[0]->get_price();
+		$second = (float) $children[1]->get_price();
+		$this->assertGreaterThan( 0.0, $first * $second, 'Both variations have a price' );
+
+		$checks = array_column( $this->sut->get_report()['checks'], null, 'id' );
+
+		$this->assertSame( 1, $checks['missing_variation_images']['count'] );
+		$this->assertEqualsWithDelta( round( $first / ( $first + $second ), 4 ), $checks['missing_variation_images']['sales_share'], 0.0001, 'Only the variation without an image' );
+		$this->assertSame( 1.0, $checks['missing_brand']['sales_share'], 'A brand is the whole product\'s' );
+	}
+
+	/**
+	 * @testdox check_product judges a variation by its parent and returns null for products the scan leaves out.
+	 */
+	public function test_check_product_coverage(): void {
+		$variable  = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $variable->get_children()[0] );
+
+		$this->assertSame( $variable->get_id(), $this->sut->check_product( $variation )['product_id'] );
+		$orphan = new \WC_Product_Variation();
+		$orphan->set_parent_id( $variable->get_id() + 1000 );
+		$this->assertNull( $this->sut->check_product( $orphan ), 'A variation without a parent is left out' );
+		$this->assertNull( $this->sut->check_product( WC_Helper_Product::create_grouped_product() ) );
+		$this->assertNull( $this->sut->check_product( WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) ) ) );
+		$this->assertNull( $this->sut->check_product( WC_Helper_Product::create_simple_product( true, array( 'catalog_visibility' => 'hidden' ) ) ) );
+	}
+
+	/**
+	 * @testdox A report rereads shared GTINs, so check_product sees a duplicate fixed since.
+	 */
+	public function test_check_product_after_a_report_sees_gtin_changes(): void {
+		$first = WC_Helper_Product::create_simple_product();
+		$first->set_global_unique_id( '4006381333931' );
+		$first->save();
+		// The product setter rejects a duplicate, as imports and direct writes do not.
+		$second_id = WC_Helper_Product::create_simple_product()->get_id();
+		update_post_meta( $second_id, '_global_unique_id', '4006381333931' );
+		$this->assertArrayHasKey( 'duplicate_gtin', $this->sut->check_product( $first )['checks'] );
+
+		delete_post_meta( $second_id, '_global_unique_id' );
+		$this->sut->get_report();
+
+		$this->assertArrayNotHasKey( 'duplicate_gtin', $this->sut->check_product( $first )['checks'] );
+	}
+
+	/**
+	 * @testdox Past the limit, the scan stores no shared GTINs, so checking one product reads the catalog.
+	 */
+	public function test_shared_gtins_past_the_limit(): void {
+		$scan = new ProductScan();
+		$scan->use_shared_gtins( range( 1, ProductScan::SHARED_GTINS_LIMIT ) );
+		$this->assertCount( ProductScan::SHARED_GTINS_LIMIT, $scan->shared_gtins() );
+
+		$scan->use_shared_gtins( range( 1, ProductScan::SHARED_GTINS_LIMIT + 1 ) );
+		$this->assertNull( $scan->shared_gtins() );
+	}
+
+	/**
+	 * @testdox After a stored scan, checking one product reads the scan's shared GTINs instead of every published product, and the report doesn't show them.
+	 */
+	public function test_check_product_reads_stored_shared_gtins(): void {
+		StoreOutputChecksTest::block_requests();
+		$first = WC_Helper_Product::create_simple_product();
+		$first->set_global_unique_id( '4006381333931' );
+		$first->save();
+		$second_id = WC_Helper_Product::create_simple_product()->get_id();
+		update_post_meta( $second_id, '_global_unique_id', '4006381333931' );
+		$this->sut->refresh_report();
+
+		$this->assertSame( array( '4006381333931' ), get_option( AgentReadiness::REPORT_OPTION )['shared_gtins'] );
+		$this->assertArrayNotHasKey( 'shared_gtins', $this->sut->get_cached_report() );
+
+		delete_post_meta( $second_id, '_global_unique_id' );
+		$queries = 0;
+		$count   = static function ( $query ) use ( &$queries ) {
+			$queries += false !== strpos( (string) $query, 'HAVING COUNT(*) > 1' ) ? 1 : 0;
+			return $query;
+		};
+		add_filter( 'query', $count );
+		$checks = $this->sut->check_product( $first )['checks'];
+		remove_filter( 'query', $count );
+
+		$this->assertArrayHasKey( 'duplicate_gtin', $checks, 'A GTIN change on another product waits for the next scan' );
+		$this->assertSame( 0, $queries );
+	}
+
+	/**
+	 * @testdox Hidden products and unsupported types are counted, not checked; search-only and shop-only products are checked.
+	 */
+	public function test_scan_counts_hidden_and_unsupported_products(): void {
+		WC_Helper_Product::create_simple_product();
+		$hidden_variable = WC_Helper_Product::create_variation_product();
+		$hidden_variable->set_catalog_visibility( 'hidden' );
+		$hidden_variable->save();
+		$search_only = WC_Helper_Product::create_simple_product();
+		$search_only->set_catalog_visibility( 'search' );
+		$search_only->save();
+		$shop_only = WC_Helper_Product::create_simple_product();
+		$shop_only->set_catalog_visibility( 'catalog' );
+		$shop_only->save();
+		WC_Helper_Product::create_external_product();
+		// A subscription whose plugin is inactive loads as simple but keeps its stored type.
+		$subscription = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms( $subscription->get_id(), 'subscription', 'product_type' );
+		\WC_Cache_Helper::invalidate_cache_group( 'product_' . $subscription->get_id() );
+		$subscription = wc_get_product( $subscription->get_id() );
+		WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) );
+
+		$report = $this->sut->get_report();
+
+		$this->assertSame( 3, $report['products'], 'The shown simple product, the search-only one and the shop-only one are checked: agents can open all three' );
+		$this->assertSame( 1, $report['hidden_from_catalog'], 'Only the Hidden product is counted apart' );
+		$this->assertSame( 3, $report['available'], 'The catalog agents can see: the same products as checked when under the limit' );
+		$this->assertSame( 2, $report['unsupported_types'], 'External and the subscription are counted apart' );
+		$this->assertSame( 3, $report['channels']['chatgpt']['listable'] + $report['channels']['chatgpt']['not_listable'] );
+		$this->assertTrue( ProductScan::covers( $search_only ) );
+		$this->assertFalse( ProductScan::covers( $hidden_variable ) );
+		$this->assertNotContains( 'hidden_from_catalog', array_column( $report['checks'], 'id' ) );
+		$this->assertSame( array(), $this->sut->get_failing_check_ids( $hidden_variable ), 'A hidden product has no issues' );
+		$this->assertSame( array(), $this->sut->get_failing_check_ids( wc_get_product( $hidden_variable->get_children()[0] ) ), 'Nor do its variations' );
+		$this->assertSame( array(), $this->sut->get_failing_check_ids( $subscription ), 'An unsupported type has no issues' );
+	}
+
+	/**
+	 * @testdox The rules filter runs once per instance, not once per product.
+	 */
+	public function test_rules_are_built_once(): void {
+		$calls = 0;
+		add_filter(
+			'woocommerce_agent_readiness_rules',
+			static function ( $rules ) use ( &$calls ) {
+				++$calls;
+				return $rules;
+			}
+		);
+
+		$this->sut->get_failing_check_ids( WC_Helper_Product::create_simple_product() );
+		$this->sut->get_failing_check_ids( WC_Helper_Product::create_simple_product() );
+
+		$this->assertSame( 1, $calls );
+	}
+
+	/**
+	 * @testdox A stored output check keeps the detail of what the store served.
+	 */
+	public function test_get_store_checks_keeps_the_served_detail(): void {
+		$checks = $this->sut->get_store_checks(
+			array(
+				'store_checks' => array(
+					array(
+						'id'     => 'ucp_endpoints_live',
+						'name'   => 'Catalog search answers',
+						'ok'     => false,
+						'source' => '403 text/html',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( '403 text/html', array_column( $checks, 'source', 'id' )['ucp_endpoints_live'] );
+	}
+}

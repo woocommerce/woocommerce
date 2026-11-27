@@ -366,10 +366,23 @@ if ( wc_tax_enabled() ) {
 <?php if ( $render_refunds ) : ?>
 <div class="wc-order-data-row wc-order-refund-items wc-order-data-row-toggle" style="display: none;">
 	<table class="wc-order-totals">
-		<?php if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) : ?>
-			<tr>
-				<td class="label"><label for="restock_refunded_items"><?php esc_html_e( 'Restock refunded items', 'woocommerce' ); ?>:</label></td>
-				<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" <?php checked( apply_filters( 'woocommerce_restock_refunded_items', true ) ); ?> /></td>
+		<?php
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) :
+			/**
+			 * Filters whether the restock checkbox is ticked by default once a refund quantity is entered.
+			 *
+			 * @since 3.5.0
+			 *
+			 * @param bool $restock_by_default Whether to tick the restock checkbox by default.
+			 */
+			$restock_by_default = apply_filters( 'woocommerce_restock_refunded_items', true );
+			?>
+			<tr class="restock-refunded-items">
+				<td class="label">
+					<label for="restock_refunded_items"><?php esc_html_e( 'Restock refunded items', 'woocommerce' ); ?>:</label>
+					<p class="description" id="restock_refunded_items_description"></p>
+				</td>
+				<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" aria-describedby="restock_refunded_items_description" <?php checked( $restock_by_default ); ?> /></td>
 			</tr>
 		<?php endif; ?>
 		<tr>

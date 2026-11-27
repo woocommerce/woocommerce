@@ -284,16 +284,26 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			const addToCartButton = addToCartBlock.locator(
 				'.single_add_to_cart_button'
 			);
+			// The button text updates optimistically before the Store API
+			// request settles, so wait for the server response before relying
+			// on the cart contents (e.g. navigating to the Cart page).
+			const addToCartAndWaitForResponse = async () => {
+				const batchResponse = page.waitForResponse(
+					'**/wp-json/wc/store/v1/batch**'
+				);
+				await addToCartButton.click();
+				await batchResponse;
+			};
 
 			// Select variation V (Blue, Large) and add it: creates V's line.
 			await colorBlueOption.click();
 			await sizeLargeOption.click();
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
-			await addToCartButton.click();
+			await addToCartAndWaitForResponse();
 			await expect( addToCartButton ).toHaveText( '1 in cart' );
 
 			// Add V again: increments V's existing line (no second V line).
-			await addToCartButton.click();
+			await addToCartAndWaitForResponse();
 			await expect( addToCartButton ).toHaveText( '2 in cart' );
 
 			// Select a different variation W (Red, Large), not in the cart: the
@@ -302,7 +312,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			await expect( addToCartButton ).toHaveText( 'Add to cart' );
 
 			// Add W: creates a new, separate line for W.
-			await addToCartButton.click();
+			await addToCartAndWaitForResponse();
 			await expect( addToCartButton ).toHaveText( '1 in cart' );
 
 			// Persisted cart: V incremented to 2 and W added as a distinct line,

@@ -309,6 +309,30 @@ describe( 'Email editor sidebar settings', () => {
 		);
 	} );
 
+	it( 'says who receives an email without a recipient field that is not sent to the customer', () => {
+		mockEntityState.woocommerceData = {
+			...defaultWooCommerceData,
+			recipient: null,
+			is_customer_email: false,
+		};
+		mockEntityState.editedWooCommerceData = {
+			...mockEntityState.woocommerceData,
+		};
+		renderSettings( {
+			recordEvent: jest.fn(),
+			debouncedRecordEvent: jest.fn(),
+		} );
+
+		expect(
+			screen.getByText(
+				'This email is sent to the person who requested it.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText( 'This email is sent to Customer.' )
+		).not.toBeInTheDocument();
+	} );
+
 	it( 'updates and clears CC and BCC recipients', async () => {
 		const recordEvent = jest.fn();
 		const debouncedRecordEvent = jest.fn();

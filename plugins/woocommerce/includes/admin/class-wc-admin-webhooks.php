@@ -92,8 +92,14 @@ class WC_Admin_Webhooks {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$delivery_url = ! empty( $_POST['webhook_delivery_url'] ) ? esc_url_raw( wp_unslash( $_POST['webhook_delivery_url'] ) ) : '';
 
-		if ( wc_is_valid_url( $delivery_url ) ) {
+		// An untouched form sends back the URL it displayed. That URL can differ from the stored one when a filter changes it, and it is not a change.
+		if ( wc_is_valid_url( $delivery_url ) && esc_url_raw( $webhook->get_delivery_url() ) !== $delivery_url ) {
 			$webhook->set_delivery_url( $delivery_url );
+		}
+
+		// Payloads are built as the author, so whoever changes where they go becomes the author.
+		if ( array_key_exists( 'delivery_url', $webhook->get_changes() ) ) {
+			$webhook->set_user_id( get_current_user_id() );
 		}
 
 		// Secret.
@@ -126,7 +132,7 @@ class WC_Admin_Webhooks {
 			if ( wc_is_webhook_valid_topic( $topic ) ) {
 				$webhook->set_topic( $topic );
 			} else {
-				$errors[] = __( 'Webhook topic unknown. Please select a valid topic.', 'woocommerce' );
+				$errors[] = __( 'This webhook topic is not supported. Choose a different topic.', 'woocommerce' );
 			}
 		}
 
@@ -161,6 +167,20 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
+	 * Get the URL of the webhooks list page, with optional query arguments.
+	 *
+	 * Pass false to omit an argument; empty strings keep the key.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $args Query arguments to add to the URL.
+	 * @return string
+	 */
+	public static function get_list_url( $args = array() ) {
+		return add_query_arg( $args, admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' ) );
+	}
+
+	/**
 	 * Bulk delete.
 	 *
 	 * @param array $webhooks List of webhooks IDs.
@@ -173,11 +193,52 @@ class WC_Admin_Webhooks {
 
 		$qty = count( $webhooks );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
+		$status = ! empty( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : false;
 
-		// Redirect to webhooks page.
-		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' . $status . '&deleted=' . $qty ) );
+		wp_safe_redirect(
+			self::get_list_url(
+				array(
+					'status'  => $status,
+					'deleted' => $qty,
+				)
+			)
+		);
 		exit();
+	}
+
+	/**
+	 * Update the status of selected webhooks.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array  $webhooks List of webhook IDs.
+	 * @param string $status   New webhook status.
+	 * @return int Number of webhooks updated.
+	 */
+	public static function bulk_update_status( $webhooks, $status ) {
+		if ( ! wc_is_webhook_valid_status( $status ) ) {
+			return 0;
+		}
+
+		$updated = 0;
+
+		foreach ( array_unique( array_map( 'absint', $webhooks ) ) as $webhook_id ) {
+			if ( ! $webhook_id ) {
+				continue;
+			}
+
+			$webhook = wc_get_webhook( $webhook_id );
+
+			if ( ! $webhook || $status === $webhook->get_status() ) {
+				continue;
+			}
+
+			$webhook->set_status( $status );
+			$webhook->save();
+			++$updated;
+		}
+
+		return $updated;
 	}
 
 	/**
@@ -240,6 +301,17 @@ class WC_Admin_Webhooks {
 	 * Notices.
 	 */
 	public static function notices() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only count.
+		if ( isset( $_GET['bulk_updated'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only count.
+			$updated = absint( $_GET['bulk_updated'] );
+
+			if ( $updated ) {
+				/* translators: %d: number of webhooks updated. */
+				WC_Admin_Settings::add_message( sprintf( _n( '%d webhook updated.', '%d webhooks updated.', $updated, 'woocommerce' ), $updated ) );
+			}
+		}
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['deleted'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended

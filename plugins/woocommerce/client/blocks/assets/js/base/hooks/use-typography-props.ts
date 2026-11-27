@@ -3,6 +3,7 @@
  */
 import { isObject, isString } from '@woocommerce/types';
 import type { Style as StyleEngineProperties } from '@wordpress/style-engine/src/types';
+import type { CSSProperties } from 'react';
 
 /**
  * Internal dependencies
@@ -18,7 +19,8 @@ type blockAttributes = {
 };
 
 export const useTypographyProps = ( props: blockAttributes ): StyleProps => {
-	const typography = isObject( props.style.typography )
+	const typography: NonNullable< StyleEngineProperties[ 'typography' ] > &
+		Pick< CSSProperties, 'textAlign' > = isObject( props.style.typography )
 		? props.style.typography
 		: {};
 	const classNameFallback = isString( typography.fontFamily )
@@ -40,6 +42,7 @@ export const useTypographyProps = ( props: blockAttributes ): StyleProps => {
 			lineHeight: typography.lineHeight,
 			textDecoration: typography.textDecoration,
 			textTransform: typography.textTransform,
+			textAlign: typography.textAlign,
 		},
 	};
 };

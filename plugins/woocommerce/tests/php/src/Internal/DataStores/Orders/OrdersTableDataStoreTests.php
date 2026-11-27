@@ -116,9 +116,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->clean_up_cot_setup();
 		$this->disable_cogs_feature();
 
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
-		remove_all_filters( 'woocommerce_load_order_cogs_value' );
-		remove_all_filters( 'woocommerce_save_order_cogs_value' );
 		parent::tearDown();
 	}
 
@@ -785,6 +782,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->trash_order( $order );
 		$this->sut->read( $order );
 
+		// Without transactional emails the notification count below stays 0 whatever untrash_order() does.
+		$this->enable_transactional_emails();
+
 		$status_action_count       = 0;
 		$status_notification_count = 0;
 		$status_action             = function ( $order_id ) use ( $order, &$status_action_count ) {
@@ -828,19 +828,21 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->trash_order( $order );
 		$this->sut->read( $order );
 
-		$dispatch_callbacks_before = array(
+		$this->enable_transactional_emails();
+		$this->assertNotFalse(
 			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'send_transactional_email' ) ),
-			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'queue_transactional_email' ) ),
+			'The email dispatch listener is registered before the restore.'
 		);
 
 		$this->assertTrue( $this->sut->untrash_order( $order ) );
 
-		$dispatch_callbacks_after = array(
-			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'send_transactional_email' ) ),
-			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'queue_transactional_email' ) ),
+		// untrash_order() swaps the listener for a wrapper in the same slot while it saves, so has_action() cannot
+		// tell whether it was put back. Check the stored callback instead.
+		global $wp_filter;
+		$this->assertSame(
+			array( 'WC_Emails', 'send_transactional_email' ),
+			$wp_filter['woocommerce_order_status_completed']->callbacks[10]['WC_Emails::send_transactional_email']['function']
 		);
-
-		$this->assertSame( $dispatch_callbacks_before, $dispatch_callbacks_after );
 	}
 
 	/**
@@ -1649,7 +1651,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->read( $refreshed_order );
 
 		$this->assertEquals( array( 'key' => 'value' ), $refreshed_order->get_meta( 'my_custom_meta' ) );
-		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1690,7 +1691,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'custom_value_4', $refreshed_order->get_meta( 'custom_meta_4' ) );
 		$this->assertEquals( 'custom_value_1_updated', $refreshed_order->get_meta( 'custom_meta_1' ) );
 		$this->assertEquals( '', $refreshed_order->get_meta( 'custom_meta_2' ) );
-		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1699,12 +1699,13 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_sync_on_read_does_not_duplicate_postmeta() {
 		$this->enable_cot_sync();
 		$this->toggle_cot_feature_and_usage( true );
-		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order = $this->create_complex_cot_order();
 		$order->add_meta_data( 'multi_meta', 'x' );
 		$order->add_meta_data( 'multi_meta', 'y' );
 		$order->add_meta_data( 'changed_meta', 'before' );
 		$order->save();
+		// Fixture saves can read the order, so enable sync-on-read only after setup.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 
 		// Simulate direct writes to the posts table.
 		add_post_meta( $order->get_id(), 'new_meta', 'new_value' ); // add_meta path.
@@ -1723,7 +1724,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( array( 'new_value' ), get_post_meta( $order->get_id(), 'new_meta', false ) );
 		$this->assertEquals( array( 'after' ), get_post_meta( $order->get_id(), 'changed_meta', false ) );
 		$this->assertEquals( array( 'y', 'z' ), get_post_meta( $order->get_id(), 'multi_meta', false ) );
-		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1757,7 +1757,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->read( $r_order );
 		$this->assertFalse( $post_order_comparison_closure->call( $this->sut, $r_order ) );
 		$this->assertEquals( array( 'key' => 'value' ), $r_order->get_meta( 'my_custom_meta' ) );
-		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1923,9 +1922,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->reset_order_data_store_state( $this->sut );
 		wc_get_order( $order->get_id() );
 		$this->assertFalse( $sync_on_read_triggered, 'Sync on read should not trigger when post is older.' );
-
-		remove_all_actions( 'woocommerce_hpos_post_record_migrated_on_read' );
-		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -2656,9 +2652,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 * @testdox Generic order persistence saves the store tax-mode default captured at construction.
 	 */
 	public function test_create_without_explicit_prices_include_tax_keeps_default(): void {
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
-		$order             = null;
+		$order = null;
 
 		try {
 			update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -2684,8 +2678,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			if ( $order ) {
 				$order->delete( true );
 			}
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
-			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
@@ -2693,8 +2685,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 * @testDox An explicitly set prices_include_tax value is persisted as given, not replaced by the store setting.
 	 */
 	public function test_create_keeps_explicit_prices_include_tax_value(): void {
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$order             = null;
+		$order = null;
 
 		try {
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
@@ -2718,7 +2709,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			if ( $order ) {
 				$order->delete( true );
 			}
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
 		}
 	}
 
@@ -2728,9 +2718,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_read_with_null_prices_include_tax_uses_store_default(): void {
 		global $wpdb;
 
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
-		$order             = new WC_Order();
+		$order = new WC_Order();
 
 		try {
 			update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -2759,8 +2747,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			$this->assertArrayNotHasKey( 'prices_include_tax', $read_order->get_changes() );
 		} finally {
 			$order->delete( true );
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
-			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
@@ -3374,7 +3360,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
 		$this->assertEquals( 'test_value_2', $r_order->get_meta( 'test_key_2', true ) );
 		$this->assertEquals( 'test_value_3', $r_order->get_meta( 'test_key_3', true ) );
-		remove_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ) );
 	}
 
 	/**
@@ -3412,7 +3397,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'test_value_2', $r_order->get_meta( 'test_key_2', true ) );
 		$this->assertEquals( 'test_value_3', $r_order->get_meta( 'test_key_3', true ) );
 		$this->assertEquals( 1, $r_order->get_customer_id() );
-		remove_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ) );
 	}
 
 	/**
@@ -3514,9 +3498,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			$this->assertEquals( 2, $new_count );
 			$this->assertEquals( 2, $update_count );
 		}
-
-		remove_action( 'woocommerce_new_order', $callback );
-		remove_action( 'woocommerce_update_order', $callback );
 	}
 
 	/**
@@ -4306,8 +4287,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$r_order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 2, $r_order->get_customer_id() );
-
-		remove_all_actions( 'woocommerce_delete_shop_order_transients' );
 	}
 
 	/**
@@ -4393,7 +4372,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertTrue( $current_time_called, 'current_time mock was not called' );
 
 		remove_filter( 'woocommerce_order_data_store', $orders_table_data_store, 1000 );
-		remove_all_actions( 'woocommerce_before_order_object_save' );
 	}
 
 	/**
@@ -4661,8 +4639,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		}
 
 		$this->assertEquals( 0, $new_count );
-
-		remove_action( 'woocommerce_new_order', $callback );
 	}
 
 	/**
@@ -4698,8 +4674,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		}
 
 		$this->assertEquals( 4, $new_count );
-
-		remove_action( 'woocommerce_new_order', $callback );
 	}
 
 	/**
@@ -4714,6 +4688,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		};
 
 		add_action( 'woocommerce_new_order', $callback );
+		// The new order email saves the order again while it is being saved, which this test is not about.
+		add_filter( 'woocommerce_email_enabled_new_order', '__return_false' );
 
 		$order = new WC_Order();
 		$order->set_status( OrderStatus::PROCESSING );
@@ -4724,8 +4700,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->save();
 
 		$this->assertEquals( 1, $new_count );
-
-		remove_action( 'woocommerce_new_order', $callback );
 	}
 
 
@@ -5141,5 +5115,61 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$this->assertInstanceOf( \Exception::class, $error, 'The update should throw when a value does not fit its column.' );
 		$this->assertStringContainsString( 'phone', $error->getMessage(), 'The error should name the column that is too long.' );
+	}
+
+	/**
+	 * @testDox clear_recorded_coupon_usage_counts() clears a set flag once, and only while the stored status matches the order object.
+	 */
+	public function test_clear_recorded_coupon_usage_counts(): void {
+		$this->toggle_cot_feature_and_usage( true );
+		$order       = $this->create_cancelled_order_with_counted_coupon_usage();
+		$other_order = $this->create_cancelled_order_with_counted_coupon_usage();
+
+		$copy_with_other_status = clone $order;
+		$copy_with_other_status->set_status( OrderStatus::FAILED );
+		$this->assertFalse( $this->sut->clear_recorded_coupon_usage_counts( $copy_with_other_status ), 'The flag should not be cleared when the stored status differs' );
+		$this->assertTrue( $this->sut->get_recorded_coupon_usage_counts( $order->get_id() ), 'The flag should stay set' );
+
+		$this->assertTrue( $this->sut->clear_recorded_coupon_usage_counts( $order ), 'A set flag should be cleared' );
+		$this->assertFalse( $this->sut->get_recorded_coupon_usage_counts( $order->get_id() ), 'The flag should read as cleared' );
+		$this->assertFalse( $order->get_recorded_coupon_usage_counts(), 'The order object should be updated' );
+		$this->assertTrue( $this->sut->get_recorded_coupon_usage_counts( $other_order->get_id() ), 'Other orders should keep their flag' );
+
+		$this->assertFalse( $this->sut->clear_recorded_coupon_usage_counts( $order ), 'A cleared flag should not be cleared again' );
+	}
+
+	/**
+	 * @testDox get_stored_recorded_coupon_usage_counts() reads the flag from the database, not from the order cache.
+	 */
+	public function test_get_stored_recorded_coupon_usage_counts(): void {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( true );
+		$order = $this->create_cancelled_order_with_counted_coupon_usage();
+		$this->assertFalse( $this->sut->get_stored_recorded_coupon_usage_counts( OrderHelper::create_order() ), 'An order without the flag should read as not counted' );
+		$this->assertTrue( $this->sut->get_stored_recorded_coupon_usage_counts( $order ), 'A set flag should read as counted' );
+
+		$wpdb->update(
+			OrdersTableDataStore::get_operational_data_table_name(),
+			array( 'coupon_usages_are_counted' => 0 ),
+			array( 'order_id' => $order->get_id() )
+		);
+
+		$this->assertTrue( $order->get_recorded_coupon_usage_counts(), 'The loaded order should still see the old value' );
+		$this->assertFalse( $this->sut->get_stored_recorded_coupon_usage_counts( $order ), 'The stored read should see the cleared flag' );
+	}
+
+	/**
+	 * Create a cancelled order marked as having its coupon usage counted.
+	 *
+	 * @return WC_Order
+	 */
+	private function create_cancelled_order_with_counted_coupon_usage(): WC_Order {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::CANCELLED );
+		$order->save();
+		$this->sut->set_recorded_coupon_usage_counts( $order, true );
+
+		return $order;
 	}
 }

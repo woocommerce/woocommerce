@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Agent readiness: keep each product's check results up to date, so readiness counts and links to failing products stay current.

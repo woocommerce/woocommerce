@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Remove the MailPoet Sending Service sign-up note from the email editor’s test email error message.

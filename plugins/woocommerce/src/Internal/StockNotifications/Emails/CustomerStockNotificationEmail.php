@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\UtmHelper;
 use WC_Email;
 
@@ -40,6 +41,8 @@ class CustomerStockNotificationEmail extends WC_Email {
 
 		// Call parent constructor.
 		parent::__construct();
+
+		$this->template_block_content = 'emails/block/general-block-content-for-stock-notification-emails.php';
 	}
 
 	/**
@@ -118,6 +121,32 @@ class CustomerStockNotificationEmail extends WC_Email {
 	}
 
 	/**
+	 * Get block editor email template content.
+	 *
+	 * @return string
+	 */
+	public function get_block_editor_email_template_content() {
+		$notification = $this->object;
+		if ( ! $notification instanceof Notification ) {
+			return '';
+		}
+
+		return wc_get_template_html(
+			$this->template_block_content,
+			array_merge(
+				$this->get_additional_template_args(),
+				array(
+					'notification'  => $notification,
+					'product'       => $notification->get_product(),
+					'intro_content' => $this->get_intro_content(),
+					'plain_text'    => false,
+					'email'         => $this,
+				),
+			),
+		);
+	}
+
+	/**
 	 * Get content plain.
 	 *
 	 * @return string
@@ -177,12 +206,17 @@ class CustomerStockNotificationEmail extends WC_Email {
 			$product
 		);
 
-		$user     = $notification instanceof Notification && $notification->get_user_id() ? get_user_by( 'id', $notification->get_user_id() ) : false;
-		$is_guest = ! is_a( $user, 'WP_User' );
+		$user         = $notification instanceof Notification && $notification->get_user_id() ? get_user_by( 'id', $notification->get_user_id() ) : false;
+		$is_guest     = ! is_a( $user, 'WP_User' );
+		$account_link = '';
+		if ( ! $is_guest && '' !== MyAccountEndpoint::get_endpoint_slug() ) {
+			$account_link = UtmHelper::add_email_utm_params( MyAccountEndpoint::get_endpoint_url() );
+		}
 
 		return array(
 			'button_text'      => $button_text,
 			'button_link'      => $button_link,
+			'account_link'     => $account_link,
 			'unsubscribe_link' => UtmHelper::add_email_utm_params(
 				add_query_arg(
 					array(

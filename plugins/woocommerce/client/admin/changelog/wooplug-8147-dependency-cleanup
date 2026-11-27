@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Remove unused dependencies from private WooCommerce builds and tools.

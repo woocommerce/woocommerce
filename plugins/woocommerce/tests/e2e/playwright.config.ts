@@ -118,9 +118,11 @@ const serialRunSpecs = [
 	// behavior for every other worker. (`cart.spec.ts` runs in core-parallel — it
 	// scopes its tax rate to a dedicated tax class instead of toggling global tax.)
 	'**/tests/cart/add-to-cart.spec.ts',
-	// Activates a custom-gateway test plugin globally, which would surface its extra
-	// payment button on every other worker's checkout.
+	// Activates a test plugin with WP-CLI, which races other workers on the
+	// `active_plugins` option.
 	'**/tests/checkout/checkout-shortcode-custom-place-order-button.spec.ts',
+	// Changes site visibility and the active plugins while checking llms.txt.
+	'**/tests/llms-txt/*.spec.ts',
 	// Mutate the global onboarding profile/options, site-visibility options and
 	// the active theme.
 	'**/tests/onboarding/**/*.spec.ts',
@@ -177,73 +179,134 @@ const nonCoreSpecs = [
  * serial resets wipe the data of the parallel workers.
  */
 const blocksSerialSpecs = [
-	// Switch the active theme, which every other spec renders with.
+	// Switch the active theme. It is a site-wide setting, and every spec
+	// renders with the active theme, so a test lock cannot isolate the switch.
+
+	// Activates `theme-with-woo-templates` and saves its Single Product
+	// template and Add to Cart + Options template part.
 	'**/tests/blocks/add-to-cart-with-options/add-to-cart-with-options.block_theme_with_templates.spec.ts',
-	'**/tests/blocks/cart/cart-checkout-block-notices.shopper.block_theme.spec.ts',
+	// Activates three child themes of the block theme to check their notices,
+	// and makes the Cart Shortcode page the cart page.
+	'**/tests/blocks/cart/cart-checkout-block-notices-child-themes.shopper.block_theme.spec.ts',
+	// Activates Storefront and three of its child themes to check notices in a
+	// classic theme, and makes the Cart Shortcode page the cart page.
 	'**/tests/blocks/cart/cart-checkout-block-notices.shopper.classic_theme.spec.ts',
+	// Activates Storefront to check the Mini-Cart drawer with the classic AJAX
+	// add-to-cart button.
 	'**/tests/blocks/mini-cart/mini-cart.classic_theme.spec.ts',
+	// Activates Storefront to check the Product Button block in a classic
+	// theme.
 	'**/tests/blocks/product-button/product-button.classic_theme.spec.ts',
+	// Activates Storefront to check which block styles a classic theme loads.
 	'**/tests/blocks/style.classic_theme.spec.ts',
+	// Activates `theme-with-woo-templates` and saves its template for one
+	// product.
 	'**/tests/blocks/templates/single-product-template.block_theme_with_templates.spec.ts',
+	// Saves each site-wide WooCommerce template and template part. The
+	// template part priority tests also activate `theme-with-woo-templates`.
 	'**/tests/blocks/templates/template-customization.block_theme.spec.ts',
+	// Activates `theme-with-woo-templates` and saves each of its WooCommerce
+	// templates.
 	'**/tests/blocks/templates/template-customization.block_theme_with_templates.spec.ts',
+	// Activates a Storefront child theme that has block template parts, and
+	// saves its Mini-Cart template part.
 	'**/tests/blocks/templates/template-part-customization.classic_theme_with_template_parts.spec.ts',
+	// Activates two Storefront child themes with block template part support,
+	// and saves the Mini-Cart template part.
 	'**/tests/blocks/templates/template-part-customization.classic_theme_with_template_parts_support.spec.ts',
+	// Activates `theme-with-woo-templates`, and saves the site-wide Single
+	// Product, Product Catalog and Products by Category templates.
 	'**/tests/blocks/templates/template-priority.block_theme.spec.ts',
+	// Activates Storefront, because only a classic theme has the widget
+	// editor.
 	'**/tests/blocks/widget-area/widget-area.classic_theme.spec.ts',
 
 	// Save site-wide templates, template parts or pages (single product, product
 	// archive, header, cart, checkout), or the
 	// `wc_blocks_use_blockified_product_grid_block_as_template` option. Every
 	// spec that visits those pages reads them.
+
+	// Saves the Single Product template and the Add to Cart + Options template
+	// part for variable products, creates and changes visible products,
+	// activates two test plugins, and turns off AJAX add to cart and turns on
+	// the redirect to the cart.
 	'**/tests/blocks/add-to-cart-with-options/add-to-cart-with-options.block_theme.spec.ts',
-	'**/tests/blocks/all-products/all-products.block_theme.spec.ts',
-	'**/tests/blocks/attributes-filter/attribute-filter.block_theme.spec.ts',
+	// Sets the option to false and saves the Product Catalog template, to check
+	// the Filter by Attribute block with the classic template on `/shop`.
+	'**/tests/blocks/attributes-filter/attribute-filter-classic-template.block_theme.spec.ts',
+	// Makes Beanie sold individually, activates a test plugin, and saves the
+	// Single Product template.
 	'**/tests/blocks/cart-store/cart-line-identity.block_theme.spec.ts',
+	// Saves the Checkout page template. A post with a Checkout block is not the
+	// checkout page, so it cannot replace this template. Also places orders for
+	// Polo.
 	'**/tests/blocks/checkout/checkout-block.merchant.block_theme.spec.ts',
-	'**/tests/blocks/classic-template/classic-template.block_theme.spec.ts',
+	// Sets the option to false, to check that the Product Catalog template
+	// then has the classic template block.
+	'**/tests/blocks/classic-template/classic-template-blockified-option.block_theme.spec.ts',
+	// Saves the header template part, creates a visible $10 product, and
+	// changes the tax settings `woocommerce_prices_include_tax` and
+	// `woocommerce_tax_display_cart`.
 	'**/tests/blocks/mini-cart/mini-cart-block.shopper.block_theme.spec.ts',
-	'**/tests/blocks/mini-cart/mini-cart.block_theme.spec.ts',
-	'**/tests/blocks/page-content-wrapper/page-content-wrapper.block_theme.spec.ts',
-	'**/tests/blocks/price-filter/price-filter.block_theme.spec.ts',
-	'**/tests/blocks/product-collection/product-collection.block_theme.spec.ts',
-	'**/tests/blocks/product-filters/active-filter-frontend.block_theme.spec.ts',
-	'**/tests/blocks/product-filters/attribute-filter-frontend.block_theme.spec.ts',
-	'**/tests/blocks/product-filters/product-filters-frontend.block_theme.spec.ts',
-	'**/tests/blocks/products/products.block_theme.spec.ts',
-	'**/tests/blocks/rating-filter/rating-filter.block_theme.spec.ts',
-	'**/tests/blocks/stock-filter/stock-filter.block_theme.spec.ts',
+	// Saves the header template part, which every frontend page shows. Its
+	// only test is skipped.
+	'**/tests/blocks/mini-cart/mini-cart-header-colors.block_theme.spec.ts',
+	// Edits the content of the Cart and Checkout pages.
+	'**/tests/blocks/page-content-wrapper/page-content-wrapper-page-edit.block_theme.spec.ts',
+	// Sets the option to false and saves the Product Catalog template, to check
+	// the Filter by Price block with the classic template on `/shop`.
+	'**/tests/blocks/price-filter/price-filter-classic-template.block_theme.spec.ts',
+	// Saves the Product Catalog and Product Search Results templates and the
+	// templates for all categories and all tags, and changes the default
+	// catalog order and the number of products per page.
+	'**/tests/blocks/product-collection/product-collection-site-templates.block_theme.spec.ts',
+	// Saves the Product Catalog template and checks term counts on `/shop`,
+	// which only stay the same in a serial run.
+	'**/tests/blocks/product-filters/product-filters-shop.block_theme.spec.ts',
+	// Saves the Product Catalog and Product Search Results templates. No
+	// narrower template can change only one of these pages.
+	'**/tests/blocks/products/products-site-templates.block_theme.spec.ts',
+	// Sets the option to false and saves the Product Catalog template, to check
+	// the Filter by Rating block with the classic template on `/shop`.
+	'**/tests/blocks/rating-filter/rating-filter-classic-template.block_theme.spec.ts',
+	// Sets the option to false and saves the Product Catalog template, to check
+	// the Filter by Stock block with the classic template on `/shop`.
+	'**/tests/blocks/stock-filter/stock-filter-classic-template.block_theme.spec.ts',
+	// Saves the Single Product template under the plugin template ID and
+	// renames the `wp_theme` term of the plugin. Only a site-wide template has
+	// this ID.
 	'**/tests/blocks/templates/legacy-templates.block_theme.spec.ts',
 
-	// Activate test plugins that change every cart, checkout or product page, or
-	// race other specs on the `active_plugins` option.
-	'**/tests/blocks/cart/cart-checkout-block-extension-callbacks.shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/checkout-block-custom-place-order-button.block_theme.spec.ts',
-	'**/tests/blocks/checkout/checkout-block-extensibility.shopper.block_theme.spec.ts',
-	'**/tests/blocks/product-button/product-button.block_theme.spec.ts',
-	'**/tests/blocks/product-collection/product-picker.block_theme.spec.ts',
-	'**/tests/blocks/product-collection/register-product-collection.block_theme.spec.ts',
+	// Turn off AJAX add to cart, which every Product Button reads.
+	'**/tests/blocks/product-button/product-button-ajax-disabled.block_theme.spec.ts',
 
-	// Change global settings that cart, checkout and storefront specs read:
-	// shipping, taxes, local pickup, account creation, site language, the shop
-	// page slug and feature flags.
+	// Change global settings that cart, checkout and storefront specs read.
+
+	// Adds, edits and deletes shipping zones and methods, and changes the
+	// default customer location, local pickup and "Hide shipping costs until an
+	// address is entered".
 	'**/tests/blocks/cart/cart-checkout-block-shipping.block_theme.spec.ts',
+	// Turns tax calculation off and on and adds a standard tax rate, which
+	// changes the prices every cart and checkout spec shows.
 	'**/tests/blocks/cart/cart-checkout-block-taxes.shopper.block_theme.spec.ts',
+	// Switches the site language, which every spec reads.
 	'**/tests/blocks/cart/cart-checkout-block-translations.shopper.block_theme.spec.ts',
+	// Turns on Back in Stock Notifications sign-ups, which adds a form to every
+	// out-of-stock product page.
+	'**/tests/blocks/add-to-cart-with-options/back-in-stock-form.block_theme.spec.ts',
+	// Changes local pickup, shipping methods, "Hide shipping costs until an
+	// address is entered" and the countries the store ships to, and saves the
+	// Checkout page template. Most tests also place orders, some for Beanie,
+	// which changes the Best Sellers ranking.
 	'**/tests/blocks/checkout/checkout-block.shopper.block_theme.spec.ts',
+	// Logs out the admin user that all workers share. Also changes local pickup,
+	// account creation settings and the `experimental-blocks` feature flag,
+	// activates a test plugin, places orders for Beanie and opens the newest
+	// order in the orders list.
 	'**/tests/blocks/checkout/order-confirmation.block_theme.spec.ts',
+	// Changes the shop page slug, so the `shop/` URL that other specs visit
+	// stops working.
 	'**/tests/blocks/templates/shop-page.block_theme.spec.ts',
-
-	// Place orders, which change the Best Sellers ranking. Some also add to the
-	// cart as the admin user, whose cart all workers share.
-	'**/tests/blocks/cart/cart-checkout-block-coupons.shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.guest-shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.merchant.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/checkout-block-locale-hide-country.block_theme.spec.ts',
-
-	// Create or edit products and categories that catalog specs count.
-	'**/tests/blocks/product-collection/product-collection-errors.block_theme.spec.ts',
 ];
 
 export default defineConfig< { resetDatabaseAfterEachTest: boolean } >( {

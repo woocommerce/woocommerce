@@ -82,7 +82,8 @@ if ( ! class_exists( 'WC_Email_Order_Withdrawal_Requested', false ) ) :
 
 			parent::__construct();
 
-			$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
+			$this->recipient              = $this->get_option( 'recipient', get_option( 'admin_email' ) );
+			$this->template_block_content = 'emails/block/general-block-content-for-order-withdrawal-emails.php';
 		}
 
 		/**
@@ -213,6 +214,26 @@ if ( ! class_exists( 'WC_Email_Order_Withdrawal_Requested', false ) ) :
 		}
 
 		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'detail_rows'               => $this->formatter->get_detail_rows( $this->withdrawal_data, $this->submitted_at ),
+					'matched_order'             => $this->matched_order,
+					'outside_withdrawal_window' => $this->outside_withdrawal_window,
+					'withdrawal_window_warning' => $this->withdrawal_window_warning,
+					'sent_to_admin'             => true,
+					'plain_text'                => false,
+					'email'                     => $this,
+				)
+			);
+		}
+
+		/**
 		 * Get content plain.
 		 *
 		 * @return string
@@ -243,10 +264,14 @@ if ( ! class_exists( 'WC_Email_Order_Withdrawal_Requested', false ) ) :
 			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
 			$this->form_fields = array(
 				'enabled'            => array(
-					'title'   => __( 'Enable/Disable', 'woocommerce' ),
-					'type'    => 'checkbox',
-					'label'   => __( 'Enable this email notification', 'woocommerce' ),
-					'default' => 'yes',
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
+					'title'     => __( 'Enable/Disable', 'woocommerce' ),
+					'type'      => 'checkbox',
+					'label'     => __( 'Enable this email notification', 'woocommerce' ),
+					'default'   => 'yes',
 				),
 				'recipient'          => array(
 					'title'       => __( 'Recipient(s)', 'woocommerce' ),
@@ -258,6 +283,10 @@ if ( ! class_exists( 'WC_Email_Order_Withdrawal_Requested', false ) ) :
 					'desc_tip'    => true,
 				),
 				'subject'            => array(
+					'abilities'   => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'title'       => __( 'Subject', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -266,6 +295,10 @@ if ( ! class_exists( 'WC_Email_Order_Withdrawal_Requested', false ) ) :
 					'default'     => '',
 				),
 				'heading'            => array(
+					'abilities'   => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'title'       => __( 'Email heading', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -274,6 +307,10 @@ if ( ! class_exists( 'WC_Email_Order_Withdrawal_Requested', false ) ) :
 					'default'     => '',
 				),
 				'additional_content' => array(
+					'abilities'   => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'title'       => __( 'Additional content', 'woocommerce' ),
 					'description' => __( 'Text to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
 					'css'         => 'width:400px; height: 75px;',
@@ -283,6 +320,10 @@ if ( ! class_exists( 'WC_Email_Order_Withdrawal_Requested', false ) ) :
 					'desc_tip'    => true,
 				),
 				'email_type'         => array(
+					'abilities'   => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'title'       => __( 'Email type', 'woocommerce' ),
 					'type'        => 'select',
 					'description' => __( 'Choose which format of email to send.', 'woocommerce' ),

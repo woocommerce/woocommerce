@@ -10,7 +10,7 @@ import {
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,
-} from '@woocommerce/stores/woocommerce/cart';
+} from '@woocommerce/stores/woocommerce';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
@@ -282,7 +282,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
-				yield import( '@woocommerce/stores/woocommerce/cart' );
+				yield import( '@woocommerce/stores/woocommerce' );
 
 				const product = productsState.productInContext;
 

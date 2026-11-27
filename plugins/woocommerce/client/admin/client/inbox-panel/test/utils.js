@@ -50,6 +50,18 @@ describe( 'truncateRenderableHTML', () => {
 		);
 	} );
 
+	test( 'it should keep a base letter and its combining mark together', () => {
+		expect( truncateRenderableHTML( '<div>éclair</div>', 1 ) ).toBe(
+			'<div>é</div>...'
+		);
+	} );
+
+	test( 'it should keep an emoji sequence together', () => {
+		expect( truncateRenderableHTML( '<div>👨‍👩‍👧 family</div>', 1 ) ).toBe(
+			'<div>👨‍👩‍👧</div>...'
+		);
+	} );
+
 	test( 'it should preserve whole words when truncated', () => {
 		const sample = '<div>this is a test sentence</div>';
 		// it should return 'this is a' (9 chars) when length 11 is given

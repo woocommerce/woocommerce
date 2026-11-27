@@ -484,4 +484,32 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 	public function test_unique_truthy_values_returns_empty_array_when_nothing_survives( $input ) {
 		$this->assertEquals( array(), ArrayUtil::unique_truthy_values( $input ) );
 	}
+
+	/**
+	 * @testdox `is_flat_scalar_array` is true only for an array whose direct values are all scalars.
+	 *
+	 * @testWith [[], true]
+	 *           [[1, "2.00", true], true]
+	 *           [[null], false]
+	 *           [[[1, 2]], false]
+	 *
+	 * @param array $input    The input value to test.
+	 * @param bool  $expected The expected result.
+	 */
+	public function test_is_flat_scalar_array_checks_direct_values_only( $input, bool $expected ) {
+		$this->assertSame( $expected, ArrayUtil::is_flat_scalar_array( $input ) );
+	}
+
+	/**
+	 * @testdox `is_flat_scalar_array` is false for a non-array value.
+	 *
+	 * @testWith [null]
+	 *           ["a string"]
+	 *           [42]
+	 *
+	 * @param mixed $input The input value to test.
+	 */
+	public function test_is_flat_scalar_array_is_false_for_non_arrays( $input ) {
+		$this->assertFalse( ArrayUtil::is_flat_scalar_array( $input ) );
+	}
 }

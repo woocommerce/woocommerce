@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render emails containing a block whose style attribute is a string, such as a Calendly embed, instead of failing.

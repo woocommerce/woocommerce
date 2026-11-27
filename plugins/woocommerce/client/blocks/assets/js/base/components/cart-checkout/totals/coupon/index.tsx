@@ -3,18 +3,18 @@
  */
 import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
-import { useState, useRef } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import {
-	ValidatedTextInput,
+	TextInput,
 	ValidationInputError,
-	ValidatedTextInputHandle,
 	Panel,
 	Spinner,
 } from '@woocommerce/blocks-components';
-import { useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
+import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
 import type { MouseEvent, MouseEventHandler } from 'react';
 
 /**
@@ -36,9 +36,10 @@ export interface TotalsCouponProps {
 	 */
 	displayCouponForm?: boolean;
 	/**
-	 * Submit handler
+	 * Submit handler. Resolves when the coupon was applied. Rejects with an
+	 * Error whose message is shown under the input when it was not.
 	 */
-	onSubmit?: ( couponValue: string ) => Promise< boolean > | undefined;
+	onSubmit?: ( couponValue: string ) => Promise< unknown > | undefined;
 }
 
 export const TotalsCoupon = ( {
@@ -48,37 +49,52 @@ export const TotalsCoupon = ( {
 	displayCouponForm = false,
 }: TotalsCouponProps ): JSX.Element => {
 	const [ couponValue, setCouponValue ] = useState( '' );
+	const [ errorMessage, setErrorMessage ] = useState( '' );
 	const [ isCouponFormVisible, setIsCouponFormVisible ] =
 		useState( displayCouponForm );
 	const textInputId = `wc-block-components-totals-coupon__input-${ instanceId }`;
-	const { validationErrorId } = useSelect(
-		( select ) => {
-			const store = select( validationStore );
-			return {
-				validationErrorId: store.getValidationErrorId( instanceId ),
-			};
-		},
-		[ instanceId ]
+	const errorId = `wc-block-components-totals-coupon__error-${ instanceId }`;
+	const inputRef = useRef< HTMLInputElement >( null );
+	const { clearValidationError } = useDispatch( validationStore );
+	const hasError = errorMessage !== '';
+
+	useEffect( () => {
+		if ( isCouponFormVisible ) {
+			inputRef.current?.focus();
+		}
+	}, [ isCouponFormVisible ] );
+
+	// The message only concerns this form. Drop it whenever the checkout is
+	// validated, so a checkout error never reads as a coupon problem and the
+	// scroll to the first error never lands on the coupon input.
+	useEffect(
+		() =>
+			checkoutEvents.onCheckoutValidation( () => {
+				setErrorMessage( '' );
+				return true;
+			} ),
+		[]
 	);
-	const inputRef = useRef< ValidatedTextInputHandle >( null );
 
 	const handleCouponSubmit: MouseEventHandler< HTMLButtonElement > = (
 		e: MouseEvent< HTMLButtonElement >
 	) => {
 		e.preventDefault();
-		if ( typeof onSubmit !== 'undefined' ) {
-			void onSubmit( couponValue )?.then( ( result ) => {
-				if ( result ) {
-					setCouponValue( '' );
-					setIsCouponFormVisible( false );
-				} else if ( inputRef.current?.focus ) {
-					inputRef.current.focus();
-				}
-			} );
-		} else {
+		if ( typeof onSubmit === 'undefined' ) {
 			setCouponValue( '' );
 			setIsCouponFormVisible( true );
+			return;
 		}
+		setErrorMessage( '' );
+		void onSubmit( couponValue )
+			?.then( () => {
+				setCouponValue( '' );
+				setIsCouponFormVisible( false );
+			} )
+			.catch( ( error: Error ) => {
+				setErrorMessage( error.message );
+				inputRef.current?.focus();
+			} );
 	};
 
 	return (
@@ -100,19 +116,24 @@ export const TotalsCoupon = ( {
 						className="wc-block-components-totals-coupon__form"
 						id="wc-block-components-totals-coupon__form"
 					>
-						<ValidatedTextInput
+						<TextInput
 							id={ textInputId }
-							errorId="coupon"
-							className="wc-block-components-totals-coupon__input"
+							className={ clsx(
+								'wc-block-components-totals-coupon__input',
+								{ 'has-error': hasError }
+							) }
 							label={ __( 'Enter code', 'woocommerce' ) }
 							value={ couponValue }
-							ariaDescribedBy={ validationErrorId || '' }
+							ariaDescribedBy={ hasError ? errorId : undefined }
+							aria-invalid={ hasError }
 							onChange={ ( newCouponValue ) => {
+								setErrorMessage( '' );
+								// An extension can still set a `coupon` validation error,
+								// which blocks checkout but shows nowhere. Editing the
+								// code clears it, as it did before.
+								void clearValidationError( 'coupon' );
 								setCouponValue( newCouponValue );
 							} }
-							focusOnMount={ true }
-							validateOnMount={ false }
-							showError={ false }
 							ref={ inputRef }
 						/>
 						<Button
@@ -131,10 +152,12 @@ export const TotalsCoupon = ( {
 							{ __( 'Apply', 'woocommerce' ) }
 						</Button>
 					</form>
-					<ValidationInputError
-						propertyName="coupon"
-						elementId={ instanceId }
-					/>
+					{ hasError && (
+						<ValidationInputError
+							errorMessage={ errorMessage }
+							id={ errorId }
+						/>
+					) }
 				</div>
 			</LoadingMask>
 		</Panel>

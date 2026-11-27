@@ -1,0 +1,10 @@
+# Dependency build scripts this docs site doesn't need; denied explicitly so pnpm doesn't fail on them.
+allowBuilds:
+    '@swc/core': false
+    core-js: false
+
+overrides:
+    # Remove after upgrading to the next stable Docusaurus release.
+    'tinypool@<2.1.2': ^2.1.2
+    # Remove after upgrading to the next stable Docusaurus release.
+    'serialize-javascript@<7.0.3': ^7.1.3

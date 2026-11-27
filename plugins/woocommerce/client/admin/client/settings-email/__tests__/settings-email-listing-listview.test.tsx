@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests/src/util/index.js';
 import { render } from '@testing-library/react';
 import type { ComponentType } from 'react';
 
@@ -10,6 +11,8 @@ import type { ComponentType } from 'react';
 import { ListView } from '../settings-email-listing-listview';
 import type { EmailType } from '../settings-email-listing-slotfill';
 import { useSendTestEmail } from '../settings-email-send-test';
+
+const setHref = mockBrowserLocation( 'href' );
 
 type DataViewsAction = {
 	id: string;
@@ -23,10 +26,18 @@ type DataViewsAction = {
 
 // Captured on each render so tests can drive the actions directly.
 let capturedActions: DataViewsAction[] = [];
+let capturedOnClickItem: ( ( item: EmailType ) => unknown ) | undefined;
 
 jest.mock( '@wordpress/dataviews/wp', () => ( {
-	DataViews: ( { actions }: { actions: DataViewsAction[] } ) => {
+	DataViews: ( {
+		actions,
+		onClickItem,
+	}: {
+		actions: DataViewsAction[];
+		onClickItem?: ( item: EmailType ) => unknown;
+	} ) => {
 		capturedActions = actions;
+		capturedOnClickItem = onClickItem;
 		return null;
 	},
 } ) );
@@ -107,27 +118,11 @@ const renderTestModal = ( email: EmailType ) => {
 };
 
 describe( 'ListView', () => {
-	let originalLocation: typeof window.location;
-
 	beforeEach( () => {
 		capturedActions = [];
+		capturedOnClickItem = undefined;
 		useSendTestEmailMock.mockClear();
 		mockRecreateEmailPost.mockReset();
-
-		originalLocation = window.location;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		delete ( window as any ).location;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		( window as any ).location = {
-			...originalLocation,
-			href: '',
-			assign: jest.fn(),
-		};
-	} );
-
-	afterEach( () => {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		( window as any ).location = originalLocation;
 	} );
 
 	describe( 'edit action', () => {
@@ -137,7 +132,7 @@ describe( 'ListView', () => {
 			await getAction( 'edit' )?.callback?.( [ emailType ] );
 
 			expect( mockRecreateEmailPost ).not.toHaveBeenCalled();
-			expect( window.location.href ).toBe(
+			expect( setHref ).toHaveBeenCalledWith(
 				'https://example.test/wp-admin/post.php?post=123&action=edit'
 			);
 		} );
@@ -157,7 +152,7 @@ describe( 'ListView', () => {
 			await getAction( 'edit' )?.callback?.( [ emailWithoutPost ] );
 
 			expect( mockRecreateEmailPost ).toHaveBeenCalledWith( 'new_order' );
-			expect( window.location.href ).toBe(
+			expect( setHref ).toHaveBeenCalledWith(
 				'https://example.test/wp-admin/post.php?post=456&action=edit'
 			);
 		} );
@@ -177,7 +172,7 @@ describe( 'ListView', () => {
 			await getAction( 'edit' )?.callback?.( [ classicEmail ] );
 
 			expect( mockRecreateEmailPost ).not.toHaveBeenCalled();
-			expect( window.location.href ).toBe(
+			expect( setHref ).toHaveBeenCalledWith(
 				'https://example.test/wp-admin/admin.php?page=wc-settings&tab=email&section=wc_email_customer_stock_notification_verify'
 			);
 			expect( mockCreateErrorNotice ).not.toHaveBeenCalled();
@@ -195,8 +190,40 @@ describe( 'ListView', () => {
 			await getAction( 'edit' )?.callback?.( [ emailWithoutPost ] );
 
 			expect( mockRecreateEmailPost ).toHaveBeenCalledWith( 'new_order' );
-			expect( window.location.href ).toBe( '' );
+			expect( setHref ).not.toHaveBeenCalled();
 			expect( mockCreateErrorNotice ).toHaveBeenCalled();
+		} );
+	} );
+
+	describe( 'title click', () => {
+		it( 'opens the editor like the edit action', async () => {
+			render( <ListView emailTypes={ [ emailType ] } /> );
+
+			await capturedOnClickItem?.( emailType );
+
+			expect( setHref ).toHaveBeenCalledWith(
+				'https://example.test/wp-admin/post.php?post=123&action=edit'
+			);
+		} );
+
+		it( 'lazily creates the post when no post exists', async () => {
+			mockRecreateEmailPost.mockResolvedValue( {
+				message: 'ok',
+				post_id: '456',
+			} );
+			const emailWithoutPost = {
+				...emailType,
+				post_id: '',
+				postStatus: null,
+			};
+			render( <ListView emailTypes={ [ emailWithoutPost ] } /> );
+
+			await capturedOnClickItem?.( emailWithoutPost );
+
+			expect( mockRecreateEmailPost ).toHaveBeenCalledWith( 'new_order' );
+			expect( setHref ).toHaveBeenCalledWith(
+				'https://example.test/wp-admin/post.php?post=456&action=edit'
+			);
 		} );
 	} );
 

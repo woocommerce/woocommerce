@@ -21,6 +21,17 @@
 			     include-time (top-level HTML and `echo`). Exclude to silence them. -->
 			<exclude>./tests/php/src/Internal/EmailEditor/WCTransactionalEmails/fixtures</exclude>
 		</testsuite>
+		<testsuite name="wc-phpunit-main-includes">
+			<directory suffix=".php">./tests/php/includes</directory>
+		</testsuite>
+		<testsuite name="wc-phpunit-main-other">
+			<directory suffix=".php">./tests/php</directory>
+			<!-- Exclude the includes shard and keep the other exclusions in sync with wc-phpunit-main. -->
+			<exclude>./tests/php/includes</exclude>
+			<exclude>./tests/php/helpers</exclude>
+			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
+			<exclude>./tests/php/src/Internal/EmailEditor/WCTransactionalEmails/fixtures</exclude>
+		</testsuite>
 	</testsuites>
 	<listeners>
 		<listener class="JohnKary\PHPUnit\Listener\SpeedTrapListener">
@@ -35,6 +46,9 @@
                 </array>
             </arguments>
 		</listener>
+		<listener class="WC_External_HTTP_Guard_Listener" file="./tests/legacy/framework/class-wc-external-http-guard-listener.php" />
+		<listener class="WC_Early_Exit_Guard_Listener" file="./tests/legacy/framework/class-wc-early-exit-guard-listener.php" />
+		<listener class="WC_Test_Instance_Cleanup_Listener" file="./tests/legacy/framework/class-wc-test-instance-cleanup-listener.php" />
 	</listeners>
 	<coverage includeUncoveredFiles="true">
 		<include>

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Apply the "verified owners" review restriction to product comments sent through the REST API and XML-RPC.

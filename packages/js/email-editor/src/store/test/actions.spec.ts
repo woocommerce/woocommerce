@@ -3,6 +3,7 @@
  */
 import { select } from '@wordpress/data';
 import { apiFetch } from '@wordpress/data-controls';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -21,6 +22,10 @@ jest.mock( '@wordpress/core-data', () => ( {
 
 jest.mock( '@wordpress/data-controls', () => ( {
 	apiFetch: jest.fn(),
+} ) );
+
+jest.mock( '@wordpress/hooks', () => ( {
+	applyFilters: jest.fn( ( _hook: string, value: unknown ) => value ),
 } ) );
 
 jest.mock( '../../events', () => ( {
@@ -49,6 +54,9 @@ describe( 'requestSendingNewsletterPreview', () => {
 			} )
 			.mockReturnValueOnce( {
 				getEmailPostId: () => 123,
+			} )
+			.mockReturnValueOnce( {
+				getEmailPostType: () => 'woo_email',
 			} );
 	} );
 
@@ -88,6 +96,33 @@ describe( 'requestSendingNewsletterPreview', () => {
 		} );
 	} );
 
+	it( 'posts the preview request to the path returned by the API path filter', () => {
+		( applyFilters as jest.Mock ).mockImplementationOnce(
+			(
+				hook: string,
+				value: unknown,
+				postType: string,
+				postId: number
+			) =>
+				hook === 'woocommerce_email_editor_send_preview_api_path'
+					? `/my-plugin/v1/test-email/${ postType }/${ postId }`
+					: value
+		);
+
+		const action = requestSendingNewsletterPreview( 'test@example.com' );
+		action.next();
+		action.next();
+
+		expect( apiFetchMock ).toHaveBeenCalledWith( {
+			path: '/my-plugin/v1/test-email/woo_email/123',
+			method: 'POST',
+			data: {
+				email: 'test@example.com',
+				postId: 123,
+			},
+		} );
+	} );
+
 	it( 'yields nothing when a preview send is already in flight', () => {
 		// Overwrite the queue beforeEach set up: this case needs the guard to see a
 		// send already running. Queue it the same way, so nothing outlives the case.
@@ -121,10 +156,28 @@ describe( 'requestSendingNewsletterPreview', () => {
 				state: {
 					sendingPreviewStatus: SendingPreviewStatus.ERROR,
 					isSendingPreviewEmail: false,
-					errorMessage: '"Request failed"',
+					errorMessage: 'Request failed',
 				},
 			},
 			done: false,
+		} );
+	} );
+
+	it( 'shows the message of a standard REST error from a custom endpoint', () => {
+		apiFetchMock.mockReturnValue( { type: 'API_FETCH' } );
+		const action = requestSendingNewsletterPreview( 'test@example.com' );
+
+		action.next();
+		action.next();
+
+		expect(
+			action.throw( {
+				code: 'my_plugin_error',
+				message: 'No mailer configured',
+				data: { status: 500 },
+			} ).value
+		).toMatchObject( {
+			state: { errorMessage: 'No mailer configured' },
 		} );
 	} );
 } );

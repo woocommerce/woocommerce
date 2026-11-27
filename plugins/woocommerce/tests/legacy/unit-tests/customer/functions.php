@@ -137,8 +137,6 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 			'woo_user_',
 			wc_create_new_customer_username( 'test@test.com' )
 		);
-
-		remove_filter( 'illegal_user_logins', array( $this, 'setup_illegal_user_logins' ) );
 	}
 
 	/**

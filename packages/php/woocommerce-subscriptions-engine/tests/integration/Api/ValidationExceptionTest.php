@@ -25,12 +25,14 @@ class ValidationExceptionTest extends EngineIntegrationTestCase {
 	 * Params a message for each code needs.
 	 */
 	private const SAMPLE_PARAMS = array(
-		ValidationErrorCode::REQUIRED       => array(),
-		ValidationErrorCode::INVALID_TYPE   => array( 'type' => 'string' ),
-		ValidationErrorCode::OUT_OF_BOUNDS  => array( 'min' => 1 ),
-		ValidationErrorCode::NOT_IN_ENUM    => array( 'allowed' => array( 'day', 'week' ) ),
-		ValidationErrorCode::INVALID_VALUE  => array(),
-		ValidationErrorCode::NOT_REGISTERED => array( 'value' => 'seasonal' ),
+		ValidationErrorCode::REQUIRED        => array(),
+		ValidationErrorCode::INVALID_TYPE    => array( 'type' => 'string' ),
+		ValidationErrorCode::OUT_OF_BOUNDS   => array( 'min' => 1 ),
+		ValidationErrorCode::NOT_IN_ENUM     => array( 'allowed' => array( 'day', 'week' ) ),
+		ValidationErrorCode::TOO_LONG        => array( 'max' => 320 ),
+		ValidationErrorCode::INVALID_VALUE   => array(),
+		ValidationErrorCode::INVALID_PATTERN => array( 'pattern' => '^[a-z]+$' ),
+		ValidationErrorCode::NOT_REGISTERED  => array( 'value' => 'seasonal' ),
 	);
 
 	/**
@@ -74,6 +76,8 @@ class ValidationExceptionTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'This field is required.', self::message_for( ValidationErrorCode::REQUIRED, 'name' ) );
 		$this->assertSame( 'Must be of type integer.', self::message_for( ValidationErrorCode::INVALID_TYPE, 'interval', array( 'type' => 'integer' ) ) );
 		$this->assertSame( 'This value is not valid.', self::message_for( ValidationErrorCode::INVALID_VALUE, 'currency' ) );
+		$this->assertSame( 'Must be at most 320 characters.', self::message_for( ValidationErrorCode::TOO_LONG, 'email', array( 'max' => 320 ) ) );
+		$this->assertSame( 'Must be at most 1 character.', self::message_for( ValidationErrorCode::TOO_LONG, 'code', array( 'max' => 1 ) ) );
 		$this->assertSame( '"seasonal" is not registered.', self::message_for( ValidationErrorCode::NOT_REGISTERED, 'status', array( 'value' => 'seasonal' ) ) );
 	}
 
@@ -130,6 +134,7 @@ class ValidationExceptionTest extends EngineIntegrationTestCase {
 	public function test_an_unknown_code_gets_the_generic_message(): void {
 		$this->assertSame( 'This value is not valid.', self::message_for( 'acme_unknown', 'name' ) );
 		$this->assertSame( 'This value is not valid.', self::message_for( ValidationErrorCode::OUT_OF_BOUNDS, 'limit' ) );
+		$this->assertSame( 'This value is not valid.', self::message_for( ValidationErrorCode::TOO_LONG, 'email' ) );
 		$this->assertSame( 'This value is not valid.', self::message_for( ValidationErrorCode::INVALID_TYPE, 'name', array( 'type' => 3 ) ) );
 		$this->assertSame( 'This value is not valid.', self::message_for( ValidationErrorCode::NOT_IN_ENUM, 'period', array( 'allowed' => 'day' ) ) );
 	}

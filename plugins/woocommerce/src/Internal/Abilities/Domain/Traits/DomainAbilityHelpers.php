@@ -99,22 +99,6 @@ trait DomainAbilityHelpers {
 	}
 
 	/**
-	 * Get a delete output schema.
-	 *
-	 * @return array
-	 */
-	protected static function get_delete_output_schema(): array {
-		return array(
-			'type'                 => 'object',
-			'properties'           => array(
-				'deleted' => array( 'type' => 'boolean' ),
-				'id'      => array( 'type' => 'integer' ),
-			),
-			'additionalProperties' => false,
-		);
-	}
-
-	/**
 	 * Get an ID value from ability input.
 	 *
 	 * @param mixed $input Ability input.

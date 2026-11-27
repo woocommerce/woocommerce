@@ -81,7 +81,7 @@ pnpm run test:js -- -u
 
 # Examples:
 pnpm run test:js -- client/settings-payments/components/status-badge
-pnpm run test:js -- --testPathPattern="complete-setup-button"
+pnpm run test:js -- --testPathPatterns="complete-setup-button"
 ```
 
 ### Jest Configuration

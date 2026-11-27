@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Update button doing nothing on orders that have an item with a decimal quantity.

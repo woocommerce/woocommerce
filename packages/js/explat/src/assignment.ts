@@ -107,6 +107,34 @@ export const fetchExperimentAssignment = async ( {
 	return await response.json();
 };
 
+/**
+ * Same request as fetchExperimentAssignment, with the default variation returned by name.
+ *
+ * Use it when an experiment runs on only part of the stores, for example at a 50% traffic ramp. ExPlat sends the default variation as null in `variations`, the same value a store outside the experiment gets, so the two cannot be told apart there. `assignments` has the variation name, with `variation: null` for a store the traffic ramp leaves out.
+ */
+export const fetchExperimentAssignmentWithDefaultVariationName = async ( {
+	experimentName,
+	anonId,
+}: {
+	experimentName: string;
+	anonId: string | null;
+} ): Promise< unknown > => {
+	const response = ( await fetchExperimentAssignment( {
+		experimentName,
+		anonId,
+	} ) ) as {
+		variations?: Record< string, unknown >;
+		assignments?: Record< string, { variation?: unknown } | null >;
+	} | null;
+	const variationName = response?.assignments?.[ experimentName ]?.variation;
+
+	if ( response?.variations && typeof variationName === 'string' ) {
+		response.variations[ experimentName ] = variationName;
+	}
+
+	return response;
+};
+
 export const fetchExperimentAssignmentWithAuth = async ( {
 	experimentName,
 	anonId,

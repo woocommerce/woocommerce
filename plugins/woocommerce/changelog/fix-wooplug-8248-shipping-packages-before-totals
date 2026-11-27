@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a PHP warning logged when a product is added to the cart with local pickup chosen and taxes enabled.

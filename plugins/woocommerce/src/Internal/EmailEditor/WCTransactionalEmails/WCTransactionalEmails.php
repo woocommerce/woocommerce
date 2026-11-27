@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -21,6 +23,7 @@ class WCTransactionalEmails {
 	 */
 	public static $core_transactional_emails = array(
 		'admin_payment_gateway_enabled',
+		'admin_report_export_download',
 		'cancelled_order',
 		'customer_cancelled_order',
 		'customer_completed_order',
@@ -69,6 +72,15 @@ class WCTransactionalEmails {
 				'customer_fulfillment_deleted',
 			);
 			$emails             = array_merge( $emails, $fulfillment_emails );
+		}
+
+		if ( FeaturesUtil::feature_is_enabled( 'order_withdrawal' ) ) {
+			$emails[] = 'customer_order_withdrawal_requested';
+			$emails[] = 'order_withdrawal_requested';
+		}
+
+		if ( StockNotifications::is_enabled_before_init() ) {
+			$emails = array_merge( $emails, EmailManager::$email_ids );
 		}
 
 		return $emails;

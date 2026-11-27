@@ -14,21 +14,27 @@ import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { CART_URL } from '@woocommerce/block-settings';
 import { useSelect } from '@wordpress/data';
 import { paymentStore } from '@woocommerce/block-data';
+import { useStyleProps } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
  */
 import { defaultPlaceOrderButtonLabel } from './constants';
 import { CheckoutOrderSummarySlot } from '../checkout-order-summary-block/slotfills';
+import TermsAndConditions from '../checkout-terms-block/frontend';
+import type { ButtonStyleAttributes } from '../../../cart-checkout-shared/types';
 import './style.scss';
 
-export type BlockAttributes = {
+export type BlockAttributes = ButtonStyleAttributes & {
 	cartPageId: number;
 	showReturnToCart: boolean;
 	className?: string;
 	placeOrderButtonLabel: string;
 	priceSeparator: string;
 	returnToCartButtonLabel: string;
+	showTerms?: boolean;
+	termsCheckbox?: boolean;
+	termsText?: string;
 };
 
 const Block = ( {
@@ -38,7 +44,12 @@ const Block = ( {
 	placeOrderButtonLabel,
 	returnToCartButtonLabel,
 	priceSeparator,
+	showTerms,
+	termsCheckbox,
+	termsText,
+	...styleAttributes
 }: BlockAttributes ) => {
+	const buttonStyleProps = useStyleProps( styleAttributes );
 	const { paymentMethodButtonLabel, paymentMethodPlaceOrderButton } =
 		useCheckoutSubmit();
 
@@ -66,16 +77,32 @@ const Block = ( {
 
 	const showPrice = className?.includes( 'is-style-with-price' ) || false;
 
+	// A required checkbox goes above the button; consent text goes below it. Extensions can hide the terms
+	// with the woocommerce_checkout_show_terms filter.
+	const terms =
+		showTerms && getSetting( 'checkoutShowTerms', true ) ? (
+			<TermsAndConditions
+				text={ termsText || '' }
+				checkbox={ !! termsCheckbox }
+				showSeparator={ false }
+				// Matches the Terms block wrapper, which extensions target.
+				className="wp-block-woocommerce-checkout-terms-block"
+			/>
+		) : null;
+
 	return (
 		<div className={ clsx( 'wc-block-checkout__actions', className ) }>
 			<CheckoutOrderSummarySlot />
 			<StoreNoticesContainer
 				context={ noticeContexts.CHECKOUT_ACTIONS }
 			/>
+			{ termsCheckbox && terms }
 			<div
 				className={ clsx( 'wc-block-checkout__actions_row', {
 					'wc-block-checkout__actions_row--justify-flex-end':
 						! shouldShowReturnToCart,
+					'wc-block-checkout__actions_row--with-return-to-cart':
+						shouldShowReturnToCart,
 				} ) }
 			>
 				{ shouldShowReturnToCart && (
@@ -84,12 +111,14 @@ const Block = ( {
 					</ReturnToCartButton>
 				) }
 				<PlaceOrderButton
+					buttonStyleProps={ buttonStyleProps }
 					CustomButtonComponent={ CustomButtonComponent }
 					label={ label }
-					fullWidth={ ! shouldShowReturnToCart }
+					fullWidth
 					showPrice={ showPrice }
 					priceSeparator={ priceSeparator }
 				/>
+				{ ! termsCheckbox && terms }
 			</div>
 		</div>
 	);

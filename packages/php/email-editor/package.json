@@ -18,6 +18,7 @@
 		"test:unit": "composer run-script test:unit",
 		"test:php:ci": "pnpm test:unit && pnpm test:integration",
 		"test:integration": "composer run-script test:integration",
+		"test:update-email-snapshots": "wp-env run tests-cli --env-cwd=wp-content/plugins/email-editor env UPDATE_EMAIL_SNAPSHOTS=1 ./vendor/bin/phpunit --configuration phpunit-integration.xml.dist --filter Renderer_Snapshot_Test",
 		"build:composer-package": "bash tasks/build-package.sh"
 	},
 	"license": "GPL-2.0-or-later",
@@ -42,13 +43,46 @@
 						"composer.json",
 						"composer.lock",
 						"**/*.php",
-						"phpunit.xml",
-						".wp-env.json"
+						"phpunit*.xml.dist",
+						".wp-env.json",
+						"src/**/*.css",
+						"src/**/*.json",
+						"src/**/*.html",
+						"tests/**/*.html",
+						"tests/**/*.txt"
 					],
 					"testEnv": {
 						"start": "env:test",
 						"config": {
 							"phpVersion": "8.1",
+							"wpVersion": "latest"
+						}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "PHP: 7.4 WP: latest",
+					"testType": "unit:php",
+					"command": "test:php:ci",
+					"changes": [
+						"composer.json",
+						"composer.lock",
+						"**/*.php",
+						"phpunit*.xml.dist",
+						".wp-env.json",
+						"src/**/*.css",
+						"src/**/*.json",
+						"src/**/*.html",
+						"tests/**/*.html",
+						"tests/**/*.txt"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "7.4",
 							"wpVersion": "latest"
 						}
 					},

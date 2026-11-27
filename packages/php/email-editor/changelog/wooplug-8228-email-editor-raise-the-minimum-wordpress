@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Require WordPress 7.0 or newer: Dependency_Check::are_dependencies_met() now returns false on older versions.

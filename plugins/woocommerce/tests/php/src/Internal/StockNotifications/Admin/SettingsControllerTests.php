@@ -12,6 +12,8 @@ use WC_Settings_Advanced;
 use WC_Settings_Products;
 use WP_REST_Request;
 
+require_once dirname( __DIR__, 4 ) . '/includes/settings/class-wc-settings-unit-test-case.php';
+
 /**
  * SettingsControllerTests data tests.
  */
@@ -265,8 +267,6 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 
 		$this->assertSame( 0, $field['value'] );
 		$this->assertSame( 0, $field['custom_attributes']['min'] );
-
-		delete_option( $option_id );
 	}
 
 	/**

@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  * HandpickedProducts class.
  */
 class HandpickedProducts extends AbstractProductGrid {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *

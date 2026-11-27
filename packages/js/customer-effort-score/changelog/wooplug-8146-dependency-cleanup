@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove the unused `@wordpress/notices`, `prop-types`, and `react-transition-group` dependencies. If your code imports one directly, add it to your own dependencies.

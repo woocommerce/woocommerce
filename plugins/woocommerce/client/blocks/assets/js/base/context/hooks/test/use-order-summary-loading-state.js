@@ -8,6 +8,7 @@ jest.mock( '../cart/use-store-cart-coupons', () => ( {
 } ) );
 
 jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
 } ) );
 
@@ -17,16 +18,40 @@ jest.mock( '@woocommerce/block-data', () => ( {
 	},
 } ) );
 
+jest.mock( '@woocommerce/base-hooks', () => {
+	const actual = jest.requireActual( '@woocommerce/base-hooks' );
+	return { ...actual, usePresence: jest.fn( actual.usePresence ) };
+} );
+
+jest.mock( '@wordpress/compose', () => {
+	const actual = jest.requireActual( '@wordpress/compose' );
+	return {
+		...actual,
+		useReducedMotion: jest.fn( actual.useReducedMotion ),
+	};
+} );
+
+jest.mock( '@woocommerce/base-utils', () => ( {
+	...jest.requireActual( '@woocommerce/base-utils' ),
+	isKeyboardInput: jest.fn( () => false ),
+} ) );
+
 /**
  * External dependencies
  */
-import { renderHook } from '@testing-library/react';
+import { usePresence } from '@woocommerce/base-hooks';
+import { isKeyboardInput } from '@woocommerce/base-utils';
+import { act, renderHook } from '@testing-library/react';
+import { useReducedMotion } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { useOrderSummaryLoadingState } from '../use-order-summary-loading-state';
+import {
+	useOrderSummaryLoadingState,
+	useOrderSummaryRow,
+} from '../use-order-summary-loading-state';
 import { useStoreCart } from '../cart/use-store-cart';
 import { useStoreCartCoupons } from '../cart/use-store-cart-coupons';
 
@@ -152,5 +177,118 @@ describe( 'useOrderSummaryLoadingState', () => {
 				name: 'wc/store/checkout',
 			} )
 		);
+	} );
+} );
+
+describe( 'useOrderSummaryRow', () => {
+	const mockCart = ( cartFees, isCalculating = false ) => {
+		useStoreCart.mockReturnValue( {
+			cartIsLoading: false,
+			isLoadingRates: false,
+			hasPendingItemsOperations: false,
+			cartFees,
+		} );
+		useSelect.mockReturnValue( isCalculating );
+	};
+	const renderRow = () =>
+		renderHook( () =>
+			useOrderSummaryRow(
+				useStoreCart(),
+				( { cartFees } ) => cartFees.length > 0
+			)
+		);
+
+	beforeEach( () => {
+		useStoreCartCoupons.mockReturnValue( {
+			isApplyingCoupon: false,
+			isRemovingCoupon: false,
+		} );
+	} );
+
+	afterEach( () => {
+		jest.clearAllMocks();
+	} );
+
+	it( 'returns the cart while the row shows, and null when it goes', () => {
+		mockCart( [ 'fee' ] );
+		const { result, rerender } = renderRow();
+		expect( result.current.cart.cartFees ).toEqual( [ 'fee' ] );
+
+		mockCart( [] );
+		rerender();
+		expect( result.current.cart ).toBeNull();
+		expect( result.current.wrapperProps.isExiting ).toBe( false );
+	} );
+
+	it( 'shows a new row when the skeletons end, not when the data arrives', () => {
+		mockCart( [] );
+		const { result, rerender } = renderRow();
+
+		mockCart( [ 'fee' ], true );
+		rerender();
+		expect( result.current.cart ).toBeNull();
+
+		mockCart( [ 'fee' ] );
+		rerender();
+		expect( result.current.cart.cartFees ).toEqual( [ 'fee' ] );
+	} );
+
+	it( 'is stale while the row shows a cart that is not the current one', () => {
+		mockCart( [ 'fee' ] );
+		const { result, rerender } = renderRow();
+		expect( result.current.isStale ).toBe( false );
+
+		mockCart( [], true );
+		rerender();
+		expect( result.current.cart.cartFees ).toEqual( [ 'fee' ] );
+		expect( result.current.isStale ).toBe( true );
+
+		mockCart( [ 'fee' ] );
+		rerender();
+		expect( result.current.isStale ).toBe( false );
+	} );
+
+	it( 'stays stale until the skeletons end, with motion', () => {
+		// The global mock reports reduced motion, which ends the skeletons at once.
+		useReducedMotion.mockReturnValue( false );
+		jest.useFakeTimers();
+		try {
+			mockCart( [ 'fee' ] );
+			const { result, rerender } = renderRow();
+
+			mockCart( [ 'new fee' ], true );
+			rerender();
+			mockCart( [ 'new fee' ] );
+			rerender();
+			expect( result.current.cart.cartFees ).toEqual( [ 'fee' ] );
+			expect( result.current.isStale ).toBe( true );
+
+			act( () => jest.advanceTimersByTime( 100 ) );
+			expect( result.current.isStale ).toBe( true );
+
+			act( () => jest.runOnlyPendingTimers() );
+			expect( result.current.cart.cartFees ).toEqual( [ 'new fee' ] );
+			expect( result.current.isStale ).toBe( false );
+		} finally {
+			jest.useRealTimers();
+			useReducedMotion.mockImplementation(
+				jest.requireActual( '@wordpress/compose' ).useReducedMotion
+			);
+		}
+	} );
+
+	it( 'animates after a pointer change, not after a key press', () => {
+		mockCart( [] );
+		const { rerender } = renderRow();
+		const lastAnimate = () => usePresence.mock.lastCall[ 1 ].animate;
+
+		mockCart( [ 'fee' ] );
+		rerender();
+		expect( lastAnimate() ).toBe( true );
+
+		isKeyboardInput.mockReturnValue( true );
+		rerender();
+		expect( lastAnimate() ).toBe( false );
+		isKeyboardInput.mockReturnValue( false );
 	} );
 } );

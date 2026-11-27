@@ -803,6 +803,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
+	 * @throws WC_REST_Exception When a product attribute or term ID is invalid.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$customs = CustomsDataValidator::normalize_fields( $request->get_params() );
@@ -818,17 +819,17 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Post title.
 		if ( isset( $request['name'] ) ) {
-			$product->set_name( wp_filter_post_kses( $request['name'] ) );
+			$product->set_name( wp_kses_post( $request['name'] ) );
 		}
 
 		// Post content.
 		if ( isset( $request['description'] ) ) {
-			$product->set_description( wp_filter_post_kses( $request['description'] ) );
+			$product->set_description( wp_kses_post( $request['description'] ) );
 		}
 
 		// Post excerpt.
 		if ( isset( $request['short_description'] ) ) {
-			$product->set_short_description( wp_filter_post_kses( $request['short_description'] ) );
+			$product->set_short_description( wp_kses_post( $request['short_description'] ) );
 		}
 
 		// Post status.
@@ -909,15 +910,22 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$attributes = array();
 
 			foreach ( $request['attributes'] as $attribute ) {
+				if ( ! is_array( $attribute ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute', esc_html__( 'Each attribute must be an object.', 'woocommerce' ), 400 );
+				}
+
 				$attribute_id   = 0;
 				$attribute_name = '';
 
 				// Check ID for global attributes or name for product attributes.
 				if ( ! empty( $attribute['id'] ) ) {
-					$attribute_id   = absint( $attribute['id'] );
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+					$attribute_id = absint( $attribute['id'] );
 				} elseif ( ! empty( $attribute['name'] ) ) {
 					$attribute_name = wc_clean( $attribute['name'] );
+				}
+
+				if ( array_key_exists( 'term_ids', $attribute ) && ( ! $attribute_id || ! is_array( $attribute['term_ids'] ) ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_term_id', esc_html__( 'Term IDs must be an array belonging to a valid global attribute.', 'woocommerce' ), 400 );
 				}
 
 				if ( ! $attribute_id && ! $attribute_name ) {
@@ -925,8 +933,26 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				}
 
 				if ( $attribute_id ) {
+					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
 
-					if ( isset( $attribute['options'] ) ) {
+					if ( array_key_exists( 'term_ids', $attribute ) ) {
+						if ( ! $attribute_name || ! taxonomy_exists( $attribute_name ) ) {
+							throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_term_id', esc_html__( 'Term IDs must be an array belonging to a valid global attribute.', 'woocommerce' ), 400 );
+						}
+
+						// Term IDs identify terms exactly, even when several terms share a name.
+						$values = array();
+						foreach ( $attribute['term_ids'] as $posted_term_id ) {
+							// Batch requests skip schema validation, so reject non-integer IDs before converting them.
+							$term_id = is_numeric( $posted_term_id ) && (float) (int) $posted_term_id === (float) $posted_term_id ? (int) $posted_term_id : 0;
+							$term    = $term_id > 0 ? get_term( $term_id, wc_attribute_taxonomy_name_by_id( $attribute_id ) ) : null;
+							if ( ! $term instanceof WP_Term ) {
+								/* translators: %d: term ID */
+								throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_term_id', esc_html( sprintf( __( '#%d is not a term of this attribute.', 'woocommerce' ), $term_id ) ), 400 );
+							}
+							$values[] = $term_id;
+						}
+					} elseif ( isset( $attribute['options'] ) ) {
 						$options = $attribute['options'];
 
 						if ( ! is_array( $attribute['options'] ) ) {
@@ -1819,6 +1845,15 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 									'type' => 'string',
 								),
 								'context'     => array( 'view', 'edit' ),
+							),
+							'term_ids'  => array(
+								'description' => __( 'List of term IDs of a global attribute. When set, it is used instead of options.', 'woocommerce' ),
+								'type'        => 'array',
+								'items'       => array(
+									'type'    => 'integer',
+									'minimum' => 1,
+								),
+								'context'     => array( 'edit' ),
 							),
 						),
 					),

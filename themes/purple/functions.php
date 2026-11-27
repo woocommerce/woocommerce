@@ -102,6 +102,31 @@ endif;
 
 add_action( 'init', 'purple_register_pattern_categories' );
 
+if ( ! function_exists( 'purple_block_attribute_string' ) ) :
+	/**
+	 * Encode a string as a JSON string literal for a block comment attribute.
+	 *
+	 * The block parser decodes JSON, not HTML, so HTML escaping would show "&amp;"
+	 * in the editor and a backslash would break the block's attributes.
+	 *
+	 * @param mixed $value Attribute value, usually a translated string.
+	 * @return string JSON string literal, including the surrounding quotes.
+	 */
+	function purple_block_attribute_string( $value ): string {
+		// Translations pass through gettext filters, which may return anything.
+		$value = is_scalar( $value ) ? (string) $value : '';
+
+		// serialize_block_attributes() encodes ["value"]; drop the brackets.
+		$encoded = serialize_block_attributes( array( $value ) );
+		if ( strlen( $encoded ) < 4 ) {
+			return '""';
+		}
+
+		return substr( $encoded, 1, -1 );
+	}
+
+endif;
+
 if ( ! function_exists( 'purple_get_woocommerce_stylesheets' ) ) :
 	/**
 	 * WooCommerce compatibility stylesheets that apply to the installed version.
@@ -119,7 +144,6 @@ if ( ! function_exists( 'purple_get_woocommerce_stylesheets' ) ) :
 		}
 
 		$stylesheets = array(
-			'11.2.0' => 'assets/css/woocommerce-11.1.css',
 			'11.3.0' => 'assets/css/woocommerce-11.2.css',
 		);
 

@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\RestApi\OrderLineItemValidationTrait;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\OrderLineMetaValidator;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -29,6 +30,8 @@ use Automattic\WooCommerce\Utilities\StringUtil;
 class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 	// phpcs:enable
+	use OrderLineItemValidationTrait;
+
 	/**
 	 * Endpoint namespace.
 	 *
@@ -726,6 +729,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Prepare a single order for create or update.
 	 *
+	 * @throws WC_REST_Exception When a new line item's product doesn't exist.
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
@@ -735,6 +739,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$order     = new WC_Order( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
+
+		$this->check_new_line_item_products( $request['line_items'] );
 
 		$item_types = array( 'shipping_lines', 'line_items', 'fee_lines', 'coupon_lines' );
 
@@ -895,10 +901,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$product_id = (int) $posted['product_id'];
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];
-		} elseif ( 'update' === $action ) {
+		} elseif ( 'update' === $action || $this->is_custom_line_item( $posted ) ) {
 			$product_id = 0;
 		} else {
-			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
+			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required. For a custom item, send a name and total instead.', 'woocommerce' ), 400 );
 		}
 		return $product_id;
 	}
@@ -972,11 +979,29 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			&& array_key_exists( 'variation_id', $posted )
 			&& 0 === (int) $posted['variation_id'];
 
+		// Only new items are checked, so orders whose products were deleted later stay editable.
+		// prepare_object_for_database() already checks them up front, but subclasses that skip it, like Subscriptions, rely on this check.
+		if ( 'create' === $action ) {
+			$this->check_line_item_product( $posted, $product );
+		}
+
 		if ( $clear_variation_id && $product instanceof WC_Product_Variation ) {
 			$product = wc_get_product( $current_product_id );
 		}
 
-		if ( $product && $product !== $item->get_product() ) {
+		$current_product = $item->get_product();
+
+		if (
+			$product
+			&& ! $this->should_preserve_line_item_product(
+				$action,
+				$product,
+				$current_product_id,
+				$current_variation_id,
+				$restore_variation_id
+			)
+			&& $product !== $current_product
+		) {
 			$item->set_product( $product );
 			if ( $restore_variation_id && $product_item ) {
 				try {
@@ -1032,6 +1057,44 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * Whether an update should preserve the line's recorded product details.
+	 *
+	 * @param string           $action               Create or update.
+	 * @param WC_Product|false $product              Product resolved from the request.
+	 * @param int              $current_product_id   Stored parent or simple product ID.
+	 * @param int              $current_variation_id Stored variation ID, or zero.
+	 * @param bool             $restore_variation_id Whether the request preserves the existing variation.
+	 * @return bool
+	 */
+	private function should_preserve_line_item_product(
+		$action,
+		$product,
+		$current_product_id,
+		$current_variation_id,
+		$restore_variation_id
+	) {
+		if ( 'update' !== $action || ! $product instanceof WC_Product ) {
+			return false;
+		}
+
+		// Leave deleted variations to the existing fallback handling.
+		if (
+			$current_variation_id
+			&& 'product_variation' !== get_post_type( $current_variation_id )
+		) {
+			return false;
+		}
+
+		if ( $restore_variation_id ) {
+			return true;
+		}
+
+		$current_id = $current_variation_id ? $current_variation_id : $current_product_id;
+
+		return $product->get_id() === $current_id;
+	}
 
 	/**
 	 * Create or update an order shipping method.

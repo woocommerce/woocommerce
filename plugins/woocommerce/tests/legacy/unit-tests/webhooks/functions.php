@@ -58,6 +58,19 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 			array( false, wc_is_webhook_valid_topic( 'missingdot' ) ),
 			array( false, wc_is_webhook_valid_topic( 'with space' ) ),
 			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_login_credentials' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_webhook_payload.extra' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_mail_content.extra' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_form_field_password' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_webhook_secret' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_logger_days_to_retain_logs' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_paypal_capture_request' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_paypal_refund_request.extra' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.woocommerce_product_csv_importer_check_import_file_path' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.woocommerce_add_to_cart.extra' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.woocommerce_form_field_checkbox' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.woocommerce_format_log_entry' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.woocommerce_logger_log_message' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.wc_webhook_extension_event' ) ),
 		);
 	}
 
@@ -171,13 +184,8 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_valid_webhook_events', $add_event );
 		add_filter( 'woocommerce_valid_webhook_resources', $add_resource );
 
-		try {
-			$this->assertTrue( wc_is_webhook_valid_topic( 'order.refunded' ) );
-			$this->assertTrue( wc_is_webhook_valid_topic( 'subscription.created' ) );
-		} finally {
-			remove_filter( 'woocommerce_valid_webhook_events', $add_event );
-			remove_filter( 'woocommerce_valid_webhook_resources', $add_resource );
-		}
+		$this->assertTrue( wc_is_webhook_valid_topic( 'order.refunded' ) );
+		$this->assertTrue( wc_is_webhook_valid_topic( 'subscription.created' ) );
 	}
 
 	/**
@@ -537,7 +545,6 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		$webhook2->delete( true );
 		$customer1->delete( true );
 		$customer2->delete( true );
-		remove_action( 'woocommerce_webhook_process_delivery', array( $this, 'woocommerce_webhook_process_delivery' ), 1, 2 );
 	}
 
 	/**

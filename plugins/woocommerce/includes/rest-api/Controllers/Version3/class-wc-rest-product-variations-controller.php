@@ -206,7 +206,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
-	 * @throws \Throwable When setting gallery_image_ids fails.
+	 * @throws \Throwable When setting gallery images fails or an attribute term ID is invalid.
+	 * @throws WC_REST_Exception When an attribute option is an array.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$customs = CustomsDataValidator::normalize_fields( $request->get_params() );
@@ -216,7 +217,27 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			$variation = new WC_Product_Variation();
 		}
 
+		if ( ! $variation instanceof WC_Product_Variation ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
 		$variation->set_parent_id( absint( $request['product_id'] ) );
+		$attribute_terms = array();
+		if ( isset( $request['attributes'] ) ) {
+			foreach ( $request['attributes'] as $index => $attribute ) {
+				if ( ! is_array( $attribute ) ) {
+					continue;
+				}
+				if ( isset( $attribute['option'] ) && is_array( $attribute['option'] ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_option', esc_html__( 'Attribute option must be a single value, not an array.', 'woocommerce' ), 400 );
+				}
+				if ( ! array_key_exists( 'term_id', $attribute ) ) {
+					continue;
+				}
+				$taxonomy                  = ! empty( $attribute['id'] ) ? wc_attribute_taxonomy_name_by_id( absint( $attribute['id'] ) ) : wc_sanitize_taxonomy_name( is_string( $attribute['name'] ?? null ) ? $attribute['name'] : '' );
+				$attribute_terms[ $index ] = $this->get_attribute_term( $attribute['term_id'], $taxonomy );
+			}
+		}
 
 		foreach ( $customs as $property => $value ) {
 			$variation->{ 'set_' . $property }( $value );
@@ -238,7 +259,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		// MPN.
-		if ( $variation instanceof WC_Product && isset( $request['mpn'] ) ) {
+		if ( isset( $request['mpn'] ) ) {
 			$variation->set_mpn( sanitize_text_field( $request['mpn'] ) );
 		}
 
@@ -400,7 +421,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 			$parent_attributes = $parent->get_attributes();
 
-			foreach ( $request['attributes'] as $attribute ) {
+			foreach ( $request['attributes'] as $index => $attribute ) {
+				if ( ! is_array( $attribute ) ) {
+					continue;
+				}
+
 				$attribute_id   = 0;
 				$attribute_name = '';
 
@@ -424,8 +449,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				$attribute_value = isset( $attribute['option'] ) ? wc_clean( rawurldecode( stripslashes( $attribute['option'] ) ) ) : '';
 
 				if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
-					// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-					$term = get_term_by( 'name', $attribute_value, $attribute_name );
+					// A term ID identifies the term exactly; otherwise get the slug from the name posted to the API.
+					if ( isset( $attribute_terms[ $index ] ) ) {
+						$term = $attribute_terms[ $index ];
+					} else {
+						$term = get_term_by( 'name', $attribute_value, $parent_attributes[ $attribute_name ]->get_name() );
+					}
 
 					if ( $term && ! is_wp_error( $term ) ) {
 						$attribute_value = $term->slug;
@@ -464,6 +493,24 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		 * @param bool            $creating  If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $variation, $request, $creating );
+	}
+
+	/**
+	 * Get a global attribute term before processing variation images.
+	 *
+	 * @param mixed $posted_term_id Requested term ID.
+	 * @param mixed $taxonomy       Global attribute taxonomy.
+	 * @return WP_Term
+	 * @throws WC_REST_Exception When the term ID or taxonomy is invalid.
+	 */
+	private function get_attribute_term( $posted_term_id, $taxonomy ): WP_Term {
+		$term_id = is_numeric( $posted_term_id ) && (float) (int) $posted_term_id === (float) $posted_term_id ? (int) $posted_term_id : 0;
+		$term    = $term_id > 0 && is_string( $taxonomy ) && taxonomy_exists( $taxonomy ) && taxonomy_is_product_attribute( $taxonomy ) ? get_term_by( 'id', $term_id, $taxonomy ) : false;
+		if ( ! $term instanceof WP_Term ) {
+			/* translators: %d: term ID */
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_term_id', esc_html( sprintf( __( '#%d is not a term of this attribute.', 'woocommerce' ), $term_id ) ), 400 );
+		}
+		return $term;
 	}
 
 	/**
@@ -908,20 +955,26 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
-							'id'     => array(
+							'id'      => array(
 								'description' => __( 'Attribute ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'name'   => array(
+							'name'    => array(
 								'description' => __( 'Attribute name.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'option' => array(
+							'option'  => array(
 								'description' => __( 'Selected attribute term name.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
+							),
+							'term_id' => array(
+								'description' => __( 'Selected term ID of a global attribute. When set, it is used instead of option.', 'woocommerce' ),
+								'type'        => 'integer',
+								'minimum'     => 1,
+								'context'     => array( 'edit' ),
 							),
 						),
 					),

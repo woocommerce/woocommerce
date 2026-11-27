@@ -2,26 +2,20 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes\Reviews;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 
 /**
  * ProductReviewRating class.
  */
 class ProductReviewRating extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
 	protected $block_name = 'product-review-rating';
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return string[]|null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
 
 	/**
 	 * Render the block.
@@ -62,16 +56,5 @@ class ProductReviewRating extends AbstractBlock {
 			get_block_wrapper_attributes(),
 			$html
 		);
-	}
-
-	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @see $this->register_block_type()
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string|null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }

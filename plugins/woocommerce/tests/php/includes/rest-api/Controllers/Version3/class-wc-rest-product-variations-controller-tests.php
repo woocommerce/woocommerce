@@ -40,6 +40,54 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	private $variation_orderby_clauses = array();
 
 	/**
+	 * @testdox The variation API resolves term names using the registered taxonomy for non-Latin attributes.
+	 * @testWith ["v3", "χρώμα", "κόκκινο"]
+	 *           ["v3", "χρώμα", "ερυθρό"]
+	 *           ["v3", "color", "red"]
+	 *           ["v2", "χρώμα", "κόκκινο"]
+	 *           ["v2", "χρώμα", "ερυθρό"]
+	 *           ["v2", "color", "red"]
+	 * @param string $version REST API version.
+	 * @param string $attribute_name Attribute name.
+	 * @param string $term_slug Term slug, which may differ from the term name.
+	 */
+	public function test_create_variation_with_non_latin_attribute( string $version, string $attribute_name, string $term_slug ): void {
+		if ( 'v2' === $version ) {
+			$controller = new WC_REST_Product_Variations_V2_Controller();
+			$controller->register_routes();
+		}
+
+		$attribute = WC_Helper_Product::create_product_attribute_object( $attribute_name, array( 'Κόκκινο' ) );
+		$term_id   = $attribute->get_options()[0];
+		wp_update_term( $term_id, $attribute->get_name(), array( 'slug' => $term_slug ) );
+		$term = get_term( $term_id, $attribute->get_name() );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$request = new WP_REST_Request( 'POST', "/wc/{$version}/products/{$product->get_id()}/variations" );
+		$request->set_body_params(
+			array(
+				'regular_price' => '10',
+				'attributes'    => array(
+					array(
+						'id'     => $attribute->get_id(),
+						'option' => 'Κόκκινο',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 201, $response->get_status() );
+		$data      = $response->get_data();
+		$variation = wc_get_product( $data['id'] );
+
+		$this->assertSame( array( sanitize_title( $attribute->get_name() ) => $term->slug ), $variation->get_attributes(), 'The API must save the actual term slug, including custom slugs.' );
+		$this->assertSame( 'Κόκκινο', $data['attributes'][0]['option'], 'The API must return the term name rather than its slug.' );
+	}
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -64,7 +112,6 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 		parent::tearDown();
 		$this->clear_rest_server();
 		unset( $this->server, $this->controller );
-		$this->disable_cogs_feature();
 	}
 
 	/**
@@ -1130,6 +1177,40 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Preparing an update for a variation deleted mid-request returns an invalid ID error instead of a fatal error.
+	 *
+	 * @testWith ["WC_REST_Product_Variations_Controller"]
+	 *           ["WC_REST_Product_Variations_V2_Controller"]
+	 *
+	 * @param string $controller_class The variations controller class under test.
+	 */
+	public function test_prepare_object_returns_error_when_variation_deleted( string $controller_class ): void {
+		$parent       = WC_Helper_Product::create_variation_product();
+		$variation_id = (int) $parent->get_children()[0];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $parent->get_id() . '/variations/' . $variation_id );
+		$request->set_url_params(
+			array(
+				'product_id' => $parent->get_id(),
+				'id'         => $variation_id,
+			)
+		);
+		$request->set_body_params( array( 'regular_price' => '9.99' ) );
+
+		// Simulate a concurrent deletion between the update_item() guard and preparation.
+		wp_delete_post( $variation_id, true );
+
+		$controller     = new $controller_class();
+		$prepare_method = new ReflectionMethod( $controller, 'prepare_object_for_database' );
+		$prepare_method->setAccessible( true );
+		$result = $prepare_method->invoke( $controller, $request, false );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_rest_product_variation_invalid_id', $result->get_error_code() );
+		$this->assertSame( 404, $result->get_error_data()['status'] );
+	}
+
+	/**
 	 * @testdox Creating a variation normalizes customs values.
 	 */
 	public function test_create_variation_normalizes_customs_values(): void {
@@ -1482,5 +1563,293 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 		$product->set_attributes( array( $attribute ) );
 		$product->save();
 		return $product;
+	}
+
+	/**
+	 * @testdox A variation attribute can be set by term ID, so terms that share a name are not mixed up.
+	 */
+	public function test_create_variation_with_attribute_term_id(): void {
+		list( $attribute, $first_term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+
+		$product_attribute = new WC_Product_Attribute();
+		$product_attribute->set_id( $attribute['attribute_id'] );
+		$product_attribute->set_name( $attribute['attribute_taxonomy'] );
+		$product_attribute->set_options( array( $first_term_id, $second_term_id ) );
+		$product_attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $product_attribute ) );
+		$product->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_body_params(
+			array(
+				'attributes' => array(
+					array(
+						'id'      => $attribute['attribute_id'],
+						'option'  => 'Green',
+						'term_id' => $second_term_id,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$variation = wc_get_product( $response->get_data()['id'] );
+		$this->assertSame( 'trousers-green', $variation->get_attributes()[ $attribute['attribute_taxonomy'] ] );
+	}
+
+	/**
+	 * @testdox An unknown variation attribute term ID is rejected instead of saving "Any".
+	 */
+	public function test_create_variation_with_unknown_attribute_term_id_fails(): void {
+		list( $attribute, $first_term_id ) = $this->create_attribute_with_duplicate_term_names();
+
+		$product_attribute = new WC_Product_Attribute();
+		$product_attribute->set_id( $attribute['attribute_id'] );
+		$product_attribute->set_name( $attribute['attribute_taxonomy'] );
+		$product_attribute->set_options( array( $first_term_id ) );
+		$product_attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $product_attribute ) );
+		$product->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_body_params(
+			array(
+				'attributes' => array(
+					array(
+						'id'      => $attribute['attribute_id'],
+						'term_id' => PHP_INT_MAX,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_attribute_term_id', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox An invalid variation attribute term ID is rejected and keeps the saved selection.
+	 * @testWith [0]
+	 *           [-1]
+	 *           [1, 0.5]
+	 *
+	 * @param int   $sign   Multiplier applied to a real term ID: 0 posts 0, -1 posts the negated ID.
+	 * @param float $offset Fraction added to the term ID.
+	 */
+	public function test_batch_update_variation_rejects_non_positive_attribute_term_id( int $sign, float $offset = 0 ): void {
+		list( $attribute, $first_term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+		$taxonomy = $attribute['attribute_taxonomy'];
+
+		$product_attribute = new WC_Product_Attribute();
+		$product_attribute->set_id( $attribute['attribute_id'] );
+		$product_attribute->set_name( $taxonomy );
+		$product_attribute->set_options( array( $first_term_id, $second_term_id ) );
+		$product_attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $product_attribute ) );
+		$product->save();
+
+		$selected_slug = get_term( $second_term_id )->slug;
+		$variation     = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( $taxonomy => $selected_slug ) );
+		$variation->save();
+		$attachment_id = $this->factory->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		update_post_meta( $attachment_id, '_wp_attachment_image_alt', 'Original image text' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'         => $variation->get_id(),
+						'image'      => array(
+							'id'  => $attachment_id,
+							'alt' => 'Changed by rejected request',
+						),
+						'attributes' => array(
+							array(
+								'id'      => $attribute['attribute_id'],
+								'term_id' => $sign * $first_term_id + $offset,
+							),
+						),
+					),
+				),
+			)
+		);
+		$data = $this->server->dispatch( $request )->get_data();
+
+		$this->assertSame( 'woocommerce_rest_invalid_attribute_term_id', $data['update'][0]['error']['code'] ?? null, 'The term ID should be rejected.' );
+		$this->assertSame( $selected_slug, wc_get_product( $variation->get_id() )->get_attributes()[ $taxonomy ], 'The saved selection should not change.' );
+		$this->assertSame( 'Original image text', get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ), 'Rejected requests must not update attachment metadata.' );
+	}
+
+	/**
+	 * @testdox A variation batch update skips malformed attribute entries while applying valid term selections.
+	 * @testWith [null]
+	 *           [false]
+	 *           [42]
+	 *           ["invalid"]
+	 *
+	 * @param mixed $invalid_attribute Non-array attribute entry.
+	 */
+	public function test_batch_update_variation_skips_non_array_attributes( $invalid_attribute ): void {
+		list( $attribute, $first_term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+		$taxonomy          = $attribute['attribute_taxonomy'];
+		$product_attribute = new WC_Product_Attribute();
+		$product_attribute->set_id( $attribute['attribute_id'] );
+		$product_attribute->set_name( $taxonomy );
+		$product_attribute->set_options( array( $first_term_id, $second_term_id ) );
+		$product_attribute->set_variation( true );
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $product_attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( $taxonomy => get_term( $first_term_id )->slug ) );
+		$variation->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'         => $variation->get_id(),
+						'attributes' => array(
+							$invalid_attribute,
+							array(
+								'id'      => $attribute['attribute_id'],
+								'term_id' => $second_term_id,
+							),
+							$invalid_attribute,
+						),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $variation->get_id(), $data['update'][0]['id'] );
+		$this->assertArrayNotHasKey( 'error', $data['update'][0] );
+		$this->assertSame( get_term( $second_term_id )->slug, wc_get_product( $variation->get_id() )->get_attributes()[ $taxonomy ] );
+	}
+
+	/**
+	 * @testdox An array option rejects only its variation batch item without changing saved data or images.
+	 * @testWith [false, false]
+	 *           [true, false]
+	 *           [false, true]
+	 *
+	 * @param bool $use_term_id Whether to include a valid term ID alongside the invalid option.
+	 * @param bool $custom_attribute Whether to use a custom attribute instead of a global attribute.
+	 */
+	public function test_batch_update_variation_rejects_array_option( bool $use_term_id, bool $custom_attribute ): void {
+		if ( $custom_attribute ) {
+			$product          = $this->create_customs_product_with_variation_attribute();
+			$taxonomy         = 'size';
+			$selected_option  = 'Small';
+			$posted_attribute = array( 'name' => 'Size' );
+		} else {
+			list( $attribute, $first_term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+			$taxonomy          = $attribute['attribute_taxonomy'];
+			$selected_option   = get_term( $first_term_id )->slug;
+			$product_attribute = new WC_Product_Attribute();
+			$product_attribute->set_id( $attribute['attribute_id'] );
+			$product_attribute->set_name( $taxonomy );
+			$product_attribute->set_options( array( $first_term_id, $second_term_id ) );
+			$product_attribute->set_variation( true );
+			$product = new WC_Product_Variable();
+			$product->set_attributes( array( $product_attribute ) );
+			$product->save();
+			$posted_attribute = array( 'id' => $attribute['attribute_id'] );
+			if ( $use_term_id ) {
+				$posted_attribute['term_id'] = $second_term_id;
+			}
+		}
+		$posted_attribute['option'] = array( 'Invalid option' );
+		$variations                 = array();
+		for ( $index = 0; $index < 3; ++$index ) {
+			$variation = new WC_Product_Variation();
+			$variation->set_parent_id( $product->get_id() );
+			$variation->set_attributes( array( $taxonomy => $selected_option ) );
+			$variation->set_description( 'Original description' );
+			$variation->save();
+			$variations[] = $variation;
+		}
+		$attachment_id = $this->factory->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+				'meta_input'     => array( '_wp_attached_file' => 'variation.jpg' ),
+			)
+		);
+		update_post_meta( $attachment_id, '_wp_attachment_image_alt', 'Original image text' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'          => $variations[0]->get_id(),
+						'description' => 'Updated before invalid item',
+					),
+					array(
+						'id'          => $variations[1]->get_id(),
+						'description' => 'Must not be saved',
+						'attributes'  => array( $posted_attribute ),
+						'image'       => array(
+							'id'  => $attachment_id,
+							'alt' => 'Changed by rejected request',
+						),
+					),
+					array(
+						'id'          => $variations[2]->get_id(),
+						'description' => 'Updated after invalid item',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 3, $data['update'] );
+		$this->assertSame( $variations[0]->get_id(), $data['update'][0]['id'] );
+		$this->assertSame( 'woocommerce_rest_invalid_attribute_option', $data['update'][1]['error']['code'] );
+		$this->assertSame( 400, $data['update'][1]['error']['data']['status'] );
+		$this->assertSame( $variations[2]->get_id(), $data['update'][2]['id'] );
+		$this->assertSame( 'Updated before invalid item', wc_get_product( $variations[0]->get_id() )->get_description() );
+		$this->assertSame( 'Original description', wc_get_product( $variations[1]->get_id() )->get_description() );
+		$this->assertSame( $selected_option, wc_get_product( $variations[1]->get_id() )->get_attributes()[ $taxonomy ] );
+		$this->assertSame( 'Original image text', get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) );
+		$this->assertSame( 'Updated after invalid item', wc_get_product( $variations[2]->get_id() )->get_description() );
+	}
+
+	/**
+	 * Creates a global attribute with two terms that share the name "Green" but have different slugs.
+	 *
+	 * @return array{0: array, 1: int, 2: int} Attribute data, first term ID, second term ID.
+	 */
+	private function create_attribute_with_duplicate_term_names(): array {
+		$attribute = WC_Helper_Product::create_attribute( 'color', array() );
+		$first     = wp_insert_term( 'Green', $attribute['attribute_taxonomy'], array( 'slug' => 'shirts-green' ) );
+		$second    = wp_insert_term( 'Green', $attribute['attribute_taxonomy'], array( 'slug' => 'trousers-green' ) );
+
+		return array( $attribute, $first['term_id'], $second['term_id'] );
 	}
 }

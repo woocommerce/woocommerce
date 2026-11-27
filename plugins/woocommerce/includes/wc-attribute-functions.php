@@ -71,6 +71,11 @@ function wc_get_attribute_taxonomies() {
 		set_transient( 'wc_attribute_taxonomies', $raw_attribute_taxonomies );
 	}
 
+	// Stored labels are plain text for every reader, as the admin form stores them.
+	foreach ( (array) $raw_attribute_taxonomies as $raw_attribute_taxonomy ) {
+		$raw_attribute_taxonomy->attribute_label = sanitize_text_field( (string) $raw_attribute_taxonomy->attribute_label );
+	}
+
 	/**
 	 * Filter attribute taxonomies.
 	 *
@@ -527,7 +532,7 @@ function wc_get_attribute( $id ) {
  *     Array of attribute parameters.
  *
  *     @type int    $id           Unique identifier, used to update an attribute.
- *     @type string $name         Attribute name. Always required.
+ *     @type string $name         Attribute name. Always required. Stored as plain text (sanitize_text_field()).
  *     @type string $slug         Attribute alphanumeric identifier.
  *     @type string $type         Type of attribute.
  *                                Core by default accepts: 'select' and
@@ -548,13 +553,15 @@ function wc_create_attribute( $args ) {
 	$format = array( '%s', '%s', '%s', '%s', '%d' );
 
 	// Name is required.
+	$raw_name     = isset( $args['name'] ) && is_scalar( $args['name'] ) ? (string) $args['name'] : '';
+	$args['name'] = sanitize_text_field( $raw_name );
 	if ( empty( $args['name'] ) ) {
 		return new WP_Error( 'missing_attribute_name', __( 'Please, provide an attribute name.', 'woocommerce' ), array( 'status' => 400 ) );
 	}
 
-	// Set the attribute slug.
+	// Set the attribute slug. Derive it from the name as given so the default slug does not change with the label cleanup.
 	if ( empty( $args['slug'] ) ) {
-		$slug = wc_sanitize_taxonomy_name( $args['name'] );
+		$slug = wc_sanitize_taxonomy_name( $raw_name );
 	} else {
 		$slug = (string) preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( $args['slug'] ) );
 	}
@@ -614,6 +621,9 @@ function wc_create_attribute( $args ) {
 
 		$id = $wpdb->insert_id;
 
+		// Register now so hook listeners can add terms.
+		WC_Post_Types::refresh_attribute_taxonomy( $id );
+
 		/**
 		 * Attribute added.
 		 *
@@ -636,6 +646,8 @@ function wc_create_attribute( $args ) {
 
 		// Set old slug to check for database changes.
 		$old_slug = ! empty( $args['old_slug'] ) ? wc_sanitize_taxonomy_name( $args['old_slug'] ) : $slug;
+
+		WC_Post_Types::refresh_attribute_taxonomy( $id );
 
 		/**
 		 * Attribute updated.
@@ -694,15 +706,20 @@ function wc_create_attribute( $args ) {
 				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_slug ) ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- This one-time attribute migration matches an indexed postmeta key.
 			);
 
-			// Update global vars to reflect migration. This ensures any functions dealing with terms later in this request
-			// use the correct info.
+			// The terms moved to the new taxonomy, so drop the old one.
 			global $wc_product_attributes;
-			if ( isset( $wc_product_attributes[ $old_taxonomy_name ] ) && ! isset( $wc_product_attributes[ $new_taxonomy_name ] ) ) {
-				$wc_product_attributes[ $new_taxonomy_name ] = $wc_product_attributes[ $old_taxonomy_name ];
-			}
-			global $wp_taxonomies;
-			if ( isset( $wp_taxonomies[ $old_taxonomy_name ] ) && ! isset( $wp_taxonomies[ $new_taxonomy_name ] ) ) {
-				$wp_taxonomies[ $new_taxonomy_name ] = $wp_taxonomies[ $old_taxonomy_name ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			unset( $wc_product_attributes[ $old_taxonomy_name ] );
+			$old_taxonomy = get_taxonomy( $old_taxonomy_name );
+			if ( $old_taxonomy ) {
+				// Keep object types that other code attached to the old taxonomy.
+				foreach ( $old_taxonomy->object_type as $object_type ) {
+					register_taxonomy_for_object_type( $new_taxonomy_name, $object_type );
+				}
+				// Flush queued term counts while the old taxonomy still exists, as wc_delete_attribute() does.
+				if ( wp_defer_term_counting() ) {
+					wp_update_term_count( array(), '', true );
+				}
+				unregister_taxonomy( $old_taxonomy_name );
 			}
 		}//end if
 	}//end if

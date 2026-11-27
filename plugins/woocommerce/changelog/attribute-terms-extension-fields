@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Return extension fields, such as swatch colors, on the attribute terms that the product-attributes-query ability lists.

@@ -10,7 +10,10 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,6 +21,11 @@ defined( 'ABSPATH' ) || exit;
  * Order item product class.
  */
 class WC_Order_Item_Product extends WC_Order_Item {
+
+	/**
+	 * Meta key for the backordered quantity on an order item.
+	 */
+	const BACKORDER_META_KEY = 'Backordered';
 
 	/**
 	 * Legacy values.
@@ -175,48 +183,53 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * but scalar values (floats/strings) are accepted for legacy compatibility.
 	 */
 	public function set_taxes( $raw_tax_data ) {
-		$raw_tax_data = maybe_unserialize( $raw_tax_data );
+		$raw_tax_data = MetaDataUtil::maybe_unserialize_no_classes( $raw_tax_data );
 		$tax_data     = array(
 			'total'    => array(),
 			'subtotal' => array(),
 		);
-		if ( ! empty( $raw_tax_data['total'] ) && ! empty( $raw_tax_data['subtotal'] ) ) {
+		if ( is_array( $raw_tax_data ) && ! empty( $raw_tax_data['total'] ) && ! empty( $raw_tax_data['subtotal'] ) ) {
 			$subtotal = $raw_tax_data['subtotal'];
 			$total    = $raw_tax_data['total'];
 
-			// Handle legacy data where total/subtotal might be floats/strings instead of arrays.
-			// Convert scalar values to array format to preserve the tax amount.
-			$has_legacy_data = ! is_array( $subtotal ) || ! is_array( $total );
+			if (
+				( is_scalar( $total ) || ArrayUtil::is_flat_scalar_array( $total ) )
+				&& ( is_scalar( $subtotal ) || ArrayUtil::is_flat_scalar_array( $subtotal ) )
+			) {
+				// Handle legacy data where total/subtotal might be floats/strings instead of arrays.
+				// Convert scalar values to array format to preserve the tax amount.
+				$has_legacy_data = ! is_array( $subtotal ) || ! is_array( $total );
 
-			if ( $has_legacy_data ) {
-				$order = $this->get_order();
-				if ( ! is_array( $subtotal ) ) {
-					$subtotal = $this->convert_legacy_tax_value_to_array( $subtotal, $order );
+				if ( $has_legacy_data ) {
+					$order = $this->get_order();
+					if ( ! is_array( $subtotal ) ) {
+						$subtotal = $this->convert_legacy_tax_value_to_array( $subtotal, $order );
+					}
+					if ( ! is_array( $total ) ) {
+						$total = $this->convert_legacy_tax_value_to_array( $total, $order );
+					}
+					// Log legacy data format for debugging purposes.
+					wc_get_logger()->warning(
+						sprintf(
+							/* translators: %d: order item ID */
+							__( 'Order item #%d contains legacy tax data format. Tax rate ID information is unavailable.', 'woocommerce' ),
+							$this->get_id()
+						),
+						array(
+							'source'        => 'woocommerce-order-item-product',
+							'order_item_id' => $this->get_id(),
+							'order_id'      => $order ? $order->get_id() : 0,
+						)
+					);
 				}
-				if ( ! is_array( $total ) ) {
-					$total = $this->convert_legacy_tax_value_to_array( $total, $order );
+
+				$tax_data['subtotal'] = array_map( 'wc_format_decimal', $subtotal );
+				$tax_data['total']    = array_map( 'wc_format_decimal', $total );
+
+				// Subtotal cannot be less than total!
+				if ( NumberUtil::array_sum( $tax_data['subtotal'] ) < NumberUtil::array_sum( $tax_data['total'] ) ) {
+					$tax_data['subtotal'] = $tax_data['total'];
 				}
-				// Log legacy data format for debugging purposes.
-				wc_get_logger()->warning(
-					sprintf(
-						/* translators: %d: order item ID */
-						__( 'Order item #%d contains legacy tax data format. Tax rate ID information is unavailable.', 'woocommerce' ),
-						$this->get_id()
-					),
-					array(
-						'source'        => 'woocommerce-order-item-product',
-						'order_item_id' => $this->get_id(),
-						'order_id'      => $order ? $order->get_id() : 0,
-					)
-				);
-			}
-
-			$tax_data['subtotal'] = array_map( 'wc_format_decimal', $subtotal );
-			$tax_data['total']    = array_map( 'wc_format_decimal', $total );
-
-			// Subtotal cannot be less than total!
-			if ( NumberUtil::array_sum( $tax_data['subtotal'] ) < NumberUtil::array_sum( $tax_data['total'] ) ) {
-				$tax_data['subtotal'] = $tax_data['total'];
 			}
 		}
 		$this->set_prop( 'taxes', $tax_data );
@@ -275,7 +288,12 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function set_backorder_meta() {
 		$product = $this->get_product();
 		if ( $product && $product->backorders_require_notification() && $product->is_on_backorder( $this->get_quantity() ) ) {
-			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $this ), $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
+			$legacy_backorder_meta_key = OrderUtil::get_legacy_backorder_meta_key( $this );
+			if ( self::BACKORDER_META_KEY !== $legacy_backorder_meta_key ) {
+				$this->delete_meta_data( $legacy_backorder_meta_key );
+			}
+
+			$this->add_meta_data( self::BACKORDER_META_KEY, (string) ( $this->get_quantity() - max( 0, $product->get_stock_quantity() ) ), true );
 		}
 	}
 
@@ -527,25 +545,40 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function get_formatted_meta_data( $hideprefix = '_', $include_all = false ) {
 		$formatted_meta = parent::get_formatted_meta_data( $hideprefix, $include_all );
 
+		if ( ! is_array( $formatted_meta ) ) {
+			return $formatted_meta;
+		}
+
 		$order = $this->get_order();
 
 		if ( $order && $order->has_status( OrderStatus::COMPLETED ) ) {
-			/**
-			 * Filter the backorder meta key.
-			 * Make sure to use the same filter as used in set_backorder_meta().
-			 *
-			 * @param string $backorder_meta_key The backorder meta key.
-			 * @param WC_Order_Item_Product $item The order item product.
-			 * @since 9.9.0
-			 * @return string
-			 */
-			$backorder_meta_key = apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $this );
+			// Older orders may have stored this note under the site's translated word for "Backordered" at the time.
+			$legacy_backorder_meta_key = OrderUtil::get_legacy_backorder_meta_key( $this );
 
 			foreach ( $formatted_meta as $meta_id => $meta ) {
-				if ( isset( $meta->key ) && $meta->key === $backorder_meta_key ) {
+				if ( isset( $meta->key ) && ( self::BACKORDER_META_KEY === $meta->key || $legacy_backorder_meta_key === $meta->key ) ) {
 					unset( $formatted_meta[ $meta_id ] );
 				}
 			}
+
+			return $formatted_meta;
+		}
+
+		foreach ( $formatted_meta as $meta ) {
+			/**
+			 * Formatted meta entry.
+			 *
+			 * @var \stdClass $meta
+			 */
+			if ( ! isset( $meta->key ) || self::BACKORDER_META_KEY !== $meta->key ) {
+				continue;
+			}
+
+			// Leave the label alone if woocommerce_order_item_display_meta_key already customized it. That filter gets the final say on the displayed label.
+			if ( self::BACKORDER_META_KEY === $meta->display_key ) {
+				$meta->display_key = OrderUtil::get_legacy_backorder_meta_key( $this );
+			}
+			break;
 		}
 
 		return $formatted_meta;
