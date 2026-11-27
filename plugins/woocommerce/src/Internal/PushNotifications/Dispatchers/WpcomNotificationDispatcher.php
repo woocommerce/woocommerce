@@ -7,11 +7,11 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Dispatchers;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
+use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Enums\SendOutcome;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
-use Jetpack_Options;
 use WP_Error;
 use WP_Http;
 
@@ -74,6 +74,19 @@ class WpcomNotificationDispatcher {
 	}
 
 	/**
+	 * Returns the store's WordPress.com blog ID used for push notifications, or null when Jetpack has no ID.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @return int|null
+	 */
+	public function get_site_id(): ?int {
+		$site_id = Jetpack_Connection_Manager::get_site_id( true );
+
+		return is_int( $site_id ) && $site_id > 0 ? $site_id : null;
+	}
+
+	/**
 	 * Dispatches a notification with push tokens to WPCOM.
 	 *
 	 * `invalid_tokens` holds the token strings WPCOM refused, exactly as sent,
@@ -86,9 +99,9 @@ class WpcomNotificationDispatcher {
 	 * @since 10.7.0
 	 */
 	public function dispatch( Notification $notification, array $tokens ): array {
-		$site_id = class_exists( Jetpack_Options::class ) ? Jetpack_Options::get_option( 'id' ) : null;
+		$site_id = $this->get_site_id();
 
-		if ( empty( $site_id ) ) {
+		if ( null === $site_id ) {
 			$this->step_logger->log_failure(
 				$notification,
 				'dispatched',

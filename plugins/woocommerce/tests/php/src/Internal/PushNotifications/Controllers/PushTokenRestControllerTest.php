@@ -232,6 +232,26 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test it returns the WordPress.com blog ID when creating a push token.
+	 */
+	public function test_create_returns_the_blog_id(): void {
+		wp_set_current_user( $this->user_id );
+		add_filter( 'pre_option_jetpack_options', static fn () => array( 'id' => 12345 ) );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', 'test_android_token_123' );
+		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
+		$request->set_param( 'device_uuid', 'test-device-uuid-789' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_ANDROID );
+		$request->set_param( 'device_locale', 'en_US' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::CREATED, $response->get_status() );
+		$this->assertSame( 12345, $response->get_data()['blog_id'] );
+	}
+
+	/**
 	 * @testdox Test it updates an existing push token by token value.
 	 */
 	public function test_it_updates_existing_token_by_token_value() {
