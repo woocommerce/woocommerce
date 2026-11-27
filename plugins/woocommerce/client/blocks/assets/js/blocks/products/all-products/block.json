@@ -39,5 +39,10 @@
 			"type": "boolean",
 			"default": false
 		}
-	}
+	},
+	"style": [
+		"wc-blocks-style",
+		"file:../all-products.css"
+	],
+	"viewScript": "file:../all-products-frontend.js"
 }

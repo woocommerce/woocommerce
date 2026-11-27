@@ -88,6 +88,8 @@ final class BlockTypesLazyController {
 			$this->get_order_confirmation_blocks(),
 			$this->get_add_to_cart_with_options_blocks(),
 			$this->get_product_display_element_blocks(),
+			$this->get_product_grid_blocks(),
+			$this->get_product_listing_blocks(),
 		);
 		foreach ( $block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
@@ -328,6 +330,55 @@ final class BlockTypesLazyController {
 			$list['product-image-gallery']   = \Automattic\WooCommerce\Blocks\BlockTypes\ProductImageGallery::class;
 			$list['product-image']           = \Automattic\WooCommerce\Blocks\BlockTypes\ProductImage::class;
 			$list['product-stock-indicator'] = \Automattic\WooCommerce\Blocks\BlockTypes\ProductStockIndicator::class;
+		}
+
+		return $list;
+	}
+
+	/**
+	 * Side effect free and stateless product grid blocks.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_product_grid_blocks(): array {
+		if ( ! is_admin() ) {
+			// All inherit enqueue_data() from AbstractProductGrid with editor-visible theme support data.
+			return array(
+				'handpicked-products'   => \Automattic\WooCommerce\Blocks\BlockTypes\HandpickedProducts::class,
+				'product-best-sellers'  => \Automattic\WooCommerce\Blocks\BlockTypes\ProductBestSellers::class,
+				'product-new'           => \Automattic\WooCommerce\Blocks\BlockTypes\ProductNew::class,
+				'product-on-sale'       => \Automattic\WooCommerce\Blocks\BlockTypes\ProductOnSale::class,
+				'product-top-rated'     => \Automattic\WooCommerce\Blocks\BlockTypes\ProductTopRated::class,
+				'products-by-attribute' => \Automattic\WooCommerce\Blocks\BlockTypes\ProductsByAttribute::class,
+				'product-category'      => \Automattic\WooCommerce\Blocks\BlockTypes\ProductCategory::class,
+				'product-tag'           => \Automattic\WooCommerce\Blocks\BlockTypes\ProductTag::class,
+			);
+		}
+
+		return array();
+	}
+
+
+	/**
+	 * Side effect free and stateless product listing blocks (shop, category, tag pages).
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_product_listing_blocks(): array {
+		// ProductCollection\Controller: excluded — query_loop_block_query_vars, pre_render_block, rest_api_init, render_block_data.
+		// ProductQuery: excluded — query_vars, pre_render_block, rest_product_query, render_block_core/*.
+		// ProductButton: excluded — hooks wp_enqueue_scripts in enqueue_assets() to dequeue legacy add-to-cart scripts.
+		// ProductTemplate: excluded — block_type_metadata_settings (before parent — must run during other blocks' registration).
+		// ProductResultsCount: excluded — custom get_block_type_style() with non-standard CSS path.
+		$list = array(
+			'catalog-sorting'               => \Automattic\WooCommerce\Blocks\BlockTypes\CatalogSorting::class,
+			'category-title'                => \Automattic\WooCommerce\Blocks\BlockTypes\CategoryTitle::class,
+			'category-description'          => \Automattic\WooCommerce\Blocks\BlockTypes\CategoryDescription::class,
+			'product-collection-no-results' => \Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\NoResults::class,
+		);
+		if ( ! is_admin() ) {
+			// AllProducts overrides enqueue_data() with editor-visible theme support data, hence loads eagerly in admin.
+			$list['all-products'] = \Automattic\WooCommerce\Blocks\BlockTypes\AllProducts::class;
 		}
 
 		return $list;
