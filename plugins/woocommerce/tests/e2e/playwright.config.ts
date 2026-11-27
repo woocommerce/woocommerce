@@ -291,6 +291,9 @@ const blocksSerialSpecs = [
 	'**/tests/blocks/cart/cart-checkout-block-taxes.shopper.block_theme.spec.ts',
 	// Switches the site language, which every spec reads.
 	'**/tests/blocks/cart/cart-checkout-block-translations.shopper.block_theme.spec.ts',
+	// Turns on Back in Stock Notifications sign-ups, which adds a form to every
+	// out-of-stock product page.
+	'**/tests/blocks/add-to-cart-with-options/back-in-stock-form.block_theme.spec.ts',
 	// Changes local pickup, shipping methods, "Hide shipping costs until an
 	// address is entered" and the countries the store ships to, and saves the
 	// Checkout page template. Most tests also place orders, some for Beanie,
@@ -304,12 +307,6 @@ const blocksSerialSpecs = [
 	// Changes the shop page slug, so the `shop/` URL that other specs visit
 	// stops working.
 	'**/tests/blocks/templates/shop-page.block_theme.spec.ts',
-
-	// Creates a visible $10 product with limited stock, which the Product
-	// Collection block needs to show it. While it exists, it changes product
-	// counts that catalog specs check, such as the single product under $10 in
-	// `inspector-controls`.
-	'**/tests/blocks/product-collection/product-collection-errors.block_theme.spec.ts',
 ];
 
 export default defineConfig< { resetDatabaseAfterEachTest: boolean } >( {
