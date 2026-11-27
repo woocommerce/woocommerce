@@ -365,11 +365,21 @@ const exitToJetpackAuth = fromPromise( async () => {
 	await dispatch( onboardingStore )
 		.coreProfilerCompleted()
 		.catch( logProfilerError );
-	// The merchant clicked through, so register again instead of reusing the prefetched result, which
-	// the connection package may have held back after an earlier failed attempt.
-	return await resolveSelect( onboardingStore ).getJetpackAuthUrl( {
+	const query = {
 		redirectUrl: getAdminLink( 'admin.php?page=wc-admin' ),
 		from: 'woocommerce-core-profiler',
+	};
+	// Same arguments as the prefetch, so this waits for it if it is still registering. Two registrations
+	// at once would share one secret, and WordPress.com accepts only the first.
+	const prefetched =
+		await resolveSelect( onboardingStore ).getJetpackAuthUrl( query );
+	if ( prefetched?.success ) {
+		return prefetched;
+	}
+	// The merchant clicked through, so retry once past the connection package's backoff, which may
+	// have held the prefetch back after an earlier failed attempt.
+	return await resolveSelect( onboardingStore ).getJetpackAuthUrl( {
+		...query,
 		force: true,
 	} );
 } );
