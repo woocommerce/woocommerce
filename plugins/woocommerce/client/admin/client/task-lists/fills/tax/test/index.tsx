@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TaskType } from '@woocommerce/data';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -11,6 +12,8 @@ import { setLocaleData, resetLocaleData } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Tax } from '..';
+
+const setHref = mockBrowserLocation( 'href' );
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -200,15 +203,6 @@ it( 'should navigate to the marketplace when clicking the WooCommerce Marketplac
 	const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
 	( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
 
-	const mockLocation = {
-		href: 'test',
-	} as Location;
-
-	mockLocation.href = 'test';
-	Object.defineProperty( global.window, 'location', {
-		value: mockLocation,
-	} );
-
 	render(
 		<Tax
 			onComplete={ () => {} }
@@ -219,7 +213,9 @@ it( 'should navigate to the marketplace when clicking the WooCommerce Marketplac
 
 	fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
-	expect( mockLocation.href ).toContain(
-		'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
+	expect( setHref ).toHaveBeenCalledWith(
+		expect.stringContaining(
+			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
+		)
 	);
 } );

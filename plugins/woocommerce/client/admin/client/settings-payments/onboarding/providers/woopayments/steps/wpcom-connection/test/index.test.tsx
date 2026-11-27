@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import {
 	act,
 	fireEvent,
@@ -17,6 +18,8 @@ import { speak } from '@wordpress/a11y';
  */
 import { useOnboardingContext } from '../../../data/onboarding-context';
 import JetpackStep from '../index';
+
+const setHref = mockBrowserLocation( 'href' );
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 jest.mock( '@wordpress/a11y', () => ( { speak: jest.fn() } ) );
@@ -50,22 +53,9 @@ const renderStep = (
 };
 
 describe( 'JetpackStep', () => {
-	const originalLocation = window.location;
-
 	beforeEach( () => {
 		jest.clearAllMocks();
 		mockApiFetch.mockReset();
-		Object.defineProperty( window, 'location', {
-			writable: true,
-			value: { ...originalLocation, href: '' },
-		} );
-	} );
-
-	afterEach( () => {
-		Object.defineProperty( window, 'location', {
-			writable: true,
-			value: originalLocation,
-		} );
 	} );
 
 	it( 'redirects to the authorization URL returned after registering the store', async () => {
@@ -78,7 +68,9 @@ describe( 'JetpackStep', () => {
 		fireEvent.click( screen.getByRole( 'button', { name: 'Connect' } ) );
 
 		await waitFor( () =>
-			expect( window.location.href ).toBe( 'https://wordpress.com/auth' )
+			expect( setHref ).toHaveBeenCalledWith(
+				'https://wordpress.com/auth'
+			)
 		);
 	} );
 
@@ -88,7 +80,7 @@ describe( 'JetpackStep', () => {
 		fireEvent.click( screen.getByRole( 'button', { name: 'Connect' } ) );
 
 		expect( mockApiFetch ).not.toHaveBeenCalled();
-		expect( window.location.href ).toBe( 'https://wordpress.com/auth' );
+		expect( setHref ).toHaveBeenCalledWith( 'https://wordpress.com/auth' );
 	} );
 
 	it( 'decodes registration errors and lets the merchant retry', async () => {

@@ -42,16 +42,18 @@ jest.mock( '../../payments', () => ( {
 	),
 } ) );
 
-const stubLocation = ( location: string ) => {
-	jest.spyOn( window, 'location', 'get' ).mockReturnValue( {
-		...window.location,
-		search: location,
-	} );
-};
-
 describe( 'Embedded layout', () => {
+	const originalUrl = window.location.href;
+
+	beforeEach( () => {
+		window.history.replaceState( null, '', '?page=settings&tab=test' );
+	} );
+
+	afterEach( () => {
+		window.history.replaceState( null, '', originalUrl );
+	} );
+
 	it( 'should render a fill component with matching name, and provide query params', async () => {
-		stubLocation( '?page=settings&tab=test' );
 		const { queryByText } = render( <EmbeddedBodyLayout /> );
 
 		expect( queryByText( 'payment_recommendations' ) ).toBeInTheDocument();
@@ -73,7 +75,6 @@ describe( 'Embedded layout', () => {
 				];
 			}
 		);
-		stubLocation( '?page=settings&tab=test' );
 		const { queryByText } = render( <EmbeddedBodyLayout /> );
 
 		expect( queryByText( 'new_component' ) ).toBeInTheDocument();

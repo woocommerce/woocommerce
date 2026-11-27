@@ -44,11 +44,11 @@ const TestComponent = ( { multiple }: { multiple?: boolean } ) => {
 			? selected.map( ( i ) => ( {
 					value: String( i.id ),
 					label: i.name,
-			  } ) )
+				} ) )
 			: {
 					value: String( selected.id ),
 					label: selected.name,
-			  },
+				},
 		onSelect: ( item: Item | Item[] ) =>
 			item && Array.isArray( item )
 				? setSelected(
@@ -57,12 +57,12 @@ const TestComponent = ( { multiple }: { multiple?: boolean } ) => {
 							name: i.label,
 							parent: i.parent ? +i.parent : 0,
 						} ) )
-				  )
+					)
 				: setSelected( {
 						id: +item.value,
 						name: item.label,
 						parent: item.parent ? +item.parent : 0,
-				  } ),
+					} ),
 	} );
 };
 
@@ -161,7 +161,7 @@ describe( 'SelectTree', () => {
 		await act( () => {
 			queryByText( 'Create "new item"' )?.click();
 		} );
-		expect( mockFn ).toBeCalledTimes( 1 );
+		expect( mockFn ).toHaveBeenCalledTimes( 1 );
 	} );
 	it( 'correctly selects existing item in single mode with arrow keys', async () => {
 		const { findByRole } = render( <TestComponent /> );

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  * ProductNew class.
  */
 class ProductNew extends AbstractProductGrid {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.

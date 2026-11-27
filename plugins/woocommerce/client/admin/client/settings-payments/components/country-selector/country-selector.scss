@@ -135,7 +135,6 @@
 			line-height: 1;
 			width: 100%;
 			border: none;
-			padding-right: 40px;
 			position: relative;
 			color: $gray-600;
 			font-size: 13px;
@@ -177,19 +176,7 @@
 	}
 }
 
-html[dir="rtl"] {
-	.components-country-select-control__button svg {
-		margin-left: 0;
-		margin-right: auto;
-	}
-
-	.components-country-select-control__search--input-suffix {
-		right: auto;
-		left: 5px;
-	}
-
-	.components-country-select-control__search--input {
-		padding-right: 8px;
-		padding-left: 40px;
-	}
+// Outranks WordPress core's input[type="text"] padding, so the clear button has room.
+.components-country-select-control__search .components-country-select-control__search--input {
+	padding-right: 40px;
 }

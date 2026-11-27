@@ -117,6 +117,10 @@ class ProductAttributesQuery extends AbstractDomainAbility implements AbilityDef
 			}
 			$formatted[] = $data;
 		}
+		$formatted = self::format_product_attribute_terms( $formatted );
+		if ( is_wp_error( $formatted ) ) {
+			return $formatted;
+		}
 
 		return array(
 			'attributes'  => $formatted,

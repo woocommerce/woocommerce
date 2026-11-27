@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -9,13 +10,9 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { TrackedLink } from '../tracked-link';
 
-jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
+const setHref = mockBrowserLocation( 'href' );
 
-const mockLocation = { href: '' };
-Object.defineProperty( window, 'location', {
-	value: mockLocation,
-	writable: true,
-} );
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
 // Stop jsdom from following the link when Link leaves a modified click to the browser.
 const preventNavigation = ( event: Event ) => event.preventDefault();
@@ -34,7 +31,6 @@ const renderLink = ( props = {} ) =>
 describe( 'TrackedLink', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
-		mockLocation.href = '';
 		document.addEventListener( 'click', preventNavigation );
 	} );
 
@@ -51,7 +47,7 @@ describe( 'TrackedLink', () => {
 		expect( recordEvent ).toHaveBeenCalledWith( 'test_link_click', {
 			source: 'test',
 		} );
-		expect( mockLocation.href ).toBe(
+		expect( setHref ).toHaveBeenCalledWith(
 			'admin.php?page=wc-admin&path=/extensions'
 		);
 	} );
@@ -64,7 +60,7 @@ describe( 'TrackedLink', () => {
 		} );
 
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
-		expect( mockLocation.href ).toBe( '' );
+		expect( setHref ).not.toHaveBeenCalled();
 	} );
 
 	it( 'calls onClickCallback instead of recording the event, also on a Cmd-click', () => {

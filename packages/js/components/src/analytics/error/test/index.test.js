@@ -4,6 +4,7 @@
 import { createElement } from '@wordpress/element';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 
 /**
  * Internal dependencies
@@ -11,17 +12,7 @@ import userEvent from '@testing-library/user-event';
 import AnalyticsError from '..';
 
 describe( 'AnalyticsError', () => {
-	// Mock window.location.reload by using a global variable
-	const originalLocation = window.location;
-
-	beforeAll( () => {
-		delete window.location;
-		window.location = { reload: jest.fn() };
-	} );
-
-	afterAll( () => {
-		window.location = originalLocation;
-	} );
+	const reloadMock = mockBrowserLocation( 'reload' );
 
 	it( 'displays an error message', () => {
 		render( <AnalyticsError /> );
@@ -42,12 +33,6 @@ describe( 'AnalyticsError', () => {
 	} );
 
 	it( 'refreshes the page when Reload Page button is clicked', async () => {
-		const reloadMock = jest.fn();
-		Object.defineProperty( window.location, 'reload', {
-			configurable: true,
-			value: reloadMock,
-		} );
-
 		render( <AnalyticsError /> );
 
 		await userEvent.click( screen.getByText( 'Reload' ) );

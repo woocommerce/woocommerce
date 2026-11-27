@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Frontend;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
@@ -20,6 +21,11 @@ class ProductPageIntegration {
 	 * Name of the Add to Cart + Options block.
 	 */
 	private const ADD_TO_CART_WITH_OPTIONS_BLOCK = 'woocommerce/add-to-cart-with-options';
+
+	/**
+	 * Script module that shows the form for the variation chosen in the Add to Cart + Options block.
+	 */
+	private const SCRIPT_MODULE = 'woocommerce/back-in-stock-form';
 
 	/**
 	 * Runtime cache for preventing double rendering.
@@ -61,6 +67,7 @@ class ProductPageIntegration {
 	public function __construct() {
 		add_action( 'woocommerce_simple_add_to_cart', array( $this, 'maybe_render_form' ), 30 );
 		add_action( 'woocommerce_after_add_to_cart_form', array( $this, 'maybe_render_form' ), 30 );
+		add_filter( 'render_block_' . self::ADD_TO_CART_WITH_OPTIONS_BLOCK, array( $this, 'render_form_after_add_to_cart_with_options' ), 10, 3 );
 	}
 
 	/**
@@ -70,19 +77,122 @@ class ProductPageIntegration {
 	 */
 	public function maybe_render_form() {
 
-		if ( ! Config::allows_signups() ) {
-			return;
-		}
-
 		// Add to Cart + Options buffers this hook inside its <form> and falls back to a
-		// legacy HTML form when the buffer contains form elements. Block-theme support
-		// will ship separately.
+		// legacy HTML form when the buffer contains form elements. The form is appended
+		// after the block instead, see render_form_after_add_to_cart_with_options().
 		if ( $this->is_rendering_inside_add_to_cart_with_options() ) {
 			return;
 		}
 
 		global $product;
-		if ( ! is_product() || ! is_a( $product, 'WC_Product' ) ) {
+		if ( is_a( $product, 'WC_Product' ) ) {
+			$this->maybe_render_product_form( $product );
+		}
+	}
+
+	/**
+	 * Append the BIS form to the Add to Cart + Options block, outside its <form>.
+	 *
+	 * @internal
+	 *
+	 * @param string    $block_content The block content.
+	 * @param array     $parsed_block  The parsed block.
+	 * @param \WP_Block $block         The block instance.
+	 * @return string
+	 */
+	public function render_form_after_add_to_cart_with_options( $block_content, $parsed_block, $block ) {
+		$product_id = (int) ( $block->context['postId'] ?? 0 );
+
+		// Only the block for the product being viewed, not those in related products, upsells or other products' Single Product blocks.
+		$product = $product_id && get_queried_object_id() === $product_id ? wc_get_product( $product_id ) : null;
+		if ( '' === $block_content || ! $product ) {
+			return $block_content;
+		}
+
+		ob_start();
+		$this->maybe_render_product_form( $product, true );
+
+		return $this->add_interactivity_to_form( $block_content, (string) ob_get_clean(), $product );
+	}
+
+	/**
+	 * Let the Interactivity API show the form for the variation chosen in the block and post its attributes.
+	 *
+	 * The template is left untouched: the directives are added to its rendered markup.
+	 *
+	 * @param string     $block_content The Add to Cart + Options block content.
+	 * @param string     $form          The rendered form markup.
+	 * @param WC_Product $product       Product object.
+	 * @return string The block content followed by the form.
+	 */
+	private function add_interactivity_to_form( string $block_content, string $form, WC_Product $product ): string {
+		$html = new \WP_HTML_Tag_Processor( $form );
+
+		// The form of a variable product starts hidden until an out of stock variation is chosen.
+		if ( ! $product instanceof \WC_Product_Variable || ! $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ) || null === $html->get_attribute( 'hidden' ) ) {
+			return $block_content . $form;
+		}
+
+		// The block renders no variation selector when the product can't be bought, so offer sign-ups for the parent.
+		if ( AddToCartWithOptionsUtils::is_not_purchasable_product( $product ) ) {
+			$html->remove_attribute( 'hidden' );
+
+			return $block_content . $html->get_updated_html();
+		}
+
+		wp_enqueue_script_module( self::SCRIPT_MODULE );
+
+		// The store namespace matches the script module ID.
+		$html->set_attribute( 'data-wp-interactive', self::SCRIPT_MODULE );
+		$html->set_attribute( 'data-wp-bind--hidden', '!state.isVisible' );
+
+		$form_id = wp_unique_id( 'wc-bis-form-' );
+		if ( $html->next_tag( array( 'tag_name' => 'form' ) ) ) {
+			$html->set_attribute( 'id', $form_id );
+		}
+
+		while ( $html->next_tag( array( 'tag_name' => 'input' ) ) ) {
+			if ( 'wc_bis_product_id' === $html->get_attribute( 'name' ) ) {
+				$html->set_attribute( 'data-wp-bind--value', 'woocommerce/products::state.productInContext.id' );
+				break;
+			}
+		}
+
+		$form = $html->get_updated_html();
+
+		// Post the chosen values, so "any" attributes are kept like in the classic form. The inputs sit inside
+		// the block's <form> to read its selected attributes, and the `form` attribute submits them with the BIS form.
+		$attribute_inputs = '';
+		foreach ( array_keys( $product->get_variation_attributes() ) as $attribute_name ) {
+			$attribute_name    = (string) $attribute_name;
+			$attribute_inputs .= sprintf(
+				'<input type="hidden" name="%s" form="%s" data-wp-interactive="%s" %s data-wp-bind--value="state.selectedAttributeValue" />',
+				esc_attr( wc_variation_attribute_name( $attribute_name ) ),
+				esc_attr( $form_id ),
+				esc_attr( self::SCRIPT_MODULE ),
+				wp_interactivity_data_wp_context( array( 'attribute' => wc_attribute_label( $attribute_name ) ) )
+			);
+		}
+
+		// The block's own </form> comes first, as forms can't be nested.
+		$block_form_end = stripos( $block_content, '</form>' );
+		if ( false !== $block_form_end ) {
+			$block_content = substr_replace( $block_content, $attribute_inputs, $block_form_end, 0 );
+		}
+
+		return $block_content . $form;
+	}
+
+	/**
+	 * Render the BIS form for a product when it is eligible for sign-ups.
+	 *
+	 * @param WC_Product $product  Product object.
+	 * @param bool       $is_block Whether the form renders for the Add to Cart + Options block.
+	 * @return void
+	 */
+	private function maybe_render_product_form( WC_Product $product, bool $is_block = false ): void {
+
+		if ( ! Config::allows_signups() || ! is_product() ) {
 			return;
 		}
 
@@ -90,7 +200,10 @@ class ProductPageIntegration {
 			return;
 		}
 
-		$this->rendered[ $product->get_id() ] = true;
+		// The block doesn't mark the product as rendered, as its output can be discarded.
+		if ( ! $is_block ) {
+			$this->rendered[ $product->get_id() ] = true;
+		}
 
 		$is_variable = $product->is_type( 'variable' );
 		// Check if the product is in stock.
@@ -108,8 +221,10 @@ class ProductPageIntegration {
 			return;
 		}
 
-		// Enqueue the script.
-		wp_enqueue_script( 'wc-back-in-stock-form' );
+		// The block is driven by the Interactivity API, see add_interactivity_to_form().
+		if ( ! $is_block ) {
+			wp_enqueue_script( 'wc-back-in-stock-form' );
+		}
 
 		$this->render_form( $product );
 	}

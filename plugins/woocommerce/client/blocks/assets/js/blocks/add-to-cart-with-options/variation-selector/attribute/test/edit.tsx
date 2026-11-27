@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import * as hooks from '@woocommerce/base-context/hooks';
 import type { ComponentProps, ReactNode } from 'react';
 
@@ -181,8 +180,7 @@ describe( 'Variation Selector attribute template edit', () => {
 		} );
 	} );
 
-	it( 'selects a custom attribute row when it is clicked', async () => {
-		const user = userEvent.setup();
+	it( 'selects a custom attribute row when it is clicked', () => {
 		// A global attribute followed by a custom one, which the Store API
 		// reports as id 0 - the payload from #68197. The global id is 1 on
 		// purpose: it collides with the custom row's index, so this case also
@@ -194,13 +192,12 @@ describe( 'Variation Selector attribute template edit', () => {
 
 		expect( selectedRowIndex() ).toBe( 0 );
 
-		await user.click( screen.getByTestId( 'attribute-preview' ) );
+		fireEvent.click( screen.getByTestId( 'attribute-preview' ) );
 
 		expect( selectedRowIndex() ).toBe( 1 );
 	} );
 
-	it( 'keeps exactly one row editable when every attribute is custom', async () => {
-		const user = userEvent.setup();
+	it( 'keeps exactly one row editable when every attribute is custom', () => {
 		renderWithAttributes( [
 			attribute( 'Size', null, 0 ),
 			attribute( 'Fit', null, 0 ),
@@ -211,7 +208,7 @@ describe( 'Variation Selector attribute template edit', () => {
 		).toHaveLength( 1 );
 		expect( selectedRowIndex() ).toBe( 0 );
 
-		await user.click( screen.getByTestId( 'attribute-preview' ) );
+		fireEvent.click( screen.getByTestId( 'attribute-preview' ) );
 
 		expect(
 			screen.getAllByTestId( 'attribute-inner-blocks' )
