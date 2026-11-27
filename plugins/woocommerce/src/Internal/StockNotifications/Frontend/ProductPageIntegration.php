@@ -116,7 +116,7 @@ class ProductPageIntegration {
 		}
 
 		// The product isn't marked as rendered, as the block's output can be discarded.
-		// Like the block's variation selector, which isn't rendered when the product can't be bought.
+		// The block shows no variation selector when the product can't be bought, so offer sign-ups for the parent.
 		$is_visible = ! $product->is_type( 'variable' ) || AddToCartWithOptionsUtils::is_not_purchasable_product( $product );
 
 		ob_start();
