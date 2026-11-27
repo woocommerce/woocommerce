@@ -46,7 +46,6 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 		wp_prime_option_caches(
 			array(
 				'woocommerce_registration_generate_username',
-				'woocommerce_registration_generate_password',
 			)
 		);
 
@@ -73,7 +72,6 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 						'type'     => 'string',
 					),
 					'password' => array(
-						'required' => 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ),
 						'description' => __( 'New user password.', 'woocommerce' ),
 						'type'     => 'string',
 					),

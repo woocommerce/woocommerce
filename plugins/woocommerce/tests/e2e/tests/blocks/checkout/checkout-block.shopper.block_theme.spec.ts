@@ -84,11 +84,6 @@ test.describe( 'Shopper → Account (guest user)', () => {
 			path: 'wc/v3/settings/account/woocommerce_enable_signup_and_login_from_checkout',
 			data: { value: 'yes' },
 		} );
-		await requestUtils.rest( {
-			method: 'PUT',
-			path: 'wc/v3/settings/account/woocommerce_registration_generate_password',
-			data: { value: 'yes' },
-		} );
 
 		await page.reload();
 

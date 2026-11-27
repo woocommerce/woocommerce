@@ -11,10 +11,7 @@ import { expect, test } from '../../fixtures/fixtures';
 const customerEmailAddress = `john.doe.${ Date.now() }@example.com`;
 const originalSettingValues = new Map< string, string >();
 const accountSettingsPath = `${ WC_API_PATH }/settings/account`;
-const registrationSettingIds = [
-	'woocommerce_enable_myaccount_registration',
-	'woocommerce_registration_generate_password',
-];
+const registrationSettingIds = [ 'woocommerce_enable_myaccount_registration' ];
 
 test.describe( 'Shopper My Account Create Account', () => {
 	test.beforeAll( async ( { restApi } ) => {
@@ -27,12 +24,6 @@ test.describe( 'Shopper My Account Create Account', () => {
 
 		await restApi.put(
 			`${ accountSettingsPath }/woocommerce_enable_myaccount_registration`,
-			{
-				value: 'yes',
-			}
-		);
-		await restApi.put(
-			`${ accountSettingsPath }/woocommerce_registration_generate_password`,
 			{
 				value: 'yes',
 			}

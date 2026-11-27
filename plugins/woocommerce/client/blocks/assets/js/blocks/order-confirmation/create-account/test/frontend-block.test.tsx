@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { act, render, fireEvent, waitFor } from '@testing-library/react';
-import { getSetting } from '@woocommerce/settings';
+import { act, render } from '@testing-library/react';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -27,98 +26,7 @@ jest.mock( '@wordpress/i18n', () => ( {
 	__: jest.fn( ( msg ) => msg ),
 } ) );
 
-describe( 'CreateAccountFrontendBlock - Automatic password generation off', () => {
-	beforeEach( () => {
-		( getSetting as jest.Mock ).mockImplementation(
-			( key: string, defaultValue: unknown ) => {
-				if ( key === 'registrationGeneratePassword' ) {
-					return false;
-				}
-				return defaultValue;
-			}
-		);
-	} );
-
-	it( 'Renders "Set a password" prompt', async () => {
-		const { queryByText } = render(
-			<CreateAccountBlock
-				attributes={ {
-					customerEmail: 'test@test.com',
-				} }
-				isEditor={ false }
-			/>
-		);
-
-		await act( async () => {
-			expect(
-				queryByText(
-					textContentMatcher( 'Set a password for test@test.com' )
-				)
-			).toBeInTheDocument();
-		} );
-	} );
-
-	it( 'Disables submit button when password is required but empty', async () => {
-		const { getByRole, getByLabelText } = render(
-			<CreateAccountBlock
-				attributes={ { customerEmail: 'test@example.com' } }
-				isEditor={ false }
-			/>
-		);
-
-		await act( async () => {
-			const passwordInput = getByLabelText( 'Password' );
-			const submitButton = getByRole( 'button', {
-				name: 'Create account',
-			} );
-			expect( submitButton ).toBeDisabled();
-
-			// Weak password.
-			fireEvent.change( passwordInput, {
-				target: { value: '12345' },
-			} );
-			expect( submitButton ).toBeDisabled();
-
-			// Strong password.
-			fireEvent.change( passwordInput, {
-				target: { value: 'StrongP@ssw0rd123!' },
-			} );
-			expect( submitButton ).toBeEnabled();
-		} );
-	} );
-} );
-
-describe( 'CreateAccountFrontendBlock - Automatic password generation on', () => {
-	beforeEach( () => {
-		( getSetting as jest.Mock ).mockImplementation(
-			( key: string, defaultValue: unknown ) => {
-				if ( key === 'registrationGeneratePassword' ) {
-					return true;
-				}
-				return defaultValue;
-			}
-		);
-	} );
-
-	it( 'Does not render "Set a password" prompt', async () => {
-		const { queryByText } = render(
-			<CreateAccountBlock
-				attributes={ {
-					customerEmail: 'test@test.com',
-				} }
-				isEditor={ false }
-			/>
-		);
-
-		await act( async () => {
-			expect(
-				queryByText(
-					textContentMatcher( 'Set a password for test@test.com' )
-				)
-			).not.toBeInTheDocument();
-		} );
-	} );
-
+describe( 'CreateAccountFrontendBlock', () => {
 	it( 'Submit button is not disabled', async () => {
 		const { getByRole } = render(
 			<CreateAccountBlock
@@ -149,7 +57,7 @@ describe( 'CreateAccountFrontendBlock - Automatic password generation on', () =>
 			expect(
 				queryByText(
 					textContentMatcher(
-						'Check your email at test@test.com for the link to set up an account password.'
+						'We’ll email you a link to set your password.'
 					)
 				)
 			).toBeInTheDocument();
@@ -158,17 +66,6 @@ describe( 'CreateAccountFrontendBlock - Automatic password generation on', () =>
 } );
 
 describe( 'CreateAccountFrontendBlock - Editor mode', () => {
-	beforeEach( () => {
-		( getSetting as jest.Mock ).mockImplementation(
-			( key: string, defaultValue: unknown ) => {
-				if ( key === 'registrationGeneratePassword' ) {
-					return false;
-				}
-				return defaultValue;
-			}
-		);
-	} );
-
 	it( 'Renders a placeholder in editor mode', async () => {
 		const { queryByText } = render(
 			<CreateAccountBlock attributes={ {} } isEditor={ true } />
@@ -182,7 +79,9 @@ describe( 'CreateAccountFrontendBlock - Editor mode', () => {
 
 		expect(
 			queryByText(
-				textContentMatcher( 'Set a password for customer@email.com' )
+				textContentMatcher(
+					'We’ll email you a link to set your password.'
+				)
 			)
 		).toBeInTheDocument();
 	} );
@@ -203,129 +102,9 @@ describe( 'CreateAccountFrontendBlock - Edge cases', () => {
 	} );
 } );
 
-describe( 'CreateAccountFrontendBlock - Password strength (check-password-strength)', () => {
-	beforeEach( () => {
-		( getSetting as jest.Mock ).mockImplementation(
-			( key: string, defaultValue: unknown ) => {
-				if ( key === 'registrationGeneratePassword' ) {
-					return false;
-				}
-				return defaultValue;
-			}
-		);
-	} );
-
-	describe( 'Shows password strength meter and updates accordingly', () => {
-		it( 'Very weak password', async () => {
-			const { getByLabelText, getByText } = render(
-				<CreateAccountBlock
-					attributes={ { customerEmail: 'test@example.com' } }
-					isEditor={ false }
-				/>
-			);
-			const passwordInput = getByLabelText( 'Password' );
-			fireEvent.change( passwordInput, {
-				target: { value: 'we' },
-			} );
-			await waitFor( () => {
-				expect(
-					getByText( 'Too weak', {
-						selector:
-							'.wc-block-components-password-strength__meter',
-					} )
-				).toBeInTheDocument();
-			} );
-		} );
-
-		it( 'Weak password', async () => {
-			const { getByLabelText, getByText } = render(
-				<CreateAccountBlock
-					attributes={ { customerEmail: 'test@example.com' } }
-					isEditor={ false }
-				/>
-			);
-			const passwordInput = getByLabelText( 'Password' );
-			fireEvent.change( passwordInput, {
-				target: { value: 'weak' },
-			} );
-			await waitFor( () => {
-				expect(
-					getByText( 'Weak', {
-						selector:
-							'.wc-block-components-password-strength__meter',
-					} )
-				).toBeInTheDocument();
-			} );
-		} );
-
-		it( 'Medium password', async () => {
-			const { getByLabelText, getByText } = render(
-				<CreateAccountBlock
-					attributes={ { customerEmail: 'test@example.com' } }
-					isEditor={ false }
-				/>
-			);
-			const passwordInput = getByLabelText( 'Password' );
-			fireEvent.change( passwordInput, {
-				target: { value: 'M3dium!!' },
-			} );
-			await waitFor( () => {
-				expect(
-					getByText( 'Medium', {
-						selector:
-							'.wc-block-components-password-strength__meter',
-					} )
-				).toBeInTheDocument();
-			} );
-		} );
-
-		it( 'Strong password', async () => {
-			const { getByLabelText, getByText } = render(
-				<CreateAccountBlock
-					attributes={ { customerEmail: 'test@example.com' } }
-					isEditor={ false }
-				/>
-			);
-			const passwordInput = getByLabelText( 'Password' );
-			fireEvent.change( passwordInput, {
-				target: { value: 'StrongP@ssw0rd123!' },
-			} );
-			await waitFor( () => {
-				expect(
-					getByText( 'Strong', {
-						selector:
-							'.wc-block-components-password-strength__meter',
-					} )
-				).toBeInTheDocument();
-			} );
-		} );
-
-		it( 'Very strong password', async () => {
-			const { getByLabelText, getByText } = render(
-				<CreateAccountBlock
-					attributes={ { customerEmail: 'test@example.com' } }
-					isEditor={ false }
-				/>
-			);
-			const passwordInput = getByLabelText( 'Password' );
-			fireEvent.change( passwordInput, {
-				target: { value: 'V3ryStrongP@ssw0rd123!' },
-			} );
-			await waitFor( () => {
-				expect(
-					getByText( 'Very strong', {
-						selector:
-							'.wc-block-components-password-strength__meter',
-					} )
-				).toBeInTheDocument();
-			} );
-		} );
-	} );
-} );
-
 describe( 'CreateAccountFrontendBlock - Email handling', () => {
 	it( 'Correctly handles email addresses with special characters', async () => {
-		const { queryByText } = render(
+		const { container } = render(
 			<CreateAccountBlock
 				attributes={ { customerEmail: 'test+special@example.com' } }
 				isEditor={ false }
@@ -334,12 +113,8 @@ describe( 'CreateAccountFrontendBlock - Email handling', () => {
 
 		await act( async () => {
 			expect(
-				queryByText(
-					textContentMatcher(
-						'Set a password for test+special@example.com'
-					)
-				)
-			).toBeInTheDocument();
+				container.querySelector( 'input[name="email"]' )
+			).toHaveValue( 'test+special@example.com' );
 		} );
 	} );
 } );

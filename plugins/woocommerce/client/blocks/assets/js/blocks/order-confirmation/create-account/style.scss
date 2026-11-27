@@ -53,8 +53,7 @@
 		flex-direction: column;
 		gap: $gap-small;
 
-		p,
-		.wc-block-components-text-input {
+		p {
 			margin-top: 0;
 			margin-bottom: 0;
 		}
@@ -74,10 +73,6 @@
 					white-space: nowrap;
 				}
 			}
-		}
-
-		.wc-block-components-password-strength.hidden {
-			opacity: 1;
 		}
 	}
 

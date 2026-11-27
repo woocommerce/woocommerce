@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { select } from '@wordpress/data';
+import deprecated from '@wordpress/deprecated';
 import { hasCollectableRate } from '@woocommerce/base-utils';
 import { isString, objectHasProp } from '@woocommerce/types';
 import type { AddressFormType } from '@woocommerce/settings';
@@ -17,8 +18,20 @@ export const getCustomerId = ( state: CheckoutState ) => {
 	return state.customerId;
 };
 
-export const getCustomerPassword = ( state: CheckoutState ) => {
-	return state.customerPassword;
+/**
+ * @deprecated Checkout no longer sets a password for new accounts. Customers set it from the new account email.
+ *
+ * @param      _state Ignored. Kept so existing callers still type-check.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const getCustomerPassword = ( _state?: CheckoutState ) => {
+	deprecated( 'getCustomerPassword', {
+		plugin: 'WooCommerce',
+		version: '11.5.0',
+		hint: 'Checkout no longer sets a password for new accounts.',
+	} );
+
+	return '';
 };
 
 export const getOrderId = ( state: CheckoutState ) => {

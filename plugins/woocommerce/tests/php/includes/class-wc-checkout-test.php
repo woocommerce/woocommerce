@@ -4330,4 +4330,26 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		);
 		$this->assertSame( array(), $errors->get_error_messages( 'shipping' ), 'One missing country should raise one notice.' );
 	}
+
+	/**
+	 * @testdox Classic checkout never asks for a password, and a new account gets a generated one even if a password is posted.
+	 */
+	public function test_process_customer_creates_account_with_generated_password(): void {
+		wp_set_current_user( 0 );
+		add_filter( 'pre_wp_mail', '__return_true' );
+
+		$this->assertArrayNotHasKey( 'account_password', (array) $this->sut->get_checkout_fields( 'account' ), 'The form should not ask for a password.' );
+
+		$this->sut->process_customer(
+			array(
+				'createaccount'    => 1,
+				'billing_email'    => 'classic-generated@example.com',
+				'account_password' => 'chosen-Password-123',
+			)
+		);
+
+		$customer = get_user_by( 'email', 'classic-generated@example.com' );
+		$this->assertInstanceOf( WP_User::class, $customer, 'The account should be created.' );
+		$this->assertFalse( wp_check_password( 'chosen-Password-123', $customer->user_pass, $customer->ID ), 'A posted password should be ignored.' );
+	}
 }

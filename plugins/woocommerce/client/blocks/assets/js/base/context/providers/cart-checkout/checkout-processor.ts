@@ -51,7 +51,6 @@ const CheckoutProcessor = () => {
 	const {
 		additionalFields,
 		customerId,
-		customerPassword,
 		extensionData,
 		hasError: checkoutHasError,
 		isBeforeProcessing: checkoutIsBeforeProcessing,
@@ -65,7 +64,6 @@ const CheckoutProcessor = () => {
 		return {
 			additionalFields: store.getAdditionalFields(),
 			customerId: store.getCustomerId(),
-			customerPassword: store.getCustomerPassword(),
 			extensionData: store.getExtensionData(),
 			hasError: store.hasError(),
 			isBeforeProcessing: store.isBeforeProcessing(),
@@ -269,7 +267,6 @@ const CheckoutProcessor = () => {
 			billing_address: billingAddressData,
 			create_account: shouldCreateAccount,
 			customer_note: orderNotes,
-			customer_password: customerPassword,
 			extensions: { ...extensionData },
 			shipping_address: cartNeedsShipping
 				? shippingAddressData
@@ -359,7 +356,6 @@ const CheckoutProcessor = () => {
 		orderNotes,
 		shouldCreateAccount,
 		customerId,
-		customerPassword,
 		extensionData,
 		additionalFields,
 		cartNeedsShipping,

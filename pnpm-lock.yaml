@@ -3602,9 +3602,6 @@ importers:
       change-case:
         specifier: ^4.1.2
         version: 4.1.2
-      check-password-strength:
-        specifier: ^2.0.10
-        version: 2.0.10
       clsx:
         specifier: 2.1.x
         version: 2.1.1
@@ -12480,9 +12477,6 @@ packages:
     resolution: {integrity: sha512-YYmFYHV/X7kSJhuN/QYHUu998n/TRuDe8UenM3+m5NrkiH670lb9ILqHIvBencvJc4SDh+XcbXMR4b+TtubJiw==}
     engines: {node: '>=8.3.0'}
     hasBin: true
-
-  check-password-strength@2.0.10:
-    resolution: {integrity: sha512-HRM5ICPmtnNtLnTv2QrfVkq1IxI9z3bzYpDJ1k5ixwD9HtJGHuv265R6JmHOV6r8wLhQMlULnIUVpkrC2yaiCw==}
 
   checkstyle-formatter@1.1.0:
     resolution: {integrity: sha512-mak+5ooX5cDFBBIhsR+NqxoQ9+JQRqupr49G2PiUYXKn8OntoI9osjhECaScrzqq1l4phuRmK1VlMdxHdpwZvg==}
@@ -34897,8 +34891,6 @@ snapshots:
       object-filter: 1.0.2
       run-parallel: 1.2.0
       semver: 6.3.1
-
-  check-password-strength@2.0.10: {}
 
   checkstyle-formatter@1.1.0:
     dependencies:

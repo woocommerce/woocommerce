@@ -13,7 +13,6 @@ export type CheckoutState = {
 	additionalFields: OrderFormValues; // Additional fields values that are collected on Checkout.
 	calculatingCount: number; // If any of the totals, taxes, shipping, etc need to be calculated, the count will be increased here
 	customerId: number; // This is the ID of the customer the draft order belongs to.
-	customerPassword: string; // Customer password for account creation, if applicable.
 	extensionData: Record< string, Record< string, unknown > >; // Custom checkout data passed to the store API on processing.
 	hasError: boolean; // True when the checkout is in an error state. Whatever caused the error (validation/payment method) will likely have triggered a notice.
 	orderId: number; // This is the ID for the draft order if one exists.
@@ -51,7 +50,6 @@ export const defaultState: CheckoutState = {
 	additionalFields: checkoutData.additional_fields || {},
 	calculatingCount: 0,
 	customerId: checkoutData.customer_id,
-	customerPassword: '',
 	extensionData: {},
 	hasError: false,
 	orderId: checkoutData.order_id,
