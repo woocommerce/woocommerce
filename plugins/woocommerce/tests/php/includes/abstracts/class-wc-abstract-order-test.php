@@ -1127,28 +1127,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Two copies of one order that both stage the removal of the same coupon and save give its use back only once.
-	 */
-	public function test_stage_coupon_removal_on_two_copies_of_order_gives_use_back_once(): void {
-		$order       = $this->create_pending_order_with_counted_coupons( array( 'two-staged-copies' ) );
-		$first_copy  = wc_get_order( $order->get_id() );
-		$second_copy = wc_get_order( $order->get_id() );
-		$this->assertCount( 1, $second_copy->get_items( 'coupon' ), 'The second copy should load the coupon line before the first one removes it' );
-
-		$this->assertTrue( $first_copy->stage_coupon_removal( 'two-staged-copies' ), 'The first copy should stage the removal' );
-		$this->assertTrue( $second_copy->stage_coupon_removal( 'two-staged-copies' ), 'The second copy should also stage the removal' );
-		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items( 'coupon' ), 'Staging should leave the stored coupon line until the save' );
-		$this->assertSame( 6, ( new WC_Coupon( 'two-staged-copies' ) )->get_usage_count(), 'Staging should not give the use back yet' );
-		$first_copy->save();
-		$second_copy->save();
-
-		$this->assertSame( 5, ( new WC_Coupon( 'two-staged-copies' ) )->get_usage_count(), 'The use should be given back once' );
-		$stored = wc_get_order( $order->get_id() );
-		$this->assertSame( array(), $stored->get_coupon_codes(), 'The coupon should be gone from the order' );
-		$this->assertFalse( $stored->get_data_store()->get_recorded_coupon_usage_counts( $stored ), 'The order should no longer be counted' );
-	}
-
-	/**
 	 * @testdox Removing two coupons one after the other gives each use back and clears the counted flag after the last one.
 	 */
 	public function test_remove_coupons_one_after_another_gives_each_use_back(): void {
@@ -3384,5 +3362,29 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		wp_set_current_user( 0 );
 
 		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_email_change', 'before@example.com' ), 'The use is found through the email recorded with it' );
+	}
+
+	/**
+	 * @testdox apply_coupon() counts the coupon once when its own save also changes the order status.
+	 *
+	 * @testWith ["processing", "completed"]
+	 *           ["pending", "on-hold"]
+	 *
+	 * @param string $stored_status Status that the order is saved with.
+	 * @param string $new_status    Status set in memory before the coupon is applied.
+	 */
+	public function test_apply_coupon_counts_once_when_its_save_changes_the_status( string $stored_status, string $new_status ): void {
+		WC_Helper_Coupon::create_coupon( 'count-once' );
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( $stored_status );
+		$order->save();
+		$order = wc_get_order( $order->get_id() );
+
+		$order->set_status( $new_status );
+		$order->apply_coupon( 'count-once' );
+		$this->assertSame( 1, ( new WC_Coupon( 'count-once' ) )->get_usage_count(), 'The coupon should be counted once.' );
+
+		$order->remove_coupon( 'count-once' );
+		$this->assertSame( 0, ( new WC_Coupon( 'count-once' ) )->get_usage_count(), 'Removing the coupon should give the use back.' );
 	}
 }

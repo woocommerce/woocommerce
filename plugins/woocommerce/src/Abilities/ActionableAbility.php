@@ -151,6 +151,20 @@ abstract class ActionableAbility extends Ability {
 	}
 
 	/**
+	 * Whether the ability runs the extensible abilities steps. When it returns
+	 * false, the ability runs as with the feature off: no `extensions` input,
+	 * no field writes, no validators and no syncs.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 *
+	 * @return bool
+	 */
+	protected function is_extensible(): bool {
+		return true;
+	}
+
+	/**
 	 * The objects that save() deleted for good, for the syncs. An ability that
 	 * deletes objects collects them in save() and returns them here.
 	 *
@@ -204,7 +218,7 @@ abstract class ActionableAbility extends Ability {
 			return $subject;
 		}
 
-		$enabled = ExtensibleAbilities::is_enabled();
+		$enabled = ExtensibleAbilities::is_enabled() && $this->is_extensible();
 		$writes  = $enabled && $this->writes_extension_fields();
 		$updates = $writes ? $this->prepare_fields( $input['extensions'] ?? array(), $this->get_resource() ) : array();
 		if ( is_wp_error( $updates ) ) {
@@ -515,7 +529,7 @@ abstract class ActionableAbility extends Ability {
 	 */
 	protected function prepare_properties( array $args ): array {
 		$args['execute_callback'] = array( $this, 'execute_change' );
-		if ( is_array( $args['input_schema'] ?? null ) && ExtensibleAbilities::is_enabled() && $this->writes_extension_fields() ) {
+		if ( is_array( $args['input_schema'] ?? null ) && ExtensibleAbilities::is_enabled() && $this->is_extensible() && $this->writes_extension_fields() ) {
 			$args['input_schema'] = $this->add_extensions_input_schema( $args['input_schema'] );
 		}
 		return parent::prepare_properties( $args );

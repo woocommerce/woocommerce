@@ -1733,8 +1733,12 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	public function test_set_items_from_order_keeps_unsaved_lines() {
 		$product = WC_Helper_Product::create_simple_product();
 		$order   = wc_create_order();
-		$order->stage_product_item( $product, 1 );
-		$order->stage_product_item( $product, 2 );
+		foreach ( array( 1, 2 ) as $quantity ) {
+			$item = new WC_Order_Item_Product();
+			$item->set_product( $product );
+			$item->set_quantity( $quantity );
+			$order->add_item( $item );
+		}
 
 		$discounts = new WC_Discounts( $order );
 
