@@ -66,7 +66,8 @@ final class AbstractOrderConfirmationBlockTest extends WC_Unit_Test_Case {
 	 * @testdox After the grace period, the billing email unlocks a guest order only while guest checkout is on.
 	 */
 	public function test_billing_email_unlocks_guest_order_with_guest_checkout(): void {
-		$order = \WC_Helper_Order::create_order( 0 );
+		$order = wc_create_order();
+		$order->set_billing_email( 'guest-unlock@example.com' );
 		$order->set_date_created( time() - HOUR_IN_SECONDS );
 		$order->save();
 		$_GET['key']       = $order->get_order_key();
@@ -83,5 +84,43 @@ final class AbstractOrderConfirmationBlockTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'full', $with_guest_checkout );
 		$this->assertFalse( $without_guest_checkout );
+	}
+
+	/**
+	 * @testdox The billing email never unlocks another customer's order, even when a subclass permits email verification.
+	 */
+	public function test_billing_email_does_not_unlock_customer_order_for_permissive_subclass(): void {
+		$sut   = new class() extends AbstractOrderConfirmationBlock {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function __construct() {
+			}
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function get_view_order_permissions_proxy( WC_Order $order ) {
+				return $this->get_view_order_permissions( $order );
+			}
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			protected function email_verification_permitted( $order ) {
+				return true;
+			}
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			protected function render_content( $order, $permission = false, $attributes = array(), $content = '' ) {
+				return '';
+			}
+		};
+		$order = wc_create_order( array( 'customer_id' => self::factory()->user->create( array( 'role' => 'customer' ) ) ) );
+		$order->set_billing_email( 'customer-unlock@example.com' );
+		$order->save();
+		wp_set_current_user( 0 );
+		$_GET['key']       = $order->get_order_key();
+		$_POST['_wpnonce'] = wp_create_nonce( 'wc_verify_email' );
+		$_POST['email']    = $order->get_billing_email();
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+
+		$permission = $sut->get_view_order_permissions_proxy( $order );
+
+		unset( $_GET['key'], $_POST['_wpnonce'], $_POST['email'] );
+		delete_option( 'woocommerce_enable_guest_checkout' );
+
+		$this->assertFalse( $permission );
 	}
 }

@@ -101,6 +101,11 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 			return 'full';
 		}
 
+		// Only the shared rule can unlock a customer order by email, even when a subclass overrides email_verification_permitted().
+		if ( $order->get_customer_id() && ! $this->get_order_received_access()->guest_can_unlock_order( $order, $this->get_request_order_key() ) ) {
+			return false;
+		}
+
 		return $this->email_verification_permitted( $order ) && $this->is_email_verified( $order ) ? 'full' : false;
 	}
 
