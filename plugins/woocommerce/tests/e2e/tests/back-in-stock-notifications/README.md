@@ -35,23 +35,23 @@ Covers the scenarios from the original plugin test plan that have a target in co
   `product_allows_signups()`, so the variation branch of that method — the one
   that walks up to the parent — is only reached on the signup POST, which the
   form's absence makes unreachable from the UI.
-- The plugin's "already signed up for this variation" scenario has no E2E test
-  yet. PHPUnit covers the "already joined" notice core adds to the signed-up
-  variation's data; `back-in-stock-form.js` shows it in place of the form when
-  that variation is selected.
+- Logged-in shoppers see the "already joined" notice instead of the form. For a
+  variable product, core lists the joined variations on the form
+  (`data-bis-signed-up-variations`), and `back-in-stock-form.js` (classic) or the
+  `woocommerce/back-in-stock-form` store (Add to Cart + Options block) shows the
+  notice when one is selected. `variations.spec.ts` covers the classic path.
 
 ## Configuration-branch notes
 
 - The signup nonce is only verified when the
   `woocommerce_customer_stock_notifications_personalization_enabled` filter is
   on (the default) and the shopper is logged in (or an account is required), so
-  guest forms survive HTML caching. The nonce test turns personalization on through the
-  test helper's `e2e-filters` cookie (`setFilterValue()`), which is why it runs
-  in the logged-in describe.
+  guest forms survive HTML caching. That is why the nonce test runs in the
+  logged-in describe.
 - Verify-link expiry is a filter
   (`woocommerce_customer_stock_notifications_verification_expiration_time_threshold`),
   not an option, so `expireVerificationLinks()` sets it to a negative value
-  through the same cookie. Both tests clear the cookie afterwards with
+  through the test helper's `e2e-filters` cookie, and clears it afterwards with
   `clearFilters()`.
 - Sign-ups are rate limited per client and per e-mail
   (`woocommerce_customer_stock_notifications_signup_rate_limit_options`), and
