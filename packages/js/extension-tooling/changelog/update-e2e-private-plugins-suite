@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Let browser tests list their private plugins with the e2e suite, so CI downloads them before checkout instead of passing a token.

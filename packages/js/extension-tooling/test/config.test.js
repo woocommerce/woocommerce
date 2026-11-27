@@ -64,6 +64,21 @@ test( 'rejects invalid extension config before producing outputs', ( context ) =
 	);
 } );
 
+test( 'turns on E2E private plugins when an entry lists the e2e suite', ( context ) => {
+	function e2ePrivatePlugins( suites ) {
+		const result = spawnSync( 'bash', [ reader ], {
+			cwd: fixture( context, {
+				privatePlugins: [ { slug: 'example-addon', suites } ],
+			} ),
+			encoding: 'utf8',
+		} );
+		assert.equal( result.status, 0, result.stderr );
+		return JSON.parse( result.stdout ).e2e.privatePlugins;
+	}
+	assert.equal( e2ePrivatePlugins( [ 'unit', 'e2e' ] ), true );
+	assert.equal( e2ePrivatePlugins( [ 'unit' ] ), false );
+} );
+
 test( 'preserves an older config without the ZIP PHP compatibility opt-in', ( context ) => {
 	const result = spawnSync( 'bash', [ reader ], {
 		cwd: fixture( context, {} ),
