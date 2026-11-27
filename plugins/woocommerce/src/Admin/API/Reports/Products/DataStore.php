@@ -582,11 +582,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$round_tax      = 'no' === get_option( 'woocommerce_tax_round_at_subtotal' );
 
 		$is_full_refund_without_line_items = false;
-		$partial_refund_product_revenue    = array();
 		$refund_type                       = $order->get_meta( '_refund_type' );
 		$uses_new_full_refund_data         = OrderUtil::uses_new_full_refund_data();
 
-		$parent_order = null;
+		$parent_order       = null;
+		$prior_refunded_qty = array();
+		$prior_refunded_net = array();
 
 		// When changing the order status to "Refunded", the refund order's type will be full refund, and the order items will be empty.
 		// We need to get the parent order items, and exclude the items that are already being partially refunded.
@@ -602,45 +603,24 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$parent_order    = wc_get_order( $parent_order_id );
 			$order_items     = $parent_order->get_items();
 
-			// Get the partially refunded product and variation IDs along with their sum of product_net_revenue from the parent order.
-			$partial_refund_products = $wpdb->get_results(
-				$wpdb->prepare(
-					"
-						SELECT
-							product_lookup.product_id,
-							product_lookup.variation_id,
-							SUM( product_lookup.product_net_revenue ) AS product_net_revenue
-						FROM %i AS product_lookup
-						INNER JOIN {$wpdb->prefix}wc_order_stats AS order_stats
-							ON order_stats.order_id = product_lookup.order_id
-						WHERE 1 = 1
-							AND order_stats.parent_id = %d
-							AND product_lookup.product_net_revenue < 0
-						GROUP BY product_lookup.product_id, product_lookup.variation_id
-					",
-					$table_name,
-					$parent_order_id
-				)
-			);
-
-			/**
-			 * Create a lookup table for partially refunded products.
-			 * E.g. [
-			 *   '1' => -20,
-			 *   '2' => -40,
-			 *   '51' => -10,
-			 *   '52' => -30,
-			 * ]
-			 */
-			foreach ( $partial_refund_products as $product ) {
-				$id                                    = $product->variation_id ? $product->variation_id : $product->product_id;
-				$partial_refund_product_revenue[ $id ] = (float) $product->product_net_revenue;
+			// Sum what earlier refunds took from each line, read and rounded like the rows those refunds wrote,
+			// which store the quantity as a whole number.
+			if ( $parent_order instanceof \WC_Order ) {
+				foreach ( $parent_order->get_refunds() as $prior_refund ) {
+					foreach ( $prior_refund->get_items() as $refunded_item ) {
+						if ( ! $refunded_item instanceof \WC_Order_Item_Product ) {
+							continue;
+						}
+						$refunded_item_id                        = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
+						$prior_refunded_qty[ $refunded_item_id ] = ( $prior_refunded_qty[ $refunded_item_id ] ?? 0 ) + (int) $refunded_item->get_quantity( 'edit' );
+						$prior_refunded_net[ $refunded_item_id ] = ( $prior_refunded_net[ $refunded_item_id ] ?? 0 ) + round( (float) $refunded_item->get_total( 'edit' ), $decimals );
+					}
+				}
 			}
 		}
 
 		foreach ( $order_items as $order_item ) {
-			$order_item_id = $order_item->get_id();
-			unset( $existing_items[ $order_item_id ] );
+			$order_item_id       = $order_item->get_id();
 			$product_qty         = $order_item->get_quantity( 'edit' );
 			$product_id          = $order_item->get_product_id( 'edit' );
 			$variation_id        = $order_item->get_variation_id( 'edit' );
@@ -652,19 +632,18 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			// If the order is a full refund and there is no order items. The order item here is the parent order item.
 			if ( $is_full_refund_without_line_items ) {
-				$id             = $variation_id ? $variation_id : $product_id;
-				$partial_refund = $partial_refund_product_revenue[ $id ] ?? 0;
-				// If a single line item was refunded 60% then fully refunded after, we need store the difference in the product lookup table.
-				// E.g. A product costs $100, it was previously partially refunded $60, then fully refunded $40.
-				// So it will be -abs( 100 + (-60) ) = -40.
-				$net_revenue = -abs( $net_revenue + $partial_refund );
+				// Earlier refunds of this line already have their own rows, so only store what they left.
+				// For example, when 1 of 4 units at $25 was refunded before, this row is -3 units and -$75.
+				// Refund items are negative, so adding them takes the earlier refunds off.
+				$net_revenue = -abs( round( $net_revenue + ( $prior_refunded_net[ $order_item_id ] ?? 0 ), $decimals ) );
 
 				// Skip items that have already been fully refunded (single or multiple partial refunds).
+				// The line stays in $existing_items, so the cleanup below removes a row an earlier sync wrote for it.
 				if ( 0.0 === $net_revenue ) {
 					continue;
 				}
 
-				$product_qty = -abs( $product_qty );
+				$product_qty = -abs( (int) $product_qty + ( $prior_refunded_qty[ $order_item_id ] ?? 0 ) );
 
 				// Set coupon amount to 0 for full refunds without line items.
 				$coupon_amount = 0;
@@ -694,6 +673,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					$tax_amount = -abs( $parent_order->get_item_cart_tax_amount( $order_item ) );
 				}
 			}
+
+			unset( $existing_items[ $order_item_id ] );
 
 			$is_refund = $net_revenue < 0;
 

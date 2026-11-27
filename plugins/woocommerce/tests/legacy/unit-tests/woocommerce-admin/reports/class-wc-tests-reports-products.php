@@ -439,6 +439,243 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Partial refunds made before an order is set to Refunded.
+	 *
+	 * Each line is a quantity and a total. Each refund is a line index, a quantity and a total.
+	 *
+	 * @return array[]
+	 */
+	public function provide_partial_refunds_then_full_refund() {
+		return array(
+			'one unit of a line'                   => array(
+				array( array( 4, 100 ) ),
+				array( array( 0, 1, 25 ) ),
+			),
+			'one of two lines of the same product' => array(
+				array( array( 4, 100 ), array( 1, 25 ) ),
+				array( array( 1, 1, 25 ) ),
+			),
+			'two refunds of an uneven unit price'  => array(
+				array( array( 3, 29 ) ),
+				array( array( 0, 1, 29 / 3 ), array( 0, 1, 29 / 3 ) ),
+			),
+		);
+	}
+
+	/**
+	 * Tests that a full refund after partial refunds counts only what the partial refunds left.
+	 *
+	 * @dataProvider provide_partial_refunds_then_full_refund
+	 *
+	 * @param array $lines   Order lines as quantity and total.
+	 * @param array $refunds Partial refunds as line index, quantity and total.
+	 */
+	public function test_populate_partial_refunds_then_full_refund( $lines, $refunds ) {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = new WC_Order();
+		$items = array();
+		foreach ( $lines as $line ) {
+			$item = new WC_Order_Item_Product();
+			$item->set_product( $product );
+			$item->set_quantity( $line[0] );
+			$item->set_subtotal( $line[1] );
+			$item->set_total( $line[1] );
+			$order->add_item( $item );
+			$items[] = $item;
+		}
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->calculate_totals( false );
+		$order->save();
+
+		foreach ( $refunds as $refund ) {
+			wc_create_refund(
+				array(
+					'amount'     => round( $refund[2], 2 ),
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						$items[ $refund[0] ]->get_id() => array(
+							'qty'          => $refund[1],
+							'refund_total' => $refund[2],
+						),
+					),
+				)
+			);
+		}
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$order = wc_get_order( $order->get_id() );
+		$order->set_status( OrderStatus::REFUNDED );
+		$order->save();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
+		$data       = ( new ProductsDataStore() )->get_data(
+			array(
+				'after'  => $start_time,
+				'before' => $end_time,
+			)
+		);
+
+		$this->assertSame( 0, (int) $data->data[0]['items_sold'] );
+		$this->assertEquals( 0.0, $data->data[0]['net_revenue'] );
+	}
+
+	/**
+	 * Tests that a full refund after fractional partial refunds leaves the line at zero units.
+	 *
+	 * Lookup rows store the quantity as a whole number, so two refunds of half a unit store zero units each.
+	 */
+	public function test_populate_fractional_partial_refunds_then_full_refund() {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Allow decimal quantities as a decimal stock setup does.
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		try {
+			$product = new WC_Product_Simple();
+			$product->set_name( 'Test Product' );
+			$product->set_regular_price( 25 );
+			$product->save();
+
+			$order = new WC_Order();
+			$item  = new WC_Order_Item_Product();
+			$item->set_product( $product );
+			$item->set_quantity( 4 );
+			$item->set_subtotal( 100 );
+			$item->set_total( 100 );
+			$order->add_item( $item );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->calculate_totals( false );
+			$order->save();
+
+			for ( $i = 0; $i < 2; $i++ ) {
+				wc_create_refund(
+					array(
+						'amount'     => 12.5,
+						'order_id'   => $order->get_id(),
+						'line_items' => array(
+							$item->get_id() => array(
+								'qty'          => 0.5,
+								'refund_total' => 12.5,
+							),
+						),
+					)
+				);
+			}
+			WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+			$order = wc_get_order( $order->get_id() );
+			$order->set_status( OrderStatus::REFUNDED );
+			$order->save();
+			WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+			$units = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					'SELECT SUM( product_qty ) FROM %i WHERE product_id = %d',
+					$wpdb->prefix . 'wc_order_product_lookup',
+					$product->get_id()
+				)
+			);
+			$this->assertSame( 0, $units );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+	}
+
+	/**
+	 * Tests that re-syncing a full refund removes an earlier row for a line that has nothing left to refund.
+	 */
+	public function test_resync_full_refund_removes_row_for_line_with_nothing_left() {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order  = WC_Helper_Order::create_order( 1, $product );
+		$second = new WC_Order_Item_Product();
+		$second->set_product( $product );
+		$second->set_quantity( 1 );
+		$second->set_subtotal( 25 );
+		$second->set_total( 25 );
+		$order->add_item( $second );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->calculate_totals();
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'amount'     => 25,
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$second->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => 25,
+					),
+				),
+			)
+		);
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$order = wc_get_order( $order->get_id() );
+		$order->set_status( OrderStatus::REFUNDED );
+		$order->save();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$full_refund = null;
+		foreach ( wc_get_order( $order->get_id() )->get_refunds() as $refund ) {
+			if ( 'full' === $refund->get_meta( '_refund_type' ) ) {
+				$full_refund = $refund;
+			}
+		}
+		$table = $wpdb->prefix . 'wc_order_product_lookup';
+
+		// A row for the already refunded line, as an earlier calculation could have written it.
+		$wpdb->insert(
+			$table,
+			array(
+				'order_item_id'         => $second->get_id(),
+				'order_id'              => $full_refund->get_id(),
+				'product_id'            => $product->get_id(),
+				'variation_id'          => 0,
+				'customer_id'           => 0,
+				'date_created'          => $full_refund->get_date_created()->date( 'Y-m-d H:i:s' ),
+				'product_qty'           => -1,
+				'product_net_revenue'   => -25,
+				'product_gross_revenue' => -25,
+				'coupon_amount'         => 0,
+				'tax_amount'            => 0,
+				'shipping_amount'       => 0,
+				'shipping_tax_amount'   => 0,
+			)
+		);
+
+		ProductsDataStore::sync_order_products( $full_refund->get_id() );
+
+		$rows = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM %i WHERE order_id = %d AND order_item_id = %d',
+				$table,
+				$full_refund->get_id(),
+				$second->get_id()
+			)
+		);
+		$this->assertSame( 0, $rows );
+	}
+
+	/**
 	 * @testdox Should not throw DivisionByZeroError when syncing a monetary-only refund (qty 0) with float quantities.
 	 *
 	 * Reproduces WOOPLUG-6639. When a store uses decimal/float stock amounts (e.g. WCPOS),

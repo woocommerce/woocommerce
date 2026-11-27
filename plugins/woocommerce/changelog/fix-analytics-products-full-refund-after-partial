@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Analytics: stop counting refunded units and revenue twice when an order is marked refunded after a partial refund.
