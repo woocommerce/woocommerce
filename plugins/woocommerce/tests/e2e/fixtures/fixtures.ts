@@ -119,6 +119,10 @@ export const locks = {
 	// sent emails or the Email settings page also take it, since the flags
 	// change both.
 	EMAIL_FEATURE_FLAGS: 'email-feature-flags',
+	// The visible product that sorts last by title. A test that creates a
+	// visible product named to sort last shares it with tests that list
+	// products by title in descending order.
+	LAST_PRODUCT_BY_TITLE: 'last-product-by-title',
 	// `woocommerce_pickup_location_settings` and `pickup_location_pickup_locations`.
 	LOCAL_PICKUP: 'local-pickup',
 	// The Back in Stock feature flag and `woocommerce_customer_stock_notifications_*`.
