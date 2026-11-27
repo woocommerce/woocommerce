@@ -16,16 +16,25 @@ require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
 class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 
 	/**
-	 * @testDox 'get_sections' returns the predefined sections as well as one section per existing tax class.
+	 * @testDox 'get_sections' keys each tax class section by its stored slug, not sanitize_title( $name ).
 	 */
 	public function test_get_sections_returns_predefined_sections_and_one_section_per_tax_class() {
-		 $tax_classes = array( 'tax_class_1', 'tax_class_2' );
+		$tax_rate_classes = array(
+			(object) array(
+				'name' => 'Custom tax name',
+				'slug' => 'custom_tax_class',
+			),
+			(object) array(
+				'name' => 'tax_class_2',
+				'slug' => 'tax_class_2',
+			),
+		);
 
 		StaticMockerHack::add_method_mocks(
 			array(
 				WC_Tax::class => array(
-					'get_tax_classes' => function() use ( $tax_classes ) {
-						return $tax_classes;
+					'get_tax_rate_classes' => function () use ( $tax_rate_classes ) {
+						return $tax_rate_classes;
 					},
 				),
 			)
@@ -35,13 +44,128 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 		$sections = $sut->get_sections();
 
 		$expected = array(
-			''            => 'Tax options',
-			'standard'    => 'Standard rates',
-			'tax_class_1' => 'tax_class_1 rates',
-			'tax_class_2' => 'tax_class_2 rates',
+			''                 => 'Tax options',
+			'standard'         => 'Standard rates',
+			'custom_tax_class' => 'Custom tax name rates',
+			'tax_class_2'      => 'tax_class_2 rates',
 		);
 
-		$this->assertEquals( $expected, $sections );
+		$this->assertEquals( $expected, $sections, 'Sections must be keyed by the stored slug, not sanitize_title( $name ).' );
+	}
+
+	/**
+	 * @testDox 'get_current_tax_class' returns the stored slug, not sanitize_title( $name ), when they differ.
+	 */
+	public function test_get_current_tax_class_resolves_stored_slug_over_sanitized_name() {
+		$name = 'Custom tax name';
+		$slug = 'custom_tax_class';
+
+		// Confirm the fixture actually exercises a slug that diverges from the sanitized name;
+		// otherwise this test would pass even with the old, buggy behavior.
+		$this->assertNotSame( sanitize_title( $name ), $slug, 'Fixture must use a slug that differs from sanitize_title( $name ).' );
+
+		global $current_section;
+		$current_section = $slug;
+
+		StaticMockerHack::add_method_mocks(
+			array(
+				WC_Tax::class => array(
+					'get_tax_rate_classes' => function () use ( $name, $slug ) {
+						return array(
+							(object) array(
+								'name' => $name,
+								'slug' => $slug,
+							),
+						);
+					},
+				),
+			)
+		);
+
+		$reflection = new ReflectionClass( WC_Settings_Tax::class );
+		$method     = $reflection->getMethod( 'get_current_tax_class' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( null );
+
+		$this->assertSame( $slug, $result, "Expected the stored slug '{$slug}' to be returned instead of a sanitized version of the name '{$name}'." );
+		$this->assertNotSame( sanitize_title( $name ), $result, 'The stored slug must win over sanitize_title( $name ).' );
+	}
+
+	/**
+	 * @testDox 'get_current_tax_class' returns a falsy-looking slug like "0" instead of treating it as no match.
+	 */
+	public function test_get_current_tax_class_resolves_falsy_string_slug() {
+		global $current_section;
+		$current_section = '0';
+
+		StaticMockerHack::add_method_mocks(
+			array(
+				WC_Tax::class => array(
+					'get_tax_rate_classes' => function () {
+						return array(
+							(object) array(
+								'name' => '0%',
+								'slug' => '0',
+							),
+						);
+					},
+				),
+			)
+		);
+
+		$reflection = new ReflectionClass( WC_Settings_Tax::class );
+		$method     = $reflection->getMethod( 'get_current_tax_class' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( null );
+
+		$this->assertSame( '0', $result, 'A slug of "0" must not be treated the same as no match found.' );
+	}
+
+	/**
+	 * @testDox 'get_current_tax_class' resolves to the tax class's own rates, not the standard rates.
+	 */
+	public function test_get_current_tax_class_resolves_to_correct_rates() {
+		global $current_section;
+
+		$tax_class = WC_Tax::create_tax_class( 'Custom tax name', 'custom_tax_class' );
+		$this->assertIsArray( $tax_class, 'Failed to create the tax class fixture.' );
+
+		$standard_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => 'US',
+				'tax_rate_state'   => '',
+				'tax_rate'         => '10.0000',
+				'tax_rate_name'    => 'Standard VAT',
+				'tax_rate_class'   => '',
+			)
+		);
+
+		$custom_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => 'US',
+				'tax_rate_state'   => '',
+				'tax_rate'         => '21.0000',
+				'tax_rate_name'    => 'Custom VAT',
+				'tax_rate_class'   => 'custom_tax_class',
+			)
+		);
+
+		$current_section = 'custom_tax_class';
+
+		$reflection = new ReflectionClass( WC_Settings_Tax::class );
+		$method     = $reflection->getMethod( 'get_current_tax_class' );
+		$method->setAccessible( true );
+		$current_class = $method->invoke( null );
+
+		$this->assertSame( 'custom_tax_class', $current_class, 'The section should resolve to the stored tax class slug.' );
+
+		$rates = WC_Tax::get_rates_for_tax_class( $current_class );
+
+		$this->assertArrayHasKey( $custom_rate_id, $rates, 'The custom tax class rate should be present.' );
+		$this->assertArrayNotHasKey( $standard_rate_id, $rates, 'The standard tax rate must not leak into a custom tax class section.' );
+		$this->assertSame( '21.0000', $rates[ $custom_rate_id ]->tax_rate, 'The rate belonging to the custom tax class should be the one selected.' );
 	}
 
 	/**
