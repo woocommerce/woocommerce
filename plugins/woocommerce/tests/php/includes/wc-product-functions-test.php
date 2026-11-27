@@ -809,6 +809,104 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a product (regular 50, sale 20) whose scheduled sale boundary has just passed.
+	 *
+	 * @param string $boundary  Which sale boundary has passed: 'start' or 'end'.
+	 * @param bool   $event_ran Whether the boundary's Action Scheduler event has run.
+	 * @return int Product ID. Before the event runs, `_price` is stale: 20 after the end, 50 after the start.
+	 */
+	private function create_product_past_sale_boundary( string $boundary, bool $event_ran ): int {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		if ( 'end' === $boundary ) {
+			$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+			$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		} else {
+			$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+			$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + 2 * HOUR_IN_SECONDS ) );
+		}
+		$product->save();
+
+		update_post_meta( $product->get_id(), 'end' === $boundary ? '_sale_price_dates_to' : '_sale_price_dates_from', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		if ( $event_ran ) {
+			call_user_func( "wc_handle_product_{$boundary}_scheduled_sale", $product->get_id() );
+		}
+
+		return $product->get_id();
+	}
+
+	/**
+	 * @testdox A price set with set_price() is kept after the scheduled sale event runs, even when it equals the other price.
+	 * @testWith ["end", "20"]
+	 *           ["start", "50"]
+	 *
+	 * @param string $boundary      Which sale boundary has passed: 'start' or 'end'.
+	 * @param string $runtime_price Price an extension sets at runtime, equal to the price on the other side of the boundary.
+	 */
+	public function test_scheduled_sale_active_price_keeps_runtime_price_after_event( string $boundary, string $runtime_price ): void {
+		$product = wc_get_product( $this->create_product_past_sale_boundary( $boundary, true ) );
+		$product->set_price( $runtime_price );
+
+		$this->assertEquals( $runtime_price, $product->get_price(), 'A runtime price must not be replaced by the scheduled sale correction.' );
+	}
+
+	/**
+	 * @testdox A cart price set in woocommerce_before_calculate_totals is kept after a scheduled sale ends.
+	 */
+	public function test_scheduled_sale_active_price_keeps_cart_runtime_price_after_sale_ends(): void {
+		$product_id = $this->create_product_past_sale_boundary( 'end', true );
+		$callback   = function ( $cart ) {
+			foreach ( $cart->get_cart() as $item ) {
+				$item['data']->set_price( 20 );
+			}
+		};
+		add_action( 'woocommerce_before_calculate_totals', $callback );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product_id );
+		WC()->cart->calculate_totals();
+		$total = WC()->cart->get_cart_contents_total();
+		WC()->cart->empty_cart();
+		remove_action( 'woocommerce_before_calculate_totals', $callback );
+
+		$this->assertEquals( 20, $total, 'The cart charges the price the extension set, not the regular price.' );
+	}
+
+	/**
+	 * @testdox Other woocommerce_product_get_price callbacks get the corrected price before the sale event runs.
+	 */
+	public function test_scheduled_sale_active_price_is_corrected_before_other_price_callbacks(): void {
+		$product_id = $this->create_product_past_sale_boundary( 'end', false );
+		// Currency-conversion style callback.
+		$callback = function ( $price ) {
+			return '' === (string) $price ? $price : (string) ( (float) $price * 2 );
+		};
+		add_filter( 'woocommerce_product_get_price', $callback, 10 );
+		$price = wc_get_product( $product_id )->get_price();
+		remove_filter( 'woocommerce_product_get_price', $callback, 10 );
+
+		$this->assertEquals( 100, $price, 'The regular price (50) should be converted, not the stale sale price (20).' );
+	}
+
+	/**
+	 * @testdox A woocommerce_product_get_price callback that returns the expired sale price is respected before the sale event runs.
+	 */
+	public function test_scheduled_sale_active_price_respects_callback_returning_expired_sale_price(): void {
+		$product_id = $this->create_product_past_sale_boundary( 'end', false );
+		$callback   = function () {
+			return '20';
+		};
+		add_filter( 'woocommerce_product_get_price', $callback, 10 );
+		$price = wc_get_product( $product_id )->get_price();
+		remove_filter( 'woocommerce_product_get_price', $callback, 10 );
+
+		$this->assertEquals( 20, $price, 'The callback price should win over the scheduled sale correction.' );
+	}
+
+	/**
 	 * @testdox An external product reconciles like a simple product.
 	 */
 	public function test_scheduled_sale_active_price_heals_external_product(): void {

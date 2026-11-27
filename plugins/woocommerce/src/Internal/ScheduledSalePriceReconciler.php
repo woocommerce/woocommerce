@@ -32,7 +32,8 @@ class ScheduledSalePriceReconciler implements RegisterHooksInterface {
 	 * Register hooks and filters.
 	 */
 	public function register(): void {
-		add_filter( 'woocommerce_product_get_price', array( $this, 'reconcile_price' ), 99, 2 );
+		// Run early so other callbacks, such as currency conversion, work on the corrected price.
+		add_filter( 'woocommerce_product_get_price', array( $this, 'reconcile_price' ), 0, 2 );
 	}
 
 	/**
@@ -80,13 +81,16 @@ class ScheduledSalePriceReconciler implements RegisterHooksInterface {
 			return $price;
 		}
 
-		// Respect third-party prices: if another callback already changed the price away from
-		// the stored value, leave it alone. This is deliberate even for ambient transforms
-		// such as currency conversion: by this priority the price is already transformed, and
-		// returning a raw sale/regular price would bypass the transform, which cannot be
-		// re-applied from here. Those stores keep their pre-existing behavior during the gap.
-		// The 'edit' context returns the raw stored price without re-applying this filter, so
-		// there is no recursion.
+		// Keep a price set with set_price() after the product was read, for example by a cart pricing extension.
+		// get_price( 'edit' ) includes that change, so the stored-price check below can't detect it. A runtime price
+		// that formats the same as the stale stored price isn't recorded as a change, and is still reconciled until
+		// the sale event updates `_price`.
+		if ( array_key_exists( 'price', $product->get_changes() ) ) {
+			return $price;
+		}
+
+		// Respect a price changed by a callback that runs before this one. The 'edit' context returns the raw stored
+		// price without re-applying this filter, so there is no recursion.
 		$stored_price = $product->get_price( 'edit' );
 		if ( (string) $price !== (string) $stored_price ) {
 			return $price;
