@@ -358,7 +358,6 @@ final class BlockTypesLazyController {
 		return array();
 	}
 
-
 	/**
 	 * Side effect free and stateless product listing blocks (shop, category, tag pages).
 	 *
