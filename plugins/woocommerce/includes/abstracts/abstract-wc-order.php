@@ -2965,9 +2965,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	private function sum_totals_before_taxes( $and_taxes ): array {
 		$this->do_mapped_action( 'woocommerce_order_before_calculate_totals', array( $and_taxes, $this ), $and_taxes );
 
-		$fees_total        = 0;
-		$shipping_total    = 0;
-		$price_decimals    = wc_get_price_decimals();
+		$fees_total     = 0;
+		$shipping_total = 0;
+		$price_decimals = wc_get_price_decimals();
 
 		$cart_subtotal = $this->get_cart_subtotal_for_order();
 		$cart_total    = (float) $this->get_cart_total_for_order();

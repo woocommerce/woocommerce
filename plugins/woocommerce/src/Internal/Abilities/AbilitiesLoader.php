@@ -217,7 +217,11 @@ class AbilitiesLoader {
 			}
 			$order->add_order_note( $paid['note'], false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
 
-			/** This action is documented in includes/class-wc-order.php. */
+			/**
+			 * This action is documented in includes/class-wc-order.php.
+			 *
+			 * @since 1.2.2
+			 */
 			do_action( 'woocommerce_payment_complete', $order->get_id(), $paid['transaction_id'] );
 		}
 	}

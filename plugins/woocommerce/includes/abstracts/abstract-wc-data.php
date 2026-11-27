@@ -257,8 +257,24 @@ abstract class WC_Data {
 			if ( defined( 'WC_NOTICE_OLD_STAGED_HOOKS' ) && WC_NOTICE_OLD_STAGED_HOOKS && has_action( $hook ) ) {
 				wc_deprecated_hook( $hook, '11.5.0', $hook . '_v2' );
 			}
+			/**
+			 * Fires the old action with its old arguments. Each mapped action is documented where it is called.
+			 *
+			 * @since 11.5.0
+			 *
+			 * @param mixed ...$old_args Arguments of the old action.
+			 */
 			do_action( $hook, ...$old_args );
 		}
+		/**
+		 * Fires the new action, whose name ends in _v2. Each mapped action is documented where it is called.
+		 *
+		 * @since 11.5.0
+		 *
+		 * @param WC_Data $this    The object the action is about.
+		 * @param bool    $staged  Whether the change is staged and not saved yet.
+		 * @param mixed   ...$args Other arguments of the new action.
+		 */
 		do_action( $hook . '_v2', $this, $staged, ...$args );
 	}
 

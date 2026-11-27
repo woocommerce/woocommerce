@@ -205,7 +205,7 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 					array(
 						'resource'  => 'order',
 						'namespace' => 'spike',
-						'callback'  => static function ( array $orders ) use ( &$seen ) {
+						'callback'  => static function ( array $orders ) use ( &$seen ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- A sync callback receives the orders; this one only records the action count.
 							$seen[] = did_action( 'woocommerce_payment_complete' );
 						},
 					)
@@ -513,7 +513,13 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 				)
 			);
 			$this->products = array( WC_Helper_Product::create_simple_product(), WC_Helper_Product::create_simple_product() );
-			WC_Helper_Coupon::create_coupon( 'staged10', array( 'discount_type' => 'percent', 'coupon_amount' => '10' ) );
+			WC_Helper_Coupon::create_coupon(
+				'staged10',
+				array(
+					'discount_type' => 'percent',
+					'coupon_amount' => '10',
+				)
+			);
 		}
 
 		$order = new WC_Order();
@@ -566,6 +572,7 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 	}
 }
 
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound -- Test helper used only by the tests above.
 /**
  * An order class that overrides calculate_totals() and not stage_totals().
  */
@@ -576,7 +583,7 @@ class WC_Data_Staged_Actions_Test_Order extends WC_Order {
 	 * @param bool $and_taxes Calc taxes if true.
 	 * @return float
 	 */
-	public function calculate_totals( $and_taxes = true ) {
+	public function calculate_totals( $and_taxes = true ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found -- The test needs a subclass that overrides this method.
 		return parent::calculate_totals( $and_taxes );
 	}
 }
