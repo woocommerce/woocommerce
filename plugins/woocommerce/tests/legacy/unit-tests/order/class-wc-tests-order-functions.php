@@ -1979,6 +1979,37 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Posts-storage extensions can replace the full ID list and choose the fields to search.
+	 */
+	public function test_posts_order_search_filters() {
+		$first  = self::factory()->post->create( array( 'post_type' => 'shop_order' ) );
+		$second = self::factory()->post->create( array( 'post_type' => 'shop_order' ) );
+		foreach ( array( $first, $second ) as $id ) {
+			add_post_meta( $id, '_invoice_number', 'Invoice-123' );
+		}
+
+		$fields  = static function () {
+			return array( '_invoice_number' );
+		};
+		$results = function ( $ids, $term, $search_fields ) use ( $first, $second ) {
+			$this->assertEqualsCanonicalizing( array( $first, $second ), $ids );
+			$this->assertSame( 'Invoice-123', $term );
+			$this->assertSame( array( '_invoice_number' ), $search_fields );
+			return array( $second );
+		};
+
+		add_filter( 'woocommerce_shop_order_search_fields', $fields );
+		add_filter( 'woocommerce_shop_order_search_results', $results, 10, 3 );
+		try {
+			$store = new WC_Order_Data_Store_CPT();
+			$this->assertSame( array( $second ), $store->search_orders( 'Invoice-123' ) );
+		} finally {
+			remove_filter( 'woocommerce_shop_order_search_results', $results );
+			remove_filter( 'woocommerce_shop_order_search_fields', $fields );
+		}
+	}
+
+	/**
 	 * Checks if hold coupons are released when increasing usage count.
 	 *
 	 * @throws Exception When unable to create an order.

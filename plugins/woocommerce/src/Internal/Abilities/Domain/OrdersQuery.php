@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrderSearchQuery;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -21,6 +22,8 @@ defined( 'ABSPATH' ) || exit;
 class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 	use OrderAbilityTrait;
+
+	private const SEARCH_QUERY_VAR = 'wc_orders_ability_search';
 
 	/**
 	 * Get the ability name.
@@ -208,9 +211,9 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			if ( $hpos ) {
 				$args['s'] = $search;
 			} else {
-				// Posts storage matches `s` against post title and content only, which orders leave empty.
-				$matches = wc_order_search( $search );
-				$include = null === $include ? $matches : array_intersect( $include, $matches );
+				$args[ self::SEARCH_QUERY_VAR ] = $search;
+				// Changes to customer phone or order items can affect matches without invalidating the post query cache.
+				$args['cache_results'] = false;
 			}
 		}
 		if ( null !== $include ) {
@@ -263,6 +266,26 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'page'        => $page,
 			'per_page'    => $per_page,
 		);
+	}
+
+	/**
+	 * Join matching order IDs before WP_Query counts and pages the orders.
+	 *
+	 * @internal
+	 * @param string    $join  Existing JOIN clauses.
+	 * @param \WP_Query $query WordPress posts query.
+	 * @return string
+	 */
+	public static function join_search_matches( $join, $query ) {
+		global $wpdb;
+
+		$term = $query->get( self::SEARCH_QUERY_VAR );
+		if ( ! is_string( $term ) || '' === $term ) {
+			return $join;
+		}
+
+		$matches = ( new OrderSearchQuery( $term ) )->get_subquery();
+		return $join . " INNER JOIN ( $matches ) AS wc_order_matches ON wc_order_matches.order_id = {$wpdb->posts}.ID ";
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Reduce memory use for broad searches with the orders query ability on stores using posts storage.

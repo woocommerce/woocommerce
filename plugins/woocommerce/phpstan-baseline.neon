@@ -16915,12 +16915,6 @@ parameters:
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, array\<array\|string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Parameter \#3 \$index_key of function wp_list_pluck expects int\|string\|null, true given\.$#'
 			identifier: argument.type
 			count: 1

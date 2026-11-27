@@ -5,6 +5,7 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrderSearchQuery;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -575,78 +576,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @return array of ids
 	 */
 	public function search_orders( $term ) {
-		global $wpdb;
-
-		/**
-		 * Searches on meta data can be slow - this lets you choose what fields to search.
-		 * 3.0.0 added _billing_address and _shipping_address meta which contains all address data to make this faster.
-		 * This however won't work on older orders unless updated, so search a few others (expand this using the filter if needed).
-		 *
-		 * @var array
-		 */
-		$search_fields = array_map(
-			'wc_clean',
-			apply_filters(
-				'woocommerce_shop_order_search_fields',
-				array(
-					'_billing_address_index',
-					'_shipping_address_index',
-					'_billing_last_name',
-					'_billing_email',
-					'_billing_phone',
-				)
-			)
-		);
-		$order_ids     = array();
-
-		if ( is_numeric( $term ) ) {
-			$order_ids[] = absint( $term );
-		}
-
-		if ( ! empty( $search_fields ) ) {
-			$order_ids = array_unique(
-				array_merge(
-					$order_ids,
-					$wpdb->get_col(
-						$wpdb->prepare(
-							"SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_value LIKE %s AND p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "')", // @codingStandardsIgnoreLine
-							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
-						)
-					),
-					$wpdb->get_col(
-						$wpdb->prepare(
-							"SELECT order_id
-							FROM {$wpdb->prefix}woocommerce_order_items as order_items
-							WHERE order_item_name LIKE %s",
-							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
-						)
-					),
-					$wpdb->get_col(
-						$wpdb->prepare(
-							"SELECT DISTINCT os.order_id FROM {$wpdb->prefix}wc_order_stats os
-							INNER JOIN {$wpdb->prefix}wc_customer_lookup cl ON os.customer_id = cl.customer_id
-							INNER JOIN {$wpdb->usermeta} um ON cl.user_id = um.user_id
-							WHERE (um.meta_key = 'billing_phone' OR um.meta_key = 'shipping_phone')
-							AND um.meta_value = %s",
-							wc_clean( $term )
-						)
-					)
-				)
-			);
-		}
-
-		/**
-		 * Filter the order ids to be returned.
-		 *
-		 * @since 3.0.0
-		 * @param array $order_ids The order ids.
-		 * @param string $term The search term.
-		 * @param array $search_fields The search fields.
-		 * @return array
-		 */
-		$order_ids = apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term, $search_fields );
-
-		return array_map( 'absint', $order_ids );
+		return ( new OrderSearchQuery( $term ) )->get_ids();
 	}
 
 	/**

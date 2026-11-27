@@ -207,6 +207,53 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Posts storage pages all search matches even when the legacy ID-list filter replaces its results.
+	 */
+	public function test_posts_search_pages_matches_in_the_order_query(): void {
+		$this->use_storage( false );
+		$first  = $this->create_customer_order( 'Zoe', 'Jones', 'zoe@example.com' );
+		$second = $this->create_customer_order( 'Zac', 'Smith', 'zac@example.com' );
+		$third  = $this->create_customer_order( 'Zara', 'Shaw', 'zara@example.com' );
+		$args   = array(
+			'search'   => 'z',
+			'per_page' => 2,
+			'orderby'  => 'id',
+			'order'    => 'asc',
+		);
+
+		add_filter( 'woocommerce_shop_order_search_results', '__return_empty_array' );
+		try {
+			$page_one = OrdersQuery::execute( $args );
+			$page_two = OrdersQuery::execute( array_merge( $args, array( 'page' => 2 ) ) );
+		} finally {
+			remove_filter( 'woocommerce_shop_order_search_results', '__return_empty_array' );
+		}
+
+		$this->assertSame( array( $first, $second ), array_column( $page_one['orders'], 'id' ) );
+		$this->assertSame( array( $third ), array_column( $page_two['orders'], 'id' ) );
+		$this->assertSame( 2, $page_one['total_pages'] );
+		$this->assertSame( 2, $page_two['total_pages'] );
+	}
+
+	/**
+	 * @testdox Updating a customer's phone changes matches without an order edit.
+	 */
+	public function test_posts_search_reflects_customer_phone_changes(): void {
+		$this->use_storage( false );
+		$customer = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$order    = $this->create_customer_order( 'Jane', 'Doe', 'jane@example.com', null, $customer );
+		\Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::sync_order( $order );
+
+		$args   = array( 'search' => '555-0199' );
+		$before = OrdersQuery::execute( $args );
+		update_user_meta( $customer, 'shipping_phone', '555-0199' );
+		$after = OrdersQuery::execute( $args );
+
+		$this->assertSame( array(), $before['orders'] );
+		$this->assertSame( array( $order ), array_column( $after['orders'], 'id' ) );
+	}
+
+	/**
 	 * @testdox Should find an order by its order number, with or without an "Order #" prefix.
 	 *
 	 * @dataProvider storage_modes
