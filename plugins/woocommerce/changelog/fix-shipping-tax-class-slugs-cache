@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the current tax classes when choosing the shipping tax for a cart with several tax classes, not a list kept from earlier in the request.

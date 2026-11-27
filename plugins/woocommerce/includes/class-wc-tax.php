@@ -677,12 +677,7 @@ class WC_Tax {
 		}
 
 		// For multiple classes, use the first one found using the order defined in settings.
-		static $tax_class_slugs = null;
-		if ( null === $tax_class_slugs ) {
-			$tax_class_slugs = self::get_tax_class_slugs();
-		}
-
-		foreach ( $tax_class_slugs as $tax_class_slug ) {
+		foreach ( self::get_tax_class_slugs() as $tax_class_slug ) {
 			if ( in_array( $tax_class_slug, $cart_tax_classes, true ) ) {
 				return $tax_class_slug;
 			}
