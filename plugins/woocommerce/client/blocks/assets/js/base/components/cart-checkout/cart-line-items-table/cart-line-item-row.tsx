@@ -23,11 +23,11 @@ import {
 } from '@woocommerce/blocks-checkout';
 import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
-import { isBoolean, Currency } from '@woocommerce/types';
+import { isBoolean } from '@woocommerce/types';
 import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
 import { Icon, trash } from '@wordpress/icons';
-import { calculateSaleAmount } from '@woocommerce/base-utils';
-import { dinero, transformScale, toSnapshot, type Dinero } from 'dinero.js';
+import { calculateLineSaleAmount } from '@woocommerce/base-utils';
+import { dinero, toSnapshot } from 'dinero.js';
 import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 
 /**
@@ -37,21 +37,6 @@ import ProductBackorderBadge from '../product-backorder-badge';
 import ProductImage from '../product-image';
 import ProductMetadata from '../product-metadata';
 import ProductSaleBadge from '../product-sale-badge';
-
-/**
- * Convert a Dinero object with precision to store currency minor unit.
- *
- * @param {Dinero} priceObject Price object to convert.
- * @param {Object} currency    Currency data.
- * @return {number} Amount with new minor unit precision.
- */
-const getAmountFromRawPrice = (
-	priceObject: Dinero< number >,
-	currency: Currency
-) => {
-	return toSnapshot( transformScale( priceObject, currency.minorUnit ) )
-		.amount;
-};
 
 interface CartLineItemRowProps {
 	lineItem: CartItem | Record< string, never >;
@@ -174,23 +159,13 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 		// `name` is a raw HTML string; decode entities for screen-reader text (aria-label, speak).
 		const decodedName = decodeEntities( name );
 
-		const regularAmountSingle = dinero( {
-			amount: parseInt( prices.raw_prices.regular_price, 10 ),
-			currency: USD,
-			scale: prices.raw_prices.precision,
-		} );
-		const purchaseAmountSingle = dinero( {
-			amount: parseInt( prices.raw_prices.price, 10 ),
-			currency: USD,
-			scale: prices.raw_prices.precision,
-		} );
-		const saleAmountSingle = calculateSaleAmount(
-			prices,
-			priceCurrency.minorUnit
-		);
 		const totalsCurrency = getCurrencyFromPriceResponse( totals );
+		const includeTax = getSetting< boolean >(
+			'displayCartPricesIncludingTax',
+			false
+		);
 		let lineSubtotal = parseInt( totals.line_subtotal, 10 );
-		if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
+		if ( includeTax ) {
 			lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
 		}
 		const subtotalPrice = dinero( {
@@ -198,6 +173,12 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 			currency: USD,
 			scale: totalsCurrency.minorUnit,
 		} );
+		const lineQuantity = lineItem.quantity ?? 0;
+		const lineSaleAmount = calculateLineSaleAmount(
+			{ prices, totals, quantity: lineQuantity },
+			totalsCurrency.minorUnit,
+			includeTax
+		);
 
 		const firstImage = images.length ? images[ 0 ] : {};
 		const isProductHiddenFromCatalog =
@@ -296,14 +277,11 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 						<div className="wc-block-cart-item__prices">
 							<ProductPrice
 								currency={ priceCurrency }
-								regularPrice={ getAmountFromRawPrice(
-									regularAmountSingle,
-									priceCurrency
+								regularPrice={ parseInt(
+									prices.regular_price,
+									10
 								) }
-								price={ getAmountFromRawPrice(
-									purchaseAmountSingle,
-									priceCurrency
-								) }
+								price={ parseInt( prices.price, 10 ) }
 								format={ subtotalPriceFormat }
 							/>
 						</div>
@@ -462,8 +440,8 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 						</DelayedContentWithSkeleton>
 
 						<ProductSaleBadge
-							currency={ priceCurrency }
-							saleAmount={ saleAmountSingle * quantity }
+							currency={ totalsCurrency }
+							saleAmount={ lineSaleAmount }
 							format={ saleBadgePriceFormat }
 						/>
 					</div>

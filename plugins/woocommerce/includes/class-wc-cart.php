@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\Cart\PriceDisplayPrecision;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\ProductVariations\VariationMatcher;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
@@ -2448,16 +2449,18 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get the product row price per item.
 	 *
+	 * A price the shopper sees as entered keeps the decimals it was entered with, e.g. £0.207.
+	 *
 	 * @param WC_Product $product Product object.
 	 * @return string formatted price
 	 */
 	public function get_product_price( $product ) {
-		if ( $this->display_prices_including_tax() ) {
-			$product_price = wc_get_price_including_tax( $product );
-		} else {
-			$product_price = wc_get_price_excluding_tax( $product );
-		}
-		return apply_filters( 'woocommerce_cart_product_price', wc_price( $product_price ), $product );
+		$including_tax = $this->display_prices_including_tax();
+		$decimals      = PriceDisplayPrecision::get_decimals( $product, $including_tax );
+		$price         = $including_tax ? wc_get_price_including_tax( $product ) : wc_get_price_excluding_tax( $product );
+		$product_price = wc_price( $this->round_price( (float) $price, $decimals ), array( 'decimals' => $decimals ) );
+
+		return apply_filters( 'woocommerce_cart_product_price', $product_price, $product ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Long-standing undocumented hook; unchanged.
 	}
 
 	/**

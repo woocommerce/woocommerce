@@ -470,13 +470,37 @@ const { state: cartItemState } = store(
 				);
 			},
 
-			get lineItemDiscount(): string {
-				const { quantity, extensions } = cartItemState.cartItem;
+			// Unit prices can have more decimals than the totals when shown as entered, e.g. £0.207.
+			get priceCurrency(): Currency {
+				return normalizeCurrencyResponse(
+					cartItemState.cartItem.prices,
+					cartItemState.currency
+				);
+			},
 
-				const totalLineItemDiscount =
-					( cartItemState.regularAmountSingle -
-						cartItemState.purchaseAmountSingle ) *
-					quantity;
+			get lineItemDiscount(): string {
+				const { quantity, extensions, totals } = cartItemState.cartItem;
+
+				// The regular price for the whole line minus what the line costs, so the saving matches the line total.
+				const linePrice = displayCartPriceIncludingTax
+					? parseInt( totals.line_subtotal, 10 ) +
+						parseInt( totals.line_subtotal_tax, 10 )
+					: parseInt( totals.line_subtotal, 10 );
+				const regularLinePrice = scalePrice( {
+					price:
+						parseInt(
+							cartItemState.cartItem.prices.raw_prices
+								.regular_price,
+							10
+						) * quantity,
+					inputDecimals:
+						cartItemState.cartItem.prices.raw_prices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
+				const totalLineItemDiscount = Math.max(
+					0,
+					regularLinePrice - linePrice
+				);
 
 				const price = formatPriceWithCurrency(
 					totalLineItemDiscount,
@@ -610,37 +634,12 @@ const { state: cartItemState } = store(
 			},
 
 			get priceWithoutDiscount(): string {
-				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
-				const priceWithoutDiscount = scalePrice( {
-					price: parseInt( rawPrices.regular_price, 10 ),
-					inputDecimals: rawPrices.precision,
-					outputDecimals: cartItemState.currency.minorUnit,
-				} );
-
+				// Use the price the server rounded, so it matches the product page and the cart.
 				return formatPriceWithCurrency(
-					priceWithoutDiscount,
-					cartItemState.currency
+					parseInt( cartItemState.cartItem.prices.regular_price, 10 ),
+					cartItemState.currency,
+					cartItemState.priceCurrency
 				);
-			},
-
-			get regularAmountSingle(): number {
-				const { prices } = cartItemState.cartItem;
-
-				return scalePrice( {
-					price: parseInt( prices.raw_prices.regular_price, 10 ),
-					inputDecimals: prices.raw_prices.precision,
-					outputDecimals: cartItemState.currency.minorUnit,
-				} );
-			},
-
-			get purchaseAmountSingle(): number {
-				const { prices } = cartItemState.cartItem;
-
-				return scalePrice( {
-					price: parseInt( prices.raw_prices.price, 10 ),
-					inputDecimals: prices.raw_prices.precision,
-					outputDecimals: cartItemState.currency.minorUnit,
-				} );
 			},
 
 			get beforeItemPrice(): string | null {
@@ -696,16 +695,11 @@ const { state: cartItemState } = store(
 			},
 
 			get itemPrice(): string {
-				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
-				const itemPrice = scalePrice( {
-					price: parseInt( rawPrices.price, 10 ),
-					inputDecimals: rawPrices.precision,
-					outputDecimals: cartItemState.currency.minorUnit,
-				} );
-
+				// Use the price the server rounded, so it matches the product page and the cart.
 				return formatPriceWithCurrency(
-					itemPrice,
-					cartItemState.currency
+					parseInt( cartItemState.cartItem.prices.price, 10 ),
+					cartItemState.currency,
+					cartItemState.priceCurrency
 				);
 			},
 

@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Utils\ProductDescriptionUtils;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\StockDisplayFormat;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\Cart\PriceDisplayPrecision;
 
 /**
  * ProductSchema class.
@@ -1008,12 +1009,26 @@ class ProductSchema extends AbstractSchema {
 			$sale_price    = $product->is_on_sale() ? $product->get_sale_price() : '';
 		}
 
+		// A price the shopper sees as entered keeps its decimals, e.g. 0.207 is "207" with a minor unit of 3. Ranges don't,
+		// and neither do prices changed after they were saved (e.g. by a discount extension).
+		if ( ! $product->is_type( array( ProductType::VARIABLE, ProductType::GROUPED ) ) && ! PriceDisplayPrecision::is_price_changed( $product ) ) {
+			$including_tax  = TaxDisplayMode::INCLUSIVE === $tax_display_mode;
+			$price_decimals = max(
+				PriceDisplayPrecision::get_decimals( $product, $including_tax ),
+				PriceDisplayPrecision::get_decimals( $product, $including_tax, $regular_price ),
+				PriceDisplayPrecision::get_decimals( $product, $including_tax, $sale_price )
+			);
+		}
+
 		$prices['price']         = $this->prepare_money_response( $price_function( $product ), $price_decimals );
 		$prices['regular_price'] = $this->prepare_money_response( $price_function( $product, [ 'price' => $regular_price ] ), $price_decimals );
 		$prices['sale_price']    = $this->prepare_money_response( $price_function( $product, [ 'price' => $sale_price ] ), $price_decimals );
 		$prices['price_range']   = $this->get_price_range( $product, $tax_display_mode );
 
-		return $this->prepare_currency_response( $prices );
+		$prices                        = $this->prepare_currency_response( $prices );
+		$prices['currency_minor_unit'] = $price_decimals;
+
+		return $prices;
 	}
 
 	/**

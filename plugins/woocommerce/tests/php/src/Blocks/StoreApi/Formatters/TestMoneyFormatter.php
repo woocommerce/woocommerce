@@ -55,6 +55,14 @@ class TestMoneyFormatter extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Rounds amounts stored just below a half cent, like 4.975, the way cart totals do.
+	 */
+	public function test_format_ignores_float_noise() {
+		$this->assertEquals( '498', $this->formatter->format( 4.975 ), '4.975 is stored as 4.97499… but cart totals round it to 4.98' );
+		$this->assertEquals( '833', $this->formatter->format( 9.99 / 1.2 ), '£9.99 less 20% VAT is 8.325, shown as 8.33 in the cart' );
+	}
+
+	/**
 	 * Test formatting for int overflow values.
 	 */
 	public function test_format_int_overflow() {

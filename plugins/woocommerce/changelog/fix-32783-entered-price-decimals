@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Show prices entered with extra decimals as entered, e.g. £0.207, on the product page, cart and checkout.

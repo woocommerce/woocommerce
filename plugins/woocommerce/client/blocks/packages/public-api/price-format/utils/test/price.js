@@ -2,6 +2,51 @@
  * Internal dependencies
  */
 import { formatPrice, getCurrency } from '../price';
+import { formatPriceWithCurrency } from '../currency';
+
+/** @type {import('@woocommerce/types').Currency} */
+const GBP = {
+	code: 'GBP',
+	symbol: '£',
+	thousandSeparator: ',',
+	decimalSeparator: '.',
+	minorUnit: 2,
+	prefix: '£',
+	suffix: '',
+};
+
+/** @type {import('@woocommerce/types').Currency} */
+const JPY = { ...GBP, code: 'JPY', symbol: '¥', minorUnit: 0, prefix: '¥' };
+
+describe( 'The function formatPriceWithCurrency()', () => {
+	test.each`
+		value     | storeCurrency | minorUnit | expected
+		${ 2100 } | ${ GBP }      | ${ 3 }    | ${ '£2.10' }
+		${ 1995 } | ${ GBP }      | ${ 3 }    | ${ '£1.995' }
+		${ 207 }  | ${ GBP }      | ${ 3 }    | ${ '£0.207' }
+		${ 230 }  | ${ GBP }      | ${ 3 }    | ${ '£0.23' }
+		${ 1995 } | ${ JPY }      | ${ 1 }    | ${ '¥199.5' }
+		${ 2000 } | ${ JPY }      | ${ 1 }    | ${ '¥200' }
+		${ 210 }  | ${ GBP }      | ${ 2 }    | ${ '£2.10' }
+	`(
+		'drops zeros beyond the store’s decimals: $value at minor unit $minorUnit is "$expected"',
+		( { value, storeCurrency, minorUnit, expected } ) => {
+			expect(
+				formatPriceWithCurrency( value, storeCurrency, { minorUnit } )
+			).toBe( expected );
+		}
+	);
+
+	it( 'keeps every decimal of a currency other than the store’s', () => {
+		expect(
+			formatPriceWithCurrency( 2100, GBP, {
+				code: 'KWD',
+				minorUnit: 3,
+				prefix: 'KD ',
+			} )
+		).toBe( 'KD 2.100' );
+	} );
+} );
 
 describe( 'The function formatPrice()', () => {
 	test.each`

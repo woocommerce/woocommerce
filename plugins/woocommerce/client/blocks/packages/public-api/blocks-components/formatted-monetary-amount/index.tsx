@@ -11,6 +11,7 @@ import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
 import { SITE_CURRENCY } from '@woocommerce/settings';
 import { decodeHtmlEntities } from '@woocommerce/utils';
+import { getDisplayMinorUnit } from '@woocommerce/price-format/utils/currency';
 
 /**
  * Internal dependencies
@@ -197,7 +198,12 @@ const FormattedMonetaryAmount = ( {
 		'wc-block-components-formatted-money-amount',
 		className
 	);
-	const decimalScale = props.decimalScale ?? currency?.minorUnit;
+	// Shown amounts drop zeros beyond the store's decimals, e.g. £2.10, not £2.100; inputs keep the currency's decimals.
+	const decimalScale =
+		props.decimalScale ??
+		( displayType === 'text'
+			? getDisplayMinorUnit( value, currency, SITE_CURRENCY )
+			: currency.minorUnit );
 	const decodedPrefix = decodeHtmlEntities( currency.prefix );
 	const decodedSuffix = decodeHtmlEntities( currency.suffix );
 

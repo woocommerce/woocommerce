@@ -3336,6 +3336,151 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Shows the cart unit price as the product page shows it, with the decimals entered when shown as entered.
+	 * @testWith ["no", "excl", "none", "GB", "1.995", "$1.995"]
+	 *           ["no", "excl", "none", "GB", "0.207", "$0.207"]
+	 *           ["yes", "incl", "taxable", "GB", "1.995", "$1.995"]
+	 *           ["yes", "incl", "taxable", "GB", "0.207", "$0.207"]
+	 *           ["yes", "incl", "taxable", "GB", "1.99", "$1.99"]
+	 *           ["no", "excl", "taxable", "GB", "1.66", "$1.66"]
+	 *           ["no", "excl", "taxable", "GB", "2.9925", "$2.9925"]
+	 *           ["no", "incl", "taxable", "GB", "1.66", "$1.99"]
+	 *           ["yes", "incl", "taxable", "NL", "0.207", "$0.21"]
+	 *           ["yes", "incl", "taxable", "NL", "1.41", "$1.42"]
+	 *
+	 * @param string $prices_include_tax Whether prices are entered including tax (yes/no).
+	 * @param string $display            Shop and cart tax display (incl/excl).
+	 * @param string $tax_status         Product tax status.
+	 * @param string $country            Customer country (GB 20%, NL 21%).
+	 * @param string $price              Product price as entered.
+	 * @param string $expected           Expected unit price text.
+	 */
+	public function test_cart_item_price_matches_product_page_at_every_quantity( string $prices_include_tax, string $display, string $tax_status, string $country, string $price, string $expected ): void {
+		$this->set_up_uk_vat_store( $prices_include_tax, $display, $country );
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => $price,
+				'tax_status'    => $tax_status,
+			)
+		);
+
+		$this->assertSame( $expected, $this->price_text( $product->get_price_html() ), 'Product page price' );
+
+		foreach ( array( 1, 2, 3, 5, 200 ) as $quantity ) {
+			WC()->cart->empty_cart();
+			$key = WC()->cart->add_to_cart( $product->get_id(), $quantity );
+			WC()->cart->calculate_totals();
+
+			$price_html = apply_filters( 'woocommerce_cart_item_price', WC()->cart->get_product_price( $product ), WC()->cart->get_cart_item( $key ), $key );
+
+			$this->assertSame( $expected, $this->price_text( $price_html ), "Cart unit price at quantity $quantity" );
+		}
+	}
+
+	/**
+	 * @testdox Shows a sale on the product page with each price's own decimals.
+	 * @testWith ["2.10", "1.995", "GB", "$2.10 Original price was: $2.10.$1.995Current price is: $1.995."]
+	 *           ["2.10", "1.99", "GB", "$2.10 Original price was: $2.10.$1.99Current price is: $1.99."]
+	 *           ["2.10", "1.995", "NL", "$2.12 Original price was: $2.12.$2.01Current price is: $2.01."]
+	 *
+	 * @param string $regular_price Regular price entered with 20% UK VAT.
+	 * @param string $sale_price    Sale price entered with 20% UK VAT.
+	 * @param string $country       Customer country (GB 20%, NL 21%).
+	 * @param string $expected      Expected price text.
+	 */
+	public function test_product_page_sale_price_keeps_entered_decimals( string $regular_price, string $sale_price, string $country, string $expected ): void {
+		$this->set_up_uk_vat_store( 'yes', 'incl', $country );
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => $regular_price,
+				'sale_price'    => $sale_price,
+			)
+		);
+
+		$this->assertSame( $expected, $this->price_text( $product->get_price_html() ) );
+	}
+
+	/**
+	 * @testdox Shows a price changed in the cart by an extension (e.g. a 7% discount) with the store's decimals, not its own.
+	 * @testWith ["1.99", "$1.85", "$5.55"]
+	 *           ["1.995", "$1.86", "$5.57"]
+	 *
+	 * @param string $price         Price entered with 20% UK VAT.
+	 * @param string $expected_unit Expected cart unit price text.
+	 * @param string $expected_line Expected line total text for 3 items.
+	 */
+	public function test_cart_price_changed_by_an_extension_uses_store_decimals( string $price, string $expected_unit, string $expected_line ): void {
+		$this->set_up_uk_vat_store( 'yes', 'incl', 'GB' );
+		$product  = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $price ) );
+		$discount = function ( $cart ) {
+			foreach ( $cart->get_cart() as $cart_item ) {
+				// Like discount extensions, start from the saved price so recalculating doesn't discount twice.
+				$cart_item['data']->set_price( (float) wc_get_product( $cart_item['data']->get_id() )->get_price() * 0.93 );
+			}
+		};
+		add_action( 'woocommerce_before_calculate_totals', $discount );
+
+		try {
+			WC()->cart->empty_cart();
+			$key = WC()->cart->add_to_cart( $product->get_id(), 3 );
+			WC()->cart->calculate_totals();
+			$cart_product = WC()->cart->get_cart_item( $key )['data'];
+
+			$this->assertSame( $expected_unit, $this->price_text( WC()->cart->get_product_price( $cart_product ) ), 'Cart unit price' );
+			$this->assertSame( $expected_line, $this->price_text( WC()->cart->get_product_subtotal( $cart_product, 3 ) ), 'Line total' );
+		} finally {
+			remove_action( 'woocommerce_before_calculate_totals', $discount );
+		}
+	}
+
+	/**
+	 * Set up a UK store charging 20% VAT, with 21% for the Netherlands, and a customer in the given country.
+	 *
+	 * @param string $prices_include_tax Whether prices are entered including tax (yes/no).
+	 * @param string $display            Shop and cart tax display (incl/excl).
+	 * @param string $country            Customer country.
+	 */
+	private function set_up_uk_vat_store( string $prices_include_tax, string $display, string $country ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'GB' );
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
+		update_option( 'woocommerce_tax_display_cart', $display );
+		update_option( 'woocommerce_tax_display_shop', $display );
+		$rates = array(
+			'GB' => '20.0000',
+			'NL' => '21.0000',
+		);
+		foreach ( $rates as $rate_country => $rate ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => $rate_country,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => 'VAT',
+					'tax_rate_priority' => '1',
+					'tax_rate_order'    => '1',
+				)
+			);
+		}
+		WC()->customer->set_billing_country( $country );
+		WC()->cart->empty_cart();
+	}
+
+	/**
+	 * Get the text of a price as the shopper reads it.
+	 *
+	 * @param string $price_html Price HTML.
+	 * @return string
+	 */
+	private function price_text( string $price_html ): string {
+		return html_entity_decode( wp_strip_all_tags( $price_html ), ENT_QUOTES, 'UTF-8' );
+	}
+
+	/**
 	 * @testdox A line price entered with tax is rounded once, then charged and shown as that amount.
 	 * @testWith ["1.995", 1, "GB", "yes", "no", "2.00"]
 	 *           ["1.995", 3, "GB", "yes", "no", "5.99"]
