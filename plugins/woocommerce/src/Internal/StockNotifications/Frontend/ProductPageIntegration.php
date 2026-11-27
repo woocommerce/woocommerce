@@ -6,11 +6,10 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Frontend;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
-use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupService;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
-use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 use WC_Product;
 use WC_Product_Variation;
 
@@ -44,14 +43,23 @@ class ProductPageIntegration {
 	private EligibilityService $eligibility_service;
 
 	/**
+	 * The signup service instance.
+	 *
+	 * @var SignupService
+	 */
+	private SignupService $signup_service;
+
+	/**
 	 * Init.
 	 *
 	 * @internal
 	 *
 	 * @param EligibilityService $eligibility_service The eligibility service instance.
+	 * @param SignupService      $signup_service The signup service instance.
 	 */
-	final public function init( EligibilityService $eligibility_service ): void {
+	final public function init( EligibilityService $eligibility_service, SignupService $signup_service ): void {
 		$this->eligibility_service = $eligibility_service;
+		$this->signup_service      = $signup_service;
 	}
 
 	/**
@@ -297,21 +305,7 @@ class ProductPageIntegration {
 			return array();
 		}
 
-		$notifications = NotificationQuery::get_notifications(
-			array(
-				'status'     => NotificationStatus::ACTIVE,
-				'product_id' => $product_ids,
-				'user_id'    => get_current_user_id(),
-				'return'     => 'objects',
-			)
-		);
-
-		$signups = array();
-		foreach ( $notifications as $notification ) {
-			$signups[ $notification->get_product_id() ] ??= $notification;
-		}
-
-		return $signups;
+		return $this->signup_service->get_active_signups_by_user( get_current_user_id(), $product_ids );
 	}
 
 	/**

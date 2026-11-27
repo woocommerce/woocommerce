@@ -859,4 +859,30 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 
 		return $variation;
 	}
+
+	/**
+	 * @testdox get_active_signups_by_user() returns only the user's active sign-ups, keyed by product ID.
+	 */
+	public function test_get_active_signups_by_user(): void {
+		$user_id  = $this->factory->user->create();
+		$products = array_map(
+			fn() => WC_Helper_Product::create_simple_product()->get_id(),
+			range( 1, 3 )
+		);
+		$signups  = array(
+			array( $products[0], $user_id, NotificationStatus::ACTIVE ),
+			array( $products[1], $user_id, NotificationStatus::PENDING ),
+			array( $products[2], $this->factory->user->create(), NotificationStatus::ACTIVE ),
+		);
+		foreach ( $signups as list( $product_id, $signup_user_id, $status ) ) {
+			$notification = new Notification();
+			$notification->set_product_id( $product_id );
+			$notification->set_user_id( $signup_user_id );
+			$notification->set_status( $status );
+			$notification->save();
+		}
+
+		$this->assertSame( array( $products[0] ), array_keys( $this->sut->get_active_signups_by_user( $user_id, $products ) ) );
+		$this->assertSame( array(), $this->sut->get_active_signups_by_user( 0, $products ) );
+	}
 }
