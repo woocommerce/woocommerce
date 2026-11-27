@@ -474,6 +474,10 @@ class Content_Renderer {
 	 * @return string The content wrapped with horizontal padding, or unchanged if no padding.
 	 */
 	private function add_root_horizontal_padding( string $content, array $email_attrs ): string {
+		if ( ! Html_Processing_Helper::has_visible_content( $content ) ) {
+			return $content;
+		}
+
 		$padding_left  = $this->sum_padding_values(
 			$email_attrs['root-padding-left'] ?? null,
 			$email_attrs['container-padding-left'] ?? null

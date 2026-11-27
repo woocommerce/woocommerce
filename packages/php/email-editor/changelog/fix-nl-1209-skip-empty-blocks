@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Leave out email blocks that show nothing, such as Custom HTML holding only a style tag, so they add no blank gap.

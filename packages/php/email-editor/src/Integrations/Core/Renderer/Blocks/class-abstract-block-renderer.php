@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Block_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Style_Engine;
@@ -121,14 +122,22 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	/**
 	 * Render the block.
 	 *
+	 * Content with nothing visible, such as a Custom HTML block holding only a `<style>` tag,
+	 * is returned without the spacer so it adds no gap to the email.
+	 *
 	 * @param string            $block_content The block content.
 	 * @param array             $parsed_block The parsed block.
 	 * @param Rendering_Context $rendering_context The rendering context.
 	 * @return string
 	 */
 	public function render( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		$content = $this->render_content( $block_content, $parsed_block, $rendering_context );
+		if ( ! Html_Processing_Helper::has_visible_content( $content ) ) {
+			return $content;
+		}
+
 		return $this->add_spacer_with_context(
-			$this->render_content( $block_content, $parsed_block, $rendering_context ),
+			$content,
 			$parsed_block['email_attrs'] ?? array(),
 			$rendering_context
 		);

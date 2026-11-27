@@ -337,4 +337,41 @@ class Html_Processing_Helper_Test extends \Email_Editor_Integration_Test_Case {
 			),
 		);
 	}
+
+	/**
+	 * Only HTML that shows nothing in an email counts as empty, so its block can be left out without a gap.
+	 *
+	 * Catches a check that treats image, separator or spacer markup as empty, which strips their wrapper,
+	 * padding and gap, or one that misses `<style>`/`<script>`-only HTML (or a doctype or stray closer
+	 * pasted with it), whose block then leaves a blank gap.
+	 *
+	 * @dataProvider visible_content_provider
+	 * @param string $html     HTML to check.
+	 * @param bool   $expected Whether the HTML shows anything.
+	 */
+	public function test_has_visible_content_ignores_only_style_script_comments_and_whitespace( string $html, bool $expected ): void {
+		$this->assertSame( $expected, Html_Processing_Helper::has_visible_content( $html ) );
+	}
+
+	/**
+	 * Data provider for test_has_visible_content_ignores_only_style_script_comments_and_whitespace.
+	 *
+	 * @return array<string, array{string, bool}>
+	 */
+	public function visible_content_provider(): array {
+		return array(
+			'style only'                     => array( '<style>.a { color: red; }</style>', false ),
+			'script, comment and whitespace' => array( "\n<!-- note --><script>var a = 1;</script>\n", false ),
+			'doctype and stray closers'      => array( '<!DOCTYPE html></2></><style>p { color: red; }</style>', false ),
+			'text after a doctype'           => array( '<!DOCTYPE html>Hello', true ),
+			// Browsers turn a lone </p> into an empty <p>, but the CSS inliner's parser drops it like any other.
+			'stray closing tags'             => array( '</div></p></span>', false ),
+			'text after a stray closing tag' => array( '</div>Hello', true ),
+			'text'                           => array( '<style>p { margin: 0; }</style>Hello', true ),
+			'non-breaking space'             => array( '&nbsp;', true ),
+			'image'                          => array( '<img src="https://example.com/a.jpg" alt="">', true ),
+			'separator'                      => array( '<hr class="wp-block-separator">', true ),
+			'spacer'                         => array( '<div style="height:40px" aria-hidden="true" class="wp-block-spacer"></div>', true ),
+		);
+	}
 }
