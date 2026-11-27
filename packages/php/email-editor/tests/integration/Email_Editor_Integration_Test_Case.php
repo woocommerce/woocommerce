@@ -362,4 +362,71 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 		// phpcs:enable
 		$this->original_enqueue_registries = null;
 	}
+
+	/**
+	 * Create a site on the network.
+	 *
+	 * @return int Site ID.
+	 */
+	protected function createSite(): int {
+		$site_id = self::factory()->blog->create();
+		$this->assertIsInt( $site_id );
+		return $site_id;
+	}
+
+	/**
+	 * Fill core's cache of the current site's global styles, as rendering a page or an email does.
+	 *
+	 * After core clears its cache, its first read doesn't record the registered blocks, so the next read rebuilds once. After two reads the cache stays.
+	 */
+	protected function fillCoreUserDataCache(): void {
+		WP_Theme_JSON_Resolver::get_user_data();
+		WP_Theme_JSON_Resolver::get_user_data();
+	}
+
+	/**
+	 * Save the email styles (the email editor's Styles panel) on the current site.
+	 *
+	 * @param array $styles Theme.json styles.
+	 */
+	protected function saveEmailStyles( array $styles ): void {
+		$this->insertGlobalStylesPost( 'wp-global-styles-woocommerce-email', $styles );
+	}
+
+	/**
+	 * Save the active theme's global styles (the Site Editor's Styles panel) on the current site.
+	 *
+	 * @param array $styles Theme.json styles.
+	 */
+	protected function saveSiteStyles( array $styles ): void {
+		$post_id = $this->insertGlobalStylesPost( 'wp-global-styles-' . rawurlencode( get_stylesheet() ), $styles );
+		// Core looks the post up by this term, and wp_insert_post() only sets it for users who can assign terms.
+		wp_set_object_terms( $post_id, get_stylesheet(), 'wp_theme' );
+	}
+
+	/**
+	 * Insert a global styles post on the current site.
+	 *
+	 * @param string $post_name Post name.
+	 * @param array  $styles Theme.json styles.
+	 * @return int Post ID.
+	 */
+	private function insertGlobalStylesPost( string $post_name, array $styles ): int {
+		$post_id = wp_insert_post(
+			array(
+				'post_name'    => $post_name,
+				'post_type'    => 'wp_global_styles',
+				'post_status'  => 'publish',
+				'post_content' => (string) wp_json_encode(
+					array(
+						'version'                     => 3,
+						'isGlobalStylesUserThemeJSON' => true,
+						'styles'                      => $styles,
+					)
+				),
+			)
+		);
+		$this->assertIsInt( $post_id );
+		return $post_id;
+	}
 }

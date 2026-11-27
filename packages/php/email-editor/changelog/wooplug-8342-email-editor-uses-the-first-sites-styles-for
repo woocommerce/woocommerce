@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix emails using the first site's styles when several sites of a network render emails in one request.

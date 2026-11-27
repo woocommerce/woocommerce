@@ -14,6 +14,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Process_M
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Json_Cache;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use WP_Style_Engine;
@@ -179,6 +180,9 @@ class Renderer {
 			);
 		} finally {
 			$this->content_renderer->restore_rendering_context( $previous_rendering_context );
+			if ( is_multisite() && ms_is_switched() ) {
+				Theme_Json_Cache::clean_on_next_blog_switch();
+			}
 		}
 	}
 

@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\EmailEditor\Tests\Integration\Engine;
 use Automattic\WooCommerce\EmailEditor\Engine\Site_Style_Sync_Controller;
 use Automattic\WooCommerce\EmailEditor\Tests\Integration\Email_Editor_Integration_Test_Case;
 use WP_Theme_JSON;
+use WP_Theme_JSON_Resolver;
 
 /**
  * Class Site_Style_Sync_Controller_Test
@@ -147,11 +148,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		// Create a mock theme.
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		// Use reflection to set the private site_theme property.
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -329,10 +326,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		// Create a mock theme.
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -360,11 +354,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		// Create a mock theme.
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		// Use reflection to set the private site_theme property.
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -397,11 +387,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		// Create a mock theme.
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		// Use reflection to set the private site_theme property.
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -442,10 +428,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		// Create a mock theme.
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -534,10 +517,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		// Create a mock theme.
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -566,11 +546,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		// Create a mock theme.
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		// Use reflection to set the private site_theme property.
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -641,10 +617,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		// Create a mock theme.
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -782,10 +755,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		// Create a mock theme.
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -822,10 +792,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		// Create a mock theme.
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -930,10 +897,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		// Create a mock theme.
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -1060,10 +1024,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		// Create a mock theme.
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -1211,11 +1172,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		);
 		$site_theme      = new WP_Theme_JSON( $site_theme_data );
 
-		// Use reflection to set the site theme.
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $site_theme );
+		$this->set_cached_site_theme( $site_theme );
 
 		$synced_data = $this->controller->sync_site_styles( $base_theme );
 
@@ -1243,10 +1200,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		);
 		$site_theme      = new WP_Theme_JSON( $site_theme_data );
 
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $site_theme );
+		$this->set_cached_site_theme( $site_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -1333,10 +1287,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -1371,10 +1322,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 
 		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
 
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $mock_theme );
+		$this->set_cached_site_theme( $mock_theme );
 
 		$synced_data = $this->controller->sync_site_styles();
 
@@ -1408,10 +1356,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		);
 		$site_theme      = new WP_Theme_JSON( $site_theme_data );
 
-		$reflection          = new \ReflectionClass( $this->controller );
-		$site_theme_property = $reflection->getProperty( 'site_theme' );
-		$site_theme_property->setAccessible( true );
-		$site_theme_property->setValue( $this->controller, $site_theme );
+		$this->set_cached_site_theme( $site_theme );
 
 		$synced_data = $this->controller->sync_site_styles( $base_theme );
 
@@ -1485,6 +1430,95 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	}
 
 	/**
+	 * Test the site theme is loaded once while the site stays the same.
+	 */
+	public function test_get_theme_reuses_site_theme_for_same_site(): void {
+		$site_theme_loads = 0;
+		add_filter(
+			'woocommerce_email_editor_site_theme',
+			static function ( $site_theme ) use ( &$site_theme_loads ) {
+				++$site_theme_loads;
+				return $site_theme;
+			}
+		);
+
+		$this->controller->get_theme();
+		$this->controller->get_theme();
+
+		$this->assertSame( 1, $site_theme_loads );
+	}
+
+	/**
+	 * Test the site theme comes from the current site after switch_to_blog().
+	 *
+	 * @group ms-required
+	 */
+	public function test_get_theme_uses_current_site_styles_after_switch_to_blog(): void {
+		$this->skipWithoutMultisite();
+		$this->saveSiteStyles( array( 'color' => array( 'text' => '#1a2b3c' ) ) );
+		$other_site_id = $this->createSite();
+		switch_to_blog( $other_site_id );
+		$this->saveSiteStyles( array( 'color' => array( 'text' => '#3c2b1a' ) ) );
+		restore_current_blog();
+
+		$this->controller->get_theme();
+		switch_to_blog( $other_site_id );
+		$other_site_theme = $this->controller->get_theme();
+		restore_current_blog();
+		// Another switch that doesn't use the email editor leaves the other site's data in core's cache, so get_theme() has to notice the site change itself.
+		switch_to_blog( $other_site_id );
+		$this->fillCoreUserDataCache();
+		restore_current_blog();
+		$main_site_theme = $this->controller->get_theme();
+
+		$this->assertInstanceOf( WP_Theme_JSON::class, $other_site_theme );
+		$this->assertSame( '#3c2b1a', $other_site_theme->get_data()['styles']['color']['text'] ?? null, 'The other site should get its own site styles.' );
+		$this->assertInstanceOf( WP_Theme_JSON::class, $main_site_theme );
+		$this->assertSame( '#1a2b3c', $main_site_theme->get_data()['styles']['color']['text'] ?? null, 'The main site should get its own site styles back after restore_current_blog().' );
+	}
+
+	/**
+	 * Test loading another site's theme leaves none of its data in core's cache after restore_current_blog().
+	 *
+	 * @group ms-required
+	 */
+	public function test_get_theme_while_switched_leaves_no_other_site_data_in_core_after_restore(): void {
+		$this->skipWithoutMultisite();
+		$this->saveSiteStyles( array( 'color' => array( 'text' => '#1a2b3c' ) ) );
+		$other_site_id = $this->createSite();
+		switch_to_blog( $other_site_id );
+		$this->saveSiteStyles( array( 'color' => array( 'text' => '#3c2b1a' ) ) );
+		$this->controller->get_theme();
+		$this->fillCoreUserDataCache();
+		restore_current_blog();
+
+		$user_styles = WP_Theme_JSON_Resolver::get_user_data()->get_raw_data()['styles'] ?? array();
+		$this->assertSame( '#1a2b3c', $user_styles['color']['text'] ?? null, 'The site that switched should get its own site styles back.' );
+	}
+
+	/**
+	 * Test the first site theme load inside switch_to_blog() ignores core's cache of the original site.
+	 *
+	 * @group ms-required
+	 */
+	public function test_get_theme_first_loaded_while_switched_uses_current_site_styles(): void {
+		$this->skipWithoutMultisite();
+		$this->saveSiteStyles( array( 'color' => array( 'text' => '#1a2b3c' ) ) );
+		$other_site_id = $this->createSite();
+		switch_to_blog( $other_site_id );
+		$this->saveSiteStyles( array( 'color' => array( 'text' => '#3c2b1a' ) ) );
+		restore_current_blog();
+		$this->fillCoreUserDataCache();
+
+		switch_to_blog( $other_site_id );
+		$other_site_theme = $this->controller->get_theme();
+		restore_current_blog();
+
+		$this->assertInstanceOf( WP_Theme_JSON::class, $other_site_theme );
+		$this->assertSame( '#3c2b1a', $other_site_theme->get_data()['styles']['color']['text'] ?? null );
+	}
+
+	/**
 	 * Make the controller sync the given theme data as the site theme.
 	 *
 	 * @param array $theme_data Theme JSON data.
@@ -1496,5 +1530,24 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 				return new WP_Theme_JSON( $theme_data, 'theme' );
 			}
 		);
+	}
+
+	/**
+	 * Set the controller's cached site theme, as if it had loaded it for the current site.
+	 *
+	 * @param WP_Theme_JSON $site_theme Site theme.
+	 */
+	private function set_cached_site_theme( WP_Theme_JSON $site_theme ): void {
+		$reflection = new \ReflectionClass( $this->controller );
+		foreach (
+			array(
+				'site_theme'         => $site_theme,
+				'site_theme_blog_id' => get_current_blog_id(),
+			) as $property_name => $value
+		) {
+			$property = $reflection->getProperty( $property_name );
+			$property->setAccessible( true );
+			$property->setValue( $this->controller, $value );
+		}
 	}
 }

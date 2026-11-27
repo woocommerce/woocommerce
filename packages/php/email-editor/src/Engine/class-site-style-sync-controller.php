@@ -28,6 +28,13 @@ class Site_Style_Sync_Controller {
 	private ?WP_Theme_JSON $site_theme = null;
 
 	/**
+	 * ID of the site the site theme data belongs to.
+	 *
+	 * @var int|null
+	 */
+	private ?int $site_theme_blog_id = null;
+
+	/**
 	 * Base theme data for fallback lookups
 	 *
 	 * @var array|null
@@ -142,7 +149,19 @@ class Site_Style_Sync_Controller {
 	 * @return WP_Theme_JSON
 	 */
 	private function get_site_theme(): WP_Theme_JSON {
-		if ( null === $this->site_theme ) {
+		$blog_id = get_current_blog_id();
+		if ( null === $this->site_theme || $blog_id !== $this->site_theme_blog_id ) {
+			$site_changed = null !== $this->site_theme_blog_id && $blog_id !== $this->site_theme_blog_id;
+			if ( is_multisite() ) {
+				if ( $site_changed || ms_is_switched() ) {
+					Theme_Json_Cache::clean();
+				}
+				if ( ms_is_switched() ) {
+					Theme_Json_Cache::clean_on_next_blog_switch();
+				}
+			}
+			$this->site_theme_blog_id = $blog_id;
+
 			// Get only the theme and user customizations (e.g. from site editor).
 			$this->site_theme = new WP_Theme_JSON();
 			$this->site_theme->merge( WP_Theme_JSON_Resolver::get_theme_data() );

@@ -81,4 +81,27 @@ class User_Theme_Test extends \Email_Editor_Integration_Test_Case {
 		$raw   = $theme->get_raw_data();
 		$this->assertArrayHasKey( 'version', $raw );
 	}
+
+	/**
+	 * Test it loads the email styles of the current site after switch_to_blog().
+	 *
+	 * @group ms-required
+	 */
+	public function testItLoadsEmailStylesOfCurrentSiteAfterSwitchToBlog(): void {
+		$this->skipWithoutMultisite();
+		$this->saveEmailStyles( array( 'color' => array( 'background' => '#a1b2c3' ) ) );
+		$other_site_id = $this->createSite();
+		switch_to_blog( $other_site_id );
+		$this->saveEmailStyles( array( 'color' => array( 'background' => '#c3b2a1' ) ) );
+		restore_current_blog();
+
+		$this->user_theme->get_theme();
+		switch_to_blog( $other_site_id );
+		$other_site_styles = $this->user_theme->get_theme()->get_raw_data()['styles'] ?? array();
+		restore_current_blog();
+		$main_site_styles = $this->user_theme->get_theme()->get_raw_data()['styles'] ?? array();
+
+		$this->assertSame( '#c3b2a1', $other_site_styles['color']['background'] ?? null, 'The other site should get its own email styles.' );
+		$this->assertSame( '#a1b2c3', $main_site_styles['color']['background'] ?? null, 'The main site should get its own email styles back after restore_current_blog().' );
+	}
 }

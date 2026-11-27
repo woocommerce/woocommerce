@@ -29,6 +29,13 @@ class User_Theme {
 	private ?WP_Post $user_theme_post = null;
 
 	/**
+	 * ID of the site the user theme post belongs to.
+	 *
+	 * @var int|null
+	 */
+	private ?int $user_theme_post_blog_id = null;
+
+	/**
 	 * Getter for user theme.
 	 *
 	 * @throws \Exception If the user theme post cannot be created.
@@ -64,10 +71,12 @@ class User_Theme {
 	 * @throws \Exception If the user theme post cannot be created.
 	 */
 	private function ensure_theme_post(): void {
-		if ( $this->user_theme_post ) {
+		$blog_id = get_current_blog_id();
+		if ( $this->user_theme_post && $blog_id === $this->user_theme_post_blog_id ) {
 			return;
 		}
-		$this->user_theme_post = get_page_by_path( self::USER_THEME_POST_NAME, OBJECT, 'wp_global_styles' );
+		$this->user_theme_post_blog_id = $blog_id;
+		$this->user_theme_post         = get_page_by_path( self::USER_THEME_POST_NAME, OBJECT, 'wp_global_styles' );
 		if ( $this->user_theme_post instanceof WP_Post ) {
 			return;
 		}
