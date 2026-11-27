@@ -455,6 +455,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\ProductSales::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\TexturizeExclusions::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\OutOfStockOrderItemLinks::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
