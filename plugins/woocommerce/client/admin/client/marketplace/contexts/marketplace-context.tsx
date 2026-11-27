@@ -7,7 +7,7 @@ import {
 	useCallback,
 	createContext,
 } from '@wordpress/element';
-import { useExperiment } from '@woocommerce/explat';
+import { useExperimentWithDefaultVariationName } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
@@ -51,10 +51,12 @@ export function MarketplaceContextProvider( props: {
 	const [ selectedTab, setSelectedTab ] = useState( '' );
 	const [ iamSettings, setIamSettings ] = useState( {} );
 	// Loaded up front so product cards already know whether to open the preview modal when clicked.
-	const [ , productPreviewAssignment ] = useExperiment(
-		PRODUCT_PREVIEW_EXPERIMENT_NAME
-	);
-	// useExperiment keeps returning a cached assignment after tracking is turned off, so drop it here.
+	// The control arm is ExPlat's default variation, and its clicks and links are tagged too, so it needs its name.
+	const [ , productPreviewAssignment ] =
+		useExperimentWithDefaultVariationName(
+			PRODUCT_PREVIEW_EXPERIMENT_NAME
+		);
+	// The hook keeps returning a cached assignment after tracking is turned off, so drop it here.
 	const productPreviewVariation = window.wcTracks?.isEnabled
 		? ( productPreviewAssignment?.variationName ?? null )
 		: null;

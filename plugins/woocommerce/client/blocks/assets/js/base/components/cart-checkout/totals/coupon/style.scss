@@ -29,12 +29,7 @@
 		flex: 3 1 120px;
 	}
 
-	// The button is at least as tall as the text input next to it (50px), whatever padding the theme gives buttons.
 	.wc-block-components-totals-coupon__button {
-		min-block-size: 50px;
-		padding-block: 0;
-		padding-left: $gap;
-		padding-right: $gap;
 		white-space: nowrap;
 		flex: 1 1 auto;
 
@@ -53,4 +48,17 @@
 .wc-block-components-totals-coupon__content {
 	flex-direction: column;
 	position: relative;
+}
+
+// When a coupon applies, the form closes at the same moment as the totals rows grow. Closing at the same speed keeps
+// the content below moving in one direction.
+:where(.wp-block-woocommerce-cart, .wp-block-woocommerce-checkout) .wc-block-components-totals-coupon {
+	// Not after a key press, which applies immediately.
+	> .wc-block-components-panel__button[aria-expanded="false"]:not([data-wc-instant]) {
+		@include motion-transition($move: margin-bottom, $easing: balanced);
+	}
+
+	> .wc-block-components-panel__content {
+		@include motion-collapse($out: lg);
+	}
 }

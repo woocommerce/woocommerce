@@ -49,7 +49,7 @@ describe( 'SendButton', () => {
 					return {
 						hasEmptyContent: () => mockStoreValues.hasEmptyContent,
 						isEmailSent: () => mockStoreValues.isEmailSent,
-						getUrls: () => ( { send: 'https://example.com/send' } ),
+						getUrls: () => ( { send: '#send' } ),
 					};
 				}
 				return {};
@@ -136,11 +136,7 @@ describe( 'SendButton', () => {
 		mockStoreValues.hasEmptyContent = false;
 		mockStoreValues.isEmailSent = false;
 
-		const originalLocation = window.location;
-		Object.defineProperty( window, 'location', {
-			value: { href: '' },
-			writable: true,
-		} );
+		const originalUrl = window.location.href;
 
 		const { getByRole } = render( <SendButton /> );
 		fireEvent.click( getByRole( 'button' ) );
@@ -148,8 +144,10 @@ describe( 'SendButton', () => {
 		expect( recordEventMock ).toHaveBeenCalledWith(
 			'header_send_button_clicked'
 		);
-		expect( window.location.href ).toBe( 'https://example.com/send' );
+		expect( window.location.href ).toBe(
+			new URL( '#send', originalUrl ).href
+		);
 
-		window.location = originalLocation;
+		window.history.replaceState( null, '', originalUrl );
 	} );
 } );

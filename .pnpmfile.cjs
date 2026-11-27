@@ -124,7 +124,10 @@ function computeReferences(
 		if ( ! consumers.has( depName ) ) {
 			continue;
 		}
-		const resolvedDep = resolved[ depName ];
+		const entry = resolved[ depName ];
+		// pnpm 12 hands over `{ specifier, version }`; older versions a plain string.
+		const resolvedDep =
+			entry && typeof entry === 'object' ? entry.version : entry;
 		if ( ! resolvedDep || ! resolvedDep.startsWith( 'link:' ) ) {
 			continue;
 		}

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Removing a product from the Cart block now fades it out, and the products below slide up into its place.

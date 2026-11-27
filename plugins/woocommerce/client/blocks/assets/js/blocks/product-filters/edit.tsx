@@ -30,6 +30,10 @@ import './editor.scss';
 import { type BlockAttributes } from './types';
 import { getColorsFromBlockSupports } from './utils/get-colors-from-block-supports';
 import { getOverlayMode, isOverlayMode } from './utils/overlay-mode';
+import {
+	getOverlayButtonStyle,
+	isOverlayButtonStyle,
+} from './utils/overlay-button-style';
 import { presetToCssVariable } from './utils/preset-to-css-variable';
 import { getDefaultAttributeId } from './inner-blocks/attribute-filter/utils';
 
@@ -66,6 +70,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const hasOverlay = overlayMode !== 'off';
 	const overlayPosition =
 		attributes.overlayPosition === 'right' ? 'right' : 'left';
+	const overlayButtonStyle = getOverlayButtonStyle( attributes );
 	const [ isOpen, setIsOpen ] = useState( false );
 
 	const globalColors = getSetting< { background?: string; text?: string } >(
@@ -111,7 +116,10 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 		filtersContent = (
 			<>
 				<button
-					className="wc-block-product-filters__open-overlay"
+					className={ clsx(
+						'wc-block-product-filters__open-overlay',
+						overlayButtonStyle === 'button' && 'wp-element-button'
+					) }
 					onClick={ () => setIsOpen( ! isOpen ) }
 				>
 					<Icon icon={ filterThreeLines } />
@@ -213,6 +221,31 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 							<ToggleGroupControlOption
 								value="right"
 								label={ __( 'Right', 'woocommerce' ) }
+							/>
+						</ToggleGroupControl>
+					) }
+					{ overlayMode !== 'off' && (
+						<ToggleGroupControl
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
+							isBlock
+							label={ __( 'Button style', 'woocommerce' ) }
+							value={ overlayButtonStyle }
+							onChange={ ( value ) => {
+								if ( isOverlayButtonStyle( value ) ) {
+									setAttributes( {
+										overlayButtonStyle: value,
+									} );
+								}
+							} }
+						>
+							<ToggleGroupControlOption
+								value="plain"
+								label={ __( 'Plain', 'woocommerce' ) }
+							/>
+							<ToggleGroupControlOption
+								value="button"
+								label={ __( 'Button', 'woocommerce' ) }
 							/>
 						</ToggleGroupControl>
 					) }

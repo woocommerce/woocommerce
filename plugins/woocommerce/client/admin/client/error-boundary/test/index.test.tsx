@@ -1,11 +1,14 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import { render, screen, fireEvent } from '@testing-library/react';
 /**
  * Internal dependencies
  */
 import { ErrorBoundary } from '../';
+
+const reload = mockBrowserLocation( 'reload' );
 
 const ThrowError = () => {
 	throw new Error( 'Test error' );
@@ -19,18 +22,12 @@ describe( 'ErrorBoundary', () => {
 		event.preventDefault();
 	}
 
-	// Mock window.location.reload by using a global variable
-	const originalLocation = window.location;
-
 	beforeAll( () => {
 		// Opt Out of the jsdom error messages
 		window.addEventListener( 'error', onError );
-		delete window.location;
-		window.location = { reload: jest.fn() };
 	} );
 
 	afterAll( () => {
-		window.location = originalLocation;
 		window.removeEventListener( 'error', onError );
 	} );
 
@@ -58,12 +55,6 @@ describe( 'ErrorBoundary', () => {
 	} );
 
 	it( 'refreshes the page when Refresh Page button is clicked', () => {
-		const reloadMock = jest.fn();
-		Object.defineProperty( window.location, 'reload', {
-			configurable: true,
-			value: reloadMock,
-		} );
-
 		render(
 			<ErrorBoundary>
 				<ThrowError />
@@ -72,7 +63,7 @@ describe( 'ErrorBoundary', () => {
 
 		fireEvent.click( screen.getByText( 'Reload Page' ) );
 
-		expect( reloadMock ).toHaveBeenCalled();
+		expect( reload ).toHaveBeenCalled();
 	} );
 
 	it( 'opens a new issue when Report Issue button is clicked', () => {

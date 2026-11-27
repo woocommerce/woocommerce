@@ -681,4 +681,136 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $styles );
 		$this->assertEquals( '660px', $result[0]['email_attrs']['width'] ); // 100% of 660
 	}
+
+	/**
+	 * Test it shrinks two columns saved at 100% each to half the row
+	 */
+	public function testItShrinksColumnsThatAddUpToMoreThanTheRow(): void {
+		$result  = $this->preprocessor->preprocess( $this->get_columns_blocks( array( '100%', '100%' ) ), array( 'contentSize' => '580px' ), $this->styles );
+		$columns = $result[0]['innerBlocks'];
+
+		$this->assertEquals( '290px', $columns[0]['email_attrs']['column-width'] );
+		$this->assertEquals( '290px', $columns[0]['email_attrs']['width'] );
+		$this->assertEquals( '290px', $columns[0]['innerBlocks'][0]['email_attrs']['width'] );
+		$this->assertEquals( '290px', $columns[1]['email_attrs']['column-width'] );
+		$this->assertEquals( '290px', $columns[1]['email_attrs']['width'] );
+		$this->assertEquals( '290px', $columns[1]['innerBlocks'][0]['email_attrs']['width'] );
+		$this->assertEquals( '100%', $columns[0]['attrs']['width'], 'Saved attributes are left untouched.' );
+	}
+
+	/**
+	 * Test it shrinks three columns at 50% each to a third of the row
+	 */
+	public function testItShrinksThreeColumnsAtHalfWidthToThirds(): void {
+		$result  = $this->preprocessor->preprocess( $this->get_columns_blocks( array( '50%', '50%', '50%' ) ), array( 'contentSize' => '600px' ), $this->styles );
+		$columns = $result[0]['innerBlocks'];
+
+		$this->assertCount( 3, $columns );
+		foreach ( $columns as $column ) {
+			$this->assertEquals( '200px', $column['email_attrs']['column-width'] );
+			$this->assertEquals( '200px', $column['email_attrs']['width'] );
+		}
+	}
+
+	/**
+	 * Test it compares mixed px and % widths in pixels
+	 */
+	public function testItShrinksMixedPixelAndPercentColumns(): void {
+		$result  = $this->preprocessor->preprocess( $this->get_columns_blocks( array( '400px', '100%' ) ), array( 'contentSize' => '580px' ), $this->styles );
+		$columns = $result[0]['innerBlocks'];
+
+		// 400 + 580 = 980, scaled by 580 / 980 and floored to whole pixels.
+		$this->assertEquals( '236px', $columns[0]['email_attrs']['column-width'] );
+		$this->assertEquals( '343px', $columns[1]['email_attrs']['column-width'] );
+	}
+
+	/**
+	 * Test it leaves columns that fit the row unchanged
+	 */
+	public function testItDoesNotShrinkColumnsThatFit(): void {
+		$result  = $this->preprocessor->preprocess( $this->get_columns_blocks( array( '30%', '70%' ) ), array( 'contentSize' => '580px' ), $this->styles );
+		$columns = $result[0]['innerBlocks'];
+
+		$this->assertArrayNotHasKey( 'column-width', $columns[0]['email_attrs'] );
+		$this->assertArrayNotHasKey( 'column-width', $columns[1]['email_attrs'] );
+		$this->assertEquals( '174px', $columns[0]['email_attrs']['width'] );
+		$this->assertEquals( '406px', $columns[1]['email_attrs']['width'] );
+	}
+
+	/**
+	 * Test rounding percent widths to whole pixels doesn't count as overflowing
+	 */
+	public function testItDoesNotShrinkColumnsThatOverflowOnlyByRounding(): void {
+		$result  = $this->preprocessor->preprocess( $this->get_columns_blocks( array( '33.33%', '33.33%', '33.33%' ) ), array( 'contentSize' => '620px' ), $this->styles );
+		$columns = $result[0]['innerBlocks'];
+
+		$this->assertCount( 3, $columns );
+		foreach ( $columns as $column ) {
+			$this->assertArrayNotHasKey( 'column-width', $column['email_attrs'] );
+			$this->assertEquals( '207px', $column['email_attrs']['width'] );
+		}
+	}
+
+	/**
+	 * Test a column without a width next to a full-width column gets a positive share of the row
+	 */
+	public function testItGivesUnsetColumnAShareWhenDefinedColumnsFillTheRow(): void {
+		$result  = $this->preprocessor->preprocess( $this->get_columns_blocks( array( '100%', null ) ), array( 'contentSize' => '580px' ), $this->styles );
+		$columns = $result[0]['innerBlocks'];
+
+		// The unset column gets an equal share (290px), then 580 + 290 is scaled to fit 580 and floored.
+		$this->assertEquals( '386px', $columns[0]['email_attrs']['column-width'] );
+		$this->assertEquals( '193px', $columns[1]['email_attrs']['column-width'] );
+	}
+
+	/**
+	 * Test a row with no room left (padding wider than the parent) is left alone instead of shrunk to negative widths
+	 */
+	public function testItDoesNotShrinkColumnsInARowWithNoRoom(): void {
+		$blocks = $this->get_columns_blocks( array( '100px', '100px' ) );
+
+		$blocks[0]['attrs']['style']['spacing']['padding'] = array(
+			'left'  => '80px',
+			'right' => '80px',
+		);
+		$columns = $this->preprocessor->preprocess( $blocks, array( 'contentSize' => '100px' ), $this->styles )[0]['innerBlocks'];
+		$this->assertArrayNotHasKey( 'column-width', $columns[0]['email_attrs'] );
+		$this->assertEquals( '100px', $columns[0]['email_attrs']['width'] );
+
+		// Zero widths in that row would otherwise divide by zero.
+		$blocks[0]['innerBlocks'] = $this->get_columns_blocks( array( '0%', '0px' ) )[0]['innerBlocks'];
+		$columns                  = $this->preprocessor->preprocess( $blocks, array( 'contentSize' => '100px' ), $this->styles )[0]['innerBlocks'];
+		$this->assertArrayNotHasKey( 'column-width', $columns[0]['email_attrs'] );
+		$this->assertArrayNotHasKey( 'column-width', $columns[1]['email_attrs'] );
+	}
+
+	/**
+	 * Build a columns block with one paragraph per column.
+	 *
+	 * @param array<string|null> $widths Saved width per column; null leaves the width unset.
+	 * @return array
+	 */
+	private function get_columns_blocks( array $widths ): array {
+		$columns = array();
+		foreach ( $widths as $width ) {
+			$columns[] = array(
+				'blockName'   => 'core/column',
+				'attrs'       => null === $width ? array() : array( 'width' => $width ),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/paragraph',
+						'attrs'       => array(),
+						'innerBlocks' => array(),
+					),
+				),
+			);
+		}
+		return array(
+			array(
+				'blockName'   => 'core/columns',
+				'attrs'       => array(),
+				'innerBlocks' => $columns,
+			),
+		);
+	}
 }

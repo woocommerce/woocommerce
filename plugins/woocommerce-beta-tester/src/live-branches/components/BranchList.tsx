@@ -13,16 +13,13 @@ import {
 	ComboboxControl,
 } from '@wordpress/components';
 import { useState, Fragment } from 'react';
-import { css } from '@emotion/react';
 
 /**
  * Internal dependencies
  */
 import { Branch, useLiveBranchInstall } from '../hooks/live-branches';
 
-const cardStyle = css( {
-	marginTop: '32px',
-} );
+import './style.css';
 
 const BranchListItem = ( {
 	branch,
@@ -137,7 +134,7 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 
 	return (
 		<>
-			<Card elevation={ 3 } css={ cardStyle }>
+			<Card elevation={ 3 } className="wc-beta-tester-live-branches-card">
 				<CardHeader>
 					<h2>Currently Running</h2>
 				</CardHeader>
@@ -154,7 +151,7 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 					<Fragment />
 				</CardFooter>
 			</Card>
-			<Card elevation={ 3 } css={ cardStyle }>
+			<Card elevation={ 3 } className="wc-beta-tester-live-branches-card">
 				<CardHeader>
 					<h2>Install and Activate Live Branches</h2>
 				</CardHeader>
@@ -191,7 +188,10 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 				</CardFooter>
 			</Card>
 			{ installedBranchesExist && (
-				<Card elevation={ 3 } css={ cardStyle }>
+				<Card
+					elevation={ 3 }
+					className="wc-beta-tester-live-branches-card"
+				>
 					<CardHeader>
 						<h2>Other Installed Branches</h2>
 					</CardHeader>

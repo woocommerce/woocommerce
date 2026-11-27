@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Use consistent motion timing in the Cart and Checkout blocks, and keep the loading spinner still when reduced motion is preferred.

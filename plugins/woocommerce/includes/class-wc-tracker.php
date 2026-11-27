@@ -13,6 +13,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Enums\PaymentMode;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\MigratorTracker;
@@ -320,6 +321,9 @@ class WC_Tracker {
 		$data['categories'] = self::get_category_counts();
 		$data['brands']     = self::get_brands_counts();
 
+		// Orders whose gateway recorded test mode. The gateway totals in `orders` count every order, test ones included.
+		$data['test_orders_by_gateway'] = self::get_orders_by_gateway( PaymentMode::TEST );
+
 		// Migrator CLI statistics.
 		$data['migrator'] = self::get_migrator_data();
 
@@ -616,7 +620,41 @@ class WC_Tracker {
 			$user_count[ $role ] = $count;
 		}
 
+		$user_count['customer_application_password_users'] = self::get_customer_application_password_user_count();
+
 		return $user_count;
+	}
+
+	/**
+	 * Count current customers with at least one stored Application Password.
+	 *
+	 * @return int
+	 */
+	private static function get_customer_application_password_user_count(): int {
+		global $wpdb;
+
+		$capabilities_meta_key = $wpdb->get_blog_prefix( get_current_blog_id() ) . 'capabilities';
+		// Application Passwords and capabilities are separate rows in user meta, so the query joins them by user ID.
+		// Both values are serialized; these fragments identify an active customer role and a stored credential.
+		$customer_role_pattern = '%' . $wpdb->esc_like( 's:8:"customer";b:1;' ) . '%';
+		$password_data_pattern = '%' . $wpdb->esc_like( 's:4:"uuid";' ) . '%';
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(DISTINCT application_passwords.user_id)
+				FROM {$wpdb->usermeta} AS application_passwords
+				INNER JOIN {$wpdb->usermeta} AS capabilities
+					ON capabilities.user_id = application_passwords.user_id
+					AND capabilities.meta_key = %s
+				WHERE application_passwords.meta_key = %s
+					AND application_passwords.meta_value LIKE %s
+					AND capabilities.meta_value LIKE %s",
+				$capabilities_meta_key,
+				WP_Application_Passwords::USERMETA_KEY_APPLICATION_PASSWORDS,
+				$password_data_pattern,
+				$customer_role_pattern
+			)
+		);
 	}
 
 	/**
@@ -881,24 +919,38 @@ class WC_Tracker {
 	/**
 	 * Get order details by gateway.
 	 *
+	 * @param string $payment_mode Count only orders whose gateway recorded this PaymentMode value. Empty counts all orders.
 	 * @return array
 	 */
-	private static function get_orders_by_gateway() {
+	private static function get_orders_by_gateway( string $payment_mode = '' ) {
 		global $wpdb;
 
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$orders_table = OrdersTableDataStore::get_orders_table_name();
+			$meta_table   = OrdersTableDataStore::get_meta_table_name();
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$payment_mode_clause = $payment_mode ? $wpdb->prepare(
+				"AND id IN ( SELECT order_id FROM $meta_table WHERE meta_key = '_wc_payment_mode' AND meta_value = %s )",
+				$payment_mode
+			) : '';
+
 			$orders_and_gateway_details = $wpdb->get_results(
 				"
 				SELECT IFNULL(payment_method, '') AS gateway, currency AS currency, SUM( total_amount ) AS totals, count( id ) AS counts
 				FROM $orders_table
 				WHERE status IN ( 'wc-completed', 'wc-processing', 'wc-refunded' )
+					$payment_mode_clause
 				GROUP BY gateway, currency;
 				"
 			);
 			// phpcs:enable
 		} else {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$payment_mode_clause = $payment_mode ? $wpdb->prepare(
+				"AND orders.id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_wc_payment_mode' AND meta_value = %s )",
+				$payment_mode
+			) : '';
+
 			$orders_and_gateway_details = $wpdb->get_results(
 				"
 				SELECT
@@ -916,11 +968,13 @@ class WC_Tracker {
 					WHERE orders.post_type = 'shop_order'
 						AND orders.post_status in ( 'wc-completed', 'wc-processing', 'wc-refunded' )
 						AND meta_key in( '_payment_method','_order_total','_order_currency')
+						$payment_mode_clause
 					GROUP BY orders.id
 				) order_gateways
 				GROUP BY gateway, currency
 				"
 			);
+			// phpcs:enable
 		}
 
 		$orders_by_gateway_currency = array();

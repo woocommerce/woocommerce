@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
 use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use WC_Unit_Test_Case;
 
@@ -137,6 +138,7 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $checks['guest_checkout']['ok'] );
 		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['guest_checkout']['level'] );
 		$this->assertFalse( StoreConditions::shows_required( $checks['guest_checkout'] ), 'AI assistants can still build carts without guest checkout' );
+		$this->assertSame( 'With guest checkout off, AI assistants can’t check out for shoppers. They can still find your products and build carts.', $checks['guest_checkout']['why'], 'Creating an account at checkout doesn\'t help: the store serves no checkout to assistants' );
 	}
 
 	/**
@@ -188,13 +190,20 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Plain permalinks pass when WooCommerce can write the discovery file, and fail with both fixes when it can't.
+	 * @testdox Plain permalinks pass when WooCommerce can write the discovery file, and fail with both fixes when it can't. On multisite they always fail.
 	 */
 	public function test_plain_permalinks_depend_on_writing_the_discovery_file(): void {
 		global $wp_rewrite;
 		self::make_store_ready();
 		$wp_rewrite->set_permalink_structure( '' );
 
+		if ( is_multisite() ) {
+			// Multisite never writes the file, so plain permalinks fail with only the permalink fix.
+			$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
+			$this->assertStringContainsString( 'except Plain', $this->ucp_discovery_fix() );
+			$this->assertStringNotContainsString( 'writable', $this->ucp_discovery_fix() );
+			return;
+		}
 		$this->assertNotContains( 'ucp_discovery', $this->sut->failing_required() );
 
 		$locked = get_temp_dir() . uniqid( 'wc-ucp-locked-' );
@@ -207,7 +216,8 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 			}
 			$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
 			$fix = $this->ucp_discovery_fix();
-			$this->assertStringContainsString( 'Settings > Permalinks', $fix );
+			$this->assertStringContainsString( 'except Plain', $fix );
+			$this->assertStringContainsString( 'index.php', $fix );
 			$this->assertStringContainsString( 'writable', $fix );
 			$checks = array_column( $this->sut->all(), null, 'id' );
 			$this->assertSame( admin_url( 'options-permalink.php' ), $checks['ucp_discovery']['fix_url'] );
@@ -220,10 +230,10 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox A /.well-known/ucp file in the way fails the UCP address check with the fix for its reason, and deleting it passes the check.
-	 * @testWith ["foreign", "Remove the "]
-	 *           ["outdated", "Delete the "]
-	 *           ["not_json", "The "]
-	 *           ["unreadable", "WooCommerce can't read "]
+	 * @testWith ["foreign", "A file at "]
+	 *           ["outdated", "The file at "]
+	 *           ["not_json", "The file at "]
+	 *           ["unreadable", "WooCommerce can’t read the file at "]
 	 *
 	 * @param string $file   Someone else's file, an old profile, invalid JSON, or a file the web server can't read.
 	 * @param string $prefix How the fix should start.
@@ -316,6 +326,18 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 			if ( is_dir( $dir ) ) {
 				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
 			}
+		}
+	}
+
+	/**
+	 * @testdox The texts in the report call them AI assistants, as the pages do.
+	 */
+	public function test_report_texts_say_ai_assistants(): void {
+		StoreOutputChecksTest::block_requests();
+		$checks = array_merge( wc_get_container()->get( StoreConditions::class )->all(), wc_get_container()->get( StoreOutputChecks::class )->all() );
+		$this->assertGreaterThan( 30, count( $checks ) );
+		foreach ( $checks as $check ) {
+			$this->assertDoesNotMatchRegularExpression( '/\\bagents?\\b/i', (string) ( $check['why'] ?? '' ), $check['id'] );
 		}
 	}
 }

@@ -59,6 +59,7 @@
 		"file:../product-image.css"
 	],
 	"keywords": [ "WooCommerce" ],
+	"viewScript": "file:../product-image-frontend.js",
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

@@ -1,5 +1,17 @@
 // Sales readiness page and the AI tools Overview. Tokens from the design system; the build injects their fallbacks.
 
+// WordPress UI buttons are semibold in the design; the version bundled here sets medium (499).
+// The element in the selector outweighs the button's own class, whichever stylesheet loads last.
+:is(button, a).wc-sales-readiness-ui-button {
+	font-weight: 600;
+}
+
+// The coming soon notice's button is a link, so wp-admin's link blue would override the neutral button's label.
+.wc-ai-shopping__notice-action,
+.wc-ai-shopping__notice-action:is(:hover, :focus, :active) {
+	color: var(--wpds-color-foreground-interactive-neutral);
+}
+
 // The prototype's buttons (WordPress UI minimal and outline): semibold, and a light background
 // on hover and focus that stays after a click until focus moves; the focus ring only for keyboard focus.
 @mixin sales-readiness-button($padding: var(--wpds-dimension-padding-md)) {
@@ -45,6 +57,19 @@
 	// The page title is semibold in the design; the admin-ui Page header sets medium.
 	.wc-sales-readiness h1 {
 		font-weight: 600;
+		line-height: 20px;
+	}
+}
+
+// Sales readiness and the AI tools tab have no admin footer (AgenticCommerceSettings empties its
+// text), so the 24px under the last card is the page's own.
+body:has(.wc-sales-readiness) {
+	#wpfooter {
+		display: none;
+	}
+
+	#wpbody-content {
+		padding-block-end: 0;
 	}
 }
 
@@ -54,6 +79,12 @@
 	--wc-sr-link: var(--wpds-color-foreground-interactive-brand);
 
 	color: var(--wpds-color-foreground-content-neutral);
+
+	// The AI shopping health page's background reaches the bottom of the screen, also when the cards are
+	// short. Not the Overview and AI shopping panels, which sit inside the settings form.
+	&:not(.wc-sales-readiness--overview):not(.wc-ai-shopping) {
+		min-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
+	}
 
 	&__content {
 		box-sizing: border-box;
@@ -71,6 +102,12 @@
 		color: var(--wc-sr-muted);
 	}
 
+	// What a Fix first issue affects, in bold before its line.
+	&__impact {
+		color: var(--wpds-color-foreground-content-neutral);
+		font-weight: 600;
+	}
+
 	// No orphans: balance the last line of text.
 	:is(p, .components-text, [class*="__body-"]) {
 		text-wrap: pretty;
@@ -84,8 +121,8 @@
 		gap: var(--wpds-dimension-gap-lg);
 		max-width: 632px;
 		margin: 0 auto;
-		// The settings form already leaves a gap under the tabs.
-		padding-block: 0 var(--wpds-dimension-padding-3xl);
+		// The settings form already leaves a gap under the tabs. 24px under the last card, as on Sales readiness.
+		padding-block: 0 var(--wpds-dimension-padding-2xl);
 	}
 }
 
@@ -136,8 +173,14 @@
 		padding-block-start: var(--wpds-dimension-padding-xs);
 	}
 
-	:is(&__description, .wc-sales-readiness-channels) + .wc-sales-readiness-list > .wc-sales-readiness-row:first-child {
+	&__description + .wc-sales-readiness-list > .wc-sales-readiness-row:first-child {
 		padding-block-start: 0;
+	}
+
+	// Listings: a line between the channel counts and the first check, as between checks.
+	.wc-sales-readiness-channels + .wc-sales-readiness-list > .wc-sales-readiness-row:first-child {
+		border-block-start: 1px solid var(--wc-sr-stroke);
+		padding-block-start: var(--wpds-dimension-padding-md);
 	}
 
 	// An open fold continues the list above it, under that list's last line.
@@ -173,8 +216,41 @@
 	}
 }
 
-// A list that ends the card (Fix first, an open fold, a passed card) has no line under its last row.
-.wc-sales-readiness-card .wc-sales-readiness-list:last-child > .wc-sales-readiness-row:last-child {
+// Extra details for AI assistants: a compact list per group, as in the design.
+.wc-sales-readiness-declared {
+	display: grid;
+	gap: 20px;
+	padding-block-start: 12px;
+
+	&__title {
+		display: block;
+		font-weight: 600;
+		margin-block-end: 6px;
+	}
+
+	&__list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	&__item {
+		display: flex;
+		gap: 8px;
+		align-items: flex-start;
+		// wp-admin gives every li a bottom margin.
+		margin: 0;
+		padding-block: 2px;
+
+		> svg {
+			flex: 0 0 20px;
+		}
+	}
+}
+
+// A list that ends the card (Fix first, a passed card) has no line under its last row. An open
+// fold keeps its line, above Hide.
+.wc-sales-readiness-card .wc-sales-readiness-list:last-child:not(.wc-sales-readiness-fold *) > .wc-sales-readiness-row:last-child {
 	border-block-end: 0;
 }
 
@@ -253,13 +329,22 @@
 		gap: var(--wpds-dimension-gap-xs);
 	}
 
+	// The badge follows the title's last word, so a long title wraps without leaving it on a line of its own.
 	&__title {
-		display: inline-flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: var(--wpds-dimension-gap-sm);
-		margin-block-end: -2px;
+		display: block;
 		font-weight: 600;
+
+		// The badge is taller than the 20px line, so it overlaps the line by 2px each side instead of adding a gap.
+		&-end {
+			white-space: nowrap;
+
+			> span {
+				display: inline-flex;
+				margin-block: -2px;
+				margin-inline-start: var(--wpds-dimension-gap-sm);
+				vertical-align: middle;
+			}
+		}
 	}
 
 	// The fix line reads as an instruction, so it keeps the text color.
@@ -299,11 +384,10 @@
 }
 
 .wc-sales-readiness-fold {
-	padding-block-start: var(--wpds-dimension-padding-sm);
-
-	// "Show more" and "Hide": a minimal button whose text lines up with the card text, while its
-	// hover background reaches past it.
+	// "Show more" and "Hide": 16px under the line above, a minimal button whose text lines up
+	// with the card text, while its hover background reaches past it.
 	> .components-button {
+		margin-block-start: var(--wpds-dimension-gap-lg);
 		@include sales-readiness-button(var(--wpds-dimension-padding-sm));
 		margin-inline-start: calc(-1 * var(--wpds-dimension-padding-sm));
 		border-color: transparent;
@@ -352,22 +436,34 @@
 		gap: 2px;
 	}
 
-	&__intro {
-		display: block;
-		margin-block-end: var(--wpds-dimension-gap-md);
-	}
+	> .wc-sales-readiness-checked__running {
+		flex-direction: row;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-md);
 
-	// Check again: an outline button.
-	> .components-button {
-		@include sales-readiness-button;
-		border-color: var(--wpds-color-stroke-interactive-brand);
-
-		&:not(:disabled):is(:hover, :active, :focus) {
-			border-color: var(--wpds-color-stroke-interactive-brand-active);
-		}
-
-		&:disabled {
-			border-color: var(--wpds-color-stroke-interactive-brand-disabled);
+		.components-spinner {
+			margin: 0;
 		}
 	}
+
+	> button {
+		flex-shrink: 0;
+		white-space: nowrap;
+	}
+}
+
+.wc-sales-readiness-checked__daily {
+	margin-block-start: var(--wpds-dimension-gap-lg);
+	padding-block-start: var(--wpds-dimension-gap-lg);
+	border-block-start: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+}
+
+// Download your results: a button styled like the contact support link.
+.wc-sales-readiness__link-button {
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	text-decoration-line: underline;
+	cursor: pointer;
 }

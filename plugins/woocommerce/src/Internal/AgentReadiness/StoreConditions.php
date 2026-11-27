@@ -31,10 +31,12 @@ class StoreConditions {
 
 	/**
 	 * Recommended conditions shown as Required, which don't keep AI shopping from being turned on:
-	 * AI assistants read the catalog through the API whatever search engines are told, and with no
-	 * payment method no sale goes through. The rules file's `store_checks` can change any of them (RemoteRules).
+	 * AI assistants read the catalog through the API whatever search engines are told, with no
+	 * payment method no sale goes through, customers learn their order went through from its email,
+	 * and AI assistants share the policy pages with shoppers before they buy. The rules file's
+	 * `store_checks` can change any of them (RemoteRules).
 	 */
-	public const SHOWN_REQUIRED = array( 'search_visible', 'payment_method' );
+	public const SHOWN_REQUIRED = array( 'search_visible', 'payment_method', 'order_emails', 'privacy_page', 'terms_page', 'refund_returns_page' );
 
 	public const LEVEL_RECOMMENDED = 'recommended';
 
@@ -85,7 +87,7 @@ class StoreConditions {
 				'level'   => self::LEVEL_REQUIRED,
 				'name'    => __( 'Store is launched', 'woocommerce' ),
 				'label'   => __( 'Store is in coming soon mode', 'woocommerce' ),
-				'why'     => __( 'Visitors, crawlers and shopping agents see a holding page instead of your products.', 'woocommerce' ),
+				'why'     => __( 'Visitors, crawlers and AI assistants see a holding page instead of your products.', 'woocommerce' ),
 				'fix'     => __( 'Launch the store under WooCommerce > Settings > Site visibility.', 'woocommerce' ),
 				'fix_url' => $settings_url( 'site-visibility' ),
 			),
@@ -93,12 +95,13 @@ class StoreConditions {
 				'id'      => 'search_visible',
 				'ok'      => '0' !== (string) get_option( 'blog_public', '1' ),
 				'blocks'  => 'listing',
-				'group'   => 'find',
+				// In Store access, where the noindex check it causes sits.
+				'group'   => 'access',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Search engines can index the store', 'woocommerce' ),
 				'label'   => __( 'Store is hidden from search engines', 'woocommerce' ),
 				'why'     => __( '"Discourage search engines" asks crawlers, including AI shopping crawlers, to skip your store.', 'woocommerce' ),
-				'fix'     => __( 'Clear "Discourage search engines from indexing this site" under Settings > Reading.', 'woocommerce' ),
+				'fix'     => __( 'Clear “Discourage search engines from indexing this site” under Settings > Reading.', 'woocommerce' ),
 				'fix_url' => admin_url( 'options-reading.php' ),
 			),
 			array(
@@ -109,7 +112,7 @@ class StoreConditions {
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Universal Commerce Protocol (UCP) is on', 'woocommerce' ),
 				'label'   => __( 'Universal Commerce Protocol (UCP) is off', 'woocommerce' ),
-				'why'     => __( 'Shopping agents that use UCP cannot read your catalog.', 'woocommerce' ),
+				'why'     => __( 'AI assistants that use UCP cannot read your catalog.', 'woocommerce' ),
 				'fix'     => __( 'Turn on "Allow AI assistants to shop your store" under WooCommerce > Settings > AI tools > AI shopping.', 'woocommerce' ),
 				'fix_url' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ),
 			),
@@ -121,38 +124,38 @@ class StoreConditions {
 				'level'   => self::LEVEL_REQUIRED,
 				'name'    => __( 'Site uses HTTPS', 'woocommerce' ),
 				'label'   => __( 'Site does not use HTTPS', 'woocommerce' ),
-				'why'     => __( 'Agents only send shoppers to a secure checkout.', 'woocommerce' ),
-				'fix'     => __( 'Move the site to HTTPS; your host can usually turn it on.', 'woocommerce' ),
+				'why'     => __( 'AI assistants only send shoppers to a secure checkout.', 'woocommerce' ),
+				'fix'     => __( 'Move the site to HTTPS; your hosting provider can usually turn it on.', 'woocommerce' ),
 				'fix_url' => wp_get_update_https_url(),
 			),
 			self::ucp_discovery( UcpDiscovery::serve_status() ),
 			$policy_page(
 				'privacy_page',
 				AgenticCommerceSettings::PRIVACY_PAGE_OPTION,
-				__( 'Privacy policy page is selected', 'woocommerce' ),
+				__( 'Privacy policy page is selected and published', 'woocommerce' ),
 				__( 'No privacy policy page', 'woocommerce' ),
-				__( 'Agents will be able to link shoppers to your privacy policy before they buy.', 'woocommerce' )
+				__( 'AI assistants will be able to link shoppers to your privacy policy before they buy.', 'woocommerce' )
 			),
 			$policy_page(
 				'terms_page',
 				AgenticCommerceSettings::TERMS_PAGE_OPTION,
-				__( 'Terms and conditions page is selected', 'woocommerce' ),
+				__( 'Terms and conditions page is selected and published', 'woocommerce' ),
 				__( 'No terms and conditions page', 'woocommerce' ),
-				__( 'Agents will be able to link shoppers to your terms before they buy.', 'woocommerce' )
+				__( 'AI assistants will be able to link shoppers to your terms before they buy.', 'woocommerce' )
 			),
 			$policy_page(
 				'refund_returns_page',
 				AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION,
-				__( 'Refund and returns page is selected', 'woocommerce' ),
+				__( 'Refund and returns page is selected and published', 'woocommerce' ),
 				__( 'No refund and returns page', 'woocommerce' ),
-				__( 'Agents will be able to link shoppers to your return terms before they buy.', 'woocommerce' )
+				__( 'AI assistants will be able to link shoppers to your return terms before they buy.', 'woocommerce' )
 			),
 			$policy_page(
 				'shipping_policy_page',
 				AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION,
-				__( 'Shipping policy page is selected', 'woocommerce' ),
+				__( 'Shipping policy page is selected and published', 'woocommerce' ),
 				__( 'No shipping policy page', 'woocommerce' ),
-				__( 'Shoppers ask agents about delivery times and costs.', 'woocommerce' )
+				__( 'Shoppers ask AI assistants about delivery times and costs.', 'woocommerce' )
 			),
 			array(
 				'id'      => 'payment_method',
@@ -162,7 +165,7 @@ class StoreConditions {
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'A payment method is turned on', 'woocommerce' ),
 				'label'   => __( 'No payment method is turned on', 'woocommerce' ),
-				'why'     => __( 'Shoppers sent by an agent cannot pay for their order.', 'woocommerce' ),
+				'why'     => __( 'Shoppers sent by an AI assistant cannot pay for their order.', 'woocommerce' ),
 				'fix'     => __( 'Turn on a payment method under WooCommerce > Settings > Payments.', 'woocommerce' ),
 				'fix_url' => $settings_url( 'checkout' ),
 			),
@@ -174,7 +177,7 @@ class StoreConditions {
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Guest checkout is allowed', 'woocommerce' ),
 				'label'   => __( 'Guest checkout is off', 'woocommerce' ),
-				'why'     => __( 'With guest checkout off, an AI assistant can check out only when the shopper creates an account at checkout. If account creation at checkout is off too, it can\'t. It can still find your products and build carts.', 'woocommerce' ),
+				'why'     => __( 'With guest checkout off, AI assistants can’t check out for shoppers. They can still find your products and build carts.', 'woocommerce' ),
 				'fix'     => __( 'Tick "Enable guest checkout" under WooCommerce > Settings > Accounts & Privacy.', 'woocommerce' ),
 				'fix_url' => $settings_url( 'account' ),
 			),
@@ -186,7 +189,7 @@ class StoreConditions {
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Order confirmation emails are on', 'woocommerce' ),
 				'label'   => __( 'Order confirmation emails are off', 'woocommerce' ),
-				'why'     => __( 'Shoppers who buy through an agent get no confirmation from your store.', 'woocommerce' ),
+				'why'     => __( 'Shoppers who buy through an AI assistant get no confirmation from your store.', 'woocommerce' ),
 				'fix'     => __( 'Turn on the Processing or Completed order email under WooCommerce > Settings > Emails.', 'woocommerce' ),
 				'fix_url' => $settings_url( 'email&section=wc_email_customer_processing_order' ),
 			),
@@ -240,7 +243,7 @@ class StoreConditions {
 			'name'    => __( 'Use a readable permalink structure', 'woocommerce' ),
 			// Without a file in the way, Plain permalinks are why the connection URL doesn't load.
 			'label'   => 'no_file' === $status ? __( 'Use a readable permalink structure', 'woocommerce' ) : __( 'Fix your connection URL', 'woocommerce' ),
-			'why'     => 'no_file' === $status ? __( 'Any structure except Plain lets AI assistants reach your store.', 'woocommerce' ) : __( 'AI assistants use your connection URL to find your products, and it doesn\'t load your store\'s details.', 'woocommerce' ),
+			'why'     => 'no_file' === $status ? __( 'Any structure except Plain lets AI assistants reach your store.', 'woocommerce' ) : __( 'AI assistants use your connection URL to find your products, so it needs to load your store’s details.', 'woocommerce' ),
 			'fix'     => UcpDiscovery::discovery_fix( $status ),
 			// Permalinks are one fix only when nothing is serving the address. A file in the way is removed on disk.
 			'fix_url' => 'no_file' === $status ? admin_url( 'options-permalink.php' ) : '',
@@ -297,16 +300,29 @@ class StoreConditions {
 	}
 
 	/**
-	 * Whether any payment gateway is turned on. Whether it can take a given order
-	 * depends on the cart, so this reads the setting, not is_available().
+	 * Whether any payment gateway is turned on.
 	 */
 	private function payment_method_enabled(): bool {
+		return array() !== $this->enabled_payment_methods();
+	}
+
+	/**
+	 * The names of the payment gateways that are turned on, as the payment settings show them.
+	 * Whether one can take a given order depends on the cart, so this reads the setting, not is_available().
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return string[]
+	 */
+	public function enabled_payment_methods(): array {
+		$names = array();
 		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
 			if ( $gateway instanceof \WC_Payment_Gateway && 'yes' === $gateway->enabled ) {
-				return true;
+				$title   = wp_strip_all_tags( (string) $gateway->get_method_title() );
+				$names[] = '' !== $title ? $title : $gateway->id;
 			}
 		}
-		return false;
+		return $names;
 	}
 
 	/**

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  * ProductBestSellers class.
  */
 class ProductBestSellers extends AbstractProductGrid {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.

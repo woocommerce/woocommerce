@@ -8,8 +8,14 @@ import {
 	useStoreCartCoupons,
 	useStoreCart,
 	useOrderSummaryLoadingState,
+	useOrderSummaryRow,
 } from '@woocommerce/base-context/hooks';
-import { ExperimentalDiscountsMeta } from '@woocommerce/blocks-checkout';
+import {
+	ExperimentalDiscountsMeta,
+	applyCheckoutFilter,
+} from '@woocommerce/blocks-checkout';
+
+const couponsFilterArg = { context: 'summary' };
 
 const DiscountSlotFill = (): JSX.Element => {
 	// Prepare props to pass to the ExperimentalOrderMeta slot fill. We need to pluck out receiveCart.
@@ -25,24 +31,39 @@ const DiscountSlotFill = (): JSX.Element => {
 };
 
 const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
-	const { cartTotals, cartCoupons } = useStoreCart();
+	const { cart, isStale, wrapperProps } = useOrderSummaryRow(
+		useStoreCart(),
+		// Matches `TotalsDiscount`, so coupons that a `coupons` filter adds still show.
+		( { cartCoupons, cartTotals } ) =>
+			!! parseInt( cartTotals.total_discount, 10 ) ||
+			applyCheckoutFilter( {
+				arg: couponsFilterArg,
+				filterName: 'coupons',
+				defaultValue: cartCoupons,
+			} ).length > 0
+	);
 	const { removeCoupon, isRemovingCoupon } =
 		useStoreCartCoupons( 'wc/checkout' );
 	const { isLoading } = useOrderSummaryLoadingState();
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	return (
 		<>
-			<TotalsWrapper className={ className }>
-				<TotalsDiscount
-					cartCoupons={ cartCoupons }
-					currency={ totalsCurrency }
-					isRemovingCoupon={ isRemovingCoupon }
-					removeCoupon={ removeCoupon }
-					values={ cartTotals }
-					isLoading={ isLoading }
-				/>
-			</TotalsWrapper>
+			{ /* Kept before the slot, so the slot stays mounted and its fills keep their state. */ }
+			{ cart && (
+				<TotalsWrapper className={ className } { ...wrapperProps }>
+					<TotalsDiscount
+						cartCoupons={ cart.cartCoupons }
+						currency={ getCurrencyFromPriceResponse(
+							cart.cartTotals
+						) }
+						isRemovingCoupon={ isRemovingCoupon }
+						removeCoupon={ removeCoupon }
+						values={ cart.cartTotals }
+						isLoading={ isLoading }
+						disabled={ isStale }
+					/>
+				</TotalsWrapper>
+			) }
 			<DiscountSlotFill />
 		</>
 	);

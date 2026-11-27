@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+After launching a store checked in coming soon mode, AI shopping health waits for the next check instead of saying hosting blocked it.

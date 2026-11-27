@@ -39,6 +39,7 @@ class Quote_Preprocessor implements Preprocessor {
 			if ( 'core/quote' === $block['blockName'] ) {
 				$quote_align      = $block['attrs']['textAlign'] ?? null;
 				$quote_typography = $block['attrs']['style']['typography'] ?? array();
+				$quote_typography = is_array( $quote_typography ) ? $quote_typography : array();
 
 				// Apply quote's text alignment to its children.
 				$block['innerBlocks'] = $this->apply_alignment_to_children( $block['innerBlocks'], $quote_align );
@@ -102,10 +103,11 @@ class Quote_Preprocessor implements Preprocessor {
 				if ( ! isset( $block['attrs'] ) ) {
 					$block['attrs'] = array();
 				}
-				if ( ! isset( $block['attrs']['style'] ) ) {
+				// A string style (e.g. Calendly's "style":"inline") is not a style object, so treat it as absent.
+				if ( ! isset( $block['attrs']['style'] ) || ! is_array( $block['attrs']['style'] ) ) {
 					$block['attrs']['style'] = array();
 				}
-				if ( ! isset( $block['attrs']['style']['typography'] ) ) {
+				if ( ! isset( $block['attrs']['style']['typography'] ) || ! is_array( $block['attrs']['style']['typography'] ) ) {
 					$block['attrs']['style']['typography'] = array();
 				}
 

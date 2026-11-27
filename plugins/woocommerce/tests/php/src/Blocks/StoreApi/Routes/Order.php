@@ -547,6 +547,51 @@ class Order extends ControllerTestCase {
 
 
 	/**
+	 * Wallets such as Apple Pay and Google Pay convert these totals with `currency_minor_unit`,
+	 * so both must use the store's number of decimals, as the cart endpoint does.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/71042
+	 *
+	 * @testWith [0, "1740"]
+	 *           [2, "174000"]
+	 *
+	 * @testdox Order totals use the store's number of decimals ($decimals), matching currency_minor_unit.
+	 *
+	 * @param int    $decimals       Store setting for the number of decimals.
+	 * @param string $expected_total Order total of 1740 in the minor unit for that setting.
+	 */
+	public function test_order_totals_use_store_price_decimals( int $decimals, string $expected_total ): void {
+		add_filter(
+			'wc_get_price_decimals',
+			function () use ( $decimals ) {
+				return $decimals;
+			}
+		);
+
+		$order = new \WC_Order();
+		$order->set_billing_email( 'guest@example.com' );
+		$order->add_product( $this->product, 174 );
+		$order->calculate_totals();
+		$order->save();
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+
+		$totals = (array) $response->get_data()['totals'];
+
+		$this->assertSame( $decimals, $totals['currency_minor_unit'] );
+		$this->assertSame( $expected_total, $totals['total_price'] );
+		$this->assertSame( $expected_total, $totals['subtotal'] );
+		$this->assertSame( $expected_total, $totals['total_items'] );
+	}
+
+	/**
 	 * Test that a guest can access a guest order with valid order key and billing email.
 	 */
 	public function test_guest_can_access_guest_order_with_valid_credentials() {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show translated image alt text and pagination labels correctly in pattern blocks.

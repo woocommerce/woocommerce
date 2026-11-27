@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
+
+/**
  * Internal dependencies
  */
 import {
@@ -13,8 +18,7 @@ import {
 	navigateTo,
 } from '../index';
 
-global.window = Object.create( window );
-global.window.wcNavigation = {};
+window.wcNavigation = {};
 
 describe( 'getPersistedQuery', () => {
 	beforeEach( () => {
@@ -286,33 +290,29 @@ describe( 'isWCAdmin', () => {
 } );
 
 describe( 'navigateTo', () => {
-	let oldLocation;
-
-	beforeAll( () => {
-		oldLocation = window.location;
-	} );
+	const setHref = mockBrowserLocation( 'href' );
+	let originalUrl;
 
 	beforeEach( () => {
-		window.location = oldLocation;
+		originalUrl = window.location.href;
 		jest.spyOn( getHistory(), 'push' );
 	} );
 
 	afterEach( () => {
+		window.history.replaceState( null, '', originalUrl );
 		getHistory().push.mockRestore();
 	} );
 
 	it( 'correctly redirects for absolute urls', () => {
-		delete window.location;
-		window.location = new URL( 'https://www.example.com' );
-
 		navigateTo( { url: 'http://www.google.com/' } );
-		expect( window.location.href ).toBe( 'http://www.google.com/' );
+		expect( setHref ).toHaveBeenCalledWith( 'http://www.google.com/' );
 	} );
 
 	it( 'correctly uses router when on wcadmin page', () => {
-		delete window.location;
-		window.location = new URL(
-			'http://localhost/wp-admin/admin.php?page=wc-admin'
+		window.history.replaceState(
+			null,
+			'',
+			'/wp-admin/admin.php?page=wc-admin'
 		);
 
 		navigateTo( {
@@ -326,43 +326,40 @@ describe( 'navigateTo', () => {
 	} );
 
 	it( 'correctly redirects when not on wcadmin page', () => {
-		delete window.location;
-		window.location = new URL( 'http://localhost/wp-admin/order.php' );
+		window.history.replaceState( null, '', '/wp-admin/order.php' );
 
 		navigateTo( {
 			url: getNewPath( {}, '/setup-wizard', {} ),
 		} );
 
-		const resultUrl = new URL( window.location.href );
-
 		expect( getHistory().push ).not.toHaveBeenCalled();
-		expect( resultUrl.search ).toBe(
-			'?page=wc-admin&path=%2Fsetup-wizard'
+		expect( setHref ).toHaveBeenCalledWith(
+			'https://vagrant.local/wp/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard'
 		);
 	} );
 
 	it( 'correctly redirects when navigating to non-wcadmin page', () => {
-		delete window.location;
-		window.location = new URL(
-			'http://localhost/wp-admin/admin.php?page=wc-admin'
+		window.history.replaceState(
+			null,
+			'',
+			'/wp-admin/admin.php?page=wc-admin'
 		);
 
 		navigateTo( {
 			url: 'orders.php',
 		} );
 
-		const resultUrl = new URL( window.location.href );
-
 		expect( getHistory().push ).not.toHaveBeenCalled();
-		expect( resultUrl.toString() ).toBe(
+		expect( setHref ).toHaveBeenCalledWith(
 			'https://vagrant.local/wp/wp-admin/orders.php'
 		);
 	} );
 
 	it( 'correctly parses url and uses router for non-root relative path', () => {
-		delete window.location;
-		window.location = new URL(
-			'http://localhost/wp-admin/admin.php?page=wc-admin'
+		window.history.replaceState(
+			null,
+			'',
+			'/wp-admin/admin.php?page=wc-admin'
 		);
 
 		navigateTo( {
@@ -376,17 +373,14 @@ describe( 'navigateTo', () => {
 	} );
 
 	it( 'correctly redirects when navigating to non-root relative path', () => {
-		delete window.location;
-		window.location = new URL( 'http://localhost/wp-admin/orders.php' );
+		window.history.replaceState( null, '', '/wp-admin/orders.php' );
 
 		navigateTo( {
 			url: '/setup-wizard',
 		} );
 
-		const resultUrl = new URL( window.location.href );
-
 		expect( getHistory().push ).not.toHaveBeenCalled();
-		expect( resultUrl.toString() ).toBe(
+		expect( setHref ).toHaveBeenCalledWith(
 			'https://vagrant.local/wp/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard'
 		);
 	} );

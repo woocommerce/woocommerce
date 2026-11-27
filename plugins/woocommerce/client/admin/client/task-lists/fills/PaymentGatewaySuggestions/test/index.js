@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import { useSelect } from '@wordpress/data';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { recordEvent } from '@woocommerce/tracks';
@@ -9,6 +10,8 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 
 import { PaymentGatewaySuggestions } from '../index';
+
+const setHref = mockBrowserLocation( 'href' );
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -451,22 +454,15 @@ describe( 'PaymentGatewaySuggestions', () => {
 		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
 		isFeatureEnabled.mockReturnValue( true );
 
-		const mockLocation = {
-			href: 'test',
-		};
-
-		mockLocation.href = 'test';
-		Object.defineProperty( global.window, 'location', {
-			value: mockLocation,
-		} );
-
 		render(
 			<PaymentGatewaySuggestions onComplete={ () => {} } query={ {} } />
 		);
 
 		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
-		expect( mockLocation.href ).toContain(
-			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+		expect( setHref ).toHaveBeenCalledWith(
+			expect.stringContaining(
+				'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+			)
 		);
 	} );
 } );

@@ -1,34 +1,8 @@
-// Cart and Checkout buttons use the same corners as their fields and panels. The rule has no specificity, so a button
-// radius from the theme (`styles.elements.button.border.radius`) still applies.
-:where(.wp-block-woocommerce-cart, .wp-block-woocommerce-checkout) :where(.wc-block-components-button:not(.is-link)) {
-	border-radius: $universal-border-radius;
-}
-
-.wc-block-components-button:not(.is-link) {
-	align-items: center;
-	display: inline-flex;
-	height: auto;
-	justify-content: center;
-	text-align: center;
-	position: relative;
-	transition: box-shadow 0.1s linear;
-
+@mixin button-appearance {
 	&:focus {
 		box-shadow: 0 0 0 2px $studio-blue;
 		box-shadow: inset 0 0 0 1px $white, 0 0 0 2px $studio-blue;
 		outline: 3px solid transparent;
-	}
-
-	.wc-block-components-button__text {
-		display: block;
-
-		// Prevent runts/widows. Overwrite `balance` with `pretty`, as `pretty` is not supported in all browsers.
-		text-wrap: balance;
-		text-wrap: pretty;
-
-		> svg {
-			fill: currentColor;
-		}
 	}
 
 	&.text {
@@ -37,15 +11,6 @@
 		&:hover:not(:disabled):not([aria-disabled="true"]) {
 			opacity: 0.9;
 		}
-	}
-
-	// Fade the whole button, not just its label, so the fill and border read as
-	// unavailable too. Some buttons stay focusable and use aria-disabled rather
-	// than the disabled attribute, so both need covering.
-	&:disabled,
-	&[aria-disabled="true"] {
-		cursor: not-allowed;
-		opacity: 0.5;
 	}
 
 	&.outlined,
@@ -70,8 +35,47 @@
 	}
 }
 
+.wc-block-components-button:not(.is-link) {
+	align-items: center;
+	display: inline-flex;
+	height: auto;
+	justify-content: center;
+	position: relative;
+	transition: motion-state(box-shadow);
+
+	&:not(:where(.wp-block-woocommerce-cart *, .wp-block-woocommerce-checkout *)) {
+		@include button-appearance;
+		text-align: center;
+	}
+
+	.wc-block-components-button__text {
+		display: block;
+
+		// Prevent runts/widows. Overwrite `balance` with `pretty`, as `pretty` is not supported in all browsers.
+		text-wrap: balance;
+		text-wrap: pretty;
+
+		> svg {
+			fill: currentColor;
+		}
+	}
+
+	// Some disabled buttons remain focusable and use aria-disabled.
+	&:disabled,
+	&[aria-disabled="true"] {
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+}
+
+:where(.wp-block-woocommerce-cart, .wp-block-woocommerce-checkout) {
+	.wc-block-components-button:not(.is-link) .wc-block-components-button__text {
+		width: 100%;
+	}
+}
+
 body:not(.woocommerce-block-theme-has-button-styles)
-	.wc-block-components-button:not(.is-link) {
+	.wc-block-components-button:not(.is-link):not(:where(.wp-block-woocommerce-cart *, .wp-block-woocommerce-checkout *)) {
 	min-height: 3em;
 
 	&:focus {

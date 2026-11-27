@@ -52,15 +52,76 @@ class ProductSalesTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $sales );
 		$this->assertSame( 90, $sales['days'] );
 		$this->assertSame( 1, $sales['orders'], 'Only the completed order in the period counts' );
-		$this->assertEqualsWithDelta( 20.0, $sales['by_product'][ $mug->get_id() ] ?? 0.0, 0.01 );
 		$this->assertGreaterThan( 0.0, (float) $variant->get_price(), 'The variation has a price, so its sales show' );
-		$this->assertArrayHasKey( $variable->get_id(), $sales['by_product'], 'A variation counts toward its parent' );
-		$this->assertEqualsWithDelta( (float) $variant->get_price(), $sales['by_product'][ $variable->get_id() ], 0.01 );
-		$this->assertArrayNotHasKey( $variant->get_id(), $sales['by_product'] );
-		$this->assertEqualsWithDelta( (float) $variant->get_price(), $sales['by_variation'][ $variant->get_id() ] ?? 0.0, 0.01, 'The variation\'s own sales are kept too' );
-		$this->assertArrayNotHasKey( $mug->get_id(), $sales['by_variation'] );
-		$this->assertArrayNotHasKey( $vase->get_id(), $sales['by_product'], 'Cancelled and older orders are left out' );
 		$this->assertEqualsWithDelta( 20.0 + (float) $variant->get_price(), $sales['total'], 0.01 );
+		$this->assertArrayNotHasKey( 'top', $sales, 'The totals do not list best sellers; the scan asks for them only when it ranks' );
+		$this->assertEqualsCanonicalizing( array( $mug->get_id(), $variable->get_id() ), $this->sut->more_top_products( $sales['since'], 0, ProductSales::TOP_PRODUCTS ), 'A variation counts toward its parent; cancelled and older orders are left out' );
+
+		$some = $this->sut->for_products( array( $mug->get_id(), $variable->get_id(), $vase->get_id() ), $sales['since'] );
+
+		$this->assertEqualsWithDelta( 20.0, $some['by_product'][ $mug->get_id() ] ?? 0.0, 0.01 );
+		$this->assertEqualsWithDelta( (float) $variant->get_price(), $some['by_product'][ $variable->get_id() ] ?? 0.0, 0.01 );
+		$this->assertArrayNotHasKey( $variant->get_id(), $some['by_product'] );
+		$this->assertEqualsWithDelta( (float) $variant->get_price(), $some['by_variation'][ $variant->get_id() ] ?? 0.0, 0.01, 'The variation\'s own sales are kept too' );
+		$this->assertArrayNotHasKey( $mug->get_id(), $some['by_variation'] );
+		$this->assertArrayNotHasKey( $vase->get_id(), $some['by_product'] );
+	}
+
+	/**
+	 * @testdox The best sellers are listed with the most net sales first, leaving out a product refunded in full.
+	 */
+	public function test_last_days_lists_best_sellers_first(): void {
+		$mug    = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$vase   = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 30 ) );
+		$lamp   = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 50 ) );
+		$unsold = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 90 ) );
+
+		$this->order( array( array( $mug, 1 ) ), OrderStatus::COMPLETED );
+		$this->order( array( array( $vase, 2 ) ), OrderStatus::COMPLETED );
+		$this->order( array( array( $mug, 1 ) ), OrderStatus::PROCESSING );
+		$order  = $this->order( array( array( $lamp, 1 ) ), OrderStatus::COMPLETED );
+		$items  = $order->get_items();
+		$item   = reset( $items );
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 50,
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => 50,
+					),
+				),
+			)
+		);
+		$this->assertInstanceOf( \WC_Order_Refund::class, $refund );
+		OrdersStatsDataStore::sync_order( $refund->get_id() );
+		ProductsDataStore::sync_order_products( $refund->get_id() );
+
+		$sales = $this->sut->last_days();
+
+		$top = $this->sut->more_top_products( $sales['since'], 0, ProductSales::TOP_PRODUCTS );
+		$this->assertSame( array( $vase->get_id(), $mug->get_id() ), $top, 'Vase 60, mug 20; the lamp nets to nothing and one product never sold' );
+		$this->assertNotContains( $unsold->get_id(), $top );
+		$this->assertEqualsWithDelta( 80.0, $sales['total'], 0.01 );
+		$this->assertSame( array( $mug->get_id() ), $this->sut->more_top_products( $sales['since'], 1, 1 ) );
+	}
+
+	/**
+	 * @testdox A deleted product keeps its revenue in the total and drops out of the best sellers.
+	 */
+	public function test_top_products_skip_a_deleted_product(): void {
+		$mug  = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$lamp = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 40 ) );
+
+		$this->order( array( array( $mug, 1 ) ), OrderStatus::COMPLETED );
+		$this->order( array( array( $lamp, 1 ) ), OrderStatus::COMPLETED );
+		$lamp->delete( true );
+
+		$sales = $this->sut->last_days();
+
+		$this->assertSame( array( $mug->get_id() ), $this->sut->more_top_products( $sales['since'], 0, ProductSales::TOP_PRODUCTS ) );
+		$this->assertEqualsWithDelta( 50.0, $sales['total'], 0.01, 'The deleted product\'s revenue still counts' );
 	}
 
 	/**
@@ -89,7 +150,8 @@ class ProductSalesTest extends WC_Unit_Test_Case {
 
 		$sales = $this->sut->last_days();
 
-		$this->assertEqualsWithDelta( 10.0, $sales['by_product'][ $mug->get_id() ] ?? 0.0, 0.01, 'Two sold, one refunded' );
+		$this->assertEqualsWithDelta( 10.0, $sales['total'], 0.01, 'Two sold, one refunded' );
+		$this->assertEqualsWithDelta( 10.0, $this->sut->for_products( array( $mug->get_id() ), $sales['since'] )['by_product'][ $mug->get_id() ] ?? 0.0, 0.01 );
 		$this->assertSame( 1, $sales['orders'] );
 	}
 
@@ -210,7 +272,7 @@ class ProductSalesTest extends WC_Unit_Test_Case {
 			$sales = $this->sut->last_days();
 
 			$this->assertSame( 1, $sales['orders'], 'The older order is out, though its local date reads later than the UTC boundary' );
-			$this->assertEqualsWithDelta( 20.0, $sales['by_product'][ $mug->get_id() ] ?? 0.0, 0.01 );
+			$this->assertEqualsWithDelta( 20.0, $sales['total'], 0.01 );
 		} finally {
 			delete_option( 'timezone_string' );
 		}

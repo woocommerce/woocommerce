@@ -1,4 +1,7 @@
 {
+	"auto_review": {
+		"on": "never"
+	},
 	"personas": {
 		"general": {
 			"enabled": false
@@ -9,7 +12,7 @@
 		"security": {
 			"file": ".ai/review/personas/security.md",
 			"engine": "codex",
-			"model": "gpt-6-astra",
+			"model": "gpt-6.2-astra",
 			"triggers": [
 				"**/*.php",
 				"**/*.js",
@@ -27,8 +30,8 @@
 		},
 		"regression": {
 			"file": ".ai/review/personas/regression.md",
-			"engine": "claude",
-			"model": "claude-opus-4-8",
+			"engine": "codex",
+			"model": "gpt-6.2-sol",
 			"triggers": [
 				"**/*.php"
 			],
@@ -36,8 +39,8 @@
 		},
 		"performance": {
 			"file": ".ai/review/personas/performance.md",
-			"engine": "claude",
-			"model": "claude-opus-4-8",
+			"engine": "codex",
+			"model": "gpt-6.2-sol",
 			"triggers": [
 				"**/*.php"
 			],
@@ -139,8 +142,8 @@
 		},
 		"frontend": {
 			"file": ".ai/review/personas/frontend.md",
-			"engine": "claude",
-			"model": "claude-opus-4-8",
+			"engine": "codex",
+			"model": "gpt-6.2-sol",
 			"triggers": [
 				"**/*.ts",
 				"**/*.tsx",

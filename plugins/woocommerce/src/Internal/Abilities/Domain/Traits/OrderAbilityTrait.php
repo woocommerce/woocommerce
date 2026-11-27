@@ -231,7 +231,8 @@ trait OrderAbilityTrait {
 							),
 							'additionalProperties' => false,
 						),
-						'order_item'
+						'order_item',
+						self::order_item_field_filter( 'line_item' )
 					),
 				),
 				'shipping'             => array(
@@ -248,7 +249,8 @@ trait OrderAbilityTrait {
 						'instance_id'  => array( 'type' => 'string' ),
 						'total'        => array( 'type' => 'string' ),
 						'total_tax'    => array( 'type' => 'string' ),
-					)
+					),
+					'shipping'
 				),
 				'fee_lines'            => self::get_order_lines_schema(
 					array(
@@ -261,7 +263,8 @@ trait OrderAbilityTrait {
 						),
 						'total'      => array( 'type' => 'string' ),
 						'total_tax'  => array( 'type' => 'string' ),
-					)
+					),
+					'fee'
 				),
 				'coupon_lines'         => self::get_order_lines_schema(
 					array(
@@ -269,7 +272,8 @@ trait OrderAbilityTrait {
 						'code'         => array( 'type' => 'string' ),
 						'discount'     => array( 'type' => 'string' ),
 						'discount_tax' => array( 'type' => 'string' ),
-					)
+					),
+					'coupon'
 				),
 				'tax_lines'            => self::get_order_lines_schema(
 					array(
@@ -291,18 +295,32 @@ trait OrderAbilityTrait {
 	/**
 	 * Schema of one kind of order line other than line items. The include_lines input describes when they are present.
 	 *
-	 * @param array $properties Properties of one line.
+	 * @param array       $properties Properties of one line.
+	 * @param string|null $item_type  Order item type of the line, such as `fee`, to list the extension fields that apply to it. Null lists none.
 	 * @return array
 	 */
-	private static function get_order_lines_schema( array $properties ): array {
+	private static function get_order_lines_schema( array $properties, ?string $item_type = null ): array {
+		$schema = array(
+			'type'                 => 'object',
+			'properties'           => $properties,
+			'additionalProperties' => false,
+		);
 		return array(
 			'type'  => 'array',
-			'items' => array(
-				'type'                 => 'object',
-				'properties'           => $properties,
-				'additionalProperties' => false,
-			),
+			'items' => null === $item_type ? $schema : ExtensibleAbilities::add_fields_schema( $schema, 'order_item', self::order_item_field_filter( $item_type ) ),
 		);
+	}
+
+	/**
+	 * Field filter for add_fields_schema() that keeps the order item fields whose `object_types` include an item type.
+	 *
+	 * @param string $item_type Order item type, such as `line_item` or `fee`.
+	 * @return callable
+	 */
+	private static function order_item_field_filter( string $item_type ): callable {
+		return static function ( array $args ) use ( $item_type ): bool {
+			return empty( $args['object_types'] ) || in_array( $item_type, $args['object_types'], true );
+		};
 	}
 
 	/**
@@ -313,6 +331,15 @@ trait OrderAbilityTrait {
 	 */
 	protected static function get_order_from_input( array $input ) {
 		$order = wc_get_order( $input['id'] );
+
+		if ( $order instanceof \WC_Order_Refund ) {
+			return new \WP_Error(
+				'woocommerce_order_not_found',
+				/* translators: 1: refund ID, 2: ID of the refunded order. */
+				sprintf( __( '%1$d is the ID of a refund of order %2$d, not of an order. Use order ID %2$d.', 'woocommerce' ), $input['id'], $order->get_parent_id() ),
+				array( 'status' => 404 )
+			);
+		}
 
 		if ( ! $order instanceof \WC_Order ) {
 			return new \WP_Error(
@@ -429,9 +456,9 @@ trait OrderAbilityTrait {
 	 */
 	protected static function format_orders_for_response( array $orders, array $includes ) {
 		ExtensibleAbilities::prime( 'order', $orders );
+		$items = array();
 		if ( in_array( 'line_items', $includes, true ) ) {
 			$product_ids = array();
-			$items       = array();
 			foreach ( $orders as $order ) {
 				foreach ( $order->get_items() as $item ) {
 					if ( $item instanceof \WC_Order_Item_Product ) {
@@ -446,8 +473,13 @@ trait OrderAbilityTrait {
 				// Prime caches to reduce future queries.
 				_prime_post_caches( $product_ids );
 			}
-			ExtensibleAbilities::prime( 'order_item', $items );
 		}
+		if ( in_array( 'lines', $includes, true ) ) {
+			foreach ( $orders as $order ) {
+				array_push( $items, ...array_values( $order->get_shipping_methods() ), ...array_values( $order->get_fees() ), ...array_values( $order->get_coupons() ) );
+			}
+		}
+		ExtensibleAbilities::prime( 'order_item', $items );
 
 		$formatted = array();
 		foreach ( $orders as $order ) {
@@ -475,7 +507,7 @@ trait OrderAbilityTrait {
 	 *
 	 * @param \WC_Order $order    Order object.
 	 * @param string[]  $includes Optional parts: `line_items`, and `lines` for the shipping, fee, coupon and tax lines.
-	 * @return array|\WP_Error A WP_Error when an extension field value does not match its schema.
+	 * @return array|\WP_Error A WP_Error when an extension field fails or returns a value its schema does not allow.
 	 */
 	protected static function format_order_for_response( \WC_Order $order, array $includes ) {
 		$billing_email = $order->get_billing_email();
@@ -522,7 +554,11 @@ trait OrderAbilityTrait {
 		}
 
 		if ( in_array( 'lines', $includes, true ) ) {
-			$data += self::format_order_lines_for_response( $order );
+			$lines = self::format_order_lines_for_response( $order );
+			if ( is_wp_error( $lines ) ) {
+				return $lines;
+			}
+			$data += $lines;
 		}
 
 		if ( '' !== $billing_email ) {
@@ -577,72 +613,80 @@ trait OrderAbilityTrait {
 	}
 
 	/**
-	 * Format the shipping, fee, coupon and tax lines of an order, with the keys of wc/v3/orders.
+	 * Format the shipping, fee, coupon and tax lines of an order, with the keys of wc/v3/orders. Tax lines have no extension fields.
 	 *
 	 * @param \WC_Order $order Order object.
-	 * @return array
+	 * @return array|\WP_Error A WP_Error when an extension field fails or returns a value its schema does not allow.
 	 */
-	private static function format_order_lines_for_response( \WC_Order $order ): array {
-		return array(
-			'shipping_lines' => array_values(
-				array_map(
-					static function ( \WC_Order_Item_Shipping $item ): array {
-						return array(
-							'id'           => $item->get_id(),
-							'method_title' => $item->get_method_title(),
-							'method_id'    => $item->get_method_id(),
-							'instance_id'  => (string) $item->get_instance_id(),
-							'total'        => self::format_amount_for_response( $item->get_total() ),
-							'total_tax'    => self::format_amount_for_response( $item->get_total_tax() ),
-						);
-					},
-					$order->get_shipping_methods()
-				)
+	private static function format_order_lines_for_response( \WC_Order $order ) {
+		$lines = array(
+			'shipping_lines' => array(
+				$order->get_shipping_methods(),
+				static function ( \WC_Order_Item_Shipping $item ): array {
+					return array(
+						'id'           => $item->get_id(),
+						'method_title' => $item->get_method_title(),
+						'method_id'    => $item->get_method_id(),
+						'instance_id'  => (string) $item->get_instance_id(),
+						'total'        => self::format_amount_for_response( $item->get_total() ),
+						'total_tax'    => self::format_amount_for_response( $item->get_total_tax() ),
+					);
+				},
 			),
-			'fee_lines'      => array_values(
-				array_map(
-					static function ( \WC_Order_Item_Fee $item ): array {
-						return array(
-							'id'         => $item->get_id(),
-							'name'       => $item->get_name(),
-							'tax_class'  => $item->get_tax_class(),
-							'tax_status' => $item->get_tax_status(),
-							'total'      => self::format_amount_for_response( $item->get_total() ),
-							'total_tax'  => self::format_amount_for_response( $item->get_total_tax() ),
-						);
-					},
-					$order->get_fees()
-				)
+			'fee_lines'      => array(
+				$order->get_fees(),
+				static function ( \WC_Order_Item_Fee $item ): array {
+					return array(
+						'id'         => $item->get_id(),
+						'name'       => $item->get_name(),
+						'tax_class'  => $item->get_tax_class(),
+						'tax_status' => $item->get_tax_status(),
+						'total'      => self::format_amount_for_response( $item->get_total() ),
+						'total_tax'  => self::format_amount_for_response( $item->get_total_tax() ),
+					);
+				},
 			),
-			'coupon_lines'   => array_values(
-				array_map(
-					static function ( \WC_Order_Item_Coupon $item ): array {
-						return array(
-							'id'           => $item->get_id(),
-							'code'         => $item->get_code(),
-							'discount'     => self::format_amount_for_response( $item->get_discount() ),
-							'discount_tax' => self::format_amount_for_response( $item->get_discount_tax() ),
-						);
-					},
-					$order->get_coupons()
-				)
-			),
-			'tax_lines'      => array_values(
-				array_map(
-					static function ( \WC_Order_Item_Tax $item ): array {
-						return array(
-							'id'                 => $item->get_id(),
-							'rate_code'          => $item->get_rate_code(),
-							'rate_id'            => $item->get_rate_id(),
-							'label'              => $item->get_label(),
-							'compound'           => $item->is_compound(),
-							'tax_total'          => self::format_amount_for_response( $item->get_tax_total() ),
-							'shipping_tax_total' => self::format_amount_for_response( $item->get_shipping_tax_total() ),
-						);
-					},
-					$order->get_taxes()
-				)
+			'coupon_lines'   => array(
+				$order->get_coupons(),
+				static function ( \WC_Order_Item_Coupon $item ): array {
+					return array(
+						'id'           => $item->get_id(),
+						'code'         => $item->get_code(),
+						'discount'     => self::format_amount_for_response( $item->get_discount() ),
+						'discount_tax' => self::format_amount_for_response( $item->get_discount_tax() ),
+					);
+				},
 			),
 		);
+
+		$data = array();
+		foreach ( $lines as $key => list( $items, $format ) ) {
+			$data[ $key ] = array();
+			foreach ( $items as $item ) {
+				$line = ExtensibleAbilities::add_fields_to_object( $format( $item ), 'order_item', $item );
+				if ( is_wp_error( $line ) ) {
+					return $line;
+				}
+				$data[ $key ][] = $line;
+			}
+		}
+
+		$data['tax_lines'] = array_values(
+			array_map(
+				static function ( \WC_Order_Item_Tax $item ): array {
+					return array(
+						'id'                 => $item->get_id(),
+						'rate_code'          => $item->get_rate_code(),
+						'rate_id'            => $item->get_rate_id(),
+						'label'              => $item->get_label(),
+						'compound'           => $item->is_compound(),
+						'tax_total'          => self::format_amount_for_response( $item->get_tax_total() ),
+						'shipping_tax_total' => self::format_amount_for_response( $item->get_shipping_tax_total() ),
+					);
+				},
+				$order->get_taxes()
+			)
+		);
+		return $data;
 	}
 }

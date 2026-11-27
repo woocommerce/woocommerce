@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+UCP routes now refuse an agent request for a protocol version the store does not support, with a version_unsupported error.

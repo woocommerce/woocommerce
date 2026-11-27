@@ -11,15 +11,15 @@
 		"log": "node log-to-codevitals.js"
 	},
 	"dependencies": {
-		"@types/node": "^24.1.0",
 		"@tsconfig/node16": "^1.0.4",
-		"@wordpress/env": "catalog:tooling",
-		"commander": "9.5.0",
 		"chalk": "^4.1.2",
+		"commander": "catalog:tooling",
 		"inquirer": "^7.1.0",
 		"simple-git": "catalog:tooling",
-		"ts-node": "^10.9.2",
-		"tslib": "^2.6.2"
+		"ts-node": "^10.9.2"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:types"
 	},
 	"engines": {
 		"node": "^24.15.0"

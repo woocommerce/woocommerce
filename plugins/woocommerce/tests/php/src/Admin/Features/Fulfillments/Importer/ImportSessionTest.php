@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Importer;
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsCsvImporter;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\ImportSession;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper;
 use Automattic\WooCommerce\Tests\Internal\TransientFiles\TransientFilesTestStreamWrapper;
@@ -580,5 +581,170 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 				$this->assertFileDoesNotExist( $staged, 'An abandoned file on a stream wrapper must be deleted like a local one' );
 			}
 		);
+	}
+
+	/**
+	 * Build a result in the shape FulfillmentsCsvImporter::import_chunk() returns.
+	 *
+	 * @param int  $consumed    Data rows the chunk processed.
+	 * @param int  $created     Rows created by the chunk.
+	 * @param int  $byte_offset Position the next chunk resumes from.
+	 * @param bool $eof         Whether the chunk reached the end of the file.
+	 * @return array<string, mixed>
+	 */
+	private function chunk_result( int $consumed, int $created, int $byte_offset, bool $eof = false ): array {
+		return array(
+			'counts'              => array(
+				FulfillmentsCsvImporter::STATUS_CREATED => $created,
+				FulfillmentsCsvImporter::STATUS_UPDATED => 1,
+				FulfillmentsCsvImporter::STATUS_SKIPPED => 0,
+				FulfillmentsCsvImporter::STATUS_FAILED  => 0,
+				'notified'                              => 0,
+			),
+			'rows'                => array(
+				array(
+					'row'     => $byte_offset,
+					'status'  => FulfillmentsCsvImporter::STATUS_CREATED,
+					'message' => 'Fulfillment created.',
+				),
+			),
+			'seen_tracking_pairs' => array( 'pair-' . $byte_offset => true ),
+			'consumed'            => $consumed,
+			'byte_offset'         => $byte_offset,
+			'next_record_number'  => $consumed + 2,
+			'eof'                 => $eof,
+		);
+	}
+
+	/**
+	 * @testdox record_chunk() advances processed, adds counts and stores the resume position and the last chunk's rows.
+	 */
+	public function test_record_chunk_persists_progress(): void {
+		$session = $this->make_session( 81 );
+
+		$this->assertTrue( $session->record_chunk( 0, $this->chunk_result( 10, 7, 400 ) ) );
+		$this->assertTrue( $session->record_chunk( 10, $this->chunk_result( 5, 3, 650, true ) ) );
+
+		$reloaded = ImportSession::load( 81, $session->token() );
+		$this->assertNotNull( $reloaded );
+		$this->assertSame( 15, $reloaded->processed(), 'processed is the chunk offset plus the rows it consumed' );
+		$this->assertSame( 650, $reloaded->byte_offset() );
+		$this->assertSame( 7, $reloaded->next_record_number() );
+		$this->assertSame( 10, $reloaded->counts()[ FulfillmentsCsvImporter::STATUS_CREATED ], 'Counts of each chunk are added up' );
+		$this->assertSame( 2, $reloaded->counts()[ FulfillmentsCsvImporter::STATUS_UPDATED ] );
+		$this->assertSame( array( 'pair-650' => true ), $reloaded->seen_tracking_pairs(), 'The dedupe set is replaced, not merged' );
+		$last = $reloaded->last_chunk();
+		$this->assertSame( 10, $last['offset'] );
+		$this->assertSame( $this->chunk_result( 5, 3, 650 )['rows'], $last['rows'], 'Only the last chunk keeps its rows, so a replay of it can return them' );
+		$this->assertTrue( $last['eof'] );
+	}
+
+	/**
+	 * @testdox record_chunk() refuses an offset other than the recorded progress, so a replayed chunk is never counted twice.
+	 */
+	public function test_record_chunk_refuses_an_offset_that_is_not_the_recorded_progress(): void {
+		$session = $this->make_session( 82 );
+		$this->assertNull( $session->last_chunk() );
+		$session->record_chunk( 0, $this->chunk_result( 10, 7, 400 ) );
+
+		$this->assertFalse( $session->record_chunk( 0, $this->chunk_result( 10, 7, 400 ) ), 'A replayed offset must be refused' );
+		$this->assertFalse( $session->record_chunk( 20, $this->chunk_result( 10, 7, 800 ) ), 'An offset ahead of the progress must be refused' );
+
+		$reloaded = ImportSession::load( 82, $session->token() );
+		$this->assertSame( 10, $reloaded->processed() );
+		$this->assertSame( 7, $reloaded->counts()[ FulfillmentsCsvImporter::STATUS_CREATED ] );
+		$this->assertSame( 400, $reloaded->byte_offset() );
+	}
+
+	/**
+	 * @testdox record_chunk() refuses an error result, a stale copy of the session, a deleted session and a lost write.
+	 */
+	public function test_record_chunk_refuses_what_it_cannot_store_safely(): void {
+		$session = $this->make_session( 84 );
+		$stale   = ImportSession::load( 84, $session->token() );
+
+		$this->assertFalse( $session->record_chunk( 0, array( 'error' => array( 'code' => 'file_not_readable' ) ) ), 'An error result is refused' );
+		$this->assertTrue( $session->record_chunk( 0, $this->chunk_result( 10, 7, 400 ) ) );
+		$this->assertFalse( $stale->record_chunk( 0, $this->chunk_result( 10, 3, 999 ) ), 'A copy loaded before the stored progress moved is refused' );
+		$this->assertSame( 400, ImportSession::load( 84, $session->token() )->byte_offset(), 'The stale copy cannot replace newer progress' );
+
+		add_filter(
+			'pre_update_option__transient_wc_fulfillment_import_84_' . $session->token(),
+			function ( $value, $old ) {
+				unset( $value );
+				return $old;
+			},
+			10,
+			2
+		);
+		$this->assertFalse( $session->record_chunk( 10, $this->chunk_result( 5, 1, 650 ) ), 'A lost write is reported' );
+		$this->assertSame( 10, $session->processed(), 'A lost write does not advance the session in memory' );
+
+		$gone = $this->make_session( 85 );
+		$gone->delete();
+		$this->assertFalse( $gone->record_chunk( 0, $this->chunk_result( 5, 1, 650 ) ), 'A deleted session is refused' );
+		$this->assertNull( ImportSession::load( 85, $gone->token() ), 'A refused chunk does not bring the session back' );
+	}
+
+	/**
+	 * @testdox freeze_run_settings() stores the first mapping and options and keeps them.
+	 */
+	public function test_freeze_run_settings_keeps_the_first_settings(): void {
+		$mapping = array(
+			0 => 'order_number',
+			1 => 'tracking_number',
+			2 => 'shipment_provider',
+		);
+		$session = $this->make_session( 83 );
+
+		$this->assertTrue( $session->freeze_run_settings( $mapping, true, false ) );
+		$this->assertTrue( ImportSession::load( 83, $session->token() )->freeze_run_settings( array( 0 => 'tracking_number' ), false, true ) );
+
+		$reloaded = ImportSession::load( 83, $session->token() );
+		$this->assertSame( $mapping, $reloaded->frozen_mapping(), 'The first settings are stored and a second call keeps them' );
+		$this->assertTrue( $reloaded->notify_customer() );
+		$this->assertFalse( $reloaded->update_existing() );
+	}
+
+	/**
+	 * @testdox freeze_run_settings() rolls back a lost write, builds on a newer stored copy and refuses a deleted session.
+	 */
+	public function test_freeze_run_settings_writes_only_on_top_of_the_stored_session(): void {
+		$mapping = array( 0 => 'order_number' );
+		$session = $this->make_session( 86 );
+		$keep    = function ( $value, $old ) {
+			unset( $value );
+			return $old;
+		};
+		add_filter( 'pre_update_option__transient_wc_fulfillment_import_86_' . $session->token(), $keep, 10, 2 );
+		$this->assertFalse( $session->freeze_run_settings( $mapping, true, true ), 'A lost write is reported' );
+		remove_filter( 'pre_update_option__transient_wc_fulfillment_import_86_' . $session->token(), $keep, 10 );
+		$this->assertTrue( $session->freeze_run_settings( $mapping, true, true ) );
+		$this->assertSame( $mapping, ImportSession::load( 86, $session->token() )->frozen_mapping(), 'A retry stores the settings' );
+
+		$first  = $this->make_session( 87 );
+		$second = ImportSession::load( 87, $first->token() );
+		$first->freeze_run_settings( $mapping, true, true );
+		$first->record_chunk( 0, $this->chunk_result( 10, 7, 400 ) );
+		$this->assertTrue( $second->freeze_run_settings( array( 0 => 'tracking_number' ), false, false ) );
+		$reloaded = ImportSession::load( 87, $first->token() );
+		$this->assertSame( $mapping, $reloaded->frozen_mapping(), 'A stale copy does not replace the stored settings' );
+		$this->assertSame( 10, $reloaded->processed(), 'A stale copy does not rewind the stored progress' );
+		$this->assertSame( $mapping, $second->frozen_mapping(), 'The stale copy takes the stored settings' );
+
+		$early = $this->make_session( 89 );
+		$late  = ImportSession::load( 89, $early->token() );
+		$early->freeze_run_settings( $mapping, true, false );
+		$this->assertTrue( $late->record_chunk( 0, $this->chunk_result( 10, 7, 400 ) ) );
+		$reloaded = ImportSession::load( 89, $early->token() );
+		$this->assertSame( $mapping, $reloaded->frozen_mapping(), 'A chunk recorded by an older copy keeps the stored settings' );
+		$this->assertTrue( $reloaded->notify_customer() );
+		$this->assertFalse( $reloaded->update_existing() );
+		$this->assertSame( 10, $reloaded->processed() );
+
+		$gone = $this->make_session( 88 );
+		$gone->delete();
+		$this->assertFalse( $gone->freeze_run_settings( $mapping, true, true ), 'A deleted session is refused' );
+		$this->assertNull( ImportSession::load( 88, $gone->token() ) );
 	}
 }

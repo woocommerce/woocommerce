@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+In AI shopping health, a check that needs a product page says Not checked yet when the store has no product to check.

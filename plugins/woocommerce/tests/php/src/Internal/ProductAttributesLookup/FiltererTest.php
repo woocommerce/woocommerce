@@ -19,6 +19,23 @@ use Automattic\WooCommerce\Enums\ProductStatus;
  */
 class FiltererTest extends \WC_Unit_Test_Case {
 
+	private const FIXTURE_COLOR    = 'Filterer Color';
+	private const FIXTURE_FEATURES = 'Filterer Features';
+
+	/**
+	 * Attribute IDs owned by the shared fixture.
+	 *
+	 * @var int[]
+	 */
+	private static $fixture_attribute_ids = array();
+
+	/**
+	 * ID of the variable product shared by the non-variation attribute tests.
+	 *
+	 * @var int
+	 */
+	private static $fixture_product_id = 0;
+
 	/**
 	 * Product IDs owned by the current test.
 	 *
@@ -37,10 +54,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before all the tests in the class.
 	 */
-	public static function setUpBeforeClass(): void {
+	public static function wpSetUpBeforeClass(): void {
 		global $wpdb, $wp_post_types;
-
-		parent::setUpBeforeClass();
 
 		foreach ( wc_get_attribute_taxonomy_ids() as $attribute_name => $attribute_id ) {
 			$taxonomy_name = wc_attribute_taxonomy_name( wc_sanitize_taxonomy_name( $attribute_name ) );
@@ -74,10 +89,63 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			"
 		);
 
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_attributes_lookup" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_attributes_lookup" );
 
 		// This is required too for WC_Query to act on the main query.
 		$wp_post_types['product']->has_archive = true;
+
+		$color    = ProductHelper::create_attribute( self::FIXTURE_COLOR, array( 'Blue', 'Red' ) );
+		$features = ProductHelper::create_attribute( self::FIXTURE_FEATURES, array( 'Washable', 'Ironable', 'Elastic' ) );
+
+		self::$fixture_attribute_ids = array( $color['attribute_id'], $features['attribute_id'] );
+
+		$builder = new self();
+
+		self::$fixture_product_id = self::with_direct_product_attribute_lookup_updates(
+			static function () use ( $builder ): int {
+				$product = $builder->create_variable_product(
+					array(
+						'variation_attributes'     => array(
+							self::FIXTURE_COLOR => array( 'Blue', 'Red' ),
+						),
+						'non_variation_attributes' => array(
+							self::FIXTURE_FEATURES => array( 'Washable', 'Ironable' ),
+						),
+						'variations'               => array(
+							array(
+								'in_stock'            => true,
+								'defining_attributes' => array(
+									self::FIXTURE_COLOR => 'Blue',
+								),
+							),
+							array(
+								'in_stock'            => true,
+								'defining_attributes' => array(
+									self::FIXTURE_COLOR => 'Red',
+								),
+							),
+						),
+					)
+				);
+				return $product['id'];
+			}
+		);
+	}
+
+	/**
+	 * Remove the test-owned catalog and taxonomies after the class finishes.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		$product = wc_get_product( self::$fixture_product_id );
+		if ( $product ) {
+			$product->delete( true );
+		}
+		self::$fixture_product_id = 0;
+
+		foreach ( self::$fixture_attribute_ids as $attribute_id ) {
+			wc_delete_attribute( $attribute_id );
+		}
+		self::$fixture_attribute_ids = array();
 	}
 
 	/**
@@ -346,7 +414,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$main_product_in_stock = ! empty(
 				array_filter(
 					$data['variations'],
-					function( $variation ) {
+					function ( $variation ) {
 						return $variation['in_stock'];
 					}
 				)
@@ -609,7 +677,11 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		} finally {
 			remove_filter( 'woocommerce_get_filtered_term_product_counts_query', $scope_to_owned_products );
 		}
-		$this->assertEqualsCanonicalizing( $expected, $term_counts );
+		$this->assertCount( count( $expected ), $term_counts, 'Only the expected terms should be counted.' );
+		foreach ( $expected as $term_id => $count ) {
+			$this->assertArrayHasKey( $term_id, $term_counts, 'The expected term ID must be present.' );
+			$this->assertSame( $count, $term_counts[ $term_id ], 'The count must belong to the expected term ID.' );
+		}
 	}
 
 	/**
@@ -921,44 +993,18 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * @param bool   $using_lookup_table Are we using the lookup table?.
 	 */
 	private function base_test_filtering_variable_product_in_stock_for_non_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible, $using_lookup_table ) {
-		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
-		$this->create_product_attribute( 'Features', array( 'Washable', 'Ironable', 'Elastic' ) );
+		$this->product_ids = array( self::$fixture_product_id );
 
-		$product = $this->create_variable_product(
-			array(
-				'variation_attributes'     => array(
-					'Color' => array( 'Blue', 'Red' ),
-				),
-				'non_variation_attributes' => array(
-					'Features' => array( 'Washable', 'Ironable' ),
-				),
-				'variations'               => array(
-					array(
-						'in_stock'            => true,
-						'defining_attributes' => array(
-							'Color' => 'Blue',
-						),
-					),
-					array(
-						'in_stock'            => true,
-						'defining_attributes' => array(
-							'Color' => 'Red',
-						),
-					),
-				),
-			)
-		);
-
-		$filtered_product_ids = $this->do_product_request( array( 'Features' => $attributes ), array( 'Features' => $filter_type ) );
+		$filtered_product_ids = $this->do_product_request( array( self::FIXTURE_FEATURES => $attributes ), array( self::FIXTURE_FEATURES => $filter_type ) );
 
 		if ( $expected_to_be_visible ) {
-			$this->assertEquals( array( $product['id'] ), $filtered_product_ids );
+			$this->assertEquals( array( self::$fixture_product_id ), $filtered_product_ids );
 		} else {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 
 		$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
-		$this->assert_counters( 'Features', $expected_to_be_included_in_count ? array( 'Washable', 'Ironable' ) : array(), $filter_type );
+		$this->assert_counters( self::FIXTURE_FEATURES, $expected_to_be_included_in_count ? array( 'Washable', 'Ironable' ) : array(), $filter_type );
 	}
 
 	/**
@@ -1596,5 +1642,103 @@ class FiltererTest extends \WC_Unit_Test_Case {
 
 		$this->assert_counters( 'Color', $expected_to_be_visible ? array( 'Blue' ) : array() );
 		$this->assert_counters( 'Size', $expected_to_be_visible ? array( 'Medium' ) : array() );
+	}
+
+	/**
+	 * @testdox Counts respect OR selections on other attributes.
+	 *
+	 * @testWith ["or"]
+	 *           ["and"]
+	 *
+	 * @param string $query_type The query type of the widget being counted.
+	 */
+	public function test_counts_respect_other_or_attributes( string $query_type ): void {
+		$this->set_use_lookup_table( true );
+		$this->create_product_attribute( 'FacetColor', array( 'Red', 'Blue', 'Green' ) );
+		$this->create_product_attribute( 'FacetSize', array( 'Small', 'Large' ) );
+		$this->create_simple_product(
+			array(
+				'FacetColor' => array( 'Red' ),
+				'FacetSize'  => array( 'Small' ),
+			),
+			true
+		);
+		$this->create_simple_product(
+			array(
+				'FacetColor' => array( 'Blue' ),
+				'FacetSize'  => array( 'Small' ),
+			),
+			true
+		);
+		$this->create_simple_product(
+			array(
+				'FacetColor' => array( 'Green' ),
+				'FacetSize'  => array( 'Large' ),
+			),
+			true
+		);
+
+		$this->do_product_request( array( 'FacetSize' => array( 'Small' ) ), array( 'FacetSize' => 'or' ) );
+		$this->assert_counters( 'FacetColor', array( 'Red', 'Blue' ), $query_type );
+
+		\WC_Query::reset_chosen_attributes();
+		$this->do_product_request(
+			array(
+				'FacetSize'  => array( 'Small' ),
+				'FacetColor' => array( 'Red' ),
+			),
+			array(
+				'FacetSize'  => 'or',
+				'FacetColor' => 'or',
+			)
+		);
+		$this->assert_counters( 'FacetColor', 'or' === $query_type ? array( 'Red', 'Blue' ) : array( 'Red' ), $query_type );
+
+		unset( $_GET['filter_facetcolor'], $_GET['query_type_facetcolor'] );
+		\WC_Query::reset_chosen_attributes();
+		$this->do_product_request( array( 'FacetSize' => array( 'Large' ) ), array( 'FacetSize' => 'or' ) );
+		$this->assert_counters( 'FacetColor', array( 'Green' ), $query_type );
+	}
+
+	/**
+	 * @testdox Other OR selections use the selected variation's stock when counting products.
+	 *
+	 * @testWith [true, ["Blue"]]
+	 *           [false, ["Blue", "Green"]]
+	 *
+	 * @param bool     $hide_out_of_stock Whether to hide out-of-stock variations.
+	 * @param string[] $expected_colors Colors available after selecting Small.
+	 */
+	public function test_other_or_counts_respect_variation_stock( bool $hide_out_of_stock, array $expected_colors ): void {
+		$this->set_use_lookup_table( true );
+		$this->set_hide_out_of_stock_items( $hide_out_of_stock );
+		$this->create_product_attribute( 'FacetColor', array( 'Blue', 'Green' ) );
+		$this->create_product_attribute( 'FacetSize', array( 'Small', 'Medium', 'Large' ) );
+		$this->create_simple_product(
+			array(
+				'FacetColor' => array( 'Blue' ),
+				'FacetSize'  => array( 'Small' ),
+			),
+			true
+		);
+		$this->create_variable_product(
+			array(
+				'variation_attributes'     => array( 'FacetSize' => array( 'Small', 'Large' ) ),
+				'non_variation_attributes' => array( 'FacetColor' => array( 'Green' ) ),
+				'variations'               => array(
+					array(
+						'in_stock'            => false,
+						'defining_attributes' => array( 'FacetSize' => 'Small' ),
+					),
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array( 'FacetSize' => 'Large' ),
+					),
+				),
+			)
+		);
+
+		$this->do_product_request( array( 'FacetSize' => array( 'Small', 'Medium' ) ), array( 'FacetSize' => 'or' ) );
+		$this->assert_counters( 'FacetColor', $expected_colors, 'or' );
 	}
 }

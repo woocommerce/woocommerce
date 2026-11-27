@@ -3,10 +3,10 @@
  */
 import { render } from '@testing-library/react';
 import { useContext } from '@wordpress/element';
-import { useExperiment } from '@woocommerce/explat';
+import { useExperimentWithDefaultVariationName } from '@woocommerce/explat';
 
 jest.mock( '@woocommerce/explat', () => ( {
-	useExperiment: jest.fn(),
+	useExperimentWithDefaultVariationName: jest.fn(),
 } ) );
 
 /**
@@ -26,10 +26,9 @@ describe( 'MarketplaceContextProvider', () => {
 	const originalTracks = window.wcTracks;
 
 	beforeEach( () => {
-		( useExperiment as jest.Mock ).mockReturnValue( [
-			false,
-			{ variationName: 'treatment' },
-		] );
+		( useExperimentWithDefaultVariationName as jest.Mock ).mockReturnValue(
+			[ false, { variationName: 'treatment' } ]
+		);
 		global.fetch = jest.fn( () => new Promise( () => {} ) ) as jest.Mock;
 	} );
 

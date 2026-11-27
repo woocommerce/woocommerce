@@ -31,6 +31,18 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	use OrderLineItemValidationTrait;
 
 	/**
+	 * Maps each order line request argument to the order_item_type stored for it.
+	 *
+	 * @var array<string, string>
+	 */
+	protected const STORED_ITEM_TYPES = array(
+		'line_items'     => 'line_item',
+		'shipping_lines' => 'shipping',
+		'fee_lines'      => 'fee',
+		'coupon_lines'   => 'coupon',
+	);
+
+	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
@@ -708,7 +720,19 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$product = wc_get_product( $current_product_id );
 		}
 
-		if ( $product && $product !== $item->get_product() ) {
+		$current_product = $item->get_product();
+
+		if (
+			$product
+			&& ! $this->should_preserve_line_item_product(
+				$action,
+				$product,
+				$current_product_id,
+				$current_variation_id,
+				$restore_variation_id
+			)
+			&& $product !== $current_product
+		) {
 			$item->set_product( $product );
 			if ( $restore_variation_id ) {
 				try {
@@ -750,6 +774,44 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	}
 
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * Whether an update should preserve the line's recorded product details.
+	 *
+	 * @param string           $action               Create or update.
+	 * @param WC_Product|false $product              Product resolved from the request.
+	 * @param int              $current_product_id   Stored parent or simple product ID.
+	 * @param int              $current_variation_id Stored variation ID, or zero.
+	 * @param bool             $restore_variation_id Whether the request preserves the existing variation.
+	 * @return bool
+	 */
+	private function should_preserve_line_item_product(
+		$action,
+		$product,
+		$current_product_id,
+		$current_variation_id,
+		$restore_variation_id
+	) {
+		if ( 'update' !== $action || ! $product instanceof WC_Product ) {
+			return false;
+		}
+
+		// Leave deleted variations to the existing fallback handling.
+		if (
+			$current_variation_id
+			&& 'product_variation' !== get_post_type( $current_variation_id )
+		) {
+			return false;
+		}
+
+		if ( $restore_variation_id ) {
+			return true;
+		}
+
+		$current_id = $current_variation_id ? $current_variation_id : $current_product_id;
+
+		return $product->get_id() === $current_id;
+	}
 
 	/**
 	 * Create or update an order shipping method.
@@ -824,7 +886,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Wrapper method to create/update order items.
 	 * When updating, the item ID provided is checked to ensure it is associated
-	 * with the order.
+	 * with the order and it's of the correct type.
 	 *
 	 * @param WC_Order $order order
 	 * @param string $item_type
@@ -842,15 +904,18 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 		$method = 'prepare_' . $item_type;
 
-		// Verify provided line item ID is associated with order.
+		// Verify provided line item ID is associated with order and matches its stored type.
 		if ( 'update' === $action ) {
 			$result = $wpdb->get_row(
-				$wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d AND order_id = %d",
-				absint( $posted['id'] ),
-				absint( $order->get_id() )
-			) );
+				$wpdb->prepare(
+					"SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d AND order_id = %d AND order_item_type = %s",
+					absint( $posted['id'] ),
+					absint( $order->get_id() ),
+					static::STORED_ITEM_TYPES[ $item_type ] ?? $item_type
+				)
+			);
 			if ( is_null( $result ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID provided is not associated with order.', 'woocommerce' ), 400 );
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_item_id', esc_html__( 'Order item ID provided is not associated with order, or does not match the expected item type.', 'woocommerce' ), 400 );
 			}
 		}
 

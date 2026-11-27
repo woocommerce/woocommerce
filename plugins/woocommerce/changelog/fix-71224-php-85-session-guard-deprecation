@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid a PHP 8.5 deprecation when checking whether Store API session state changed during checkout.

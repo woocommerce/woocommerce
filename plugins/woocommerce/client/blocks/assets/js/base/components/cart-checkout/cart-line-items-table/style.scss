@@ -123,17 +123,43 @@ table.wc-block-cart-items {
 			@include font-small-locked;
 			text-align: right;
 			line-height: 1.4;
+
+			.wc-block-cart-item__total-skeleton {
+				display: inline-block;
+				vertical-align: middle;
+			}
 		}
 
-		&.is-disabled {
-			opacity: 0.5;
+		@include motion-dim(".is-disabled") {
 			pointer-events: none;
-			transition: opacity 200ms ease;
 		}
 	}
 
 	&.wc-block-mini-cart-items .wc-block-cart-item__save-for-later {
 		display: none;
+	}
+}
+
+// A removed row: a copy fades out in its place, then the rows below slide up and the space at the bottom of the table
+// closes. See `use-row-removal-motion.ts`.
+.wp-block-woocommerce-cart table.wc-block-cart-items {
+	> [data-wc-row-copy] {
+		@include motion-fade-out;
+
+		// The copy does not replay the entrance of the rows.
+		> tr {
+			animation: none;
+		}
+	}
+
+	&[data-wc-row-removal] {
+		@include motion-safe {
+			transition: motion-move((padding-bottom, margin-bottom), lg, balanced);
+		}
+
+		> tbody > tr {
+			@include motion-transition($state: opacity, $move: translate, $easing: balanced);
+		}
 	}
 }
 
@@ -258,5 +284,15 @@ table.wc-block-cart-items {
 				}
 			}
 		}
+	}
+}
+
+// Rows rise in, 50ms apart, the first time they show (`useListEntrance`). The cells animate, not the row, so the
+// movement works in table and grid layouts and does not override the row's dimmed opacity.
+.wp-block-woocommerce-cart [data-wc-list-entering] > .wc-block-cart-items__row {
+	@include motion-stagger-index;
+
+	> td {
+		@include motion-enter($delay: motion-stagger-delay());
 	}
 }

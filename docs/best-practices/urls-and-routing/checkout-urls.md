@@ -5,7 +5,7 @@ sidebar_label: Checkout URLs
 
 # Shareable Checkout URLs
 
-Custom checkout links automatically populate the cart with specific products and redirect customers straight to checkout with a unique session ID.
+Custom checkout links automatically populate the cart with specific products and redirect customers straight to checkout.
 
 The custom checkout link path is `/checkout-link/` and is not customizable.
 
@@ -28,6 +28,12 @@ The product identifier can be:
 - A numeric SKU prefixed with `sku=`, such as `sku=999999`. Without the prefix, a numeric identifier is treated as a product ID.
 
 Variation and cart item data use `key=value` pairs. Separate multiple pairs in the same field with semicolons. Variation data selects a variation, while cart item data passes additional values consumed by extensions or custom product types. The accepted cart item data depends on the extension handling the product.
+
+Cart item data in a checkout link comes from the shopper, not a trusted extension. Treat it as untrusted input, the same as any other external data.
+
+:::note
+For products sold individually, cart item data is dropped by default: since the shopper is in charge of this input, letting it vary would let a checkout link add more than one unit. An extension can restore it for a specific product with the `woocommerce_checkout_link_sold_individually_cart_item_data` filter, and restored data then behaves like any other item data. To keep both the data and the limit, add a check to the `woocommerce_add_cart_item_data` filter (it runs on every add to cart) that rejects the add if the cart already has a line for that product.
+:::
 
 For example:
 
@@ -74,4 +80,6 @@ In this link:
 
 ## Sessions
 
-Once the user is redirected to the checkout page, the cart is populated with the products and coupon code. The final URL includes a `session` parameter storing the ID of the session. Future changes to the checkout will be persisted in the session, enabling persistent and shareable carts.
+Once the user is redirected to the checkout page, the cart is populated with the products and coupon code. For guests, the final URL includes a `session` parameter so the cart is kept if they open the page in another browser, for example when leaving an app's built-in browser. The cart is copied without the shopper's address or contact details.
+
+To share a cart with other people, share the `/checkout-link/` URL. Each person who opens it gets their own cart with the same products and coupon.

@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Internal\Utilities;
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use WC_Order;
 use WP_Error, WP_User;
 
 /**
@@ -79,7 +80,11 @@ class Users {
 	 * @return bool
 	 */
 	public static function should_user_verify_order_email( $order_id, $supplied_email = null, $context = 'view' ) {
-		$order         = wc_get_order( $order_id );
+		$order = wc_get_order( $order_id );
+		if ( ! $order instanceof WC_Order ) {
+			return true;
+		}
+
 		$billing_email = $order->get_billing_email();
 		$customer_id   = $order->get_customer_id();
 
@@ -131,8 +136,23 @@ class Users {
 		$can_view_orders      = current_user_can( 'read_private_shop_orders' );
 		$session_email_match  = ! empty( $session_email ) && 0 === strcasecmp( $session_email, $billing_email );
 		$supplied_email_match = ! empty( $supplied_email ) && 0 === strcasecmp( $supplied_email, $billing_email );
+		$verified_payment     = false;
+		$payment_email_hash   = '';
 
-		$email_verification_required = ! $session_email_match && ! $supplied_email_match && ! $can_view_orders;
+		if ( 'order-pay' === $context && ! $customer_id && $session instanceof \WC_Session ) {
+			$payment_email_data = wp_json_encode( array( get_current_blog_id(), $order->get_id(), $order->get_order_key(), strtolower( $billing_email ), $session->get_customer_id() ) );
+			if ( is_string( $payment_email_data ) ) {
+				$payment_email_hash = hash( 'sha256', $payment_email_data );
+				$verification       = $session->get( 'order_pay_email_verification' );
+				$verified_payment   = is_array( $verification )
+					&& is_string( $verification['hash'] ?? null )
+					&& is_int( $verification['expires'] ?? null )
+					&& $verification['expires'] > time()
+					&& hash_equals( $payment_email_hash, $verification['hash'] );
+			}
+		}
+
+		$email_verification_required = ! $session_email_match && ! $supplied_email_match && ! $can_view_orders && ! $verified_payment;
 
 		/**
 		 * Provides an opportunity to override the (potential) requirement for shoppers to verify their email address
@@ -148,7 +168,20 @@ class Users {
 		 * @param WC_Order $order                       The relevant order.
 		 * @param string   $context                     The context under which we are performing this check.
 		 */
-		return (bool) apply_filters( 'woocommerce_order_email_verification_required', $email_verification_required, $order, $context );
+		$email_verification_required = (bool) apply_filters( 'woocommerce_order_email_verification_required', $email_verification_required, $order, $context );
+
+		// The email challenge and payment form are separate requests. Remember only an explicitly verified guest email.
+		if ( ! $email_verification_required && $supplied_email_match && '' !== $payment_email_hash ) {
+			$session->set(
+				'order_pay_email_verification',
+				array(
+					'hash'    => $payment_email_hash,
+					'expires' => time() + HOUR_IN_SECONDS,
+				)
+			);
+		}
+
+		return $email_verification_required;
 	}
 
 	/**

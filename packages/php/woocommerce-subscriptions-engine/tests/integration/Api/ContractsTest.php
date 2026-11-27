@@ -1225,28 +1225,43 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The owner matches exactly: a slug differing only in case reads as another extension.
+	 * @testdox A case variant of the owner slug is refused at the boundary and changes nothing.
 	 */
-	public function test_the_owner_match_is_case_sensitive(): void {
+	public function test_a_case_variant_owner_slug_is_refused(): void {
 		$id    = $this->contract_with_currency();
 		$upper = strtoupper( self::EXTENSION_SLUG );
-
-		$this->assertNull( Contracts::lock( $id, $upper, 'hold' ) );
-		$this->assertNull(
-			Contracts::update(
-				$id,
-				array(
-					'extension_slug' => $upper,
-					'billing_total'  => '9',
-				)
-			)
-		);
-		$this->assertNull( Contracts::update( $id, array( 'extension_slug' => $upper ) ), 'The fieldless path agrees.' );
 		Contracts::add_meta( $id, self::EXTENSION_SLUG, 'k', 'v' );
-		$this->assertFalse( Contracts::delete_meta( $id, $upper, 'k' ) );
+		$before = Contracts::get( $id );
+		$this->assertNotNull( $before );
+
+		$calls = array(
+			'lock'        => static function () use ( $id, $upper ): void {
+				Contracts::lock( $id, $upper, 'hold' );
+			},
+			'update'      => static function () use ( $id, $upper ): void {
+				Contracts::update(
+					$id,
+					array(
+						'extension_slug' => $upper,
+						'billing_total'  => '9',
+					)
+				);
+			},
+			'add_meta'    => static function () use ( $id, $upper ): void {
+				Contracts::add_meta( $id, $upper, 'k', 'theirs' );
+			},
+			'delete_meta' => static function () use ( $id, $upper ): void {
+				Contracts::delete_meta( $id, $upper, 'k' );
+			},
+		);
+		foreach ( $calls as $call ) {
+			$this->assert_validation_errors( $call, array( array( ValidationErrorCode::INVALID_PATTERN, 'extension_slug' ) ) );
+		}
+
+		$after = Contracts::get( $id );
+		$this->assertNotNull( $after );
+		$this->assertSame( $before->get_billing_total(), $after->get_billing_total() );
 		$this->assertSame( 'v', Contracts::get_meta( $id, 'k', true ), 'The case variant deletes nothing.' );
-		$this->expectException( InvalidArgumentException::class );
-		Contracts::add_meta( $id, $upper, 'k', 'v' );
 	}
 
 	/**
@@ -1564,7 +1579,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @param int $cycle_id    Cycle id.
 	 */
 	private function cycle( int $contract_id, int $cycle_id ): Cycle {
-		foreach ( ( new ContractRepository() )->find_cycle_history( $contract_id ) as $cycle ) {
+		foreach ( ( new ContractRepository() )->find_cycles( $contract_id ) as $cycle ) {
 			if ( $cycle->get_id() === $cycle_id ) {
 				return $cycle;
 			}
@@ -1880,16 +1895,16 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$id      = $this->contract_with_currency();
 		$created = $this->add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) );
 
-		$history = Contracts::get_cycles( $id );
+		$cycles = Contracts::get_cycles( $id );
 
-		$this->assertCount( 1, $history );
-		$this->assertEquals( $history[0], $created, 'The returned view matches a fresh read.' );
+		$this->assertCount( 1, $cycles );
+		$this->assertEquals( $cycles[0], $created, 'The returned view matches a fresh read.' );
 		$cycle_id = $created->get_id();
 		$this->assertGreaterThan( 0, $cycle_id );
-		$this->assertInstanceOf( CycleView::class, $history[0] );
-		$this->assertSame( $cycle_id, $history[0]->get_id() );
-		$this->assertSame( CycleStatus::BILLED, $history[0]->get_status() );
-		$this->assertSame( 77, $history[0]->get_order_id() );
+		$this->assertInstanceOf( CycleView::class, $cycles[0] );
+		$this->assertSame( $cycle_id, $cycles[0]->get_id() );
+		$this->assertSame( CycleStatus::BILLED, $cycles[0]->get_status() );
+		$this->assertSame( 77, $cycles[0]->get_order_id() );
 	}
 
 	/**
@@ -2734,13 +2749,14 @@ class ContractsTest extends EngineIntegrationTestCase {
 	/**
 	 * Seed a contract for a customer at a status, returning its id.
 	 *
-	 * @param int    $customer_id Owning customer.
-	 * @param string $status      Contract status.
+	 * @param int    $customer_id    Owning customer.
+	 * @param string $status         Contract status.
+	 * @param string $extension_slug Owning extension.
 	 */
-	private function seed_for_customer( int $customer_id, string $status = ContractStatus::ACTIVE ): int {
+	private function seed_for_customer( int $customer_id, string $status = ContractStatus::ACTIVE, string $extension_slug = 'engine-tests' ): int {
 		$contract = Contract::create(
 			array(
-				'extension_slug'   => 'engine-tests',
+				'extension_slug'   => $extension_slug,
 				'customer_id'      => $customer_id,
 				'status'           => $status,
 				'currency'         => 'USD',
@@ -2889,11 +2905,11 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		$history = Contracts::get_cycles( $contract_id );
-		$this->assertCount( 1, $history );
-		$this->assertInstanceOf( CycleView::class, $history[0] );
-		$this->assertSame( 1, $history[0]->get_count() );
-		$this->assertSame( CycleStatus::BILLED, $history[0]->get_status() );
+		$cycles = Contracts::get_cycles( $contract_id );
+		$this->assertCount( 1, $cycles );
+		$this->assertInstanceOf( CycleView::class, $cycles[0] );
+		$this->assertSame( 1, $cycles[0]->get_count() );
+		$this->assertSame( CycleStatus::BILLED, $cycles[0]->get_status() );
 	}
 
 	/**
@@ -2934,6 +2950,84 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox list_for_customer filters by the owning extension.
+	 */
+	public function test_list_for_customer_filters_by_extension_slug(): void {
+		$mine    = $this->seed_for_customer( 46 );
+		$foreign = $this->seed_for_customer( 46, ContractStatus::ACTIVE, 'other-extension' );
+
+		$ids = static fn ( array $views ): array => array_map( static fn ( ContractView $c ): int => (int) $c->get_id(), $views );
+
+		$this->assertSame( array( $mine ), $ids( Contracts::list_for_customer( 46, 20, 0, array( 'extension_slug' => 'engine-tests' ) ) ) );
+		$this->assertSame( array( $foreign ), $ids( Contracts::list_for_customer( 46, 20, 0, array( 'extension_slug' => 'other-extension' ) ) ) );
+		$this->assertSame( array( $foreign, $mine ), $ids( Contracts::list_for_customer( 46 ) ), 'Without the key, every extension\'s contracts are listed.' );
+	}
+
+	/**
+	 * @testdox list_for_customer combines the status and owner filters.
+	 */
+	public function test_list_for_customer_combines_the_status_and_extension_slug_filters(): void {
+		$this->seed_for_customer( 49 );
+		$held = $this->seed_for_customer( 49, ContractStatus::ON_HOLD );
+		$this->seed_for_customer( 49, ContractStatus::ON_HOLD, 'other-extension' );
+
+		$views = Contracts::list_for_customer(
+			49,
+			20,
+			0,
+			array(
+				'status'         => ContractStatus::ON_HOLD,
+				'extension_slug' => 'engine-tests',
+			)
+		);
+
+		$this->assertCount( 1, $views );
+		$this->assertSame( $held, $views[0]->get_id() );
+	}
+
+	/**
+	 * @testdox list_for_customer refuses an invalid extension_slug.
+	 * @dataProvider provide_invalid_list_for_customer_slugs
+	 *
+	 * @param mixed  $extension_slug Invalid owner value.
+	 * @param string $code           Expected error code.
+	 */
+	public function test_list_for_customer_rejects_an_invalid_extension_slug( $extension_slug, string $code ): void {
+		$this->assert_validation_errors(
+			static function () use ( $extension_slug ): void {
+				Contracts::list_for_customer( 47, 20, 0, array( 'extension_slug' => $extension_slug ) );
+			},
+			array( array( $code, 'extension_slug' ) )
+		);
+	}
+
+	/**
+	 * @return array<string, array{0: mixed, 1: string}>
+	 */
+	public function provide_invalid_list_for_customer_slugs(): array {
+		return array(
+			'null'         => array( null, ValidationErrorCode::REQUIRED ),
+			'empty string' => array( '', ValidationErrorCode::REQUIRED ),
+			'integer'      => array( 5, ValidationErrorCode::INVALID_TYPE ),
+			'array'        => array( array( 'engine-tests' ), ValidationErrorCode::INVALID_TYPE ),
+			'any'          => array( 'any', ValidationErrorCode::INVALID_VALUE ),
+		);
+	}
+
+	/**
+	 * @testdox list_for_customer ignores an unknown key with a notice.
+	 */
+	public function test_list_for_customer_ignores_an_unknown_key_with_a_notice(): void {
+		$this->setExpectedIncorrectUsage( Contracts::class . '::list_for_customer' );
+		$id = $this->seed_for_customer( 48 );
+
+		$views = Contracts::list_for_customer( 48, 20, 0, array( 'owner' => 'nobody' ) );
+
+		$this->assertCount( 1, $views );
+		$this->assertSame( $id, $views[0]->get_id() );
+	}
+
+	/**
 	 * @testdox get_for_customer returns the contract when the customer owns it.
 	 */
 	public function test_get_for_customer_returns_the_owned_contract(): void {
@@ -2953,5 +3047,90 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		$this->assertNull( Contracts::get_for_customer( $id, 45 ), 'foreign-owned reads as not found' );
 		$this->assertNull( Contracts::get_for_customer( 987654, 44 ), 'unknown id reads as not found' );
+	}
+
+	/**
+	 * @testdox A facade read throws on a failed query instead of returning an empty value.
+	 * @dataProvider provide_failing_facade_reads
+	 *
+	 * @param string   $pattern The query to fail.
+	 * @param callable $read    Runs the facade read for the contract.
+	 * @param string   $message The expected message prefix, with {contract}, {customer} and {order} placeholders.
+	 */
+	public function test_facade_read_throws_on_a_failed_query( string $pattern, callable $read, string $message ): void {
+		$contract = $this->sign_up_contract( 46 );
+
+		$this->fail_next_query( $pattern );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage(
+			strtr(
+				$message,
+				array(
+					'{contract}' => (string) $contract->get_id(),
+					'{customer}' => (string) $contract->get_customer_id(),
+					'{order}'    => (string) $contract->get_origin_order_id(),
+				)
+			)
+		);
+
+		$read( $contract );
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: callable, 2: string}>
+	 */
+	public function provide_failing_facade_reads(): array {
+		$row_read = '/^\s*SELECT\s+\*,\s*\(\s*lock_token.*WHERE id = \d+\s*$/s';
+
+		return array(
+			'get'                  => array( $row_read, static fn ( Contract $contract ) => Contracts::get( (int) $contract->get_id() ), 'Failed to read contract {contract}:' ),
+			'get_for_customer'     => array( '/WHERE id = \d+ AND customer_id = \d+/', static fn ( Contract $contract ) => Contracts::get_for_customer( (int) $contract->get_id(), 46 ), 'Failed to read contract {contract}:' ),
+			'list'                 => array( '/^\s*SELECT\s+\*,\s*\(\s*lock_token.*LIMIT \d+ OFFSET/s', static fn () => Contracts::list(), 'Failed to read contracts:' ),
+			'count'                => array( '/^\s*SELECT COUNT\(\*\) FROM \S*subscription_contracts WHERE/', static fn () => Contracts::count(), 'Failed to count contracts:' ),
+			'count_by_status'      => array( '/SELECT status, COUNT\(\*\) AS total/', static fn () => Contracts::count_by_status(), 'Failed to count contracts by status:' ),
+			'item_counts'          => array( '/SELECT contract_id, COUNT\(\*\) AS total/', static fn ( Contract $contract ) => Contracts::item_counts( array( (int) $contract->get_id() ) ), 'Failed to count contract items:' ),
+			'list_for_customer'    => array( '/WHERE customer_id = \d+/', static fn () => Contracts::list_for_customer( 46 ), 'Failed to read the contracts of customer {customer}:' ),
+			'find_by_origin_order' => array( '/WHERE origin_order_id = \d+/', static fn ( Contract $contract ) => Contracts::find_by_origin_order( (int) $contract->get_origin_order_id() ), 'Failed to read the contracts of order {order}:' ),
+			'get_cycles'           => array( '/^\s*SELECT \* FROM \S*subscription_cycles WHERE contract_id = \d+ AND kind/', static fn ( Contract $contract ) => Contracts::get_cycles( (int) $contract->get_id() ), 'Failed to read the cycles of contract {contract}:' ),
+			'find_cycles_by_order' => array( '/^\s*SELECT \* FROM \S*subscription_cycles WHERE order_id = \d+/', static fn ( Contract $contract ) => Contracts::find_cycles_by_order( (int) $contract->get_origin_order_id() ), 'Failed to read the cycles of order {order}:' ),
+			'get_meta'             => array( '/^\s*SELECT\s+meta_key,\s*meta_value/i', static fn ( Contract $contract ) => Contracts::get_meta( (int) $contract->get_id(), 'note', true ), 'Failed to read contract meta for contract {contract}:' ),
+			'update'               => array(
+				$row_read,
+				static fn ( Contract $contract ) => Contracts::update(
+					(int) $contract->get_id(),
+					array(
+						'extension_slug' => (string) $contract->get_extension_slug(),
+						'billing_total'  => '29.99',
+					)
+				),
+				'Failed to read contract {contract}:',
+			),
+		);
+	}
+
+	/**
+	 * @testdox update writes nothing when its row read fails.
+	 */
+	public function test_update_writes_nothing_on_a_failed_row_read(): void {
+		$contract    = $this->sign_up_contract( 46 );
+		$contract_id = (int) $contract->get_id();
+
+		$this->fail_next_query( '/^\s*SELECT\s+\*,\s*\(\s*lock_token.*WHERE id = \d+\s*$/s' );
+		$thrown = null;
+		try {
+			Contracts::update(
+				$contract_id,
+				array(
+					'extension_slug' => (string) $contract->get_extension_slug(),
+					'billing_total'  => '29.99',
+				)
+			);
+		} catch ( \RuntimeException $e ) {
+			$thrown = $e;
+		}
+
+		$this->assertInstanceOf( \RuntimeException::class, $thrown, 'The update throws.' );
+		$this->assertSame( '19.99000000', $this->entity( $contract_id )->get_billing_total(), 'The refused update wrote nothing.' );
 	}
 }
