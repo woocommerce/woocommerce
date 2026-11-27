@@ -58,6 +58,25 @@ class Woocommerce_Analytics {
 	const PROXY_TRACKING_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_enabled';
 
 	/**
+	 * What `jetpack_woocommerce_analytics_event_props` callbacks add to every event, recorded daily for the
+	 * speed module, which answers before they register.
+	 *
+	 * @since 0.19.1
+	 *
+	 * @var string
+	 */
+	const PROXY_SPEED_MODULE_EVENT_PROPS_OPTION = 'woocommerce_analytics_speed_module_event_props';
+
+	/**
+	 * Daily cron hook that records the event props the speed module replays.
+	 *
+	 * @since 0.19.1
+	 *
+	 * @var string
+	 */
+	const PROXY_SPEED_MODULE_EVENT_PROPS_HOOK = 'woocommerce_analytics_record_speed_module_event_props';
+
+	/**
 	 * Whether proxy tracking has ever been enabled on this site.
 	 *
 	 * Keeps the REST route registered to return 403 to cached pages after the
@@ -120,6 +139,7 @@ class Woocommerce_Analytics {
 	public static function should_track_store() {
 		// Register before early returns so the speed module does not keep stale state.
 		add_action( 'init', array( __CLASS__, 'sync_proxy_tracking_state' ), 20 );
+		add_action( self::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK, array( __CLASS__, 'record_speed_module_event_props' ) );
 
 		// Ensure this is available, even with mu-plugins.
 		if ( ! function_exists( 'is_plugin_active' ) ) {
@@ -269,7 +289,7 @@ class Woocommerce_Analytics {
 	public static function sync_proxy_tracking_state() {
 		// One query covers both, so sites without these rows do not pay a query each.
 		if ( function_exists( 'wp_prime_option_caches' ) ) {
-			wp_prime_option_caches( array( self::PROXY_TRACKING_ENABLED_OPTION, self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
+			wp_prime_option_caches( array( self::PROXY_TRACKING_ENABLED_OPTION, self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, self::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION ) );
 		}
 
 		// A leftover MU-plugin keeps answering while this is yes, even after proxy tracking is turned off.
@@ -282,6 +302,8 @@ class Woocommerce_Analytics {
 		if ( $enabled && 'yes' !== get_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION ) ) {
 			update_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION, 'yes' );
 		}
+
+		self::schedule_speed_module_event_props( $enabled );
 
 		$value   = $enabled ? 'yes' : 'no';
 		$current = get_option( self::PROXY_TRACKING_ENABLED_OPTION );
@@ -299,6 +321,83 @@ class Woocommerce_Analytics {
 	}
 
 	/**
+	 * Keep the daily record of the speed module's event props scheduled while proxy tracking is on.
+	 *
+	 * @since 0.19.1
+	 *
+	 * @param bool $proxy_tracking_enabled Whether proxy tracking is on.
+	 * @return void
+	 */
+	private static function schedule_speed_module_event_props( $proxy_tracking_enabled ) {
+		$next = wp_next_scheduled( self::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK );
+
+		if ( $proxy_tracking_enabled ) {
+			if ( false === $next ) {
+				wp_schedule_event( time(), 'daily', self::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK );
+			}
+			return;
+		}
+
+		if ( false !== $next ) {
+			wp_clear_scheduled_hook( self::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK );
+		}
+
+		if ( false !== get_option( self::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION ) ) {
+			delete_option( self::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION );
+		}
+	}
+
+	/**
+	 * Record what `jetpack_woocommerce_analytics_event_props` callbacks add to every event, for the speed module.
+	 *
+	 * Runs from cron, with no visitor or request behind it, so a value that depends on either is not
+	 * replayed onto other visitors' events. Only scalar properties within the client bounds are kept.
+	 *
+	 * @since 0.19.1
+	 *
+	 * @return void
+	 */
+	public static function record_speed_module_event_props() {
+		// Anywhere else would record whichever visitor's request ran it.
+		if ( ! wp_doing_cron() && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			return;
+		}
+
+		$props = array();
+
+		if ( 'yes' === get_option( self::PROXY_TRACKING_ENABLED_OPTION ) ) {
+			// ALTERNATE_WP_CRON runs cron inside a visitor's request, so drop the user it may carry.
+			$user_id = get_current_user_id();
+			wp_set_current_user( 0 );
+
+			try {
+				$base = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::get_page_common_properties();
+
+				/** This filter is documented in src/class-wc-analytics-tracking.php */
+				$filtered = apply_filters( 'jetpack_woocommerce_analytics_event_props', $base, '', true );
+			} finally {
+				wp_set_current_user( $user_id );
+			}
+
+			// Sanitizing strips the common properties, which are all reserved, and bounds what is left.
+			$props = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::sanitize_client_properties(
+				array_filter( is_array( $filtered ) ? $filtered : array(), 'is_scalar' )
+			);
+		}
+
+		if ( get_option( self::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION, array() ) === $props ) {
+			return;
+		}
+
+		if ( array() === $props ) {
+			delete_option( self::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION );
+			return;
+		}
+
+		update_option( self::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION, $props );
+	}
+
+	/**
 	 * Forget that proxy tracking was enabled, so the REST route is unregistered.
 	 *
 	 * Separate from removing a leftover MU-plugin, because cached pages may still post to the route.
@@ -311,6 +410,8 @@ class Woocommerce_Analytics {
 		delete_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION );
 		delete_option( self::PROXY_TRACKING_ENABLED_OPTION );
 		delete_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
+		delete_option( self::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION );
+		wp_clear_scheduled_hook( self::PROXY_SPEED_MODULE_EVENT_PROPS_HOOK );
 	}
 
 	/**

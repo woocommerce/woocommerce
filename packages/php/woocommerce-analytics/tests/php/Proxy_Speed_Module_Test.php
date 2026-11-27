@@ -48,7 +48,9 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	 * Restore the request globals.
 	 */
 	public function tear_down(): void {
-		unset( $_COOKIE['wp_consent_statistics'], $_COOKIE['custom_statistics'] );
+		unset( $_COOKIE['wp_consent_statistics'], $_COOKIE['custom_statistics'], $_COOKIE['tk_ai'] );
+		remove_all_filters( 'jetpack_woocommerce_analytics_event_props' );
+		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION );
 		$_SERVER               = $this->previous_server;
 		$GLOBALS['wp_actions'] = $this->previous_wp_actions;
 		remove_action( 'muplugins_loaded', array( Proxy_Speed_Module::class, 'maybe_serve' ) );
@@ -351,6 +353,25 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 		if ( 'loaded' === $stage ) {
 			$GLOBALS['wp_actions']['plugins_loaded'] = 1;
 		}
+	}
+
+	/**
+	 * Callbacks on the event props filter have not registered here, so what they added at the last init is replayed.
+	 */
+	public function test_replays_the_recorded_event_props_over_the_client_value(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION, array( 'host' => 'ecommplan' ) );
+		$method = new \ReflectionMethod( Proxy_Speed_Module::class, 'handle_events' );
+		$method->setAccessible( true );
+
+		$method->invoke( null, '{"event_name":"product_view","properties":{"host":"forged"}}' );
+
+		$queue = ( new \ReflectionClass( WC_Analytics_Tracking::class ) )->getProperty( 'pixel_batch_queue' );
+		$queue->setAccessible( true );
+		$pixels = $queue->getValue();
+		$this->assertCount( 1, $pixels );
+		parse_str( (string) wp_parse_url( $pixels[0], PHP_URL_QUERY ), $props );
+		$this->assertSame( 'ecommplan', $props['host'] ?? null );
 	}
 
 	/**

@@ -307,7 +307,7 @@ if ( class_exists( \Automattic\Woocommerce_Analytics\Proxy_Speed_Module::class )
 
 Called from an MU-plugin, it serves on `muplugins_loaded`, when a `wp_consent_cookie_prefix` filter from any MU-plugin is already registered. Called from a plugin's main file, it serves at once, so it also sees that filter from the plugins that load before it, but not from those after. A call after `plugins_loaded` is refused with a `_doing_it_wrong()` notice.
 
-The module serves only while proxy tracking was on at the last `init`, and otherwise leaves the request to the REST route. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route too, which applies the consent check.
+The module serves only while proxy tracking was on at the last `init`, and otherwise leaves the request to the REST route. Callbacks on `jetpack_woocommerce_analytics_event_props` have not registered when it serves, so it replays the scalar properties they add, recorded by a daily `woocommerce_analytics_record_speed_module_event_props` cron run with no user logged in. With `ALTERNATE_WP_CRON`, that run happens inside a visitor's request, whose request data a callback could still read. A property that depends on the event, the visitor or the request only reaches events the REST route records. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route too, which applies the consent check.
 
 `woocommerce_analytics_auto_install_proxy_speed_module` is deprecated and has no effect.
 

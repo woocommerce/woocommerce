@@ -167,6 +167,17 @@ class Proxy_Speed_Module {
 			return self::error_response( 'Invalid JSON' );
 		}
 
+		// Callbacks on this filter have not registered yet, so replay what they added at the last `init`.
+		$recorded = get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION );
+		if ( is_array( $recorded ) && array() !== $recorded ) {
+			add_filter(
+				'jetpack_woocommerce_analytics_event_props',
+				static function ( $props ) use ( $recorded ) {
+					return is_array( $props ) ? array_merge( $props, $recorded ) : $props;
+				}
+			);
+		}
+
 		$data = WC_Analytics_Tracking::record_client_events( $events );
 
 		$data['is_proxy_speed_module'] = true;
