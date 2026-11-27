@@ -56,6 +56,15 @@ class AssetDataRegistryMock extends AssetDataRegistry {
 	}
 
 	/**
+	 * Exposes the preloaded responses the preloading middleware serves.
+	 *
+	 * @return array Preloaded responses by path.
+	 */
+	public function preloading_middleware_requests() {
+		return parent::preloading_middleware_requests();
+	}
+
+	/**
 	 * Loops through each registered lazy data callback and adds the returned
 	 * value to the data array.
 	 *

@@ -9,6 +9,7 @@ import {
 	select,
 } from '@wordpress/data';
 import { controls as dataControls } from '@wordpress/data-controls';
+import apiFetch from '@wordpress/api-fetch';
 import { getSetting } from '@woocommerce/settings';
 
 /**
@@ -30,7 +31,8 @@ import {
 	isAddingToCart,
 } from './persistence-layer';
 import { defaultCartState } from './default-state';
-import { getTriggerStoreSyncEvent } from './utils';
+import { getTriggerStoreSyncEvent, setTriggerStoreSyncEvent } from './utils';
+import { getPreloadedCartResponse } from './preloaded-cart';
 import type { QuantityChanges } from './notify-quantity-changes';
 import { isEditor } from '../utils';
 
@@ -140,5 +142,33 @@ const unsubscribeUpdatePaymentMethods = subscribe( async () => {
 		subscribe( debouncedUpdatePaymentMethods, store );
 	}
 }, store );
+
+// The Cart and Checkout blocks render before the getCartData resolver could read a preloaded cart through apiFetch, so
+// their first render would be the loading skeleton, which DelayedContentWithSkeleton then keeps for its minimum display
+// time. When the page preloaded the cart (wcSettings.preloadedCart, which the preloading middleware does not serve, so a
+// later cart request reads the server), receive it now, as the resolver would, so the first render shows the cart. This
+// runs after the subscriptions above, so they see the cart arrive.
+const preloadedCart = getPreloadedCartResponse();
+
+if ( preloadedCart && ! isEditor() ) {
+	// Started before the cart arrives: receiveCart notifies the subscribers above, which select getCartData, and a
+	// resolution not yet started would queue the resolver.
+	void wpDispatch( store ).startResolution( 'getCartData', [] );
+	try {
+		if (
+			// @ts-expect-error setCartHash exists but is not typed
+			typeof apiFetch.setCartHash === 'function'
+		) {
+			// @ts-expect-error setCartHash exists but is not typed
+			apiFetch.setCartHash( preloadedCart.headers );
+		}
+	} catch {
+		// The hash is stored in localStorage, which a browser may refuse to write; the cart is received regardless.
+	}
+	setTriggerStoreSyncEvent( false );
+	void wpDispatch( store ).receiveCart( preloadedCart.body );
+	setTriggerStoreSyncEvent( true );
+	void wpDispatch( store ).finishResolution( 'getCartData', [] );
+}
 
 export const CART_STORE_KEY = STORE_KEY;
