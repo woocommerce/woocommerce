@@ -116,11 +116,12 @@ class CouponUpdate extends ActionableAbility {
 	 * Return saved coupon fields.
 	 *
 	 * @param \WC_Coupon $subject Coupon.
-	 * @return array
+	 * @return array|\WP_Error
 	 */
-	protected function prepare_response( $subject ): array {
+	protected function prepare_response( $subject ) {
 		// Reload because saving can retain removed array entries in the in-memory object.
-		return array( 'coupon' => self::format_coupon_for_response( new \WC_Coupon( $subject ) ) );
+		$coupon = self::format_coupon_for_response( new \WC_Coupon( $subject ) );
+		return is_wp_error( $coupon ) ? $coupon : array( 'coupon' => $coupon );
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Coupon abilities: return and filter by the coupon fields that extensions add, with the extensible abilities feature on.

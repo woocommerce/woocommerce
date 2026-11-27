@@ -7,7 +7,11 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CouponsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate;
 
 /**
  * Tests coupon reads through the ability API.
@@ -621,5 +625,124 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertSame( '15', $result['coupon']['amount'] );
 		$this->assertSame( 'saved-real-coupon', get_post_field( 'post_title', $saved_id ) );
 		$this->assertSame( '15', get_post_meta( $saved_id, 'coupon_amount', true ) );
+	}
+
+	/**
+	 * @testdox Should read, write, validate, sync and filter extension fields on coupons while the extensible abilities feature is on.
+	 */
+	public function test_extension_fields_and_filters(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$saved = array();
+		foreach ( array( 'resources', 'fields', 'filters', 'validators', 'syncs' ) as $name ) {
+			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property->setAccessible( true );
+			$saved[ $name ] = $property->getValue();
+			$property->setValue( null, array() );
+		}
+		try {
+			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
+			add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
+			do_action( 'woocommerce_extensible_abilities_resources_init' );
+			$synced = array();
+			add_action(
+				'woocommerce_extensible_abilities_init',
+				static function () use ( &$synced ) {
+					ExtensibleAbilities::register_field(
+						array(
+							'resource'      => 'coupon',
+							'namespace'     => 'test-ext',
+							'field'         => 'credit',
+							'output_schema' => array( 'type' => 'integer' ),
+							'get_callback'  => static fn( \WC_Coupon $coupon ) => '' === $coupon->get_meta( 'test_credit' ) ? null : $coupon->get_meta( 'test_credit' ),
+							'input_schema'  => array( 'type' => 'integer' ),
+							'set_callback'  => static fn( \WC_Coupon $coupon, int $value ) => $coupon->update_meta_data( 'test_credit', $value ),
+						)
+					);
+					ExtensibleAbilities::register_validator(
+						array(
+							'resource'  => 'coupon',
+							'namespace' => 'test-ext',
+							'callback'  => static fn( \WC_Coupon $coupon ) => (int) $coupon->get_meta( 'test_credit' ) > 100 ? new \WP_Error( 'test_credit_too_high', 'Too much credit.' ) : null,
+						)
+					);
+					ExtensibleAbilities::register_sync(
+						array(
+							'resource'  => 'coupon',
+							'namespace' => 'test-ext',
+							'callback'  => static function ( array $objects ) use ( &$synced ) {
+								$synced[] = $objects[0]->get_id();
+							},
+						)
+					);
+					ExtensibleAbilities::register_query_filter(
+						array(
+							'resource'  => 'coupon',
+							'namespace' => 'test-ext',
+							'filter'    => 'has_credit',
+							'schema'    => array( 'type' => 'boolean' ),
+							'callback'  => static fn( bool $value ) => array(
+								'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+									array(
+										'key'     => 'test_credit',
+										'compare' => $value ? 'EXISTS' : 'NOT EXISTS',
+									),
+								),
+							),
+						)
+					);
+				}
+			);
+			do_action( 'woocommerce_extensible_abilities_init' );
+			$create = new CouponCreate( CouponCreate::ABILITY_NAME, CouponCreate::get_registration_args() );
+			$update = new CouponUpdate( CouponUpdate::ABILITY_NAME, CouponUpdate::get_registration_args() );
+			$query  = new \WP_Ability( CouponsQuery::get_name(), CouponsQuery::get_registration_args() );
+
+			$result = $create->execute(
+				array(
+					'code'       => 'credit-coupon',
+					'extensions' => array( 'test-ext' => array( 'credit' => 50 ) ),
+				)
+			);
+			$this->assertNotWPError( $result );
+			$id = $result['coupon']['id'];
+			$this->assertSame( 50, $result['coupon']['extensions']['test-ext']['credit'] );
+			$this->assertSame( array( $id ), $synced );
+
+			$refused = $update->execute(
+				array(
+					'id'         => $id,
+					'extensions' => array( 'test-ext' => array( 'credit' => 500 ) ),
+				)
+			);
+			$this->assertSame( 'test-ext:test_credit_too_high', $refused->get_error_code() );
+			$this->assertSame( '50', ( new \WC_Coupon( $id ) )->get_meta( 'test_credit' ), 'A refused update saves nothing.' );
+
+			$result = $update->execute(
+				array(
+					'id'         => $id,
+					'extensions' => array( 'test-ext' => array( 'credit' => 75 ) ),
+				)
+			);
+			$this->assertSame( 75, $result['coupon']['extensions']['test-ext']['credit'] );
+
+			$plain = new \WC_Coupon();
+			$plain->set_code( 'plain-coupon' );
+			$plain_id = $plain->save();
+			$filter   = static fn( bool $value, array $input = array() ) => $input + array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'has_credit' => $value ) ) ) );
+
+			$result = $query->execute( $filter( true ) );
+			$this->assertSame( array( $id ), array_column( $result['coupons'], 'id' ) );
+			$this->assertSame( 75, $result['coupons'][0]['extensions']['test-ext']['credit'] );
+			$this->assertSame( 'integer', $query->get_output_schema()['properties']['coupons']['items']['properties']['extensions']['properties']['test-ext']['properties']['credit']['type'] );
+			$this->assertSame( array( $plain_id ), array_column( $query->execute( $filter( false ) )['coupons'], 'id' ) );
+			$this->assertSame( array(), $query->execute( $filter( false, array( 'include' => array( $id ) ) ) )['coupons'], 'An extension filter applies together with include.' );
+		} finally {
+			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
+			foreach ( $saved as $name => $value ) {
+				$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+				$property->setAccessible( true );
+				$property->setValue( null, $value );
+			}
+		}
 	}
 }

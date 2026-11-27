@@ -93,10 +93,11 @@ class CouponCreate extends ActionableAbility {
 	 * Return saved coupon fields.
 	 *
 	 * @param \WC_Coupon $subject Coupon.
-	 * @return array
+	 * @return array|\WP_Error
 	 */
-	protected function prepare_response( $subject ): array {
-		return array( 'coupon' => self::format_coupon_for_response( new \WC_Coupon( $subject ) ) );
+	protected function prepare_response( $subject ) {
+		$coupon = self::format_coupon_for_response( new \WC_Coupon( $subject ) );
+		return is_wp_error( $coupon ) ? $coupon : array( 'coupon' => $coupon );
 	}
 
 	/**

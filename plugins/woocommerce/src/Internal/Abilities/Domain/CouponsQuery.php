@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\CouponAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -107,6 +108,22 @@ class CouponsQuery extends AbstractDomainAbility implements AbilityDefinition {
 				),
 			);
 		}
+
+		$extension_args = ExtensibleAbilities::get_query_args( 'coupon', $input );
+		if ( is_wp_error( $extension_args ) ) {
+			return $extension_args;
+		}
+		if ( isset( $args['post__in'] ) ) {
+			// A recursive merge would add the extension IDs to include, and WP_Query ignores post__not_in next to post__in.
+			$include = array_diff( $args['post__in'], $extension_args['post__not_in'] ?? array() );
+			if ( isset( $extension_args['post__in'] ) ) {
+				$include = array_intersect( $include, $extension_args['post__in'] );
+			}
+			$args['post__in'] = empty( $include ) ? array( 0 ) : array_values( $include );
+			unset( $extension_args['post__in'], $extension_args['post__not_in'] );
+		}
+		$args = array_merge_recursive( $args, $extension_args );
+
 		$args['orderby'] = array(
 			'date' => 'DESC',
 			'ID'   => 'DESC',
@@ -121,13 +138,24 @@ class CouponsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$total                  = (int) $count_query->found_posts;
 		}
 
+		$coupons = array_map(
+			static function ( $coupon_id ) {
+				return new \WC_Coupon( $coupon_id instanceof \WP_Post ? $coupon_id->ID : $coupon_id );
+			},
+			$query->posts
+		);
+		ExtensibleAbilities::prime( 'coupon', $coupons );
+		$formatted = array();
+		foreach ( $coupons as $coupon ) {
+			$data = self::format_coupon_for_response( $coupon );
+			if ( is_wp_error( $data ) ) {
+				return $data;
+			}
+			$formatted[] = $data;
+		}
+
 		return array(
-			'coupons'     => array_map(
-				static function ( $coupon_id ) {
-					return self::format_coupon_for_response( new \WC_Coupon( $coupon_id instanceof \WP_Post ? $coupon_id->ID : $coupon_id ) );
-				},
-				$query->posts
-			),
+			'coupons'     => $formatted,
 			'total'       => $total,
 			'total_pages' => (int) ceil( $total / $per_page ),
 			'page'        => $page,
@@ -153,7 +181,7 @@ class CouponsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
-		return array(
+		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
 				'include'       => array(
@@ -196,5 +224,6 @@ class CouponsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'additionalProperties' => false,
 			'default'              => array(),
 		);
+		return ExtensibleAbilities::add_query_filters_schema( $schema, 'coupon' );
 	}
 }
