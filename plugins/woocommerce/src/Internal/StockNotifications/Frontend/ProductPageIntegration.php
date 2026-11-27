@@ -245,7 +245,10 @@ class ProductPageIntegration {
 		if ( $is_visible ) {
 			$notification = $this->get_current_user_signups( array( $product->get_id() ) )[ $product->get_id() ] ?? null;
 			if ( $notification instanceof Notification ) {
-				$this->display_already_signed_up( $product, $notification );
+				// The sign-up request already shows its own notice.
+				if ( ! isset( $_POST['wc_bis_register'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+					$this->display_already_signed_up( $product, $notification );
+				}
 				return;
 			}
 
@@ -300,8 +303,7 @@ class ProductPageIntegration {
 	 * @return array<int, Notification>
 	 */
 	private function get_current_user_signups( array $product_ids ): array {
-		// The sign-up request already shows its own notice.
-		if ( ! $product_ids || ! is_user_logged_in() || ! self::is_personalization_enabled() || isset( $_POST['wc_bis_register'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( ! $product_ids || ! is_user_logged_in() || ! self::is_personalization_enabled() ) {
 			return array();
 		}
 

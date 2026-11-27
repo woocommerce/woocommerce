@@ -398,9 +398,9 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep the form on the sign-up request, which shows its own notice.
+	 * @testdox Should print neither the form nor a second notice on the sign-up request, which shows its own notice.
 	 */
-	public function test_form_is_rendered_on_the_signup_request(): void {
+	public function test_nothing_is_rendered_on_the_signup_request_after_joining(): void {
 		$product_id = $this->create_and_visit_out_of_stock_simple_product();
 		$this->log_in_customer_signed_up_for( $product_id );
 		$_POST['wc_bis_register'] = '1';
@@ -410,7 +410,8 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		$markup = ob_get_clean();
 		unset( $_POST['wc_bis_register'] );
 
-		$this->assertStringContainsString( 'wc_bis_form', $markup, 'The sign-up request should not add the "already joined" notice.' );
+		$this->assertStringNotContainsString( 'wc_bis_form', $markup, 'The form should not come back after joining.' );
+		$this->assertStringNotContainsString( self::ALREADY_JOINED, $markup, 'The sign-up request should not add the "already joined" notice.' );
 	}
 
 	/**
