@@ -38,6 +38,8 @@ interface EmailWooCommerceData {
 	subject_partial: string | null;
 	default_subject: string | null;
 	is_manual: boolean;
+	/** Whether the email goes to the customer. Older data may not include it. */
+	is_customer_email?: boolean;
 	enabled: boolean;
 	/** `null` means this email has no such setting. */
 	send_on_unpaid_timeout: boolean | null;
