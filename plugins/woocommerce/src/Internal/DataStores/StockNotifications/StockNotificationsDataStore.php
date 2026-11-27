@@ -21,54 +21,54 @@ defined( 'ABSPATH' ) || exit;
 class StockNotificationsDataStore implements \WC_Object_Data_Store_Interface {
 
 	/**
-	 * Notification props and the table columns that store them.
+	 * Table column to Notification prop mapping for the wc_stock_notifications table.
 	 *
-	 * @var array<string, array{name: string, format: string}>
+	 * @var array<string, array{type: string, name: string}>
 	 */
-	private const PROP_COLUMNS = array(
-		'product_id'          => array(
-			'name'   => 'product_id',
-			'format' => '%d',
+	protected $notification_column_mapping = array(
+		'product_id'            => array(
+			'type' => 'int',
+			'name' => 'product_id',
 		),
-		'user_id'             => array(
-			'name'   => 'user_id',
-			'format' => '%d',
+		'user_id'               => array(
+			'type' => 'int',
+			'name' => 'user_id',
 		),
-		'user_email'          => array(
-			'name'   => 'user_email',
-			'format' => '%s',
+		'user_email'            => array(
+			'type' => 'string',
+			'name' => 'user_email',
 		),
-		'status'              => array(
-			'name'   => 'status',
-			'format' => '%s',
+		'status'                => array(
+			'type' => 'string',
+			'name' => 'status',
 		),
-		'date_created'        => array(
-			'name'   => 'date_created_gmt',
-			'format' => '%s',
+		'date_created_gmt'      => array(
+			'type' => 'date',
+			'name' => 'date_created',
 		),
-		'date_modified'       => array(
-			'name'   => 'date_modified_gmt',
-			'format' => '%s',
+		'date_modified_gmt'     => array(
+			'type' => 'date',
+			'name' => 'date_modified',
 		),
-		'date_confirmed'      => array(
-			'name'   => 'date_confirmed_gmt',
-			'format' => '%s',
+		'date_confirmed_gmt'    => array(
+			'type' => 'date',
+			'name' => 'date_confirmed',
 		),
-		'date_last_attempt'   => array(
-			'name'   => 'date_last_attempt_gmt',
-			'format' => '%s',
+		'date_last_attempt_gmt' => array(
+			'type' => 'date',
+			'name' => 'date_last_attempt',
 		),
-		'date_notified'       => array(
-			'name'   => 'date_notified_gmt',
-			'format' => '%s',
+		'date_notified_gmt'     => array(
+			'type' => 'date',
+			'name' => 'date_notified',
 		),
-		'date_cancelled'      => array(
-			'name'   => 'date_cancelled_gmt',
-			'format' => '%s',
+		'date_cancelled_gmt'    => array(
+			'type' => 'date',
+			'name' => 'date_cancelled',
 		),
-		'cancellation_source' => array(
-			'name'   => 'cancellation_source',
-			'format' => '%s',
+		'cancellation_source'   => array(
+			'type' => 'string',
+			'name' => 'cancellation_source',
 		),
 	);
 
@@ -198,30 +198,33 @@ CREATE TABLE $meta_table_name (
 	}
 
 	/**
-	 * Get the table row for a notification's props, like HPOS `OrdersTableDataStore::get_db_row_from_order()`.
+	 * Get the table row for a notification's props, like `OrdersTableDataStore::get_db_row_from_order()`.
 	 *
 	 * @param Notification $notification The notification.
-	 * @param bool         $only_changes Whether to include only the props changed since the object was read.
-	 * @return array{data: array<string, mixed>, format: string[]} The row keyed by column, and its `$wpdb` formats.
+	 * @param bool         $only_changes Whether to consider only changes in the notification for generating the row.
+	 * @return array{data: array<string, mixed>, format: array<string, string>} The row keyed by column, and its `$wpdb` formats.
 	 */
-	private function get_db_row_from_notification( Notification $notification, bool $only_changes = false ): array {
-		$props = $only_changes ? $notification->get_changes() : array_merge( $notification->get_data(), $notification->get_changes() );
-		$row   = array(
-			'data'   => array(),
-			'format' => array(),
-		);
+	protected function get_db_row_from_notification( Notification $notification, bool $only_changes = false ): array {
+		$changes = $only_changes ? $notification->get_changes() : array_merge( $notification->get_data(), $notification->get_changes() );
 
-		foreach ( self::PROP_COLUMNS as $prop => $column ) {
-			if ( ! array_key_exists( $prop, $props ) ) {
+		$row        = array();
+		$row_format = array();
+
+		foreach ( $this->notification_column_mapping as $column => $details ) {
+			if ( ! array_key_exists( $details['name'], $changes ) ) {
 				continue;
 			}
 
-			$value                          = $props[ $prop ];
-			$row['data'][ $column['name'] ] = $value instanceof \WC_DateTime ? gmdate( 'Y-m-d H:i:s', $value->getTimestamp() ) : $value;
-			$row['format'][]                = $column['format'];
+			$value = $changes[ $details['name'] ];
+			// Keep NULL in nullable columns such as cancellation_source; the 'string' type would store ''.
+			$row[ $column ]        = null === $value ? null : $this->database_util->format_object_value_for_db( $value, $details['type'] );
+			$row_format[ $column ] = $this->database_util->get_wpdb_format_for_type( $details['type'] );
 		}
 
-		return $row;
+		return array(
+			'data'   => $row,
+			'format' => $row_format,
+		);
 	}
 
 	/**
