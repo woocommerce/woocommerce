@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Keep the data of extensible ability prime callbacks in Core; experimental feature, off by default.
+
