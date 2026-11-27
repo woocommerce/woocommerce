@@ -35,27 +35,31 @@ const mockJetpackAuthResult = {
 };
 const mockFailingRequests = new Set< string >();
 const mockStoreCalls: string[] = [];
+const mockStoreArgs: Array< [ string, unknown[] ] > = [];
 function mockWooStore( resolvedValues: Record< string, unknown > ) {
 	return new Proxy(
 		{},
 		{
-			get: ( _target, name: string ) => () => {
-				mockStoreCalls.push( name );
-				if (
-					! mockFailingRequests.has( name ) &&
-					! mockFailingRequests.has( '*' )
-				) {
-					return Promise.resolve( resolvedValues[ name ] );
-				}
-				// apiFetch rejects with a plain error object, not an Error.
-				const request = Promise.reject( {
-					code: 'rest_no_route',
-					message: `${ name } failed`,
-				} );
-				// The profiler fires some writes without awaiting them; awaiting callers still see the rejection.
-				request.catch( () => undefined );
-				return request;
-			},
+			get:
+				( _target, name: string ) =>
+				( ...args: unknown[] ) => {
+					mockStoreCalls.push( name );
+					mockStoreArgs.push( [ name, args ] );
+					if (
+						! mockFailingRequests.has( name ) &&
+						! mockFailingRequests.has( '*' )
+					) {
+						return Promise.resolve( resolvedValues[ name ] );
+					}
+					// apiFetch rejects with a plain error object, not an Error.
+					const request = Promise.reject( {
+						code: 'rest_no_route',
+						message: `${ name } failed`,
+					} );
+					// The profiler fires some writes without awaiting them; awaiting callers still see the rejection.
+					request.catch( () => undefined );
+					return request;
+				},
 		}
 	);
 }
@@ -147,6 +151,7 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 			.mockImplementation( () => undefined );
 		mockFailingRequests.clear();
 		mockStoreCalls.length = 0;
+		mockStoreArgs.length = 0;
 		mockOnboardingSetting.skipOnboardingFallbackUrl = FALLBACK_URL;
 		// @ts-expect-error Replace jsdom's location so navigation can be observed.
 		delete window.location;
@@ -262,5 +267,20 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 			'getJetpackAuthUrl',
 		] );
 		expectLoggedFailure( 'coreProfilerCompleted' );
+	} );
+
+	it( 'asks for a forced registration when the merchant leaves for Jetpack auth', async () => {
+		const actor = createActor(
+			coreProfilerMachineActors.exitToJetpackAuth
+		).start();
+
+		await expect( toPromise( actor ) ).resolves.toEqual(
+			mockJetpackAuthResult
+		);
+		// A forced query resolves fresh instead of reusing the prefetch, which the connection package may have held back.
+		expect( mockStoreArgs ).toContainEqual( [
+			'getJetpackAuthUrl',
+			[ expect.objectContaining( { force: true } ) ],
+		] );
 	} );
 } );

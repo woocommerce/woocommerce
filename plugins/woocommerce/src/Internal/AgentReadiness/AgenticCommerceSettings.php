@@ -143,7 +143,8 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 */
 	public static function connect_redirect(): string {
 		self::ensure_jetpack_activation_source();
-		$result    = JetpackConnection::get_authorization_url( add_query_arg( self::CONNECT_RESULT, 'connected', self::url() ), 'woocommerce-core-profiler' );
+		// Only a merchant's click reaches this, so registration is forced past the connection package's backoff.
+		$result    = JetpackConnection::get_authorization_url( add_query_arg( self::CONNECT_RESULT, 'connected', self::url() ), 'woocommerce-core-profiler', true );
 		$candidate = ! empty( $result['success'] ) && is_string( $result['url'] ?? null ) ? $result['url'] : '';
 		$url       = self::wordpress_com_https_url( $candidate );
 		return '' !== $url ? $url : add_query_arg( self::CONNECT_RESULT, 'error', self::url() );

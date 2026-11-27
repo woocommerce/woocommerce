@@ -203,6 +203,34 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Connecting forces WordPress.com registration past the connection package's backoff, since only a merchant's click reaches it.
+	 */
+	public function test_connect_redirect_forces_registration(): void {
+		$calls   = array();
+		$manager = $this->createMock( \Automattic\Jetpack\Connection\Manager::class );
+		$manager->method( 'is_connected' )->willReturn( false );
+		$manager->method( 'get_authorization_url' )->willReturn( 'https://jetpack.wordpress.com/jetpack.authorize/1/?client_id=1' );
+		$manager->method( 'try_registration' )->willReturnCallback(
+			static function ( ...$args ) use ( &$calls ) {
+				$calls[] = $args;
+				return true;
+			}
+		);
+		$property = new \ReflectionProperty( \Automattic\WooCommerce\Internal\Jetpack\JetpackConnection::class, 'manager' );
+		$property->setAccessible( true );
+		$property->setValue( null, $manager );
+
+		try {
+			AgenticCommerceSettings::connect_redirect();
+		} finally {
+			// JetpackConnection caches its manager in a static property that no base class resets.
+			$property->setValue( null, null );
+		}
+
+		$this->assertSame( array( array( true, true ) ), $calls, 'The connect click should register once, forced.' );
+	}
+
+	/**
 	 * @testdox An activation source Jetpack already stored is left as it is.
 	 */
 	public function test_connect_redirect_keeps_an_existing_activation_source(): void {

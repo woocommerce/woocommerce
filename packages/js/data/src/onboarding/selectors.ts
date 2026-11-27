@@ -108,6 +108,7 @@ export const getJetpackAuthUrl = (
 	query: {
 		redirectUrl: string;
 		from?: string;
+		force?: boolean;
 	}
 ): GetJetpackAuthUrlResponse => {
 	return state.jetpackAuthUrls[ query.redirectUrl ] || '';

@@ -365,9 +365,12 @@ const exitToJetpackAuth = fromPromise( async () => {
 	await dispatch( onboardingStore )
 		.coreProfilerCompleted()
 		.catch( logProfilerError );
+	// The merchant clicked through, so register again instead of reusing the prefetched result, which
+	// the connection package may have held back after an earlier failed attempt.
 	return await resolveSelect( onboardingStore ).getJetpackAuthUrl( {
 		redirectUrl: getAdminLink( 'admin.php?page=wc-admin' ),
 		from: 'woocommerce-core-profiler',
+		force: true,
 	} );
 } );
 

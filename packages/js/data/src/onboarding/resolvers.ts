@@ -171,6 +171,8 @@ export function* getProductTypes() {
 export function* getJetpackAuthUrl( query: {
 	redirectUrl: string;
 	from?: string;
+	// Only for a merchant's click: registration then skips the backoff after an earlier failure.
+	force?: boolean;
 } ) {
 	try {
 		let path =
@@ -180,6 +182,10 @@ export function* getJetpackAuthUrl( query: {
 
 		if ( query.from ) {
 			path += '&from=' + query.from;
+		}
+
+		if ( query.force ) {
+			path += '&force=true';
 		}
 
 		const results: GetJetpackAuthUrlResponse = yield apiFetch( {
