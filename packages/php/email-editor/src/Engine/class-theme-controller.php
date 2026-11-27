@@ -304,18 +304,6 @@ class Theme_Controller {
 	 * @return array
 	 */
 	public function get_variables_values_map(): array {
-		$variables_css = $this->get_theme()->get_stylesheet( array( 'variables' ) );
-		$map           = array();
-		// Regular expression to match CSS variable definitions.
-		$pattern = '/--(.*?):\s*(.*?);/';
-
-		if ( preg_match_all( $pattern, $variables_css, $matches, PREG_SET_ORDER ) ) {
-			foreach ( $matches as $match ) {
-				// '--' . $match[1] is the variable name, $match[2] is the variable value.
-				$map[ '--' . $match[1] ] = $match[2];
-			}
-		}
-
-		return $map;
+		return Preset_Variable_Resolver::get_variables_map( $this->get_theme() );
 	}
 }

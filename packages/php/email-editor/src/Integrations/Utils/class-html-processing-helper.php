@@ -59,6 +59,89 @@ class Html_Processing_Helper {
 	}
 
 	/**
+	 * Scale the image's saved height attribute to the width the email renders it at.
+	 *
+	 * Outlook renders with Word's engine, which sizes an image from its width and height
+	 * attributes and ignores the inlined `height: auto`. A saved height left beside a rewritten
+	 * width therefore stretches the image, so the height is scaled by the same factor.
+	 *
+	 * The height is left alone when either saved dimension is missing or non-numeric, since there
+	 * is then no ratio to scale by.
+	 *
+	 * @param \WP_HTML_Tag_Processor $html Processor positioned on the img tag.
+	 * @param float                  $new_width Width in pixels the image is rendered at.
+	 */
+	public static function scale_height_attribute( \WP_HTML_Tag_Processor $html, float $new_width ): void {
+		$saved_width  = $html->get_attribute( 'width' );
+		$saved_height = $html->get_attribute( 'height' );
+
+		if ( ! is_string( $saved_width ) || ! is_numeric( $saved_width ) || ! is_string( $saved_height ) || ! is_numeric( $saved_height ) ) {
+			return;
+		}
+
+		if ( (float) $saved_width <= 0 ) {
+			return;
+		}
+
+		$scaled_height = max( 1, (int) round( (float) $saved_height * ( $new_width / (float) $saved_width ) ) );
+		$html->set_attribute( 'height', esc_attr( (string) $scaled_height ) );
+	}
+
+	/**
+	 * Get the width an image URL asks for in its `w` query parameter, as image CDNs use.
+	 *
+	 * @param string $url Image URL.
+	 * @return int|null Width in pixels, or null when the URL has no usable `w`.
+	 */
+	public static function get_width_from_url_query( string $url ): ?int {
+		$query = wp_parse_url( $url, PHP_URL_QUERY );
+		if ( ! is_string( $query ) ) {
+			return null;
+		}
+
+		parse_str( $query, $query_params );
+		$width = $query_params['w'] ?? null;
+
+		return is_numeric( $width ) && $width > 0 ? (int) $width : null;
+	}
+
+	/**
+	 * Get the size of an image stored in the site's uploads directory.
+	 *
+	 * Only files inside the uploads directory are read. Other URLs return null.
+	 *
+	 * @param string $url Image URL.
+	 * @return array{0: int, 1: int}|null Width and height in pixels, or null when the file can't be read locally.
+	 */
+	public static function get_local_image_size( string $url ): ?array {
+		$upload_dir = wp_upload_dir();
+		$base_url   = trailingslashit( $upload_dir['baseurl'] );
+
+		if ( ! str_starts_with( $url, $base_url ) ) {
+			return null;
+		}
+
+		$base_dir   = realpath( $upload_dir['basedir'] );
+		$relative   = (string) strtok( substr( $url, strlen( $base_url ) ), '?#' );
+		$image_path = realpath( $upload_dir['basedir'] . '/' . $relative );
+
+		if ( false === $base_dir || false === $image_path ) {
+			return null;
+		}
+
+		// Make sure the resolved file stays inside the uploads directory.
+		$base_dir   = trailingslashit( wp_normalize_path( $base_dir ) );
+		$image_path = wp_normalize_path( $image_path );
+		if ( ! str_starts_with( $image_path, $base_dir ) ) {
+			return null;
+		}
+
+		$result = wp_getimagesize( $image_path );
+
+		return $result ? array( (int) $result[0], (int) $result[1] ) : null;
+	}
+
+	/**
 	 * Remove from an element the class names whose styles the renderer applies to the wrapping table cell.
 	 *
 	 * Background and border classes are resolved by the CSS inliner wherever they appear. The wrapping

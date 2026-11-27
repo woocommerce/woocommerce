@@ -109,6 +109,7 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			$modified_styles['spacing']['padding']['left']  = $block_padding_left;
 			$modified_styles['spacing']['padding']['right'] = $block_padding_right;
 
+			// Includes the block's own padding and border. Media_Text::get_horizontal_box_width() relies on that.
 			$block['email_attrs']['width'] = "{$width}px";
 			$block['innerBlocks']          = $this->calculate_widths( $block['innerBlocks'], $modified_layout, $modified_styles, $variables_map );
 			$parsed_blocks[ $key ]         = $block;

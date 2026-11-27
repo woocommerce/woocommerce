@@ -108,14 +108,7 @@ class Image extends Abstract_Block_Renderer {
 		$image_size = null;
 
 		if ( $image_url ) {
-			// Try to extract width from URL query parameter if it exists.
-			$parsed_url = wp_parse_url( $image_url );
-			if ( isset( $parsed_url['query'] ) ) {
-				parse_str( $parsed_url['query'], $query_params );
-				if ( isset( $query_params['w'] ) && is_numeric( $query_params['w'] ) && $query_params['w'] > 0 ) {
-					$image_size = (int) $query_params['w'];
-				}
-			}
+			$image_size = Html_Processing_Helper::get_width_from_url_query( $image_url );
 
 			// Next we check the attachment data if it has an ID.
 			if ( ! isset( $image_size ) ) {
@@ -145,7 +138,7 @@ class Image extends Abstract_Block_Renderer {
 
 			// Fall back to reading the local image file if we still don't have a size.
 			if ( ! isset( $image_size ) ) {
-				$image_size = $this->get_local_image_width( $image_url );
+				$image_size = Html_Processing_Helper::get_local_image_size( $image_url )[0] ?? null;
 			}
 		}
 
@@ -154,43 +147,6 @@ class Image extends Abstract_Block_Renderer {
 
 		$parsed_block['attrs']['width'] = "{$width}px";
 		return $parsed_block;
-	}
-
-	/**
-	 * Get the width of an image stored locally in the uploads directory.
-	 *
-	 * Only local files are measured. External URLs return null so the caller
-	 * can fall back to the max width.
-	 *
-	 * @param string $image_url Image URL.
-	 * @return int|null Image width in pixels, or null if it can't be determined locally.
-	 */
-	private function get_local_image_width( string $image_url ): ?int {
-		$upload_dir = wp_upload_dir();
-		$base_url   = trailingslashit( $upload_dir['baseurl'] );
-
-		// Only measure images served from the uploads directory.
-		if ( ! str_starts_with( $image_url, $base_url ) ) {
-			return null;
-		}
-
-		$base_dir   = realpath( $upload_dir['basedir'] );
-		$image_path = realpath( $upload_dir['basedir'] . '/' . substr( $image_url, strlen( $base_url ) ) );
-
-		if ( false === $base_dir || false === $image_path ) {
-			return null;
-		}
-
-		// Make sure the resolved file stays inside the uploads directory.
-		$base_dir   = trailingslashit( wp_normalize_path( $base_dir ) );
-		$image_path = wp_normalize_path( $image_path );
-		if ( ! str_starts_with( $image_path, $base_dir ) ) {
-			return null;
-		}
-
-		$result = wp_getimagesize( $image_path );
-
-		return $result ? (int) $result[0] : null;
 	}
 
 	/**
@@ -349,7 +305,7 @@ class Image extends Abstract_Block_Renderer {
 				$width       = Styles_Helper::parse_value( $block_width );
 				// A percentage can't be scaled against, and a fixed height is the author's choice.
 				if ( ! $has_fixed_height && strpos( $block_width, '%' ) === false ) {
-					$this->scale_height_attribute( $html, $width );
+					Html_Processing_Helper::scale_height_attribute( $html, $width );
 				}
 				/* @phpstan-ignore-next-line Wrong annotation for parameter in WP. */
 				$html->set_attribute( 'width', esc_attr( $width ) );
@@ -419,35 +375,6 @@ class Image extends Abstract_Block_Renderer {
 		$html->set_attribute( 'width', (string) $width );
 		$html->set_attribute( 'height', (string) $height );
 		return $html->get_updated_html();
-	}
-
-	/**
-	 * Scale the image's saved height attribute to the width the email renders it at.
-	 *
-	 * Outlook renders with Word's engine, which sizes an image from its width and height
-	 * attributes and ignores the inlined `height: auto`. A saved height left beside a rewritten
-	 * width therefore stretches the image, so the height is scaled by the same factor.
-	 *
-	 * The height is left alone when either saved dimension is missing or non-numeric, since there
-	 * is then no ratio to scale by.
-	 *
-	 * @param \WP_HTML_Tag_Processor $html Processor positioned on the img tag.
-	 * @param float                  $new_width Width in pixels the image is rendered at.
-	 */
-	private function scale_height_attribute( \WP_HTML_Tag_Processor $html, float $new_width ): void {
-		$saved_width  = $html->get_attribute( 'width' );
-		$saved_height = $html->get_attribute( 'height' );
-
-		if ( ! is_string( $saved_width ) || ! is_numeric( $saved_width ) || ! is_string( $saved_height ) || ! is_numeric( $saved_height ) ) {
-			return;
-		}
-
-		if ( (float) $saved_width <= 0 ) {
-			return;
-		}
-
-		$scaled_height = max( 1, (int) round( (float) $saved_height * ( $new_width / (float) $saved_width ) ) );
-		$html->set_attribute( 'height', esc_attr( (string) $scaled_height ) );
 	}
 
 	/**
