@@ -31,9 +31,7 @@
 
 :where(.wc-block-next-previous-buttons__button) {
 	cursor: pointer;
-	// Make sure the buttons are always on top of elements.
-	// Sale badge with align setting has z-index: 21.
-	z-index: 22;
+	z-index: 10;
 	pointer-events: all;
 	border: none;
 	width: 40px;
