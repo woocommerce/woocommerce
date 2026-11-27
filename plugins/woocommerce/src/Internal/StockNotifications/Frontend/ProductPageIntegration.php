@@ -292,7 +292,8 @@ class ProductPageIntegration {
 	 * @return array<int, Notification>
 	 */
 	private function get_current_user_signups( array $product_ids ): array {
-		if ( ! $product_ids || ! is_user_logged_in() || ! self::is_personalization_enabled() ) {
+		// The sign-up request already shows its own notice.
+		if ( ! $product_ids || ! is_user_logged_in() || ! self::is_personalization_enabled() || isset( $_POST['wc_bis_register'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			return array();
 		}
 

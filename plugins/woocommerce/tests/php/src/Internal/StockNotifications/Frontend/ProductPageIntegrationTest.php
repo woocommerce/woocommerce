@@ -393,6 +393,22 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the form on the sign-up request, which shows its own notice.
+	 */
+	public function test_form_is_rendered_on_the_signup_request(): void {
+		$product_id = $this->create_and_visit_out_of_stock_simple_product();
+		$this->log_in_customer_signed_up_for( $product_id );
+		$_POST['wc_bis_register'] = '1';
+
+		ob_start();
+		do_action( 'woocommerce_simple_add_to_cart' );
+		$markup = ob_get_clean();
+		unset( $_POST['wc_bis_register'] );
+
+		$this->assertStringContainsString( 'wc_bis_form', $markup, 'The sign-up request should not add the "already joined" notice.' );
+	}
+
+	/**
 	 * @testdox Should show the "already joined" notice from the classic hook to a customer signed up for a parent product when out of stock items are hidden.
 	 */
 	public function test_already_joined_notice_replaces_classic_form_for_parent_when_out_of_stock_items_are_hidden(): void {
