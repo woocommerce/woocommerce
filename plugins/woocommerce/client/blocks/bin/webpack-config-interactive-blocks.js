@@ -57,6 +57,10 @@ const entries = {
 	// (cross-sells, upsells). Conditionally enqueued.
 	'woocommerce/product-collection-cart-reference':
 		'./assets/js/blocks/product-collection/cart-reference-frontend.ts',
+	// Back in Stock form frontend module. Enqueued when the form is rendered
+	// after the Add to Cart + Options block of a variable product.
+	'woocommerce/back-in-stock-form':
+		'./assets/js/blocks/add-to-cart-with-options/back-in-stock-form/frontend.ts',
 	// Other
 	'@woocommerce/stores/woocommerce':
 		'./assets/js/base/stores/woocommerce/index.ts',

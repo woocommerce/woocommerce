@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  * ProductTopRated class.
  */
 class ProductTopRated extends AbstractProductGrid {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.

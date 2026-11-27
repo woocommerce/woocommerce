@@ -26,13 +26,38 @@
 			"isBanned": true
 		},
 		{
+			"label": "block-library pins @types/lodash 4.14.182 until its remaining lodash use is removed",
 			"dependencies": [
-				"@types/node"
+				"@types/lodash"
+			],
+			"packages": [
+				"@woocommerce/block-library"
+			],
+			"isIgnored": true
+		},
+		{
+			"label": "Shared type declarations",
+			"dependencyTypes": [
+				"prod",
+				"dev",
+				"pnpmOverrides"
+			],
+			"dependencies": [
+				"@types/debug",
+				"@types/jest",
+				"@types/lodash",
+				"@types/node",
+				"@types/prop-types",
+				"@types/qs",
+				"@types/react",
+				"@types/react-dom",
+				"@types/react-transition-group",
+				"@types/semver"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^24.1.0"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [
@@ -108,7 +133,8 @@
 			"label": "Shared build tooling",
 			"dependencyTypes": [
 				"prod",
-				"dev"
+				"dev",
+				"pnpmOverrides"
 			],
 			"dependencies": [
 				"@babel/cli",
@@ -121,7 +147,6 @@
 				"@commander-js/extra-typings",
 				"@jest/globals",
 				"@oclif/core",
-				"@types/jest",
 				"@wordpress/browserslist-config",
 				"@wordpress/env",
 				"@wordpress/postcss-plugins-preset",
@@ -146,6 +171,7 @@
 				"postcss-loader",
 				"prettier",
 				"rimraf",
+				"sass",
 				"sass-loader",
 				"simple-git",
 				"ts-jest",
