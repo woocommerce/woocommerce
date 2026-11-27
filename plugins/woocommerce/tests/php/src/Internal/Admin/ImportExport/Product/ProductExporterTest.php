@@ -268,6 +268,27 @@ class ProductExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep autoloaded options cached in every batch after the caches are flushed.
+	 */
+	public function test_run_keeps_autoloaded_options_cached_across_batches(): void {
+		for ( $i = 0; $i < 3; $i++ ) {
+			WC_Helper_Product::create_simple_product();
+		}
+
+		$cached_per_batch = array();
+
+		$this->sut->run(
+			$this->new_temp_path(),
+			array( 'limit' => 1 ),
+			function ( int $page ) use ( &$cached_per_batch ) {
+				$cached_per_batch[ $page ] = false !== wp_cache_get( 'alloptions', 'options' );
+			}
+		);
+
+		$this->assertSame( array_fill_keys( array( 1, 2, 3 ), true ), $cached_per_batch, 'Autoloaded options should be cached in every batch' );
+	}
+
+	/**
 	 * @testdox Should export and count the variations of a variable product when the export spans several batches.
 	 */
 	public function test_run_counts_variations_across_batches(): void {
