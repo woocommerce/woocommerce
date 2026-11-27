@@ -116,6 +116,27 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			$args['object_ids'] = array( $input['product'] );
 		}
 
+		$extension_args = ExtensibleAbilities::get_query_args( 'product_term', $input );
+		if ( is_wp_error( $extension_args ) ) {
+			return $extension_args;
+		}
+		if ( isset( $extension_args['meta_query'] ) ) {
+			$args['meta_query'] = $extension_args['meta_query']; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- The filters of extensions read term meta.
+		}
+		$excluded = $extension_args['post__not_in'] ?? array();
+		$include  = $args['include'] ?? $extension_args['post__in'] ?? null;
+		if ( isset( $args['include'], $extension_args['post__in'] ) ) {
+			$include = array_intersect( $include, $extension_args['post__in'] );
+		}
+		if ( null !== $include ) {
+			// WordPress ignores exclude next to include, and an empty include does not filter.
+			$include         = array_values( array_diff( $include, $excluded ) );
+			$args['include'] = empty( $include ) ? array( 0 ) : $include;
+		}
+		if ( ! empty( $excluded ) ) {
+			$args['exclude'] = array_merge( $args['exclude'] ?? array(), $excluded );
+		}
+
 		add_filter( 'terms_clauses', array( __CLASS__, 'add_id_tiebreak' ), PHP_INT_MAX );
 		$terms = get_terms( $args );
 		remove_filter( 'terms_clauses', array( __CLASS__, 'add_id_tiebreak' ), PHP_INT_MAX );
@@ -184,7 +205,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
-		return array(
+		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
 				'taxonomy'   => self::get_taxonomy_input_schema( __( 'Product taxonomy to query: product_cat, product_tag, product_brand, or the slug of a global attribute from product-attributes-query.', 'woocommerce' ) ),
@@ -254,5 +275,6 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			'required'             => array( 'taxonomy' ),
 			'additionalProperties' => false,
 		);
+		return ExtensibleAbilities::add_query_filters_schema( $schema, 'product_term' );
 	}
 }

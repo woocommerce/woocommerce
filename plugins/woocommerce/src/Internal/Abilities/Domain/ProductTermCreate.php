@@ -7,28 +7,24 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductTermAbilityTrait;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductTermWriteTrait;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Creates a product category, tag, brand or global attribute term.
  */
-class ProductTermCreate extends AbstractDomainAbility implements AbilityDefinition {
+class ProductTermCreate extends ActionableAbility {
 
 	use ProductTermAbilityTrait;
+	use ProductTermWriteTrait;
+	use DomainAbilityHelpers;
 
-	/**
-	 * Get the ability name.
-	 *
-	 * @since 11.4.0
-	 * @return string
-	 */
-	public static function get_name(): string {
-		return 'woocommerce/product-term-create';
-	}
+	/** Ability name. */
+	public const ABILITY_NAME = 'woocommerce/product-term-create';
 
 	/**
 	 * Get the ability registration arguments.
@@ -41,9 +37,8 @@ class ProductTermCreate extends AbstractDomainAbility implements AbilityDefiniti
 			'label'               => __( 'Create product term', 'woocommerce' ),
 			'description'         => __( 'Create a product category, tag, brand or a term of a global attribute, such as pa_color. Product writes then assign it by ID.', 'woocommerce' ),
 			'category'            => 'woocommerce',
-			'input_schema'        => self::get_input_schema(),
+			'input_schema'        => self::build_input_schema(),
 			'output_schema'       => self::get_entity_output_schema( 'term', self::get_written_term_output_schema() ),
-			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_create_term' ),
 			'meta'                => array(
 				'show_in_rest' => true,
@@ -72,49 +67,51 @@ class ProductTermCreate extends AbstractDomainAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * Create a product term.
+	 * Build the new term in memory.
 	 *
-	 * @since 11.4.0
 	 * @param array $input Ability input.
-	 * @return array|\WP_Error
+	 * @return \WP_Term|\WP_Error
 	 */
-	public static function execute( array $input ) {
-		$taxonomy = $input['taxonomy'];
-		if ( ! self::is_writable_product_taxonomy( $taxonomy ) ) {
-			return self::get_unknown_taxonomy_error( $taxonomy );
+	protected function load( array $input ) {
+		$this->term_args = array();
+		if ( ! self::is_writable_product_taxonomy( $input['taxonomy'] ) ) {
+			return self::get_unknown_taxonomy_error( $input['taxonomy'] );
 		}
 
+		return new \WP_Term(
+			(object) array(
+				'term_id'  => 0,
+				'taxonomy' => $input['taxonomy'],
+			)
+		);
+	}
+
+	/**
+	 * Set the term fields in memory.
+	 *
+	 * @param \WP_Term $subject New term.
+	 * @param array    $input   Ability input.
+	 * @return null|\WP_Error
+	 */
+	protected function change( $subject, array $input ) {
 		$name   = sanitize_text_field( $input['name'] );
 		$slug   = isset( $input['slug'] ) ? sanitize_title( $input['slug'] ) : null;
 		$parent = $input['parent'] ?? 0;
-		$error  = self::check_term_write( $taxonomy, $name, $slug, $parent );
+		$error  = self::check_term_write( $subject->taxonomy, $name, $slug, $parent );
 		if ( $error ) {
 			return $error;
 		}
 
 		$args = array(
+			'name'        => $name,
 			'parent'      => $parent,
 			'description' => wp_kses_post( $input['description'] ?? '' ),
 		);
 		if ( null !== $slug ) {
 			$args['slug'] = $slug;
 		}
-		$ids = wp_insert_term( wp_slash( $name ), $taxonomy, wp_slash( $args ) );
-		if ( is_wp_error( $ids ) ) {
-			return new \WP_Error( 'woocommerce_ability_product_term_create_failed', $ids->get_error_message(), array( 'status' => 500 ) );
-		}
-
-		$term = get_term( $ids['term_id'], $taxonomy );
-		if ( ! $term instanceof \WP_Term ) {
-			return new \WP_Error( 'woocommerce_ability_product_term_create_failed', __( 'The term was created but could not be read back.', 'woocommerce' ), array( 'status' => 500 ) );
-		}
-
-		$output = self::format_term( $term );
-		if ( is_wp_error( $output ) ) {
-			return ExtensibleAbilities::saved_write_error( $output, 'product_term', $term->term_id );
-		}
-
-		return array( 'term' => $output );
+		$this->stage_term_args( $subject, $args );
+		return null;
 	}
 
 	/**
@@ -122,7 +119,7 @@ class ProductTermCreate extends AbstractDomainAbility implements AbilityDefiniti
 	 *
 	 * @return array
 	 */
-	private static function get_input_schema(): array {
+	private static function build_input_schema(): array {
 		$properties                        = self::get_term_write_properties();
 		$properties['slug']['description'] = __( 'Defaults to one made from the name.', 'woocommerce' );
 

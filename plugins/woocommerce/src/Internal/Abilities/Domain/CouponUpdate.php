@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\WCDataSaveTrait;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\CouponAbilityTrait;
 
@@ -18,6 +19,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class CouponUpdate extends ActionableAbility {
 
+	use WCDataSaveTrait;
 	use CouponAbilityTrait;
 	use DomainAbilityHelpers;
 

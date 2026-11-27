@@ -44,9 +44,9 @@ class ExtensibleAbilities {
 	private static array $fields = array();
 
 	/**
-	 * Registered resources, keyed by resource name.
+	 * Registered resources, keyed by resource name. The value holds the arguments from `register_resource()`.
 	 *
-	 * @var array<string, bool>
+	 * @var array<string, array<string, mixed>>
 	 */
 	private static array $resources = array();
 
@@ -110,16 +110,28 @@ class ExtensibleAbilities {
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
-	 * Core registers `product`, `order` and `order_item` there. An
-	 * extension registers a resource that its own abilities format, and then calls `add_fields_to_object()`
-	 * and `add_fields_schema()` from those abilities, exactly as Core's abilities do.
+	 * Core registers `product`, `order`, `order_item`, `order_refund`, `product_term`, `product_review`, `customer`
+	 * and `coupon` there. An extension registers a resource that its own abilities format, and then calls
+	 * `add_fields_to_object()` and `add_fields_schema()` from those abilities, exactly as Core's abilities do.
 	 * Registering the same resource again does nothing.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @param string $resource_name Slug of the resource, such as `ticket`.
+	 * @param array  $args          {
+	 *     Arguments of the resource. Both callbacks are required.
+	 *
+	 *     @type callable $object_id_callback   Receives an object of the resource and returns its ID as an integer,
+	 *                                          or zero when the object is not saved yet. Core's `product` returns
+	 *                                          `get_id()` and its `product_term` returns the term ID.
+	 *     @type callable $object_type_callback Receives an object of the resource and returns its type as a string,
+	 *                                          which the `object_types` of a field are compared with. Core's `product`
+	 *                                          returns `get_type()`, its `product_term` the taxonomy, its `coupon` the
+	 *                                          discount type, its `customer` the user role and its `product_review`
+	 *                                          the comment type.
+	 * }
 	 */
-	public static function register_resource( string $resource_name ): void {
+	public static function register_resource( string $resource_name, array $args = array() ): void {
 		if ( did_action( 'woocommerce_extensible_abilities_resources_init' ) && ! doing_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
 			wc_doing_it_wrong( __METHOD__, 'Register a resource inside the woocommerce_extensible_abilities_resources_init action, before the fields are registered.', '11.3.0' );
 			return;
@@ -128,8 +140,14 @@ class ExtensibleAbilities {
 			wc_doing_it_wrong( __METHOD__, 'The resource name must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.', '11.3.0' );
 			return;
 		}
+		foreach ( array( 'object_id_callback', 'object_type_callback' ) as $callback ) {
+			if ( ! isset( $args[ $callback ] ) || ! is_callable( $args[ $callback ] ) ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%1$s" resource needs a callable "%2$s" argument.', $resource_name, $callback ), '11.5.0' );
+				return;
+			}
+		}
 
-		self::$resources[ $resource_name ] = true;
+		self::$resources[ $resource_name ] = self::$resources[ $resource_name ] ?? $args;
 	}
 
 	/**
@@ -140,10 +158,10 @@ class ExtensibleAbilities {
 	 * A field declares `get_callback` and `output_schema` to be readable, and `input_schema` to be writable.
 	 * A `set_callback` is optional on a writable field, and it is refused without `input_schema`.
 	 *
-	 * There are two kinds of writable field. A field kept on the object, such as a meta value, has a
+	 * There are two kinds of writable field. A field kept on a `WC_Data` object, such as a meta value, has a
 	 * `set_callback` that stages the value, and Core saves it with the object. A field kept elsewhere, such
-	 * as a row in a table of the extension, has no `set_callback`: a sync that register_sync() adds writes
-	 * the value from `$context['fields']`.
+	 * as a row in a table of the extension or the meta of a term, has no `set_callback`: a sync that
+	 * register_sync() adds writes the value from `$context['fields']`.
 	 *
 	 * @since 11.3.0
 	 *
@@ -164,14 +182,13 @@ class ExtensibleAbilities {
 	 *                                  which are the keywords with a nested schema that WordPress supports (see
 	 *                                  `rest_get_allowed_schema_keywords()`), and under `allOf`, which
 	 *                                  WooCommerce also reads, because some clients refuse it.
-	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
-	 *                                  object returns them, such as `simple` and `subscription` for a product or
-	 *                                  `line_item`, `shipping`, `fee` and `coupon` for an order item. The object
-	 *                                  must have a `get_type()` method.
-	 *                                  The abilities leave the field out of the other objects, and an ability
-	 *                                  that writes the resource refuses a write to them. Omit it for every type:
-	 *                                  an `order_item` field without it is then read on product, shipping, fee
-	 *                                  and coupon lines, so its `get_callback` must accept each of them.
+	 *     @type string[] $object_types Optional. The object types the field applies to, as the `object_type_callback` of
+	 *                                  the resource returns them, such as `simple` and `subscription` for a product,
+	 *                                  `line_item`, `shipping`, `fee` and `coupon` for an order item or `product_brand`
+	 *                                  for a term. The abilities leave the field out of the other objects, and an ability
+	 *                                  that writes the resource refuses a write to them. Omit it for every type: an
+	 *                                  `order_item` field without it is then read on product, shipping, fee and coupon
+	 *                                  lines, so its `get_callback` must accept each of them.
 	 *     @type callable $get_callback Optional. Receives the object and returns the value. A field without it
 	 *                                  is not in the output. Required with `output_schema`. Return null when the
 	 *                                  object has no value, and the field is left out with no error. Any other
@@ -372,8 +389,9 @@ class ExtensibleAbilities {
 	 *     Filter arguments.
 	 *
 	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query`,
-	 *                               `orders-query`, `customers-query` and `coupons-query` apply the filters of
-	 *                               `product`, `order`, `customer` and `coupon`. A `customer` filter returns only `include_ids`, which are
+	 *                               `orders-query`, `customers-query`, `coupons-query` and `product-terms-query` apply
+	 *                               the filters of `product`, `order`, `customer`, `coupon` and `product_term`. A `product_term`
+	 *                               `meta_query` reads term meta. A `customer` filter returns only `include_ids`, which are
 	 *                               user IDs, so it matches registered customers only. The list ability
 	 *                               of another resource must call `get_query_args()` and `add_query_filters_schema()` itself.
 	 *     @type string   $namespace Slug of the extension that owns the filter, such as `subscriptions`.
@@ -711,7 +729,7 @@ class ExtensibleAbilities {
 	 *
 	 *     @type string   $resource  Resource that an ActionableAbility saves, such as `product`.
 	 *     @type string   $namespace Slug of the extension that owns the sync, such as `subscriptions`.
-	 *     @type callable $callback  Receives `\WC_Data[] $saved` and `array $context`.
+	 *     @type callable $callback  Receives `object[] $saved` and `array $context`.
 	 *                               `$saved` is every saved object of the sync's own resource. The context
 	 *                               describes the whole call.
 	 *                               `$context['ability']` is the name of the ability, such as
@@ -997,23 +1015,53 @@ class ExtensibleAbilities {
 	 * @since 11.4.0
 	 *
 	 * @param array<string, mixed> $args    Field arguments from `register_field()`.
-	 * @param mixed                $subject The object. It must have a `get_type()` method.
+	 * @param mixed                $subject The object.
 	 * @return bool
 	 */
 	public static function field_applies_to( array $args, $subject ): bool {
-		return empty( $args['object_types'] ) || in_array( $subject->get_type(), $args['object_types'], true );
+		return empty( $args['object_types'] ) || in_array( self::get_object_type( $subject, $args['resource'] ), $args['object_types'], true );
 	}
 
 	/**
-	 * The type of an object, from its `get_type()` method.
+	 * The type of an object, from the `object_type_callback` of its resource.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param mixed $subject The object. It must have a `get_type()` method.
+	 * @param mixed  $subject       The object.
+	 * @param string $resource_name Resource of the object.
 	 * @return string
+	 * @throws \LogicException When the resource is not registered.
 	 */
-	public static function get_object_type( $subject ): string {
-		return $subject->get_type();
+	public static function get_object_type( $subject, string $resource_name ): string {
+		return call_user_func( self::get_registered_resource( $resource_name )['object_type_callback'], $subject );
+	}
+
+	/**
+	 * The ID of an object, from the `object_id_callback` of its resource.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param mixed  $subject       The object.
+	 * @param string $resource_name Resource of the object.
+	 * @return int The ID, or zero when the object is not saved yet.
+	 * @throws \LogicException When the resource is not registered.
+	 */
+	public static function get_object_id( $subject, string $resource_name ): int {
+		return call_user_func( self::get_registered_resource( $resource_name )['object_id_callback'], $subject );
+	}
+
+	/**
+	 * The arguments of a registered resource.
+	 *
+	 * @param string $resource_name Resource.
+	 * @return array<string, mixed>
+	 * @throws \LogicException When the resource is not registered.
+	 */
+	private static function get_registered_resource( string $resource_name ): array {
+		if ( ! isset( self::$resources[ $resource_name ] ) ) {
+			throw new \LogicException( esc_html( sprintf( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() inside the woocommerce_extensible_abilities_resources_init action.', $resource_name ) ) );
+		}
+		return self::$resources[ $resource_name ];
 	}
 
 	/**

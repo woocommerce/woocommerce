@@ -9,11 +9,14 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\WCDataSaveTrait;
 
 /**
  * An extension's write ability that renames a product.
  */
 class TestProductRenameAbility extends ActionableAbility {
+
+	use WCDataSaveTrait;
 
 	/**
 	 * Resource that the ability changes.

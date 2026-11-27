@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\WCDataSaveTrait;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
@@ -22,6 +23,9 @@ defined( 'ABSPATH' ) || exit;
  */
 class OrderUpdateStatus extends ActionableAbility {
 
+	use WCDataSaveTrait {
+		save as private save_data;
+	}
 	use DomainAbilityHelpers;
 	use OrderAbilityTrait;
 
@@ -133,7 +137,7 @@ class OrderUpdateStatus extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	public function save( $subject ) {
-		return ExtensibleAbilities::is_enabled() ? parent::save( $subject ) : null;
+		return ExtensibleAbilities::is_enabled() ? $this->save_data( $subject ) : null;
 	}
 
 	/**

@@ -20,7 +20,8 @@ trait ExtensibleAbilitiesTestTrait {
 	private ?array $extensible_abilities_before = null;
 
 	/**
-	 * Empty the registries of ExtensibleAbilities, so the test starts without resources and fields.
+	 * Empty the registries of ExtensibleAbilities, so the test starts with Core's resources and without fields.
+	 * The resources are also registered with the feature off, because a write reads the ID of an object from its resource.
 	 */
 	private function isolate_extensible_abilities(): void {
 		$registries = array();
@@ -31,6 +32,10 @@ trait ExtensibleAbilitiesTestTrait {
 			$property->setValue( null, array() );
 		}
 		$this->extensible_abilities_before ??= $registries;
+
+		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in AbilitiesLoader::init_extensions().
+		do_action( 'woocommerce_extensible_abilities_resources_init' );
 	}
 
 	/**
@@ -42,14 +47,11 @@ trait ExtensibleAbilitiesTestTrait {
 		$this->isolate_extensible_abilities();
 		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', 'yes' );
 
-		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
 		if ( $register ) {
 			add_action( 'woocommerce_extensible_abilities_init', $register );
 		}
-		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in AbilitiesLoader::init_extensions().
-		do_action( 'woocommerce_extensible_abilities_resources_init' );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in AbilitiesLoader::init_extensions().
 		do_action( 'woocommerce_extensible_abilities_init' );
-		// phpcs:enable
 	}
 
 	/**

@@ -672,13 +672,122 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should write a sent extension field of a new and of an existing term in a sync, and save nothing when a validator or a sync refuses or the field does not apply to the taxonomy.
+	 */
+	public function test_writes_extension_fields(): void {
+		$id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_tag',
+				'name'     => 'Existing',
+			)
+		);
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
+		$this->enable_extensible_abilities(
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'product_term',
+						'namespace'     => 'test-ext',
+						'field'         => 'label',
+						'object_types'  => array( 'product_tag' ),
+						'output_schema' => array( 'type' => 'string' ),
+						'input_schema'  => array( 'type' => 'string' ),
+						'get_callback'  => static function ( \WP_Term $term ) {
+							$label = get_term_meta( $term->term_id, '_test_label', true );
+							return '' === $label ? null : $label;
+						},
+					)
+				);
+				ExtensibleAbilities::register_validator(
+					array(
+						'resource'  => 'product_term',
+						'namespace' => 'test-ext',
+						'callback'  => static fn( \WP_Term $term ) => 'Refused' === $term->name ? new \WP_Error( 'refused', 'This name is refused.' ) : null,
+					)
+				);
+				ExtensibleAbilities::register_sync(
+					array(
+						'resource'  => 'product_term',
+						'namespace' => 'test-ext',
+						'callback'  => static function ( array $saved, array $context ) {
+							foreach ( $saved as $term ) {
+								$label = $context['fields'][ $term ]['label'] ?? null;
+								if ( 'fail' === $label ) {
+									return new \WP_Error( 'sync_failed', 'The sync failed.' );
+								}
+								if ( null !== $label ) {
+									update_term_meta( $term->term_id, '_test_label', $label );
+								}
+							}
+							return null;
+						},
+					)
+				);
+			}
+		);
+		$extensions = static fn( string $label ) => array( 'test-ext' => array( 'label' => $label ) );
+
+		$created     = $this->create(
+			array(
+				'taxonomy'   => 'product_tag',
+				'name'       => 'Sale',
+				'extensions' => $extensions( 'new' ),
+			)
+		);
+		$updated     = $this->update(
+			array(
+				'taxonomy'   => 'product_tag',
+				'id'         => $id,
+				'extensions' => $extensions( 'changed' ),
+			)
+		);
+		$refused     = $this->update(
+			array(
+				'taxonomy'   => 'product_tag',
+				'id'         => $id,
+				'name'       => 'Refused',
+				'extensions' => $extensions( 'lost' ),
+			)
+		);
+		$rolled_back = $this->create(
+			array(
+				'taxonomy'   => 'product_tag',
+				'name'       => 'Rolled back',
+				'extensions' => $extensions( 'fail' ),
+			)
+		);
+		$other_type  = $this->create(
+			array(
+				'taxonomy'   => 'product_cat',
+				'name'       => 'Other taxonomy',
+				'extensions' => $extensions( 'new' ),
+			)
+		);
+
+		$this->assertSame( 'new', $created['term']['extensions']['test-ext']['label'] );
+		$this->assertSame( 'new', get_term_meta( $created['term']['id'], '_test_label', true ) );
+		$this->assertSame( 'changed', $updated['term']['extensions']['test-ext']['label'] );
+		$this->assertSame( 'Existing', $updated['term']['name'] );
+		$this->assertWPError( $refused );
+		$this->assertSame( 'test-ext:refused', $refused->get_error_code() );
+		$this->assertSame( 'Existing', get_term( $id, 'product_tag' )->name );
+		$this->assertSame( 'changed', get_term_meta( $id, '_test_label', true ) );
+		$this->assertWPError( $rolled_back );
+		$this->assertSame( 'sync_failed', $rolled_back->get_error_code() );
+		$this->assertFalse( get_term_by( 'name', 'Rolled back', 'product_tag' ) );
+		$this->assertWPError( $other_type );
+		$this->assertSame( 'test-ext:woocommerce_ability_field_object_type', $other_type->get_error_code() );
+		$this->assertFalse( get_term_by( 'name', 'Other taxonomy', 'product_cat' ) );
+	}
+
+	/**
 	 * Run the create ability.
 	 *
 	 * @param array $input Ability input.
 	 * @return mixed
 	 */
 	private function create( array $input ) {
-		return ( new Ability( ProductTermCreate::get_name(), ProductTermCreate::get_registration_args() ) )->execute( $input );
+		return ( new ProductTermCreate( ProductTermCreate::ABILITY_NAME, ProductTermCreate::get_registration_args() ) )->execute( $input );
 	}
 
 	/**
@@ -688,6 +797,6 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 	 * @return mixed
 	 */
 	private function update( array $input ) {
-		return ( new Ability( ProductTermUpdate::get_name(), ProductTermUpdate::get_registration_args() ) )->execute( $input );
+		return ( new ProductTermUpdate( ProductTermUpdate::ABILITY_NAME, ProductTermUpdate::get_registration_args() ) )->execute( $input );
 	}
 }

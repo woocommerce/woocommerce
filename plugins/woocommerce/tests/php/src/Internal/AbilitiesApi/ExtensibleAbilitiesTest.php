@@ -852,7 +852,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( array(), ExtensibleAbilities::get_query_args( 'ticket', $input ) );
 
 		$register_resource = static function () {
-			ExtensibleAbilities::register_resource( 'ticket' );
+			ExtensibleAbilities::register_resource( 'ticket', self::get_ticket_resource_args() );
 		};
 		$register          = static function () use ( $filter ) {
 			ExtensibleAbilities::register_query_filter( $filter );
@@ -1479,7 +1479,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_register_resource_lets_an_extension_register_fields_on_its_own_resource(): void {
 		$register_resource = static function () {
-			ExtensibleAbilities::register_resource( 'ticket' );
+			ExtensibleAbilities::register_resource( 'ticket', self::get_ticket_resource_args() );
 		};
 		$register_field    = static function () {
 			ExtensibleAbilities::register_field(
@@ -1512,7 +1512,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
 		$this->get_output_schema( 'woocommerce/products-query' );
 
-		ExtensibleAbilities::register_resource( 'late_resource' );
+		ExtensibleAbilities::register_resource( 'late_resource', self::get_ticket_resource_args() );
 
 		$this->assertFalse( ExtensibleAbilities::is_resource_registered( 'late_resource' ) );
 	}
@@ -1699,7 +1699,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function test_a_resource_name_of_only_digits_is_refused(): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
 
-		ExtensibleAbilities::register_resource( '42' );
+		ExtensibleAbilities::register_resource( '42', self::get_ticket_resource_args() );
 
 		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
 		$resources->setAccessible( true );
@@ -1750,7 +1750,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		)['orders'];
 
-		$this->assertSame( 0, did_action( 'woocommerce_extensible_abilities_resources_init' ) );
+		$this->assertTrue( ExtensibleAbilities::is_resource_registered( 'product' ), 'A write reads the ID of an object from its resource, also with the feature off.' );
 		$this->assertSame( 0, did_action( 'woocommerce_extensible_abilities_init' ) );
 		$this->assertArrayNotHasKey( 'filters', $this->get_ability( 'woocommerce/products-query' )['input_schema']['properties'] );
 		$this->assertSame( 400, $this->run_ability_response( 'woocommerce/products-query', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'has_code' => true ) ) ) ) )->get_status() );
@@ -5401,6 +5401,152 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'monthly', $updated['product']['extensions']['test-ext']['plan'] );
 		$this->assertSame( 'yearly', wc_get_product( $simple->get_id() )->get_meta( '_test_plan' ) );
 		$this->assertArrayNotHasKey( 'plan', $read['products'][0]['extensions']['test-ext'] ?? array() );
+	}
+
+	/**
+	 * @testdox Should limit a term field with object_types to the terms of those taxonomies.
+	 */
+	public function test_object_types_limit_a_term_field_to_some_taxonomies(): void {
+		$this->register_typed_field( 'product_term', array( 'product_brand' ) );
+		$list_terms = fn( string $taxonomy ): array => $this->run_ability(
+			'woocommerce/product-terms-query',
+			array(
+				'taxonomy'   => $taxonomy,
+				'include'    => array( self::factory()->term->create( array( 'taxonomy' => $taxonomy ) ) ),
+				'hide_empty' => false,
+			)
+		)['terms'];
+
+		$brands     = $list_terms( 'product_brand' );
+		$categories = $list_terms( 'product_cat' );
+
+		$this->assertSame( 'value', $brands[0]['extensions']['test-ext']['typed'] );
+		$this->assertCount( 1, $categories );
+		$this->assertArrayNotHasKey( 'extensions', $categories[0] );
+	}
+
+	/**
+	 * @testdox Should limit a coupon field with object_types to the coupons of those discount types.
+	 */
+	public function test_object_types_limit_a_coupon_field_to_some_discount_types(): void {
+		$this->register_typed_field( 'coupon', array( 'percent' ) );
+		$this->get_output_schema( 'woocommerce/products-query' );
+		$read = static function ( string $discount_type ) {
+			$coupon = new \WC_Coupon();
+			$coupon->set_discount_type( $discount_type );
+			return ExtensibleAbilities::add_fields_to_object( array(), 'coupon', $coupon );
+		};
+
+		$this->assertSame( array( 'test-ext' => array( 'typed' => 'value' ) ), $read( 'percent' )['extensions'] );
+		$this->assertSame( array(), $read( 'fixed_cart' ) );
+	}
+
+	/**
+	 * @testdox Should compare the object_types of a $resource_name field with the type that the resource gives.
+	 * @dataProvider provide_resources_with_their_object_type
+	 *
+	 * @param string   $resource_name Resource.
+	 * @param string   $ability       List ability.
+	 * @param string   $list_key      Output key of the list.
+	 * @param callable $create_input  Creates two objects and returns the ability input that lists them.
+	 * @param string   $object_type   The type of the created objects.
+	 */
+	public function test_object_types_compare_with_the_type_of_the_resource( string $resource_name, string $ability, string $list_key, callable $create_input, string $object_type ): void {
+		$this->register_typed_field( $resource_name, array( $object_type ) );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => $resource_name,
+						'namespace'     => 'test-ext',
+						'field'         => 'other',
+						'output_schema' => array( 'type' => 'string' ),
+						'object_types'  => array( 'another-type' ),
+						'get_callback'  => static fn() => 'value',
+					)
+				);
+			}
+		);
+
+		$list = $this->run_ability( $ability, $create_input() )[ $list_key ];
+
+		$this->assertCount( 2, $list );
+		$this->assertSame( array( 'typed' => 'value' ), $list[0]['extensions']['test-ext'] );
+	}
+
+	/**
+	 * The rows of provide_list_abilities() for a customer and a review, with the type of the objects they create:
+	 * the user role and the comment type.
+	 *
+	 * @return array<string, array>
+	 */
+	public function provide_resources_with_their_object_type(): array {
+		$rows = $this->provide_list_abilities();
+		return array(
+			'customer'       => array_merge( $rows['customer'], array( 'customer' ) ),
+			'product_review' => array_merge( $rows['product_review'], array( 'review' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should refuse a resource that has no callable $missing.
+	 * @testWith ["object_id_callback"]
+	 *           ["object_type_callback"]
+	 *
+	 * @param string $missing The argument the resource does not pass.
+	 */
+	public function test_a_resource_without_both_callbacks_is_refused( string $missing ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
+
+		ExtensibleAbilities::register_resource( 'ticket', array_diff_key( self::get_ticket_resource_args(), array( $missing => true ) ) );
+
+		$this->assertFalse( ExtensibleAbilities::is_resource_registered( 'ticket' ) );
+	}
+
+	/**
+	 * @testdox Should throw when the ID of an object is read from a resource that is not registered.
+	 */
+	public function test_the_id_of_an_object_of_an_unregistered_resource_throws(): void {
+		$this->expectException( \LogicException::class );
+
+		ExtensibleAbilities::get_object_id( new \stdClass(), 'gadget' );
+	}
+
+	/**
+	 * The callbacks of a test resource whose objects have an `id` and one type.
+	 *
+	 * @return array<string, callable>
+	 */
+	private static function get_ticket_resource_args(): array {
+		return array(
+			'object_id_callback'   => static fn( $ticket ): int => (int) ( $ticket->id ?? 0 ),
+			'object_type_callback' => static fn(): string => 'ticket',
+		);
+	}
+
+	/**
+	 * Register a readable `test-ext.typed` field with object_types.
+	 *
+	 * @param string   $resource_name Resource of the field.
+	 * @param string[] $object_types  Object types the field applies to.
+	 */
+	private function register_typed_field( string $resource_name, array $object_types ): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name, $object_types ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => $resource_name,
+						'namespace'     => 'test-ext',
+						'field'         => 'typed',
+						'output_schema' => array( 'type' => 'string' ),
+						'object_types'  => $object_types,
+						'get_callback'  => static fn() => 'value',
+					)
+				);
+			}
+		);
 	}
 
 	/**

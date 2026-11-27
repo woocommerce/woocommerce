@@ -8,11 +8,14 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\WCDataSaveTrait;
 
 /**
  * An extension's write ability that changes an order status.
  */
 class TestOrderStatusAbility extends ActionableAbility {
+
+	use WCDataSaveTrait;
 
 	/**
 	 * Resource that the ability changes.

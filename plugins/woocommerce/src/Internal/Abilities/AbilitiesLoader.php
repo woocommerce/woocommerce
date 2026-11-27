@@ -176,9 +176,45 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function register_core_resources(): void {
-		foreach ( array( 'product', 'order', 'order_item', 'order_refund', 'product_term', 'product_review', 'customer', 'coupon' ) as $resource_name ) {
-			ExtensibleAbilities::register_resource( $resource_name );
+		$data_id   = static fn( \WC_Data $data ): int => $data->get_id();
+		$data_type = static fn( $data ): string => $data->get_type();
+		foreach ( array( 'product', 'order', 'order_item', 'order_refund' ) as $resource_name ) {
+			ExtensibleAbilities::register_resource(
+				$resource_name,
+				array(
+					'object_id_callback'   => $data_id,
+					'object_type_callback' => $data_type,
+				)
+			);
 		}
+		ExtensibleAbilities::register_resource(
+			'coupon',
+			array(
+				'object_id_callback'   => $data_id,
+				'object_type_callback' => static fn( \WC_Coupon $coupon ): string => $coupon->get_discount_type(),
+			)
+		);
+		ExtensibleAbilities::register_resource(
+			'customer',
+			array(
+				'object_id_callback'   => $data_id,
+				'object_type_callback' => static fn( \WC_Customer $customer ): string => $customer->get_role(),
+			)
+		);
+		ExtensibleAbilities::register_resource(
+			'product_review',
+			array(
+				'object_id_callback'   => static fn( \WP_Comment $comment ): int => (int) $comment->comment_ID,
+				'object_type_callback' => static fn( \WP_Comment $comment ): string => $comment->comment_type,
+			)
+		);
+		ExtensibleAbilities::register_resource(
+			'product_term',
+			array(
+				'object_id_callback'   => static fn( \WP_Term $term ): int => $term->term_id,
+				'object_type_callback' => static fn( \WP_Term $term ): string => $term->taxonomy,
+			)
+		);
 	}
 
 	/**
@@ -213,19 +249,22 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function init_extensions(): void {
+		if ( ! did_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
+			/**
+			 * Fires when extensions can register their resources with ExtensibleAbilities.
+			 *
+			 * Fires one time, before `woocommerce_extensible_abilities_init`. It also fires when the
+			 * experimental `extensible_abilities` feature is off, because an ability that writes a
+			 * resource reads the ID of its objects from the resource.
+			 *
+			 * @since 11.3.0
+			 */
+			do_action( 'woocommerce_extensible_abilities_resources_init' );
+		}
+
 		if ( did_action( 'woocommerce_extensible_abilities_init' ) || ! ExtensibleAbilities::is_enabled() ) {
 			return;
 		}
-
-		/**
-		 * Fires when extensions can register their resources with ExtensibleAbilities.
-		 *
-		 * Fires one time, before `woocommerce_extensible_abilities_init`, only when the
-		 * experimental `extensible_abilities` feature is on.
-		 *
-		 * @since 11.3.0
-		 */
-		do_action( 'woocommerce_extensible_abilities_resources_init' );
 
 		/**
 		 * Fires when extensions can register their fields with ExtensibleAbilities.

@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\WCDataSaveTrait;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
@@ -24,6 +25,9 @@ defined( 'ABSPATH' ) || exit;
  */
 class OrderUpdate extends ActionableAbility {
 
+	use WCDataSaveTrait {
+		save as private save_data;
+	}
 	use DomainAbilityHelpers;
 	use OrderAbilityTrait;
 	use OrderEditTrait;
@@ -184,7 +188,7 @@ class OrderUpdate extends ActionableAbility {
 
 		$added = $this->add_queued_products( $subject );
 
-		$saved = parent::save( $subject );
+		$saved = $this->save_data( $subject );
 
 		if ( is_wp_error( $saved ) ) {
 			foreach ( $added as $item ) {
