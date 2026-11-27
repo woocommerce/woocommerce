@@ -99,6 +99,34 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A staged payment fires woocommerce_pre_payment_complete first, and the note and woocommerce_payment_complete come after the save.
+	 */
+	public function test_staged_payment_complete(): void {
+		$order = $this->create_order( 'existing' );
+		$fired = array();
+		$spy   = static function ( string $hook ) use ( &$fired ) {
+			if ( in_array( $hook, array( 'woocommerce_pre_payment_complete', 'woocommerce_valid_order_statuses_for_payment_complete', 'woocommerce_payment_complete_order_status', 'woocommerce_payment_complete', 'woocommerce_order_status_processing' ), true ) ) {
+				$fired[] = $hook;
+			}
+		};
+		add_action( 'all', $spy );
+
+		$order->set_staged( true );
+		$paid = $order->stage_payment_complete( 'txn-1' );
+		$order->set_staged( false );
+		$fired[] = 'save';
+		$order->save();
+		$order->finish_staged_payment_complete( $paid );
+		remove_action( 'all', $spy );
+
+		$this->assertSame( array( 'woocommerce_pre_payment_complete', 'woocommerce_valid_order_statuses_for_payment_complete', 'woocommerce_payment_complete_order_status', 'save', 'woocommerce_order_status_processing', 'woocommerce_payment_complete' ), $fired );
+		$stored = wc_get_order( $order->get_id() );
+		$this->assertSame( OrderStatus::PROCESSING, $stored->get_status() );
+		$this->assertSame( 'txn-1', $stored->get_transaction_id() );
+		$this->assertCount( 1, array_filter( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), static fn( $note ) => 'Payment complete.' === $note->content ) );
+	}
+
+	/**
 	 * @testdox A direct stage call is refused when the class overrides the saving method and not the stage method.
 	 */
 	public function test_unadopted_override_is_refused(): void {
