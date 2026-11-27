@@ -48,17 +48,19 @@ final class PriceDisplayPrecision {
 	 * Whether the product's active price differs from the saved price, for example because a discount extension changed it
 	 * in the cart. A changed price wasn't entered by the merchant, so it's shown with the store's decimals.
 	 *
+	 * Checks the product's changes and the filtered price rather than get_data(), which also builds the meta data and can
+	 * read it from the database for every product on a page.
+	 *
 	 * @param \WC_Product $product Product.
 	 * @return bool
 	 */
 	public static function is_price_changed( \WC_Product $product ): bool {
-		$saved = $product->get_data()['price'] ?? '';
-
-		if ( '' === $saved ) {
-			return false;
+		// set_price() after the product was read records a change; a filter changes only the price in the 'view' context.
+		if ( array_key_exists( 'price', $product->get_changes() ) ) {
+			return true;
 		}
 
-		return abs( (float) $product->get_price() - (float) $saved ) > 1e-9;
+		return abs( (float) $product->get_price() - (float) $product->get_price( 'edit' ) ) > 1e-9;
 	}
 
 	/**
