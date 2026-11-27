@@ -240,6 +240,26 @@ Database migrations live in `WC_Install::$db_updates`. Read that class for the c
 - To test a migration locally, set the `woocommerce_db_version` and `woocommerce_version` options to the previous release, for example with `wp option update woocommerce_db_version 11.1.0` and the same for `woocommerce_version`. The next page load schedules every callback above that version through Action Scheduler. `wp wc update` runs them immediately instead.
 - Feature flag defaults are persisted, so changing `enabled_by_default` alone doesn't change behavior on existing sites. Ship a migration or remove the flag.
 
+## Workarounds for Older Versions
+
+Code that only exists to support an older WordPress or PHP version, such as a backport or a version check, must say when it can go. Add a `@remove-when` tag to its docblock, with the WooCommerce minimum version that makes it unnecessary:
+
+```php
+/**
+ * @remove-when WordPress 7.2
+ */
+```
+
+The value is `<WordPress|PHP> <version>` and nothing else, so one search finds every workaround for a platform. Put the tag on every method, class, or constant that belongs to the workaround, not only the main one.
+
+When the workaround waits for another plugin to raise its minimum version, name that plugin: `@remove-when MCP Adapter requires WordPress 7.2`.
+
+When you raise a minimum version in `plugins/woocommerce/woocommerce.php`:
+
+1. Search for the platform of the header you raised: `@remove-when WordPress` for `Requires at least`, `@remove-when PHP` for `Requires PHP`.
+2. Remove each workaround whose version is the new minimum or lower.
+3. Search for `@remove-when` tags that name a plugin, and remove the ones whose plugin now requires the version they name.
+
 ## Comments and Docblocks
 
 Docblocks are expected on methods, classes, and hooks (see the `woocommerce-backend-dev` skill for exact requirements). Hook docblocks in `src/Blocks` and `src/StoreApi` are published as developer documentation and have to be regenerated after a change — the `woocommerce-backend-dev` skill has the command. Inline comments are the exception, not the default: add one only when the code can't explain itself, for example a non-obvious "why", a hidden constraint, or a workaround for a specific bug. Either way, don't add a comment that just restates what the identifier names already say.
