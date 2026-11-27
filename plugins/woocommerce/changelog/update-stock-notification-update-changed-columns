@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Save only the changed fields of a back-in-stock sign-up, so concurrent saves no longer overwrite each other's updates.

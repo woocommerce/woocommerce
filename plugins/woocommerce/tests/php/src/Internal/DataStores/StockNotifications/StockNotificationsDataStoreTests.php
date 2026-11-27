@@ -625,6 +625,44 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep a column changed in the database since load when a stale object saves another prop.
+	 */
+	public function test_update_keeps_columns_changed_since_load(): void {
+		global $wpdb;
+
+		$notification = $this->create_notification_modified_in_the_past();
+		$wpdb->update(
+			$this->data_store->get_table_name(),
+			array( 'date_last_attempt_gmt' => '2025-03-01 10:00:00' ),
+			array( 'id' => $notification->get_id() )
+		);
+
+		$notification->set_user_email( 'new@example.com' );
+		$notification->save();
+
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT user_email, date_last_attempt_gmt FROM {$wpdb->prefix}wc_stock_notifications WHERE id = %d", $notification->get_id() ) );
+		$this->assertSame( 'new@example.com', $row->user_email, 'The changed prop should be saved.' );
+		$this->assertSame( '2025-03-01 10:00:00', $row->date_last_attempt_gmt, 'A column the object did not change should keep its newer value.' );
+	}
+
+	/**
+	 * @testdox Should not overwrite a status saved by another object with the stale object's value.
+	 */
+	public function test_update_from_stale_object_keeps_status_saved_by_another_object(): void {
+		$stale = $this->create_notification_modified_in_the_past();
+		$fresh = new Notification( $stale->get_id() );
+		$fresh->set_status( NotificationStatus::CANCELLED );
+		$fresh->save();
+
+		$stale->set_user_email( 'new@example.com' );
+		$stale->save();
+
+		$notification = new Notification( $stale->get_id() );
+		$this->assertSame( NotificationStatus::CANCELLED, $notification->get_status() );
+		$this->assertSame( 'new@example.com', $notification->get_user_email() );
+	}
+
+	/**
 	 * Test querying notifications.
 	 */
 	public function test_query_notifications() {

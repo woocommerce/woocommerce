@@ -21,6 +21,58 @@ defined( 'ABSPATH' ) || exit;
 class StockNotificationsDataStore implements \WC_Object_Data_Store_Interface {
 
 	/**
+	 * Notification props and the table columns that store them.
+	 *
+	 * @var array<string, array{name: string, format: string}>
+	 */
+	private const PROP_COLUMNS = array(
+		'product_id'          => array(
+			'name'   => 'product_id',
+			'format' => '%d',
+		),
+		'user_id'             => array(
+			'name'   => 'user_id',
+			'format' => '%d',
+		),
+		'user_email'          => array(
+			'name'   => 'user_email',
+			'format' => '%s',
+		),
+		'status'              => array(
+			'name'   => 'status',
+			'format' => '%s',
+		),
+		'date_created'        => array(
+			'name'   => 'date_created_gmt',
+			'format' => '%s',
+		),
+		'date_modified'       => array(
+			'name'   => 'date_modified_gmt',
+			'format' => '%s',
+		),
+		'date_confirmed'      => array(
+			'name'   => 'date_confirmed_gmt',
+			'format' => '%s',
+		),
+		'date_last_attempt'   => array(
+			'name'   => 'date_last_attempt_gmt',
+			'format' => '%s',
+		),
+		'date_notified'       => array(
+			'name'   => 'date_notified_gmt',
+			'format' => '%s',
+		),
+		'date_cancelled'      => array(
+			'name'   => 'date_cancelled_gmt',
+			'format' => '%s',
+		),
+		'cancellation_source' => array(
+			'name'   => 'cancellation_source',
+			'format' => '%s',
+		),
+	);
+
+	/**
 	 * The database util object to use.
 	 *
 	 * @var DatabaseUtil
@@ -146,6 +198,33 @@ CREATE TABLE $meta_table_name (
 	}
 
 	/**
+	 * Get the table row for a notification's props, like HPOS `OrdersTableDataStore::get_db_row_from_order()`.
+	 *
+	 * @param Notification $notification The notification.
+	 * @param bool         $only_changes Whether to include only the props changed since the object was read.
+	 * @return array{data: array<string, mixed>, format: string[]} The row keyed by column, and its `$wpdb` formats.
+	 */
+	private function get_db_row_from_notification( Notification $notification, bool $only_changes = false ): array {
+		$props = $only_changes ? $notification->get_changes() : array_merge( $notification->get_data(), $notification->get_changes() );
+		$row   = array(
+			'data'   => array(),
+			'format' => array(),
+		);
+
+		foreach ( self::PROP_COLUMNS as $prop => $column ) {
+			if ( ! array_key_exists( $prop, $props ) ) {
+				continue;
+			}
+
+			$value                          = $props[ $prop ];
+			$row['data'][ $column['name'] ] = $value instanceof \WC_DateTime ? gmdate( 'Y-m-d H:i:s', $value->getTimestamp() ) : $value;
+			$row['format'][]                = $column['format'];
+		}
+
+		return $row;
+	}
+
+	/**
 	 * Create a new stock notification.
 	 *
 	 * @param Notification $notification The data object to create.
@@ -162,35 +241,8 @@ CREATE TABLE $meta_table_name (
 			$notification->set_date_modified( time() );
 		}
 
-		$insert = $wpdb->insert(
-			$this->get_table_name(),
-			array(
-				'product_id'            => $notification->get_product_id( 'edit' ),
-				'user_id'               => $notification->get_user_id( 'edit' ),
-				'user_email'            => $notification->get_user_email( 'edit' ),
-				'status'                => $notification->get_status( 'edit' ),
-				'date_created_gmt'      => gmdate( 'Y-m-d H:i:s', $notification->get_date_created( 'edit' )->getTimestamp() ),
-				'date_modified_gmt'     => gmdate( 'Y-m-d H:i:s', $notification->get_date_modified( 'edit' )->getTimestamp() ),
-				'date_confirmed_gmt'    => $notification->get_date_confirmed( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_confirmed( 'edit' )->getTimestamp() ) : null,
-				'date_last_attempt_gmt' => $notification->get_date_last_attempt( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_last_attempt( 'edit' )->getTimestamp() ) : null,
-				'date_notified_gmt'     => $notification->get_date_notified( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_notified( 'edit' )->getTimestamp() ) : null,
-				'date_cancelled_gmt'    => $notification->get_date_cancelled( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_cancelled( 'edit' )->getTimestamp() ) : null,
-				'cancellation_source'   => $notification->get_cancellation_source( 'edit' ),
-			),
-			array(
-				'%d',
-				'%d',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-			)
-		);
+		$row    = $this->get_db_row_from_notification( $notification );
+		$insert = $wpdb->insert( $this->get_table_name(), $row['data'], $row['format'] );
 
 		if ( false === $insert ) {
 			return new \WP_Error( 'db_insert_error', 'Could not insert stock notification into the database.' );
@@ -322,25 +374,9 @@ CREATE TABLE $meta_table_name (
 				$notification->set_date_modified( time() );
 			}
 
-			$result = $wpdb->update(
-				$this->get_table_name(),
-				array(
-					'product_id'            => $notification->get_product_id( 'edit' ),
-					'user_id'               => $notification->get_user_id( 'edit' ),
-					'user_email'            => $notification->get_user_email( 'edit' ),
-					'status'                => $notification->get_status( 'edit' ),
-					'date_created_gmt'      => $notification->get_date_created( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_created( 'edit' )->getTimestamp() ) : null,
-					'date_modified_gmt'     => gmdate( 'Y-m-d H:i:s', $notification->get_date_modified( 'edit' )->getTimestamp() ),
-					'date_confirmed_gmt'    => $notification->get_date_confirmed( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_confirmed( 'edit' )->getTimestamp() ) : null,
-					'date_last_attempt_gmt' => $notification->get_date_last_attempt( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_last_attempt( 'edit' )->getTimestamp() ) : null,
-					'date_notified_gmt'     => $notification->get_date_notified( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_notified( 'edit' )->getTimestamp() ) : null,
-					'date_cancelled_gmt'    => $notification->get_date_cancelled( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_cancelled( 'edit' )->getTimestamp() ) : null,
-					'cancellation_source'   => $notification->get_cancellation_source( 'edit' ),
-				),
-				array( 'id' => $notification->get_id() ),
-				array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' ),
-				array( '%d' )
-			);
+			// Write only the changed columns, so a save from a stale object can't overwrite newer values in the others.
+			$row    = $this->get_db_row_from_notification( $notification, true );
+			$result = $wpdb->update( $this->get_table_name(), $row['data'], array( 'id' => $notification->get_id() ), $row['format'], array( '%d' ) );
 
 			if ( false === $result ) {
 				return new \WP_Error( 'db_update_error', 'Could not update stock notification in the database.' );
