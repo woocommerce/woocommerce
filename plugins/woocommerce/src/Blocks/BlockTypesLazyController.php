@@ -91,6 +91,7 @@ final class BlockTypesLazyController {
 			$this->get_product_grid_blocks(),
 			$this->get_product_listing_blocks(),
 			$this->get_product_reviews_blocks(),
+			$this->get_misc_blocks(),
 		);
 		foreach ( $block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
@@ -331,6 +332,40 @@ final class BlockTypesLazyController {
 			$list['product-image-gallery']   = \Automattic\WooCommerce\Blocks\BlockTypes\ProductImageGallery::class;
 			$list['product-image']           = \Automattic\WooCommerce\Blocks\BlockTypes\ProductImage::class;
 			$list['product-stock-indicator'] = \Automattic\WooCommerce\Blocks\BlockTypes\ProductStockIndicator::class;
+		}
+
+		return $list;
+	}
+
+	/**
+	 * Side effect free and stateless miscellaneous blocks.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_misc_blocks(): array {
+		// ProductSearch: excluded — no block.json directory, falls back to register_block_type() without metadata.
+		// FeaturedCategory: excluded — via FeaturedItem: render_block_context, render_block_core/post-title.
+		// FeaturedProduct: excluded — via FeaturedItem: render_block_context, render_block_core/post-title.
+		// CustomerAccount: excluded — hooked_block_types, hooked_block_* (Block Hooks API).
+		// SavedForLater: excluded — block_type_metadata_settings (before parent), hooked_block_*.
+		// Wishlist: excluded — conditional registration behind ShopperListsController feature flag.
+		// AddToWishlistButton: excluded — conditional registration behind ShopperListsController feature flag.
+		$list = array(
+			'breadcrumbs'        => \Automattic\WooCommerce\Blocks\BlockTypes\Breadcrumbs::class,
+			'cart-link'          => \Automattic\WooCommerce\Blocks\BlockTypes\CartLink::class,
+			'classic-shortcode'  => \Automattic\WooCommerce\Blocks\BlockTypes\ClassicShortcode::class,
+			'dropdown'           => \Automattic\WooCommerce\Blocks\BlockTypes\Dropdown::class,
+			'email-content'      => \Automattic\WooCommerce\Blocks\BlockTypes\EmailContent::class,
+			'product-categories' => \Automattic\WooCommerce\Blocks\BlockTypes\ProductCategories::class,
+			'store-notices'      => \Automattic\WooCommerce\Blocks\BlockTypes\StoreNotices::class,
+			'accordion-group'    => \Automattic\WooCommerce\Blocks\BlockTypes\Accordion\AccordionGroup::class,
+			'accordion-item'     => \Automattic\WooCommerce\Blocks\BlockTypes\Accordion\AccordionItem::class,
+			'accordion-panel'    => \Automattic\WooCommerce\Blocks\BlockTypes\Accordion\AccordionPanel::class,
+			'accordion-header'   => \Automattic\WooCommerce\Blocks\BlockTypes\Accordion\AccordionHeader::class,
+		);
+		if ( ! is_admin() ) {
+			// CouponCode overrides enqueue_data() with editor-visible coupon types, hence loads eagerly in admin.
+			$list['coupon-code'] = \Automattic\WooCommerce\Blocks\BlockTypes\CouponCode::class;
 		}
 
 		return $list;

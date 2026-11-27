@@ -68,6 +68,10 @@
 			"hasImage": false
 		}
 	},
+	"style": [
+		"wc-blocks-style",
+		"file:../product-categories.css"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

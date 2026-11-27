@@ -5,6 +5,10 @@
 	"description": "Display a link to the cart.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
+	"style": [
+		"wc-blocks-style",
+		"file:../cart-link.css"
+	],
 	"textdomain": "woocommerce",
 	"supports": {
 		"interactivity": {

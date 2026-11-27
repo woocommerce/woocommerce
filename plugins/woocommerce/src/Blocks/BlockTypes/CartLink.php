@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
  * CartLink class.
  */
 class CartLink extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.

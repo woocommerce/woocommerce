@@ -4,6 +4,10 @@
 	"description": "Enable customers to keep track of their location within the store and navigate back to parent pages.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
+	"style": [
+		"wc-blocks-style",
+		"file:../breadcrumbs.css"
+	],
 	"textdomain": "woocommerce",
 	"attributes": {
 		"contentJustification": {
