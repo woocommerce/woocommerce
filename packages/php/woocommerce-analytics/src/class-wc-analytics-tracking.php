@@ -562,6 +562,7 @@ class WC_Analytics_Tracking {
 		 *
 		 * It also runs hourly from cron with an empty `$event_name`, and the scalar properties it adds
 		 * then are replayed on every event the proxy speed module records, for all visitors.
+		 * So for an empty `$event_name`, leave out any property meant only for some events or visitors.
 		 *
 		 * @module woocommerce-analytics
 		 *
