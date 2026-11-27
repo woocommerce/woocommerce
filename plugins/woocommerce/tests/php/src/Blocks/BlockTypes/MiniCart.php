@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCart as MiniCartBlock;
+use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
@@ -131,6 +132,16 @@ class MiniCart extends \WC_Unit_Test_Case {
 		);
 		WC()->cart->empty_cart();
 		add_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
+
+		// Earlier tests leave WOOCOMMERCE_CART and WOOCOMMERCE_CHECKOUT defined for the rest of the process, so the real
+		// is_cart() and is_checkout() can never return false again here. Start each test on neither page;
+		// use_cart_or_checkout_page() switches a test back to the real checks.
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'is_cart'     => '__return_false',
+				'is_checkout' => '__return_false',
+			)
+		);
 	}
 
 	/**
@@ -483,14 +494,14 @@ class MiniCart extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should not enqueue the view script module when rendered on the cart or checkout page.
 	 *
-	 * @testWith [ "woocommerce_is_cart" ]
-	 *           [ "woocommerce_is_checkout" ]
+	 * @testWith [ "is_cart" ]
+	 *           [ "is_checkout" ]
 	 *
-	 * @param string $page_filter Conditional filter forcing the cart or checkout context.
+	 * @param string $page_check The conditional function for the page: is_cart or is_checkout.
 	 */
-	public function test_view_script_module_is_not_enqueued_on_cart_and_checkout_pages( string $page_filter ): void {
+	public function test_view_script_module_is_not_enqueued_on_cart_and_checkout_pages( string $page_check ): void {
 		wp_dequeue_script_module( 'woocommerce/mini-cart' );
-		add_filter( $page_filter, '__return_true' );
+		$this->use_cart_or_checkout_page( $page_check );
 
 		$block = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
 		render_block( $block[0] );
@@ -508,14 +519,16 @@ class MiniCart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Cart/checkout constants defined by other tests cannot be reset in this process.
-	 *
 	 * @testdox Should keep the closed drawer out of the tab order and the accessibility tree.
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_closed_drawer_is_inert_and_hidden(): void {
-		$processor = new \WP_HTML_Tag_Processor( $this->render_overlay() );
+		$this->render_mini_cart_block();
+
+		$this->assertSame( 10, has_action( 'wp_footer', array( $this->mock, 'render_mini_cart_overlay' ) ), 'The overlay should be printed in the footer.' );
+
+		ob_start();
+		$this->mock->render_mini_cart_overlay();
+		$processor = new \WP_HTML_Tag_Processor( (string) ob_get_clean() );
 
 		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wc-block-mini-cart__drawer' ) ), 'The drawer should be rendered.' );
 		$this->assertTrue( $processor->get_attribute( 'inert' ), 'The closed drawer should be inert so its contents are not focusable.' );
@@ -523,17 +536,59 @@ class MiniCart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Render the Mini-Cart block and return the overlay markup it prints in the footer.
+	 * @testdox Should not print the drawer overlay in the footer on the cart or checkout page.
 	 *
-	 * @return string
+	 * @testWith [ "is_cart" ]
+	 *           [ "is_checkout" ]
+	 *
+	 * @param string $page_check The conditional function for the page: is_cart or is_checkout.
 	 */
-	private function render_overlay(): string {
-		$block = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
-		render_block( $block[0] );
+	public function test_overlay_is_not_printed_on_cart_and_checkout_pages( string $page_check ): void {
+		$this->use_cart_or_checkout_page( $page_check );
+		$asset_data_registry = $this->createMock( AssetDataRegistry::class );
+		$asset_data_registry->expects( $this->never() )->method( 'add' );
+		$this->mock = $this->replace_block_type( 'woocommerce/mini-cart', static fn () => new MiniCartMock( $asset_data_registry ) );
 
-		ob_start();
-		$this->mock->render_mini_cart_overlay();
-		return (string) ob_get_clean();
+		$output = $this->render_mini_cart_block();
+
+		$this->assertFalse( has_action( 'wp_footer', array( $this->mock, 'render_mini_cart_overlay' ) ), 'The overlay should not be printed on the cart and checkout pages.' );
+		$this->assert_hidden_mini_cart_markup( $output );
+	}
+
+	/**
+	 * Assert the markup is the hidden, disabled Mini-Cart button rendered on the cart and checkout pages.
+	 *
+	 * @param string $output Rendered block markup.
+	 */
+	private function assert_hidden_mini_cart_markup( string $output ): void {
+		$processor = new \WP_HTML_Tag_Processor( $output );
+
+		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wc-block-mini-cart' ) ), 'The Mini-Cart wrapper should be rendered.' );
+		$this->assertStringContainsString( 'visibility:hidden', (string) $processor->get_attribute( 'style' ), 'The Mini-Cart should be hidden on the cart and checkout pages.' );
+		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wc-block-mini-cart__button' ) ), 'The Mini-Cart button should be rendered.' );
+		$this->assertTrue( $processor->get_attribute( 'disabled' ), 'The Mini-Cart button should be disabled on the cart and checkout pages.' );
+	}
+
+	/**
+	 * Put the current test on the cart or checkout page.
+	 *
+	 * Replaces the setUp() stub with the real page check and turns it on through its public filter.
+	 *
+	 * @param string $page_check The conditional function for the page: is_cart or is_checkout.
+	 */
+	private function use_cart_or_checkout_page( string $page_check ): void {
+		$this->register_legacy_proxy_function_mocks( array( $page_check => $page_check ) );
+		add_filter( 'woocommerce_' . $page_check, '__return_true' );
+	}
+
+	/**
+	 * Render the Mini-Cart block.
+	 *
+	 * @return string Rendered block markup.
+	 */
+	private function render_mini_cart_block(): string {
+		$block = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		return render_block( $block[0] );
 	}
 
 	/**

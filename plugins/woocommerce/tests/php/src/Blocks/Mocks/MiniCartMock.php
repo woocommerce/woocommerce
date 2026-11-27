@@ -15,11 +15,13 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 class MiniCartMock extends MiniCart {
 	/**
 	 * Initialize our mock class.
+	 *
+	 * @param AssetDataRegistry|null $asset_data_registry Registry to use instead of the shared one.
 	 */
-	public function __construct() {
+	public function __construct( ?AssetDataRegistry $asset_data_registry = null ) {
 		parent::__construct(
 			Package::container()->get( Api::class ),
-			Package::container()->get( AssetDataRegistry::class ),
+			$asset_data_registry ?? Package::container()->get( AssetDataRegistry::class ),
 			new IntegrationRegistry()
 		);
 	}
