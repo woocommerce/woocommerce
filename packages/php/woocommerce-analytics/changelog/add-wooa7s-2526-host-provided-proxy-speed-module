@@ -1,0 +1,4 @@
+Significance: minor
+Type: changed
+
+Let hosts run the proxy speed module from their own platform code, and stop writing the speed module MU-plugin into sites. The `woocommerce_analytics_auto_install_proxy_speed_module` filter is deprecated.

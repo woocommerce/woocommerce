@@ -3,7 +3,7 @@
  * WooCommerce Analytics Tracking for tracking frontend events
  *
  * This class is designed to work without WooCommerce dependencies,
- * enabling it to run at the MU-plugin stage without loading WooCommerce to optimize performance.
+ * so the proxy speed module can run it before WooCommerce loads.
  *
  * @package automattic/woocommerce-analytics
  */
@@ -253,9 +253,9 @@ class WC_Analytics_Tracking {
 	/**
 	 * Record an event whose properties came from an untrusted client.
 	 *
-	 * The entry point for the tracking proxy: the REST controller and the MU-plugin
-	 * speed module both come through here. A distinct method rather than a sanitizer
-	 * callers must remember to invoke, so a wrong choice is visible at the call site.
+	 * The entry point for the tracking proxy, through record_client_events(). A distinct
+	 * method rather than a sanitizer callers must remember to invoke, so a wrong choice is
+	 * visible at the call site.
 	 *
 	 * @since 0.18.0
 	 *
@@ -266,6 +266,69 @@ class WC_Analytics_Tracking {
 	 */
 	public static function record_client_event( $event_name, $event_properties = array() ) {
 		return self::record_event( $event_name, $event_properties, true );
+	}
+
+	/**
+	 * Record a batch of events posted to the tracking proxy, shared by the REST route and the speed module.
+	 *
+	 * @internal Not for use outside this package; the contract may change.
+	 * @since 0.19.0
+	 *
+	 * @param mixed $events Decoded request body: a list of events, or a single event.
+	 * @return array{success: bool, results: array} Per-event results; `success` is false when any event failed.
+	 */
+	public static function record_client_events( $events ) {
+		if ( ! is_array( $events ) || isset( $events['event_name'] ) ) {
+			$events = array( $events );
+		}
+
+		// Every event becomes an outbound pixel, so bound what an unauthenticated caller can fan out.
+		if ( count( $events ) > self::MAX_CLIENT_EVENTS_PER_REQUEST ) {
+			$events = array_slice( $events, 0, self::MAX_CLIENT_EVENTS_PER_REQUEST, true );
+		}
+
+		$results    = array();
+		$has_errors = false;
+
+		foreach ( $events as $index => $event ) {
+			if ( empty( $event ) || ! is_array( $event ) ) {
+				$results[ $index ] = array(
+					'success' => false,
+					'error'   => 'Invalid event format',
+				);
+				$has_errors        = true;
+				continue;
+			}
+
+			$event_name = $event['event_name'] ?? null;
+			$properties = $event['properties'] ?? array();
+			if ( ! $event_name || ! is_string( $event_name ) || ! is_array( $properties ) ) {
+				$results[ $index ] = array(
+					'success' => false,
+					'error'   => 'Missing event_name or invalid properties',
+				);
+				$has_errors        = true;
+				continue;
+			}
+
+			$result = self::record_client_event( $event_name, $properties );
+
+			if ( is_wp_error( $result ) ) {
+				$results[ $index ] = array(
+					'success' => false,
+					'error'   => $result->get_error_message(),
+				);
+				$has_errors        = true;
+				continue;
+			}
+
+			$results[ $index ] = array( 'success' => true );
+		}
+
+		return array(
+			'success' => ! $has_errors,
+			'results' => $results,
+		);
 	}
 
 	/**
@@ -1093,8 +1156,8 @@ class WC_Analytics_Tracking {
 			return $salt_data['salt'];
 		}
 
-		// Generate new salt for today
-		$new_salt = wp_generate_password( 32, false );
+		// Not wp_generate_password(): the speed module can get here before pluggable.php loads.
+		$new_salt = bin2hex( random_bytes( 16 ) );
 
 		// Store salt with date (no expiration time needed)
 		$salt_data = array(

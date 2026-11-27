@@ -210,4 +210,28 @@ class WC_Analytics_Tracking_Test extends BaseTestCase {
 
 		$this->assertSame( 'test-visitor-id-1234567890ab', $visitor_id, 'Cookie value should be returned verbatim when present.' );
 	}
+
+	/**
+	 * The speed module can mint a salt before pluggable.php loads, where wp_generate_password() is undefined.
+	 */
+	public function test_get_daily_salt_does_not_need_pluggable_functions(): void {
+		delete_option( WC_Analytics_Tracking::DAILY_SALT_OPTION );
+
+		$pluggable_calls = 0;
+		$spy             = function ( $password ) use ( &$pluggable_calls ) {
+			++$pluggable_calls;
+			return $password;
+		};
+		add_filter( 'random_password', $spy );
+
+		$method = new \ReflectionMethod( WC_Analytics_Tracking::class, 'get_daily_salt' );
+		$method->setAccessible( true );
+		$salt = $method->invoke( null );
+
+		remove_filter( 'random_password', $spy );
+
+		$this->assertSame( 0, $pluggable_calls );
+		$this->assertMatchesRegularExpression( '/^[0-9a-f]{32}$/', $salt );
+		$this->assertSame( $salt, get_option( WC_Analytics_Tracking::DAILY_SALT_OPTION )['salt'] );
+	}
 }

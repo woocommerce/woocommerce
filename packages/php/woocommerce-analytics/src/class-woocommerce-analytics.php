@@ -14,44 +14,48 @@ use Automattic\Woocommerce_Analytics\Consent_Manager;
 use Automattic\Woocommerce_Analytics\My_Account;
 use Automattic\Woocommerce_Analytics\Universal;
 use Automattic\Woocommerce_Analytics\WC_Analytics_Tracking_Proxy;
-use Composer\InstalledVersions;
 
 /**
  * Instantiate WooCommerce Analytics
  */
 class Woocommerce_Analytics {
 	/**
-	 * Package version, also the key that triggers the proxy speed module refresh. Rewritten from
-	 * composer.json by tasks/build-package.sh when the package is published, so bumping it here
-	 * does not refresh published copies. Bump the version in composer.json instead.
+	 * Package version. Rewritten from composer.json by tasks/build-package.sh when the package is
+	 * published, so bump the version in composer.json instead.
 	 */
 	const PACKAGE_VERSION = '0.18.0';
 
 	/**
-	 * Proxy speed module version option.
+	 * Version of the speed module MU-plugin an earlier package installed, kept until the file is removed.
 	 *
 	 * @var string
 	 */
 	const PROXY_SPEED_MODULE_VERSION_OPTION = 'woocommerce_analytics_proxy_speed_module_version';
 
 	/**
-	 * Proxy speed module version check transient.
+	 * Throttles the daily check for a leftover speed module MU-plugin.
 	 *
 	 * @var string
 	 */
 	const PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT = 'woocommerce_analytics_proxy_speed_module_version_check';
 
 	/**
-	 * Whether the MU-plugin speed module may serve requests.
-	 *
-	 * It reads this option because filters are unavailable before plugins load.
-	 * It tracks installation eligibility, so removal cannot reauthorize the module.
+	 * Authorization read by the MU-plugin earlier package versions installed. Deleted at `init`, so that file cannot serve.
 	 *
 	 * @since 0.18.0
 	 *
 	 * @var string
 	 */
 	const PROXY_SPEED_MODULE_AUTHORIZED_OPTION = 'woocommerce_analytics_proxy_speed_module_authorized';
+
+	/**
+	 * Whether proxy tracking was on at the last `init`, for the speed module, which runs before plugins register the filter.
+	 *
+	 * @since 0.19.0
+	 *
+	 * @var string
+	 */
+	const PROXY_TRACKING_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_enabled';
 
 	/**
 	 * Whether proxy tracking has ever been enabled on this site.
@@ -114,7 +118,7 @@ class Woocommerce_Analytics {
 	 * @return bool
 	 */
 	public static function should_track_store() {
-		// Register before early returns so the MU-plugin does not keep stale state.
+		// Register before early returns so the speed module does not keep stale state.
 		add_action( 'init', array( __CLASS__, 'sync_proxy_tracking_state' ), 20 );
 
 		// Ensure this is available, even with mu-plugins.
@@ -256,39 +260,48 @@ class Woocommerce_Analytics {
 	}
 
 	/**
-	 * Sync proxy tracking state for the REST route and MU-plugin speed module.
+	 * Sync proxy tracking state for the REST route and the speed module.
 	 *
 	 * @since 0.18.0
 	 *
 	 * @return void
 	 */
 	public static function sync_proxy_tracking_state() {
-		if ( \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled()
-			&& 'yes' !== get_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION ) ) {
+		// One query covers both, so sites without these rows do not pay a query each.
+		if ( function_exists( 'wp_prime_option_caches' ) ) {
+			wp_prime_option_caches( array( self::PROXY_TRACKING_ENABLED_OPTION, self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
+		}
+
+		// A leftover MU-plugin keeps answering while this is yes, even after proxy tracking is turned off.
+		if ( false !== get_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) ) {
+			delete_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
+		}
+
+		$enabled = \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled();
+
+		if ( $enabled && 'yes' !== get_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION ) ) {
 			update_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION, 'yes' );
 		}
 
-		// Track module eligibility so a removed module cannot be reauthorized.
-		$authorized = self::should_install_proxy_speed_module() ? 'yes' : 'no';
-		$current    = get_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
+		$value   = $enabled ? 'yes' : 'no';
+		$current = get_option( self::PROXY_TRACKING_ENABLED_OPTION );
 
-		if ( $current === $authorized ) {
+		if ( $current === $value ) {
 			return;
 		}
 
-		// An absent option already means unauthorized, so most sites installing this
-		// package never need a row saying so.
-		if ( false === $current && 'no' === $authorized ) {
+		// An absent option already means off, so most sites installing this package never need a row saying so.
+		if ( false === $current && 'no' === $value ) {
 			return;
 		}
 
-		update_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, $authorized );
+		update_option( self::PROXY_TRACKING_ENABLED_OPTION, $value );
 	}
 
 	/**
 	 * Forget that proxy tracking was enabled, so the REST route is unregistered.
 	 *
-	 * This is separate from removing the speed module because cached pages may remain.
+	 * Separate from removing a leftover MU-plugin, because cached pages may still post to the route.
 	 *
 	 * @since 0.18.0
 	 *
@@ -296,147 +309,54 @@ class Woocommerce_Analytics {
 	 */
 	public static function reset_proxy_tracking_state() {
 		delete_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION );
+		delete_option( self::PROXY_TRACKING_ENABLED_OPTION );
 		delete_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 	}
 
 	/**
-	 * Update the proxy speed module.
-	 *
-	 * The module must refuse itself because this periodic check can be delayed.
+	 * Remove a speed module MU-plugin that an earlier package version installed.
 	 */
 	public static function maybe_update_proxy_speed_module() {
-		// Skip if we've already checked recently.
 		if ( get_transient( self::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT ) ) {
 			return;
 		}
 
-		$version = get_option( self::PROXY_SPEED_MODULE_VERSION_OPTION, false );
+		// Fire the deprecated filter during its deprecation window, so its callbacks get the notice.
+		\Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled();
 
-		if ( self::should_install_proxy_speed_module() ) {
-			if ( $version !== self::PACKAGE_VERSION ) {
-				self::maybe_add_proxy_speed_module();
-			}
-		} elseif ( $version !== false ) {
-			self::maybe_remove_proxy_speed_module();
+		if ( false !== get_option( self::PROXY_SPEED_MODULE_VERSION_OPTION, false ) ) {
+			self::remove_legacy_proxy_speed_module();
 		}
 
-		// Set the transient after the update attempt to prevent checking on every admin_init.
-		// If the update failed, it will be retried after the transient expires (1 day).
+		// A failed removal keeps the version option, so it is retried once this expires.
 		set_transient( self::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT, 1, DAY_IN_SECONDS );
 	}
 
 	/**
-	 * Whether the proxy speed module belongs on this site.
+	 * Formerly installed the speed module MU-plugin; the package no longer writes it.
 	 *
-	 * It requires its own opt-in and proxy tracking, so it cannot serve when
-	 * tracking is disabled.
-	 *
-	 * @since 0.18.0
-	 *
-	 * @return bool
-	 */
-	private static function should_install_proxy_speed_module() {
-		return \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled()
-			&& \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled();
-	}
-
-	/**
-	 * Maybe add proxy speed module.
+	 * @deprecated 0.19.0 Call Proxy_Speed_Module::enable() instead.
 	 */
 	public static function maybe_add_proxy_speed_module() {
-		if ( ! self::should_install_proxy_speed_module() ) {
-			return;
-		}
-
-		// Write before the module file exists because it fails closed on this option.
-		self::sync_proxy_tracking_state();
-
-		if ( ! self::init_filesystem() ) {
-			if ( function_exists( 'wc_get_logger' ) ) {
-				wc_get_logger()->error( 'WooCommerce Analytics proxy speed module not installed: filesystem unavailable.', array( 'source' => 'woocommerce-analytics' ) );
-			}
-			return;
-		}
-
-		global $wp_filesystem;
-
-		// Create the mu-plugin directory if it doesn't exist.
-		if ( ! is_dir( WPMU_PLUGIN_DIR ) ) {
-			wp_mkdir_p( WPMU_PLUGIN_DIR );
-		}
-
-		// If the mu-plugin directory doesn't exist, we can't copy the files.
-		if ( ! is_dir( WPMU_PLUGIN_DIR ) ) {
-			if ( function_exists( 'wc_get_logger' ) ) {
-				wc_get_logger()->error( 'WooCommerce Analytics proxy speed module not installed: mu-plugins directory could not be created.', array( 'source' => 'woocommerce-analytics' ) );
-			}
-			return;
-		}
-
-		// Check if the mu-plugin directory is writable.
-		if ( ! $wp_filesystem->is_writable( WPMU_PLUGIN_DIR ) ) {
-			if ( function_exists( 'wc_get_logger' ) ) {
-				wc_get_logger()->debug( 'WooCommerce Analytics proxy speed module not installed: mu-plugins directory is not writable.', array( 'source' => 'woocommerce-analytics' ) );
-			}
-			return;
-		}
-
-		if ( get_option( self::PROXY_SPEED_MODULE_VERSION_OPTION ) === self::PACKAGE_VERSION ) {
-			// No need to copy the files again.
-			return;
-		}
-
-		$mu_plugin_src_file  = __DIR__ . '/mu-plugin/woocommerce-analytics-proxy-speed-module-template.php';
-		$mu_plugin_dest_file = trailingslashit( WPMU_PLUGIN_DIR ) . 'woocommerce-analytics-proxy-speed-module.php';
-
-		// Verify source file exists before attempting to copy.
-		if ( ! file_exists( $mu_plugin_src_file ) ) {
-			if ( function_exists( 'wc_get_logger' ) ) {
-				wc_get_logger()->error( 'WooCommerce Analytics proxy speed module source file not found.', array( 'source' => 'woocommerce-analytics' ) );
-			}
-			return;
-		}
-
-		$content = $wp_filesystem->get_contents( $mu_plugin_src_file );
-		if ( false === $content ) {
-			if ( function_exists( 'wc_get_logger' ) ) {
-				wc_get_logger()->error( 'Failed to read the WooCommerce Analytics proxy speed module source file.', array( 'source' => 'woocommerce-analytics' ) );
-			}
-			return;
-		}
-
-		// Get the autoloader path from the current plugin location.
-		$autoloader_path = self::locate_autoloader_file();
-		if ( null === $autoloader_path ) {
-			if ( function_exists( 'wc_get_logger' ) ) {
-				wc_get_logger()->error( 'WooCommerce Analytics proxy speed module not installed: could not locate autoloader.', array( 'source' => 'woocommerce-analytics' ) );
-			}
-			return;
-		}
-
-		// Replace placeholders with actual values.
-		$content = str_replace(
-			array( '{{AUTOLOADER_PATH}}', '{{VERSION}}' ),
-			array( $autoloader_path, self::PACKAGE_VERSION ),
-			$content
-		);
-
-		if ( ! $wp_filesystem->put_contents( $mu_plugin_dest_file, $content ) ) {
-			if ( function_exists( 'wc_get_logger' ) ) {
-				wc_get_logger()->error( 'Failed to write the WooCommerce Analytics proxy speed module file.', array( 'source' => 'woocommerce-analytics' ) );
-			}
-			return;
-		}
-
-		update_option( self::PROXY_SPEED_MODULE_VERSION_OPTION, self::PACKAGE_VERSION );
+		// Kept as a no-op for callers such as the Jetpack activation hook.
 	}
 
 	/**
-	 * Remove the proxy speed module when the plugin is deactivated.
+	 * Stop the speed module serving once the plugin carrying this package is deactivated.
+	 *
+	 * A copy of this package in another plugin that never runs `init` would otherwise keep serving on the stored state.
+	 */
+	public static function maybe_remove_proxy_speed_module() {
+		delete_option( self::PROXY_TRACKING_ENABLED_OPTION );
+		self::remove_legacy_proxy_speed_module();
+	}
+
+	/**
+	 * Remove a speed module MU-plugin left by an earlier package version, and the authorization it reads.
 	 *
 	 * Clear its authorization because an undeletable MU-plugin can still load.
 	 */
-	public static function maybe_remove_proxy_speed_module() {
+	private static function remove_legacy_proxy_speed_module() {
 		// Revoked before anything can fail: WP_Filesystem() returns false outright on
 		// hosts that ask for credentials, and that is exactly the case where the file
 		// survives and keeps loading.
@@ -448,76 +368,19 @@ class Woocommerce_Analytics {
 
 		global $wp_filesystem;
 
-		/**
-		 * Clean up MU plugin.
-		 */
 		$file_path = trailingslashit( WPMU_PLUGIN_DIR ) . 'woocommerce-analytics-proxy-speed-module.php';
 
-		if ( $wp_filesystem->exists( $file_path ) && $wp_filesystem->is_writable( $file_path ) ) {
-			$deleted = $wp_filesystem->delete( $file_path );
-			if ( ! $deleted && function_exists( 'wc_get_logger' ) ) {
+		if ( $wp_filesystem->exists( $file_path )
+			&& ( ! $wp_filesystem->is_writable( $file_path ) || ! $wp_filesystem->delete( $file_path ) ) ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
 				wc_get_logger()->error( 'Failed to delete WooCommerce Analytics proxy speed module file. The MU-plugin may continue running.', array( 'source' => 'woocommerce-analytics' ) );
 			}
+			// Keep the version option, which is what schedules the next attempt.
+			return;
 		}
 
 		delete_option( self::PROXY_SPEED_MODULE_VERSION_OPTION );
 		delete_transient( self::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT );
-	}
-
-	/**
-	 * Finds the path to the autoloader file.
-	 *
-	 * Uses multiple strategies to locate the autoloader, since this package
-	 * can be included in different plugins (Jetpack, WooCommerce Analytics, etc.):
-	 * 1. Jetpack autoloader global (if available)
-	 * 2. Composer's InstalledVersions API
-	 * 3. Directory-based guessing as a fallback
-	 *
-	 * @return string|null The path to the autoloader file, or null if not found.
-	 */
-	private static function locate_autoloader_file() {
-		global $jetpack_autoloader_loader;
-
-		$autoload_file = null;
-
-		// Try the Jetpack autoloader.
-		if ( isset( $jetpack_autoloader_loader ) ) {
-			$class_file = $jetpack_autoloader_loader->find_class_file( self::class );
-			if ( $class_file ) {
-				// Walk up 5 levels: src/ → woocommerce-analytics/ → automattic/ → jetpack_vendor/ → plugin root.
-				$autoload_file = dirname( $class_file, 5 ) . '/vendor/autoload.php';
-			}
-		}
-
-		// Try Composer's InstalledVersions API.
-		if ( null === $autoload_file
-			&& is_callable( array( InstalledVersions::class, 'getInstallPath' ) )
-			&& InstalledVersions::isInstalled( 'automattic/woocommerce-analytics' )
-		) {
-			$package_file    = InstalledVersions::getInstallPath( 'automattic/woocommerce-analytics' );
-			$expected_suffix = '/automattic/woocommerce-analytics';
-			if ( substr( $package_file, -strlen( $expected_suffix ) ) === $expected_suffix ) {
-				// Walk up 3 levels: woocommerce-analytics/ → automattic/ → jetpack_vendor/ → plugin root.
-				$autoload_file = dirname( $package_file, 3 ) . '/vendor/autoload.php';
-			}
-		}
-
-		// Guess based on directory structure.
-		// First try standard vendor layout (vendor/automattic/woocommerce-analytics/src/),
-		// then try standalone package with its own vendor dir.
-		if ( null === $autoload_file ) {
-			// Walk up 4 levels from src/: woocommerce-analytics/ → automattic/ → vendor/ → project root.
-			$autoload_file = dirname( __DIR__, 4 ) . '/vendor/autoload.php';
-			if ( ! file_exists( $autoload_file ) ) {
-				$autoload_file = dirname( __DIR__ ) . '/vendor/autoload.php';
-			}
-		}
-
-		if ( ! file_exists( $autoload_file ) ) {
-			return null;
-		}
-
-		return $autoload_file;
 	}
 
 	/**
