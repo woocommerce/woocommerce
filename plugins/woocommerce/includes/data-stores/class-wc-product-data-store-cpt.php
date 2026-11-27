@@ -2709,13 +2709,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : null;
 			$price        = wc_format_decimal( get_post_meta( $id, '_price', true ) );
 			$sale_price   = wc_format_decimal( get_post_meta( $id, '_sale_price', true ) );
+			$min_price    = reset( $price_meta );
+			$max_price    = end( $price_meta );
 			$product_data = array(
 				'product_id'     => absint( $id ),
 				'sku'            => get_post_meta( $id, '_sku', true ),
 				'virtual'        => 'yes' === get_post_meta( $id, '_virtual', true ) ? 1 : 0,
 				'downloadable'   => 'yes' === get_post_meta( $id, '_downloadable', true ) ? 1 : 0,
-				'min_price'      => reset( $price_meta ),
-				'max_price'      => end( $price_meta ),
+				'min_price'      => ( false === $min_price || '' === $min_price ) ? null : $min_price,
+				'max_price'      => ( false === $max_price || '' === $max_price ) ? null : $max_price,
 				'onsale'         => $sale_price && $price === $sale_price ? 1 : 0,
 				'stock_quantity' => $stock,
 				'stock_status'   => get_post_meta( $id, '_stock_status', true ),

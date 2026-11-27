@@ -446,6 +446,56 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Saving an unpriced product stores NULL for min_price and max_price in the lookup table.
+	 */
+	public function test_get_data_for_lookup_table_normalizes_empty_price_to_null(): void {
+		global $wpdb;
+
+		// 1. Unpriced product (empty regular price).
+		$unpriced_product = new WC_Product_Simple();
+		$unpriced_product->set_name( 'Unpriced Product' );
+		$unpriced_product->save();
+
+		$unpriced_row = $wpdb->get_row(
+			$wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $unpriced_product->get_id() ),
+			ARRAY_A
+		);
+		$this->assertNull( $unpriced_row['min_price'], 'Unpriced product min_price should be NULL.' );
+		$this->assertNull( $unpriced_row['max_price'], 'Unpriced product max_price should be NULL.' );
+
+		// 2. Free product ($0 regular price).
+		$free_product = new WC_Product_Simple();
+		$free_product->set_name( 'Free Product' );
+		$free_product->set_regular_price( 0 );
+		$free_product->save();
+
+		$free_row = $wpdb->get_row(
+			$wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $free_product->get_id() ),
+			ARRAY_A
+		);
+		$this->assertSame( 0.0, (float) $free_row['min_price'], 'Free product min_price should be 0.0.' );
+		$this->assertSame( 0.0, (float) $free_row['max_price'], 'Free product max_price should be 0.0.' );
+
+		// 3. Priced product.
+		$priced_product = new WC_Product_Simple();
+		$priced_product->set_name( 'Priced Product' );
+		$priced_product->set_regular_price( 15.5 );
+		$priced_product->save();
+
+		$priced_row = $wpdb->get_row(
+			$wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $priced_product->get_id() ),
+			ARRAY_A
+		);
+		$this->assertSame( 15.5, (float) $priced_row['min_price'], 'Priced product min_price should match.' );
+		$this->assertSame( 15.5, (float) $priced_row['max_price'], 'Priced product max_price should match.' );
+
+		// Cleanup.
+		$unpriced_product->delete( true );
+		$free_product->delete( true );
+		$priced_product->delete( true );
+	}
+
+	/**
 	 * Test that only one product is created with a unique SKU
 	 * during concurrent requests and when request is initiated via REST API.
 	 *
