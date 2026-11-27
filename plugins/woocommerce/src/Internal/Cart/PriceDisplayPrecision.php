@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Cart;
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -118,23 +120,25 @@ final class PriceDisplayPrecision {
 			return $decimals;
 		}
 
-		return max( $decimals, min( 6, self::count_decimals( NumberUtil::round( $unit, 6 ) ) ) );
+		// Count at 6 places, not the internal rounding precision, which a filter can lower below the decimals needed.
+		return max( $decimals, min( 6, self::count_decimals( round( $unit, 6 ), 6 ) ) );
 	}
 
 	/**
-	 * Count the decimals in a price, ignoring trailing zeros and float noise beyond the rounding precision.
+	 * Count the decimals in a price, ignoring trailing zeros and float noise beyond the precision.
 	 *
-	 * @param mixed $price Price.
+	 * @param mixed    $price     Price.
+	 * @param int|null $precision Decimals to count up to. Defaults to the internal rounding precision.
 	 * @return int
 	 */
-	private static function count_decimals( $price ): int {
+	private static function count_decimals( $price, ?int $precision = null ): int {
 		if ( '' === $price || null === $price || ! is_numeric( $price ) ) {
 			return 0;
 		}
 
 		// PHP's round(), not NumberUtil::round(), which first rounds to WC_ROUNDING_PRECISION and so drops digits from
 		// stores with more decimals than that allows.
-		$precision = wc_get_rounding_precision();
+		$precision = $precision ?? wc_get_rounding_precision();
 		$digits    = rtrim( number_format( round( (float) $price, $precision ), $precision, '.', '' ), '0' );
 		$dot       = strpos( $digits, '.' );
 

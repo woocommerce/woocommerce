@@ -103,7 +103,7 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 					html_entity_decode( wp_strip_all_tags( wc_price( NumberUtil::round( $item_cost, $item_cost_decimals ), array_merge( $wc_price_arg, array( 'decimals' => $item_cost_decimals ) ) ) ), ENT_QUOTES, get_bloginfo( 'charset' ) )
 				);
 				printf(
-					'<span class="tips wc-order-item-rounded-price" data-tip="%1$s">%2$s<span class="screen-reader-text"> %3$s</span></span>',
+					'<span class="tips wc-order-item-rounded-price" tabindex="0" data-tip="%1$s">%2$s<span class="screen-reader-text"> %3$s</span></span>',
 					esc_attr( $item_cost_note ),
 					$item_cost_html, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					esc_html( $item_cost_note )

@@ -28,4 +28,16 @@ class PriceDisplayPrecisionTest extends WC_Unit_Test_Case {
 	public function test_unit_decimals_explain_the_line( float $unit, float $quantity, float $line, int $expected ): void {
 		$this->assertSame( $expected, PriceDisplayPrecision::get_unit_decimals_for_line( $unit, $quantity, $line ) );
 	}
+
+	/**
+	 * @testdox Counts the unit's decimals at 6 places, even when the internal rounding precision is lowered.
+	 */
+	public function test_unit_decimals_ignore_lowered_rounding_precision(): void {
+		$precision = fn() => 2;
+		add_filter( 'woocommerce_internal_rounding_precision', $precision );
+		$decimals  = PriceDisplayPrecision::get_unit_decimals_for_line( 8.325, 3, 24.975 );
+		remove_filter( 'woocommerce_internal_rounding_precision', $precision );
+
+		$this->assertSame( 3, $decimals );
+	}
 }
