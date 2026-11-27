@@ -911,7 +911,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			foreach ( $request['attributes'] as $attribute ) {
 				if ( ! is_array( $attribute ) ) {
-					throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute', esc_html__( 'Each attribute must be an object.', 'woocommerce' ), 400 );
+					continue;
 				}
 
 				$attribute_id   = 0;
