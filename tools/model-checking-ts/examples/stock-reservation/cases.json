@@ -1,0 +1,41 @@
+{
+	"constants": {
+		"STOCK": 1,
+		"MAX_QUANTITY": 2,
+		"HOLD_FOR": 2,
+		"MAX_TIME": 3,
+		"FOUND_ROWS": false,
+		"SPLIT_CHECK_WRITE": false
+	},
+	"types": {
+		"Quantity": [ 1, 2 ]
+	},
+	"cases": {
+		"small": {},
+		"larger": {
+			"constants": {
+				"STOCK": 2,
+				"MAX_QUANTITY": 3
+			},
+			"types": {
+				"Quantity": [ 1, 2, 3 ]
+			}
+		},
+		"found-rows": {
+			"constants": {
+				"FOUND_ROWS": true
+			}
+		},
+		"split": {
+			"constants": {
+				"MAX_QUANTITY": 1,
+				"MAX_TIME": 0,
+				"SPLIT_CHECK_WRITE": true
+			},
+			"types": {
+				"Quantity": [ 1 ]
+			},
+			"violation": "NoOverReservation"
+		}
+	}
+}
