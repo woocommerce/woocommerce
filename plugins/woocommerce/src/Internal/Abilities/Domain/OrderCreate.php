@@ -115,11 +115,12 @@ class OrderCreate extends ActionableAbility {
 	}
 
 	/**
-	 * Set the customer, addresses, payment method and lines in memory, then the status. Every refusal comes back in one error.
+	 * Set the customer, addresses, payment method and lines in memory. Every refusal comes back in one error. The product
+	 * lines are the secondary objects, of the `order_item` resource.
 	 *
 	 * @param \WC_Order $subject New order.
 	 * @param array     $input   Ability input.
-	 * @return null|\WP_Error
+	 * @return \WP_Error|array<int, array{0: \WC_Order_Item_Product, 1: array, 2: string}>
 	 * @throws \WC_Data_Exception When the order class has not adopted a stage method.
 	 */
 	public function change( $subject, array $input ) {
@@ -179,8 +180,22 @@ class OrderCreate extends ActionableAbility {
 		}
 
 		if ( ! empty( $input['line_items'] ) || ! empty( $input['shipping_lines'] ) ) {
-			$this->stage_line_totals( $subject, ! empty( $input['line_items'] ) );
+			$this->product_added = ! empty( $input['line_items'] );
 		}
+
+		return $this->line_objects;
+	}
+
+	/**
+	 * Recalculate the totals after the field writes, then stage the status.
+	 *
+	 * @param \WC_Order $subject New order.
+	 * @param array     $input   Ability input.
+	 * @return null
+	 * @throws \WC_Data_Exception When the order class has not adopted a stage method.
+	 */
+	protected function finish_change( $subject, array $input ) {
+		$this->stage_changed_line_totals( $subject );
 
 		// Not a manual change, as in REST and wc_create_order(): a new order has no ID for woocommerce_order_edit_status.
 		if ( ExtensibleAbilities::is_enabled() && $subject->get_status() !== $this->status ) {
@@ -275,15 +290,17 @@ class OrderCreate extends ActionableAbility {
 					'minItems'    => 1,
 					'items'       => array(
 						'type'                 => 'object',
-						'properties'           => array(
-							'product_id' => array(
-								'type'    => 'integer',
-								'minimum' => 1,
-							),
-							'quantity'   => array(
-								'type'    => 'integer',
-								'minimum' => 1,
-							),
+						'properties'           => self::add_line_item_extensions_schema(
+							array(
+								'product_id' => array(
+									'type'    => 'integer',
+									'minimum' => 1,
+								),
+								'quantity'   => array(
+									'type'    => 'integer',
+									'minimum' => 1,
+								),
+							)
 						),
 						'required'             => array( 'product_id' ),
 						'additionalProperties' => false,

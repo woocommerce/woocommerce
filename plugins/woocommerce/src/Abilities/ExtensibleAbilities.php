@@ -634,7 +634,11 @@ class ExtensibleAbilities {
 	 * no extension fields. For example, a validator refuses a product change that
 	 * would break a subscription plan.
 	 *
-	 * Core's product abilities and order-update-status run validators. An order
+	 * Core's product and order abilities run validators. order-create and order-update
+	 * run the validators and the syncs of `order_item` on each product line that the
+	 * call adds, changes or removes, and a `line_items` entry takes the `extensions` of
+	 * that resource. They recalculate the totals after the field writes, so the
+	 * `set_callback` of an `order_item` field can give its line a price. An order
 	 * validator sees the order with its new status staged, including the paid
 	 * and completed dates that the status sets. A stage_*() method refuses a class
 	 * that overrides its saving method without overriding the stage method too, so

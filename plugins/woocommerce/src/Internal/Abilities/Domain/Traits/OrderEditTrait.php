@@ -46,12 +46,83 @@ trait OrderEditTrait {
 	private array $products_to_add = array();
 
 	/**
+	 * Product lines that change() added or changed, as secondary objects of the `order_item` resource with
+	 * their `extensions` input. The save of the order saves them.
+	 *
+	 * @var array<int, array{0: \WC_Order_Item_Product, 1: array, 2: string}>
+	 */
+	private array $line_objects = array();
+
+	/**
+	 * Whether change() added a product line, for the totals in stage_changed_line_totals(). Null when no line changed.
+	 *
+	 * @var bool|null
+	 */
+	private ?bool $product_added = null;
+
+	/**
 	 * Forget the line changes of an earlier call, since the ability object is reused.
 	 */
 	private function reset_line_changes(): void {
 		$this->changed_product_lines  = array();
 		$this->recalculate_after_save = null;
 		$this->products_to_add        = array();
+		$this->line_objects           = array();
+		$this->product_added          = null;
+	}
+
+	/**
+	 * Recalculate the totals when change() changed a line. It runs in finish_change(), so the totals include
+	 * a price that the `set_callback` of an `order_item` field gave a line.
+	 *
+	 * @param \WC_Order $order Order.
+	 * @throws \WC_Data_Exception When the order class has not adopted a stage method.
+	 */
+	private function stage_changed_line_totals( \WC_Order $order ): void {
+		if ( null !== $this->product_added ) {
+			$this->stage_line_totals( $order, $this->product_added );
+		}
+	}
+
+	/**
+	 * Whether an `order_item` field applies to a product line, from the `object_types` of the field.
+	 *
+	 * @param array<string, mixed> $args Field arguments.
+	 * @return bool
+	 */
+	public static function field_applies_to_product_lines( array $args ): bool {
+		return empty( $args['object_types'] ) || in_array( 'line_item', $args['object_types'], true );
+	}
+
+	/**
+	 * Add the `extensions` input of the `order_item` resource to the properties of a `line_items` entry,
+	 * when the feature is on.
+	 *
+	 * @param array<string, array> $properties Properties of one product line.
+	 * @return array<string, array>
+	 */
+	private static function add_line_item_extensions_schema( array $properties ): array {
+		if ( ExtensibleAbilities::is_enabled() ) {
+			$properties['extensions'] = ExtensibleAbilities::get_input_schema( 'order_item', array( self::class, 'field_applies_to_product_lines' ) );
+		}
+		return $properties;
+	}
+
+	/**
+	 * Say what is wrong with each bad extension field of the input and of its `line_items` entries. The
+	 * message of an entry starts with the entry, as `line_items[0]: `.
+	 *
+	 * @param array $input Ability input that the schema refused.
+	 * @return string[]
+	 */
+	protected function get_field_refusals( array $input ): array {
+		$refusals = parent::get_field_refusals( $input );
+		foreach ( ExtensibleAbilities::is_enabled() && is_array( $input['line_items'] ?? null ) ? $input['line_items'] : array() as $index => $line ) {
+			foreach ( self::describe_bad_fields( $line['extensions'] ?? null, 'order_item', array( self::class, 'field_applies_to_product_lines' ) ) as $message ) {
+				$refusals[] = 'line_items[' . $index . ']: ' . $message;
+			}
+		}
+		return $refusals;
 	}
 
 	/**
@@ -286,7 +357,9 @@ trait OrderEditTrait {
 			return null;
 		}
 
-		$this->changed_product_lines[] = $order->stage_product_item( $product, $quantity, array( 'order' => $order ) );
+		$item                          = $order->stage_product_item( $product, $quantity, array( 'order' => $order ) );
+		$this->changed_product_lines[] = $item;
+		$this->line_objects[]          = array( $item, $line['extensions'] ?? array(), 'order_item' );
 
 		return null;
 	}

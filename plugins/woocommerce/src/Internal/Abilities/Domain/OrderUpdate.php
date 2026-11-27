@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
@@ -39,6 +40,13 @@ class OrderUpdate extends ActionableAbility {
 	 * @var array<int, \WC_Order_Item_Product>
 	 */
 	private array $removed_product_lines = array();
+
+	/**
+	 * Copies of the removed product lines as they were before the save deleted them, for the syncs.
+	 *
+	 * @var array<int, array{0: \WC_Order_Item_Product, 1: string}>
+	 */
+	private array $deleted_product_lines = array();
 
 	/**
 	 * Get the ability registration arguments.
@@ -108,15 +116,17 @@ class OrderUpdate extends ActionableAbility {
 
 	/**
 	 * Change the order in memory. A refused address or line does not stop the
-	 * others, and every refusal comes back in one error.
+	 * others, and every refusal comes back in one error. The product lines that
+	 * the call adds or changes are the secondary objects, of the `order_item` resource.
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
-	 * @return null|\WP_Error
+	 * @return null|\WP_Error|array<int, array{0: \WC_Order_Item_Product, 1: array, 2: string}>
 	 * @throws \WC_Data_Exception When the order class has not adopted a stage method.
 	 */
 	public function change( $subject, array $input ) {
 		$this->removed_product_lines = array();
+		$this->deleted_product_lines = array();
 		$this->reset_line_changes();
 
 		$refused = new \WP_Error();
@@ -158,7 +168,38 @@ class OrderUpdate extends ActionableAbility {
 			$refused->merge_from( $error );
 		}
 
-		return $refused->has_errors() ? $refused : null;
+		return $refused->has_errors() ? $refused : $this->line_objects;
+	}
+
+	/**
+	 * Recalculate the totals after the field writes, when a line changed.
+	 *
+	 * @param \WC_Order $subject Order.
+	 * @param array     $input   Ability input.
+	 * @return null
+	 * @throws \WC_Data_Exception When the order class has not adopted a stage method.
+	 */
+	protected function finish_change( $subject, array $input ) {
+		$this->stage_changed_line_totals( $subject );
+		return null;
+	}
+
+	/**
+	 * The product lines that the call removes, for the validators of the `order_item` resource.
+	 *
+	 * @return array<int, array{0: \WC_Order_Item_Product, 1: string}>
+	 */
+	protected function get_objects_to_delete(): array {
+		return array_map( static fn( \WC_Order_Item_Product $item ): array => array( $item, 'order_item' ), $this->removed_product_lines );
+	}
+
+	/**
+	 * The product lines that the save removed, for the syncs of the `order_item` resource.
+	 *
+	 * @return array<int, array{0: \WC_Order_Item_Product, 1: string}>
+	 */
+	protected function get_deleted_objects(): array {
+		return $this->deleted_product_lines;
 	}
 
 	/**
@@ -173,6 +214,8 @@ class OrderUpdate extends ActionableAbility {
 	 */
 	public function save( $subject ) {
 		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
+
+		$this->deleted_product_lines = array_map( static fn( \WC_Order_Item_Product $item ): array => array( clone $item, 'order_item' ), $this->removed_product_lines );
 
 		$stock_notes = array();
 		foreach ( $this->removed_product_lines as $item ) {
@@ -237,10 +280,10 @@ class OrderUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Remove, change and add lines in memory, then recalculate the totals
-	 * without saving. Coupons apply again after a product is added, because
-	 * they were applied before the new line existed. Every refused line comes
-	 * back in one error, and then nothing is recalculated.
+	 * Remove, change and add lines in memory. finish_change() then recalculates
+	 * the totals without saving. Coupons apply again after a product is added,
+	 * because they were applied before the new line existed. Every refused line
+	 * comes back in one error, and then nothing is recalculated.
 	 *
 	 * @param \WC_Order $order Order.
 	 * @param array     $input Ability input.
@@ -296,14 +339,15 @@ class OrderUpdate extends ActionableAbility {
 			return $refused;
 		}
 
-		$this->stage_line_totals( $order, $product_added );
+		$this->product_added = $product_added;
 
 		return null;
 	}
 
 	/**
-	 * Give a product line a new quantity in memory. The subtotal and the total
-	 * keep their price per unit, so a custom price or a discount stays.
+	 * Give a product line a new quantity in memory, when the input sends one. The subtotal and the total
+	 * keep their price per unit, so a custom price or a discount stays. A line that only gets
+	 * `extensions` keeps its quantity.
 	 *
 	 * @param \WC_Order $order Order.
 	 * @param array     $line  Product line input.
@@ -316,13 +360,21 @@ class OrderUpdate extends ActionableAbility {
 			return self::line_not_found( $line['id'] );
 		}
 
-		if ( ! isset( $line['quantity'] ) ) {
+		if ( ! isset( $line['quantity'] ) && ! isset( $line['extensions'] ) ) {
 			return new \WP_Error(
 				'woocommerce_ability_order_line_item_quantity_required',
-				/* translators: %d: order item ID. */
-				sprintf( __( 'Nothing to change on line %d. Send quantity to change the line, or send its ID in remove_items to remove it.', 'woocommerce' ), $line['id'] ),
+				ExtensibleAbilities::is_enabled()
+					/* translators: %d: order item ID. */
+					? sprintf( __( 'Nothing to change on line %d. Send quantity or extensions to change the line, or send its ID in remove_items to remove it.', 'woocommerce' ), $line['id'] )
+					/* translators: %d: order item ID. */
+					: sprintf( __( 'Nothing to change on line %d. Send quantity to change the line, or send its ID in remove_items to remove it.', 'woocommerce' ), $line['id'] ),
 				array( 'status' => 400 )
 			);
+		}
+
+		$this->line_objects[] = array( $item, $line['extensions'] ?? array(), 'order_item' );
+		if ( ! isset( $line['quantity'] ) ) {
+			return null;
 		}
 
 		try {
@@ -369,19 +421,21 @@ class OrderUpdate extends ActionableAbility {
 					'minItems'    => 1,
 					'items'       => array(
 						'type'                 => 'object',
-						'properties'           => array(
-							'id'         => array(
-								'type'    => 'integer',
-								'minimum' => 1,
-							),
-							'product_id' => array(
-								'type'    => 'integer',
-								'minimum' => 1,
-							),
-							'quantity'   => array(
-								'type'    => 'integer',
-								'minimum' => 1,
-							),
+						'properties'           => self::add_line_item_extensions_schema(
+							array(
+								'id'         => array(
+									'type'    => 'integer',
+									'minimum' => 1,
+								),
+								'product_id' => array(
+									'type'    => 'integer',
+									'minimum' => 1,
+								),
+								'quantity'   => array(
+									'type'    => 'integer',
+									'minimum' => 1,
+								),
+							)
 						),
 						'additionalProperties' => false,
 					),
