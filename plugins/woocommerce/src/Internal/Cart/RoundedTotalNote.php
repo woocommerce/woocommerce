@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * e.g. "Rounded to £5.98 from 3 units priced £1.992 (incl. VAT), shown as £1.99 in your cart." The Cart and Checkout
  * blocks apply the same rules in the browser and use the same markup, script and styles.
  *
- * @since 11.4.0
+ * @since 11.5.0
  */
 class RoundedTotalNote implements RegisterHooksInterface {
 
