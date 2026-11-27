@@ -51,6 +51,9 @@ abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 		global $wp_rest_server;
 		$wp_rest_server = null;
 		WC()->cart->empty_cart();
+
+		// This base does not extend WC_Unit_Test_Case, so its teardown never runs here.
+		\WC_Unit_Test_Case::reset_product_filters_term_trees();
 	}
 
 	/**

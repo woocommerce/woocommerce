@@ -7,6 +7,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
+use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -259,6 +260,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			CodeHacker::reset_hacks();
 
 			$this->reset_analytics_reload_flag();
+			self::reset_product_filters_term_trees();
 			$this->clear_wc_singleton_state();
 		} finally {
 			// The parent teardown must always run: it rolls back the database
@@ -473,6 +475,18 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			null,
 			Analytics::class
 		)();
+	}
+
+	/**
+	 * Drop the term trees the product filters cache on their shared service. The rollback removes a
+	 * test's terms without firing the term hooks that would clear the cache, so the next test would
+	 * read a tree of terms that no longer exist and miss the ones it creates. Public and static so
+	 * test bases outside this hierarchy can call it too.
+	 */
+	public static function reset_product_filters_term_trees(): void {
+		( function (): void {
+			$this->hierarchy_data = array();
+		} )->call( wc_get_container()->get( TaxonomyHierarchyData::class ) );
 	}
 
 	/**

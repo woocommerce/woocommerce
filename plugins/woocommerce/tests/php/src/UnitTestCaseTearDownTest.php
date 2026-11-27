@@ -5,11 +5,12 @@ namespace Automattic\WooCommerce\Tests;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
+use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 
 /**
  * Tests the state cleanup in WC_Unit_Test_Case: the WC() singleton, $_SERVER, Constants and
- * block type state that survives the parent teardown, the Analytics reload flag, and the
- * attribute taxonomies the rollback leaves registered.
+ * block type state that survives the parent teardown, the Analytics reload flag, the product
+ * filters' cached term tree, and the attribute taxonomies the rollback leaves registered.
  *
  * This drives the cleanup methods directly rather than dirtying state in one test and
  * asserting it is gone in the next. A pair like that only holds under declaration order: run
@@ -130,6 +131,24 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 			WC()->countries->get_country_locale()['GB']['postcode']['label'] ?? null,
 			'The filtered locale should not still be cached.'
 		);
+	}
+
+	/**
+	 * @testdox The term trees the product filters cache on their shared service are dropped.
+	 */
+	public function test_reset_product_filters_term_trees_drops_the_cached_trees(): void {
+		$hierarchy_data = wc_get_container()->get( TaxonomyHierarchyData::class );
+		$cached_trees   = new \ReflectionProperty( TaxonomyHierarchyData::class, 'hierarchy_data' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$cached_trees->setAccessible( true );
+		}
+
+		$hierarchy_data->get_hierarchy_map( 'product_cat' );
+		$this->assertArrayHasKey( 'product_cat', $cached_trees->getValue( $hierarchy_data ), 'Reading a tree should cache it on the shared service.' );
+
+		self::reset_product_filters_term_trees();
+
+		$this->assertSame( array(), $cached_trees->getValue( $hierarchy_data ), 'The cached trees should have been dropped.' );
 	}
 
 	/**
