@@ -651,6 +651,54 @@ class TaxRateAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report a failed rate update and leave the rate and its locations unchanged, even when an updated hook runs a query.
+	 */
+	public function test_failed_rate_update_is_reported(): void {
+		global $wpdb;
+
+		$rate         = $this->create_rate(
+			array(
+				'rate'      => '19',
+				'postcodes' => array( '10115' ),
+			)
+		);
+		$rates_update = "UPDATE `{$wpdb->prefix}woocommerce_tax_rates` SET ";
+		add_filter(
+			'query',
+			static function ( $query ) use ( $rates_update ) {
+				return 0 === strpos( $query, $rates_update ) ? 'UPDATE no_such_table_for_the_rate SET x = 1' : $query;
+			}
+		);
+		add_action(
+			'woocommerce_tax_rate_updated',
+			static function () use ( $wpdb ) {
+				$wpdb->query( 'SELECT 1' );
+			}
+		);
+
+		$suppressed = $wpdb->suppress_errors( true );
+		try {
+			$result = $this->run_ability(
+				'woocommerce/tax-rate-update',
+				array(
+					'id'        => $rate['id'],
+					'rate'      => '16',
+					'postcodes' => array( '10117' ),
+				)
+			);
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_tax_rate_update_failed', $result->get_error_code() );
+		$this->assertSame( 500, $result->get_error_data()['status'] );
+		$stored = $this->run_ability( 'woocommerce/tax-rates-query', array( 'include' => array( $rate['id'] ) ) )['rates'][0];
+		$this->assertSame( '19.0000', $stored['rate'] );
+		$this->assertSame( array( '10115' ), $stored['postcodes'] );
+	}
+
+	/**
 	 * @testdox Should report an unknown rate ID as not found on $ability.
 	 *
 	 * @testWith ["woocommerce/tax-rate-update"]
