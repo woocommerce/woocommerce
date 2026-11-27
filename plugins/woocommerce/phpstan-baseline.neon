@@ -63863,18 +63863,6 @@ parameters:
 			path: src/Internal/StockNotifications/Frontend/ProductPageIntegration.php
 
 		-
-			message: '#^Cannot access property \$ID on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Frontend/ProductPageIntegration.php
-
-		-
-			message: '#^Cannot access property \$user_email on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Frontend/ProductPageIntegration.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Frontend\\SignupService\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
