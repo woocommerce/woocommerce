@@ -122,6 +122,67 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The Features row names the experiments another plugin already provides, from the last check.
+	 */
+	public function test_provided_elsewhere_note_names_found_experiments(): void {
+		$this->store_found(
+			array(
+				'llms-full'  => true,
+				'tdmrep'     => true,
+				'sitemap-md' => false,
+				'agents-md'  => true,
+			)
+		);
+
+		$this->assertSame(
+			'Another plugin already provides a full-content llms.txt and AI training notices, so WooCommerce won’t add its own.',
+			AiAssistantExperiments::get_provided_elsewhere_note()
+		);
+	}
+
+	/**
+	 * @testdox There's no note when none of the files are found, the check couldn't read them, or there's no check yet.
+	 */
+	public function test_provided_elsewhere_note_empty_without_found_files(): void {
+		$this->store_found(
+			array(
+				'llms-full' => false,
+				'ai-txt'    => null,
+				'agents-md' => true,
+			)
+		);
+		$this->assertSame( '', AiAssistantExperiments::get_provided_elsewhere_note() );
+
+		delete_option( AgentReadiness::REPORT_OPTION );
+		$this->assertSame( '', AiAssistantExperiments::get_provided_elsewhere_note() );
+	}
+
+	/**
+	 * @testdox The note shows under the Features row only once the feature is on.
+	 *
+	 * @testWith ["yes", "Another plugin already provides a full-content llms.txt, so WooCommerce won’t add its own."]
+	 *           ["no", ""]
+	 *
+	 * @param string $enabled  Value of the feature option.
+	 * @param string $expected The row's line under its description.
+	 */
+	public function test_provided_elsewhere_note_only_when_on( string $enabled, string $expected ): void {
+		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
+		update_option( 'woocommerce_feature_ai_assistant_experiments_enabled', $enabled );
+		$this->store_found( array( 'llms-full' => true ) );
+		$option_name = $this->sut->feature_enable_option_name( AiAssistantExperiments::FEATURE_NAME );
+
+		$rows = array_values(
+			array_filter(
+				$this->sut->add_feature_settings( array(), 'features' ),
+				static fn( $setting ) => ( $setting['id'] ?? null ) === $option_name
+			)
+		);
+
+		$this->assertSame( $expected, $rows[0]['desc_tip'] );
+	}
+
+	/**
 	 * @testdox While the feature is off, AI shopping health suggests it and links to its row on the Features page.
 	 */
 	public function test_health_notice_copy(): void {
@@ -190,6 +251,30 @@ class AiAssistantExperimentsTest extends WC_Unit_Test_Case {
 
 		$this->assertArrayNotHasKey( 'experiments', $view['declared'] );
 		$this->assertArrayNotHasKey( 'experiments', $view['overview'] );
+	}
+
+	/**
+	 * Store a check report whose Extra details items have these results.
+	 *
+	 * @param array<string, bool|null> $found Whether each item, by id, was found.
+	 */
+	private function store_found( array $found ): void {
+		$items = array();
+		foreach ( $found as $id => $value ) {
+			$items[] = array(
+				'id'    => $id,
+				'name'  => $id,
+				'found' => $value,
+			);
+		}
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+				'declared'     => $items,
+			)
+		);
 	}
 
 	/**

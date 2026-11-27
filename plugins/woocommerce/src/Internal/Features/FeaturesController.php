@@ -686,6 +686,10 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'setting'                      => array(
+					// Only once they're on: which experiments another plugin already provides.
+					'desc_tip' => fn() => $this->feature_is_enabled( AiAssistantExperiments::FEATURE_NAME ) ? AiAssistantExperiments::get_provided_elsewhere_note() : '',
+				),
 			),
 			'destroy-empty-sessions'               => array(
 				'name'                         => __( 'Clear Customer Sessions When Empty', 'woocommerce' ),
