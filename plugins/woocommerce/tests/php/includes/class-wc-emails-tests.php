@@ -60,6 +60,23 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The New account email gets the password only when the customer chose it, so custom templates can't print a generated one.
+	 * @testWith [true, ""]
+	 *           [false, "chosen-Password-1"]
+	 *
+	 * @param bool   $password_generated Whether WooCommerce generated the password.
+	 * @param string $expected           Password the email holds.
+	 */
+	public function test_customer_new_account_leaves_out_a_generated_password( bool $password_generated, string $expected ): void {
+		$customer_id = WC_Helper_Customer::create_customer( 'new-account-pass', 'unused', 'new-account-pass@example.test' )->get_id();
+		add_filter( 'pre_wp_mail', '__return_true' );
+
+		WC()->mailer()->customer_new_account( $customer_id, array( 'user_pass' => 'chosen-Password-1' ), $password_generated );
+
+		$this->assertSame( $expected, WC()->mailer()->get_emails()['WC_Email_Customer_New_Account']->user_pass );
+	}
+
+	/**
 	 * @testdox Pending to cancelled order status changes trigger transactional email notifications.
 	 */
 	public function test_pending_to_cancelled_status_change_triggers_transactional_email_notifications(): void {
