@@ -116,6 +116,13 @@
 				fields: params.cookieFields,
 			} );
 		}
+		updateAttributionData();
+	}
+
+	/**
+	 * Update the classic checkout inputs and the Checkout block with the current attribution data.
+	 */
+	function updateAttributionData() {
 		const values = wc_order_attribution.getAttributionData();
 		updateFormValues( values );
 		updateCheckoutBlockData( values );
@@ -145,7 +152,13 @@
 	}
 
 	// Run init.
-	wc_order_attribution.setOrderTracking( params.allowTracking );
+	if ( params.consentCategory && ! params.allowTracking ) {
+		// The WP Consent API integration decides once it can read the visitor's consent. Until then,
+		// keep the cookies: this page may be cached, so `allowTracking` does not reflect this visitor.
+		updateAttributionData();
+	} else {
+		wc_order_attribution.setOrderTracking( params.allowTracking );
+	}
 
 	// Work around the lack of explicit script dependency for the checkout block.
 	// Conditionally, wait for and use 'wp-data' & 'wc-blocks-checkout.

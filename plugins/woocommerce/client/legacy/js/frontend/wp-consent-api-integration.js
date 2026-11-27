@@ -15,5 +15,10 @@
 	document.addEventListener( 'wp_consent_type_defined', () => {
 		window.wc_order_attribution.setOrderTracking( wp_has_consent( window.wc_order_attribution.params.consentCategory ) );
 	} );
+
+	// Check consent now, unless the consent plugin will define the consent type later.
+	if ( window.wp_consent_type || ! window.waitfor_consent_hook ) {
+		window.wc_order_attribution.setOrderTracking( wp_has_consent( window.wc_order_attribution.params.consentCategory ) );
+	}
 }() );
 
