@@ -7,6 +7,7 @@
 
 namespace Automattic\WooCommerce\Tests\Admin\API;
 
+use Automattic\WooCommerce\Tests\Helpers\JetpackConnectionManagerTrait;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 
@@ -16,6 +17,8 @@ use WP_REST_Request;
  * @class OnboardingPluginsTest.
  */
 class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
+	use JetpackConnectionManagerTrait;
+
 	/**
 	 * Endpoint.
 	 *
@@ -36,6 +39,7 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		unset( $GLOBALS['wp_rest_auth_cookie'] );
+		$this->reset_jetpack_connection_manager();
 
 		parent::tearDown();
 	}
@@ -270,36 +274,19 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_jetpack_authorization_url_passes_force_to_registration( $force, $expected ) {
-		$calls   = array();
-		$manager = $this->createMock( \Automattic\Jetpack\Connection\Manager::class );
-		$manager->method( 'is_connected' )->willReturn( false );
-		$manager->method( 'get_authorization_url' )->willReturn( 'https://jetpack.wordpress.com/jetpack.authorize/1/?client_id=1' );
-		$manager->method( 'try_registration' )->willReturnCallback(
-			static function ( ...$args ) use ( &$calls ) {
-				$calls[] = $args;
-				return true;
-			}
-		);
-		$property = new \ReflectionProperty( \Automattic\WooCommerce\Internal\Jetpack\JetpackConnection::class, 'manager' );
-		$property->setAccessible( true );
-		$property->setValue( null, $manager );
+		$calls = $this->use_recording_jetpack_connection_manager();
 
 		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/jetpack-authorization-url' );
 		$request->set_param( 'redirect_url', 'https://example.com' );
 		if ( null !== $force ) {
-			$request->set_query_params( array_merge( $request->get_query_params(), array( 'force' => $force ) ) );
+			$request->set_param( 'force', $force );
 		}
 		$this->add_rest_nonce( $request );
 
-		try {
-			$response = $this->server->dispatch( $request );
-		} finally {
-			// JetpackConnection caches its manager in a static property that no base class resets.
-			$property->setValue( null, null );
-		}
+		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( 200, $response->get_status(), 'The request should succeed.' );
-		$this->assertSame( array( array( true, $expected ) ), $calls, 'Registration should be attempted once with the expected force flag.' );
+		$this->assertSame( array( array( true, $expected ) ), $calls->getArrayCopy(), 'Registration should be attempted once with the expected force flag.' );
 	}
 
 	/**

@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
+use Automattic\WooCommerce\Tests\Helpers\JetpackConnectionManagerTrait;
 use WC_Admin_Settings;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -21,6 +22,7 @@ use WC_Unit_Test_Case;
  * Tests for the Agentic commerce settings tab.
  */
 class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
+	use JetpackConnectionManagerTrait;
 
 	/**
 	 * The System Under Test.
@@ -61,8 +63,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			set_current_screen( 'front' );
-			// JetpackConnection caches its manager in a static property that no base class resets.
-			$this->set_connection_manager( null );
+			$this->reset_jetpack_connection_manager();
 			foreach ( array_reverse( $this->restore ) as $item ) {
 				$item[0]->enabled = $item[1];
 			}
@@ -213,7 +214,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 * @param bool $force Whether the merchant asked to connect.
 	 */
 	public function test_connect_redirect_passes_force_to_registration( bool $force ): void {
-		$calls = $this->use_recording_connection_manager();
+		$calls = $this->use_recording_jetpack_connection_manager();
 
 		AgenticCommerceSettings::connect_redirect( $force );
 
@@ -224,7 +225,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 * @testdox Clicking Connect forces WordPress.com registration past the connection package's backoff.
 	 */
 	public function test_connect_action_forces_registration(): void {
-		$calls                = $this->use_recording_connection_manager();
+		$calls                = $this->use_recording_jetpack_connection_manager();
 		$_REQUEST['_wpnonce'] = wp_create_nonce( AgenticCommerceSettings::CONNECT_ACTION );
 		// handle_connect() exits after redirecting; stop it at the redirect instead.
 		add_filter(
@@ -243,40 +244,6 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( array( array( true, true ) ), $calls->getArrayCopy(), 'The connect click should register once, forced.' );
-	}
-
-	/**
-	 * Make JetpackConnection use a connection manager that records try_registration() calls.
-	 *
-	 * The manager is reset when the test ends, since JetpackConnection caches it in a static property.
-	 *
-	 * @return \ArrayObject<int, array<int, mixed>> The recorded calls.
-	 */
-	private function use_recording_connection_manager(): \ArrayObject {
-		$calls   = new \ArrayObject();
-		$manager = $this->createMock( \Automattic\Jetpack\Connection\Manager::class );
-		$manager->method( 'is_connected' )->willReturn( false );
-		$manager->method( 'get_authorization_url' )->willReturn( 'https://jetpack.wordpress.com/jetpack.authorize/1/?client_id=1' );
-		$manager->method( 'try_registration' )->willReturnCallback(
-			static function ( ...$args ) use ( $calls ) {
-				$calls[] = $args;
-				return true;
-			}
-		);
-		$this->set_connection_manager( $manager );
-
-		return $calls;
-	}
-
-	/**
-	 * Replace the manager JetpackConnection caches.
-	 *
-	 * @param object|null $manager Manager to use, or null to reset.
-	 */
-	private function set_connection_manager( $manager ): void {
-		$property = new \ReflectionProperty( \Automattic\WooCommerce\Internal\Jetpack\JetpackConnection::class, 'manager' );
-		$property->setAccessible( true );
-		$property->setValue( null, $manager );
 	}
 
 	/**
