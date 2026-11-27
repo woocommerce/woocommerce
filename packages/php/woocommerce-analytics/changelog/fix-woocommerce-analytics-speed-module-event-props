@@ -1,4 +1,0 @@
-Significance: patch
-Type: fixed
-
-Keep the properties that plugins add through `jetpack_woocommerce_analytics_event_props` on events the proxy speed module records.
