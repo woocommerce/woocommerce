@@ -85,13 +85,14 @@
 	margin: 0;
 	padding: 0.5em 0.75em;
 	// The theme's text on the surface behind the total (the script copies it into the variable), tinted with the text
-	// colour like WooCommerce's tinted boxes. A tooltip floats over content, so the surface keeps it opaque.
+	// colour like WooCommerce's tinted boxes. A tooltip floats over content, so the surface keeps it opaque. When the
+	// surface can't be copied (a gradient or image), the script switches to the system pair Canvas and CanvasText.
 	border: 1px solid color-mix(in srgb, currentcolor 20%, transparent);
 	border-radius: 4px;
 	background:
 		linear-gradient(color-mix(in srgb, currentcolor 7%, transparent), color-mix(in srgb, currentcolor 7%, transparent)),
 		var(--wc-rounded-total-info-surface, Canvas);
-	color: inherit;
+	color: var(--wc-rounded-total-info-text, inherit);
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 	font-size: 0.875rem;
 	font-weight: 400;

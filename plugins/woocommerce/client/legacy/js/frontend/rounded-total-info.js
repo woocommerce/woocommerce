@@ -12,6 +12,7 @@
 	}
 	window.wcRoundedTotalInfo = true;
 
+	var WRAPPER = '.wc-rounded-total-info';
 	var BUTTON = '.wc-rounded-total-info__button';
 	var TOOLTIP = '.wc-rounded-total-info__tooltip';
 	var GAP = 6;
@@ -20,14 +21,16 @@
 	var closeTimer;
 	var canTransitionOut;
 
+	// A button and its tooltip share a wrapper. Look them up through it rather than by ID: the classic Mini-Cart's AJAX
+	// refresh copies the same HTML into every widget on the page (e.g. the header and a sidebar), so IDs can repeat.
 	function getTooltip( button ) {
-		return document.getElementById( button.getAttribute( 'popovertarget' ) );
+		var wrapper = button.closest( WRAPPER );
+		return wrapper ? wrapper.querySelector( TOOLTIP ) : null;
 	}
 
 	function getButton( tooltip ) {
-		return document.querySelector(
-			'[popovertarget="' + CSS.escape( tooltip.id ) + '"]'
-		);
+		var wrapper = tooltip.closest( WRAPPER );
+		return wrapper ? wrapper.querySelector( BUTTON ) : null;
 	}
 
 	function isOpen( tooltip ) {
@@ -46,12 +49,16 @@
 		return slash === -1 || parseFloat( colour.slice( slash + 1 ) ) >= 1;
 	}
 
-	// The first opaque background behind an element: a table cell, a drawer, or the page.
+	// The first opaque background behind an element: a table cell, a drawer, or the page. Empty when a background image
+	// or gradient is painted first, because the tooltip can't copy that.
 	function surfaceBehind( element ) {
 		for ( var node = element; node && node.nodeType === 1; node = node.parentElement ) {
-			var colour = getComputedStyle( node ).backgroundColor;
-			if ( isOpaque( colour ) ) {
-				return colour;
+			var style = getComputedStyle( node );
+			if ( isOpaque( style.backgroundColor ) ) {
+				return style.backgroundColor;
+			}
+			if ( style.backgroundImage && style.backgroundImage !== 'none' ) {
+				return '';
 			}
 		}
 		return '';
@@ -59,13 +66,20 @@
 
 	// Above the button, or below it when there's no room, and inside the viewport. Measure from the top-left corner:
 	// left where it sits in the page, the tooltip only gets the width to the screen's edge (e.g. in a narrow drawer).
-	// The tooltip paints the surface behind the button, so it matches light, dark and coloured themes.
+	// The tooltip paints the surface behind the button, so it matches light, dark and coloured themes. When it can't,
+	// it uses the system colours Canvas and CanvasText, which always contrast.
 	function place( button, tooltip ) {
 		var anchor = button.getBoundingClientRect();
+		var surface = surfaceBehind( button );
 		tooltip.style.setProperty(
 			'--wc-rounded-total-info-surface',
-			surfaceBehind( button ) || 'Canvas'
+			surface || 'Canvas'
 		);
+		if ( surface ) {
+			tooltip.style.removeProperty( '--wc-rounded-total-info-text' );
+		} else {
+			tooltip.style.setProperty( '--wc-rounded-total-info-text', 'CanvasText' );
+		}
 		tooltip.style.top = '0px';
 		tooltip.style.left = '0px';
 		var size = tooltip.getBoundingClientRect();
@@ -185,10 +199,13 @@
 
 	document.addEventListener( 'mouseover', function ( event ) {
 		var button = event.target.closest && event.target.closest( BUTTON );
+		var tooltip = ! button && tooltipFor( event.target );
 		if ( button ) {
 			show( button );
-		} else if ( tooltipFor( event.target ) ) {
+		} else if ( tooltip ) {
+			// Onto the tooltip: keep it open, even if it had started to fade.
 			clearTimeout( closeTimer );
+			tooltip.removeAttribute( 'data-closing' );
 		}
 	} );
 
@@ -213,11 +230,20 @@
 		}
 	} );
 
-	// event.detail is 0 for Enter and Space, so only a click or tap keeps the tooltip open.
+	// event.detail is 0 for Enter and Space, so only a click or tap keeps the tooltip open. When the tooltip's ID
+	// repeats, popovertarget opens the first copy, so open this button's own tooltip instead. (aria-describedby still
+	// finds the first copy, but repeated IDs come from copied HTML, so it has the same text.)
 	document.addEventListener( 'click', function ( event ) {
 		var button = event.target.closest && event.target.closest( BUTTON );
 		var tooltip = button && getTooltip( button );
-		if ( tooltip && event.detail > 0 ) {
+		if ( ! tooltip ) {
+			return;
+		}
+		if ( document.getElementById( button.getAttribute( 'popovertarget' ) ) !== tooltip ) {
+			event.preventDefault();
+			show( button );
+		}
+		if ( event.detail > 0 ) {
 			tooltip.setAttribute( 'data-pinned', '' );
 		}
 	} );
