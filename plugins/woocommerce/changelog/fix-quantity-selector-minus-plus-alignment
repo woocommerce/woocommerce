@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Align the minus and plus icons in quantity selectors in certain font sizes
