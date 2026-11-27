@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error when HPOS sync removes order post meta saved by a plugin that is no longer active.

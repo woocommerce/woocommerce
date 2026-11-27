@@ -1151,7 +1151,25 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		foreach ( $keys_to_delete as $meta_key ) {
 			if ( isset( $existing_meta_data[ $meta_key ] ) ) {
 				foreach ( $existing_meta_data[ $meta_key ] as $meta_value ) {
-					delete_post_meta( $order->get_id(), $meta_key, maybe_unserialize( $meta_value ) );
+					$unserialized_value = maybe_unserialize( $meta_value );
+					if ( is_object( $unserialized_value ) && '__PHP_Incomplete_Class' === get_class( $unserialized_value ) ) {
+						// delete_post_meta() would fatal unslashing an incomplete object, so delete the serialized row directly.
+						$wpdb->delete(
+							_get_meta_table( 'post' ),
+							array(
+								'post_id'    => $order->get_id(),
+								'meta_key'   => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+								'meta_value' => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+							),
+							array( '%d', '%s', '%s' )
+						);
+						wp_cache_delete( $order->get_id(), 'post_meta' );
+						/** @var WC_Logger_Interface $logger */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+						$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+						$logger->warning( sprintf( 'encountered an order meta value of type __PHP_Incomplete_Class while removing stale post meta in `update_order_meta_from_object` in order with ID %d: "%s"', $order->get_id(), var_export( $meta_value, true ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+					} else {
+						delete_post_meta( $order->get_id(), $meta_key, $unserialized_value );
+					}
 				}
 			}
 		}
