@@ -277,6 +277,7 @@ class ProductGallery extends AbstractBlock {
 					array(
 						'imageData'               => $default_media_ids,
 						'isDialogOpen'            => false,
+						'fullScreenOnClick'       => ! empty( $attributes['fullScreenOnClick'] ),
 						'productId'               => $product_id,
 						'selectedImageId'         => $initial_media_id,
 						'thumbnailsOverflow'      => [

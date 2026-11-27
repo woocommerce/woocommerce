@@ -308,20 +308,28 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the ProductGallery block renders correctly with fullscreen on click enabled.
+	 * @testdox Should expose the effective fullscreen setting in the gallery runtime context.
+	 * @testWith ["", true]
+	 *           ["{\"fullScreenOnClick\":true}", true]
+	 *           ["{\"fullScreenOnClick\":false}", false]
+	 * @param string $attributes Gallery block attributes.
+	 * @param bool   $expected Expected fullscreen setting.
 	 */
-	public function test_product_gallery_render_with_fullscreen_on_click() {
+	public function test_product_gallery_render_with_fullscreen_on_click( string $attributes, bool $expected ): void {
 		$data = $this->create_product_with_gallery( 1 );
 
 		$markup = $this->render_product_gallery(
 			$data['product']->get_id(),
-			'{"fullScreenOnClick":true}'
+			$attributes
 		);
 
-		// Check that fullscreen is enabled in the context.
-		$this->assertStringContainsString( 'data-full-screen-on-click="true"', $markup );
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-gallery' ) ) );
+		$context = json_decode( (string) $processor->get_attribute( 'data-wp-context' ), true );
 
-		$this->cleanup_product_data( $data );
+		$this->assertIsArray( $context );
+		$this->assertArrayHasKey( 'fullScreenOnClick', $context );
+		$this->assertSame( $expected, $context['fullScreenOnClick'] );
 	}
 
 	/**

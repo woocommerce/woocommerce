@@ -521,10 +521,12 @@ const productGallery = {
 			actions.selectImage( newImageIndex );
 		},
 		onViewerImageKeyDown: withSyncEvent( ( event: KeyboardEvent ) => {
-			if ( event.key === 'Enter' || event.key === ' ' ) {
-				if ( event.key === ' ' ) {
-					event.preventDefault();
-				}
+			const { fullScreenOnClick } = getContext();
+			const isActivationKey = event.key === 'Enter' || event.key === ' ';
+			if ( event.key === ' ' ) {
+				event.preventDefault();
+			}
+			if ( fullScreenOnClick && isActivationKey ) {
 				actions.openDialog();
 			}
 

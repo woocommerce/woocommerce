@@ -56,6 +56,7 @@ export type LegacyJQueryFormHandlers = {
 export interface ProductGalleryContext {
 	selectedImageId: number;
 	isDialogOpen: boolean;
+	fullScreenOnClick: boolean;
 	videoLocation?: 'dialog' | 'gallery';
 	productId: string;
 	imageData: number[];

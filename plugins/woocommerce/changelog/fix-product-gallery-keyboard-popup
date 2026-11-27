@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Respect the Product Gallery pop-up setting when using Enter or Space.
