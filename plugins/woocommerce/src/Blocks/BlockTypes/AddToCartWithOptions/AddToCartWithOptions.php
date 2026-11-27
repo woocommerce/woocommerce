@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\Utils as BlocksUtils;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListRenderer;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
@@ -551,6 +552,7 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			$cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add' );
 			$form_attributes         = '';
+			$notices_region          = '';
 			$legacy_mode             = 'yes' === $cart_redirect_after_add || $this->has_form_elements( $hooks_before ) || $this->has_form_elements( $hooks_after );
 			if ( $legacy_mode ) {
 				$action_url   = BlocksUtils::get_current_page_url();
@@ -580,10 +582,14 @@ class AddToCartWithOptions extends AbstractBlock {
 					'class'   => $form_classes,
 				);
 			} else {
-				// Otherwise, we use the Interactivity API.
+				// Otherwise, we use the Interactivity API. The form also holds the
+				// store notices context, so notices raised by the form and the
+				// blocks inside it are listed at the top of the form.
 				$form_attributes = array(
-					'data-wp-on--submit' => 'actions.addToCart',
+					'data-wp-on--submit'        => 'actions.addToCart',
+					'data-wp-context---notices' => 'woocommerce/store-notices::' . (string) wp_json_encode( array( 'notices' => array() ) ),
 				);
+				$notices_region  = ShopperListRenderer::render_interactivity_notices_region( 'wc-block-add-to-cart-with-options__notices' );
 			}
 
 			// These hidden inputs are used by extensions or Express Payment methods to gather information of the form state.
@@ -604,7 +610,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			$form_html = sprintf(
-				'<form %1$s %2$s>%3$s%4$s%5$s%6$s</form>',
+				'<form %1$s %2$s>%3$s%4$s%5$s%6$s%7$s</form>',
 				get_block_wrapper_attributes(
 					array_merge(
 						$wrapper_attributes,
@@ -619,11 +625,8 @@ class AddToCartWithOptions extends AbstractBlock {
 										// Add the `is-layout-flow` class so inner elements automatically get the
 										// default vertical margin from the theme. That's especially useful for
 										// elements added by extensions like express payment method buttons.
-										// In the future, we want to use `supports.layout` in block.json instead
-										// of hardcoding the class here. However, right now that wouldn't work
-										// because the wrapper element of the block is the notices `<div>`, so the
-										// `is-layout-flow` class would be applied to the notices container instead
-										// of the `<form>` as we want.
+										// phpcs:ignore Generic.Commenting.Todo.TaskFound
+										// @todo Now that the form is the block wrapper, use `supports.layout` in block.json instead.
 										'is-layout-flow',
 									)
 								)
@@ -632,6 +635,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					)
 				),
 				$context_directive,
+				$notices_region,
 				$hooks_before,
 				$template_part_blocks,
 				$hooks_after,
@@ -655,10 +659,6 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			$form_html = $form_html . ob_get_clean();
-
-			if ( ! $legacy_mode ) {
-				$form_html = $this->render_interactivity_notices_region( $form_html );
-			}
 		} else {
 			ob_start();
 
@@ -695,53 +695,5 @@ class AddToCartWithOptions extends AbstractBlock {
 		$product = $previous_product;
 
 		return $form_html;
-	}
-
-	/**
-	 * Render interactivity API powered notices that can be added client-side. This reuses classes
-	 * from the woocommerce/store-notices block to ensure style consistency.
-	 *
-	 * @param string $form_html The form HTML.
-	 * @return string The rendered store notices HTML.
-	 */
-	protected function render_interactivity_notices_region( $form_html ) {
-		$context_directive = wp_interactivity_data_wp_context(
-			array(
-				'notices' => array(),
-			)
-		);
-
-		ob_start();
-		?>
-		<div data-wp-interactive="woocommerce/store-notices" class="wc-block-components-notices alignwide" <?php echo $context_directive; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<template data-wp-each--notice="context.notices" data-wp-each-key="context.notice.id">
-				<div
-					class="wc-block-components-notice-banner"
-					data-wp-class--is-error="state.isError"
-					data-wp-class--is-success="state.isSuccess"
-					data-wp-class--is-info="state.isInfo"
-					data-wp-class--is-dismissible="context.notice.dismissible"
-					data-wp-bind--role="state.role"
-					data-wp-watch="callbacks.injectIcon"
-				>
-					<div class="wc-block-components-notice-banner__content">
-						<span data-wp-init="callbacks.renderNoticeContent" aria-live="assertive" aria-atomic="true"></span>
-					</div>
-					<button
-						data-wp-bind--hidden="!context.notice.dismissible"
-						class="wc-block-components-button wp-element-button wc-block-components-notice-banner__dismiss contained"
-						aria-label="<?php esc_attr_e( 'Dismiss this notice', 'woocommerce' ); ?>"
-						data-wp-on--click="actions.removeNotice"
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-							<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z" />
-						</svg>
-					</button>
-				</div>
-			</template>
-			<?php echo $form_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		</div>
-		<?php
-		return ob_get_clean();
 	}
 }

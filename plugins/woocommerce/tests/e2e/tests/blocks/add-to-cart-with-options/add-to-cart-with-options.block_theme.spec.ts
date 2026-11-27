@@ -291,14 +291,74 @@ test.describe( 'Add to Cart + Options Block', () => {
 						.locator( '.wp-block-accordion-panel' )
 				: page.getByLabel( 'Additional Information', { exact: true } );
 
+		await test.step( 'takes the width of its column, with no margin above its first inner block', async () => {
+			const { width, columnContentWidth } = await page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options"]'
+				)
+				.evaluate( ( block ) => {
+					const px = ( element: Element, property: string ) =>
+						parseFloat(
+							getComputedStyle( element ).getPropertyValue(
+								property
+							)
+						);
+					const column = block.parentElement as Element;
+					return {
+						width: block.getBoundingClientRect().width,
+						columnContentWidth:
+							column.getBoundingClientRect().width -
+							px( column, 'padding-inline-start' ) -
+							px( column, 'padding-inline-end' ) -
+							px( column, 'border-inline-start-width' ) -
+							px( column, 'border-inline-end-width' ),
+					};
+				} );
+
+			expect( width ).toBeCloseTo( columnContentWidth );
+
+			// The first inner block gets no flow margin while no notice is shown.
+			await expect(
+				addToCartBlock.locator(
+					'.wp-block-woocommerce-add-to-cart-with-options-variation-selector'
+				)
+			).toHaveCSS( 'margin-block-start', '0px' );
+		} );
+
 		await test.step( 'displays an error when attributes are not selected', async () => {
 			await addToCartButton.click();
 
+			const notice = addToCartBlock.getByRole( 'alert' );
+			await expect( notice ).toHaveText(
+				'Please select product attributes before adding to cart.'
+			);
+			await expect( notice ).toHaveClass( /\bis-error\b/ );
+			await expect( notice.locator( 'svg' ).first() ).toBeVisible();
+
+			const noticeBox = await notice.boundingBox();
+			const colorBox = await addToCartBlock
+				.getByRole( 'radiogroup', { name: 'Color' } )
+				.boundingBox();
+			expect( noticeBox?.y ).toBeLessThan( colorBox?.y ?? 0 );
+
+			// Submitting the invalid form again replaces the notice instead of
+			// adding a second one. The replacement is a new element, so wait
+			// for it before counting.
+			await notice.evaluate( ( element ) =>
+				element.setAttribute( 'data-test-first-submit', '' )
+			);
+			await addToCartButton.click();
 			await expect(
-				page.getByText(
-					'Please select product attributes before adding to cart.'
+				addToCartBlock.locator(
+					'[role="alert"]:not([data-test-first-submit])'
 				)
-			).toBeVisible();
+			).toHaveCount( 1 );
+			await expect( notice ).toHaveCount( 1 );
+
+			await notice
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.click();
+			await expect( notice ).toHaveCount( 0 );
 		} );
 
 		await test.step( 'updates blocks rendering variation data when attributes are selected', async () => {
@@ -577,6 +637,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/product/logo-collection' );
 
+		const addToCartBlock = page.locator(
+			'[data-block-name="woocommerce/add-to-cart-with-options"]'
+		);
 		const addToCartButton = page
 			.getByRole( 'button', { name: 'Add to cart' } )
 			.first();
@@ -588,11 +651,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 			// stores have been loaded.
 			await expect( async () => {
 				await addToCartButton.click();
-				await expect(
-					page.getByText(
-						'Please select some products to add to the cart.'
-					)
-				).toBeVisible();
+				await expect( addToCartBlock.getByRole( 'alert' ) ).toHaveText(
+					'Please select some products to add to the cart.'
+				);
 			} ).toPass();
 		} );
 
@@ -725,9 +786,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 			// Verify error message is displayed.
 			await expect(
-				page.getByText(
-					'The quantity of "Hoodie with Logo" cannot be changed'
-				)
+				addToCartBlock
+					.getByRole( 'alert' )
+					.getByText(
+						'The quantity of "Hoodie with Logo" cannot be changed'
+					)
 			).toBeVisible();
 			// Verify optimistic updates were applied, so the product that was
 			// successfully added to cart is counted.
@@ -1389,6 +1452,140 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect(
 			page.getByRole( 'button', { name: 'Added to cart', exact: true } )
 		).toBeVisible();
+	} );
+
+	test( 'shows notices only in the block that raised them when a page has several', async ( {
+		page,
+		requestUtils,
+	} ) => {
+		const productIds = [];
+		for ( const slug of [ 'hoodie', 'v-neck-t-shirt' ] ) {
+			const cliOutput = await wpCLI(
+				`post list --post_type=product --field=ID --name="${ slug }" --format=ids`
+			);
+			productIds.push( cliOutput.stdout.match( /\d+/g )?.pop() );
+		}
+		// The first block follows a paragraph, to measure the space above it.
+		const singleProductBlocks = productIds
+			.map(
+				( productId, index ) =>
+					`<!-- wp:woocommerce/single-product {"productId":${ productId }} --><div class="wp-block-woocommerce-single-product woocommerce">${
+						index === 0
+							? '<!-- wp:paragraph --><p>Before the block.</p><!-- /wp:paragraph --><!-- wp:woocommerce/add-to-cart-with-options /-->'
+							: '<!-- wp:woocommerce/add-to-cart-with-options /-->'
+					}</div><!-- /wp:woocommerce/single-product -->`
+			)
+			.join( '' );
+		const testPage = await requestUtils.rest< { link: string } >( {
+			method: 'POST',
+			path: '/wp/v2/pages',
+			data: {
+				status: 'publish',
+				title: 'Two Add to Cart + Options blocks',
+				content: `<!-- wp:woocommerce/store-notices /-->${ singleProductBlocks }`,
+			},
+		} );
+
+		await page.goto( testPage.link );
+
+		const addToCartBlocks = page.locator(
+			'[data-block-name="woocommerce/add-to-cart-with-options"]'
+		);
+		const firstBlock = addToCartBlocks.nth( 0 );
+
+		await test.step( 'takes the width of the Single Product block and adds no space above itself', async () => {
+			const layout = await firstBlock.evaluate( ( block ) => {
+				const px = ( element: Element, property: string ) =>
+					parseFloat(
+						getComputedStyle( element ).getPropertyValue( property )
+					);
+				const box = block.getBoundingClientRect();
+				const parent = block.parentElement as Element;
+				const previous = block.previousElementSibling as Element;
+				return {
+					width: box.width,
+					parentContentWidth:
+						parent.getBoundingClientRect().width -
+						px( parent, 'padding-inline-start' ) -
+						px( parent, 'padding-inline-end' ) -
+						px( parent, 'border-inline-start-width' ) -
+						px( parent, 'border-inline-end-width' ),
+					gapAbove: box.top - previous.getBoundingClientRect().bottom,
+					previousMargin: px( previous, 'margin-block-end' ),
+				};
+			} );
+
+			expect( layout.width ).toBeCloseTo( layout.parentContentWidth );
+			expect( layout.gapAbove ).toBeCloseTo( layout.previousMargin );
+		} );
+
+		// Before its JavaScript is ready, an Add to cart click submits the
+		// form natively and reloads the page. Selecting an option only works
+		// once the JavaScript is ready, so wait for that first.
+		const colorBlueOption = firstBlock
+			.getByRole( 'radiogroup', { name: 'Color' } )
+			.getByRole( 'radio', { name: 'Blue', exact: true } );
+		await expect( async () => {
+			await colorBlueOption.click();
+			await expect( colorBlueOption ).toBeChecked( { timeout: 1_000 } );
+		} ).toPass();
+
+		await firstBlock
+			.getByRole( 'button', { name: 'Add to cart', exact: true } )
+			.click();
+		await expect( firstBlock.getByRole( 'alert' ) ).toHaveText(
+			'Please select product attributes before adding to cart.'
+		);
+
+		// The notice shows once on the whole page: not in the second block,
+		// nor in the page-level Store Notices block.
+		await expect( page.getByRole( 'alert' ) ).toHaveCount( 1 );
+	} );
+
+	test( 'shows Add to wishlist errors inside the block', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await wpCLI( 'option set woocommerce_product_wishlist_enabled yes' );
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		const errorMessage = 'The product could not be saved to your wishlist.';
+		await page.route( /shopper-lists/, ( route ) =>
+			route.request().method() === 'POST'
+				? route.fulfill( {
+						status: 500,
+						json: {
+							code: 'woocommerce_rest_wishlist_error',
+							message: errorMessage,
+							data: { status: 500 },
+						},
+					} )
+				: route.continue()
+		);
+
+		await page.goto( '/product/beanie/' );
+
+		const addToCartBlock = page.locator(
+			'[data-block-name="woocommerce/add-to-cart-with-options"]'
+		);
+
+		// There is the chance the button might be clicked before the iAPI
+		// stores have been loaded.
+		await expect( async () => {
+			await addToCartBlock
+				.getByRole( 'button', { name: 'Add to wishlist' } )
+				.click();
+			await expect( addToCartBlock.getByRole( 'alert' ) ).toHaveText(
+				errorMessage,
+				{ timeout: 1_000 }
+			);
+		} ).toPass();
 	} );
 
 	test( 'allows updating the Product Image Gallery block to the Product Gallery block', async ( {
