@@ -7,7 +7,10 @@ const path = require( 'path' );
 /**
  * Internal dependencies
  */
-const { getAlias } = require( '../bin/webpack-helpers.js' );
+const {
+	bundledWordPressAliases,
+	getAlias,
+} = require( '../bin/webpack-helpers.js' );
 const {
 	getMainConfig,
 	getStylingConfig,
@@ -46,8 +49,7 @@ module.exports = ( { config: storybookConfig } ) => {
 			require.resolve( './__mocks__/woocommerce-block-settings.js' ),
 		'@woocommerce/base-hooks':
 			require.resolve( './__mocks__/woocommerce-base-hooks.js' ),
-		'wordpress-components':
-			require.resolve( '../node_modules/wordpress-components' ),
+		...bundledWordPressAliases,
 	};
 
 	// Resolve `@woocommerce/*` monorepo packages from source via the `wc-source`

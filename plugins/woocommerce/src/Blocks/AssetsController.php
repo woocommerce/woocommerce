@@ -94,6 +94,7 @@ final class AssetsController {
 
 		// Vendor scripts for blocks frontends (not including cart and checkout).
 		$this->api->register_script( 'wc-blocks-frontend-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-frontend-vendors-frontend' ), array(), true );
+		$this->api->register_script( 'wc-blocks-legacy-filter-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-legacy-filter-vendors-frontend' ), array(), true );
 
 		// Cart and checkout frontend scripts.
 		$this->api->register_script( 'wc-cart-checkout-vendors', $this->api->get_block_asset_build_path( 'wc-cart-checkout-vendors-frontend' ), array(), true );

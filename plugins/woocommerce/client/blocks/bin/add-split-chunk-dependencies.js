@@ -11,6 +11,10 @@
 // This means for any split chunk you build you'll only need to register it in PHP, but all
 // files that depend on it will automatically include it as a dependency.
 class AddSplitChunkDependencies {
+	constructor( scopedChunkNames = [] ) {
+		this.scopedChunkNames = scopedChunkNames;
+	}
+
 	apply( compiler ) {
 		compiler.hooks.thisCompilation.tap(
 			'AddStableChunksToAssets',
@@ -52,8 +56,22 @@ class AddSplitChunkDependencies {
 								.toString();
 
 							const extraDependencies = splitChunks
+								.filter(
+									( split ) =>
+										! this.scopedChunkNames.includes(
+											split.name
+										) ||
+										Array.from( chunk.groupsIterable ).some(
+											( group ) =>
+												group.chunks.includes( split )
+										)
+								)
 								.map( ( c ) => `'${ c.name }'` )
 								.join( ', ' );
+
+							if ( ! extraDependencies ) {
+								continue;
+							}
 
 							const updatedFileContent = assetFileContent.replace(
 								/('dependencies'\s*=>\s*array\s*\(\s*)([^)]*)\)/,
