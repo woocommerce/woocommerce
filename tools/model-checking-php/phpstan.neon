@@ -1,0 +1,8 @@
+parameters:
+    level: max
+    paths:
+        - src
+        - examples
+        - run.php
+        - tests
+    tmpDir: artifacts/phpstan
