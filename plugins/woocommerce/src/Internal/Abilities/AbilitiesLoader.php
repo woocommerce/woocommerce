@@ -194,8 +194,20 @@ class AbilitiesLoader {
 				'object_type_callback' => static fn( \WC_Coupon $coupon ): string => $coupon->get_discount_type(),
 			)
 		);
-		ExtensibleAbilities::register_resource( 'customer', array( 'object_id_callback' => $data_id ) );
-		ExtensibleAbilities::register_resource( 'product_review', array( 'object_id_callback' => static fn( \WP_Comment $comment ): int => (int) $comment->comment_ID ) );
+		ExtensibleAbilities::register_resource(
+			'customer',
+			array(
+				'object_id_callback'   => $data_id,
+				'object_type_callback' => static fn( \WC_Customer $customer ): string => $customer->get_role(),
+			)
+		);
+		ExtensibleAbilities::register_resource(
+			'product_review',
+			array(
+				'object_id_callback'   => static fn( \WP_Comment $comment ): int => (int) $comment->comment_ID,
+				'object_type_callback' => static fn( \WP_Comment $comment ): string => $comment->comment_type,
+			)
+		);
 		ExtensibleAbilities::register_resource(
 			'product_term',
 			array(

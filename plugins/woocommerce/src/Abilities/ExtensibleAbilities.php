@@ -119,16 +119,16 @@ class ExtensibleAbilities {
 	 *
 	 * @param string $resource_name Slug of the resource, such as `ticket`.
 	 * @param array  $args          {
-	 *     Arguments of the resource.
+	 *     Arguments of the resource. Both callbacks are required.
 	 *
 	 *     @type callable $object_id_callback   Receives an object of the resource and returns its ID as an integer,
 	 *                                          or zero when the object is not saved yet. Core's `product` returns
 	 *                                          `get_id()` and its `product_term` returns the term ID.
-	 *     @type callable $object_type_callback Optional. Receives an object of the resource and returns its type as a
-	 *                                          string, which the `object_types` of a field are compared with. Core's
-	 *                                          `product` returns `get_type()`, its `product_term` returns the taxonomy
-	 *                                          and its `coupon` returns the discount type. Without it, the objects of
-	 *                                          the resource have no type, and a field with `object_types` is refused.
+	 *     @type callable $object_type_callback Receives an object of the resource and returns its type as a string,
+	 *                                          which the `object_types` of a field are compared with. Core's `product`
+	 *                                          returns `get_type()`, its `product_term` the taxonomy, its `coupon` the
+	 *                                          discount type, its `customer` the user role and its `product_review`
+	 *                                          the comment type.
 	 * }
 	 */
 	public static function register_resource( string $resource_name, array $args = array() ): void {
@@ -140,13 +140,11 @@ class ExtensibleAbilities {
 			wc_doing_it_wrong( __METHOD__, 'The resource name must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.', '11.3.0' );
 			return;
 		}
-		if ( ! isset( $args['object_id_callback'] ) || ! is_callable( $args['object_id_callback'] ) ) {
-			wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" resource needs a callable "object_id_callback" argument.', $resource_name ), '11.5.0' );
-			return;
-		}
-		if ( isset( $args['object_type_callback'] ) && ! is_callable( $args['object_type_callback'] ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "object_type_callback" argument must be callable.', '11.5.0' );
-			return;
+		foreach ( array( 'object_id_callback', 'object_type_callback' ) as $callback ) {
+			if ( ! isset( $args[ $callback ] ) || ! is_callable( $args[ $callback ] ) ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%1$s" resource needs a callable "%2$s" argument.', $resource_name, $callback ), '11.5.0' );
+				return;
+			}
 		}
 
 		self::$resources[ $resource_name ] = self::$resources[ $resource_name ] ?? $args;
@@ -190,8 +188,7 @@ class ExtensibleAbilities {
 	 *                                  for a term. The abilities leave the field out of the other objects, and an ability
 	 *                                  that writes the resource refuses a write to them. Omit it for every type: an
 	 *                                  `order_item` field without it is then read on product, shipping, fee and coupon
-	 *                                  lines, so its `get_callback` must accept each of them. It is refused on a resource
-	 *                                  whose objects have no type, such as `product_review` and `customer`.
+	 *                                  lines, so its `get_callback` must accept each of them.
 	 *     @type callable $get_callback Optional. Receives the object and returns the value. A field without it
 	 *                                  is not in the output. Required with `output_schema`. Return null when the
 	 *                                  object has no value, and the field is left out with no error. Any other
@@ -303,10 +300,6 @@ class ExtensibleAbilities {
 		}
 		if ( isset( $args['object_types'] ) && ( ! is_array( $args['object_types'] ) || empty( $args['object_types'] ) || array_filter( $args['object_types'], static fn( $type ) => ! is_string( $type ) ) ) ) {
 			wc_doing_it_wrong( __METHOD__, 'The "object_types" argument must be a list of object types.', '11.4.0' );
-			return;
-		}
-		if ( isset( $args['object_types'] ) && ! isset( self::$resources[ $args['resource'] ]['object_type_callback'] ) ) {
-			wc_doing_it_wrong( __METHOD__, sprintf( 'The objects of the "%s" resource have no type, so a field of it cannot set "object_types". Remove the argument.', $args['resource'] ), '11.5.0' );
 			return;
 		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
@@ -1036,11 +1029,11 @@ class ExtensibleAbilities {
 	 *
 	 * @param mixed  $subject       The object.
 	 * @param string $resource_name Resource of the object.
-	 * @return string The type, or an empty string when the resource has no `object_type_callback` or it returns no string.
+	 * @return string
+	 * @throws \LogicException When the resource is not registered.
 	 */
 	public static function get_object_type( $subject, string $resource_name ): string {
-		$type = isset( self::$resources[ $resource_name ]['object_type_callback'] ) ? call_user_func( self::$resources[ $resource_name ]['object_type_callback'], $subject ) : '';
-		return is_string( $type ) ? $type : '';
+		return call_user_func( self::get_registered_resource( $resource_name )['object_type_callback'], $subject );
 	}
 
 	/**
@@ -1050,11 +1043,25 @@ class ExtensibleAbilities {
 	 *
 	 * @param mixed  $subject       The object.
 	 * @param string $resource_name Resource of the object.
-	 * @return int The ID, or zero when the object is not saved yet, the callback returns no integer or the resource is not registered.
+	 * @return int The ID, or zero when the object is not saved yet.
+	 * @throws \LogicException When the resource is not registered.
 	 */
 	public static function get_object_id( $subject, string $resource_name ): int {
-		$id = isset( self::$resources[ $resource_name ] ) ? call_user_func( self::$resources[ $resource_name ]['object_id_callback'], $subject ) : 0;
-		return is_int( $id ) ? $id : 0;
+		return call_user_func( self::get_registered_resource( $resource_name )['object_id_callback'], $subject );
+	}
+
+	/**
+	 * The arguments of a registered resource.
+	 *
+	 * @param string $resource_name Resource.
+	 * @return array<string, mixed>
+	 * @throws \LogicException When the resource is not registered.
+	 */
+	private static function get_registered_resource( string $resource_name ): array {
+		if ( ! isset( self::$resources[ $resource_name ] ) ) {
+			throw new \LogicException( esc_html( sprintf( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() inside the woocommerce_extensible_abilities_resources_init action.', $resource_name ) ) );
+		}
+		return self::$resources[ $resource_name ];
 	}
 
 	/**

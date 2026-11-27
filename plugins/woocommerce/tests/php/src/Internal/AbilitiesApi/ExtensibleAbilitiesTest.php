@@ -5442,51 +5442,87 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse a field with object_types on $resource_name, because its objects have no type.
-	 * @dataProvider provide_resources_without_object_types
+	 * @testdox Should compare the object_types of a $resource_name field with the type that the resource gives.
+	 * @dataProvider provide_resources_with_their_object_type
 	 *
-	 * @param string   $resource_name Resource whose objects have no type.
+	 * @param string   $resource_name Resource.
 	 * @param string   $ability       List ability.
 	 * @param string   $list_key      Output key of the list.
 	 * @param callable $create_input  Creates two objects and returns the ability input that lists them.
+	 * @param string   $object_type   The type of the created objects.
 	 */
-	public function test_object_types_are_refused_on_a_resource_without_types( string $resource_name, string $ability, string $list_key, callable $create_input ): void {
-		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
-		$this->register_typed_field( $resource_name, array( 'simple' ) );
+	public function test_object_types_compare_with_the_type_of_the_resource( string $resource_name, string $ability, string $list_key, callable $create_input, string $object_type ): void {
+		$this->register_typed_field( $resource_name, array( $object_type ) );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => $resource_name,
+						'namespace'     => 'test-ext',
+						'field'         => 'other',
+						'output_schema' => array( 'type' => 'string' ),
+						'object_types'  => array( 'another-type' ),
+						'get_callback'  => static fn() => 'value',
+					)
+				);
+			}
+		);
 
 		$list = $this->run_ability( $ability, $create_input() )[ $list_key ];
 
 		$this->assertCount( 2, $list );
-		$this->assertArrayNotHasKey( 'extensions', $list[0] );
+		$this->assertSame( array( 'typed' => 'value' ), $list[0]['extensions']['test-ext'] );
 	}
 
 	/**
-	 * The rows of provide_list_abilities() for resources whose objects have no type.
+	 * The rows of provide_list_abilities() for a customer and a review, with the type of the objects they create:
+	 * the user role and the comment type.
 	 *
 	 * @return array<string, array>
 	 */
-	public function provide_resources_without_object_types(): array {
-		return array_intersect_key( $this->provide_list_abilities(), array_flip( array( 'product_review', 'customer' ) ) );
+	public function provide_resources_with_their_object_type(): array {
+		$rows = $this->provide_list_abilities();
+		return array(
+			'customer'       => array_merge( $rows['customer'], array( 'customer' ) ),
+			'product_review' => array_merge( $rows['product_review'], array( 'review' ) ),
+		);
 	}
 
 	/**
-	 * @testdox Should refuse a resource that has no callable object_id_callback.
+	 * @testdox Should refuse a resource that has no callable $missing.
+	 * @testWith ["object_id_callback"]
+	 *           ["object_type_callback"]
+	 *
+	 * @param string $missing The argument the resource does not pass.
 	 */
-	public function test_a_resource_without_an_id_callback_is_refused(): void {
+	public function test_a_resource_without_both_callbacks_is_refused( string $missing ): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
 
-		ExtensibleAbilities::register_resource( 'ticket' );
+		ExtensibleAbilities::register_resource( 'ticket', array_diff_key( self::get_ticket_resource_args(), array( $missing => true ) ) );
 
 		$this->assertFalse( ExtensibleAbilities::is_resource_registered( 'ticket' ) );
 	}
 
 	/**
-	 * The callbacks of a test resource whose objects have an `id` and no type.
+	 * @testdox Should throw when the ID of an object is read from a resource that is not registered.
+	 */
+	public function test_the_id_of_an_object_of_an_unregistered_resource_throws(): void {
+		$this->expectException( \LogicException::class );
+
+		ExtensibleAbilities::get_object_id( new \stdClass(), 'gadget' );
+	}
+
+	/**
+	 * The callbacks of a test resource whose objects have an `id` and one type.
 	 *
 	 * @return array<string, callable>
 	 */
 	private static function get_ticket_resource_args(): array {
-		return array( 'object_id_callback' => static fn( $ticket ): int => (int) ( $ticket->id ?? 0 ) );
+		return array(
+			'object_id_callback'   => static fn( $ticket ): int => (int) ( $ticket->id ?? 0 ),
+			'object_type_callback' => static fn(): string => 'ticket',
+		);
 	}
 
 	/**
