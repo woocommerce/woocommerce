@@ -305,7 +305,7 @@ class ProductPageIntegration {
 			return array();
 		}
 
-		return $this->signup_service->get_active_signups_by_user( get_current_user_id(), $product_ids );
+		return $this->signup_service->get_user_signups_for_products( get_current_user_id(), $product_ids );
 	}
 
 	/**

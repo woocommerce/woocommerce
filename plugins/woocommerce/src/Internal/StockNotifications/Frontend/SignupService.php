@@ -297,7 +297,7 @@ class SignupService {
 	 * @param int[] $product_ids Product IDs.
 	 * @return array<int, Notification>
 	 */
-	public function get_active_signups_by_user( int $user_id, array $product_ids ): array {
+	public function get_user_signups_for_products( int $user_id, array $product_ids ): array {
 		if ( $user_id <= 0 || ! $product_ids ) {
 			return array();
 		}

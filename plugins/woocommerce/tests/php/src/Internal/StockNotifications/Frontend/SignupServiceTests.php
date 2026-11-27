@@ -861,9 +861,9 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_active_signups_by_user() returns only the user's active sign-ups, keyed by product ID.
+	 * @testdox get_user_signups_for_products() returns only the user's active sign-ups, keyed by product ID.
 	 */
-	public function test_get_active_signups_by_user(): void {
+	public function test_get_user_signups_for_products(): void {
 		$user_id  = $this->factory->user->create();
 		$products = array_map(
 			fn() => WC_Helper_Product::create_simple_product()->get_id(),
@@ -882,7 +882,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 			$notification->save();
 		}
 
-		$this->assertSame( array( $products[0] ), array_keys( $this->sut->get_active_signups_by_user( $user_id, $products ) ) );
-		$this->assertSame( array(), $this->sut->get_active_signups_by_user( 0, $products ) );
+		$this->assertSame( array( $products[0] ), array_keys( $this->sut->get_user_signups_for_products( $user_id, $products ) ) );
+		$this->assertSame( array(), $this->sut->get_user_signups_for_products( 0, $products ) );
 	}
 }
