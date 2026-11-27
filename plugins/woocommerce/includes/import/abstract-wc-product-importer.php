@@ -340,16 +340,16 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					);
 				}
 
-				// A blank or missing Parent keeps an existing variation's parent, as it does for a new or placeholder row,
-				// but an existing product turning into a variation needs one.
+				// A blank or missing Parent keeps an existing variation's parent, but an existing product turning into a variation needs one.
 				$converts_product = 'product' === $post_type && 'importing' !== get_post_status( absint( $data['id'] ) );
 
 				if ( ! $converts_product && '' === ( $data['parent_id'] ?? '' ) ) {
 					unset( $data['parent_id'] );
 
 					// The kept parent still has to hold the variation, or set_variation_data() would skip the row's attributes.
+					// A new or placeholder row has no parent to keep, so it fails here instead of creating a variation without one.
 					$current_parent = 'product_variation' === $post_type ? wp_get_post_parent_id( absint( $data['id'] ) ) : 0;
-					$parent         = $current_parent ? $this->get_variation_parent( $current_parent ) : null;
+					$parent         = $this->get_variation_parent( $current_parent ? $current_parent : null );
 				} else {
 					// Check the parent before get_product_object() turns the post into a variation, so a row with an unusable parent changes nothing.
 					$parent = $this->get_variation_parent( $data['parent_id'] ?? null );
