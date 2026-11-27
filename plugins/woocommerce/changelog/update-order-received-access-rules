@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Use the same access rules on the classic and block order received pages. After the 10-minute grace period, guests confirm their email to see an order. Add `OrderUtil::current_user_can_view_order()` and `OrderUtil::guest_can_unlock_order()`.

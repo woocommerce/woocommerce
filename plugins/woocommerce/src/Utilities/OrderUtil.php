@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\Orders\OrderReceivedAccess;
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
 use WC_Order;
 use WC_Order_Item;
@@ -325,5 +326,42 @@ final class OrderUtil {
 		);
 
 		return is_string( $filtered_label ) ? $filtered_label : $default_label;
+	}
+
+	/**
+	 * Whether the current visitor can see the order details on the order received page, without entering an email address.
+	 *
+	 * Pass the order key from the request, never the key stored on the order: the key is what proves access. With a
+	 * matching key, this is true for the logged in owner, for any customer order when the
+	 * `woocommerce_order_received_verify_known_shoppers` filter returns false, and for a guest order that is within the
+	 * grace period, is the session's checkout draft, has no billing email, or when `woocommerce_order_email_verification_required`
+	 * returns false. It does not check an email address that a guest submitted.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param WC_Order $order     Order object.
+	 * @param string   $order_key Order key from the request.
+	 * @return bool
+	 */
+	public static function current_user_can_view_order( WC_Order $order, string $order_key ): bool {
+		return wc_get_container()->get( OrderReceivedAccess::class )->current_user_can_view_order( $order, $order_key );
+	}
+
+	/**
+	 * Whether a guest can unlock the order details on the order received page by entering the billing email address.
+	 *
+	 * Pass the order key from the request, never the key stored on the order. With a matching key, this is true for a
+	 * guest order that has a billing email, while guest checkout is on. When this and
+	 * {@see self::current_user_can_view_order()} are both false, the order details stay hidden. For an order that
+	 * belongs to a customer, the visitor must log in. Use it when custom code sends logged out visitors to a login page.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param WC_Order $order     Order object.
+	 * @param string   $order_key Order key from the request.
+	 * @return bool
+	 */
+	public static function guest_can_unlock_order( WC_Order $order, string $order_key ): bool {
+		return wc_get_container()->get( OrderReceivedAccess::class )->guest_can_unlock_order( $order, $order_key );
 	}
 }

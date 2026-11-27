@@ -48188,12 +48188,6 @@ parameters:
 			path: src/Blocks/BlockTypes/NextPreviousButtons.php
 
 		-
-			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\WC_Order \$order does not accept actual type of parameter\: WC_Order\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Blocks/BlockTypes/OrderConfirmation/AbstractOrderConfirmationBlock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\AbstractOrderConfirmationBlock\:\:get_hook_content\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -48202,18 +48196,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\AbstractOrderConfirmationBlock\:\:get_order\(\) should return WC_Order\|null but returns WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/OrderConfirmation/AbstractOrderConfirmationBlock.php
-
-		-
-			message: '#^Parameter \#1 \$key of method WC_Order\:\:key_is_valid\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/OrderConfirmation/AbstractOrderConfirmationBlock.php
-
-		-
-			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, WC_DateTime\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/OrderConfirmation/AbstractOrderConfirmationBlock.php
 
