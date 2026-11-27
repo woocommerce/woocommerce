@@ -306,6 +306,14 @@ class Api {
 			}
 		}
 
+		$filterable_dependencies = $script_data['dependencies'];
+		$required_dependencies   = array();
+		if ( in_array( $handle, array( 'wc-attribute-filter-block-frontend', 'wc-stock-filter-block-frontend' ), true ) ) {
+			// Callbacks can replace the list with the dependencies these handles had before the vendor split.
+			$required_dependencies   = array_intersect( $filterable_dependencies, array( 'wc-blocks-legacy-filter-vendors', 'react-dom' ) );
+			$filterable_dependencies = array_values( array_diff( $filterable_dependencies, $required_dependencies ) );
+		}
+
 		/**
 		 * Filters the list of script dependencies.
 		 *
@@ -315,7 +323,11 @@ class Api {
 		 * @param string $handle The script's handle.
 		 * @return array
 		 */
-		$script_dependencies = apply_filters( 'woocommerce_blocks_register_script_dependencies', $script_data['dependencies'], $handle );
+		$script_dependencies = apply_filters( 'woocommerce_blocks_register_script_dependencies', $filterable_dependencies, $handle );
+		if ( ! empty( $required_dependencies ) ) {
+			$script_dependencies = is_array( $script_dependencies ) ? $script_dependencies : $filterable_dependencies;
+			$script_dependencies = array_merge( array_diff( $required_dependencies, $script_dependencies ), $script_dependencies );
+		}
 
 		wp_register_script( $handle, $script_data['src'], $script_dependencies, $script_data['version'], true );
 		if ( $has_i18n ) {

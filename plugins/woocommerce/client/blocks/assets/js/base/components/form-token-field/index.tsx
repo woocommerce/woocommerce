@@ -2,6 +2,9 @@
  * External dependencies
  */
 import { FormTokenField as WPFormTokenField } from 'wc-bundled-wordpress-components';
+import { Portal, PortalContext } from 'wc-bundled-wordpress-ariakit-portal';
+import { useState } from '@wordpress/element';
+import type { ComponentProps, CSSProperties } from 'react';
 import clsx from 'clsx';
 
 /**
@@ -15,13 +18,13 @@ export interface Props {
 	displayTransform?: ( value: string ) => string;
 	label?: string;
 	messages?: NonNullable<
-		React.ComponentProps< typeof WPFormTokenField >[ 'messages' ]
+		ComponentProps< typeof WPFormTokenField >[ 'messages' ]
 	>;
 	multiple?: boolean;
 	onChange: ( value: string[] ) => void;
 	placeholder?: string;
 	saveTransform?: ( value: string ) => string;
-	style?: React.CSSProperties;
+	style?: CSSProperties;
 	suggestions: string[];
 	validateInput?: ( token: string ) => boolean;
 	value: string[];
@@ -39,6 +42,10 @@ const FormTokenField = ( {
 	onChange,
 	...props
 }: Props ) => {
+	const [ tooltipPortal, setTooltipPortal ] = useState< HTMLElement | null >(
+		null
+	);
+
 	return (
 		<div
 			className={ clsx(
@@ -50,24 +57,30 @@ const FormTokenField = ( {
 			) }
 			style={ style }
 		>
-			<WPFormTokenField
-				label={ label }
-				__experimentalExpandOnFocus={ true }
-				__experimentalShowHowTo={ false }
-				__experimentalValidateInput={ validateInput }
-				saveTransform={ saveTransform }
-				{ ...( multiple ? {} : { maxLength: 1 } ) }
-				suggestions={ suggestions }
-				__nextHasNoMarginBottom
-				__next40pxDefaultSize
-				onChange={ ( tokens ) =>
-					onChange(
-						tokens.map( ( token ) =>
-							typeof token === 'string' ? token : token.value
+			<PortalContext.Provider value={ tooltipPortal }>
+				<WPFormTokenField
+					label={ label }
+					__experimentalExpandOnFocus={ true }
+					__experimentalShowHowTo={ false }
+					__experimentalValidateInput={ validateInput }
+					saveTransform={ saveTransform }
+					{ ...( multiple ? {} : { maxLength: 1 } ) }
+					suggestions={ suggestions }
+					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+					onChange={ ( tokens ) =>
+						onChange(
+							tokens.map( ( token ) =>
+								typeof token === 'string' ? token : token.value
+							)
 						)
-					)
-				}
-				{ ...props }
+					}
+					{ ...props }
+				/>
+			</PortalContext.Provider>
+			<Portal
+				className="wc-blocks-legacy-filter-tooltip-portal"
+				ref={ setTooltipPortal }
 			/>
 		</div>
 	);

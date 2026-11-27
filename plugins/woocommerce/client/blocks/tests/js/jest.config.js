@@ -114,6 +114,16 @@ module.exports = {
 			'assets/js/base/stores/shopper-lists',
 		'@woocommerce/stores/(.*)$': 'assets/js/base/stores/$1',
 		'^wc-bundled-wordpress-components$': '@wordpress/components',
+		'^wc-bundled-wordpress-ariakit-portal$': require.resolve(
+			'@ariakit/react/portal',
+			{
+				paths: [
+					path.dirname(
+						require.resolve( '@wordpress/components/package.json' )
+					),
+				],
+			}
+		),
 		'^react$': '<rootDir>/node_modules/react',
 		'^react-dom$': '<rootDir>/node_modules/react-dom',
 		// Catch-all for monorepo @woocommerce/* packages: route bare and

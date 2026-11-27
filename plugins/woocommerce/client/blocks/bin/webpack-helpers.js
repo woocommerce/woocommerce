@@ -47,12 +47,28 @@ const wcHandleMap = {
 	'@woocommerce/entities': 'wc-entities',
 };
 
+// The bundled token field and its portal provider must share the same Ariakit context.
+const bundledWordPressAliases = {
+	'wc-bundled-wordpress-components$': '@wordpress/components',
+	'wc-bundled-wordpress-ariakit-portal$': path.join(
+		path.dirname(
+			require.resolve( '@ariakit/react/package.json', {
+				paths: [
+					path.dirname(
+						require.resolve( '@wordpress/components/package.json' )
+					),
+				],
+			} )
+		),
+		'portal'
+	),
+};
+
 const getAlias = ( options = {} ) => {
 	let { pathPart } = options;
 	pathPart = pathPart ? `${ pathPart }/` : '';
 	return {
-		// Storefront filters need the component even when wp-components is absent.
-		'wc-bundled-wordpress-components$': '@wordpress/components',
+		...bundledWordPressAliases,
 		'@woocommerce/product-elements': path.resolve(
 			__dirname,
 			`../assets/js/${ pathPart }blocks/product-elements-blocks`
@@ -262,6 +278,7 @@ module.exports = {
 	NODE_ENV,
 	CHECK_CIRCULAR_DEPS,
 	ASSET_CHECK,
+	bundledWordPressAliases,
 	getAlias,
 	getResolve,
 	requestToHandle,

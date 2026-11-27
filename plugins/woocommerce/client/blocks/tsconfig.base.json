@@ -34,6 +34,9 @@
 			"jquery"
 		],
 		"paths": {
+			"wc-bundled-wordpress-ariakit-portal": [
+				"node_modules/@ariakit/react/esm/portal.d.ts"
+			],
 			"wc-bundled-wordpress-components": [
 				"node_modules/@wordpress/components/build-types/index.d.ts"
 			],
