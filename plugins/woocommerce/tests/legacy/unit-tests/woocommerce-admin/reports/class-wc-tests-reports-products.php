@@ -439,6 +439,109 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that a full refund after a partial line item refund does not count the refunded units twice.
+	 */
+	public function test_populate_partial_refund_then_full_refund() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$items   = $order->get_items();
+		$item_id = array_key_first( $items );
+		wc_create_refund(
+			array(
+				'amount'     => 25,
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 1,
+						'refund_total' => 25,
+					),
+				),
+			)
+		);
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$order = wc_get_order( $order->get_id() );
+		$order->set_status( OrderStatus::REFUNDED );
+		$order->save();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
+		$data       = ( new ProductsDataStore() )->get_data(
+			array(
+				'after'  => $start_time,
+				'before' => $end_time,
+			)
+		);
+
+		$this->assertSame( 0, (int) $data->data[0]['items_sold'] );
+		$this->assertEquals( 0.0, $data->data[0]['net_revenue'] );
+	}
+
+	/**
+	 * Tests that a full refund after refunding one of two lines of the same product leaves no net revenue.
+	 */
+	public function test_populate_refund_one_of_two_lines_of_a_product_then_full_refund() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order  = WC_Helper_Order::create_order( 1, $product );
+		$second = new WC_Order_Item_Product();
+		$second->set_product( $product );
+		$second->set_quantity( 1 );
+		$second->set_subtotal( 25 );
+		$second->set_total( 25 );
+		$order->add_item( $second );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->calculate_totals();
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'amount'     => 25,
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$second->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => 25,
+					),
+				),
+			)
+		);
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$order = wc_get_order( $order->get_id() );
+		$order->set_status( OrderStatus::REFUNDED );
+		$order->save();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
+		$data       = ( new ProductsDataStore() )->get_data(
+			array(
+				'after'  => $start_time,
+				'before' => $end_time,
+			)
+		);
+
+		$this->assertSame( 0, (int) $data->data[0]['items_sold'] );
+		$this->assertEquals( 0.0, $data->data[0]['net_revenue'] );
+	}
+
+	/**
 	 * @testdox Should not throw DivisionByZeroError when syncing a monetary-only refund (qty 0) with float quantities.
 	 *
 	 * Reproduces WOOPLUG-6639. When a store uses decimal/float stock amounts (e.g. WCPOS),
