@@ -86,7 +86,7 @@ As an example, to add a "Get 10% off if you sign up to the mailing list" checkbo
 Assuming you've already added the checkbox, either through the Additional Checkout Fields API, or by creating an inner block, the next step will be to register the server-side code to apply the coupon if the box is checked, and remove it if it's not.
 
 ```php
-add_action('woocommerce_blocks_loaded', function() {
+add_action('woocommerce_init', function() {
   woocommerce_store_api_register_update_callback(
     [
       'namespace' => 'extension-unique-namespace',

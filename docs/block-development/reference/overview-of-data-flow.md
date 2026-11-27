@@ -44,7 +44,7 @@ A key/value pair can be added to the registry like so:
 
 ```php
 add_action(
-    'woocommerce_blocks_loaded',
+    'woocommerce_init',
     function() {
       $asset_data_registry = \Automattic\WooCommerce\Blocks\Package::container()->get( \Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class );
       $asset_data_registry->add( 'namespace/value', 'this is a custom value' );

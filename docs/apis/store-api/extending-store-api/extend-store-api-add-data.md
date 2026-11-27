@@ -19,7 +19,7 @@ This example below uses the Cart endpoint, [see passed parameters.](./available-
 ```php
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
 
-add_action('woocommerce_blocks_loaded', function() {
+add_action('woocommerce_init', function() {
  woocommerce_store_api_register_endpoint_data(
 	array(
 		'endpoint' => CartSchema::IDENTIFIER,
@@ -75,13 +75,13 @@ The ExtendSchema is stored as a shared instance between the API and consumers (t
 $extend = StoreApi::container()->get( ExtendSchema::class );
 ```
 
-Also note that the dependency injection container is not available until after the `woocommerce_blocks_loaded` action has been fired, so you should hook your file that action:
+Also note that the dependency injection container is not available until WooCommerce has loaded, so you should hook your code to the `woocommerce_init` action. Unlike `woocommerce_blocks_loaded`, which fires during `plugins_loaded`, this also works when the code lives in a theme:
 
 ```php
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 
-add_action( 'woocommerce_blocks_loaded', function() {
+add_action( 'woocommerce_init', function() {
 	$extend = StoreApi::container()->get( ExtendSchema::class );
 	// my logic.
 });

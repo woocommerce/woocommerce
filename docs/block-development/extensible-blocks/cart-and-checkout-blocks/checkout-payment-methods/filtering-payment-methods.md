@@ -142,7 +142,7 @@ The next step will tell the `ExtendSchema` class to execute this callback when c
 To do this you could use the following code:
 
 ```php
-add_action('woocommerce_blocks_loaded', function() {
+add_action('woocommerce_init', function() {
   woocommerce_store_api_register_payment_requirements(
     array(
       'data_callback' => 'inject_payment_feature_requirements_for_cart_api',
