@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show Analytics table columns that extensions add once the report data loads.

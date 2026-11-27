@@ -3,8 +3,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { createElement, Fragment, useState } from '@wordpress/element';
-import { find, first, without } from 'lodash';
+import {
+	createElement,
+	Fragment,
+	useEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
+import { difference, find, first, union, without } from 'lodash';
 import {
 	Card,
 	CardBody,
@@ -76,6 +82,21 @@ const TableCard: React.FC< TableCardProps > = ( {
 	};
 
 	const [ showCols, setShowCols ] = useState( getShowCols( headers ) );
+	const knownKeys = useRef( headers.map( ( { key } ) => key ) );
+
+	useEffect( () => {
+		const addedCols = difference(
+			getShowCols( headers ),
+			knownKeys.current
+		);
+		knownKeys.current = union(
+			knownKeys.current,
+			headers.map( ( { key } ) => key )
+		);
+		if ( addedCols.length ) {
+			setShowCols( ( cols ) => [ ...cols, ...addedCols ] );
+		}
+	}, [ headers ] );
 
 	const onColumnToggle = ( key: string ) => {
 		return () => {
