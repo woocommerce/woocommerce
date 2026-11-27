@@ -97,9 +97,9 @@ class ExtensibleAbilities {
 	private static array $filters = array();
 
 	/**
-	 * Query arguments that a filter callback can return.
+	 * Query clauses that a filter callback can return when the list ability does not name its own.
 	 */
-	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'include_ids', 'exclude_ids' );
+	private const DEFAULT_QUERY_CLAUSES = array( 'meta_query', 'include_ids', 'exclude_ids' );
 
 	/**
 	 * Type names that the REST schema check knows. It accepts any value for another name.
@@ -371,20 +371,17 @@ class ExtensibleAbilities {
 	 * @param array $args {
 	 *     Filter arguments.
 	 *
-	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query`,
-	 *                               `orders-query` and `customers-query` apply the filters of `product`, `order`
-	 *                               and `customer`. A `customer` filter returns only `include_ids`, which are
-	 *                               user IDs, so it matches registered customers only. The list ability
-	 *                               of another resource must call `get_query_args()` and `add_query_filters_schema()` itself.
+	 *     @type string   $resource  Resource whose list ability applies the filters. The list ability calls
+	 *                               `get_query_args()` and `add_query_filters_schema()`, and documents the
+	 *                               clauses its backend runs and which IDs `include_ids` and `exclude_ids` hold.
 	 *     @type string   $namespace Slug of the extension that owns the filter, such as `subscriptions`.
 	 *     @type string   $filter    Filter name inside the namespace, such as `subscribable`.
 	 *     @type array    $schema    JSON schema of the value. Its `description` tells agents how to use the filter.
-	 *     @type callable $callback  Receives the value, sanitized with the schema, and returns query arguments:
-	 *                               a `meta_query`, for products also a `tax_query`, `include_ids` or
-	 *                               `exclude_ids`. Core adds each one to the query with AND. Return a
-	 *                               WP_Error to refuse the value. A `tax_query` is accepted only for
-	 *                               `product`. Any other key, a `tax_query` for another resource, or a key other
-	 *                               than `include_ids` for `customer`, fails the call.
+	 *     @type callable $callback  Receives the value, sanitized with the schema, and returns query clauses,
+	 *                               such as a `meta_query`, `include_ids` or `exclude_ids`. The list ability adds
+	 *                               each one to the query with AND. Return a WP_Error to refuse the value. A clause
+	 *                               that the list ability does not accept, or a value that is not an array of
+	 *                               clause arrays, fails the call and is logged.
 	 *                               `include_ids` and `exclude_ids` are lists of object IDs. Use them for
 	 *                               data that is not meta, such as order items or a table of the extension:
 	 *                               query that data and return the IDs that match. Core keeps the IDs that
@@ -490,21 +487,22 @@ class ExtensibleAbilities {
 	}
 
 	/**
-	 * Get the query arguments of the filters in the input of a list ability.
-	 * Each key holds one clause for each filter, so `array_merge_recursive()`
-	 * adds them to WP_Query, wc_get_orders() or WP_User_Query arguments with AND. `post__in`
-	 * holds the IDs that every `include_ids` filter returned, without the IDs
-	 * that any `exclude_ids` filter returned, or `0` when none remain, because
-	 * an empty `post__in` does not filter. Without `include_ids`, the excluded
-	 * IDs go to `post__not_in`, which WP_Query ignores next to `post__in`.
+	 * Get the query clauses of the filters in the input of a list ability, which maps them to its backend.
+	 * Each clause key holds one clause for each filter, to add to the query with AND. `include_ids` holds the
+	 * IDs that every `include_ids` filter returned, without the IDs that any `exclude_ids` filter returned, or
+	 * `0` when none remain, so a backend that ignores an empty list still matches nothing. Without
+	 * `include_ids`, `exclude_ids` holds the excluded IDs.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @param string               $resource_name Resource.
 	 * @param array<string, mixed> $input         Ability input.
+	 * @param string[]             $clauses       Clause keys that the backend of the list ability runs, such as
+	 *                                            `meta_query`, `tax_query`, `include_ids` and `exclude_ids`.
+	 *                                            Defaults to `meta_query`, `include_ids` and `exclude_ids`.
 	 * @return array<string, array>|\WP_Error The error of a value that fails its schema, or of a filter that refused its value or failed.
 	 */
-	public static function get_query_args( string $resource_name, array $input ) {
+	public static function get_query_args( string $resource_name, array $input, array $clauses = self::DEFAULT_QUERY_CLAUSES ) {
 		$query_args = array();
 		$include    = null;
 		$exclude    = array();
@@ -524,45 +522,40 @@ class ExtensibleAbilities {
 					return $value;
 				}
 				try {
-					$clauses = call_user_func( $args['callback'], $value );
+					$filter_clauses = call_user_func( $args['callback'], $value );
 				} catch ( \Throwable $e ) {
 					self::log_error( sprintf( 'Ability filter "%s.%s" of "%s" failed: %s', $namespace, $filter, $resource_name, $e->getMessage() ) );
-					$clauses = null;
+					return self::get_filter_failed_error( $namespace . '.' . $filter );
 				}
-				if ( is_wp_error( $clauses ) ) {
-					return $clauses;
+				if ( is_wp_error( $filter_clauses ) ) {
+					return $filter_clauses;
 				}
-				if (
-					! is_array( $clauses )
-					|| ! empty( array_diff_key( $clauses, array_flip( self::QUERY_ARG_KEYS ) ) )
-					|| ( 'product' !== $resource_name && isset( $clauses['tax_query'] ) )
-					|| ( 'customer' === $resource_name && ! empty( array_diff_key( $clauses, array( 'include_ids' => true ) ) ) )
-					|| in_array( false, array_map( 'is_array', $clauses ), true )
-				) {
-					return new \WP_Error(
-						'woocommerce_ability_extension_filter_failed',
-						/* translators: %s: filter name, such as subscriptions.subscribable. */
-						sprintf( __( 'The "%s" filter failed.', 'woocommerce' ), $namespace . '.' . $filter ),
-						array( 'status' => 500 )
-					);
+				if ( ! is_array( $filter_clauses ) || in_array( false, array_map( 'is_array', $filter_clauses ), true ) ) {
+					self::log_error( sprintf( 'Ability filter "%s.%s" of "%s" must return an array of clause arrays.', $namespace, $filter, $resource_name ) );
+					return self::get_filter_failed_error( $namespace . '.' . $filter );
 				}
-				if ( isset( $clauses['include_ids'] ) ) {
-					$filter_ids = self::get_filter_ids( $clauses['include_ids'], $namespace . '.' . $filter );
+				$refused = array_diff( array_keys( $filter_clauses ), $clauses );
+				if ( ! empty( $refused ) ) {
+					self::log_error( sprintf( 'Ability filter "%s.%s" of "%s" returned the clause "%s". This list ability accepts: %s.', $namespace, $filter, $resource_name, implode( '", "', $refused ), implode( ', ', $clauses ) ) );
+					return self::get_filter_failed_error( $namespace . '.' . $filter );
+				}
+				if ( isset( $filter_clauses['include_ids'] ) ) {
+					$filter_ids = self::get_filter_ids( $filter_clauses['include_ids'], $namespace . '.' . $filter, $resource_name );
 					if ( is_wp_error( $filter_ids ) ) {
 						return $filter_ids;
 					}
 					$include = null === $include ? $filter_ids : array_values( array_intersect( $include, $filter_ids ) );
-					unset( $clauses['include_ids'] );
+					unset( $filter_clauses['include_ids'] );
 				}
-				if ( isset( $clauses['exclude_ids'] ) ) {
-					$filter_ids = self::get_filter_ids( $clauses['exclude_ids'], $namespace . '.' . $filter );
+				if ( isset( $filter_clauses['exclude_ids'] ) ) {
+					$filter_ids = self::get_filter_ids( $filter_clauses['exclude_ids'], $namespace . '.' . $filter, $resource_name );
 					if ( is_wp_error( $filter_ids ) ) {
 						return $filter_ids;
 					}
 					$exclude = array_merge( $exclude, $filter_ids );
-					unset( $clauses['exclude_ids'] );
+					unset( $filter_clauses['exclude_ids'] );
 				}
-				foreach ( $clauses as $key => $clause ) {
+				foreach ( $filter_clauses as $key => $clause ) {
 					if ( empty( $clause ) ) {
 						continue;
 					}
@@ -571,10 +564,10 @@ class ExtensibleAbilities {
 			}
 		}
 		if ( null !== $include ) {
-			$include                = array_values( array_diff( $include, $exclude ) );
-			$query_args['post__in'] = empty( $include ) ? array( 0 ) : $include;
+			$include                   = array_values( array_diff( $include, $exclude ) );
+			$query_args['include_ids'] = empty( $include ) ? array( 0 ) : $include;
 		} elseif ( ! empty( $exclude ) ) {
-			$query_args['post__not_in'] = array_values( array_unique( $exclude ) );
+			$query_args['exclude_ids'] = array_values( array_unique( $exclude ) );
 		}
 		return $query_args;
 	}
@@ -582,11 +575,12 @@ class ExtensibleAbilities {
 	/**
 	 * The IDs that a filter returned, as integers.
 	 *
-	 * @param array  $ids    IDs from the filter callback.
-	 * @param string $filter Filter name, such as `subscriptions.related_to`.
+	 * @param array  $ids           IDs from the filter callback.
+	 * @param string $filter        Filter name, such as `subscriptions.related_to`.
+	 * @param string $resource_name Resource.
 	 * @return int[]|\WP_Error An error when an ID is not a positive integer.
 	 */
-	private static function get_filter_ids( array $ids, string $filter ) {
+	private static function get_filter_ids( array $ids, string $filter, string $resource_name ) {
 		$valid = array_filter(
 			array_map(
 				static fn( $id ) => filter_var( $id, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ),
@@ -594,14 +588,28 @@ class ExtensibleAbilities {
 			)
 		);
 		if ( count( $valid ) !== count( $ids ) ) {
-			return new \WP_Error(
-				'woocommerce_ability_extension_filter_failed',
-				/* translators: %s: filter name, such as subscriptions.subscribable. */
-				sprintf( __( 'The "%s" filter failed.', 'woocommerce' ), $filter ),
-				array( 'status' => 500 )
-			);
+			self::log_error( sprintf( 'Ability filter "%s" of "%s" must return IDs that are positive integers.', $filter, $resource_name ) );
+			return self::get_filter_failed_error( $filter );
 		}
 		return array_values( array_unique( $valid ) );
+	}
+
+	/**
+	 * The error of a query filter that failed. The log names the cause for the extension developer.
+	 *
+	 * @param string $filter Filter name, such as `subscriptions.related_to`.
+	 * @return \WP_Error
+	 */
+	private static function get_filter_failed_error( string $filter ): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_ability_extension_filter_failed',
+			sprintf(
+				/* translators: %s: filter name, such as subscriptions.subscribable. */
+				__( 'The "%s" filter failed. Call again without it, and ask the store owner to check the extensible-abilities log in WooCommerce > Status > Logs.', 'woocommerce' ),
+				$filter
+			),
+			array( 'status' => 500 )
+		);
 	}
 
 	/**

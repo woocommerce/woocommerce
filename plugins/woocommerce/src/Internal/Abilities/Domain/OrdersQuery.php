@@ -23,6 +23,11 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	use OrderAbilityTrait;
 
 	/**
+	 * Clauses that extension filters can return. `include_ids` and `exclude_ids` are order IDs.
+	 */
+	private const EXTENSION_FILTER_CLAUSES = array( 'meta_query', 'include_ids', 'exclude_ids' );
+
+	/**
 	 * Get the ability name.
 	 *
 	 * @return string
@@ -186,23 +191,23 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['date_query'][] = $modified_date_query;
 		}
 
-		$extension_args = ExtensibleAbilities::get_query_args( 'order', $input );
+		$extension_args = ExtensibleAbilities::get_query_args( 'order', $input, self::EXTENSION_FILTER_CLAUSES );
 		if ( is_wp_error( $extension_args ) ) {
 			return $extension_args;
 		}
 
-		if ( isset( $extension_args['post__not_in'] ) ) {
-			$args['exclude'] = array_merge( (array) ( $args['exclude'] ?? array() ), $extension_args['post__not_in'] );
-			unset( $extension_args['post__not_in'] );
+		if ( isset( $extension_args['exclude_ids'] ) ) {
+			$args['exclude'] = array_merge( (array) ( $args['exclude'] ?? array() ), $extension_args['exclude_ids'] );
+			unset( $extension_args['exclude_ids'] );
 		}
 
 		$hpos = OrderUtil::custom_orders_table_usage_is_enabled();
 
 		// Both stores merge extension args recursively, which would add the extension IDs to include instead of intersecting them.
 		$include = empty( $input['include'] ) ? null : $input['include'];
-		if ( isset( $extension_args['post__in'] ) ) {
-			$include = null === $include ? $extension_args['post__in'] : array_intersect( $include, $extension_args['post__in'] );
-			unset( $extension_args['post__in'] );
+		if ( isset( $extension_args['include_ids'] ) ) {
+			$include = null === $include ? $extension_args['include_ids'] : array_intersect( $include, $extension_args['include_ids'] );
+			unset( $extension_args['include_ids'] );
 		}
 		if ( null !== $search ) {
 			if ( $hpos ) {

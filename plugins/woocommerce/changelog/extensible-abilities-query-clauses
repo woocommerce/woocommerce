@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Let experimental list abilities declare their own extension query filter clauses; behind a feature flag.
+

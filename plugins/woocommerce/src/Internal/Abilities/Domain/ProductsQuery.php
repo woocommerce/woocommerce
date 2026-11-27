@@ -28,6 +28,11 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	private const PARENT_TYPES_QUERY_VAR = 'woocommerce_ability_parent_types';
 
 	/**
+	 * Clauses that extension filters can return. `include_ids` and `exclude_ids` are product IDs.
+	 */
+	private const EXTENSION_FILTER_CLAUSES = array( 'meta_query', 'tax_query', 'include_ids', 'exclude_ids' );
+
+	/**
 	 * Taxonomies of the term filters, keyed by input property.
 	 */
 	private const TERM_FILTERS = array(
@@ -175,9 +180,19 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['s'] = wc_clean( $input['search'] );
 		}
 
-		$extension_args = ExtensibleAbilities::get_query_args( 'product', $input );
+		$extension_args = ExtensibleAbilities::get_query_args( 'product', $input, self::EXTENSION_FILTER_CLAUSES );
 		if ( is_wp_error( $extension_args ) ) {
 			return $extension_args;
+		}
+		$id_query_vars = array(
+			'include_ids' => 'post__in',
+			'exclude_ids' => 'post__not_in',
+		);
+		foreach ( $id_query_vars as $key => $query_var ) {
+			if ( isset( $extension_args[ $key ] ) ) {
+				$extension_args[ $query_var ] = $extension_args[ $key ];
+				unset( $extension_args[ $key ] );
+			}
 		}
 
 		foreach ( self::TERM_FILTERS as $field => $taxonomy ) {
