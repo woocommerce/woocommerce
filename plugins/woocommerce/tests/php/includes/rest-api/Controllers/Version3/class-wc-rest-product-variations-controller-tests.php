@@ -250,6 +250,108 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should batch gallery attachment reads in both REST variation collection versions.
+	 * @testWith ["WC_REST_Product_Variations_Controller"]
+	 *           ["WC_REST_Product_Variations_V2_Controller"]
+	 *
+	 * @param string $controller_class Variation controller to query.
+	 */
+	public function test_gallery_only_collection_batches_attachment_queries( string $controller_class ): void {
+		global $wpdb;
+		$parent = WC_Helper_Product::create_variation_product();
+		$images = array();
+		foreach ( $parent->get_children() as $id ) {
+			$image_id = wp_insert_attachment( array( 'post_mime_type' => 'image/jpeg' ) );
+			update_post_meta( $image_id, '_wp_attached_file', 'rest-collection-' . $id . '.jpg' );
+			$variation = wc_get_product( $id );
+			$variation->set_image_id( 0 );
+			$variation->set_gallery_image_ids( array( $image_id ) );
+			$variation->save();
+			$images[] = $image_id;
+			clean_post_cache( $image_id );
+		}
+		$attachment_queries = array();
+		add_filter(
+			'query',
+			static function ( $sql ) use ( $wpdb, $images, &$attachment_queries ) {
+				if ( preg_match( '/FROM\s+' . preg_quote( $wpdb->posts, '/' ) . '\s+WHERE\s+ID\s+(?:IN\s*\(([^)]+)\)|=\s*(\d+))/i', $sql, $matches ) ) {
+					$queried_ids = wp_parse_id_list( $matches[1] ? $matches[1] : ( $matches[2] ?? '' ) );
+					if ( array_intersect( $images, $queried_ids ) ) {
+						$attachment_queries[] = $sql;
+					}
+				}
+				return $sql;
+			}
+		);
+		$controller  = new $controller_class();
+		$get_objects = new ReflectionMethod( $controller, 'get_objects' );
+		$get_objects->setAccessible( true );
+		$result = $get_objects->invoke(
+			$controller,
+			array(
+				'post_type'      => 'product_variation',
+				'post_parent'    => $parent->get_id(),
+				'posts_per_page' => 10,
+				'post_status'    => 'any',
+			)
+		);
+		$this->assertCount( count( $images ), $result['objects'] );
+		foreach ( $result['objects'] as $variation ) {
+			$this->assertContains( $variation->get_image_id(), $images, 'Every REST item must use its own gallery photo.' );
+		}
+		$this->assertCount( 1, $attachment_queries, 'Cold attachment posts must load in one batch instead of one query per variation.' );
+	}
+
+	/**
+	 * @testdox Should return the gallery fallback in view context and keep an unassigned main image empty in edit context.
+	 * @testWith ["view"]
+	 *           ["edit"]
+	 *
+	 * @param string $context REST response context.
+	 */
+	public function test_gallery_only_main_image_context( string $context ): void {
+		$parent    = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$image_id  = wp_insert_attachment( array( 'post_mime_type' => 'image/jpeg' ) );
+		update_post_meta( $image_id, '_wp_attached_file', 'rest-gallery-fallback.jpg' );
+		$variation->set_image_id( 0 );
+		$variation->set_gallery_image_ids( array( $image_id ) );
+		$variation->save();
+
+		$request = new WP_REST_Request( 'GET', "/wc/v3/products/{$parent->get_id()}/variations/{$variation->get_id()}" );
+		$request->set_param( 'context', $context );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		if ( 'view' === $context ) {
+			$this->assertSame( $image_id, $data['image']['id'], 'View responses must prefer the variation gallery photo.' );
+		} else {
+			$this->assertEmpty( $data['image'], 'Edit responses must expose the saved empty main image.' );
+		}
+		$this->assertSame( array( $image_id ), $data['gallery_image_ids'], 'Response gallery IDs must retain their existing independent contract.' );
+	}
+
+	/**
+	 * @testdox Should preserve gallery-only API writes when a read fallback already selects one of the submitted photos.
+	 */
+	public function test_gallery_only_writes_do_not_remove_read_fallback(): void {
+		$parent    = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$image_id  = wp_insert_attachment( array( 'post_mime_type' => 'image/jpeg' ) );
+		$parent->set_image_id( $image_id );
+		$parent->save();
+		$variation->set_image_id( 0 );
+		$variation->save();
+
+		foreach ( range( 1, 2 ) as $attempt ) {
+			$this->update_variation_via_post_request( $variation, array( 'gallery_image_ids' => array( $image_id ) ) );
+			$variation = new WC_Product_Variation( $variation->get_id() );
+			$this->assertSame( array( $image_id ), $variation->get_gallery_image_ids( 'edit' ), 'Attempt ' . $attempt . ' must retain a gallery photo even when it is also the read-time main photo.' );
+			$this->assertSame( 0, (int) $variation->get_image_id( 'edit' ), 'Updating the gallery alone must not assign a saved main image.' );
+		}
+	}
+
+	/**
 	 * @testdox The variation GET endpoint returns typed gallery image IDs.
 	 */
 	public function test_variation_get_returns_gallery_image_ids() {

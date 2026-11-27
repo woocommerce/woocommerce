@@ -27,6 +27,28 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve gallery-only CSV data while using its first photo for display.
+	 */
+	public function test_gallery_only_csv_import_keeps_raw_fields(): void {
+		$parent = new WC_Product_Variable();
+		$parent->save();
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->save();
+		$image_id = wp_insert_attachment( array( 'post_mime_type' => 'image/jpeg' ) );
+		update_post_meta( $image_id, '_wp_attached_file', 'csv-gallery-fallback.jpg' );
+		$csv = "id,type,images\n{$variation->get_id()},variation,\",csv-gallery-fallback.jpg\"\n";
+
+		$result = $this->import_relationship_updates( $csv );
+
+		$this->assertEmpty( $result['failed'], wp_json_encode( $result['failed'] ) );
+		$variation = new WC_Product_Variation( $variation->get_id() );
+		$this->assertSame( 0, (int) $variation->get_image_id( 'edit' ), 'The empty first CSV image slot must remain unassigned.' );
+		$this->assertSame( array( $image_id ), $variation->get_gallery_image_ids( 'edit' ), 'Importing must not remove the gallery photo.' );
+		$this->assertSame( $image_id, $variation->get_image_id(), 'The gallery-only import must still have a usable main photo for display.' );
+	}
+
+	/**
 	 * @testdox An update import resolves relationship SKUs saved by earlier rows in the same import.
 	 * @testWith [-1]
 	 *           [1]

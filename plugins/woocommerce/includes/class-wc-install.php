@@ -23,7 +23,6 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
-use Automattic\WooCommerce\Internal\VariationGallery\OrphanedGalleryMigration;
 use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
 
 defined( 'ABSPATH' ) || exit;
@@ -382,7 +381,6 @@ class WC_Install {
 		),
 		'11.4.0'   => array(
 			'wc_update_1140_re_enable_autoload_options',
-			OrphanedGalleryMigration::class . '::run',
 			'wc_update_1140_add_mpn_to_product_lookup_table',
 			// Run again for stores whose database was already at 11.3.0 or later, as they skip the 11.2.2 key.
 			'wc_update_1122_remove_objects_from_default_attributes',

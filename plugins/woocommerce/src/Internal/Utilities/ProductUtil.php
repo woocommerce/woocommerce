@@ -325,12 +325,18 @@ class ProductUtil {
 	 */
 	public function prime_image_caches( array $products ): void {
 		$products  = array_filter( $products, static fn( $product ) => $product instanceof \WC_Product );
-		$featured  = array_map( static fn( $product ) => $product->get_image_id(), $products );
-		$gallery   = array_map( static fn( $product ) => $product->get_gallery_image_ids(), $products );
+		$featured  = array_map( static fn( $product ) => (int) $product->get_image_id( 'edit' ), $products );
+		$gallery   = array_map( static fn( $product ) => (array) $product->get_gallery_image_ids(), $products );
 		$image_ids = array_filter( array_unique( array_map( 'intval', array_merge( $featured, ...array_values( $gallery ) ) ) ) );
 		if ( ! empty( $image_ids ) ) {
-			// Prime caches to reduce future queries.
+			// Prime known images before variation getters inspect the gallery; filtered main images are primed below.
 			_prime_post_caches( $image_ids );
+		}
+
+		$featured = array_filter( array_unique( array_map( static fn( $product ) => (int) $product->get_image_id(), $products ) ) );
+		if ( ! empty( $featured ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $featured );
 		}
 	}
 

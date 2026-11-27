@@ -277,7 +277,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			$gallery_ids = array_values(
 				array_diff(
 					wp_parse_id_list( $request['gallery_image_ids'] ),
-					array( (int) $variation->get_image_id() )
+					array( (int) $variation->get_image_id( 'edit' ) )
 				)
 			);
 			try {
@@ -1320,12 +1320,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			remove_filter( 'posts_where', array( $this, 'exclude_product_variation_statuses' ) );
 
 			$this->exclude_status = array();
-		}
-
-		$attachment_ids = array_filter( array_map( fn( $variation ) => (int) $variation->get_image_id(), $result['objects'] ) );
-		if ( ! empty( $attachment_ids ) ) {
-			// Prime caches to reduce future queries.
-			_prime_post_caches( $attachment_ids );
 		}
 
 		return $result;

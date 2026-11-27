@@ -89,6 +89,8 @@ class GalleryImageResolverTest extends \WC_Unit_Test_Case {
 	 *           ["invalid", ["front"], ["front", "size"]]
 	 *           ["none", ["size"], ["size"]]
 	 *           ["size", [], ["size"]]
+	 *           ["front", ["front"], ["front", "size"]]
+	 *           ["none", ["front", "front"], ["front", "size"]]
 	 *           ["none", ["pdf"], ["pdf", "size"]]
 	 *           ["none", ["pdf", "back"], ["pdf", "back"]]
 	 *           ["front", ["pdf"], ["front", "pdf"]]
@@ -174,6 +176,32 @@ class GalleryImageResolverTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $this->images['parent'], $classic['image_id'] );
 		$this->assertSame( $this->image_ids_for( array( 'parent', 'size' ) ), $block['image_ids'] );
+	}
+
+	/**
+	 * @testdox Should handle missing parent photos and placeholders consistently in both galleries.
+	 * @testWith [false, false, [], []]
+	 *           [false, true, [], ["size"]]
+	 *           [false, false, ["front"], ["front"]]
+	 *           [true, false, ["front"], ["front"]]
+	 *
+	 * @param bool     $parent_featured Whether the parent has a main photo.
+	 * @param bool     $parent_gallery Whether the parent has gallery extras.
+	 * @param string[] $gallery Variation gallery photo names.
+	 * @param string[] $expected Expected photo names, or empty for the placeholder.
+	 */
+	public function test_missing_parent_photos( bool $parent_featured, bool $parent_gallery, array $gallery, array $expected ): void {
+		$this->parent->set_image_id( $parent_featured ? $this->images['parent'] : 0 );
+		$this->parent->set_gallery_image_ids( $parent_gallery ? array( $this->images['size'] ) : array() );
+		$this->parent->save();
+		$this->parent = new \WC_Product_Variable( $this->parent->get_id() );
+		$variation    = $this->create_variation( 'none', $gallery );
+
+		list( $classic, $block ) = $this->get_storefront_data( $variation );
+
+		$expected_ids = $expected ? $this->image_ids_for( $expected ) : array( 0 );
+		$this->assertSame( $expected_ids[0], $classic['image_id'], 'Classic must select an available photo or the placeholder.' );
+		$this->assertSame( $expected_ids, $block['image_ids'], 'The block must use the same fallback order.' );
 	}
 
 	/**
