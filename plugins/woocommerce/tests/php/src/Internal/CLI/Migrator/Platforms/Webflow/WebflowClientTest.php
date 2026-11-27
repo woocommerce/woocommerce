@@ -36,34 +36,15 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 	private WebflowClient $client;
 
 	/**
-	 * HTTP filter callbacks registered during the test, removed in tearDown.
-	 *
-	 * @var array<callable>
-	 */
-	private array $http_filters = array();
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->http_filters     = array();
 		$this->test_credentials = array(
 			'site_id'      => 'site-123',
 			'access_token' => 'ws-test-token',
 		);
 		$this->client           = new WebflowClient( $this->test_credentials );
-	}
-
-	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		foreach ( $this->http_filters as $cb ) {
-			remove_filter( 'pre_http_request', $cb );
-		}
-		$this->http_filters = array();
-		parent::tearDown();
 	}
 
 	/**
@@ -246,13 +227,12 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Register a pre_http_request filter and track it for cleanup.
+	 * Register a pre_http_request filter.
 	 *
 	 * @param callable $callback   Filter callback.
 	 * @param int      $args_count Number of accepted arguments (default 1).
 	 */
 	private function add_http_filter( callable $callback, int $args_count = 1 ): void {
 		add_filter( 'pre_http_request', $callback, 10, $args_count );
-		$this->http_filters[] = $callback;
 	}
 }

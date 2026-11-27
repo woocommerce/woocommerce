@@ -289,7 +289,7 @@ class WC_Order extends WC_Abstract_Order {
 
 		$this->save_if_writing_through();
 
-		$add_note    = function () use ( $payment_complete_note ) {
+		$add_note = function () use ( $payment_complete_note ) {
 			try {
 				$this->add_order_note( $payment_complete_note, 0, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
 			} catch ( Exception $e ) {
@@ -302,19 +302,31 @@ class WC_Order extends WC_Abstract_Order {
 				);
 			}
 		};
-		$action_args = array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
-		$save_error  = $this->writing_through ? $this->get_last_save_error() : null;
+
+		$order_id         = $this->get_id();
+		$payment_complete = static function () use ( $order_id, $transaction_id ) {
+			/**
+			 * Fires after the payment of an order is completed and the order is saved.
+			 *
+			 * @param int    $order_id       Order ID.
+			 * @param string $transaction_id Transaction ID of the order.
+			 * @since 1.2.2
+			 * @since 6.8.0 Passes $transaction_id.
+			 */
+			do_action( 'woocommerce_payment_complete', $order_id, $transaction_id );
+		};
+		$save_error       = $this->writing_through ? $this->get_last_save_error() : null;
 		if ( null !== $save_error ) {
 			$paid_status = $this->get_status();
 			$this->defer_to_save(
 				'payment_complete',
-				function () use ( $paid_status, $add_note, $action_args ) {
+				function () use ( $paid_status, $add_note, $payment_complete ) {
 					if ( ! $this->has_status( $paid_status ) && ! $this->is_paid() ) {
 						return;
 					}
 					$add_note();
 					try {
-						call_user_func_array( 'do_action', $action_args );
+						$payment_complete();
 					} catch ( Exception $e ) {
 						wc_get_logger()->error(
 							sprintf( 'Error completing payment for order #%d', $this->get_id() ),
@@ -332,7 +344,7 @@ class WC_Order extends WC_Abstract_Order {
 			throw $save_error;
 		}
 		$this->write_or_defer( 'payment_complete_note', $add_note, array(), true );
-		$this->write_or_defer( 'payment_complete', 'do_action', $action_args, true );
+		$this->write_or_defer( 'payment_complete', $payment_complete, array(), true );
 
 		return true;
 	}
@@ -1718,7 +1730,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set the payment method.
 	 *
-	 * @param string $payment_method Supports WC_Payment_Gateway for bw compatibility with < 3.0.
+	 * @param string|WC_Payment_Gateway $payment_method Gateway id, or a gateway object (also sets the title).
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
 	 * @return void
 	 */

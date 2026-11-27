@@ -30,25 +30,18 @@ use WP_REST_Request;
 class WCEmailTemplateMetaRestExposureTest extends \WC_REST_Unit_Test_Case {
 
 	/**
-	 * Previous value of the email editor feature flag, captured in setUp() so we
-	 * can deterministically restore the original state in tearDown() and avoid
-	 * order-dependent failures when other tests touch the same option.
-	 *
-	 * @var string|false|null Either the previous option value (string), `false`
-	 *   when the option did not exist, or `null` before setUp() runs.
-	 */
-	private $previous_feature_flag_value = null;
-
-	/**
 	 * Setup test case.
 	 *
-	 * The bootstrap order matters: WC_REST_Unit_Test_Case::setUp() fires
-	 * `rest_api_init` after `parent::setUp()`, so the woo_email post type and its
-	 * meta must be registered before the parent setup runs — otherwise the post
-	 * type's REST routes never get registered and GET wp/v2/woo_email returns 404.
+	 * Everything runs after `parent::setUp()` so the option write and the `init` side effects
+	 * stay inside the test transaction. The woo_email post type and its meta are registered
+	 * before the first request, which is when the lazy REST server fires `rest_api_init`.
 	 */
 	public function setUp(): void {
-		$this->previous_feature_flag_value = get_option( 'woocommerce_feature_block_email_editor_enabled', false );
+		parent::setUp();
+
+		// Firing init again registers the block payment integrations a second time.
+		$this->setExpectedIncorrectUsage( 'Automattic\\WooCommerce\\Blocks\\Integrations\\IntegrationRegistry::register' );
+
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 		wc_get_container()->get( Package::class )->init();
 		wc_get_container()->get( Integration::class )->initialize();
@@ -60,20 +53,6 @@ class WCEmailTemplateMetaRestExposureTest extends \WC_REST_Unit_Test_Case {
 		 * @since 1.5.0
 		 */
 		do_action( 'init' );
-
-		parent::setUp();
-	}
-
-	/**
-	 * Cleanup after test.
-	 */
-	public function tearDown(): void {
-		if ( false === $this->previous_feature_flag_value ) {
-			delete_option( 'woocommerce_feature_block_email_editor_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_block_email_editor_enabled', $this->previous_feature_flag_value );
-		}
-		parent::tearDown();
 	}
 
 	/**

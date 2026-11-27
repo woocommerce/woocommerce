@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Include HPOS orders when downloading Orders from Tools > Export with compatibility mode off.

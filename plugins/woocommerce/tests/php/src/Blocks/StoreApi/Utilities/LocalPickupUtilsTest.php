@@ -47,9 +47,6 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 		// Restore original shipping methods.
 		WC()->shipping()->shipping_methods = $this->original_shipping_methods;
 
-		// Remove the filter.
-		remove_filter( 'pre_option_pickup_location_pickup_locations', array( $this, 'filter_pickup_locations' ) );
-
 		// Reset mocked value.
 		$this->mocked_pickup_locations = null;
 
@@ -255,8 +252,6 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $result );
 		$this->assertSame( 'GB', $result[0]['address']['country'] );
 		$this->assertSame( 'LND', $result[0]['address']['state'] );
-
-		remove_all_filters( 'pre_option_woocommerce_default_country' );
 	}
 
 	/**

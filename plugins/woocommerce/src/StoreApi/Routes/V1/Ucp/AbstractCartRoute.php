@@ -3,19 +3,21 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute as StoreApiCartRoute;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CartMapper;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyClaim;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * Shared behaviour of the UCP cart routes.
  *
- * Inherits session binding, cart loading and draft order sync from the Store API cart
- * route. Adds the UCP envelope, and keys the session off the path instead of a header.
+ * Inherits session binding and cart loading from the Store API cart route. Adds the UCP
+ * envelope, and keys the session off the path instead of a header.
  *
  * Writes are last-wins, as for every Store API cart: the session row is read when the
  * request starts and written whole at shutdown, with no lock or version check. Two
@@ -38,6 +40,13 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	const CANCELLED_SESSION_KEY = 'ucp_cart_cancelled';
 
 	/**
+	 * Session key holding the checkout state: `created_at`, and once set `status`, `continue_url`, `order_id` and `fingerprint`.
+	 *
+	 * Its presence is what makes a cart session a checkout, so the cart routes read it too.
+	 */
+	const CHECKOUT_SESSION_KEY = 'ucp_checkout';
+
+	/**
 	 * Most lines one request may name.
 	 *
 	 * Each line can cost a product lookup, so an open route needs a ceiling. Matches the
@@ -46,22 +55,46 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	const LINE_ITEMS_MAX = 100;
 
 	/**
+	 * Most discount codes one request may submit.
+	 *
+	 * Each code costs a coupon lookup and validation, where the Store API takes one code per request.
+	 */
+	const DISCOUNT_CODES_MAX = 10;
+
+	/**
+	 * Coupons this request took off the cart because the store has turned coupons off.
+	 *
+	 * @var array<int, string>
+	 */
+	private $disabled_coupons = array();
+
+	/**
 	 * Build the `ucp` envelope for a response from this route.
 	 *
 	 * @param string $status Response status, `success` or `error`.
 	 * @return array
 	 */
 	protected function ucp_metadata( string $status ): array {
-		return Utils::response_metadata( Utils::CAPABILITY_CART, $status );
+		return Utils::response_metadata( $this->capability(), $status );
+	}
+
+	/**
+	 * The capability this route answers for, named in every envelope it sends.
+	 *
+	 * @return string One of the Utils::CAPABILITY_* constants.
+	 */
+	protected function capability(): string {
+		return Utils::CAPABILITY_CART;
 	}
 
 	/**
 	 * Answer the request, under the `Idempotency-Key` it carries.
 	 *
-	 * A payload the route cannot read is refused before the key is claimed, so a 415 never
-	 * touches the store. After that the key is settled before anything else runs: a replay
-	 * must not load a session or resolve a cart id, since a retried `cancel` has to return the
-	 * stored response rather than the `not_found` its own first run left behind.
+	 * An unsupported version or a payload the route cannot read is refused before the key is
+	 * claimed, so a 422 or 415 never touches the store. After that the key is settled before
+	 * anything else runs: a replay must not load a session or resolve a cart id, since a
+	 * retried `cancel` has to return the stored response rather than the `not_found` its own
+	 * first run left behind.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -70,12 +103,12 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$refusal = Utils::refuse_non_json_payload( $request, Utils::CAPABILITY_CART );
+		$refusal = Utils::refuse_unsupported_version( $request, $this->capability() ) ?? Utils::refuse_non_json_payload( $request, $this->capability() );
 		if ( null !== $refusal ) {
 			return $this->add_response_headers( $refusal );
 		}
 
-		$claim = IdempotencyClaim::for_request( $request, Utils::CAPABILITY_CART );
+		$claim = IdempotencyClaim::for_request( $request, $this->capability() );
 
 		if ( $claim instanceof \WP_REST_Response ) {
 			// The gate answers without reaching the parent, so it stamps the cache directive itself.
@@ -104,14 +137,46 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			return $this->add_response_headers( $this->ucp_not_found() );
 		}
 
-		$inherited_token = CartTokenUtils::get_request_cart_token();
+		$inherited_token        = CartTokenUtils::get_request_cart_token();
+		$this->disabled_coupons = array();
+		add_filter( 'woocommerce_coupon_get_usage_count', array( $this, 'usage_count_without_own_order' ), 10, 2 );
 
 		try {
 			return parent::get_response( $request );
 		} finally {
+			remove_filter( 'woocommerce_coupon_get_usage_count', array( $this, 'usage_count_without_own_order' ), 10 );
 			$this->restore_request_cart_token( $inherited_token );
 			remove_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
 		}
+	}
+
+	/**
+	 * Leave the use this session's handed-off order recorded out of a coupon's usage count.
+	 *
+	 * The order spends the coupon while it awaits payment, and cart validation would otherwise
+	 * refuse a usage-limited coupon to the very checkout that spent it.
+	 *
+	 * @internal
+	 *
+	 * @param int|string $count Usage count.
+	 * @param \WC_Coupon $coupon The coupon.
+	 * @return int|string
+	 */
+	public function usage_count_without_own_order( $count, $coupon ) {
+		$order = wc_get_order( (int) ( $this->checkout_state()['order_id'] ?? 0 ) );
+
+		// Read on every call: an order this request cancels gives its use back, and must stop counting here.
+		if ( ! $order instanceof \WC_Order || ! $order->get_recorded_coupon_usage_counts() ) {
+			return $count;
+		}
+
+		foreach ( $order->get_coupon_codes() as $code ) {
+			if ( wc_is_same_coupon( $code, $coupon->get_code() ) ) {
+				return max( 0, (int) $count - 1 );
+			}
+		}
+
+		return $count;
 	}
 
 	/**
@@ -154,13 +219,24 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * The parent picks the Store API session handler from a `Cart-Token` header. UCP
 	 * carries that token in the path, so it is promoted to the header first.
 	 *
+	 * The parent also lowers each line to the stock left before handling the request. No
+	 * human watches a UCP cart and `complete` carries no expected total, so a shortfall is
+	 * left in place for cart validation to report instead of being absorbed.
+	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
+	 * @throws \RuntimeException When a previous cart session load failed.
+	 * @throws \Throwable When the cart cannot be loaded.
+	 *
 	 * @return void
 	 */
 	protected function load_cart_session( \WP_REST_Request $request ) {
+		if ( WC()->cart instanceof \WC_Cart && ! \WC_Cart_Session::are_updates_enabled_for_cart( WC()->cart ) ) {
+			throw new \RuntimeException( 'The cart is unavailable after its session failed to load.' );
+		}
+
 		$cart_id = $this->validated_cart_id( $request );
 
 		if ( '' === $cart_id ) {
@@ -190,7 +266,39 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			$this->discard_preloaded_cart_session();
 		}
 
-		parent::load_cart_session( $request );
+		try {
+			$this->cart_controller->load_cart();
+		} catch ( \Throwable $error ) {
+			// The parent's flag: a later load in the same process must refuse, not reuse, this cart.
+			if ( WC()->cart instanceof \WC_Cart ) {
+				\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, false );
+			}
+
+			throw $error;
+		}
+
+		$this->remove_disabled_coupons();
+	}
+
+	/**
+	 * Take the coupons off a cart that got them before the store turned coupons off.
+	 *
+	 * Core then only refuses to add a coupon: one already applied goes on discounting, into the order.
+	 */
+	private function remove_disabled_coupons(): void {
+		$cart = $this->cart_controller->get_cart_instance();
+
+		if ( wc_coupons_enabled() || ! $cart->get_applied_coupons() ) {
+			return;
+		}
+
+		$this->disabled_coupons = array_values( $cart->get_applied_coupons() );
+
+		foreach ( $this->disabled_coupons as $code ) {
+			$cart->remove_coupon( $code );
+		}
+
+		$cart->calculate_totals();
 	}
 
 	/**
@@ -238,9 +346,10 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Dispatch the request, refusing a cart that was cancelled.
+	 * Dispatch the request, refusing a cart that was cancelled or that a checkout owns.
 	 *
-	 * Runs after the session is bound, so one check covers every id-bearing route.
+	 * Runs after the session is bound, so one check covers every id-bearing route. A live checkout's
+	 * cart is readable but changed only through the checkout routes, which close the buyer's order.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -249,8 +358,20 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_response_by_request_method( \WP_REST_Request $request ) {
-		if ( '' !== $this->route_cart_id( $request ) && $this->cart_is_cancelled() ) {
-			return $this->ucp_not_found();
+		if ( '' !== $this->route_cart_id( $request ) ) {
+			if ( $this->cart_is_cancelled() ) {
+				return $this->ucp_not_found();
+			}
+
+			$checkout = Utils::CAPABILITY_CART === $this->capability() ? $this->checkout_state() : null;
+
+			if ( null !== $checkout && $this->is_terminal( $checkout ) ) {
+				return $this->ucp_not_found();
+			}
+
+			if ( null !== $checkout && 'GET' !== $request->get_method() ) {
+				return $this->ucp_error( 'CONFLICT', __( 'This cart has become a checkout session, which the checkout routes manage.', 'woocommerce' ), 'recoverable', 409, '$.id' );
+			}
 		}
 
 		return parent::get_response_by_request_method( $request );
@@ -315,10 +436,54 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
+	 * The bound session's checkout state, with the order filled in once the buyer has paid it.
+	 *
+	 * Paying happens in the browser, outside this session, so `completed` is read off the
+	 * order rather than stored. An order that can no longer be paid, such as one the hold-stock
+	 * timer cancelled, drops the hand-off so the status derives again.
+	 *
+	 * @return array<string, mixed>|null Null when the session holds no checkout.
+	 */
+	protected function checkout_state(): ?array {
+		$state = WC()->session ? WC()->session->get( self::CHECKOUT_SESSION_KEY ) : null;
+
+		if ( ! is_array( $state ) ) {
+			return null;
+		}
+
+		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
+
+		// Paid once is completed for good: a later refund or cancellation must not reopen the checkout.
+		if ( $order instanceof \WC_Order && ( $order->is_paid() || $order->get_date_paid() || $order->has_status( OrderStatus::REFUNDED ) ) ) {
+			$state['status'] = CheckoutMapper::STATUS_COMPLETED;
+			$state['order']  = array(
+				'id'            => (string) $order->get_id(),
+				'permalink_url' => $order->get_checkout_order_received_url(),
+			);
+		} elseif ( ! empty( $state['order_id'] ) && ! ( $order instanceof \WC_Order && $order->has_status( array( OrderStatus::PENDING, OrderStatus::FAILED, OrderStatus::ON_HOLD ) ) ) ) {
+			// Status list rather than needs_payment(): that is false for a zero-total order, and
+			// on-hold is a payment the buyer made that the store has yet to confirm.
+			unset( $state['status'], $state['continue_url'], $state['order_id'] );
+		}
+
+		return $state;
+	}
+
+	/**
+	 * Whether a checkout is completed or canceled.
+	 *
+	 * @param array<string, mixed> $state Checkout state.
+	 * @return bool
+	 */
+	protected function is_terminal( array $state ): bool {
+		return in_array( $state['status'] ?? '', array( CheckoutMapper::STATUS_COMPLETED, CheckoutMapper::STATUS_CANCELED ), true );
+	}
+
+	/**
 	 * Build a successful cart response.
 	 *
 	 * @param string               $cart_id Cart identifier.
-	 * @param array<string, mixed> $context Optional `messages` to merge into the payload.
+	 * @param array<string, mixed> $context Optional `messages` and `discount_codes`, as {@see CartMapper::build_cart()} takes them.
 	 * @return \WP_REST_Response
 	 */
 	protected function cart_response( string $cart_id, array $context = array() ): \WP_REST_Response {
@@ -336,9 +501,20 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 *
 	 * @return array
 	 */
-	private function cart_item_response(): array {
+	protected function cart_item_response(): array {
 		// Nested values are stdClass; decode through JSON for uniform array access.
-		return (array) json_decode( (string) wp_json_encode( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) ), true );
+		$cart = (array) json_decode( (string) wp_json_encode( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) ), true );
+
+		// Added here, not through cart validation, which stops at the first failing check and would drop them.
+		foreach ( $this->disabled_coupons as $code ) {
+			$cart['errors'][] = array(
+				'code'    => 'woocommerce_rest_cart_coupon_error',
+				/* translators: %s: coupon code. */
+				'message' => sprintf( __( 'The "%s" coupon has been removed from your cart: coupons are disabled.', 'woocommerce' ), $code ),
+			);
+		}
+
+		return $cart;
 	}
 
 	/**
@@ -356,7 +532,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_error( string $code, string $message, string $severity, int $status, string $path = '$' ): \WP_REST_Response {
-		return Utils::error_response( Utils::CAPABILITY_CART, $code, $message, $severity, $status, $path );
+		return Utils::error_response( $this->capability(), $code, $message, $severity, $status, $path );
 	}
 
 	/**
@@ -540,6 +716,160 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Read the request's `discounts.codes`, normalized as WooCommerce stores coupon codes.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return array<int, string>|\WP_REST_Response|null The codes, a 400 error response, or null when the request sends none.
+	 */
+	protected function parse_discount_codes( \WP_REST_Request $request ) {
+		$discounts = Utils::json_param( $request, 'discounts' );
+
+		if ( ! is_array( $discounts ) || ! array_key_exists( 'codes', $discounts ) ) {
+			return null;
+		}
+
+		$codes = $discounts['codes'];
+
+		if ( ! is_array( $codes ) || array_values( $codes ) !== $codes || count( $codes ) > self::DISCOUNT_CODES_MAX ) {
+			return $this->ucp_error(
+				'VALIDATION_ERROR',
+				/* translators: %d: maximum number of discount codes accepted in one request. */
+				sprintf( __( 'discounts.codes must be an array of at most %d strings.', 'woocommerce' ), self::DISCOUNT_CODES_MAX ),
+				'recoverable',
+				400,
+				'$.discounts.codes'
+			);
+		}
+
+		foreach ( $codes as $index => $code ) {
+			if ( ! is_string( $code ) ) {
+				return $this->ucp_error( 'VALIDATION_ERROR', __( 'Each discount code must be a string.', 'woocommerce' ), 'recoverable', 400, sprintf( '$.discounts.codes[%d]', $index ) );
+			}
+
+			$codes[ $index ] = wc_format_coupon_code( trim( $code ) );
+		}
+
+		return $codes;
+	}
+
+	/**
+	 * Replace the cart's coupons with the submitted codes, which an empty list clears.
+	 *
+	 * A code the cart refuses is reported as a warning at its index, and the rest still apply.
+	 *
+	 * @param array<int, string>|null $codes Codes from parse_discount_codes(), or null to leave the coupons alone.
+	 * @return array<string, mixed> Context for the response: the `discount_codes` to echo and any `messages`.
+	 */
+	protected function apply_discount_codes( ?array $codes ): array {
+		if ( null === $codes ) {
+			return array();
+		}
+
+		$messages = array();
+
+		if ( ! wc_coupons_enabled() ) {
+			foreach ( $codes as $index => $code ) {
+				$messages[] = $this->discount_warning( 'discount_code_invalid', __( 'Coupons are disabled.', 'woocommerce' ), $index );
+			}
+
+			return array( 'messages' => $messages );
+		}
+
+		$cart = $this->cart_controller->get_cart_instance();
+
+		foreach ( $cart->get_applied_coupons() as $applied ) {
+			if ( ! in_array( $applied, $codes, true ) ) {
+				$cart->remove_coupon( $applied );
+			}
+		}
+
+		$rejected = array();
+
+		foreach ( $codes as $index => $code ) {
+			if ( $this->cart_controller->has_coupon( $code ) ) {
+				continue;
+			}
+
+			// The cart's refusal names no reason, so the one coupon validation gives is caught on its way out.
+			$reason  = null;
+			$capture = static function ( $message, $error_code ) use ( &$reason ) {
+				$reason = (int) $error_code;
+				return $message;
+			};
+			add_filter( 'woocommerce_coupon_error', $capture, PHP_INT_MAX, 2 );
+
+			try {
+				$this->cart_controller->apply_coupon( $code );
+			} catch ( RouteException $error ) {
+				$rejected[ $code ] = true;
+				$messages[]        = $this->discount_warning( $this->discount_error_code( $code, $reason ), wp_specialchars_decode( $error->getMessage(), ENT_QUOTES ), $index );
+			} finally {
+				remove_filter( 'woocommerce_coupon_error', $capture, PHP_INT_MAX );
+			}
+		}
+
+		// An individual-use coupon removes the coupons applied before it.
+		foreach ( $codes as $index => $code ) {
+			if ( ! isset( $rejected[ $code ] ) && ! $this->cart_controller->has_coupon( $code ) ) {
+				/* translators: %s: coupon code. */
+				$messages[] = $this->discount_warning( 'discount_code_combination_disallowed', sprintf( __( 'Coupon code "%s" cannot be used together with the other coupons applied.', 'woocommerce' ), $code ), $index );
+			}
+		}
+
+		$this->cart_controller->calculate_totals();
+
+		return array(
+			'discount_codes' => $codes,
+			'messages'       => $messages,
+		);
+	}
+
+	/**
+	 * The discount extension's rejection code for a coupon the cart refused.
+	 *
+	 * @param string   $code The refused coupon code.
+	 * @param int|null $reason The `WC_Coupon::E_WC_COUPON_*` code coupon validation gave, or null when it never ran.
+	 * @return string
+	 */
+	private function discount_error_code( string $code, ?int $reason ): string {
+		switch ( $reason ) {
+			case \WC_Coupon::E_WC_COUPON_EXPIRED:
+				return 'discount_code_expired';
+			case \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST:
+				return 'discount_code_user_not_logged_in';
+			case \WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED:
+			case \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK:
+				return 'discount_code_user_ineligible';
+			case null:
+				// Past validation, the cart only refuses an existing coupon for an individual-use one already applied.
+				return wc_get_coupon_id_by_code( $code ) ? 'discount_code_combination_disallowed' : 'discount_code_invalid';
+			default:
+				return 'discount_code_invalid';
+		}
+	}
+
+	/**
+	 * Build the warning reporting a submitted discount code that was not applied.
+	 *
+	 * @param string $code Rejection code.
+	 * @param string $content Message for the buyer.
+	 * @param int    $index Position of the code in `discounts.codes`.
+	 * @return array
+	 */
+	private function discount_warning( string $code, string $content, int $index ): array {
+		return array(
+			'type'         => 'warning',
+			'code'         => $code,
+			'content'      => $content,
+			'path'         => sprintf( '$.discounts.codes[%d]', $index ),
+			'content_type' => 'plain',
+		);
 	}
 
 	/**

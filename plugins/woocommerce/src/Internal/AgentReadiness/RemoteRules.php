@@ -12,12 +12,25 @@ defined( 'ABSPATH' ) || exit;
  * The file is the list of checks that run. Each id has to match a check in
  * code; an id the file leaves out does not run, and an id code does not know
  * is ignored. A check whose entry has a malformed channel runs with its
- * bundled channels instead.
+ * bundled channels instead. A check no channel asks for, such as image alt
+ * text, is named with an empty channel map ("channels": {}). A file is only
+ * stored when at least one check in it has a valid channel.
+ *
+ * The optional `store_checks` map changes store checks by id: `required`
+ * (true or false) sets whether a setup step or output check is shown as
+ * Required, and `"off": true` stops one running. An id the map leaves out
+ * keeps its bundled behaviour. A check that keeps AI shopping from being
+ * turned on (StoreConditions::LEVEL_REQUIRED) is always Required and can't be
+ * turned off. `version` is the date of the file's last change (Y-m-d).
  *
  * The file is fetched before each background scan: the daily run and any
  * scan that is asked for. Only a GET is made; the request's user agent
  * includes the site URL, as other WooCommerce.com polls do. A failed fetch
  * keeps the last good copy, and with no copy the bundled checks apply.
+ * With marketplace suggestions turned off (woocommerce_show_marketplace_suggestions), the
+ * WooCommerce.com file is not fetched, as for the other WooCommerce.com polls. A URL set by the
+ * filter is still fetched. With the fetch turned off, by that setting or an empty URL, a copy
+ * stored earlier is removed at the next scan and the bundled checks apply.
  *
  * The file is fetched from PUBLISHED_URL, the same host as the payment gateway
  * suggestions; the woocommerce_agent_readiness_rules_url filter changes it.
@@ -39,7 +52,7 @@ class RemoteRules {
 	/**
 	 * Fetch the rules file and store it when at least one check entry is valid
 	 * (see is_valid_check()) and, when known ids are given, is one of them.
-	 * Anything less keeps the last good copy.
+	 * Anything less keeps the last good copy. With the fetch turned off, the copy is removed.
 	 *
 	 * @param array<int, string>|null $known_ids Check ids the code can run; null accepts any id.
 	 * @return bool Whether a new copy was stored.
@@ -53,7 +66,11 @@ class RemoteRules {
 		 * @param string $url Rules file URL.
 		 */
 		$url = apply_filters( 'woocommerce_agent_readiness_rules_url', self::PUBLISHED_URL );
-		if ( ! is_string( $url ) || '' === $url ) {
+		// The opt-out is about reaching WooCommerce.com. A URL a developer set is still fetched.
+		$opted_out = self::PUBLISHED_URL === $url && 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' );
+		if ( ! is_string( $url ) || '' === $url || $opted_out ) {
+			// A copy stored earlier could never update, and would hide checks added in later releases.
+			delete_option( self::OPTION );
 			return false;
 		}
 
@@ -88,15 +105,46 @@ class RemoteRules {
 		if ( array() === $usable ) {
 			return false;
 		}
-		update_option(
-			self::OPTION,
-			array(
-				'version' => (string) ( $rules['version'] ?? '' ),
-				'checks'  => $checks,
-			),
-			false
+		$stored       = array(
+			'version' => (string) ( $rules['version'] ?? '' ),
+			'checks'  => $checks,
 		);
+		$store_checks = self::valid_store_checks( $rules['store_checks'] ?? null );
+		if ( array() !== $store_checks ) {
+			$stored['store_checks'] = $store_checks;
+		}
+		update_option( self::OPTION, $stored, false );
 		return true;
+	}
+
+	/**
+	 * What the stored file sets for one store check: `required` and `off`, each only when the file
+	 * sets it. Empty when no file is stored or the file doesn't name the check.
+	 *
+	 * @param string $id Store check id.
+	 * @return array{required?:bool,off?:bool}
+	 */
+	public static function store_check( string $id ): array {
+		$stored = get_option( self::OPTION );
+		$check  = is_array( $stored ) && is_array( $stored['store_checks'] ?? null ) ? ( $stored['store_checks'][ $id ] ?? null ) : null;
+		return is_array( $check ) ? $check : array();
+	}
+
+	/**
+	 * The `store_checks` entries with a boolean `required` or `off`, keeping only those two keys.
+	 *
+	 * @param mixed $store_checks `store_checks` map from the file.
+	 * @return array<string, array{required?:bool,off?:bool}>
+	 */
+	private static function valid_store_checks( $store_checks ): array {
+		$valid = array();
+		foreach ( is_array( $store_checks ) ? $store_checks : array() as $id => $check ) {
+			$set = is_string( $id ) && is_array( $check ) ? array_filter( array_intersect_key( $check, array_flip( array( 'required', 'off' ) ) ), 'is_bool' ) : array();
+			if ( array() !== $set ) {
+				$valid[ $id ] = $set;
+			}
+		}
+		return $valid;
 	}
 
 	/**

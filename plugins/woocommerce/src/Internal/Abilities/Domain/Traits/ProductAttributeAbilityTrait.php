@@ -7,12 +7,16 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Formats global attributes with the fields of the `wc/v3` attribute reads.
  */
 trait ProductAttributeAbilityTrait {
+
+	use ProductTermAbilityTrait;
 
 	/**
 	 * Check product attribute access, as the REST attribute endpoints do.
@@ -21,11 +25,13 @@ trait ProductAttributeAbilityTrait {
 	 * @return bool
 	 */
 	private static function can_manage_product_attributes( string $context ): bool {
-		return wc_rest_check_manager_permissions( 'attributes', $context );
+		return (bool) wc_rest_check_manager_permissions( 'attributes', $context );
 	}
 
 	/**
-	 * Format a global attribute and up to `$term_limit` of its terms, in the attribute's own term order.
+	 * Format a global attribute and load up to `$term_limit` of its terms, in the attribute's own term order.
+	 * The terms stay `WP_Term` objects until format_product_attribute_terms() formats them.
+	 * An attribute whose terms the user cannot read, as product-terms-query checks it, gets no terms.
 	 *
 	 * @param \stdClass $attribute  Row of wc_get_attribute_taxonomies().
 	 * @param int       $term_limit Most terms to return. Zero returns none.
@@ -60,7 +66,7 @@ trait ProductAttributeAbilityTrait {
 		}
 		$output['term_count'] = (int) $count;
 
-		if ( 0 === $term_limit || 0 === $output['term_count'] ) {
+		if ( 0 === $term_limit || 0 === $output['term_count'] || ! self::can_manage_product_terms( $taxonomy, 'read' ) ) {
 			return $output;
 		}
 
@@ -75,18 +81,31 @@ trait ProductAttributeAbilityTrait {
 			return $terms;
 		}
 
-		foreach ( $terms as $term ) {
-			$output['terms'][] = array(
-				'id'          => $term->term_id,
-				'name'        => html_entity_decode( $term->name, ENT_QUOTES | ENT_HTML5 ),
-				'slug'        => $term->slug,
-				'description' => $term->description,
-				'menu_order'  => (int) get_term_meta( $term->term_id, 'order', true ),
-				'count'       => $term->count,
-			);
-		}
+		$output['terms'] = array_values( $terms );
 
 		return $output;
+	}
+
+	/**
+	 * Format the terms of a list of attributes. Terms carry the same fields as in product-terms-query,
+	 * extension fields included. The prime callbacks run once, with the terms of every attribute.
+	 *
+	 * @param array[] $attributes Attributes from format_product_attribute().
+	 * @return array[]|\WP_Error The error of an extension field that failed.
+	 */
+	private static function format_product_attribute_terms( array $attributes ) {
+		ExtensibleAbilities::prime( 'product_term', array_merge( ...array_column( $attributes, 'terms' ) ) );
+		foreach ( $attributes as $index => $attribute ) {
+			foreach ( $attribute['terms'] as $key => $term ) {
+				$data = self::format_term( $term );
+				if ( is_wp_error( $data ) ) {
+					return $data;
+				}
+				$attributes[ $index ]['terms'][ $key ] = $data;
+			}
+		}
+
+		return $attributes;
 	}
 
 	/**
@@ -119,17 +138,20 @@ trait ProductAttributeAbilityTrait {
 				),
 				'terms'        => array(
 					'type'  => 'array',
-					'items' => array(
-						'type'                 => 'object',
-						'properties'           => array(
-							'id'          => array( 'type' => 'integer' ),
-							'name'        => array( 'type' => 'string' ),
-							'slug'        => array( 'type' => 'string' ),
-							'description' => array( 'type' => 'string' ),
-							'menu_order'  => array( 'type' => 'integer' ),
-							'count'       => array( 'type' => 'integer' ),
+					'items' => ExtensibleAbilities::add_fields_schema(
+						array(
+							'type'                 => 'object',
+							'properties'           => array(
+								'id'          => array( 'type' => 'integer' ),
+								'name'        => array( 'type' => 'string' ),
+								'slug'        => array( 'type' => 'string' ),
+								'description' => array( 'type' => 'string' ),
+								'menu_order'  => array( 'type' => 'integer' ),
+								'count'       => array( 'type' => 'integer' ),
+							),
+							'additionalProperties' => false,
 						),
-						'additionalProperties' => false,
+						'product_term'
 					),
 				),
 			),

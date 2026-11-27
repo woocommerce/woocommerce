@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix new product attributes rejecting values added right after creation, and stop duplicate attributes from being saved.

@@ -64,7 +64,6 @@ class OrdersTableDataStoreCachePrimingTest extends \HposTestCase {
 		$this->toggle_cot_feature_and_usage( $this->cot_state );
 		$this->clean_up_cot_setup();
 
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		parent::tearDown();
 	}
 

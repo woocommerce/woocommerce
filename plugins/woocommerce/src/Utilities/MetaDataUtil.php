@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Utilities;
 use WC_Data;
 
 /**
- * Utility methods for handling meta data in REST API requests.
+ * Utility methods for handling order item meta data.
  *
  * @since 10.8.0
  */
@@ -60,5 +60,22 @@ class MetaDataUtil {
 			}
 		}
 		return $normalized;
+	}
+
+	/**
+	 * Unserialize a meta value, if it is serialized, without instantiating any object it may contain.
+	 *
+	 * @since 11.3.1
+	 *
+	 * @param mixed $value Raw meta value, maybe serialized.
+	 * @return mixed Unserialized value.
+	 */
+	public static function maybe_unserialize_no_classes( $value ) {
+		if ( ! is_serialized( $value ) ) {
+			return $value;
+		}
+
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- maybe_unserialize() can't restrict classes, and @ hides the warning on bad input.
+		return @unserialize( trim( $value ), array( 'allowed_classes' => false ) );
 	}
 }

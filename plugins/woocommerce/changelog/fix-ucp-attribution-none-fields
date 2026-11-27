@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+AI shopper orders now send unset attribution fields as (none) to extensions, as classic checkout orders do.

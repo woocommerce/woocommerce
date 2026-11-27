@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix misplaced action buttons, arrows and the business location chevron on the Payments settings page in RTL languages.

@@ -35,9 +35,11 @@ class Html2Text {
 	 */
 	public static function default_options(): array {
 		return array(
-			'ignore_errors' => false,
-			'drop_links'    => false,
-			'char_set'      => 'auto',
+			'ignore_errors'    => false,
+			'drop_links'       => false,
+			'char_set'         => 'auto',
+			'mark_bold'        => false,
+			'tag_link_targets' => false,
 		);
 	}
 
@@ -567,6 +569,14 @@ class Html2Text {
 					$output = $node->getAttribute( 'title' );
 				}
 
+				// With tag_link_targets, a personalization tag used as the whole URL is kept as the target so it can
+				// be personalized later. A link still without text after the title fallback above is dropped rather
+				// than leaving the bare tag behind.
+				$tag_href = $options['tag_link_targets'] && $node instanceof \DOMElement ? $node->getAttribute( 'data-link-href' ) : '';
+				if ( '' !== $tag_href ) {
+					$href = $output ? $tag_href : '';
+				}
+
 				if ( ! $href ) {
 					// It doesn't link anywhere.
 					if ( $node instanceof \DOMElement && $node->getAttribute( 'name' ) ) {
@@ -616,6 +626,16 @@ class Html2Text {
 
 			case 'li':
 				$output .= "\n";
+				break;
+
+			case 'b':
+			case 'strong':
+				// Mark bold text as *text*, keeping the whitespace around it outside the markers.
+				$bold_text = trim( $output );
+				if ( $options['mark_bold'] && '' !== $bold_text ) {
+					$leading = substr( $output, 0, strlen( $output ) - strlen( ltrim( $output ) ) );
+					$output  = $leading . '*' . $bold_text . '*' . substr( $output, strlen( rtrim( $output ) ) );
+				}
 				break;
 
 			case 'blockquote':

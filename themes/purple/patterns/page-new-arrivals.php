@@ -14,7 +14,7 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"name":"New arrivals with filters","categories":["woo-commerce","purple"],"patternName":"purple/page-new-arrivals","description":"A newest-first product grid with breadcrumbs, page title, sidebar filters, and pagination, for use on regular pages. Pairs with the Page no title template."},"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|90"}}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'New arrivals with filters', 'Pattern title', 'purple' ) ); ?>,"categories":["woo-commerce","purple"],"patternName":"purple/page-new-arrivals","description":"A newest-first product grid with breadcrumbs, page title, sidebar filters, and pagination, for use on regular pages. Pairs with the Page no title template."},"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|90"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--90)"><!-- wp:woocommerce/store-notices /-->
 
 <!-- wp:breadcrumbs {"align":"wide"} /-->
@@ -144,11 +144,11 @@
 
 <!-- wp:group {"style":{"spacing":{"margin":{"top":"var:preset|spacing|30","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--30);margin-bottom:0"><!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
-<!-- wp:query-pagination-previous {"label":"<?php esc_html_e( 'Previous', 'purple' );?>"} /-->
+<!-- wp:query-pagination-previous {"label":<?php echo purple_block_attribute_string( __( 'Previous', 'purple' ) ); ?>} /-->
 
 <!-- wp:query-pagination-numbers /-->
 
-<!-- wp:query-pagination-next {"label":"<?php esc_html_e( 'Next', 'purple' );?>"} /-->
+<!-- wp:query-pagination-next {"label":<?php echo purple_block_attribute_string( __( 'Next', 'purple' ) ); ?>} /-->
 <!-- /wp:query-pagination --></div>
 <!-- /wp:group -->
 

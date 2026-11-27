@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep apostrophes in plain-text emails instead of removing them.

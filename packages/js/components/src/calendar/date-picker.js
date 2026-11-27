@@ -1,8 +1,6 @@
 /**
  * External dependencies
  */
-import 'core-js/features/object/assign';
-import 'core-js/features/array/from';
 import { __, sprintf } from '@wordpress/i18n';
 import { createElement, Component } from '@wordpress/element';
 import { Dropdown, DatePicker as WpDatePicker } from '@wordpress/components';

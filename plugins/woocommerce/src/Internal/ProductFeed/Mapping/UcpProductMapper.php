@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\ProductFeed\Mapping;
 
+use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Ucp\UcpProductSchema;
@@ -72,6 +73,13 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	private $variant_budget = self::MAX_VARIANTS_PER_RESPONSE;
 
 	/**
+	 * Price filter of the response being built: optional `min` and `max` in minor units.
+	 *
+	 * @var array
+	 */
+	private $price_bounds = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string             $currency ISO 4217 currency code; '' uses the store currency.
@@ -84,10 +92,51 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 
 	/**
 	 * Start a new response, clearing per-response state.
+	 *
+	 * @param array $price_bounds Optional `min` and `max` variant prices in minor units, both inclusive.
 	 */
-	public function begin_response(): void {
+	public function begin_response( array $price_bounds = array() ): void {
 		$this->truncations    = array();
 		$this->variant_budget = self::MAX_VARIANTS_PER_RESPONSE;
+		$this->price_bounds   = $price_bounds;
+	}
+
+	/**
+	 * Whether a price in minor units passes the response's price filter.
+	 *
+	 * @param int $amount Price in minor units.
+	 * @return bool
+	 */
+	private function in_price_range( int $amount ): bool {
+		return ( ! isset( $this->price_bounds['min'] ) || $amount >= $this->price_bounds['min'] )
+			&& ( ! isset( $this->price_bounds['max'] ) || $amount <= $this->price_bounds['max'] );
+	}
+
+	/**
+	 * Keep the variation ids whose displayed price passes the response's price filter.
+	 *
+	 * Reads the parent's cached price list, so no variation is loaded to be rejected.
+	 *
+	 * @param \WC_Product_Variable $product The variable product.
+	 * @param array                $variation_ids Variation ids, in the order to keep.
+	 * @return array
+	 */
+	private function filter_by_price( \WC_Product_Variable $product, array $variation_ids ): array {
+		if ( empty( $this->price_bounds ) ) {
+			return $variation_ids;
+		}
+
+		$prices    = $product->get_variation_prices( true )['price'] ?? array();
+		$formatter = new MoneyFormatter();
+
+		return array_values(
+			array_filter(
+				$variation_ids,
+				function ( $id ) use ( $prices, $formatter ) {
+					return isset( $prices[ $id ] ) && $this->in_price_range( (int) $formatter->format( $prices[ $id ] ) );
+				}
+			)
+		);
 	}
 
 	/**
@@ -223,7 +272,8 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * A selection narrows the variants to those matching every selected option.
 	 * One matching no variation is relaxed from its last option until one does,
 	 * and `selected` reports the options kept, as UCP requires. A request naming
-	 * a variation returns it first, with its own options as the selection.
+	 * a variation returns it first, with its own options as the selection. A
+	 * request naming neither gets the featured variation first, and its options.
 	 *
 	 * @param \WC_Product $product WooCommerce product.
 	 * @param array       $selected Selected option values, each `{ name, label, id? }`.
@@ -231,22 +281,34 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * @return array
 	 */
 	public function map_detail_product( \WC_Product $product, array $selected = array(), int $variation_id = 0 ): array {
-		if ( ! $product instanceof \WC_Product_Variable || ( empty( $selected ) && $variation_id <= 0 ) ) {
+		if ( ! $product instanceof \WC_Product_Variable ) {
 			return $this->map_product( $product );
 		}
 
 		$item = $this->item( $product );
 
+		if ( empty( $selected ) && $variation_id <= 0 ) {
+			return $this->map_featured_selection( $product, $item );
+		}
+
 		// UCP: a variant id fully determines the selection state, so the
 		// request's `selected` is ignored rather than merged.
 		if ( $variation_id > 0 ) {
+			// A named variation the price filter excludes excludes the product:
+			// its siblings would come back under a selection describing it.
+			if ( empty( $this->filter_by_price( $product, array( $variation_id ) ) ) ) {
+				return $this->map_item( $product, $item, array(), false, array() );
+			}
+
 			$selected = $this->variation_options_by_id( $item )[ $variation_id ] ?? array();
 		}
 
+		// Only matches inside the price filter stop the relaxation, as for the featured selection.
+		$in_range = $this->filter_by_price( $product, array_map( 'intval', array_column( (array) $item['variations'], 'id' ) ) );
 		$matching = array();
 
 		while ( ! empty( $selected ) ) {
-			$matching = $this->match_selection( $item, $selected );
+			$matching = array_values( array_intersect( $this->match_selection( $item, $selected ), $in_range ) );
 
 			if ( ! empty( $matching ) ) {
 				break;
@@ -295,6 +357,75 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 		}
 
 		return $this->schema;
+	}
+
+	/**
+	 * Map a variable product with its featured variation first and `selected` set to its options.
+	 *
+	 * The featured variation is the first one matching the product's default
+	 * attributes, or the first visible one when they are unset or match nothing.
+	 * Only variations passing the price filter are considered.
+	 *
+	 * @param \WC_Product_Variable $product The variable product.
+	 * @param array                $item Its Store API item response.
+	 * @return array
+	 */
+	private function map_featured_selection( \WC_Product_Variable $product, array $item ): array {
+		$defaults = $this->default_selection( $product, $item );
+		$in_range = $this->filter_by_price( $product, array_map( 'intval', array_column( (array) $item['variations'], 'id' ) ) );
+		$matching = array_values( array_intersect( $this->match_selection( $item, $defaults ), $in_range ) );
+
+		// Default matches go first; the returned prices may still drop some, so the first variant built is featured.
+		$mapped   = $this->map_item( $product, $item, array(), false, array_merge( $matching, array_diff( $in_range, $matching ) ) );
+		$featured = (int) ( $mapped['variants'][0]['id'] ?? 0 );
+		if ( $featured <= 0 ) {
+			return $mapped;
+		}
+
+		$selected = $this->variation_options_by_id( $item )[ $featured ] ?? array();
+
+		// An attribute the featured variation leaves as "Any" takes the default.
+		$fixed = array_column( $selected, 'name' );
+		foreach ( $defaults as $default ) {
+			if ( ! in_array( $default['name'], $fixed, true ) ) {
+				$selected[] = $default;
+			}
+		}
+
+		$mapped['selected'] = $selected;
+
+		return $mapped;
+	}
+
+	/**
+	 * Read the product's default attributes as selected options.
+	 *
+	 * Read from the product, not the item's `default` term flags: those are
+	 * missing for custom attributes whose name has more than one word.
+	 *
+	 * @param \WC_Product_Variable $product The variable product.
+	 * @param array                $item Its Store API item response.
+	 * @return array List of `{ name, label }`.
+	 */
+	private function default_selection( \WC_Product_Variable $product, array $item ): array {
+		$attributes = $product->get_attributes();
+		$names      = $this->term_names( $item );
+		$defaults   = array();
+
+		foreach ( $product->get_default_attributes() as $key => $value ) {
+			$attribute = $attributes[ $key ] ?? null;
+			if ( '' === (string) $value || ! $attribute instanceof \WC_Product_Attribute || ! $attribute->get_variation() ) {
+				continue;
+			}
+
+			$name       = wc_attribute_label( $attribute->get_name(), $product );
+			$defaults[] = array(
+				'name'  => $name,
+				'label' => $names[ $name ][ (string) $value ] ?? (string) $value,
+			);
+		}
+
+		return $defaults;
 	}
 
 	/**
@@ -501,14 +632,23 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 */
 	private function build_variants( \WC_Product $product, array $item, string $currency, array $required_variation_ids, bool $only_required, ?array $candidates ): array {
 		if ( ! $product instanceof \WC_Product_Variable ) {
-			return array( $this->build_simple_variant( $product, $item, $currency ) );
+			$variant = $this->build_simple_variant( $product, $item, $currency );
+
+			// As for variations, a product with no price set is outside any price filter.
+			if ( ! empty( $this->price_bounds ) && '' === (string) $product->get_price() ) {
+				return array();
+			}
+
+			return $this->in_price_range( $variant['price']['amount'] ) ? array( $variant ) : array();
 		}
 
 		$children = array_map( 'intval', null === $candidates ? $product->get_visible_children() : $candidates );
+		$children = $this->filter_by_price( $product, $children );
 		$required = array_values( array_intersect( $children, array_map( 'intval', $required_variation_ids ) ) );
 		$options  = $this->variation_options_by_id( $item );
 
-		if ( $only_required && ! empty( $required ) ) {
+		// With a price filter the named variations may all be gone; build nothing then.
+		if ( $only_required && ( ! empty( $required ) || ! empty( $this->price_bounds ) ) ) {
 			// Bounded by the request's own id cap; nothing left out, nothing to
 			// disclose.
 			$variants              = $this->build_variation_list( $required, $options, $currency );
@@ -557,7 +697,12 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 				continue;
 			}
 
-			$variants[] = $this->build_variation_variant( $variation, $this->item( $variation ), $options[ (int) $variation_id ] ?? array(), $currency );
+			$variant = $this->build_variation_variant( $variation, $this->item( $variation ), $options[ (int) $variation_id ] ?? array(), $currency );
+
+			// The returned amount is the authority, should it differ from the cached price list.
+			if ( $this->in_price_range( $variant['price']['amount'] ) ) {
+				$variants[] = $variant;
+			}
 		}
 
 		return $variants;

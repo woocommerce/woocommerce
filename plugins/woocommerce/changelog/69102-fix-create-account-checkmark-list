@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop adding the theme-specific checkmark list style to the order confirmation Create Account list, so it shows as a plain list in every theme.

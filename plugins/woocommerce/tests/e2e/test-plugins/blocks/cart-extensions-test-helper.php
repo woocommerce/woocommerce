@@ -8,6 +8,11 @@
  * @package woocommerce-blocks-test-cart-extensions
  */
 
+// Only requests from specs that enable this plugin send the cookie.
+if ( ! isset( $_COOKIE['woocommerce-blocks-test-cart-extensions-test-helper'] ) ) {
+	return;
+}
+
 class Cart_Extensions_Test_Helper {
 	/**
 	 * Constructor.

@@ -83,29 +83,32 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 		await expect( pageObject.productTemplate ).toHaveClass( /columns-4/ );
 	} );
 
-	test( 'Order By - sort products by title in descending order correctly', async ( {
-		pageObject,
-	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
+	// A visible product that sorts last by title would show first here.
+	test(
+		'Order By - sort products by title in descending order correctly',
+		{ lock: locks.LAST_PRODUCT_BY_TITLE },
+		async ( { pageObject } ) => {
+			await pageObject.createNewPostAndInsertBlock();
 
-		const sortedTitles = [
-			'WordPress Pennant',
-			'V-Neck T-Shirt',
-			'T-Shirt with Logo',
-			'T-Shirt',
-			/Sunglasses/, // In the frontend it's "Protected: Sunglasses"
-			'Single',
-			'Polo',
-			'Long Sleeve Tee',
-			'Logo Collection',
-		];
+			const sortedTitles = [
+				'WordPress Pennant',
+				'V-Neck T-Shirt',
+				'T-Shirt with Logo',
+				'T-Shirt',
+				/Sunglasses/, // In the frontend it's "Protected: Sunglasses"
+				'Single',
+				'Polo',
+				'Long Sleeve Tee',
+				'Logo Collection',
+			];
 
-		await pageObject.setOrderBy( 'title/desc' );
-		await expect( pageObject.productTitles ).toHaveText( sortedTitles );
+			await pageObject.setOrderBy( 'title/desc' );
+			await expect( pageObject.productTitles ).toHaveText( sortedTitles );
 
-		await pageObject.publishAndGoToFrontend();
-		await expect( pageObject.productTitles ).toHaveText( sortedTitles );
-	} );
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.productTitles ).toHaveText( sortedTitles );
+		}
+	);
 
 	test( 'Products can be filtered based on "on sale" status', async ( {
 		pageObject,

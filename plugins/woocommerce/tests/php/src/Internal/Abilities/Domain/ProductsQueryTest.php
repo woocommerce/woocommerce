@@ -208,6 +208,124 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should find products and variations whose GTIN equals any of the GTINs sent, and nothing for GTINs nobody has.
+	 */
+	public function test_filters_by_global_unique_id(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_global_unique_id( '4006381333931' );
+		$product->save();
+		$longer = WC_Helper_Product::create_simple_product();
+		$longer->set_global_unique_id( '40063813339310' );
+		$longer->save();
+		$variation = wc_get_product( WC_Helper_Product::create_variation_product()->get_children()[0] );
+		$variation->set_global_unique_id( '0012345678912' );
+		$variation->save();
+
+		$find = static fn( array $gtins ): array => array_column( ProductsQuery::execute( array( 'global_unique_id' => $gtins ) )['products'], 'id' );
+
+		$this->assertSame( array( $product->get_id() ), $find( array( '4006381333931' ) ), 'A GTIN that only shares a prefix should not match.' );
+		$this->assertEqualsCanonicalizing( array( $product->get_id(), $variation->get_id() ), $find( array( '4006381333931', '0012345678912' ) ) );
+		$this->assertSame( array( $variation->get_id() ), $find( array( '0012345678912', '9999999999999' ) ) );
+		$this->assertSame( array(), $find( array( '9999999999999' ) ) );
+	}
+
+	/**
+	 * @testdox Should return the exact total of matching products on partial, empty and out-of-range pages.
+	 */
+	public function test_returns_total_across_pages(): void {
+		$product_ids = array();
+		foreach ( range( 1, 11 ) as $i ) {
+			$product_ids[] = WC_Helper_Product::create_simple_product( true, array( 'name' => "Total product {$i}" ) )->get_id();
+		}
+
+		$last = ProductsQuery::execute( array( 'page' => 2 ) );
+		$this->assertSame( 11, $last['total'] );
+		$this->assertSame( 2, $last['total_pages'] );
+		$this->assertCount( 1, $last['products'] );
+
+		$beyond = ProductsQuery::execute( array( 'page' => 3 ) );
+		$this->assertSame( array(), $beyond['products'] );
+		$this->assertSame( 11, $beyond['total'], 'An out-of-range page should keep the matching total.' );
+		$this->assertSame( 2, $beyond['total_pages'] );
+
+		$none = ProductsQuery::execute( array( 'search' => 'no-such-product-xyz' ) );
+		$this->assertSame( 0, $none['total'] );
+		$this->assertSame( 0, $none['total_pages'] );
+		$this->assertSame( array(), $none['products'] );
+		$none_beyond = ProductsQuery::execute(
+			array(
+				'search' => 'no-such-product-xyz',
+				'page'   => 3,
+			)
+		);
+		$this->assertSame( 0, $none_beyond['total'] );
+		$this->assertSame( 0, $none_beyond['total_pages'] );
+
+		$id = ProductsQuery::execute( array( 'id' => $product_ids[0] ) );
+		$this->assertSame( 1, $id['total'] );
+		$this->assertSame( 1, $id['total_pages'] );
+
+		$schema = ProductsQuery::get_registration_args()['output_schema'];
+		$this->assertTrue( rest_validate_value_from_schema( $last, $schema, 'products' ) );
+	}
+
+	/**
+	 * @testdox Should preserve filtered page sizes on full, partial and empty pages.
+	 */
+	public function test_pagination_follows_filtered_page_size(): void {
+		for ( $i = 0; $i < 11; ++$i ) {
+			WC_Helper_Product::create_simple_product();
+		}
+
+		$callback = static function ( $args ) {
+			if ( 10 === $args['posts_per_page'] ) {
+				$args['posts_per_page'] = 5;
+			}
+			return $args;
+		};
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $callback );
+		try {
+			foreach ( array(
+				1 => 5,
+				3 => 1,
+				4 => 0,
+			) as $page => $rows ) {
+				$result = ProductsQuery::execute(
+					array(
+						'page'     => $page,
+						'per_page' => 10,
+					)
+				);
+				$this->assertCount( $rows, $result['products'] );
+				$this->assertSame( 11, $result['total'] );
+				$this->assertSame( 3, $result['total_pages'] );
+				$this->assertSame( 10, $result['per_page'] );
+			}
+		} finally {
+			remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $callback );
+		}
+	}
+
+	/**
+	 * @testdox Should narrow the total with extension query filters.
+	 */
+	public function test_total_follows_extension_query_filter(): void {
+		$kept     = WC_Helper_Product::create_simple_product();
+		$excluded = WC_Helper_Product::create_simple_product();
+
+		$callback = static function ( $args ) use ( $excluded ) {
+			$args['post__not_in'] = array( $excluded->get_id() );
+			return $args;
+		};
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $callback );
+		$result = ProductsQuery::execute( array() );
+		remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $callback );
+
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( $kept->get_id(), $result['products'][0]['id'] );
+	}
+
+	/**
 	 * @testdox Should match the output schema when listing products.
 	 */
 	public function test_list_output_matches_schema(): void {

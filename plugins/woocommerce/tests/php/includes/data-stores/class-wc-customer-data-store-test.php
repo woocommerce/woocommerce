@@ -34,15 +34,6 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Test that metadata cannot overwrite customer's column data.
 	 *
 	 * @link https://github.com/woocommerce/woocommerce/issues/28100

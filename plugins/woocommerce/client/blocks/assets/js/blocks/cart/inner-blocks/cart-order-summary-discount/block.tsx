@@ -8,6 +8,7 @@ import {
 	useStoreCartCoupons,
 	useStoreCart,
 	useOrderSummaryLoadingState,
+	useOrderSummaryRow,
 } from '@woocommerce/base-context/hooks';
 import { ExperimentalDiscountsMeta } from '@woocommerce/blocks-checkout';
 
@@ -24,30 +25,32 @@ const DiscountSlotFill = (): JSX.Element => {
 	return <ExperimentalDiscountsMeta.Slot { ...discountsSlotFillProps } />;
 };
 
-const Block = ( { className }: { className: string } ) => {
-	const { cartTotals, cartCoupons } = useStoreCart();
+const Block = ( { className }: { className: string } ): JSX.Element => {
+	const { cart, isStale, wrapperProps } = useOrderSummaryRow(
+		useStoreCart(),
+		( { cartCoupons } ) => cartCoupons.length > 0
+	);
 	const { removeCoupon, isRemovingCoupon } = useStoreCartCoupons( 'wc/cart' );
 	const { isLoading } = useOrderSummaryLoadingState();
 
-	// Hide all but the slot/fill if there are no coupons to show.
-	if ( ! cartCoupons.length ) {
-		return <DiscountSlotFill />;
-	}
-
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
-
 	return (
 		<>
-			<TotalsWrapper className={ className }>
-				<TotalsDiscount
-					cartCoupons={ cartCoupons }
-					currency={ totalsCurrency }
-					isRemovingCoupon={ isRemovingCoupon }
-					removeCoupon={ removeCoupon }
-					values={ cartTotals }
-					isLoading={ isLoading }
-				/>
-			</TotalsWrapper>
+			{ /* Kept before the slot, so the slot stays mounted and its fills keep their state. */ }
+			{ cart && (
+				<TotalsWrapper className={ className } { ...wrapperProps }>
+					<TotalsDiscount
+						cartCoupons={ cart.cartCoupons }
+						currency={ getCurrencyFromPriceResponse(
+							cart.cartTotals
+						) }
+						isRemovingCoupon={ isRemovingCoupon }
+						removeCoupon={ removeCoupon }
+						values={ cart.cartTotals }
+						isLoading={ isLoading }
+						disabled={ isStale }
+					/>
+				</TotalsWrapper>
+			) }
 			<DiscountSlotFill />
 		</>
 	);

@@ -9,10 +9,18 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments\Importer;
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentException;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use WC_Data_Store;
+use WC_Order;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Reads a fulfillments CSV for the import wizard and for the chunked import run.
+ * Reads a fulfillments CSV for the import wizard and imports it in chunks.
  *
  * The first non-blank record is the header. Later reads return only real data rows.
  * Blank records still advance the file position and keep their physical record numbers
@@ -23,6 +31,9 @@ defined( 'ABSPATH' ) || exit;
  * files are rejected with a message asking the merchant to re-save the file. Every cell
  * is trimmed, and a data row shorter than the header is padded with empty strings, so a
  * consumer can index a row by header position without a guard.
+ *
+ * Orders, providers and fulfillments looked up by import_chunk() are cached for the
+ * life of the importer; the import run builds a new importer for each chunk.
  *
  * @internal
  * @since 11.4.0
@@ -78,12 +89,78 @@ class FulfillmentsCsvImporter {
 	private bool $conversion_failed = false;
 
 	/**
+	 * Orders resolved so far, keyed by the order number cell. Null means not found.
+	 *
+	 * @var array<int|string, WC_Order|null>
+	 */
+	private array $order_cache = array();
+
+	/**
+	 * Orders named by ID in the chunks imported so far, loaded in one query per chunk and keyed by order ID.
+	 *
+	 * @var array<int, WC_Order>
+	 */
+	private array $primed_orders = array();
+
+	/**
+	 * Fulfillments of an order that are not deleted, keyed by order ID.
+	 *
+	 * @var array<int, array<int, Fulfillment>>
+	 */
+	private array $fulfillments_cache = array();
+
+	/**
+	 * Known provider keys by lowercase key and name, built on first use.
+	 *
+	 * @var array<string, string>|null
+	 */
+	private ?array $provider_keys = null;
+
+	/**
 	 * Maximum number of data rows accepted per file.
 	 *
 	 * The cap bounds the time the prepare request spends counting rows and the
 	 * size of the session transient. Larger files must be split and imported in parts.
 	 */
 	public const MAX_IMPORT_ROWS = 5000;
+
+	/**
+	 * Data rows imported per chunk unless the chunk size filter changes it.
+	 */
+	public const DEFAULT_CHUNK_SIZE = 200;
+
+	/**
+	 * Largest chunk size accepted from the filter.
+	 */
+	public const MAX_CHUNK_SIZE = 1000;
+
+	/**
+	 * Largest chunk size while notifying customers, since every notified row sends an email.
+	 */
+	public const NOTIFY_CHUNK_SIZE = 25;
+
+	/**
+	 * Row statuses of import_chunk(); its counts use the same keys plus "notified".
+	 */
+	public const STATUS_CREATED = 'created';
+	public const STATUS_UPDATED = 'updated';
+	public const STATUS_SKIPPED = 'skipped';
+	public const STATUS_FAILED  = 'failed';
+
+	/**
+	 * Codes of a failed row.
+	 */
+	public const CODE_MISSING_ORDER_NUMBER    = 'missing_order_number';
+	public const CODE_MISSING_TRACKING_NUMBER = 'missing_tracking_number';
+	public const CODE_MISSING_PROVIDER        = 'missing_provider';
+	public const CODE_INVALID_TRACKING_URL    = 'invalid_tracking_url';
+	public const CODE_ORDER_NOT_FOUND         = 'order_not_found';
+	public const CODE_INVALID_ITEMS           = 'invalid_items';
+	public const CODE_STORE_READ_FAILED       = 'store_read_failed';
+	public const CODE_FULFILLMENT_LOCKED      = 'fulfillment_locked';
+	public const CODE_NO_ITEMS                = 'no_items';
+	public const CODE_SAVE_FAILED             = 'save_failed';
+	public const CODE_ROW_FAILED              = 'row_failed';
 
 	/**
 	 * Spellings accepted for a tab delimiter, since multipart and JSON clients
@@ -103,7 +180,7 @@ class FulfillmentsCsvImporter {
 	 *
 	 * @param string               $file    Absolute path to the CSV file.
 	 * @param array<string, mixed> $options Importer options. Header parsing and row reading use delimiter and
-	 *                                      enclosure; the other two are kept for the import run.
+	 *                                      enclosure; import_chunk() also uses the other two.
 	 *                                      - notify_customer (bool): Whether to fire customer notifications. Default false.
 	 *                                      - delimiter (string): Single-character CSV delimiter. Default ','.
 	 *                                      - enclosure (string): Single-byte CSV enclosure. A line break, a non-ASCII byte,
@@ -172,6 +249,37 @@ class FulfillmentsCsvImporter {
 			return '"';
 		}
 		return $enclosure;
+	}
+
+	/**
+	 * Number of data rows to import per chunk.
+	 *
+	 * The filtered value is kept between 1 and MAX_CHUNK_SIZE, and at most NOTIFY_CHUNK_SIZE
+	 * when customers are notified, so a chunk stays within typical request time limits.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param bool $notify_customer Whether the import sends customer notifications.
+	 * @return int
+	 */
+	public static function resolve_chunk_size( bool $notify_customer = false ): int {
+		/**
+		 * Filter the number of CSV data rows the fulfillments importer processes per request.
+		 *
+		 * The result is kept between 1 and 1000, and at most 25 while customer notifications
+		 * are on. A value that is not a positive number falls back to the default.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param int  $chunk_size      Default chunk size (200).
+		 * @param bool $notify_customer Whether the import sends customer notifications.
+		 */
+		$size = apply_filters( 'woocommerce_fulfillments_csv_importer_chunk_size', self::DEFAULT_CHUNK_SIZE, $notify_customer );
+		$size = is_numeric( $size ) ? (int) $size : 0;
+		if ( $size < 1 ) {
+			$size = self::DEFAULT_CHUNK_SIZE;
+		}
+		return min( $size, $notify_customer ? self::NOTIFY_CHUNK_SIZE : self::MAX_CHUNK_SIZE );
 	}
 
 	/**
@@ -325,6 +433,675 @@ class FulfillmentsCsvImporter {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing the handle opened above.
 			fclose( $handle );
 		}
+	}
+
+	/**
+	 * Import the next chunk of data rows as fulfillments.
+	 *
+	 * A row creates a fulfilled fulfillment, updates the order's fulfillment with the same
+	 * tracking number (compared without case), or fails on its own with a code while the
+	 * rest of the chunk imports. An update that would change nothing is skipped. Pass the
+	 * previous result back as `$state` to continue; an empty state starts after the header.
+	 * A chunk-level problem returns `error` and writes nothing.
+	 *
+	 * Each row has `row`, `order_number`, `status` (created, updated, skipped or failed) and
+	 * `message`; a failed row adds `code`. `order_id` is set once the order resolves, and
+	 * `fulfillment_id` when the row matches or saves a fulfillment. A created or updated row
+	 * adds `notified`: whether the notification action ran without an error, which is not
+	 * proof that an email was sent. Messages are plain text and can quote CSV values.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int                  $limit   Data rows to import. Capped by resolve_chunk_size(), which is also used when 0 or less.
+	 * @param array<int, string>   $mapping CSV column index => canonical column key.
+	 * @param array<string, mixed> $state {
+	 *     Resume state; a previous result can be passed as is.
+	 *
+	 *     @type int                 $byte_offset         Position to resume from. 0 starts after the header.
+	 *     @type int                 $next_record_number  Physical record number at byte_offset.
+	 *     @type array<string, true> $seen_tracking_pairs Order and tracking number pairs imported so far.
+	 * }
+	 * @return array{
+	 *     counts?: array{created:int, updated:int, skipped:int, failed:int, notified:int},
+	 *     rows?: array<int, array<string, mixed>>,
+	 *     seen_tracking_pairs?: array<string, true>,
+	 *     consumed?: int,
+	 *     byte_offset?: int,
+	 *     next_record_number?: int,
+	 *     eof?: bool,
+	 *     error?: array{code:string, message:string}
+	 * }
+	 */
+	public function import_chunk( int $limit, array $mapping, array $state = array() ): array {
+		$header_map = self::mapping_to_header_map( $mapping );
+		$missing    = self::find_missing_required_columns( $header_map );
+		if ( array() !== $missing ) {
+			return $this->error(
+				'missing_required_columns',
+				sprintf(
+					/* translators: %s: comma-separated list of missing column names. */
+					__( 'The column mapping is missing required columns: %s.', 'woocommerce' ),
+					implode( ', ', $missing )
+				)
+			);
+		}
+
+		$max  = self::resolve_chunk_size( $this->options['notify_customer'] );
+		$read = $this->read_data_rows(
+			0,
+			$limit > 0 ? min( $limit, $max ) : $max,
+			array(
+				'byte_offset'   => (int) ( $state['byte_offset'] ?? 0 ),
+				'record_number' => (int) ( $state['next_record_number'] ?? 0 ),
+			)
+		);
+		if ( isset( $read['error'] ) ) {
+			return $read;
+		}
+
+		/**
+		 * Pairs imported by earlier chunks.
+		 *
+		 * @var array<string, true> $seen
+		 */
+		$seen = is_array( $state['seen_tracking_pairs'] ?? null ) ? $state['seen_tracking_pairs'] : array();
+		$rows = array();
+		$data = $read['rows'] ?? array();
+
+		$hook_depth = count( $GLOBALS['wp_current_filter'] );
+		$this->prime_orders( $data, $header_map );
+		foreach ( $data as $row ) {
+			$order_number = self::get_field( $row['cells'], $header_map, self::COL_ORDER_NUMBER );
+			try {
+				$result = $this->import_row( $row['cells'], $header_map, $order_number, $row['row_number'], $seen );
+			} catch ( \Throwable $e ) {
+				// One row that throws, for example in a resolve-order callback, must not stop the chunk.
+				self::restore_filter_stack( $hook_depth );
+				// The row may have changed a cached fulfillment it never saved, so later rows read again.
+				$this->fulfillments_cache = array();
+				wc_get_logger()->error(
+					sprintf( 'Fulfillments import could not import row %1$d: %2$s', $row['row_number'], $e->getMessage() ),
+					array( 'source' => 'fulfillments-importer' )
+				);
+				$result = self::fail( self::CODE_ROW_FAILED, __( 'Could not import this row.', 'woocommerce' ) );
+			}
+			$rows[] = array(
+				'row'          => $row['row_number'],
+				'order_number' => self::clip( $order_number ),
+			) + $result;
+		}
+
+		$statuses = array_count_values( array_column( $rows, 'status' ) );
+		return array(
+			'counts'              => array(
+				self::STATUS_CREATED => $statuses[ self::STATUS_CREATED ] ?? 0,
+				self::STATUS_UPDATED => $statuses[ self::STATUS_UPDATED ] ?? 0,
+				self::STATUS_SKIPPED => $statuses[ self::STATUS_SKIPPED ] ?? 0,
+				self::STATUS_FAILED  => $statuses[ self::STATUS_FAILED ] ?? 0,
+				'notified'           => count( array_filter( array_column( $rows, 'notified' ) ) ),
+			),
+			'rows'                => $rows,
+			'seen_tracking_pairs' => $seen,
+			'consumed'            => (int) ( $read['consumed'] ?? 0 ),
+			'byte_offset'         => (int) ( $read['byte_offset'] ?? 0 ),
+			'next_record_number'  => (int) ( $read['next_record_number'] ?? 0 ),
+			'eof'                 => ! empty( $read['eof'] ),
+		);
+	}
+
+	/**
+	 * Validate one data row and create or update its fulfillment.
+	 *
+	 * @param array<int, string>  $cells        Trimmed cells, padded to the header width.
+	 * @param array<string, int>  $header_map   Canonical column key => CSV column index.
+	 * @param string              $order_number Order number cell.
+	 * @param int                 $row_number   Physical record number, for the log.
+	 * @param array<string, true> $seen         Pairs imported so far; a pair is added once its row lands.
+	 * @return array<string, mixed> Status and message, plus code, order_id, fulfillment_id and notified when they apply.
+	 */
+	private function import_row( array $cells, array $header_map, string $order_number, int $row_number, array &$seen ): array {
+		$tracking_number = self::get_field( $cells, $header_map, self::COL_TRACKING_NUMBER );
+		$provider        = self::get_field( $cells, $header_map, self::COL_PROVIDER );
+		$tracking_url    = self::get_field( $cells, $header_map, self::COL_TRACKING_URL );
+
+		if ( '' === $order_number ) {
+			return self::fail( self::CODE_MISSING_ORDER_NUMBER, __( 'Missing order number.', 'woocommerce' ) );
+		}
+		if ( '' === $tracking_number ) {
+			return self::fail( self::CODE_MISSING_TRACKING_NUMBER, __( 'Missing tracking number.', 'woocommerce' ) );
+		}
+		if ( '' === $provider ) {
+			return self::fail( self::CODE_MISSING_PROVIDER, __( 'Missing shipment provider.', 'woocommerce' ) );
+		}
+		if ( '' !== $tracking_url ) {
+			$tracking_url = $this->sanitize_tracking_url( $tracking_url );
+			if ( '' === $tracking_url ) {
+				return self::fail( self::CODE_INVALID_TRACKING_URL, __( 'Tracking URL must be a valid http or https URL.', 'woocommerce' ) );
+			}
+		}
+
+		$order = $this->resolve_order( $order_number );
+		if ( null === $order ) {
+			return self::fail(
+				self::CODE_ORDER_NOT_FOUND,
+				/* translators: %s: order number from the CSV. */
+				sprintf( __( 'Order not found for order number "%s".', 'woocommerce' ), self::clip( $order_number ) )
+			);
+		}
+		$order_id = $order->get_id();
+
+		// The set is stored with the session, so pairs are hashed to a fixed length.
+		$pair = substr( md5( $order_id . '|' . strtolower( $tracking_number ) ), 0, 20 );
+		if ( isset( $seen[ $pair ] ) ) {
+			return array(
+				'status'   => self::STATUS_SKIPPED,
+				'message'  => __( 'Duplicate order and tracking number in this file.', 'woocommerce' ),
+				'order_id' => $order_id,
+			);
+		}
+
+		try {
+			$existing = $this->find_existing_fulfillment( $order_id, $tracking_number );
+		} catch ( \RuntimeException $e ) {
+			return self::fail( self::CODE_STORE_READ_FAILED, __( 'Could not read the fulfillments of this order. Please try again.', 'woocommerce' ), $order_id );
+		}
+
+		$pending    = $this->pending_items( $order, $existing );
+		$items_cell = self::get_field( $cells, $header_map, self::COL_ITEMS );
+		$items      = '' === $items_cell ? null : $this->parse_items( $items_cell, $order, $pending );
+		if ( is_string( $items ) ) {
+			return self::fail( self::CODE_INVALID_ITEMS, $items, $order_id );
+		}
+		if ( null === $items && null === $existing ) {
+			// A blank items cell fulfills what is left on create, but keeps the stored items on update.
+			$items = array();
+			foreach ( $pending as $item_id => $qty ) {
+				$items[] = array(
+					'item_id' => $item_id,
+					'qty'     => $qty,
+				);
+			}
+		}
+
+		if ( null !== $existing && ! $this->options['update_existing'] ) {
+			return array(
+				'status'         => self::STATUS_SKIPPED,
+				'message'        => __( 'Fulfillment with this tracking number already exists.', 'woocommerce' ),
+				'order_id'       => $order_id,
+				'fulfillment_id' => $existing->get_id(),
+			);
+		}
+		if ( null !== $existing && $existing->is_locked() ) {
+			return self::fail( self::CODE_FULFILLMENT_LOCKED, __( 'The fulfillment with this tracking number is locked and cannot be changed.', 'woocommerce' ), $order_id );
+		}
+
+		$result = $this->save_fulfillment(
+			$order,
+			$existing,
+			$items,
+			array(
+				'tracking_number' => $tracking_number,
+				'provider'        => $provider,
+				'tracking_url'    => $tracking_url,
+			),
+			$row_number
+		);
+		if ( self::STATUS_FAILED !== $result['status'] ) {
+			$seen[ $pair ] = true;
+		}
+		return $result;
+	}
+
+	/**
+	 * Create a fulfilled fulfillment for the order, or update the matching one, and notify the customer when asked.
+	 *
+	 * @param WC_Order                                                            $order      Order of the row.
+	 * @param Fulfillment|null                                                    $existing   Fulfillment with the row's tracking number, if any.
+	 * @param array<int, array{item_id:int, qty:int}>|null                        $items      Items to store; null keeps the stored items of an update.
+	 * @param array{tracking_number:string, provider:string, tracking_url:string} $fields     Validated cells; the URL may be empty.
+	 * @param int                                                                 $row_number Physical record number, for the log.
+	 * @return array<string, mixed> Row result without the row number and order number.
+	 */
+	private function save_fulfillment( WC_Order $order, ?Fulfillment $existing, ?array $items, array $fields, int $row_number ): array {
+		$order_id      = $order->get_id();
+		$fulfillment   = $existing ?? new Fulfillment();
+		$was_fulfilled = null !== $existing && $existing->get_is_fulfilled();
+		if ( null === $existing ) {
+			if ( array() === $items ) {
+				return self::fail( self::CODE_NO_ITEMS, __( 'This order has no items left to fulfill.', 'woocommerce' ), $order_id );
+			}
+			$fulfillment->set_entity_type( WC_Order::class );
+			$fulfillment->set_entity_id( (string) $order_id );
+		}
+		if ( null !== $items ) {
+			$fulfillment->set_items( $items );
+		}
+		if ( ! $fulfillment->get_is_fulfilled() ) {
+			$fulfillment->set_status( 'fulfilled' );
+		}
+		$fulfillment->set_tracking_number( $fields['tracking_number'] );
+		$provider_key = $this->known_provider_key( $fields['provider'] );
+		// An unknown provider is stored the way the fulfillment editor stores a custom one.
+		$fulfillment->set_shipment_provider( '' !== $provider_key ? $provider_key : 'other' );
+		if ( '' === $provider_key ) {
+			$fulfillment->update_meta_data( '_provider_name', $fields['provider'] );
+		}
+		// A blank URL cell keeps the stored URL on an update.
+		if ( '' !== $fields['tracking_url'] ) {
+			$fulfillment->set_tracking_url( $fields['tracking_url'] );
+		}
+		if ( null !== $existing && array() === $fulfillment->get_changes() ) {
+			return array(
+				'status'         => self::STATUS_SKIPPED,
+				'message'        => __( 'Fulfillment unchanged.', 'woocommerce' ),
+				'order_id'       => $order_id,
+				'fulfillment_id' => $existing->get_id(),
+			);
+		}
+
+		$hook_depth = count( $GLOBALS['wp_current_filter'] );
+		// The data store fires this action with the fulfillment only once its row is written.
+		$written_hook = null === $existing ? 'woocommerce_fulfillment_after_create' : 'woocommerce_fulfillment_after_update';
+		$written      = false;
+		$mark_written = static function ( $saved ) use ( $fulfillment, &$written ) {
+			if ( $saved === $fulfillment ) {
+				$written = true;
+			}
+		};
+		add_action( $written_hook, $mark_written, PHP_INT_MIN );
+		try {
+			$fulfillment->save();
+		} catch ( \Throwable $e ) {
+			self::restore_filter_stack( $hook_depth );
+			wc_get_logger()->error(
+				sprintf( 'Fulfillments import could not save row %1$d for order %2$d: %3$s', $row_number, $order_id, $e->getMessage() ),
+				array( 'source' => 'fulfillments-importer' )
+			);
+			// The cached fulfillment may hold values that were not written, so the next row reads it again.
+			unset( $this->fulfillments_cache[ $order_id ] );
+			if ( ! $written ) {
+				return self::fail( self::CODE_SAVE_FAILED, $e instanceof FulfillmentException ? $e->getMessage() : __( 'Could not save the fulfillment.', 'woocommerce' ), $order_id );
+			}
+			// The listener may have changed the object after the write, so the notification uses the stored row.
+			$fulfillment = new Fulfillment( (string) $fulfillment->get_id() );
+		} finally {
+			remove_action( $written_hook, $mark_written, PHP_INT_MIN );
+		}
+		if ( null === $existing && isset( $this->fulfillments_cache[ $order_id ] ) ) {
+			$this->fulfillments_cache[ $order_id ][] = $fulfillment;
+		}
+
+		return array(
+			'status'         => null === $existing ? self::STATUS_CREATED : self::STATUS_UPDATED,
+			'message'        => null === $existing ? __( 'Fulfillment created.', 'woocommerce' ) : __( 'Fulfillment updated.', 'woocommerce' ),
+			'order_id'       => $order_id,
+			'fulfillment_id' => $fulfillment->get_id(),
+			'notified'       => $this->options['notify_customer'] && $fulfillment->get_is_fulfilled() && $this->notify_customer( $order, $fulfillment, $was_fulfilled, $row_number ),
+		);
+	}
+
+	/**
+	 * Fire the customer notification the fulfillments screen fires for the same change.
+	 *
+	 * The row is already saved, so a listener that throws is logged and the row still
+	 * counts as imported. True means the action ran, not that an email was sent: the
+	 * email can be turned off in the settings.
+	 *
+	 * @param WC_Order    $order         Order of the row.
+	 * @param Fulfillment $fulfillment   Saved fulfillment.
+	 * @param bool        $was_fulfilled Whether the fulfillment was fulfilled before this row.
+	 * @param int         $row_number    Physical record number, for the log.
+	 * @return bool Whether the notification action ran without an error.
+	 */
+	private function notify_customer( WC_Order $order, Fulfillment $fulfillment, bool $was_fulfilled, int $row_number ): bool {
+		$hook_depth = count( $GLOBALS['wp_current_filter'] );
+		try {
+			if ( $was_fulfilled ) {
+				/**
+				 * This action is documented in src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php.
+				 *
+				 * @since 10.1.0
+				 * @since 10.8.0 Added $customer_note parameter.
+				 */
+				do_action( 'woocommerce_fulfillment_updated_notification', $order->get_id(), $fulfillment, $order, '' );
+			} else {
+				/**
+				 * This action is documented in src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php.
+				 *
+				 * @since 10.1.0
+				 */
+				do_action( 'woocommerce_fulfillment_created_notification', $order->get_id(), $fulfillment, $order );
+			}
+			return true;
+		} catch ( \Throwable $e ) {
+			self::restore_filter_stack( $hook_depth );
+			// The listener may have changed the cached fulfillment, so the next row reads it again.
+			unset( $this->fulfillments_cache[ $order->get_id() ] );
+			wc_get_logger()->error(
+				sprintf( 'Fulfillments import could not notify the customer for row %1$d of order %2$d: %3$s', $row_number, $order->get_id(), $e->getMessage() ),
+				array( 'source' => 'fulfillments-importer' )
+			);
+			return false;
+		}
+	}
+
+	/**
+	 * Take the hooks a throwing listener left on the filter stack back off it.
+	 *
+	 * Otherwise doing_action() stays true for them, and the data store skips its
+	 * after-save actions, which add order notes and update the order status, for later rows.
+	 *
+	 * @param int $depth Stack depth before the call that threw.
+	 */
+	private static function restore_filter_stack( int $depth ): void {
+		global $wp_current_filter;
+		array_splice( $wp_current_filter, $depth );
+	}
+
+	/**
+	 * Build a failed row result.
+	 *
+	 * @param string $code     Machine-readable failure code.
+	 * @param string $message  Plain text that can hold raw CSV values; escape it on output.
+	 * @param int    $order_id Resolved order ID, or 0 when the order is not known.
+	 * @return array<string, mixed>
+	 */
+	private static function fail( string $code, string $message, int $order_id = 0 ): array {
+		$result = array(
+			'status'  => self::STATUS_FAILED,
+			'code'    => $code,
+			'message' => $message,
+		);
+		if ( $order_id > 0 ) {
+			$result['order_id'] = $order_id;
+		}
+		return $result;
+	}
+
+	/**
+	 * Cut a CSV value echoed in a row result, since the results are stored with the session.
+	 *
+	 * @param string $value CSV value.
+	 * @return string The value, or its first 100 characters followed by "...".
+	 */
+	private static function clip( string $value ): string {
+		return mb_strlen( $value ) > 100 ? mb_substr( $value, 0, 100 ) . '...' : $value;
+	}
+
+	/**
+	 * Read a mapped cell of a row.
+	 *
+	 * @param array<int, string> $cells      Trimmed cells.
+	 * @param array<string, int> $header_map Canonical column key => CSV column index.
+	 * @param string             $column     Canonical column key.
+	 * @return string Empty when the column is not mapped or the row has no such cell.
+	 */
+	private static function get_field( array $cells, array $header_map, string $column ): string {
+		return isset( $header_map[ $column ] ) ? (string) ( $cells[ $header_map[ $column ] ] ?? '' ) : '';
+	}
+
+	/**
+	 * Keep a tracking URL only when it is an http or https URL.
+	 *
+	 * The URL is shown as a link in the admin and in customer emails. esc_url_raw() adds
+	 * "http://" to a cell without a scheme, so the cell itself must start with one.
+	 *
+	 * @param string $url URL cell.
+	 * @return string Sanitized URL, or empty when it is not allowed.
+	 */
+	private function sanitize_tracking_url( string $url ): string {
+		$lower = strtolower( $url );
+		if ( ! str_starts_with( $lower, 'http://' ) && ! str_starts_with( $lower, 'https://' ) ) {
+			return '';
+		}
+		$url = esc_url_raw( $url, array( 'http', 'https' ) );
+		return '' !== (string) wp_parse_url( $url, PHP_URL_HOST ) ? $url : '';
+	}
+
+	/**
+	 * Map a provider cell to a known provider key, matching the key or the name without case.
+	 *
+	 * @param string $cell Provider cell.
+	 * @return string Provider key, or empty when the provider is not known.
+	 */
+	private function known_provider_key( string $cell ): string {
+		if ( null === $this->provider_keys ) {
+			// Kept unset until the list is built, so a lookup that throws runs again for the next row.
+			$keys = array();
+			foreach ( FulfillmentUtils::get_shipping_providers() as $key => $provider ) {
+				$keys[ wc_strtolower( $provider->get_name() ) ] = (string) $key;
+				$keys[ wc_strtolower( (string) $key ) ]         = (string) $key;
+			}
+			$this->provider_keys = $keys;
+		}
+		return $this->provider_keys[ wc_strtolower( $cell ) ] ?? '';
+	}
+
+	/**
+	 * Load the orders a chunk names by ID in one query.
+	 *
+	 * The import run builds a new importer for each request, so without this every row
+	 * would load its order on its own. The resolve-order filter still runs once per distinct
+	 * order number.
+	 *
+	 * @param array<int, array{row_number:int, cells:array<int, string>}> $rows       Rows of the chunk.
+	 * @param array<string, int>                                          $header_map Canonical column key => CSV column index.
+	 */
+	private function prime_orders( array $rows, array $header_map ): void {
+		$ids = array();
+		foreach ( $rows as $row ) {
+			$order_number = self::get_field( $row['cells'], $header_map, self::COL_ORDER_NUMBER );
+			if ( ctype_digit( $order_number ) ) {
+				$ids[] = (int) $order_number;
+			}
+		}
+		$ids = array_values( array_unique( $ids ) );
+		if ( array() === $ids ) {
+			return;
+		}
+
+		// post__in is the ID argument both order data stores understand. The default status
+		// list includes checkout drafts, which are carts that were never placed.
+		$orders = wc_get_orders(
+			array(
+				'post__in' => $ids,
+				'limit'    => count( $ids ),
+				'status'   => array_diff( array_keys( wc_get_order_statuses() ), array( 'wc-' . OrderStatus::CHECKOUT_DRAFT ) ),
+			)
+		);
+		// The result passes through the woocommerce_order_query filter, so it is checked.
+		foreach ( is_array( $orders ) ? $orders : array() as $order ) {
+			if ( $order instanceof WC_Order ) {
+				$this->primed_orders[ $order->get_id() ] = $order;
+			}
+		}
+	}
+
+	/**
+	 * Resolve an order number cell to an order.
+	 *
+	 * A number is looked up among the orders prime_orders() loaded by ID: orders with a registered
+	 * order status other than checkout-draft, so trashed and checkout-draft orders are not found. The
+	 * filter then decides, so a store with its own order numbers can map them. The result is cached
+	 * on the importer.
+	 *
+	 * @param string $order_number Order number cell.
+	 * @return WC_Order|null
+	 */
+	private function resolve_order( string $order_number ): ?WC_Order {
+		if ( array_key_exists( $order_number, $this->order_cache ) ) {
+			return $this->order_cache[ $order_number ];
+		}
+
+		$order = null;
+		if ( ctype_digit( $order_number ) ) {
+			$order = $this->primed_orders[ (int) $order_number ] ?? null;
+		}
+
+		/**
+		 * Filter the order a fulfillments CSV row is imported into.
+		 *
+		 * The default looks up a numeric order number as an order ID. Return a WC_Order to
+		 * map custom order numbers, or null when the order cannot be found. Any other value
+		 * fails the row.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param WC_Order|null $order        Order found by ID, or null.
+		 * @param string        $order_number Order number cell from the CSV.
+		 */
+		$order = apply_filters( 'woocommerce_fulfillments_csv_importer_resolve_order', $order instanceof WC_Order ? $order : null, $order_number );
+
+		$this->order_cache[ $order_number ] = $order instanceof WC_Order ? $order : null;
+		return $this->order_cache[ $order_number ];
+	}
+
+	/**
+	 * Find the order's fulfillment that is not deleted and has this tracking number, ignoring case.
+	 *
+	 * @param int    $order_id        Order ID.
+	 * @param string $tracking_number Tracking number.
+	 * @return Fulfillment|null
+	 *
+	 * @throws \RuntimeException When the fulfillments cannot be read.
+	 */
+	private function find_existing_fulfillment( int $order_id, string $tracking_number ): ?Fulfillment {
+		if ( ! isset( $this->fulfillments_cache[ $order_id ] ) ) {
+			global $wpdb;
+			/**
+			 * Fulfillments data store.
+			 *
+			 * @var FulfillmentsDataStore $store
+			 */
+			$store        = WC_Data_Store::load( 'order-fulfillment' );
+			$fulfillments = $store->read_fulfillments( WC_Order::class, (string) $order_id );
+			// A failed query reads as no fulfillments, which would turn an update into a duplicate.
+			if ( '' !== $wpdb->last_error ) {
+				wc_get_logger()->error(
+					sprintf( 'Fulfillments import could not read the fulfillments of order %1$d: %2$s', $order_id, $wpdb->last_error ),
+					array( 'source' => 'fulfillments-importer' )
+				);
+				// Not cached, so the next row of this order reads again.
+				throw new \RuntimeException( 'fulfillments_read_failed' );
+			}
+			$this->fulfillments_cache[ $order_id ] = $fulfillments;
+		}
+
+		$needle = strtolower( $tracking_number );
+		foreach ( $this->fulfillments_cache[ $order_id ] as $fulfillment ) {
+			if ( $fulfillment instanceof Fulfillment && strtolower( (string) $fulfillment->get_tracking_number() ) === $needle ) {
+				return $fulfillment;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Parse an items cell into fulfillment items.
+	 *
+	 * Entries are separated by "|" or ";" and are either "<order item ID>:<qty>" or
+	 * "sku:<SKU>:<qty>"; empty entries are skipped. Quantities of a repeated item are
+	 * added up before they are checked against the quantity left to fulfill.
+	 *
+	 * @param string          $cell    Items cell, not empty.
+	 * @param WC_Order        $order   Order of the row.
+	 * @param array<int, int> $pending Order item ID => quantity left to fulfill.
+	 * @return array<int, array{item_id:int, qty:int}>|string Items, or a message saying why the cell is invalid.
+	 */
+	private function parse_items( string $cell, WC_Order $order, array $pending ) {
+		$line_items = $order->get_items( 'line_item' );
+		$by_sku     = null;
+		$totals     = array();
+		foreach ( explode( '|', str_replace( ';', '|', $cell ) ) as $entry ) {
+			$entry = trim( $entry );
+			if ( '' === $entry ) {
+				continue;
+			}
+			$parts  = array_map( 'trim', explode( ':', $entry ) );
+			$is_sku = 'sku' === strtolower( $parts[0] );
+			if ( count( $parts ) !== ( $is_sku ? 3 : 2 ) ) {
+				/* translators: %s: one entry of the items cell. */
+				return sprintf( __( 'Invalid items entry: %s.', 'woocommerce' ), self::clip( $entry ) );
+			}
+			if ( $is_sku ) {
+				// Built on first use, since it loads the product of every line item.
+				$by_sku = $by_sku ?? $this->index_items_by_sku( $line_items );
+				$item   = $by_sku[ wc_strtolower( $parts[1] ) ] ?? null;
+				if ( false === $item ) {
+					/* translators: %s: SKU from the CSV. */
+					return sprintf( __( 'SKU %s matches more than one item of this order. Use the item ID instead.', 'woocommerce' ), self::clip( $parts[1] ) );
+				}
+				if ( null === $item ) {
+					/* translators: %s: SKU from the CSV. */
+					return sprintf( __( 'SKU %s was not found on the order.', 'woocommerce' ), self::clip( $parts[1] ) );
+				}
+			} else {
+				$item = ctype_digit( $parts[0] ) ? ( $line_items[ (int) $parts[0] ] ?? null ) : null;
+				if ( null === $item ) {
+					/* translators: %s: order item ID from the CSV. */
+					return sprintf( __( 'Item ID %s is not part of this order.', 'woocommerce' ), self::clip( $parts[0] ) );
+				}
+			}
+
+			$qty = (string) end( $parts );
+			if ( ! ctype_digit( $qty ) || 0 === (int) $qty ) {
+				return __( 'Item quantity must be a positive integer.', 'woocommerce' );
+			}
+			$totals[ $item->get_id() ] = ( $totals[ $item->get_id() ] ?? 0 ) + (int) $qty;
+		}
+
+		if ( array() === $totals ) {
+			return __( 'The items cell has no item entries.', 'woocommerce' );
+		}
+
+		$items = array();
+		foreach ( $totals as $item_id => $qty ) {
+			$left = $pending[ $item_id ] ?? 0;
+			if ( $qty > $left ) {
+				/* translators: 1: quantity from the CSV, 2: quantity of the item not fulfilled yet. */
+				return sprintf( __( 'Item quantity %1$d exceeds the quantity left to fulfill %2$d.', 'woocommerce' ), $qty, $left );
+			}
+			$items[] = array(
+				'item_id' => (int) $item_id,
+				'qty'     => $qty,
+			);
+		}
+		return $items;
+	}
+
+	/**
+	 * Index line items by lowercase SKU.
+	 *
+	 * @param array<int|string, \WC_Order_Item> $line_items Line items of the order.
+	 * @return array<string, \WC_Order_Item|false> False for a SKU shared by more than one line item.
+	 */
+	private function index_items_by_sku( array $line_items ): array {
+		$by_sku = array();
+		foreach ( $line_items as $item ) {
+			$product = $item instanceof \WC_Order_Item_Product ? $item->get_product() : null;
+			$sku     = $product instanceof \WC_Product ? wc_strtolower( (string) $product->get_sku() ) : '';
+			if ( '' !== $sku ) {
+				$by_sku[ $sku ] = isset( $by_sku[ $sku ] ) ? false : $item;
+			}
+		}
+		return $by_sku;
+	}
+
+	/**
+	 * Quantities left to fulfill per order item, after refunds and the order's other fulfillments.
+	 *
+	 * @param WC_Order         $order    Order of the row.
+	 * @param Fulfillment|null $existing Fulfillment the row updates; its own items count as not fulfilled.
+	 * @return array<int, int> Order item ID => quantity.
+	 */
+	private function pending_items( WC_Order $order, ?Fulfillment $existing ): array {
+		$others = array_filter(
+			$this->fulfillments_cache[ $order->get_id() ] ?? array(),
+			static function ( $fulfillment ) use ( $existing ) {
+				return $fulfillment !== $existing;
+			}
+		);
+		return array_map( 'intval', array_column( FulfillmentUtils::get_pending_items( $order, $others ), 'qty', 'item_id' ) );
 	}
 
 	/**

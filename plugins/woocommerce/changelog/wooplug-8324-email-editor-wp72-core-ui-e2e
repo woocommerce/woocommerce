@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Add email editor e2e checks for hidden core UI on WordPress 7.2; no production change.
+

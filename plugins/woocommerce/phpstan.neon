@@ -90,6 +90,21 @@ parameters:
 			identifier: woocommerce.stagedWrite
 			message: '#^Method WC_Shipping_Zone::add_shipping_method\(\) writes outside save\(\)\.#'
 			path: includes/class-wc-shipping-zone.php
+		# The ping is an HTTP request to the delivery URL. It cannot wait for a later save(), so it has no stage_*() twin.
+		-
+			identifier: woocommerce.stagedWrite
+			message: '#^Method WC_Webhook::deliver_ping\(\) writes outside save\(\)\.#'
+			path: includes/class-wc-webhook.php
+		# WP_Ability::prepare_input() and sanitize_input() exist from WordPress 7.2, and Ability calls them only when they exist. Remove when WooCommerce requires WordPress 7.2.
+		-
+			identifier: staticMethod.notFound
+			message: '#^Call to an undefined static method WP_Ability::(prepare|sanitize)_input\(\)\.$#'
+			path: src/Internal/Abilities/Ability.php
+		# PHPStan has no WP-CLI stubs, so it cannot see WP_CLI or its helper functions. Remove once stubs are added.
+		-
+			message: '#unknown class WP_CLI|Function WP_CLI\\Utils\\\w+ not found#'
+			paths:
+				- src/Internal/CLI/ImportExport/Product/ExportCommand.php
 	parallel:
 		maximumNumberOfProcesses: 4
 

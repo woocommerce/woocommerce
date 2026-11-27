@@ -79,64 +79,9 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 			);
 		}
 
-		$events = $request->get_json_params();
+		$response_data = WC_Analytics_Tracking::record_client_events( $request->get_json_params() );
 
-		if ( ! is_array( $events ) || ( isset( $events['event_name'] ) ) ) {
-			// If $events is a single event (associative array), wrap it in an array.
-			$events = array( $events );
-		}
-
-		// Limit unauthenticated callers to a bounded number of pixel requests.
-		if ( count( $events ) > WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST ) {
-			$events = array_slice( $events, 0, WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST, true );
-		}
-
-		$results    = array();
-		$has_errors = false;
-
-		foreach ( $events as $index => $event ) {
-			// Validate event structure.
-			if ( empty( $event ) || ! is_array( $event ) ) {
-				$results[ $index ] = array(
-					'success' => false,
-					'error'   => 'Invalid event format',
-				);
-				$has_errors        = true;
-				continue;
-			}
-
-			// Validate event name and properties.
-			$event_name = $event['event_name'] ?? null;
-			$properties = $event['properties'] ?? array();
-			if ( ! $event_name || ! is_string( $event_name ) || ! is_array( $properties ) ) {
-				$results[ $index ] = array(
-					'success' => false,
-					'error'   => 'Missing event_name or invalid properties',
-				);
-				$has_errors        = true;
-				continue;
-			}
-
-			$result = WC_Analytics_Tracking::record_client_event( $event_name, $properties );
-
-			if ( is_wp_error( $result ) ) {
-				$results[ $index ] = array(
-					'success' => false,
-					'error'   => $result->get_error_message(),
-				);
-				$has_errors        = true;
-				continue;
-			}
-
-			$results[ $index ] = array( 'success' => true );
-		}
-
-		$response_data = array(
-			'success' => ! $has_errors,
-			'results' => $results,
-		);
-
-		return new \WP_REST_Response( $response_data, $has_errors ? 207 : 200 );
+		return new \WP_REST_Response( $response_data, $response_data['success'] ? 200 : 207 );
 	}
 
 	/**

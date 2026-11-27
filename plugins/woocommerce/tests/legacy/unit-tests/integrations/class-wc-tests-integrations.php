@@ -39,8 +39,6 @@ class WC_Tests_Integrations extends WC_Unit_Test_Case {
 		$integrations = new WC_Integrations();
 		$this->assertArrayHasKey( 'dummy-integration', $integrations->integrations );
 		$this->assertArrayHasKey( 'dummy-integration', $integrations->get_integrations() );
-
-		remove_filter( 'woocommerce_integrations', array( $this, 'add_dummy_integration' ) );
 	}
 
 	/**
