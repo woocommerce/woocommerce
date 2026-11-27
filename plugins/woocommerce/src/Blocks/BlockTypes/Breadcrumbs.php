@@ -10,6 +10,7 @@ use WP_Block;
  * Breadcrumbs class.
  */
 class Breadcrumbs extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.

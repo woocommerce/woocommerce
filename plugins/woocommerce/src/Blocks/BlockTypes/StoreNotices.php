@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * StoreNotices class.
  */
 class StoreNotices extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
