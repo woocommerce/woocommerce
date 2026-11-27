@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  * PriceFilter class.
  */
 class PriceFilter extends AbstractBlock {
-	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.

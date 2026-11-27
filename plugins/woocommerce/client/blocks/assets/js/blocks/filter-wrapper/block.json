@@ -17,7 +17,6 @@
 			"type": "string"
 		}
 	},
-	"viewScript": "file:../filter-wrapper-frontend.js",
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

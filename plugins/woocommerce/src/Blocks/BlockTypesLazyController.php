@@ -414,32 +414,20 @@ final class BlockTypesLazyController {
 	 * @return array<string,string>
 	 */
 	private function get_filter_blocks(): array {
+		// Legacy filter blocks (ActiveFilters, AttributeFilter, PriceFilter, RatingFilter, StockFilter, FilterWrapper): excluded — frontend scripts not declared in block.json.
 		// ProductFilterStatus: excluded — overrides initialize() with woocommerce_blocks_product_filters_selected_items filter.
 		// ProductFilterPrice: excluded — overrides initialize() with woocommerce_blocks_product_filters_selected_items filter.
 		// ProductFilterAttribute: excluded — overrides initialize() with selected_items filter, deleted_transient, wp_loaded → patterns.
 		// ProductFilterRating: excluded — overrides initialize() with woocommerce_blocks_product_filters_selected_items filter.
 		// ProductFilterTaxonomy: excluded — overrides initialize() with selected_items filter, REST field registration.
-		$list = array(
-			// Legacy filter blocks.
-			'active-filters'                 => \Automattic\WooCommerce\Blocks\BlockTypes\ActiveFilters::class,
-			'filter-wrapper'                 => \Automattic\WooCommerce\Blocks\BlockTypes\FilterWrapper::class,
-			// New product filter blocks.
+		return array(
 			'product-filter-price-slider'    => \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterPriceSlider::class,
 			'product-filter-active'          => \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterActive::class,
 			'product-filter-removable-chips' => \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterRemovableChips::class,
 			'product-filter-clear-button'    => \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterClearButton::class,
 			'product-filter-checkbox-list'   => \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterCheckboxList::class,
+			'product-filters'                => \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilters::class,
+			'product-filter-chips'           => \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterChips::class,
 		);
-		if ( ! is_admin() ) {
-			// These blocks override enqueue_data() with editor-visible data, hence load eagerly in admin.
-			$list['attribute-filter']     = \Automattic\WooCommerce\Blocks\BlockTypes\AttributeFilter::class;
-			$list['price-filter']         = \Automattic\WooCommerce\Blocks\BlockTypes\PriceFilter::class;
-			$list['rating-filter']        = \Automattic\WooCommerce\Blocks\BlockTypes\RatingFilter::class;
-			$list['stock-filter']         = \Automattic\WooCommerce\Blocks\BlockTypes\StockFilter::class;
-			$list['product-filters']      = \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilters::class;
-			$list['product-filter-chips'] = \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterChips::class;
-		}
-
-		return $list;
 	}
 }
