@@ -619,8 +619,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		foreach ( $order_items as $order_item ) {
-			$order_item_id = $order_item->get_id();
-			unset( $existing_items[ $order_item_id ] );
+			$order_item_id       = $order_item->get_id();
 			$product_qty         = $order_item->get_quantity( 'edit' );
 			$product_id          = $order_item->get_product_id( 'edit' );
 			$variation_id        = $order_item->get_variation_id( 'edit' );
@@ -638,16 +637,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$net_revenue = -abs( round( $net_revenue + ( $prior_refunded_net[ $order_item_id ] ?? 0 ), $decimals ) );
 
 				// Skip items that have already been fully refunded (single or multiple partial refunds).
+				// The line stays in $existing_items, so the cleanup below removes a row an earlier sync wrote for it.
 				if ( 0.0 === $net_revenue ) {
-					// Drop a row an earlier sync may have written for this line, as nothing of it is refunded here.
-					$wpdb->delete(
-						$table_name,
-						array(
-							'order_id'      => $order->get_id(),
-							'order_item_id' => $order_item_id,
-						),
-						array( '%d', '%d' )
-					);
 					continue;
 				}
 
@@ -681,6 +672,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					$tax_amount = -abs( $parent_order->get_item_cart_tax_amount( $order_item ) );
 				}
 			}
+
+			unset( $existing_items[ $order_item_id ] );
 
 			$is_refund = $net_revenue < 0;
 
