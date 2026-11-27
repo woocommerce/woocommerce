@@ -43,6 +43,7 @@ trait ExtensibleAbilitiesTestTrait {
 		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', 'yes' );
 
 		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
+		add_action( 'woocommerce_extensible_abilities_init', array( AbilitiesLoader::class, 'register_core_syncs' ), 0 );
 		if ( $register ) {
 			add_action( 'woocommerce_extensible_abilities_init', $register );
 		}

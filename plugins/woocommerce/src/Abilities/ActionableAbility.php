@@ -363,8 +363,9 @@ abstract class ActionableAbility extends Ability {
 		);
 		foreach ( $own as $resource_name => $resource_saved ) {
 			foreach ( ExtensibleAbilities::get_syncs( $resource_name ) as $args ) {
-				$context['fields'] = self::get_sent_fields( $sent, $args['namespace'] );
-				$rejected          = self::run_callback( $args['callback'], array( $resource_saved, $context ), array( 'namespace' => $args['namespace'] ) );
+				// A Core sync has no namespace: it gets no sent fields, and its error gets no namespace.
+				$context['fields'] = self::get_sent_fields( $sent, $args['namespace'] ?? '' );
+				$rejected          = self::run_callback( $args['callback'], array( $resource_saved, $context ), isset( $args['namespace'] ) ? array( 'namespace' => $args['namespace'] ) : array() );
 				if ( null !== $rejected ) {
 					return $rejected;
 				}

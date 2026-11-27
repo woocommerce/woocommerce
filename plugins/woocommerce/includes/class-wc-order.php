@@ -132,6 +132,14 @@ class WC_Order extends WC_Abstract_Order {
 	public $refunds = array();
 
 	/**
+	 * The payment note and transaction ID of a payment that stage_payment_complete() completed in memory, for
+	 * Core's order sync, which adds the note and fires woocommerce_payment_complete after the save.
+	 *
+	 * @var array{note: string, transaction_id: string}|null
+	 */
+	private $staged_payment = null;
+
+	/**
 	 * When a payment is complete this function is called.
 	 *
 	 * Most of the time this should mark an order as 'processing' so that admin can process/post the items.
@@ -187,37 +195,36 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Complete the payment in memory, like payment_complete(), but do not save. woocommerce_pre_payment_complete
-	 * fires first, as in payment_complete(). The payment note and woocommerce_payment_complete belong to the
-	 * write: after the order is saved, pass the return value to finish_staged_payment_complete().
+	 * fires first, as in payment_complete(). The payment note and woocommerce_payment_complete wait on the order
+	 * for Core's order sync, which runs after an ability saves the order.
 	 *
 	 * @since 11.5.0
 	 * @param string $transaction_id Optional transaction ID to store.
-	 * @return array{note: string, transaction_id: string}|null Null when the order is not saved yet, or when its status does not let the payment complete.
+	 * @return bool Whether the payment completes. False when the order is not saved yet, or when its status does not let the payment complete.
 	 * @throws WC_Data_Exception When the class has not adopted the stage method, or a listener does not accept $staged.
 	 */
 	public function stage_payment_complete( $transaction_id = '' ) {
 		$this->refuse_unstaged_overrides( array( 'payment_complete' => 'stage_payment_complete' ) );
 
 		if ( ! $this->get_id() ) {
-			return null;
+			return false;
 		}
 
-		return $this->prepare_payment_complete( $transaction_id );
+		$this->staged_payment = $this->prepare_payment_complete( $transaction_id );
+		return null !== $this->staged_payment;
 	}
 
 	/**
-	 * Add the payment note and fire woocommerce_payment_complete for a payment that stage_payment_complete()
-	 * completed, after the order is saved.
+	 * Return the payment that stage_payment_complete() left on the order, and remove it from the order.
 	 *
+	 * @internal Core's order sync reads it.
 	 * @since 11.5.0
-	 * @param array{note: string, transaction_id: string} $paid Return value of stage_payment_complete().
-	 * @return void
+	 * @return array{note: string, transaction_id: string}|null
 	 */
-	public function finish_staged_payment_complete( array $paid ) {
-		$this->add_order_note( $paid['note'], false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
-
-		/** This action is documented in payment_complete(). */
-		do_action( 'woocommerce_payment_complete', $this->get_id(), $paid['transaction_id'] );
+	public function take_staged_payment() {
+		$paid                 = $this->staged_payment;
+		$this->staged_payment = null;
+		return $paid;
 	}
 
 	/**

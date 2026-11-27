@@ -7,28 +7,23 @@
 
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+use Automattic\WooCommerce\Tests\Internal\Abilities\ExtensibleAbilitiesTestTrait;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Matches the WC_Data class it tests.
 /**
  * Marks an order, runs each stage method, and records each action that fires while the mark is set.
+ *
+ * The boundary: an action that WooCommerce fires (the do_action() call is in a file of the plugin) while the order
+ * is marked, and that is about the staged order. It is about the staged order when the code that calls do_action()
+ * runs on the order or on one of its items, or when an argument of the action is the order, one of its items, the
+ * order ID or an item ID. Every action inside the boundary must go through do_staged_action(). There is no list.
  */
 class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 
-	/**
-	 * Actions that fire while the order is marked and are not fired with do_staged_action(), with the reason.
-	 * A `*` matches any part of a dynamic name.
-	 */
-	private const NOT_WRAPPED = array(
-		'Loads an object that is not the staged order or one of its items; a listener cannot tell staging apart from a read.' => array(
-			'woocommerce_coupon_loaded',
-			'woocommerce_product_read',
-			'woocommerce_customer_loaded',
-		),
-		'Deprecated hook notice that WooCommerce fires itself, not a hook about the order.' => array(
-			'deprecated_hook_run',
-		),
-	);
+	use ExtensibleAbilitiesTestTrait;
 
 	/**
 	 * Products created once per test.
@@ -53,19 +48,18 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Every action that a stage method fires on a marked order goes through do_staged_action() or is listed with a reason, and a listener without $staged refuses the call before it runs.
+	 * @testdox Every action about the staged order that a stage method fires goes through do_staged_action(), and a listener without $staged refuses the call before it runs.
 	 * @dataProvider provide_rows
 	 *
 	 * @param string $method Stage method.
 	 * @param string $state  new or existing.
 	 */
 	public function test_every_action_of_a_staged_call_is_wrapped( string $method, string $state ): void {
-		list( $wrapped, $unwrapped ) = $this->record( $method, $state );
+		list( $wrapped, $unwrapped, $outside ) = $this->record( $method, $state );
 
-		self::log_row( $method, $state, $wrapped, $unwrapped );
+		self::log_row( $method, $state, $wrapped, $unwrapped, $outside );
 
-		$unlisted = array_values( array_filter( array_keys( $unwrapped ), static fn( $hook ) => ! self::is_listed( $hook ) ) );
-		$this->assertSame( array(), $unlisted, 'These actions fire on a staged call without do_staged_action(): ' . wp_json_encode( array_intersect_key( $unwrapped, array_flip( $unlisted ) ) ) );
+		$this->assertSame( array(), $unwrapped, 'These actions about the staged order fire without do_staged_action(): ' . wp_json_encode( $unwrapped ) );
 
 		foreach ( $wrapped as $hook => $count ) {
 			$this->assert_old_listener_refuses( $method, $state, $hook, $count );
@@ -99,7 +93,7 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A staged payment fires woocommerce_pre_payment_complete first, and the note and woocommerce_payment_complete come after the save.
+	 * @testdox A staged payment fires woocommerce_pre_payment_complete first, and Core's order sync adds the note and fires woocommerce_payment_complete after the save.
 	 */
 	public function test_staged_payment_complete(): void {
 		$order = $this->create_order( 'existing' );
@@ -112,18 +106,105 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 		add_action( 'all', $spy );
 
 		$order->set_staged( true );
-		$paid = $order->stage_payment_complete( 'txn-1' );
+		$completes = $order->stage_payment_complete( 'txn-1' );
 		$order->set_staged( false );
 		$fired[] = 'save';
 		$order->save();
-		$order->finish_staged_payment_complete( $paid );
+		AbilitiesLoader::sync_staged_payments( array( $order ) );
+		AbilitiesLoader::sync_staged_payments( array( $order ) );
 		remove_action( 'all', $spy );
 
+		$this->assertTrue( $completes );
 		$this->assertSame( array( 'woocommerce_pre_payment_complete', 'woocommerce_valid_order_statuses_for_payment_complete', 'woocommerce_payment_complete_order_status', 'save', 'woocommerce_order_status_processing', 'woocommerce_payment_complete' ), $fired );
 		$stored = wc_get_order( $order->get_id() );
 		$this->assertSame( OrderStatus::PROCESSING, $stored->get_status() );
 		$this->assertSame( 'txn-1', $stored->get_transaction_id() );
 		$this->assertCount( 1, array_filter( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), static fn( $note ) => 'Payment complete.' === $note->content ) );
+	}
+
+	/**
+	 * @testdox Spike measurement: a staged payment saved outside an ability gets no payment note and no woocommerce_payment_complete, because no sync runs.
+	 */
+	public function test_staged_payment_outside_an_ability_loses_the_note_and_action(): void {
+		$order = $this->create_order( 'existing' );
+		$fired = did_action( 'woocommerce_payment_complete' );
+
+		$order->stage_payment_complete( 'txn-2' );
+		$order->save();
+
+		$this->assertSame( OrderStatus::PROCESSING, wc_get_order( $order->get_id() )->get_status() );
+		$this->assertSame( $fired, did_action( 'woocommerce_payment_complete' ) );
+		$this->assertCount( 0, array_filter( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), static fn( $note ) => false !== strpos( $note->content, 'Payment' ) ) );
+	}
+
+	/**
+	 * @testdox Spike measurement: Core's order sync runs before an extension sync that registered earlier, inside an ability call, and a failure in it rolls the call back.
+	 */
+	public function test_core_payment_sync_in_an_ability(): void {
+		$seen = array();
+		// Priority -10 registers the extension sync before Core's sync, which registers at 0.
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( &$seen ) {
+				ExtensibleAbilities::register_validator(
+					array(
+						'resource'  => 'order',
+						'namespace' => 'spike',
+						'callback'  => static function ( $order ) {
+							// Not allowed for a real validator: it changes the order. It stands in for a stage call of an ability.
+							$order->stage_payment_complete( 'txn-3' );
+							return null;
+						},
+					)
+				);
+				ExtensibleAbilities::register_sync(
+					array(
+						'resource'  => 'order',
+						'namespace' => 'spike',
+						'callback'  => static function ( array $orders ) use ( &$seen ) {
+							$seen[] = did_action( 'woocommerce_payment_complete' );
+						},
+					)
+				);
+			},
+			-10
+		);
+		$this->enable_extensible_abilities();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$syncs = ExtensibleAbilities::get_syncs( 'order' );
+		$this->assertArrayNotHasKey( 'namespace', $syncs[0] );
+		$this->assertSame( 'spike', $syncs[1]['namespace'] );
+
+		$order  = $this->create_order( 'existing' );
+		$before = did_action( 'woocommerce_payment_complete' );
+		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
+			array(
+				'id'     => $order->get_id(),
+				'status' => OrderStatus::ON_HOLD,
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertSame( array( $before + 1 ), $seen );
+		$this->assertSame( OrderStatus::PROCESSING, wc_get_order( $order->get_id() )->get_status() );
+		$this->assertCount( 1, array_filter( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), static fn( $note ) => 'Payment complete.' === $note->content ) );
+
+		$failing = $this->create_order( 'existing' );
+		$throw   = static function () {
+			throw new Exception( 'Listener failed' );
+		};
+		add_action( 'woocommerce_payment_complete', $throw );
+		$error = wp_get_ability( 'woocommerce/order-update-status' )->execute(
+			array(
+				'id'     => $failing->get_id(),
+				'status' => OrderStatus::ON_HOLD,
+			)
+		);
+		remove_action( 'woocommerce_payment_complete', $throw );
+		$this->assertWPError( $error );
+		$this->assertSame( 'woocommerce_ability_extension_failed', $error->get_error_code() );
+		$this->assertSame( 'An extension failed while checking this change.', $error->get_error_message() );
+		$this->assertArrayNotHasKey( 'namespace', $error->get_error_data() );
+		$this->assertSame( OrderStatus::PENDING, wc_get_order( $failing->get_id() )->get_status() );
 	}
 
 	/**
@@ -143,33 +224,46 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 	 *
 	 * @param string $method Stage method.
 	 * @param string $state  Order state.
-	 * @return array{0: array<string, int>, 1: array<string, string>} Wrapped actions with their argument count, and unwrapped actions with their call site.
+	 * @return array{0: array<string, int>, 1: array<string, string>, 2: array<string, string>} Wrapped actions with their argument count, unwrapped actions inside the boundary with their call site, and actions outside the boundary with their call site.
 	 */
 	private function record( string $method, string $state ): array {
 		$order      = $this->create_order( $state );
 		$wrapped    = array();
 		$unwrapped  = array();
+		$outside    = array();
 		$plugin_dir = wp_normalize_path( dirname( __DIR__, 4 ) ) . '/';
-		$spy        = static function ( string $hook, ...$args ) use ( &$wrapped, &$unwrapped, $plugin_dir ) {
-			$frames = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 12 ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- The caller tells how the hook was fired.
+		$busy       = false;
+		$spy        = static function ( string $hook, ...$args ) use ( $order, &$wrapped, &$unwrapped, &$outside, $plugin_dir, &$busy ) {
+			if ( $busy ) {
+				return;
+			}
+			$busy   = true;
+			$frames = debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT, 12 ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- The caller tells how the hook was fired.
 			foreach ( $frames as $index => $frame ) {
 				if ( in_array( $frame['function'], array( 'apply_filters', 'apply_filters_ref_array' ), true ) ) {
-					return;
+					break;
 				}
 				if ( ! in_array( $frame['function'], array( 'do_action', 'do_action_ref_array' ), true ) ) {
 					continue;
 				}
 				$caller = $frames[ $index + 1 ] ?? array();
+				$site   = str_replace( $plugin_dir, '', wp_normalize_path( $frame['file'] ?? '' ) ) . ':' . ( $frame['line'] ?? 0 );
+				$args   = 'do_action_ref_array' === $frame['function'] ? (array) ( $args[0] ?? array() ) : $args;
 				if ( 'do_staged_action' === ( $caller['function'] ?? '' ) ) {
 					$wrapped[ $hook ] = count( $args );
-					return;
+					if ( end( $args ) !== $order ) {
+						$unwrapped[ $hook ] = 'passes a $staged that is not the staged order';
+					}
+				} elseif ( 0 !== strpos( wp_normalize_path( $frame['file'] ?? '' ), $plugin_dir ) ) {
+					$outside[ $hook ] = $site;
+				} elseif ( self::is_about( $order, $caller['object'] ?? null, $args ) ) {
+					$unwrapped[ $hook ] = $site;
+				} else {
+					$outside[ $hook ] = $site;
 				}
-				$file = wp_normalize_path( $frame['file'] ?? '' );
-				if ( 0 === strpos( $file, $plugin_dir ) ) {
-					$unwrapped[ $hook ] = str_replace( $plugin_dir, '', $file ) . ':' . ( $frame['line'] ?? 0 );
-				}
-				return;
+				break;
 			}
+			$busy = false;
 		};
 
 		$order->set_staged( true );
@@ -181,7 +275,61 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 			$order->set_staged( false );
 		}
 
-		return array( $wrapped, $unwrapped );
+		return array( $wrapped, $unwrapped, $outside );
+	}
+
+	/**
+	 * Whether an action is about the staged order: the code that fires it runs on the order or one of its items, or
+	 * one of its arguments is the order, one of its items, the order ID or an item ID.
+	 *
+	 * @param WC_Order    $order  Staged order.
+	 * @param object|null $caller Object whose method called do_action(), or null for a function or a static method.
+	 * @param array       $args   Action arguments.
+	 * @return bool
+	 */
+	private static function is_about( WC_Order $order, $caller, array $args ): bool {
+		foreach ( array_merge( array( $caller ), $args ) as $value ) {
+			if ( $value === $order || ( $value instanceof WC_Order_Item && self::item_order( $value ) === $order ) ) {
+				return true;
+			}
+			if ( is_int( $value ) && $value > 0 && ( $value === $order->get_id() || self::is_item_id( $order, $value ) ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * The order instance an item links to, read without loading anything.
+	 *
+	 * @param WC_Order_Item $item Item.
+	 * @return WC_Order|null
+	 */
+	private static function item_order( WC_Order_Item $item ) {
+		$property = new ReflectionProperty( WC_Order_Item::class, 'order' );
+		$property->setAccessible( true );
+		$reference = $property->getValue( $item );
+		return $reference ? $reference->get() : null;
+	}
+
+	/**
+	 * Whether an ID is the ID of an item that the order holds in memory, read without loading anything.
+	 *
+	 * @param WC_Order $order Order.
+	 * @param int      $id    ID.
+	 * @return bool
+	 */
+	private static function is_item_id( WC_Order $order, int $id ): bool {
+		$property = new ReflectionProperty( WC_Abstract_Order::class, 'items' );
+		$property->setAccessible( true );
+		foreach ( $property->getValue( $order ) as $items ) {
+			foreach ( (array) $items as $item ) {
+				if ( $item instanceof WC_Order_Item && $item->get_id() === $id ) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -244,34 +392,18 @@ class WC_Data_Staged_Actions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Whether an action is in NOT_WRAPPED.
-	 *
-	 * @param string $hook Action name.
-	 * @return bool
-	 */
-	private static function is_listed( string $hook ): bool {
-		foreach ( self::NOT_WRAPPED as $hooks ) {
-			foreach ( $hooks as $pattern ) {
-				if ( fnmatch( $pattern, $hook ) ) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
 	 * Append a row's recorded actions to a JSON lines file when STAGED_ACTIONS_LOG is set, for the spike report.
 	 *
 	 * @param string $method    Stage method.
 	 * @param string $state     Order state.
 	 * @param array  $wrapped   Wrapped actions.
-	 * @param array  $unwrapped Unwrapped actions.
+	 * @param array  $unwrapped Unwrapped actions inside the boundary.
+	 * @param array  $outside   Actions outside the boundary.
 	 */
-	private static function log_row( string $method, string $state, array $wrapped, array $unwrapped ): void {
+	private static function log_row( string $method, string $state, array $wrapped, array $unwrapped, array $outside ): void {
 		$file = getenv( 'STAGED_ACTIONS_LOG' );
 		if ( $file ) {
-			file_put_contents( $file, wp_json_encode( compact( 'method', 'state', 'wrapped', 'unwrapped' ) ) . "\n", FILE_APPEND ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			file_put_contents( $file, wp_json_encode( compact( 'method', 'state', 'wrapped', 'unwrapped', 'outside' ) ) . "\n", FILE_APPEND ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		}
 	}
 

@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Abilities;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
@@ -160,6 +161,7 @@ class AbilitiesLoader {
 
 		AbilitiesCategories::init();
 		add_action( 'woocommerce_extensible_abilities_resources_init', array( __CLASS__, 'register_core_resources' ), 0 );
+		add_action( 'woocommerce_extensible_abilities_init', array( __CLASS__, 'register_core_syncs' ), 0 );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
@@ -178,6 +180,45 @@ class AbilitiesLoader {
 	public static function register_core_resources(): void {
 		foreach ( array( 'product', 'order', 'order_item', 'order_refund', 'product_term', 'product_review', 'customer' ) as $resource_name ) {
 			ExtensibleAbilities::register_resource( $resource_name );
+		}
+	}
+
+	/**
+	 * Register Core's own syncs. They have no namespace, so they run before the syncs of the extensions.
+	 *
+	 * @internal
+	 *
+	 * @since 11.5.0
+	 */
+	public static function register_core_syncs(): void {
+		ExtensibleAbilities::register_sync(
+			array(
+				'resource' => 'order',
+				'callback' => array( __CLASS__, 'sync_staged_payments' ),
+			)
+		);
+	}
+
+	/**
+	 * After the save, add the payment note and fire woocommerce_payment_complete for each order whose payment
+	 * WC_Order::stage_payment_complete() completed in memory.
+	 *
+	 * @internal
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param \WC_Data[] $orders Saved orders of the call.
+	 */
+	public static function sync_staged_payments( array $orders ): void {
+		foreach ( $orders as $order ) {
+			$paid = $order instanceof \WC_Order ? $order->take_staged_payment() : null;
+			if ( null === $paid ) {
+				continue;
+			}
+			$order->add_order_note( $paid['note'], false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
+
+			/** This action is documented in includes/class-wc-order.php. */
+			do_action( 'woocommerce_payment_complete', $order->get_id(), $paid['transaction_id'] );
 		}
 	}
 
