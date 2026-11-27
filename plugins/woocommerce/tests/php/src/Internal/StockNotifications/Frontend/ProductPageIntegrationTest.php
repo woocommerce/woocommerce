@@ -22,6 +22,11 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	use StockNotificationsFeatureTrait;
 
 	/**
+	 * Text shared by both versions of the "already joined" notice, with and without the My Account link.
+	 */
+	private const ALREADY_JOINED = 'You have already joined this waitlist.';
+
+	/**
 	 * The System Under Test.
 	 *
 	 * @var ProductPageIntegration
@@ -388,7 +393,7 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		do_action( 'woocommerce_simple_add_to_cart' );
 		$markup = ob_get_clean();
 
-		$this->assertStringContainsString( 'You have already joined this waitlist.', $markup, 'A signed-up customer should see the "already joined" notice on load.' );
+		$this->assertStringContainsString( self::ALREADY_JOINED, $markup, 'A signed-up customer should see the "already joined" notice on load.' );
 		$this->assertStringNotContainsString( 'wc_bis_form', $markup, 'A signed-up customer should not see the Back in Stock form on load.' );
 	}
 
@@ -419,7 +424,7 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		do_action( 'woocommerce_after_add_to_cart_form' );
 		$markup = ob_get_clean();
 
-		$this->assertStringContainsString( 'You have already joined this waitlist.', $markup, 'The notice should render.' );
+		$this->assertStringContainsString( self::ALREADY_JOINED, $markup, 'The notice should render.' );
 		$this->assertStringNotContainsString( 'wc_bis_form', $markup, 'The form should not render.' );
 	}
 
@@ -432,7 +437,7 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
-		$this->assertSame( 1, substr_count( $markup, 'You have already joined this waitlist.' ), 'The notice should be printed once.' );
+		$this->assertSame( 1, substr_count( $markup, self::ALREADY_JOINED ), 'The notice should be printed once.' );
 
 		$html = new \WP_HTML_Tag_Processor( $markup );
 		$this->assertFalse( $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ), 'The form should not render.' );
@@ -564,7 +569,7 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		$ids = $this->render_signed_up_variation_ids( $markup );
 
 		$this->assertEqualsCanonicalizing( array( $out_of_stock_id, $other_out_of_stock_id ), $ids, 'Only the joined out of stock variations should be listed.' );
-		$this->assertSame( 1, substr_count( $markup, 'You have already joined this waitlist.' ), 'The notice should be printed once.' );
+		$this->assertSame( 1, substr_count( $markup, self::ALREADY_JOINED ), 'The notice should be printed once.' );
 		$html = new \WP_HTML_Tag_Processor( $markup );
 		$html->next_tag( array( 'class_name' => 'wc_bis_already_signed_up' ) );
 		$this->assertNotNull( $html->get_attribute( 'hidden' ), 'The notice should start hidden.' );
