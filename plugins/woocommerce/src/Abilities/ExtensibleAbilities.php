@@ -639,7 +639,10 @@ class ExtensibleAbilities {
 	 * and completed dates that the status sets. A stage_*() method refuses a class
 	 * that overrides its saving method without overriding the stage method too, so
 	 * the ability refuses that class while the feature is on. See
-	 * WC_Data::refuse_unstaged_override().
+	 * WC_Data::refuse_unstaged_override(). order-refund-create runs the
+	 * `order_refund` validators on the refund it built in memory, with its amount,
+	 * items, taxes and totals, before its first save, so a refusal leaves no refund
+	 * and moves no money.
 	 *
 	 * @since 11.3.0
 	 *
@@ -703,6 +706,16 @@ class ExtensibleAbilities {
 	 * was saved, deleted or trashed in the call. It runs once per call, not once per
 	 * object. It can run with no saved objects when a call only deletes, and then
 	 * it reads the deleted objects from the context.
+	 *
+	 * order-refund-create runs the `order_refund` syncs, on the refund as read back
+	 * from the database, and the `order` syncs when the refund saved the parent
+	 * order, after the refund is complete, because a
+	 * rollback cannot undo a payment gateway refund. A refusal there undoes only
+	 * the writes of the syncs: the refund stays, and the call fails with `saved` set to true and the refund ID in the error data.
+	 *
+	 * An undo drops the caches of the objects the call saved, but not other
+	 * caches, so a value that a sync wrote elsewhere, such as an option, can stay
+	 * readable in the same request after the undo removed it.
 	 *
 	 * @since 11.4.0
 	 *

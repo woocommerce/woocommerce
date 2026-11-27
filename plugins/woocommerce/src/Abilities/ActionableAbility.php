@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Abilities;
 
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Caches\ProductCache;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 
 defined( 'ABSPATH' ) || exit;
@@ -52,6 +53,10 @@ defined( 'ABSPATH' ) || exit;
  * did outside the database, such as an HTTP request, and it does nothing on a
  * table engine without transactions. The other steps must not save, send email
  * or make HTTP requests.
+ *
+ * An ability whose object is built and saved by its own steps, such as a refund,
+ * overrides execute_change() and calls prepare_fields(), apply_fields(),
+ * validate() and sync() itself.
  *
  * The API is experimental while the `extensible_abilities` feature exists.
  *
@@ -322,8 +327,10 @@ abstract class ActionableAbility extends Ability {
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}>            $objects The primary object and the secondary objects, with their resources.
 	 * @param array<string, \SplObjectStorage<object, array<string, mixed>>> $sent    The sent field values of each namespace, from apply_fields().
 	 * @return \WP_Error|null A WP_Error when a sync refused, and then the call rolls back.
+	 *
+	 * @since 11.5.0
 	 */
-	private function sync( array $objects, array $sent ): ?\WP_Error {
+	protected function sync( array $objects, array $sent ): ?\WP_Error {
 		$deleted = $this->get_deleted_objects();
 		$trashed = $this->get_trashed_objects();
 		$gone    = array_map( static fn( $item ) => get_class( $item ) . ':' . $item->get_id(), array_merge( $deleted, $trashed ) );
@@ -359,12 +366,15 @@ abstract class ActionableAbility extends Ability {
 	 * Drop the object caches of the objects a rolled back save() touched. The
 	 * saves filled the caches with rows the rollback removed, so a read in the
 	 * same request would still see them. The `WC_Data` meta cache, the product type cache, the
-	 * product instance cache and the price lookup cache are separate from the post cache.
+	 * product instance cache, the price lookup cache and the HPOS order data and meta caches are
+	 * separate from the post cache.
 	 *
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects.
 	 * @param \WC_Data[]                                          $deleted The objects the call deleted.
+	 *
+	 * @since 11.5.0
 	 */
-	private static function forget_rolled_back_objects( array $objects, array $deleted = array() ): void {
+	protected static function forget_rolled_back_objects( array $objects, array $deleted = array() ): void {
 		$product_cache = wc_get_container()->get( ProductCache::class );
 		foreach ( array_merge( $objects, array_map( static fn( $item ) => array( $item ), $deleted ) ) as list( $object ) ) {
 			$id = $object->get_id();
@@ -385,6 +395,7 @@ abstract class ActionableAbility extends Ability {
 				}
 			} elseif ( $id > 0 && $object instanceof \WC_Abstract_Order ) {
 				wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->remove( $id );
+				wc_get_container()->get( OrdersTableDataStore::class )->clear_cached_data( array( $id ) );
 				clean_post_cache( $id );
 			} elseif ( $id > 0 && $object instanceof \WC_Customer ) {
 				clean_user_cache( $id );
@@ -529,8 +540,10 @@ abstract class ActionableAbility extends Ability {
 	 * @param array  $values        Values keyed by namespace, then field.
 	 * @param string $resource_name Resource of the object that gets the values.
 	 * @return array|\WP_Error A list of field arguments and value pairs, or a WP_Error when a value is rejected.
+	 *
+	 * @since 11.5.0
 	 */
-	private function prepare_fields( array $values, string $resource_name ) {
+	protected function prepare_fields( array $values, string $resource_name ) {
 		$registered = ExtensibleAbilities::get_fields( $resource_name );
 		$updates    = array();
 		foreach ( $values as $namespace => $fields ) {
@@ -569,8 +582,10 @@ abstract class ActionableAbility extends Ability {
 	 * @param array                                                          $updates Pairs of field arguments and value from prepare_fields().
 	 * @param array<string, \SplObjectStorage<object, array<string, mixed>>> $sent    Collects the sent values, as get_sent_fields() describes.
 	 * @param \WP_Error                                                      $refused Collects the refusals, including a field that does not apply to the object.
+	 *
+	 * @since 11.5.0
 	 */
-	private function apply_fields( $subject, array $updates, array &$sent, \WP_Error $refused ): void {
+	protected function apply_fields( $subject, array $updates, array &$sent, \WP_Error $refused ): void {
 		foreach ( $updates as $param => list( $args, $value ) ) {
 			if ( ! ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
 				$rejected = new \WP_Error(
@@ -632,8 +647,10 @@ abstract class ActionableAbility extends Ability {
 	 * @param array                                                          $context       The name of the ability, the primary object of the call, whether the call deletes or trashes the object, the objects the call saves, and the objects it deletes or trashes.
 	 * @param array<string, \SplObjectStorage<object, array<string, mixed>>> $sent          The sent field values of each namespace, from apply_fields().
 	 * @param \WP_Error                                                      $refused       Collects the refusals.
+	 *
+	 * @since 11.5.0
 	 */
-	private function validate( $subject, string $resource_name, array $context, array $sent, \WP_Error $refused ): void {
+	protected function validate( $subject, string $resource_name, array $context, array $sent, \WP_Error $refused ): void {
 		foreach ( ExtensibleAbilities::get_validators( $resource_name ) as $args ) {
 			$context['fields'] = self::get_sent_fields( $sent, $args['namespace'] );
 			$rejected          = self::run_callback( $args['callback'], array( $subject, $context ), array( 'namespace' => $args['namespace'] ) );
@@ -676,8 +693,10 @@ abstract class ActionableAbility extends Ability {
 	 *
 	 * @param \WP_Error $refused Refusals in run order.
 	 * @return \WP_Error
+	 *
+	 * @since 11.5.0
 	 */
-	private static function join_refusals( \WP_Error $refused ): \WP_Error {
+	protected static function join_refusals( \WP_Error $refused ): \WP_Error {
 		$messages = $refused->get_error_messages();
 		if ( count( $messages ) > 1 ) {
 			$refused->errors[ $refused->get_error_code() ][0] = implode( ' ', array_unique( $messages ) );
