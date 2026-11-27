@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the shipping calculator country visible and submit its value when only one shipping country is available.
