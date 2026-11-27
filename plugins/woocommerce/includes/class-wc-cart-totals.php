@@ -495,6 +495,25 @@ final class WC_Cart_Totals {
 	}
 
 	/**
+	 * Round a line price that includes tax to whole currency units, before tax is split out of it.
+	 *
+	 * The line price is what the customer pays, so it is rounded once: 200 × £0.207 is £41.40, and 1 × £0.207 is £0.21.
+	 * Splitting the unrounded price instead rounds the price before tax and the tax separately, which can add up to a
+	 * penny more or less (20.7p charged as 20p). Runs after any change for the customer's tax rate, so that price is
+	 * rounded once too. Lines aren't rounded when tax is rounded at subtotal level.
+	 *
+	 * @since 11.5.0
+	 * @param stdClass $item Item to round the price of.
+	 * @return stdClass
+	 */
+	protected function round_line_price_including_tax( $item ) {
+		if ( $item->price_includes_tax && ! self::round_at_subtotal() ) {
+			$item->price = NumberUtil::round( $item->price );
+		}
+		return $item;
+	}
+
+	/**
 	 * Get discounted price of an item with precision (in cents).
 	 *
 	 * @since  3.2.0
@@ -760,6 +779,8 @@ final class WC_Cart_Totals {
 					$item = $this->adjust_non_base_location_price( $item );
 				}
 			}
+
+			$item = $this->round_line_price_including_tax( $item );
 
 			$item->subtotal = $item->price;
 

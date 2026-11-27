@@ -20,12 +20,30 @@ trait ProductItemTrait {
 		$prices             = parent::prepare_product_price_response( $product, $tax_display_mode );
 		$rounding_precision = wc_get_rounding_precision();
 
-		// Add raw prices (prices with greater precision).
+		// Add raw prices: the exact prices before rounding to the store's decimals.
 		$prices['raw_prices'] = array(
 			'precision'     => $rounding_precision,
-			'price'         => $this->prepare_money_response( $price_function( $product ), $rounding_precision ),
-			'regular_price' => $this->prepare_money_response( $price_function( $product, array( 'price' => $product->get_regular_price() ) ), $rounding_precision ),
-			'sale_price'    => $this->prepare_money_response( $price_function( $product, array( 'price' => $product->is_on_sale() ? $product->get_sale_price() : '' ) ), $rounding_precision ),
+			'price'         => $this->prepare_money_response( $price_function( $product, array( 'round' => false ) ), $rounding_precision ),
+			'regular_price' => $this->prepare_money_response(
+				$price_function(
+					$product,
+					array(
+						'price' => $product->get_regular_price(),
+						'round' => false,
+					)
+				),
+				$rounding_precision
+			),
+			'sale_price'    => $this->prepare_money_response(
+				$price_function(
+					$product,
+					array(
+						'price' => $product->is_on_sale() ? $product->get_sale_price() : '',
+						'round' => false,
+					)
+				),
+				$rounding_precision
+			),
 		);
 
 		return $prices;

@@ -1556,8 +1556,10 @@ function wc_get_product_term_ids( $product_id, $taxonomy ) {
  * For a given product, and optionally price/qty, work out the price with tax included, based on store settings.
  *
  * @since  3.0.0
+ * @since  11.5.0 Added the `round` argument.
  * @param  WC_Product $product WC_Product object.
- * @param  array      $args Optional arguments to pass product quantity and price.
+ * @param  array      $args Optional arguments: `qty`, `price`, and `round` (default true). Pass `round` false to get the
+ *                          exact price before rounding to the store's decimals, e.g. £1.66 + 20% VAT returns 1.992, not 1.99.
  * @return float|string Price with tax included, or an empty string if price calculation failed.
  */
 function wc_get_price_including_tax( $product, $args = array() ) {
@@ -1566,11 +1568,16 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 		array(
 			'qty'   => '',
 			'price' => '',
+			'round' => true,
 		)
 	);
 
-	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : (float) $product->get_price();
-	$qty   = '' !== $args['qty'] ? max( 0.0, (float) $args['qty'] ) : 1;
+	$price    = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : (float) $product->get_price();
+	$qty      = '' !== $args['qty'] ? max( 0.0, (float) $args['qty'] ) : 1;
+	$round    = false !== $args['round'];
+	$decimals = $round ? wc_get_price_decimals() : wc_get_rounding_precision();
+	// Taxes are rounded per line unless the store rounds tax at subtotal level, or the caller wants the exact price.
+	$round_taxes = $round && 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' );
 
 	if ( empty( $qty ) ) {
 		return 0.0;
@@ -1588,14 +1595,14 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 				$tax_rates = WC_Tax::get_rates( $product->get_tax_class() );
 				$taxes     = WC_Tax::calc_tax( $line_price, $tax_rates, false );
 
-				if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+				if ( ! $round_taxes ) {
 					$taxes_total = array_sum( $taxes );
 				} else {
 					$taxes_total = array_sum( array_map( 'wc_round_tax_total', $taxes ) );
 				}
 			}
 
-			$return_price = NumberUtil::round( $line_price + $taxes_total, wc_get_price_decimals() );
+			$return_price = NumberUtil::round( $line_price + $taxes_total, $decimals );
 		} else {
 			$tax_rates      = WC_Tax::get_rates( $product->get_tax_class() );
 			$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
@@ -1607,13 +1614,13 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 			if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) { // @codingStandardsIgnoreLine.
 				$remove_taxes = apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ? WC_Tax::calc_tax( $line_price, $base_tax_rates, true ) : WC_Tax::calc_tax( $line_price, $tax_rates, true );
 
-				if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+				if ( ! $round_taxes ) {
 					$remove_taxes_total = array_sum( $remove_taxes );
 				} else {
 					$remove_taxes_total = array_sum( array_map( 'wc_round_tax_total', $remove_taxes ) );
 				}
 
-				$return_price = NumberUtil::round( $line_price - $remove_taxes_total, wc_get_price_decimals() );
+				$return_price = NumberUtil::round( $line_price - $remove_taxes_total, $decimals );
 
 				/**
 			 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
@@ -1621,18 +1628,10 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 			 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
 			 */
 			} elseif ( $tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
+				// Like the cart, work out the customer's price exactly, then round the line once.
 				$base_taxes   = WC_Tax::calc_tax( $line_price, $base_tax_rates, true );
 				$modded_taxes = WC_Tax::calc_tax( $line_price - array_sum( $base_taxes ), $tax_rates, false );
-
-				if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-					$base_taxes_total   = array_sum( $base_taxes );
-					$modded_taxes_total = array_sum( $modded_taxes );
-				} else {
-					$base_taxes_total   = array_sum( array_map( 'wc_round_tax_total', $base_taxes ) );
-					$modded_taxes_total = array_sum( array_map( 'wc_round_tax_total', $modded_taxes ) );
-				}
-
-				$return_price = NumberUtil::round( $line_price - $base_taxes_total + $modded_taxes_total, wc_get_price_decimals() );
+				$return_price = NumberUtil::round( $line_price - array_sum( $base_taxes ) + array_sum( $modded_taxes ), $decimals );
 			}
 		}
 	}
@@ -1643,8 +1642,11 @@ function wc_get_price_including_tax( $product, $args = array() ) {
  * For a given product, and optionally price/qty, work out the price with tax excluded, based on store settings.
  *
  * @since  3.0.0
+ * @since  11.5.0 Added the `round` argument.
  * @param  WC_Product $product WC_Product object.
- * @param  array      $args Optional quantity, price, order, and tax location arguments.
+ * @param  array      $args Optional quantity, price, order, and tax location arguments, and `round` (default true). When
+ *                          prices include tax, the line price is rounded to the store's decimals before tax is taken off,
+ *                          as the cart does. Pass `round` false to take tax off the exact price instead.
  * @return float|string Price with tax excluded, or an empty string if price calculation failed.
  */
 function wc_get_price_excluding_tax( $product, $args = array() ) {
@@ -1657,6 +1659,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		array(
 			'qty'   => '',
 			'price' => '',
+			'round' => true,
 		)
 	);
 
@@ -1676,6 +1679,29 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 
 		if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 			$tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
+
+			// Like the cart, a customer at another tax rate pays the price adjusted to their rate, so take their tax off that.
+			$customer_rates = $tax_rates;
+			if ( is_object( $order ) && method_exists( $order, 'get_taxable_location' ) ) {
+				$location       = $order->get_taxable_location( ! empty( $args['tax_location']['country'] ) ? $args['tax_location'] : array() );
+				$customer_rates = WC_Tax::find_rates(
+					array(
+						'country'   => $location['country'] ?? '',
+						'state'     => $location['state'] ?? '',
+						'postcode'  => $location['postcode'] ?? '',
+						'city'      => $location['city'] ?? '',
+						'tax_class' => $product->get_tax_class(),
+					)
+				);
+			} elseif ( ! $order ) {
+				$customer_rates = WC_Tax::get_rates( $product->get_tax_class(), null );
+			}
+
+			if ( $customer_rates !== $tax_rates ) {
+				$net        = $line_price - array_sum( WC_Tax::calc_tax( $line_price, $tax_rates, true ) );
+				$line_price = $net + array_sum( WC_Tax::calc_tax( $net, $customer_rates, false ) );
+				$tax_rates  = $customer_rates;
+			}
 		} elseif ( $customer_id && empty( $args['tax_location']['country'] ) ) {
 			$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), $customer );
@@ -1706,6 +1732,27 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		// Fallback if no tax rates were determined.
 		if ( false === $tax_rates ) {
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), null );
+		}
+
+		// Match the cart: the line price the customer pays is rounded once before tax is taken off it. A VAT-exempt
+		// customer doesn't pay that price; the cart takes tax off the exact price, so it isn't rounded first.
+		if ( is_a( $order, 'WC_Abstract_Order' ) ) {
+			/**
+			 * Filters whether the order is exempt from VAT.
+			 *
+			 * @since 3.3.0
+			 *
+			 * @param bool              $is_vat_exempt Whether the order is exempt from VAT.
+			 * @param WC_Abstract_Order $order         Order instance.
+			 */
+			$is_vat_exempt = (bool) apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $order->get_meta( 'is_vat_exempt' ), $order );
+		} else {
+			$customer      = WC()->customer;
+			$is_vat_exempt = ! $order && $customer instanceof WC_Customer && $customer->get_is_vat_exempt();
+		}
+
+		if ( false !== $args['round'] && ! $is_vat_exempt && 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+			$line_price = NumberUtil::round( $line_price, wc_get_price_decimals() );
 		}
 
 		$remove_taxes = WC_Tax::calc_tax( $line_price, $tax_rates, true );

@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Charge cart lines with tax rounded once, so line totals match what's charged, including for customers at another VAT rate.

@@ -185,7 +185,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			wc_get_price_excluding_tax( $product );
 
 			$this->assertFalse( $customer_id_passed_to_wc_customer_constructor );
-			$this->assertEquals( $set_filter ? null : false, $customer_passed_to_get_rates );
+			// Without an order the shopper's rates are used, also when prices are adjusted to them (WC_Tax::get_rates gets no customer).
+			$this->assertNull( $customer_passed_to_get_rates );
 			$this->assertEquals( ! $set_filter, $get_base_rates_invoked );
 		}
 
