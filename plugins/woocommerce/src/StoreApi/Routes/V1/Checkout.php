@@ -902,6 +902,13 @@ class Checkout extends AbstractCartRoute {
 			 * place-order time, so this action fires once at POST rather than on the
 			 * first PATCH.
 			 *
+			 * Don't add products or coupons here. The order is already synced with
+			 * the cart, so a cart change made here doesn't reach it, and when a
+			 * shopper retries the order, products and coupons that the cart didn't add
+			 * are removed. Add them to the cart before checkout instead. Fees and
+			 * shipping lines added here are kept on a retry, unless the cart's own fees
+			 * or shipping change, which replaces every line of that type.
+			 *
 			 * @since 10.8.0
 			 *
 			 * @param \WC_Order $order Order object.

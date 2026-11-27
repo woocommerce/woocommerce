@@ -744,6 +744,437 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() keeps every item of an unchanged retried order taxed at two rates.
+	 *
+	 * @testWith ["12.34", "yes", "yes"]
+	 *           ["19.99", "yes", "no"]
+	 *           ["23.45", "no", "yes"]
+	 *           ["19.99", "no", "no"]
+	 *
+	 * @param string $price              The product price.
+	 * @param string $prices_include_tax Whether prices include tax.
+	 * @param string $round_at_subtotal  Whether tax is rounded at subtotal.
+	 */
+	public function test_update_order_from_cart_keeps_items_of_an_unchanged_retried_order( string $price, string $prices_include_tax, string $round_at_subtotal ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
+		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal );
+		foreach ( array( '7.2500', '1.5000' ) as $priority => $tax_rate ) {
+			\WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => '',
+					'tax_rate'          => $tax_rate,
+					'tax_rate_name'     => "Rate {$priority}",
+					'tax_rate_priority' => (string) ( $priority + 1 ),
+					'tax_rate_compound' => '0',
+					'tax_rate_shipping' => '1',
+					'tax_rate_order'    => (string) ( $priority + 1 ),
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+		$coupon = \WC_Helper_Coupon::create_coupon(
+			'retry-two-rates',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '15',
+			)
+		);
+		$order  = $this->create_retried_order_with_shipping_and_fee( $price, 3.33, $coupon->get_code() );
+		$before = $this->get_item_ids_by_type( $order );
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertNotEmpty( $before['coupon'], 'The order should have a coupon line.' );
+		$this->assertCount( 2, $before['tax'], 'The order should have a line for each tax rate.' );
+		$this->assertSame( $before, $this->get_item_ids_by_type( $order ), 'Every item should keep its ID.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps the items of an unchanged retried order with Cost of Goods Sold on and a product without a cost.
+	 */
+	public function test_update_order_from_cart_keeps_items_with_cost_of_goods_sold_on(): void {
+		// A cost of 0 is held as 0 in memory but isn't saved, so the item reads back with no cost.
+		update_option( 'woocommerce_feature_cost_of_goods_sold_enabled', 'yes' );
+		$order  = $this->create_retried_order_with_shipping_and_fee();
+		$before = $this->get_item_ids_by_type( $order );
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertSame( $before, $this->get_item_ids_by_type( $order ), 'Every item should keep its ID.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps items whose tax a merchant edited on a retried order, since the taxes are recalculated.
+	 *
+	 * @testWith ["line_item"]
+	 *           ["tax"]
+	 *
+	 * @param string $item_type The item type whose tax the merchant edits.
+	 */
+	public function test_update_order_from_cart_recalculates_tax_a_merchant_edited( string $item_type ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		\WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		$order  = $this->create_retried_order_with_shipping_and_fee();
+		$before = $this->get_item_ids_by_type( $order );
+		$item   = current( $order->get_items( $item_type ) );
+		if ( 'tax' === $item_type ) {
+			$item->set_tax_total( (float) $item->get_tax_total() + 5 );
+		} else {
+			$taxes          = $item->get_taxes();
+			$rate_id        = key( $taxes['total'] );
+			$taxes['total'] = array( $rate_id => (float) $taxes['total'][ $rate_id ] + 5 );
+			$item->set_taxes( $taxes );
+		}
+		$item->save();
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertSame( $before, $this->get_item_ids_by_type( $order ), 'Every item should keep its ID.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
+		$this->assertSame( 30.0, (float) $order->get_total(), 'The order should be charged the cart total, with 20% tax.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() rebuilds the items a merchant edited on a retried order, so the order total matches the cart.
+	 *
+	 * @testWith ["shipping"]
+	 *           ["fee"]
+	 *           ["line_item"]
+	 *
+	 * @param string $item_type The item type the merchant edits.
+	 */
+	public function test_update_order_from_cart_rebuilds_items_a_merchant_edited( string $item_type ): void {
+		$order  = $this->create_retried_order_with_shipping_and_fee();
+		$before = $this->get_item_ids_by_type( $order );
+
+		// Like editing the item in the admin and saving it without recalculating the order.
+		$item = current( $order->get_items( $item_type ) );
+		$item->set_total( (float) $item->get_total() + 5 );
+		$item->save();
+
+		$order = $this->sync_order_in_a_new_request( $order );
+		$after = $this->get_item_ids_by_type( $order );
+
+		$this->assertCount( 1, $after[ $item_type ], "The {$item_type} line should be added again once." );
+		$this->assertNotContains( $item->get_id(), $after[ $item_type ], "The edited {$item_type} line should be replaced." );
+		foreach ( array_diff( array( 'line_item', 'shipping', 'fee' ), array( $item_type ) ) as $other_type ) {
+			$this->assertSame( $before[ $other_type ], $after[ $other_type ], "The {$other_type} lines should keep their IDs." );
+		}
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
+		$this->assertSame( 25.0, (float) $order->get_total(), 'The order should be charged the cart total, not the edited amount.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps items of a retried order that were only given meta, as gateways do, or renamed.
+	 *
+	 * @testWith ["shipping", false]
+	 *           ["fee", true]
+	 *           ["line_item", true]
+	 *
+	 * @param string $item_type The item type to change.
+	 * @param bool   $rename    Whether to rename the item too. A shipping line's name is its method title, which counts as a change.
+	 */
+	public function test_update_order_from_cart_keeps_items_that_were_renamed_or_given_meta( string $item_type, bool $rename ): void {
+		$order  = $this->create_retried_order_with_shipping_and_fee();
+		$before = $this->get_item_ids_by_type( $order );
+
+		$item = current( $order->get_items( $item_type ) );
+		if ( $rename ) {
+			$item->set_name( 'Renamed' );
+		}
+		$item->update_meta_data( '_gateway_reference', 'ref-123' );
+		$item->save();
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertSame( $before, $this->get_item_ids_by_type( $order ), 'Every item should keep its ID.' );
+		$this->assertSame( 'ref-123', current( $order->get_items( $item_type ) )->get_meta( '_gateway_reference' ), 'The item meta should be kept.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps an extension's fee or shipping line when it rebuilds the ones a merchant edited.
+	 *
+	 * @testWith ["fee"]
+	 *           ["shipping"]
+	 *
+	 * @param string $item_type The item type the merchant edits.
+	 */
+	public function test_update_order_from_cart_keeps_extension_items_when_rebuilding_edited_ones( string $item_type ): void {
+		$order          = $this->create_retried_order_with_shipping_and_fee();
+		$cart_item      = current( $order->get_items( $item_type ) );
+		$extension_item = 'fee' === $item_type ? new \WC_Order_Item_Fee() : new \WC_Order_Item_Shipping();
+		$extension_item->set_name( 'Extension line' );
+		$extension_item->set_total( '2' );
+		$order->add_item( $extension_item );
+		$order->save();
+		$cart_item->set_total( '15' );
+		$cart_item->save();
+
+		$order = $this->sync_order_in_a_new_request( $order );
+		$ids   = array_keys( $order->get_items( $item_type ) );
+
+		$this->assertNotContains( $cart_item->get_id(), $ids, "The edited {$item_type} line should be rebuilt." );
+		$this->assertContains( $extension_item->get_id(), $ids, "The extension's {$item_type} line should be kept." );
+		$this->assertCount( 2, $ids, "Only the cart's and the extension's {$item_type} lines should be on the order." );
+		$this->assertSame( 27.0, (float) $order->get_total(), "The order should be charged the cart total plus the extension's line." );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps a fee that a totals listener added during a sync when it rebuilds the fees a merchant edited.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $on_creation Whether the listener adds its fee on the sync that creates the order, or on a later one.
+	 */
+	public function test_update_order_from_cart_keeps_fees_a_totals_listener_added( bool $on_creation ): void {
+		$extension_fee = null;
+		$add_fee_once  = function ( $and_taxes, \WC_Abstract_Order $order ) use ( &$extension_fee ) {
+			unset( $and_taxes );
+			if ( null === $extension_fee ) {
+				$extension_fee = new \WC_Order_Item_Fee();
+				$extension_fee->set_name( 'Listener surcharge' );
+				$extension_fee->set_total( '2' );
+				$order->add_item( $extension_fee );
+			}
+		};
+		if ( $on_creation ) {
+			add_action( 'woocommerce_order_after_calculate_totals', $add_fee_once, 10, 2 );
+			$order = $this->create_retried_order_with_shipping_and_fee();
+		} else {
+			$order = $this->create_retried_order_with_shipping_and_fee();
+			add_action( 'woocommerce_order_after_calculate_totals', $add_fee_once, 10, 2 );
+			$order = $this->sync_order_in_a_new_request( $order );
+		}
+		remove_action( 'woocommerce_order_after_calculate_totals', $add_fee_once, 10 );
+		$this->assertGreaterThan( 0, $extension_fee->get_id(), 'The listener should have added its fee.' );
+
+		$cart_fee = current( array_diff_key( $order->get_fees(), array( $extension_fee->get_id() => true ) ) );
+		$cart_fee->set_total( '15' );
+		$cart_fee->save();
+		$order = $this->sync_order_in_a_new_request( $order );
+		$ids   = array_keys( $order->get_fees() );
+
+		$this->assertNotContains( $cart_fee->get_id(), $ids, 'The edited cart fee should be rebuilt.' );
+		$this->assertContains( $extension_fee->get_id(), $ids, "The listener's fee should be kept." );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps a fee an extension added without saving before a sync when it rebuilds the fees a merchant edited.
+	 */
+	public function test_update_order_from_cart_keeps_unsaved_extension_fees(): void {
+		$order         = $this->create_retried_order_with_shipping_and_fee();
+		$order         = wc_get_order( $order->get_id() );
+		$extension_fee = new \WC_Order_Item_Fee();
+		$extension_fee->set_name( 'Extension surcharge' );
+		$extension_fee->set_total( '2' );
+		$order->add_item( $extension_fee );
+		$this->sut->update_order_from_cart( $order );
+		$this->assertGreaterThan( 0, $extension_fee->get_id(), 'The sync should have saved the extension fee.' );
+
+		$cart_fee = current( array_diff_key( $order->get_fees(), array( $extension_fee->get_id() => true ) ) );
+		$cart_fee->set_total( '15' );
+		$cart_fee->save();
+		$order = $this->sync_order_in_a_new_request( $order );
+		$ids   = array_keys( $order->get_fees() );
+
+		$this->assertNotContains( $cart_fee->get_id(), $ids, 'The edited cart fee should be rebuilt.' );
+		$this->assertContains( $extension_fee->get_id(), $ids, 'The extension fee should be kept.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() still rebuilds a shipping line a merchant edited after a sync that didn't calculate shipping.
+	 */
+	public function test_update_order_from_cart_rebuilds_edited_shipping_after_a_sync_without_shipping(): void {
+		$order    = $this->create_retried_order_with_shipping_and_fee();
+		$shipping = current( $order->get_shipping_methods() );
+		$shipping->set_total( '15' );
+		$shipping->save();
+
+		add_filter( 'woocommerce_cart_ready_to_calc_shipping', '__return_false' );
+		$order = $this->sync_order_in_a_new_request( $order );
+		remove_filter( 'woocommerce_cart_ready_to_calc_shipping', '__return_false' );
+		$this->assertContains( $shipping->get_id(), array_keys( $order->get_shipping_methods() ), 'Shipping should not be rebuilt while it is not calculated.' );
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertNotContains( $shipping->get_id(), array_keys( $order->get_shipping_methods() ), 'The edited shipping line should be rebuilt once shipping is calculated.' );
+		$this->assertSame( 25.0, (float) $order->get_total(), 'The order should be charged the cart total, not the edited amount.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() adds back the coupon a merchant removed from a retried order.
+	 */
+	public function test_update_order_from_cart_adds_back_a_coupon_removed_from_a_retried_order(): void {
+		$coupon = \WC_Helper_Coupon::create_coupon( 'retry10', array( 'coupon_amount' => 5 ) );
+		$order  = $this->create_retried_order_with_shipping_and_fee( '10', 5, $coupon->get_code() );
+
+		$order->remove_coupon( $coupon->get_code() );
+		$order->save();
+		$this->assertEmpty( $order->get_coupons(), 'Removing the coupon should remove its line.' );
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertSame( array( $coupon->get_code() ), $order->get_coupon_codes(), 'The coupon line should be added back.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
+		$this->assertSame( 20.0, (float) $order->get_total(), 'The order should be charged the discounted total.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() removes a product a merchant added to a retried order, so the order total matches the cart.
+	 */
+	public function test_update_order_from_cart_removes_a_product_a_merchant_added(): void {
+		$order   = $this->create_retried_order_with_shipping_and_fee();
+		$item_id = $order->add_product( WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '7' ) ) );
+		$order->save();
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertNotContains( $item_id, array_keys( $order->get_items() ), 'The product the merchant added should be removed.' );
+		$this->assertCount( 1, $order->get_items(), "Only the cart's line item should be on the order." );
+		$this->assertSame( 25.0, (float) $order->get_total(), 'The order should be charged the cart total.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() removes a coupon a merchant applied to a retried order, along with its discount.
+	 */
+	public function test_update_order_from_cart_removes_a_coupon_a_merchant_applied(): void {
+		$coupon = \WC_Helper_Coupon::create_coupon( 'merchant-applied', array( 'coupon_amount' => 3 ) );
+		$order  = $this->create_retried_order_with_shipping_and_fee();
+		$order->apply_coupon( $coupon->get_code() );
+		$order->save();
+		$this->assertSame( array( $coupon->get_code() ), $order->get_coupon_codes(), 'The merchant should have applied the coupon.' );
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertEmpty( $order->get_coupons(), 'The coupon line should be removed.' );
+		$this->assertSame( 0.0, (float) $order->get_discount_total(), 'The order should have no discount.' );
+		$this->assertSame( 25.0, (float) $order->get_total(), 'The order should be charged the cart total.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps repaired items, and items an extension added, on the next unchanged sync.
+	 */
+	public function test_update_order_from_cart_keeps_repaired_and_extension_items_on_the_next_sync(): void {
+		$order = $this->create_retried_order_with_shipping_and_fee();
+
+		$extension_fee = new \WC_Order_Item_Fee();
+		$extension_fee->set_name( 'Extension surcharge' );
+		$extension_fee->set_total( '2' );
+		$order->add_item( $extension_fee );
+		$order->save();
+
+		$shipping = current( $order->get_shipping_methods() );
+		$shipping->set_total( '15' );
+		$shipping->save();
+
+		$order    = $this->sync_order_in_a_new_request( $order );
+		$repaired = $this->get_item_ids_by_type( $order );
+		$this->assertNotContains( $shipping->get_id(), $repaired['shipping'], 'The edited shipping line should be replaced.' );
+		$this->assertContains( $extension_fee->get_id(), $repaired['fee'], 'The extension fee should be kept.' );
+
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertSame( $repaired, $this->get_item_ids_by_type( $order ), 'Every item should keep its ID on the next sync.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps the items of an order without a snapshot, and rebuilds them once they are edited after that.
+	 */
+	public function test_update_order_from_cart_starts_checking_edits_on_an_order_without_a_snapshot(): void {
+		$order = $this->create_retried_order_with_shipping_and_fee();
+		$order->delete_meta_data( '_store_api_cart_order_items_snapshot' );
+		$order->save();
+		$before = $this->get_item_ids_by_type( $order );
+
+		$order = $this->sync_order_in_a_new_request( $order );
+		$this->assertSame( $before, $this->get_item_ids_by_type( $order ), 'Every item should keep its ID.' );
+
+		$fee = current( $order->get_fees() );
+		$fee->set_total( '15' );
+		$fee->save();
+		$order = $this->sync_order_in_a_new_request( $order );
+
+		$this->assertNotContains( $fee->get_id(), array_keys( $order->get_fees() ), 'The edited fee should be replaced.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
+	}
+
+	/**
+	 * Creates a pending Store API order from a cart with one product, a fee and flat rate shipping, as a failed payment
+	 * leaves it.
+	 *
+	 * @param string      $price       The product price.
+	 * @param float       $fee         The fee amount.
+	 * @param string|null $coupon_code A coupon to apply, if any.
+	 * @return \WC_Order
+	 */
+	private function create_retried_order_with_shipping_and_fee( string $price = '10', float $fee = 5, ?string $coupon_code = null ): \WC_Order {
+		$this->add_flat_rate_to_default_zone( '10' );
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( \WC_Cart $cart ) use ( $fee ) {
+				$cart->add_fee( 'Handling', $fee, true );
+			}
+		);
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $price ) );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+		if ( $coupon_code ) {
+			WC()->cart->apply_coupon( $coupon_code );
+		}
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'The cart should have calculated shipping.' );
+
+		$order = $this->sut->create_order_from_cart();
+		$order->update_status( OrderStatus::PENDING );
+		$this->assertCount( 1, $order->get_shipping_methods(), 'The order should have a shipping line.' );
+		$this->assertCount( 1, array_filter( $order->get_fees(), fn( \WC_Order_Item_Fee $fee ) => 'Handling' === $fee->get_name() ), "The order should have the cart's fee." );
+
+		return $order;
+	}
+
+	/**
+	 * Reads the order again, as the next checkout request does, and syncs it with the cart.
+	 *
+	 * @param \WC_Order $order The order.
+	 * @return \WC_Order The synced order.
+	 */
+	private function sync_order_in_a_new_request( \WC_Order $order ): \WC_Order {
+		wp_cache_flush();
+		$order = wc_get_order( $order->get_id() );
+		$this->sut->update_order_from_cart( $order );
+
+		return $order;
+	}
+
+	/**
+	 * Reads an order's item IDs, grouped by item type.
+	 *
+	 * @param \WC_Order $order The order.
+	 * @return array<string, int[]>
+	 */
+	private function get_item_ids_by_type( \WC_Order $order ): array {
+		$ids_by_type = array();
+		foreach ( array( 'line_item', 'shipping', 'fee', 'tax', 'coupon' ) as $type ) {
+			$ids_by_type[ $type ] = array_keys( $order->get_items( $type ) );
+		}
+
+		return $ids_by_type;
+	}
+
+	/**
 	 * @testdox update_order_from_cart() keeps the shopper's session choice on the order even when the default payment method filter returns nothing.
 	 */
 	public function test_update_order_from_cart_keeps_the_session_payment_choice_with_a_callback(): void {

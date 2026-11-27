@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop charging a merchant's edits to an order's items, or products and coupons they added, when a shopper retries it in the Checkout block.

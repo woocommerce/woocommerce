@@ -5333,6 +5333,34 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Retrying a pending order a merchant edited charges the cart total, not the edited amount.
+	 */
+	public function test_post_retry_charges_the_cart_total_after_a_merchant_edits_the_order(): void {
+		$fail_hook = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException( 'woocommerce_rest_checkout_payment_failed', 'Forced failure', 400 );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
+		$first_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		remove_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
+		$this->assertSame( 400, $first_response->get_status(), 'The first POST should fail.' );
+
+		$order       = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$cart_total  = (float) $order->get_total();
+		$edited_item = current( $order->get_items() );
+		// Like editing the item in the admin and saving it without recalculating the order.
+		$edited_item->set_total( (float) $edited_item->get_total() + 5 );
+		$edited_item->save();
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( $order->get_id(), (int) $response->get_data()['order_id'], 'The retry should reuse the pending order.' );
+		$this->assertNotContains( $edited_item->get_id(), array_keys( $order->get_items() ), 'The edited line item should be rebuilt from the cart.' );
+		$this->assertSame( $cart_total, (float) $order->get_total(), 'The order should be charged the cart total.' );
+	}
+
+	/**
 	 * @testdox Checkout stops when the draft order could not be saved.
 	 */
 	public function test_post_rejects_draft_order_when_save_fails(): void {
