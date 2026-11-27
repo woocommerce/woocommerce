@@ -68,5 +68,9 @@
 		"interactivity": {
 			"clientNavigation": true
 		}
-	}
+	},
+	"style": [
+		"wc-blocks-style",
+		"file:../product-reviews-title.css"
+	]
 }
