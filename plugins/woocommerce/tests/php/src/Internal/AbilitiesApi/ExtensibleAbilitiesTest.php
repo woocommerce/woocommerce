@@ -5231,23 +5231,50 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should log an exception of the change step and return a fixed 500 error without its text.
+	 * Change failures with a working or failing logger.
+	 *
+	 * @return array
 	 */
-	public function test_a_change_that_throws_returns_a_fixed_error(): void {
+	public static function provider_change_failures(): array {
+		return array(
+			'exception'      => array( new \RuntimeException( 'Ledger table is locked.' ), false ),
+			'type error'     => array( new \TypeError( 'Invalid ledger type.' ), false ),
+			'logger failure' => array( new \RuntimeException( 'Ledger table is locked.' ), true ),
+		);
+	}
+
+	/**
+	 * @testdox Should return a fixed 500 error for a failed change even if logging fails.
+	 * @dataProvider provider_change_failures
+	 *
+	 * @param \Throwable $failure      Failure from the change step.
+	 * @param bool       $logger_fails Whether the logger throws.
+	 */
+	public function test_a_change_that_throws_returns_a_fixed_error( \Throwable $failure, bool $logger_fails ): void {
 		$this->register_order_status_ability( TestThrowingOrderAbility::class );
+		$ability = wp_get_ability( 'test-ext/order-status' );
+		$this->assertInstanceOf( TestThrowingOrderAbility::class, $ability );
+		$ability->failure = $failure;
+
 		$order  = \WC_Helper_Order::create_order();
 		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
-		$logger->expects( $this->once() )->method( 'error' )->with(
-			'Ability "test-ext/order-status" failed during change: Ledger table is locked.',
+		$log    = $logger->expects( $this->once() )->method( 'error' )->with(
+			'Ability "test-ext/order-status" failed during change: ' . $failure->getMessage(),
 			array( 'source' => 'woocommerce-abilities' )
 		);
+		if ( $logger_fails ) {
+			$log->willThrowException( new \RuntimeException( 'Logger broke' ) );
+		}
 		add_filter( 'woocommerce_logging_class', static fn() => $logger );
 
 		$response = $this->run_ability_response( 'test-ext/order-status', array( 'id' => $order->get_id() ) );
 
 		$this->assertSame( 500, $response->get_status() );
 		$this->assertSame( 'woocommerce_ability_save_failed', $response->get_data()['code'] );
-		$this->assertStringNotContainsString( 'Ledger table is locked.', wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'The change could not be saved.', $response->get_data()['message'] );
+		$data = wp_json_encode( $response->get_data() );
+		$this->assertStringNotContainsString( $failure->getMessage(), $data );
+		$this->assertStringNotContainsString( 'Logger broke', $data );
 	}
 
 	/**

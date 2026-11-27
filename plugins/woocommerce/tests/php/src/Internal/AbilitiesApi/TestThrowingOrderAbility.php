@@ -13,14 +13,21 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 class TestThrowingOrderAbility extends TestOrderStatusAbility {
 
 	/**
-	 * Throw an internal exception.
+	 * Failure to throw during the change step.
+	 *
+	 * @var \Throwable
+	 */
+	public $failure;
+
+	/**
+	 * Throw the configured failure.
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
 	 * @return never
-	 * @throws \RuntimeException Always.
+	 * @throws \Throwable Configured failure.
 	 */
 	protected function change( $subject, array $input ) {
-		throw new \RuntimeException( 'Ledger table is locked.' );
+		throw $this->failure;
 	}
 }
