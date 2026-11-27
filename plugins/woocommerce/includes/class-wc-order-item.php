@@ -209,13 +209,14 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	}
 
 	/**
-	 * Whether hooks about this item fire on a staged change: the order instance that holds the item is marked.
+	 * The marked order that hooks about this item pass as $staged: the order instance that holds the item, when
+	 * it is marked. An item with no link to its order instance gets null, as on the saving path.
 	 *
-	 * @return bool
+	 * @return WC_Data|null
 	 */
-	protected function is_staged_for_hooks(): bool {
+	protected function get_staged_object() {
 		$order = $this->order ? $this->order->get() : null;
-		return null !== $order && $order->staged_mark;
+		return null !== $order && $order->staged_mark ? $order : null;
 	}
 
 	/*

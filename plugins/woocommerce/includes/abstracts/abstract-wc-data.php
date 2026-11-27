@@ -229,26 +229,27 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Whether hooks about this object fire on a staged change.
+	 * The marked object that hooks about this object pass as $staged: this object when it is marked, or null.
 	 *
-	 * @return bool
+	 * @return WC_Data|null
 	 */
-	protected function is_staged_for_hooks(): bool {
-		return $this->staged_mark;
+	protected function get_staged_object() {
+		return $this->staged_mark ? $this : null;
 	}
 
 	/**
-	 * Fire an action about this object with $staged as its last argument. On a marked object, refuse the change
-	 * before the action fires when a listener accepts fewer arguments than the action passes.
+	 * Fire an action about this object with $staged as its last argument: the marked object that holds the
+	 * staged change, or null on the saving path. With a marked object, refuse the change before the action
+	 * fires when a listener accepts fewer arguments than the action passes.
 	 *
 	 * @param string $hook    Action name.
 	 * @param mixed  ...$args Action arguments, without $staged.
 	 * @throws WC_Data_Exception When a listener does not accept $staged on a marked object.
 	 */
 	protected function do_staged_action( string $hook, ...$args ): void {
-		$staged = $this->is_staged_for_hooks();
+		$staged = $this->get_staged_object();
 		$args[] = $staged;
-		if ( $staged ) {
+		if ( null !== $staged ) {
 			self::refuse_listeners_without_staged( $hook, count( $args ) );
 		}
 		do_action( $hook, ...$args );
