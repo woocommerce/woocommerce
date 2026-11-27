@@ -54,5 +54,9 @@
 			}
 		},
 		"html": false
-	}
+	},
+	"style": [
+		"wc-blocks-style",
+		"file:../product-review-content.css"
+	]
 }

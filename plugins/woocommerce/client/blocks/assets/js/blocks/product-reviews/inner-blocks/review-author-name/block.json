@@ -64,5 +64,9 @@
 				"style": true
 			}
 		}
-	}
+	},
+	"style": [
+		"wc-blocks-style",
+		"file:../product-review-author-name.css"
+	]
 }
