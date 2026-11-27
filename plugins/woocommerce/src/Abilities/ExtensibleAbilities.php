@@ -719,11 +719,18 @@ class ExtensibleAbilities {
 	 * }
 	 */
 	public static function register_sync( array $args ): void {
-		if ( ! self::check_callback_args( $args, __METHOD__, 'sync', '11.4.0' ) ) {
+		// A sync without a namespace is Core's own. It runs before the syncs of the extensions.
+		$core = ! array_key_exists( 'namespace', $args );
+		if ( ! self::check_callback_args( $core ? $args + array( 'namespace' => 'woocommerce' ) : $args, __METHOD__, 'sync', '11.4.0' ) ) {
 			return;
 		}
 
-		self::$syncs[ $args['resource'] ][] = $args;
+		self::$syncs[ $args['resource'] ] ??= array();
+		if ( $core ) {
+			array_unshift( self::$syncs[ $args['resource'] ], $args );
+		} else {
+			self::$syncs[ $args['resource'] ][] = $args;
+		}
 	}
 
 	/**

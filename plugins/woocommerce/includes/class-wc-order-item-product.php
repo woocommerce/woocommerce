@@ -425,7 +425,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			 * @param WC_Order_Item_Product $line_item Line item instance.
 			 * @param WC_Order              $order     Order Instance.
 			 */
-			$product = apply_filters( 'woocommerce_get_product_from_item', $product, $this, $this->get_order() );
+			$product = $this->apply_staged_filters( 'woocommerce_get_product_from_item', $product, $this, $this->get_order() );
 		}
 		/**
 		 * Modifies the product object returned by \WC_Order_Item_Product::get_product.
@@ -435,7 +435,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		 * @param WC_Product|false      $product   Product instance.
 		 * @param WC_Order_Item_Product $line_item Line item instance.
 		 */
-		$product = apply_filters( 'woocommerce_order_item_product', $product, $this );
+		$product = $this->apply_staged_filters( 'woocommerce_order_item_product', $product, $this );
 
 		return $product;
 	}

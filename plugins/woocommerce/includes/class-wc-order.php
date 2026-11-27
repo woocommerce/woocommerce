@@ -132,6 +132,14 @@ class WC_Order extends WC_Abstract_Order {
 	public $refunds = array();
 
 	/**
+	 * The payment note and transaction ID of a payment that stage_payment_complete() completed in memory, for
+	 * Core's order sync, which adds the note and fires woocommerce_payment_complete after the save.
+	 *
+	 * @var array{note: string, transaction_id: string}|null
+	 */
+	private $staged_payment = null;
+
+	/**
 	 * When a payment is complete this function is called.
 	 *
 	 * Most of the time this should mark an order as 'processing' so that admin can process/post the items.
@@ -149,53 +157,9 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		try {
-			/**
-			 * Fires before the payment of an order is completed.
-			 *
-			 * @param int    $order_id       Order ID.
-			 * @param string $transaction_id Transaction ID passed to payment_complete().
-			 * @since 2.1.0
-			 */
-			do_action( 'woocommerce_pre_payment_complete', $this->get_id(), $transaction_id );
-
-			if ( WC()->session ) {
-				WC()->session->set( 'order_awaiting_payment', false );
-			}
-
-			/**
-			 * Filters the valid order statuses for payment complete.
-			 *
-			 * @param array    $valid_completed_statuses Array of valid order statuses for payment complete.
-			 * @param WC_Order $this                     Order object.
-			 * @since 2.7.0
-			 */
-			$valid_completed_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', OrderStatus::PAYMENT_COMPLETE_STATUSES, $this );
-			if ( $this->has_status( $valid_completed_statuses ) ) {
-				if ( ! empty( $transaction_id ) ) {
-					$this->set_transaction_id( $transaction_id );
-				}
-				if ( ! $this->get_date_paid( 'edit' ) ) {
-					$this->set_date_paid( time() );
-				}
-
-				/**
-				 * Filters the order status to set after payment complete.
-				 *
-				 * @param string   $status        Order status.
-				 * @param int      $order_id      Order ID.
-				 * @param WC_Order $this          Order object.
-				 * @since 2.7.0
-				 */
-				$next_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
-
-				$transaction_id = $this->get_transaction_id();
-				$payment_method = $this->get_payment_method_title();
-
-				// translators: %1$s is the payment method, %2$s is the transaction id.
-				$payment_complete_note = $payment_method && $transaction_id ? sprintf( __( 'Payment via %1$s (%2$s).', 'woocommerce' ), $payment_method, $transaction_id ) : __( 'Payment complete.', 'woocommerce' );
-
-				$this->set_status( $next_status, false );
-				$this->add_order_note( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
+			$paid = $this->prepare_payment_complete( $transaction_id );
+			if ( null !== $paid ) {
+				$this->add_order_note( $paid['note'], false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
 				$this->save();
 
 				/**
@@ -206,16 +170,7 @@ class WC_Order extends WC_Abstract_Order {
 				 * @since 1.2.2
 				 * @since 6.8.0 Passes $transaction_id.
 				 */
-				do_action( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
-			} else {
-				/**
-				 * Fires when payment completes for an order whose status payment cannot complete.
-				 *
-				 * @param int    $order_id       Order ID.
-				 * @param string $transaction_id Transaction ID passed to payment_complete().
-				 * @since 2.1.0
-				 */
-				do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id(), $transaction_id );
+				do_action( 'woocommerce_payment_complete', $this->get_id(), $paid['transaction_id'] );
 			}
 		} catch ( Exception $e ) {
 			/**
@@ -236,6 +191,112 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Complete the payment in memory, like payment_complete(), but do not save. woocommerce_pre_payment_complete
+	 * fires first, as in payment_complete(). The payment note and woocommerce_payment_complete wait on the order
+	 * for Core's order sync, which runs after an ability saves the order.
+	 *
+	 * @since 11.5.0
+	 * @param string $transaction_id Optional transaction ID to store.
+	 * @return bool Whether the payment completes. False when the order is not saved yet, or when its status does not let the payment complete.
+	 * @throws WC_Data_Exception When the class has not adopted the stage method, or a listener does not accept $staged.
+	 */
+	public function stage_payment_complete( $transaction_id = '' ) {
+		$this->refuse_unstaged_overrides( array( 'payment_complete' => 'stage_payment_complete' ) );
+
+		if ( ! $this->get_id() ) {
+			return false;
+		}
+
+		$this->staged_payment = $this->prepare_payment_complete( $transaction_id );
+		return null !== $this->staged_payment;
+	}
+
+	/**
+	 * Return the payment that stage_payment_complete() left on the order, and remove it from the order.
+	 *
+	 * @internal Core's order sync reads it.
+	 * @since 11.5.0
+	 * @return array{note: string, transaction_id: string}|null
+	 */
+	public function take_staged_payment() {
+		$paid                 = $this->staged_payment;
+		$this->staged_payment = null;
+		return $paid;
+	}
+
+	/**
+	 * The in-memory part of payment_complete(): fire the pre action, set the transaction ID, the paid date and
+	 * the status. When the status does not let the payment complete, fire the action for that status instead.
+	 *
+	 * @param string $transaction_id Transaction ID passed to payment_complete().
+	 * @return array{note: string, transaction_id: string}|null The payment note and the transaction ID, or null when the status does not let the payment complete.
+	 */
+	private function prepare_payment_complete( $transaction_id ) {
+		/**
+		 * Fires before the payment of an order is completed.
+		 *
+		 * @param int    $order_id       Order ID.
+		 * @param string $transaction_id Transaction ID passed to payment_complete().
+		 * @since 2.1.0
+		 */
+		$this->do_staged_action( 'woocommerce_pre_payment_complete', $this->get_id(), $transaction_id );
+
+		if ( WC()->session ) {
+			WC()->session->set( 'order_awaiting_payment', false );
+		}
+
+		/**
+		 * Filters the valid order statuses for payment complete.
+		 *
+		 * @param array    $valid_completed_statuses Array of valid order statuses for payment complete.
+		 * @param WC_Order $this                     Order object.
+		 * @since 2.7.0
+		 */
+		$valid_completed_statuses = $this->apply_staged_filters( 'woocommerce_valid_order_statuses_for_payment_complete', OrderStatus::PAYMENT_COMPLETE_STATUSES, $this );
+		if ( ! $this->has_status( $valid_completed_statuses ) ) {
+			/**
+			 * Fires when payment completes for an order whose status payment cannot complete.
+			 *
+			 * @param int    $order_id       Order ID.
+			 * @param string $transaction_id Transaction ID passed to payment_complete().
+			 * @since 2.1.0
+			 */
+			$this->do_staged_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id(), $transaction_id );
+			return null;
+		}
+
+		if ( ! empty( $transaction_id ) ) {
+			$this->set_transaction_id( $transaction_id );
+		}
+		if ( ! $this->get_date_paid( 'edit' ) ) {
+			$this->set_date_paid( time() );
+		}
+
+		/**
+		 * Filters the order status to set after payment complete.
+		 *
+		 * @param string   $status        Order status.
+		 * @param int      $order_id      Order ID.
+		 * @param WC_Order $this          Order object.
+		 * @since 2.7.0
+		 */
+		$next_status = $this->apply_staged_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
+
+		$transaction_id = $this->get_transaction_id();
+		$payment_method = $this->get_payment_method_title();
+
+		// translators: %1$s is the payment method, %2$s is the transaction id.
+		$payment_complete_note = $payment_method && $transaction_id ? sprintf( __( 'Payment via %1$s (%2$s).', 'woocommerce' ), $payment_method, $transaction_id ) : __( 'Payment complete.', 'woocommerce' );
+
+		$this->set_status( $next_status, false );
+
+		return array(
+			'note'           => $payment_complete_note,
+			'transaction_id' => $transaction_id,
+		);
 	}
 
 	/**
@@ -384,7 +445,7 @@ class WC_Order extends WC_Abstract_Order {
 				 * @param int    $order_id Order ID.
 				 * @param string $status   New status, without the wc- prefix.
 				 */
-				do_action( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] );
+				$this->do_staged_action( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] );
 			}
 
 			$this->maybe_set_date_paid();
@@ -419,7 +480,7 @@ class WC_Order extends WC_Abstract_Order {
 			 * @param WC_Order $this          Order object.
 			 * @since 2.7.0
 			 */
-			$payment_completed_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
+			$payment_completed_status = $this->apply_staged_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
 
 			if ( $this->has_status( $payment_completed_status ) ) {
 				// If payment complete status is reached, set paid now.
@@ -444,6 +505,22 @@ class WC_Order extends WC_Abstract_Order {
 		if ( $this->has_status( OrderStatus::COMPLETED ) ) {
 			$this->set_date_completed( time() );
 		}
+	}
+
+	/**
+	 * Change the status in memory, like update_status(), but do not save. The status hooks and the note run
+	 * when the order is saved.
+	 *
+	 * @since 11.5.0
+	 * @param string       $new_status    Status to change the order to. No internal wc- prefix is required.
+	 * @param string|false $note          Optional note to add. False will skip adding a note entirely.
+	 * @param bool         $manual_update Is this a manual order status change?.
+	 * @return array
+	 * @throws WC_Data_Exception When the class has not adopted the stage method, or a listener does not accept $staged.
+	 */
+	public function stage_status( $new_status, $note = '', $manual_update = false ) {
+		$this->refuse_unstaged_overrides( array( 'update_status' => 'stage_status' ) );
+		return $this->set_status( $new_status, $note, $manual_update );
 	}
 
 	/**
@@ -710,7 +787,7 @@ class WC_Order extends WC_Abstract_Order {
 				 * @param string   $value The address property value.
 				 * @param WC_Order $order The order object being read.
 				 */
-				$value = apply_filters( $this->get_hook_prefix() . $address_type . '_' . $prop, $value, $this );
+				$value = self::staged_getter_filters() ? $this->apply_staged_filters( $this->get_hook_prefix() . $address_type . '_' . $prop, $value, $this ) : apply_filters( $this->get_hook_prefix() . $address_type . '_' . $prop, $value, $this );
 			}
 		}
 		return $value;
@@ -1025,7 +1102,7 @@ class WC_Order extends WC_Abstract_Order {
 			 * @param WC_Order $this          Order object.
 			 * @since 3.0.0
 			 */
-			&& $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this ) ) ) {
+			&& $this->has_status( $this->apply_staged_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this ) ) ) {
 			// In view context, return a date if missing.
 			$date_paid = $this->get_date_created( 'edit' );
 		}
@@ -1770,7 +1847,7 @@ class WC_Order extends WC_Abstract_Order {
 		 * @param WC_Order $this        Order object.
 		 * @since 2.7.0
 		 */
-		return apply_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( OrderStatus::PENDING, OrderStatus::ON_HOLD, OrderStatus::AUTO_DRAFT ), true ), $this );
+		return $this->apply_staged_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( OrderStatus::PENDING, OrderStatus::ON_HOLD, OrderStatus::AUTO_DRAFT ), true ), $this );
 	}
 
 	/**
@@ -1951,7 +2028,7 @@ class WC_Order extends WC_Abstract_Order {
 							 * @param int         $order_id
 							 * @return bool
 							 */
-							$custom_needs_processing = (bool) apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $order_id );
+							$custom_needs_processing = (bool) $this->apply_staged_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $order_id );
 							if ( $custom_needs_processing ) {
 								$needs_processing = 1;
 								break;

@@ -23,6 +23,13 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	use CogsAwareTrait;
 
 	/**
+	 * Hooks about the item pass $staged.
+	 *
+	 * @var bool
+	 */
+	protected $staged_hooks = true;
+
+	/**
 	 * Legacy cart item values.
 	 *
 	 * @deprecated 4.4.0 For legacy actions.
@@ -208,6 +215,17 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		return $order ?? wc_get_order( $this->get_order_id() );
 	}
 
+	/**
+	 * The marked order that hooks about this item pass as $staged: the order instance that holds the item, when
+	 * it is marked. An item with no link to its order instance gets null, as on the saving path.
+	 *
+	 * @return WC_Data|null
+	 */
+	protected function get_staged_object() {
+		$order = $this->order ? $this->order->get() : null;
+		return null !== $order && $order->staged_mark ? $order : null;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -303,7 +321,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$this->set_taxes( false );
 		}
 
-		do_action( 'woocommerce_order_item_after_calculate_taxes', $this, $calculate_tax_for );
+		$this->do_staged_action( 'woocommerce_order_item_after_calculate_taxes', $this, $calculate_tax_for );
 
 		return true;
 	}
@@ -537,7 +555,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		 * @param float|null $value The value originally calculated, null if it was not possible to calculate it.
 		 * @param WC_Order_Item $line_item The order item for which the value is calculated.
 		 */
-		$value = apply_filters( 'woocommerce_calculated_order_item_cogs_value', $value, $this );
+		$value = $this->apply_staged_filters( 'woocommerce_calculated_order_item_cogs_value', $value, $this );
 
 		if ( is_null( $value ) ) {
 			return false;

@@ -100,7 +100,7 @@ class OrderController {
 			);
 		}
 
-		add_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
+		add_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ), 10, 2 );
 
 		try {
 			$order = new \WC_Order();
@@ -1301,9 +1301,11 @@ class OrderController {
 	/**
 	 * Changes default order status to draft for orders created via this API.
 	 *
+	 * @param string        $status Default order status.
+	 * @param \WC_Data|null $staged Staged object, or null outside a staged write.
 	 * @return string
 	 */
-	public function default_order_status() {
+	public function default_order_status( $status = '', $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- The listener must accept all filter arguments up to $staged to run on a staged order.
 		return 'checkout-draft';
 	}
 

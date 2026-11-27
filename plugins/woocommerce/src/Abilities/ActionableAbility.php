@@ -226,6 +226,7 @@ abstract class ActionableAbility extends Ability {
 		}
 
 		$refused = new \WP_Error();
+		$subject->set_staged( $enabled );
 		try {
 			$changed = $this->change( $subject, $input );
 		} catch ( \WC_Data_Exception $e ) {
@@ -241,6 +242,7 @@ abstract class ActionableAbility extends Ability {
 		foreach ( (array) $changed as $secondary ) {
 			$resource_name = $secondary[2] ?? $this->get_resource();
 			if ( $enabled && ! ExtensibleAbilities::is_resource_registered( $resource_name ) ) {
+				$subject->set_staged( false );
 				wc_doing_it_wrong(
 					get_class( $this ) . '::change',
 					sprintf(
@@ -266,6 +268,7 @@ abstract class ActionableAbility extends Ability {
 			}
 			$fields = $writes ? $this->prepare_fields( $secondary[1], $resource_name ) : array();
 			if ( is_wp_error( $fields ) ) {
+				$subject->set_staged( false );
 				return $fields;
 			}
 			$objects[] = array( $secondary[0], $fields, $resource_name );
@@ -299,6 +302,7 @@ abstract class ActionableAbility extends Ability {
 				$refused
 			);
 		}
+		$subject->set_staged( false );
 		if ( $core_refused || $refused->has_errors() ) {
 			return self::join_refusals( $refused );
 		}
@@ -359,8 +363,9 @@ abstract class ActionableAbility extends Ability {
 		);
 		foreach ( $own as $resource_name => $resource_saved ) {
 			foreach ( ExtensibleAbilities::get_syncs( $resource_name ) as $args ) {
-				$context['fields'] = self::get_sent_fields( $sent, $args['namespace'] );
-				$rejected          = self::run_callback( $args['callback'], array( $resource_saved, $context ), array( 'namespace' => $args['namespace'] ) );
+				// A Core sync has no namespace: it gets no sent fields, and its error gets no namespace.
+				$context['fields'] = self::get_sent_fields( $sent, $args['namespace'] ?? '' );
+				$rejected          = self::run_callback( $args['callback'], array( $resource_saved, $context ), isset( $args['namespace'] ) ? array( 'namespace' => $args['namespace'] ) : array() );
 				if ( null !== $rejected ) {
 					return $rejected;
 				}

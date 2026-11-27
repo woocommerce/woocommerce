@@ -334,7 +334,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		} else {
 			$product = false;
 		}
-		return apply_filters( 'woocommerce_get_product_from_item', $product, $item, $this );
+		return $this->apply_staged_filters( 'woocommerce_get_product_from_item', $product, $item, $this );
 	}
 
 	/**

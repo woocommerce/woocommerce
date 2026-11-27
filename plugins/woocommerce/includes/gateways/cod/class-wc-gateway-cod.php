@@ -61,7 +61,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
-		add_filter( 'woocommerce_payment_complete_order_status', array( $this, 'change_payment_complete_order_status' ), 10, 3 );
+		add_filter( 'woocommerce_payment_complete_order_status', array( $this, 'change_payment_complete_order_status' ), 10, 4 );
 
 		// Customer Emails.
 		add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
@@ -169,9 +169,10 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @param  string         $status Current order status.
 	 * @param  int            $order_id Order ID.
 	 * @param  WC_Order|false $order Order object.
+	 * @param  WC_Data|null   $staged Staged object, or null outside a staged write.
 	 * @return string
 	 */
-	public function change_payment_complete_order_status( $status, $order_id = 0, $order = false ) {
+	public function change_payment_complete_order_status( $status, $order_id = 0, $order = false, $staged = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- The listener must accept $staged to run on a staged order.
 		if ( $order && self::ID === $order->get_payment_method() ) {
 			$status = OrderStatus::COMPLETED;
 		}
