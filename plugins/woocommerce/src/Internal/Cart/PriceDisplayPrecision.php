@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * When the price is converted for tax (shown with VAT but entered without, or adjusted to the customer's VAT rate), the
  * converted price is shown with the currency's decimals as usual.
  *
- * @since 11.4.0
+ * @since 11.5.0
  */
 final class PriceDisplayPrecision {
 
