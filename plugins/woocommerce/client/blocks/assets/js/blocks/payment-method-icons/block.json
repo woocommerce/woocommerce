@@ -4,6 +4,12 @@
 	"description": "Display icons for available payment methods.",
 	"category": "woocommerce",
 	"keywords": [ "woocommerce", "payments", "payment methods" ],
+	"editorStyle": "wc-blocks-editor-style",
+	"style": [
+		"wc-blocks-style",
+		"wc-blocks-packages-style",
+		"file:../payment-method-icons.css"
+	],
 	"textdomain": "woocommerce",
 	"attributes": {
 		"numberOfIcons": {

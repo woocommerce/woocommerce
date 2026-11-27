@@ -48373,17 +48373,6 @@ parameters:
 			count: 1
 			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\PaymentMethodIcons\:\:get_block_type_script\(\) should return array\|string but returns null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
 
 		-
 			message: '#^Parameter \#1 \$array_arg of function usort contains unresolvable type\.$#'

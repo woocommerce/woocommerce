@@ -91,6 +91,8 @@ final class BlockTypesLazyController {
 			$this->get_product_grid_blocks(),
 			$this->get_product_listing_blocks(),
 			$this->get_product_reviews_blocks(),
+			$this->get_cart_and_checkout_blocks(),
+			$this->get_dedicated_pages_blocks(),
 		);
 		foreach ( $block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
@@ -404,6 +406,41 @@ final class BlockTypesLazyController {
 			'product-reviews-pagination-previous' => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewsPaginationPrevious::class,
 			'product-reviews-pagination-numbers'  => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewsPaginationNumbers::class,
 			'product-review-template'             => \Automattic\WooCommerce\Blocks\BlockTypes\Reviews\ProductReviewTemplate::class,
+		);
+	}
+
+	/**
+	 * Side effect free and stateless cart and checkout blocks.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_cart_and_checkout_blocks(): array {
+		// CheckoutExpressPaymentBlock: excluded — save_post → express payment attr sync.
+		// MiniCart: excluded — wp_loaded → patterns, hooked_block_types, render_block_context.
+		$list = array(
+			'mini-cart-contents' => \Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents::class,
+		);
+		if ( ! is_admin() ) {
+			// PaymentMethodIcons overrides enqueue_data() with available payment methods, hence loads eagerly in admin.
+			$list['payment-method-icons'] = \Automattic\WooCommerce\Blocks\BlockTypes\PaymentMethodIcons::class;
+		}
+
+		return $list;
+	}
+
+	/**
+	 * Side effect free and stateless page-template blocks.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_dedicated_pages_blocks(): array {
+		// SingleProduct: excluded — render_block_context, render_block_core/post-excerpt, render_block_core/post-title.
+		// Cart: excluded — wp_loaded → patterns, wp → emoji disable.
+		// Checkout: excluded — rest_api_init, wp_loaded → patterns, save_post, cart redirect filter.
+		// ClassicTemplate: excluded — render_block filter, enqueue_block_assets.
+		// ComingSoon: excluded — enqueue_block_assets filter.
+		return array(
+			'page-content-wrapper' => \Automattic\WooCommerce\Blocks\BlockTypes\PageContentWrapper::class,
 		);
 	}
 }
