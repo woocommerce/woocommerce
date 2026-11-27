@@ -51,9 +51,14 @@ class CartReferenceTest extends WC_Unit_Test_Case {
 	public function test_cart_context_and_explicit_references( string $collection, string $setter ): void {
 		$cart_product     = WC_Helper_Product::create_simple_product();
 		$explicit_product = WC_Helper_Product::create_simple_product();
-		$cart_product->$setter( array( 101, 102 ) );
+		// Real products, so no ID can match the cart product, which the collection leaves out.
+		list( $first, $second, $third ) = array_map(
+			fn() => WC_Helper_Product::create_simple_product()->get_id(),
+			range( 1, 3 )
+		);
+		$cart_product->$setter( array( $first, $second ) );
 		$cart_product->save();
-		$explicit_product->$setter( array( 103 ) );
+		$explicit_product->$setter( array( $third ) );
 		$explicit_product->save();
 		WC()->cart->add_to_cart( $cart_product->get_id() );
 
@@ -74,17 +79,17 @@ class CartReferenceTest extends WC_Unit_Test_Case {
 		$parsed_block['attrs']['productCollectionLocation'] = $context['productCollectionLocation'];
 		$sut   = new ProductCollectionMock();
 		$query = Utils::initialize_merged_query( $sut, $parsed_block );
-		$this->assertSame( array( 101, 102 ), array_values( $query['post__in'] ) );
+		$this->assertSame( array( $first, $second ), array_values( $query['post__in'] ) );
 
-		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = array( 102, 103 );
+		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = array( $second, $third );
 		$query = Utils::initialize_merged_query( $sut, $parsed_block );
-		$this->assertSame( array( 102 ), array_values( $query['post__in'] ), 'Hand-picked products must still intersect with recommendations.' );
+		$this->assertSame( array( $second ), array_values( $query['post__in'] ), 'Hand-picked products must still intersect with recommendations.' );
 
 		unset( $parsed_block['attrs']['query']['woocommerceHandPickedProducts'] );
 		$parsed_block['attrs']['query']['productReferenceType'] = 'cart';
 		$parsed_block['attrs']['query']['productReference']     = $explicit_product->get_id();
 		$query = Utils::initialize_merged_query( $sut, $parsed_block );
-		$this->assertSame( array( 103 ), array_values( $query['post__in'] ), 'An explicit product takes precedence over both cart references.' );
+		$this->assertSame( array( $third ), array_values( $query['post__in'] ), 'An explicit product takes precedence over both cart references.' );
 
 		$request = Utils::build_request(
 			array(
@@ -94,7 +99,7 @@ class CartReferenceTest extends WC_Unit_Test_Case {
 			)
 		);
 		$query   = $sut->update_rest_query_in_editor( array(), $request );
-		$this->assertSame( array( 103 ), array_values( $query['post__in'] ), 'Editor previews must honor the same explicit product.' );
+		$this->assertSame( array( $third ), array_values( $query['post__in'] ), 'Editor previews must honor the same explicit product.' );
 	}
 
 	/**
