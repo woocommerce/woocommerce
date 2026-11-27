@@ -100,6 +100,12 @@ describe( 'Back in Stock form store', () => {
 		}
 	);
 
+	it( 'leaves the signed-up variations to the server', () => {
+		expect( mockRegisteredStore.state ).not.toHaveProperty(
+			'signedUpVariationIds'
+		);
+	} );
+
 	it( 'reads the selected attribute value from the Add to Cart + Options context', () => {
 		expect( mockRegisteredStore.state.selectedAttributeValue ).toBe( '' );
 

@@ -23,7 +23,9 @@ const { state: productsState } = store< ProductsStore >(
 
 export type BackInStockFormStore = {
 	state: {
-		signedUpVariationIds: number[];
+		// Out of stock variations the shopper already signed up for. Set by the server only,
+		// as a client default would overwrite the server's value when the store registers.
+		signedUpVariationIds?: number[];
 		isVisible: boolean;
 		isSignedUpNoticeVisible: boolean;
 		selectedAttributeValue: string;
@@ -43,7 +45,10 @@ const isOutOfStock = (): boolean => {
 const isSignedUp = (): boolean => {
 	const variation = productsState.productVariationInContext;
 
-	return !! variation && state.signedUpVariationIds.includes( variation.id );
+	return (
+		!! variation &&
+		( state.signedUpVariationIds ?? [] ).includes( variation.id )
+	);
 };
 
 /**
@@ -54,11 +59,6 @@ const { state } = store< BackInStockFormStore >(
 	'woocommerce/back-in-stock-form',
 	{
 		state: {
-			/**
-			 * Out of stock variations the shopper already signed up for,
-			 * set by the server.
-			 */
-			signedUpVariationIds: [],
 			/**
 			 * Whether shoppers can sign up for the selected variation.
 			 */
