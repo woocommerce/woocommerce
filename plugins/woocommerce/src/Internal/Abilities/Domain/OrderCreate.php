@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\WCDataSaveTrait;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
@@ -24,6 +25,9 @@ defined( 'ABSPATH' ) || exit;
  */
 class OrderCreate extends ActionableAbility {
 
+	use WCDataSaveTrait {
+		save as private save_data;
+	}
 	use DomainAbilityHelpers;
 	use OrderAbilityTrait;
 	use OrderEditTrait;
@@ -199,11 +203,11 @@ class OrderCreate extends ActionableAbility {
 	 */
 	public function save( $subject ) {
 		if ( ExtensibleAbilities::is_enabled() ) {
-			return parent::save( $subject );
+			return $this->save_data( $subject );
 		}
 
 		$added = $this->add_queued_products( $subject );
-		$saved = parent::save( $subject );
+		$saved = $this->save_data( $subject );
 		if ( is_wp_error( $saved ) ) {
 			foreach ( $added as $item ) {
 				$item->delete();
@@ -223,7 +227,7 @@ class OrderCreate extends ActionableAbility {
 			return null;
 		}
 
-		// The error rolls back the pending order that parent::save() wrote.
+		// The error rolls back the pending order that save_data() wrote.
 		return $subject->update_status( $this->status ) ? null : new \WP_Error(
 			'woocommerce_order_status_update_failed',
 			__( 'The order was not created, because its status could not be set.', 'woocommerce' ),

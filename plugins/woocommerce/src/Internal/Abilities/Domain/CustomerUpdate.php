@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\WCDataSaveTrait;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\AddressInputTrait;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 
@@ -19,6 +20,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class CustomerUpdate extends ActionableAbility {
 
+	use WCDataSaveTrait;
 	use AddressInputTrait;
 	use DomainAbilityHelpers;
 

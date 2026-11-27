@@ -32,9 +32,10 @@ defined( 'ABSPATH' ) || exit;
  * input is ignored. An ability whose own input schema sets
  * `additionalProperties` to false rejects it instead.
  *
- * The default save() saves a `WC_Data` object. An ability for a `WP_Term` sets
- * the new values on the term in memory in change(), so the validators see
- * them, and writes them in its own save().
+ * Each ability saves its own object in save(). An ability for a `WC_Data`
+ * object uses WCDataSaveTrait. An ability for a `WP_Term` sets the new values on
+ * the term in memory in change(), so the validators see them, and writes them
+ * in its own save().
  *
  * The object that load() returns is the primary object. An ability that saves
  * more objects returns them from change(). These are the secondary objects. The field
@@ -111,42 +112,23 @@ abstract class ActionableAbility extends Ability {
 	 */
 	abstract protected function prepare_response( $subject );
 
+	// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn -- The method is not abstract, so a class without it fails on the call and not on load.
 	/**
-	 * Save the changed object. The default calls WC_Data::save(). An order's
-	 * save() catches a failed write, so the default reads that error from
-	 * WC_Abstract_Order::get_last_save_error(). When the save fails or leaves
-	 * the object without an ID, it logs the error and returns a WP_Error with a
-	 * fixed message, so the exception text stays out of the response. An ability
-	 * whose object is not a `WC_Data` object writes its own save().
+	 * Save the changed object, and any secondary object. Every ability writes
+	 * this method. An ability for a `WC_Data` object uses WCDataSaveTrait. An
+	 * ability for another kind of object, such as a `WP_Term`, writes it with
+	 * the function WordPress has for it.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @param object $subject Changed object.
 	 * @return null|\WP_Error Null when the object was saved, a WP_Error when it was not.
+	 * @throws \BadMethodCallException When the ability has no save() method.
 	 */
 	protected function save( $subject ) {
-		if ( ! $subject instanceof \WC_Data ) {
-			wc_doing_it_wrong( static::class . '::save', 'Write a save() method in an ability whose object is not a WC_Data object.', '11.5.0' );
-			return self::save_failed();
-		}
-
-		try {
-			$subject->save();
-			$error = $subject instanceof \WC_Abstract_Order ? $subject->get_last_save_error() : null;
-		} catch ( \Exception $e ) {
-			$error = $e;
-		}
-
-		if ( null !== $error ) {
-			wc_get_logger()->error(
-				sprintf( 'Ability "%s" failed to save: %s', $this->get_name(), $error->getMessage() ),
-				array( 'source' => 'woocommerce-abilities' )
-			);
-			return self::save_failed();
-		}
-
-		return self::get_object_id( $subject ) > 0 ? null : self::save_failed();
+		throw new \BadMethodCallException( esc_html( static::class . ' has no save() method. Use WCDataSaveTrait for a WC_Data object, or write save() for another kind of object.' ) );
 	}
+	// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn
 
 	/**
 	 * The ID of an object of the call, or zero when it is not saved yet.
@@ -769,9 +751,11 @@ abstract class ActionableAbility extends Ability {
 	/**
 	 * The error for a save that failed.
 	 *
+	 * @since 11.5.0
+	 *
 	 * @return \WP_Error
 	 */
-	private static function save_failed(): \WP_Error {
+	protected static function save_failed(): \WP_Error {
 		return new \WP_Error(
 			'woocommerce_ability_save_failed',
 			__( 'The change could not be saved.', 'woocommerce' ),
