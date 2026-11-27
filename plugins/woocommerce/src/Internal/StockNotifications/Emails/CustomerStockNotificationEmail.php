@@ -16,13 +16,6 @@ use WC_Email;
 class CustomerStockNotificationEmail extends WC_Email {
 
 	/**
-	 * Unsubscribe key for the email being sent. The caller's save persists its hash.
-	 *
-	 * @var string
-	 */
-	private $unsubscribe_key = '';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -181,7 +174,9 @@ class CustomerStockNotificationEmail extends WC_Email {
 		$user         = $notification instanceof Notification && $notification->get_user_id() ? get_user_by( 'id', $notification->get_user_id() ) : false;
 		$is_guest     = ! is_a( $user, 'WP_User' );
 		$account_link = '';
-		if ( ! $is_guest && '' !== MyAccountEndpoint::get_endpoint_slug() ) {
+		// Guests can only manage sign-ups after creating an account, so skip the link when registration is off.
+		$can_reach_account = ! $is_guest || 'yes' === get_option( 'woocommerce_enable_myaccount_registration' );
+		if ( $can_reach_account && '' !== MyAccountEndpoint::get_endpoint_slug() ) {
 			$account_link = UtmHelper::add_email_utm_params( MyAccountEndpoint::get_endpoint_url() );
 		}
 
@@ -189,16 +184,8 @@ class CustomerStockNotificationEmail extends WC_Email {
 			'button_text'      => $button_text,
 			'button_link'      => $button_link,
 			'account_link'     => $account_link,
-			'unsubscribe_link' => UtmHelper::add_email_utm_params(
-				add_query_arg(
-					array(
-						'email_link_action'     => EmailActionController::ACTION_UNSUBSCRIBE,
-						'email_link_action_key' => $this->unsubscribe_key,
-						'notification_id'       => $notification->get_id(),
-					),
-					home_url( '/' )
-				)
-			),
+			// Unsubscribe is no longer used in the template, since the sign-up is sent with this email, but we're keeping it for backwards compatibility with custom templates, which now link to account management.
+			'unsubscribe_link' => $account_link,
 			'is_guest'         => $is_guest,
 		);
 	}
@@ -248,7 +235,6 @@ class CustomerStockNotificationEmail extends WC_Email {
 	public function prepare_email( Notification $notification ): void {
 		$this->object                         = $notification;
 		$this->recipient                      = $notification->get_user_email();
-		$this->unsubscribe_key                = $notification->get_unsubscribe_key( false );
 		$product                              = $notification->get_product();
 		$this->placeholders['{product_name}'] = preg_replace( $this->plain_search, $this->plain_replace, $product->get_name() );
 		$this->placeholders['{site_title}']   = preg_replace( $this->plain_search, $this->plain_replace, $this->get_blogname() );

@@ -63563,12 +63563,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
 
 		-
-			message: '#^Cannot call method get_id\(\) on bool\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
-
-		-
 			message: '#^Cannot call method get_name\(\) on WC_Product\|false\.$#'
 			identifier: method.nonObject
 			count: 1

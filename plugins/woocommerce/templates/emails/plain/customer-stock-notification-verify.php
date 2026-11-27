@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 10.2.0
+ * @version 11.4.0
  */
 
 // Exit if accessed directly.
@@ -35,6 +35,13 @@ echo "\n\n----------------------------------------\n\n";
  * @since 10.2.0
  */
 do_action( 'woocommerce_email_stock_notification_product', $product, $notification, true, $email );
+
+// translators: %1$s: Confirm button text, %2$s: Confirm URL.
+printf( esc_html__( '%1$s: %2$s', 'woocommerce' ), esc_html( $verification_button_text ), esc_url( $verification_link ) );
+echo "\n";
+// translators: %s placeholder is the verification expiration datetime string.
+printf( esc_html__( 'This link will remain active for %s.', 'woocommerce' ), esc_html( $verification_expiration_threshold ) );
+echo "\n\n----------------------------------------\n\n";
 
 /**
  * Show user-defined additional content - this is set in each email's settings.

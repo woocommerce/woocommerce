@@ -656,15 +656,17 @@ export function corruptEmailLinkKey( link: string ): string {
 }
 
 /**
- * Text the email footer renders for a signup bound to an account.
+ * Footer text in the signed-up and back-in-stock emails.
+ *
+ * `unsubscribe` only renders in the signed-up email, for guests or when the account page can't be reached.
  *
  * @see templates/emails/customer-stock-notification.php
  * @see templates/emails/customer-stock-notification-verified.php
  */
 export const BIS_EMAIL_FOOTER = {
-	loggedIn:
-		/To manage your notifications, click here to log in to your account\./,
-	guest: /To stop receiving these messages, click here to unsubscribe\./,
+	manage: /Manage notifications/,
+	unsubscribe:
+		/To stop receiving these messages, click here to unsubscribe\./,
 } as const;
 
 /**
@@ -798,6 +800,7 @@ export const BIS_EMAIL_LINKS = {
 	// Product CTA in the back-in-stock email; verification link in the verify email.
 	actionButton: '#notification__action_button',
 	unsubscribe: '#notification__unsubscribe_link',
+	manage: '#notification__manage_link',
 } as const;
 
 /**

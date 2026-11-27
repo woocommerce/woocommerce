@@ -8,11 +8,8 @@ import {
 	BIS_EMAIL_FOOTER,
 	BIS_EMAIL_LINKS,
 	BIS_FEATURE_OPTION,
-	bisAdminListUrl,
 	bisEmailBody,
 	bisEmailSubject,
-	bisNotice,
-	corruptEmailLinkKey,
 	getEmailLinkById,
 	openEmailInMailLog,
 	resetBISOptions,
@@ -100,7 +97,7 @@ test.describe(
 				new URL( product.permalink ).toString()
 			);
 
-			// A guest signup gets the unsubscribe wording in the footer.
+			// The notification is sent with this email, so there is nothing left to unsubscribe from.
 			await openEmailInMailLog(
 				page,
 				email,
@@ -108,10 +105,15 @@ test.describe(
 			);
 			await expect(
 				bisEmailBody( page ).locator( 'body' )
-			).toContainText( BIS_EMAIL_FOOTER.guest );
+			).not.toContainText( BIS_EMAIL_FOOTER.unsubscribe );
+			await expect(
+				bisEmailBody( page ).locator(
+					'a[href*="email_link_action=unsubscribe"]'
+				)
+			).toHaveCount( 0 );
 		} );
 
-		test( "a logged-in customer's back-in-stock email offers account management instead of unsubscribing", async ( {
+		test( "a logged-in customer's back-in-stock email links to account management", async ( {
 			page,
 			product,
 			restApi,
@@ -130,14 +132,14 @@ test.describe(
 
 			const body = bisEmailBody( page ).locator( 'body' );
 
-			// The template forks on whether the signup belongs to an account;
-			// the guest fork is what every other email test exercises.
-			await expect( body ).toContainText( BIS_EMAIL_FOOTER.loggedIn );
-			await expect( body ).not.toContainText( BIS_EMAIL_FOOTER.guest );
+			await expect( body ).toContainText( BIS_EMAIL_FOOTER.manage );
+			await expect( body ).not.toContainText(
+				BIS_EMAIL_FOOTER.unsubscribe
+			);
 
 			// Account management must not cancel the notification.
 			const accountLink = bisEmailBody( page ).locator(
-				`a${ BIS_EMAIL_LINKS.unsubscribe }`
+				`a${ BIS_EMAIL_LINKS.manage }`
 			);
 			await expect( accountLink ).toHaveAttribute(
 				'href',
@@ -147,96 +149,6 @@ test.describe(
 				'href',
 				/email_link_action=unsubscribe/
 			);
-		} );
-
-		test( 'unsubscribe link in the back-in-stock email leaves the sent notification unchanged', async ( {
-			page,
-			product,
-			restApi,
-			browser,
-		} ) => {
-			const email = uniqueGuestEmail( 'bis-restock-unsub' );
-
-			await signUpAsGuest( browser, product.permalink, email );
-
-			await restockProduct( restApi, product.id );
-			await triggerStockNotificationsBatch( page );
-
-			await expectEmail(
-				page,
-				email,
-				bisEmailSubject.backInStock( product.name )
-			);
-
-			const unsubscribeLink = await getEmailLinkById(
-				page,
-				email,
-				bisEmailSubject.backInStock( product.name ),
-				BIS_EMAIL_LINKS.unsubscribe
-			);
-			await page.goto( unsubscribeLink );
-
-			// The shopper sees the outcome on the shop page they are sent to.
-			await expect(
-				page.getByText( bisNotice.alreadySent, { exact: true } )
-			).toBeVisible();
-
-			await page.goto( bisAdminListUrl( product.id ) );
-			const row = page
-				.getByRole( 'row' )
-				.filter( { has: page.getByText( email, { exact: true } ) } );
-			await expect(
-				row.getByText( 'Sent', { exact: true } )
-			).toBeVisible();
-			await expect( row.getByText( /Cancelled/i ) ).toHaveCount( 0 );
-		} );
-
-		test( 'an unsubscribe link with a tampered key changes nothing', async ( {
-			page,
-			product,
-			restApi,
-			browser,
-		} ) => {
-			const email = uniqueGuestEmail( 'bis-restock-bad-key' );
-
-			await signUpAsGuest( browser, product.permalink, email );
-
-			await restockProduct( restApi, product.id );
-			await triggerStockNotificationsBatch( page );
-
-			const unsubscribeLink = await getEmailLinkById(
-				page,
-				email,
-				bisEmailSubject.backInStock( product.name ),
-				BIS_EMAIL_LINKS.unsubscribe
-			);
-
-			await page.goto( corruptEmailLinkKey( unsubscribeLink ) );
-
-			// A rejected key changes nothing, but the shopper is told why.
-			await expect(
-				page.getByText( bisNotice.unsubscribeLinkInvalid, {
-					exact: true,
-				} )
-			).toBeVisible();
-			await expect(
-				page.getByText( bisNotice.alreadySent, { exact: true } )
-			).toHaveCount( 0 );
-
-			await page.goto( bisAdminListUrl( product.id ) );
-			const row = page
-				.getByRole( 'row' )
-				.filter( { has: page.getByText( email, { exact: true } ) } );
-			await expect( row ).toHaveCount( 1 );
-			await expect( row.getByText( /Cancelled/i ) ).toHaveCount( 0 );
-
-			// Positive control: the untouched link is accepted, so the page
-			// above rejected the link because of the key and not because the
-			// link is broken.
-			await page.goto( unsubscribeLink );
-			await expect(
-				page.getByText( bisNotice.alreadySent, { exact: true } )
-			).toBeVisible();
 		} );
 	}
 );
