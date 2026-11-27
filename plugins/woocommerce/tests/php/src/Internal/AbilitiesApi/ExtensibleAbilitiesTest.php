@@ -852,7 +852,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( array(), ExtensibleAbilities::get_query_args( 'ticket', $input ) );
 
 		$register_resource = static function () {
-			ExtensibleAbilities::register_resource( 'ticket' );
+			ExtensibleAbilities::register_resource( 'ticket', self::get_ticket_resource_args() );
 		};
 		$register          = static function () use ( $filter ) {
 			ExtensibleAbilities::register_query_filter( $filter );
@@ -1471,7 +1471,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$products = array_column( $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen late' ) )['products'], null, 'id' );
 
 		$this->assertArrayNotHasKey( 'late-ext', $products[ $product->get_id() ]['extensions'] ?? array() );
-		$this->assertArrayNotHasKey( 'late-ext', ExtensibleAbilities::add_fields_to_object( array(), 'product', $product, $product->get_type() )['extensions'] ?? array() );
+		$this->assertArrayNotHasKey( 'late-ext', ExtensibleAbilities::add_fields_to_object( array(), 'product', $product )['extensions'] ?? array() );
 	}
 
 	/**
@@ -1479,7 +1479,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_register_resource_lets_an_extension_register_fields_on_its_own_resource(): void {
 		$register_resource = static function () {
-			ExtensibleAbilities::register_resource( 'ticket' );
+			ExtensibleAbilities::register_resource( 'ticket', self::get_ticket_resource_args() );
 		};
 		$register_field    = static function () {
 			ExtensibleAbilities::register_field(
@@ -1498,7 +1498,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		remove_action( 'woocommerce_extensible_abilities_resources_init', $register_resource, 99 );
 		remove_action( 'woocommerce_extensible_abilities_init', $register_field, 1 );
 
-		$output = ExtensibleAbilities::add_fields_to_object( array(), 'ticket', new \stdClass(), '' );
+		$output = ExtensibleAbilities::add_fields_to_object( array(), 'ticket', new \stdClass() );
 		$schema = ExtensibleAbilities::add_fields_schema( array( 'type' => 'object' ), 'ticket' );
 
 		$this->assertSame( array( 'test-ext' => array( 'code' => 'T1' ) ), $output['extensions'] );
@@ -1512,7 +1512,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
 		$this->get_output_schema( 'woocommerce/products-query' );
 
-		ExtensibleAbilities::register_resource( 'late_resource' );
+		ExtensibleAbilities::register_resource( 'late_resource', self::get_ticket_resource_args() );
 
 		$this->assertFalse( ExtensibleAbilities::is_resource_registered( 'late_resource' ) );
 	}
@@ -1699,7 +1699,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function test_a_resource_name_of_only_digits_is_refused(): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
 
-		ExtensibleAbilities::register_resource( '42' );
+		ExtensibleAbilities::register_resource( '42', self::get_ticket_resource_args() );
 
 		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
 		$resources->setAccessible( true );
@@ -1750,7 +1750,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		)['orders'];
 
-		$this->assertSame( 0, did_action( 'woocommerce_extensible_abilities_resources_init' ) );
+		$this->assertTrue( ExtensibleAbilities::is_resource_registered( 'product' ), 'A write reads the ID of an object from its resource, also with the feature off.' );
 		$this->assertSame( 0, did_action( 'woocommerce_extensible_abilities_init' ) );
 		$this->assertArrayNotHasKey( 'filters', $this->get_ability( 'woocommerce/products-query' )['input_schema']['properties'] );
 		$this->assertSame( 400, $this->run_ability_response( 'woocommerce/products-query', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'has_code' => true ) ) ) ) )->get_status() );
@@ -1787,7 +1787,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					),
 					'execute_callback'    => static function ( array $input ) {
 						$product = wc_get_product( $input['id'] );
-						return ExtensibleAbilities::add_fields_to_object( array( 'id' => $product->get_id() ), 'product', $product, $product->get_type() );
+						return ExtensibleAbilities::add_fields_to_object( array( 'id' => $product->get_id() ), 'product', $product );
 					},
 					'permission_callback' => '__return_true',
 					'meta'                => array(
@@ -1843,7 +1843,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertSame(
 			array( 'test-ext' => array( 'note' => 'order-' . $order->get_id() ) ),
-			ExtensibleAbilities::add_fields_to_object( array(), 'order', $order, $order->get_type() )['extensions']
+			ExtensibleAbilities::add_fields_to_object( array(), 'order', $order )['extensions']
 		);
 	}
 
@@ -3033,7 +3033,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		}
 		$order = \WC_Helper_Order::create_order();
 
-		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', $order, $order->get_type() );
+		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', $order );
 
 		$this->assertSame( array( 'count' => 12 ), $output['extensions']['values'] );
 	}
@@ -5426,7 +5426,23 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should ignore object_types on a $resource_name field, because the objects have no type.
+	 * @testdox Should limit a coupon field with object_types to the coupons of those discount types.
+	 */
+	public function test_object_types_limit_a_coupon_field_to_some_discount_types(): void {
+		$this->register_typed_field( 'coupon', array( 'percent' ) );
+		$this->get_output_schema( 'woocommerce/products-query' );
+		$read = static function ( string $discount_type ) {
+			$coupon = new \WC_Coupon();
+			$coupon->set_discount_type( $discount_type );
+			return ExtensibleAbilities::add_fields_to_object( array(), 'coupon', $coupon );
+		};
+
+		$this->assertSame( array( 'test-ext' => array( 'typed' => 'value' ) ), $read( 'percent' )['extensions'] );
+		$this->assertSame( array(), $read( 'fixed_cart' ) );
+	}
+
+	/**
+	 * @testdox Should refuse a field with object_types on $resource_name, because its objects have no type.
 	 * @dataProvider provide_resources_without_object_types
 	 *
 	 * @param string   $resource_name Resource whose objects have no type.
@@ -5434,13 +5450,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @param string   $list_key      Output key of the list.
 	 * @param callable $create_input  Creates two objects and returns the ability input that lists them.
 	 */
-	public function test_object_types_have_no_effect_on_a_resource_without_types( string $resource_name, string $ability, string $list_key, callable $create_input ): void {
+	public function test_object_types_are_refused_on_a_resource_without_types( string $resource_name, string $ability, string $list_key, callable $create_input ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
 		$this->register_typed_field( $resource_name, array( 'simple' ) );
 
 		$list = $this->run_ability( $ability, $create_input() )[ $list_key ];
 
 		$this->assertCount( 2, $list );
-		$this->assertSame( 'value', $list[0]['extensions']['test-ext']['typed'] );
+		$this->assertArrayNotHasKey( 'extensions', $list[0] );
 	}
 
 	/**
@@ -5450,6 +5467,26 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function provide_resources_without_object_types(): array {
 		return array_intersect_key( $this->provide_list_abilities(), array_flip( array( 'product_review', 'customer' ) ) );
+	}
+
+	/**
+	 * @testdox Should refuse a resource that has no callable object_id_callback.
+	 */
+	public function test_a_resource_without_an_id_callback_is_refused(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
+
+		ExtensibleAbilities::register_resource( 'ticket' );
+
+		$this->assertFalse( ExtensibleAbilities::is_resource_registered( 'ticket' ) );
+	}
+
+	/**
+	 * The callbacks of a test resource whose objects have an `id` and no type.
+	 *
+	 * @return array<string, callable>
+	 */
+	private static function get_ticket_resource_args(): array {
+		return array( 'object_id_callback' => static fn( $ticket ): int => (int) ( $ticket->id ?? 0 ) );
 	}
 
 	/**
@@ -7727,7 +7764,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			);
 		}
 
-		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', \WC_Helper_Order::create_order(), 'shop_order' );
+		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', \WC_Helper_Order::create_order() );
 		return $output['extensions']['values'];
 	}
 

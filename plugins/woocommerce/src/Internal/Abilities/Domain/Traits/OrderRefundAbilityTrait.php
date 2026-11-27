@@ -164,7 +164,7 @@ trait OrderRefundAbilityTrait {
 			);
 		}
 
-		return ExtensibleAbilities::add_fields_to_object( $data, 'order_refund', $refund, $refund->get_type() );
+		return ExtensibleAbilities::add_fields_to_object( $data, 'order_refund', $refund );
 	}
 
 	/**

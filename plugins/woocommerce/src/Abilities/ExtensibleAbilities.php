@@ -44,9 +44,9 @@ class ExtensibleAbilities {
 	private static array $fields = array();
 
 	/**
-	 * Registered resources, keyed by resource name.
+	 * Registered resources, keyed by resource name. The value holds the arguments from `register_resource()`.
 	 *
-	 * @var array<string, bool>
+	 * @var array<string, array<string, mixed>>
 	 */
 	private static array $resources = array();
 
@@ -110,16 +110,28 @@ class ExtensibleAbilities {
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
-	 * Core registers `product`, `order` and `order_item` there. An
-	 * extension registers a resource that its own abilities format, and then calls `add_fields_to_object()`
-	 * and `add_fields_schema()` from those abilities, exactly as Core's abilities do.
+	 * Core registers `product`, `order`, `order_item`, `order_refund`, `product_term`, `product_review`, `customer`
+	 * and `coupon` there. An extension registers a resource that its own abilities format, and then calls
+	 * `add_fields_to_object()` and `add_fields_schema()` from those abilities, exactly as Core's abilities do.
 	 * Registering the same resource again does nothing.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @param string $resource_name Slug of the resource, such as `ticket`.
+	 * @param array  $args          {
+	 *     Arguments of the resource.
+	 *
+	 *     @type callable $object_id_callback   Receives an object of the resource and returns its ID as an integer,
+	 *                                          or zero when the object is not saved yet. Core's `product` returns
+	 *                                          `get_id()` and its `product_term` returns the term ID.
+	 *     @type callable $object_type_callback Optional. Receives an object of the resource and returns its type as a
+	 *                                          string, which the `object_types` of a field are compared with. Core's
+	 *                                          `product` returns `get_type()`, its `product_term` returns the taxonomy
+	 *                                          and its `coupon` returns the discount type. Without it, the objects of
+	 *                                          the resource have no type, and a field with `object_types` is refused.
+	 * }
 	 */
-	public static function register_resource( string $resource_name ): void {
+	public static function register_resource( string $resource_name, array $args = array() ): void {
 		if ( did_action( 'woocommerce_extensible_abilities_resources_init' ) && ! doing_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
 			wc_doing_it_wrong( __METHOD__, 'Register a resource inside the woocommerce_extensible_abilities_resources_init action, before the fields are registered.', '11.3.0' );
 			return;
@@ -128,8 +140,16 @@ class ExtensibleAbilities {
 			wc_doing_it_wrong( __METHOD__, 'The resource name must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.', '11.3.0' );
 			return;
 		}
+		if ( ! isset( $args['object_id_callback'] ) || ! is_callable( $args['object_id_callback'] ) ) {
+			wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" resource needs a callable "object_id_callback" argument.', $resource_name ), '11.5.0' );
+			return;
+		}
+		if ( isset( $args['object_type_callback'] ) && ! is_callable( $args['object_type_callback'] ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "object_type_callback" argument must be callable.', '11.5.0' );
+			return;
+		}
 
-		self::$resources[ $resource_name ] = true;
+		self::$resources[ $resource_name ] = self::$resources[ $resource_name ] ?? $args;
 	}
 
 	/**
@@ -164,15 +184,14 @@ class ExtensibleAbilities {
 	 *                                  which are the keywords with a nested schema that WordPress supports (see
 	 *                                  `rest_get_allowed_schema_keywords()`), and under `allOf`, which
 	 *                                  WooCommerce also reads, because some clients refuse it.
-	 *     @type string[] $object_types Optional. The object types the field applies to, such as `simple` and
-	 *                                  `subscription` for a product, `line_item`, `shipping`, `fee` and `coupon` for an
-	 *                                  order item or `product_brand` for a term. The ability that reads or writes the
-	 *                                  object gives its type. The abilities leave the field out of
-	 *                                  the other objects, and an ability that writes the resource refuses a write to
-	 *                                  them. Omit it for every type: an `order_item` field without it is then read on
-	 *                                  product, shipping, fee and coupon lines, so its `get_callback` must accept each
-	 *                                  of them. It has no effect on an object that has no type, such as a review or
-	 *                                  a customer.
+	 *     @type string[] $object_types Optional. The object types the field applies to, as the `object_type_callback` of
+	 *                                  the resource returns them, such as `simple` and `subscription` for a product,
+	 *                                  `line_item`, `shipping`, `fee` and `coupon` for an order item or `product_brand`
+	 *                                  for a term. The abilities leave the field out of the other objects, and an ability
+	 *                                  that writes the resource refuses a write to them. Omit it for every type: an
+	 *                                  `order_item` field without it is then read on product, shipping, fee and coupon
+	 *                                  lines, so its `get_callback` must accept each of them. It is refused on a resource
+	 *                                  whose objects have no type, such as `product_review` and `customer`.
 	 *     @type callable $get_callback Optional. Receives the object and returns the value. A field without it
 	 *                                  is not in the output. Required with `output_schema`. Return null when the
 	 *                                  object has no value, and the field is left out with no error. Any other
@@ -284,6 +303,10 @@ class ExtensibleAbilities {
 		}
 		if ( isset( $args['object_types'] ) && ( ! is_array( $args['object_types'] ) || empty( $args['object_types'] ) || array_filter( $args['object_types'], static fn( $type ) => ! is_string( $type ) ) ) ) {
 			wc_doing_it_wrong( __METHOD__, 'The "object_types" argument must be a list of object types.', '11.4.0' );
+			return;
+		}
+		if ( isset( $args['object_types'] ) && ! isset( self::$resources[ $args['resource'] ]['object_type_callback'] ) ) {
+			wc_doing_it_wrong( __METHOD__, sprintf( 'The objects of the "%s" resource have no type, so a field of it cannot set "object_types". Remove the argument.', $args['resource'] ), '11.5.0' );
 			return;
 		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
@@ -953,15 +976,12 @@ class ExtensibleAbilities {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param array<string, mixed> $output        Formatted object.
+	 * @param array<string, mixed> $output   Formatted object.
 	 * @param string               $resource_name Resource.
-	 * @param object               $subject       Object to read.
-	 * @param string               $object_type   The type of the object, which the `object_types` of a field are
-	 *                                            compared with, such as the type of a product or the taxonomy of
-	 *                                            a term. An empty string for an object that has no type.
+	 * @param object               $subject  Object to read.
 	 * @return array<string, mixed>|\WP_Error
 	 */
-	public static function add_fields_to_object( array $output, string $resource_name, $subject, string $object_type ) {
+	public static function add_fields_to_object( array $output, string $resource_name, $subject ) {
 		if ( empty( self::$fields[ $resource_name ] ) || ! self::is_enabled() ) {
 			return $output;
 		}
@@ -969,7 +989,7 @@ class ExtensibleAbilities {
 		$extensions = array();
 		foreach ( self::$fields[ $resource_name ] as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
-				if ( ! isset( $args['get_callback'] ) || ! self::field_applies_to( $args, $object_type ) ) {
+				if ( ! isset( $args['get_callback'] ) || ! self::field_applies_to( $args, $subject ) ) {
 					continue;
 				}
 				try {
@@ -997,17 +1017,44 @@ class ExtensibleAbilities {
 	}
 
 	/**
-	 * Whether a field applies to an object of a type, from the `object_types` of the field.
-	 * A field applies to every object that has no type.
+	 * Whether a field applies to an object, from the `object_types` of the field.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param array<string, mixed> $args        Field arguments from `register_field()`.
-	 * @param string               $object_type The type of the object, or an empty string when it has none.
+	 * @param array<string, mixed> $args    Field arguments from `register_field()`.
+	 * @param mixed                $subject The object.
 	 * @return bool
 	 */
-	public static function field_applies_to( array $args, string $object_type ): bool {
-		return empty( $args['object_types'] ) || '' === $object_type || in_array( $object_type, $args['object_types'], true );
+	public static function field_applies_to( array $args, $subject ): bool {
+		return empty( $args['object_types'] ) || in_array( self::get_object_type( $subject, $args['resource'] ), $args['object_types'], true );
+	}
+
+	/**
+	 * The type of an object, from the `object_type_callback` of its resource.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed  $subject       The object.
+	 * @param string $resource_name Resource of the object.
+	 * @return string The type, or an empty string when the resource has no `object_type_callback` or it returns no string.
+	 */
+	public static function get_object_type( $subject, string $resource_name ): string {
+		$type = isset( self::$resources[ $resource_name ]['object_type_callback'] ) ? call_user_func( self::$resources[ $resource_name ]['object_type_callback'], $subject ) : '';
+		return is_string( $type ) ? $type : '';
+	}
+
+	/**
+	 * The ID of an object, from the `object_id_callback` of its resource.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param mixed  $subject       The object.
+	 * @param string $resource_name Resource of the object.
+	 * @return int The ID, or zero when the object is not saved yet, the callback returns no integer or the resource is not registered.
+	 */
+	public static function get_object_id( $subject, string $resource_name ): int {
+		$id = isset( self::$resources[ $resource_name ] ) ? call_user_func( self::$resources[ $resource_name ]['object_id_callback'], $subject ) : 0;
+		return is_int( $id ) ? $id : 0;
 	}
 
 	/**

@@ -50,26 +50,6 @@ class TestOrderStatusAbility extends ActionableAbility {
 	}
 
 	/**
-	 * The ID of an order, or zero when it is not saved yet.
-	 *
-	 * @param \WC_Order $subject An order.
-	 * @return int
-	 */
-	protected static function get_object_id( $subject ): int {
-		return $subject->get_id();
-	}
-
-	/**
-	 * The type of the object, which the `object_types` of a field are compared with.
-	 *
-	 * @param \WC_Order $subject An order.
-	 * @return string
-	 */
-	protected static function get_object_type( $subject ): string {
-		return $subject->get_type();
-	}
-
-	/**
 	 * The saved order status.
 	 *
 	 * @param \WC_Order $subject Saved order.

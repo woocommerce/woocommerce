@@ -20,26 +20,6 @@ defined( 'ABSPATH' ) || exit;
 trait OrderAbilityTrait {
 
 	/**
-	 * The ID of an order or an order item, or zero when it is not saved yet.
-	 *
-	 * @param \WC_Abstract_Order|\WC_Order_Item $subject An order or an order item.
-	 * @return int
-	 */
-	protected static function get_object_id( $subject ): int {
-		return $subject->get_id();
-	}
-
-	/**
-	 * The type of an order or an order item, which the `object_types` of a field are compared with.
-	 *
-	 * @param \WC_Abstract_Order|\WC_Order_Item $subject An order or an order item.
-	 * @return string
-	 */
-	protected static function get_object_type( $subject ): string {
-		return $subject->get_type();
-	}
-
-	/**
 	 * Allowed order status slugs (without the `wc-` prefix).
 	 *
 	 * @return array<int, string>
@@ -564,8 +544,7 @@ trait OrderAbilityTrait {
 				$line_item = ExtensibleAbilities::add_fields_to_object(
 					self::format_line_item_for_response( $item ),
 					'order_item',
-					$item,
-					self::get_object_type( $item )
+					$item
 				);
 				if ( is_wp_error( $line_item ) ) {
 					return $line_item;
@@ -599,7 +578,7 @@ trait OrderAbilityTrait {
 			)
 		);
 
-		return ExtensibleAbilities::add_fields_to_object( $data, 'order', $order, self::get_object_type( $order ) );
+		return ExtensibleAbilities::add_fields_to_object( $data, 'order', $order );
 	}
 
 	/**
@@ -684,7 +663,7 @@ trait OrderAbilityTrait {
 		foreach ( $lines as $key => list( $items, $format ) ) {
 			$data[ $key ] = array();
 			foreach ( $items as $item ) {
-				$line = ExtensibleAbilities::add_fields_to_object( $format( $item ), 'order_item', $item, self::get_object_type( $item ) );
+				$line = ExtensibleAbilities::add_fields_to_object( $format( $item ), 'order_item', $item );
 				if ( is_wp_error( $line ) ) {
 					return $line;
 				}

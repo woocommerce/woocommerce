@@ -1,3 +1,3 @@
 Significance: patch
 Type: dev
-Comment: Let the product term abilities write extension fields and let object_types work on terms; the feature is experimental.
+Comment: Let the product term abilities write extension fields, and read the ID and type of an object from its resource; the feature is experimental.

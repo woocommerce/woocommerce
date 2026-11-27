@@ -21,26 +21,6 @@ defined( 'ABSPATH' ) || exit;
 trait ProductAbilityTrait {
 
 	/**
-	 * The ID of a product or a variation, or zero when it is not saved yet.
-	 *
-	 * @param \WC_Product $subject A product or a variation.
-	 * @return int
-	 */
-	protected static function get_object_id( $subject ): int {
-		return $subject->get_id();
-	}
-
-	/**
-	 * The type of a product, which the `object_types` of a field are compared with.
-	 *
-	 * @param \WC_Product $subject A product or a variation.
-	 * @return string
-	 */
-	protected static function get_object_type( $subject ): string {
-		return $subject->get_type();
-	}
-
-	/**
 	 * Get the product create input schema.
 	 *
 	 * @return array
@@ -1968,7 +1948,7 @@ trait ProductAbilityTrait {
 			)
 		);
 
-		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product, self::get_object_type( $product ) );
+		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product );
 	}
 
 	/**
