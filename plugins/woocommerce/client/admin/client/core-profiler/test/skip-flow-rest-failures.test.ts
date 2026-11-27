@@ -33,12 +33,12 @@ const mockJetpackAuthResult = {
 	success: true,
 	url: 'https://jetpack.test/authorize',
 };
-// What the unforced request (the same one the prefetch makes) returns; forced requests get mockJetpackAuthResult.
-let mockUnforcedJetpackAuthResult: Record< string, unknown > =
-	mockJetpackAuthResult;
+const mockGetJetpackAuthUrl = jest.fn<
+	Record< string, unknown >,
+	[ { force?: boolean } ]
+>( () => mockJetpackAuthResult );
 const mockFailingRequests = new Set< string >();
 const mockStoreCalls: string[] = [];
-const mockStoreArgs: Array< [ string, unknown[] ] > = [];
 function mockWooStore( resolvedValues: Record< string, unknown > ) {
 	return new Proxy(
 		{},
@@ -47,7 +47,6 @@ function mockWooStore( resolvedValues: Record< string, unknown > ) {
 				( _target, name: string ) =>
 				( ...args: unknown[] ) => {
 					mockStoreCalls.push( name );
-					mockStoreArgs.push( [ name, args ] );
 					if (
 						! mockFailingRequests.has( name ) &&
 						! mockFailingRequests.has( '*' )
@@ -85,10 +84,7 @@ jest.mock( '@wordpress/data', () => {
 						getCountries: [],
 						getFreeExtensions: [],
 						getCoreProfilerCompletedSteps: {},
-						getJetpackAuthUrl: ( query: { force?: boolean } ) =>
-							query?.force
-								? mockJetpackAuthResult
-								: mockUnforcedJetpackAuthResult,
+						getJetpackAuthUrl: mockGetJetpackAuthUrl,
 					} )
 				: actual.resolveSelect( store ),
 	};
@@ -162,8 +158,6 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 			.mockImplementation( () => undefined );
 		mockFailingRequests.clear();
 		mockStoreCalls.length = 0;
-		mockStoreArgs.length = 0;
-		mockUnforcedJetpackAuthResult = mockJetpackAuthResult;
 		mockOnboardingSetting.skipOnboardingFallbackUrl = FALLBACK_URL;
 		// @ts-expect-error Replace jsdom's location so navigation can be observed.
 		delete window.location;
@@ -289,11 +283,10 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 		await expect( toPromise( actor ) ).resolves.toEqual(
 			mockJetpackAuthResult
 		);
-		const authQueries = mockStoreArgs
-			.filter( ( [ name ] ) => name === 'getJetpackAuthUrl' )
-			.map( ( [ , args ] ) => args[ 0 ] );
 		// The same arguments as the prefetch, so a prefetch still registering is awaited instead of raced.
-		expect( authQueries ).toEqual( [
+		expect(
+			mockGetJetpackAuthUrl.mock.calls.map( ( [ q ] ) => q )
+		).toEqual( [
 			{
 				redirectUrl: expect.any( String ),
 				from: 'woocommerce-core-profiler',
@@ -302,11 +295,12 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 	} );
 
 	it( 'retries with a forced registration once the prefetched request failed', async () => {
-		mockUnforcedJetpackAuthResult = {
+		// The unforced request, the one the prefetch makes, fails.
+		mockGetJetpackAuthUrl.mockReturnValueOnce( {
 			success: false,
 			errors: [ 'Held back after an earlier failure.' ],
 			url: 'https://jetpack.test/authorize',
-		};
+		} );
 		const actor = createActor(
 			coreProfilerMachineActors.exitToJetpackAuth
 		).start();
@@ -314,10 +308,9 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 		await expect( toPromise( actor ) ).resolves.toEqual(
 			mockJetpackAuthResult
 		);
-		const authQueries = mockStoreArgs
-			.filter( ( [ name ] ) => name === 'getJetpackAuthUrl' )
-			.map( ( [ , args ] ) => args[ 0 ] );
-		expect( authQueries ).toEqual( [
+		expect(
+			mockGetJetpackAuthUrl.mock.calls.map( ( [ q ] ) => q )
+		).toEqual( [
 			expect.not.objectContaining( { force: true } ),
 			expect.objectContaining( { force: true } ),
 		] );
