@@ -65,7 +65,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test update_total_sales_counts and check total_sales after order reflection.
+	 * @testdox Should update total sales exactly once across order status transitions.
 	 *
 	 * Tests the fix for issue #23796
 	 */
@@ -73,7 +73,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 
 		$product_id = WC_Helper_Product::create_simple_product()->get_id();
 
-		WC()->cart->add_to_cart( $product_id );
+		WC()->cart->add_to_cart( $product_id, 2 );
 
 		$order_id = WC_Checkout::instance()->create_order(
 			array(
@@ -87,22 +87,48 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$order = new WC_Order( $order_id );
 
 		$order->update_status( OrderStatus::PROCESSING );
-		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
+		$this->assertEquals( 2, wc_get_product( $product_id )->get_total_sales() );
+
+		$order->update_status( OrderStatus::FAILED );
+		$order->update_status( OrderStatus::FAILED );
+		$this->assertEquals( 0, wc_get_product( $product_id )->get_total_sales() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 2, wc_get_product( $product_id )->get_total_sales() );
+
+		$order->update_status( OrderStatus::ON_HOLD );
+		$order->update_status( OrderStatus::FAILED );
+		$order->update_status( OrderStatus::FAILED );
+		$this->assertEquals( 0, wc_get_product( $product_id )->get_total_sales() );
+
+		$order->update_status( OrderStatus::ON_HOLD );
+		$order->update_status( OrderStatus::ON_HOLD );
+		$this->assertEquals( 2, wc_get_product( $product_id )->get_total_sales() );
+
+		$order->update_status( OrderStatus::COMPLETED );
+		$order->update_status( OrderStatus::FAILED );
+		$order->update_status( OrderStatus::FAILED );
+		$this->assertEquals( 0, wc_get_product( $product_id )->get_total_sales() );
+
+		$order->update_status( OrderStatus::COMPLETED );
+		$order->update_status( OrderStatus::COMPLETED );
+		$this->assertEquals( 2, wc_get_product( $product_id )->get_total_sales() );
 
 		$order->update_status( OrderStatus::CANCELLED );
 		$this->assertEquals( 0, wc_get_product( $product_id )->get_total_sales() );
 
 		$order->update_status( OrderStatus::PROCESSING );
-		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
+		$this->assertEquals( 2, wc_get_product( $product_id )->get_total_sales() );
 
 		$order->update_status( OrderStatus::COMPLETED );
-		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
+		$this->assertEquals( 2, wc_get_product( $product_id )->get_total_sales() );
 
 		$order->update_status( OrderStatus::REFUNDED );
-		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
+		$this->assertEquals( 2, wc_get_product( $product_id )->get_total_sales() );
 
 		$order->update_status( OrderStatus::PROCESSING );
-		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
+		$this->assertEquals( 2, wc_get_product( $product_id )->get_total_sales() );
 
 		// Test trashing the order.
 		$order->delete( false );
@@ -110,7 +136,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 
 		// To successfully untrash, we need to grab a new instance of the order.
 		wc_get_order( $order_id )->untrash();
-		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
+		$this->assertEquals( 2, wc_get_product( $product_id )->get_total_sales() );
 
 		// Test full deletion of the order (again, we need to grab a new instance of the order).
 		wc_get_order( $order_id )->delete( true );

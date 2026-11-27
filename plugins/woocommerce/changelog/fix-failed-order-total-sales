@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Exclude failed orders from product sales totals when a previously counted order fails.
