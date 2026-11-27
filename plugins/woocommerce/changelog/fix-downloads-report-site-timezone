@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Analytics Downloads report filtering and grouping download dates in UTC instead of the store timezone, so downloads near midnight count toward the right day.
