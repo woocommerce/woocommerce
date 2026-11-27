@@ -90,7 +90,7 @@ class AuthenticationRouteMatchingTest extends WC_Unit_Test_Case {
 	 */
 	public function test_session_handler_uses_cart_token_for_encoded_path(): void {
 		$_SERVER['REQUEST_URI']     = '/wp%2Djson/wc/store/v1/cart';
-		$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_token( 'test-customer' );
+		$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_token( 't_test_customer' );
 
 		$this->assertSame( SessionHandler::class, $this->sut->maybe_use_store_api_session_handler( \WC_Session_Handler::class ) );
 	}
