@@ -2240,6 +2240,75 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should name the full path of an unknown nested key and the keys its object accepts.
+	 * @testWith [{"metal":{"gold":1}}, "\"extensions.probe.dims[metal][gold]\" is not a key of this field. Remove it from the input. \"extensions.probe.dims[metal]\" accepts: iron."]
+	 *           [{"wood":{"pine":1,"oak":1}}, "\"extensions.probe.dims[wood][oak]\" is not a key of this field. Remove it from the input. \"extensions.probe.dims[wood]\" accepts: pine."]
+	 *           [{"stones":[{"name":"ruby"},{"carat":2}]}, "\"extensions.probe.dims[stones][1][carat]\" is not a key of this field. Remove it from the input. \"extensions.probe.dims[stones][1]\" accepts: name."]
+	 *           [{"gems":{"ruby":{"size_mm":2,"cut":1}}}, "\"extensions.probe.dims[gems][ruby][cut]\" is not a key of this field. Remove it from the input."]
+	 *           [{"bead":{"name":"jade","size_mm":2,"cut":1}}, "\"extensions.probe.dims[bead][cut]\" is not a key of this field. Remove it from the input."]
+	 *           [{"tier":{"b":1}}, "\"extensions.probe.dims[tier][b]\" is not a key of this field. Remove it from the input. \"extensions.probe.dims[tier]\" accepts: a."]
+	 *           [{"wood":{"oak":1}}, "extensions.probe.dims[wood] does not match the expected format. Reason: pine is a required property of extensions.probe.dims[wood]."]
+	 *
+	 * @param array  $dims    Value of the field.
+	 * @param string $message Expected refusal.
+	 */
+	public function test_an_unknown_nested_key_is_refused_with_its_full_path( array $dims, string $message ): void {
+		$strict = static fn( array $properties, array $required = array() ): array => array(
+			'type'                 => 'object',
+			'properties'           => $properties,
+			'required'             => $required,
+			'additionalProperties' => false,
+		);
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $strict ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'probe',
+						'field'        => 'dims',
+						'input_schema' => $strict(
+							array(
+								'metal'  => $strict( array( 'iron' => array( 'type' => 'integer' ) ) ),
+								'wood'   => array( 'anyOf' => array( $strict( array( 'pine' => array( 'type' => 'integer' ) ), array( 'pine' ) ), array( 'type' => 'null' ) ) ),
+								'stones' => array(
+									'type'  => 'array',
+									'items' => $strict( array( 'name' => array( 'type' => 'string' ) ) ),
+								),
+								'bead'   => array( 'patternProperties' => array( '^size_' => array( 'type' => 'integer' ) ) ) + $strict( array( 'name' => array( 'type' => 'string' ) ) ),
+								'tier'   => array( 'anyOf' => array( array( 'anyOf' => array( $strict( array( 'a' => array( 'type' => 'integer' ) ) ) ) ), array( 'type' => 'null' ) ) ),
+								'gems'   => array(
+									'oneOf' => array(
+										array(
+											'type' => 'object',
+											'additionalProperties' => array( 'patternProperties' => array( '^size_' => array( 'type' => 'integer' ) ) ) + $strict( array() ),
+										),
+										array( 'type' => 'null' ),
+									),
+								),
+							)
+						),
+						'set_callback' => '__return_null',
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'probe' => array( 'dims' => $dims ) ),
+			)
+		);
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( $message, $refused->get_data()['message'] );
+	}
+
+	/**
 	 * @testdox Should register a field whose input schema is an anyOf of single types, publish it as declared and pass null or a typed value to the set_callback.
 	 */
 	public function test_an_any_of_input_schema_takes_null_and_a_typed_value(): void {
