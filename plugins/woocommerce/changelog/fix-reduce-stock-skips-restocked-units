@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop taking refunded and restocked units out of stock again when an order is paid after being cancelled, failed or set to pending.

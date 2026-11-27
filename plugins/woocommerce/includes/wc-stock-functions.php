@@ -196,6 +196,12 @@ function wc_reduce_stock_levels( $order_id ) {
 			continue;
 		}
 
+		// Units refunded with restock are already back in stock, so only take the units the customer kept.
+		$kept_quantity = $item->get_quantity() - wc_stock_amount( $item->get_meta( '_restock_refunded_items', true ) );
+		if ( $kept_quantity <= 0 ) {
+			continue;
+		}
+
 		/**
 		 * Filter order item quantity.
 		 *
@@ -203,7 +209,7 @@ function wc_reduce_stock_levels( $order_id ) {
 		 * @param WC_Order              $order    Order data.
 		 * @param WC_Order_Item_Product $item Order item data.
 		 */
-		$qty       = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
+		$qty       = apply_filters( 'woocommerce_order_item_quantity', $kept_quantity, $order, $item );
 		$item_name = $product->get_name();
 		$new_stock = wc_update_product_stock( $product, $qty, 'decrease' );
 

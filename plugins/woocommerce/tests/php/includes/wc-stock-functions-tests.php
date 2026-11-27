@@ -58,7 +58,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	 *
 	 * @param string $status Status for the newly created order.
 	 */
-	private function create_order_from_cart_with_status( $status ) {
+	private function create_order_from_cart_with_status( $status, $quantity = 1 ) {
 		if ( ! $this->stock_product ) {
 			$this->stock_product = WC_Helper_Product::create_simple_product(
 				true,
@@ -72,7 +72,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		}
 		$product = $this->stock_product;
 		WC()->cart->empty_cart();
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_to_cart( $product->get_id(), $quantity );
 		WC()->cart->calculate_totals();
 
 		$checkout = WC_Checkout::instance();
@@ -340,6 +340,45 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$order->save();
 		$this->assertEquals( 9, wc_get_product( $product_id )->get_stock_quantity(), 'Re-activating the order should reduce stock exactly once.' );
 		$this->assertTrue( (bool) $order->get_data_store()->get_stock_reduced( $order->get_id() ), 'The stock-reduced flag should be set again after re-activation.' );
+	}
+
+	/**
+	 * @testdox Paying for an order again does not take units that were refunded and restocked out of stock a second time.
+	 *
+	 * @testWith [3, 1, 8]
+	 *           [3, 3, 10]
+	 *
+	 * @param int $quantity       Units ordered.
+	 * @param int $refunded       Units refunded with restock.
+	 * @param int $expected_stock Stock once the order is paid again.
+	 */
+	public function test_paying_again_does_not_reduce_refunded_restocked_units( $quantity, $refunded, $expected_stock ) {
+		$order      = $this->create_order_from_cart_with_status( OrderInternalStatus::PROCESSING, $quantity );
+		$item       = array_values( $order->get_items( 'line_item' ) )[0];
+		$product_id = $item->get_product_id();
+
+		wc_create_refund(
+			array(
+				'order_id'      => $order->get_id(),
+				'amount'        => 0,
+				'line_items'    => array(
+					$item->get_id() => array(
+						'qty'          => $refunded,
+						'refund_total' => 0,
+					),
+				),
+				'restock_items' => true,
+			)
+		);
+		$this->assertEquals( 10 - $quantity + $refunded, wc_get_product( $product_id )->get_stock_quantity(), 'The refund should put the refunded units back.' );
+
+		$order = wc_get_order( $order->get_id() );
+		$order->set_status( OrderInternalStatus::PENDING );
+		$order->save();
+		$order->set_status( OrderInternalStatus::PROCESSING );
+		$order->save();
+
+		$this->assertEquals( $expected_stock, wc_get_product( $product_id )->get_stock_quantity(), 'Paying again should only take the units the customer kept.' );
 	}
 
 	/**
