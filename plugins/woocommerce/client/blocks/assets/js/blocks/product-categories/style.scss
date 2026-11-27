@@ -65,11 +65,12 @@
 
 .wc-block-product-categories__button {
 	display: flex;
-	align-items: center;
-	margin: 0;
-	padding: 0 0.5em;
-	position: relative;
-	overflow: hidden;
+
+	// Double-class for specificity, so it wins default button styles.
+	&.wc-block-product-categories__button {
+		align-items: center;
+		padding: 0 0.5em;
+	}
 
 	svg {
 		fill: currentColor;
@@ -77,17 +78,5 @@
 		.rtl & {
 			transform: rotate(180deg);
 		}
-	}
-	&:active {
-		color: currentColor;
-	}
-	&:disabled,
-	&[aria-disabled="true"] {
-		cursor: default;
-		opacity: 0.3;
-	}
-	&[aria-disabled="true"]:focus,
-	&:disabled:focus {
-		box-shadow: none;
 	}
 }

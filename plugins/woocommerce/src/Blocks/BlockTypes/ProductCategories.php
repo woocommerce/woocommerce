@@ -162,7 +162,7 @@ class ProductCategories extends AbstractDynamicBlock {
 		if ( ! $attributes['hasEmpty'] ) {
 			$categories = array_filter(
 				$categories,
-				function( $category ) {
+				function ( $category ) {
 					return 0 !== $category->count;
 				}
 			);
@@ -255,7 +255,7 @@ class ProductCategories extends AbstractDynamicBlock {
 			</div>
 			<button
 				type="button"
-				class="wc-block-product-categories__button"
+				class="wc-block-product-categories__button wp-element-button"
 				aria-label="' . esc_html__( 'Go to category', 'woocommerce' ) . '"
 				onclick="const url = document.getElementById( \'' . esc_attr( $uid ) . '-select\' ).value; if ( \'false\' !== url ) document.location.href = url;"
 			>
