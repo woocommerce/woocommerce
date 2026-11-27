@@ -167,6 +167,8 @@ class Proxy_Speed_Module {
 			return self::error_response( 'Invalid JSON' );
 		}
 
+		self::replay_recorded_event_props();
+
 		$data = WC_Analytics_Tracking::record_client_events( $events );
 
 		$data['is_proxy_speed_module'] = true;
@@ -235,6 +237,32 @@ class Proxy_Speed_Module {
 		$cookie_name = $prefix . '_statistics';
 
 		return isset( $_COOKIE[ $cookie_name ] ) && 'deny' === $_COOKIE[ $cookie_name ];
+	}
+
+	/**
+	 * Add what plugin callbacks on the event props filter returned at the last cron record, since they have not registered yet.
+	 *
+	 * @return void
+	 */
+	private static function replay_recorded_event_props() {
+		// Mid-deploy, an older Woocommerce_Analytics may lack it.
+		if ( ! defined( Woocommerce_Analytics::class . '::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION' ) ) {
+			return;
+		}
+
+		$recorded = get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_EVENT_PROPS_OPTION );
+		if ( ! is_array( $recorded ) || array() === $recorded ) {
+			return;
+		}
+
+		// First, so a client value is replaced but an MU-plugin callback, which runs here, still sets its own live value.
+		add_filter(
+			'jetpack_woocommerce_analytics_event_props',
+			static function ( $props ) use ( $recorded ) {
+				return array_merge( $props, $recorded );
+			},
+			PHP_INT_MIN
+		);
 	}
 
 	/**
