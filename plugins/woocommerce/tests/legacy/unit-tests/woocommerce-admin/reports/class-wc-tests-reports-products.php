@@ -439,58 +439,38 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that a full refund after a partial line item refund does not count the refunded units twice.
+	 * Partial refunds made before an order is set to Refunded.
+	 *
+	 * Each line is a quantity and a total. Each refund is a line index, a quantity and a total.
+	 *
+	 * @return array[]
 	 */
-	public function test_populate_partial_refund_then_full_refund() {
-		WC_Helper_Reports::reset_stats_dbs();
-
-		$product = new WC_Product_Simple();
-		$product->set_name( 'Test Product' );
-		$product->set_regular_price( 25 );
-		$product->save();
-
-		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( OrderStatus::COMPLETED );
-		$order->save();
-
-		$items   = $order->get_items();
-		$item_id = array_key_first( $items );
-		wc_create_refund(
-			array(
-				'amount'     => 25,
-				'order_id'   => $order->get_id(),
-				'line_items' => array(
-					$item_id => array(
-						'qty'          => 1,
-						'refund_total' => 25,
-					),
-				),
-			)
+	public function provide_partial_refunds_then_full_refund() {
+		return array(
+			'one unit of a line'                   => array(
+				array( array( 4, 100 ) ),
+				array( array( 0, 1, 25 ) ),
+			),
+			'one of two lines of the same product' => array(
+				array( array( 4, 100 ), array( 1, 25 ) ),
+				array( array( 1, 1, 25 ) ),
+			),
+			'two refunds of an uneven unit price'  => array(
+				array( array( 3, 29 ) ),
+				array( array( 0, 1, 29 / 3 ), array( 0, 1, 29 / 3 ) ),
+			),
 		);
-		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
-
-		$order = wc_get_order( $order->get_id() );
-		$order->set_status( OrderStatus::REFUNDED );
-		$order->save();
-		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
-
-		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
-		$end_time   = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
-		$data       = ( new ProductsDataStore() )->get_data(
-			array(
-				'after'  => $start_time,
-				'before' => $end_time,
-			)
-		);
-
-		$this->assertSame( 0, (int) $data->data[0]['items_sold'] );
-		$this->assertEquals( 0.0, $data->data[0]['net_revenue'] );
 	}
 
 	/**
-	 * Tests that a full refund after refunding one of two lines of the same product leaves no net revenue.
+	 * Tests that a full refund after partial refunds counts only what the partial refunds left.
+	 *
+	 * @dataProvider provide_partial_refunds_then_full_refund
+	 *
+	 * @param array $lines   Order lines as quantity and total.
+	 * @param array $refunds Partial refunds as line index, quantity and total.
 	 */
-	public function test_populate_refund_one_of_two_lines_of_a_product_then_full_refund() {
+	public function test_populate_partial_refunds_then_full_refund( $lines, $refunds ) {
 		WC_Helper_Reports::reset_stats_dbs();
 
 		$product = new WC_Product_Simple();
@@ -498,29 +478,35 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$product->set_regular_price( 25 );
 		$product->save();
 
-		$order  = WC_Helper_Order::create_order( 1, $product );
-		$second = new WC_Order_Item_Product();
-		$second->set_product( $product );
-		$second->set_quantity( 1 );
-		$second->set_subtotal( 25 );
-		$second->set_total( 25 );
-		$order->add_item( $second );
+		$order = new WC_Order();
+		$items = array();
+		foreach ( $lines as $line ) {
+			$item = new WC_Order_Item_Product();
+			$item->set_product( $product );
+			$item->set_quantity( $line[0] );
+			$item->set_subtotal( $line[1] );
+			$item->set_total( $line[1] );
+			$order->add_item( $item );
+			$items[] = $item;
+		}
 		$order->set_status( OrderStatus::COMPLETED );
-		$order->calculate_totals();
+		$order->calculate_totals( false );
 		$order->save();
 
-		wc_create_refund(
-			array(
-				'amount'     => 25,
-				'order_id'   => $order->get_id(),
-				'line_items' => array(
-					$second->get_id() => array(
-						'qty'          => 1,
-						'refund_total' => 25,
+		foreach ( $refunds as $refund ) {
+			wc_create_refund(
+				array(
+					'amount'     => round( $refund[2], 2 ),
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						$items[ $refund[0] ]->get_id() => array(
+							'qty'          => $refund[1],
+							'refund_total' => $refund[2],
+						),
 					),
-				),
-			)
-		);
+				)
+			);
+		}
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$order = wc_get_order( $order->get_id() );

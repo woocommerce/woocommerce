@@ -585,7 +585,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$refund_type                       = $order->get_meta( '_refund_type' );
 		$uses_new_full_refund_data         = OrderUtil::uses_new_full_refund_data();
 
-		$parent_order = null;
+		$parent_order       = null;
+		$prior_refunded_qty = array();
+		$prior_refunded_net = array();
 
 		// When changing the order status to "Refunded", the refund order's type will be full refund, and the order items will be empty.
 		// We need to get the parent order items, and exclude the items that are already being partially refunded.
@@ -600,6 +602,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$parent_order_id = $order->get_parent_id();
 			$parent_order    = wc_get_order( $parent_order_id );
 			$order_items     = $parent_order->get_items();
+
+			// Sum what earlier refunds took from each line, rounding each like the rows those refunds wrote.
+			if ( $parent_order instanceof \WC_Order ) {
+				foreach ( $parent_order->get_refunds() as $prior_refund ) {
+					foreach ( $prior_refund->get_items() as $refunded_item ) {
+						if ( ! $refunded_item instanceof \WC_Order_Item_Product ) {
+							continue;
+						}
+						$refunded_item_id                        = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
+						$prior_refunded_qty[ $refunded_item_id ] = ( $prior_refunded_qty[ $refunded_item_id ] ?? 0 ) + $refunded_item->get_quantity();
+						$prior_refunded_net[ $refunded_item_id ] = ( $prior_refunded_net[ $refunded_item_id ] ?? 0 ) + round( (float) $refunded_item->get_total(), $decimals );
+					}
+				}
+			}
 		}
 
 		foreach ( $order_items as $order_item ) {
@@ -618,10 +634,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			if ( $is_full_refund_without_line_items ) {
 				// Earlier refunds of this line already have their own rows, so only store what they left.
 				// For example, when 1 of 4 units at $25 was refunded before, this row is -3 units and -$75.
-				$is_parent_order = $parent_order instanceof \WC_Order;
-				$refunded_total  = $is_parent_order ? $parent_order->get_total_refunded_for_item( $order_item_id ) : 0;
-				$refunded_qty    = $is_parent_order ? $parent_order->get_qty_refunded_for_item( $order_item_id ) : 0;
-				$net_revenue     = -abs( round( $net_revenue - $refunded_total, $decimals ) );
+				// Refund items are negative, so adding them takes the earlier refunds off.
+				$net_revenue = -abs( round( $net_revenue + ( $prior_refunded_net[ $order_item_id ] ?? 0 ), $decimals ) );
 
 				// Skip items that have already been fully refunded (single or multiple partial refunds).
 				if ( 0.0 === $net_revenue ) {
@@ -637,7 +651,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					continue;
 				}
 
-				$product_qty = -abs( $product_qty + $refunded_qty );
+				$product_qty = -abs( $product_qty + ( $prior_refunded_qty[ $order_item_id ] ?? 0 ) );
 
 				// Set coupon amount to 0 for full refunds without line items.
 				$coupon_amount = 0;
