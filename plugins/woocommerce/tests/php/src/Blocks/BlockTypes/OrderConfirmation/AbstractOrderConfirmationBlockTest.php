@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\OrderConfirmation;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\AbstractOrderConfirmationBlock;
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use WC_Order;
 use WC_Unit_Test_Case;
 
@@ -34,6 +35,10 @@ final class AbstractOrderConfirmationBlockTest extends WC_Unit_Test_Case {
 			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			public function get_view_order_permissions_proxy( WC_Order $order ) {
 				return $this->get_view_order_permissions( $order );
+			}
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function email_verification_permitted_proxy( WC_Order $order ): bool {
+				return $this->email_verification_permitted( $order );
 			}
 			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			protected function render_content( $order, $permission = false, $attributes = array(), $content = '' ) {
@@ -122,5 +127,34 @@ final class AbstractOrderConfirmationBlockTest extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_enable_guest_checkout' );
 
 		$this->assertFalse( $permission );
+	}
+
+	/**
+	 * @testdox Email verification is offered for an account created in this session even when guest checkout is off.
+	 */
+	public function test_email_verification_permitted_for_session_account_without_guest_checkout(): void {
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+		wp_set_current_user( 0 );
+		$new_customer_session = wc_get_container()->get( NewCustomerSession::class );
+		$customer_id          = $new_customer_session->create_customer( 'confirmation-no-guest@example.com' );
+		$new_order            = wc_create_order( array( 'customer_id' => $customer_id ) );
+		$new_order->set_billing_email( 'confirmation-no-guest@example.com' );
+		$new_customer_session->mark_order_created_customer( $new_order, $customer_id );
+		$new_order->save();
+		$guest_order = wc_create_order();
+		$guest_order->set_billing_email( 'guest-no-guest-checkout@example.com' );
+		$guest_order->save();
+
+		try {
+			$_GET['key'] = $new_order->get_order_key();
+			$this->assertTrue( $this->sut->email_verification_permitted_proxy( $new_order ), 'The new account cannot log in yet, so it must be able to verify its email.' );
+
+			$_GET['key'] = $guest_order->get_order_key();
+			$this->assertFalse( $this->sut->email_verification_permitted_proxy( $guest_order ), 'Guest orders still need guest checkout.' );
+		} finally {
+			unset( $_GET['key'] );
+			// The session object is shared across tests and the base class does not reset its data.
+			WC()->session->set( 'new_customer', null );
+		}
 	}
 }

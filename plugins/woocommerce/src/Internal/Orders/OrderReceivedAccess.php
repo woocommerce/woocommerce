@@ -3,12 +3,15 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Orders;
 
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
+
 /**
  * Decides who can see an order on the order received page.
  *
  * The order received shortcode and the order confirmation blocks share these rules. Every visitor needs the order key.
  * A logged in owner then sees the order. Other orders that belong to a customer need a login. A guest sees a guest
- * order for a short time after checkout, and after that unlocks it by entering the billing email address.
+ * order for a short time after checkout, and after that unlocks it by entering the billing email address. The shopper
+ * has no password for a new account until they claim it, so its order is treated like a guest order until then.
  *
  * @since 11.5.0
  */
@@ -18,6 +21,24 @@ class OrderReceivedAccess {
 	 * Context passed to the email verification filters.
 	 */
 	private const CONTEXT = 'order-received';
+
+	/**
+	 * Tracks the account created at checkout.
+	 *
+	 * @var NewCustomerSession
+	 */
+	private NewCustomerSession $new_customer_session;
+
+	/**
+	 * Initialize the class with its dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param NewCustomerSession $new_customer_session Tracks the account created at checkout.
+	 */
+	final public function init( NewCustomerSession $new_customer_session ): void {
+		$this->new_customer_session = $new_customer_session;
+	}
 
 	/**
 	 * Whether the current visitor can see the order details without entering an email address.
@@ -35,8 +56,12 @@ class OrderReceivedAccess {
 
 		$customer_id = $order->get_customer_id();
 
-		if ( $customer_id ) {
-			return get_current_user_id() === $customer_id || ! $this->verify_known_shoppers();
+		if ( $customer_id && get_current_user_id() === $customer_id ) {
+			return true;
+		}
+
+		if ( $this->needs_login( $order ) ) {
+			return ! $this->verify_known_shoppers();
 		}
 
 		// An order without a billing email can never be unlocked, so there is nothing to ask for.
@@ -60,7 +85,9 @@ class OrderReceivedAccess {
 	/**
 	 * Whether a guest can unlock the order details by entering the order's billing email address.
 	 *
-	 * Guests can unlock guest orders while guest checkout is on. Orders that belong to a customer need a login instead.
+	 * Guests can unlock guest orders while guest checkout is on. They can also unlock the order of a new account the
+	 * shopper has not claimed yet, because stores without guest checkout create these accounts too. Other customer
+	 * orders need a login.
 	 *
 	 * @since 11.5.0
 	 *
@@ -69,10 +96,15 @@ class OrderReceivedAccess {
 	 * @return bool
 	 */
 	public function guest_can_unlock_order( \WC_Order $order, string $order_key ): bool {
-		return $this->key_matches( $order, $order_key )
-			&& '' !== (string) $order->get_billing_email()
-			&& ! $order->get_customer_id()
-			&& 'yes' === get_option( 'woocommerce_enable_guest_checkout' );
+		if ( ! $this->key_matches( $order, $order_key ) || '' === (string) $order->get_billing_email() ) {
+			return false;
+		}
+
+		if ( $order->get_customer_id() ) {
+			return $this->new_customer_session->is_unclaimed_customer_order( $order );
+		}
+
+		return 'yes' === get_option( 'woocommerce_enable_guest_checkout' );
 	}
 
 	/**
@@ -128,6 +160,18 @@ class OrderReceivedAccess {
 	 */
 	private function key_matches( \WC_Order $order, string $order_key ): bool {
 		return '' !== $order_key && $order->key_is_valid( $order_key );
+	}
+
+	/**
+	 * Whether the order belongs to a customer account that a visitor has to log in to.
+	 *
+	 * The shopper has no password for a new account until they claim it, so its order does not need a login.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return bool
+	 */
+	private function needs_login( \WC_Order $order ): bool {
+		return $order->get_customer_id() > 0 && ! $this->new_customer_session->is_unclaimed_customer_order( $order );
 	}
 
 	/**

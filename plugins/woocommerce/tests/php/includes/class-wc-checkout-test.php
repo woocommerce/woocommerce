@@ -543,6 +543,151 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating an account at checkout keeps the shopper logged out and makes the new account the order customer.
+	 */
+	public function test_process_customer_creates_account_without_logging_in(): void {
+		wp_set_current_user( 0 );
+		WC()->session->set( 'new_customer', null );
+
+		$this->sut->process_customer(
+			array(
+				'createaccount'      => 1,
+				'billing_email'      => 'classic-new@example.com',
+				'billing_first_name' => 'Classic',
+				'account_password'   => 'ignored-password',
+			)
+		);
+
+		$customer = get_user_by( 'email', 'classic-new@example.com' );
+
+		$this->assertInstanceOf( WP_User::class, $customer, 'The account should be created.' );
+		$this->assertSame( 0, get_current_user_id(), 'The shopper should stay logged out.' );
+		$this->assertFalse( wp_check_password( 'ignored-password', $customer->user_pass, $customer->ID ), 'A posted password should be ignored.' );
+		$this->assertSame( $customer->ID, $this->sut->customer_id, 'The new account should be the default order customer.' );
+		$this->assertNull( WC()->session->get( 'reload_checkout' ), 'Checkout should not reload as the shopper is not logged in.' );
+	}
+
+	/**
+	 * @testdox An email that already has an account offers a login and a link to set a password, because a new account may not have one yet.
+	 */
+	public function test_process_customer_existing_email_offers_password_link(): void {
+		wp_set_current_user( 0 );
+		WC()->session->set( 'new_customer', null );
+		self::factory()->user->create(
+			array(
+				'user_email' => 'classic-existing@example.com',
+				'role'       => 'customer',
+			)
+		);
+
+		try {
+			$this->sut->process_customer(
+				array(
+					'createaccount' => 1,
+					'billing_email' => 'classic-existing@example.com',
+				)
+			);
+			$this->fail( 'Checkout should refuse an email that already has an account.' );
+		} catch ( Exception $e ) {
+			$this->assertStringContainsString( 'class="showlogin"', $e->getMessage(), 'The message should offer a login.' );
+			$this->assertStringContainsString( esc_url( wp_lostpassword_url() ), $e->getMessage(), 'The message should link to the lost password page.' );
+		}
+	}
+
+	/**
+	 * @testdox The order placed with a new account records that it created the account, so the order received page works in any session.
+	 */
+	public function test_create_order_marks_order_that_created_the_account(): void {
+		wp_set_current_user( 0 );
+		WC()->session->set( 'new_customer', null );
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+		$data = array(
+			'createaccount'  => 1,
+			'billing_email'  => 'classic-marked@example.com',
+			'payment_method' => WC_Gateway_BACS::ID,
+		);
+
+		try {
+			$this->sut->process_customer( $data );
+			$order_id = $this->sut->create_order( $data );
+		} finally {
+			WC()->cart->empty_cart();
+			// The session object is shared across tests and the base class does not reset its data.
+			WC()->session->set( 'new_customer', null );
+		}
+
+		$customer = get_user_by( 'email', 'classic-marked@example.com' );
+		$this->assertIsInt( $order_id, 'Checkout should create an order.' );
+		$this->assertInstanceOf( WP_User::class, $customer, 'The account should be created.' );
+		$order = wc_get_order( $order_id );
+		$this->assertSame( $customer->ID, $order->get_customer_id(), 'The order should belong to the new account.' );
+		$this->assertTrue( wc_get_container()->get( \Automattic\WooCommerce\Internal\Customers\NewCustomerSession::class )->is_unclaimed_customer_order( $order ), 'The order should record that it created the account.' );
+	}
+
+	/**
+	 * @testdox Retrying checkout in the same session reuses the account it created, instead of failing with an existing email error.
+	 */
+	public function test_process_customer_reuses_account_on_retry(): void {
+		wp_set_current_user( 0 );
+		WC()->session->set( 'new_customer', null );
+		$data = array(
+			'createaccount' => 1,
+			'billing_email' => 'classic-retry@example.com',
+		);
+
+		$this->sut->process_customer( $data );
+		$first_customer_id = $this->sut->customer_id;
+		$this->sut->process_customer( $data );
+
+		$this->assertGreaterThan( 0, $first_customer_id );
+		$this->assertSame( $first_customer_id, $this->sut->customer_id, 'The retry should link the order to the same account.' );
+	}
+
+	/**
+	 * @testdox After an account is created with a chosen username, the form reloads on failure, stops asking for the username and keeps the account box ticked.
+	 */
+	public function test_chosen_username_reloads_form_and_is_not_asked_for_again(): void {
+		wp_set_current_user( 0 );
+		update_option( 'woocommerce_registration_generate_username', 'no' );
+		WC()->session->set( 'new_customer', null );
+
+		$this->sut->process_customer(
+			array(
+				'createaccount'    => 1,
+				'billing_email'    => 'classic-username@example.com',
+				'account_username' => 'classic-username',
+			)
+		);
+		$this->sut->__set( 'checkout_fields', null );
+
+		try {
+			$this->assertTrue( WC()->session->get( 'reload_checkout' ), 'The form should reload if the payment fails.' );
+			$this->assertArrayNotHasKey( 'account_username', (array) $this->sut->get_checkout_fields( 'account' ), 'The username cannot change, so it should not be asked for again.' );
+			$this->assertTrue( apply_filters( 'woocommerce_create_account_default_checked', false ), 'The box should stay ticked so the retry uses the account.' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		} finally {
+			// The session object is shared across tests and the base class does not reset its data.
+			WC()->session->set( 'new_customer', null );
+			WC()->session->set( 'reload_checkout', null );
+		}
+	}
+
+	/**
+	 * @testdox The checkout form never asks for a password, and only asks for a username when the store does not generate one.
+	 */
+	public function test_checkout_fields_ask_for_username_only_when_not_generated(): void {
+		update_option( 'woocommerce_registration_generate_username', 'yes' );
+		$this->sut->__set( 'checkout_fields', null );
+		$this->assertArrayNotHasKey( 'account_username', (array) $this->sut->get_checkout_fields( 'account' ) );
+
+		update_option( 'woocommerce_registration_generate_username', 'no' );
+		$this->sut->__set( 'checkout_fields', null );
+		$fields = (array) $this->sut->get_checkout_fields( 'account' );
+
+		$this->assertArrayHasKey( 'account_username', $fields );
+		$this->assertArrayNotHasKey( 'account_password', $fields );
+	}
+
+	/**
 	 * @testdox the customer notes can have linebreaks.
 	 */
 	public function test_order_notes_linebreaks() {
@@ -1518,7 +1663,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		}
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 
-		// Keep the session cookie in $_COOKIE, where the login reads it, instead of sending a header.
+		// Keep the session cookie in $_COOKIE instead of sending a header.
 		$cookie_name  = '';
 		$store_cookie = function ( $enabled, $name, $value ) use ( &$cookie_name ) {
 			$cookie_name             = $name;
@@ -1568,8 +1713,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$this->sut->update_session( $data );
 			$this->sut->process_customer( $data );
 
-			$this->assertTrue( is_user_logged_in(), 'The checkout must create the account and log the customer in.' );
-			$this->assertSame( array( $posted_rate ), WC()->session->get( 'chosen_shipping_methods' ), 'The posted rate must still be the chosen rate after the login.' );
+			$this->assertInstanceOf( WP_User::class, get_user_by( 'email', 'new-shopper@example.com' ), 'The checkout must create the account.' );
+			$this->assertFalse( is_user_logged_in(), 'The checkout must not log the new customer in.' );
+			$this->assertSame( array( $posted_rate ), WC()->session->get( 'chosen_shipping_methods' ), 'The posted rate must still be the chosen rate after the account is created.' );
 			$this->assertSame( $expected_shipping, (float) WC()->cart->get_shipping_total(), 'The cart must be charged the posted rate.' );
 			$this->assertSame( $expected_shipping_tax, (float) WC()->cart->get_shipping_tax(), 'The shipping tax must be the tax of the posted address.' );
 		} finally {
@@ -4329,27 +4475,5 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$errors->get_error_messages( 'billing_country_validation' )
 		);
 		$this->assertSame( array(), $errors->get_error_messages( 'shipping' ), 'One missing country should raise one notice.' );
-	}
-
-	/**
-	 * @testdox Classic checkout never asks for a password, and a new account gets a generated one even if a password is posted.
-	 */
-	public function test_process_customer_creates_account_with_generated_password(): void {
-		wp_set_current_user( 0 );
-		add_filter( 'pre_wp_mail', '__return_true' );
-
-		$this->assertArrayNotHasKey( 'account_password', (array) $this->sut->get_checkout_fields( 'account' ), 'The form should not ask for a password.' );
-
-		$this->sut->process_customer(
-			array(
-				'createaccount'    => 1,
-				'billing_email'    => 'classic-generated@example.com',
-				'account_password' => 'chosen-Password-123',
-			)
-		);
-
-		$customer = get_user_by( 'email', 'classic-generated@example.com' );
-		$this->assertInstanceOf( WP_User::class, $customer, 'The account should be created.' );
-		$this->assertFalse( wp_check_password( 'chosen-Password-123', $customer->user_pass, $customer->ID ), 'A posted password should be ignored.' );
 	}
 }

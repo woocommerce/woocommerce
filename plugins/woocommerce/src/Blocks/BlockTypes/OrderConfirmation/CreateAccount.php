@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 
 /**
  * CreateAccount class.
@@ -148,15 +149,17 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 			return new \WP_Error( 'email_mismatch', __( 'The email address provided does not match the email address on this order.', 'woocommerce' ) );
 		}
 
-		$customer_id = wc_create_new_customer(
+		// The new account email has a link to set the password. The order is paid, so the session does not keep the account.
+		$new_customer_session = wc_get_container()->get( NewCustomerSession::class );
+		$customer_id          = $new_customer_session->create_customer(
 			$user_email,
-			'',
-			'',
 			[
 				'first_name' => $order->get_billing_first_name(),
 				'last_name'  => $order->get_billing_last_name(),
 				'source'     => 'delayed-account-creation',
-			]
+			],
+			'',
+			false
 		);
 
 		if ( is_wp_error( $customer_id ) ) {
@@ -165,14 +168,12 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 
 		// Associate customer with the order.
 		$order->set_customer_id( $customer_id );
+		$new_customer_session->mark_order_created_customer( $order, $customer_id );
 		$order->save();
 
 		// Associate addresses from the order with the customer.
 		$order_controller = new OrderController();
 		$order_controller->sync_customer_data_with_order( $order );
-
-		// Set the customer auth cookie.
-		wc_set_customer_auth_cookie( $customer_id );
 
 		return $customer_id;
 	}
@@ -241,19 +242,13 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	 * @return string
 	 */
 	protected function render_confirmation() {
-		$content  = '<div class="wc-block-order-confirmation-create-account-success" id="create-account">';
-		$content .= '<h3>' . esc_html__( 'Your account has been successfully created', 'woocommerce' ) . '</h3>';
-		$content .= '<p>' . sprintf(
-			/* translators: 1: link to my account page, 2: link to shipping and billing addresses, 3: link to account details, 4: closing tag */
-			esc_html__( 'You can now %1$sview your recent orders%4$s, manage your %2$sshipping and billing addresses%4$s, and edit your %3$spassword and account details%4$s.', 'woocommerce' ),
-			'<a href="' . esc_url( wc_get_endpoint_url( 'orders', '', wc_get_page_permalink( 'myaccount' ) ) ) . '">',
-			'<a href="' . esc_url( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) ) . '">',
-			'<a href="' . esc_url( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) ) . '">',
-			'</a>'
-		) . '</p>';
-		$content .= '</div>';
+		$order = $this->get_order();
 
-		return $content;
+		return '<div class="wc-block-order-confirmation-create-account-success" id="create-account"><p>' . sprintf(
+			/* translators: %s: customer email address */
+			esc_html__( 'Your account has been created. Check %s for a link to set your password.', 'woocommerce' ),
+			'<strong>' . esc_html( $order ? $order->get_billing_email() : '' ) . '</strong>'
+		) . '</p></div>';
 	}
 
 	/**

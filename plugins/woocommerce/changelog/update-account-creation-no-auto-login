@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+New accounts from checkout or the My Account page are no longer logged in automatically. Shoppers log in after they set their password from the email link. Classic checkout links shoppers who already have an account to the lost password page.

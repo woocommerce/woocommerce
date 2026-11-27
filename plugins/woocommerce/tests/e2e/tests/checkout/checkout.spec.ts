@@ -305,12 +305,18 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				.getByText( 'Direct bank transfer', { exact: true } )
 				.click();
 			await placeOrder( page );
-			await page.goto( 'my-account/' );
+
+			// The order belongs to the new account, but the shopper stays logged out until they set a password from the emailed link.
+			// The summary shows only when the shopper can see the order: classic template or order confirmation blocks.
 			await expect(
 				page
-					.getByLabel( 'Account pages' )
-					.getByRole( 'link', { name: 'Log out' } )
+					.locator(
+						'.woocommerce-order-overview, .wc-block-order-confirmation-summary'
+					)
+					.first()
 			).toBeVisible();
+			await page.goto( 'my-account/' );
+			await expect( page.locator( '#username' ) ).toBeVisible();
 		}
 	);
 } );

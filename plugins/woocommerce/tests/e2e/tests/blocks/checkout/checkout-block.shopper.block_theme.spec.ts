@@ -90,11 +90,23 @@ test.describe( 'Shopper → Account (guest user)', () => {
 		const createAccount = page.getByLabel( 'Create an account' );
 		await createAccount.check();
 
+		// New accounts get a link by email to set their password, so checkout does not ask for one.
+		await expect( page.getByLabel( 'Create a password' ) ).toBeHidden();
+
 		const testEmail = `test-${ Date.now() }@example.com`;
 		await checkoutPageObject.fillInCheckoutWithTestData( {
 			email: testEmail,
 		} );
 		await checkoutPageObject.placeOrder();
+
+		// The shopper stays logged out, but can view the order.
+		await expect(
+			page.getByRole( 'heading', { name: 'Billing address' } )
+		).toBeVisible();
+		await page.goto( '/my-account' );
+		await expect(
+			page.getByRole( 'button', { name: 'Log in' } )
+		).toBeVisible();
 
 		// Get users from API with same email used when purchasing.
 		await requestUtils

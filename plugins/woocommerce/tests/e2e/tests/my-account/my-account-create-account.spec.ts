@@ -70,60 +70,36 @@ test.describe( 'Shopper My Account Create Account', () => {
 		}
 	} );
 
-	test( 'can create a new account via my account', async ( { page } ) => {
+	test( 'can create a new account via my account', async ( {
+		page,
+		restApi,
+	} ) => {
 		await page.goto( 'my-account/' );
 
 		await expect(
 			page.locator( '.woocommerce-form-register' )
 		).toBeVisible();
+		// New accounts get a link by email to set their password, so registration does not ask for one.
+		await expect( page.locator( '#reg_password' ) ).toHaveCount( 0 );
 
 		await page.locator( 'input#reg_email' ).fill( customerEmailAddress );
 		await page.locator( 'button[name="register"]' ).click();
 
 		await expect(
-			page.getByRole( 'heading', { name: 'My account' } )
+			page.getByText(
+				`Your account has been created. Check ${ customerEmailAddress } for a link to set your password.`
+			)
 		).toBeVisible();
-		await expect( page.locator( 'text=Log out' ).first() ).toBeVisible();
 
-		await page.goto( 'my-account/edit-account/' );
-		await expect( page.locator( '#account_email' ) ).toHaveValue(
-			customerEmailAddress
+		// The customer is not logged in until they set a password.
+		await expect( page.locator( 'text=Log out' ) ).toHaveCount( 0 );
+		await expect( page.locator( '#username' ) ).toBeVisible();
+
+		const response = await restApi.get(
+			`${ WC_API_PATH }/customers?email=${ encodeURIComponent(
+				customerEmailAddress
+			) }`
 		);
-	} );
-
-	test( 'shows the temporary password reminder on My Account after registration', async ( {
-		page,
-		restApi,
-	} ) => {
-		const email = `temporary-password-${ Date.now() }@example.com`;
-
-		try {
-			await page.goto( 'my-account/' );
-			await expect(
-				page.locator( '.woocommerce-form-register' )
-			).toBeVisible();
-			await expect( page.locator( '#reg_password' ) ).toBeHidden();
-			await page.locator( '#reg_email' ).fill( email );
-			await page.locator( 'button[name="register"]' ).click();
-
-			await expect( page ).toHaveURL( /\/my-account\/?$/ );
-			await expect(
-				page.getByRole( 'status' ).filter( {
-					has: page.getByRole( 'link', { name: 'Resend' } ),
-				} )
-			).toContainText(
-				'Your account is using a temporary password. We emailed you a link to change your password.'
-			);
-		} finally {
-			const response = await restApi.get(
-				`${ WC_API_PATH }/customers?email=${ encodeURIComponent( email ) }`
-			);
-			for ( const customer of response.data ) {
-				await restApi.delete(
-					`${ WC_API_PATH }/customers/${ customer.id }`,
-					{ force: true }
-				);
-			}
-		}
+		expect( response.data ).toHaveLength( 1 );
 	} );
 } );

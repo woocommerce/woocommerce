@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Order;
 use WP_Error, WP_User;
@@ -138,8 +139,8 @@ class Users {
 		$supplied_email_match = ! empty( $supplied_email ) && 0 === strcasecmp( $supplied_email, $billing_email );
 		$verified_payment     = false;
 		$payment_email_hash   = '';
-
-		if ( 'order-pay' === $context && ! $customer_id && $session instanceof \WC_Session ) {
+		// An unclaimed new account has no password the shopper knows, so its order is paid like a guest order.
+		if ( 'order-pay' === $context && $session instanceof \WC_Session && ( ! $customer_id || wc_get_container()->get( NewCustomerSession::class )->is_unclaimed_customer_order( $order ) ) ) {
 			$payment_email_data = wp_json_encode( array( get_current_blog_id(), $order->get_id(), $order->get_order_key(), strtolower( $billing_email ), $session->get_customer_id() ) );
 			if ( is_string( $payment_email_data ) ) {
 				$payment_email_hash = hash( 'sha256', $payment_email_data );

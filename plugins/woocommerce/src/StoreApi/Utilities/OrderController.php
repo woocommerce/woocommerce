@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use Automattic\WooCommerce\Internal\Customers\SearchService as CustomerSearchService;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -136,7 +137,10 @@ class OrderController {
 		$this->update_addresses_from_cart( $order );
 		$order->set_currency( get_woocommerce_currency() );
 		$order->set_prices_include_tax( wc_prices_include_tax() );
-		$order->set_customer_id( get_current_user_id() );
+		// A shopper who created an account at checkout stays logged out, so keep that account on the order.
+		if ( ! wc_get_container()->get( NewCustomerSession::class )->is_session_customer_order( $order ) ) {
+			$order->set_customer_id( get_current_user_id() );
+		}
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( wc_get_user_agent() );
 		$payment_method_id   = PaymentUtils::get_checkout_payment_method();

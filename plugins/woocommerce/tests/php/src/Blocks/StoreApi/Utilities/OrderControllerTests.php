@@ -3,9 +3,11 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
+use WC_Helper_Customer;
 use WC_Helper_Order;
 use WC_Helper_Product;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
@@ -793,6 +795,29 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 			WC()->cart->empty_cart();
 			$bacs->enabled = $bacs_enabled_before;
 			WC()->session->set( 'chosen_payment_method', null );
+		}
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps the account a logged out shopper created at checkout, so a retry after a failed payment stays linked to it.
+	 */
+	public function test_update_order_from_cart_keeps_the_session_account(): void {
+		wp_set_current_user( 0 );
+		$customer_id = wc_get_container()->get( NewCustomerSession::class )->create_customer( 'order-controller-retry@example.com' );
+		$order       = WC_Helper_Order::create_order( $customer_id );
+		$other_order = WC_Helper_Order::create_order( WC_Helper_Customer::create_customer( 'occother', 'password', 'occother@example.com' )->get_id() );
+
+		try {
+			WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+			$this->sut->update_order_from_cart( $order );
+			$this->sut->update_order_from_cart( $other_order );
+
+			$this->assertSame( $customer_id, $order->get_customer_id(), 'The order should stay linked to the account created in this session.' );
+			$this->assertSame( 0, $other_order->get_customer_id(), 'Other customer orders should still follow the current user.' );
+		} finally {
+			WC()->cart->empty_cart();
+			// The session object is shared across tests and the base class does not reset its data.
+			WC()->session->set( 'new_customer', null );
 		}
 	}
 

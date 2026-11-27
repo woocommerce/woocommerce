@@ -1667,6 +1667,7 @@ class WC_Form_Handler {
 			$username = 'no' === get_option( 'woocommerce_registration_generate_username' ) && isset( $_POST['username'] ) ? wp_unslash( $_POST['username'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$password = ''; // Kept for the woocommerce_process_registration_errors filter.
 			$email    = wp_unslash( $_POST['email'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$redirect = '';
 
 			try {
 				$validation_error  = new WP_Error();
@@ -1688,27 +1689,63 @@ class WC_Form_Handler {
 					throw new Exception( $new_customer->get_error_message() );
 				}
 
-				wc_add_notice( __( 'Your account was created successfully and a password has been sent to your email address.', 'woocommerce' ) );
+				wc_add_notice(
+					sprintf(
+						/* translators: %s: customer email address */
+						__( 'Your account has been created. Check %s for a link to set your password.', 'woocommerce' ),
+						'<strong>' . esc_html( sanitize_email( $email ) ) . '</strong>'
+					)
+				);
 
-				// Only redirect after a forced login - otherwise output a success notice.
-				if ( apply_filters( 'woocommerce_registration_auth_new_customer', true, $new_customer ) ) {
-					wc_set_customer_auth_cookie( $new_customer );
+				// The shopper stays on the same page, so empty the form to avoid a second submit for the same email.
+				unset( $_POST['email'], $_POST['username'] );
 
-					if ( ! empty( $_POST['redirect'] ) ) {
-						$redirect = wp_sanitize_redirect( wp_unslash( $_POST['redirect'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-					} elseif ( wc_get_raw_referer() ) {
-						$redirect = wc_get_raw_referer();
-					} else {
-						$redirect = wc_get_page_permalink( 'myaccount' );
-					}
+				/**
+				 * Filters whether to log in a customer straight after registration.
+				 *
+				 * Deprecated: new customers are never logged in. They set a password from the new account email, which
+				 * also verifies their email address. The return value is ignored.
+				 *
+				 * @since 3.0.0
+				 * @deprecated 11.5.0
+				 *
+				 * @param bool $auth_new_customer Whether to log in the new customer.
+				 * @param int  $new_customer      New customer ID.
+				 */
+				apply_filters_deprecated(
+					'woocommerce_registration_auth_new_customer',
+					array( true, $new_customer ),
+					'11.5.0',
+					'',
+					'New customers are no longer logged in after registration. They set a password from the new account email first. The return value is ignored.'
+				);
 
-					wp_redirect( wp_validate_redirect( apply_filters( 'woocommerce_registration_redirect', $redirect ), wc_get_page_permalink( 'myaccount' ) ) ); //phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
-					exit;
+				$default_redirect = wc_get_raw_referer() ? wc_get_raw_referer() : wc_get_page_permalink( 'myaccount' );
+
+				/**
+				 * Filters where to send a customer after registration.
+				 *
+				 * The customer is not logged in after registration, and stays on the registration page by default. Return a
+				 * different URL to send them there instead.
+				 *
+				 * @since 2.0.6
+				 *
+				 * @param string $redirect Redirect URL.
+				 */
+				$filtered_redirect = apply_filters( 'woocommerce_registration_redirect', $default_redirect );
+
+				if ( $filtered_redirect !== $default_redirect ) {
+					$redirect = $filtered_redirect;
 				}
 			} catch ( Exception $e ) {
 				if ( $e->getMessage() ) {
 					wc_add_notice( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . $e->getMessage(), 'error' );
 				}
+			}
+
+			if ( $redirect ) {
+				wp_safe_redirect( wp_validate_redirect( $redirect, wc_get_page_permalink( 'myaccount' ) ) );
+				exit;
 			}
 		}
 	}

@@ -10171,18 +10171,6 @@ parameters:
 			path: includes/class-wc-checkout.php
 
 		-
-			message: '#^Method WC_Checkout\:\:__get\(\) should return array\|string but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: includes/class-wc-checkout.php
-
-		-
-			message: '#^Method WC_Checkout\:\:__get\(\) should return array\|string but returns bool\.$#'
-			identifier: return.type
-			count: 3
-			path: includes/class-wc-checkout.php
-
-		-
 			message: '#^Method WC_Checkout\:\:check_cart_items\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10305,18 +10293,6 @@ parameters:
 		-
 			message: '#^Method WC_Checkout\:\:validate_posted_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-checkout.php
-
-		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wc-checkout.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(int The current user''s ID \(this may be 0 if no user is logged in\)\.\)\: Unexpected token "The", expected variable at offset 170 on line 6$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-checkout.php
 

@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
@@ -121,6 +122,13 @@ class WC_Checkout {
 	private $kept_order_item_types = array();
 
 	/**
+	 * ID of the customer account created during this checkout. The shopper stays logged out, so this is the default customer for the order.
+	 *
+	 * @var int
+	 */
+	private $new_customer_id = 0;
+
+	/**
 	 * Gets the main WC_Checkout Instance.
 	 *
 	 * @since 2.1
@@ -211,7 +219,7 @@ class WC_Checkout {
 	 * Gets the legacy public variables for backwards compatibility.
 	 *
 	 * @param string $key Key.
-	 * @return array|string
+	 * @return mixed
 	 */
 	public function __get( $key ) {
 		if ( in_array( $key, array( 'posted', 'shipping_method', 'payment_method' ), true ) && empty( $this->legacy_posted_data ) ) {
@@ -240,9 +248,9 @@ class WC_Checkout {
 				 *
 				 * @since 3.0.0 or earlier
 				 *
-				 * @param int The current user's ID (this may be 0 if no user is logged in).
+				 * @param int $customer_id The current user's ID, or the ID of the account created during checkout (this may be 0 for guests).
 				 */
-				return apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
+				return apply_filters( 'woocommerce_checkout_customer_id', $this->get_default_customer_id() );
 			case 'shipping_methods':
 				return (array) WC()->session->get( 'chosen_shipping_methods' );
 		}
@@ -349,7 +357,8 @@ class WC_Checkout {
 			);
 		}
 
-		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
+		// A username cannot change once the account exists, so a retry in the same session does not ask for it.
+		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) && ! wc_get_container()->get( NewCustomerSession::class )->has_unclaimed_customer() ) {
 			$this->fields['account']['account_username'] = array(
 				'type'         => 'text',
 				'label'        => __( 'Account username', 'woocommerce' ),
@@ -549,7 +558,10 @@ class WC_Checkout {
 			 *
 			 * @since 3.0.0 or earlier
 			 */
-			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) );
+			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', $this->get_default_customer_id() ) );
+			if ( $order instanceof WC_Order ) {
+				wc_get_container()->get( NewCustomerSession::class )->mark_order_created_customer( $order, $this->new_customer_id );
+			}
 			$order->set_currency( get_woocommerce_currency() );
 			$order->set_prices_include_tax( wc_prices_include_tax() );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
@@ -1728,12 +1740,23 @@ class WC_Checkout {
 	}
 
 	/**
+	 * Get the default customer ID for the order: the account created during this checkout, or the current user.
+	 *
+	 * @return int
+	 */
+	private function get_default_customer_id(): int {
+		return $this->new_customer_id ? $this->new_customer_id : get_current_user_id();
+	}
+
+	/**
 	 * Create a new customer account if needed.
 	 *
 	 * @throws Exception When not able to create customer.
 	 * @param array $data Posted data.
 	 */
 	protected function process_customer( $data ) {
+		$this->new_customer_id = 0;
+
 		/**
 		 * This action is documented in woocommerce/includes/class-wc-checkout.php
 		 *
@@ -1742,19 +1765,22 @@ class WC_Checkout {
 		$customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 
 		if ( ! is_user_logged_in() && ( $this->is_registration_required() || ! empty( $data['createaccount'] ) ) ) {
-			$username    = ! empty( $data['account_username'] ) ? $data['account_username'] : '';
-			$customer_id = wc_create_new_customer(
-				$data['billing_email'],
-				$username,
-				'',
+			$customer_id = wc_get_container()->get( NewCustomerSession::class )->create_customer(
+				(string) ( $data['billing_email'] ?? '' ),
 				array(
 					'first_name' => ! empty( $data['billing_first_name'] ) ? $data['billing_first_name'] : '',
 					'last_name'  => ! empty( $data['billing_last_name'] ) ? $data['billing_last_name'] : '',
-				)
+				),
+				! empty( $data['account_username'] ) ? (string) $data['account_username'] : ''
 			);
 
 			if ( is_wp_error( $customer_id ) ) {
 				if ( 'registration-error-email-exists' === $customer_id->get_error_code() ) {
+					$message = sprintf(
+						/* translators: %s: Lost password page URL. */
+						__( 'An account is already registered with your email address. <a href="#" class="showlogin">Please log in</a> or <a href="%s">get a link to set your password</a>.', 'woocommerce' ),
+						esc_url( wp_lostpassword_url() )
+					);
 					/**
 					 * Filter the notice shown when a customer tries to register with an existing email address.
 					 *
@@ -1762,23 +1788,18 @@ class WC_Checkout {
 					 * @param string $message The notice.
 					 * @param string $email   The email address.
 					 */
-					throw new Exception( apply_filters( 'woocommerce_registration_error_email_exists', __( 'An account is already registered with your email address. <a href="#" class="showlogin">Please log in.</a>', 'woocommerce' ), $data['billing_email'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+					throw new Exception( apply_filters( 'woocommerce_registration_error_email_exists', $message, $data['billing_email'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 				throw new Exception( $customer_id->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
-			// Save the posted choices, because the login loads the session again from the database.
-			if ( is_callable( array( WC()->session, 'save_data' ) ) ) {
-				WC()->session->save_data();
+			// The shopper stays logged out until they set a password from the new account email. Link the order to the account by ID instead.
+			$this->new_customer_id = $customer_id;
+
+			// The username field goes away once the account exists, so reload the form if the payment fails.
+			if ( ! empty( $data['account_username'] ) ) {
+				WC()->session->set( 'reload_checkout', true );
 			}
-
-			wc_set_customer_auth_cookie( $customer_id );
-
-			// As we are now logged in, checkout will need to refresh to show logged in data.
-			WC()->session->set( 'reload_checkout', true );
-
-			// Also, recalculate cart totals to reveal any role-based discounts that were unavailable before registering.
-			WC()->cart->calculate_totals();
 		}
 
 		// On multisite, ensure user exists on current site, if not add them before allowing login.

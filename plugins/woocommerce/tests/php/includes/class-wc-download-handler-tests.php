@@ -1,6 +1,7 @@
 <?php
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Approved_Directories;
 
 /**
@@ -1008,6 +1009,52 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'email', $query_args, 'The current email download URL should contain an email argument.' );
 		$this->assertArrayNotHasKey( 'uid', $query_args, 'The email download URL should exercise the email authorization path.' );
 		$this->assert_download_url_is_authorized( $download_url );
+	}
+
+	/**
+	 * @testdox With "Downloads require login" on, a logged out shopper can download from a new account they haven't claimed yet, like a guest, and must log in once they have.
+	 */
+	public function test_downloads_require_login_follows_guest_rules_for_unclaimed_account(): void {
+		update_option( 'woocommerce_downloads_require_login', 'yes' );
+		wp_set_current_user( 0 );
+		$new_customer_session = wc_get_container()->get( NewCustomerSession::class );
+		$customer_id          = $new_customer_session->create_customer( 'download-new@example.com' );
+		$product              = WC_Helper_Product::create_downloadable_product(
+			array(
+				array(
+					'name' => 'New account download',
+					'file' => $this->woocommerce_upload_url( 'new-account-download.pdf' ),
+				),
+			)
+		);
+		$order                = WC_Helper_Order::create_order( $customer_id, $product );
+		$new_customer_session->mark_order_created_customer( $order, $customer_id );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$download_url = current( $order->get_items() )->get_item_download_url( current( array_keys( $product->get_downloads() ) ) );
+
+		$this->assert_download_url_is_authorized( $download_url );
+
+		// Logging in claims the account, so from then on the download needs that login.
+		do_action( 'set_auth_cookie', '', 0, 0, $customer_id, 'auth', '' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$location = '';
+		$redirect = static function ( $url ) use ( &$location ) {
+			$location = (string) $url;
+			throw new UnexpectedValueException( 'redirect' );
+		};
+		add_filter( 'wp_redirect', $redirect );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Download links carry no nonce.
+		parse_str( (string) wp_parse_url( $download_url, PHP_URL_QUERY ), $_GET );
+
+		try {
+			WC_Download_Handler::download_product();
+			$this->fail( 'A claimed account should need a login to download.' );
+		} catch ( UnexpectedValueException $e ) {
+			$this->assertStringContainsString( 'wc_error=', $location, 'The shopper should be sent to log in.' );
+		} finally {
+			remove_filter( 'wp_redirect', $redirect );
+			$_GET = array();
+		}
 	}
 
 	/**

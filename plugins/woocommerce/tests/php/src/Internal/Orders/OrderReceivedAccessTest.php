@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
+use Automattic\WooCommerce\Internal\CustomerEmailVerification\EmailVerificationService;
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use Automattic\WooCommerce\Internal\Orders\OrderReceivedAccess;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Customer;
@@ -201,6 +203,27 @@ class OrderReceivedAccessTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_order_email_verification_required', '__return_false' );
 
 		$this->assertTrue( $this->sut->current_user_can_view_order( $order, $order->get_order_key() ) );
+	}
+
+	/**
+	 * @testdox A guest can unlock the order that created an unconfirmed account, in any session, until the account is confirmed.
+	 */
+	public function test_unconfirmed_new_account_order_can_be_unlocked(): void {
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+		$new_customer_session = wc_get_container()->get( NewCustomerSession::class );
+		$customer_id          = $new_customer_session->create_customer( 'unlock-new-account@example.com' );
+		$order                = $this->create_old_order( $customer_id );
+		$new_customer_session->mark_order_created_customer( $order, $customer_id );
+		$order->save();
+		WC()->session->set( 'new_customer', null );
+		$key = $order->get_order_key();
+
+		$this->assertFalse( $this->sut->current_user_can_view_order( $order, $key ), 'After the grace period, the guest must enter the email.' );
+		$this->assertTrue( $this->sut->guest_can_unlock_order( $order, $key ), 'The account has no password, so the email must unlock it, even without guest checkout.' );
+
+		wc_get_container()->get( EmailVerificationService::class )->mark_verified( $customer_id, 'unlock-new-account@example.com' );
+
+		$this->assertFalse( $this->sut->guest_can_unlock_order( $order, $key ), 'A confirmed account has a password, so its owner must log in.' );
 	}
 
 	/**

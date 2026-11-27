@@ -10,6 +10,8 @@ declare( strict_types = 1 );
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 
 /**
  * WC_Form_Handler tests.
@@ -114,7 +116,6 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		wp_set_current_user( 0 );
 		update_option( 'woocommerce_enable_myaccount_registration', $registration_enabled );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
-		add_filter( 'woocommerce_registration_auth_new_customer', '__return_false' );
 		add_filter( 'pre_wp_mail', '__return_true' );
 
 		$_POST             = array(
@@ -132,30 +133,6 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		if ( ! $expected_customer ) {
 			$this->assertTrue( wc_has_notice( 'Registration is disabled.', 'error' ), 'The registration policy error should be shown.' );
 		}
-	}
-
-	/**
-	 * @testdox My Account registration gives a new account a generated password, even if a password is posted.
-	 */
-	public function test_process_registration_generates_the_password(): void {
-		wp_set_current_user( 0 );
-		update_option( 'woocommerce_enable_myaccount_registration', 'yes' );
-		add_filter( 'woocommerce_registration_auth_new_customer', '__return_false' );
-		add_filter( 'pre_wp_mail', '__return_true' );
-
-		$_POST = array(
-			'register'                   => 'Register',
-			'email'                      => 'registration-generated@example.com',
-			'password'                   => 'chosen-Password-123',
-			'woocommerce-register-nonce' => wp_create_nonce( 'woocommerce-register' ),
-		);
-
-		WC_Form_Handler::process_registration();
-
-		$customer = get_user_by( 'email', 'registration-generated@example.com' );
-		$this->assertInstanceOf( WP_User::class, $customer, 'The account should be created.' );
-		$this->assertFalse( wp_check_password( 'chosen-Password-123', $customer->user_pass, $customer->ID ), 'A posted password should be ignored.' );
-		$this->assertTrue( wc_has_notice( 'Your account was created successfully and a password has been sent to your email address.' ), 'The notice should point to the email.' );
 	}
 
 	/**
@@ -1648,6 +1625,24 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A logged out shopper can pay for the order of an unclaimed new account after confirming the billing email, like a guest order.
+	 */
+	public function test_pay_action_allows_unclaimed_new_account_order_after_email_check(): void {
+		wp_set_current_user( 0 );
+		WC()->session         = new WC_Mock_Session_Handler();
+		$new_customer_session = wc_get_container()->get( NewCustomerSession::class );
+		$customer_id          = $new_customer_session->create_customer( 'payer@example.org' );
+		// Pay from another session, as when the payment link is opened later.
+		WC()->session->set( 'new_customer', null );
+		$order = $this->create_payment_order( $customer_id );
+		$new_customer_session->mark_order_created_customer( $order, $customer_id );
+		$order->save();
+
+		$this->assertFalse( Users::should_user_verify_order_email( $order->get_id(), $order->get_billing_email(), 'order-pay' ), 'The billing email should unlock the order.' );
+		$this->assert_payment_authorization( $order, true );
+	}
+
+	/**
 	 * Create a payable order outside the email verification grace period.
 	 *
 	 * @param int $customer_id Order owner, or zero for a guest.
@@ -2096,5 +2091,93 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	private function register_checkout_field( array $args ): void {
 		woocommerce_register_additional_checkout_field( $args );
 		$this->registered_checkout_fields[] = $args['id'];
+	}
+
+	/**
+	 * @testdox process_registration() creates the account with a generated password, uses a chosen username only when the store asks for one, and does not log the customer in.
+	 *
+	 * @covers WC_Form_Handler::process_registration()
+	 */
+	public function test_process_registration_creates_account_without_logging_in(): void {
+		wp_set_current_user( 0 );
+		update_option( 'woocommerce_registration_generate_username', 'no' );
+		$this->prepare_registration_request(
+			'register-new@example.test',
+			array(
+				'username' => 'chosen-username',
+				'password' => 'ignored-Password-123!',
+			)
+		);
+
+		WC_Form_Handler::process_registration();
+
+		$user = get_user_by( 'email', 'register-new@example.test' );
+		$this->assertInstanceOf( WP_User::class, $user, 'The account should be created.' );
+		$this->assertSame( 0, get_current_user_id(), 'The new customer should not be logged in.' );
+		$this->assertSame( 'chosen-username', $user->user_login, 'The store asks for a username, so the posted one should be used.' );
+		$this->assertFalse( wp_check_password( 'ignored-Password-123!', $user->user_pass, $user->ID ), 'A posted password should be ignored.' );
+		$this->assertTrue( (bool) get_user_option( 'default_password_nag', $user->ID ), 'The account should have a generated password.' );
+		$this->assertStringContainsString( 'for a link to set your password.', wp_json_encode( wc_get_notices( 'success' ) ), 'The customer should be told to check their email.' );
+		$this->assertArrayNotHasKey( 'email', $_POST, 'The form should be empty after a successful registration.' ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	}
+
+	/**
+	 * @testdox process_registration() fires the deprecated auth filter and ignores its return value.
+	 *
+	 * @covers WC_Form_Handler::process_registration()
+	 */
+	public function test_process_registration_ignores_deprecated_auth_filter(): void {
+		$this->setExpectedDeprecated( 'woocommerce_registration_auth_new_customer' );
+		wp_set_current_user( 0 );
+		add_filter( 'woocommerce_registration_auth_new_customer', '__return_true' );
+		$this->prepare_registration_request( 'register-filter@example.test' );
+
+		WC_Form_Handler::process_registration();
+
+		$this->assertInstanceOf( WP_User::class, get_user_by( 'email', 'register-filter@example.test' ) );
+		$this->assertSame( 0, get_current_user_id(), 'Returning true from the deprecated filter should not log the customer in.' );
+	}
+
+	/**
+	 * @testdox process_registration() sends the customer to the URL from woocommerce_registration_redirect, without logging them in.
+	 *
+	 * @covers WC_Form_Handler::process_registration()
+	 */
+	public function test_process_registration_follows_a_changed_redirect(): void {
+		wp_set_current_user( 0 );
+		$target = home_url( '/vendor-setup/' );
+		add_filter( 'woocommerce_registration_redirect', fn() => $target );
+		$this->prepare_registration_request( 'register-redirect@example.test' );
+
+		try {
+			WC_Form_Handler::process_registration();
+			$this->fail( 'A changed URL should redirect.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertSame( $target, $e->getMessage() );
+		}
+
+		$this->assertInstanceOf( WP_User::class, get_user_by( 'email', 'register-redirect@example.test' ) );
+		$this->assertSame( 0, get_current_user_id(), 'The redirect should not log the customer in.' );
+		$this->assertStringContainsString( 'for a link to set your password.', wp_json_encode( wc_get_notices( 'success' ) ), 'The notice should show on the next page.' );
+	}
+
+	/**
+	 * Prepare a My Account registration POST request.
+	 *
+	 * @param string               $email Email address to register.
+	 * @param array<string, mixed> $extra Extra POST fields.
+	 */
+	private function prepare_registration_request( string $email, array $extra = array() ): void {
+		update_option( 'woocommerce_enable_myaccount_registration', 'yes' );
+		add_filter( 'pre_wp_mail', '__return_true' );
+
+		$_POST = array_merge(
+			array(
+				'register'                   => 'Register',
+				'email'                      => $email,
+				'woocommerce-register-nonce' => wp_create_nonce( 'woocommerce-register' ),
+			),
+			$extra
+		);
 	}
 }

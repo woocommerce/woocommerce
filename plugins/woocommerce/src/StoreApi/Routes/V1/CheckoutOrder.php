@@ -330,6 +330,9 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	private function process_customer( \WP_REST_Request $request ) {
-		$this->order_controller->sync_customer_data_with_order( $this->order );
+		// A logged out shopper can pay for an unclaimed new account's order, but must not change the account.
+		if ( get_current_user_id() === $this->order->get_customer_id() ) {
+			$this->order_controller->sync_customer_data_with_order( $this->order );
+		}
 	}
 }
