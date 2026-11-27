@@ -210,6 +210,25 @@ class FeaturePluginTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The recurring order import is unscheduled right away when Analytics is turned off for the first time.
+	 */
+	public function test_recurring_order_import_is_unscheduled_when_analytics_is_first_saved_as_off(): void {
+		$batch_hook = OrdersScheduler::get_action( OrdersScheduler::PROCESS_PENDING_ORDERS_BATCH_ACTION );
+
+		$this->assertIsString( $batch_hook, 'The batch import hook should be defined.' );
+
+		// A missing option means Analytics is on, and saving it adds the option instead of updating it.
+		delete_option( Analytics::TOGGLE_OPTION_NAME );
+		OrdersScheduler::init();
+		OrdersScheduler::schedule_recurring_batch_processor();
+		$this->assertTrue( as_has_scheduled_action( $batch_hook, array(), OrdersScheduler::$group ), 'The batch import should be scheduled while Analytics is on.' );
+
+		update_option( Analytics::TOGGLE_OPTION_NAME, 'no' );
+
+		$this->assertFalse( as_has_scheduled_action( $batch_hook, array(), OrdersScheduler::$group ), 'Turning Analytics off the first time should not wait for the daily check.' );
+	}
+
+	/**
 	 * Disable Analytics in the legacy feature list.
 	 *
 	 * @param array $features Feature slugs.

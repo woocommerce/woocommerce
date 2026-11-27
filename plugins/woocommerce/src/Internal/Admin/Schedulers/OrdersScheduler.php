@@ -150,6 +150,7 @@ class OrdersScheduler extends ImportScheduler {
 
 		// Stop the recurring import as soon as Analytics is turned off, nothing handles it after that.
 		add_action( 'update_option_' . Analytics::TOGGLE_OPTION_NAME, array( __CLASS__, 'handle_analytics_option_change' ), 10, 2 );
+		add_action( 'add_option_' . Analytics::TOGGLE_OPTION_NAME, array( __CLASS__, 'handle_analytics_option_added' ), 10, 2 );
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
@@ -597,6 +598,21 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		if ( 'no' === $new_value ) {
 			self::unschedule_recurring_batch_processor();
 		}
+	}
+
+	/**
+	 * Unschedule the recurring batch processor when Analytics is first saved as disabled.
+	 *
+	 * A missing option means Analytics is on, so saving 'no' adds the option and skips the update hook.
+	 *
+	 * @internal
+	 * @param string $option The option name.
+	 * @param mixed  $value  The option value.
+	 * @return void
+	 */
+	public static function handle_analytics_option_added( $option, $value ): void {
+		unset( $option );
+		self::handle_analytics_option_change( null, $value );
 	}
 
 	/**
