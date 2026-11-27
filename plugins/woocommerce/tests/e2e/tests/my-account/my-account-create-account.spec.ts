@@ -86,9 +86,15 @@ test.describe( 'Shopper My Account Create Account', () => {
 		await page.locator( 'button[name="register"]' ).click();
 
 		await expect(
+			page.getByText( 'Your account has been created.' )
+		).toBeVisible();
+		await expect(
 			page.getByText(
-				`Your account has been created. Check ${ customerEmailAddress } for a link to set your password.`
+				`Check ${ customerEmailAddress } for a link to set your password.`
 			)
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'link', { name: 'Get a new link' } )
 		).toBeVisible();
 
 		// The customer is not logged in until they set a password.

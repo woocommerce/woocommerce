@@ -635,6 +635,52 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox After a reset, My Account says the password is set when a logged out customer replaced a generated password, and reset otherwise.
+	 * @testWith [true, false, "Your password is set. You can now log in."]
+	 *           [false, false, "Your password has been reset successfully."]
+	 *           [true, true, "Your password has been reset successfully."]
+	 *
+	 * @param bool   $generated_password Whether the account still had its generated password.
+	 * @param bool   $logged_in          Whether the customer is logged in while setting the password.
+	 * @param string $expected_notice    Notice shown on My Account after the redirect.
+	 */
+	public function test_reset_notice_says_when_a_first_password_is_set( bool $generated_password, bool $logged_in, string $expected_notice ): void {
+		update_user_option( $this->user->ID, 'default_password_nag', $generated_password, true );
+		$handle   = WC_Shortcode_My_Account::create_password_reset_bridge_token( $this->user );
+		$template = $this->render_bridge_handle( $handle );
+		if ( $logged_in ) {
+			wp_set_current_user( $this->user->ID );
+		}
+		$_POST = array(
+			'woocommerce-reset-password-nonce' => wp_create_nonce( 'reset_password' ),
+			'wc_reset_password'                => 'true',
+			'password_1'                       => 'a-new-Password-123',
+			'password_2'                       => 'a-new-Password-123',
+			'reset_key'                        => $template['args']['key'],
+			'reset_login'                      => $this->user->user_login,
+		);
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Build the request superglobal consumed by the form handler.
+		$_REQUEST = $_POST;
+
+		$location = $this->capture_redirect( array( WC_Form_Handler::class, 'process_reset_password' ) );
+
+		$this->assertNotSame( '', $location, 'A successful reset should redirect to My Account.' );
+		parse_str( (string) wp_parse_url( $location, PHP_URL_QUERY ), $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Build the request superglobal for the redirected page.
+		wc_clear_notices();
+		// Read while the page renders, because printing the notices empties the queue.
+		$notices = null;
+		$capture = static function () use ( &$notices ): void {
+			$notices ??= array_column( wc_get_notices( 'success' ), 'notice' );
+		};
+		add_action( 'woocommerce_before_template_part', $capture, 10, 0 );
+		ob_start();
+		WC_Shortcode_My_Account::output( array() );
+		ob_end_clean();
+		remove_action( 'woocommerce_before_template_part', $capture, 10 );
+		$this->assertSame( array( $expected_notice ), $notices );
+	}
+
+	/**
 	 * Render the lost-password page and capture the selected template arguments.
 	 *
 	 * @return array{name: string, args: array<string, mixed>}
@@ -733,6 +779,20 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 	 */
 	private function intercept_reset_link_redirect(): string {
 		add_filter( 'woocommerce_is_account_page', '__return_true' );
+		try {
+			return $this->capture_redirect( array( WC_Form_Handler::class, 'redirect_reset_password_link' ) );
+		} finally {
+			remove_filter( 'woocommerce_is_account_page', '__return_true' );
+		}
+	}
+
+	/**
+	 * Run a form handler and capture its redirect without allowing its trailing exit to stop PHPUnit.
+	 *
+	 * @param callable $handler Form handler that redirects.
+	 * @return string Redirect location, or an empty string when the handler didn't redirect.
+	 */
+	private function capture_redirect( callable $handler ): string {
 		$location = '';
 		$abort    = static function ( string $redirect ) use ( &$location ): void {
 			$location = $redirect;
@@ -748,13 +808,12 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 			}
 		);
 		try {
-			WC_Form_Handler::redirect_reset_password_link();
+			$handler();
 		} catch ( RuntimeException $e ) {
 			$this->assertSame( 'Password-reset redirect intercepted.', $e->getMessage() );
 		} finally {
 			restore_error_handler();
 			remove_filter( 'wp_redirect', $abort );
-			remove_filter( 'woocommerce_is_account_page', '__return_true' );
 		}
 
 		return $location;

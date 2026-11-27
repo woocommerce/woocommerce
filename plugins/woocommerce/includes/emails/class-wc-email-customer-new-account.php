@@ -74,7 +74,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 			$this->supports_cc_bcc = false;
 			$this->title           = __( 'New account', 'woocommerce' );
 			$this->email_group     = 'accounts';
-			$this->description     = __( 'Send an email to customers notifying them that they have created an account', 'woocommerce' );
+			$this->description     = __( 'Send new customers a link to set their password', 'woocommerce' );
 			$this->template_html   = 'emails/customer-new-account.php';
 			$this->template_plain  = 'emails/plain/customer-new-account.php';
 			parent::__construct();
@@ -82,7 +82,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 			// Must be after parent's constructor which sets `block_email_editor_enabled` property.
 			if ( $this->block_email_editor_enabled ) {
 				$this->title       = __( 'Account created', 'woocommerce' );
-				$this->description = __( 'Notifies customers when their account has been created.', 'woocommerce' );
+				$this->description = __( 'Sends new customers a link to set their password.', 'woocommerce' );
 			}
 		}
 
@@ -211,6 +211,21 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 		 */
 		public function get_default_additional_content() {
 			return __( 'We look forward to seeing you soon.', 'woocommerce' );
+		}
+
+		/**
+		 * Initialise settings form fields.
+		 *
+		 * Says under the enable checkbox why customers need the email. It's not a warning, because some stores
+		 * disable it on purpose, for example when another plugin sends their emails.
+		 *
+		 * @since 11.5.0
+		 * @return void
+		 */
+		public function init_form_fields() {
+			parent::init_form_fields();
+
+			$this->form_fields['enabled']['description'] = wc_get_container()->get( \Automattic\WooCommerce\Internal\Customers\NewAccountEmailWarning::class )->get_status_message();
 		}
 
 		/**

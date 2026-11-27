@@ -274,7 +274,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'email_customer_new_account',
 						label: 'New account',
 						description:
-							'Send an email to customers notifying them that they have created an account',
+							'Send new customers a link to set their password',
 						parent_id: 'email',
 						sub_groups: expect.arrayContaining( [] ),
 					} ),
@@ -2981,7 +2981,8 @@ test.describe( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'enabled',
 						label: 'Enable/Disable',
-						description: '',
+						description:
+							'New customers need this email to set their password and sign in.',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',

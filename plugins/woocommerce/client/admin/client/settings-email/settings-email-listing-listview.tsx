@@ -152,7 +152,12 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 					operators: [ 'isAny' ],
 				},
 				render: ( row: { item: EmailType } ) => {
-					return <Status slug={ row.item.status } />;
+					return (
+						<Status
+							slug={ row.item.status }
+							warning={ row.item.status_warning }
+						/>
+					);
 				},
 				elements: EMAIL_STATUSES,
 			},

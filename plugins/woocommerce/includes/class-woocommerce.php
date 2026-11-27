@@ -55,6 +55,7 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
+use Automattic\WooCommerce\Internal\Customers\AccountCreatedConfirmation;
 use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyStore;
 use Automattic\WooCommerce\Internal\StructuredData\OpenGraph;
@@ -424,6 +425,7 @@ final class WooCommerce {
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
 		$container->get( NewCustomerSession::class );
+		$container->get( AccountCreatedConfirmation::class );
 		$container->get( OrderLogsCleanupHelper::class );
 		$container->get( ChequeSettings::class );
 		$container->get( SettingsScreen::class );

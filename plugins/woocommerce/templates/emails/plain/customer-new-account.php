@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 10.9.0
+ * @version 11.5.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -27,7 +27,20 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 /* translators: %s: Customer first name, or username if name is not available */
 echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_display_name ) ) . "\n\n";
-if ( $email_improvements_enabled ) {
+if ( $email_improvements_enabled && $password_generated && $set_password_url ) {
+	/* translators: %s: Site title */
+	echo sprintf( esc_html__( 'Thanks for creating an account on %s. To start using it, set your password.', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
+	echo esc_html( $set_password_url ) . "\n\n";
+	/* translators: %s: My account link */
+	echo sprintf( esc_html__( 'If the link has expired, you can get a new one from the “Lost your password?” page in %s.', 'woocommerce' ), esc_html__( 'My account', 'woocommerce' ) ) . "\n";
+	echo esc_html( wc_get_page_permalink( 'myaccount' ) ) . "\n\n";
+	echo "----------------------------------------\n\n";
+	/* translators: %s: Username */
+	echo sprintf( esc_html__( 'Username: %s.', 'woocommerce' ), esc_html( $user_login ) ) . "\n\n";
+	echo "----------------------------------------\n\n";
+	/* translators: %s: My account link */
+	echo sprintf( esc_html__( 'Once your password is set, you can view your orders and manage your details in %s.', 'woocommerce' ), esc_html__( 'My account', 'woocommerce' ) ) . "\n\n";
+} elseif ( $email_improvements_enabled ) {
 	/* translators: %s: Site title */
 	echo sprintf( esc_html__( 'Thanks for creating an account on %s. Here’s a copy of your user details.', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
 	echo "----------------------------------------\n\n";
@@ -39,13 +52,13 @@ if ( $email_improvements_enabled ) {
 } else {
 	/* translators: %1$s: Site title, %2$s: Username, %3$s: My account link */
 	echo sprintf( esc_html__( 'Thanks for creating an account on %1$s. Your username is %2$s. You can access your account area to view orders, change your password, and more at: %3$s', 'woocommerce' ), esc_html( $blogname ), esc_html( $user_login ), esc_html( wc_get_page_permalink( 'myaccount' ) ) ) . "\n\n";
-}
 
-// Only send the set new password link if the user hasn't set their password during sign-up.
-if ( $password_generated && $set_password_url ) {
-	/* translators: URL follows */
-	echo esc_html__( 'To set your password, visit the following address: ', 'woocommerce' ) . "\n\n";
-	echo esc_html( $set_password_url ) . "\n\n";
+	// Only send the set new password link if the user hasn't set their password during sign-up.
+	if ( $password_generated && $set_password_url ) {
+		/* translators: URL follows */
+		echo esc_html__( 'To set your password, visit the following address: ', 'woocommerce' ) . "\n\n";
+		echo esc_html( $set_password_url ) . "\n\n";
+	}
 }
 
 echo "\n\n----------------------------------------\n\n";

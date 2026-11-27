@@ -4654,7 +4654,8 @@ img.help_tip {
 
 .status-enabled,
 .status-manual,
-.status-disabled {
+.status-disabled,
+.status-disabled-warning {
 	font-size: 1.4em;
 
 	@include ir();
@@ -4676,6 +4677,25 @@ img.help_tip {
 
 	@include icon("\e013");
 	color: #ccc;
+}
+
+// The New account email is disabled while customers can still create accounts (see NewAccountEmailWarning).
+// Amber picked for 3:1 contrast on white; WP admin has no warning token that dark yet.
+$new-account-email-warning: #bd8600;
+
+.status-disabled-warning::before {
+
+	@include icon("\f534");
+	font-family: dashicons;
+	color: $new-account-email-warning;
+}
+
+.woocommerce-new-account-email-warning .dashicons {
+	color: $new-account-email-warning;
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
+	vertical-align: text-bottom;
 }
 
 .woocommerce {

@@ -115,7 +115,11 @@ class WC_Shortcode_My_Account {
 
 		// After password reset, add confirmation message.
 		if ( ! empty( $_GET['password-reset'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			wc_add_notice( __( 'Your password has been reset successfully.', 'woocommerce' ) );
+			if ( 'new' === $_GET['password-reset'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				wc_add_notice( __( 'Your password is set. You can now log in.', 'woocommerce' ) );
+			} else {
+				wc_add_notice( __( 'Your password has been reset successfully.', 'woocommerce' ) );
+			}
 		}
 
 		// After logging out without a nonce, add confirmation message.

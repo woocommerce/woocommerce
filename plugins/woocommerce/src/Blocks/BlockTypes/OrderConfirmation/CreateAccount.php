@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Customers\AccountCreatedConfirmation;
 use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 
 /**
@@ -244,11 +245,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	protected function render_confirmation() {
 		$order = $this->get_order();
 
-		return '<div class="wc-block-order-confirmation-create-account-success" id="create-account"><p>' . sprintf(
-			/* translators: %s: customer email address */
-			esc_html__( 'Your account has been created. Check %s for a link to set your password.', 'woocommerce' ),
-			'<strong>' . esc_html( $order ? $order->get_billing_email() : '' ) . '</strong>'
-		) . '</p></div>';
+		return wc_get_container()->get( AccountCreatedConfirmation::class )->render( $order ? $order->get_billing_email() : '' );
 	}
 
 	/**

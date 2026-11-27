@@ -13,6 +13,7 @@ if ( class_exists( 'WC_Settings_Accounts', false ) ) {
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Customers\NewAccountEmailWarning;
 
 /**
  * WC_Settings_Accounts.
@@ -51,6 +52,14 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				$erasure_text = sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'erase-personal-data.php' ) ), $erasure_text );
 			}
 			$privacy_text = sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'options-privacy.php' ) ), $privacy_text );
+		}
+
+		// Shown under the account creation options when customers can create accounts but the email they need is disabled.
+		// Only checked while this screen renders, because the check loads every email class.
+		$account_creation_help     = '';
+		$new_account_email_warning = wc_get_container()->get( NewAccountEmailWarning::class );
+		if ( doing_action( 'woocommerce_settings_' . $this->id ) && $new_account_email_warning->should_warn() ) {
+			$account_creation_help = '<span class="woocommerce-new-account-email-warning"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . $new_account_email_warning->get_account_settings_message() . '</span>';
 		}
 
 		$account_settings = array(
@@ -126,6 +135,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			array(
 				'title'         => __( 'Account creation', 'woocommerce' ),
 				'desc'          => __( 'On "My account" page', 'woocommerce' ),
+				'desc_tip'      => $account_creation_help,
 				'id'            => 'woocommerce_enable_myaccount_registration',
 				'abilities'     => array(
 					'read'  => true,

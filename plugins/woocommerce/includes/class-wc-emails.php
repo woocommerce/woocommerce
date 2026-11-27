@@ -527,7 +527,8 @@ class WC_Emails {
 			return;
 		}
 		$email = $this->emails['WC_Email_Customer_New_Account'];
-		$email->trigger( $customer_id, $new_customer_data['user_pass'] ?? '', $password_generated );
+		// A generated password is not sent. The customer sets their own from the link in the email.
+		$email->trigger( $customer_id, $password_generated ? '' : ( $new_customer_data['user_pass'] ?? '' ), $password_generated );
 	}
 
 	/**

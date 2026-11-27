@@ -13,7 +13,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 11.0.0
+ * @version 11.5.0
  *
  * @var \WC_Order    $order      Order object.
  */
@@ -75,7 +75,17 @@ endif;
 if ( 'customer_new_account' === $email->id ) :
 	?>
 	<?php if ( $set_password_url ) : ?>
-		<p><a href="<?php echo esc_attr( $set_password_url ); ?>"><?php printf( esc_html__( 'Set your new password.', 'woocommerce' ) ); ?></a></p>
+		<?php
+		wc_get_template(
+			'emails/email-button.php',
+			array(
+				'url'   => $set_password_url,
+				'label' => __( 'Set your password', 'woocommerce' ),
+			)
+		);
+		?>
+		<?php /* translators: %s: My account link */ ?>
+		<p><?php printf( esc_html__( 'If the link has expired, you can get a new one from the “Lost your password?” page in %s.', 'woocommerce' ), '<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">' . esc_html__( 'My account', 'woocommerce' ) . '</a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The link is escaped inline. ?></p>
 		<?php
 	endif;
 endif;

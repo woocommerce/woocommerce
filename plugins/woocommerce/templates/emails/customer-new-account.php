@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.9.0
+ * @version 11.5.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -33,16 +33,33 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 <?php echo $email_improvements_enabled ? '<div class="email-introduction">' : ''; ?>
 <?php /* translators: %s: Customer first name, or username if name is not available */ ?>
 <p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_display_name ) ); ?></p>
-<?php if ( $email_improvements_enabled ) : ?>
+<?php if ( $email_improvements_enabled && $password_generated && $set_password_url ) : ?>
+	<?php $my_account_link = '<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">' . esc_html__( 'My account', 'woocommerce' ) . '</a>'; ?>
+	<?php /* translators: %s: Site title */ ?>
+	<p><?php printf( esc_html__( 'Thanks for creating an account on %s. To start using it, set your password.', 'woocommerce' ), esc_html( $blogname ) ); ?></p>
+	<?php
+	wc_get_template(
+		'emails/email-button.php',
+		array(
+			'url'   => $set_password_url,
+			'label' => __( 'Set your password', 'woocommerce' ),
+		)
+	);
+	?>
+	<?php /* translators: %s: My account link */ ?>
+	<p><?php printf( esc_html__( 'If the link has expired, you can get a new one from the “Lost your password?” page in %s.', 'woocommerce' ), $my_account_link ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?></p>
+	<div class="hr hr-top"></div>
+	<?php /* translators: %s: Username */ ?>
+	<p><?php echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), esc_html( $user_login ) ), array( 'b' => array() ) ); ?></p>
+	<div class="hr hr-bottom"></div>
+	<?php /* translators: %s: My account link */ ?>
+	<p><?php printf( esc_html__( 'Once your password is set, you can view your orders and manage your details in %s.', 'woocommerce' ), $my_account_link ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?></p>
+<?php elseif ( $email_improvements_enabled ) : ?>
 	<?php /* translators: %s: Site title */ ?>
 	<p><?php printf( esc_html__( 'Thanks for creating an account on %s. Here’s a copy of your user details.', 'woocommerce' ), esc_html( $blogname ) ); ?></p>
 	<div class="hr hr-top"></div>
 	<?php /* translators: %s: Username */ ?>
 	<p><?php echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), esc_html( $user_login ) ), array( 'b' => array() ) ); ?></p>
-	<?php if ( $password_generated && $set_password_url ) : ?>
-		<?php // If the password has not been set by the user during the sign up process, send them a link to set a new password. ?>
-		<p><a href="<?php echo esc_attr( $set_password_url ); ?>"><?php printf( esc_html__( 'Set your new password.', 'woocommerce' ) ); ?></a></p>
-	<?php endif; ?>
 	<div class="hr hr-bottom"></div>
 	<p><?php echo esc_html__( 'You can access your account area to view orders, change your password, and more via the link below:', 'woocommerce' ); ?></p>
 	<p><a href="<?php echo esc_attr( wc_get_page_permalink( 'myaccount' ) ); ?>"><?php printf( esc_html__( 'My account', 'woocommerce' ) ); ?></a></p>
