@@ -181,12 +181,32 @@ class FeaturePluginTest extends WC_Unit_Test_Case {
 		OrdersScheduler::schedule_recurring_batch_processor();
 		$this->assertTrue( as_has_scheduled_action( $batch_hook, array(), OrdersScheduler::$group ), 'The batch import should be scheduled before Analytics is disabled.' );
 
+		// Analytics was already off before this request, so only the daily check can clean up.
+		remove_action( 'update_option_' . Analytics::TOGGLE_OPTION_NAME, array( OrdersScheduler::class, 'handle_analytics_option_change' ) );
 		update_option( Analytics::TOGGLE_OPTION_NAME, 'no' );
 
 		FeaturePlugin::instance()->includes();
 		do_action( 'action_scheduler_ensure_recurring_actions' );
 
 		$this->assertFalse( as_has_scheduled_action( $batch_hook, array(), OrdersScheduler::$group ), 'The batch import has no callback without Analytics, so it should not stay scheduled.' );
+	}
+
+	/**
+	 * @testdox The recurring order import is unscheduled right away when Analytics is turned off.
+	 */
+	public function test_recurring_order_import_is_unscheduled_when_analytics_is_turned_off(): void {
+		$batch_hook = OrdersScheduler::get_action( OrdersScheduler::PROCESS_PENDING_ORDERS_BATCH_ACTION );
+
+		$this->assertIsString( $batch_hook, 'The batch import hook should be defined.' );
+
+		update_option( Analytics::TOGGLE_OPTION_NAME, 'yes' );
+		OrdersScheduler::init();
+		OrdersScheduler::schedule_recurring_batch_processor();
+		$this->assertTrue( as_has_scheduled_action( $batch_hook, array(), OrdersScheduler::$group ), 'The batch import should be scheduled while Analytics is on.' );
+
+		update_option( Analytics::TOGGLE_OPTION_NAME, 'no' );
+
+		$this->assertFalse( as_has_scheduled_action( $batch_hook, array(), OrdersScheduler::$group ), 'Turning Analytics off should not wait for the daily check.' );
 	}
 
 	/**
