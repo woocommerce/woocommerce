@@ -1359,6 +1359,35 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not claim a never-refunded zero-total order was already fully refunded.
+	 */
+	public function test_zero_total_order_without_refunds_gets_neutral_error(): void {
+		$order = $this->create_order_with_taxes( array(), 50.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 0 );
+		$order->save();
+
+		$items     = $order->get_items( 'line_item' );
+		$item      = reset( $items );
+		$line_data = array(
+			array(
+				'line_item_id' => $item->get_id(),
+				'quantity'     => 1,
+			),
+		);
+
+		$preview_result = $this->data_utils->validate_preview_line_items( $line_data, $order );
+		$create_result  = $this->data_utils->validate_line_items( $line_data, $order );
+
+		foreach ( array( $preview_result, $create_result ) as $result ) {
+			$this->assertInstanceOf( \WP_Error::class, $result );
+			$this->assertEquals( 'order_not_refundable', $result->get_error_code() );
+			$this->assertEquals( 'This order has no amount left to refund.', $result->get_error_message() );
+			$this->assertEquals( 422, $result->get_error_data()['status'] );
+		}
+	}
+
+	/**
 	 * @testdox Should return missing_line_item_id when line_item_id key is absent.
 	 */
 	public function test_validate_preview_line_items_missing_id(): void {

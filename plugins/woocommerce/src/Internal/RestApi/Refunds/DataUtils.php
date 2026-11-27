@@ -207,11 +207,7 @@ class DataUtils {
 		// by both endpoints rather than via the controller's later
 		// refund_exceeds_remaining guard.
 		if ( (float) $order->get_remaining_refund_amount() <= 0 ) {
-			return new WP_Error(
-				'order_not_refundable',
-				__( 'This order has already been fully refunded.', 'woocommerce' ),
-				array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-			);
+			return $this->get_nothing_left_to_refund_error( $order );
 		}
 
 		// Precompute refunded quantities/totals once so the over-refund check
@@ -1092,11 +1088,7 @@ class DataUtils {
 		}
 
 		if ( (float) $order->get_remaining_refund_amount() <= 0 ) {
-			return new WP_Error(
-				'order_not_refundable',
-				__( 'This order has already been fully refunded.', 'woocommerce' ),
-				array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-			);
+			return $this->get_nothing_left_to_refund_error( $order );
 		}
 
 		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
@@ -1285,6 +1277,27 @@ class DataUtils {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Build the error returned when an order has no amount left to refund.
+	 *
+	 * Only claims the order was fully refunded when it actually has refunds;
+	 * a zero-total order that was never refunded gets a neutral message.
+	 *
+	 * @param WC_Order $order The order being refunded.
+	 * @return WP_Error
+	 */
+	private function get_nothing_left_to_refund_error( $order ): WP_Error {
+		$message = $order->get_refunds()
+			? __( 'This order has already been fully refunded.', 'woocommerce' )
+			: __( 'This order has no amount left to refund.', 'woocommerce' );
+
+		return new WP_Error(
+			'order_not_refundable',
+			$message,
+			array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+		);
 	}
 
 	/**
