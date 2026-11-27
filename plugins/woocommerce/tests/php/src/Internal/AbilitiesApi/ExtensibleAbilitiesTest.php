@@ -3414,6 +3414,47 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should run no order validator and no order sync in order-create, order-update and order-update-status.
+	 */
+	public function test_order_write_abilities_run_no_validators_and_no_syncs(): void {
+		$calls = 0;
+		$count = static function () use ( &$calls ) {
+			++$calls;
+			return null;
+		};
+		$this->register_validator( 'order', 'test-ext', $count );
+		$this->register_sync( 'order', 'test-ext', $count );
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = \WC_Helper_Order::create_order();
+
+		$created = $this->run_ability_response(
+			'woocommerce/order-create',
+			array( 'line_items' => array( array( 'product_id' => $product->get_id() ) ) )
+		);
+		$updated = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array( 'city' => 'Lisbon' ),
+			)
+		);
+		$status  = $this->run_ability_response(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'on-hold',
+			)
+		);
+
+		$this->assertSame( 200, $created->get_status() );
+		$this->assertSame( 200, $updated->get_status() );
+		$this->assertSame( 200, $status->get_status() );
+		$this->assertSame( 0, $calls );
+	}
+
+	/**
 	 * @testdox Should keep backslashes and quotes in the name and descriptions of a created product.
 	 */
 	public function test_product_create_keeps_backslashes_in_post_fields(): void {

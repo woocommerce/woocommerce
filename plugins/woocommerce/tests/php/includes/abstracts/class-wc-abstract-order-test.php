@@ -3363,4 +3363,28 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'You have used this coupon', (string) $this->try_hold_coupon( 'hold_email_change', 'before@example.com' ), 'The use is found through the email recorded with it' );
 	}
+
+	/**
+	 * @testdox apply_coupon() counts the coupon once when its own save also changes the order status.
+	 *
+	 * @testWith ["processing", "completed"]
+	 *           ["pending", "on-hold"]
+	 *
+	 * @param string $stored_status Status that the order is saved with.
+	 * @param string $new_status    Status set in memory before the coupon is applied.
+	 */
+	public function test_apply_coupon_counts_once_when_its_save_changes_the_status( string $stored_status, string $new_status ): void {
+		WC_Helper_Coupon::create_coupon( 'count-once' );
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( $stored_status );
+		$order->save();
+		$order = wc_get_order( $order->get_id() );
+
+		$order->set_status( $new_status );
+		$order->apply_coupon( 'count-once' );
+		$this->assertSame( 1, ( new WC_Coupon( 'count-once' ) )->get_usage_count(), 'The coupon should be counted once.' );
+
+		$order->remove_coupon( 'count-once' );
+		$this->assertSame( 0, ( new WC_Coupon( 'count-once' ) )->get_usage_count(), 'Removing the coupon should give the use back.' );
+	}
 }
