@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the shopper's postcode and show rates in the cart shipping calculator when a single-country store hides the country field.
