@@ -262,6 +262,34 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox Backfilling an order with an empty status onto its draft backup post falls back to pending without a notice.
+	 */
+	public function test_backfill_post_record_with_empty_status_falls_back_to_pending(): void {
+		$this->disable_cot_sync();
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->save();
+
+		$this->assertSame( '', $order->get_status( 'edit' ), 'The order should have no status of its own.' );
+		$this->assertSame( OrderStatus::DRAFT, get_post_status( $order->get_id() ), 'The backup post should be a draft placeholder.' );
+
+		$this->sut->backfill_post_record( $order );
+
+		$this->assertSame( OrderInternalStatus::PENDING, get_post_status( $order->get_id() ), 'The backfilled post should fall back to pending.' );
+	}
+
+	/**
+	 * @testDox Creating an order with sync enabled backfills its draft backup post without a notice.
+	 */
+	public function test_create_with_sync_enabled_backfills_draft_backup_post(): void {
+		$this->enable_cot_sync();
+		$order = $this->create_complex_cot_order();
+
+		$this->assertSame( OrderInternalStatus::PENDING, get_post_status( $order->get_id() ), 'The synced post should be pending, not the draft placeholder.' );
+		$this->assertSame( OrderStatus::PENDING, wc_get_order( $order->get_id() )->get_status(), 'The HPOS order should be pending.' );
+	}
+
+	/**
 	 * @testDox Tests update() on the COT datastore.
 	 */
 	public function test_cot_datastore_update() {
