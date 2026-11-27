@@ -80,7 +80,7 @@ class CartMergeTest extends WC_Unit_Test_Case {
 		try {
 			// The parent empties the cart, resets the current user and rolls back user meta.
 			WC()->session = $this->original_session;
-			unset( $_SERVER['HTTP_CART_TOKEN'], $_GET['rest_route'] );
+			unset( $_SERVER['HTTP_CART_TOKEN'], $_SERVER['HTTP_NONCE'], $_GET['rest_route'], $GLOBALS['wp_rest_auth_cookie'] );
 
 			if ( null === $this->original_request_uri ) {
 				unset( $_SERVER['REQUEST_URI'] );
@@ -412,6 +412,42 @@ class CartMergeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A cookie login without a Store API nonce does not merge a guest cart token.
+	 */
+	public function test_cookie_login_without_nonce_does_not_merge_guest_cart(): void {
+		$guest_id = $this->start_store_api_guest_request( array( $this->guest_product->get_id() => 1 ) );
+		wp_set_current_user( $this->user_id );
+		$GLOBALS['wp_rest_auth_cookie'] = true;
+
+		$this->dispatch_store_api_request();
+
+		$this->assertSame( $guest_id, WC()->session->get_customer_id(), 'The session should stay on the guest cart.' );
+		$this->assertNotEmpty( WC()->session->get_session( $guest_id, array() ), 'The guest session should not be consumed.' );
+		$this->assertEmpty(
+			get_user_meta( $this->user_id, '_woocommerce_load_saved_cart_after_login', true ),
+			'No saved-cart merge should be requested without a nonce.'
+		);
+	}
+
+	/**
+	 * @testdox A cookie login with a valid Store API nonce merges a guest cart token.
+	 */
+	public function test_cookie_login_with_nonce_merges_guest_cart(): void {
+		$this->save_persistent_cart( array( $this->saved_product->get_id() => 1 ) );
+		$this->start_store_api_guest_request( array( $this->guest_product->get_id() => 1 ) );
+		wp_set_current_user( $this->user_id );
+		$GLOBALS['wp_rest_auth_cookie'] = true;
+		$_SERVER['HTTP_NONCE']          = wp_create_nonce( 'wc_store_api' );
+
+		$this->dispatch_store_api_request();
+		$contents = $this->load_cart();
+
+		$this->assertSame( (string) $this->user_id, WC()->session->get_customer_id(), 'The session should switch to the logged-in user.' );
+		$this->assertArrayHasKey( $this->saved_product->get_id(), $contents, 'Saved cart item should be merged in.' );
+		$this->assertArrayHasKey( $this->guest_product->get_id(), $contents, 'Guest cart token item should survive the merge.' );
+	}
+
+	/**
 	 * @testdox A guest cart id on a UCP route stays a separate cart when the shopper is logged in.
 	 * @testWith ["/wp-json/wc/ucp/v1/carts", ""]
 	 *           ["/?rest_route=%2Fwc%2Fucp%2Fv1%2Fcarts", "/wc/ucp/v1/carts"]
@@ -536,11 +572,12 @@ class CartMergeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Simulate a classic login by setting the current user and the merge flag wp_login would set.
+	 * Log the user in and fire wp_login, as a classic login does.
 	 */
 	private function log_in_via_wp_login(): void {
 		wp_set_current_user( $this->user_id );
-		update_user_meta( $this->user_id, '_woocommerce_load_saved_cart_after_login', 1 );
+		$user = get_user_by( 'id', $this->user_id );
+		do_action( 'wp_login', $user->user_login, $user );
 	}
 
 	/**
