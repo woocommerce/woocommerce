@@ -1640,11 +1640,14 @@ class WC_Form_Handler {
 			wc_add_wp_error_notices( $errors );
 
 			if ( 0 === wc_notice_count( 'error' ) ) {
+				// A generated password nobody has changed means a first password. A logged in customer is already in.
+				$first_password = ! is_user_logged_in() && (bool) get_user_option( 'default_password_nag', $user->ID );
+
 				WC_Shortcode_My_Account::reset_password( $user, $posted_fields['password_1'] );
 
 				do_action( 'woocommerce_customer_reset_password', $user );
 
-				wp_safe_redirect( add_query_arg( 'password-reset', 'true', wc_get_page_permalink( 'myaccount' ) ) );
+				wp_safe_redirect( add_query_arg( 'password-reset', $first_password ? 'new' : 'true', wc_get_page_permalink( 'myaccount' ) ) );
 				exit;
 			}
 		}
