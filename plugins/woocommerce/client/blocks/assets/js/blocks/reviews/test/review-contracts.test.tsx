@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getSetting } from '@woocommerce/settings';
 
@@ -215,11 +221,10 @@ describe( 'Product Reviews contracts', () => {
 			await waitFor( () =>
 				expect( mockGetReviews ).toHaveBeenCalledTimes( 1 )
 			);
-			await user.click(
-				await screen.findByRole( 'button', {
-					name: 'Load more reviews',
-				} )
-			);
+			const loadMore = await screen.findByRole( 'button', {
+				name: 'Load more reviews',
+			} );
+			await act( () => user.click( loadMore ) );
 			await waitFor( () =>
 				expect( mockGetReviews ).toHaveBeenCalledTimes( 2 )
 			);
@@ -231,10 +236,10 @@ describe( 'Product Reviews contracts', () => {
 				per_page: 2,
 			} );
 
-			await user.selectOptions(
-				screen.getByRole( 'combobox', { name: 'Order reviews by' } ),
-				'lowest-rating'
-			);
+			const orderBy = screen.getByRole( 'combobox', {
+				name: 'Order reviews by',
+			} );
+			await act( () => user.selectOptions( orderBy, 'lowest-rating' ) );
 			await waitFor( () =>
 				expect( mockGetReviews ).toHaveBeenCalledTimes( 3 )
 			);

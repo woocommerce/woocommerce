@@ -68,7 +68,7 @@
 		"glob": "^10.3.10",
 		"husky": "^9.0.11",
 		"jest": "catalog:tooling",
-		"lint-staged": "^12.5.0",
+		"lint-staged": "17.6.2",
 		"mkdirp": "^1.0.4",
 		"moment": "^2.29.4",
 		"node-stream-zip": "^1.15.0",

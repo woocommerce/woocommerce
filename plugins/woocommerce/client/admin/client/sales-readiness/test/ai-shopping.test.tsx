@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import {
 	act,
 	fireEvent,
@@ -16,6 +17,8 @@ import apiFetch from '@wordpress/api-fetch';
 import AiShopping from '../ai-shopping';
 import { trackReadiness } from '../tracks';
 import type { ShoppingView } from '../types';
+
+const assign = mockBrowserLocation( 'assign' );
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 jest.mock( '@wordpress/a11y', () => ( { speak: jest.fn() } ) );
@@ -169,29 +172,22 @@ const toggle = () =>
 	} );
 
 describe( 'AiShopping', () => {
-	const { location } = window;
+	const originalUrl = window.location.href;
 
 	beforeEach( () => {
 		mockedFetch.mockReset();
 		mockCreateSuccessNotice.mockReset();
 		window.sessionStorage.clear();
-		Object.defineProperty( window, 'location', {
-			configurable: true,
-			value: {
-				...location,
-				href: 'https://example.com/wp-admin/admin.php?page=wc-settings#x',
-				hash: '',
-				assign: jest.fn(),
-			},
-		} );
+		window.history.replaceState(
+			null,
+			'',
+			'/wp-admin/admin.php?page=wc-settings'
+		);
 	} );
 
 	afterEach( () => {
 		window.onbeforeunload = null;
-		Object.defineProperty( window, 'location', {
-			configurable: true,
-			value: location,
-		} );
+		window.history.replaceState( null, '', originalUrl );
 	} );
 
 	it( 'shows the trail back to AI tools, and Save, off until a field changes, posting the settings form', () => {
@@ -443,8 +439,8 @@ describe( 'AiShopping', () => {
 			method: 'POST',
 			data: { enabled: true },
 		} );
-		expect( window.location.assign ).toHaveBeenCalledWith(
-			'https://example.com/wp-admin/admin.php?page=wc-settings'
+		expect( assign ).toHaveBeenCalledWith(
+			`${ window.location.origin }/wp-admin/admin.php?page=wc-settings`
 		);
 		expect(
 			window.sessionStorage.getItem( 'wc-ai-shopping-snackbar' )
@@ -463,8 +459,8 @@ describe( 'AiShopping', () => {
 		await waitFor( () => expect( mockedFetch ).toHaveBeenCalled() );
 		await screen.findByRole( 'checkbox', { name: /Allow AI assistants/ } );
 
-		expect( window.location.assign ).toHaveBeenCalledWith(
-			'https://example.com/wp-admin/admin.php?page=wc-settings'
+		expect( assign ).toHaveBeenCalledWith(
+			`${ window.location.origin }/wp-admin/admin.php?page=wc-settings`
 		);
 		expect(
 			window.sessionStorage.getItem( 'wc-ai-shopping-snackbar' )
@@ -489,7 +485,7 @@ describe( 'AiShopping', () => {
 		await waitFor( () => expect( mockedFetch ).toHaveBeenCalled() );
 		await screen.findByRole( 'checkbox', { name: /Allow AI assistants/ } );
 
-		expect( window.location.assign ).not.toHaveBeenCalled();
+		expect( assign ).not.toHaveBeenCalled();
 		expect( toggle() ).toBeChecked();
 		expect( mockCreateSuccessNotice ).not.toHaveBeenCalled();
 		expect(
@@ -533,7 +529,7 @@ describe( 'AiShopping', () => {
 		await waitFor( () => expect( mockedFetch ).toHaveBeenCalled() );
 		await screen.findByRole( 'checkbox', { name: /Allow AI assistants/ } );
 
-		expect( window.location.assign ).not.toHaveBeenCalled();
+		expect( assign ).not.toHaveBeenCalled();
 		expect( toggle() ).not.toBeChecked();
 		expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
 			'AI assistants can no longer shop your store.',
@@ -561,7 +557,7 @@ describe( 'AiShopping', () => {
 		expect(
 			screen.getByText( 'Finish the required steps first.' )
 		).toBeInTheDocument();
-		expect( window.location.assign ).not.toHaveBeenCalled();
+		expect( assign ).not.toHaveBeenCalled();
 	} );
 
 	it( 'says which way the switch failed when there is no reason to give, such as when offline', async () => {

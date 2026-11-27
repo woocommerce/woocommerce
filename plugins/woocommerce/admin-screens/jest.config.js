@@ -8,7 +8,7 @@ const esmModules = [ 'client-zip' ];
 module.exports = {
 	rootDir: __dirname,
 	roots: [ '<rootDir>' ],
-	preset: `<rootDir>/${ presetDir }`,
+	preset: `<rootDir>/${ presetDir }/jest-preset.js`,
 	transformIgnorePatterns: preset.transformIgnorePatterns.map( ( pattern ) =>
 		pattern.replace(
 			'(?:\\.pnpm|',

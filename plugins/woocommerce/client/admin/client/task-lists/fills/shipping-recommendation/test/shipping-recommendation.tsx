@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { mockBrowserLocation } from '@woocommerce/internal-js-tests';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TaskType } from '@woocommerce/data';
 import userEvent from '@testing-library/user-event';
@@ -12,6 +13,8 @@ import { recordEvent } from '@woocommerce/tracks';
 import { ShippingRecommendation as _ShippingRecommendation } from '../shipping-recommendation';
 import { ShippingRecommendationProps, TaskProps } from '../types';
 import { redirectToWCSSettings } from '../utils';
+
+const setHref = mockBrowserLocation( 'href' );
 
 jest.mock( '../../tax/utils', () => ( {
 	hasCompleteAddress: jest.fn().mockReturnValue( true ),
@@ -164,21 +167,14 @@ describe( 'ShippingRecommendation', () => {
 		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
 		( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
 
-		const mockLocation = {
-			href: 'test',
-		} as Location;
-
-		mockLocation.href = 'test';
-		Object.defineProperty( global.window, 'location', {
-			value: mockLocation,
-		} );
-
 		render( <ShippingRecommendation /> );
 
 		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
-		expect( mockLocation.href ).toContain(
-			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'
+		expect( setHref ).toHaveBeenCalledWith(
+			expect.stringContaining(
+				'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'
+			)
 		);
 	} );
 } );
