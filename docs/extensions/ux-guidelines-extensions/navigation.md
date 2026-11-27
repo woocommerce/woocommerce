@@ -1,6 +1,7 @@
 ---
 post_title: Navigation
 sidebar_label: Navigation
+sidebar_position: 1
 ---
 
 # Navigation
