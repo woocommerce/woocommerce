@@ -66,6 +66,11 @@ class WC_Tracker {
 			return;
 		}
 
+		// Re-check consent at send time. A WP-Cron job scheduled before opt-out can still fire afterward.
+		if ( ! wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
+			return;
+		}
+
 		/**
 		 * Filter whether to send tracking data or not.
 		 *
