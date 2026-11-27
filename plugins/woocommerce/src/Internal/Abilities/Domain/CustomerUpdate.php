@@ -249,6 +249,26 @@ class CustomerUpdate extends ActionableAbility {
 	}
 
 	/**
+	 * The ID of a customer, or zero when it is not saved yet.
+	 *
+	 * @param \WC_Customer $subject A customer.
+	 * @return int
+	 */
+	protected static function get_object_id( $subject ): int {
+		return $subject->get_id();
+	}
+
+	/**
+	 * A customer has no type, so the `object_types` of a field have no effect on it.
+	 *
+	 * @param \WC_Customer $subject A customer.
+	 * @return string
+	 */
+	protected static function get_object_type( $subject ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- A customer has no type.
+		return '';
+	}
+
+	/**
 	 * The ability output for the saved customer.
 	 *
 	 * @param \WC_Customer $subject Saved customer.

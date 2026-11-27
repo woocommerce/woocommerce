@@ -166,8 +166,8 @@ class ExtensibleAbilities {
 	 *                                  WooCommerce also reads, because some clients refuse it.
 	 *     @type string[] $object_types Optional. The object types the field applies to, such as `simple` and
 	 *                                  `subscription` for a product, `line_item`, `shipping`, `fee` and `coupon` for an
-	 *                                  order item or `product_brand` for a term. The type is the taxonomy of a term,
-	 *                                  and `get_type()` of another object. The abilities leave the field out of
+	 *                                  order item or `product_brand` for a term. The ability that reads or writes the
+	 *                                  object gives its type. The abilities leave the field out of
 	 *                                  the other objects, and an ability that writes the resource refuses a write to
 	 *                                  them. Omit it for every type: an `order_item` field without it is then read on
 	 *                                  product, shipping, fee and coupon lines, so its `get_callback` must accept each
@@ -953,12 +953,15 @@ class ExtensibleAbilities {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param array<string, mixed> $output   Formatted object.
+	 * @param array<string, mixed> $output        Formatted object.
 	 * @param string               $resource_name Resource.
-	 * @param object               $subject  Object to read.
+	 * @param object               $subject       Object to read.
+	 * @param string               $object_type   The type of the object, which the `object_types` of a field are
+	 *                                            compared with, such as the type of a product or the taxonomy of
+	 *                                            a term. An empty string for an object that has no type.
 	 * @return array<string, mixed>|\WP_Error
 	 */
-	public static function add_fields_to_object( array $output, string $resource_name, $subject ) {
+	public static function add_fields_to_object( array $output, string $resource_name, $subject, string $object_type ) {
 		if ( empty( self::$fields[ $resource_name ] ) || ! self::is_enabled() ) {
 			return $output;
 		}
@@ -966,7 +969,7 @@ class ExtensibleAbilities {
 		$extensions = array();
 		foreach ( self::$fields[ $resource_name ] as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
-				if ( ! isset( $args['get_callback'] ) || ! self::field_applies_to( $args, $subject ) ) {
+				if ( ! isset( $args['get_callback'] ) || ! self::field_applies_to( $args, $object_type ) ) {
 					continue;
 				}
 				try {
@@ -994,36 +997,17 @@ class ExtensibleAbilities {
 	}
 
 	/**
-	 * Whether a field applies to an object, from the `object_types` of the field.
+	 * Whether a field applies to an object of a type, from the `object_types` of the field.
 	 * A field applies to every object that has no type.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param array<string, mixed> $args    Field arguments from `register_field()`.
-	 * @param mixed                $subject The object.
+	 * @param array<string, mixed> $args        Field arguments from `register_field()`.
+	 * @param string               $object_type The type of the object, or an empty string when it has none.
 	 * @return bool
 	 */
-	public static function field_applies_to( array $args, $subject ): bool {
-		if ( empty( $args['object_types'] ) ) {
-			return true;
-		}
-		$type = self::get_object_type( $subject );
-		return '' === $type || in_array( $type, $args['object_types'], true );
-	}
-
-	/**
-	 * The type of an object: the taxonomy of a term, or else what its `get_type()` method returns.
-	 *
-	 * @since 11.4.0
-	 *
-	 * @param mixed $subject The object.
-	 * @return string The type, or an empty string when the object has none.
-	 */
-	public static function get_object_type( $subject ): string {
-		if ( $subject instanceof \WP_Term ) {
-			return $subject->taxonomy;
-		}
-		return is_object( $subject ) && method_exists( $subject, 'get_type' ) ? (string) $subject->get_type() : '';
+	public static function field_applies_to( array $args, string $object_type ): bool {
+		return empty( $args['object_types'] ) || '' === $object_type || in_array( $object_type, $args['object_types'], true );
 	}
 
 	/**

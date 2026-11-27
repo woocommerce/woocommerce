@@ -32,7 +32,8 @@ defined( 'ABSPATH' ) || exit;
  * input is ignored. An ability whose own input schema sets
  * `additionalProperties` to false rejects it instead.
  *
- * Each ability saves its own object in save(). An ability for a `WC_Data`
+ * Each ability saves its own object in save(), and gives the ID and the type
+ * of an object in get_object_id() and get_object_type(). An ability for a `WC_Data`
  * object uses WCDataSaveTrait. An ability for a `WP_Term` sets the new values on
  * the term in memory in change(), so the validators see them, and writes them
  * in its own save().
@@ -128,20 +129,38 @@ abstract class ActionableAbility extends Ability {
 	protected function save( $subject ) {
 		throw new \BadMethodCallException( esc_html( static::class . ' has no save() method. Use WCDataSaveTrait for a WC_Data object, or write save() for another kind of object.' ) );
 	}
-	// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn
 
 	/**
-	 * The ID of an object of the call, or zero when it is not saved yet.
+	 * The ID of an object of the call, or zero when it is not saved yet. Every
+	 * ability writes this method, for the primary object and for each secondary
+	 * object.
 	 *
-	 * @param object $subject A `WP_Term`, or an object with a `get_id()` method, such as a `WC_Data` object.
+	 * @since 11.5.0
+	 *
+	 * @param object $subject An object of the call.
 	 * @return int
+	 * @throws \BadMethodCallException When the ability has no get_object_id() method.
 	 */
-	private static function get_object_id( object $subject ): int {
-		if ( $subject instanceof \WP_Term ) {
-			return $subject->term_id;
-		}
-		return method_exists( $subject, 'get_id' ) ? (int) $subject->get_id() : 0;
+	protected static function get_object_id( $subject ): int {
+		throw new \BadMethodCallException( esc_html( static::class . ' has no get_object_id() method. Return the ID of the object.' ) );
 	}
+
+	/**
+	 * The type of an object of the call, which the `object_types` of a field are
+	 * compared with, such as the type of a product or the taxonomy of a term.
+	 * Every ability writes this method. It returns an empty string for an object
+	 * that has no type.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param object $subject An object of the call.
+	 * @return string
+	 * @throws \BadMethodCallException When the ability has no get_object_type() method.
+	 */
+	protected static function get_object_type( $subject ): string {
+		throw new \BadMethodCallException( esc_html( static::class . ' has no get_object_type() method. Return the type of the object, or an empty string.' ) );
+	}
+	// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn
 
 	/**
 	 * Whether the ability writes the extension fields of its resource. An
@@ -312,7 +331,7 @@ abstract class ActionableAbility extends Ability {
 
 		$response = $this->prepare_response( $subject );
 		if ( is_wp_error( $response ) ) {
-			return ExtensibleAbilities::saved_write_error( $response, $this->get_resource(), self::get_object_id( $subject ) );
+			return ExtensibleAbilities::saved_write_error( $response, $this->get_resource(), static::get_object_id( $subject ) );
 		}
 
 		return $response;
@@ -331,12 +350,12 @@ abstract class ActionableAbility extends Ability {
 	private function sync( array $objects, array $sent ): ?\WP_Error {
 		$deleted = $this->get_deleted_objects();
 		$trashed = $this->get_trashed_objects();
-		$gone    = array_map( static fn( $item ) => get_class( $item ) . ':' . self::get_object_id( $item ), array_merge( $deleted, $trashed ) );
+		$gone    = array_map( static fn( $item ) => get_class( $item ) . ':' . static::get_object_id( $item ), array_merge( $deleted, $trashed ) );
 		$saved   = array();
 		$own     = array();
 		foreach ( $objects as list( $object, , $resource_name ) ) {
 			$own[ $resource_name ] ??= array();
-			$id                      = self::get_object_id( $object );
+			$id                      = static::get_object_id( $object );
 			if ( $id > 0 && ! in_array( get_class( $object ) . ':' . $id, $gone, true ) ) {
 				$saved[]                 = $object;
 				$own[ $resource_name ][] = $object;
@@ -374,7 +393,7 @@ abstract class ActionableAbility extends Ability {
 	private static function forget_rolled_back_objects( array $objects, array $deleted = array() ): void {
 		$product_cache = wc_get_container()->get( ProductCache::class );
 		foreach ( array_merge( $objects, array_map( static fn( $item ) => array( $item ), $deleted ) ) as list( $object ) ) {
-			$id = self::get_object_id( $object );
+			$id = static::get_object_id( $object );
 			if ( $id > 0 && $object instanceof \WC_Data ) {
 				$object->delete_meta_cache();
 			}
@@ -582,14 +601,14 @@ abstract class ActionableAbility extends Ability {
 	 */
 	private function apply_fields( $subject, array $updates, array &$sent, \WP_Error $refused ): void {
 		foreach ( $updates as $param => list( $args, $value ) ) {
-			if ( ! ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
+			if ( ! ExtensibleAbilities::field_applies_to( $args, static::get_object_type( $subject ) ) ) {
 				$rejected = new \WP_Error(
 					'woocommerce_ability_field_object_type',
 					sprintf(
 						/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
 						__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
 						$param,
-						ExtensibleAbilities::get_object_type( $subject ),
+						static::get_object_type( $subject ),
 						implode( ', ', $args['object_types'] )
 					),
 					array( 'status' => 400 )

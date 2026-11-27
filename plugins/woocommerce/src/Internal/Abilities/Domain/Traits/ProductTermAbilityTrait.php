@@ -17,6 +17,26 @@ defined( 'ABSPATH' ) || exit;
 trait ProductTermAbilityTrait {
 
 	/**
+	 * The ID of a term, or zero when it is not saved yet.
+	 *
+	 * @param \WP_Term $subject A term.
+	 * @return int
+	 */
+	protected static function get_object_id( $subject ): int {
+		return $subject->term_id;
+	}
+
+	/**
+	 * The type of a term is its taxonomy, so a field with `object_types` applies to the terms of those taxonomies.
+	 *
+	 * @param \WP_Term $subject A term.
+	 * @return string
+	 */
+	protected static function get_object_type( $subject ): string {
+		return $subject->taxonomy;
+	}
+
+	/**
 	 * Get the taxonomy input schema, limited to product taxonomies.
 	 *
 	 * @param string $description Field description.
@@ -262,7 +282,7 @@ trait ProductTermAbilityTrait {
 				}
 			}
 		}
-		return ExtensibleAbilities::add_fields_to_object( $output, 'product_term', $term );
+		return ExtensibleAbilities::add_fields_to_object( $output, 'product_term', $term, self::get_object_type( $term ) );
 	}
 
 	/**

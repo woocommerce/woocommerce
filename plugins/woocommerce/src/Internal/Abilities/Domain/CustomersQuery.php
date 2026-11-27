@@ -262,7 +262,7 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 
 		$output['user_id'] = $customer->get_id();
 		$output['role']    = $customer->get_role();
-		return ExtensibleAbilities::add_fields_to_object( $output, 'customer', $customer );
+		return ExtensibleAbilities::add_fields_to_object( $output, 'customer', $customer, '' );
 	}
 
 	/**

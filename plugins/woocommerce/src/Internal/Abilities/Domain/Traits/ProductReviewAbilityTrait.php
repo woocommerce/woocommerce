@@ -228,7 +228,7 @@ trait ProductReviewAbilityTrait {
 		if ( $with_status ) {
 			$review['status'] = self::get_review_status( $comment );
 		}
-		return ExtensibleAbilities::add_fields_to_object( $review, 'product_review', $comment );
+		return ExtensibleAbilities::add_fields_to_object( $review, 'product_review', $comment, '' );
 	}
 
 	/**

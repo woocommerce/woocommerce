@@ -1457,7 +1457,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$products = array_column( $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen late' ) )['products'], null, 'id' );
 
 		$this->assertArrayNotHasKey( 'late-ext', $products[ $product->get_id() ]['extensions'] ?? array() );
-		$this->assertArrayNotHasKey( 'late-ext', ExtensibleAbilities::add_fields_to_object( array(), 'product', $product )['extensions'] ?? array() );
+		$this->assertArrayNotHasKey( 'late-ext', ExtensibleAbilities::add_fields_to_object( array(), 'product', $product, $product->get_type() )['extensions'] ?? array() );
 	}
 
 	/**
@@ -1484,7 +1484,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		remove_action( 'woocommerce_extensible_abilities_resources_init', $register_resource, 99 );
 		remove_action( 'woocommerce_extensible_abilities_init', $register_field, 1 );
 
-		$output = ExtensibleAbilities::add_fields_to_object( array(), 'ticket', new \stdClass() );
+		$output = ExtensibleAbilities::add_fields_to_object( array(), 'ticket', new \stdClass(), '' );
 		$schema = ExtensibleAbilities::add_fields_schema( array( 'type' => 'object' ), 'ticket' );
 
 		$this->assertSame( array( 'test-ext' => array( 'code' => 'T1' ) ), $output['extensions'] );
@@ -1773,7 +1773,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					),
 					'execute_callback'    => static function ( array $input ) {
 						$product = wc_get_product( $input['id'] );
-						return ExtensibleAbilities::add_fields_to_object( array( 'id' => $product->get_id() ), 'product', $product );
+						return ExtensibleAbilities::add_fields_to_object( array( 'id' => $product->get_id() ), 'product', $product, $product->get_type() );
 					},
 					'permission_callback' => '__return_true',
 					'meta'                => array(
@@ -1829,7 +1829,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertSame(
 			array( 'test-ext' => array( 'note' => 'order-' . $order->get_id() ) ),
-			ExtensibleAbilities::add_fields_to_object( array(), 'order', $order )['extensions']
+			ExtensibleAbilities::add_fields_to_object( array(), 'order', $order, $order->get_type() )['extensions']
 		);
 	}
 
@@ -3019,7 +3019,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		}
 		$order = \WC_Helper_Order::create_order();
 
-		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', $order );
+		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', $order, $order->get_type() );
 
 		$this->assertSame( array( 'count' => 12 ), $output['extensions']['values'] );
 	}
@@ -7713,7 +7713,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			);
 		}
 
-		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', \WC_Helper_Order::create_order() );
+		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', \WC_Helper_Order::create_order(), 'shop_order' );
 		return $output['extensions']['values'];
 	}
 

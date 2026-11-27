@@ -51,12 +51,32 @@ class TestProductRenameAbility extends ActionableAbility {
 	}
 
 	/**
+	 * The ID of a product or an order item, or zero when it is not saved yet.
+	 *
+	 * @param \WC_Product|\WC_Order_Item $subject A product or an order item.
+	 * @return int
+	 */
+	protected static function get_object_id( $subject ): int {
+		return $subject->get_id();
+	}
+
+	/**
+	 * The type of the object, which the `object_types` of a field are compared with.
+	 *
+	 * @param \WC_Product|\WC_Order_Item $subject A product or an order item.
+	 * @return string
+	 */
+	protected static function get_object_type( $subject ): string {
+		return $subject->get_type();
+	}
+
+	/**
 	 * The renamed product with its extension fields.
 	 *
 	 * @param \WC_Product $subject Saved product.
 	 * @return array
 	 */
 	protected function prepare_response( $subject ) {
-		return ExtensibleAbilities::add_fields_to_object( array( 'id' => $subject->get_id() ), 'product', $subject );
+		return ExtensibleAbilities::add_fields_to_object( array( 'id' => $subject->get_id() ), 'product', $subject, self::get_object_type( $subject ) );
 	}
 }

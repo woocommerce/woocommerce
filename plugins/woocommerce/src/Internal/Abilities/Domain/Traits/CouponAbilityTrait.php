@@ -15,6 +15,26 @@ defined( 'ABSPATH' ) || exit;
 trait CouponAbilityTrait {
 
 	/**
+	 * The ID of a coupon, or zero when it is not saved yet.
+	 *
+	 * @param \WC_Coupon $subject A coupon.
+	 * @return int
+	 */
+	protected static function get_object_id( $subject ): int {
+		return $subject->get_id();
+	}
+
+	/**
+	 * A coupon has no type, so the `object_types` of a field have no effect on it.
+	 *
+	 * @param \WC_Coupon $subject A coupon.
+	 * @return string
+	 */
+	protected static function get_object_type( $subject ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- A coupon has no type.
+		return '';
+	}
+
+	/**
 	 * Coupon post statuses supported by the coupon abilities.
 	 *
 	 * @return array<int, string>
