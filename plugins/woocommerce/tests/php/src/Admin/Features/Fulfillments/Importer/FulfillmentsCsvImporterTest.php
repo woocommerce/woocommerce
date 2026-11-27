@@ -2041,4 +2041,48 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( doing_action( 'woocommerce_fulfillment_created_notification' ), 'The interrupted action is taken off the filter stack' );
 		$this->assertCount( 1, $this->fulfillments_of( $order ) );
 	}
+
+	/**
+	 * @testdox import_chunk() imports nothing when the file ends before the rows the caller still expects.
+	 *
+	 * @testWith [2, true]
+	 *           [3, false]
+	 *
+	 * @param int  $remaining_rows Rows the caller expects, of the two in the file.
+	 * @param bool $imports        Whether the chunk is imported.
+	 */
+	public function test_import_chunk_refuses_a_file_that_ends_before_the_expected_rows( int $remaining_rows, bool $imports ): void {
+		$first  = OrderHelper::create_order();
+		$second = OrderHelper::create_order();
+		$file   = $this->make_csv( "order_number,tracking_number,shipment_provider\n{$first->get_id()},EOF-1,ups\n{$second->get_id()},EOF-2,ups\n" );
+
+		$chunk = ( new FulfillmentsCsvImporter( $file ) )->import_chunk( 10, self::IMPORT_MAPPING, array( 'remaining_rows' => $remaining_rows ) );
+
+		$this->assertSame( $imports ? null : 'unexpected_eof', $chunk['error']['code'] ?? null );
+		$this->assertCount( $imports ? 1 : 0, $this->fulfillments_of( $first ), 'A chunk that ended early writes none of its rows' );
+		$this->assertCount( $imports ? 1 : 0, $this->fulfillments_of( $second ), 'Its last row is not written either' );
+	}
+
+	/**
+	 * @testdox import_chunk() imports nothing when the stream stops inside a row.
+	 */
+	public function test_import_chunk_writes_nothing_when_the_stream_stops_inside_a_row(): void {
+		$first   = OrderHelper::create_order();
+		$second  = OrderHelper::create_order();
+		$header  = "order_number,tracking_number,shipment_provider\n";
+		$row_one = "{$first->get_id()},CUT-1,ups\n";
+		$path    = $this->make_csv( $header . $row_one . "{$second->get_id()},CUT-2,ups\n" );
+
+		// The stream ends a few bytes into the second row, which then reads as a shorter row.
+		FulfillmentsCsvReadTracker::$fail_after = strlen( $header . $row_one ) + strlen( (string) $second->get_id() ) + 3;
+		try {
+			$chunk = ( new FulfillmentsCsvImporter( 'wcimp://' . $path ) )->import_chunk( 10, self::IMPORT_MAPPING, array( 'remaining_rows' => 2 ) );
+		} finally {
+			FulfillmentsCsvReadTracker::$fail_after = null;
+		}
+
+		$this->assertSame( 'unexpected_eof', $chunk['error']['code'] ?? null, 'A read that stops before the expected rows is an error' );
+		$this->assertCount( 0, $this->fulfillments_of( $first ), 'The complete row before the cut is not written either' );
+		$this->assertCount( 0, $this->fulfillments_of( $second ), 'The cut row is not written' );
+	}
 }

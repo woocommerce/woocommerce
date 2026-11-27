@@ -257,7 +257,7 @@ class FulfillmentsCsvImporter {
 	 * The filtered value is kept between 1 and MAX_CHUNK_SIZE, and at most NOTIFY_CHUNK_SIZE
 	 * when customers are notified, so a chunk stays within typical request time limits.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 *
 	 * @param bool $notify_customer Whether the import sends customer notifications.
 	 * @return int
@@ -269,7 +269,7 @@ class FulfillmentsCsvImporter {
 		 * The result is kept between 1 and 1000, and at most 25 while customer notifications
 		 * are on. A value that is not a positive number falls back to the default.
 		 *
-		 * @since 11.4.0
+		 * @since 11.5.0
 		 *
 		 * @param int  $chunk_size      Default chunk size (200).
 		 * @param bool $notify_customer Whether the import sends customer notifications.
@@ -450,7 +450,7 @@ class FulfillmentsCsvImporter {
 	 * adds `notified`: whether the notification action ran without an error, which is not
 	 * proof that an email was sent. Messages are plain text and can quote CSV values.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 *
 	 * @param int                  $limit   Data rows to import. Capped by resolve_chunk_size(), which is also used when 0 or less.
 	 * @param array<int, string>   $mapping CSV column index => canonical column key.
@@ -460,6 +460,10 @@ class FulfillmentsCsvImporter {
 	 *     @type int                 $byte_offset         Position to resume from. 0 starts after the header.
 	 *     @type int                 $next_record_number  Physical record number at byte_offset.
 	 *     @type array<string, true> $seen_tracking_pairs Order and tracking number pairs imported so far.
+	 *     @type int                 $remaining_rows      Data rows the caller still expects. When set, a read that
+	 *                                                    ends before them is an error and nothing of the chunk is
+	 *                                                    imported. A read that ends before the size of the file is
+	 *                                                    an error either way.
 	 * }
 	 * @return array{
 	 *     counts?: array{created:int, updated:int, skipped:int, failed:int, notified:int},
@@ -497,6 +501,20 @@ class FulfillmentsCsvImporter {
 		);
 		if ( isset( $read['error'] ) ) {
 			return $read;
+		}
+		// A read that ends before the size of the file, or before the rows the caller counted,
+		// stopped early, for example on a stream that dropped. Its last row may be cut short and
+		// still look like a row, so nothing of the chunk is imported.
+		if ( ! empty( $read['eof'] ) ) {
+			$size      = filesize( $this->file );
+			$cut_short = false !== $size && (int) ( $read['byte_offset'] ?? 0 ) < $size;
+			$too_few   = isset( $state['remaining_rows'] ) && (int) ( $read['consumed'] ?? 0 ) < (int) $state['remaining_rows'];
+			if ( $cut_short || $too_few ) {
+				return $this->error(
+					'unexpected_eof',
+					__( 'The CSV file ended before all of its rows were read. Please try again, or upload the file again.', 'woocommerce' )
+				);
+			}
 		}
 
 		/**
@@ -945,7 +963,7 @@ class FulfillmentsCsvImporter {
 		 * map custom order numbers, or null when the order cannot be found. Any other value
 		 * fails the row.
 		 *
-		 * @since 11.4.0
+		 * @since 11.5.0
 		 *
 		 * @param WC_Order|null $order        Order found by ID, or null.
 		 * @param string        $order_number Order number cell from the CSV.

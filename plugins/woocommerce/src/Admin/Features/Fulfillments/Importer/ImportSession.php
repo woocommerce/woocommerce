@@ -18,7 +18,8 @@ defined( 'ABSPATH' ) || exit;
  * The prepare endpoint creates it with the staged file path, attachment ID, delimiter,
  * headers and row total, and schedules the cleanup of the staged file. The import run
  * freezes its mapping here and records each chunk's progress (processed, byte_offset,
- * counts, seen_tracking_pairs, last chunk). One session is active per user at a time.
+ * counts, seen_tracking_pairs, last chunk). A finished import is marked completed and
+ * its record is kept until it expires. One session is active per user at a time.
  *
  * @internal
  * @since 11.4.0
@@ -483,6 +484,13 @@ final class ImportSession {
 			delete_transient( self::INDEX_PREFIX . $this->user_id );
 		}
 
+		$this->unschedule_cleanup();
+	}
+
+	/**
+	 * Unschedule the pending cleanup action of the staged file.
+	 */
+	private function unschedule_cleanup(): void {
 		if ( function_exists( 'as_unschedule_action' ) ) {
 			as_unschedule_action(
 				self::CLEANUP_HOOK,
@@ -677,7 +685,7 @@ final class ImportSession {
 	 * settings or recorded a chunk cannot write over them. That narrows the window for two
 	 * requests freezing at once; the caller's lock closes it.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 *
 	 * @param array<int, string> $mapping CSV column index => canonical column key.
 	 * @param bool               $notify  Whether to fire customer notifications.
@@ -720,7 +728,7 @@ final class ImportSession {
 	/**
 	 * Physical record number of the row at byte_offset(), passed back to the reader on resume.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 *
 	 * @return int 0 until a chunk is recorded.
 	 */
@@ -733,7 +741,7 @@ final class ImportSession {
 	 *
 	 * Lets a caller answer a replay of that chunk without importing its rows again.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 *
 	 * @return array{offset:int, rows:array<int, array<string, mixed>>, eof:bool}|null Null until a chunk is recorded.
 	 */
@@ -760,7 +768,7 @@ final class ImportSession {
 	 * settings another copy froze are kept. The dedupe set and the resume position are
 	 * replaced, and only this chunk's rows are kept, which bounds the payload.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 *
 	 * @param int                  $offset Data rows processed before this chunk; must equal processed().
 	 * @param array<string, mixed> $chunk  Result of import_chunk() without an error.
@@ -832,6 +840,139 @@ final class ImportSession {
 	 */
 	public function summary(): array {
 		return array_merge( $this->counts(), array( 'rows' => array() ) );
+	}
+
+	/**
+	 * Write the stored session again so it does not expire while a chunk is imported.
+	 *
+	 * A session expires an hour after its last write. A chunk that starts just before
+	 * that would write its rows and then find no session to record them on. The stored
+	 * payload replaces this copy, so the caller checks the progress after this call.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @return bool False when the session is gone, could not be stored, or did not get its lifetime renewed.
+	 */
+	public function keep_alive(): bool {
+		$payload_key = self::PREFIX . $this->user_id . '_' . $this->token;
+		$stored      = get_transient( $payload_key );
+		if ( ! is_array( $stored ) ) {
+			return false;
+		}
+		$this->data = $stored;
+		if ( ! $this->persist() ) {
+			return false;
+		}
+		// set_transient() does not report a failed timeout write, so the lifetime is read back.
+		return self::remaining_ttl( $payload_key ) > self::TTL - MINUTE_IN_SECONDS;
+	}
+
+	/**
+	 * Whether every data row the prepare step counted has been processed.
+	 *
+	 * The end of the file alone does not end the import: a reader that stops before the
+	 * counted rows hit a read failure, and the rows it did not reach are still expected.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @return bool
+	 */
+	public function done(): bool {
+		return $this->processed() >= $this->total();
+	}
+
+	/**
+	 * Whether the session was marked completed.
+	 *
+	 * The staged file is released after this flag is stored, so the flag does not prove the
+	 * file is gone: a file that could not be deleted is left to its scheduled cleanup.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @return bool
+	 */
+	public function completed(): bool {
+		return ! empty( $this->data['completed'] );
+	}
+
+	/**
+	 * Mark a finished import as completed and release its staged file.
+	 *
+	 * The record itself is kept until it expires or the user's next upload replaces it, so
+	 * a request that repeats the last chunk can still be answered. The flag is stored
+	 * first: when that fails the file and its scheduled cleanup stay, and a later call
+	 * can complete the session. The stored payload is read first, as record_chunk() does,
+	 * so a copy of a session that was replaced or deleted cannot store it again.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @return bool True when this call completed the session; false when it was already
+	 *              completed, is not done yet, is gone, or the flag could not be stored.
+	 */
+	public function complete(): bool {
+		if ( $this->completed() || ! $this->done() ) {
+			return false;
+		}
+		$stored = get_transient( self::PREFIX . $this->user_id . '_' . $this->token );
+		if ( ! is_array( $stored ) ) {
+			return false;
+		}
+		$this->data = $stored;
+		if ( $this->completed() ) {
+			return false;
+		}
+
+		$this->data['completed'] = true;
+		if ( ! $this->persist() ) {
+			unset( $this->data['completed'] );
+			return false;
+		}
+
+		// The import is completed either way; what could not be deleted keeps a cleanup.
+		$this->release_staged_file();
+		return true;
+	}
+
+	/**
+	 * Delete the staged file of a session that no longer needs it, and its attachment.
+	 *
+	 * For a completed session and for one that was replaced. When the file and the
+	 * attachment are gone the scheduled cleanup goes too. When something is left, because
+	 * a delete failed or a callback threw, a cleanup stays scheduled and tries again later.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @return bool Whether the file and its attachment are gone.
+	 */
+	public function release_staged_file(): bool {
+		$hook_depth = count( $GLOBALS['wp_current_filter'] );
+		try {
+			self::delete_staged_file( $this->file(), $this->attachment_id() );
+		} catch ( \Throwable $e ) {
+			// WordPress leaves the hook on the stack when a callback throws.
+			array_splice( $GLOBALS['wp_current_filter'], $hook_depth );
+			wc_get_logger()->error(
+				sprintf( 'The staged file of fulfillments import session %1$s could not be released: %2$s', $this->token, $e->getMessage() ),
+				array( 'source' => 'fulfillments-importer' )
+			);
+		}
+
+		$attachment_left = $this->attachment_id() > 0 && null !== get_post( $this->attachment_id() );
+		if ( ! file_exists( $this->file() ) && ! $attachment_left ) {
+			$this->unschedule_cleanup();
+			return true;
+		}
+
+		// A path outside the import directory is never deleted, so it gets no cleanup either.
+		$args = array( $this->user_id, $this->token, $this->file(), $this->attachment_id() );
+		if (
+			self::is_staged_path( $this->file() )
+			&& function_exists( 'as_next_scheduled_action' )
+			&& false === as_next_scheduled_action( self::CLEANUP_HOOK, $args, 'woocommerce-fulfillments-importer' )
+		) {
+			self::schedule_cleanup( $this->user_id, $this->token, $this->file(), $this->attachment_id(), 0 );
+		}
+		return false;
 	}
 
 	/**

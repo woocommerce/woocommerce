@@ -22,6 +22,13 @@ class FulfillmentsCsvReadTracker {
 	public static $max_position = 0;
 
 	/**
+	 * File position after which the stream returns nothing, like a connection that drops. Null reads the whole file.
+	 *
+	 * @var int|null
+	 */
+	public static $fail_after = null;
+
+	/**
 	 * Stream context PHP assigns to the wrapper instance.
 	 *
 	 * @var resource|null
@@ -89,6 +96,12 @@ class FulfillmentsCsvReadTracker {
 	 * @return string
 	 */
 	public function stream_read( $count ) {
+		if ( null !== self::$fail_after ) {
+			$count = min( (int) $count, max( 0, self::$fail_after - $this->stream_tell() ) );
+			if ( 0 === $count ) {
+				return '';
+			}
+		}
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- Reading the fixture handle opened above.
 		$data = fread( $this->handle, (int) $count );
 		$this->note_position();
@@ -125,6 +138,9 @@ class FulfillmentsCsvReadTracker {
 	 * @return bool
 	 */
 	public function stream_eof() {
+		if ( null !== self::$fail_after && $this->stream_tell() >= self::$fail_after ) {
+			return true;
+		}
 		return feof( $this->handle );
 	}
 

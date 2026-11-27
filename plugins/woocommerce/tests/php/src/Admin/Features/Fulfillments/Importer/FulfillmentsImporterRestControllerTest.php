@@ -7,6 +7,9 @@ use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsCsvI
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsImporterRestController;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\ImportSession;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+use WC_Data_Store;
+use WC_Order;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 
@@ -49,6 +52,22 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @var FulfillmentsImporterRestController
 	 */
 	private FulfillmentsImporterRestController $sut;
+
+	/**
+	 * Product shared by the orders of one test; created with the first order.
+	 *
+	 * @var \WC_Product|null
+	 */
+	private ?\WC_Product $product = null;
+
+	/**
+	 * Mapping of the three-column CSV the run tests stage.
+	 */
+	private const RUN_MAPPING = array(
+		'0' => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+		'1' => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+		'2' => FulfillmentsCsvImporter::COL_PROVIDER,
+	);
 
 	/**
 	 * Bootstrap the fulfillments feature and create an admin user.
@@ -344,11 +363,131 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox register() exposes the prepare route on the REST server through the WooCommerce namespace filter.
+	 * Create an order with one line item, which is all the importer reads from it.
+	 *
+	 * @return int Order ID.
 	 */
-	public function test_register_exposes_prepare_route(): void {
+	private function make_order(): int {
+		if ( null === $this->product ) {
+			$this->product = \WC_Helper_Product::create_simple_product();
+		}
+		$order = wc_create_order();
+		$order->add_product( $this->product, 1 );
+		return $order->save();
+	}
+
+	/**
+	 * Stage a CSV with one row per new order and open a session over it.
+	 *
+	 * @param int  $rows            Number of orders and data rows.
+	 * @param bool $with_attachment Whether the staged file gets an attachment post.
+	 * @param bool $notify          Value of notify_customer stored by the prepare step.
+	 * @param bool $update          Value of update_existing stored by the prepare step.
+	 * @return array{0: ImportSession, 1: array<int, int>} The session and the order IDs in file order.
+	 */
+	private function make_run_session( int $rows, bool $with_attachment = false, bool $notify = false, bool $update = true ): array {
+		$order_ids = array();
+		$csv       = "order_number,tracking_number,shipment_provider\n";
+		for ( $i = 1; $i <= $rows; $i++ ) {
+			$order_ids[] = $this->make_order();
+			$csv        .= end( $order_ids ) . ",RUN-{$i},ups\n";
+		}
+		$file    = $this->make_staged_file( $csv );
+		$session = ImportSession::create(
+			get_current_user_id(),
+			$file,
+			',',
+			array( 'order_number', 'tracking_number', 'shipment_provider' ),
+			$rows,
+			$notify,
+			$update,
+			$with_attachment ? $this->make_attachment( $file ) : 0
+		);
+		$this->assertTrue( $session->persisted() );
+		return array( $session, $order_ids );
+	}
+
+	/**
+	 * Call handle_run with the three-column mapping.
+	 *
+	 * @param string               $token  Session token.
+	 * @param int                  $offset Offset to send.
+	 * @param int|null             $limit  Limit to send; null leaves it out.
+	 * @param array<string, mixed> $params Parameters that replace or add to the defaults.
+	 * @return mixed
+	 */
+	private function run_chunk( string $token, int $offset, ?int $limit = null, array $params = array() ) {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );
+		$request->set_param( 'token', $token );
+		$request->set_param( 'offset', $offset );
+		$request->set_param( 'mapping', self::RUN_MAPPING );
+		if ( null !== $limit ) {
+			$request->set_param( 'limit', $limit );
+		}
+		foreach ( $params as $name => $value ) {
+			$request->set_param( $name, $value );
+		}
+		return $this->invoke( 'handle_run', $request );
+	}
+
+	/**
+	 * Read the fulfillments of an order.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return array
+	 */
+	private function fulfillments_of( int $order_id ): array {
+		return WC_Data_Store::load( 'order-fulfillment' )->read_fulfillments( WC_Order::class, (string) $order_id );
+	}
+
+	/**
+	 * Read the value of the current user's run lock row.
+	 *
+	 * @return string|null Null when no request holds the lock.
+	 */
+	private function run_lock_value(): ?string {
+		global $wpdb;
+		return $wpdb->get_var(
+			$wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'woocommerce_fulfillments_import_lock_' . get_current_user_id() )
+		);
+	}
+
+	/**
+	 * Write the current user's run lock row, as another request holding the lock would.
+	 *
+	 * @param int $expires Expiry timestamp stored as the lock value.
+	 */
+	private function set_run_lock( int $expires ): void {
+		global $wpdb;
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %d, 'no') ON DUPLICATE KEY UPDATE option_value = VALUES(option_value)",
+				'woocommerce_fulfillments_import_lock_' . get_current_user_id(),
+				$expires
+			)
+		);
+	}
+
+	/**
+	 * Assert a handler result is the expected error.
+	 *
+	 * @param string $code   Expected error code.
+	 * @param int    $status Expected HTTP status.
+	 * @param mixed  $result Handler result.
+	 */
+	private function assert_run_error( string $code, int $status, $result ): void {
+		$this->assertInstanceOf( \WP_Error::class, $result, "The request should be refused with {$code}" );
+		$this->assertSame( $code, $result->get_error_code(), 'The error code tells the client what to do next' );
+		$this->assertSame( $status, $result->get_error_data()['status'], "{$code} should answer with HTTP {$status}" );
+	}
+
+	/**
+	 * @testdox register() exposes the prepare and run routes on the REST server through the WooCommerce namespace filter.
+	 */
+	public function test_register_exposes_the_import_routes(): void {
 		$this->assertSame( 10, has_filter( 'woocommerce_rest_api_get_rest_namespaces', array( $this->sut, 'handle_woocommerce_rest_api_get_rest_namespaces' ) ) );
 		$this->assertArrayHasKey( '/wc/v3/fulfillments/import/prepare', rest_get_server()->get_routes( 'wc/v3' ) );
+		$this->assertArrayHasKey( '/wc/v3/fulfillments/import/run', rest_get_server()->get_routes( 'wc/v3' ) );
 	}
 
 	/**
@@ -1060,5 +1199,843 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 413, $response->get_error_data()['status'] );
 		$this->assertNull( ImportSession::active_for_user( get_current_user_id() ) );
 		$this->assertArrayNotHasKey( 'fulfillment_import_file', $_FILES ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Asserting the superglobal was never written, not reading input.
+	}
+
+	/**
+	 * @testdox handle_run imports the rows of one chunk, records the progress and releases the lock.
+	 */
+	public function test_run_imports_a_chunk_and_records_the_progress(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 3 );
+
+		$response = $this->run_chunk( $session->token(), 0, 2 );
+
+		$this->assertIsArray( $response );
+		$this->assertSame( 2, $response['processed'] );
+		$this->assertSame( 3, $response['total'] );
+		$this->assertFalse( $response['done'] );
+		$this->assertArrayNotHasKey( 'summary', $response, 'The summary comes with the last chunk only' );
+		$this->assertSame( 2, $response['counts']['created'] );
+		$this->assertSame( array( 2, 3 ), array_column( $response['rows'], 'row' ), 'Row numbers count the header' );
+		$this->assertSame( array( $order_ids[0], $order_ids[1] ), array_column( $response['rows'], 'order_id' ) );
+		$this->assertSame( OrderUtil::get_order_admin_edit_url( $order_ids[0] ), $response['rows'][0]['order_edit_url'] );
+		$this->assertCount( 1, $this->fulfillments_of( $order_ids[0] ) );
+		$stored = $this->fulfillments_of( $order_ids[1] );
+		$this->assertCount( 1, $stored );
+		$this->assertSame( 'RUN-2', $stored[0]->get_tracking_number(), 'Each cell lands in the field the mapping names' );
+		$this->assertSame( 'ups', $stored[0]->get_shipment_provider() );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[2] ), 'A row past the limit is not imported' );
+		$stored_session = ImportSession::load( get_current_user_id(), $session->token() );
+		$this->assertSame( 2, $stored_session->processed() );
+		$this->assertTrue( $stored_session->update_existing(), 'A request without options keeps update_existing as the prepare step stored it' );
+		$this->assertNull( $this->run_lock_value(), 'The lock is released when the request ends' );
+	}
+
+	/**
+	 * @testdox handle_run completes the import with the last chunk: summary, staged file released, action fired once.
+	 */
+	public function test_run_completes_the_import_with_the_last_chunk(): void {
+		list( $session, ) = $this->make_run_session( 2, true );
+		$file             = $session->file();
+		$attachment_id    = $session->attachment_id();
+		$fired            = array();
+		add_action(
+			'woocommerce_fulfillments_csv_import_completed',
+			function ( $counts, $user_id ) use ( &$fired ) {
+				$fired[] = array( $counts, $user_id );
+			},
+			10,
+			2
+		);
+
+		$first = $this->run_chunk( $session->token(), 0, 1 );
+		$this->assertCount( 0, $fired, 'The action does not fire before the last chunk' );
+		$last = $this->run_chunk( $session->token(), $first['processed'], 1 );
+
+		$this->assertTrue( $last['done'] );
+		$this->assertSame( 2, $last['processed'] );
+		$this->assertSame( 2, $last['summary']['created'], 'The summary has the counts of every chunk' );
+		$this->assertSame( array(), $last['summary']['rows'], 'The summary carries no rows' );
+		$this->assertSame( array( array( $last['counts'], get_current_user_id() ) ), $fired, 'The action fires once with the counts and the user' );
+		$this->assertFileDoesNotExist( $file );
+		$this->assertNull( get_post( $attachment_id ), 'The attachment of the staged file is deleted' );
+		$this->assertFalse(
+			as_has_scheduled_action( ImportSession::CLEANUP_HOOK, array( get_current_user_id(), $session->token(), $file, $attachment_id ), 'woocommerce-fulfillments-importer' ),
+			'The cleanup of the released file is unscheduled'
+		);
+		$this->assertTrue( ImportSession::load( get_current_user_id(), $session->token() )->completed(), 'The record of a completed import is kept' );
+	}
+
+	/**
+	 * @testdox handle_run answers a repeated chunk from its record: same rows and counts, no second write or notification.
+	 */
+	public function test_run_answers_a_repeated_chunk_without_importing_it_again(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 2 );
+		$options                     = array( 'options' => array( 'notify_customer' => true ) );
+
+		$first    = $this->run_chunk( $session->token(), 0, 1, $options );
+		$notified = did_action( 'woocommerce_fulfillment_created_notification' );
+		$repeated = $this->run_chunk( $session->token(), 0, 1, $options );
+
+		$this->assertSame( 1, $first['counts']['notified'], 'The option of the first chunk turns notifications on' );
+		$this->assertSame( $first['processed'], $repeated['processed'], 'The repeated request reports the same progress' );
+		$this->assertSame( $first['counts'], $repeated['counts'], 'The repeated request does not count the rows again' );
+		$this->assertSame( $first['rows'], $repeated['rows'], 'The repeated request gets the row results of the first one' );
+		$this->assertSame( OrderUtil::get_order_admin_edit_url( $order_ids[0] ), $repeated['rows'][0]['order_edit_url'] );
+		$this->assertCount( 1, $this->fulfillments_of( $order_ids[0] ), 'The row is not written a second time' );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[1] ), 'The repeated request does not import the next chunk' );
+		$this->assertSame( $notified, did_action( 'woocommerce_fulfillment_created_notification' ), 'The customer is not notified a second time' );
+	}
+
+	/**
+	 * @testdox handle_run answers a repeated last chunk after the import completed, without firing the completed action again.
+	 */
+	public function test_run_answers_a_repeated_last_chunk_after_completion(): void {
+		list( $session, ) = $this->make_run_session( 1 );
+
+		$last     = $this->run_chunk( $session->token(), 0 );
+		$repeated = $this->run_chunk( $session->token(), 0 );
+
+		$this->assertTrue( $last['done'] );
+		$this->assertTrue( $repeated['done'], 'The record of the completed import answers the repeated request' );
+		$this->assertSame( $last['counts'], $repeated['counts'], 'The repeated request does not count the rows again' );
+		$this->assertSame( $last['rows'], $repeated['rows'], 'The repeated request gets the row results of the last chunk' );
+		$this->assertSame( $last['summary'], $repeated['summary'] );
+		$this->assertSame( 1, did_action( 'woocommerce_fulfillments_csv_import_completed' ), 'The repeated request does not complete the import again' );
+	}
+
+	/**
+	 * @testdox handle_run still answers the last chunk when a callback of the completed action throws.
+	 */
+	public function test_run_answers_the_last_chunk_when_a_completed_callback_throws(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 1 );
+		add_action(
+			'woocommerce_fulfillments_csv_import_completed',
+			function () {
+				throw new \Error( 'A listener failed after the import.' );
+			}
+		);
+
+		$last = $this->run_chunk( $session->token(), 0 );
+
+		$this->assertIsArray( $last, 'The rows are imported and recorded, so the request succeeds' );
+		$this->assertTrue( $last['done'] );
+		$this->assertCount( 1, $this->fulfillments_of( $order_ids[0] ) );
+		$this->assertFalse( doing_action( 'woocommerce_fulfillments_csv_import_completed' ), 'The hook the callback threw from is taken off the stack' );
+		$this->assertTrue( ImportSession::load( get_current_user_id(), $session->token() )->completed() );
+	}
+
+	/**
+	 * @testdox handle_run loads the orders of a chunk in one query for their edit URLs, not one by one.
+	 */
+	public function test_run_response_does_not_query_each_order_of_the_chunk(): void {
+		global $wpdb;
+		list( $small, ) = $this->make_run_session( 2 );
+		$this->run_chunk( $small->token(), 0 );
+		wp_cache_flush();
+		$before       = $wpdb->num_queries;
+		$two_rows     = $this->run_chunk( $small->token(), 0 );
+		$for_two_rows = $wpdb->num_queries - $before;
+
+		list( $large, ) = $this->make_run_session( 8 );
+		$this->run_chunk( $large->token(), 0 );
+		wp_cache_flush();
+		$before         = $wpdb->num_queries;
+		$eight_rows     = $this->run_chunk( $large->token(), 0 );
+		$for_eight_rows = $wpdb->num_queries - $before;
+
+		$this->assertCount( 2, array_column( $two_rows['rows'], 'order_edit_url' ), 'The first measured request answers its two rows with edit URLs' );
+		$this->assertCount( 8, array_column( $eight_rows['rows'], 'order_edit_url' ), 'The second measured request answers its eight rows with edit URLs' );
+		$this->assertLessThan( 6, $for_eight_rows - $for_two_rows, 'Six more rows in the answered chunk must cost fewer than six more queries' );
+	}
+
+	/**
+	 * @testdox handle_run answers 500 when the completed flag cannot be stored, and the repeated request completes the import.
+	 */
+	public function test_run_completes_on_a_repeated_request_when_the_first_could_not(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 1 );
+		$file                        = $session->file();
+		$lose_completed_write        = function ( $value, $old ) {
+			return ! empty( $value['completed'] ) ? $old : $value;
+		};
+		$transient_filter            = 'pre_update_option__transient_wc_fulfillment_import_' . get_current_user_id() . '_' . $session->token();
+		add_filter( $transient_filter, $lose_completed_write, 10, 2 );
+
+		$last = $this->run_chunk( $session->token(), 0 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_progress_failed', 500, $last );
+		$this->assertSame( 0, did_action( 'woocommerce_fulfillments_csv_import_completed' ), 'An import that is not marked completed does not fire the action' );
+		$this->assertFileExists( $file, 'The file stays with its scheduled cleanup until the session is completed' );
+		$this->assertCount( 1, $this->fulfillments_of( $order_ids[0] ), 'The row of the chunk is imported and recorded' );
+
+		remove_filter( $transient_filter, $lose_completed_write, 10 );
+		$repeated = $this->run_chunk( $session->token(), 0 );
+
+		$this->assertTrue( $repeated['done'], 'The repeated request reports the end from the recorded chunk' );
+		$this->assertSame( 1, $repeated['counts']['created'], 'The repeated request does not import the row again' );
+		$this->assertSame( 1, did_action( 'woocommerce_fulfillments_csv_import_completed' ), 'The repeated request completes the import' );
+		$this->assertFileDoesNotExist( $file );
+	}
+
+	/**
+	 * @testdox handle_run imports nothing from a chunk when the file ends before the rows the prepare step counted.
+	 */
+	public function test_run_imports_nothing_when_the_file_ends_early(): void {
+		$first_order  = $this->make_order();
+		$second_order = $this->make_order();
+		$file         = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n{$first_order},SHORT-1,ups\n{$second_order},SHORT-2,ups\n" );
+		// A reader that stops early looks like a file with fewer rows than the session counted.
+		$session = ImportSession::create( get_current_user_id(), $file, ',', array( 'order_number', 'tracking_number', 'shipment_provider' ), 3, false, true );
+
+		$first  = $this->run_chunk( $session->token(), 0, 1 );
+		$second = $this->run_chunk( $session->token(), 1, 1 );
+
+		$this->assertIsArray( $first, 'A chunk with a row after it is a normal chunk' );
+		$this->assertFalse( $first['done'] );
+		$this->assert_run_error( 'woocommerce_fulfillments_import_chunk_failed', 500, $second );
+		$this->assertSame( 'unexpected_eof', $second->get_error_data()['reason'] );
+		$this->assertCount( 0, $this->fulfillments_of( $second_order ), 'The rows of a chunk that ended early are not written' );
+		$this->assertSame( 1, ImportSession::load( get_current_user_id(), $session->token() )->processed(), 'The chunk that ended early is not recorded' );
+		$this->assertFileExists( $file, 'The staged file is kept while rows are still expected' );
+		$this->assertSame( 0, did_action( 'woocommerce_fulfillments_csv_import_completed' ) );
+	}
+
+	/**
+	 * @testdox handle_run refuses an offset that is neither the recorded progress nor the last recorded chunk.
+	 */
+	public function test_run_rejects_an_offset_that_does_not_match_the_progress(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 3 );
+		$this->run_chunk( $session->token(), 0, 1 );
+		$this->run_chunk( $session->token(), 1, 1 );
+
+		$ahead = $this->run_chunk( $session->token(), 3, 1 );
+		$older = $this->run_chunk( $session->token(), 0, 1 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_offset_mismatch', 409, $ahead );
+		$this->assert_run_error( 'woocommerce_fulfillments_import_offset_mismatch', 409, $older );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[2] ), 'A refused request imports nothing' );
+		$this->assertSame( 2, ImportSession::load( get_current_user_id(), $session->token() )->processed() );
+
+		$this->run_chunk( $session->token(), 2, 1 );
+		$after_the_end = $this->run_chunk( $session->token(), 3, 1 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_offset_mismatch', 409, $after_the_end );
+	}
+
+	/**
+	 * @testdox handle_run refuses a second request for the session while the first one is importing, and the first completes.
+	 */
+	public function test_run_refuses_a_second_request_while_the_first_is_importing(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 2 );
+		$second                      = null;
+		$sent                        = false;
+		$lock_after_refusal          = null;
+		add_filter(
+			'woocommerce_fulfillments_csv_importer_resolve_order',
+			function ( $order ) use ( &$second, &$sent, &$lock_after_refusal, $session ) {
+				// Runs while the first request imports its rows under the lock.
+				if ( ! $sent ) {
+					$sent               = true;
+					$second             = $this->run_chunk( $session->token(), 0 );
+					$lock_after_refusal = $this->run_lock_value();
+				}
+				return $order;
+			}
+		);
+
+		$first = $this->run_chunk( $session->token(), 0 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_chunk_in_progress', 409, $second );
+		$this->assertTrue( $first['done'] );
+		$this->assertSame( 2, $first['counts']['created'] );
+		$this->assertCount( 1, $this->fulfillments_of( $order_ids[0] ), 'The refused request wrote nothing' );
+		$this->assertCount( 1, $this->fulfillments_of( $order_ids[1] ) );
+		$this->assertNotNull( $lock_after_refusal, 'The refused request does not release the lock of the first' );
+		$this->assertNull( $this->run_lock_value(), 'The first request releases its lock at the end' );
+	}
+
+	/**
+	 * @testdox handle_prepare keeps a cleanup scheduled for a replaced session's file it could not delete.
+	 */
+	public function test_prepare_keeps_a_cleanup_for_a_replaced_file_it_could_not_delete(): void {
+		$old_file = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n1,OLD-1,ups\n" );
+		$prior    = $this->make_session( $old_file );
+		$upload   = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n1,NEW-1,ups\n" );
+		// An empty path from this filter makes wp_delete_file() leave the file in place.
+		add_filter( 'wp_delete_file', '__return_empty_string' );
+
+		$response = $this->prepare_with_staged_file( $upload );
+		// Removed before tearDown() deletes the fixtures through the same function.
+		remove_filter( 'wp_delete_file', '__return_empty_string' );
+
+		$this->assertIsArray( $response );
+		$this->assertFileExists( $old_file, 'The file of the replaced session could not be deleted' );
+		$this->assertIsInt(
+			as_next_scheduled_action( ImportSession::CLEANUP_HOOK, array( get_current_user_id(), $prior->token(), $old_file, 0 ), 'woocommerce-fulfillments-importer' ),
+			'A cleanup stays scheduled for the file that is left'
+		);
+	}
+
+	/**
+	 * @testdox handle_prepare is refused while a chunk is being imported, and keeps the session that is importing.
+	 */
+	public function test_prepare_is_refused_while_a_chunk_is_being_imported(): void {
+		$importing = $this->make_session( $this->make_staged_file( "order_number,tracking_number,shipment_provider\n1,OLD-1,ups\n" ) );
+		$upload    = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n1,NEW-1,ups\n" );
+		$held      = time() + MINUTE_IN_SECONDS;
+		$this->set_run_lock( $held );
+
+		$response = $this->prepare_with_staged_file( $upload, $this->make_attachment( $upload ) );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_chunk_in_progress', 409, $response );
+		$this->assertInstanceOf( ImportSession::class, ImportSession::load( get_current_user_id(), $importing->token() ) );
+		$this->assertFileExists( $importing->file() );
+		$this->assertFileDoesNotExist( $upload, 'The refused upload is not left behind' );
+		$this->assertSame( (string) $held, $this->run_lock_value(), 'The lock of the importing request is left alone' );
+	}
+
+	/**
+	 * @testdox handle_run takes over a lock that expired and releases it at the end.
+	 */
+	public function test_run_takes_over_an_expired_lock(): void {
+		list( $session, ) = $this->make_run_session( 1 );
+		$expired          = time() - 1;
+		$this->set_run_lock( $expired );
+		$this->assertSame( (string) $expired, $this->run_lock_value(), 'The expired lock is in place before the request' );
+
+		$response = $this->run_chunk( $session->token(), 0 );
+
+		$this->assertIsArray( $response );
+		$this->assertTrue( $response['done'] );
+		$this->assertNull( $this->run_lock_value(), 'The lock that was taken over is released like any other' );
+	}
+
+	/**
+	 * @testdox handle_run does not record a chunk, or release the lock, after another request took the lock over.
+	 */
+	public function test_run_does_not_record_a_chunk_that_lost_its_lock(): void {
+		list( $session, ) = $this->make_run_session( 1 );
+		$taken_over       = time() + HOUR_IN_SECONDS;
+		add_filter(
+			'woocommerce_fulfillments_csv_importer_resolve_order',
+			function ( $order ) use ( $taken_over ) {
+				// The lock value changes under the importing request, as a takeover would do.
+				$this->set_run_lock( $taken_over );
+				return $order;
+			}
+		);
+
+		$response = $this->run_chunk( $session->token(), 0 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_lock_lost', 500, $response );
+		$this->assertSame( 0, ImportSession::load( get_current_user_id(), $session->token() )->processed(), 'The request that took the lock over records the chunk' );
+		$this->assertSame( (string) $taken_over, $this->run_lock_value(), 'The lock of the other request is left alone' );
+	}
+
+	/**
+	 * @testdox handle_run releases the lock when the request ends in an error or an exception.
+	 */
+	public function test_run_releases_the_lock_when_the_request_fails(): void {
+		$this->assert_run_error( 'woocommerce_fulfillments_import_token_invalid', 400, $this->run_chunk( str_repeat( 'a', 32 ), 0 ) );
+		$this->assertNull( $this->run_lock_value(), 'An error response releases the lock' );
+
+		list( $session, ) = $this->make_run_session( 1 );
+		$thrown           = new \RuntimeException( 'A callback failed during the import.' );
+		add_filter(
+			'woocommerce_fulfillments_csv_importer_chunk_size',
+			function () use ( $thrown ) {
+				throw $thrown;
+			}
+		);
+
+		try {
+			$this->run_chunk( $session->token(), 0 );
+			$this->fail( 'The exception of the callback should reach the caller.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( $thrown, $e, 'The request ended in the exception of the callback' );
+			$this->assertNull( $this->run_lock_value(), 'An exception releases the lock' );
+		}
+	}
+
+	/**
+	 * @testdox handle_run refuses the token of another user's session.
+	 */
+	public function test_run_rejects_the_token_of_another_user(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 1 );
+		$other_admin                 = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $other_admin );
+
+		$response = $this->run_chunk( $session->token(), 0 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_token_invalid', 400, $response );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[0] ) );
+	}
+
+	/**
+	 * @testdox handle_run ends the session and removes the staged file when the file is no longer the one that was prepared.
+	 *
+	 * @testWith ["grown"]
+	 *           ["touched"]
+	 *           ["rewritten"]
+	 *           ["deleted"]
+	 *
+	 * @param string $change What happens to the staged file before the request.
+	 */
+	public function test_run_ends_the_session_when_the_staged_file_changed( string $change ): void {
+		// Larger than the hashed head of the file, so each case is caught by one check only.
+		$file    = $this->make_staged_file( $this->csv_with_rows( 400 ) );
+		$session = $this->make_session( $file, $this->make_attachment( $file ) );
+		$this->assertGreaterThan( 4096, $session->file_size() );
+		if ( 'grown' === $change ) {
+			// Same head and modification time, one more row at the end.
+			file_put_contents( $file, "1,EXTRA-1,ups\n", FILE_APPEND ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
+			touch( $file, $session->file_mtime() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Test fixture write.
+		} elseif ( 'touched' === $change ) {
+			touch( $file, $session->file_mtime() + 10 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Test fixture write.
+		} elseif ( 'rewritten' === $change ) {
+			// Same size and modification time, different head.
+			file_put_contents( $file, strtoupper( (string) file_get_contents( $file ) ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Test fixture write.
+			touch( $file, $session->file_mtime() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Test fixture write.
+		} else {
+			wp_delete_file( $file );
+		}
+
+		$response = $this->run_chunk( $session->token(), 0 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_file_changed', 409, $response );
+		$this->assertNull( ImportSession::load( get_current_user_id(), $session->token() ), 'The session of a changed file is ended' );
+		$this->assertFileDoesNotExist( $file );
+		$this->assertNull( get_post( $session->attachment_id() ), 'The attachment of the staged file is deleted' );
+	}
+
+	/**
+	 * @testdox handle_run refuses a mapping the import cannot run with and stores nothing.
+	 *
+	 * @testWith [{"0": "order_number", "1": "tracking_number"}, "shipment_provider"]
+	 *           [{"0": "order_number", "1": "tracking_number", "2": "shipment_provider", "3": "tracking_url"}, "column 3"]
+	 *           [{"0": "order_number", "1": "order_number", "2": "shipment_provider"}, "order_number to more than one"]
+	 *           [{"0": "order_number", "1": "tracking_number", "01": "tracking_url", "2": "shipment_provider"}, "column 01"]
+	 *
+	 * @param array<string, string> $mapping Mapping to send.
+	 * @param string                $reason  Text the error message names.
+	 */
+	public function test_run_rejects_a_mapping_it_cannot_import_with( array $mapping, string $reason ): void {
+		list( $session, $order_ids ) = $this->make_run_session( 1 );
+
+		$response = $this->run_chunk( $session->token(), 0, null, array( 'mapping' => $mapping ) );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_mapping_invalid', 400, $response );
+		$this->assertStringContainsString( $reason, $response->get_error_message() );
+		$this->assertNull( ImportSession::load( get_current_user_id(), $session->token() )->frozen_mapping() );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[0] ) );
+	}
+
+	/**
+	 * @testdox handle_run imports every chunk under the mapping and options of the first one.
+	 */
+	public function test_run_keeps_the_settings_of_the_first_chunk(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 2 );
+
+		$this->run_chunk( $session->token(), 0, 1, array( 'options' => array( 'update_existing' => false ) ) );
+		$second = $this->run_chunk(
+			$session->token(),
+			1,
+			1,
+			array(
+				'mapping' => array(
+					'0' => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+					'1' => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+				),
+				'options' => array(
+					'update_existing' => true,
+					'notify_customer' => true,
+				),
+			)
+		);
+
+		$stored = ImportSession::load( get_current_user_id(), $session->token() );
+		$this->assertIsArray( $second, 'A mapping that would be refused on the first chunk is not read on a later one' );
+		$this->assertSame( FulfillmentsCsvImporter::STATUS_CREATED, $second['rows'][0]['status'], 'The swapped mapping of the second request is ignored' );
+		$this->assertSame( $order_ids[1], $second['rows'][0]['order_id'] );
+		$this->assertFalse( $stored->update_existing(), 'The option of the first chunk is kept' );
+		$this->assertFalse( $stored->notify_customer(), 'The option of a later chunk is not read' );
+		$this->assertSame( 0, $second['counts']['notified'] );
+	}
+
+	/**
+	 * @testdox handle_run keeps the options of the prepare step when the first chunk sends none.
+	 */
+	public function test_run_keeps_the_prepare_options_the_first_chunk_leaves_out(): void {
+		list( $session, ) = $this->make_run_session( 1, false, true, false );
+
+		$response = $this->run_chunk( $session->token(), 0 );
+
+		$stored = ImportSession::load( get_current_user_id(), $session->token() );
+		$this->assertTrue( $stored->notify_customer(), 'notify_customer keeps the value of the prepare step' );
+		$this->assertFalse( $stored->update_existing(), 'update_existing keeps the value of the prepare step' );
+		$this->assertSame( 1, $response['counts']['notified'], 'The row is imported under the kept options' );
+	}
+
+	/**
+	 * @testdox handle_run uses the store's chunk size when the limit is left out and a smaller limit when one is sent.
+	 */
+	public function test_run_passes_the_limit_to_the_importer(): void {
+		list( $session, ) = $this->make_run_session( 4 );
+		add_filter(
+			'woocommerce_fulfillments_csv_importer_chunk_size',
+			function () {
+				return 2;
+			}
+		);
+
+		$without_limit = $this->run_chunk( $session->token(), 0 );
+		$with_limit    = $this->run_chunk( $session->token(), 2, 1 );
+
+		$this->assertSame( 2, $without_limit['processed'] );
+		$this->assertSame( 3, $with_limit['processed'] );
+	}
+
+	/**
+	 * @testdox handle_run and handle_prepare answer 500 and change nothing when the lock cannot be taken because of a database error.
+	 */
+	public function test_run_and_prepare_fail_when_the_lock_query_fails(): void {
+		global $wpdb;
+		list( $session, $order_ids ) = $this->make_run_session( 1 );
+		$upload                      = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n1,NEW-1,ups\n" );
+		add_filter(
+			'query',
+			function ( $query ) {
+				return false !== strpos( $query, 'woocommerce_fulfillments_import_lock_' ) ? 'SELECT 1 FROM wc_no_such_table' : $query;
+			}
+		);
+		$suppressed = $wpdb->suppress_errors( true );
+
+		$run     = $this->run_chunk( $session->token(), 0 );
+		$prepare = $this->prepare_with_staged_file( $upload );
+
+		$wpdb->suppress_errors( $suppressed );
+		$this->assert_run_error( 'woocommerce_fulfillments_import_lock_failed', 500, $run );
+		$this->assert_run_error( 'woocommerce_fulfillments_import_lock_failed', 500, $prepare );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[0] ), 'A request without the lock imports nothing' );
+		$this->assertInstanceOf( ImportSession::class, ImportSession::load( get_current_user_id(), $session->token() ), 'The session is not replaced without the lock' );
+		$this->assertFileDoesNotExist( $upload, 'The refused upload is not left behind' );
+	}
+
+	/**
+	 * @testdox handle_run imports nothing when the settings of the first chunk cannot be stored.
+	 */
+	public function test_run_imports_nothing_when_the_settings_cannot_be_saved(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 1 );
+		add_filter(
+			'pre_update_option__transient_wc_fulfillment_import_' . get_current_user_id() . '_' . $session->token(),
+			function ( $value, $old ) {
+				unset( $value );
+				return $old;
+			},
+			10,
+			2
+		);
+
+		$response = $this->run_chunk( $session->token(), 0 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_progress_failed', 500, $response );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[0] ), 'No row is imported under settings that are not stored' );
+		$this->assertNull( ImportSession::load( get_current_user_id(), $session->token() )->frozen_mapping() );
+		$this->assertNull( $this->run_lock_value(), 'The lock is released after the failure' );
+	}
+
+	/**
+	 * @testdox handle_run imports nothing when the session expired right after it was loaded.
+	 */
+	public function test_run_imports_nothing_when_the_session_expired_after_it_was_loaded(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 2 );
+		$this->run_chunk( $session->token(), 0, 1 );
+		$transient = 'wc_fulfillment_import_' . get_current_user_id() . '_' . $session->token();
+		$expired   = false;
+		// The first read is the one that loads the session; the record is gone for the next one.
+		add_filter(
+			'transient_' . $transient,
+			function ( $value ) use ( &$expired, $transient ) {
+				if ( ! $expired ) {
+					$expired = true;
+					delete_transient( $transient );
+				}
+				return $value;
+			}
+		);
+
+		$response = $this->run_chunk( $session->token(), 1, 1 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_token_invalid', 400, $response );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[1] ), 'No row is written for a session that cannot record it' );
+	}
+
+	/**
+	 * @testdox handle_run checks the offset against the progress it imports from, not against a copy loaded earlier.
+	 */
+	public function test_run_does_not_import_from_progress_another_request_recorded(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 2 );
+		$transient                   = 'wc_fulfillment_import_' . get_current_user_id() . '_' . $session->token();
+		$recorded                    = false;
+		// While this request holds its copy, another one stores the settings and records the first row.
+		add_filter(
+			'transient_' . $transient,
+			function ( $value ) use ( &$recorded, $session ) {
+				if ( ! $recorded ) {
+					$recorded = true;
+					$other    = ImportSession::load( get_current_user_id(), $session->token() );
+					$other->freeze_run_settings( array_values( self::RUN_MAPPING ), false, true );
+					$other->record_chunk(
+						0,
+						array(
+							'consumed'    => 1,
+							'byte_offset' => 60,
+							'rows'        => array(
+								array(
+									'row'    => 2,
+									'status' => 'created',
+								),
+							),
+						)
+					);
+				}
+				return $value;
+			}
+		);
+
+		$response = $this->run_chunk( $session->token(), 0, 1 );
+
+		$this->assertIsArray( $response, 'The offset is the one of the chunk the other request recorded, so its record answers' );
+		$this->assertSame( 1, $response['processed'] );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[0] ), 'This request imports nothing for an offset that is already recorded' );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[1] ), 'This request does not import the next row under the old offset' );
+	}
+
+	/**
+	 * @testdox handle_run checks the offset again after the first chunk stored its settings, which reloads the session.
+	 */
+	public function test_run_checks_the_offset_again_after_the_settings_reload(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 3 );
+		$recorded                    = false;
+		// The upload directory is read during the staged-file check, between the offset check
+		// and the settings. Another request stores the settings and records the first row there.
+		add_filter(
+			'upload_dir',
+			function ( $uploads ) use ( &$recorded, $session ) {
+				if ( ! $recorded ) {
+					$recorded = true;
+					$other    = ImportSession::load( get_current_user_id(), $session->token() );
+					$other->freeze_run_settings( array_values( self::RUN_MAPPING ), false, true );
+					$other->record_chunk(
+						0,
+						array(
+							'consumed'    => 1,
+							'byte_offset' => 60,
+						)
+					);
+				}
+				return $uploads;
+			}
+		);
+
+		$response = $this->run_chunk( $session->token(), 0, 1 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_offset_mismatch', 409, $response );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[1] ), 'The request does not import the next row under an offset that is no longer the progress' );
+		$this->assertSame( 1, ImportSession::load( get_current_user_id(), $session->token() )->processed(), 'The recorded progress is left as the other request stored it' );
+	}
+
+	/**
+	 * @testdox handle_run keeps a cleanup scheduled for a changed staged file it could not delete.
+	 */
+	public function test_run_keeps_a_cleanup_for_a_changed_file_it_could_not_delete(): void {
+		$file    = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n1,CHG-1,ups\n" );
+		$session = $this->make_session( $file );
+		touch( $file, $session->file_mtime() + 10 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Test fixture write.
+		// An empty path from this filter makes wp_delete_file() leave the file in place.
+		add_filter( 'wp_delete_file', '__return_empty_string' );
+
+		$response = $this->run_chunk( $session->token(), 0 );
+		// Removed before tearDown() deletes the fixture through the same function.
+		remove_filter( 'wp_delete_file', '__return_empty_string' );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_file_changed', 409, $response );
+		$this->assertNull( ImportSession::load( get_current_user_id(), $session->token() ), 'The session is ended either way' );
+		$this->assertFileExists( $file );
+		$this->assertIsInt(
+			as_next_scheduled_action( ImportSession::CLEANUP_HOOK, array( get_current_user_id(), $session->token(), $file, 0 ), 'woocommerce-fulfillments-importer' ),
+			'A cleanup stays scheduled for the file that is left'
+		);
+	}
+
+	/**
+	 * @testdox handle_run releases its lock in the options table it took it from, whatever a callback leaves behind.
+	 */
+	public function test_run_releases_the_lock_in_the_table_it_was_taken_from(): void {
+		global $wpdb;
+		list( $session, ) = $this->make_run_session( 1 );
+		$options_table    = $wpdb->options;
+		// A callback that switched to another site and did not switch back leaves another options table.
+		add_action(
+			'woocommerce_fulfillments_csv_import_completed',
+			function () use ( $wpdb ) {
+				$wpdb->options = $wpdb->prefix . 'options_of_another_site';
+			}
+		);
+		$suppressed = $wpdb->suppress_errors( true );
+
+		$this->run_chunk( $session->token(), 0 );
+
+		$wpdb->options = $options_table;
+		$wpdb->suppress_errors( $suppressed );
+		$this->assertNull( $this->run_lock_value(), 'The lock is released on the site that holds it' );
+	}
+
+	/**
+	 * @testdox handle_run keeps the session when the importer cannot read the chunk.
+	 */
+	public function test_run_keeps_the_session_when_the_importer_reports_an_error(): void {
+		// The prepare step refuses CR-only line endings, so only a session opened by hand has such a file.
+		$session = $this->make_session( $this->make_staged_file( "order_number,tracking_number,shipment_provider\r1,CR-1,ups\r" ) );
+
+		$response = $this->run_chunk( $session->token(), 0 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_chunk_failed', 500, $response );
+		$this->assertSame( 'cr_line_endings', $response->get_error_data()['reason'] );
+		$this->assertInstanceOf( ImportSession::class, ImportSession::load( get_current_user_id(), $session->token() ) );
+		$this->assertFileExists( $session->file() );
+	}
+
+	/**
+	 * @testdox handle_run reports progress it could not save, and the repeated chunk skips the row it already wrote.
+	 */
+	public function test_run_reports_progress_that_could_not_be_saved(): void {
+		list( $session, $order_ids ) = $this->make_run_session( 2 );
+		$this->run_chunk( $session->token(), 0, 1 );
+		$lose_write       = function ( $value, $old ) {
+			unset( $value );
+			return $old;
+		};
+		$transient_filter = 'pre_update_option__transient_wc_fulfillment_import_' . get_current_user_id() . '_' . $session->token();
+		add_filter( $transient_filter, $lose_write, 10, 2 );
+
+		$failed = $this->run_chunk( $session->token(), 1, 1 );
+
+		$this->assert_run_error( 'woocommerce_fulfillments_import_progress_failed', 500, $failed );
+		$this->assertCount( 1, $this->fulfillments_of( $order_ids[1] ), 'The row was written before its progress could not be saved' );
+
+		remove_filter( $transient_filter, $lose_write, 10 );
+		$repeated = $this->run_chunk( $session->token(), 1, 1 );
+
+		$this->assertSame( FulfillmentsCsvImporter::STATUS_SKIPPED, $repeated['rows'][0]['status'] );
+		$this->assertCount( 1, $this->fulfillments_of( $order_ids[1] ), 'The repeated chunk does not write the row again' );
+		$this->assertTrue( $repeated['done'] );
+	}
+
+	/**
+	 * @testdox The run route imports a chunk when dispatched through the REST server, with a mapping that skips a column.
+	 */
+	public function test_rest_run_route_imports_a_chunk(): void {
+		$order_id = $this->make_order();
+		$file     = $this->make_staged_file( "order_number,note,tracking_number,shipment_provider\n{$order_id},fragile,REST-1,ups\n" );
+		$session  = ImportSession::create( get_current_user_id(), $file, ',', array( 'order_number', 'note', 'tracking_number', 'shipment_provider' ), 1, false, true );
+		$request  = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			'{"token":"' . $session->token() . '","offset":0,"mapping":{"0":"order_number","2":"tracking_number","3":"shipment_provider"},"options":{"notify_customer":false}}'
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['done'] );
+		$stored = $this->fulfillments_of( $order_id );
+		$this->assertCount( 1, $stored );
+		$this->assertSame( 'REST-1', $stored[0]->get_tracking_number(), 'The skipped column does not shift the mapping' );
+	}
+
+	/**
+	 * @testdox The run route rejects arguments outside its schema with a 400.
+	 *
+	 * @testWith [{"token": "not-a-token"}]
+	 *           [{"offset": -1}]
+	 *           [{"limit": 0}]
+	 *           [{"limit": 1001}]
+	 *           [{"mapping": {"first": "order_number"}}]
+	 *           [{"mapping": {"0": "order_id"}}]
+	 *           [{"options": {"dry_run": true}}]
+	 *           [{"options": {"notify_customer": "sometimes"}}]
+	 *
+	 * @param array<string, mixed> $invalid Argument that replaces a valid one.
+	 */
+	public function test_rest_run_route_rejects_invalid_arguments( array $invalid ): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			(string) wp_json_encode(
+				array_merge(
+					array(
+						'token'   => str_repeat( 'a', 32 ),
+						'mapping' => self::RUN_MAPPING,
+					),
+					$invalid
+				)
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertSame( array( key( $invalid ) ), array_keys( $response->get_data()['data']['params'] ) );
+	}
+
+	/**
+	 * @testdox The run route returns 403 for a user without manage_woocommerce, even for that user's own session.
+	 */
+	public function test_rest_run_route_requires_manage_woocommerce(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
+		list( $session, $order_ids ) = $this->make_run_session( 1 );
+		$request                     = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );
+		$request->set_body_params(
+			array(
+				'token'   => $session->token(),
+				'mapping' => self::RUN_MAPPING,
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertCount( 0, $this->fulfillments_of( $order_ids[0] ), 'Only the capability check stands between this user and the import' );
+	}
+
+	/**
+	 * @testdox A file goes from handle_prepare through handle_run to the end, and a new prepare then replaces the completed session.
+	 */
+	public function test_prepare_then_run_imports_the_file_and_the_next_prepare_replaces_it(): void {
+		$first_order  = $this->make_order();
+		$second_order = $this->make_order();
+		$file         = $this->make_staged_file( "Order ID,Tracking Number,Carrier\n{$first_order},JOINT-1,ups\n\n{$second_order},JOINT-2,ups\n" );
+
+		$prepared = $this->prepare_with_staged_file( $file, $this->make_attachment( $file ) );
+		$offset   = 0;
+		$requests = 0;
+		do {
+			$chunk  = $this->run_chunk( $prepared['token'], $offset, 1, array( 'mapping' => (array) $prepared['detected_mapping'] ) );
+			$offset = $chunk['processed'];
+		} while ( ! $chunk['done'] && ++$requests < 5 );
+
+		$this->assertTrue( $chunk['done'], 'The import ends within the expected number of requests' );
+		$this->assertSame( $prepared['total'], $chunk['processed'], 'The run processes exactly the rows the prepare step counted' );
+		$this->assertSame( 2, $chunk['counts']['created'] );
+		$this->assertSame( 'JOINT-2', $this->fulfillments_of( $second_order )[0]->get_tracking_number() );
+		$this->assertNull( $this->run_lock_value(), 'No lock is left after the import' );
+
+		$next_file = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n{$first_order},NEXT-1,ups\n" );
+		$next      = $this->prepare_with_staged_file( $next_file );
+
+		$this->assertIsArray( $next, 'A prepare after a completed import is accepted although the old staged file is already gone' );
+		$this->assertSame( $next['token'], ImportSession::active_for_user( get_current_user_id() )->token() );
+		$this->assert_run_error( 'woocommerce_fulfillments_import_token_invalid', 400, $this->run_chunk( $prepared['token'], 1, 1 ) );
 	}
 }

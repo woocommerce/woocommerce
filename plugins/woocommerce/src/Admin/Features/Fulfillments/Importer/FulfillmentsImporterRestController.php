@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\Admin\Features\Fulfillments\Importer;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WP_Error;
 use WP_Http;
 use WP_REST_Request;
@@ -23,7 +24,8 @@ defined( 'ABSPATH' ) || exit;
  * REST controller backing the Fulfillments CSV importer.
  *
  * Exposes `POST /wc/v3/fulfillments/import/prepare`, which uploads the CSV, parses the
- * headers and opens an ImportSession for the wizard's column-mapping step.
+ * headers and opens an ImportSession for the wizard's column-mapping step, and
+ * `POST /wc/v3/fulfillments/import/run`, which imports the staged file one chunk per request.
  *
  * @internal
  * @since 11.4.0
@@ -36,6 +38,19 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 * @var string
 	 */
 	protected string $rest_base = '/fulfillments/import';
+
+	/**
+	 * Prefix of the option row that locks a user's import while one of its chunks runs.
+	 */
+	private const RUN_LOCK_PREFIX = 'woocommerce_fulfillments_import_lock_';
+
+	/**
+	 * Seconds after which a run lock that was never released can be taken over.
+	 *
+	 * A lock is only left behind when PHP is killed mid-chunk, so this is set well above
+	 * the time a chunk takes: taking over a chunk that is still running imports it twice.
+	 */
+	private const RUN_LOCK_TTL = 5 * MINUTE_IN_SECONDS;
 
 	/**
 	 * Upload helper that stages the CSV under the wc-imports directory.
@@ -104,6 +119,67 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				'schema' => fn() => $this->get_schema_for_prepare(),
 			)
 		);
+
+		register_rest_route(
+			$this->route_namespace,
+			$this->rest_base . '/run',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => fn( WP_REST_Request $request ) => $this->run( $request, 'handle_run' ),
+					'permission_callback' => fn( WP_REST_Request $request ) => $this->check_permission_for_fulfillments_import( $request ),
+					'args'                => array(
+						'token'   => array(
+							'type'        => 'string',
+							'required'    => true,
+							'pattern'     => '^([a-f0-9]{32}|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$',
+							'description' => __( 'Import session token returned by the prepare endpoint.', 'woocommerce' ),
+						),
+						'offset'  => array(
+							'type'        => 'integer',
+							'default'     => 0,
+							'minimum'     => 0,
+							'description' => __( 'Number of data rows processed so far, as reported by the previous response.', 'woocommerce' ),
+						),
+						'limit'   => array(
+							'type'        => 'integer',
+							'minimum'     => 1,
+							'maximum'     => FulfillmentsCsvImporter::MAX_CHUNK_SIZE,
+							'description' => __( 'Most data rows to import in this request. Defaults to, and is capped by, the chunk size of the store.', 'woocommerce' ),
+						),
+						'mapping' => array(
+							'type'                 => 'object',
+							'required'             => true,
+							'description'          => __( 'Canonical column for each CSV column index. Stored by the first chunk and ignored afterwards.', 'woocommerce' ),
+							'patternProperties'    => array(
+								'^[0-9]+$' => array(
+									'type' => 'string',
+									'enum' => FulfillmentsCsvImporter::canonical_columns(),
+								),
+							),
+							'additionalProperties' => false,
+						),
+						'options' => array(
+							'type'                 => 'object',
+							'default'              => array(),
+							'description'          => __( 'Run options. Stored by the first chunk and ignored afterwards; an omitted option keeps the value sent to the prepare endpoint.', 'woocommerce' ),
+							'properties'           => array(
+								'notify_customer' => array(
+									'type'        => 'boolean',
+									'description' => __( 'Whether customers are notified about imported fulfillments.', 'woocommerce' ),
+								),
+								'update_existing' => array(
+									'type'        => 'boolean',
+									'description' => __( 'Whether a fulfillment with the same tracking number is updated instead of skipped.', 'woocommerce' ),
+								),
+							),
+							'additionalProperties' => false,
+						),
+					),
+				),
+				'schema' => fn() => $this->get_schema_for_run(),
+			)
+		);
 	}
 
 	/**
@@ -141,6 +217,119 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			'delimiter'        => array(
 				'type'        => 'string',
 				'description' => __( 'Effective CSV delimiter.', 'woocommerce' ),
+			),
+		);
+		return $schema;
+	}
+
+	/**
+	 * Get the response schema for the run endpoint.
+	 *
+	 * @return array
+	 */
+	private function get_schema_for_run(): array {
+		$counts = array(
+			'created'  => array(
+				'type'        => 'integer',
+				'description' => __( 'Rows that created a fulfillment.', 'woocommerce' ),
+			),
+			'updated'  => array(
+				'type'        => 'integer',
+				'description' => __( 'Rows that updated a fulfillment.', 'woocommerce' ),
+			),
+			'skipped'  => array(
+				'type'        => 'integer',
+				'description' => __( 'Rows that changed nothing.', 'woocommerce' ),
+			),
+			'failed'   => array(
+				'type'        => 'integer',
+				'description' => __( 'Rows that could not be imported.', 'woocommerce' ),
+			),
+			'notified' => array(
+				'type'        => 'integer',
+				'description' => __( 'Rows whose customer notification action ran.', 'woocommerce' ),
+			),
+		);
+		$rows   = array(
+			'type'  => 'array',
+			'items' => array(
+				'type'       => 'object',
+				'properties' => array(
+					'row'            => array(
+						'type'        => 'integer',
+						'description' => __( 'Record number of the row in the file, counting the header and blank lines.', 'woocommerce' ),
+					),
+					'order_number'   => array(
+						'type'        => 'string',
+						'description' => __( 'Order number cell of the row.', 'woocommerce' ),
+					),
+					'status'         => array(
+						'type'        => 'string',
+						'description' => __( 'Result of the row.', 'woocommerce' ),
+						'enum'        => array(
+							FulfillmentsCsvImporter::STATUS_CREATED,
+							FulfillmentsCsvImporter::STATUS_UPDATED,
+							FulfillmentsCsvImporter::STATUS_SKIPPED,
+							FulfillmentsCsvImporter::STATUS_FAILED,
+						),
+					),
+					'message'        => array(
+						'type'        => 'string',
+						'description' => __( 'Plain text that can quote values from the file. Escape it before output.', 'woocommerce' ),
+					),
+					'code'           => array(
+						'type'        => 'string',
+						'description' => __( 'Failure code, on failed rows only.', 'woocommerce' ),
+					),
+					'order_id'       => array(
+						'type'        => 'integer',
+						'description' => __( 'ID of the order, once it is found.', 'woocommerce' ),
+					),
+					'order_edit_url' => array(
+						'type'        => 'string',
+						'format'      => 'uri',
+						'description' => __( 'Admin URL of the order.', 'woocommerce' ),
+					),
+					'fulfillment_id' => array(
+						'type'        => 'integer',
+						'description' => __( 'ID of the fulfillment the row matched or saved.', 'woocommerce' ),
+					),
+					'notified'       => array(
+						'type'        => 'boolean',
+						'description' => __( 'Whether the customer notification action ran for the row.', 'woocommerce' ),
+					),
+				),
+			),
+		);
+
+		$schema               = $this->get_base_schema();
+		$schema['title']      = __( 'Run fulfillments import chunk response.', 'woocommerce' );
+		$schema['properties'] = array(
+			'processed' => array(
+				'type'        => 'integer',
+				'description' => __( 'Data rows processed so far. Send it as the offset of the next request.', 'woocommerce' ),
+			),
+			'total'     => array(
+				'type'        => 'integer',
+				'description' => __( 'Number of non-blank data rows in the file.', 'woocommerce' ),
+			),
+			'done'      => array(
+				'type'        => 'boolean',
+				'description' => __( 'Whether every data row has been processed.', 'woocommerce' ),
+			),
+			'counts'    => array(
+				'type'        => 'object',
+				'description' => __( 'Results of all chunks so far.', 'woocommerce' ),
+				'properties'  => $counts,
+			),
+			'rows'      => array_merge(
+				$rows,
+				array( 'description' => __( 'Result of each row in this chunk.', 'woocommerce' ) )
+			),
+			'summary'   => array(
+				'type'        => 'object',
+				'description' => __( 'Final counts, present once the import is done. Its rows list is always empty.', 'woocommerce' ),
+				'properties'  => array_merge( $counts, array( 'rows' => $rows ) ),
 			),
 		);
 		return $schema;
@@ -200,6 +389,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 * session is replaced, so two overlapping prepares by the same user each delete the
 	 * staged file of the session they retired. A 500 from a session that could not be
 	 * stored comes after that point, so the prior session is gone on that path too.
+	 * The replacement takes the run lock of the user, so a session is never replaced while
+	 * one of its chunks is being imported: that prepare gets a 409 and its upload is dropped.
 	 *
 	 * @since 11.4.0
 	 *
@@ -255,23 +446,36 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			);
 		}
 
-		$session = ImportSession::create(
+		// Creating the session deletes the user's previous one, so it happens under the run
+		// lock: a session is never replaced while one of its chunks is being imported.
+		$session = $this->with_run_lock(
 			$user_id,
-			$file_path,
-			(string) ( $parsed['delimiter'] ?? ',' ),
-			(array) ( $parsed['headers'] ?? array() ),
-			$total,
-			$notify,
-			$update,
-			$attachment_id
-		);
+			function () use ( $user_id, $file_path, $parsed, $total, $notify, $update, $attachment_id ) {
+				$session = ImportSession::create(
+					$user_id,
+					$file_path,
+					(string) ( $parsed['delimiter'] ?? ',' ),
+					(array) ( $parsed['headers'] ?? array() ),
+					$total,
+					$notify,
+					$update,
+					$attachment_id
+				);
 
-		// The replaced session's record and cleanup action are already gone, so its staged
-		// file goes too, whether or not the new session could be stored. The path comes from
-		// stored session state, so the containment check in ImportSession applies.
-		$replaced = $session->replaced();
-		if ( $replaced instanceof ImportSession ) {
-			ImportSession::delete_staged_file( $replaced->file(), $replaced->attachment_id() );
+				// The replaced session's record and cleanup action are already gone, so its staged
+				// file goes too, whether or not the new session could be stored. The path comes from
+				// stored session state, so the containment check in ImportSession applies. A file
+				// that cannot be deleted now gets a cleanup scheduled again.
+				$replaced = $session->replaced();
+				if ( $replaced instanceof ImportSession ) {
+					$replaced->release_staged_file();
+				}
+				return $session;
+			}
+		);
+		if ( $session instanceof WP_Error ) {
+			$this->discard_failed_upload( $file_path, $attachment_id );
+			return $session;
 		}
 
 		// Not stored, or stored without a scheduled cleanup: either way the new staged file
@@ -292,6 +496,510 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			'total'            => $parsed['total'] ?? 0,
 			'detected_mapping' => $this->mapping_for_response( (array) ( $parsed['detected_mapping'] ?? array() ) ),
 			'delimiter'        => $parsed['delimiter'] ?? ',',
+		);
+	}
+
+	/**
+	 * Run step: import the next chunk of the staged CSV and record the progress.
+	 *
+	 * One lock per user is held from before the session is loaded until the chunk is
+	 * recorded, so two requests do not import the same rows. A user has one session at a
+	 * time and the prepare step replaces it under the same lock. A request that finds the
+	 * lock taken gets a 409 and has imported nothing. The one exception is a chunk that
+	 * runs longer than RUN_LOCK_TTL: its lock can be taken over, and it then answers with
+	 * a lock_lost error instead of recording rows another request is importing too.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 * @param WP_REST_Request $request The incoming JSON request.
+	 * @return array|WP_Error
+	 */
+	protected function handle_run( WP_REST_Request $request ) {
+		$user_id = get_current_user_id();
+
+		return $this->with_run_lock(
+			$user_id,
+			fn( array $lock ) => $this->handle_run_locked( $request, $user_id, $lock )
+		);
+	}
+
+	/**
+	 * Run a callback while holding the run lock of a user.
+	 *
+	 * @template T
+	 *
+	 * @param int      $user_id  User ID.
+	 * @param callable $callback Receives the lock value and returns the result.
+	 * @return mixed The result of the callback, or a WP_Error when the lock could not be taken.
+	 *
+	 * @phpstan-param callable(array{table:string, name:string, value:string}): T $callback
+	 * @phpstan-return T|WP_Error
+	 */
+	private function with_run_lock( int $user_id, callable $callback ) {
+		$lock = $this->acquire_run_lock( $user_id );
+		if ( false === $lock ) {
+			return new WP_Error(
+				'woocommerce_fulfillments_import_lock_failed',
+				__( 'The import could not be locked because of a database error, so nothing was imported. Please try again.', 'woocommerce' ),
+				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+			);
+		}
+		if ( null === $lock ) {
+			return $this->chunk_in_progress_error();
+		}
+
+		// A fatal error, a timeout or an exit() in a row's hooks skips the finally block.
+		// Without this the next request would get a 409 until the lock expires.
+		$state = (object) array( 'locked' => true );
+		register_shutdown_function(
+			function () use ( $state, $lock ) {
+				if ( $state->locked ) {
+					$this->release_run_lock( $lock );
+				}
+			}
+		);
+
+		try {
+			return $callback( $lock );
+		} finally {
+			$this->release_run_lock( $lock );
+			$state->locked = false;
+		}
+	}
+
+	/**
+	 * Process one run request while the lock of the user is held.
+	 *
+	 * The offset decides what happens. The recorded progress imports the next chunk. The
+	 * offset of the last recorded chunk answers with the stored rows of that chunk and
+	 * imports nothing, so a client that lost a response can ask again without a second
+	 * write or a second customer email. Any other offset is refused.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 * @param WP_REST_Request $request The incoming JSON request.
+	 * @param int             $user_id Current user ID.
+	 * @param array           $lock    Lock acquire_run_lock() returned.
+	 * @return array|WP_Error
+	 *
+	 * @phpstan-param array{table:string, name:string, value:string} $lock
+	 */
+	private function handle_run_locked( WP_REST_Request $request, int $user_id, array $lock ) {
+		// The session is written again as soon as it is loaded, so it cannot expire before this
+		// chunk is recorded, and the progress checked below is the stored one, not an older copy.
+		$session = ImportSession::load( $user_id, (string) $request->get_param( 'token' ) );
+		if ( ! $session instanceof ImportSession || ! $session->keep_alive() ) {
+			return $this->token_invalid_error();
+		}
+
+		$offset = (int) $request->get_param( 'offset' );
+		$last   = $session->last_chunk();
+		if ( null !== $last && $offset === $last['offset'] ) {
+			return $this->complete_finished_import( $session ) ?? $this->build_run_response( $session, $last['rows'] );
+		}
+		if ( $session->done() || $offset !== $session->processed() ) {
+			return $this->offset_mismatch_error();
+		}
+
+		if ( $this->staged_file_changed( $session ) ) {
+			// The session's scheduled cleanup goes with it, so the file is removed here. A file
+			// that cannot be deleted now gets a cleanup scheduled again.
+			$session->delete();
+			$session->release_staged_file();
+			return new WP_Error(
+				'woocommerce_fulfillments_import_file_changed',
+				__( 'The uploaded CSV file was changed or removed. Please upload it again.', 'woocommerce' ),
+				array( 'status' => WP_Http::CONFLICT )
+			);
+		}
+
+		$frozen = $this->freeze_run_settings( $session, $request );
+		if ( $frozen instanceof WP_Error ) {
+			return $frozen;
+		}
+		// Storing the settings reads the stored session again, so the progress is checked once more.
+		if ( $offset !== $session->processed() ) {
+			return $this->offset_mismatch_error();
+		}
+
+		$chunk = $this->import_next_chunk( $session, (int) $request->get_param( 'limit' ) );
+		if ( $chunk instanceof WP_Error ) {
+			return $chunk;
+		}
+
+		// Only a chunk that outlived the lock gets here without it. The request that took
+		// the lock over is importing the same rows and records them, so this one must not.
+		// The rows of this chunk are written, so the caller is not told it can simply resend.
+		if ( ! $this->holds_run_lock( $lock ) ) {
+			wc_get_logger()->warning(
+				sprintf( 'A fulfillments import chunk of user %d ended without its lock, so its rows may have been imported twice.', $user_id ),
+				array( 'source' => 'fulfillments-importer' )
+			);
+			return new WP_Error(
+				'woocommerce_fulfillments_import_lock_lost',
+				__( 'This part of the import took too long and its result could not be confirmed. Please try again.', 'woocommerce' ),
+				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+			);
+		}
+
+		// The rows are written by now. Sending the chunk again reports them as skipped or
+		// updated, never as created a second time.
+		if ( ! $session->record_chunk( $offset, $chunk ) ) {
+			return new WP_Error(
+				'woocommerce_fulfillments_import_progress_failed',
+				__( 'The progress of the import could not be saved. Please try again.', 'woocommerce' ),
+				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+			);
+		}
+
+		return $this->complete_finished_import( $session ) ?? $this->build_run_response( $session, (array) ( $chunk['rows'] ?? array() ) );
+	}
+
+	/**
+	 * Import the next chunk of the session's file under its stored settings.
+	 *
+	 * @param ImportSession $session Session of the run, with its settings stored.
+	 * @param int           $limit   Most rows to import; 0 uses the chunk size of the store.
+	 * @return array<string, mixed>|WP_Error The importer's result, or the error when it could not read the chunk.
+	 */
+	private function import_next_chunk( ImportSession $session, int $limit ) {
+		$importer = new FulfillmentsCsvImporter(
+			$session->file(),
+			array(
+				'notify_customer' => $session->notify_customer(),
+				'update_existing' => $session->update_existing(),
+				'delimiter'       => $session->delimiter(),
+			)
+		);
+		$chunk    = $importer->import_chunk(
+			$limit,
+			(array) $session->frozen_mapping(),
+			array(
+				'byte_offset'         => $session->byte_offset(),
+				'next_record_number'  => $session->next_record_number(),
+				'seen_tracking_pairs' => $session->seen_tracking_pairs(),
+				'remaining_rows'      => $session->total() - $session->processed(),
+			)
+		);
+
+		// The importer wrote nothing, so the session is kept and the same chunk can be sent again.
+		if ( isset( $chunk['error'] ) ) {
+			return new WP_Error(
+				'woocommerce_fulfillments_import_chunk_failed',
+				(string) $chunk['error']['message'],
+				array(
+					'status' => WP_Http::INTERNAL_SERVER_ERROR,
+					'reason' => (string) $chunk['error']['code'],
+				)
+			);
+		}
+
+		return $chunk;
+	}
+
+	/**
+	 * Complete a session whose last row has been processed, once.
+	 *
+	 * Releases the staged file and fires the completed action. A callback that throws is
+	 * logged: the rows are imported and recorded, so it cannot turn the request into an error.
+	 *
+	 * @param ImportSession $session Session after its chunk was recorded.
+	 * @return WP_Error|null The error when a finished import could not be marked completed. The
+	 *                       chunk is recorded, so the same offset can be sent again to complete it.
+	 */
+	private function complete_finished_import( ImportSession $session ): ?WP_Error {
+		if ( ! $session->complete() ) {
+			if ( $session->done() && ! $session->completed() ) {
+				return new WP_Error(
+					'woocommerce_fulfillments_import_progress_failed',
+					__( 'The end of the import could not be saved. Please try again.', 'woocommerce' ),
+					array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+				);
+			}
+			return null;
+		}
+
+		$hook_depth = count( $GLOBALS['wp_current_filter'] );
+		try {
+			/**
+			 * Fires once after a fulfillments CSV import has processed its last row.
+			 *
+			 * @since 11.5.0
+			 *
+			 * @param array $counts  Number of rows per result: created, updated, skipped and failed,
+			 *                       plus notified, the rows whose notification action ran.
+			 * @param int   $user_id User who ran the import.
+			 */
+			do_action( 'woocommerce_fulfillments_csv_import_completed', $session->counts(), $session->user_id() );
+		} catch ( \Throwable $e ) {
+			// WordPress leaves the hook on the stack when a callback throws.
+			array_splice( $GLOBALS['wp_current_filter'], $hook_depth );
+			wc_get_logger()->error(
+				'A callback of woocommerce_fulfillments_csv_import_completed failed: ' . $e->getMessage(),
+				array( 'source' => 'fulfillments-importer' )
+			);
+		}
+		return null;
+	}
+
+	/**
+	 * Store the mapping and run options on the session unless an earlier chunk already did.
+	 *
+	 * Every chunk of a session imports under the settings of its first chunk, so a later
+	 * request cannot import the rest of the file under different rules.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 * @param ImportSession   $session Session of the run.
+	 * @param WP_REST_Request $request The incoming JSON request.
+	 * @return WP_Error|null The error to return, or null when the session holds its settings.
+	 */
+	private function freeze_run_settings( ImportSession $session, WP_REST_Request $request ): ?WP_Error {
+		if ( null !== $session->frozen_mapping() ) {
+			return null;
+		}
+
+		$columns = count( $session->headers() );
+		$mapping = array();
+		foreach ( (array) $request->get_param( 'mapping' ) as $index => $column ) {
+			// "01" passes the schema and would land on column 1 a second time.
+			if ( (string) (int) $index !== (string) $index || (int) $index >= $columns ) {
+				return $this->mapping_invalid_error(
+					/* translators: %s: column index sent in the mapping. */
+					sprintf( __( 'The mapping names column %s, which the file does not have.', 'woocommerce' ), (string) $index )
+				);
+			}
+			if ( in_array( $column, $mapping, true ) ) {
+				return $this->mapping_invalid_error(
+					/* translators: %s: canonical column name, e.g. tracking_number. */
+					sprintf( __( 'The mapping assigns %s to more than one column.', 'woocommerce' ), (string) $column )
+				);
+			}
+			$mapping[ (int) $index ] = (string) $column;
+		}
+
+		$missing = FulfillmentsCsvImporter::find_missing_required_columns( FulfillmentsCsvImporter::mapping_to_header_map( $mapping ) );
+		if ( array() !== $missing ) {
+			return $this->mapping_invalid_error(
+				/* translators: %s: comma-separated list of missing column names. */
+				sprintf( __( 'The column mapping is missing required columns: %s.', 'woocommerce' ), implode( ', ', $missing ) )
+			);
+		}
+
+		$options = (array) $request->get_param( 'options' );
+		$notify  = array_key_exists( 'notify_customer', $options ) ? (bool) $options['notify_customer'] : $session->notify_customer();
+		$update  = array_key_exists( 'update_existing', $options ) ? (bool) $options['update_existing'] : $session->update_existing();
+
+		if ( ! $session->freeze_run_settings( $mapping, $notify, $update ) ) {
+			return new WP_Error(
+				'woocommerce_fulfillments_import_progress_failed',
+				__( 'The settings of the import could not be saved. Please try again.', 'woocommerce' ),
+				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+			);
+		}
+		return null;
+	}
+
+	/**
+	 * Whether the staged CSV is no longer the file the prepare step measured.
+	 *
+	 * The stored byte offset is only valid for that file, so a missing or changed file
+	 * ends the session. An existing file that cannot be read is left to the importer,
+	 * which reports it without ending the session.
+	 *
+	 * @param ImportSession $session Session of the run.
+	 * @return bool
+	 */
+	private function staged_file_changed( ImportSession $session ): bool {
+		$file = $session->file();
+		clearstatcache( true, $file );
+		if ( '' === $file || ! file_exists( $file ) || ! ImportSession::is_staged_path( $file ) ) {
+			return true;
+		}
+		if ( $session->file_size() > 0 && (int) filesize( $file ) !== $session->file_size() ) {
+			return true;
+		}
+		if ( $session->file_mtime() > 0 && (int) filemtime( $file ) !== $session->file_mtime() ) {
+			return true;
+		}
+
+		$hash = ImportSession::hash_file_head( $file );
+		return '' !== $hash && '' !== $session->file_head_hash() && $hash !== $session->file_head_hash();
+	}
+
+	/**
+	 * Build the response of a run request from the recorded progress.
+	 *
+	 * @param ImportSession                    $session Session after the chunk was recorded.
+	 * @param array<int, array<string, mixed>> $rows    Row results of the chunk being answered.
+	 * @return array<string, mixed>
+	 */
+	private function build_run_response( ImportSession $session, array $rows ): array {
+		// The edit URL needs the type of each order. One query loads the orders of the chunk,
+		// which would otherwise be read one by one with HPOS.
+		$order_ids = array_values( array_unique( array_map( 'intval', array_column( $rows, 'order_id' ) ) ) );
+		if ( array() !== $order_ids ) {
+			wc_get_orders(
+				array(
+					'post__in' => $order_ids,
+					'limit'    => count( $order_ids ),
+					'status'   => array_keys( wc_get_order_statuses() ),
+				)
+			);
+		}
+		foreach ( $rows as $index => $row ) {
+			if ( isset( $row['order_id'] ) ) {
+				$rows[ $index ]['order_edit_url'] = OrderUtil::get_order_admin_edit_url( (int) $row['order_id'] );
+			}
+		}
+
+		$response = array(
+			'processed' => $session->processed(),
+			'total'     => $session->total(),
+			'done'      => $session->done(),
+			'counts'    => $session->counts(),
+			'rows'      => array_values( $rows ),
+		);
+		if ( $response['done'] ) {
+			$response['summary'] = $session->summary();
+		}
+		return $response;
+	}
+
+	/**
+	 * Lock the import of a user with an option row, as WC_Install::create_lock() does, taking over an expired lock.
+	 *
+	 * The lock remembers the options table it was taken in. A callback that runs during the
+	 * import can leave another site switched in, and the check and the release must still
+	 * reach the row of the site that holds the lock.
+	 *
+	 * @param int $user_id User ID.
+	 * @return array|false|null The lock to check and release, null while another request holds it, or false on a database error.
+	 *
+	 * @phpstan-return array{table:string, name:string, value:string}|false|null
+	 */
+	private function acquire_run_lock( int $user_id ) {
+		global $wpdb;
+
+		$table   = $wpdb->options;
+		$name    = self::RUN_LOCK_PREFIX . $user_id;
+		$expires = time() + self::RUN_LOCK_TTL;
+
+		// The table name in the lock queries is $wpdb->options as it was when the lock was taken.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// INSERT IGNORE affects no rows while another request holds the lock, so contention is not logged as a DB error.
+		$locked = $wpdb->query(
+			$wpdb->prepare( "INSERT IGNORE INTO {$table} (option_name, option_value, autoload) VALUES (%s, %d, 'no')", $name, $expires )
+		);
+		if ( 0 === $locked ) {
+			$locked = $wpdb->query(
+				$wpdb->prepare( "UPDATE {$table} SET option_value = %d WHERE option_name = %s AND option_value < %d", $expires, $name, time() )
+			);
+		}
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		if ( false === $locked ) {
+			return false;
+		}
+		if ( ! $locked ) {
+			return null;
+		}
+
+		return array(
+			'table' => $table,
+			'name'  => $name,
+			'value' => (string) $expires,
+		);
+	}
+
+	/**
+	 * Whether the lock row still holds the value of this request.
+	 *
+	 * A read that fails counts as a lost lock: the caller cannot confirm it is alone.
+	 *
+	 * @param array $lock Lock acquire_run_lock() returned.
+	 * @return bool
+	 *
+	 * @phpstan-param array{table:string, name:string, value:string} $lock
+	 */
+	private function holds_run_lock( array $lock ): bool {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table is $wpdb->options as it was when the lock was taken.
+		$value = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$lock['table']} WHERE option_name = %s", $lock['name'] ) );
+		return $value === $lock['value'];
+	}
+
+	/**
+	 * Release a lock, unless another request took it over after it expired.
+	 *
+	 * @param array $lock Lock acquire_run_lock() returned.
+	 *
+	 * @phpstan-param array{table:string, name:string, value:string} $lock
+	 */
+	private function release_run_lock( array $lock ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table is $wpdb->options as it was when the lock was taken.
+		$released = $wpdb->query( $wpdb->prepare( "DELETE FROM {$lock['table']} WHERE option_name = %s AND option_value = %s", $lock['name'], $lock['value'] ) );
+		if ( false === $released ) {
+			wc_get_logger()->warning(
+				sprintf( 'The fulfillments import lock %s could not be released and blocks that user until it expires.', $lock['name'] ),
+				array( 'source' => 'fulfillments-importer' )
+			);
+		}
+	}
+
+	/**
+	 * Build the 409 error for a request that arrives while another one holds the run lock.
+	 *
+	 * The holder is a chunk being imported or, for a moment, an upload being stored.
+	 *
+	 * @return WP_Error
+	 */
+	private function chunk_in_progress_error(): WP_Error {
+		return new WP_Error(
+			'woocommerce_fulfillments_import_chunk_in_progress',
+			__( 'Another request of your import is still being processed. Please try again in a moment.', 'woocommerce' ),
+			array( 'status' => WP_Http::CONFLICT )
+		);
+	}
+
+	/**
+	 * Build the 400 error for a session that does not exist, has expired or belongs to another user.
+	 *
+	 * @return WP_Error
+	 */
+	private function token_invalid_error(): WP_Error {
+		return new WP_Error(
+			'woocommerce_fulfillments_import_token_invalid',
+			__( 'The import session is missing or has expired. Please upload the CSV file again.', 'woocommerce' ),
+			array( 'status' => WP_Http::BAD_REQUEST )
+		);
+	}
+
+	/**
+	 * Build the 409 error for an offset that is not the recorded progress.
+	 *
+	 * @return WP_Error
+	 */
+	private function offset_mismatch_error(): WP_Error {
+		return new WP_Error(
+			'woocommerce_fulfillments_import_offset_mismatch',
+			__( 'The import is out of step with its recorded progress. Please start the import again.', 'woocommerce' ),
+			array( 'status' => WP_Http::CONFLICT )
+		);
+	}
+
+	/**
+	 * Build the 400 error for a mapping the import cannot run with.
+	 *
+	 * @param string $message Translated reason.
+	 * @return WP_Error
+	 */
+	private function mapping_invalid_error( string $message ): WP_Error {
+		return new WP_Error(
+			'woocommerce_fulfillments_import_mapping_invalid',
+			$message,
+			array( 'status' => WP_Http::BAD_REQUEST )
 		);
 	}
 

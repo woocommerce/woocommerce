@@ -253,3 +253,17 @@ function log_abandoned_import( $user_id, $token, $file, $attachment_id ) {
     error_log( sprintf( 'Import session %s of user %d was abandoned', $token, $user_id ) );
 }
 ```
+
+When the last row of an import has been processed, the importer releases the staged file and fires the completed action once. Rows that failed are part of a completed import, so check the counts before treating it as a success.
+
+| Hook | Parameters | Purpose |
+| --- | --- | --- |
+| `woocommerce_fulfillments_csv_import_completed` | `array $counts`, `int $user_id` | React when a CSV import finishes. `$counts` has the number of `created`, `updated`, `skipped` and `failed` rows, and `notified`, the rows whose customer notification action ran. `$user_id` is the user who ran the import. |
+
+```php
+add_action( 'woocommerce_fulfillments_csv_import_completed', function( $counts, $user_id ) {
+    if ( $counts['failed'] > 0 ) {
+        error_log( sprintf( 'Fulfillments import of user %d finished with %d failed rows', $user_id, $counts['failed'] ) );
+    }
+}, 10, 2 );
+```
