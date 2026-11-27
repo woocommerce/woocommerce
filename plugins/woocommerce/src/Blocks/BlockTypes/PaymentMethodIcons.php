@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * PaymentMethodIcons class.
  */
 class PaymentMethodIcons extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -18,22 +20,12 @@ class PaymentMethodIcons extends AbstractBlock {
 	protected $block_name = 'payment-method-icons';
 
 	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
-	}
-
-	/**
 	 * Get the frontend style handle for this block type.
 	 *
 	 * @return string[]
 	 */
 	protected function get_block_type_style() {
-		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
+		return array_merge( (array) parent::get_block_type_style(), array( 'wc-blocks-packages-style' ) );
 	}
 
 	/**
