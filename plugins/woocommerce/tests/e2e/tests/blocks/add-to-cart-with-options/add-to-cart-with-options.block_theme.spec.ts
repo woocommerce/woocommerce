@@ -323,7 +323,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await logoNoOption.click();
 
 			await expect( productPrice ).toHaveText( '$45.00' );
-			await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
+			const stockIndicator = page.locator(
+				'.wp-block-woocommerce-product-stock-indicator'
+			);
+			await expect( stockIndicator ).toBeVisible();
+			await expect( stockIndicator ).toHaveText( 'Out of stock' );
 			await expect( addToCartButton ).toBeHidden();
 			await expect( quantitySelector ).toBeHidden();
 			await expect(

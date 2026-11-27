@@ -156,6 +156,70 @@ describe( 'product filter chips interactivity store', () => {
 		expect( mockParentToggle ).not.toHaveBeenCalled();
 	} );
 
+	describe( 'item description', () => {
+		const getState = ( item?: Record< string, unknown > ) => {
+			if ( ! mockRegisteredStore ) {
+				throw new Error( 'Chips store was not registered.' );
+			}
+			mockGetContext.mockReturnValue( { item } );
+			return mockRegisteredStore.state;
+		};
+
+		const textItem = { id: 'size-s', label: 'S', value: 's' };
+		const swatchItem = {
+			id: 'color-blue',
+			label: 'Blue',
+			value: 'blue',
+			visual: { color: '#0000ff' },
+		};
+
+		it( 'links the description to text chips and uses it as the tooltip', () => {
+			const state = getState( {
+				...textItem,
+				description: 'Out of stock',
+			} );
+
+			expect( state.itemTitle ).toBe( 'Out of stock' );
+			expect( state.descriptionId ).toBe( 'size-s-description' );
+		} );
+
+		it( 'adds the description to the swatch label tooltip', () => {
+			const state = getState( {
+				...swatchItem,
+				description: 'Out of stock',
+			} );
+
+			expect( state.swatchTitle ).toBe( 'Blue (Out of stock)' );
+			expect( state.descriptionId ).toBe( 'color-blue-description' );
+		} );
+
+		it( 'leaves text chips without a tooltip or description by default', () => {
+			const state = getState( textItem );
+
+			expect( state.itemTitle ).toBeUndefined();
+			expect( state.descriptionId ).toBeUndefined();
+		} );
+
+		it( 'keeps the label tooltip on swatches without a description', () => {
+			expect( getState( swatchItem ).swatchTitle ).toBe( 'Blue' );
+		} );
+
+		it( 'keeps the label tooltip on swatch items without visual data', () => {
+			expect( getState( textItem ).swatchTitle ).toBe( 'S' );
+		} );
+
+		it( 'uses the aria label as swatch tooltip when the label is not text', () => {
+			const state = getState( {
+				...swatchItem,
+				label: { type: 'span' },
+				ariaLabel: 'Blue',
+				description: 'Out of stock',
+			} );
+
+			expect( state.swatchTitle ).toBe( 'Blue (Out of stock)' );
+		} );
+	} );
+
 	it( 'sets chip CSS variables when not already defined', () => {
 		if ( ! mockRegisteredStore ) {
 			throw new Error( 'Chips store was not registered.' );

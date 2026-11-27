@@ -132,6 +132,9 @@ describe( 'Add to Cart + Options variation selector store', () => {
 				variableProductMissingAttributes: 'Choose options.',
 				variableProductOutOfStock: 'Variation unavailable.',
 			},
+			variationOptionDescriptions: {
+				outOfStock: 'Out of stock',
+			},
 		} );
 
 		jest.isolateModules( () => {
@@ -193,6 +196,186 @@ describe( 'Add to Cart + Options variation selector store', () => {
 			} );
 		}
 	);
+
+	describe( 'out-of-stock options', () => {
+		const setUpBlueSmallOutOfStock = (
+			selectedAttributes: SelectedAttributes[]
+		) => {
+			mockProductsState.mainProductInContext = {
+				id: 100,
+				type: 'variable',
+				variations: [
+					variation( 101, [
+						{ name: 'Color', value: 'blue' },
+						{ name: 'Size', value: 's' },
+					] ),
+					variation( 102, [
+						{ name: 'Color', value: 'blue' },
+						{ name: 'Size', value: 'm' },
+					] ),
+					variation( 103, [
+						{ name: 'Color', value: 'red' },
+						{ name: 'Size', value: 's' },
+					] ),
+				],
+			};
+			mockProductsState.productVariations = {
+				101: { id: 101, is_in_stock: false },
+				102: { id: 102, is_in_stock: true },
+				103: { id: 103, is_in_stock: true },
+			};
+			mockContext = {
+				...mockContext,
+				name: 'Size',
+				selectedAttributes,
+				variationAttributeOptions: [
+					{ id: 'size-s', label: 'S', value: 's' },
+					{ id: 'size-m', label: 'M', value: 'm' },
+					{ id: 'size-l', label: 'L', value: 'l' },
+				],
+			};
+
+			return Object.fromEntries(
+				getRegisteredStore().state.selectableItems.map( ( item ) => [
+					item.value,
+					item,
+				] )
+			);
+		};
+
+		it( 'grays out an option whose matching variations are all out of stock, without disabling it', () => {
+			const items = setUpBlueSmallOutOfStock( [
+				{ attribute: 'attribute_pa_color', value: 'blue' },
+			] );
+
+			expect( items.s ).toMatchObject( {
+				disabled: false,
+				hidden: false,
+				looksDisabled: true,
+				description: 'Out of stock',
+			} );
+			expect( items.m ).toMatchObject( {
+				disabled: false,
+				looksDisabled: false,
+				description: undefined,
+			} );
+		} );
+
+		it( 'keeps a selected out-of-stock option grayed out', () => {
+			const items = setUpBlueSmallOutOfStock( [
+				{ attribute: 'attribute_pa_color', value: 'blue' },
+				{ attribute: 'Size', value: 's' },
+			] );
+
+			expect( items.s ).toMatchObject( {
+				selected: true,
+				disabled: false,
+				looksDisabled: true,
+				description: 'Out of stock',
+			} );
+			expect( items.m ).toMatchObject( {
+				disabled: false,
+				looksDisabled: false,
+			} );
+		} );
+
+		it( 'grays out a value in another attribute when it is out of stock for the selected option', () => {
+			setUpBlueSmallOutOfStock( [
+				{ attribute: 'attribute_pa_color', value: 'blue' },
+				{ attribute: 'Size', value: 's' },
+			] );
+			mockContext = {
+				...mockContext,
+				name: 'Color',
+				variationAttributeOptions: [
+					{ id: 'color-blue', label: 'Blue', value: 'blue' },
+					{ id: 'color-red', label: 'Red', value: 'red' },
+				],
+			};
+
+			const items = Object.fromEntries(
+				getRegisteredStore().state.selectableItems.map( ( item ) => [
+					item.value,
+					item,
+				] )
+			);
+
+			expect( items.blue ).toMatchObject( {
+				selected: true,
+				disabled: false,
+				looksDisabled: true,
+			} );
+			expect( items.red ).toMatchObject( {
+				disabled: false,
+				looksDisabled: false,
+			} );
+		} );
+
+		it( 'does not gray out an option that is in stock for another selection', () => {
+			const items = setUpBlueSmallOutOfStock( [] );
+
+			expect( items.s ).toMatchObject( {
+				disabled: false,
+				looksDisabled: false,
+			} );
+		} );
+
+		it( 'keeps invalid options disabled instead of marking them out of stock', () => {
+			const items = setUpBlueSmallOutOfStock( [
+				{ attribute: 'attribute_pa_color', value: 'blue' },
+			] );
+
+			expect( items.l ).toMatchObject( {
+				disabled: true,
+				looksDisabled: false,
+				description: undefined,
+			} );
+		} );
+
+		it( 'shows out-of-stock options when invalid options are hidden', () => {
+			mockContext = { ...mockContext, disabledAttributesAction: 'hide' };
+			const items = setUpBlueSmallOutOfStock( [
+				{ attribute: 'attribute_pa_color', value: 'blue' },
+			] );
+
+			expect( items.s ).toMatchObject( {
+				disabled: false,
+				hidden: false,
+				looksDisabled: true,
+			} );
+			expect( items.l ).toMatchObject( {
+				disabled: true,
+				hidden: true,
+				looksDisabled: false,
+			} );
+		} );
+
+		it( 'does not gray out an option when the variation data is not loaded', () => {
+			setUpBlueSmallOutOfStock( [
+				{ attribute: 'attribute_pa_color', value: 'blue' },
+			] );
+			mockProductsState.productVariations = {};
+
+			expect(
+				getRegisteredStore().state.selectableItems.find(
+					( item ) => item.value === 's'
+				)
+			).toMatchObject( { disabled: false, looksDisabled: false } );
+		} );
+
+		it( 'lets the shopper select an out-of-stock option', () => {
+			const items = setUpBlueSmallOutOfStock( [
+				{ attribute: 'attribute_pa_color', value: 'blue' },
+			] );
+
+			getRegisteredStore().actions.toggle( items.s );
+
+			expect( mockContext.selectedAttributes ).toEqual( [
+				{ attribute: 'attribute_pa_color', value: 'blue' },
+				{ attribute: 'Size', value: 's' },
+			] );
+		} );
+	} );
 
 	it( 'preserves a custom attribute slug while matching its Store API label', () => {
 		mockProductsState.mainProductInContext = {

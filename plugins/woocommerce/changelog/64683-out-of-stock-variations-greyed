@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Gray out out-of-stock variation options in the Add to Cart + Options block, while keeping them selectable.

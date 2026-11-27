@@ -12,6 +12,15 @@ export type SelectableItem< T = unknown > = (
 	selected?: boolean;
 	disabled?: boolean;
 	hidden?: boolean;
+	/**
+	 * Show the item as unavailable while keeping it selectable, unlike `disabled`.
+	 */
+	looksDisabled?: boolean;
+	/**
+	 * Short status text for the item, e.g. "Out of stock". Inner blocks may
+	 * show it as a tooltip and expose it to assistive technology.
+	 */
+	description?: string;
 	type?: string;
 } & T;
 

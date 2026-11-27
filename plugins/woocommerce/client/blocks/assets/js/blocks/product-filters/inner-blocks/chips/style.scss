@@ -78,6 +78,11 @@
 	}
 }
 
+// Looks unavailable but stays clickable, e.g. an out-of-stock variation.
+.wc-block-product-filter-chips__item.is-disabled:not(:disabled) {
+	opacity: 0.5;
+}
+
 :where(.wc-block-product-filter-chips__label) {
 	display: inline-flex;
 	align-items: center;
