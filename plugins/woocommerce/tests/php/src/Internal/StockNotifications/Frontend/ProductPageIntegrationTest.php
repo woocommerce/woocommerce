@@ -457,13 +457,21 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		$markup = ob_get_clean();
 
 		$this->assertStringContainsString( 'wc_bis_form', $markup, 'The hidden variation form should still render.' );
-		$this->assertStringNotContainsString( 'You have already joined this waitlist.', $markup, 'The parent sign-up should not replace the variation form.' );
+		$this->assertStringNotContainsString( 'wc_bis_already_signed_up', $markup, 'The parent sign-up should not replace the variation form.' );
+	}
+
+	/**
+	 * Sign-up statuses that are not active.
+	 *
+	 * @return array<array{string}>
+	 */
+	public static function inactive_statuses(): array {
+		return array( array( NotificationStatus::CANCELLED ), array( NotificationStatus::PENDING ) );
 	}
 
 	/**
 	 * @testdox Should keep the form for a logged-in customer whose sign-up is $status.
-	 * @testWith ["cancelled"]
-	 *           ["pending"]
+	 * @dataProvider inactive_statuses
 	 *
 	 * @param string $status The sign-up status.
 	 */
@@ -541,7 +549,10 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 
 		$this->assertEqualsCanonicalizing( array( $out_of_stock_id, $other_out_of_stock_id ), $ids, 'Only the joined out of stock variations should be listed.' );
 		$this->assertSame( 1, substr_count( $markup, 'You have already joined this waitlist.' ), 'The notice should be printed once.' );
-		$this->assertStringContainsString( '<div class="wc_bis_already_signed_up" data-bis-product-id="' . $product_id . '" hidden>', $markup, 'The notice should start hidden and name the product its form is for.' );
+		$html = new \WP_HTML_Tag_Processor( $markup );
+		$html->next_tag( array( 'class_name' => 'wc_bis_already_signed_up' ) );
+		$this->assertNotNull( $html->get_attribute( 'hidden' ), 'The notice should start hidden.' );
+		$this->assertSame( (string) $product_id, $html->get_attribute( 'data-bis-product-id' ), 'The notice should name the product its form is for.' );
 	}
 
 	/**
@@ -558,8 +569,7 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should not list a variation whose sign-up is $status.
-	 * @testWith ["cancelled"]
-	 *           ["pending"]
+	 * @dataProvider inactive_statuses
 	 *
 	 * @param string $status The sign-up status.
 	 */
