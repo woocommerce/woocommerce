@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersSta
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -146,6 +147,10 @@ class OrdersScheduler extends ImportScheduler {
 		add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );
 		add_action( 'update_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_change' ), 10, 2 );
 		add_action( 'delete_option', array( __CLASS__, 'handle_scheduled_import_option_before_delete' ), 10, 1 );
+
+		// Stop the recurring import as soon as Analytics is turned off, nothing handles it after that.
+		add_action( 'update_option_' . Analytics::TOGGLE_OPTION_NAME, array( __CLASS__, 'handle_analytics_option_change' ), 10, 2 );
+		add_action( 'add_option_' . Analytics::TOGGLE_OPTION_NAME, array( __CLASS__, 'handle_analytics_option_added' ), 10, 2 );
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
@@ -570,6 +575,47 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
+	 * Unschedule the recurring batch processor for order imports.
+	 *
+	 * @internal
+	 */
+	public static function unschedule_recurring_batch_processor(): void {
+		$action_hook = self::get_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
+		if ( null !== $action_hook ) {
+			as_unschedule_all_actions( $action_hook, array(), static::$group ?? '' );
+		}
+	}
+
+	/**
+	 * Unschedule the recurring batch processor when Analytics is disabled.
+	 *
+	 * @internal
+	 * @param mixed $old_value The old value of the option.
+	 * @param mixed $new_value The new value of the option.
+	 * @return void
+	 */
+	public static function handle_analytics_option_change( $old_value, $new_value ): void {
+		if ( 'no' === $new_value ) {
+			self::unschedule_recurring_batch_processor();
+		}
+	}
+
+	/**
+	 * Unschedule the recurring batch processor when Analytics is first saved as disabled.
+	 *
+	 * A missing option means Analytics is on, so saving 'no' adds the option and skips the update hook.
+	 *
+	 * @internal
+	 * @param string $option The option name.
+	 * @param mixed  $value  The option value.
+	 * @return void
+	 */
+	public static function handle_analytics_option_added( $option, $value ): void {
+		unset( $option );
+		self::handle_analytics_option_change( null, $value );
+	}
+
+	/**
 	 * Handle changes to the scheduled import option.
 	 *
 	 * When switching from scheduled to immediate import,
@@ -586,11 +632,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	public static function handle_scheduled_import_option_change( $old_value, $new_value ) {
 		// If switching from scheduled to immediate import.
 		if ( 'yes' === $old_value && 'no' === $new_value ) {
-			// Unschedule the recurring batch processor.
-			$action_hook = self::get_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
-			if ( null !== $action_hook ) {
-				as_unschedule_all_actions( $action_hook, array(), static::$group ?? '' );
-			}
+			self::unschedule_recurring_batch_processor();
 
 			// Schedule an immediate catchup batch to process all orders up to now.
 			// This ensures no orders are missed during the transition.

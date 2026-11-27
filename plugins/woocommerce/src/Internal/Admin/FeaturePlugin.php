@@ -26,6 +26,7 @@ use Automattic\WooCommerce\Admin\ReportsSync;
 use Automattic\WooCommerce\Internal\Admin\CategoryLookup;
 use Automattic\WooCommerce\Internal\Admin\Events;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\Onboarding;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\Admin\Screens\AdminScreens;
 
 /**
@@ -188,6 +189,8 @@ class FeaturePlugin {
 		} else {
 			// Already generated exports still need serving and expiring.
 			ReportExporter::init_export_files();
+			// Nothing handles the order import batches now, so stop the recurring one.
+			add_action( 'action_scheduler_ensure_recurring_actions', array( OrdersScheduler::class, 'unschedule_recurring_batch_processor' ) );
 		}
 
 		// Admin note providers.
