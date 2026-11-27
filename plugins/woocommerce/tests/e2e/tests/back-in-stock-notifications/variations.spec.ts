@@ -113,6 +113,10 @@ test.describe(
 					outOfStockVariation
 				);
 				await signUpOnProductPage( page );
+				// Let the sign-up finish before navigating away.
+				await expect(
+					page.getByText( /You have successfully signed up/ )
+				).toBeVisible();
 
 				await page.goto( variableProduct.permalink );
 				await selectVariation(
