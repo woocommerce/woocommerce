@@ -734,6 +734,27 @@ class WC_Frontend_Scripts {
 					'fragment_name'   => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) . get_template() ) ),
 					'request_timeout' => 5000,
 				);
+
+				/**
+				 * Filters whether visitors without a cart session skip the initial cart fragments AJAX request.
+				 *
+				 * When enabled, pages rendered while the cart is empty include pre-rendered empty-cart
+				 * fragments, so the frontend can populate the mini cart without an uncacheable
+				 * `wc-ajax=get_refreshed_fragments` request. Disable this if fragments must be generated
+				 * per visitor even for empty carts (e.g. dynamic empty-cart content on cached pages).
+				 *
+				 * @since 11.0.0
+				 *
+				 * @param bool $skip Whether to skip the AJAX request for visitors without a cart session. Default true.
+				 */
+				if ( apply_filters( 'woocommerce_cart_fragments_skip_ajax_for_empty_carts', true ) && WC()->cart instanceof WC_Cart && WC()->cart->is_empty() ) {
+					$empty_cart_fragments = self::get_empty_cart_fragments();
+
+					// Omitted entirely on failure: an empty value would suppress the AJAX fallback in the frontend script.
+					if ( ! empty( $empty_cart_fragments ) ) {
+						$params['empty_cart_fragments'] = $empty_cart_fragments;
+					}
+				}
 				break;
 			case 'wc-add-to-cart':
 				$params = array(
@@ -793,6 +814,47 @@ class WC_Frontend_Scripts {
 		$params = apply_filters_deprecated( $handle . '_params', array( $params ), '3.0.0', 'woocommerce_get_script_data' );
 
 		return apply_filters( 'woocommerce_get_script_data', $params, $handle );
+	}
+
+	/**
+	 * Get the cart fragments for an empty cart, matching what WC_AJAX::get_refreshed_fragments() returns.
+	 *
+	 * Third-party fragment callbacks and mini cart templates run during regular page rendering here,
+	 * unlike the AJAX endpoint, so failures are contained: an empty array is returned and the
+	 * frontend falls back to requesting fragments over AJAX.
+	 *
+	 * @return array Fragments keyed by replacement selector, or an empty array on failure.
+	 */
+	private static function get_empty_cart_fragments() {
+		$ob_level = ob_get_level();
+
+		try {
+			ob_start();
+
+			woocommerce_mini_cart();
+
+			$mini_cart = ob_get_clean();
+
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			/** This filter is documented in includes/class-wc-ajax.php */
+			$fragments = apply_filters(
+				'woocommerce_add_to_cart_fragments',
+				array(
+					'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
+				)
+			);
+			// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+
+			return is_array( $fragments ) ? $fragments : array();
+		} catch ( Throwable $e ) {
+			while ( ob_get_level() > $ob_level ) {
+				ob_end_clean();
+			}
+
+			wc_get_logger()->error( 'Could not pre-render empty cart fragments: ' . $e->getMessage(), array( 'source' => 'cart-fragments' ) );
+
+			return array();
+		}
 	}
 
 	/**
