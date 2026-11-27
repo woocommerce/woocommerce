@@ -542,6 +542,89 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that re-syncing a full refund removes an earlier row for a line that has nothing left to refund.
+	 */
+	public function test_resync_full_refund_removes_row_for_line_with_nothing_left() {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order  = WC_Helper_Order::create_order( 1, $product );
+		$second = new WC_Order_Item_Product();
+		$second->set_product( $product );
+		$second->set_quantity( 1 );
+		$second->set_subtotal( 25 );
+		$second->set_total( 25 );
+		$order->add_item( $second );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->calculate_totals();
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'amount'     => 25,
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$second->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => 25,
+					),
+				),
+			)
+		);
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$order = wc_get_order( $order->get_id() );
+		$order->set_status( OrderStatus::REFUNDED );
+		$order->save();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$full_refund = null;
+		foreach ( wc_get_order( $order->get_id() )->get_refunds() as $refund ) {
+			if ( 'full' === $refund->get_meta( '_refund_type' ) ) {
+				$full_refund = $refund;
+			}
+		}
+		$table = $wpdb->prefix . 'wc_order_product_lookup';
+
+		// A row for the already refunded line, as an earlier calculation could have written it.
+		$wpdb->insert(
+			$table,
+			array(
+				'order_item_id'         => $second->get_id(),
+				'order_id'              => $full_refund->get_id(),
+				'product_id'            => $product->get_id(),
+				'variation_id'          => 0,
+				'customer_id'           => 0,
+				'date_created'          => $full_refund->get_date_created()->date( 'Y-m-d H:i:s' ),
+				'product_qty'           => -1,
+				'product_net_revenue'   => -25,
+				'product_gross_revenue' => -25,
+				'coupon_amount'         => 0,
+				'tax_amount'            => 0,
+				'shipping_amount'       => 0,
+				'shipping_tax_amount'   => 0,
+			)
+		);
+
+		ProductsDataStore::sync_order_products( $full_refund->get_id() );
+
+		$rows = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM %i WHERE order_id = %d AND order_item_id = %d',
+				$table,
+				$full_refund->get_id(),
+				$second->get_id()
+			)
+		);
+		$this->assertSame( 0, $rows );
+	}
+
+	/**
 	 * @testdox Should not throw DivisionByZeroError when syncing a monetary-only refund (qty 0) with float quantities.
 	 *
 	 * Reproduces WOOPLUG-6639. When a store uses decimal/float stock amounts (e.g. WCPOS),

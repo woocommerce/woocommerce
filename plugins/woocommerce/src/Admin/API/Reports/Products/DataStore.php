@@ -625,6 +625,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 				// Skip items that have already been fully refunded (single or multiple partial refunds).
 				if ( 0.0 === $net_revenue ) {
+					// Drop a row an earlier sync may have written for this line, as nothing of it is refunded here.
+					$wpdb->delete(
+						$table_name,
+						array(
+							'order_id'      => $order->get_id(),
+							'order_item_id' => $order_item_id,
+						),
+						array( '%d', '%d' )
+					);
 					continue;
 				}
 
