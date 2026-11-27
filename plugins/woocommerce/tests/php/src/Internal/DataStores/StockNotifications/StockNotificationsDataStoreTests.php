@@ -625,6 +625,48 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should store every prop in its own column on create and update.
+	 */
+	public function test_every_prop_round_trips_through_its_column_on_create_and_update(): void {
+		$created = array(
+			'product_id'          => 1,
+			'user_id'             => 1,
+			'user_email'          => 'first@example.com',
+			'status'              => NotificationStatus::ACTIVE,
+			'date_created'        => '2024-01-01 00:00:00',
+			'date_modified'       => '2024-02-01 00:00:00',
+			'date_confirmed'      => '2024-03-01 00:00:00',
+			'date_last_attempt'   => '2024-04-01 00:00:00',
+			'date_notified'       => '2024-05-01 00:00:00',
+			'date_cancelled'      => '2024-06-01 00:00:00',
+			'cancellation_source' => NotificationCancellationSource::USER,
+		);
+		$updated = array(
+			'product_id'          => 2,
+			'user_id'             => 2,
+			'user_email'          => 'second@example.com',
+			'status'              => NotificationStatus::CANCELLED,
+			'date_created'        => '2025-01-01 00:00:00',
+			'date_modified'       => '2025-02-01 00:00:00',
+			'date_confirmed'      => '2025-03-01 00:00:00',
+			'date_last_attempt'   => '2025-04-01 00:00:00',
+			'date_notified'       => '2025-05-01 00:00:00',
+			'date_cancelled'      => '2025-06-01 00:00:00',
+			'cancellation_source' => NotificationCancellationSource::ADMIN,
+		);
+
+		$notification = new Notification();
+		$notification->set_props( $created );
+		$notification->save();
+		$this->assert_reloaded_props( $notification->get_id(), $created );
+
+		$notification = new Notification( $notification->get_id() );
+		$notification->set_props( $updated );
+		$notification->save();
+		$this->assert_reloaded_props( $notification->get_id(), $updated );
+	}
+
+	/**
 	 * @testdox Should keep a column changed in the database since load when a stale object saves another prop.
 	 */
 	public function test_update_keeps_columns_changed_since_load(): void {
@@ -1088,6 +1130,22 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$notification->save();
 
 		return new Notification( $notification->get_id() );
+	}
+
+	/**
+	 * Assert that a notification read again from the database has the expected props.
+	 *
+	 * @param int   $notification_id The notification ID.
+	 * @param array $expected        Expected prop values keyed by prop, with dates as `Y-m-d H:i:s`.
+	 */
+	private function assert_reloaded_props( int $notification_id, array $expected ): void {
+		$notification = new Notification( $notification_id );
+
+		foreach ( $expected as $prop => $value ) {
+			$actual = $notification->{"get_$prop"}();
+			$actual = $actual instanceof \WC_DateTime ? $actual->format( 'Y-m-d H:i:s' ) : $actual;
+			$this->assertSame( $value, $actual, "The $prop prop should round-trip through the database." );
+		}
 	}
 
 	/**
