@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Enums;
  * Enum class for the payment mode a payment gateway records on an order with
  * WC_Order::set_payment_mode(), which tells whether it was paid in test or live mode.
  *
- * @since 11.4.0
+ * @since 11.5.0
  */
 final class PaymentMode {
 	/**

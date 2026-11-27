@@ -2829,7 +2829,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get whether the order was paid in test or live mode, as recorded by its payment gateway.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 * @return string One of the PaymentMode constants, or an empty string when the gateway didn't record it.
 	 */
 	public function get_payment_mode() {
@@ -2845,7 +2845,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * another gateway clears the mode, unless this was called on the same object before that switch. That includes
 	 * changes after payment, such as an admin edit or a REST update, so a cleared mode can only count a test order as live.
 	 *
-	 * @since 11.4.0
+	 * @since 11.5.0
 	 * @param string $mode One of the PaymentMode constants, or an empty string to clear it.
 	 * @throws WC_Data_Exception When the mode is not valid.
 	 * @return void
