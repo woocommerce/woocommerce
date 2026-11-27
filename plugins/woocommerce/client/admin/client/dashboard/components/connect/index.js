@@ -6,8 +6,13 @@ import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { resolveSelect, withDispatch, withSelect } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { onboardingStore } from '@woocommerce/data';
+
+const getAuthUrlQuery = ( { redirectUrl, from } ) => ( {
+	redirectUrl: redirectUrl || window.location.href,
+	from,
+} );
 
 /**
  * Button redirecting to Jetpack auth flow.
@@ -64,33 +69,14 @@ export class Connect extends Component {
 	}
 
 	async retryConnection() {
-		const {
-			requestJetpackAuthUrl,
-			redirectUrl,
-			from,
-			onConnect,
-			createNotice,
-		} = this.props;
-
-		if ( ! requestJetpackAuthUrl ) {
-			window.location.reload();
-			return;
-		}
+		const { requestJetpackAuthUrl, onConnect, createNotice } = this.props;
 
 		this.setState( { isRetrying: true } );
-		let response;
-		try {
-			// The merchant asked to retry, so force registration past the connection package's backoff.
-			// The URL fetched on render stays unforced.
-			response = await requestJetpackAuthUrl( {
-				redirectUrl: redirectUrl || window.location.href,
-				from,
-				force: true,
-			} );
-		} catch {
-			// A failed request is reported below like an unsuccessful one.
-			response = null;
-		}
+		// Only a click forces registration; the URL fetched on render stays unforced.
+		const response = await requestJetpackAuthUrl( {
+			...getAuthUrlQuery( this.props ),
+			force: true,
+		} );
 
 		if ( response?.success && response.url ) {
 			if ( onConnect ) {
@@ -202,9 +188,9 @@ Connect.propTypes = {
 	 */
 	from: PropTypes.string,
 	/**
-	 * Requests the authorization URL; Retry uses it to force a fresh registration.
+	 * Requests a new authorization URL; Retry uses it to force a fresh registration.
 	 */
-	requestJetpackAuthUrl: PropTypes.func,
+	requestJetpackAuthUrl: PropTypes.func.isRequired,
 };
 
 Connect.defaultProps = {
@@ -216,10 +202,7 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { getJetpackAuthUrl, isResolving } = select( onboardingStore );
 
-		const queryArgs = {
-			redirectUrl: props.redirectUrl || window.location.href,
-			from: props.from,
-		};
+		const queryArgs = getAuthUrlQuery( props );
 
 		const jetpackAuthUrlResponse = getJetpackAuthUrl( queryArgs );
 		const isRequesting = isResolving( 'getJetpackAuthUrl', [ queryArgs ] );
@@ -240,13 +223,19 @@ export default compose(
 			jetpackAuthUrl: jetpackAuthUrlResponse.url,
 		};
 	} ),
-	withDispatch( ( dispatch ) => {
+	withDispatch( ( dispatch, ownProps, { resolveSelect } ) => {
 		const { createNotice } = dispatch( 'core/notices' );
+		const { invalidateResolution } = dispatch( onboardingStore );
 
 		return {
 			createNotice,
-			requestJetpackAuthUrl: ( query ) =>
-				resolveSelect( onboardingStore ).getJetpackAuthUrl( query ),
+			// Drops the cached result first, so every Retry sends a new request.
+			requestJetpackAuthUrl: async ( query ) => {
+				await invalidateResolution( 'getJetpackAuthUrl', [ query ] );
+				return resolveSelect( onboardingStore ).getJetpackAuthUrl(
+					query
+				);
+			},
 		};
 	} )
 )( Connect );
