@@ -954,4 +954,59 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertSame( 6, $product->get_stock_quantity() );
 		$this->assertGreaterThan( strtotime( $past ), $product->get_date_modified()->getTimestamp() );
 	}
+
+	/**
+	 * @testdox Stock updates and order stock bookkeeping are skipped when the product that manages the stock cannot be loaded.
+	 */
+	public function test_stock_changes_are_skipped_when_stock_owner_cannot_be_loaded(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_manage_stock( true );
+		$parent->set_stock_quantity( 10 );
+		$parent->save();
+
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$order     = WC_Helper_Order::create_order( 0, $variation );
+		$this->assertSame( $parent->get_id(), $variation->get_stock_managed_by_id(), 'The variation should take its stock from the parent' );
+
+		// A post type other than product makes wc_get_product() return false for the parent.
+		$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_type' => 'post' ), array( 'ID' => $parent->get_id() ) );
+		clean_post_cache( $parent->get_id() );
+
+		$this->assertFalse( wc_update_product_stock( $variation, 5 ), 'The update should fail when the parent cannot be loaded' );
+
+		// Reading the variation again would drop its invalid parent, so hand the order item the variation loaded above.
+		$return_variation = function () use ( $variation ) {
+			return $variation;
+		};
+		add_filter( 'woocommerce_order_item_product', $return_variation );
+
+		wc_reduce_stock_levels( $order );
+		$item  = current( $order->get_items() );
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertSame( '', $item->get_meta( '_reduced_stock', true ), 'Reducing should not mark the item as reduced' );
+		$this->assertStringStartsWith( 'Unable to reduce stock for item', $notes[0]->content, 'Reducing should add an error note' );
+
+		$item->add_meta_data( '_reduced_stock', 4, true );
+		$item->save();
+		wc_increase_stock_levels( $order );
+		$item  = current( $order->get_items() );
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertSame( '4', (string) $item->get_meta( '_reduced_stock', true ), 'Restoring should keep the item marked as reduced' );
+		$this->assertStringStartsWith( 'Unable to restore stock for item', $notes[0]->content, 'Restoring should add an error note' );
+
+		$note_count = count( $notes );
+		wc_restock_refunded_items( $order, array( $item->get_id() => array( 'qty' => 1 ) ) );
+		$item  = current( $order->get_items() );
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertSame( '4', (string) $item->get_meta( '_reduced_stock', true ), 'Restocking a refund should keep the item marked as reduced' );
+		$this->assertSame( '', $item->get_meta( '_restock_refunded_items', true ), 'Restocking a refund should not count the item as restocked' );
+		$this->assertCount( $note_count + 1, $notes, 'Restocking a refund should add one note' );
+		$this->assertStringStartsWith( 'Unable to restore stock for item', $notes[0]->content, 'Restocking a refund should add an error note' );
+
+		$this->assertFalse( wc_maybe_adjust_line_item_product_stock( $item, 6 ), 'Adjusting the line item stock should report no change' );
+		$this->assertSame( '4', (string) $item->get_meta( '_reduced_stock', true ), 'Adjusting the line item stock should keep the reduced quantity' );
+
+		remove_filter( 'woocommerce_order_item_product', $return_variation );
+		$this->assertSame( '10', get_post_meta( $parent->get_id(), '_stock', true ), 'The parent stock should not change' );
+	}
 }

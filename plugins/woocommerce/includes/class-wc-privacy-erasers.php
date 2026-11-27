@@ -32,7 +32,6 @@ class WC_Privacy_Erasers {
 
 		$coupon_data_store = WC_Data_Store::load( 'coupon' );
 		if ( $coupon_data_store->has_callable( 'remove_used_by_email_records' ) ) {
-			// @phpstan-ignore-next-line method.notFound (WC_Data_Store forwards the call to the coupon data store.)
 			$removed = $coupon_data_store->remove_used_by_email_records( (string) $email_address, $user instanceof WP_User ? $user->ID : 0 );
 			if ( $removed ) {
 				$response['messages'][]    = __( 'Removed customer email from coupon usage records', 'woocommerce' );

@@ -1107,7 +1107,6 @@ class OrderController {
 		global $wpdb;
 		$data_store = $coupon->get_data_store();
 		if ( $data_store instanceof \WC_Data_Store && $data_store->has_callable( 'add_recorded_user_ids_to_aliases' ) ) {
-			// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the coupon data store instance.)
 			$aliases = $data_store->add_recorded_user_ids_to_aliases( $coupon, $aliases );
 		}
 		$aliases        = array_unique( array_filter( $aliases ) );

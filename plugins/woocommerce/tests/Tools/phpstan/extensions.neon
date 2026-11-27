@@ -1,0 +1,5 @@
+services:
+	-
+		class: Automattic\WooCommerce\Testing\Tools\phpstan\DataStoreHasCallableExtension
+		tags:
+			- phpstan.typeSpecifier.methodTypeSpecifyingExtension

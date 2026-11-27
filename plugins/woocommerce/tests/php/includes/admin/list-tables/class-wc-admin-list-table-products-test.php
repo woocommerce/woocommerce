@@ -88,6 +88,26 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product searches return no products for a term that is empty after sanitizing, including a term that is not a string.
+	 */
+	public function test_product_search_returns_no_products_for_empty_term(): void {
+		WC_Helper_Product::create_simple_product();
+
+		foreach ( array( '<br>', array( 'foo' ) ) as $search_term ) {
+			$query_vars = $this->sut->request_query(
+				array(
+					'post_type'   => 'product',
+					'post_status' => 'publish',
+					'fields'      => 'ids',
+					's'           => $search_term,
+				)
+			);
+
+			$this->assertSame( array(), ( new WP_Query( $query_vars ) )->get_posts(), 'The search term ' . wp_json_encode( $search_term ) . ' should match no products' );
+		}
+	}
+
+	/**
 	 * @testdox Product searches return a partial title match.
 	 */
 	public function test_product_search_returns_partial_title_match(): void {

@@ -298,7 +298,7 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 		return false;
 	}
 
-	if ( is_wp_error( $new_stock ) ) {
+	if ( is_wp_error( $new_stock ) || false === $new_stock ) {
 		return $new_stock;
 	}
 

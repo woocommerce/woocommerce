@@ -16,4 +16,8 @@ class WC_Data_Store {
 	public static function load( string $type ) {
 		return new self();
 	}
+
+	public function has_callable( string $method ): bool {
+		return true;
+	}
 }

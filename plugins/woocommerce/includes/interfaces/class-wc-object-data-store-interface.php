@@ -36,9 +36,11 @@ interface WC_Object_Data_Store_Interface {
 	/**
 	 * Deletes a record from the database.
 	 *
+	 * Implementations might return a value, e.g. order item data stores return the number of deleted rows.
+	 *
 	 * @param  WC_Data $data Data object.
 	 * @param  array   $args Array of args to pass to the delete method.
-	 * @return void
+	 * @return mixed What the implementation returns, if anything.
 	 */
 	public function delete( &$data, $args = array() );
 

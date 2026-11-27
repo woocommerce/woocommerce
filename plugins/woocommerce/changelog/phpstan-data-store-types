@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix fatal errors when updating stock, or acting on stock notifications in the admin, for items that can no longer be loaded.

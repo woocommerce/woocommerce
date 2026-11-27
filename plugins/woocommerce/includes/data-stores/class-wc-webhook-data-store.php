@@ -243,7 +243,9 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	 * Search webhooks.
 	 *
 	 * @param  array $args Search arguments.
-	 * @return array|object
+	 * @return int[]|stdClass Webhook IDs, or an object with webhooks, total and max_num_pages when paginate is enabled.
+	 *
+	 * @phpstan-return ($args is array{paginate: true} ? stdClass : ($args is array{paginate: false|0|''|'0'|null} ? int[] : ($args is array{paginate: mixed} ? int[]|stdClass : int[])))
 	 */
 	public function search_webhooks( $args ) {
 		global $wpdb;

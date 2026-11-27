@@ -862,6 +862,12 @@ function wc_restock_refunded_items( $order, $refunded_line_items ) {
 		$old_stock = $product->get_stock_quantity();
 		$new_stock = wc_update_product_stock( $product, $qty_to_refund, 'increase' );
 
+		if ( is_wp_error( $new_stock ) || false === $new_stock ) {
+			/* translators: %s item name. */
+			$order->add_order_note( sprintf( __( 'Unable to restore stock for item %s.', 'woocommerce' ), $item->get_name() ), 0, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
+			continue;
+		}
+
 		// Update _reduced_stock meta to track changes.
 		$item_stock_reduced = $item_stock_reduced - $qty_to_refund;
 
@@ -969,11 +975,17 @@ add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
  *
  * @since  2.6.0
  * @param  string $term Term to search.
- * @return array List of orders ID.
+ * @return array List of orders ID, empty when the term has no text left after sanitizing.
  */
 function wc_order_search( $term ) {
+	$term = str_replace( 'Order #', '', sanitize_text_field( $term ) );
+
+	if ( '' === $term ) {
+		return array();
+	}
+
 	$data_store = WC_Data_Store::load( 'order' );
-	return $data_store->search_orders( str_replace( 'Order #', '', wc_clean( $term ) ) );
+	return $data_store->search_orders( $term );
 }
 
 /**
@@ -1084,7 +1096,6 @@ function wc_update_coupon_usage_counts( $order_id ) {
 	if ( $is_invalid && $has_recorded ) {
 		$action = 'reduce';
 		if ( $data_store->has_callable( 'clear_recorded_coupon_usage_counts' ) ) {
-			// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
 			if ( ! $data_store->clear_recorded_coupon_usage_counts( $order ) ) {
 				// Another request already gave the uses back, or changed the order status since this order was loaded.
 				wc_release_coupons_for_order( $order );
@@ -1096,7 +1107,6 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 		if ( $data_store->has_callable( 'get_item_ids' ) ) {
 			try {
-				// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
 				$stored_item_ids = $data_store->get_item_ids( $order, 'coupon' );
 			} catch ( Exception $e ) {
 				// Give nothing back rather than risk giving a use back twice.
@@ -1206,7 +1216,7 @@ function wc_cancel_unpaid_orders() {
 	}
 
 	$data_store    = WC_Data_Store::load( 'order' );
-	$unpaid_orders = $data_store->get_unpaid_orders( strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
+	$unpaid_orders = $data_store->get_unpaid_orders( (int) strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- get_unpaid_orders() expects a site-local timestamp.
 
 	if ( $unpaid_orders ) {
 		foreach ( $unpaid_orders as $unpaid_order ) {

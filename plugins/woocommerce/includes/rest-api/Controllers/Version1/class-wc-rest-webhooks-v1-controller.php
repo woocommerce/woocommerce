@@ -267,8 +267,13 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		$prepared_args['paginate'] = true;
 
 		// Get the webhooks.
-		$webhooks    = array();
-		$data_store  = WC_Data_Store::load( 'webhook' );
+		$webhooks   = array();
+		$data_store = WC_Data_Store::load( 'webhook' );
+		/**
+		 * Paginated results, as paginate is set to true above.
+		 *
+		 * @var stdClass $results
+		 */
 		$results     = $data_store->search_webhooks( $prepared_args );
 		$webhook_ids = $results->webhooks;
 
