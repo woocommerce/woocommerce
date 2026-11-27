@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove the unused `@woocommerce/components`, `@woocommerce/explat`, and `@wordpress/compose` dependencies. If your code imports one directly, add it to your own dependencies.

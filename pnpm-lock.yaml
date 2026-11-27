@@ -703,9 +703,6 @@ importers:
 
   packages/js/components:
     dependencies:
-      '@automattic/calypso-color-schemes':
-        specifier: ^2.1.1
-        version: 2.1.1
       '@automattic/interpolate-components':
         specifier: ^1.2.1
         version: 1.2.1(@types/react@18.3.28)(react@18.3.1)
@@ -721,18 +718,6 @@ importers:
       '@types/react-window':
         specifier: ^1.8.8
         version: 1.8.8
-      '@types/wordpress__block-editor':
-        specifier: catalog:wp-min
-        version: 15.0.6(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@10.2.2)
-      '@types/wordpress__block-library':
-        specifier: catalog:wp-min
-        version: 2.6.3
-      '@types/wordpress__blocks':
-        specifier: catalog:wp-min
-        version: 12.5.18(@emotion/is-prop-valid@1.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@10.2.2)
-      '@woocommerce/csv-export':
-        specifier: workspace:*
-        version: link:../csv-export
       '@woocommerce/currency':
         specifier: workspace:*
         version: link:../currency
@@ -757,24 +742,12 @@ importers:
       '@wordpress/base-styles':
         specifier: catalog:wp-bundled
         version: 6.9.1
-      '@wordpress/block-editor':
-        specifier: catalog:wp-min
-        version: 15.6.9(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(supports-color@10.2.2)(typescript@5.7.3))(supports-color@10.2.2)
-      '@wordpress/block-library':
-        specifier: catalog:wp-min
-        version: 9.33.10(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.4.0)(esbuild@0.27.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(supports-color@10.2.2)(typescript@5.7.3))(supports-color@10.2.2)
-      '@wordpress/blocks':
-        specifier: catalog:wp-min
-        version: 15.6.3(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/components':
         specifier: catalog:wp-min
         version: 30.6.5(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@10.2.2)
       '@wordpress/compose':
         specifier: catalog:wp-min
         version: 7.33.1(@types/react@18.3.28)(react@18.3.1)
-      '@wordpress/core-data':
-        specifier: catalog:wp-min
-        version: 7.33.9(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.4.0)(esbuild@0.27.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(supports-color@10.2.2)(typescript@5.7.3))(supports-color@10.2.2)
       '@wordpress/data':
         specifier: ^10.19.0
         version: 10.33.1(@types/react@18.3.28)(react@18.3.1)
@@ -802,18 +775,12 @@ importers:
       '@wordpress/icons':
         specifier: catalog:wp-bundled
         version: 11.0.1(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@wordpress/keyboard-shortcuts':
-        specifier: catalog:wp-min
-        version: 5.33.1(@types/react@18.3.28)(react@18.3.1)
       '@wordpress/keycodes':
         specifier: catalog:wp-min
         version: 4.33.1
       '@wordpress/media-utils':
         specifier: catalog:wp-min
         version: 5.33.1
-      '@wordpress/rich-text':
-        specifier: catalog:wp-min
-        version: 7.33.2(@types/react@18.3.28)(react@18.3.1)
       '@wordpress/url':
         specifier: catalog:wp-min
         version: 4.33.1
@@ -865,9 +832,6 @@ importers:
       moment:
         specifier: ^2.29.4
         version: 2.31.0
-      moment-timezone:
-        specifier: ^0.5.43
-        version: 0.5.48
       prop-types:
         specifier: ^15.8.1
         version: 15.8.1
@@ -968,9 +932,6 @@ importers:
       postcss-loader:
         specifier: catalog:tooling
         version: 4.3.0(cssnano@6.1.2(postcss@8.5.26))(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)(webpack-dev-server@6.1.0)(webpack@5.112.2)
-      qrcode.react:
-        specifier: ^3.1.0
-        version: 3.2.0(react@18.3.1)
       react:
         specifier: 18.3.x
         version: 18.3.1
@@ -1133,18 +1094,9 @@ importers:
       '@wordpress/i18n':
         specifier: catalog:wp-min
         version: 6.6.1
-      '@wordpress/notices':
-        specifier: catalog:wp-min
-        version: 5.33.1(@types/react@18.3.28)(react@18.3.1)
       clsx:
         specifier: 2.1.x
         version: 2.1.1
-      prop-types:
-        specifier: ^15.8.1
-        version: 15.8.1
-      react-transition-group:
-        specifier: ^4.4.5
-        version: 4.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@babel/core':
         specifier: catalog:tooling
@@ -1158,9 +1110,6 @@ importers:
       '@types/jest':
         specifier: catalog:types
         version: 30.0.0
-      '@types/prop-types':
-        specifier: catalog:types
-        version: 15.7.15
       '@types/testing-library__jest-dom':
         specifier: ^5.14.9
         version: 5.14.9
@@ -2192,15 +2141,6 @@ importers:
 
   packages/js/navigation:
     dependencies:
-      '@wordpress/api-fetch':
-        specifier: catalog:wp-min
-        version: 7.33.1
-      '@wordpress/components':
-        specifier: catalog:wp-min
-        version: 30.6.5(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@10.2.2)
-      '@wordpress/compose':
-        specifier: catalog:wp-min
-        version: 7.33.1(@types/react@18.3.28)(react@18.3.1)
       '@wordpress/element':
         specifier: catalog:wp-min
         version: 6.33.1
@@ -2210,9 +2150,6 @@ importers:
       '@wordpress/i18n':
         specifier: catalog:wp-min
         version: 6.6.1
-      '@wordpress/notices':
-        specifier: catalog:wp-min
-        version: 5.33.1(@types/react@18.3.28)(react@18.3.1)
       '@wordpress/url':
         specifier: catalog:wp-min
         version: 4.33.1
@@ -2393,24 +2330,15 @@ importers:
 
   packages/js/onboarding:
     dependencies:
-      '@woocommerce/components':
-        specifier: workspace:*
-        version: link:../components
       '@woocommerce/experimental':
         specifier: workspace:*
         version: link:../experimental
-      '@woocommerce/explat':
-        specifier: workspace:*
-        version: link:../explat
       '@woocommerce/tracks':
         specifier: workspace:*
         version: link:../tracks
       '@wordpress/components':
         specifier: catalog:wp-min
         version: 30.6.5(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(supports-color@10.2.2)
-      '@wordpress/compose':
-        specifier: catalog:wp-min
-        version: 7.33.1(@types/react@18.3.28)(react@18.3.1)
       '@wordpress/element':
         specifier: catalog:wp-min
         version: 6.33.1
@@ -4656,9 +4584,6 @@ packages:
 
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
-
-  '@automattic/calypso-color-schemes@2.1.1':
-    resolution: {integrity: sha512-X5gmQEDJVtw8N9NARgZGM/pmalfapV8ZyRzEn2o0sCLmTAXGYg6A28ucLCQdBIn1l9t2rghBDFkY71vyqjyyFQ==}
 
   '@automattic/calypso-color-schemes@4.0.0':
     resolution: {integrity: sha512-HPF4RvqYDC1bCwCFCS1SX6gCYbckA7nEQlWk3RLwKzCrTtRbslx2C1KUIUcGaVh4ilzHVwVVgNPYQOZrO0JnbA==}
@@ -20749,8 +20674,6 @@ snapshots:
       '@csstools/css-parser-algorithms': 3.0.5(@csstools/css-tokenizer@3.0.4)
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 10.4.3
-
-  '@automattic/calypso-color-schemes@2.1.1': {}
 
   '@automattic/calypso-color-schemes@4.0.0': {}
 
