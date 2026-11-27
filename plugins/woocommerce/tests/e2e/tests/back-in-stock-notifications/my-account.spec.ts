@@ -110,9 +110,7 @@ test.describe(
 					await page.goto( product.permalink );
 					await signUpOnProductPage( page );
 					await expect(
-						page.getByText(
-							/You have successfully signed up|You have already joined this waitlist/i
-						)
+						page.getByText( /You have successfully signed up/i )
 					).toBeVisible();
 
 					// Row 2: flip double opt-in on and sign up again → pending.
