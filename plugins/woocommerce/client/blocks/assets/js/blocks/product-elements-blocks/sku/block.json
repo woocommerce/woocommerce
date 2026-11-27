@@ -16,9 +16,9 @@
 			"type": "boolean",
 			"default": false
 		},
-		"hideWhenUnavailable": {
+		"showWhenUndefined": {
 			"type": "boolean",
-			"default": true
+			"default": false
 		},
 		"prefix": {
 			"type": "string",

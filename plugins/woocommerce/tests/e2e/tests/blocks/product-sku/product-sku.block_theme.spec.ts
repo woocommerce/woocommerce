@@ -102,7 +102,7 @@ test.describe( 'Product SKU block', () => {
 			);
 			const sku = skuBlock.locator( '.sku' );
 
-			await test.step( 'hides the SKU when unavailable by default', async () => {
+			await test.step( 'hides a missing SKU by default', async () => {
 				await page.goto( productUrl );
 				await expect( sku ).toHaveText( '' );
 				await expect( skuBlock ).toBeHidden();
@@ -120,7 +120,7 @@ test.describe( 'Product SKU block', () => {
 				await expect( skuBlock ).toBeHidden();
 			} );
 
-			await test.step( 'shows N/A when hiding is turned off', async () => {
+			await test.step( 'shows N/A when the setting is enabled', async () => {
 				await admin.visitSiteEditor( {
 					postId: template.id,
 					postType: 'wp_template',
@@ -130,11 +130,11 @@ test.describe( 'Product SKU block', () => {
 				await editor.selectBlocks(
 					await editor.getBlockByName( 'woocommerce/product-sku' )
 				);
-				const hideSku = page.getByRole( 'checkbox', {
-					name: 'Hide SKU when unavailable',
+				const showMissingSku = page.getByRole( 'checkbox', {
+					name: 'Show N/A when the SKU is missing',
 				} );
-				await expect( hideSku ).toBeChecked();
-				await hideSku.uncheck();
+				await expect( showMissingSku ).not.toBeChecked();
+				await showMissingSku.check();
 				await editor.saveSiteEditorEntities( {
 					isOnlyCurrentEntityDirty: true,
 				} );
@@ -150,4 +150,39 @@ test.describe( 'Product SKU block', () => {
 			} );
 		} );
 	}
+
+	test( 'shows N/A for a simple product only when the setting is enabled', async ( {
+		cleanup,
+		createHiddenProduct,
+		page,
+		requestUtils,
+	} ) => {
+		const slug = `e2e-product-sku-${ randomUUID().slice( 0, 8 ) }`;
+		const { id } = await createHiddenProduct( {
+			name: 'Simple product without a SKU',
+			slug,
+			type: 'simple',
+			regular_price: '10',
+		} );
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug: `single-product-${ slug }`,
+			title: 'Product SKU for a simple product',
+			content: `<!-- wp:woocommerce/product-meta -->
+<div class="wp-block-woocommerce-product-meta">
+	<!-- wp:woocommerce/product-sku /-->
+	<!-- wp:woocommerce/product-sku {"showWhenUndefined":true} /-->
+</div>
+<!-- /wp:woocommerce/product-meta -->`,
+		} );
+		cleanup( () =>
+			requestUtils.revertTemplate( 'wp_template', template.id )
+		);
+
+		await page.goto( `/?p=${ id }` );
+		const skuBlock = page.locator( '.wp-block-woocommerce-product-sku' );
+		await expect( skuBlock ).toHaveCount( 1 );
+		const sku = skuBlock.locator( '.sku' );
+		await expect( sku ).toBeVisible();
+		await expect( sku ).toHaveText( 'N/A' );
+	} );
 } );

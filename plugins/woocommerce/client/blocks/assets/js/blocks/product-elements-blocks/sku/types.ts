@@ -2,7 +2,7 @@ export interface Attributes {
 	productId: number;
 	showProductSelector: boolean;
 	isDescendantOfAllProducts: boolean;
-	hideWhenUnavailable: boolean;
+	showWhenUndefined: boolean;
 	prefix: string;
 	suffix: string;
 }

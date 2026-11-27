@@ -46,12 +46,12 @@ const Edit = ( {
 						<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 							<ToggleControl
 								label={ __(
-									'Hide SKU when unavailable',
+									'Show N/A when the SKU is missing',
 									'woocommerce'
 								) }
-								checked={ attributes.hideWhenUnavailable }
-								onChange={ ( hideWhenUnavailable ) =>
-									setAttributes( { hideWhenUnavailable } )
+								checked={ attributes.showWhenUndefined }
+								onChange={ ( showWhenUndefined ) =>
+									setAttributes( { showWhenUndefined } )
 								}
 							/>
 						</PanelBody>
