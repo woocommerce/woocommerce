@@ -16,11 +16,24 @@ export const hasBackgroundImageSupport = ( nameOrType: string ) => {
 };
 
 export function BlockCompatibilityWarnings(): JSX.Element {
-	// Select the currently selected block
-	const selectedBlock = useSelect(
-		( sel ) => sel( 'core/block-editor' ).getSelectedBlock(),
-		[]
-	);
+	const { selectedBlock, canChangeStyles } = useSelect( ( sel ) => {
+		const blockEditor = sel( 'core/block-editor' );
+		// getBlockEditingMode is missing from the block editor store types.
+		const { getBlockEditingMode } = blockEditor as unknown as {
+			getBlockEditingMode: ( clientId: string ) => string;
+		};
+		const clientId = blockEditor.getSelectedBlockClientId();
+		return {
+			selectedBlock: blockEditor.getSelectedBlock(),
+			// Template areas are locked, so there are no style controls to warn about.
+			canChangeStyles:
+				!! clientId && getBlockEditingMode( clientId ) === 'default',
+		};
+	}, [] );
+
+	if ( ! canChangeStyles ) {
+		return null;
+	}
 
 	// Check if the selected block has enabled border configuration
 	const hasBorderSupport =

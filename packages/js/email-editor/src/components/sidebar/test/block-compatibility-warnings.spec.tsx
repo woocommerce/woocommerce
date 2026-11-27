@@ -63,8 +63,14 @@ const BLOCK_SUPPORTS = {
 	'test/no-border': {},
 };
 
-function renderWithSelectedBlock( name: string ) {
-	( useSelect as jest.Mock ).mockReturnValue( { name } );
+function renderWithSelectedBlock( name: string, editingMode = 'default' ) {
+	( useSelect as jest.Mock ).mockImplementation( ( selector ) =>
+		selector( () => ( {
+			getSelectedBlock: () => ( { name } ),
+			getSelectedBlockClientId: () => 'block',
+			getBlockEditingMode: () => editingMode,
+		} ) )
+	);
 	render( <BlockCompatibilityWarnings /> );
 }
 
@@ -101,6 +107,14 @@ describe( 'BlockCompatibilityWarnings', () => {
 
 	it( 'does not show the border warning for a block without border support', () => {
 		renderWithSelectedBlock( 'test/no-border' );
+
+		expect(
+			screen.queryByText( BORDER_WARNING, { exact: false } )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'shows no warnings for a block whose styles cannot be changed', () => {
+		renderWithSelectedBlock( 'test/border', 'contentOnly' );
 
 		expect(
 			screen.queryByText( BORDER_WARNING, { exact: false } )
