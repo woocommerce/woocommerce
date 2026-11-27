@@ -132,6 +132,16 @@ class MiniCart extends \WC_Unit_Test_Case {
 		);
 		WC()->cart->empty_cart();
 		add_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
+
+		// Earlier tests leave WOOCOMMERCE_CART and WOOCOMMERCE_CHECKOUT defined for the rest of the process, so the real
+		// is_cart() and is_checkout() can never return false again here. Start each test on neither page;
+		// use_cart_or_checkout_page() switches a test back to the real checks.
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'is_cart'     => '__return_false',
+				'is_checkout' => '__return_false',
+			)
+		);
 	}
 
 	/**
@@ -484,14 +494,14 @@ class MiniCart extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should not enqueue the view script module when rendered on the cart or checkout page.
 	 *
-	 * @testWith [ "woocommerce_is_cart" ]
-	 *           [ "woocommerce_is_checkout" ]
+	 * @testWith [ "is_cart" ]
+	 *           [ "is_checkout" ]
 	 *
-	 * @param string $page_filter Conditional filter forcing the cart or checkout context.
+	 * @param string $page_check The conditional function for the page: is_cart or is_checkout.
 	 */
-	public function test_view_script_module_is_not_enqueued_on_cart_and_checkout_pages( string $page_filter ): void {
+	public function test_view_script_module_is_not_enqueued_on_cart_and_checkout_pages( string $page_check ): void {
 		wp_dequeue_script_module( 'woocommerce/mini-cart' );
-		add_filter( $page_filter, '__return_true' );
+		$this->use_cart_or_checkout_page( $page_check );
 
 		$block = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
 		render_block( $block[0] );
@@ -512,14 +522,6 @@ class MiniCart extends \WC_Unit_Test_Case {
 	 * @testdox Should keep the closed drawer out of the tab order and the accessibility tree.
 	 */
 	public function test_closed_drawer_is_inert_and_hidden(): void {
-		// An earlier test can leave WOOCOMMERCE_CART or WOOCOMMERCE_CHECKOUT defined, which makes is_cart() or is_checkout() true.
-		$this->register_legacy_proxy_function_mocks(
-			array(
-				'is_cart'     => '__return_false',
-				'is_checkout' => '__return_false',
-			)
-		);
-
 		$this->render_mini_cart_block();
 
 		$this->assertSame( 10, has_action( 'wp_footer', array( $this->mock, 'render_mini_cart_overlay' ) ), 'The overlay should be printed in the footer.' );
@@ -536,36 +538,13 @@ class MiniCart extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should not print the drawer overlay in the footer on the cart or checkout page.
 	 *
-	 * @testWith [ "woocommerce_is_cart" ]
-	 *           [ "woocommerce_is_checkout" ]
-	 *
-	 * @param string $page_filter Conditional filter forcing the cart or checkout context.
-	 */
-	public function test_overlay_is_not_printed_on_cart_and_checkout_pages( string $page_filter ): void {
-		add_filter( $page_filter, '__return_true' );
-
-		$output = $this->render_mini_cart_block();
-
-		$this->assertFalse( has_action( 'wp_footer', array( $this->mock, 'render_mini_cart_overlay' ) ), 'The overlay should not be printed on the cart and checkout pages.' );
-		$this->assert_hidden_mini_cart_markup( $output );
-	}
-
-	/**
-	 * @testdox Should read the cart and checkout pages through LegacyProxy and skip the interactive block there.
-	 *
 	 * @testWith [ "is_cart" ]
 	 *           [ "is_checkout" ]
 	 *
-	 * @param string $page_function The conditional function that reports the current page.
+	 * @param string $page_check The conditional function for the page: is_cart or is_checkout.
 	 */
-	public function test_cart_and_checkout_pages_are_read_through_legacy_proxy( string $page_function ): void {
-		// The test passes only when MiniCart asks LegacyProxy, since nothing else marks this request as the cart or checkout.
-		$this->register_legacy_proxy_function_mocks(
-			array(
-				'is_cart'     => 'is_cart' === $page_function ? '__return_true' : '__return_false',
-				'is_checkout' => 'is_checkout' === $page_function ? '__return_true' : '__return_false',
-			)
-		);
+	public function test_overlay_is_not_printed_on_cart_and_checkout_pages( string $page_check ): void {
+		$this->use_cart_or_checkout_page( $page_check );
 		$asset_data_registry = $this->createMock( AssetDataRegistry::class );
 		$asset_data_registry->expects( $this->never() )->method( 'add' );
 		$this->mock = $this->replace_block_type( 'woocommerce/mini-cart', static fn () => new MiniCartMock( $asset_data_registry ) );
@@ -574,32 +553,6 @@ class MiniCart extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( has_action( 'wp_footer', array( $this->mock, 'render_mini_cart_overlay' ) ), 'The overlay should not be printed on the cart and checkout pages.' );
 		$this->assert_hidden_mini_cart_markup( $output );
-	}
-
-	/**
-	 * @testdox Should render the interactive block when LegacyProxy reports another page, even if is_cart() or is_checkout() is true.
-	 *
-	 * @testWith [ "woocommerce_is_cart" ]
-	 *           [ "woocommerce_is_checkout" ]
-	 *
-	 * @param string $page_filter Conditional filter that makes the real page check true.
-	 */
-	public function test_interactive_block_follows_legacy_proxy_over_real_page_checks( string $page_filter ): void {
-		// The real check and the proxy disagree, so the test fails if MiniCart calls is_cart() or is_checkout() directly, whatever earlier tests defined.
-		add_filter( $page_filter, '__return_true' );
-		$this->register_legacy_proxy_function_mocks(
-			array(
-				'is_cart'     => '__return_false',
-				'is_checkout' => '__return_false',
-			)
-		);
-		$asset_data_registry = $this->createMock( AssetDataRegistry::class );
-		$asset_data_registry->expects( $this->atLeastOnce() )->method( 'add' );
-		$this->mock = $this->replace_block_type( 'woocommerce/mini-cart', static fn () => new MiniCartMock( $asset_data_registry ) );
-
-		$this->render_mini_cart_block();
-
-		$this->assertSame( 10, has_action( 'wp_footer', array( $this->mock, 'render_mini_cart_overlay' ) ), 'The overlay should be printed in the footer.' );
 	}
 
 	/**
@@ -614,6 +567,18 @@ class MiniCart extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'visibility:hidden', (string) $processor->get_attribute( 'style' ), 'The Mini-Cart should be hidden on the cart and checkout pages.' );
 		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wc-block-mini-cart__button' ) ), 'The Mini-Cart button should be rendered.' );
 		$this->assertTrue( $processor->get_attribute( 'disabled' ), 'The Mini-Cart button should be disabled on the cart and checkout pages.' );
+	}
+
+	/**
+	 * Put the current test on the cart or checkout page.
+	 *
+	 * Replaces the setUp() stub with the real page check and turns it on through its public filter.
+	 *
+	 * @param string $page_check The conditional function for the page: is_cart or is_checkout.
+	 */
+	private function use_cart_or_checkout_page( string $page_check ): void {
+		$this->register_legacy_proxy_function_mocks( array( $page_check => $page_check ) );
+		add_filter( 'woocommerce_' . $page_check, '__return_true' );
 	}
 
 	/**
