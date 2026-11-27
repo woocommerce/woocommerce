@@ -832,6 +832,33 @@ class CartItems extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Cart item raw prices are exact, before rounding to the store's decimals: £1.66 + 20% VAT is 1.992.
+	 */
+	public function test_cart_item_raw_prices_are_exact(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+		\WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		$product = ( new FixtureData() )->get_simple_product( array( 'regular_price' => '1.66' ) );
+		wc_empty_cart();
+		$key = wc()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$data = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/items/' . $key ) )->get_data();
+
+		$this->assertSame( '1992000', $data['prices']->raw_prices['price'] );
+		$this->assertSame( 6, $data['prices']->raw_prices['precision'] );
+	}
+
+	/**
 	 * Add an image to the simple product used by image-filter tests.
 	 *
 	 * @return int Attachment ID.

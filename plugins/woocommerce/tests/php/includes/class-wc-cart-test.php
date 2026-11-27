@@ -3334,4 +3334,75 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( $cart->cart_contents[ $first_key ]['line_total'], $packages[0]['contents_cost'] );
 	}
+
+	/**
+	 * @testdox A line price entered with tax is rounded once, then charged and shown as that amount.
+	 * @testWith ["1.995", 1, "GB", "yes", "no", "2.00"]
+	 *           ["1.995", 3, "GB", "yes", "no", "5.99"]
+	 *           ["1.995", 5, "GB", "yes", "no", "9.98"]
+	 *           ["0.207", 1, "GB", "yes", "no", "0.21"]
+	 *           ["0.207", 2, "GB", "yes", "no", "0.41"]
+	 *           ["0.207", 200, "GB", "yes", "no", "41.40"]
+	 *           ["1.29", 1, "GB", "yes", "no", "1.29"]
+	 *           ["0.03", 1, "GB", "yes", "no", "0.03"]
+	 *           ["9.99", 3, "GB", "yes", "no", "29.97"]
+	 *           ["1.995", 1, "GB", "yes", "yes", "2.00"]
+	 *           ["1.41", 7, "NL", "no", "no", "9.87"]
+	 *           ["1.995", 1, "NL", "no", "no", "2.00"]
+	 *
+	 * @param string $price              Price entered with 20% UK VAT.
+	 * @param int    $quantity           Quantity in the cart.
+	 * @param string $country            Customer country (GB 20%, NL 21%).
+	 * @param string $adjust_prices      Whether prices change for customers at another tax rate (woocommerce_adjust_non_base_location_prices).
+	 * @param string $round_at_subtotal  Value of the woocommerce_tax_round_at_subtotal option.
+	 * @param string $expected           Amount shown and charged.
+	 */
+	public function test_price_including_tax_matches_cart_charge( string $price, int $quantity, string $country, string $adjust_prices, string $round_at_subtotal, string $expected ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'GB' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+		if ( 'no' === $adjust_prices ) {
+			add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		}
+		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal );
+		$rates = array(
+			'GB' => '20.0000',
+			'NL' => '21.0000',
+		);
+		foreach ( $rates as $rate_country => $rate ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => $rate_country,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => 'VAT',
+					'tax_rate_priority' => '1',
+					'tax_rate_order'    => '1',
+				)
+			);
+		}
+		WC()->customer->set_billing_country( $country );
+		WC()->customer->set_shipping_country( $country );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => $price,
+				'virtual'       => true,
+			)
+		);
+		WC()->cart->add_to_cart( $product->get_id(), $quantity );
+		WC()->cart->calculate_totals();
+
+		$this->assertSame( $expected, WC()->cart->get_total( 'edit' ), 'Cart charge' );
+		$this->assertSame( $expected, wc_format_decimal( wc_get_price_including_tax( $product, array( 'qty' => $quantity ) ), 2 ), 'Price shown' );
+
+		$order = wc_create_order();
+		$order->set_billing_country( $country );
+		$order->set_shipping_country( $country );
+		$order->add_product( $product, $quantity, array( 'order' => $order ) );
+		$order->calculate_totals( true );
+		$this->assertSame( $expected, $order->get_total( 'edit' ), 'Order built in admin' );
+	}
 }

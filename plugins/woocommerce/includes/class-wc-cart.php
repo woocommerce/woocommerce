@@ -2461,6 +2461,20 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Round a price without float noise deciding the result.
+	 *
+	 * Rounds to WooCommerce's rounding precision first, like the cart totals, so 24.975 (stored as 24.97499…) rounds to
+	 * 24.98 rather than 24.97.
+	 *
+	 * @param float $price    Price to round.
+	 * @param int   $decimals Decimals to round to.
+	 * @return float
+	 */
+	private function round_price( $price, $decimals ) {
+		return NumberUtil::round( NumberUtil::round( $price, wc_get_rounding_precision() ), $decimals );
+	}
+
+	/**
 	 * Get the product row subtotal.
 	 *
 	 * Gets the tax etc to avoid rounding issues.
@@ -2472,31 +2486,37 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string formatted price
 	 */
 	public function get_product_subtotal( $product, $quantity ) {
-		$price = $product->get_price();
+		$product_subtotal = wc_price( $this->get_product_row_price( $product, $quantity ) );
 
-		if ( $product->is_taxable() ) {
-
-			if ( $this->display_prices_including_tax() ) {
-				$row_price        = wc_get_price_including_tax( $product, array( 'qty' => $quantity ) );
-				$product_subtotal = wc_price( $row_price );
-
-				if ( ! wc_prices_include_tax() && $this->get_subtotal_tax() > 0 ) {
-					$product_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
-				}
-			} else {
-				$row_price        = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
-				$product_subtotal = wc_price( $row_price );
-
-				if ( wc_prices_include_tax() && $this->get_subtotal_tax() > 0 ) {
-					$product_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
-				}
+		if ( $product->is_taxable() && $this->get_subtotal_tax() > 0 ) {
+			if ( $this->display_prices_including_tax() && ! wc_prices_include_tax() ) {
+				$product_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+			} elseif ( ! $this->display_prices_including_tax() && wc_prices_include_tax() ) {
+				$product_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
-		} else {
-			$row_price        = (float) $price * (float) $quantity;
-			$product_subtotal = wc_price( $row_price );
 		}
 
-		return apply_filters( 'woocommerce_cart_product_subtotal', $product_subtotal, $product, $quantity, $this );
+		return apply_filters( 'woocommerce_cart_product_subtotal', $product_subtotal, $product, $quantity, $this ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Long-standing undocumented hook; unchanged.
+	}
+
+	/**
+	 * Get the unformatted row subtotal shown for a product and quantity, rounded like the cart totals.
+	 *
+	 * @param WC_Product $product  Product object.
+	 * @param float      $quantity Quantity being purchased.
+	 * @return float
+	 */
+	private function get_product_row_price( $product, $quantity ) {
+		if ( ! $product->is_taxable() ) {
+			$row_price = (float) $product->get_price() * (float) $quantity;
+		} elseif ( $this->display_prices_including_tax() ) {
+			$row_price = (float) wc_get_price_including_tax( $product, array( 'qty' => $quantity ) );
+		} else {
+			$row_price = (float) wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
+		}
+
+		// Round like the cart totals so the row matches them, rather than leaving wc_price() to round float noise.
+		return $this->round_price( $row_price, wc_get_price_decimals() );
 	}
 
 	/**
