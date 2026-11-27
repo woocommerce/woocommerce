@@ -3,6 +3,7 @@
  */
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
+import { exitingProps, usePresence } from '@woocommerce/base-hooks';
 import { Icon, cautionFilled } from '@wordpress/icons';
 
 /**
@@ -14,12 +15,18 @@ export interface ValidationInputErrorProps {
 	errorMessage?: string;
 	propertyName?: string;
 	elementId?: string;
+	/**
+	 * Id for the message element. Use it when errorMessage does not come from
+	 * the validation store, so an input can still reference the message.
+	 */
+	id?: string;
 }
 
 export const ValidationInputError = ( {
 	errorMessage = '',
 	propertyName = '',
 	elementId = '',
+	id = '',
 }: ValidationInputErrorProps ): JSX.Element | null => {
 	const { validationError, validationErrorId } = useSelect(
 		( select ) => {
@@ -34,18 +41,38 @@ export const ValidationInputError = ( {
 	);
 
 	if ( ! errorMessage || typeof errorMessage !== 'string' ) {
-		if ( validationError?.message && ! validationError?.hidden ) {
-			errorMessage = validationError.message;
-		} else {
-			return null;
-		}
+		errorMessage =
+			validationError?.message && ! validationError?.hidden
+				? validationError.message
+				: '';
+	}
+
+	// The error grows in and collapses out, so the content below moves with it. This includes errors after Tab or
+	// typing: they follow the field, not the key. Errors that the page shows before the shopper interacts, such as for
+	// invalid saved data, appear immediately.
+	const presence = usePresence( errorMessage || null, {
+		animate: navigator.userActivation?.hasBeenActive !== false,
+		collapse: true,
+	} );
+
+	if ( ! presence.value ) {
+		return null;
 	}
 
 	return (
-		<div className="wc-block-components-validation-error" role="alert">
-			<p id={ validationErrorId }>
+		<div
+			ref={ presence.ref }
+			className="wc-block-components-validation-error"
+			role="alert"
+			{ ...exitingProps( presence.isExiting ) }
+		>
+			<p
+				// A new paragraph when the error comes back during its collapse, so the alert announces it again.
+				key={ presence.isExiting ? 'exiting' : 'present' }
+				id={ presence.isExiting ? undefined : id || validationErrorId }
+			>
 				<Icon icon={ cautionFilled } />
-				<span>{ errorMessage }</span>
+				<span>{ presence.value }</span>
 			</p>
 		</div>
 	);

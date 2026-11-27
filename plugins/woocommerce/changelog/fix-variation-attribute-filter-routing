@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Keep variation attribute filters on attribute meta; follow-up to an unreleased Store API fix.
+

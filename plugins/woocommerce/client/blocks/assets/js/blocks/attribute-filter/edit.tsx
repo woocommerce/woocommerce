@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { sort } from 'fast-sort';
+import { compareStrings } from '@woocommerce/utils/compare-strings';
 import { __, sprintf, _n, _x } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import {
@@ -151,14 +151,10 @@ const Edit = ( {
 			),
 		};
 
-		const list = sort(
-			ATTRIBUTES.map( ( item ) => {
-				return {
-					id: parseInt( item.attribute_id, 10 ),
-					name: item.attribute_label,
-				};
-			} )
-		).asc( 'name' );
+		const list = ATTRIBUTES.map( ( item ) => ( {
+			id: parseInt( item.attribute_id, 10 ),
+			name: item.attribute_label,
+		} ) ).sort( ( a, b ) => compareStrings( a.name, b.name ) );
 
 		return (
 			<SearchListControl

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Stop checkout logging from sending extra "Order updated" webhooks.

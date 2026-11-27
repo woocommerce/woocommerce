@@ -65,6 +65,10 @@ class CheckoutLink {
 			return;
 		}
 
+		// The redirect depends on the visitor's session, so page caches must not store it.
+		\WC_Cache_Helper::set_nocache_constants();
+		nocache_headers();
+
 		if ( ! $this->validate_checkout_link() ) {
 			$redirect = add_query_arg( 'wc_error', rawurlencode( __( 'The provided checkout link was out of date or invalid. No products were added to the cart.', 'woocommerce' ) ), wc_get_cart_url() );
 		} else {
@@ -128,6 +132,24 @@ class CheckoutLink {
 
 			if ( ! $product_id ) {
 				continue;
+			}
+
+			$product = wc_get_product( $product_id );
+
+			if ( $product && $product->is_sold_individually() ) {
+				/**
+				 * Filters the cart item data kept for a sold-individually product or variation added via a checkout link.
+				 *
+				 * Empty by default, so repeated adds of the same product share one cart item and the one-per-order
+				 * limit holds. Returning data lets it vary, so the limit is no longer guaranteed.
+				 *
+				 * @since 11.3.1
+				 *
+				 * @param array       $cart_item_data Cart item data to keep. Empty by default.
+				 * @param array       $raw_cart_item_data Cart item data parsed from the link, before stripping.
+				 * @param \WC_Product $product The resolved product or variation.
+				 */
+				$cart_item_data = (array) apply_filters( 'woocommerce_checkout_link_sold_individually_cart_item_data', [], $cart_item_data, $product );
 			}
 
 			$variation = array_map(
@@ -222,7 +244,7 @@ class CheckoutLink {
 	}
 
 	/**
-	 * Process the query params and return the checkout link to redirect to complete with session token.
+	 * Process the query params and return the checkout link to redirect to complete with a cart link token.
 	 *
 	 * @return string The checkout link.
 	 */
@@ -310,14 +332,16 @@ class CheckoutLink {
 					'products',
 					'coupon',
 					'checkout-link',
+					'session',
 				],
 				add_query_arg( wp_unslash( $_SERVER['QUERY_STRING'] ), '', $redirect_url ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			);
 		}
 
-		// If the user is logged in, the session is tied to the user ID. Do not use a cart token.
+		// Logged-in sessions are tied to the user ID. Guests get a link token so the cart survives opening the URL in
+		// another browser, such as leaving an in-app browser. It can't be used as a Store API Cart-Token.
 		if ( ! is_user_logged_in() ) {
-			$session_token = CartTokenUtils::get_cart_token( (string) wc()->session->get_customer_id() );
+			$session_token = CartTokenUtils::get_cart_link_token( (string) wc()->session->get_customer_id() );
 			$redirect_url  = add_query_arg( 'session', $session_token, $redirect_url );
 		}
 

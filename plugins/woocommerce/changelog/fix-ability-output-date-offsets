@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return timezone offsets in product and order ability dates so clients can validate successful results.

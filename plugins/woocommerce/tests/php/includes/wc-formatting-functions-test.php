@@ -353,4 +353,26 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 			'A blank hold stock value should remove the cancellation action.'
 		);
 	}
+
+	/**
+	 * @testdox Saving a hold stock value falls back to WP-Cron when Action Scheduler is not ready.
+	 */
+	public function test_hold_stock_value_falls_back_to_wp_cron_when_action_scheduler_is_not_ready(): void {
+		update_option( 'woocommerce_hold_stock_minutes', '60' );
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'function_exists' => fn( string $function_name ): bool => 'as_schedule_single_action' !== $function_name && function_exists( $function_name ),
+			)
+		);
+
+		$expected_time = time() + HOUR_IN_SECONDS;
+		wc_format_option_hold_stock_minutes( '60', array(), '60' );
+
+		$this->assertFalse( as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders' ), 'Nothing should be scheduled through Action Scheduler while it is not ready.' );
+		$this->assertEqualsWithDelta( $expected_time, wp_next_scheduled( 'woocommerce_cancel_unpaid_orders' ), 1, 'The cancellation event should fall back to WP-Cron.' );
+
+		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	}
 }

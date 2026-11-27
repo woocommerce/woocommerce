@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Addressed N+1 query pattern in wc_get_formatted_variation by bulk-fetching taxonomy terms.

@@ -21,6 +21,7 @@ import type {
 import type { ApiErrorResponse } from './api-error-response';
 export interface StoreCartItemQuantity {
 	isPendingDelete: boolean;
+	isPendingQuantity: boolean;
 	quantity: number;
 	setItemQuantity: React.Dispatch< React.SetStateAction< number > >;
 	removeItem: () => Promise< boolean >;
@@ -31,7 +32,11 @@ export interface StoreCartItemQuantity {
 export interface StoreCartCoupon {
 	appliedCoupons: CartResponseCouponItem[];
 	isLoading: boolean;
-	applyCoupon: ( coupon: string ) => Promise< boolean >;
+	/**
+	 * Resolves `true` once the coupon is applied. Rejects with an `Error` whose
+	 * message can be shown to the shopper when the coupon is not applied.
+	 */
+	applyCoupon: ( coupon: string ) => Promise< true >;
 	removeCoupon: ( coupon: string ) => Promise< boolean >;
 	isApplyingCoupon: boolean;
 	isRemovingCoupon: boolean;

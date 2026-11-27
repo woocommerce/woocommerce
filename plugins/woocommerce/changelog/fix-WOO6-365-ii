@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop a later variation from being added when an earlier variation already matches the selected options.

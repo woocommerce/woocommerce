@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests
  */
 
+use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -47,6 +49,56 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @var int
 	 */
 	private static $direct_product_attribute_lookup_updates_depth = 0;
+
+	/**
+	 * The WC()->customer instance at setUp(), which teardown puts back with its state.
+	 *
+	 * @var WC_Customer|null
+	 */
+	private $customer_at_setup;
+
+	/**
+	 * The internal state of $customer_at_setup when the test started.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private $customer_state_at_setup = array();
+
+	/**
+	 * $_SERVER at setUp(), or null until setUp() saves it.
+	 *
+	 * @var array<string, mixed>|null
+	 */
+	private $server_at_setup = null;
+
+	/**
+	 * Constants::$set_constants at setUp(), or null until setUp() saves it.
+	 *
+	 * @var array<string, mixed>|null
+	 */
+	private $constant_overrides_at_setup = null;
+
+	/**
+	 * Whether WordPress used an external object cache at setUp(), wrapped so that WordPress's own
+	 * null (never set) can be saved too, or null until setUp() saves it.
+	 *
+	 * @var array{using: bool|null}|null
+	 */
+	private $object_cache_mode_at_setup = null;
+
+	/**
+	 * The registered block types at setUp(), by name, or null until setUp() saves them.
+	 *
+	 * @var array<string, WP_Block_Type>|null
+	 */
+	private $block_types_at_setup = null;
+
+	/**
+	 * The mailer to put back after the test, or false when the test did not rebuild it.
+	 *
+	 * @var WC_Emails|null|false
+	 */
+	private $mailer_before_rebuild = false;
 
 	/**
 	 * Enable synchronous product attribute lookup updates for test fixtures.
@@ -146,6 +198,14 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// Reset the instance of MockableLegacyProxy that was registered during bootstrap,
 		// in order to start the test in a clean state (without anything mocked).
 		wc_get_container()->get( LegacyProxy::class )->reset();
+
+		$this->customer_at_setup       = WC()->customer instanceof WC_Customer ? WC()->customer : null;
+		$this->customer_state_at_setup = $this->customer_at_setup ? self::customer_state( $this->customer_at_setup ) : array();
+
+		$this->server_at_setup             = $_SERVER;
+		$this->constant_overrides_at_setup = Constants::$set_constants;
+		$this->object_cache_mode_at_setup  = array( 'using' => $GLOBALS['_wp_using_ext_object_cache'] ?? null );
+		$this->block_types_at_setup        = WP_Block_Type_Registry::get_instance()->get_all_registered();
 	}
 
 	/**
@@ -176,15 +236,29 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	/**
 	 * Tear down test case.
 	 *
-	 * The cart contents, the cart context, the queued notices, the cached country
-	 * locale, and the loaded shipping methods all live on the WC() singletons, which
-	 * neither the per-test database rollback nor the hook restore resets, so clear them
-	 * here or they leak into every later test in the process.
+	 * The cart, notices, country locale, loaded shipping methods, and customer live on
+	 * WC() singletons that survive database rollback and hook restoration. Reset them
+	 * along with $_SERVER, Constants overrides, and the block type registry so their
+	 * state does not leak into later tests.
 	 *
 	 * @since 11.1.0
 	 */
 	public function tearDown(): void {
 		try {
+			// PHPUnit runs tearDown() even when a subclass skips the test before calling parent::setUp().
+			// Each restore then finds no saved state and leaves the current one alone.
+			$this->restore_server_superglobal();
+			$this->restore_constant_overrides();
+			$this->restore_object_cache_mode();
+			$this->restore_block_type_registry();
+			$this->restore_mailer();
+
+			// Function and static-method mocks are process-wide. Reset them here so the test
+			// that installs one is the last to see it, including when the next test extends a
+			// WordPress base class that never runs setUp() on this hierarchy.
+			CodeHacker::reset_hacks();
+
+			$this->reset_analytics_reload_flag();
 			$this->clear_wc_singleton_state();
 		} finally {
 			// The parent teardown must always run: it rolls back the database
@@ -192,6 +266,52 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// test that runs after this one.
 			parent::tearDown();
 		}
+	}
+
+	/**
+	 * Turn on hook-driven transactional emails for the current test.
+	 *
+	 * The test bootstrap leaves them off. This adds the email dispatch hooks and makes the next use of the mailer
+	 * build a fresh one, so its listeners exist. The hook restore after the test removes the hooks, and the previous
+	 * mailer is put back.
+	 *
+	 * @return void
+	 */
+	protected function enable_transactional_emails(): void {
+		$this->rebuild_mailer();
+		WC_Emails::init_transactional_emails();
+	}
+
+	/**
+	 * Make the next use of the mailer build a fresh one inside the current test.
+	 *
+	 * The emails the mailer loads depend on the features enabled when it is built, and the shared one is otherwise
+	 * built in whichever earlier test needed it first. The previous mailer is put back after the test.
+	 *
+	 * @return void
+	 */
+	protected function rebuild_mailer(): void {
+		$instance = new ReflectionProperty( WC_Emails::class, 'instance' );
+		$instance->setAccessible( true );
+		if ( false === $this->mailer_before_rebuild ) {
+			$this->mailer_before_rebuild = $instance->getValue();
+		}
+		$instance->setValue( null, null );
+	}
+
+	/**
+	 * Put back the mailer that was in place before rebuild_mailer(), if the test rebuilt it.
+	 *
+	 * @return void
+	 */
+	private function restore_mailer(): void {
+		if ( false === $this->mailer_before_rebuild ) {
+			return;
+		}
+		$instance = new ReflectionProperty( WC_Emails::class, 'instance' );
+		$instance->setAccessible( true );
+		$instance->setValue( null, $this->mailer_before_rebuild );
+		$this->mailer_before_rebuild = false;
 	}
 
 	/**
@@ -221,6 +341,14 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			wc_clear_notices();
 		}
 
+		if ( WC()->session instanceof WC_Session ) {
+			// The session row is rolled back but the session object keeps what it loaded, which no longer matches
+			// storage. Make its next save a full write instead of a merge against that stale snapshot.
+			( function () {
+				$this->replace_session_on_save();
+			} )->call( WC()->session );
+		}
+
 		if ( isset( WC()->countries ) ) {
 			// The locale is cached on first read. A test that reads it while a
 			// woocommerce_get_country_locale filter is attached leaves the filtered
@@ -231,6 +359,120 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		// WC_Shipping caches the loaded methods, including any a test's filters or zones added.
 		WC()->shipping()->unregister_shipping_methods();
+
+		if ( $this->customer_at_setup ) {
+			// Tests swap in a customer for another user, or change addresses, tax exemption, meta
+			// and other props through setters, which also leave entries in the change set. Put back
+			// the setUp() instance with its exact state, so later tests start from the same one.
+			WC()->customer = $this->customer_at_setup;
+			self::customer_state( $this->customer_at_setup, $this->customer_state_at_setup );
+		}
+	}
+
+	/**
+	 * Read a customer's internal state, or write it back when $state is given.
+	 *
+	 * @param WC_Customer               $customer The customer.
+	 * @param array<string, mixed>|null $state    State from an earlier read, to write back.
+	 * @return array<string, mixed> The state as it was before any write.
+	 */
+	private static function customer_state( WC_Customer $customer, ?array $state = null ): array {
+		// update_meta_data() changes WC_Meta_Data objects in place, so the saved state keeps its own copies.
+		// Null means the meta was never read, and writing it back makes the next read reload it.
+		$copy_meta = static fn ( $meta ) => is_array( $meta ) ? array_map( static fn ( WC_Meta_Data $item ) => clone $item, $meta ) : $meta;
+
+		$access = function ( ?array $state ) use ( $copy_meta ): array {
+			$current = array(
+				'id'                  => $this->id,
+				'data'                => $this->data,
+				'changes'             => $this->changes,
+				'meta_data'           => $copy_meta( $this->meta_data ),
+				'is_vat_exempt'       => $this->is_vat_exempt,
+				'calculated_shipping' => $this->calculated_shipping,
+			);
+			foreach ( (array) $state as $prop => $value ) {
+				$this->$prop = 'meta_data' === $prop ? $copy_meta( $value ) : $value;
+			}
+			return $current;
+		};
+
+		return Closure::bind( $access, $customer, WC_Customer::class )( $state );
+	}
+
+	/**
+	 * Put back $_SERVER from setUp(). Tests change it directly and through go_to(), and code that
+	 * reads the request URI, client IP or user agent would otherwise see the previous test's values.
+	 */
+	protected function restore_server_superglobal(): void {
+		if ( null === $this->server_at_setup ) {
+			return;
+		}
+
+		$_SERVER = $this->server_at_setup;
+	}
+
+	/**
+	 * Put back the Constants overrides from setUp(). Constants::set_constant() keeps them in a static
+	 * store, so one a test forgets to clear would otherwise apply to every later test.
+	 */
+	protected function restore_constant_overrides(): void {
+		if ( null === $this->constant_overrides_at_setup ) {
+			return;
+		}
+
+		Constants::$set_constants = $this->constant_overrides_at_setup;
+	}
+
+	/**
+	 * Put back whether WordPress uses an external object cache, as it was at setUp(). Tests switch it with
+	 * wp_using_ext_object_cache() to exercise transients in the object cache, and putting the old value
+	 * back through that function does nothing when it was null, so the switch would outlive the test.
+	 */
+	protected function restore_object_cache_mode(): void {
+		if ( null === $this->object_cache_mode_at_setup ) {
+			return;
+		}
+
+		$GLOBALS['_wp_using_ext_object_cache'] = $this->object_cache_mode_at_setup['using']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restores the value saved at setUp().
+	}
+
+	/**
+	 * Put back the block types from setUp(): unregister the ones a test added or replaced, and
+	 * register again the ones it removed. The registry is a singleton that outlives the test.
+	 */
+	protected function restore_block_type_registry(): void {
+		if ( null === $this->block_types_at_setup ) {
+			return;
+		}
+
+		$registry = WP_Block_Type_Registry::get_instance();
+
+		foreach ( $registry->get_all_registered() as $name => $block_type ) {
+			if ( ( $this->block_types_at_setup[ $name ] ?? null ) !== $block_type ) {
+				$registry->unregister( $name );
+			}
+		}
+
+		foreach ( $this->block_types_at_setup as $name => $block_type ) {
+			if ( ! $registry->is_registered( $name ) ) {
+				$registry->register( $block_type );
+			}
+		}
+	}
+
+	/**
+	 * Clear the flag that makes Analytics redirect and exit() on the next settings save. Changing the
+	 * Analytics option sets it, and it is static, so a later test that saves settings would end the
+	 * PHPUnit process and every test after it would silently not run.
+	 */
+	protected function reset_analytics_reload_flag(): void {
+		Closure::bind(
+			static function (): void {
+				self::$is_updated = false;
+			},
+			null,
+			Analytics::class
+		)();
 	}
 
 	/**

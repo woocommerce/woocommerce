@@ -182,7 +182,7 @@ class MetaDataUtilTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox `update` uses default_id for entries without an id, updating that metadata row in place.
 	 */
-	public function test_update_passes_default_id(): void {
+	public function test_update_uses_default_id_to_rewrite_the_row_in_place(): void {
 		$order = wc_create_order();
 		$order->add_meta_data( 'original_key', 'original_value' );
 		$order->save();
@@ -219,5 +219,50 @@ class MetaDataUtilTest extends WC_Unit_Test_Case {
 		$this->assertSame( $existing_id, $updated_rows[0]->id, 'The entry should update the row named by default_id rather than add a new one.' );
 		$this->assertSame( 'v', $updated_rows[0]->value );
 		$this->assertCount( 0, $rows_with_key( $order, 'original_key' ), 'The row named by default_id should have been rewritten in place.' );
+	}
+
+	/**
+	 * @testdox `maybe_unserialize_no_classes` passes through non-serialized values, and unserializes serialized ones without instantiating any class they hold.
+	 */
+	public function test_maybe_unserialize_no_classes(): void {
+		// Not serialized: returned unchanged.
+		$this->assertSame( array( 'total' => array( 1 => '24.00' ) ), MetaDataUtil::maybe_unserialize_no_classes( array( 'total' => array( 1 => '24.00' ) ) ) );
+		$this->assertSame( 'not serialized', MetaDataUtil::maybe_unserialize_no_classes( 'not serialized' ) );
+
+		// Serialized array: unserialized faithfully.
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Testing a serialized value.
+		$array_result = MetaDataUtil::maybe_unserialize_no_classes( serialize( array( 'total' => array( 1 => '24.00' ) ) ) );
+		$this->assertSame( array( 'total' => array( 1 => '24.00' ) ), $array_result );
+
+		// Serialized object: unserialized as-is, without instantiating the real class.
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Testing serialized data that holds an object.
+		$object_result = MetaDataUtil::maybe_unserialize_no_classes( serialize( array( 'total' => new \stdClass() ) ) );
+		$this->assertInstanceOf( \__PHP_Incomplete_Class::class, $object_result['total'] );
+
+		// Malformed input that merely looks serialized (declares 2 array elements, has only 1)
+		// and a legitimately serialized false both return unserialize()'s raw `false`.
+		$this->assertFalse( MetaDataUtil::maybe_unserialize_no_classes( 'a:2:{s:1:"a";i:1;}' ) );
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Testing a serialized value.
+		$this->assertFalse( MetaDataUtil::maybe_unserialize_no_classes( serialize( false ) ) );
+	}
+
+	/**
+	 * @testdox Order item types with tax data discard set_taxes() input holding an unresolved class, whether at the top level or nested under 'total'.
+	 * @testWith ["WC_Order_Item_Product"]
+	 *           ["WC_Order_Item_Fee"]
+	 *           ["WC_Order_Item_Shipping"]
+	 *
+	 * @param string $item_class Order item class to test.
+	 */
+	public function test_order_item_set_taxes_discards_unresolved_class( string $item_class ): void {
+		$item = new $item_class();
+
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Testing serialized data that holds an object.
+		$item->set_taxes( serialize( new \stdClass() ) );
+		$this->assertSame( array(), $item->get_taxes()['total'], 'A bare object as the raw value should be discarded.' );
+
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Testing serialized data that holds an object nested under 'total'.
+		$item->set_taxes( serialize( array( 'total' => new \stdClass() ) ) );
+		$this->assertSame( array(), $item->get_taxes()['total'], 'An object nested under "total" should be discarded.' );
 	}
 }

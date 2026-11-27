@@ -107,7 +107,7 @@ interface TestJobEnv {
 interface TestJobReport {
 	resultsBlobName: string;
 	resultsPath: string;
-	allure: boolean;
+	publish: boolean;
 }
 
 /**

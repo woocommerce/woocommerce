@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restoring an order from the trash no longer sends an extra "order updated" webhook or event when HPOS is on.

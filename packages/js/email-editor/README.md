@@ -6,6 +6,10 @@ You can try the email editor in [the WordPress Playground](https://playground.wo
 
 This JavaScript package is designed to work in conjunction with its PHP counterpart, which can be found in the same repository at `packages/php/email-editor`. Both packages are required for full functionality.
 
+## Requirements
+
+-   WordPress 7.0 or newer
+
 ## Initializing the editor
 
 > **Note:** The `initializeEditor` function is currently experimental and its API is subject to change in future releases. Please be aware that breaking changes may occur.
@@ -352,12 +356,16 @@ We may add, update and delete any of them.
 | `woocommerce_email_editor_send_action_callback`                    | `function` sendAction                                 | `function` sendAction                      | Action to perform when the Send button is clicked                                                                              |
 | `woocommerce_email_editor_send_button_disabled`                    | `boolean` isDisabled, `object` flags                  | `boolean` isDisabled                       | Override the send button disabled state. The flags object contains `hasEmptyContent`, `isEmailSent`, and `isDirty` booleans    |
 | `woocommerce_email_editor_content_validation_rules`                | `array` rules                                         | `EmailContentValidationRule[]` rules       | Email editor content validation rules. The validation is done on `send button` click and revalidated on `save draft`           |
-| `woocommerce_email_editor_check_sending_method_configuration_link` | `string` link                                         | `string` link                              | Edit or remove the sending configuration link message                                                                          |
+| `woocommerce_email_editor_check_sending_method_configuration_link` | `string` link (`''` default), `string` postType       | `string` link                              | Link in the test email error message. An empty link hides that line                                                            |
+| `woocommerce_email_editor_send_preview_enabled`                    | `boolean` (true-default), `string` postType           | `boolean`                                  | Return `false` to remove the “Send a test email” menu item and its modal                                                       |
+| `woocommerce_email_editor_send_preview_api_path`                   | `string` path, `string` postType, `number` postId     | `string` path                              | REST path for test emails, posted `email` and `postId`. On failure, respond with an `error` or a WP REST error `message`       |
+| `woocommerce_email_editor_send_preview_help_items`                 | `array` items (`[]` default), `string` postType       | `array` items                              | Extra items listed in the test email error message. Each item is a string or a React element; others are skipped               |
 | `woocommerce_email_editor_setting_sidebar_extension_component`     | `JSX.Element` RichTextWithButton                      | `JSX.Element` Sidebar extension component  | Add components to the Email settings sidebar                                                                                   |
 | `woocommerce_email_editor_preferred_template_title`                | `string` '', `Post` post                              | `string` custom (preferred) template title | Custom title for Email preset template selector                                                                                |
 | `woocommerce_email_editor_sidebar_email_type_info_icon`            | none                                                  | `JSX.Element` icon component               | Return an icon from @wordpress/icons e.g. () => <Icon icon={ postContent } />                                                  |
 | `woocommerce_email_editor_sidebar_email_type_info_content`         | none                                                  | `JSX.Element` info content                 | Return a React component containing information about the current template or content                                          |
 | `woocommerce_email_editor_trash_modal_should_permanently_delete`   | `boolean` (false-default)                             | `boolean`                                  | Controls the action of the trash modal. Returning `true` will ensure the modal permanently deletes the email (skipping trash). |
+| `woocommerce_email_editor_entity_actions`                          | `Record< string, object >` actions (`{}` default)     | `Record< string, object >` actions         | WordPress 7.2+: JS parts (`RenderModal`, `isEligible`, …) of entity actions registered in PHP, keyed by action id              |
 | `woocommerce_email_editor_iframe_stylesheet_should_remove`         | `boolean` (false-default), `CSSStyleSheet` stylesheet | `boolean`                                  | Controls whether the iframe stylesheet should be removed. Returning `true` will remove the iframe stylesheet.                  |
 | `woocommerce_email_editor_close_action_callback`                   | `function` backAction                                 | `function` backAction                      | Action to perform when the close (back) button is clicked                                                                      |
 | `woocommerce_email_editor_close_content`                           | `React.ComponentType` DefaultBackButtonContent        | `React.ComponentType` Back button content  | Custom component for the back button content in the editor header                                                              |

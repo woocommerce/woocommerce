@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { recordEvent, isEventTrackingEnabled } from '.';
+import { recordEvent, isEventTrackingEnabled } from './event-pipeline';
 
 let EVENTS_TO_TRACK = [];
 

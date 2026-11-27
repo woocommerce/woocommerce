@@ -31,6 +31,14 @@ const rulesOf = ( configs ) =>
 	Object.assign( {}, ...configs.map( ( config ) => config.rules ?? {} ) );
 
 export default [
+	{
+		// wp-build transpiles each package into these folders.
+		ignores: [
+			'packages/*/build/',
+			'packages/*/build-module/',
+			'packages/*/build-types/',
+		],
+	},
 	...woocommerce.map( escalateWarnings ),
 	{
 		files: [ '**/*.ts', '**/*.tsx' ],
@@ -43,6 +51,19 @@ export default [
 		rules: {
 			...rulesOf( tseslint.configs[ 'flat/strict-type-checked' ] ),
 			...rulesOf( tseslint.configs[ 'flat/stylistic-type-checked' ] ),
+			// The router expects notFound() and redirect() results to be thrown.
+			'@typescript-eslint/only-throw-error': [
+				'error',
+				{
+					allow: [
+						{
+							from: 'package',
+							package: '@tanstack/router-core',
+							name: [ 'NotFoundError', 'Redirect' ],
+						},
+					],
+				},
+			],
 		},
 	},
 	{

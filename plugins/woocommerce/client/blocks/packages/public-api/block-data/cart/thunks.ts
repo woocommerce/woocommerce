@@ -674,13 +674,15 @@ export const changeCartItemQuantity =
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			return Promise.reject( error );
 		} finally {
-			// Clean up controller if it's still the current one for this item.
-			if (
-				quantityAbortControllers.get( cartItemKey ) === abortController
-			) {
+			const isLatestRequest =
+				quantityAbortControllers.get( cartItemKey ) === abortController;
+			if ( isLatestRequest ) {
 				quantityAbortControllers.delete( cartItemKey );
 			}
-			dispatch.itemIsPendingQuantity( cartItemKey, false );
+			// A request that a newer one aborted leaves the item pending until the newer one ends.
+			if ( isLatestRequest || abortController === null ) {
+				dispatch.itemIsPendingQuantity( cartItemKey, false );
+			}
 		}
 	};
 

@@ -87,6 +87,7 @@ function wc_rest_upload_image_from_url( $image_url ) {
 
 	$file_array         = array();
 	$file_array['name'] = basename( current( explode( '?', $image_url ) ) );
+	$file_array['type'] = ''; // WordPress uses this fallback for unfiltered uploads without a recognized type.
 
 	// Download file to temp location.
 	$file_array['tmp_name'] = download_url( $image_url );
@@ -161,8 +162,10 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 	);
 
 	$attachment_id = wp_insert_attachment( $attachment, $upload['file'], $id );
-	if ( ! is_wp_error( $attachment_id ) ) {
+	if ( $attachment_id && ! is_wp_error( $attachment_id ) ) {
 		@wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $upload['file'] ) );
+	} else {
+		wp_delete_file( $upload['file'] );
 	}
 
 	return $attachment_id;

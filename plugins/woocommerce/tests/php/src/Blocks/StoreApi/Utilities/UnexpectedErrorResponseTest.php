@@ -31,7 +31,6 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
-		Constants::clear_single_constant( 'WP_DEBUG' );
 		parent::tearDown();
 	}
 
@@ -72,6 +71,7 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 			array(
 				'source'         => 'store-api',
 				'error'          => array(
+					'type' => E_ERROR,
 					'file' => $error->getFile(),
 					'line' => $error->getLine(),
 				),
@@ -94,6 +94,119 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should omit payment arguments from local and remote error logs.
+	 */
+	public function test_omits_payment_arguments_from_error_logs(): void {
+		$previous_ignore_args = ini_set( 'zend.exception_ignore_args', '0' ); // phpcs:ignore WordPress.PHP.IniSet.Risky -- Exercise PHP traces that contain arguments.
+		try {
+			$customer = 'Žluťoučký kôň – العربية – 日本語 – 🛒';
+			$error    = ( static function ( $number, $expiry, $cvc, $name ) {
+				$error = new \TypeError( 'Fixture payment failure.' );
+				unset( $number, $expiry, $cvc, $name );
+				return $error;
+			} )( '378282246310005', '12 / 30', '2440', $customer );
+		} finally {
+			ini_set( 'zend.exception_ignore_args', $previous_ignore_args ); // phpcs:ignore WordPress.PHP.IniSet.Risky -- Restore the process setting.
+		}
+
+		$this->assertStringContainsString( '378282246310005', $error->getTraceAsString(), 'The fixture must capture payment arguments.' );
+		$this->assertSame( $customer, $error->getTrace()[0]['args'][3], 'The fixture must capture multilingual customer data.' );
+		UnexpectedErrorResponse::create( $error, self::class );
+
+		$logged = $this->captured_logs[0];
+		$record = wc_get_container()->get( RemoteLogger::class )->get_formatted_log( 'critical', $logged['message'], $logged['context'] );
+		foreach ( array( '378282246310005', '12 / 30', '2440', $customer ) as $secret ) {
+			$this->assertStringNotContainsString( $secret, wp_json_encode( $logged, JSON_UNESCAPED_UNICODE ), 'Local logs must omit call arguments.' );
+			$this->assertStringNotContainsString( $secret, wp_json_encode( $record, JSON_UNESCAPED_UNICODE ), 'Remote logs must omit call arguments.' );
+		}
+		$this->assertStringContainsString( basename( __FILE__ ), $logged['context']['backtrace'][0], 'The trace must retain the call site.' );
+		$this->assertStringStartsWith( '#0 ', $record['trace'], 'Remote logs must retain their existing trace format.' );
+	}
+
+	/**
+	 * @testdox Should log anonymous class frames without the hidden declaring path.
+	 */
+	public function test_logs_anonymous_class_frames_without_hidden_path(): void {
+		$thrower = new class() {
+			/**
+			 * Create a failure from inside an anonymous class method.
+			 *
+			 * @return \TypeError
+			 */
+			public function fail(): \TypeError {
+				return new \TypeError( 'Fixture anonymous failure.' );
+			}
+		};
+
+		UnexpectedErrorResponse::create( $thrower->fail(), self::class );
+
+		$frame = $this->captured_logs[0]['context']['backtrace'][0];
+		$this->assertStringContainsString( 'class@anonymous->fail()', $frame, 'The frame must keep the call site.' );
+		$this->assertStringNotContainsString( "\0", $frame, 'The frame must not contain the NUL byte or the path after it.' );
+	}
+
+	/**
+	 * @testdox Should log the PHP error type the failure would have produced if uncaught.
+	 * @dataProvider uncaught_error_type_provider
+	 *
+	 * @param \Throwable $error         Caught failure.
+	 * @param int        $expected_type Native uncaught error type.
+	 */
+	public function test_logs_uncaught_error_type( \Throwable $error, int $expected_type ): void {
+		UnexpectedErrorResponse::create( $error, self::class );
+
+		$this->assertSame( $expected_type, $this->captured_logs[0]['context']['error']['type'] ?? null );
+	}
+
+	/**
+	 * Error types reported by PHP for uncaught throwables.
+	 *
+	 * @return array
+	 */
+	public function uncaught_error_type_provider(): array {
+		return array(
+			'type error with unrelated code' => array( new \TypeError( 'Fixture failure.', E_PARSE ), E_ERROR ),
+			'parse error'                    => array( new \ParseError( 'Fixture failure.' ), E_PARSE ),
+			'compile error'                  => array( new \CompileError( 'Fixture failure.' ), E_COMPILE_ERROR ),
+			'exception with unrelated code'  => array( new \RuntimeException( 'Fixture failure.', E_PARSE ), E_ERROR ),
+			'converted warning'              => array( new \ErrorException( 'Fixture failure.', 0, E_WARNING ), E_ERROR ),
+			'parse error subclass'           => array( new class() extends \ParseError {}, E_ERROR ),
+			'compile error subclass'         => array( new class() extends \CompileError {}, E_ERROR ),
+		);
+	}
+
+	/**
+	 * @testdox Should preserve a legacy remote logging override that reads the PHP error type.
+	 */
+	public function test_logged_context_preserves_legacy_error_type_override(): void {
+		UnexpectedErrorResponse::create( new \TypeError( 'Fixture extension failure.' ), self::class );
+		$context              = $this->captured_logs[0]['context'];
+		$context['backtrace'] = array( '#0 ' . WP_PLUGIN_DIR . '/fixture-extension/error.php(1): fail()' );
+		$filter_calls         = 0;
+		add_filter(
+			'woocommerce_remote_logging_is_third_party_error',
+			static function ( $is_third_party, $message, $context ) use ( &$filter_calls ) {
+				unset( $is_third_party, $message );
+				++$filter_calls;
+				return E_ERROR !== $context['error']['type'];
+			},
+			10,
+			3
+		);
+
+		$classify = new \ReflectionMethod( RemoteLogger::class, 'is_third_party_error' );
+		$classify->setAccessible( true );
+		$result = $classify->invoke(
+			wc_get_container()->get( RemoteLogger::class ),
+			'Fixture extension failure.',
+			$context
+		);
+
+		$this->assertSame( 1, $filter_calls );
+		$this->assertFalse( $result, 'The existing callback must still allow E_ERROR records.' );
+	}
+
+	/**
 	 * @testdox Should produce a remote log record that keeps the file and leaks nothing from the error object.
 	 */
 	public function test_logged_context_formats_into_a_remote_record(): void {
@@ -113,6 +226,7 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 		$record        = $remote_logger->get_formatted_log( 'critical', $logged['message'], $logged['context'] );
 
 		$this->assertSame( 'store-api', $record['extra']['source'] );
+		$this->assertSame( E_ERROR, $record['extra']['error']['type'] ?? null );
 		$this->assertStringContainsString( basename( __FILE__ ), $record['file'], 'The remote record must carry the file the error was raised in.' );
 		$this->assertStringStartsWith( '#0 ', $record['trace'] );
 		$this->assertStringNotContainsString( 'fixture-secret-token', wp_json_encode( $record ), 'Error object state must not reach the remote record.' );

@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Remove unrelated Mini-Cart coverage from the Add to Cart E2E suite; no production change.

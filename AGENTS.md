@@ -302,6 +302,10 @@ See [the theme CLI README](tools/theme-cli/README.md) and the selected theme's R
 
 ## Block Development
 
+### Motion
+
+Before adding or changing motion (transitions, animations, layout changes) in blocks or the components they share, read the [Motion guide](plugins/woocommerce/client/blocks/docs/contributors/motion.md). It has the rules, tokens, helpers, techniques, and how to test motion.
+
 ### Block Styling
 
 Prefer Core Block Supports. For explicit style generation, use `wp_style_engine_get_styles()`. Avoid new `StyleAttributesUtils` usages; migrate existing ones when touched, preserving rendered styles.
@@ -331,6 +335,8 @@ When registering a block variation with `registerBlockVariation()` or a helper s
 Do not import these user-facing strings from `block.json`, pass JSON properties or variables to translation functions, or read another block's registered metadata to obtain them.
 
 ## Interactivity API Stores
+
+Before changing WooCommerce Interactivity API stores or blocks that use them, please read the [Woo iAPI stores README](plugins/woocommerce/client/blocks/assets/js/base/stores/README.md).```
 
 Most WooCommerce Interactivity API stores are **private by design**. Exception: the `woocommerce/product-filters` store is public for Product Filters inner-block extensibility.
 

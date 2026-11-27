@@ -12,7 +12,9 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -40,13 +42,19 @@ function wc_protected_product_add_to_cart( $passed, $product_id ) {
 add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_cart', 10, 2 );
 
 /**
- * Clears the cart session when called.
+ * Empties the cart once the shopper is done with it, for example after an order is placed.
+ *
+ * Also deletes a logged-in customer's saved (persistent) cart, so its items aren't loaded back on the next request.
+ * To reset the cart but keep the saved cart, call `WC()->cart->empty_cart( false )` instead, as `WC_Session_Handler::forget_session()` does.
+ * Creates the cart if it isn't loaded yet, which needs `WC()->session` to be set.
+ *
+ * @since 11.4.0 Deletes the saved cart too. Before 11.4.0 it was kept, and its items came back on the next request.
  */
 function wc_empty_cart() {
 	if ( ! isset( WC()->cart ) || '' === WC()->cart ) {
 		WC()->cart = new WC_Cart();
 	}
-	WC()->cart->empty_cart( false );
+	WC()->cart->empty_cart();
 }
 
 /**
@@ -203,8 +211,16 @@ function wc_clear_cart_after_payment() {
 	}
 
 	// If the order is awaiting payment, and we haven't already decided to clear the cart, check the order status.
-	if ( is_object( WC()->session ) && WC()->session->order_awaiting_payment > 0 && ! $should_clear_cart_after_payment ) {
-		$order = wc_get_order( WC()->session->order_awaiting_payment );
+	$session_order_id = 0;
+	if ( is_object( WC()->session ) ) {
+		// The order sent to the gateway comes first: payment_complete() clears order_awaiting_payment
+		// before the status change, so after a request dies there it is the only pointer left.
+		$session_order_id = absint( WC()->session->get( PaymentRecovery::ORDER_SENT_TO_GATEWAY ) );
+		$session_order_id = $session_order_id ? $session_order_id : absint( WC()->session->order_awaiting_payment );
+	}
+
+	if ( $session_order_id > 0 && ! $should_clear_cart_after_payment ) {
+		$order = wc_get_order( $session_order_id );
 
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
 			// If the order status is neither pending, failed, nor cancelled, the order must have gone through.
@@ -220,7 +236,7 @@ function wc_clear_cart_after_payment() {
 
 	// If the order is different from the cart, don't clear the cart. This can happen if the user has multiple tabs open and completes a different order than the one in the cart.
 	if ( $should_clear_cart_after_payment && $order instanceof WC_Order && ! WC()->cart->is_empty() ) {
-		$should_clear_cart_after_payment = $order->has_cart_hash( WC()->cart->get_cart_hash() );
+		$should_clear_cart_after_payment = PaymentRecovery::cart_belongs_to_order( $order );
 	}
 
 	/**
@@ -426,6 +442,8 @@ function wc_cart_round_discount( $value, $precision ) {
 /**
  * Gets chosen shipping method IDs from chosen_shipping_methods session, without instance IDs.
  *
+ * Only choices whose rate was listed for the cart are returned, see ShippingUtil::filter_chosen_shipping_methods().
+ *
  * @since  2.6.2
  * @return string[]
  */
@@ -434,7 +452,7 @@ function wc_get_chosen_shipping_method_ids() {
 		return array();
 	}
 
-	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	$chosen_methods = ShippingUtil::filter_chosen_shipping_methods( WC()->session->get( 'chosen_shipping_methods', array() ) );
 	$method_ids     = array();
 
 	foreach ( $chosen_methods as $chosen_method ) {

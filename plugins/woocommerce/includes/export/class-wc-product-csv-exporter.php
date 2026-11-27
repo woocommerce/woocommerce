@@ -103,7 +103,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Product category to export
 	 *
-	 * @param string $product_category_to_export Product category slug to export, empty string exports all.
+	 * @param string[] $product_category_to_export Product category slugs to export, empty array exports all.
 	 *
 	 * @since  3.5.0
 	 * @return void
@@ -137,6 +137,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'type'               => __( 'Type', 'woocommerce' ),
 			'sku'                => __( 'SKU', 'woocommerce' ),
 			'global_unique_id'   => __( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ),
+			'mpn'                => __( 'MPN', 'woocommerce' ),
 			'name'               => __( 'Name', 'woocommerce' ),
 			'published'          => __( 'Published', 'woocommerce' ),
 			'featured'           => __( 'Is featured?', 'woocommerce' ),

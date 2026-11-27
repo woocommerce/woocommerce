@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Let merchants skip setup when the site's REST API fails, and point them to Site Health to find the cause.

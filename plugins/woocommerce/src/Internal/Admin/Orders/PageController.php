@@ -517,8 +517,7 @@ class PageController {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					// translators: %s is the name of a function.
-					esc_html__( '%s must be called after the current_screen action.', 'woocommerce' ),
+					esc_html( '%s must be called after the current_screen action.' ),
 					esc_html( __METHOD__ )
 				),
 				'7.9.0'
@@ -532,8 +531,7 @@ class PageController {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					// translators: %s is the name of an order type.
-					esc_html__( '%s is not a valid order type.', 'woocommerce' ),
+					esc_html( '%s is not a valid order type.' ),
 					esc_html( $type )
 				),
 				'7.9.0'

@@ -14,6 +14,9 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\Webhooks\WebhookCaptureRules;
+use Automattic\WooCommerce\Internal\Webhooks\WebhookObservers;
+use Automattic\WooCommerce\Internal\Webhooks\WebhookPayloadRedactor;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
@@ -35,6 +38,21 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @var array
 	 */
 	protected $processed = array();
+
+	/**
+	 * ID of the site that was current when the webhook's hooks were added.
+	 *
+	 * @var int
+	 */
+	protected $enqueued_blog_id = 0;
+
+	/**
+	 * Whether stage_delivery_result() disabled the webhook since the last save. The next save() fires
+	 * woocommerce_webhook_disabled_due_delivery_failures after it writes.
+	 *
+	 * @var bool
+	 */
+	private $disabled_due_delivery_failures = false;
 
 	/**
 	 * Stores webhook data.
@@ -98,8 +116,10 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$url   = $this->get_delivery_url();
 
 		if ( is_array( $hooks ) && ! empty( $url ) ) {
+			$this->enqueued_blog_id = get_current_blog_id();
+
 			foreach ( $hooks as $hook ) {
-				add_action( $hook, array( $this, 'process' ) );
+				WebhookCaptureRules::subscribe( $hook, array( $this, 'process' ), array( $this, 'process_with_context' ) );
 			}
 		}
 	}
@@ -113,13 +133,45 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return mixed $arg Returns the argument in case the webhook was hooked into a filter.
 	 */
 	public function process( $arg ) {
+		$hook = current_filter();
+		if ( $hook && ( WebhookObservers::is_suppressed( $hook ) || ! WebhookCaptureRules::allows_argument( $hook, $arg ) ) ) {
+			return $arg;
+		}
 
-		// Verify that webhook should be processed for delivery.
+		WebhookObservers::without_observers( fn() => $this->dispatch_delivery( $arg ) );
+
+		return $arg;
+	}
+
+	/**
+	 * Check extra hook arguments before processing the webhook.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @param mixed $arg        First hook argument.
+	 * @param mixed ...$context Extra hook arguments.
+	 * @return mixed The first hook argument.
+	 */
+	public function process_with_context( $arg, ...$context ) {
+		$hook = current_filter();
+		if ( $hook && ! WebhookCaptureRules::allows_context( $hook, $context ) ) {
+			return $arg;
+		}
+
+		return $this->process( $arg );
+	}
+
+	/**
+	 * Check whether to deliver the webhook and dispatch it when allowed.
+	 *
+	 * @param mixed $arg First hook argument.
+	 */
+	private function dispatch_delivery( $arg ): void {
 		if ( ! $this->should_deliver( $arg ) ) {
 			return;
 		}
 
-		// Mark this $arg as processed to ensure it doesn't get processed again within the current request.
 		$this->processed[] = $arg;
 
 		/**
@@ -129,8 +181,6 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		 * @hooked wc_webhook_process_delivery - 10
 		 */
 		do_action( 'woocommerce_webhook_process_delivery', $this, $arg );
-
-		return $arg;
 	}
 
 	/**
@@ -192,6 +242,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				$return = $this->is_valid_post_action( $arg );
 				break;
 			case 'delete_user':
+			case 'remove_user_from_blog':
 				$return = $this->is_valid_user_action( $arg );
 				break;
 			case 'before_delete_post':
@@ -268,14 +319,19 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_user_action( $arg ) {
-		$user = get_userdata( absint( $arg ) );
-
-		// Only deliver deleted customer event for users with customer role.
-		if ( ! $user || ! in_array( 'customer', (array) $user->roles, true ) ) {
+		if ( ( ! is_int( $arg ) && ! ( is_string( $arg ) && ctype_digit( $arg ) ) ) || 0 >= (int) $arg ) {
 			return false;
 		}
 
-		return true;
+		// Both user hooks fire on the affected site, so skip users deleted from or removed from another site.
+		if ( $this->enqueued_blog_id && get_current_blog_id() !== $this->enqueued_blog_id ) {
+			return false;
+		}
+
+		// Deliver for users of any role, like the customer.created and customer.updated topics.
+		$user_id = absint( $arg );
+
+		return $user_id > 0 && is_user_member_of_blog( $user_id );
 	}
 
 	/**
@@ -360,6 +416,16 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @param mixed $arg First hook argument.
 	 */
 	public function deliver( $arg ) {
+		$topic = WebhookObservers::without_observers( fn() => $this->get_topic() );
+		WebhookObservers::during_delivery( $topic, fn() => $this->deliver_request( $arg ) );
+	}
+
+	/**
+	 * Send a webhook and record the outcome.
+	 *
+	 * @param mixed $arg First hook argument.
+	 */
+	private function deliver_request( $arg ): void {
 		$start_time = microtime( true );
 		$payload    = $this->build_payload( $arg );
 
@@ -383,7 +449,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		 *
 		 * @since 3.3.0
 		 * @param array $http_args The HTTP arguments.
-		 * @param mixed $arg The first hook argument.
+		 * @param mixed $arg The first hook argument, redacted for background delivery of custom action topics.
 		 * @param int   $webhook_id The webhook ID.
 		 * @return array The filtered HTTP arguments.
 		 */
@@ -468,19 +534,21 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$resource = $this->get_resource();
 			$event    = $this->get_event();
 
+			$payload_arg = WebhookPayloadRedactor::redact_for_payload( $this->get_topic(), $resource, $resource_id );
+
 			// If a resource has been deleted, just include the ID in the payload.
 			$payload = array(
-				'id' => $resource_id,
+				'id' => $payload_arg,
 			);
 
 			if ( 'deleted' !== $event ) {
 				$api_version = $this->get_api_version();
 
 				if ( in_array( $api_version, wc_get_webhook_rest_api_versions(), true ) ) {
-					$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
+					$payload = $this->get_wp_api_payload( $resource, $payload_arg, $event );
 				} elseif ( 'legacy_v3' === $api_version && WC()->legacy_rest_api_is_available() ) {
 					wc_deprecated_function( 'Webhook delivery via the Legacy REST API', '9.0.0', 'editing the webhook to use a current API version' );
-					$payload = wc()->api->get_webhook_api_payload( $resource, $resource_id, $event );
+					$payload = wc()->api->get_webhook_api_payload( $resource, $payload_arg, $event );
 				} else {
 					throw new \Exception( esc_html__( 'Unsupported webhook API version. Please edit this webhook to use a current REST API version.', 'woocommerce' ) );
 				}
@@ -603,40 +671,85 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			);
 		}
 
-		// Track failures.
-		// Check for a success, which is a 2xx, 301 or 302 Response Code.
-		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
-			$this->set_failure_count( 0 );
-
-			if ( 0 !== $this->get_id() ) {
-				$this->save();
+		$this->write_through(
+			function () use ( $response_code ) {
+				$this->stage_delivery_result( $response_code );
 			}
-		} else {
-			$this->failed_delivery();
+		);
+
+		if ( 0 !== $this->get_id() ) {
+			$this->save();
 		}
 	}
 
 	/**
-	 * Track consecutive delivery failures and automatically disable the webhook.
-	 * if more than 5 consecutive failures occur. A failure is defined as a.
-	 * non-2xx response.
+	 * Track the result of a delivery in memory. The next save() writes it. log_delivery() calls this method,
+	 * then save().
 	 *
-	 * @since 2.2.0
+	 * A success, which is a 2xx, 301 or 302 response code, resets the failure count. A failure adds one to
+	 * the failure count, and disables the webhook after more than 5 consecutive failures. The next save()
+	 * fires woocommerce_webhook_disabled_due_delivery_failures after it writes. log_delivery() runs this
+	 * method through write_through(), so it fires the action right away, as it always did.
+	 *
+	 * @since 11.4.0
+	 * @param int|string $response_code Response code, or the error code of a failed request.
 	 */
-	private function failed_delivery() {
+	public function stage_delivery_result( $response_code ): void {
+		$this->refuse_unstaged_override( 'log_delivery', 'stage_delivery_result' );
+
+		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
+			$this->set_failure_count( 0 );
+			// A successful delivery proves the delivery URL works, so it no longer needs a ping.
+			$this->set_pending_delivery( false );
+			return;
+		}
+
 		$failures = $this->get_failure_count();
 
 		if ( $failures > apply_filters( 'woocommerce_max_webhook_delivery_failures', 5 ) ) {
 			$this->set_status( 'disabled' );
 
-			do_action( 'woocommerce_webhook_disabled_due_delivery_failures', $this->get_id() );
+			$this->disabled_due_delivery_failures = ! $this->writing_through;
+			if ( $this->writing_through ) {
+				$this->fire_disabled_due_delivery_failures();
+			}
 		} else {
 			$this->set_failure_count( ++$failures );
 		}
+	}
 
-		if ( 0 !== $this->get_id() ) {
-			$this->save();
+	/**
+	 * Save the webhook, then fire woocommerce_webhook_disabled_due_delivery_failures when
+	 * stage_delivery_result() disabled it since the last save and it is still disabled.
+	 *
+	 * @since 11.4.0
+	 * @return int Webhook ID.
+	 */
+	public function save() {
+		$id = parent::save();
+
+		$disabled                             = $this->disabled_due_delivery_failures && 'disabled' === $this->get_status();
+		$this->disabled_due_delivery_failures = false;
+		if ( $disabled ) {
+			$this->fire_disabled_due_delivery_failures();
 		}
+
+		return $id;
+	}
+
+	/**
+	 * Fire the action for a webhook that too many failed deliveries disabled.
+	 *
+	 * @since 11.4.0
+	 */
+	private function fire_disabled_due_delivery_failures(): void {
+		/**
+		 * Fires when a webhook is disabled after too many consecutive failed deliveries.
+		 *
+		 * @param int $webhook_id Webhook ID.
+		 * @since 2.2.0
+		 */
+		do_action( 'woocommerce_webhook_disabled_due_delivery_failures', $this->get_id() );
 	}
 
 	/**
@@ -698,7 +811,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL cannot be reached: %s', 'woocommerce' ), $test->get_error_message() ) );
 		}
 
-		if ( 200 !== $response_code ) {
+		if ( $response_code < 200 || $response_code >= 300 ) {
 			/* translators: error message */
 			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL returned response code: %s', 'woocommerce' ), absint( $response_code ) ) );
 		}
@@ -1048,6 +1161,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			),
 			'customer.deleted'  => array(
 				'delete_user',
+				'remove_user_from_blog',
 			),
 			'order.created'     => array(
 				'woocommerce_new_order',

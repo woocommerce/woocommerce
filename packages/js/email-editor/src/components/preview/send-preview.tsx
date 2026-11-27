@@ -1,10 +1,11 @@
 /**
  * External dependencies
  */
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { external } from '@wordpress/icons';
 import { PluginPreviewMenuItem } from '@wordpress/editor';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -15,6 +16,20 @@ import { recordEvent } from '../../events';
 
 export function SendPreview() {
 	const { togglePreviewModal } = useDispatch( storeName );
+	const postType = useSelect(
+		( select ) => select( storeName ).getEmailPostType(),
+		[]
+	);
+
+	if (
+		applyFilters(
+			'woocommerce_email_editor_send_preview_enabled',
+			true,
+			postType
+		) === false
+	) {
+		return null;
+	}
 
 	return (
 		<>

@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Admin\Orders\ItemQuantityLimits;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 $product      = $item->get_product();
 $product_link = $product ? admin_url( 'post.php?post=' . $item->get_product_id() . '&action=edit' ) : '';
@@ -18,6 +19,9 @@ $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnai
 $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empty( $class ) ? $class : '', $item, $order );
 $wc_price_arg = array( 'currency' => $order->get_currency() );
 $is_visible   = $product && $product->is_visible();
+
+// Mirrors the checks in wc_restock_refunded_items(), so the refund panel only offers restocking that will happen.
+$can_restock = $product && $product->managing_stock() && $item->get_meta( '_reduced_stock', true );
 
 /**
  * Filter the order item name.
@@ -106,10 +110,14 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			/**
 			* Filter to change the product quantity stepping in the order editor of the admin area.
 			*
+			* In the 'edit' context the input accepts any quantity, instead of the returned
+			* step, when the item's stored quantity does not match that step, or when the
+			* step is 1 and the store allows decimal quantities.
+			*
 			* @since   5.8.0
-			* @param   string      $step    The current step amount to be used in the quantity editor.
-			* @param   WC_Product  $product The product that is being edited.
-			* @param   string      $context The context in which the quantity editor is shown, 'edit' or 'refund'.
+			* @param   int|float|string $step    The current step amount to be used in the quantity editor, or 'any' to accept any quantity.
+			* @param   WC_Product       $product The product that is being edited.
+			* @param   string           $context The context in which the quantity editor is shown, 'edit' or 'refund'.
 			*/
 			$step_edit   = apply_filters( 'woocommerce_quantity_input_step_admin', $step, $product, 'edit' );
 			$step_refund = apply_filters( 'woocommerce_quantity_input_step_admin', $step, $product, 'refund' );
@@ -129,12 +137,13 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			*/
 			$min_refund = apply_filters( 'woocommerce_quantity_input_min_admin', '0', $product, 'refund' );
 			$min_edit   = wc_get_container()->get( ItemQuantityLimits::class )->get_quantity_input_min( $item, $product );
+			$step_edit  = wc_get_container()->get( ItemQuantityLimits::class )->get_quantity_input_step( $step_edit, (float) $item->get_quantity(), $min_edit );
 		?>
 		<div class="edit" style="display: none;">
-			<input type="number" step="<?php echo esc_attr( $step_edit ); ?>" min="<?php echo esc_attr( $min_edit ); ?>" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo esc_attr( $item->get_quantity() ); ?>" data-qty="<?php echo esc_attr( $item->get_quantity() ); ?>" size="4" class="quantity" />
+			<input type="number" step="<?php echo esc_attr( null === $step_edit ? 'any' : (string) $step_edit ); ?>" min="<?php echo esc_attr( $min_edit ); ?>" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo esc_attr( $item->get_quantity() ); ?>" data-qty="<?php echo esc_attr( $item->get_quantity() ); ?>" size="4" class="quantity" />
 		</div>
 		<div class="refund" style="display: none;">
-			<input type="number" step="<?php echo esc_attr( $step_refund ); ?>" min="<?php echo esc_attr( $min_refund ); ?>" max="<?php echo absint( $item->get_quantity() ); ?>" autocomplete="off" name="refund_order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="refund_order_item_qty" />
+			<input type="number" step="<?php echo esc_attr( $step_refund ); ?>" min="<?php echo esc_attr( $min_refund ); ?>" max="<?php echo esc_attr( (string) max( 0, NumberUtil::round( abs( $item->get_quantity() ) - abs( $refunded_qty ), WC_ROUNDING_PRECISION ) ) ); ?>" autocomplete="off" name="refund_order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="refund_order_item_qty" data-can-restock="<?php echo esc_attr( wc_bool_to_string( $can_restock ) ); ?>" />
 		</div>
 	</td>
 	<td class="line_cost" width="1%" data-sort-value="<?php echo esc_attr( $item->get_total() ); ?>">

@@ -1,10 +1,11 @@
+/** @jest-environment jest-fixed-jsdom */
+
 /**
  * External dependencies
  */
 import { renderHook } from '@testing-library/react-hooks/dom';
 import { waitFor } from '@testing-library/react';
 import { dispatch } from '@wordpress/data';
-import 'whatwg-fetch'; /* To make sure Response is available */
 
 /**
  * Internal dependencies

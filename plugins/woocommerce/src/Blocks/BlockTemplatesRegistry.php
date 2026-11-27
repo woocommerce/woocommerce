@@ -114,18 +114,18 @@ class BlockTemplatesRegistry {
 			);
 			if ( wp_is_block_theme() ) {
 				$product_types = wc_get_product_types();
-				if ( count( $product_types ) > 0 ) {
+				if ( ! empty( $product_types ) ) {
 					add_filter( 'default_wp_template_part_areas', array( $this, 'register_add_to_cart_with_options_template_part_area' ), 10, 1 );
-					if ( array_key_exists( ProductType::SIMPLE, $product_types ) ) {
+					if ( isset( $product_types[ ProductType::SIMPLE ] ) ) {
 						$template_parts[ SimpleProductAddToCartWithOptionsTemplate::SLUG ] = new SimpleProductAddToCartWithOptionsTemplate();
 					}
-					if ( array_key_exists( ProductType::EXTERNAL, $product_types ) ) {
+					if ( isset( $product_types[ ProductType::EXTERNAL ] ) ) {
 						$template_parts[ ExternalProductAddToCartWithOptionsTemplate::SLUG ] = new ExternalProductAddToCartWithOptionsTemplate();
 					}
-					if ( array_key_exists( ProductType::VARIABLE, $product_types ) ) {
+					if ( isset( $product_types[ ProductType::VARIABLE ] ) ) {
 						$template_parts[ VariableProductAddToCartWithOptionsTemplate::SLUG ] = new VariableProductAddToCartWithOptionsTemplate();
 					}
-					if ( array_key_exists( ProductType::GROUPED, $product_types ) ) {
+					if ( isset( $product_types[ ProductType::GROUPED ] ) ) {
 						$template_parts[ GroupedProductAddToCartWithOptionsTemplate::SLUG ] = new GroupedProductAddToCartWithOptionsTemplate();
 					}
 				}

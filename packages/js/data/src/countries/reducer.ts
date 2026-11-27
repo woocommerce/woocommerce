@@ -1,25 +1,19 @@
 /**
- * External dependencies
- */
-
-import type { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import TYPES from './action-types';
 import { Action } from './actions';
 import { CountriesState } from './types';
 
-const reducer: Reducer< CountriesState, Action > = (
-	state = {
+const reducer = (
+	state: CountriesState = {
 		errors: {},
 		locales: {},
 		countries: [],
 		geolocation: undefined,
 	},
-	action
-) => {
+	action: Action
+): CountriesState => {
 	switch ( action.type ) {
 		case TYPES.GET_LOCALES_SUCCESS:
 			state = {

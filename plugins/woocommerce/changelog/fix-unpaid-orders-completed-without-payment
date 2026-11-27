@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent checkout retries from marking cancelled, unpaid orders as paid.

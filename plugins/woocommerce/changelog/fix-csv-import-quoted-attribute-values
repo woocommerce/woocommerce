@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep double-quoted values together when importing product CSV lists, such as attribute values and tags.

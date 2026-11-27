@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
-import { Spinner } from '@woocommerce/components';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	__experimentalHeading as Heading,
+	Spinner,
 } from '@wordpress/components';
 
 /**

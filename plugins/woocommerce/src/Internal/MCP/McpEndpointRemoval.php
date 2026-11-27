@@ -299,8 +299,7 @@ class McpEndpointRemoval {
 		wc_doing_it_wrong(
 			$function_name,
 			sprintf(
-				/* translators: 1: Function or method name, 2: WooCommerce version, 3: Documentation URL. */
-				__( '%1$s was removed in WooCommerce %2$s along with the WooCommerce MCP endpoint and its REST-based abilities. WooCommerce abilities remain available through the WordPress Abilities API, and the MCP Adapter plugin exposes them to MCP clients. See %3$s.', 'woocommerce' ),
+				'%1$s was removed in WooCommerce %2$s along with the WooCommerce MCP endpoint and its REST-based abilities. WooCommerce abilities remain available through the WordPress Abilities API, and the MCP Adapter plugin exposes them to MCP clients. See %3$s.',
 				$function_name,
 				self::REMOVED_IN,
 				self::DOCS_URL

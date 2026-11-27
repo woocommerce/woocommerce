@@ -72,6 +72,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 				$items[]   = array(
 					'type'        => 'taxonomy/' . $term->taxonomy,
 					'value'       => $term->slug,
+					'label'       => $term_name,
 					'activeLabel' => $taxonomy_object->labels->singular_name . ': ' . $term_name,
 				);
 			}//end if

@@ -34,6 +34,21 @@ class WC_Helper_API {
 	}
 
 	/**
+	 * Return the connect funnel id if it is valid, or an empty string otherwise.
+	 *
+	 * The id ties the events of one connect attempt together for analytics; it never authorizes anything.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 *
+	 * @param mixed $funnel_id Candidate id.
+	 * @return string
+	 */
+	public static function validate_funnel_id( $funnel_id ): string {
+		return is_string( $funnel_id ) && preg_match( '/^[A-Za-z0-9_-]{1,64}$/D', $funnel_id ) ? $funnel_id : '';
+	}
+
+	/**
 	 * Perform an HTTP request to the Helper API.
 	 *
 	 * @param string $endpoint The endpoint to request.

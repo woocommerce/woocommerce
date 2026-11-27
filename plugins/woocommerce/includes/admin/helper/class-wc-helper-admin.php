@@ -49,11 +49,25 @@ class WC_Helper_Admin {
 	/**
 	 * Pushes settings onto the WooCommerce Admin global settings object (wcSettings).
 	 *
+	 * Users who can't manage WooCommerce get only the defaults the marketplace client needs.
+	 *
 	 * @param mixed $settings The settings object we're amending.
 	 *
 	 * @return mixed $settings
 	 */
 	public static function add_marketplace_settings( $settings ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			$settings['wccomHelper'] = array(
+				'isConnected'               => false,
+				'storeCountry'              => wc_get_base_location()['country'],
+				'installedProducts'         => array(),
+				'wooUpdateManagerInstalled' => WC_Woo_Update_Manager_Plugin::is_plugin_installed(),
+				'wooUpdateManagerActive'    => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
+				'trackingAllowed'           => 'yes' === get_option( 'woocommerce_allow_tracking' ),
+			);
+			return $settings;
+		}
+
 		if ( ! WC_Helper::is_site_connected() && isset( $_GET['connect'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			wp_safe_redirect( self::get_connection_url() );
 			exit;
@@ -74,22 +88,24 @@ class WC_Helper_Admin {
 		$blog_name = get_bloginfo( 'name' );
 
 		$settings['wccomHelper'] = array(
-			'isConnected'                => WC_Helper::is_site_connected(),
-			'connectURL'                 => self::get_connection_url(),
-			'reConnectURL'               => self::get_connection_url( true ),
-			'userEmail'                  => $auth_user_email,
-			'userAvatar'                 => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
-			'storeCountry'               => wc_get_base_location()['country'],
-			'storeName'                  => $blog_name ? $blog_name : '',
-			'inAppPurchaseURLParams'     => WC_Admin_Addons::get_in_app_purchase_url_params(),
-			'installedProducts'          => $installed_products,
-			'mySubscriptionsTabLoaded'   => WC_Helper_Options::get( 'my_subscriptions_tab_loaded' ),
-			'wooUpdateManagerInstalled'  => WC_Woo_Update_Manager_Plugin::is_plugin_installed(),
-			'wooUpdateManagerActive'     => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
-			'wooUpdateManagerInstallUrl' => WC_Woo_Update_Manager_Plugin::generate_install_url(),
-			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
-			'dismissNoticeNonce'         => wp_create_nonce( 'dismiss_notice' ),
-			'trackingAllowed'            => 'yes' === get_option( 'woocommerce_allow_tracking' ),
+			'isConnected'                   => WC_Helper::is_site_connected(),
+			'connectURL'                    => self::get_connection_url(),
+			'reConnectURL'                  => self::get_connection_url( true ),
+			'userEmail'                     => $auth_user_email,
+			'userAvatar'                    => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
+			'storeCountry'                  => wc_get_base_location()['country'],
+			'storeName'                     => $blog_name ? $blog_name : '',
+			'inAppPurchaseURLParams'        => WC_Admin_Addons::get_in_app_purchase_url_params(),
+			'installedProducts'             => $installed_products,
+			'mySubscriptionsTabLoaded'      => WC_Helper_Options::get( 'my_subscriptions_tab_loaded' ),
+			'wooUpdateManagerInstalled'     => WC_Woo_Update_Manager_Plugin::is_plugin_installed(),
+			'wooUpdateManagerActive'        => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
+			'wooUpdateManagerInstallUrl'    => current_user_can( 'install_plugins' ) ? WC_Woo_Update_Manager_Plugin::generate_install_url() : '',
+			'wooUpdateManagerManualInstall' => WC_Woo_Update_Manager_Plugin::needs_manual_install(),
+			'wooUpdateManagerUploadUrl'     => current_user_can( 'install_plugins' ) ? network_admin_url( 'plugin-install.php?tab=upload' ) : '',
+			'wooUpdateManagerPluginSlug'    => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
+			'dismissNoticeNonce'            => wp_create_nonce( 'dismiss_notice' ),
+			'trackingAllowed'               => 'yes' === get_option( 'woocommerce_allow_tracking' ),
 		);
 
 		// This data is only used in the `Extensions` screen, so only populate it there.

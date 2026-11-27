@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Show customers their back-in-stock sign-ups on My Account when the database enforces ONLY_FULL_GROUP_BY.

@@ -681,7 +681,7 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that an html value type tag (the default) is never touched by the Personalizer.
+	 * Test that an html value type tag (the default) is inserted untouched in the html rendering context.
 	 */
 	public function testHtmlValueTypeIsNotEscaped(): void {
 		$this->tags_registry->register(
@@ -711,15 +711,395 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 			'<p><span class="price">10 &euro;</span></p>',
 			$this->personalizer->personalize_content( $content, Personalizer::RENDERING_CONTEXT_HTML )
 		);
-		$this->assertSame(
-			'<p><span class="price">10 &euro;</span></p>',
-			$this->personalizer->personalize_content( $content, Personalizer::RENDERING_CONTEXT_TEXT )
-		);
 		// A tag emitting raw markup, such as a tracking pixel, is inserted verbatim.
 		$this->assertSame(
 			'<div><img src="https://track.example/open?id=42&amp;c=1" width="1" height="1" alt="" /></div>',
 			$this->personalizer->personalize_content( '<div><!--[test/tracking-pixel]--></div>' )
 		);
+	}
+
+	/**
+	 * Test that a tag token that cannot be resolved leaves nothing visible in the text rendering context,
+	 * where an HTML comment is shown to the recipient as text.
+	 */
+	public function testUnresolvedTagLeavesNoCommentInTextContext(): void {
+		$this->assertSame( 'Hi , welcome.', $this->personalizer->personalize_content( 'Hi <!--[other-plugin/first-name]-->, welcome.', Personalizer::RENDERING_CONTEXT_TEXT ) );
+		$this->assertSame( '<p>Hi <!--[other-plugin/first-name]-->, welcome.</p>', $this->personalizer->personalize_content( '<p>Hi <!--[other-plugin/first-name]-->, welcome.</p>' ) );
+		// A comment that is not a tag token is left alone.
+		$this->assertSame( 'Hi <!-- note -->', $this->personalizer->personalize_content( 'Hi <!-- note -->', Personalizer::RENDERING_CONTEXT_TEXT ) );
+	}
+
+	/**
+	 * Test that only the link targets of the text version are personalized, not tag-like text elsewhere.
+	 */
+	public function testTextContextPersonalizesOnlyLinkTargets(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store URL',
+				'woocommerce/store-url',
+				'Store',
+				function () {
+					return 'https://example.com';
+				}
+			)
+		);
+
+		$this->assertSame(
+			'Type [woocommerce/store-url] or visit [the store](https://example.com).',
+			$this->personalizer->personalize_content( 'Type [woocommerce/store-url] or visit [the store](http://%5Bwoocommerce/store-url%5D).', Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+
+		// A target with parentheses, as in Wikipedia-style URLs, is still personalized.
+		$this->assertSame(
+			'See [the article](https://example.org/a_(b)?ref=https://example.com).',
+			$this->personalizer->personalize_content( 'See [the article](https://example.org/a_(b)?ref=[woocommerce/store-url]).', Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+
+		// A tag value that looks like a link target is inserted as it is, not personalized again.
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Name',
+				'test/name',
+				'Test',
+				function () {
+					return '[x](http://[woocommerce/store-url])';
+				}
+			)
+		);
+		$this->assertSame(
+			'Hi [x](http://[woocommerce/store-url])',
+			$this->personalizer->personalize_content( 'Hi <!--[test/name]-->', Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+	}
+
+	/**
+	 * Test that a tag callback that throws leaves its tag empty and is logged, instead of stopping the whole email.
+	 */
+	public function testThrowingCallbackLeavesTagEmptyAndIsLogged(): void {
+		$logger = $this->createMock( Email_Editor_Logger::class );
+		$logger->expects( $this->exactly( 3 ) )->method( 'error' );
+		$personalizer = new Personalizer( $this->tags_registry, $logger );
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Broken',
+				'test/broken',
+				'Test',
+				function () {
+					throw new \RuntimeException( 'Order not found' );
+				}
+			)
+		);
+
+		$this->assertSame( '<p>Hi !</p>', $personalizer->personalize_content( '<p>Hi <!--[test/broken]-->!</p>' ) );
+		$this->assertSame( 'Hi !', $personalizer->personalize_content( 'Hi <!--[test/broken]-->!', Personalizer::RENDERING_CONTEXT_TEXT ) );
+		$this->assertSame(
+			'<a href="http://[test/broken]">Link</a>',
+			$personalizer->personalize_content( '<a href="http://[test/broken]">Link</a>' )
+		);
+	}
+
+	/**
+	 * Content with an argument holding the entities &#039;, &quot; and &amp; at each replacement site.
+	 * Tokens in attributes are HTML-encoded once more, as they are serialized in the block markup.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function encodedArgumentSitesProvider(): array {
+		return array(
+			'comment token'  => array( '<p><!--[test/args note="O&#039;Brien &quot;Bob&quot; &amp; co"]--></p>' ),
+			'data-link-href' => array( '<a data-link-href="[test/args note=&quot;O&amp;#039;Brien &amp;quot;Bob&amp;quot; &amp;amp; co&quot;]" href="#">Link</a>' ),
+			// A saved href has been through esc_url(), which drops the quotes around the value.
+			'plain href'     => array( '<a href="https://example.com/?r=%5Btest/args%20note=O&#039;Brien%20&quot;Bob&quot;%20&#038;%20co%5D">Link</a>' ),
+		);
+	}
+
+	/**
+	 * Test that HTML entities in tag argument values reach the callback decoded at every replacement site.
+	 *
+	 * @dataProvider encodedArgumentSitesProvider
+	 * @param string $content The content to personalize.
+	 */
+	public function testArgumentEntitiesAreDecoded( string $content ): void {
+		$received = array();
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'args',
+				'test/args',
+				'Test',
+				function ( $context, $args ) use ( &$received ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed -- The $context parameter is not used in this test.
+					$received[] = $args['note'] ?? '';
+					return 'https://example.com/value';
+				},
+				array(),
+				null,
+				array(),
+				Personalization_Tag::VALUE_TYPE_TEXT
+			)
+		);
+
+		$this->personalizer->personalize_content( $content );
+		$this->assertSame( array( 'O\'Brien "Bob" & co' ), $received );
+	}
+
+	/**
+	 * Test that an html value type tag still gets decoded argument values in link targets.
+	 */
+	public function testHtmlValueTypeTagGetsDecodedArgumentsInLinks(): void {
+		$received = array();
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'link',
+				'test/link',
+				'Test',
+				function ( $context, $args ) use ( &$received ) {
+					unset( $context );
+					$received[] = $args['note'] ?? '';
+					return 'https://example.com/value';
+				}
+			)
+		);
+
+		$this->personalizer->personalize_content( '<a data-link-href="[test/link note=&quot;O&amp;#039;Brien &amp;amp; co&quot;]">Link</a>' );
+		$this->assertSame( array( "O'Brien & co" ), $received );
+	}
+
+	/**
+	 * Test that an html value type tag gets its argument values escaped for HTML in HTML content,
+	 * so a callback that outputs an argument as it is shows it as text, and decoded elsewhere.
+	 */
+	public function testHtmlValueTypeTagGetsEscapedArgumentsInHtmlContent(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'echo',
+				'test/echo',
+				'Test',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed -- The $context parameter is not used in this test.
+					return $args['note'] ?? '';
+				}
+			)
+		);
+
+		$this->assertSame(
+			'<p>&lt;b&gt;x&lt;/b&gt; O&#039;Brien</p>',
+			$this->personalizer->personalize_content( '<p><!--[test/echo note="&lt;b&gt;x&lt;/b&gt;"]--> <!--[test/echo note="O&#039;Brien"]--></p>' )
+		);
+		// In plain text the decoded value is used, and the HTML tag's value is then converted to text.
+		$this->assertSame(
+			"x O'Brien",
+			$this->personalizer->personalize_content( '<!--[test/echo note="&lt;b&gt;x&lt;/b&gt;"]--> <!--[test/echo note="O&#039;Brien"]-->', Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+	}
+
+	/**
+	 * Test that a "]" inside a quoted argument value does not end a tag inside a link early.
+	 */
+	public function testClosingBracketInQuotedArgumentInLinks(): void {
+		$received = array();
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'campaign',
+				'test/campaign',
+				'Test',
+				function ( $context, $args ) use ( &$received ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed -- The $context parameter is not used in this test.
+					$received[] = $args['note'] ?? '';
+					return 'spring';
+				}
+			)
+		);
+
+		$this->assertSame(
+			'<a  href="http://spring">Link</a>',
+			$this->personalizer->personalize_content( '<a data-link-href="[test/campaign note=&quot;a [2026]&quot;]" href="#">Link</a>' )
+		);
+		$this->assertSame(
+			'<a href="https://example.com/?c=spring&#038;x=1">Link</a>',
+			$this->personalizer->personalize_content( '<a href="https://example.com/?c=[test/campaign note=&quot;a [2026]&quot;]&amp;x=1">Link</a>' )
+		);
+		// An apostrophe in an unquoted value (esc_url() drops the quotes) must not run into the next tag.
+		$this->assertSame(
+			'<a href="https://example.com/?c=spring&#038;d=spring">Link</a>',
+			$this->personalizer->personalize_content( '<a href="https://example.com/?c=[test/campaign note=O&#039;Brien]&amp;d=[test/campaign note=\'x\']">Link</a>' )
+		);
+		$this->assertSame( array( 'a [2026]', 'a [2026]', 'O\'Brien', 'x' ), $received );
+
+		// A quote that is never closed is read as part of an unquoted value, and the token still ends at "]".
+		$this->assertSame(
+			'<a href="https://example.com/?c=spring&#038;x=1">Link</a>',
+			$this->personalizer->personalize_content( '<a href="https://example.com/?c=[test/campaign note=&quot;abc]&amp;x=1">Link</a>' )
+		);
+		$this->assertSame( '"abc', end( $received ) );
+
+		// An unclosed quote must not swallow a second tag in the same link.
+		$this->assertSame(
+			'<a href="https://example.com/?c=spring&#038;d=spring">Link</a>',
+			$this->personalizer->personalize_content( '<a href="https://example.com/?c=[test/campaign note=&quot;abc]&amp;d=[test/campaign note=&quot;x&quot;]">Link</a>' )
+		);
+
+		// A tag used as the whole URL drops the protocol the editor forces in front of it.
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'campaign_url',
+				'test/campaign-url',
+				'Test',
+				function () {
+					return 'https://shop.example/spring';
+				}
+			)
+		);
+		$this->assertSame(
+			'<a href="https://shop.example/spring">Link</a>',
+			$this->personalizer->personalize_content( '<a href="http://[test/campaign-url note=&quot;a [2026]&quot;]">Link</a>' )
+		);
+	}
+
+	/**
+	 * Values of html value type tags with markup or entities, and the plain text expected in the text rendering context.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function htmlValueInTextContextProvider(): array {
+		return array(
+			'anchor'                    => array( '<a href="https://example.com/manage">Manage</a>', '[Manage](https://example.com/manage)' ),
+			'anchor with URL as text'   => array( '<a href="https://example.com">https://example.com</a>', 'https://example.com' ),
+			'strong'                    => array( '<strong>Bold</strong> text', 'Bold text' ),
+			'line break'                => array( 'Line one<br>Line two', "Line one\nLine two" ),
+			'list'                      => array( '<ul><li>One</li><li>Two</li></ul>', "- One\n- Two" ),
+			'entities'                  => array( 'Tom &amp; Jerry&#039;s', "Tom & Jerry's" ),
+			'markup and entities'       => array( '<span class="price">10&nbsp;&euro;</span>', '10 €' ),
+			'URL with encoded query'    => array( 'https://example.com/reset?key=a&amp;login=b', 'https://example.com/reset?key=a&login=b' ),
+			'plain text'                => array( 'Plain value', 'Plain value' ),
+			'bare ampersand'            => array( 'Tom & Jerry', 'Tom & Jerry' ),
+			'less-than sign'            => array( '5 <3 you', '5 <3 you' ),
+			'whitespace in plain text'  => array( "  Line one\nLine two ", "  Line one\nLine two " ),
+			'entity and bare less-than' => array( 'Tom &amp; Jerry <3 you', 'Tom & Jerry <3 you' ),
+			'markup and bare less-than' => array( '<em>a</em> < b', 'a < b' ),
+			'separator only'            => array( '&nbsp;', ' ' ),
+			'surrounding spaces kept'   => array( ' <b>x</b>&nbsp;', ' x ' ),
+		);
+	}
+
+	/**
+	 * Test that an html value type tag is converted to plain text in the text rendering context,
+	 * and left untouched when it holds no markup or entities.
+	 *
+	 * @dataProvider htmlValueInTextContextProvider
+	 * @param string $value    The tag value.
+	 * @param string $expected The expected plain text.
+	 */
+	public function testHtmlValueTypeIsConvertedToTextInTextContext( string $value, string $expected ): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'html_value',
+				'test/html-value',
+				'Test',
+				function () use ( $value ) {
+					return $value;
+				}
+			)
+		);
+
+		$this->assertSame(
+			"Value: {$expected}.",
+			$this->personalizer->personalize_content( 'Value: <!--[test/html-value]-->.', Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+		$this->assertSame(
+			"<p>Value: {$value}.</p>",
+			$this->personalizer->personalize_content( '<p>Value: <!--[test/html-value]-->.</p>' )
+		);
+	}
+
+	/**
+	 * Test that an html value type tag in the title is converted to plain text, while the body keeps the markup.
+	 */
+	public function testHtmlValueTypeIsConvertedToTextInTitle(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'order_number',
+				'test/order-number',
+				'Test',
+				function () {
+					return '<strong>#42</strong>';
+				}
+			)
+		);
+
+		$content = '<html><head><title>Order <!--[test/order-number]--></title></head><body><p><!--[test/order-number]--></p></body></html>';
+		$this->assertSame(
+			'<html><head><title>Order #42</title></head><body><p><strong>#42</strong></p></body></html>',
+			$this->personalizer->personalize_content( $content )
+		);
+	}
+
+	/**
+	 * Test that a text value type tag is not converted in the text rendering context.
+	 */
+	public function testTextValueTypeIsNotConvertedInTextContext(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'snippet',
+				'test/snippet',
+				'Test',
+				function () {
+					return 'Use <strong> &amp; <em>';
+				},
+				array(),
+				null,
+				array(),
+				Personalization_Tag::VALUE_TYPE_TEXT
+			)
+		);
+
+		$this->assertSame(
+			'Code: Use <strong> &amp; <em>',
+			$this->personalizer->personalize_content( 'Code: <!--[test/snippet]-->', Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+	}
+
+	/**
+	 * Test that rich text such as a subject is personalized and converted to plain text in one pass,
+	 * so neither the author's text nor a tag value is read as HTML twice.
+	 */
+	public function testPersonalizeRichTextAsPlainText(): void {
+		$received = array();
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Sale',
+				'test/sale',
+				'Test',
+				function ( $context ) use ( &$received ) {
+					$received[] = $context[ Personalizer::RENDERING_CONTEXT_KEY ];
+					return '&lt;em&gt;Sale&lt;/em&gt;';
+				}
+			)
+		);
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Shop',
+				'test/shop',
+				'Test',
+				function () {
+					return 'Tom & Jerry <3';
+				},
+				array(),
+				null,
+				array(),
+				Personalization_Tag::VALUE_TYPE_TEXT
+			)
+		);
+		$intercepted = array();
+		$this->personalizer->set_value_interceptor(
+			function ( string $value ) use ( &$intercepted ): string {
+				$intercepted[] = $value;
+				return $value;
+			}
+		);
+
+		$this->assertSame(
+			'Big a<b <em>Sale</em> at Tom & Jerry <3 now',
+			$this->personalizer->personalize_rich_text_as_plain_text( '<strong>Big</strong> a&lt;b <!--[test/sale]--> at <!--[test/shop]--> <!--[other-plugin/x]--><!-- note -->now' )
+		);
+		$this->assertSame( array( Personalizer::RENDERING_CONTEXT_TEXT ), $received );
+		$this->assertSame( array( '<em>Sale</em>', 'Tom & Jerry <3' ), $intercepted );
 	}
 
 	/**
@@ -1014,6 +1394,33 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 		$html_content = '<p>Hello, <!--[mailpoet/unknown-tag]-->!</p>';
 		$this->assertSame( $html_content, $this->personalizer->personalize_content( $html_content ) );
 		$this->assertSame( 0, $calls );
+	}
+
+	/**
+	 * Test that the interceptor receives an html value type tag value already converted to plain text in the text rendering context.
+	 */
+	public function testValueInterceptorReceivesConvertedHtmlValueInTextContext(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'manage_link',
+				'test/manage-link',
+				'Test',
+				function () {
+					return '<a href="https://example.com/manage">Manage</a>';
+				}
+			)
+		);
+
+		$received = array();
+		$this->personalizer->set_value_interceptor(
+			function ( string $value ) use ( &$received ): string {
+				$received[] = $value;
+				return $value;
+			}
+		);
+
+		$this->personalizer->personalize_content( '<!--[test/manage-link]-->', Personalizer::RENDERING_CONTEXT_TEXT );
+		$this->assertSame( array( '[Manage](https://example.com/manage)' ), $received );
 	}
 
 	/**

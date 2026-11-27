@@ -8,6 +8,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Automattic\WooCommerce\Internal\Webhooks\WebhookCaptureRules;
+use Automattic\WooCommerce\Internal\Webhooks\WebhookObservers;
+use Automattic\WooCommerce\Internal\Webhooks\WebhookPayloadRedactor;
+
 /**
  * Process the web hooks at the end of the request.
  *
@@ -19,26 +24,50 @@ function wc_webhook_execute_queue() {
 		return;
 	}
 
+	$now = time();
+
 	foreach ( $wc_queued_webhooks as $data ) {
-		// Webhooks are processed in the background by default
-		// so as to avoid delays or failures in delivery from affecting the
-		// user who triggered it.
-		if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $data['webhook'], $data['arg'] ) ) {
+		$original_arg = $data['original_arg'] ?? $data['arg'];
+
+		/**
+		 * Filters whether a webhook is delivered in the background.
+		 *
+		 * Background delivery is the default so a slow or failed delivery does not delay the request that triggered it.
+		 *
+		 * @since 3.5.0
+		 * @param bool       $deliver_async Whether to deliver in the background. Default true.
+		 * @param WC_Webhook $webhook       The webhook being delivered.
+		 * @param mixed      $arg           The argument the webhook fired with, usually a resource ID.
+		 */
+		if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $data['webhook'], $original_arg ) ) {
 
 			$queue_args = array(
 				'webhook_id' => $data['webhook']->get_id(),
 				'arg'        => $data['arg'],
 			);
 
-			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
+			$next_scheduled = as_next_scheduled_action( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
 
 			// Make webhooks unique - only schedule one webhook every 10 minutes to maintain backward compatibility with WP Cron behaviour seen in WC < 3.5.0.
-			if ( is_null( $next_scheduled_date ) || $next_scheduled_date->getTimestamp() >= ( 600 + gmdate( 'U' ) ) ) {
-				WC()->queue()->add( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
+			// A pending delivery has a timestamp; an in-progress delivery (true) or none (false) gets a new one.
+			if ( ! is_numeric( $next_scheduled ) || $next_scheduled >= ( 10 * MINUTE_IN_SECONDS + $now ) ) {
+				/**
+				 * Filters the Action Scheduler priority of a queued webhook delivery.
+				 *
+				 * @since 11.4.0
+				 *
+				 * @param int        $priority The delivery priority, expected to be in the range 0-255 (lower numbers take precedence). Default 10.
+				 * @param WC_Webhook $webhook  The webhook being delivered.
+				 * @param mixed      $arg      The argument the webhook fired with, usually the resource ID.
+				 */
+				$priority = apply_filters( 'woocommerce_webhook_delivery_priority', 10, $data['webhook'], $original_arg );
+				$priority = is_numeric( $priority ) && is_finite( $priority ) ? (int) max( 0, min( $priority, 255 ) ) : 10;
+
+				ActionSchedulerUtil::schedule_single( $now, 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks', false, $priority );
 			}
 		} else {
 			// Deliver immediately.
-			$data['webhook']->deliver( $data['arg'] );
+			$data['webhook']->deliver( $original_arg );
 		}
 	}
 }
@@ -49,7 +78,7 @@ add_action( 'shutdown', 'wc_webhook_execute_queue' );
  *
  * @since 3.3.0
  * @param WC_Webhook $webhook Webhook instance.
- * @param array      $arg     Delivery arguments.
+ * @param mixed      $arg     Delivery argument.
  */
 function wc_webhook_process_delivery( $webhook, $arg ) {
 	// We need to queue the webhook so that it can be ran after the request has finished processing.
@@ -58,8 +87,9 @@ function wc_webhook_process_delivery( $webhook, $arg ) {
 		$wc_queued_webhooks = array();
 	}
 	$wc_queued_webhooks[] = array(
-		'webhook' => $webhook,
-		'arg'     => $arg,
+		'webhook'      => $webhook,
+		'arg'          => $webhook instanceof WC_Webhook ? WebhookPayloadRedactor::redact( $webhook->get_topic(), $arg ) : $arg,
+		'original_arg' => $arg,
 	);
 }
 add_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10, 2 );
@@ -74,21 +104,24 @@ add_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery
  * @param mixed $arg        Hook argument.
  */
 function wc_deliver_webhook_async( $webhook_id, $arg ) {
-	$webhook = new WC_Webhook( $webhook_id );
+	$webhook = WebhookObservers::without_observers(
+		static function () use ( $webhook_id ) {
+			$webhook = new WC_Webhook( $webhook_id );
 
-	if ( 0 === $webhook->get_id() ) {
-		return;
+			return 0 === $webhook->get_id() || '' === $webhook->get_topic() ? null : $webhook;
+		}
+	);
+
+	if ( $webhook ) {
+		$webhook->deliver( $arg );
 	}
-
-	$webhook->deliver( $arg );
 }
 add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10, 2 );
 
 /**
  * Check if the given topic is a valid webhook topic, a topic is valid if:
  *
- * + starts with `action.woocommerce_` or `action.wc_` (unless explicitly blocked by
- *   the `$invalid_topics` list below).
+ * + it is a custom action topic with a supported hook name that is not blocked below.
  * + it has a valid resource & event AND (when both are part of the default sets) the
  *   `<resource>.<event>` pair has a registered hook. Default/default pairs with no
  *   registered hook (e.g. `order.published`, `customer.restored`) are rejected to
@@ -99,25 +132,20 @@ add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10,
  * @return bool
  */
 function wc_is_webhook_valid_topic( $topic ) {
-	$invalid_topics = array(
-		'action.woocommerce_login_credentials',
-		'action.woocommerce_product_csv_importer_check_import_file_path',
-		'action.woocommerce_webhook_should_deliver',
-	);
-
-	if ( in_array( $topic, $invalid_topics, true ) ) {
-		return false;
-	}
-
-	// Custom topics are prefixed with woocommerce_ or wc_ are valid.
-	if ( 0 === strpos( $topic, 'action.woocommerce_' ) || 0 === strpos( $topic, 'action.wc_' ) ) {
-		return true;
-	}
-
 	$data = explode( '.', $topic );
 
-	if ( ! isset( $data[0] ) || ! isset( $data[1] ) ) {
+	if ( ! isset( $data[1] ) ) {
 		return false;
+	}
+
+	if ( 'action' === $data[0] ) {
+		// WC_Webhook subscribes to the second segment, even when the topic has a suffix.
+		$hook = $data[1];
+		if ( 0 !== strpos( $hook, 'woocommerce_' ) && 0 !== strpos( $hook, 'wc_' ) ) {
+			return false;
+		}
+
+		return ! WebhookCaptureRules::is_blocked_hook( $hook );
 	}
 
 	$default_resources = array( 'coupon', 'customer', 'order', 'product' );
@@ -216,8 +244,12 @@ function wc_load_webhooks( $status = '', $limit = null ) {
 			break;
 		}
 
-		$webhook = new WC_Webhook( $webhook_id );
-		$webhook->enqueue();
+		WebhookObservers::without_observers(
+			static function () use ( $webhook_id ) {
+				$webhook = new WC_Webhook( $webhook_id );
+				$webhook->enqueue();
+			}
+		);
 		$loaded ++;
 	}
 

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Utils\WC_Product_Custom;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
@@ -14,15 +15,17 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 /**
  * Tests for the AddToCartWithOptions block type
  */
-class AddToCartWithOptions extends \WP_UnitTestCase {
+class AddToCartWithOptions extends \WC_Unit_Test_Case {
+	use BlockTypeRegistryTrait;
 
 	/**
 	 * Initiate the mock object.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
-		AddToCartWithOptionsMocks::register_all();
+		// The blocks are not registered on `init`, because `init` runs with a classic theme.
+		$this->replace_block_types( AddToCartWithOptionsMocks::get_mock_classes() );
 	}
 
 	/**
@@ -107,8 +110,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		// Third-party product types use their own template.
 		$this->assertStringContainsString( 'Custom Product Type Add to Cart Form', $markup, 'The Custom Product Type Add to Cart + Options contains the custom product type add to cart form.' );
-
-		remove_action( 'woocommerce_custom_add_to_cart', array( $this, 'print_custom_product_type_add_to_cart_markup' ) );
 	}
 
 	/**
@@ -165,9 +166,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'Hook into add to cart action', $markup, 'The Add to Cart + Options correctly renders the contents from the wrapper hook if the product is out of stock.' );
 		$this->assertStringNotContainsString( 'Hook into add to cart button action', $markup, 'The Add to Cart + Options doesn\'t render the contents from the inner hooks if the product is out of stock.' );
-
-		remove_action( 'woocommerce_simple_add_to_cart', array( $this, 'hook_into_add_to_cart_action' ) );
-		remove_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action' ) );
 	}
 
 	/**
@@ -265,10 +263,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$this->assertStringNotContainsString( 'action="https://example.com"', $markup, 'The form doesn\'t have an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter when an extension hooks into the form but not adding a form element.' );
 		$this->assertStringContainsString( 'data-wp-on--submit', $markup, 'The form has an on submit event when an extension hooks into the form but not adding a form element.' );
-
-		remove_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action_text' ) );
-
-		remove_filter( 'woocommerce_add_to_cart_form_action', array( $this, 'hook_into_woocommerce_add_to_cart_form_action_filter' ) );
 	}
 
 	/**
@@ -603,18 +597,14 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		add_filter( 'woocommerce_quantity_input_args', $filter, 10, 2 );
 
-		try {
-			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
-			// Quantity selector block should not render at all.
-			$this->assertStringContainsString( 'wc-block-add-to-cart-with-options__quantity-selector--hidden', $markup, 'The Quantity Selector block is hidden when min equals max.' );
+		// Quantity selector block should not render at all.
+		$this->assertStringContainsString( 'wc-block-add-to-cart-with-options__quantity-selector--hidden', $markup, 'The Quantity Selector block is hidden when min equals max.' );
 
-			// Plus and minus stepper buttons should not be present.
-			$this->assertStringNotContainsString( 'wc-block-components-quantity-selector__button--plus', $markup, 'The plus stepper is not rendered when min equals max.' );
-			$this->assertStringNotContainsString( 'wc-block-components-quantity-selector__button--minus', $markup, 'The minus stepper is not rendered when min equals max.' );
-		} finally {
-			remove_filter( 'woocommerce_quantity_input_args', $filter, 10 );
-		}
+		// Plus and minus stepper buttons should not be present.
+		$this->assertStringNotContainsString( 'wc-block-components-quantity-selector__button--plus', $markup, 'The plus stepper is not rendered when min equals max.' );
+		$this->assertStringNotContainsString( 'wc-block-components-quantity-selector__button--minus', $markup, 'The minus stepper is not rendered when min equals max.' );
 	}
 
 	/**
@@ -727,7 +717,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$markup = do_blocks( $block );
 			$this->assertStringNotContainsString( $marker, $markup, 'The Add to Wishlist Button is not injected when the wishlist feature is disabled.' );
 		} finally {
-			$registry->unregister( 'woocommerce/add-to-wishlist-button' );
 			$features->change_feature_enable( 'product_wishlist', $original );
 		}
 	}

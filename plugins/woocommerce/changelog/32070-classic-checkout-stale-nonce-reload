@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Reload the classic checkout when the browser restores a copy rendered before the shopper logged in, instead of leaving it stuck on a spinner after the order review request is rejected.

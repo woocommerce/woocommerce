@@ -55,7 +55,7 @@ class WC_REST_Authentication {
 	 */
 	public function __construct() {
 		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 15 );
-		add_filter( 'rest_authentication_errors', array( $this, 'authentication_fallback' ) );
+		add_filter( 'rest_authentication_errors', array( $this, 'authentication_fallback' ), 8 );
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication_error' ), 15 );
 		add_filter( 'rest_authentication_errors', array( $this, 'reject_out_of_scope_route' ), 20 );
 		add_filter( 'rest_post_dispatch', array( $this, 'send_unauthorized_headers' ), 50 );
@@ -72,9 +72,20 @@ class WC_REST_Authentication {
 			return false;
 		}
 
+		// Only treat this as a WooCommerce REST API request once WordPress is actually dispatching one.
+		if ( ! wp_is_rest_endpoint() ) {
+			return false;
+		}
+
+		$uri_route      = $this->route_from_request_uri();
 		$resolved_route = $this->resolved_route();
-		$is_wc_route    = $this->is_wc_namespace( $this->route_from_request_uri() )
-			|| ( wp_is_rest_endpoint() && null !== $resolved_route && $this->is_wc_namespace( $resolved_route ) );
+		$is_wc_route    = $this->is_wc_namespace( $uri_route )
+			|| ( null !== $resolved_route && $this->is_wc_namespace( $resolved_route ) );
+
+		// API keys are for the admin REST API. Store API requests are left to cookie or Cart-Token auth.
+		if ( $this->is_store_api_route( $uri_route ) || ( null !== $resolved_route && $this->is_store_api_route( $resolved_route ) ) ) {
+			$is_wc_route = false;
+		}
 
 		/**
 		 * Filters whether the current request is a request to the WooCommerce REST API.
@@ -96,6 +107,22 @@ class WC_REST_Authentication {
 	 */
 	private function is_wc_namespace( string $route ): bool {
 		return str_starts_with( $route, 'wc/' ) || str_starts_with( $route, 'wc-' );
+	}
+
+	/**
+	 * Whether a route is in the Store API namespace, which API keys may not authenticate.
+	 *
+	 * WordPress matches routes case-insensitively and decodes the route it dispatches, so this does too.
+	 *
+	 * @since 11.3.1
+	 *
+	 * @param string $route Route without the REST prefix.
+	 * @return bool
+	 */
+	private function is_store_api_route( string $route ): bool {
+		$route = strtolower( trim( urldecode( $route ), '/' ) );
+
+		return 'wc/store' === $route || str_starts_with( $route, 'wc/store/' );
 	}
 
 	/**
@@ -224,7 +251,11 @@ class WC_REST_Authentication {
 	 * Authenticate the user if authentication wasn't performed during the
 	 * determine_current_user action.
 	 *
-	 * Necessary in cases where wp_get_current_user() is called before WooCommerce is loaded.
+	 * This is the usual place a WooCommerce REST API key gets authenticated: it happens here
+	 * because wp_get_current_user() usually resolves before REST dispatch is confirmed.
+	 *
+	 * Runs at priority 8, just ahead of the default priority other plugins tend to use on this
+	 * filter, so our own call to get_current_user_id() below is what resolves the real user first.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/26847
 	 *
@@ -232,17 +263,19 @@ class WC_REST_Authentication {
 	 * @return WP_Error|null|bool
 	 */
 	public function authentication_fallback( $error ) {
-		if ( ! empty( $error ) ) {
-			// Another plugin has already declared a failure.
+		if ( is_wp_error( $error ) ) {
+			// Another plugin has already declared a failure. A plain `true` falls through instead.
 			return $error;
 		}
-		if ( empty( $this->error ) && empty( $this->auth_method ) && empty( $this->user ) && 0 === get_current_user_id() ) {
+		if ( 0 === get_current_user_id() && empty( $this->error ) && empty( $this->auth_method ) && empty( $this->user ) ) {
 			// Authentication hasn't occurred during `determine_current_user`, so check auth.
 			$user_id = $this->authenticate( false );
 			if ( $user_id ) {
 				wp_set_current_user( $user_id );
-				return true;
 			}
+		}
+		if ( $this->user ) {
+			return true;
 		}
 		return $error;
 	}
@@ -265,9 +298,9 @@ class WC_REST_Authentication {
 	/**
 	 * Reject a request when a WooCommerce API key authenticated a route outside our namespaces.
 	 *
-	 * Scope is first judged from REQUEST_URI, during 'determine_current_user', before WordPress has
-	 * parsed the request, so at that point the route the request will be dispatched to is not settled
-	 * yet. This runs later on rest_authentication_errors, after authentication_fallback() and
+	 * Scope is first judged from REQUEST_URI, during 'determine_current_user', where a URI that names
+	 * one of our routes is enough, and that is not necessarily the route WordPress dispatches the
+	 * request to. This runs later on rest_authentication_errors, after authentication_fallback() and
 	 * check_authentication_error(), so $this->user reflects the final authentication decision and
 	 * WordPress has resolved the route. It acts only on a key we authenticated ourselves; a failed or
 	 * absent key keeps the result the earlier callbacks produced.
@@ -294,7 +327,7 @@ class WC_REST_Authentication {
 	 *
 	 * @since 11.1.0
 	 *
-	 * @return bool False only when the resolved route is not ours and the request URI never named it.
+	 * @return bool False when the resolved route is the Store API, or is not ours and the request URI never named it.
 	 */
 	private function is_resolved_route_in_scope() {
 		// Has WordPress picked a route yet? If not, there is nothing to compare.
@@ -304,7 +337,12 @@ class WC_REST_Authentication {
 			return true;
 		}
 
-		// Our own namespaces are always in scope for a WooCommerce key. The read/write permission
+		// The Store API is never in scope, even when the request URI named another route.
+		if ( $this->is_store_api_route( $resolved_route ) ) {
+			return false;
+		}
+
+		// Our other namespaces are always in scope for a WooCommerce key. The read/write permission
 		// check in check_user_permissions() still bounds what the key can do there.
 		if ( $this->is_wc_namespace( $resolved_route ) ) {
 			return true;
@@ -600,7 +638,7 @@ class WC_REST_Authentication {
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
 		$secret         = $user->consumer_secret . '&';
-		$signature      = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret, true ) );
+		$signature      = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret, true ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- OAuth 1.0a signatures are base64-encoded HMACs, not obfuscation.
 
 		if ( ! hash_equals( $signature, $consumer_signature ) ) { // @codingStandardsIgnoreLine
 			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid signature - provided signature does not match.', 'woocommerce' ), array( 'status' => 401 ) );

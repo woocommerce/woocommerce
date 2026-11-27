@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move the shared refund calculation engine (DataUtils, RefundPreviewSchema) to the version-neutral Internal\RestApi\Refunds namespace. Backward compatibility shims keep the old class names working.

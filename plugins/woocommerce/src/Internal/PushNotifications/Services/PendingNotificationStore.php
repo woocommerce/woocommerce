@@ -195,7 +195,7 @@ class PendingNotificationStore {
 		// Action Scheduler returns 0 rather than throwing when it cannot store
 		// the job, and a notification whose fallback was never scheduled has
 		// nothing to catch it if the loopback does not arrive.
-		$action_id = as_schedule_single_action(
+		$action_id = ActionSchedulerUtil::schedule_single(
 			time() + NotificationProcessor::SAFETY_NET_DELAY,
 			NotificationProcessor::SAFETY_NET_HOOK,
 			$args,

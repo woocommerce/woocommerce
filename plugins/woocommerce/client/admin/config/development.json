@@ -6,6 +6,6 @@
 		"store-alerts": true,
 		"rest-api-v4": false,
 		"order-detail-redesign": false,
-		"payment-settings-screen": true
+		"experimental-admin-screens": true
 	}
 }

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Make Status > Tools > Clear transients delete every product's cached data and cached reports, not just a few fixed entries.

@@ -913,7 +913,7 @@ describe( 'The message in the banner', () => {
 		);
 
 	const notActivatedMessage =
-		'By clicking "Create shipping label", WooCommerce Shipping↗ will be installed and you agree to its Terms of Service↗.';
+		'By clicking "Create shipping label", WooCommerce Shipping will be installed and you agree to its Terms of Service.';
 
 	it( 'should show install text "By clicking "Create shipping label"..." when first loaded.', () => {
 		const { container } = createShippingBannerWrapper( {
@@ -924,6 +924,18 @@ describe( 'The message in the banner', () => {
 			container.querySelector( '.wc-admin-shipping-banner-blob p' )
 				.textContent
 		).toBe( notActivatedMessage );
+	} );
+
+	it( 'should open the Terms of Service and WooCommerce Shipping links in a new tab with noopener noreferrer.', () => {
+		const { getByRole } = createShippingBannerWrapper( {
+			activePlugins: [],
+		} );
+
+		for ( const name of [ /^Terms of Service/, /^WooCommerce Shipping/ ] ) {
+			const link = getByRole( 'link', { name } );
+			expect( link ).toHaveAttribute( 'target', '_blank' );
+			expect( link ).toHaveAttribute( 'rel', 'noopener noreferrer' );
+		}
 	} );
 
 	it( 'should continue to show the initial message "By clicking "Create shipping label"..." after WooCommerce Service is installed successfully.', () => {

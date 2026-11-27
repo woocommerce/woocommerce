@@ -33,7 +33,7 @@ class SiteTagsProvider extends AbstractTagProvider {
 						$store_name = get_option( 'woocommerce_pos_store_name' );
 						return htmlspecialchars_decode( empty( $store_name ) ? PointOfSaleDefaultSettings::get_default_store_name() : $store_name, ENT_QUOTES );
 					}
-					return htmlspecialchars_decode( get_bloginfo( 'name' ) );
+					return wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
 				},
 				array(),
 				null,

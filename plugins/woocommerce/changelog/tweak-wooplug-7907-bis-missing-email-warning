@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Log a warning when a back in stock notification email is not registered with the mailer.

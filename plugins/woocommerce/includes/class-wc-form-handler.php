@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -61,6 +62,7 @@ class WC_Form_Handler {
 		add_action( 'wp_loaded', array( __CLASS__, 'redirect_after_cancel_order' ), PHP_INT_MAX );
 		add_action( 'wp_loaded', array( __CLASS__, 'update_cart_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_to_cart_action' ), 20 );
+		add_filter( 'redirect_canonical', array( __CLASS__, 'remove_add_to_cart_from_canonical_redirect' ), 10, 2 );
 
 		// May need $wp global to access query vars.
 		add_action( 'wp', array( __CLASS__, 'pay_action' ), 20 );
@@ -391,6 +393,78 @@ class WC_Form_Handler {
 	}
 
 	/**
+	 * Get the address type to fill an empty edit address form from, after a copy that couldn't be saved as is.
+	 *
+	 * Nothing is saved until the customer submits the form, which has its own nonce, and it only shows the
+	 * current customer's own addresses, so this read-only request needs no nonce.
+	 *
+	 * @since 11.4.0
+	 * @internal For use by WooCommerce only.
+	 *
+	 * @param string $address_type Address type being edited; 'billing' or 'shipping'.
+	 * @return string The other address type, or an empty string when the form keeps its saved values.
+	 */
+	public static function get_copy_address_form_source( $address_type ) {
+		$source_type = isset( $_GET['copy-address-from'] ) ? sanitize_key( wp_unslash( $_GET['copy-address-from'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only, see the description above.
+
+		if ( '' === $source_type || self::get_copy_address_source_type( $address_type ) !== $source_type ) {
+			return '';
+		}
+
+		if ( ! self::can_copy_address( $address_type, $source_type, get_current_user_id() ) ) {
+			return '';
+		}
+
+		$source_country = ( new WC_Customer( get_current_user_id() ) )->{"get_{$source_type}_country"}( 'edit' );
+
+		if ( ! self::is_copy_address_country_allowed( $address_type, $source_country ) ) {
+			return '';
+		}
+
+		return $source_type;
+	}
+
+	/**
+	 * Check that a copied address's country is available for the address type it is copied into.
+	 *
+	 * @param string $target_type Address type being filled.
+	 * @param string $country     Country code of the copied address.
+	 * @return bool
+	 */
+	private static function is_copy_address_country_allowed( string $target_type, string $country ): bool {
+		$countries = 'shipping' === $target_type ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
+
+		return array_key_exists( $country, $countries );
+	}
+
+	/**
+	 * Get the address type that a copy into the given address type reads from.
+	 *
+	 * @param mixed $target_type Address type being filled.
+	 * @return string 'shipping' for 'billing', 'billing' for 'shipping', or an empty string for any other value.
+	 */
+	private static function get_copy_address_source_type( $target_type ): string {
+		$source_types = array(
+			'billing'  => 'shipping',
+			'shipping' => 'billing',
+		);
+
+		return is_string( $target_type ) ? ( $source_types[ $target_type ] ?? '' ) : '';
+	}
+
+	/**
+	 * Check that the target address is empty and the source address is saved, so a copy can't overwrite an address.
+	 *
+	 * @param string $target_type Address type being filled.
+	 * @param string $source_type Address type being copied.
+	 * @param int    $user_id     Customer ID.
+	 * @return bool
+	 */
+	private static function can_copy_address( string $target_type, string $source_type, int $user_id ): bool {
+		return ! wc_get_account_formatted_address( $target_type, $user_id ) && wc_get_account_formatted_address( $source_type, $user_id );
+	}
+
+	/**
 	 * Copy the saved billing address into an empty shipping address, or vice versa, from the My Account addresses page.
 	 *
 	 * The target address is only written when it has not been set up yet, so a stale link cannot overwrite an address.
@@ -420,14 +494,11 @@ class WC_Form_Handler {
 		}
 
 		$target_type  = sanitize_key( wp_unslash( $_GET['copy-address'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified below.
-		$source_types = array(
-			'billing'  => 'shipping',
-			'shipping' => 'billing',
-		);
+		$source_type  = self::get_copy_address_source_type( $target_type );
 		$redirect_url = wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) );
 		$nonce_value  = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
 
-		if ( ! isset( $source_types[ $target_type ] ) ) {
+		if ( '' === $source_type ) {
 			wc_add_notice( __( 'The address could not be copied. Please try again.', 'woocommerce' ), 'error' );
 			wp_safe_redirect( $redirect_url );
 			exit;
@@ -439,18 +510,15 @@ class WC_Form_Handler {
 			exit;
 		}
 
-		$source_type = $source_types[ $target_type ];
-
-		if ( wc_get_account_formatted_address( $target_type, $user_id ) || ! wc_get_account_formatted_address( $source_type, $user_id ) ) {
+		if ( ! self::can_copy_address( $target_type, $source_type, $user_id ) ) {
 			wp_safe_redirect( $redirect_url );
 			exit;
 		}
 
-		$customer         = new WC_Customer( $user_id );
-		$source_country   = 'billing' === $source_type ? $customer->get_billing_country( 'edit' ) : $customer->get_shipping_country( 'edit' );
-		$target_countries = 'shipping' === $target_type ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
+		$customer       = new WC_Customer( $user_id );
+		$source_country = 'billing' === $source_type ? $customer->get_billing_country( 'edit' ) : $customer->get_shipping_country( 'edit' );
 
-		if ( ! array_key_exists( $source_country, $target_countries ) ) {
+		if ( ! self::is_copy_address_country_allowed( $target_type, $source_country ) ) {
 			wc_add_notice( __( 'This address uses a country that is not available for the other address type. Please add the address manually.', 'woocommerce' ), 'error' );
 			wp_safe_redirect( $redirect_url );
 			exit;
@@ -464,6 +532,12 @@ class WC_Form_Handler {
 			$setter     = "set_{$target_key}";
 			// Read stored values, so getter filters are not saved into the other address.
 			$value = is_callable( array( $customer, $getter ) ) ? $customer->{$getter}( 'edit' ) : $customer->get_meta( $source_key, true, 'edit' );
+
+			// Keep what the target address already has, such as a billing email or phone, when the copied address has none.
+			if ( '' === $value ) {
+				$target_getter = "get_{$target_key}";
+				$value         = is_callable( array( $customer, $target_getter ) ) ? $customer->{$target_getter}( 'edit' ) : $customer->get_meta( $target_key, true, 'edit' );
+			}
 
 			// Shipping has no email field, so fall back to the account email like the edit address form does.
 			if ( 'billing_email' === $target_key && ! $value ) {
@@ -495,7 +569,8 @@ class WC_Form_Handler {
 		$field_values    = array();
 
 		foreach ( array_keys( $checkout_fields->get_fields_for_location( 'address' ) ) as $field_key ) {
-			$field_values[ $field_key ] = $checkout_fields->get_field_from_object( $field_key, $customer, $source_type, false );
+			$value                      = $checkout_fields->get_field_from_object( $field_key, $customer, $source_type, false );
+			$field_values[ $field_key ] = '' === $value ? $checkout_fields->get_field_from_object( $field_key, $customer, $target_type, false ) : $value;
 		}
 
 		// Validate the additional fields against the target address, like the edit address form does.
@@ -513,10 +588,10 @@ class WC_Form_Handler {
 		}
 
 		/**
-		 * Fires before a customer's copied address is saved, so extensions can reject it by adding an error notice.
+		 * Fires before a customer's copied address is saved, so extensions can stop the save by adding an error notice.
 		 *
-		 * Unlike woocommerce_after_save_address_validation, there's no submitted form, so read the copied values from
-		 * the customer instead of the request.
+		 * There's no submitted form, so read the copied values from the customer instead of the request. A stopped copy
+		 * opens the edit address form filled with the copied address, and saving it runs woocommerce_after_save_address_validation.
 		 *
 		 * @since 11.4.0
 		 *
@@ -527,8 +602,10 @@ class WC_Form_Handler {
 		 */
 		do_action( 'woocommerce_before_copy_address_save', $user_id, $target_type, $source_type, $customer );
 
+		// Open the edit form filled with the copied address instead, so the customer only fixes what the errors point to.
 		if ( 0 < wc_notice_count( 'error' ) ) {
-			wp_safe_redirect( $redirect_url );
+			wc_add_notice( __( 'Review the copied address below, then save it.', 'woocommerce' ), 'notice' );
+			wp_safe_redirect( add_query_arg( 'copy-address-from', $source_type, wc_get_endpoint_url( 'edit-address', $target_type, wc_get_page_permalink( 'myaccount' ) ) ) );
 			exit;
 		}
 
@@ -752,10 +829,15 @@ class WC_Form_Handler {
 
 			// Pay for existing order.
 			$order_key = is_string( $_GET['key'] ) ? wp_unslash( $_GET['key'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$order_id  = absint( $wp->query_vars['order-pay'] );
+			$order_id  = absint( $wp->query_vars['order-pay'] ?? 0 );
 			$order     = wc_get_order( $order_id );
 
-			if ( $order_id === $order->get_id() && hash_equals( $order->get_order_key(), $order_key ) && $order->needs_payment() ) {
+			// needs_payment() is true for a checkout-draft, but a draft has not passed checkout validation yet.
+			if ( $order instanceof WC_Order && $order_id === $order->get_id() && hash_equals( $order->get_order_key(), $order_key ) && $order->needs_payment() && ! $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
+				// The order-pay page explains the refusal: login form, ownership error or email verification.
+				if ( ! current_user_can( 'pay_for_order', $order_id ) || Users::should_user_verify_order_email( $order_id, null, 'order-pay' ) ) {
+					return;
+				}
 
 				do_action( 'woocommerce_before_pay_action', $order );
 
@@ -777,14 +859,14 @@ class WC_Form_Handler {
 				// Update payment method.
 				if ( $order->needs_payment() ) {
 					try {
-						$payment_method_id = isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : false;
+						$payment_method_id  = isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : false;
+						$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
-						if ( ! $payment_method_id ) {
-							throw new Exception( __( 'Invalid payment method.', 'woocommerce' ) );
+						if ( ! $payment_method_id && ! empty( $available_gateways ) ) {
+							throw new Exception( __( 'Please select a payment method.', 'woocommerce' ) );
 						}
 
-						$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-						$payment_method     = isset( $available_gateways[ $payment_method_id ] ) ? $available_gateways[ $payment_method_id ] : false;
+						$payment_method = $payment_method_id && isset( $available_gateways[ $payment_method_id ] ) ? $available_gateways[ $payment_method_id ] : false;
 
 						if ( ! $payment_method ) {
 							throw new Exception( __( 'Invalid payment method.', 'woocommerce' ) );
@@ -1265,6 +1347,36 @@ class WC_Form_Handler {
 	}
 
 	/**
+	 * Remove add-to-cart from WordPress's canonical redirect, since add_to_cart_action() has already added the product.
+	 *
+	 * Redirects to another host (www vs non-www), or from HTTPS to HTTP, keep it, because the cart session cookie may not carry across.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @param string|false $redirect_url  The canonical redirect URL.
+	 * @param string       $requested_url The requested URL.
+	 * @return string|false The redirect URL.
+	 */
+	public static function remove_add_to_cart_from_canonical_redirect( $redirect_url, $requested_url = '' ) {
+		if ( ! is_string( $redirect_url ) || ! is_string( $requested_url ) ) {
+			return $redirect_url;
+		}
+
+		if ( ! isset( $_REQUEST['add-to-cart'] ) || ! is_numeric( wp_unslash( $_REQUEST['add-to-cart'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			return $redirect_url;
+		}
+
+		$is_https_downgrade = 'https' === strtolower( (string) wp_parse_url( $requested_url, PHP_URL_SCHEME ) ) && 'http' === strtolower( (string) wp_parse_url( $redirect_url, PHP_URL_SCHEME ) );
+
+		if ( $is_https_downgrade || wp_parse_url( $redirect_url, PHP_URL_HOST ) !== wp_parse_url( $requested_url, PHP_URL_HOST ) ) {
+			return $redirect_url;
+		}
+
+		return remove_query_arg( 'add-to-cart', $redirect_url );
+	}
+
+	/**
 	 * Handle adding simple products to the cart.
 	 *
 	 * @since 2.4.6 Split from add_to_cart_action.
@@ -1303,8 +1415,9 @@ class WC_Form_Handler {
 			$quantity_set = false;
 
 			foreach ( $items as $item => $quantity ) {
+				$item     = absint( $item );
 				$quantity = wc_stock_amount( $quantity );
-				if ( $quantity <= 0 ) {
+				if ( ! $item || $quantity <= 0 ) {
 					continue;
 				}
 				$quantity_set = true;
@@ -1367,7 +1480,7 @@ class WC_Form_Handler {
 		}
 
 		// Prevent parent variable product from being added to cart.
-		if ( empty( $variation_id ) && $product && $product->is_type( ProductType::VARIABLE ) ) {
+		if ( empty( $variation_id ) && $product && $product->is_type( ProductType::VARIABLE ) && $product->is_viewable() ) {
 			$current_url        = isset( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH ) : '';
 			$product_url        = wp_parse_url( get_permalink( $product_id ), PHP_URL_PATH );
 			$is_in_product_page = $current_url && $product_url && untrailingslashit( $current_url ) === untrailingslashit( $product_url );
@@ -1546,6 +1659,11 @@ class WC_Form_Handler {
 		$nonce_value = isset( $_POST['woocommerce-register-nonce'] ) ? wp_unslash( $_POST['woocommerce-register-nonce'] ) : $nonce_value; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		if ( isset( $_POST['register'], $_POST['email'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-register' ) ) {
+			if ( 'yes' !== get_option( 'woocommerce_enable_myaccount_registration' ) ) {
+				wc_add_notice( __( 'Registration is disabled.', 'woocommerce' ), 'error' );
+				return;
+			}
+
 			$username = 'no' === get_option( 'woocommerce_registration_generate_username' ) && isset( $_POST['username'] ) ? wp_unslash( $_POST['username'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$password = 'no' === get_option( 'woocommerce_registration_generate_password' ) && isset( $_POST['password'] ) ? $_POST['password'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$email    = wp_unslash( $_POST['email'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

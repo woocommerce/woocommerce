@@ -7,7 +7,7 @@ import {
 	AttributeQuery,
 	AttributeTerm,
 } from '@woocommerce/types';
-import { sort } from 'fast-sort';
+import { compareStrings } from '@woocommerce/utils/compare-strings';
 
 /**
  * Given a query object, removes an attribute filter by a single slug.
@@ -52,7 +52,11 @@ export const removeAttributeFilterBySlug = (
 		returnQuery.push( currentQuery );
 	}
 
-	setQuery( sort( returnQuery ).asc( 'attribute' ) );
+	setQuery(
+		[ ...returnQuery ].sort( ( a, b ) =>
+			compareStrings( a.attribute, b.attribute )
+		)
+	);
 };
 
 /**
@@ -89,7 +93,11 @@ export const updateAttributeFilter = (
 			operator,
 			slug: attributeTerms.map( ( { slug } ) => slug ).sort(),
 		} );
-		setQuery( sort( returnQuery ).asc( 'attribute' ) );
+		setQuery(
+			[ ...returnQuery ].sort( ( a, b ) =>
+				compareStrings( a.attribute, b.attribute )
+			)
+		);
 	}
 
 	return returnQuery;

@@ -3,7 +3,7 @@
 const JsonRefs = require( 'json-refs' );
 const fs = require( 'fs' );
 const yaml = require( 'js-yaml' );
-const commander = require( 'commander' );
+const { program } = require( 'commander' );
 const path = require( 'path' );
 
 let indexJsonValue;
@@ -76,7 +76,7 @@ function build( indexJson ) {
 		} );
 }
 
-commander
+program
 	.version( '1.0' )
 	.arguments( '<indexJson>' )
 	.action( function ( indexJson ) {

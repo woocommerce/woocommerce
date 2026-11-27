@@ -29,9 +29,9 @@ export async function checkCartContentInClassicCart(
 			.filter( { hasText: product.data.name } );
 
 		await expect( row ).toHaveCount( 1 );
-		await expect( row.getByLabel( 'Product quantity' ) ).toHaveValue(
-			product.qty.toString()
-		);
+		await expect(
+			row.getByLabel( `${ product.data.name } quantity`, { exact: true } )
+		).toHaveValue( product.qty.toString() );
 
 		await expect( row.locator( 'td.product-price' ) ).toHaveText(
 			`$${ formatAmount( product.data.price ) }`

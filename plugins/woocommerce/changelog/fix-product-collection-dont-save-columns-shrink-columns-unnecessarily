@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Product Collection block: don't save columns and shrinkColumns attributes when not used

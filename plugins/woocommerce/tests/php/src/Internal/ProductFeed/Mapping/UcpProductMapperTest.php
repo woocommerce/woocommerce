@@ -226,6 +226,84 @@ class UcpProductMapperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A request with no selection should report the featured variation's options as selected.
+	 */
+	public function test_detail_without_selection_reports_the_featured_variation(): void {
+		$variable = new \WC_Product_Variable();
+		$variable->set_name( 'Default Selection' );
+		$variable->set_status( 'publish' );
+		$variable->set_attributes( array( WC_Helper_Product::create_product_attribute_object( 'size', array( 'small', 'large' ) ) ) );
+		$parent_id = $variable->save();
+
+		$ids = array();
+		foreach ( array( 'small', 'large' ) as $size ) {
+			$variation = new \WC_Product_Variation();
+			$variation->set_parent_id( $parent_id );
+			$variation->set_attributes( array( 'pa_size' => $size ) );
+			$variation->set_regular_price( '10' );
+			$variation->set_status( 'publish' );
+			$ids[ $size ] = $variation->save();
+		}
+
+		\WC_Product_Variable::sync( $parent_id );
+		$mapper = new UcpProductMapper( 'USD' );
+
+		$mapped = $mapper->map_detail_product( wc_get_product( $parent_id ) );
+		$this->assertSame( 'small', $mapped['selected'][0]['label'] );
+		$this->assertSame( (string) $ids['small'], $mapped['variants'][0]['id'] );
+
+		$product = wc_get_product( $parent_id );
+		$product->set_default_attributes( array( 'pa_size' => 'large' ) );
+		$product->save();
+
+		$mapped = $mapper->map_detail_product( wc_get_product( $parent_id ) );
+		$this->assertSame( 'large', $mapped['selected'][0]['label'] );
+		$this->assertSame( (string) $ids['large'], $mapped['variants'][0]['id'] );
+		$this->assertCount( 2, $mapped['variants'] );
+	}
+
+	/**
+	 * @testdox The featured variation should come from the variants left after the returned prices are filtered.
+	 */
+	public function test_detail_features_a_variation_the_returned_prices_keep(): void {
+		$variable = new \WC_Product_Variable();
+		$variable->set_name( 'Featured In Range' );
+		$variable->set_status( 'publish' );
+		$variable->set_attributes( array( WC_Helper_Product::create_product_attribute_object( 'size', array( 'small', 'large' ) ) ) );
+		$parent_id = $variable->save();
+
+		$ids = array();
+		foreach ( array(
+			'small' => '10',
+			'large' => '12',
+		) as $size => $price ) {
+			$variation = new \WC_Product_Variation();
+			$variation->set_parent_id( $parent_id );
+			$variation->set_attributes( array( 'pa_size' => $size ) );
+			$variation->set_regular_price( $price );
+			$variation->set_status( 'publish' );
+			$ids[ $size ] = $variation->save();
+		}
+
+		\WC_Product_Variable::sync( $parent_id );
+
+		// The cached price list keeps small at 10; its returned price is 20.
+		$raise_small = function ( $price, $variation ) use ( $ids ) {
+			return $variation->get_id() === $ids['small'] ? '20' : $price;
+		};
+		add_filter( 'woocommerce_product_variation_get_price', $raise_small, 10, 2 );
+
+		$mapper = new UcpProductMapper( 'USD' );
+		$mapper->begin_response( array( 'max' => 1500 ) );
+		$mapped = $mapper->map_detail_product( wc_get_product( $parent_id ) );
+
+		remove_filter( 'woocommerce_product_variation_get_price', $raise_small, 10 );
+
+		$this->assertSame( array( (string) $ids['large'] ), array_column( $mapped['variants'], 'id' ) );
+		$this->assertSame( 'large', $mapped['selected'][0]['label'] );
+	}
+
+	/**
 	 * The storefront treats an "Any" variation attribute as a wildcard and
 	 * `options` advertises every term for it, so a selection must match it too.
 	 *
@@ -321,5 +399,53 @@ class UcpProductMapperTest extends \WC_Unit_Test_Case {
 			),
 			$mapped['variants'][0]['options']
 		);
+	}
+
+	/**
+	 * Agents match offers across stores by GTIN, so a valid one must reach the
+	 * variant, normalized to digits, and an invalid one must not.
+	 *
+	 * @testdox A valid GTIN should be sent as a variant barcode and an invalid one should be left out.
+	 */
+	public function test_valid_gtin_is_sent_as_a_variant_barcode(): void {
+		$mapper = new UcpProductMapper( 'USD' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_global_unique_id( '4006-3813-3393-1' );
+		$product->save();
+
+		$this->assertSame(
+			array(
+				array(
+					'type'  => 'GTIN',
+					'value' => '4006381333931',
+				),
+			),
+			$mapper->map_product( $product )['variants'][0]['barcodes']
+		);
+
+		$product->set_global_unique_id( '12345' );
+		$product->save();
+
+		$this->assertArrayNotHasKey( 'barcodes', $mapper->map_product( $product )['variants'][0] );
+	}
+
+	/**
+	 * @testdox Each variation should send its own GTIN, not the parent's.
+	 */
+	public function test_variation_sends_its_own_gtin(): void {
+		$variable = WC_Helper_Product::create_variation_product();
+		$variable->set_global_unique_id( '96385074' );
+		$variable->save();
+
+		$children = $variable->get_children();
+		$own      = wc_get_product( $children[0] );
+		$own->set_global_unique_id( '4006381333931' );
+		$own->save();
+
+		$variants = array_column( ( new UcpProductMapper( 'USD' ) )->map_product( wc_get_product( $variable->get_id() ) )['variants'], null, 'id' );
+
+		$this->assertSame( '4006381333931', $variants[ (string) $children[0] ]['barcodes'][0]['value'] );
+		$this->assertArrayNotHasKey( 'barcodes', $variants[ (string) $children[1] ] );
 	}
 }

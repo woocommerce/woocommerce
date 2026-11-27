@@ -13,8 +13,8 @@ use Automattic\WooCommerce\Internal\Utilities\Users;
  * short-lived, single-use verification key carried by the emailed verify-link, together
  * with the helpers consumed by the rest of the email-verification feature.
  *
- * The verify-link is only ever *completed* by a request authenticated as the link's target
- * user (see {@see VerificationController::handle_confirm_submission()}), so the key needs no
+ * The verify-link is only ever *completed* with the target user's password (see
+ * {@see VerificationController::handle_confirm_form()}), so the key needs no
  * brute-force protection: it is high-entropy ({@see self::KEY_LENGTH} chars), single-use, and
  * expires after {@see self::KEY_TTL}.
  *
@@ -90,18 +90,27 @@ class EmailVerificationService {
 	 * @since 11.0.0
 	 *
 	 * @param int         $user_id        WordPress user ID.
-	 * @param string|null $expected_email Email address proven by the verification flow.
+	 * @param string|null $expected_email Email address proven by the verification flow. If omitted or null, no verification is performed.
 	 * @return void
 	 */
-	public function mark_verified( int $user_id, ?string $expected_email ): void {
+	public function mark_verified( int $user_id, ?string $expected_email = null ): void {
 		if ( $this->is_verified( $user_id ) ) {
 			return;
 		}
 
-		$account_email  = $this->get_account_email( $user_id );
-		$expected_email = null !== $expected_email ? strtolower( $expected_email ) : null;
+		if ( null === $expected_email ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				'Verification was skipped because no expected email was provided. Pass the email address proven by the verification flow as the second argument.',
+				'11.3.0'
+			);
+			return;
+		}
 
-		if ( null === $expected_email || null === $account_email || $expected_email !== $account_email ) {
+		$account_email  = $this->get_account_email( $user_id );
+		$expected_email = strtolower( $expected_email );
+
+		if ( null === $account_email || $expected_email !== $account_email ) {
 			return;
 		}
 

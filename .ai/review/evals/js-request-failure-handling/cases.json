@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G33A-v3",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
+			"before": {
+				"file": "fixtures/G33A/before.js"
+			},
+			"after": {
+				"file": "fixtures/G33A/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
+						"lines": [
+							2,
+							2
+						],
+						"anchor": "export async function loadSuggestions( url, setSuggestions, restoreManualEntry ) { try { const response = await fetch( url ); if ( ! response.ok ) { throw new Error( 'Request failed' ); } setSuggestions( await response.json() ); } finally { /* request settled */ } }"
+					}
+				]
+			}
+		},
+		{
+			"id": "G33C-v3",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
+			"before": {
+				"file": "fixtures/G33C/before.js"
+			},
+			"after": {
+				"file": "fixtures/G33C/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G33D-v3",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
+			"before": {
+				"file": "fixtures/G33D/before.js"
+			},
+			"after": {
+				"file": "fixtures/G33D/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G33B-v5",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
+			"before": {
+				"code": "/* Cart reads this localStorage cache before initial render; a cache miss is refreshed from the server. */\nexport function readCartCache( storage ) { try { const value = JSON.parse( storage.getItem( 'wc-cart' ) ); return value && Array.isArray( value.items ) ? value.items : []; } catch ( error ) { return []; } }\n"
+			},
+			"after": {
+				"code": "/* Cart reads this localStorage cache before initial render; a cache miss is refreshed from the server. */\nexport function readCartCache( storage ) { const value = JSON.parse( storage.getItem( 'wc-cart' ) ); return value && Array.isArray( value.items ) ? value.items : []; }\n"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
+						"lines": [
+							2,
+							2
+						],
+						"anchor": "export function readCartCache( storage ) { const value = JSON.parse( storage.getItem( 'wc-cart' ) ); return value && Array.isArray( value.items ) ? value.items : []; }"
+					}
+				]
+			}
+		}
+	]
+}

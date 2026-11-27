@@ -26,3 +26,9 @@
 		display: none;
 	}
 }
+
+// From WordPress 7.2 core renders its "Template: ..." panel with "Edit" and "Create new".
+// Hide "Create new", which adds a site template instead of an email template.
+.editor-template-actions-panel__action:not(:first-child) {
+	display: none;
+}

@@ -83,7 +83,6 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		$current_section = $this->original_current_section;
 		$current_tab     = $this->original_current_tab;
 
-		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		foreach ( array( 'acme-native-settings-ui', 'acme-payments-settings-ui', 'direct-payments-settings-ui' ) as $script_handle ) {
 			wp_dequeue_script( $script_handle );
 			wp_deregister_script( $script_handle );
@@ -1072,5 +1071,38 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		$settings_property->setValue( null, $settings_pages );
 
 		return $previous_settings;
+	}
+
+	/**
+	 * @testdox Should report a gateway collision in English, whatever the site language.
+	 */
+	public function test_gateway_collision_notice_is_not_translated(): void {
+		$this->setExpectedIncorrectUsage( SettingsSectionRegistry::class . '::register' );
+		add_filter(
+			'gettext',
+			function ( $translation, $text, $domain ) {
+				return 'woocommerce' === $domain ? 'Übersetzt: ' . $text : $translation;
+			},
+			10,
+			3
+		);
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			function ( $function_name, $message ) use ( &$messages ) {
+				$messages[ $function_name ] = $message;
+			},
+			10,
+			2
+		);
+
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section( 'bacs' ) );
+
+		$this->assertArrayHasKey( SettingsSectionRegistry::class . '::register', $messages, 'The collision should raise a notice.' );
+		$this->assertStringStartsWith(
+			'The settings section &quot;checkout/bacs&quot; conflicts with an existing payment gateway section.',
+			$messages[ SettingsSectionRegistry::class . '::register' ],
+			'The notice should be the escaped English message.'
+		);
 	}
 }

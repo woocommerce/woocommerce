@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Fix webhooks REST pagination links for unaligned offsets from unreleased #68499; no merchant change.

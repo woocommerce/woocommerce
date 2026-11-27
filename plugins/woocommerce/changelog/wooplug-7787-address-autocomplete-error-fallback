@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restore browser autofill when checkout address suggestions fail or return no matches.

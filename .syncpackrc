@@ -26,13 +26,38 @@
 			"isBanned": true
 		},
 		{
+			"label": "block-library pins @types/lodash 4.14.182 until its remaining lodash use is removed",
 			"dependencies": [
-				"@types/node"
+				"@types/lodash"
+			],
+			"packages": [
+				"@woocommerce/block-library"
+			],
+			"isIgnored": true
+		},
+		{
+			"label": "Shared type declarations",
+			"dependencyTypes": [
+				"prod",
+				"dev",
+				"pnpmOverrides"
+			],
+			"dependencies": [
+				"@types/debug",
+				"@types/jest",
+				"@types/lodash",
+				"@types/node",
+				"@types/prop-types",
+				"@types/qs",
+				"@types/react",
+				"@types/react-dom",
+				"@types/react-transition-group",
+				"@types/semver"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^24.1.0"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [
@@ -108,7 +133,8 @@
 			"label": "Shared build tooling",
 			"dependencyTypes": [
 				"prod",
-				"dev"
+				"dev",
+				"pnpmOverrides"
 			],
 			"dependencies": [
 				"@babel/cli",
@@ -118,13 +144,40 @@
 				"@babel/preset-react",
 				"@babel/preset-typescript",
 				"@babel/runtime",
+				"@commander-js/extra-typings",
+				"@jest/globals",
+				"@oclif/core",
+				"@wordpress/browserslist-config",
 				"@wordpress/env",
-				"@wordpress/prettier-config",
 				"@wordpress/postcss-plugins-preset",
+				"@wordpress/prettier-config",
 				"@wordpress/scripts",
+				"axios",
+				"babel-jest",
+				"babel-loader",
+				"babel-plugin-transform-react-remove-prop-types",
+				"commander",
+				"copy-webpack-plugin",
+				"css-loader",
+				"eslint",
+				"jest",
+				"jest-circus",
+				"jest-cli",
+				"jest-environment-jsdom",
+				"jest-environment-node",
+				"jest-fixed-jsdom",
+				"mini-css-extract-plugin",
 				"postcss",
+				"postcss-loader",
 				"prettier",
-				"webpack"
+				"rimraf",
+				"sass",
+				"sass-loader",
+				"simple-git",
+				"ts-jest",
+				"typescript",
+				"webpack",
+				"webpack-cli"
 			],
 			"packages": [
 				"**"
@@ -132,14 +185,17 @@
 			"policy": "catalog"
 		},
 		{
-			"label": "Babel dependencies: babel-plugin-transform-react-remove-prop-types - reduce build artifacts size",
-			"dependencies": [
-				"babel-plugin-transform-react-remove-prop-types"
+			"label": "Preserve public ESLint peer compatibility ranges",
+			"dependencyTypes": [
+				"peer"
 			],
-			"pinVersion": "0.4.24",
+			"dependencies": [
+				"eslint"
+			],
 			"packages": [
 				"**"
-			]
+			],
+			"isIgnored": true
 		},
 		{
 			"label": "React-related dependencies: React 18",
@@ -183,74 +239,6 @@
 		},
 		{
 			"dependencies": [
-				"typescript"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "5.7.x"
-		},
-		{
-			"dependencies": [
-				"jest-fixed-jsdom"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^0.0.10"
-		},
-		{
-			"label": "ESLint dev target. Peer deps are excluded so @woocommerce/eslint-plugin can peer the wider `^9 || ^10` range.",
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"eslint"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^10.0.0"
-		},
-		{
-			"dependencies": [
-				"webpack-cli"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "5.1.x"
-		},
-		{
-			"dependencies": [
-				"webpack-dev-server"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "4.15.x"
-		},
-		{
-			"dependencies": [
-				"babel-loader"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "9.2.x"
-		},
-		{
-			"dependencies": [
-				"css-loader"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "6.11.x"
-		},
-		{
-			"dependencies": [
 				"ignore-loader"
 			],
 			"packages": [
@@ -278,15 +266,6 @@
 		},
 		{
 			"dependencies": [
-				"copy-webpack-plugin"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "13.0.x"
-		},
-		{
-			"dependencies": [
 				"progress-bar-webpack-plugin"
 			],
 			"packages": [
@@ -311,15 +290,6 @@
 				"**"
 			],
 			"pinVersion": "2.0.x"
-		},
-		{
-			"dependencies": [
-				"mini-css-extract-plugin"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "2.9.x"
 		},
 		{
 			"dependencies": [
@@ -434,7 +404,6 @@
 			"dependencies": [
 				"@wordpress/babel-plugin-import-jsx-pragma",
 				"@wordpress/babel-preset-default",
-				"@wordpress/browserslist-config",
 				"@wordpress/dependency-extraction-webpack-plugin",
 				"@wordpress/jest-preset-default",
 				"@wordpress/postcss-themes"
@@ -512,48 +481,12 @@
 		},
 		{
 			"dependencies": [
-				"postcss-loader"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "4.3.x"
-		},
-		{
-			"dependencies": [
 				"rtlcss"
 			],
 			"packages": [
 				"**"
 			],
 			"pinVersion": "4.3.x"
-		},
-		{
-			"dependencies": [
-				"rimraf"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "5.0.5"
-		},
-		{
-			"dependencies": [
-				"sass-loader"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "10.5.x"
-		},
-		{
-			"dependencies": [
-				"simple-git"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^3.21.0"
 		},
 		{
 			"dependencyTypes": [
@@ -576,53 +509,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^9.0.1"
-		},
-		{
-			"label": "Testing related dependencies: React 18",
-			"dependencies": [
-				"@jest/test-sequencer",
-				"@types/jest",
-				"jest",
-				"jest-cli",
-				"jest-circus",
-				"jest-each",
-				"jest-environment-jsdom",
-				"jest-environment-node",
-				"babel-jest"
-			],
-			"packages": [
-				"@woocommerce/block-library",
-				"@woocommerce/storybook"
-			],
-			"pinVersion": "29.5.x"
-		},
-		{
-			"label": "Testing related dependencies: React 17",
-			"dependencies": [
-				"@jest/test-sequencer",
-				"@types/jest",
-				"jest",
-				"jest-cli",
-				"jest-circus",
-				"jest-each",
-				"jest-environment-jsdom",
-				"jest-environment-node",
-				"babel-jest"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "29.5.x"
-		},
-		{
-			"dependencies": [
-				"ts-jest"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "29.1.x"
+			"pinVersion": "^11.1.1"
 		},
 		{
 			"dependencies": [
@@ -640,7 +527,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "3.4.14"
+			"pinVersion": "3.4.17"
 		},
 		{
 			"dependencies": [

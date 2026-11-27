@@ -86,6 +86,34 @@ class OptionsPermissionsTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Allowlisted options require manage_woocommerce.
+	 * @testWith ["shop_manager", 200]
+	 *           ["order_only", 403]
+	 *
+	 * @param string $user_type Tested user: a Shop Manager, or a user with only edit_others_shop_orders.
+	 * @param int    $expected_status Expected status for both the read and the write.
+	 */
+	public function test_allowlisted_options_require_manage_woocommerce( string $user_type, int $expected_status ): void {
+		if ( 'order_only' === $user_type ) {
+			$user = self::factory()->user->create_and_get( array( 'role' => 'subscriber' ) );
+			$user->add_cap( 'edit_others_shop_orders' );
+		} else {
+			$user = self::factory()->user->create_and_get( array( 'role' => 'shop_manager' ) );
+		}
+		wp_set_current_user( $user->ID );
+		$original_value = array( array( 'account_number' => 'original' ) );
+		$new_value      = array( array( 'account_number' => 'changed' ) );
+		update_option( 'woocommerce_bacs_accounts', $original_value );
+
+		$read_response = $this->get_options( array( 'woocommerce_bacs_accounts' ) );
+		$this->assertSame( $expected_status, $read_response->get_status(), "Unexpected read status for {$user_type}." );
+
+		$write_response = $this->post_options( array( 'woocommerce_bacs_accounts' => $new_value ) );
+		$this->assertSame( $expected_status, $write_response->get_status(), "Unexpected write status for {$user_type}." );
+		$this->assertSame( 200 === $expected_status ? $new_value : $original_value, get_option( 'woocommerce_bacs_accounts' ), "Unexpected stored value for {$user_type}." );
+	}
+
+	/**
 	 * @testdox The legacy filter can explicitly grant option access.
 	 */
 	public function test_filter_can_grant_option_access(): void {
@@ -99,17 +127,13 @@ class OptionsPermissionsTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'woocommerce_rest_api_option_permissions', $grant_permission );
 		$this->setExpectedDeprecated( 'woocommerce_rest_api_option_permissions' );
 
-		try {
-			$read_response = $this->get_options( array( self::UNLISTED_OPTION ) );
-			$this->assertSame( 200, $read_response->get_status(), 'A filtered option should be readable.' );
-			$this->assertSame( 'original', $read_response->get_data()[ self::UNLISTED_OPTION ], 'The filtered option should return its stored value.' );
+		$read_response = $this->get_options( array( self::UNLISTED_OPTION ) );
+		$this->assertSame( 200, $read_response->get_status(), 'A filtered option should be readable.' );
+		$this->assertSame( 'original', $read_response->get_data()[ self::UNLISTED_OPTION ], 'The filtered option should return its stored value.' );
 
-			$write_response = $this->post_options( array( self::UNLISTED_OPTION => 'changed' ) );
-			$this->assertSame( 200, $write_response->get_status(), 'A filtered option should be writable.' );
-			$this->assertSame( 'changed', get_option( self::UNLISTED_OPTION ), 'The filtered option should be updated.' );
-		} finally {
-			remove_filter( 'woocommerce_rest_api_option_permissions', $grant_permission );
-		}
+		$write_response = $this->post_options( array( self::UNLISTED_OPTION => 'changed' ) );
+		$this->assertSame( 200, $write_response->get_status(), 'A filtered option should be writable.' );
+		$this->assertSame( 'changed', get_option( self::UNLISTED_OPTION ), 'The filtered option should be updated.' );
 	}
 
 	/**

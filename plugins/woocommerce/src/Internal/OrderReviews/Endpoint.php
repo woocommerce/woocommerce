@@ -21,8 +21,12 @@ use WP_Post;
  *
  * - It is not a checkout sub-mode like order-pay or order-received; the
  *   customer is reviewing past purchases, not transacting.
- * - It is not a my-account endpoint because the order key is the auth, so
- *   guest customers must be able to reach it without logging in.
+ * - It is not a my-account endpoint because a guest order's key is the auth,
+ *   so guest customers reach it without logging in. An order that belongs to a
+ *   registered customer requires that customer's session, the same default
+ *   `order_received` and the Store API order route apply. The opt-out is this
+ *   route's own filter; `woocommerce_order_received_verify_known_shoppers` does
+ *   not carry over.
  *
  * The route uses the same wp_posts-backed page pattern as the checkout
  * page so the active theme owns the page chrome (header, footer, sidebar)
@@ -56,6 +60,11 @@ class Endpoint {
 	public const SHORTCODE = 'woocommerce_review_order';
 
 	/**
+	 * Query arg carried to the login page so signing in returns here.
+	 */
+	public const RETURN_QUERY_VAR = 'wc_review_return';
+
+	/**
 	 * Wire the endpoint into WordPress.
 	 *
 	 * Auto-called by the WC dependency container after instantiation. The
@@ -79,6 +88,7 @@ class Endpoint {
 		// Status → Tools "Create default pages" and any other repair caller see it too.
 		add_filter( 'woocommerce_create_pages', array( $this, 'inject_review_order_page' ) );
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
+		add_filter( 'woocommerce_login_redirect', array( $this, 'maybe_return_to_review' ) );
 	}
 
 	/**
@@ -546,6 +556,19 @@ class Endpoint {
 			exit;
 		}
 
+		// Sign-in is handled by the store's login page, not by this one, so the
+		// redirect happens here on `template_redirect`, before any output.
+		if ( $order instanceof WC_Order && self::requires_login( $order ) ) {
+			wp_safe_redirect( self::login_url( $order ) );
+			exit;
+		}
+
+		// Someone signed in as a different customer cannot be helped by signing
+		// in again; they get an explanation instead of the form.
+		if ( $order instanceof WC_Order && self::viewer_is_another_customer( $order ) ) {
+			return;
+		}
+
 		// Register the page-title suppression filters now that the request
 		// is fully authorised. Doing this here instead of `init()` keeps the
 		// filters out of every unrelated page render and removes the need
@@ -594,10 +617,34 @@ class Endpoint {
 			return '';
 		}
 
+		return $order instanceof WC_Order ? $this->render_body( $order ) : '';
+	}
+
+	/**
+	 * The page body: the review form, or a login prompt in its place. Both
+	 * render paths go through here so they cannot show different things.
+	 *
+	 * @param WC_Order $order The order being reviewed.
+	 * @return string
+	 */
+	private function render_body( WC_Order $order ): string {
+		if ( self::viewer_is_another_customer( $order ) ) {
+			ob_start();
+			echo '<div class="woocommerce"><div class="woocommerce-notices-wrapper">' . wc_print_notice( __( 'This order belongs to a different account, so you cannot review it.', 'woocommerce' ), 'error', array(), true ) . '</div></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_print_notice() returns kses-filtered markup.
+			return (string) ob_get_clean();
+		}
+
+		// A visitor who needs to sign in was redirected on `template_redirect`;
+		// reaching here means the shortcode ran outside that path.
+		if ( self::requires_login( $order ) ) {
+			return '';
+		}
+
 		ob_start();
 		wc_get_template( 'order/customer-review-order.php', array( 'order' => $order ) );
 		return (string) ob_get_clean();
 	}
+
 
 	/**
 	 * Render the Review Order body directly. Public so unit tests can drive
@@ -616,11 +663,13 @@ class Endpoint {
 			return;
 		}
 
-		if ( $order instanceof WC_Order ) {
-			$this->maybe_mark_no_actionable_rows( $order );
+		if ( ! $order instanceof WC_Order ) {
+			return;
 		}
 
-		wc_get_template( 'order/customer-review-order.php', array( 'order' => $order ) );
+		$this->maybe_mark_no_actionable_rows( $order );
+
+		echo $this->render_body( $order ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_get_template(), wc_print_notice() and woocommerce_login_form() output, escaped at source.
 	}
 
 	/**
@@ -637,6 +686,12 @@ class Endpoint {
 	 * @param WC_Order $order Order being reviewed.
 	 */
 	private function maybe_mark_no_actionable_rows( WC_Order $order ): void {
+		// A visitor who never sees the rows completes nothing. Checked here
+		// rather than at each caller so a new caller cannot forget it.
+		if ( self::requires_login( $order ) || self::viewer_is_another_customer( $order ) ) {
+			return;
+		}
+
 		$completed_meta_key = SubmissionHandler::COMPLETED_META_KEY;
 		if ( $order->get_meta( $completed_meta_key ) ) {
 			return;
@@ -770,12 +825,125 @@ class Endpoint {
 			return false;
 		}
 
-		// Logged-in customer must own the order. Guests with the order key still pass.
-		if ( $order->get_customer_id() && is_user_logged_in() && get_current_user_id() !== $order->get_customer_id() ) {
+		return true;
+	}
+
+	/**
+	 * Whether the visitor has to sign in before the form is shown, because the
+	 * order belongs to a registered customer. `order_received` and the Store API
+	 * ask the same of those orders.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param WC_Order $order The order being reviewed.
+	 * @return bool
+	 */
+	public static function requires_owner_login( WC_Order $order ): bool {
+		if ( ! $order->get_customer_id() || is_user_logged_in() ) {
 			return false;
 		}
 
-		return true;
+		/**
+		 * Filter whether an order that belongs to a registered customer requires
+		 * that customer to be signed in before it can be reviewed.
+		 *
+		 * Register it unconditionally: this runs both on the front end and in
+		 * `admin-ajax.php`, so an `is_admin()` guard around `add_filter()` would
+		 * open the page but leave every submission refused. Returning false does
+		 * not reopen the page on a store that also requires an account to
+		 * comment, since that requirement is checked separately.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param bool     $required Whether a session is required.
+		 * @param WC_Order $order    The order being reviewed.
+		 */
+		return (bool) apply_filters( 'woocommerce_review_order_verify_known_shoppers', true, $order );
+	}
+
+	/**
+	 * Whether the store's "users must be registered and logged in to comment"
+	 * setting blocks this visitor. `wp_new_comment()` never applies it, so this
+	 * flow has to ask for itself.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return bool
+	 */
+	public static function requires_registered_account(): bool {
+		return ! is_user_logged_in() && (bool) get_option( 'comment_registration' );
+	}
+
+	/**
+	 * Send a customer back to the Review Order page after signing in.
+	 *
+	 * The My Account login form posts no `redirect` of its own, so
+	 * `WC_Form_Handler::process_login()` falls back to the referer — the login
+	 * page URL, which still carries the return arg this route added.
+	 *
+	 * @internal
+	 *
+	 * @param string $redirect Where WooCommerce intends to send the customer.
+	 * @return string
+	 */
+	public function maybe_return_to_review( $redirect ): string {
+		$redirect = (string) $redirect;
+		$query    = (string) wp_parse_url( $redirect, PHP_URL_QUERY );
+		if ( '' === $query ) {
+			return $redirect;
+		}
+
+		$args = array();
+		wp_parse_str( $query, $args );
+		// `wp_parse_str()` yields an array for `?arg[]=…`, which is not a target.
+		$raw    = $args[ self::RETURN_QUERY_VAR ] ?? '';
+		$target = is_string( $raw ) ? $raw : '';
+
+		// Same-host only; `wp_validate_redirect()` falls back when it is not.
+		return $target ? wp_validate_redirect( $target, $redirect ) : $redirect;
+	}
+
+	/**
+	 * Whether this visitor has to sign in before the order can be reviewed:
+	 * the order belongs to a registered customer who is not signed in, or the
+	 * store only accepts reviews from registered accounts.
+	 *
+	 * @param WC_Order $order The order being reviewed.
+	 * @return bool
+	 */
+	private static function requires_login( WC_Order $order ): bool {
+		if ( is_user_logged_in() ) {
+			return false;
+		}
+
+		return self::requires_owner_login( $order ) || self::requires_registered_account();
+	}
+
+	/**
+	 * Whether the visitor is signed in as somebody other than the order's
+	 * customer. Signing in again cannot help them.
+	 *
+	 * @param WC_Order $order The order being reviewed.
+	 * @return bool
+	 */
+	private static function viewer_is_another_customer( WC_Order $order ): bool {
+		$customer_id = (int) $order->get_customer_id();
+
+		return $customer_id > 0 && is_user_logged_in() && get_current_user_id() !== $customer_id;
+	}
+
+	/**
+	 * The store's login page, returning here once the customer has signed in.
+	 *
+	 * @param WC_Order $order The order being reviewed.
+	 * @return string
+	 */
+	private static function login_url( WC_Order $order ): string {
+		$account_page = wc_get_page_permalink( 'myaccount', '' );
+
+		return $account_page
+			? add_query_arg( self::RETURN_QUERY_VAR, rawurlencode( self::get_url( $order ) ), $account_page )
+			: wp_login_url( self::get_url( $order ) );
 	}
 
 	/**

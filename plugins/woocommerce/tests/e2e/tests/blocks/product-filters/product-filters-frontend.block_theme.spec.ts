@@ -1,31 +1,19 @@
 /**
  * External dependencies
  */
-import {
-	TemplateCompiler,
-	getProductAttributeIds,
-	test as base,
-	expect,
-} from '@woocommerce/e2e-utils';
-
-const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-	templateCompiler: async ( { requestUtils }, provideTemplate ) => {
-		const compiler = await requestUtils.createTemplateFromFile(
-			'archive-product_attribute-filter'
-		);
-		await provideTemplate( compiler );
-	},
-} );
+import { getProductAttributeIds, test, expect } from '@woocommerce/e2e-utils';
 
 test.describe( 'woocommerce/product-filters - Frontend', () => {
 	test.describe( 'Overlay', () => {
-		test.beforeEach( async ( { templateCompiler, page } ) => {
+		let postLink: string;
+
+		test.beforeEach( async ( { createPost, page } ) => {
 			const { colorAttributeId } = await getProductAttributeIds();
-			await templateCompiler.compile( {
+			( { link: postLink } = await createPost( 'attribute-filter', {
 				attributes: {
 					attributeId: colorAttributeId,
 				},
-			} );
+			} ) );
 
 			await page.addInitScript( () => {
 				// Mock the wc global variable.
@@ -45,21 +33,23 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			page,
 		} ) => {
 			await page.setViewportSize( { width: 400, height: 600 } );
-			await page.goto( '/shop' );
+			await page.goto( postLink );
 
 			const openOverlayButton = page.getByRole( 'button', {
 				name: 'Filter products',
 			} );
-			const overlay = page.getByRole( 'dialog', {
-				name: 'Product Filters',
+			const overlay = page.getByLabel( 'Product Filters', {
+				exact: true,
 			} );
 
 			await expect( openOverlayButton ).toBeVisible();
-			await expect( overlay ).toHaveCount( 0 );
+			await expect( overlay ).toBeHidden();
 
 			await openOverlayButton.click();
 
 			await expect( overlay ).toBeInViewport();
+			await expect( overlay ).toHaveAttribute( 'role', 'dialog' );
+			await expect( overlay ).toHaveAttribute( 'aria-modal', 'true' );
 
 			// Close overlay by clicking close button.
 			const closeOverlayButton = page.getByRole( 'button', {
@@ -71,7 +61,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			await closeOverlayButton.click();
 
 			await expect( openOverlayButton ).toBeFocused();
-			await expect( overlay ).toHaveCount( 0 );
+			await expect( overlay ).toBeHidden();
 
 			// Close overlay by hitting Esc.
 			await openOverlayButton.click();
@@ -82,7 +72,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			await page.keyboard.press( 'Escape' );
 
 			await expect( openOverlayButton ).toBeFocused();
-			await expect( overlay ).toHaveCount( 0 );
+			await expect( overlay ).toBeHidden();
 
 			// Close overlay by clicking Apply button.
 			await openOverlayButton.click();
@@ -101,7 +91,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			await applyButton.click();
 
 			await expect( openOverlayButton ).toBeFocused();
-			await expect( overlay ).toHaveCount( 0 );
+			await expect( overlay ).toBeHidden();
 
 			await openOverlayButton.click();
 			await expect( closeOverlayButton ).toBeFocused();
@@ -110,7 +100,9 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 
 			await page.setViewportSize( { width: 1280, height: 800 } );
 			await expect( openOverlayButton ).toBeHidden();
-			await expect( overlay ).not.toHaveAttribute( 'aria-modal', 'true' );
+			await expect( overlay ).toBeVisible();
+			await expect( overlay ).not.toHaveAttribute( 'role', 'dialog' );
+			await expect( overlay ).not.toHaveAttribute( 'aria-modal' );
 			await expect( lastFilter ).toBeFocused();
 			await page.keyboard.press( 'Tab' );
 			await expect
@@ -122,7 +114,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 				.toBe( false );
 
 			await page.setViewportSize( { width: 400, height: 600 } );
-			await expect( overlay ).toHaveCount( 0 );
+			await expect( overlay ).toBeHidden();
 			await openOverlayButton.click();
 			await expect( closeOverlayButton ).toBeFocused();
 			await page.keyboard.press( 'Escape' );
@@ -133,7 +125,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 
 		test.skip( 'filter is working inside overlay', async ( { page } ) => {
 			await page.setViewportSize( { width: 400, height: 600 } );
-			await page.goto( '/shop' );
+			await page.goto( postLink );
 
 			await page
 				.getByRole( 'button', {
@@ -150,7 +142,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 				.click();
 
 			// wait for navigation
-			await page.waitForURL( /.*filter_color=gray.*/ );
+			await page.waitForURL( /.*wcp-1-filter_color=gray.*/ );
 
 			const products = page.locator( '.wc-block-product' );
 
@@ -161,7 +153,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 	test.describe( 'Multiple instances', () => {
 		test( 'syncs active filters between Product Filters blocks', async ( {
 			page,
-			requestUtils,
+			createPost,
 		} ) => {
 			await page.addInitScript( () => {
 				// Mock the wc global variable.
@@ -176,18 +168,14 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 				}
 			} );
 
-			const templateCompiler = await requestUtils.createTemplateFromFile(
-				'archive-product_multiple-product-filters'
-			);
 			const { colorAttributeId } = await getProductAttributeIds();
-
-			await templateCompiler.compile( {
+			const { link } = await createPost( 'multiple-product-filters', {
 				attributes: {
 					attributeId: colorAttributeId,
 				},
 			} );
 
-			await page.goto( '/shop' );
+			await page.goto( link );
 
 			const productFilters = page.locator(
 				'.wp-block-woocommerce-product-filters'
@@ -208,7 +196,8 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 
 			await grayCheckbox.click();
 			await page.waitForURL(
-				( url ) => url.searchParams.get( 'filter_color' ) === 'gray'
+				( url ) =>
+					url.searchParams.get( 'wcp-1-filter_color' ) === 'gray'
 			);
 
 			await expect( grayActiveFilter ).toBeVisible();
@@ -220,7 +209,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 				} )
 				.click();
 			await page.waitForURL(
-				( url ) => ! url.searchParams.has( 'filter_color' )
+				( url ) => ! url.searchParams.has( 'wcp-1-filter_color' )
 			);
 
 			await expect( grayActiveFilter ).toBeHidden();

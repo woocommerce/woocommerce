@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Exception;
 
 /**
@@ -168,7 +169,7 @@ class NotificationRetryHandler {
 			$args['extra'] = $identity_data;
 		}
 
-		$action_id = as_schedule_single_action(
+		$action_id = ActionSchedulerUtil::schedule_single(
 			time() + $delay,
 			self::RETRY_HOOK,
 			$args,

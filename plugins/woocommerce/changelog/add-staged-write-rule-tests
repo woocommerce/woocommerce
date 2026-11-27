@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Add PHPUnit tests for the staged write PHPStan rule and run them in CI; no production change.
+

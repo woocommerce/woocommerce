@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Cover the trashed-shop-page guard that keeps a rewrite flush from being queued.

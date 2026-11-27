@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a fatal error on the legacy Extensions page when WooCommerce.com categories can't be loaded.

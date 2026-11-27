@@ -19,6 +19,7 @@ import {
  * Internal dependencies
  */
 import { DisplayLayoutControlProps, LayoutOptions } from '../../types';
+import { getDefaultDisplayLayout, sanitizeDisplayLayout } from '../../utils';
 
 const getHelpText = ( layoutOptions: LayoutOptions ) => {
 	switch ( layoutOptions ) {
@@ -42,14 +43,16 @@ const getHelpText = ( layoutOptions: LayoutOptions ) => {
 const DEFAULT_VALUE = LayoutOptions.GRID;
 
 const LayoutOptionsControl = ( props: DisplayLayoutControlProps ) => {
-	const { type, columns, shrinkColumns } = props.displayLayout;
-	const setDisplayLayout = ( displayLayout: LayoutOptions ) => {
+	const { type } = props.displayLayout;
+	const setDisplayLayout = ( nextType: LayoutOptions ) => {
 		props.setAttributes( {
-			displayLayout: {
-				type: displayLayout,
-				columns,
-				shrinkColumns,
-			},
+			displayLayout: sanitizeDisplayLayout( {
+				...( nextType === LayoutOptions.GRID
+					? getDefaultDisplayLayout()
+					: {} ),
+				...props.displayLayout,
+				type: nextType,
+			} ),
 		} );
 	};
 

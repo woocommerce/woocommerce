@@ -5,6 +5,8 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
+use Automattic\WooCommerce\Internal\CustomerEmailVerification\Emails\CustomerVerifyEmail;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -32,6 +34,9 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	 * Restore the order storage a test switched with use_order_storage().
 	 */
 	public function tearDown(): void {
+		global $wc_queued_webhooks;
+
+		$wc_queued_webhooks = null;
 		try {
 			if ( null !== $this->prev_hpos_enabled ) {
 				$this->toggle_cot_authoritative( $this->prev_hpos_enabled );
@@ -694,6 +699,568 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A successful delivery clears the pending ping, so no ping follows it.
+	 */
+	public function test_successful_delivery_clears_pending_ping(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$webhook = $this->create_active_webhook( 'product.updated' );
+		$webhook->set_user_id( 1 );
+		$webhook->save();
+
+		$requests = array();
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args ) use ( &$requests ) {
+				$is_ping    = 0 === strpos( (string) $args['body'], 'webhook_id=' );
+				$requests[] = $is_ping ? 'ping' : 'delivery';
+
+				// Like an endpoint that verifies signatures: the unsigned ping is rejected, the delivery accepted.
+				return $this->mock_http_response( $is_ping ? 401 : 200 );
+			},
+			10,
+			2
+		);
+
+		$webhook->deliver( $product->get_id() );
+
+		$this->assertSame( array( 'delivery' ), $requests, 'A successful delivery should not be followed by a ping.' );
+		$this->assertFalse( wc_get_webhook( $webhook->get_id() )->get_pending_delivery(), 'A successful delivery should clear the pending ping.' );
+	}
+
+	/**
+	 * @testdox The ping counts any 2xx response as success, like deliveries do.
+	 *
+	 * @testWith [200, true]
+	 *           [202, true]
+	 *           [204, true]
+	 *           [302, false]
+	 *           [401, false]
+	 *           [500, false]
+	 *
+	 * @param int  $response_code  HTTP status code the delivery URL answers with.
+	 * @param bool $expect_success Whether the ping should succeed.
+	 */
+	public function test_ping_succeeds_on_any_2xx_response( int $response_code, bool $expect_success ): void {
+		$webhook = $this->create_active_webhook( 'product.updated' );
+		$webhook->save();
+
+		$requests = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( $response_code, &$requests ) {
+				++$requests;
+				return $this->mock_http_response( $response_code );
+			}
+		);
+
+		$result = $webhook->deliver_ping();
+
+		$this->assertSame( 1, $requests, 'The ping should send one request, and its save should not ping again.' );
+
+		if ( $expect_success ) {
+			$this->assertTrue( $result, "A ping answered with {$response_code} should succeed." );
+		} else {
+			$this->assertInstanceOf( WP_Error::class, $result, "A ping answered with {$response_code} should fail with an error." );
+		}
+		$this->assertSame( ! $expect_success, wc_get_webhook( $webhook->get_id() )->get_pending_delivery(), 'Only a successful ping should clear the pending ping.' );
+	}
+
+	/**
+	 * @testdox Checkout form internals are removed before persistence and before sending, while the local hook value is preserved.
+	 *
+	 * @dataProvider checkout_form_arguments
+	 * @param string $hook Checkout hook.
+	 * @param mixed  $argument The first hook argument.
+	 */
+	public function test_checkout_form_internals_are_redacted( string $hook, $argument ): void {
+		$sut = $this->create_active_webhook( 'action.' . $hook . '.suffix' );
+		$sut->save();
+		$sut->enqueue();
+
+		if ( 'woocommerce_after_checkout_validation' === $hook ) {
+			do_action( $hook, $argument, new WP_Error() );
+		} elseif ( 'woocommerce_checkout_update_order_review' === $hook ) {
+			do_action( $hook, $argument );
+		} else {
+			$this->assertSame( $argument, apply_filters( $hook, $argument ) );
+		}
+		$body = $this->run_scheduled_webhook_delivery( $sut, 'fixture-password' );
+		$this->assertStringContainsString( '[redacted]', $body );
+		if ( 'woocommerce_process_checkout_field_account_password' !== $hook && 'woocommerce_process_checkout_password_field' !== $hook ) {
+			$this->assertStringContainsString( 'fixture-city', $body );
+		}
+	}
+
+	/**
+	 * @testdox Queue and payload redaction use the topic supplied by the topic filter.
+	 */
+	public function test_redaction_uses_filtered_topic(): void {
+		$sut = $this->create_active_webhook( 'action.woocommerce_add_to_cart' );
+		$sut->save();
+		$hook = 'woocommerce_process_checkout_field_account_password';
+		$id   = $sut->get_id();
+		add_filter( 'woocommerce_webhook_topic', static fn( $topic, $webhook_id ) => $id === $webhook_id ? 'action.' . $hook : $topic, 10, 2 );
+		$sut->enqueue();
+
+		$this->assertSame( 'fixture-password', apply_filters( $hook, 'fixture-password' ), 'The checkout filter should keep the original password.' );
+		$this->assertSame( '[redacted]', $sut->build_payload( 'fixture-password' )['arg'], 'Payload redaction must also work for immediate delivery.' );
+		$this->assertStringContainsString( '[redacted]', $this->run_scheduled_webhook_delivery( $sut, 'fixture-password' ) );
+	}
+
+	/**
+	 * @testdox Plugin fields are masked alongside built-in fields before queueing and delivery.
+	 */
+	public function test_redacts_additional_fields_for_a_custom_hook(): void {
+		$hook = 'wc_webhook_redaction_fixture';
+		add_filter( 'woocommerce_webhook_redact_additional_fields', static fn( $fields, $source_hook ) => $hook === $source_hook ? array_merge( $fields, array( 'Gateway_Key' ) ) : $fields, 10, 2 );
+
+		$sut = $this->create_active_webhook( 'action.' . $hook );
+		$sut->save();
+		$sut->enqueue();
+		$argument = array(
+			'gateway'  => array( 'gateway_key' => 'fixture-private' ),
+			'secret'   => 'fixture-private',
+			'currency' => 'USD',
+		);
+
+		$this->assertSame( $argument, apply_filters( $hook, $argument ) );
+		$body = json_decode( $this->run_scheduled_webhook_delivery( $sut, 'fixture-private' ), true );
+		$this->assertSame( '[redacted]', $body['arg']['gateway']['gateway_key'] );
+		$this->assertSame( '[redacted]', $body['arg']['secret'] );
+		$this->assertSame( 'USD', $body['arg']['currency'] );
+	}
+
+	/**
+	 * @testdox Plugin fields in form data are masked while the format and unrelated values are preserved.
+	 */
+	public function test_redacts_additional_form_fields(): void {
+		add_filter( 'woocommerce_webhook_redact_additional_fields', static fn() => array( 'gateway_key' ) );
+		$sut     = $this->create_active_webhook( 'action.woocommerce_checkout_update_order_review' );
+		$payload = $sut->build_payload( '?currency=USD&&Gateway%5FKey=fixture-private&gateway_key=&flag&note=a%3Db' );
+
+		$this->assertSame( '?currency=USD&&Gateway%5FKey=[redacted]&gateway_key=&flag&note=a%3Db', $payload['arg'] );
+	}
+
+	/**
+	 * Provide the checkout hooks that receive a password in their first argument.
+	 *
+	 * @return array
+	 */
+	public function checkout_form_arguments(): array {
+		$posted = array(
+			'account_password' => 'fixture-password',
+			'billing_city'     => 'fixture-city',
+		);
+
+		return array(
+			'before validation' => array( 'woocommerce_after_checkout_validation', $posted ),
+			'posted data'       => array( 'woocommerce_checkout_posted_data', $posted ),
+			'specific field'    => array( 'woocommerce_process_checkout_field_account_password', 'fixture-password' ),
+			'password type'     => array( 'woocommerce_process_checkout_password_field', 'fixture-password' ),
+			'serialized review' => array( 'woocommerce_checkout_update_order_review', 'billing_city=fixture-city&account%5Fpassword=fixture-password' ),
+		);
+	}
+
+	/**
+	 * @testdox An HTML email footer webhook keeps the email identity but leaves out its internal properties.
+	 *
+	 * @dataProvider email_footer_internal_properties
+	 * @param string $email_class Email class.
+	 * @param string $property    Internal property.
+	 * @param string $email_id    Expected public email ID.
+	 * @phpstan-param class-string<WC_Email> $email_class
+	 */
+	public function test_email_footer_leaves_out_internal_properties( string $email_class, string $property, string $email_id ): void {
+		$sut = $this->create_active_webhook( 'action.woocommerce_email_footer' );
+		$sut->save();
+		$sut->enqueue();
+
+		$user             = self::factory()->user->create_and_get( array( 'role' => 'administrator' ) );
+		$email            = new $email_class();
+		$email->$property = 'fixture-email-value';
+		$email->object    = $user;
+		do_action( 'woocommerce_email_footer', $email );
+
+		$this->assertSame( 'fixture-email-value', $email->$property, 'The live email must retain its value.' );
+		$body = $this->run_scheduled_webhook_delivery( $sut, 'fixture-email-value' );
+		$this->assertStringNotContainsString( $user->user_pass, $body );
+		$this->assertStringContainsString( $email_id, $body );
+	}
+
+	/**
+	 * Email objects with public internal properties.
+	 *
+	 * @return array
+	 */
+	public function email_footer_internal_properties(): array {
+		return array(
+			'password reset'     => array( WC_Email_Customer_Reset_Password::class, 'reset_key', 'customer_reset_password' ),
+			'account setup'      => array( WC_Email_Customer_New_Account::class, 'set_password_url', 'customer_new_account' ),
+			'email verification' => array( CustomerVerifyEmail::class, 'verify_url', 'customer_verify_email' ),
+		);
+	}
+
+	/**
+	 * @testdox An ordinary custom action argument with a key query parameter is preserved.
+	 */
+	public function test_custom_action_keeps_ordinary_url(): void {
+		$sut = $this->create_active_webhook( 'action.woocommerce_form_field_url' );
+		$url = 'https://example.com/catalog?key=blue-widget';
+
+		$this->assertSame( $url, $sut->build_payload( $url )['arg'] );
+	}
+
+	/**
+	 * @testdox Immediate delivery redacts the HTTP body while existing local filters keep the original argument.
+	 */
+	public function test_immediate_webhook_preserves_local_argument(): void {
+		global $wc_queued_webhooks;
+
+		$sut = $this->create_active_webhook( 'action.woocommerce_checkout_posted_data' );
+		$sut->save();
+		$sut->enqueue();
+
+		$original_arg = array( 'account_password' => 'fixture-password' );
+		$received_arg = null;
+		$body         = '';
+		add_filter( 'woocommerce_webhook_deliver_async', '__return_false' );
+		add_filter(
+			'woocommerce_webhook_http_args',
+			static function ( $args, $arg ) use ( &$received_arg ) {
+				$received_arg = $arg;
+				return $args;
+			},
+			10,
+			2
+		);
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args ) use ( &$body ) {
+				$body = $args['body'];
+				return $this->mock_http_response( 200 );
+			},
+			10,
+			2
+		);
+
+		apply_filters( 'woocommerce_checkout_posted_data', $original_arg );
+		wc_webhook_execute_queue();
+		$wc_queued_webhooks = null;
+
+		$this->assertSame( $original_arg, $received_arg );
+		$this->assertStringContainsString( '[redacted]', $body );
+		$this->assertStringNotContainsString( 'fixture-password', $body );
+	}
+
+	/**
+	 * @testdox A queued delivery of an already stored blocked topic sends no HTTP request.
+	 * @testWith ["woocommerce_login_credentials"]
+	 *           ["woocommerce_paypal_capture_request"]
+	 *           ["woocommerce_paypal_refund_request"]
+	 * @param string $hook The blocked hook.
+	 */
+	public function test_worker_skips_previously_allowed_topic( string $hook ): void {
+		global $wpdb;
+
+		$sut = $this->create_active_webhook( 'action.woocommerce_add_to_cart' );
+		$sut->save();
+		$wpdb->update( $wpdb->prefix . 'wc_webhooks', array( 'topic' => 'action.' . $hook . '.extra' ), array( 'webhook_id' => $sut->get_id() ) );
+		wp_cache_delete( $sut->get_id(), 'webhooks' );
+
+		add_filter(
+			'pre_http_request',
+			function () {
+				$this->fail( 'A worker must not send a delivery for a refused topic.' );
+			}
+		);
+		wc_deliver_webhook_async( $sut->get_id(), array( 'password' => 'fixture-password' ) );
+
+		$this->assertSame( '', wc_get_webhook( $sut->get_id() )->get_topic() );
+	}
+
+	/**
+	 * @testdox A remapped PayPal request filter keeps its arguments local.
+	 * @testWith ["woocommerce_paypal_capture_request"]
+	 *           ["woocommerce_paypal_refund_request"]
+	 * @param string $hook The blocked PayPal hook.
+	 */
+	public function test_blocked_paypal_hook_does_not_queue_delivery( string $hook ): void {
+		global $wc_queued_webhooks;
+
+		$sut = $this->create_active_webhook( 'action.woocommerce_add_to_cart' );
+		$id  = $sut->get_id();
+		add_filter( 'woocommerce_webhook_hooks', static fn( $hooks, $webhook_id ) => $id === $webhook_id ? array( $hook ) : $hooks, 10, 2 );
+		$sut->enqueue();
+
+		$request = array(
+			'USER'      => 'fixture-user',
+			'PWD'       => 'fixture-password',
+			'SIGNATURE' => 'fixture-signature',
+		);
+		$this->assertSame( $request, apply_filters( $hook, $request ), 'The PayPal request must keep its values.' );
+		$this->assertEmpty( $wc_queued_webhooks, 'A blocked hook must not schedule a webhook even if an extension changes the subscription.' );
+	}
+
+	/**
+	 * @testdox Resource payloads retain order keys and support the product objects used by bulk edits.
+	 */
+	public function test_standard_resource_payloads_keep_existing_values(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$order = wc_create_order();
+		$sut   = $this->create_active_webhook( 'order.created' );
+		$sut->set_user_id( get_current_user_id() );
+		$order_payload = $sut->build_payload( $order->get_id() );
+		$this->assertSame( $order->get_order_key(), $order_payload['order_key'] );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$sut->set_topic( 'product.updated' );
+		$product_payload = $sut->build_payload( $product );
+		$this->assertSame( $product->get_id(), $product_payload['id'] );
+	}
+
+	/**
+	 * Persist a queued webhook and run the worker with the stored arguments.
+	 *
+	 * @param WC_Webhook $webhook Scheduled webhook.
+	 * @param string     $hidden_value Value that the stored and sent copies should leave out.
+	 * @return string
+	 */
+	private function run_scheduled_webhook_delivery( WC_Webhook $webhook, string $hidden_value ): string {
+		global $wc_queued_webhooks;
+
+		wc_webhook_execute_queue();
+		$wc_queued_webhooks = null;
+
+		$actions = as_get_scheduled_actions(
+			array(
+				'hook'   => 'woocommerce_deliver_webhook_async',
+				'group'  => 'woocommerce-webhooks',
+				'status' => ActionScheduler_Store::STATUS_PENDING,
+			)
+		);
+		$this->assertCount( 1, $actions, 'Exactly one delivery must be stored.' );
+		$args = reset( $actions )->get_args();
+		$this->assertSame( $webhook->get_id(), $args['webhook_id'] );
+		$this->assertStringNotContainsString( $hidden_value, wp_json_encode( $args ) );
+
+		$body = '';
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $request ) use ( &$body ) {
+				$body = $request['body'];
+				return $this->mock_http_response( 200 );
+			},
+			10,
+			2
+		);
+		wc_deliver_webhook_async( $args['webhook_id'], $args['arg'] );
+
+		$this->assertNotSame( '', $body, 'The worker should send the scheduled delivery.' );
+		$this->assertStringNotContainsString( $hidden_value, $body );
+
+		return $body;
+	}
+
+	/**
+	 * @testdox Two identical checkbox fields render even when the second webhook delivery is skipped.
+	 */
+	public function test_duplicate_webhook_keeps_rendered_checkbox(): void {
+		global $wc_queued_webhooks;
+
+		$sut = $this->create_active_webhook( 'action.woocommerce_form_field_checkbox' );
+		$sut->enqueue();
+
+		$args   = array(
+			'type'   => 'checkbox',
+			'return' => true,
+		);
+		$first  = woocommerce_form_field( 'fixture_checkbox', $args );
+		$second = woocommerce_form_field( 'fixture_checkbox', $args );
+
+		$this->assertStringContainsString( 'type="checkbox"', $first );
+		$this->assertSame( $first, $second );
+		$this->assertCount( 1, $wc_queued_webhooks );
+		$wc_queued_webhooks = null;
+	}
+
+	/**
+	 * @testdox Capture named mail callbacks and keep callbacks that contain objects out of the queue.
+	 */
+	public function test_mail_webhook_captures_only_named_callbacks(): void {
+		global $wc_queued_webhooks;
+
+		$hook = 'woocommerce_mail_callback';
+		$sut  = $this->create_active_webhook( 'action.' . $hook );
+		$sut->enqueue();
+
+		$closure = static function (): bool {
+			return true;
+		};
+		foreach ( array( $closure, array( $sut, 'get_name' ) ) as $callback ) {
+			$this->assertSame( $callback, apply_filters( $hook, $callback ), 'The mail filter must keep the original callback.' );
+			$this->assertEmpty( $wc_queued_webhooks, 'The webhook must not queue a callback that contains an object.' );
+		}
+
+		$named_callbacks = array( 'wp_mail', array( 'WC_Cache_Helper', 'get_transient_version' ) );
+		foreach ( $named_callbacks as $callback ) {
+			$this->assertSame( $callback, apply_filters( $hook, $callback ) );
+		}
+		$this->assertSame( $named_callbacks, array_column( $wc_queued_webhooks, 'arg' ) );
+	}
+
+	/**
+	 * @testdox Two log subscribers deliver one ordinary line each and ignore delivery logs.
+	 */
+	public function test_log_webhooks_do_not_forward_delivery_logs(): void {
+		global $wc_queued_webhooks;
+
+		update_option( 'woocommerce_logs_logging_enabled', 'yes' );
+		update_option( 'woocommerce_logs_level_threshold', 'none' );
+		add_filter(
+			'woocommerce_register_log_handlers',
+			static function () {
+				return array(
+					new class() extends LogHandlerFileV2 {
+						/**
+						 * Run the real formatter without writing a log file.
+						 *
+						 * @param int    $timestamp Log timestamp.
+						 * @param string $level Log level.
+						 * @param string $message Log message.
+						 * @param array  $context Log context.
+						 * @return bool
+						 */
+						public function handle( $timestamp, $level, $message, $context ) {
+							self::format_entry( $timestamp, $level, $message, $context );
+							return true;
+						}
+					},
+				);
+			}
+		);
+
+		$formatter = $this->create_active_webhook( 'action.woocommerce_format_log_entry' );
+		$messages  = $this->create_active_webhook( 'action.woocommerce_logger_log_message' );
+		foreach ( array( $formatter, $messages ) as $sut ) {
+			$sut->save();
+			$sut->enqueue();
+		}
+
+		$delivery_logs = 0;
+		add_filter(
+			'woocommerce_format_log_entry',
+			static function ( $entry, $details ) use ( &$delivery_logs ) {
+				if ( 'webhooks-delivery' === ( $details['context']['source'] ?? '' ) ) {
+					++$delivery_logs;
+				}
+				return $entry;
+			},
+			20,
+			2
+		);
+		wc_get_logger()->info( 'Ordinary log entry for webhook test', array( 'source' => 'webhook-forwarding-test' ) );
+		$this->assertCount( 2, $wc_queued_webhooks );
+		wc_webhook_execute_queue();
+		$wc_queued_webhooks = null;
+
+		$actions = as_get_scheduled_actions(
+			array(
+				'hook'   => 'woocommerce_deliver_webhook_async',
+				'group'  => 'woocommerce-webhooks',
+				'status' => ActionScheduler_Store::STATUS_PENDING,
+			)
+		);
+		$this->assertCount( 2, $actions );
+		$bodies = array();
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $request ) use ( &$bodies ) {
+				$bodies[ $request['headers']['X-WC-Webhook-ID'] ][] = $request['body'];
+				return $this->mock_http_response( 200 );
+			},
+			10,
+			2
+		);
+
+		foreach ( $actions as $action ) {
+			$args = $action->get_args();
+			wc_deliver_webhook_async( $args['webhook_id'], $args['arg'] );
+			$this->assertEmpty( $wc_queued_webhooks, 'The worker must not capture the resulting delivery log.' );
+		}
+
+		foreach ( array( $formatter, $messages ) as $sut ) {
+			$this->assertArrayHasKey( $sut->get_id(), $bodies );
+			$this->assertCount( 1, $bodies[ $sut->get_id() ] );
+			$this->assertStringContainsString( 'Ordinary log entry for webhook test', $bodies[ $sut->get_id() ][0] );
+		}
+		$ordinary = $this->create_active_webhook( 'action.woocommerce_add_to_cart' );
+		$ordinary->save();
+		wc_deliver_webhook_async( $ordinary->get_id(), 123 );
+		$this->assertEmpty( $wc_queued_webhooks, 'Delivery logs from ordinary webhooks must also stay local.' );
+		$this->assertSame( 3, $delivery_logs, 'Delivery logs still reach the local log handler.' );
+	}
+
+	/**
+	 * @testdox Saving a webhook is observable, but delivering the observer does not queue another observer.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $remap_topic Whether to set the observer topic through a filter.
+	 */
+	public function test_webhook_observer_does_not_observe_its_own_worker( bool $remap_topic ): void {
+		global $wc_queued_webhooks;
+
+		$updates  = $this->create_active_webhook( $remap_topic ? 'action.woocommerce_add_to_cart' : 'action.woocommerce_webhook_updated' );
+		$statuses = $this->create_active_webhook( 'action.woocommerce_webhook_statuses' );
+		$source   = $this->create_active_webhook( 'action.woocommerce_add_to_cart' );
+		$source->save();
+		// Creation marks the initial ping as pending.
+		$source->set_pending_delivery( false );
+		foreach ( array( $updates, $statuses ) as $sut ) {
+			$sut->save();
+		}
+		if ( $remap_topic ) {
+			$id = $updates->get_id();
+			add_filter( 'woocommerce_webhook_topic', static fn( $topic, $webhook_id ) => $id === $webhook_id ? 'action.woocommerce_webhook_updated' : $topic, 10, 2 );
+		}
+		$updates->enqueue();
+		$statuses->enqueue();
+
+		$source->set_name( 'Edited webhook' );
+		$source->save();
+		$this->assertCount( 1, $wc_queued_webhooks );
+		$this->assertSame( $updates, $wc_queued_webhooks[0]['webhook'] );
+		$this->assertSame( $source->get_id(), $wc_queued_webhooks[0]['arg'] );
+		$wc_queued_webhooks = null;
+
+		add_filter(
+			'pre_http_request',
+			function () {
+				return $this->mock_http_response( 200 );
+			}
+		);
+		wc_deliver_webhook_async( $updates->get_id(), $source->get_id() );
+		$this->assertEmpty( $wc_queued_webhooks, 'Neither the load nor the save may start another observer delivery.' );
+	}
+
+	/**
+	 * Build a pre_http_request response with the given status code.
+	 *
+	 * @param int $response_code HTTP status code.
+	 * @return array
+	 */
+	private function mock_http_response( int $response_code ): array {
+		return array(
+			'response' => array(
+				'code'    => $response_code,
+				'message' => get_status_header_desc( $response_code ),
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+	}
+
+	/**
 	 * @testDox The woocommerce_webhook_enable_delivery_log filter toggles delivery logging without affecting failure tracking.
 	 */
 	public function test_delivery_logging_respects_enable_delivery_log_filter() {
@@ -767,8 +1334,322 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 			wc_get_webhook( $webhook->get_id() )->get_failure_count(),
 			'Failure tracking must still run when delivery logging is disabled.'
 		);
-
-		remove_filter( 'woocommerce_logger_log_message', $log_spy, 10 );
 	}
 
+	/**
+	 * @testdox customer.deleted accepts users of any role, and rejects user IDs that don't exist.
+	 */
+	public function test_is_valid_user_action_accepts_any_role(): void {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$customer_id   = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$webhook  = new WC_Webhook();
+		$is_valid = function ( $arg ) {
+			return $this->is_valid_user_action( $arg );
+		};
+
+		$this->assertTrue( $is_valid->call( $webhook, $subscriber_id ) );
+		$this->assertTrue( $is_valid->call( $webhook, $customer_id ) );
+		$this->assertTrue( $is_valid->call( $webhook, (string) $subscriber_id ) );
+		$this->assertFalse( $is_valid->call( $webhook, -$subscriber_id ) );
+		$this->assertFalse( $is_valid->call( $webhook, (string) -$subscriber_id ) );
+		$this->assertFalse( $is_valid->call( $webhook, $subscriber_id + 0.5 ) );
+		$this->assertFalse( $is_valid->call( $webhook, PHP_INT_MAX ) );
+	}
+
+	/**
+	 * @testdox customer.deleted listens to users being removed from a site, which is how multisite deletes users.
+	 */
+	public function test_customer_deleted_topic_includes_remove_user_from_blog(): void {
+		$topic_hooks = WC_Webhook::get_default_topic_hooks();
+
+		$this->assertContains( 'remove_user_from_blog', $topic_hooks['customer.deleted'] );
+	}
+
+	/**
+	 * @testdox customer.deleted skips users deleted from or removed from a site other than the webhook's own.
+	 */
+	public function test_is_valid_user_action_rejects_other_sites(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$webhook = $this->create_active_webhook( 'customer.deleted' );
+		$webhook->enqueue();
+
+		$is_valid = function ( $arg ) {
+			return $this->is_valid_user_action( $arg );
+		};
+		$this->assertTrue( $is_valid->call( $webhook, $user_id ) );
+
+		$set_blog_id = function ( int $blog_id ) {
+			$this->enqueued_blog_id = $blog_id;
+		};
+		$set_blog_id->call( $webhook, get_current_blog_id() + 1 );
+		$this->assertFalse( $is_valid->call( $webhook, $user_id ) );
+	}
+
+	/**
+	 * @testdox Deleting a subscriber delivers customer.deleted exactly once, even on multisite where both user hooks fire.
+	 */
+	public function test_deleting_a_user_delivers_customer_deleted_once(): void {
+		$user_id       = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$delivered_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'customer.deleted' ), $delivered_ids );
+
+		wp_delete_user( $user_id );
+
+		$this->assertSame( array( $user_id ), $delivered_ids );
+	}
+
+	/**
+	 * @testdox Removing a site member directly only delivers customer.deleted to that site's webhook.
+	 */
+	public function test_removing_a_user_from_a_site_delivers_customer_deleted(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Requires multisite.' );
+		}
+
+		$site_id       = get_current_blog_id();
+		$other_site_id = $this->factory->blog->create();
+		$user_id       = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$non_member_id = $this->factory->user->create( array( 'role' => '' ) );
+		remove_user_from_blog( $non_member_id, $site_id );
+		$this->assertFalse( is_user_member_of_blog( $non_member_id, $site_id ) );
+		add_user_to_blog( $other_site_id, $user_id, 'subscriber' );
+
+		$other_deliveries = array();
+		switch_to_blog( $other_site_id );
+		try {
+			$this->record_deliveries( $this->create_active_webhook( 'customer.deleted' ), $other_deliveries );
+		} finally {
+			restore_current_blog();
+		}
+
+		$deliveries = array();
+		$this->record_deliveries( $this->create_active_webhook( 'customer.deleted' ), $deliveries );
+
+		remove_user_from_blog( -$user_id, $site_id );
+		remove_user_from_blog( $non_member_id, $site_id );
+		$this->assertSame( array(), $deliveries, 'Invalid IDs and non-members must not trigger delivery.' );
+
+		$this->assertTrue( remove_user_from_blog( $user_id, $site_id ) );
+		$this->assertSame( array( $user_id ), $deliveries );
+		$this->assertSame( array(), $other_deliveries, 'A webhook registered on another site must not deliver.' );
+		$this->assertTrue( is_user_member_of_blog( $user_id, $other_site_id ) );
+	}
+
+	/**
+	 * @testdox A class that overrides log_delivery() keeps working through it, and stage_delivery_result() refuses it.
+	 */
+	public function test_stage_delivery_result_refuses_a_class_that_has_not_adopted_it() {
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$webhook = new class() extends WC_Webhook {
+			public function log_delivery( $delivery_id, $request, $response, $duration ) {
+				parent::log_delivery( $delivery_id, $request, $response, $duration );
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 0 );
+		$webhook->save();
+
+		// Saving an active webhook with a pending delivery pings its URL; answer locally.
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
+
+		$response = array(
+			'response' => array(
+				'code'    => 500,
+				'message' => 'Internal Server Error',
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+		$request  = array(
+			'method'     => 'POST',
+			'headers'    => array(),
+			'body'       => '',
+			'user-agent' => 'test',
+		);
+		$webhook->log_delivery( 'delivery', $request, $response, 0.1 );
+		$this->assertSame( 1, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		try {
+			$webhook->stage_delivery_result( 500 );
+			$this->fail( 'stage_delivery_result() did not refuse the class.' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode() );
+			$this->assertStringContainsString( 'stage_delivery_result()', $e->getMessage() );
+		}
+	}
+
+	/**
+	 * @testdox No stage method of WC_Webhook sends an HTTP request.
+	 */
+	public function test_stage_methods_send_no_request(): void {
+		$webhook = $this->create_active_webhook( 'order.created' );
+		$webhook->save();
+
+		$requests = array();
+		add_filter(
+			'pre_http_request',
+			function ( $response, $args, $url ) use ( &$requests ) {
+				$requests[] = $url;
+				return $this->mock_http_response( 200 );
+			},
+			10,
+			3
+		);
+
+		$args_by_method = array( 'stage_delivery_result' => array( 500 ) );
+		foreach ( get_class_methods( WC_Webhook::class ) as $method ) {
+			if ( 0 === strpos( $method, 'stage_' ) ) {
+				$webhook->$method( ...( $args_by_method[ $method ] ?? array() ) );
+				$this->assertSame( array(), $requests, "{$method}() must only change the webhook in memory." );
+			}
+		}
+	}
+
+	/**
+	 * @testdox stage_delivery_result() counts a failure in memory, and the next save writes it.
+	 */
+	public function test_stage_delivery_result_changes_the_webhook_in_memory_only() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 0 );
+		$webhook->save();
+
+		// Saving an active webhook with a pending delivery pings its URL; answer locally.
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
+
+		$webhook->stage_delivery_result( 500 );
+		$this->assertSame( 1, $webhook->get_failure_count() );
+		$this->assertSame( 0, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$webhook->save();
+		$this->assertSame( 1, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$webhook->stage_delivery_result( 200 );
+		$webhook->save();
+		$this->assertSame( 0, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+	}
+
+	/**
+	 * @testdox stage_delivery_result() leaves the disabled action to the next save, which fires it after the write.
+	 */
+	public function test_stage_delivery_result_fires_the_disabled_action_after_the_write() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 6 );
+		$webhook->save();
+
+		$statuses = array();
+		$listener = static function ( $webhook_id ) use ( &$statuses ) {
+			$statuses[] = wc_get_webhook( $webhook_id )->get_status();
+		};
+		add_action( 'woocommerce_webhook_disabled_due_delivery_failures', $listener );
+
+		$webhook->stage_delivery_result( 500 );
+		$this->assertSame( 'disabled', $webhook->get_status() );
+		$this->assertSame( array(), $statuses );
+
+		$webhook->save();
+		$webhook->save();
+
+		remove_action( 'woocommerce_webhook_disabled_due_delivery_failures', $listener );
+		$this->assertSame( array( 'disabled' ), $statuses );
+	}
+
+	/**
+	 * @testdox log_delivery() after a staged disable fires the disabled action once.
+	 */
+	public function test_log_delivery_after_a_staged_disable_fires_the_disabled_action_once() {
+		$webhook = $this->create_failing_webhook();
+		$fired   = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$webhook->stage_delivery_result( 500 );
+		$webhook->log_delivery( 1, $this->delivery_request(), new WP_Error( 'http_request_failed', 'Failed' ), 0.1 );
+		$webhook->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+	}
+
+	/**
+	 * @testdox save() does not fire the disabled action when a status change replaced the staged disable.
+	 */
+	public function test_save_skips_the_disabled_action_when_the_webhook_is_active_again() {
+		$webhook = $this->create_failing_webhook();
+		$fired   = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
+
+		$webhook->stage_delivery_result( 500 );
+		$webhook->set_status( 'active' );
+		$webhook->save();
+
+		$this->assertSame( 0, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+	}
+
+	/**
+	 * Create a saved, active webhook that the next failed delivery disables.
+	 *
+	 * @return WC_Webhook
+	 */
+	private function create_failing_webhook(): WC_Webhook {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 6 );
+		$webhook->save();
+
+		return $webhook;
+	}
+
+	/**
+	 * Build the request array that log_delivery() reads.
+	 *
+	 * @return array
+	 */
+	private function delivery_request(): array {
+		return array(
+			'method'     => 'POST',
+			'user-agent' => 'WooCommerce',
+			'headers'    => array(),
+			'body'       => '',
+		);
+	}
+
+	/**
+	 * @testdox log_delivery() fires the disabled action right away, before it saves.
+	 */
+	public function test_log_delivery_fires_the_disabled_action_once() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 6 );
+		$webhook->save();
+		$fired = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$request = array(
+			'method'     => 'POST',
+			'user-agent' => 'WooCommerce',
+			'headers'    => array(),
+			'body'       => '',
+		);
+		$webhook->log_delivery( 1, $request, new WP_Error( 'http_request_failed', 'Failed' ), 0.1 );
+		$webhook->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+		$this->assertSame( 'disabled', wc_get_webhook( $webhook->get_id() )->get_status() );
+	}
 }

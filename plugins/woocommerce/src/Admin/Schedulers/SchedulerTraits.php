@@ -354,8 +354,11 @@ trait SchedulerTraits {
 	 * Clears all queued actions.
 	 */
 	public static function clear_queued_actions() {
-		if ( version_compare( \ActionScheduler_Versions::instance()->latest_version(), '3.0', '>=' ) ) {
-			\ActionScheduler::store()->cancel_actions_by_group( static::$group );
+		$store = \ActionScheduler::store();
+		// PHPStan sees the bundled copy, where the method exists; copies before 3.0.0 lack it.
+		// @phpstan-ignore-next-line function.alreadyNarrowedType -- see comment above.
+		if ( $store instanceof \ActionScheduler_Store && method_exists( $store, 'cancel_actions_by_group' ) ) {
+			$store->cancel_actions_by_group( static::$group ?? '' );
 		} else {
 			$actions = static::get_actions();
 			foreach ( $actions as $action ) {

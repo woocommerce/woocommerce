@@ -7,7 +7,7 @@ import {
 	objectHasProp,
 	type WCStoreV1ProductsCollectionProps,
 } from '@woocommerce/types';
-import { sort } from 'fast-sort';
+import { compareStrings } from '@woocommerce/utils/compare-strings';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 
 /**
@@ -25,16 +25,17 @@ const buildCollectionDataQuery = (
 	if (
 		Array.isArray( collectionDataQueryState.calculate_attribute_counts )
 	) {
-		query.calculate_attribute_counts = sort(
-			collectionDataQueryState.calculate_attribute_counts.map(
-				( { taxonomy, queryType } ) => {
-					return {
-						taxonomy,
-						query_type: queryType,
-					};
-				}
-			)
-		).asc( [ 'taxonomy', 'query_type' ] );
+		query.calculate_attribute_counts =
+			collectionDataQueryState.calculate_attribute_counts
+				.map( ( { taxonomy, queryType } ) => ( {
+					taxonomy,
+					query_type: queryType,
+				} ) )
+				.sort(
+					( a, b ) =>
+						compareStrings( a.taxonomy, b.taxonomy ) ||
+						compareStrings( a.query_type, b.query_type )
+				);
 	}
 
 	if ( Array.isArray( collectionDataQueryState.calculate_taxonomy_counts ) ) {

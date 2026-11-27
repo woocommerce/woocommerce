@@ -36,6 +36,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	use CogsAwareTrait;
 
 	/**
+	 * Regex character class of the characters a GTIN may contain: digits, hyphens, and X/x for the ISBN-10 check digit.
+	 *
+	 * @since 11.4.0
+	 */
+	public const GLOBAL_UNIQUE_ID_CHARACTERS = '0-9Xx\-';
+
+	/**
 	 * This is the name of this object type.
 	 *
 	 * @var string
@@ -73,6 +80,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'short_description'         => '',
 		'sku'                       => '',
 		'global_unique_id'          => '',
+		'mpn'                       => '',
 		'price'                     => '',
 		'regular_price'             => '',
 		'sale_price'                => '',
@@ -149,6 +157,24 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->data_store = WC_Data_Store::load( 'product-' . $this->get_type() );
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
+		}
+	}
+
+	/**
+	 * Give the clone its own attribute and download objects.
+	 *
+	 * @since 11.4.0
+	 */
+	public function __clone() {
+		parent::__clone();
+		foreach ( array( 'data', 'changes' ) as $set ) {
+			foreach ( array( 'attributes', 'downloads' ) as $prop ) {
+				foreach ( $this->{$set}[ $prop ] ?? array() as $key => $value ) {
+					if ( is_object( $value ) ) {
+						$this->{$set}[ $prop ][ $key ] = clone $value;
+					}
+				}
+			}
 		}
 	}
 
@@ -282,6 +308,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_global_unique_id( $context = 'view' ) {
 		return $this->get_prop( 'global_unique_id', $context );
+	}
+
+	/**
+	 * Get MPN.
+	 *
+	 * @since 11.4.0
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return string
+	 */
+	public function get_mpn( $context = 'view' ) {
+		return $this->get_prop( 'mpn', $context );
 	}
 
 	/**
@@ -929,8 +966,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return void
 	 */
 	public function set_global_unique_id( $global_unique_id ) {
-		// Strip characters that are never valid (digits, hyphens, and X/x for the ISBN-10 check digit).
-		$global_unique_id = preg_replace( '/[^0-9Xx\-]/', '', (string) $global_unique_id );
+		$global_unique_id = preg_replace( '/[^' . self::GLOBAL_UNIQUE_ID_CHARACTERS . ']/', '', (string) $global_unique_id );
 
 		// X is only valid as the final ISBN-10 check digit character (ISO 2108) — reject anywhere else.
 		if ( $this->get_object_read() && ! empty( $global_unique_id ) && ! preg_match( '/^[0-9\-]*[0-9Xx]?$/', $global_unique_id ) ) {
@@ -954,6 +990,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			);
 		}
 		$this->set_prop( 'global_unique_id', $global_unique_id );
+	}
+
+	/**
+	 * Set MPN.
+	 *
+	 * @since 11.4.0
+	 * @param string $mpn Product MPN.
+	 * @return void
+	 */
+	public function set_mpn( $mpn ) {
+		$this->set_prop( 'mpn', (string) $mpn );
 	}
 
 	/**

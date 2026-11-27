@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Order Custom Field personalization tag for field keys with apostrophes; HTML in field values now shows as plain text.

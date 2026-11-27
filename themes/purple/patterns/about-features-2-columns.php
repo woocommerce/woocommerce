@@ -12,7 +12,7 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"categories":["about","purple"],"name":"Heading, image and list of features","patternName":"purple/about-features-2-columns","description":"A section with a heading, paragraph, a list of features with icons and an image."},"align":"full","className":"alignfull","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+<!-- wp:group {"metadata":{"categories":["about","purple"],"name":<?php echo purple_block_attribute_string( _x( 'Heading, image and list of features', 'Pattern title', 'purple' ) ); ?>,"patternName":"purple/about-features-2-columns","description":"A section with a heading, paragraph, a list of features with icons and an image."},"align":"full","className":"alignfull","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0"><!-- wp:columns {"verticalAlignment":"center","align":"wide","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|90"}}}} -->
 <div class="wp-block-columns alignwide are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center","width":"40%","style":{"spacing":{"padding":{"bottom":"var:preset|spacing|30"}}},"layout":{"type":"default"}} -->
 <div class="wp-block-column is-vertically-aligned-center" style="padding-bottom:var(--wp--preset--spacing--30);flex-basis:40%"><!-- wp:paragraph {"style":{"typography":{"textTransform":"uppercase","letterSpacing":"1.12px"}},"fontSize":"small"} -->
@@ -61,7 +61,7 @@
 <!-- /wp:column -->
 
 <!-- wp:column {"verticalAlignment":"center"} -->
-<div class="wp-block-column is-vertically-aligned-center"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/storytelling-field.webp","alt":"<?php esc_attr_e( 'Rolling green farmland hills seen from above.', 'purple' ); ?>","dimRatio":0,"isUserOverlayColor":true,"isDark":false,"sizeSlug":"full","style":{"dimensions":{"aspectRatio":"1"}}} -->
+<div class="wp-block-column is-vertically-aligned-center"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/storytelling-field.webp","alt":<?php echo purple_block_attribute_string( __( 'Rolling green farmland hills seen from above.', 'purple' ) ); ?>,"dimRatio":0,"isUserOverlayColor":true,"isDark":false,"sizeSlug":"full","style":{"dimensions":{"aspectRatio":"1"}}} -->
 <div class="wp-block-cover is-light"><img class="wp-block-cover__image-background size-full" alt="<?php esc_attr_e( 'Rolling green farmland hills seen from above.', 'purple' ); ?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/storytelling-field.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"style":{"typography":{"textAlign":"center"}}} -->
 <p class="has-text-align-center"></p>
 <!-- /wp:paragraph --></div></div>

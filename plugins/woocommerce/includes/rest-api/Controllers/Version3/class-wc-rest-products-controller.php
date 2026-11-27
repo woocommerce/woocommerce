@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
 use Automattic\WooCommerce\Internal\ProductCustoms\CustomsDataValidator;
+use Automattic\WooCommerce\Internal\RestApi\ProductImageUploadCleanupTrait;
 use Automattic\WooCommerce\Internal\RestApi\ProductRequestPreparationTrait;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
@@ -31,6 +32,7 @@ defined( 'ABSPATH' ) || exit;
 class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 	use CogsAwareRestControllerTrait;
+	use ProductImageUploadCleanupTrait;
 	use ProductRequestPreparationTrait;
 
 	/**
@@ -48,6 +50,16 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @var string
 	 */
 	private $search_sku_arg_value = '';
+
+	/**
+	 * The value of the 'search_mpn' argument if present.
+	 *
+	 * See prepare_objects_query()
+	 *
+	 * @var string
+	 * @since 11.4.0
+	 */
+	private $search_mpn_arg_value = '';
 
 	/**
 	 * If the 'search_name_or_sku' argument is present this will be set
@@ -78,13 +90,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @var array
 	 */
 	private $exclude_status = array();
-
-	/**
-	 * Stores attachment IDs processed during the current request for potential cleanup.
-	 *
-	 * @var array
-	 */
-	private $processed_attachment_ids_for_request = array();
 
 	/**
 	 * Register the routes for products.
@@ -370,7 +375,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				'tokens' => $tokens,
 			);
 
-			unset( $request['search'], $request['search_sku'], $request['sku'], $request['search_name_or_sku'], $args['s'] );
+			unset( $request['search'], $request['search_sku'], $request['sku'], $request['search_name_or_sku'], $request['search_mpn'], $request['mpn'], $args['s'] );
 		}
 
 		$search_name_or_sku_arg = $request['search_name_or_sku'] ?? '';
@@ -412,6 +417,14 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			}
 		}
 
+		// Do a partial match for MPN. Supersedes the 'mpn' argument, that does exact matching.
+		if ( '' !== ( $request['search_mpn'] ?? '' ) ) {
+			// Store this for use in the query clause filters.
+			$this->search_mpn_arg_value = $request['search_mpn'];
+
+			unset( $request['mpn'] );
+		}
+
 		if ( ! empty( $request['global_unique_id'] ) ) {
 			$global_unique_ids  = array_map( 'trim', explode( ',', $request['global_unique_id'] ) );
 			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
@@ -419,6 +432,18 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				array(
 					'key'     => '_global_unique_id',
 					'value'   => $global_unique_ids,
+					'compare' => 'IN',
+				)
+			);
+		}
+
+		if ( '' !== ( $request['mpn'] ?? '' ) ) {
+			$mpns               = array_map( 'trim', explode( ',', $request['mpn'] ) );
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Match the full MPN; the lookup column only stores its first 100 characters.
+				$args,
+				array(
+					'key'     => '_mpn',
+					'value'   => $mpns,
 					'compare' => 'IN',
 				)
 			);
@@ -476,7 +501,14 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
-		if ( ! empty( $request['sku'] ) || ! empty( $request['search_sku'] ) || $this->search_name_or_sku_tokens || $this->search_fields_tokens ) {
+		if (
+			! empty( $request['sku'] )
+			|| ! empty( $request['search_sku'] )
+			|| '' !== ( $request['mpn'] ?? '' )
+			|| '' !== ( $request['search_mpn'] ?? '' )
+			|| $this->search_name_or_sku_tokens
+			|| $this->search_fields_tokens
+		) {
 			$args['post_type'] = array( 'product', 'product_variation' );
 		} else {
 			$args['post_type'] = $this->post_type;
@@ -513,7 +545,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	protected function get_objects( $query_args ) {
-		$add_search_criteria = $this->search_sku_arg_value || $this->search_name_or_sku_tokens || $this->search_fields_tokens;
+		$add_search_criteria = $this->search_sku_arg_value || '' !== $this->search_mpn_arg_value || $this->search_name_or_sku_tokens || $this->search_fields_tokens;
 
 		// Add filters for search criteria in product postmeta via the lookup table.
 		if ( $add_search_criteria ) {
@@ -534,6 +566,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			remove_filter( 'posts_where', array( $this, 'add_search_criteria_to_wp_query_where' ) );
 
 			$this->search_sku_arg_value      = '';
+			$this->search_mpn_arg_value      = '';
 			$this->search_name_or_sku_tokens = null;
 			$this->search_fields_tokens      = null;
 		}
@@ -569,6 +602,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Only join if we need meta table search.
 		if ( ! $this->search_fields_tokens &&
 			! $this->search_sku_arg_value &&
+			'' === $this->search_mpn_arg_value &&
 			! ( $this->search_name_or_sku_tokens && wc_product_sku_enabled() ) ) {
 			return $join;
 		}
@@ -605,6 +639,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$like_search = '%' . $wpdb->esc_like( $this->search_sku_arg_value ) . '%';
 			$where      .= ' AND ' . $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
 		}
+
+		if ( '' !== $this->search_mpn_arg_value ) {
+			$like_search = '%' . $wpdb->esc_like( $this->search_mpn_arg_value ) . '%';
+			$where      .= ' AND ' . $wpdb->prepare( '(wc_product_meta_lookup.mpn LIKE %s)', $like_search );
+		}
 		return $where;
 	}
 
@@ -626,6 +665,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'name'              => "{$wpdb->posts}.post_title",
 			'sku'               => 'wc_product_meta_lookup.sku',
 			'global_unique_id'  => 'wc_product_meta_lookup.global_unique_id',
+			'mpn'               => 'wc_product_meta_lookup.mpn',
 			'description'       => "{$wpdb->posts}.post_content",
 			'short_description' => "{$wpdb->posts}.post_excerpt",
 		);
@@ -710,6 +750,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				}
 
 				if ( ! wp_attachment_is_image( $attachment_id ) ) {
+					if ( $is_new_upload && $attachment_id > 0 ) {
+						wp_delete_attachment( $attachment_id, true );
+					}
+
 					/* translators: %s: image ID */
 					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
 				}
@@ -759,6 +803,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
+	 * @throws WC_REST_Exception When a product attribute or term ID is invalid.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$customs = CustomsDataValidator::normalize_fields( $request->get_params() );
@@ -774,17 +819,17 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Post title.
 		if ( isset( $request['name'] ) ) {
-			$product->set_name( wp_filter_post_kses( $request['name'] ) );
+			$product->set_name( wp_kses_post( $request['name'] ) );
 		}
 
 		// Post content.
 		if ( isset( $request['description'] ) ) {
-			$product->set_description( wp_filter_post_kses( $request['description'] ) );
+			$product->set_description( wp_kses_post( $request['description'] ) );
 		}
 
 		// Post excerpt.
 		if ( isset( $request['short_description'] ) ) {
-			$product->set_short_description( wp_filter_post_kses( $request['short_description'] ) );
+			$product->set_short_description( wp_kses_post( $request['short_description'] ) );
 		}
 
 		// Post status.
@@ -855,20 +900,32 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$product->set_global_unique_id( wc_clean( $request['global_unique_id'] ) );
 		}
 
+		// MPN.
+		if ( isset( $request['mpn'] ) ) {
+			$product->set_mpn( sanitize_text_field( $request['mpn'] ) );
+		}
+
 		// Attributes.
 		if ( isset( $request['attributes'] ) ) {
 			$attributes = array();
 
 			foreach ( $request['attributes'] as $attribute ) {
+				if ( ! is_array( $attribute ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute', esc_html__( 'Each attribute must be an object.', 'woocommerce' ), 400 );
+				}
+
 				$attribute_id   = 0;
 				$attribute_name = '';
 
 				// Check ID for global attributes or name for product attributes.
 				if ( ! empty( $attribute['id'] ) ) {
-					$attribute_id   = absint( $attribute['id'] );
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+					$attribute_id = absint( $attribute['id'] );
 				} elseif ( ! empty( $attribute['name'] ) ) {
 					$attribute_name = wc_clean( $attribute['name'] );
+				}
+
+				if ( array_key_exists( 'term_ids', $attribute ) && ( ! $attribute_id || ! is_array( $attribute['term_ids'] ) ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_term_id', esc_html__( 'Term IDs must be an array belonging to a valid global attribute.', 'woocommerce' ), 400 );
 				}
 
 				if ( ! $attribute_id && ! $attribute_name ) {
@@ -876,8 +933,26 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				}
 
 				if ( $attribute_id ) {
+					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
 
-					if ( isset( $attribute['options'] ) ) {
+					if ( array_key_exists( 'term_ids', $attribute ) ) {
+						if ( ! $attribute_name || ! taxonomy_exists( $attribute_name ) ) {
+							throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_term_id', esc_html__( 'Term IDs must be an array belonging to a valid global attribute.', 'woocommerce' ), 400 );
+						}
+
+						// Term IDs identify terms exactly, even when several terms share a name.
+						$values = array();
+						foreach ( $attribute['term_ids'] as $posted_term_id ) {
+							// Batch requests skip schema validation, so reject non-integer IDs before converting them.
+							$term_id = is_numeric( $posted_term_id ) && (float) (int) $posted_term_id === (float) $posted_term_id ? (int) $posted_term_id : 0;
+							$term    = $term_id > 0 ? get_term( $term_id, wc_attribute_taxonomy_name_by_id( $attribute_id ) ) : null;
+							if ( ! $term instanceof WP_Term ) {
+								/* translators: %d: term ID */
+								throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_term_id', esc_html( sprintf( __( '#%d is not a term of this attribute.', 'woocommerce' ), $term_id ) ), 400 );
+							}
+							$values[] = $term_id;
+						}
+					} elseif ( isset( $attribute['options'] ) ) {
 						$options = $attribute['options'];
 
 						if ( ! is_array( $attribute['options'] ) ) {
@@ -1287,6 +1362,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				),
 				'global_unique_id'      => array(
 					'description' => __( 'GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'mpn'                   => array(
+					'description' => __( 'Manufacturer part number.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -1766,6 +1846,15 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 								),
 								'context'     => array( 'view', 'edit' ),
 							),
+							'term_ids'  => array(
+								'description' => __( 'List of term IDs of a global attribute. When set, it is used instead of options.', 'woocommerce' ),
+								'type'        => 'array',
+								'items'       => array(
+									'type'    => 'integer',
+									'minimum' => 1,
+								),
+								'context'     => array( 'edit' ),
+							),
 						),
 					),
 				),
@@ -1913,6 +2002,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$params['search_mpn'] = array(
+			'description'       => __( "Limit results to those with an MPN that partially matches a string. This argument takes precedence over 'mpn'.", 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
 		$params['search_name_or_sku'] = array(
 			'description'       => __( "Limit results to those with a name or SKU that partial matches a string. This argument takes precedence over 'search', 'sku' and 'search_sku'.", 'woocommerce' ),
 			'type'              => 'string',
@@ -1920,13 +2016,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
-		$search_fields_enum = array( 'name', 'global_unique_id', 'description', 'short_description' );
+		$search_fields_enum = array( 'name', 'global_unique_id', 'mpn', 'description', 'short_description' );
 		if ( wc_product_sku_enabled() ) {
 			$search_fields_enum[] = 'sku';
 		}
 
 		$params['search_fields'] = array(
-			'description'       => __( 'Limit search to specific fields when used with search parameter. Available fields: name, sku, global_unique_id, description, short_description. This argument takes precedence over all other search parameters.', 'woocommerce' ),
+			'description'       => __( 'Limit search to specific fields when used with search parameter. Available fields: name, sku, global_unique_id, mpn, description, short_description. This argument takes precedence over all other search parameters.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'string',
@@ -1992,6 +2088,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'description'       => __( 'Limit result set to virtual products.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'rest_sanitize_boolean',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['mpn'] = array(
+			'description'       => __( 'Limit result set to products with specific MPN(s). Use commas to separate.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
@@ -2101,6 +2204,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			if ( in_array( 'global_unique_id', $fields, true ) ) {
 				$data['global_unique_id'] = $product->get_global_unique_id( $context );
+			}
+
+			if ( in_array( 'mpn', $fields, true ) ) {
+				$data['mpn'] = $product->get_mpn( $context );
 			}
 
 			foreach ( CustomsDataValidator::FIELDS as $property ) {

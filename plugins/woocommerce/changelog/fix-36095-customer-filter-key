@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Preserve customer IDs in the `woocommerce_json_search_found_customers` filter on order edit screens.

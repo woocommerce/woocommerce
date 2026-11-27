@@ -99,8 +99,9 @@ class Api {
 	 * @return string The cache buster value to use for the given file.
 	 */
 	protected function get_file_version( $file ) {
-		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && file_exists( $this->package->get_path() . $file ) ) {
-			return filemtime( $this->package->get_path( trim( $file, '/' ) ) );
+		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+			$mtime = @filemtime( $this->package->get_path( $file ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- performance optimization
+			return $mtime ? (string) $mtime : $this->wc_version;
 		}
 		return $this->wc_version;
 	}

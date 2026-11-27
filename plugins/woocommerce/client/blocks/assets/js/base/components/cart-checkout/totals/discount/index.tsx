@@ -31,6 +31,8 @@ export interface TotalsDiscountProps {
 		'total_discount' | 'total_discount_tax'
 	>;
 	isLoading?: boolean;
+	// Disables the coupon buttons, for example while the row shows coupons that the cart no longer has.
+	disabled?: boolean;
 }
 
 const filteredCartCouponsFilterArg = {
@@ -44,6 +46,7 @@ const TotalsDiscount = ( {
 	removeCoupon,
 	values,
 	isLoading,
+	disabled = false,
 }: TotalsDiscountProps ): JSX.Element | null => {
 	const {
 		total_discount: totalDiscount,
@@ -95,7 +98,9 @@ const TotalsDiscount = ( {
 											__( 'Coupon: %s', 'woocommerce' ),
 											cartCoupon.label
 										) }
-										disabled={ isRemovingCoupon }
+										disabled={
+											isRemovingCoupon || disabled
+										}
 										onRemove={ () => {
 											removeCoupon( cartCoupon.code );
 										} }

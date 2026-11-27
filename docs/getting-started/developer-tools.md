@@ -50,6 +50,22 @@ A dummy payment gateway for your WooCommerce development needs, with built-in su
 
 QIT is a testing platform for WooCommerce plugins and themes with managed tests, E2E tests, and disposable local testing environments.
 
+### Static analysis
+
+PHP stubs describe WordPress, WooCommerce, and extension APIs so tools such as PHPStan can analyze integrations without loading their source code.
+
+#### [WordPress stubs](https://github.com/php-stubs/wordpress-stubs)
+
+Declarations for WordPress core functions, classes, and interfaces.
+
+#### [WooCommerce stubs](https://github.com/php-stubs/woocommerce-stubs)
+
+Declarations for WooCommerce Core functions, classes, and interfaces.
+
+#### [WooCommerce extension stubs](https://github.com/woocommerce/php-stubs)
+
+Versioned declarations for Woo extensions. Use them with WooCommerce stubs to check integrations against the minimum extension versions you support.
+
 ## Libraries
 
 Use these resources to help take some of the heavy lifting off of fetching and transforming data \-- as well as creating UI elements.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent WooCommerce block types from being registered twice when a product description is rendered before init.

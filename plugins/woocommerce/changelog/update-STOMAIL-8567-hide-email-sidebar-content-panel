@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Hide the “Content” section in the Email tab of the email editor sidebar, as it only listed the email body.

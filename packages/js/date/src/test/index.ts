@@ -2231,5 +2231,24 @@ describe( 'getDateFormatsForIntervalPhp', () => {
 				false
 			);
 		} );
+
+		test( 'uses the written year of date-only strings west of UTC', () => {
+			// Date-only strings parse as UTC midnight, so west of UTC the
+			// local year of a Jan 1 date is the previous year. Simulate UTC-5.
+			jest.spyOn( Date.prototype, 'getFullYear' ).mockImplementation(
+				function ( this: Date ) {
+					return new Date(
+						this.getTime() - 5 * 60 * 60 * 1000
+					).getUTCFullYear();
+				}
+			);
+
+			expect( containsLeapYear( '2024-01-01', '2024-01-01' ) ).toBe(
+				true
+			);
+			expect( containsLeapYear( '2025-01-01', '2025-12-31' ) ).toBe(
+				false
+			);
+		} );
 	} );
 } );

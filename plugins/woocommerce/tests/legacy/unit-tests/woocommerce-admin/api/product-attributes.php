@@ -74,6 +74,16 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 			$custom_attr->set_variation( true );
 			$attributes[] = $custom_attr;
 
+			$custom_colour = new WC_Product_Attribute();
+			$custom_colour->set_name( 'Colour' );
+			$custom_colour->set_options( array( 'red', 'blue' ) );
+			$attributes[] = $custom_colour;
+
+			$custom_numeric = new WC_Product_Attribute();
+			$custom_numeric->set_name( '123' );
+			$custom_numeric->set_options( array( 'example' ) );
+			$attributes[] = $custom_numeric;
+
 			$product->set_attributes( $attributes );
 			$product->save();
 
@@ -217,6 +227,69 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 		$names = wp_list_pluck( $attributes, 'name' );
 		$this->assertContains( 'number', $names );
 		$this->assertContains( 'Numeric Size', $names );
+	}
+
+	/**
+	 * @testdox Search intersects global and custom attribute matches with the requested slugs.
+	 * @testWith ["pa_number", ["pa_number"]]
+	 *           ["NUMBER", ["pa_number"]]
+	 *           ["numeric-size", ["numeric-size"]]
+	 *           [["PA_Number", "numeric-size"], ["numeric-size", "pa_number"]]
+	 *           ["pa_colour", []]
+	 *           ["colour", []]
+	 *           ["does-not-exist", []]
+	 *           ["", ["numeric-size", "pa_number"]]
+	 *           [[], ["numeric-size", "pa_number"]]
+	 *
+	 * @param string|string[] $slug Requested slugs.
+	 * @param string[]        $expected_slugs Expected response slugs.
+	 */
+	public function test_search_with_slug( $slug, array $expected_slugs ): void {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'search' => 'num',
+				'slug'   => $slug,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected_slugs, wp_list_pluck( $response->get_data(), 'slug' ) );
+		$this->assertSame( count( $expected_slugs ), $response->get_headers()['X-WP-Total'] );
+		$this->assertSame( 1, $response->get_headers()['X-WP-TotalPages'] );
+	}
+
+	/**
+	 * @testdox Prefixed slugs select only global attributes, while unprefixed slugs can select both kinds.
+	 * @testWith ["Colour", "pa_colour", ["pa_colour"]]
+	 *           ["Colour", "PA_Colour", ["pa_colour"]]
+	 *           ["Colour", "colour", ["colour", "pa_colour"]]
+	 *           ["Colour", ["pa_colour", "colour"], ["colour", "pa_colour"]]
+	 *           ["num", "pa_numeric-size", []]
+	 *           ["123", "123", [123]]
+	 *
+	 * @param string          $search Search term.
+	 * @param string|string[] $slug Requested slugs.
+	 * @param string[]|int[]  $expected_slugs Expected response slugs.
+	 */
+	public function test_search_distinguishes_global_and_custom_slugs( string $search, $slug, array $expected_slugs ): void {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'search' => $search,
+				'slug'   => $slug,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected_slugs, wp_list_pluck( $response->get_data(), 'slug' ) );
+		$this->assertSame( count( $expected_slugs ), $response->get_headers()['X-WP-Total'] );
 	}
 
 	/**

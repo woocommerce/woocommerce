@@ -248,7 +248,8 @@ trait OrderAttributionMeta {
 		// Look through each field in given data.
 		foreach ( $this->field_names as $field_name ) {
 			$value = sanitize_text_field( wp_unslash( $raw_values[ $field_name ] ) );
-			if ( '(none)' === $value ) {
+			// Sourcebuster.js empties a field when it doesn't fit the cookie size limit.
+			if ( '' === $value || '(none)' === $value ) {
 				continue;
 			}
 
@@ -317,6 +318,13 @@ trait OrderAttributionMeta {
 				$source = $translated ?
 					__( 'Point of Sale', 'woocommerce' )
 					: 'Point of Sale';
+				break;
+			case 'ai_shopper':
+				// The agent named in a UCP request is not verified, so it stays in the details.
+				$label  = '';
+				$source = $translated ?
+					__( 'AI shopper', 'woocommerce' )
+					: 'AI shopper';
 				break;
 
 			default:

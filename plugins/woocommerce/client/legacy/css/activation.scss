@@ -62,3 +62,18 @@ p.woocommerce-actions,
 		top: 18px;
 	}
 }
+
+// PHP version requirement notice. Avoid single-word last lines where supported.
+.woocommerce-message .wc-php-version-notice {
+	text-wrap: pretty;
+
+	.wc-php-version-notice__learn-more {
+		text-align: end;
+
+		// Core aligns the 20px icon to the top of the line, which sits high next to 13px text.
+		.dashicons-external {
+			margin-top: 0;
+			vertical-align: middle;
+		}
+	}
+}

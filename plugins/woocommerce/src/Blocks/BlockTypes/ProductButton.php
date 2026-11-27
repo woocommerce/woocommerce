@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Utilities\InCartQuantity;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 /**
  * ProductButton class.
@@ -118,39 +119,10 @@ class ProductButton extends AbstractBlock {
 			)
 		);
 
-		$default_quantity = 1;
-
-		if ( ! $is_descendant_of_add_to_cart_form ) {
-			/**
-			 * Filters the change the quantity to add to cart.
-			 *
-			 * @since 8.5.0
-			 * @since 11.0.0 Added the `$variation_id` parameter.
-			 * @param int|float $default_quantity The default quantity.
-			 * @param int       $product_id The product id.
-			 * @param int       $variation_id The variation ID. Always 0 in this context.
-			 */
-			$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id(), 0 );
-		}
-
 		$add_to_cart_text = null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' );
 
 		if ( $is_descendant_of_add_to_cart_form && null !== $product->single_add_to_cart_text() ) {
 			$add_to_cart_text = $product->single_add_to_cart_text();
-		}
-
-		$context = array(
-			'quantityToAdd'    => $default_quantity,
-			'addToCartText'    => $add_to_cart_text,
-			'tempQuantity'     => $number_of_items_in_cart,
-			'animationStatus'  => 'IDLE',
-			'inTheCartText'    => $this->get_in_the_cart_text( $product ),
-			'noticeId'         => '',
-			'hasPressedButton' => false,
-		);
-
-		if ( $product->is_type( ProductType::GROUPED ) ) {
-			$context['groupedProductIds'] = $product->get_children();
 		}
 
 		$attributes = array(
@@ -172,6 +144,61 @@ class ProductButton extends AbstractBlock {
 				$attributes['target'] = '_blank';
 				$attributes['rel']    = 'nofollow noopener noreferrer';
 			}
+		}
+
+		$initial_quantity = $is_descendant_of_add_to_cart_form ? 1 : wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_quantity( $product );
+
+		/**
+		 * This filter is documented in includes/wc-template-functions.php.
+		 *
+		 * @since 2.4.11
+		 */
+		$args = apply_filters(
+			'woocommerce_loop_add_to_cart_args',
+			array(
+				'quantity'   => $initial_quantity,
+				'class'      => $html_classes,
+				'attributes' => array_merge(
+					$attributes,
+					array(
+						'data-product_id'  => $product->get_id(),
+						'data-product_sku' => $product->get_sku(),
+						'aria-label'       => ! $is_descendant_of_add_to_cart_form || 'simple' === $product->get_type() ? $product->add_to_cart_description() : null,
+					),
+				),
+			),
+			$product
+		);
+
+		// Single-product forms take their quantity from the quantity input.
+		$default_quantity = 1;
+		if ( ! $is_descendant_of_add_to_cart_form && isset( $args['quantity'] ) && is_numeric( $args['quantity'] ) ) {
+			$default_quantity = wc_stock_amount( (float) $args['quantity'] );
+		}
+
+		if ( ! $is_descendant_of_add_to_cart_form ) {
+			$button_data      = wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_button_data( $product, $default_quantity );
+			$add_to_cart_text = $button_data['text'] ?? $add_to_cart_text;
+			if ( isset( $add_to_cart_url, $args['attributes']['href'] ) && esc_url( $add_to_cart_url ) === $args['attributes']['href'] ) {
+				$args['attributes']['href'] = esc_url( $button_data['url'] );
+			}
+			if ( ( $args['attributes']['aria-label'] ?? null ) === $button_data['original_description'] ) {
+				$args['attributes']['aria-label'] = $button_data['description'];
+			}
+		}
+
+		$context = array(
+			'quantityToAdd'    => $default_quantity,
+			'addToCartText'    => $add_to_cart_text,
+			'tempQuantity'     => $number_of_items_in_cart,
+			'animationStatus'  => 'IDLE',
+			'inTheCartText'    => $this->get_in_the_cart_text( $product ),
+			'noticeId'         => '',
+			'hasPressedButton' => false,
+		);
+
+		if ( $product->is_type( ProductType::GROUPED ) ) {
+			$context['groupedProductIds'] = $product->get_children();
 		}
 
 		wp_interactivity_config(
@@ -214,30 +241,6 @@ class ProductButton extends AbstractBlock {
 						: $context['inTheCartAriaLabel'];
 				},
 			)
-		);
-
-		/**
-		 * Allow filtering of the add to cart button arguments.
-		 *
-		 * @since 9.7.0
-		 *
-		 * @param array       $args    Button arguments, with a `class` string and an `attributes` array.
-		 * @param \WC_Product $product Product the button is rendered for.
-		 */
-		$args = apply_filters(
-			'woocommerce_loop_add_to_cart_args',
-			array(
-				'class'      => $html_classes,
-				'attributes' => array_merge(
-					$attributes,
-					array(
-						'data-product_id'  => $product->get_id(),
-						'data-product_sku' => $product->get_sku(),
-						'aria-label'       => ! $is_descendant_of_add_to_cart_form || 'simple' === $product->get_type() ? $product->add_to_cart_description() : null,
-					),
-				),
-			),
-			$product
 		);
 
 		// The accessible name must keep containing the visible text once it changes to "N in cart" (WCAG 2.5.3).

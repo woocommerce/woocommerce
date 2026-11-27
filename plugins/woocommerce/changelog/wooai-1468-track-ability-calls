@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-When usage tracking is enabled, record how WooCommerce abilities are called, such as by AI agents, without their inputs or results.

@@ -6,7 +6,8 @@ import { store as editorStore } from '@wordpress/editor';
 import { useSelect } from '@wordpress/data';
 import { blockDefault } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
-import { EmptyState, Notice, Stack } from '@wordpress/ui';
+import { Notice } from '@wordpress/components';
+import { EmptyState, Stack } from '@wordpress/ui';
 // @ts-expect-error No types available for this component
 
 import { BlockPreview } from '@wordpress/block-editor';
@@ -155,14 +156,12 @@ export function TemplateList( {
 			className="email-editor-template-select__list"
 		>
 			{ selectedCategory === 'recent' && (
-				<Notice.Root intent="info">
-					<Notice.Description>
-						{ __(
-							'Templates created on the legacy editor will not appear here.',
-							__i18n_text_domain__
-						) }
-					</Notice.Description>
-				</Notice.Root>
+				<Notice status="info" isDismissible={ false }>
+					{ __(
+						'Templates created on the legacy editor will not appear here.',
+						__i18n_text_domain__
+					) }
+				</Notice>
 			) }
 
 			<MemorizedTemplateListBox

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPa
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
+use Automattic\WooCommerce\Internal\RestApi\InteractiveSessionCheck;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
 use Exception;
@@ -216,6 +217,26 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$override
 		);
 		// Onboarding step specific routes.
+		register_rest_route(
+			$this->route_namespace,
+			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_wpcom_connection_authorize' ),
+					'permission_callback' => fn( $request ) => $this->check_wpcom_connection_authorize_permissions( $request ),
+					'args'                => array(
+						'source' => array(
+							'description'       => esc_html__( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+			),
+			$override
+		);
 		register_rest_route(
 			$this->route_namespace,
 			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/init',
@@ -508,8 +529,11 @@ class WooPaymentsRestController extends RestApiControllerBase {
 
 		$source = $request->get_param( 'source' );
 
+		// The WPCOM authorization URL is only returned to an interactive admin session.
+		$is_interactive_session = ! is_wp_error( InteractiveSessionCheck::require_interactive_session( $request ) );
+
 		try {
-			$onboarding_details = $this->woopayments->get_onboarding_details( $location, $this->get_rest_url_path( 'onboarding' ), $source );
+			$onboarding_details = $this->woopayments->get_onboarding_details( $location, $this->get_rest_url_path( 'onboarding' ), $source, $is_interactive_session );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( Exception $e ) {
@@ -679,6 +703,33 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		}
 
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Handle the onboarding WPCOM connection authorize action.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return WP_Error|WP_REST_Response The response or error.
+	 */
+	protected function handle_onboarding_wpcom_connection_authorize( WP_REST_Request $request ) {
+		try {
+			$result = $this->woopayments->onboarding_wpcom_connection_authorize( $request->get_param( 'source' ) );
+		} catch ( ApiException $e ) {
+			return new WP_Error(
+				$e->getErrorCode(),
+				$e->getMessage(),
+				array_merge( $e->getAdditionalData(), array( 'status' => $e->getCode() ) )
+			);
+		}
+
+		return rest_ensure_response(
+			array_merge(
+				array( 'success' => true ),
+				$result
+			)
+		);
 	}
 
 	/**
@@ -938,6 +989,25 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	}
 
 	/**
+	 * Permissions check for the WPCOM connection authorize endpoint.
+	 *
+	 * Requires an interactive admin session on top of the general permissions.
+	 *
+	 * @param WP_REST_Request $request The request for which the permission is checked.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return bool|WP_Error True if the request is allowed, otherwise an error or False if no error is available for the request method.
+	 */
+	private function check_wpcom_connection_authorize_permissions( WP_REST_Request $request ) {
+		$session = InteractiveSessionCheck::require_interactive_session( $request );
+		if ( is_wp_error( $session ) ) {
+			return $session;
+		}
+
+		return $this->check_permissions( $request );
+	}
+
+	/**
 	 * Validate the location argument.
 	 *
 	 * @param mixed           $value   Value of the argument.
@@ -1190,6 +1260,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 								'auth'                 => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to authorize the WPCOM connection.', 'woocommerce' ),
+									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'authorize'            => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'Action to register the store with WPCOM, if needed, and get the URL to authorize the WPCOM connection.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,

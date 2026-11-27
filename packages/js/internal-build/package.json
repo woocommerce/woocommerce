@@ -61,14 +61,14 @@
 		"@wordpress/postcss-plugins-preset": "catalog:tooling",
 		"@wordpress/theme": "catalog:wp-bundled",
 		"chokidar": "^3.6.0",
-		"css-loader": "6.11.x",
-		"esbuild": "^0.24.0",
+		"css-loader": "catalog:tooling",
+		"esbuild": "^0.28.1",
 		"glob": "^10.3.10",
 		"json2php": "^0.0.7",
-		"mini-css-extract-plugin": "2.9.x",
-		"postcss-loader": "4.3.x",
+		"mini-css-extract-plugin": "catalog:tooling",
+		"postcss-loader": "catalog:tooling",
 		"rtlcss": "4.3.x",
-		"sass-loader": "10.5.x",
+		"sass-loader": "catalog:tooling",
 		"webpack-remove-empty-scripts": "1.0.x"
 	},
 	"devDependencies": {
@@ -79,9 +79,9 @@
 		"@wordpress/data": "10.33.1",
 		"@wordpress/editor": "14.33.11",
 		"@wordpress/notices": "5.33.1",
-		"eslint": "^10.0.0",
+		"eslint": "catalog:tooling",
 		"stylelint": "catalog:tooling",
-		"typescript": "5.7.x"
+		"typescript": "catalog:tooling"
 	},
 	"config": {
 		"ci": {

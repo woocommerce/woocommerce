@@ -16,6 +16,17 @@ import { URL } from 'node:url';
 import { getEnvVar } from './environment';
 
 /**
+ * Commit identity variables set by CI workflows. simple-git removes `GIT_*`
+ * variables from the git environment unless they are listed in `allowEnvironment`.
+ */
+export const GIT_IDENTITY_ENVIRONMENT = [
+	'GIT_AUTHOR_NAME',
+	'GIT_AUTHOR_EMAIL',
+	'GIT_COMMITTER_NAME',
+	'GIT_COMMITTER_EMAIL',
+];
+
+/**
  * Get filename from patch
  *
  * @param {string} str String to extract filename from.

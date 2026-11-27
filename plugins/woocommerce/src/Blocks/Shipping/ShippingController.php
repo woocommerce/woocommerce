@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 use WC_Customer;
 use WC_Shipping_Rate;
 
@@ -446,7 +447,12 @@ class ShippingController {
 			return $address;
 		}
 		// We only need to select from the first package, since pickup_location only supports a single package.
-		$chosen_method          = current( WC()->session->get( 'chosen_shipping_methods', array() ) ) ?? '';
+		// The first entry is used only when its rate was listed for the cart.
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+		$first_key      = is_array( $chosen_methods ) && ! empty( $chosen_methods ) ? array_key_first( $chosen_methods ) : null;
+		$listed_methods = null !== $first_key ? ShippingUtil::filter_chosen_shipping_methods( $chosen_methods ) : array();
+		$chosen_method  = null !== $first_key && isset( $listed_methods[ $first_key ] ) ? (string) $listed_methods[ $first_key ] : '';
+
 		$chosen_method_id       = explode( ':', $chosen_method )[0];
 		$chosen_method_instance = explode( ':', $chosen_method )[1] ?? 0;
 

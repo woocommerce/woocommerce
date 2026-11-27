@@ -6,6 +6,13 @@ This package covers functionality for bootstrapping the email editor JS applicat
 
 You can locate the JS package in [`packages/js/email-editor`](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/email-editor)
 
+## Requirements
+
+- WordPress 7.0 or newer
+- PHP 7.4 or newer
+
+Call `Dependency_Check::are_dependencies_met()` before you initialize the editor. It returns `false` on an older WordPress version.
+
 ## Workflow Commands
 
 Note: The package is developed in [the WooCommerce monorepo](https://github.com/woocommerce/woocommerce/tree/trunk/packages/php/email-editor).
@@ -95,8 +102,8 @@ We may add, update and delete any of them.
 |--------------------------------------------------------------------|------------------------------------------------------------------|--------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `woocommerce_email_editor_post_types`                              | `Array` $post_types                                              | `Array` EmailPostType                                        | Applied to the list of post types used by the `getPostTypes` method                                                                                                    |
 | `woocommerce_email_editor_theme_json`                              | `WP_Theme_JSON` $core_theme_data                                 | `WP_Theme_JSON` $theme_json                                  | Applied to the theme json data. This theme json data is created from the merging of the `WP_Theme_JSON_Resolver::get_core_data` and WooCommerce owns `theme.json` file |
-| `woocommerce_email_renderer_styles`                                | `string` $template_styles, `WP_Post` $post                       | `string` $template_styles                                    | Applied to the email editor template styles.                                                                                                                           |
-| `woocommerce_email_content_renderer_styles`                        | `string` $content_styles, `WP_Post` $post                        | `string` $content_styles                                     | Applied to the inline content styles prior to use by the CSS Inliner.                                                                                                  |
+| `woocommerce_email_renderer_styles`                                | `string` $template_styles, `WP_Post` $post                       | `string` $template_styles                                    | Applied to the email template styles. Afterwards, `:where()` is unwrapped where that keeps the selector’s meaning, and link rules skip email buttons.                  |
+| `woocommerce_email_content_renderer_styles`                        | `string` $content_styles, `WP_Post` $post                        | `string` $content_styles                                     | Applied to the content styles before CSS inlining. Afterwards, `:where()` is unwrapped where that keeps the selector’s meaning, and link rules skip email buttons.     |
 | `woocommerce_is_email_editor_page`                                 | `boolean` $is_editor_page                                        | `boolean`                                                    | Check current page is the email editor page                                                                                                                            |
 | `woocommerce_email_editor_send_preview_email`                      | `Array` $post_data                                               | `boolean` Result of processing. Was email sent successfully? | Allows override of the send preview mail function. Folks may choose to use custom implementation                                                                       |
 | `woocommerce_email_editor_post_sent_status_args`                   | `Array` `sent` post status args                                  | `Array` register_post_status args                            | Allows update of the argument for the sent post status                                                                                                                 |

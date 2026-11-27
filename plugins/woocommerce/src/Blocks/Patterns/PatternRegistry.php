@@ -43,8 +43,7 @@ class PatternRegistry {
 				'register_block_patterns',
 				esc_html(
 					sprintf(
-					/* translators: %s: file name. */
-						__( 'Could not register pattern "%s" as a block pattern ("Slug" field missing)', 'woocommerce' ),
+						'Could not register pattern "%s" as a block pattern ("Slug" field missing)',
 						$source
 					)
 				),
@@ -58,8 +57,7 @@ class PatternRegistry {
 				'register_block_patterns',
 				esc_html(
 					sprintf(
-					/* translators: %1s: file name; %2s: slug value found. */
-						__( 'Could not register pattern "%1$s" as a block pattern (invalid slug "%2$s")', 'woocommerce' ),
+						'Could not register pattern "%1$s" as a block pattern (invalid slug "%2$s")',
 						$source,
 						$pattern_data['slug']
 					)
@@ -79,8 +77,7 @@ class PatternRegistry {
 				'register_block_patterns',
 				esc_html(
 					sprintf(
-					/* translators: %1s: file name; %2s: slug value found. */
-						__( 'Could not register pattern "%s" as a block pattern ("Title" field missing)', 'woocommerce' ),
+						'Could not register pattern "%s" as a block pattern ("Title" field missing)',
 						$source
 					)
 				),

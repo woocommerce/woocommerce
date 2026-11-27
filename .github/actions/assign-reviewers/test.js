@@ -121,6 +121,55 @@ check( 'Admin Features files route to their feature owners', () => {
 	}
 } );
 
+check( 'UCP and Abilities files route to big-ocean, the rest of the Store API to rubik', () => {
+	const community = path.join( __dirname, '../../project-community-pr-assigner.json' );
+	const config = JSON.parse( fs.readFileSync( community, 'utf8' ) );
+	const owners = ( file ) => {
+		const matched = Object.keys( config )
+			.filter( ( pattern ) => matches( pattern, file ) )
+			.flatMap( ( pattern ) => [].concat( config[ pattern ] ) );
+		return [ ...new Set( matched ) ];
+	};
+
+	const source = 'plugins/woocommerce/src';
+	const tests = 'plugins/woocommerce/tests/php/src';
+	const cases = [
+		[ `${ source }/StoreApi/Routes/V1/Ucp/Carts.php`, 'big-ocean' ],
+		[ `${ source }/StoreApi/Schemas/V1/Ucp/UcpCartSchema.php`, 'big-ocean' ],
+		[ `${ source }/StoreApi/Utilities/Ucp/CartMapper.php`, 'big-ocean' ],
+		[ `${ source }/StoreApi/Utilities/UcpUtils.php`, 'big-ocean' ],
+		[ `${ source }/Internal/Ucp/Bootstrap.php`, 'big-ocean' ],
+		[ `${ source }/Abilities/AbilitiesRegistry.php`, 'big-ocean' ],
+		[ `${ source }/Internal/Abilities/REST/Controller.php`, 'big-ocean' ],
+		[ `${ source }/Internal/AbilitiesApi/AbilitiesClient.php`, 'big-ocean' ],
+		[ `${ source }/StoreApi/StoreApi.php`, 'rubik' ],
+		[ `${ source }/StoreApi/Exceptions/RouteException.php`, 'rubik' ],
+		[ `${ source }/StoreApi/Routes/RouteInterface.php`, 'rubik' ],
+		[ `${ source }/StoreApi/Routes/V1/Cart.php`, 'rubik' ],
+		[ `${ source }/StoreApi/Routes/V1/AI/Middleware.php`, 'rubik' ],
+		[ `${ source }/StoreApi/Schemas/V1/CartSchema.php`, 'rubik' ],
+		[ `${ source }/StoreApi/Utilities/CartController.php`, 'rubik' ],
+		[ `${ tests }/Internal/Ucp/BootstrapTest.php`, 'big-ocean' ],
+		[ `${ tests }/Internal/AbilitiesApi/AbilitiesClientTest.php`, 'big-ocean' ],
+	];
+
+	for ( const [ file, owner ] of cases ) {
+		assert.deepStrictEqual( owners( file ), [ owner ], `${ file } should route only to ${ owner }` );
+	}
+
+	// Every Blocks test also routes to kirigami.
+	const blocksCases = [
+		[ `${ tests }/Blocks/StoreApi/Routes/UcpCatalog.php`, 'big-ocean' ],
+		[ `${ tests }/Blocks/StoreApi/Routes/Ucp/CatalogReachabilityTest.php`, 'big-ocean' ],
+		[ `${ tests }/Blocks/StoreApi/Routes/Cart.php`, 'rubik' ],
+		[ `${ tests }/Blocks/StoreApi/Formatters/MoneyFormatter.php`, 'rubik' ],
+	];
+
+	for ( const [ file, owner ] of blocksCases ) {
+		assert.deepStrictEqual( owners( file ).sort(), [ owner, 'kirigami' ].sort(), `${ file } should route to ${ owner } and kirigami` );
+	}
+} );
+
 /* Requesting the reviews. */
 
 const run = async ( { config, mode = 'changed-files', changed = [], requestReviewers, membership = {} } ) => {

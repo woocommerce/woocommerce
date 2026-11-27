@@ -47,7 +47,7 @@ client/blocks/
 │   ├── blocks/              # Block implementations (cart, checkout, filters, products)
 │   │   └── product-elements-blocks/ # Reusable product element blocks
 │   ├── base/                # Shared components, context, hooks, stores
-│   │   └── stores/woocommerce/  # Interactivity API stores (LOCKED)
+│   │   └── stores/          # Interactivity API stores (LOCKED)
 │   ├── editor-components/   # 33+ shared editor UI components
 │   ├── extensions/          # Extension integrations
 │   └── utils/               # Shared utility functions
@@ -142,7 +142,8 @@ For private stores:
 
 - Not intended for third-party extension
 - Removing/changing store state is NOT a breaking change
-- `assets/js/base/stores/woocommerce/` contains cart, product-data, products stores
+- `assets/js/base/stores/` holds each separate store as one file (`products.ts`, `shopper-lists.ts`, `store-notices.ts`)
+- The `woocommerce` store lives in `assets/js/base/stores/woocommerce/`: `index.ts` registers it, `types.ts` declares its store-wide types, `products.ts` exposes the product data of `woocommerce/products` without copying it, and `cart/` holds the cart code split by concern, with the cart-only types in `cart/types.ts`
 - Cart store uses mutation batching for performance
 
 ### IntegrationRegistry (Extension API)
@@ -220,7 +221,7 @@ Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP en
 - Projects: `blocks-parallel` (default) and `blocks-serial` (specs in `blocksSerialSpecs`, database reset after each test). Write new specs parallel-safe, or use a test lock; add them to `blocksSerialSpecs` only as a last resort. See `../../tests/e2e/README.md#parallel-locked-and-serial-specs`.
 - Test themes: `block-theme`, `classic-theme`, `block-theme-with-templates`
 - Setup script: `../../tests/e2e/bin/blocks/test-env-setup.sh`
-- Uses MSW for API mocking, Allure for reporting
+- Uses MSW for API mocking
 
 ### PHP Tests
 

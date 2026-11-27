@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Correct plugin timing telemetry for suffixed keys; no merchant-facing installation change.

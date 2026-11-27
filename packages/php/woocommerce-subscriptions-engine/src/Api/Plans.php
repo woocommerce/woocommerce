@@ -6,8 +6,10 @@
  * the payloads it is given and interprets none of them. It checks integrity only (a
  * non-empty name, a registered status, object-shaped policies), then lets the plan's
  * owning extension validate the write through `woocommerce_subscriptions_engine_validate_plan`.
- * Any caller may read any plan; an update names the plan's owning extension and never
- * reaches a plan of another one (authorization is the caller's concern). Reads return
+ * Any caller may read any plan. Every write names the expected owner (`extension_slug`), the
+ * plan's owning extension, also when acting for that extension, and never reaches a plan of
+ * another one: such a plan reads as missing. This guards against mistakes; it is not
+ * authorization (that is the caller's concern). Reads return
  * read-only {@see PlanView}s. The engine opens no transaction and keeps no cache.
  *
  * Plan policies are stored as given; the engine does not read them.
@@ -107,7 +109,10 @@ final class Plans {
 
 		$validator      = new ArgumentValidator();
 		$extension_slug = $validator->get_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
-		$fields         = self::get_plan_fields( $validator, $filtered_args + array( 'name' => '' ) );
+		if ( null !== $extension_slug && '' !== $extension_slug ) {
+			$validator->get_extension_slug( 'extension_slug', $extension_slug );
+		}
+		$fields = self::get_plan_fields( $validator, $filtered_args + array( 'name' => '' ) );
 		try {
 			$validator->throw_errors();
 		} catch ( InvalidInputException $e ) {
@@ -157,13 +162,14 @@ final class Plans {
 	 *                             with the engine code, `field` and `params`), or the owning extension
 	 *                             refuses the plan; entity and extension refusals arrive in one exception.
 	 * @throws RuntimeException If a validation callback throws (the callback's throwable is chained
-	 *                          as the previous exception) or the update fails (no previous exception).
+	 *                          as the previous exception), or the plan read or the update fails (no
+	 *                          previous exception).
 	 */
 	public static function update( int $plan_id, array $args ): ?PlanView {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
 
 		$validator      = new ArgumentValidator();
-		$extension_slug = $validator->get_non_empty_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		$extension_slug = $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] ?? null );
 		$changes        = self::get_plan_fields( $validator, $filtered_args );
 		try {
 			$validator->throw_errors();
@@ -202,51 +208,65 @@ final class Plans {
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
-	 * Add a meta value to a plan, like `add_post_meta()`. A key may hold several values.
-	 * The plan is not looked up: meta for an unknown plan id is a caller error.
+	 * Add a meta value to a plan of the given extension, like `add_post_meta()`. A key may hold
+	 * several values. A plan of another extension reads as missing.
 	 *
-	 * @param int    $plan_id Plan id.
-	 * @param string $key     Meta key.
-	 * @param mixed  $value   Meta value; serialized when not scalar.
-	 * @param bool   $unique  When true, add nothing if the key already exists. Advisory: checked
-	 *                        before the insert with no unique index, so concurrent adds can both write.
+	 * @param int    $plan_id        Plan id.
+	 * @param string $extension_slug The expected owner (the plan's owning extension).
+	 * @param string $key            Meta key.
+	 * @param mixed  $value          Meta value; serialized when not scalar.
+	 * @param bool   $unique         When true, add nothing if the key already exists. Advisory: no
+	 *                               unique index, so concurrent adds can both write.
 	 * @return int|null The meta row id; null when `$unique` and the key exists.
-	 * @throws InvalidArgumentException If `$key` is empty.
+	 * @throws ValidationException If `$extension_slug` is not a valid extension slug or `$key` is empty, with both reported.
+	 * @throws InvalidArgumentException If no plan of that extension has the id.
+	 * @throws RuntimeException If the key is longer than the meta_key column (255 characters).
 	 */
-	public static function add_meta( int $plan_id, string $key, $value, bool $unique = false ): ?int {
-		return ( new PlanRepository() )->add_meta( $plan_id, $key, $value, $unique );
+	public static function add_meta( int $plan_id, string $extension_slug, string $key, $value, bool $unique = false ): ?int {
+		self::assert_scope( $extension_slug, $key );
+
+		return ( new PlanRepository() )->add_meta( $plan_id, $extension_slug, $key, $value, $unique );
 	}
 
 	/**
-	 * Update a plan's meta values for `$key`, like `update_post_meta()`: adds the key
-	 * when absent, else rewrites every value, or only the values equal to `$prev_value`.
-	 * The absent-key check runs before the write with no unique index, so it is not a lock.
-	 * The plan is not looked up: meta for an unknown plan id is a caller error.
+	 * Update the meta values for `$key` of a plan of the given extension, like
+	 * `update_post_meta()`: adds the key when absent, else rewrites every value, or only the
+	 * values equal to `$prev_value`. A plan of another extension reads as missing.
 	 *
-	 * @param int    $plan_id    Plan id.
-	 * @param string $key        Meta key.
-	 * @param mixed  $value      New value; serialized when not scalar.
-	 * @param mixed  $prev_value Only update values equal to this; null updates all. Any other
-	 *                           value ('' and false included) matches literally.
+	 * @param int    $plan_id        Plan id.
+	 * @param string $extension_slug The expected owner (the plan's owning extension).
+	 * @param string $key            Meta key.
+	 * @param mixed  $value          New value; serialized when not scalar.
+	 * @param mixed  $prev_value     Only update values equal to this; null updates all. Any other
+	 *                               value ('' and false included) matches literally.
 	 * @return bool True when a value was added or changed; false when nothing changed.
-	 * @throws InvalidArgumentException If `$key` is empty.
+	 * @throws ValidationException If `$extension_slug` is not a valid extension slug or `$key` is empty, with both reported.
+	 * @throws InvalidArgumentException If no plan of that extension has the id.
+	 * @throws RuntimeException If the key is longer than the meta_key column (255 characters).
 	 */
-	public static function update_meta( int $plan_id, string $key, $value, $prev_value = null ): bool {
-		return ( new PlanRepository() )->update_meta( $plan_id, $key, $value, $prev_value );
+	public static function update_meta( int $plan_id, string $extension_slug, string $key, $value, $prev_value = null ): bool {
+		self::assert_scope( $extension_slug, $key );
+
+		return ( new PlanRepository() )->update_meta( $plan_id, $extension_slug, $key, $value, $prev_value );
 	}
 
 	/**
-	 * Delete a plan's meta values for `$key`, like `delete_post_meta()`.
+	 * Delete the meta values for `$key` of a plan of the given extension, like
+	 * `delete_post_meta()`. Unlike `delete_post_meta()`, the owner comes second: an old-shape
+	 * call `delete_meta( $id, $key, $value )` reads as owner `$key`, key `$value`, and is not safe.
 	 *
-	 * @param int    $plan_id Plan id.
-	 * @param string $key     Meta key.
-	 * @param mixed  $value   Only delete values equal to this; null deletes every value for the key.
-	 *                        Any other value ('' and false included) matches literally.
-	 * @return bool True when at least one value was deleted.
-	 * @throws InvalidArgumentException If `$key` is empty.
+	 * @param int    $plan_id        Plan id.
+	 * @param string $extension_slug The expected owner (the plan's owning extension).
+	 * @param string $key            Meta key.
+	 * @param mixed  $value          Only delete values equal to this; null deletes every value for the key.
+	 *                               Any other value ('' and false included) matches literally.
+	 * @return bool True when at least one value was deleted; false also when no plan of that extension has the id.
+	 * @throws ValidationException If `$extension_slug` is not a valid extension slug or `$key` is empty, with both reported.
 	 */
-	public static function delete_meta( int $plan_id, string $key, $value = null ): bool {
-		return ( new PlanRepository() )->delete_meta( $plan_id, $key, $value );
+	public static function delete_meta( int $plan_id, string $extension_slug, string $key, $value = null ): bool {
+		self::assert_scope( $extension_slug, $key );
+
+		return ( new PlanRepository() )->delete_meta( $plan_id, $extension_slug, $key, $value );
 	}
 
 	/**
@@ -257,6 +277,7 @@ final class Plans {
 	 * @param bool   $single  With a key: return the first value only.
 	 * @return mixed Empty key: values grouped by key. Key + `$single`: the first value, or ''
 	 *               when absent. Key only: the list of values (`[]` when absent).
+	 * @throws RuntimeException If the read fails.
 	 */
 	public static function get_meta( int $plan_id, string $key = '', bool $single = false ) {
 		return ( new PlanRepository() )->get_meta( $plan_id, $key, $single );
@@ -267,6 +288,7 @@ final class Plans {
 	 *
 	 * @param int $plan_id Plan id.
 	 * @return PlanView|null The plan, or null when none exists.
+	 * @throws RuntimeException If the read fails.
 	 */
 	public static function get( int $plan_id ): ?PlanView {
 		$plan = ( new PlanRepository() )->find( $plan_id );
@@ -274,6 +296,7 @@ final class Plans {
 		return null === $plan ? null : PlanView::from_plan( $plan );
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * List plans, oldest id first. Without args: every extension's plans in every status.
 	 *
@@ -284,8 +307,9 @@ final class Plans {
 	 * @param array<string, mixed> $args {
 	 *     Optional. Query args.
 	 *
-	 *     @type string|string[] $extension_slug Owning extension slug, or a list of them (duplicates are
-	 *                                           ignored; `any` is refused). Absent: every extension.
+	 *     @type string|string[] $extension_slug Owning extension slug, or a list of them, each 1-64 of
+	 *                                           `[a-z0-9_-]` (duplicates are ignored; `any` is refused).
+	 *                                           Absent: every extension.
 	 *     @type string|string[] $status         Plan status, or a list of them. Absent: every status.
 	 *     @type int[]           $ids            Only these plan ids: a list of positive integers (digit
 	 *                                           strings are cast). A non-list or a non-positive id throws.
@@ -294,8 +318,10 @@ final class Plans {
 	 * }
 	 * @return array<int, PlanView>
 	 * @throws ValidationException If a value is invalid, with every invalid value reported: an empty
-	 *                             or non-string slug or status, `any` as a slug, a non-positive or
+	 *                             or non-string slug or status, a slug that is not a valid extension
+	 *                             slug (1-64 of `[a-z0-9_-]`), `any` as a slug, a non-positive or
 	 *                             non-integer id or limit, a negative or non-integer offset.
+	 * @throws RuntimeException If the read fails.
 	 */
 	public static function list( array $args = array() ): array {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::LIST_KEYS );
@@ -308,7 +334,20 @@ final class Plans {
 			'offset'  => $validator->get_non_negative_int( 'offset', $filtered_args['offset'] ?? 0 ),
 		);
 		if ( array_key_exists( 'extension_slug', $filtered_args ) ) {
-			$extension_slugs = array_values( array_unique( (array) $validator->get_string_list( 'extension_slug', $filtered_args['extension_slug'] ) ) );
+			$raw_slugs       = $filtered_args['extension_slug'];
+			$extension_slugs = (array) $validator->get_string_list( 'extension_slug', $raw_slugs );
+			if ( is_array( $raw_slugs ) && array_values( $raw_slugs ) === $raw_slugs ) {
+				// Each non-empty string item gets the format check even when another item failed the
+				// list check; empty and non-string items already carry that check's error.
+				foreach ( $raw_slugs as $index => $slug ) {
+					if ( is_string( $slug ) && '' !== $slug ) {
+						$validator->get_extension_slug( ArgumentValidator::get_item_field( 'extension_slug', $index ), $slug );
+					}
+				}
+			} elseif ( is_string( $raw_slugs ) && '' !== $raw_slugs ) {
+				$validator->get_extension_slug( 'extension_slug', $raw_slugs );
+			}
+			$extension_slugs = array_values( array_unique( $extension_slugs ) );
 			if ( in_array( 'any', $extension_slugs, true ) ) {
 				$validator->add(
 					new InvalidInputException(
@@ -338,6 +377,26 @@ final class Plans {
 			},
 			( new PlanRepository() )->query( $query )
 		);
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * Check the positional scope arguments of a meta write, the expected owner and the key,
+	 * reporting every error at once.
+	 *
+	 * @param string $extension_slug The expected owner.
+	 * @param string $key            Meta key.
+	 * @throws ValidationException If the owner is not a valid extension slug or the key is empty.
+	 */
+	private static function assert_scope( string $extension_slug, string $key ): void {
+		$validator = new ArgumentValidator();
+		$validator->get_extension_slug( 'extension_slug', $extension_slug );
+		$validator->get_non_empty_string( 'key', $key );
+		try {
+			$validator->throw_errors();
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+		}
 	}
 
 	/**

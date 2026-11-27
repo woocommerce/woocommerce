@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return a not-found error instead of a permission error when an order ability is given an order ID that does not exist.
