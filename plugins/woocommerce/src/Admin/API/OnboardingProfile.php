@@ -269,7 +269,10 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			if ( $jetpack_connection_manager->is_active() ) {
 				$jetpack_user = $jetpack_connection_manager->get_connected_user_data();
 
-				$result['email'] = $jetpack_user['email'];
+				// Not an array when the WordPress.com fetch failed: false, or an older Jetpack connection package's cached 'error'.
+				if ( is_array( $jetpack_user ) && ! empty( $jetpack_user['email'] ) ) {
+					$result['email'] = $jetpack_user['email'];
+				}
 			}
 		}
 
