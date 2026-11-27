@@ -156,13 +156,13 @@ class StockNotificationBlockEmailsTests extends \WC_Unit_Test_Case {
 		return array(
 			'back in stock'      => array(
 				CustomerStockNotificationEmail::class,
-				'It’s back in stock!',
+				'It\'s back in stock!',
 				array( 'Shop Now', 'email_link_action=unsubscribe', 'To stop receiving these messages,' ),
 			),
 			'confirm sign-up'    => array(
 				CustomerStockNotificationVerifyEmail::class,
 				'Confirm sign-up',
-				array( 'Confirm', 'email_link_action=verify', 'This link will remain active for', 'Wasn’t you?' ),
+				array( 'Confirm', 'email_link_action=verify', 'This link will remain active for', 'Wasn\'t you?' ),
 			),
 			'sign-up successful' => array(
 				CustomerStockNotificationVerifiedEmail::class,

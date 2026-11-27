@@ -77,7 +77,7 @@ echo wp_kses_post( wpautop( wptexturize( $intro_content ) ) );
 
 <p><?php
 if ( isset( $verification_link ) ) {
-	esc_html_e( 'You have received this message because your e-mail address was used to sign up for stock notifications on our store. Wasn’t you? Please get in touch with us if you keep receiving these messages.', 'woocommerce' );
+	esc_html_e( 'You have received this message because your e-mail address was used to sign up for stock notifications on our store. Wasn\'t you? Please get in touch with us if you keep receiving these messages.', 'woocommerce' );
 } else {
 	esc_html_e( 'You have received this message because your e-mail address was used to sign up for stock notifications on our store.', 'woocommerce' );
 	echo ' ';

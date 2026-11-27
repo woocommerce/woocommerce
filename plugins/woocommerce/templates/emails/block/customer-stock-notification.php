@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2 class="wp-block-heading"><?php echo esc_html__( 'It’s back in stock!', 'woocommerce' ); ?></h2>
+<h2 class="wp-block-heading"><?php echo esc_html__( 'It\'s back in stock!', 'woocommerce' ); ?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:woocommerce/email-content {"lock":{"move":false,"remove":true}} -->
