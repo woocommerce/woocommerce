@@ -7,7 +7,7 @@ sidebar_position: 1
 
 - **Plugin name should simply state the feature of the plugin and not use an existing core feature or extension in its' title**. The plugin name should appear at all times in the UI as a functional and original name. e.g "Appointments" instead of "VendorXYZ Bookings Plugin for WooCommerce."
 
-- **Avoid creating new UI**. Before considering a new UI, review the WordPress interface to see if a component can be repurposed. Follow existing UI navigation patterns so merchants have context on where they are when navigating to a new experience.
+- **Reuse existing UI**. Before creating a custom control, follow the [admin component guidance](./README.md#admin-components): prefer `@wordpress/ui`, with `@wordpress/components` reserved for verified coverage gaps in the supported version. Reuse [WooCommerce navigation patterns](./navigation.md) and the [WooCommerce settings structure and saving behavior](../settings-and-config/settings-ui.md#page-header) so merchants retain context and encounter predictable navigation and saving.
 
 - **Be considerate of mobile for the merchant (and shopper-facing if applicable) experience**. Stores operate 24/7. Merchants shouldn't be limited to checking their store on a desktop. Extensions need to be built responsively so they work on all device sizes.
 

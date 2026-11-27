@@ -1,6 +1,8 @@
 # Components
 
-This packages includes a library of components that can be used to create pages in the WooCommerce dashboard and reports pages.
+This package includes a library of components that can be used to create pages in the WooCommerce dashboard and reports pages.
+
+For new WooCommerce admin interfaces and modernization work, prefer `@wordpress/ui`. Use `@wordpress/components` as a fallback for verified coverage gaps in the supported version, following the [admin component guidance](https://developer.woocommerce.com/docs/extensions/ux-guidelines-extensions/#admin-components). The installation and usage instructions below apply when working with WooCommerce-specific components from this package.
 
 ## Installation
 
