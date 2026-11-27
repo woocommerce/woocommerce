@@ -1734,8 +1734,24 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), null );
 		}
 
-		// Match the cart: the line price the customer pays is rounded once before tax is taken off it.
-		if ( false !== $args['round'] && 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+		// Match the cart: the line price the customer pays is rounded once before tax is taken off it. A VAT-exempt
+		// customer doesn't pay that price; the cart takes tax off the exact price, so it isn't rounded first.
+		if ( is_a( $order, 'WC_Abstract_Order' ) ) {
+			/**
+			 * Filters whether the order is exempt from VAT.
+			 *
+			 * @since 3.3.0
+			 *
+			 * @param bool              $is_vat_exempt Whether the order is exempt from VAT.
+			 * @param WC_Abstract_Order $order         Order instance.
+			 */
+			$is_vat_exempt = (bool) apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $order->get_meta( 'is_vat_exempt' ), $order );
+		} else {
+			$customer      = WC()->customer;
+			$is_vat_exempt = ! $order && $customer instanceof WC_Customer && $customer->get_is_vat_exempt();
+		}
+
+		if ( false !== $args['round'] && ! $is_vat_exempt && 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
 			$line_price = NumberUtil::round( $line_price, wc_get_price_decimals() );
 		}
 

@@ -3349,6 +3349,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 *           ["1.995", 1, "GB", "yes", "yes", "2.00"]
 	 *           ["1.41", 7, "NL", "no", "no", "9.87"]
 	 *           ["1.995", 1, "NL", "no", "no", "2.00"]
+	 *           ["1.41", 7, "NL", "yes", "no", "9.95"]
 	 *
 	 * @param string $price              Price entered with 20% UK VAT.
 	 * @param int    $quantity           Quantity in the cart.
@@ -3404,5 +3405,44 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$order->add_product( $product, $quantity, array( 'order' => $order ) );
 		$order->calculate_totals( true );
 		$this->assertSame( $expected, $order->get_total( 'edit' ), 'Order built in admin' );
+	}
+
+	/**
+	 * @testdox A VAT-exempt customer's line shows what's charged: tax comes off the exact price, as in the cart.
+	 */
+	public function test_vat_exempt_line_matches_cart_charge(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'GB' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'GB',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+		WC()->customer->set_billing_country( 'GB' );
+		WC()->customer->set_shipping_country( 'GB' );
+		WC()->customer->set_is_vat_exempt( true );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '1.995',
+				'virtual'       => true,
+			)
+		);
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$row = html_entity_decode( wp_strip_all_tags( WC()->cart->get_product_subtotal( $product, 1 ) ), ENT_QUOTES, 'UTF-8' );
+		WC()->customer->set_is_vat_exempt( false );
+
+		$this->assertSame( '1.66', WC()->cart->get_total( 'edit' ), 'Cart charge' );
+		$this->assertStringContainsString( '1.66', $row, 'Row shown' );
 	}
 }
