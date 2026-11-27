@@ -140,10 +140,10 @@ class ExtensibleAbilities {
 	 * A field declares `get_callback` and `output_schema` to be readable, and `input_schema` to be writable.
 	 * A `set_callback` is optional on a writable field, and it is refused without `input_schema`.
 	 *
-	 * There are two kinds of writable field. A field kept on the object, such as a meta value, has a
+	 * There are two kinds of writable field. A field kept on a `WC_Data` object, such as a meta value, has a
 	 * `set_callback` that stages the value, and Core saves it with the object. A field kept elsewhere, such
-	 * as a row in a table of the extension, has no `set_callback`: a sync that register_sync() adds writes
-	 * the value from `$context['fields']`.
+	 * as a row in a table of the extension or the meta of a term, has no `set_callback`: a sync that
+	 * register_sync() adds writes the value from `$context['fields']`.
 	 *
 	 * @since 11.3.0
 	 *
@@ -164,14 +164,15 @@ class ExtensibleAbilities {
 	 *                                  which are the keywords with a nested schema that WordPress supports (see
 	 *                                  `rest_get_allowed_schema_keywords()`), and under `allOf`, which
 	 *                                  WooCommerce also reads, because some clients refuse it.
-	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
-	 *                                  object returns them, such as `simple` and `subscription` for a product or
-	 *                                  `line_item`, `shipping`, `fee` and `coupon` for an order item. The object
-	 *                                  must have a `get_type()` method.
-	 *                                  The abilities leave the field out of the other objects, and an ability
-	 *                                  that writes the resource refuses a write to them. Omit it for every type:
-	 *                                  an `order_item` field without it is then read on product, shipping, fee
-	 *                                  and coupon lines, so its `get_callback` must accept each of them.
+	 *     @type string[] $object_types Optional. The object types the field applies to, such as `simple` and
+	 *                                  `subscription` for a product, `line_item`, `shipping`, `fee` and `coupon` for an
+	 *                                  order item or `product_brand` for a term. The type is the taxonomy of a term,
+	 *                                  and `get_type()` of another object. The abilities leave the field out of
+	 *                                  the other objects, and an ability that writes the resource refuses a write to
+	 *                                  them. Omit it for every type: an `order_item` field without it is then read on
+	 *                                  product, shipping, fee and coupon lines, so its `get_callback` must accept each
+	 *                                  of them. It has no effect on an object that has no type, such as a review or
+	 *                                  a customer.
 	 *     @type callable $get_callback Optional. Receives the object and returns the value. A field without it
 	 *                                  is not in the output. Required with `output_schema`. Return null when the
 	 *                                  object has no value, and the field is left out with no error. Any other
@@ -372,8 +373,9 @@ class ExtensibleAbilities {
 	 *     Filter arguments.
 	 *
 	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query`,
-	 *                               `orders-query` and `customers-query` apply the filters of `product`, `order`
-	 *                               and `customer`. A `customer` filter returns only `include_ids`, which are
+	 *                               `orders-query`, `customers-query` and `product-terms-query` apply the filters
+	 *                               of `product`, `order`, `customer` and `product_term`. A `product_term`
+	 *                               `meta_query` reads term meta. A `customer` filter returns only `include_ids`, which are
 	 *                               user IDs, so it matches registered customers only. The list ability
 	 *                               of another resource must call `get_query_args()` and `add_query_filters_schema()` itself.
 	 *     @type string   $namespace Slug of the extension that owns the filter, such as `subscriptions`.
@@ -711,7 +713,7 @@ class ExtensibleAbilities {
 	 *
 	 *     @type string   $resource  Resource that an ActionableAbility saves, such as `product`.
 	 *     @type string   $namespace Slug of the extension that owns the sync, such as `subscriptions`.
-	 *     @type callable $callback  Receives `\WC_Data[] $saved` and `array $context`.
+	 *     @type callable $callback  Receives `object[] $saved` and `array $context`.
 	 *                               `$saved` is every saved object of the sync's own resource. The context
 	 *                               describes the whole call.
 	 *                               `$context['ability']` is the name of the ability, such as
@@ -993,27 +995,35 @@ class ExtensibleAbilities {
 
 	/**
 	 * Whether a field applies to an object, from the `object_types` of the field.
+	 * A field applies to every object that has no type.
 	 *
 	 * @since 11.4.0
 	 *
 	 * @param array<string, mixed> $args    Field arguments from `register_field()`.
-	 * @param mixed                $subject The object. It must have a `get_type()` method.
+	 * @param mixed                $subject The object.
 	 * @return bool
 	 */
 	public static function field_applies_to( array $args, $subject ): bool {
-		return empty( $args['object_types'] ) || in_array( $subject->get_type(), $args['object_types'], true );
+		if ( empty( $args['object_types'] ) ) {
+			return true;
+		}
+		$type = self::get_object_type( $subject );
+		return '' === $type || in_array( $type, $args['object_types'], true );
 	}
 
 	/**
-	 * The type of an object, from its `get_type()` method.
+	 * The type of an object: the taxonomy of a term, or else what its `get_type()` method returns.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param mixed $subject The object. It must have a `get_type()` method.
-	 * @return string
+	 * @param mixed $subject The object.
+	 * @return string The type, or an empty string when the object has none.
 	 */
 	public static function get_object_type( $subject ): string {
-		return $subject->get_type();
+		if ( $subject instanceof \WP_Term ) {
+			return $subject->taxonomy;
+		}
+		return is_object( $subject ) && method_exists( $subject, 'get_type' ) ? (string) $subject->get_type() : '';
 	}
 
 	/**

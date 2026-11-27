@@ -32,6 +32,10 @@ defined( 'ABSPATH' ) || exit;
  * input is ignored. An ability whose own input schema sets
  * `additionalProperties` to false rejects it instead.
  *
+ * The default save() saves a `WC_Data` object. An ability for a `WP_Term` sets
+ * the new values on the term in memory in change(), so the validators see
+ * them, and writes them in its own save().
+ *
  * The object that load() returns is the primary object. An ability that saves
  * more objects returns them from change(). These are the secondary objects. The field
  * writes of every object run first, then the validators of each object's own
@@ -74,7 +78,7 @@ abstract class ActionableAbility extends Ability {
 	 * @since 11.3.0
 	 *
 	 * @param array $input Ability input.
-	 * @return \WC_Data|\WP_Error
+	 * @return object|\WP_Error
 	 */
 	abstract protected function load( array $input );
 
@@ -90,9 +94,9 @@ abstract class ActionableAbility extends Ability {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param \WC_Data $subject Primary object to change.
-	 * @param array    $input   Ability input.
-	 * @return null|\WP_Error|array<int, array{0: \WC_Data, 1: array, 2?: string}> A WP_Error rejects the change, and nothing is saved. The field writes and the validators of the primary object still run, so the client gets their refusals in the same error. An array lists the secondary objects.
+	 * @param object $subject Primary object to change.
+	 * @param array  $input   Ability input.
+	 * @return null|\WP_Error|array<int, array{0: object, 1: array, 2?: string}> A WP_Error rejects the change, and nothing is saved. The field writes and the validators of the primary object still run, so the client gets their refusals in the same error. An array lists the secondary objects.
 	 */
 	abstract protected function change( $subject, array $input );
 
@@ -102,7 +106,7 @@ abstract class ActionableAbility extends Ability {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param \WC_Data $subject Saved object.
+	 * @param object $subject Saved object.
 	 * @return mixed|\WP_Error A WP_Error fails the call, but the change stays saved.
 	 */
 	abstract protected function prepare_response( $subject );
@@ -112,14 +116,20 @@ abstract class ActionableAbility extends Ability {
 	 * save() catches a failed write, so the default reads that error from
 	 * WC_Abstract_Order::get_last_save_error(). When the save fails or leaves
 	 * the object without an ID, it logs the error and returns a WP_Error with a
-	 * fixed message, so the exception text stays out of the response.
+	 * fixed message, so the exception text stays out of the response. An ability
+	 * whose object is not a `WC_Data` object writes its own save().
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param \WC_Data $subject Changed object.
+	 * @param object $subject Changed object.
 	 * @return null|\WP_Error Null when the object was saved, a WP_Error when it was not.
 	 */
 	protected function save( $subject ) {
+		if ( ! $subject instanceof \WC_Data ) {
+			wc_doing_it_wrong( static::class . '::save', 'Write a save() method in an ability whose object is not a WC_Data object.', '11.5.0' );
+			return self::save_failed();
+		}
+
 		try {
 			$subject->save();
 			$error = $subject instanceof \WC_Abstract_Order ? $subject->get_last_save_error() : null;
@@ -135,7 +145,20 @@ abstract class ActionableAbility extends Ability {
 			return self::save_failed();
 		}
 
-		return $subject->get_id() > 0 ? null : self::save_failed();
+		return self::get_object_id( $subject ) > 0 ? null : self::save_failed();
+	}
+
+	/**
+	 * The ID of an object of the call, or zero when it is not saved yet.
+	 *
+	 * @param object $subject A `WP_Term`, or an object with a `get_id()` method, such as a `WC_Data` object.
+	 * @return int
+	 */
+	private static function get_object_id( object $subject ): int {
+		if ( $subject instanceof \WP_Term ) {
+			return $subject->term_id;
+		}
+		return method_exists( $subject, 'get_id' ) ? (int) $subject->get_id() : 0;
 	}
 
 	/**
@@ -156,7 +179,7 @@ abstract class ActionableAbility extends Ability {
 	 *
 	 * @since 11.4.0
 	 *
-	 * @return \WC_Data[]
+	 * @return object[]
 	 */
 	protected function get_deleted_objects(): array {
 		return array();
@@ -168,7 +191,7 @@ abstract class ActionableAbility extends Ability {
 	 *
 	 * @since 11.4.0
 	 *
-	 * @return \WC_Data[]
+	 * @return object[]
 	 */
 	protected function get_trashed_objects(): array {
 		return array();
@@ -182,7 +205,7 @@ abstract class ActionableAbility extends Ability {
 	 *
 	 * @since 11.4.0
 	 *
-	 * @return \WC_Data[]
+	 * @return object[]
 	 */
 	protected function get_objects_to_delete(): array {
 		return array();
@@ -307,7 +330,7 @@ abstract class ActionableAbility extends Ability {
 
 		$response = $this->prepare_response( $subject );
 		if ( is_wp_error( $response ) ) {
-			return ExtensibleAbilities::saved_write_error( $response, $this->get_resource(), $subject->get_id() );
+			return ExtensibleAbilities::saved_write_error( $response, $this->get_resource(), self::get_object_id( $subject ) );
 		}
 
 		return $response;
@@ -319,19 +342,20 @@ abstract class ActionableAbility extends Ability {
 	 * of its own resource. A deleted or trashed object is not in the saved
 	 * list, even when it was the primary object.
 	 *
-	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}>            $objects The primary object and the secondary objects, with their resources.
+	 * @param array<int, array{0: object, 1: array, 2: string}>              $objects The primary object and the secondary objects, with their resources.
 	 * @param array<string, \SplObjectStorage<object, array<string, mixed>>> $sent    The sent field values of each namespace, from apply_fields().
 	 * @return \WP_Error|null A WP_Error when a sync refused, and then the call rolls back.
 	 */
 	private function sync( array $objects, array $sent ): ?\WP_Error {
 		$deleted = $this->get_deleted_objects();
 		$trashed = $this->get_trashed_objects();
-		$gone    = array_map( static fn( $item ) => get_class( $item ) . ':' . $item->get_id(), array_merge( $deleted, $trashed ) );
+		$gone    = array_map( static fn( $item ) => get_class( $item ) . ':' . self::get_object_id( $item ), array_merge( $deleted, $trashed ) );
 		$saved   = array();
 		$own     = array();
 		foreach ( $objects as list( $object, , $resource_name ) ) {
 			$own[ $resource_name ] ??= array();
-			if ( $object->get_id() > 0 && ! in_array( get_class( $object ) . ':' . $object->get_id(), $gone, true ) ) {
+			$id                      = self::get_object_id( $object );
+			if ( $id > 0 && ! in_array( get_class( $object ) . ':' . $id, $gone, true ) ) {
 				$saved[]                 = $object;
 				$own[ $resource_name ][] = $object;
 			}
@@ -360,15 +384,16 @@ abstract class ActionableAbility extends Ability {
 	 * saves filled the caches with rows the rollback removed, so a read in the
 	 * same request would still see them. The `WC_Data` meta cache, the product type cache, the
 	 * product instance cache and the price lookup cache are separate from the post cache.
+	 * A term has its own object cache and meta cache.
 	 *
-	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects.
-	 * @param \WC_Data[]                                          $deleted The objects the call deleted.
+	 * @param array<int, array{0: object, 1: array, 2: string}> $objects The primary object and the secondary objects.
+	 * @param object[]                                          $deleted The objects the call deleted.
 	 */
 	private static function forget_rolled_back_objects( array $objects, array $deleted = array() ): void {
 		$product_cache = wc_get_container()->get( ProductCache::class );
 		foreach ( array_merge( $objects, array_map( static fn( $item ) => array( $item ), $deleted ) ) as list( $object ) ) {
-			$id = $object->get_id();
-			if ( $id > 0 ) {
+			$id = self::get_object_id( $object );
+			if ( $id > 0 && $object instanceof \WC_Data ) {
 				$object->delete_meta_cache();
 			}
 			if ( $id > 0 && $object instanceof \WC_Product ) {
@@ -388,6 +413,9 @@ abstract class ActionableAbility extends Ability {
 				clean_post_cache( $id );
 			} elseif ( $id > 0 && $object instanceof \WC_Customer ) {
 				clean_user_cache( $id );
+			} elseif ( $id > 0 && $object instanceof \WP_Term ) {
+				clean_term_cache( $id, $object->taxonomy );
+				wp_cache_delete( $id, 'term_meta' );
 			}
 		}
 	}
@@ -565,7 +593,7 @@ abstract class ActionableAbility extends Ability {
 	 * rejection goes into the given errors, as add_refusal() describes. Each
 	 * value that was not rejected goes into the sent values of its namespace.
 	 *
-	 * @param \WC_Data                                                       $subject Object to change.
+	 * @param object                                                         $subject Object to change.
 	 * @param array                                                          $updates Pairs of field arguments and value from prepare_fields().
 	 * @param array<string, \SplObjectStorage<object, array<string, mixed>>> $sent    Collects the sent values, as get_sent_fields() describes.
 	 * @param \WP_Error                                                      $refused Collects the refusals, including a field that does not apply to the object.
@@ -627,7 +655,7 @@ abstract class ActionableAbility extends Ability {
 	 * Run every validator of a resource on the changed object, also after a
 	 * field or another validator refuses.
 	 *
-	 * @param \WC_Data                                                       $subject       Changed object.
+	 * @param object                                                         $subject       Changed object.
 	 * @param string                                                         $resource_name Resource of the object.
 	 * @param array                                                          $context       The name of the ability, the primary object of the call, whether the call deletes or trashes the object, the objects the call saves, and the objects it deletes or trashes.
 	 * @param array<string, \SplObjectStorage<object, array<string, mixed>>> $sent          The sent field values of each namespace, from apply_fields().
