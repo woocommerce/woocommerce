@@ -214,6 +214,148 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A fixed-cart coupon must not discount more than its amount when line quantities are fractional.
+	 *
+	 * Splitting $30 across 1.9 and 1.2 units leaves a fraction of a cent. That leftover used to be
+	 * topped up by a whole cent, so the cart recorded $30.01.
+	 */
+	public function test_fixed_cart_coupon_with_fractional_quantities_stays_within_amount() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		WC()->cart->empty_cart();
+
+		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$product_b = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$coupon    = WC_Helper_Coupon::create_coupon(
+			'frac-fixed-cart',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '30',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product_a->get_id(), 1.9 );
+		WC()->cart->add_to_cart( $product_b->get_id(), 1.2 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( '30.00', wc_format_decimal( WC()->cart->get_discount_total(), 2 ) );
+		$this->assertEquals( '280.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+
+		WC()->cart->empty_cart();
+		$product_a->delete( true );
+		$product_b->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * Three equal fractional lines must still come to the coupon amount.
+	 *
+	 * A $30 coupon on three $100 products at qty 1.2 used to leave the discount
+	 * at $30.00 while per-line rounding made the cart total $329.99.
+	 */
+	public function test_fixed_cart_coupon_fractional_lines_match_cart_total() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		WC()->cart->empty_cart();
+
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'frac-lines-fixed-cart',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '30',
+			)
+		);
+
+		$products = array();
+		for ( $i = 0; $i < 3; $i++ ) {
+			$products[] = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+			WC()->cart->add_to_cart( end( $products )->get_id(), 1.2 );
+		}
+
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( '30.00', wc_format_decimal( WC()->cart->get_discount_total(), 2 ) );
+		$this->assertEquals( '330.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+
+		WC()->cart->empty_cart();
+		foreach ( $products as $product ) {
+			$product->delete( true );
+		}
+		$coupon->delete( true );
+	}
+
+	/**
+	 * Quantities 1 and 2.5 must still come to the coupon amount.
+	 *
+	 * A $30 coupon on two $100 products at those quantities used to show a $30.00
+	 * discount while the cart total was $320.01.
+	 */
+	public function test_fixed_cart_coupon_quantities_one_and_two_point_five_match_cart_total() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		WC()->cart->empty_cart();
+
+		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$product_b = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$coupon    = WC_Helper_Coupon::create_coupon(
+			'qty-1-25-fixed-cart',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '30',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product_a->get_id(), 1 );
+		WC()->cart->add_to_cart( $product_b->get_id(), 2.5 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( '30.00', wc_format_decimal( WC()->cart->get_discount_total(), 2 ) );
+		$this->assertEquals( '320.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+
+		WC()->cart->empty_cart();
+		$product_a->delete( true );
+		$product_b->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * Whole-number quantities still receive the leftover cent, so a $10 coupon on three items is $10.
+	 */
+	public function test_fixed_cart_coupon_remainder_reaches_exact_amount() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'exact-fixed-cart',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '10',
+			)
+		);
+
+		$products = array();
+		for ( $i = 0; $i < 3; $i++ ) {
+			$products[] = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) );
+			WC()->cart->add_to_cart( end( $products )->get_id(), 1 );
+		}
+
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( '10.00', wc_format_decimal( WC()->cart->get_discount_total(), 2 ) );
+		$this->assertEquals( '50.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
+
+		WC()->cart->empty_cart();
+		foreach ( $products as $product ) {
+			$product->delete( true );
+		}
+		$coupon->delete( true );
+	}
+
+	/**
 	 * A percent 50% coupon on a $20 product yields a $10 discount and $10 total.
 	 */
 	public function test_percent_coupon_discounts_cart_total() {
