@@ -724,7 +724,8 @@ class UcpCheckout extends ControllerTestCase {
 		$data = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
 
 		$this->assertSame( 'requires_escalation', $data['status'] );
-		$this->assertSame( add_query_arg( 'session', $created['id'], wc_get_cart_url() ), $data['continue_url'] );
+		$this->assertStringStartsWith( add_query_arg( 'session', '', wc_get_cart_url() ), $data['continue_url'] );
+		$this->assertStringNotContainsString( $created['id'], $data['continue_url'] );
 		$this->assertStringNotContainsString( 'Payment must be completed', implode( ' ', array_column( $data['messages'], 'content' ) ) );
 		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ) );
 

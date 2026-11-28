@@ -429,17 +429,20 @@ class UcpCart extends UcpCartTestCase {
 	}
 
 	/**
-	 * The cart hands the buyer a URL that restores the same cart in a browser.
+	 * @testdox The continue URL names the cart's session with a link token, which is not a cart token.
 	 */
-	public function test_continue_url_carries_the_cart_token(): void {
+	public function test_continue_url_carries_a_link_token_not_the_cart_token(): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
 		$data = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
 
 		$query = array();
 		wp_parse_str( (string) wp_parse_url( $data['continue_url'], PHP_URL_QUERY ), $query );
 
-		// WC_Session_Handler restores or clones the guest session named by this token.
-		$this->assertSame( $data['id'], $query['session'] );
+		$this->assertSame(
+			CartTokenUtils::get_cart_token_payload( $data['id'] )['user_id'],
+			CartTokenUtils::get_cart_link_customer_id( $query['session'] )
+		);
+		$this->assertFalse( CartTokenUtils::validate_cart_token( $query['session'] ) );
 		$this->assertStringStartsWith( wc_get_cart_url(), $data['continue_url'] );
 	}
 

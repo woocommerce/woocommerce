@@ -224,14 +224,19 @@ class CartMapper {
 	/**
 	 * Build the URL that hands the cart to the buyer's own browser.
 	 *
-	 * `WC_Session_Handler` restores or clones the guest session named by the `session`
-	 * argument, so the shopper lands on checkout holding this cart.
+	 * `WC_Session_Handler` clones the cart of the guest session named by the `session`
+	 * argument. That is a link token, never the cart id: the URL is shared, and the id is a credential.
 	 *
 	 * @param string $cart_id Cart identifier.
 	 * @return string
 	 */
 	public function continue_url( string $cart_id ): string {
-		$continue_url = add_query_arg( 'session', $cart_id, wc_get_cart_url() );
+		$customer_id  = (string) CartTokenUtils::get_cart_token_payload( $cart_id )['user_id'];
+		$continue_url = wc_get_cart_url();
+
+		if ( '' !== $customer_id ) {
+			$continue_url = add_query_arg( 'session', CartTokenUtils::get_cart_link_token( $customer_id ), $continue_url );
+		}
 
 		/**
 		 * Filters the URL a UCP cart hands the buyer for completing the purchase.
