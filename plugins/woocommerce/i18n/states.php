@@ -784,6 +784,10 @@ return array(
 		'MU' => __( 'Maluku Utara', 'woocommerce' ),
 		'PA' => __( 'Papua', 'woocommerce' ),
 		'PB' => __( 'Papua Barat', 'woocommerce' ),
+		'PD' => __( 'Papua Barat Daya', 'woocommerce' ),
+		'PE' => __( 'Papua Pegunungan', 'woocommerce' ),
+		'PS' => __( 'Papua Selatan', 'woocommerce' ),
+		'PT' => __( 'Papua Tengah', 'woocommerce' ),
 	),
 	'IE' => array( // Irish states.
 		'CW' => __( 'Carlow', 'woocommerce' ),
