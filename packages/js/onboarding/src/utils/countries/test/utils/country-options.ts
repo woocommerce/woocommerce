@@ -2896,6 +2896,22 @@ export const countryStateOptions = [
 		label: 'Indonesia — Papua Barat',
 	},
 	{
+		key: 'ID:PD',
+		label: 'Indonesia — Papua Barat Daya',
+	},
+	{
+		key: 'ID:PE',
+		label: 'Indonesia — Papua Pegunungan',
+	},
+	{
+		key: 'ID:PS',
+		label: 'Indonesia — Papua Selatan',
+	},
+	{
+		key: 'ID:PT',
+		label: 'Indonesia — Papua Tengah',
+	},
+	{
 		key: 'IR:KHZ',
 		label: 'Iran — Khuzestan (خوزستان)',
 	},
