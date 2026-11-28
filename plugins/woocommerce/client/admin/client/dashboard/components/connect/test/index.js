@@ -151,4 +151,21 @@ describe( 'Retry with the onboarding store', () => {
 
 		await waitFor( () => expect( forcedPaths ).toHaveLength( 2 ) );
 	} );
+
+	it( 'offers Retry when a held-back registration reports no message', async () => {
+		// After a 5xx failure the connection package keeps no message, so the response has an empty error.
+		apiFetch.setFetchHandler( async () => ( {
+			success: false,
+			errors: [ '' ],
+			url: 'https://jetpack.test/authorize?scope',
+		} ) );
+		const { findByText, queryByText } = render(
+			<RegistryProvider value={ createTestRegistry() }>
+				<ConnectedConnect redirectUrl="https://store.test/wp-admin/" />
+			</RegistryProvider>
+		);
+
+		expect( await findByText( 'Retry' ) ).toBeInTheDocument();
+		expect( queryByText( 'Connect' ) ).not.toBeInTheDocument();
+	} );
 } );

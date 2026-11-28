@@ -214,7 +214,10 @@ export default compose(
 		}
 
 		if ( jetpackAuthUrlResponse?.errors?.length ) {
-			error = jetpackAuthUrlResponse?.errors[ 0 ];
+			// A registration held back after a 5xx failure reports an empty message.
+			error =
+				jetpackAuthUrlResponse.errors[ 0 ] ||
+				__( 'Error requesting connection URL.', 'woocommerce' );
 		}
 
 		return {
