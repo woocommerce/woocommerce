@@ -3,6 +3,7 @@
  */
 import { apiFetch, select } from '@wordpress/data-controls';
 import { controls } from '@wordpress/data';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -171,16 +172,19 @@ export function* getProductTypes() {
 export function* getJetpackAuthUrl( query: {
 	redirectUrl: string;
 	from?: string;
+	// Only when the merchant clicked Connect; see the endpoint's `force` argument for what it skips.
+	force?: boolean;
 } ) {
 	try {
-		let path =
+		const path = addQueryArgs(
 			WC_ADMIN_NAMESPACE +
-			'/onboarding/plugins/jetpack-authorization-url?redirect_url=' +
-			encodeURIComponent( query.redirectUrl );
-
-		if ( query.from ) {
-			path += '&from=' + query.from;
-		}
+				'/onboarding/plugins/jetpack-authorization-url',
+			{
+				redirect_url: query.redirectUrl,
+				from: query.from || undefined,
+				force: query.force || undefined,
+			}
+		);
 
 		const results: GetJetpackAuthUrlResponse = yield apiFetch( {
 			path,

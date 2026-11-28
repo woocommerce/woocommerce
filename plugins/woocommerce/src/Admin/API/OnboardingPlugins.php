@@ -125,6 +125,12 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 							'required'          => false,
 							'default'           => 'woocommerce-onboarding',
 						),
+						'force'        => array(
+							'description' => 'Whether the merchant asked to connect. Registration then runs even in offline mode and without waiting after an earlier failure, including any Retry-After window.',
+							'type'        => 'boolean',
+							'required'    => false,
+							'default'     => false,
+						),
 					),
 				),
 			)
@@ -230,7 +236,8 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	public function get_jetpack_authorization_url( WP_REST_Request $request ) {
 		return JetpackConnection::get_authorization_url(
 			$request->get_param( 'redirect_url' ),
-			$request->get_param( 'from' )
+			$request->get_param( 'from' ),
+			true === $request->get_param( 'force' )
 		);
 	}
 

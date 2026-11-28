@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an optional `force` argument to `getJetpackAuthUrl` for requesting a fresh WordPress.com registration.

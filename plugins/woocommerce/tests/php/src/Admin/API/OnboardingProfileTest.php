@@ -174,4 +174,49 @@ class OnboardingProfileTest extends WC_REST_Unit_Test_Case {
 			update_option( $field, $value );
 		}
 	}
+
+	/**
+	 * @testdox The email prefill uses the WordPress.com email when the connected user data has one, and the site admin email otherwise.
+	 *
+	 * @dataProvider provider_cached_connected_user_data
+	 *
+	 * @param mixed  $cached_user_data What the Jetpack connection package cached for the current user.
+	 * @param string $expected_source  'wpcom' for the cached WordPress.com email, 'admin' for the site admin email.
+	 * @return void
+	 */
+	public function test_email_prefill_handles_cached_connected_user_data( $cached_user_data, string $expected_source ) {
+		$user_id = get_current_user_id();
+		\Jetpack_Options::update_options(
+			array(
+				'id'          => 1234,
+				'master_user' => $user_id,
+				'blog_token'  => 'blogkey.blogsecret',
+				'user_tokens' => array( $user_id => "userkey.usersecret.{$user_id}" ),
+			)
+		);
+		set_transient( "jetpack_connected_user_data_{$user_id}", $cached_user_data, MINUTE_IN_SECONDS );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', self::ENDPOINT . '/experimental_get_email_prefill' ) );
+
+		$this->assertSame( 200, $response->get_status(), 'The prefill should not fail on cached connection data.' );
+		$this->assertSame(
+			'wpcom' === $expected_source ? 'merchant@wordpress-com.test' : get_option( 'admin_email' ),
+			$response->get_data()['email'],
+			'The prefill should fall back to the site admin email when the WordPress.com email is unavailable.'
+		);
+	}
+
+	/**
+	 * Cached connected user data and the email source the prefill should use.
+	 *
+	 * @return array<string, array{0: mixed, 1: string}>
+	 */
+	public function provider_cached_connected_user_data(): array {
+		return array(
+			// Connection package 9.x caches 'error' after a failed WordPress.com fetch; older copies return it as user data.
+			'cached fetch failure' => array( 'error', 'admin' ),
+			'no email'             => array( array( 'ID' => 1 ), 'admin' ),
+			'WordPress.com email'  => array( array( 'email' => 'merchant@wordpress-com.test' ), 'wpcom' ),
+		);
+	}
 }

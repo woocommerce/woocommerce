@@ -33,29 +33,40 @@ const mockJetpackAuthResult = {
 	success: true,
 	url: 'https://jetpack.test/authorize',
 };
+const mockGetJetpackAuthUrl = jest.fn<
+	Record< string, unknown >,
+	[ { force?: boolean } ]
+>( () => mockJetpackAuthResult );
 const mockFailingRequests = new Set< string >();
 const mockStoreCalls: string[] = [];
 function mockWooStore( resolvedValues: Record< string, unknown > ) {
 	return new Proxy(
 		{},
 		{
-			get: ( _target, name: string ) => () => {
-				mockStoreCalls.push( name );
-				if (
-					! mockFailingRequests.has( name ) &&
-					! mockFailingRequests.has( '*' )
-				) {
-					return Promise.resolve( resolvedValues[ name ] );
-				}
-				// apiFetch rejects with a plain error object, not an Error.
-				const request = Promise.reject( {
-					code: 'rest_no_route',
-					message: `${ name } failed`,
-				} );
-				// The profiler fires some writes without awaiting them; awaiting callers still see the rejection.
-				request.catch( () => undefined );
-				return request;
-			},
+			get:
+				( _target, name: string ) =>
+				( ...args: unknown[] ) => {
+					mockStoreCalls.push( name );
+					if (
+						! mockFailingRequests.has( name ) &&
+						! mockFailingRequests.has( '*' )
+					) {
+						const value = resolvedValues[ name ];
+						return Promise.resolve(
+							typeof value === 'function'
+								? value( ...args )
+								: value
+						);
+					}
+					// apiFetch rejects with a plain error object, not an Error.
+					const request = Promise.reject( {
+						code: 'rest_no_route',
+						message: `${ name } failed`,
+					} );
+					// The profiler fires some writes without awaiting them; awaiting callers still see the rejection.
+					request.catch( () => undefined );
+					return request;
+				},
 		}
 	);
 }
@@ -73,7 +84,7 @@ jest.mock( '@wordpress/data', () => {
 						getCountries: [],
 						getFreeExtensions: [],
 						getCoreProfilerCompletedSteps: {},
-						getJetpackAuthUrl: mockJetpackAuthResult,
+						getJetpackAuthUrl: mockGetJetpackAuthUrl,
 					} )
 				: actual.resolveSelect( store ),
 	};
@@ -262,5 +273,46 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 			'getJetpackAuthUrl',
 		] );
 		expectLoggedFailure( 'coreProfilerCompleted' );
+	} );
+
+	it( 'reuses the prefetched Jetpack auth URL when it succeeded, without forcing registration', async () => {
+		const actor = createActor(
+			coreProfilerMachineActors.exitToJetpackAuth
+		).start();
+
+		await expect( toPromise( actor ) ).resolves.toEqual(
+			mockJetpackAuthResult
+		);
+		// The same arguments as the prefetch, so a prefetch still registering is awaited instead of raced.
+		expect(
+			mockGetJetpackAuthUrl.mock.calls.map( ( [ q ] ) => q )
+		).toEqual( [
+			{
+				redirectUrl: expect.any( String ),
+				from: 'woocommerce-core-profiler',
+			},
+		] );
+	} );
+
+	it( 'retries with a forced registration once the prefetched request failed', async () => {
+		// The unforced request, the one the prefetch makes, fails.
+		mockGetJetpackAuthUrl.mockReturnValueOnce( {
+			success: false,
+			errors: [ 'Held back after an earlier failure.' ],
+			url: 'https://jetpack.test/authorize',
+		} );
+		const actor = createActor(
+			coreProfilerMachineActors.exitToJetpackAuth
+		).start();
+
+		await expect( toPromise( actor ) ).resolves.toEqual(
+			mockJetpackAuthResult
+		);
+		expect(
+			mockGetJetpackAuthUrl.mock.calls.map( ( [ q ] ) => q )
+		).toEqual( [
+			expect.not.objectContaining( { force: true } ),
+			expect.objectContaining( { force: true } ),
+		] );
 	} );
 } );

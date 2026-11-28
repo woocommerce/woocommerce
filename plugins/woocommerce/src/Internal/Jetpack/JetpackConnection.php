@@ -35,8 +35,15 @@ class JetpackConnection {
 	/**
 	 * Get the authorization URL for the Jetpack connection.
 	 *
+	 * Pass `$force` only when a merchant asked to connect. It makes the Jetpack connection package
+	 * register even in offline mode and without waiting after an earlier failed registration,
+	 * including any Retry-After window WordPress.com asked for. Older package versions ignore it.
+	 *
 	 * @param mixed  $redirect_url Redirect URL.
 	 * @param string $from         From parameter.
+	 * @param bool   $force        Whether the merchant asked to connect.
+	 *
+	 * @since 11.5.0 Added the `$force` parameter.
 	 *
 	 * @return array {
 	 *     Authorization data.
@@ -47,13 +54,13 @@ class JetpackConnection {
 	 *     @type string $url          The authorization URL.
 	 * }
 	 */
-	public static function get_authorization_url( $redirect_url, $from = '' ) {
+	public static function get_authorization_url( $redirect_url, $from = '', bool $force = false ) {
 		$manager = self::get_manager();
 		$errors  = new WP_Error();
 
 		// Register the site to wp.com.
 		if ( ! $manager->is_connected() ) {
-			$result = $manager->try_registration();
+			$result = $manager->try_registration( true, $force );
 			if ( is_wp_error( $result ) ) {
 				$errors->add( $result->get_error_code(), $result->get_error_message() );
 			}

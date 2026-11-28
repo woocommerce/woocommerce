@@ -9,6 +9,11 @@ import PropTypes from 'prop-types';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { onboardingStore } from '@woocommerce/data';
 
+const getAuthUrlQuery = ( { redirectUrl, from } ) => ( {
+	redirectUrl: redirectUrl || window.location.href,
+	from,
+} );
+
 /**
  * Button redirecting to Jetpack auth flow.
  *
@@ -22,16 +27,19 @@ export class Connect extends Component {
 		this.state = {
 			isAwaitingRedirect: false,
 			isRedirecting: false,
+			isRetrying: false,
 		};
 
 		this.connectJetpack = this.connectJetpack.bind( this );
+		this.retryConnection = this.retryConnection.bind( this );
 		props.setIsPending( false );
 	}
 
 	componentDidUpdate( prevProps ) {
 		const { createNotice, error, onError, isRequesting } = this.props;
 
-		if ( error && error !== prevProps.error ) {
+		// A retry reports its own outcome.
+		if ( error && error !== prevProps.error && ! this.state.isRetrying ) {
 			if ( onError ) {
 				onError();
 			}
@@ -60,6 +68,33 @@ export class Connect extends Component {
 		this.setState( { isAwaitingRedirect: true } );
 	}
 
+	async retryConnection() {
+		const { requestJetpackAuthUrl, onConnect, createNotice } = this.props;
+
+		this.setState( { isRetrying: true } );
+		// Only a click forces registration; the URL fetched on render stays unforced.
+		const response = await requestJetpackAuthUrl( {
+			...getAuthUrlQuery( this.props ),
+			force: true,
+		} );
+
+		if ( response?.success && response.url ) {
+			if ( onConnect ) {
+				onConnect();
+			}
+			this.setState( { isRedirecting: true } );
+			window.location = response.url;
+			return;
+		}
+
+		this.setState( { isRetrying: false } );
+		createNotice(
+			'error',
+			response?.errors?.[ 0 ] ||
+				__( 'Error requesting connection URL.', 'woocommerce' )
+		);
+	}
+
 	render() {
 		const { error, onSkip, skipText, onAbort, abortText } = this.props;
 
@@ -67,8 +102,9 @@ export class Connect extends Component {
 			<Fragment>
 				{ error ? (
 					<Button
+						isBusy={ this.state.isRetrying }
 						isPrimary
-						onClick={ () => window.location.reload() }
+						onClick={ this.retryConnection }
 					>
 						{ __( 'Retry', 'woocommerce' ) }
 					</Button>
@@ -151,6 +187,10 @@ Connect.propTypes = {
 	 * Source identifier for the connection.
 	 */
 	from: PropTypes.string,
+	/**
+	 * Requests a new authorization URL; Retry uses it to force a fresh registration.
+	 */
+	requestJetpackAuthUrl: PropTypes.func.isRequired,
 };
 
 Connect.defaultProps = {
@@ -162,10 +202,7 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { getJetpackAuthUrl, isResolving } = select( onboardingStore );
 
-		const queryArgs = {
-			redirectUrl: props.redirectUrl || window.location.href,
-			from: props.from,
-		};
+		const queryArgs = getAuthUrlQuery( props );
 
 		const jetpackAuthUrlResponse = getJetpackAuthUrl( queryArgs );
 		const isRequesting = isResolving( 'getJetpackAuthUrl', [ queryArgs ] );
@@ -177,7 +214,10 @@ export default compose(
 		}
 
 		if ( jetpackAuthUrlResponse?.errors?.length ) {
-			error = jetpackAuthUrlResponse?.errors[ 0 ];
+			// A registration held back after a 5xx failure reports an empty message.
+			error =
+				jetpackAuthUrlResponse.errors[ 0 ] ||
+				__( 'Error requesting connection URL.', 'woocommerce' );
 		}
 
 		return {
@@ -186,11 +226,19 @@ export default compose(
 			jetpackAuthUrl: jetpackAuthUrlResponse.url,
 		};
 	} ),
-	withDispatch( ( dispatch ) => {
+	withDispatch( ( dispatch, ownProps, { resolveSelect } ) => {
 		const { createNotice } = dispatch( 'core/notices' );
+		const { invalidateResolution } = dispatch( onboardingStore );
 
 		return {
 			createNotice,
+			// Drops the cached result first, so every Retry sends a new request.
+			requestJetpackAuthUrl: async ( query ) => {
+				await invalidateResolution( 'getJetpackAuthUrl', [ query ] );
+				return resolveSelect( onboardingStore ).getJetpackAuthUrl(
+					query
+				);
+			},
 		};
 	} )
 )( Connect );

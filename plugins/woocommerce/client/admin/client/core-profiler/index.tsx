@@ -360,14 +360,28 @@ const exitToWooHome = fromPromise(
 	}
 );
 
+// The prefetch and the exit must ask with the same arguments: the exit then waits for a prefetch that is
+// still registering. Two registrations at once would share one secret, and WordPress.com accepts only the first.
+const getJetpackAuthUrlQuery = () => ( {
+	redirectUrl: getAdminLink( 'admin.php?page=wc-admin' ),
+	from: 'woocommerce-core-profiler',
+} );
+
 const exitToJetpackAuth = fromPromise( async () => {
 	// Coming Soon setup is best effort, as in exitToWooHome.
 	await dispatch( onboardingStore )
 		.coreProfilerCompleted()
 		.catch( logProfilerError );
+	const query = getJetpackAuthUrlQuery();
+	const prefetched =
+		await resolveSelect( onboardingStore ).getJetpackAuthUrl( query );
+	if ( prefetched?.success ) {
+		return prefetched;
+	}
+	// The merchant clicked through, so retry once with registration forced.
 	return await resolveSelect( onboardingStore ).getJetpackAuthUrl( {
-		redirectUrl: getAdminLink( 'admin.php?page=wc-admin' ),
-		from: 'woocommerce-core-profiler',
+		...query,
+		force: true,
 	} );
 } );
 
@@ -617,10 +631,9 @@ const preFetchJetpackAuthUrl = assign( {
 	jetpackAuthUrlRef: ( { spawn } ) =>
 		spawn(
 			fromPromise( async () =>
-				resolveSelect( onboardingStore ).getJetpackAuthUrl( {
-					redirectUrl: getAdminLink( 'admin.php?page=wc-admin' ),
-					from: 'woocommerce-core-profiler',
-				} )
+				resolveSelect( onboardingStore ).getJetpackAuthUrl(
+					getJetpackAuthUrlQuery()
+				)
 			)
 		),
 } );

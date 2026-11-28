@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
+use Automattic\WooCommerce\Tests\Helpers\JetpackConnectionManagerTrait;
 use WC_Admin_Settings;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -21,6 +22,7 @@ use WC_Unit_Test_Case;
  * Tests for the Agentic commerce settings tab.
  */
 class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
+	use JetpackConnectionManagerTrait;
 
 	/**
 	 * The System Under Test.
@@ -61,6 +63,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			set_current_screen( 'front' );
+			$this->reset_jetpack_connection_manager();
 			foreach ( array_reverse( $this->restore ) as $item ) {
 				$item[0]->enabled = $item[1];
 			}
@@ -200,6 +203,47 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			AgenticCommerceSettings::connect_redirect()
 		);
 		$this->assertSame( array( 'woocommerce', 'ai-tools' ), get_option( 'jetpack_activation_source' ) );
+	}
+
+	/**
+	 * @testdox The connect redirect forces WordPress.com registration only when asked to.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $force Whether the merchant asked to connect.
+	 */
+	public function test_connect_redirect_passes_force_to_registration( bool $force ): void {
+		$calls = $this->use_recording_jetpack_connection_manager();
+
+		AgenticCommerceSettings::connect_redirect( $force );
+
+		$this->assertSame( array( array( true, $force ) ), $calls->getArrayCopy(), 'Registration should be attempted once with the requested force flag.' );
+	}
+
+	/**
+	 * @testdox Clicking Connect forces WordPress.com registration past the connection package's backoff.
+	 */
+	public function test_connect_action_forces_registration(): void {
+		$calls                = $this->use_recording_jetpack_connection_manager();
+		$_REQUEST['_wpnonce'] = wp_create_nonce( AgenticCommerceSettings::CONNECT_ACTION );
+		// handle_connect() exits after redirecting; stop it at the redirect instead.
+		add_filter(
+			'wp_redirect',
+			static function () {
+				throw new \RuntimeException( 'redirected' );
+			}
+		);
+		try {
+			$this->sut->handle_connect();
+			$this->fail( 'The connect action should redirect.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'redirected', $e->getMessage() );
+		} finally {
+			unset( $_REQUEST['_wpnonce'] );
+		}
+
+		$this->assertSame( array( array( true, true ) ), $calls->getArrayCopy(), 'The connect click should register once, forced.' );
 	}
 
 	/**

@@ -7,6 +7,7 @@
 
 namespace Automattic\WooCommerce\Tests\Admin\API;
 
+use Automattic\WooCommerce\Tests\Helpers\JetpackConnectionManagerTrait;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 
@@ -16,6 +17,8 @@ use WP_REST_Request;
  * @class OnboardingPluginsTest.
  */
 class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
+	use JetpackConnectionManagerTrait;
+
 	/**
 	 * Endpoint.
 	 *
@@ -36,6 +39,7 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		unset( $GLOBALS['wp_rest_auth_cookie'] );
+		$this->reset_jetpack_connection_manager();
 
 		parent::tearDown();
 	}
@@ -255,6 +259,34 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertNotSame( 403, $response->get_status(), 'An admin browser session must pass the interactive-session check.' );
 		$this->assertArrayHasKey( 'url', $response->get_data() );
+	}
+
+	/**
+	 * @testdox The Jetpack authorization URL endpoint forces registration only when the request asks for it.
+	 *
+	 * @testWith [null, false]
+	 *           ["true", true]
+	 *           ["1", true]
+	 *           ["false", false]
+	 *
+	 * @param string|null $force    Raw `force` query value, or null to leave it out.
+	 * @param bool        $expected Whether registration should be forced.
+	 * @return void
+	 */
+	public function test_jetpack_authorization_url_passes_force_to_registration( $force, $expected ) {
+		$calls = $this->use_recording_jetpack_connection_manager();
+
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/jetpack-authorization-url' );
+		$request->set_param( 'redirect_url', 'https://example.com' );
+		if ( null !== $force ) {
+			$request->set_param( 'force', $force );
+		}
+		$this->add_rest_nonce( $request );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'The request should succeed.' );
+		$this->assertSame( array( array( true, $expected ) ), $calls->getArrayCopy(), 'Registration should be attempted once with the expected force flag.' );
 	}
 
 	/**
