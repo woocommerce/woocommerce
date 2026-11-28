@@ -93,8 +93,8 @@ final class GalleryImageResolver {
 			_prime_post_caches( $image_ids );
 		}
 		foreach ( $image_ids as $image_id ) {
-			// WordPress does not cache missing posts; do not query them again through get_post().
-			if ( false === wp_cache_get( $image_id, 'posts' ) ) {
+			// Cache additions can be suspended, so confirm absence before remembering a missing post.
+			if ( false === wp_cache_get( $image_id, 'posts' ) && ! get_post( $image_id ) ) {
 				self::$missing_attachment_ids[ $image_id ] = true;
 			}
 		}
