@@ -1,10 +1,16 @@
 <?php
 declare( strict_types = 1 );
 
+namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
+
+use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
+use WC_REST_Unit_Test_Case;
+use WP_REST_Request;
+
 /**
  * Tests for the route WooCommerce.com reads a connected store's agent readiness report through.
  */
-class WC_REST_WCCOM_Site_Agent_Readiness_Controller_Test extends WC_REST_Unit_Test_Case {
+class WccomSiteReportRouteTest extends WC_REST_Unit_Test_Case {
 
 	private const ROUTE = '/wccom-site/v3/agent-readiness';
 
@@ -49,7 +55,7 @@ class WC_REST_WCCOM_Site_Agent_Readiness_Controller_Test extends WC_REST_Unit_Te
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertTrue( $data['success'] );
-		$this->assertSame( \Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility::execute( array() ), $data['data'] );
+		$this->assertSame( ReportAbility::execute( array() ), $data['data'] );
 		$this->assertArrayHasKey( 'scan_pending', $data['data'] );
 	}
 }
