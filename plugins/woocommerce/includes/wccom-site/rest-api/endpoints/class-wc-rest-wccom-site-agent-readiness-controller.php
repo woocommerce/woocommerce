@@ -16,8 +16,6 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API WCCOM Agent Readiness Controller Class.
- *
- * @extends WC_REST_WCCOM_Site_Controller
  */
 class WC_REST_WCCOM_Site_Agent_Readiness_Controller extends WC_REST_WCCOM_Site_Controller {
 
@@ -33,7 +31,7 @@ class WC_REST_WCCOM_Site_Agent_Readiness_Controller extends WC_REST_WCCOM_Site_C
 	 *
 	 * @since 11.5.0
 	 */
-	public function register_routes() {
+	public function register_routes(): void {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -51,7 +49,7 @@ class WC_REST_WCCOM_Site_Agent_Readiness_Controller extends WC_REST_WCCOM_Site_C
 	 * Check whether user has permission to access controller's endpoints.
 	 *
 	 * @since 11.5.0
-	 * @param WP_USER $user User object.
+	 * @param WP_User $user User object.
 	 * @return bool
 	 */
 	public function user_has_permission( $user ): bool {
@@ -62,8 +60,8 @@ class WC_REST_WCCOM_Site_Agent_Readiness_Controller extends WC_REST_WCCOM_Site_C
 	 * The store's last agent readiness report, as the woocommerce/get-agent-readiness ability returns it.
 	 *
 	 * @since  11.5.0
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response
+	 * @param  WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function handle_report_request( $request ) {
 		unset( $request );
