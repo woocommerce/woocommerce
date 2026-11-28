@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent errors when saving or deleting order items if an extension returns an order ID as a numeric string.
