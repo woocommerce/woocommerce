@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
@@ -377,6 +378,20 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 		$args['post_parent'] = $request['product_id'];
 
 		return $args;
+	}
+
+	/**
+	 * Load variations and prime their image attachments before preparing responses.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param array $query_args Query arguments.
+	 * @return array Query results and pagination data.
+	 */
+	protected function get_objects( $query_args ) {
+		$result = parent::get_objects( $query_args );
+		wc_get_container()->get( ProductUtil::class )->prime_image_caches( $result['objects'] );
+		return $result;
 	}
 
 	/**

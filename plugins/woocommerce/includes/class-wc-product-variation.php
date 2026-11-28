@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\ProductCustoms\CustomsDataValidator;
+use Automattic\WooCommerce\Internal\VariationGallery\GalleryImageResolver;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -26,6 +27,13 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @var string
 	 */
 	protected $post_type = 'product_variation';
+
+	/**
+	 * Prevent gallery filters that read the main image from repeating the gallery lookup.
+	 *
+	 * @var bool
+	 */
+	private $resolving_gallery_image = false;
 
 	/**
 	 * Parent data.
@@ -441,10 +449,38 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$image_id = $this->get_prop( 'image_id', $context );
 
 		if ( 'view' === $context && ! $image_id ) {
-			$image_id = apply_filters( $this->get_hook_prefix() . 'image_id', $this->parent_data['image_id'], $this );
+			$gallery_image_id = $this->get_gallery_fallback_image_id();
+			/**
+			 * Filters the main image fallback when a variation has no assigned main image.
+			 *
+			 * @since 3.0.0
+			 * @since 11.5.0 Uses the first usable gallery photo before the parent photo.
+			 *
+			 * @param int|string           $image_id  Gallery or parent image ID.
+			 * @param WC_Product_Variation $variation Variation being read.
+			 */
+			$image_id = apply_filters( $this->get_hook_prefix() . 'image_id', $gallery_image_id ? $gallery_image_id : $this->parent_data['image_id'], $this );
 		}
 
 		return $image_id;
+	}
+
+	/**
+	 * Read the gallery fallback without recursing through extension filters.
+	 *
+	 * @return int First usable gallery image ID, or zero.
+	 */
+	private function get_gallery_fallback_image_id(): int {
+		if ( $this->resolving_gallery_image ) {
+			return 0;
+		}
+		$this->resolving_gallery_image = true;
+		try {
+			$gallery_ids = $this->get_gallery_image_ids();
+			return is_array( $gallery_ids ) ? GalleryImageResolver::get_first_gallery_image_id( $gallery_ids ) : 0;
+		} finally {
+			$this->resolving_gallery_image = false;
+		}
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the first variation gallery photo when no main image is set, including in carts, emails and API responses.
