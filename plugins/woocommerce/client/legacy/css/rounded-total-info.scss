@@ -30,6 +30,18 @@
 	}
 }
 
+// A total with a link or form field sits after the button, which then holds only the icon. Give it a 24 × 24 px tap
+// target and a gap before the total (WCAG 2.2 target size), so a tap meant for one doesn't hit the other.
+.wc-rounded-total-info__button--icon-only {
+	box-sizing: border-box;
+	align-items: center;
+	justify-content: center;
+	min-inline-size: 24px;
+	min-block-size: 24px;
+	margin-inline-end: 0.25em;
+	vertical-align: middle;
+}
+
 .wc-rounded-total-info__icon {
 	flex: none;
 	align-self: center;

@@ -275,13 +275,15 @@ class RoundedTotalNote implements RegisterHooksInterface {
 		$amount_safe = ! $this->has_interactive_content( $amount_html );
 
 		return sprintf(
-			'<span class="wc-rounded-total-info"><button type="button" class="wc-rounded-total-info__button" popovertarget="%1$s" popovertargetaction="show" aria-expanded="false" aria-describedby="%1$s">%2$s%3$s<span class="wc-rounded-total-info__label">%4$s</span></button><span id="%1$s" class="wc-rounded-total-info__tooltip" popover="auto" role="tooltip">%5$s</span>%6$s</span>',
+			'<span class="wc-rounded-total-info"><button type="button" class="wc-rounded-total-info__button%7$s" popovertarget="%1$s" popovertargetaction="show" aria-expanded="false" aria-describedby="%1$s">%2$s%3$s<span class="wc-rounded-total-info__label">%4$s</span></button><span id="%1$s" class="wc-rounded-total-info__tooltip" popover="auto" role="tooltip">%5$s</span>%6$s</span>',
 			esc_attr( $id ),
 			self::get_icon_html(),
 			$amount_safe ? '<span class="wc-rounded-total-info__amount">' . $amount_html . '</span>' : '',
 			esc_html__( 'Rounding details', 'woocommerce' ),
 			esc_html( $note ),
-			$amount_safe ? '' : $amount_html
+			$amount_safe ? '' : $amount_html,
+			// Only the icon is in the button, so it gets a bigger tap target (see the stylesheet).
+			$amount_safe ? '' : ' wc-rounded-total-info__button--icon-only'
 		);
 	}
 

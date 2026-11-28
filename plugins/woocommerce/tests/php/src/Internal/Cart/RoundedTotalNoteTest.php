@@ -122,6 +122,7 @@ class RoundedTotalNoteTest extends WC_Unit_Test_Case {
 
 		$html = $this->sut->add_mini_cart_item_quantity_note( 'ROW <a href="#plan">Plan</a>', $cart_item );
 
+		$this->assertStringContainsString( 'class="wc-rounded-total-info__button wc-rounded-total-info__button--icon-only"', $html );
 		$this->assertStringContainsString( '<span class="wc-rounded-total-info__label">Rounding details</span></button>', $html );
 		$this->assertStringNotContainsString( 'wc-rounded-total-info__amount', $html );
 		$this->assertStringEndsWith( '</span>ROW <a href="#plan">Plan</a></span>', $html );
