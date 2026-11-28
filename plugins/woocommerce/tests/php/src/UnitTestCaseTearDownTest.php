@@ -134,21 +134,35 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The term trees the product filters cache on their shared service are dropped.
+	 * @testdox The term trees the product filters cache are dropped for every hierarchical taxonomy.
 	 */
-	public function test_reset_product_filters_term_trees_drops_the_cached_trees(): void {
+	public function test_reset_product_filters_term_trees_drops_every_hierarchical_tree(): void {
 		$hierarchy_data = wc_get_container()->get( TaxonomyHierarchyData::class );
-		$cached_trees   = new \ReflectionProperty( TaxonomyHierarchyData::class, 'hierarchy_data' );
+		$reset          = new \ReflectionMethod( \WC_Unit_Test_Case::class, 'reset_product_filters_term_trees' );
 		if ( PHP_VERSION_ID < 80100 ) {
-			$cached_trees->setAccessible( true );
+			$reset->setAccessible( true );
 		}
 
-		$hierarchy_data->get_hierarchy_map( 'product_cat' );
-		$this->assertArrayHasKey( 'product_cat', $cached_trees->getValue( $hierarchy_data ), 'Reading a tree should cache it on the shared service.' );
+		$terms = array();
+		foreach ( array( 'product_cat', 'category' ) as $taxonomy ) {
+			$parent_id = self::factory()->term->create( array( 'taxonomy' => $taxonomy ) );
+			$hierarchy_data->get_hierarchy_map( $taxonomy );
+			$child_id = self::factory()->term->create(
+				array(
+					'taxonomy' => $taxonomy,
+					'parent'   => $parent_id,
+				)
+			);
 
-		self::reset_product_filters_term_trees();
+			$this->assertNotContains( $child_id, $hierarchy_data->get_descendants( $parent_id, $taxonomy ), "The cached {$taxonomy} tree should not know a term created after it was read." );
+			$terms[ $taxonomy ] = array( $parent_id, $child_id );
+		}
 
-		$this->assertSame( array(), $cached_trees->getValue( $hierarchy_data ), 'The cached trees should have been dropped.' );
+		$reset->invoke( $this );
+
+		foreach ( $terms as $taxonomy => list( $parent_id, $child_id ) ) {
+			$this->assertContains( $child_id, $hierarchy_data->get_descendants( $parent_id, $taxonomy ), "The {$taxonomy} tree should be rebuilt with the new term." );
+		}
 	}
 
 	/**

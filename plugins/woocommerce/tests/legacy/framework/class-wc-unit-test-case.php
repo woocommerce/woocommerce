@@ -260,7 +260,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			CodeHacker::reset_hacks();
 
 			$this->reset_analytics_reload_flag();
-			self::reset_product_filters_term_trees();
+			$this->reset_product_filters_term_trees();
 			$this->clear_wc_singleton_state();
 		} finally {
 			// The parent teardown must always run: it rolls back the database
@@ -478,15 +478,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
-	 * Drop the term trees the product filters cache on their shared service. The rollback removes a
-	 * test's terms without firing the term hooks that would clear the cache, so the next test would
-	 * read a tree of terms that no longer exist and miss the ones it creates. Public and static so
-	 * test bases outside this hierarchy can call it too.
+	 * Drop the term trees the product filters cache for each hierarchical taxonomy. The rollback removes a
+	 * test's terms without firing the term hooks that would clear the trees, so the next test would read
+	 * terms that no longer exist and miss the ones it creates.
 	 */
-	public static function reset_product_filters_term_trees(): void {
-		( function (): void {
-			$this->hierarchy_data = array();
-		} )->call( wc_get_container()->get( TaxonomyHierarchyData::class ) );
+	private function reset_product_filters_term_trees(): void {
+		$hierarchy_data = wc_get_container()->get( TaxonomyHierarchyData::class );
+		foreach ( get_taxonomies( array( 'hierarchical' => true ) ) as $taxonomy ) {
+			$hierarchy_data->clear_cache( $taxonomy );
+		}
 	}
 
 	/**
