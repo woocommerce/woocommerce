@@ -1,0 +1,47 @@
+.woocommerce-review-activity-card {
+	.woocommerce-rating {
+		margin-top: $gap-smallest;
+		.gridicon {
+			fill: $notice-yellow;
+		}
+	}
+
+	.woocommerce-activity-card__body > span > p {
+		&:first-child {
+			margin-top: 0;
+		}
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	$icon-size: 18px;
+	.woocommerce-review-activity-card__verified {
+		display: inline-flex;
+		margin-left: $gap-smallest;
+		position: relative;
+		top: $gap-smallest;
+		color: $valid-green;
+		@include font-size( 12 );
+
+		svg {
+			width: $icon-size;
+			height: $icon-size;
+			fill: $valid-green;
+		}
+	}
+
+	@include breakpoint( "<782px" ) {
+		.woocommerce-review-activity-card__image-overlay {
+			margin-top: $gap-smallest;
+		}
+	}
+
+	&.woocommerce-activity-card {
+		padding: $gap $gap-large;
+	}
+	.woocommerce-activity-card__header .woocommerce-activity-card__title {
+		line-height: 20px;
+	}
+}

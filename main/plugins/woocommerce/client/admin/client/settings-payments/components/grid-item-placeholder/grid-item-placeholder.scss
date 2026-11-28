@@ -1,0 +1,40 @@
+.grid-item-placeholder {
+	&__title,
+	&__description,
+	&__actions,
+	&__img {
+		background-color: $gray-100;
+		border-radius: 4px;
+	}
+
+	&__content {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		height: auto;
+	}
+
+	&__title {
+		flex: 0 0 auto;
+		height: 20px;
+		max-width: 40%;
+	}
+
+	&__description {
+		flex: 0 0 auto;
+		height: 20px;
+		max-width: 100%;
+	}
+
+	&__actions {
+		height: 32px;
+		flex: 0 0 auto;
+		max-width: 20%;
+	}
+
+	&__img {
+		width: 40px;
+		height: 40px;
+		margin-right: 20px; /* Space between image and text */
+	}
+}

@@ -1,0 +1,33 @@
+.woocommerce-activity-panel {
+	.woocommerce-order-empty__success-icon {
+		font-size: 36px;
+	}
+
+	// Needs the double-class for specificity
+	.woocommerce-activity-card.woocommerce-order-activity-card {
+		.woocommerce-activity-card__header {
+			margin-bottom: $gap-smallest;
+			.woocommerce-activity-card__title.is-placeholder {
+				width: 45%;
+			}
+		}
+
+		.woocommerce-activity-card__body {
+			& > .is-placeholder {
+				width: 30%;
+			}
+		}
+
+		.woocommerce-activity-card__actions {
+			& > .is-placeholder {
+				height: 24px;
+				margin-top: $gap-smallest;
+				width: 65px;
+			}
+		}
+
+		.woocommerce-order-activity-card {
+			cursor: pointer;
+		}
+	}
+}
