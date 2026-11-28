@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Store API: return whether a product is virtual or downloadable, as `is_virtual` and `is_downloadable` in product responses.

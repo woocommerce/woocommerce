@@ -136,6 +136,8 @@ curl "https://example-store.com/wp-json/wc/store/v1/products"
 		"has_options": false,
 		"is_purchasable": true,
 		"is_in_stock": true,
+		"is_virtual": false,
+		"is_downloadable": false,
 		"is_password_protected": false,
 		"low_stock_remaining": null,
 		"add_to_cart": {
@@ -206,6 +208,8 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/34"
 	"has_options": false,
 	"is_purchasable": true,
 	"is_in_stock": true,
+	"is_virtual": false,
+	"is_downloadable": false,
 	"is_password_protected": false,
 	"low_stock_remaining": null,
 	"add_to_cart": {
@@ -275,6 +279,8 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/wordpress-pennant"
 	"has_options": false,
 	"is_purchasable": true,
 	"is_in_stock": true,
+	"is_virtual": false,
+	"is_downloadable": false,
 	"is_password_protected": false,
 	"low_stock_remaining": null,
 	"add_to_cart": {

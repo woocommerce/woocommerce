@@ -583,6 +583,18 @@ class ProductSchema extends AbstractSchema {
 					],
 				],
 			],
+			'is_virtual'            => [
+				'description' => __( 'Whether the product is virtual: it is not shipped.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => [ 'view', 'edit', 'embed' ],
+				'readonly'    => true,
+			],
+			'is_downloadable'       => [
+				'description' => __( 'Whether the product is downloadable: buying it gives access to a file.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => [ 'view', 'edit', 'embed' ],
+				'readonly'    => true,
+			],
 			'is_password_protected' => [
 				'description' => __( 'Whether the product or its parent requires a password to access its content.', 'woocommerce' ),
 				'type'        => 'boolean',
@@ -670,6 +682,8 @@ class ProductSchema extends AbstractSchema {
 				],
 				( new QuantityLimits() )->get_add_to_cart_limits( $product )
 			),
+			'is_virtual'            => $product->is_virtual(),
+			'is_downloadable'       => $product->is_downloadable(),
 			'is_password_protected' => $this->is_password_protected( $product ),
 			self::EXTENDING_KEY     => $this->get_extended_data( self::IDENTIFIER, $product ),
 
