@@ -21,7 +21,11 @@ import { getSetting } from '@woocommerce/settings';
 import { useMemo } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { CartItem } from '@woocommerce/types';
-import { calculateLineSaleAmount } from '@woocommerce/base-utils';
+import {
+	calculateLineSaleAmount,
+	getLineRoundingNote,
+	getTaxLabels,
+} from '@woocommerce/base-utils';
 import { dinero, toSnapshot } from 'dinero.js';
 import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 
@@ -32,6 +36,7 @@ import ProductBackorderBadge from '../product-backorder-badge';
 import ProductImage from '../product-image';
 import ProductMetadata from '../product-metadata';
 import ProductSaleBadge from '../product-sale-badge';
+import RoundedTotalInfo from '../rounded-total-info';
 
 interface OrderSummaryProps {
 	cartItem: CartItem;
@@ -105,6 +110,11 @@ const OrderSummaryItem = ( {
 		cartItem,
 		totalsCurrency.minorUnit,
 		includeTax
+	);
+	const roundingNote = getLineRoundingNote(
+		cartItem,
+		includeTax,
+		getTaxLabels()
 	);
 
 	const subtotalPriceFormat = applyCheckoutFilter( {
@@ -185,6 +195,14 @@ const OrderSummaryItem = ( {
 				fullDescription,
 			};
 
+	const saleBadge = (
+		<ProductSaleBadge
+			currency={ totalsCurrency }
+			saleAmount={ lineSaleAmount }
+			format={ saleBadgePriceFormat }
+		/>
+	);
+
 	return (
 		<div
 			className={ clsx(
@@ -241,19 +259,24 @@ const OrderSummaryItem = ( {
 			</span>
 			<div
 				className="wc-block-components-order-summary-item__total-price"
-				aria-hidden="true"
+				// The screen reader text above announces the total; the rounding details button stays reachable when shown.
+				aria-hidden={ roundingNote ? undefined : 'true' }
 			>
 				<div className="wc-block-cart-item__total-price-and-sale-badge-wrapper">
-					<ProductPrice
-						currency={ totalsCurrency }
-						format={ productPriceFormat }
-						price={ subtotalPrice }
-					/>
-					<ProductSaleBadge
-						currency={ totalsCurrency }
-						saleAmount={ lineSaleAmount }
-						format={ saleBadgePriceFormat }
-					/>
+					<RoundedTotalInfo note={ roundingNote }>
+						<span aria-hidden="true">
+							<ProductPrice
+								currency={ totalsCurrency }
+								format={ productPriceFormat }
+								price={ subtotalPrice }
+							/>
+						</span>
+					</RoundedTotalInfo>
+					{ roundingNote ? (
+						<span aria-hidden="true">{ saleBadge }</span>
+					) : (
+						saleBadge
+					) }
 				</div>
 			</div>
 		</div>

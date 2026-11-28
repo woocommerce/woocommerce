@@ -192,6 +192,14 @@ class MiniCart extends AbstractBlock {
 			'displayCartPricesIncludingTax',
 			$this->display_cart_prices_including_tax
 		);
+		$this->asset_data_registry->add(
+			'taxLabels',
+			array(
+				'tax'      => WC()->countries->tax_or_vat(),
+				'included' => WC()->countries->inc_tax_or_vat(),
+				'excluded' => WC()->countries->ex_tax_or_vat(),
+			)
+		);
 
 		$template_part_edit_uri = '';
 

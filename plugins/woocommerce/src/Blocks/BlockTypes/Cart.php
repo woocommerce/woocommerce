@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\Cart\RoundedTotalNote;
 
 /**
  * Cart class.
@@ -217,6 +218,18 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->add( 'countryData', CartCheckoutUtils::get_country_data() );
 		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
 		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_cart' ) );
+		$this->asset_data_registry->add( 'taxRoundAtSubtotal', 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) );
+		$this->asset_data_registry->add(
+			'taxLabels',
+			array(
+				'tax'      => WC()->countries->tax_or_vat(),
+				'included' => WC()->countries->inc_tax_or_vat(),
+				'excluded' => WC()->countries->ex_tax_or_vat(),
+			)
+		);
+		// Rounding details on totals that don't add up from the prices shown (see RoundedTotalInfo).
+		wp_enqueue_script( RoundedTotalNote::ASSET_HANDLE );
+		wp_enqueue_style( RoundedTotalNote::ASSET_HANDLE );
 		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled() );
 		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled() );
 		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled() );

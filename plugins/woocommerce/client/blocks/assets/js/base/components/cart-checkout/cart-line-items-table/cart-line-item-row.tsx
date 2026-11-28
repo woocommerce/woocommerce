@@ -26,7 +26,11 @@ import type { CartItem } from '@woocommerce/types';
 import { isBoolean } from '@woocommerce/types';
 import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
 import { Icon, trash } from '@wordpress/icons';
-import { calculateLineSaleAmount } from '@woocommerce/base-utils';
+import {
+	calculateLineSaleAmount,
+	getLineRoundingNote,
+	getTaxLabels,
+} from '@woocommerce/base-utils';
 import { dinero, toSnapshot } from 'dinero.js';
 import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 
@@ -37,6 +41,7 @@ import ProductBackorderBadge from '../product-backorder-badge';
 import ProductImage from '../product-image';
 import ProductMetadata from '../product-metadata';
 import ProductSaleBadge from '../product-sale-badge';
+import RoundedTotalInfo from '../rounded-total-info';
 
 interface CartLineItemRowProps {
 	lineItem: CartItem | Record< string, never >;
@@ -178,6 +183,11 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 			{ prices, totals, quantity: lineQuantity },
 			totalsCurrency.minorUnit,
 			includeTax
+		);
+		const roundingNote = getLineRoundingNote(
+			{ prices, totals, quantity: lineQuantity },
+			includeTax,
+			getTaxLabels()
 		);
 
 		const firstImage = images.length ? images[ 0 ] : {};
@@ -432,11 +442,13 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 								</span>
 							}
 						>
-							<ProductPrice
-								currency={ totalsCurrency }
-								format={ productPriceFormat }
-								price={ toSnapshot( subtotalPrice ).amount }
-							/>
+							<RoundedTotalInfo note={ roundingNote }>
+								<ProductPrice
+									currency={ totalsCurrency }
+									format={ productPriceFormat }
+									price={ toSnapshot( subtotalPrice ).amount }
+								/>
+							</RoundedTotalInfo>
 						</DelayedContentWithSkeleton>
 
 						<ProductSaleBadge

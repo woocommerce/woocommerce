@@ -10,8 +10,10 @@ import { previewCart } from '@woocommerce/resource-previews';
 import OrderSummary from '../index';
 import { textContentMatcher } from '../../../../../../../tests/utils/find-by-text';
 
-// The screen reader label repeats the price, so only the visible one is queried.
-const visibleOnly = { ignore: 'script, style, .screen-reader-text' };
+// The screen reader label repeats the price, and a rounding tooltip can mention it, so only the visible price is queried.
+const visibleOnly = {
+	ignore: 'script, style, .screen-reader-text, [role="tooltip"]',
+};
 
 jest.mock( '@woocommerce/base-context', () => ( {
 	...jest.requireActual( '@woocommerce/base-context' ),

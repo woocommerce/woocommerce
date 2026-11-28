@@ -87,14 +87,13 @@ export const previewCart: CartResponse = {
 			],
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayForMinorUnit(
-					displayWithTax ? '12000' : '10000'
-				),
+				// $10.00 each ($12.00 with tax): two make the $20.00 line below, so the preview line adds up.
+				price: displayForMinorUnit( displayWithTax ? '1200' : '1000' ),
 				regular_price: displayForMinorUnit(
-					displayWithTax ? '120' : '100'
+					displayWithTax ? '1200' : '1000'
 				),
 				sale_price: displayForMinorUnit(
-					displayWithTax ? '12000' : '10000'
+					displayWithTax ? '1200' : '1000'
 				),
 				price_range: null,
 				raw_prices: {

@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { Subtotal, TotalsWrapper } from '@woocommerce/blocks-components';
+import { TotalsWrapper } from '@woocommerce/blocks-components';
+import { TotalsSubtotal } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	useStoreCart,
@@ -28,9 +29,10 @@ const Block = ( { className = '' }: { className?: string } ) => {
 
 	return (
 		<TotalsWrapper className={ className } { ...wrapperProps }>
-			<Subtotal
+			<TotalsSubtotal
 				currency={ totalsCurrency }
-				values={ cart.cartTotals }
+				cartItems={ cart.cartItems }
+				cartTotals={ cart.cartTotals }
 				showSkeleton={ isLoading }
 			/>
 		</TotalsWrapper>
