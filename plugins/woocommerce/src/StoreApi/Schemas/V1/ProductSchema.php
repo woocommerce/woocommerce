@@ -584,13 +584,13 @@ class ProductSchema extends AbstractSchema {
 				],
 			],
 			'is_virtual'            => [
-				'description' => __( 'Whether the product is virtual: it is not shipped.', 'woocommerce' ),
+				'description' => __( 'Whether this product is marked virtual, so it is not shipped. A variable product returns its own value, not the value of its variations.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => [ 'view', 'edit', 'embed' ],
 				'readonly'    => true,
 			],
 			'is_downloadable'       => [
-				'description' => __( 'Whether the product is downloadable: buying it gives access to a file.', 'woocommerce' ),
+				'description' => __( 'Whether this product is marked downloadable. A variable product returns its own value, not the value of its variations.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => [ 'view', 'edit', 'embed' ],
 				'readonly'    => true,
@@ -682,8 +682,8 @@ class ProductSchema extends AbstractSchema {
 				],
 				( new QuantityLimits() )->get_add_to_cart_limits( $product )
 			),
-			'is_virtual'            => $product->is_virtual(),
-			'is_downloadable'       => $product->is_downloadable(),
+			'is_virtual'            => (bool) $product->is_virtual(),
+			'is_downloadable'       => (bool) $product->is_downloadable(),
 			'is_password_protected' => $this->is_password_protected( $product ),
 			self::EXTENDING_KEY     => $this->get_extended_data( self::IDENTIFIER, $product ),
 
