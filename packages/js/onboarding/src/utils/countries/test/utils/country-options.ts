@@ -5436,12 +5436,12 @@ export const countryStateOptions = [
 		label: 'Philippines — Cebu',
 	},
 	{
-		key: 'PH:COM',
-		label: 'Philippines — Compostela Valley',
-	},
-	{
 		key: 'PH:NCO',
 		label: 'Philippines — Cotabato',
+	},
+	{
+		key: 'PH:COM',
+		label: 'Philippines — Davao de Oro',
 	},
 	{
 		key: 'PH:DAV',
@@ -5518,6 +5518,14 @@ export const countryStateOptions = [
 	{
 		key: 'PH:MAG',
 		label: 'Philippines — Maguindanao',
+	},
+	{
+		key: 'PH:MGN',
+		label: 'Philippines — Maguindanao del Norte',
+	},
+	{
+		key: 'PH:MGS',
+		label: 'Philippines — Maguindanao del Sur',
 	},
 	{
 		key: 'PH:MAD',

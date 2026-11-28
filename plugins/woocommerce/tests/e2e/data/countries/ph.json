@@ -103,12 +103,12 @@
             "name": "Cebu"
         },
         {
-            "code": "COM",
-            "name": "Compostela Valley"
-        },
-        {
             "code": "NCO",
             "name": "Cotabato"
+        },
+        {
+            "code": "COM",
+            "name": "Davao de Oro"
         },
         {
             "code": "DAV",
@@ -185,6 +185,14 @@
         {
             "code": "MAG",
             "name": "Maguindanao"
+        },
+        {
+            "code": "MGN",
+            "name": "Maguindanao del Norte"
+        },
+        {
+            "code": "MGS",
+            "name": "Maguindanao del Sur"
         },
         {
             "code": "MAD",
