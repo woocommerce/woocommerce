@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Admin\Orders\ItemQuantityLimits;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\Cart\PriceDisplayPrecision;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 $product      = $item->get_product();
@@ -85,10 +86,31 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			</div>
 		</td>
 	<?php endif; ?>
-	<td class="item_cost" width="1%" data-sort-value="<?php echo esc_attr( $order->get_item_subtotal( $item, false, true ) ); ?>">
+	<?php
+	// The price is shown rounded. When the rounded price × quantity doesn't make the line (e.g. £8.33 × 3 isn't £24.98),
+	// it's underlined with the exact price in a tooltip, like the cart.
+	$item_cost          = (float) $order->get_item_subtotal( $item, false, false );
+	$item_cost_decimals = PriceDisplayPrecision::get_unit_decimals_for_line( $item_cost, (float) $item->get_quantity(), (float) $order->get_line_subtotal( $item, false, false ) );
+	$item_cost_html     = wc_price( NumberUtil::round( $item_cost, wc_get_price_decimals() ), $wc_price_arg );
+	?>
+	<td class="item_cost" width="1%" data-sort-value="<?php echo esc_attr( (string) $item_cost ); ?>">
 		<div class="view">
 			<?php
-			echo wc_price( $order->get_item_subtotal( $item, false, true ), $wc_price_arg ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			if ( $item_cost_decimals > wc_get_price_decimals() ) {
+				$item_cost_note = sprintf(
+					/* translators: %s: exact item price, e.g. £8.325. */
+					__( 'Rounded from %s.', 'woocommerce' ),
+					html_entity_decode( wp_strip_all_tags( wc_price( NumberUtil::round( $item_cost, $item_cost_decimals ), array_merge( $wc_price_arg, array( 'decimals' => $item_cost_decimals ) ) ) ), ENT_QUOTES, get_bloginfo( 'charset' ) )
+				);
+				printf(
+					'<span class="tips wc-order-item-rounded-price" tabindex="0" data-tip="%1$s">%2$s<span class="screen-reader-text"> %3$s</span></span>',
+					esc_attr( $item_cost_note ),
+					$item_cost_html, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					esc_html( $item_cost_note )
+				);
+			} else {
+				echo $item_cost_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			}
 			?>
 		</div>
 	</td>

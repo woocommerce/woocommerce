@@ -23,6 +23,7 @@ jQuery( function ( $ ) {
 				this.states = JSON.parse( woocommerce_admin_meta_boxes_order.countries.replace( /&quot;/g, '"' ) );
 			}
 
+			this.init_rounded_price_tips();
 			$( '.js_field-country' ).selectWoo().on( 'change', this.change_country );
 			$( '.js_field-country' ).trigger( 'change', [ true ] );
 			$( document.body ).on( 'change', 'select.js_field-state', this.change_state );
@@ -198,6 +199,22 @@ jQuery( function ( $ ) {
 				'fadeOut': 50,
 				'delay': 200,
 				'keepAlive': true
+			});
+			wc_meta_boxes_order.init_rounded_price_tips();
+		},
+
+		// A rounded item price also shows its exact price on keyboard focus (`.tips` only open on hover). The hover tipTip
+		// removes data-tip when it starts, so take the text from the price's screen reader copy.
+		init_rounded_price_tips: function() {
+			$( '.wc-order-item-rounded-price' ).each( function() {
+				var $price = $( this );
+				$price.tipTip({
+					'content': $( '<div>' ).text( $.trim( $price.find( '.screen-reader-text' ).text() ) ).html(),
+					'activation': 'focus',
+					'fadeIn': 50,
+					'fadeOut': 50,
+					'delay': 0
+				});
 			});
 		},
 

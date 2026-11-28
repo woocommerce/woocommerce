@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Cart;
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -102,19 +104,41 @@ final class PriceDisplayPrecision {
 	}
 
 	/**
-	 * Count the decimals in a price, ignoring trailing zeros and float noise beyond the rounding precision.
+	 * Get the decimals to show a unit amount with, so the unit × quantity explains the line it came from. That's the
+	 * store's decimals when the rounded unit × quantity is the line shown, otherwise the decimals the exact unit needs
+	 * (at most 6). For example, a £24.975 line of 3 shows each at £8.325, not £8.33.
 	 *
-	 * @param mixed $price Price.
+	 * @param float $unit     Exact unit amount.
+	 * @param float $quantity Quantity.
+	 * @param float $line     Exact line amount.
 	 * @return int
 	 */
-	private static function count_decimals( $price ): int {
+	public static function get_unit_decimals_for_line( float $unit, float $quantity, float $line ): int {
+		$decimals = wc_get_price_decimals();
+
+		if ( 0.0 === $quantity || abs( NumberUtil::round( $unit, $decimals ) * $quantity - NumberUtil::round( $line, $decimals ) ) < 0.000001 ) {
+			return $decimals;
+		}
+
+		// Count at 6 places, not the internal rounding precision, which a filter can lower below the decimals needed.
+		return max( $decimals, min( 6, self::count_decimals( round( $unit, 6 ), 6 ) ) );
+	}
+
+	/**
+	 * Count the decimals in a price, ignoring trailing zeros and float noise beyond the precision.
+	 *
+	 * @param mixed    $price     Price.
+	 * @param int|null $precision Decimals to count up to. Defaults to the internal rounding precision.
+	 * @return int
+	 */
+	private static function count_decimals( $price, ?int $precision = null ): int {
 		if ( '' === $price || null === $price || ! is_numeric( $price ) ) {
 			return 0;
 		}
 
 		// PHP's round(), not NumberUtil::round(), which first rounds to WC_ROUNDING_PRECISION and so drops digits from
 		// stores with more decimals than that allows.
-		$precision = wc_get_rounding_precision();
+		$precision = $precision ?? wc_get_rounding_precision();
 		$digits    = rtrim( number_format( round( (float) $price, $precision ), $precision, '.', '' ), '0' );
 		$dot       = strpos( $digits, '.' );
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Show the exact price in a tooltip when an order item's rounded price doesn't make its line total on the admin order screen.
