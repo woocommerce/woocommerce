@@ -137,7 +137,9 @@ class UcpCart extends UcpCartTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->simulate_new_request();
+		// No request has run yet, so there is nothing to persist. Saving here would write the harness's own
+		// session, and leave its cookie flag and its concurrency baseline changed for every later test.
+		$this->simulate_new_request( '', false );
 	}
 
 	/**
@@ -197,9 +199,10 @@ class UcpCart extends UcpCartTestCase {
 	 * minted or was given.
 	 *
 	 * @param string $cart_token Cart token the next request carries, or '' for none.
+	 * @param bool   $persist    Whether to save the current session first, as the end of a request does.
 	 */
-	private function simulate_new_request( string $cart_token = '' ): void {
-		if ( WC()->session ) {
+	private function simulate_new_request( string $cart_token = '', bool $persist = true ): void {
+		if ( $persist && WC()->session ) {
 			// WC_Session_Handler::save_data() is a no-op without a session cookie, and no
 			// cookie is ever sent in this suite. A real cart request sets one through
 			// woocommerce_set_cart_cookies, so flip the same flag before saving.

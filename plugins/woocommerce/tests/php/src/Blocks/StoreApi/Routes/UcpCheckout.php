@@ -81,7 +81,9 @@ class UcpCheckout extends ControllerTestCase {
 			'cart'     => WC()->cart,
 		);
 
-		$this->simulate_new_request();
+		// No request has run yet, so there is nothing to persist. Saving here would write the harness's own
+		// session, and leave its cookie flag and its concurrency baseline changed for every later test.
+		$this->simulate_new_request( '', false );
 	}
 
 	/**
@@ -129,16 +131,17 @@ class UcpCheckout extends ControllerTestCase {
 	 * Persist the current session and drop the WC() singletons, as the end of a real request does.
 	 *
 	 * @param string $cart_token Cart token the next request carries, or '' for none.
+	 * @param bool   $persist    Whether to save the current session first, as the end of a request does.
 	 */
-	private function simulate_new_request( string $cart_token = '' ): void {
-		if ( WC()->session instanceof \WC_Session_Handler ) {
+	private function simulate_new_request( string $cart_token = '', bool $persist = true ): void {
+		if ( $persist && WC()->session instanceof \WC_Session_Handler ) {
 			// save_data() is a no-op without a session cookie, which this suite never sends.
 			$has_cookie = new \ReflectionProperty( WC()->session, '_has_cookie' );
 			$has_cookie->setAccessible( true );
 			$has_cookie->setValue( WC()->session, true );
 		}
 
-		if ( WC()->session ) {
+		if ( $persist && WC()->session ) {
 			WC()->session->save_data();
 		}
 

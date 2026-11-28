@@ -5,11 +5,12 @@ namespace Automattic\WooCommerce\Tests;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
+use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 
 /**
  * Tests the state cleanup in WC_Unit_Test_Case: the WC() singleton, $_SERVER, Constants and
- * block type state that survives the parent teardown, the Analytics reload flag, and the
- * attribute taxonomies the rollback leaves registered.
+ * block type state that survives the parent teardown, the Analytics reload flag, the product
+ * filters' cached term tree, and the attribute taxonomies the rollback leaves registered.
  *
  * This drives the cleanup methods directly rather than dirtying state in one test and
  * asserting it is gone in the next. A pair like that only holds under declaration order: run
@@ -130,6 +131,38 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 			WC()->countries->get_country_locale()['GB']['postcode']['label'] ?? null,
 			'The filtered locale should not still be cached.'
 		);
+	}
+
+	/**
+	 * @testdox The term trees the product filters cache are dropped for every hierarchical taxonomy.
+	 */
+	public function test_reset_product_filters_term_trees_drops_every_hierarchical_tree(): void {
+		$hierarchy_data = wc_get_container()->get( TaxonomyHierarchyData::class );
+		$reset          = new \ReflectionMethod( \WC_Unit_Test_Case::class, 'reset_product_filters_term_trees' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$reset->setAccessible( true );
+		}
+
+		$terms = array();
+		foreach ( array( 'product_cat', 'category' ) as $taxonomy ) {
+			$parent_id = self::factory()->term->create( array( 'taxonomy' => $taxonomy ) );
+			$hierarchy_data->get_hierarchy_map( $taxonomy );
+			$child_id = self::factory()->term->create(
+				array(
+					'taxonomy' => $taxonomy,
+					'parent'   => $parent_id,
+				)
+			);
+
+			$this->assertNotContains( $child_id, $hierarchy_data->get_descendants( $parent_id, $taxonomy ), "The cached {$taxonomy} tree should not know a term created after it was read." );
+			$terms[ $taxonomy ] = array( $parent_id, $child_id );
+		}
+
+		$reset->invoke( $this );
+
+		foreach ( $terms as $taxonomy => list( $parent_id, $child_id ) ) {
+			$this->assertContains( $child_id, $hierarchy_data->get_descendants( $parent_id, $taxonomy ), "The {$taxonomy} tree should be rebuilt with the new term." );
+		}
 	}
 
 	/**

@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Formatters;
 use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
@@ -46,6 +47,13 @@ abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 	 * Tear down Rest API server.
 	 */
 	protected function tearDown(): void {
+		// This base does not extend WC_Unit_Test_Case, so drop the product filters' cached term trees here,
+		// before the rollback, as that teardown does.
+		$hierarchy_data = wc_get_container()->get( TaxonomyHierarchyData::class );
+		foreach ( get_taxonomies( array( 'hierarchical' => true ) ) as $taxonomy ) {
+			$hierarchy_data->clear_cache( $taxonomy );
+		}
+
 		parent::tearDown();
 		/** @var \WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
