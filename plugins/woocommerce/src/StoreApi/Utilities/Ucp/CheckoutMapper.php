@@ -23,7 +23,7 @@ class CheckoutMapper {
 	 * @param array                $cart Store API cart response, as nested arrays.
 	 * @param string               $checkout_id Checkout identifier (a Store API cart token).
 	 * @param array<string, mixed> $state Stored `status` and `continue_url`, the `order_id` of an order handed off for payment, and the `order` once paid.
-	 * @param array<string, mixed> $context Optional `messages` and `discount_codes`, as {@see CartMapper::build_cart()} takes them.
+	 * @param array<string, mixed> $context Optional `messages` and `discount_codes`, as {@see CartMapper::build_cart()} takes them, and the `buyer_fields` to return.
 	 * @return array
 	 */
 	public function build_checkout( array $cart, string $checkout_id, array $state, array $context = array() ): array {
@@ -43,7 +43,7 @@ class CheckoutMapper {
 		$payload['status'] = $status;
 		$payload['links']  = $this->policy_links();
 
-		$buyer = $this->buyer( (array) ( $cart['billing_address'] ?? array() ) );
+		$buyer = $this->buyer( (array) ( $cart['billing_address'] ?? array() ), (array) ( $context['buyer_fields'] ?? array() ) );
 		if ( ! empty( $buyer ) ) {
 			$payload['buyer'] = $buyer;
 		}
@@ -166,16 +166,23 @@ class CheckoutMapper {
 	/**
 	 * Build the UCP buyer from the cart billing address.
 	 *
-	 * @param array $billing Store API billing address.
+	 * Confirms what a request set and nothing else: the checkout id is the only credential, so
+	 * details are not handed to a request that did not bring them.
+	 *
+	 * @param array    $billing Store API billing address.
+	 * @param string[] $fields Buyer fields the request set.
 	 * @return array<string, string> Only the fields that are set.
 	 */
-	private function buyer( array $billing ): array {
+	private function buyer( array $billing, array $fields ): array {
 		return array_filter(
-			array(
-				'first_name'   => (string) ( $billing['first_name'] ?? '' ),
-				'last_name'    => (string) ( $billing['last_name'] ?? '' ),
-				'email'        => (string) ( $billing['email'] ?? '' ),
-				'phone_number' => (string) ( $billing['phone'] ?? '' ),
+			array_intersect_key(
+				array(
+					'first_name'   => (string) ( $billing['first_name'] ?? '' ),
+					'last_name'    => (string) ( $billing['last_name'] ?? '' ),
+					'email'        => (string) ( $billing['email'] ?? '' ),
+					'phone_number' => (string) ( $billing['phone'] ?? '' ),
+				),
+				array_flip( $fields )
 			),
 			static function ( string $value ): bool {
 				return '' !== $value;

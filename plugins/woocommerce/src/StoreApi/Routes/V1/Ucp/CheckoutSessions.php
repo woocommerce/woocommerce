@@ -149,7 +149,7 @@ class CheckoutSessions extends AbstractCheckoutRoute {
 			return $error;
 		}
 
-		$context = $this->apply_discount_codes( $codes );
+		$context = array_merge( $this->apply_discount_codes( $codes ), array( 'buyer_fields' => $this->buyer_fields_set( $request ) ) );
 		$state   = array( 'created_at' => time() );
 		$this->save_checkout_state( $state );
 
