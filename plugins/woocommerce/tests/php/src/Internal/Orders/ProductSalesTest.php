@@ -46,6 +46,66 @@ class ProductSalesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Reconciles sales when saved items have filtered numeric-string order IDs.
+	 */
+	public function test_item_saves_with_numeric_string_order_ids(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$pending = wc_create_order();
+		$item_id = $order->add_product( $product, 1 );
+		$order->update_status( OrderStatus::ON_HOLD );
+
+		$filter = static function ( $order_id ) {
+			return (string) $order_id;
+		};
+		add_filter( 'woocommerce_order_item_get_order_id', $filter );
+
+		try {
+			$item = new WC_Order_Item_Product( $item_id );
+			$this->assertSame( (string) $order->get_id(), $item->get_order_id(), 'The filter should return a numeric-string order ID.' );
+			$item->set_quantity( 2 );
+			$item->save();
+			$item->save();
+			$this->assertSame( 2, wc_get_product( $product->get_id() )->get_total_sales(), 'Repeated saves should count the quantity difference only once.' );
+
+			$order->add_product( $product, 3 );
+			$this->assertSame( 5, wc_get_product( $product->get_id() )->get_total_sales(), 'New items should also accept filtered order IDs.' );
+
+			$item->set_order_id( $pending->get_id() );
+			$item->save();
+			$this->assertSame( 3, wc_get_product( $product->get_id() )->get_total_sales(), 'Moving to an unrecorded order should reverse the item sales.' );
+
+			$item->set_order_id( $order->get_id() );
+			$item->save();
+			$this->assertSame( 5, wc_get_product( $product->get_id() )->get_total_sales(), 'Moving back should record the item sales again.' );
+		} finally {
+			remove_filter( 'woocommerce_order_item_get_order_id', $filter );
+		}
+	}
+
+	/**
+	 * @testdox Reverses sales when deleted items have filtered numeric-string order IDs.
+	 */
+	public function test_item_deletion_with_numeric_string_order_ids(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$item_id = $order->add_product( $product, 2 );
+		$order->update_status( OrderStatus::ON_HOLD );
+
+		$filter = static function ( $order_id ) {
+			return (string) $order_id;
+		};
+		add_filter( 'woocommerce_order_item_get_order_id', $filter );
+
+		try {
+			wc_delete_order_item( $item_id );
+			$this->assertSame( 0, wc_get_product( $product->get_id() )->get_total_sales(), 'Deleting an item should reverse its sales with a filtered order ID.' );
+		} finally {
+			remove_filter( 'woocommerce_order_item_get_order_id', $filter );
+		}
+	}
+
+	/**
 	 * @testdox Does not count edits to an order whose sales have not been recorded.
 	 */
 	public function test_unrecorded_order_edits_do_not_count_sales(): void {

@@ -71,7 +71,7 @@ class ProductSales implements RegisterHooksInterface {
 		$this->item_snapshots_before_save[ $object_id ] = array(
 			'product_id' => $persisted_item instanceof WC_Order_Item_Product ? $persisted_item->get_product_id() : 0,
 			'quantity'   => $persisted_item instanceof WC_Order_Item_Product ? absint( $persisted_item->get_quantity() ) : 0,
-			'order_id'   => $persisted_item ? $persisted_item->get_order_id() : $item->get_order_id(),
+			'order_id'   => absint( $persisted_item ? $persisted_item->get_order_id() : $item->get_order_id() ),
 		);
 	}
 
@@ -94,8 +94,9 @@ class ProductSales implements RegisterHooksInterface {
 			return;
 		}
 
+		$current_order_id                  = absint( $item->get_order_id() );
 		$previous_order_has_recorded_sales = $this->has_recorded_sales( $item_before_save['order_id'] );
-		$current_order_has_recorded_sales  = $item_before_save['order_id'] === $item->get_order_id() ? $previous_order_has_recorded_sales : $this->has_recorded_sales( $item->get_order_id() );
+		$current_order_has_recorded_sales  = $item_before_save['order_id'] === $current_order_id ? $previous_order_has_recorded_sales : $this->has_recorded_sales( $current_order_id );
 		if ( ! $previous_order_has_recorded_sales && ! $current_order_has_recorded_sales ) {
 			return;
 		}
@@ -126,7 +127,7 @@ class ProductSales implements RegisterHooksInterface {
 		$item_id = absint( $item_id );
 		unset( $this->item_sales_before_delete[ $item_id ] );
 		$item = WC_Order_Factory::get_order_item( $item_id );
-		if ( ! $item instanceof WC_Order_Item_Product || ! $this->has_recorded_sales( $item->get_order_id() ) ) {
+		if ( ! $item instanceof WC_Order_Item_Product || ! $this->has_recorded_sales( absint( $item->get_order_id() ) ) ) {
 			return;
 		}
 
