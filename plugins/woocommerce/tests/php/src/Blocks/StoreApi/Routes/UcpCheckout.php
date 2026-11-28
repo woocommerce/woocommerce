@@ -810,6 +810,19 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox The buyer is returned only to a request that set it, and an empty value reads nothing back.
+	 */
+	public function test_buyer_is_not_returned_to_a_request_that_did_not_set_it(): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+
+		$this->assertArrayNotHasKey( 'buyer', $this->request( 'GET', $path )->get_data() );
+		$this->assertArrayNotHasKey( 'buyer', $this->request( 'PUT', $path, array() )->get_data() );
+		$this->assertArrayNotHasKey( 'buyer', $this->request( 'PUT', $path, array( 'buyer' => array( 'phone_number' => '' ) ) )->get_data() );
+		$this->assertArrayNotHasKey( 'buyer', $this->request( 'POST', $path . '/complete' )->get_data() );
+	}
+
+	/**
 	 * @testdox Billing follows the shipping address, and a checkout stays incomplete until the buyer's name and phone are known.
 	 */
 	public function test_billing_follows_shipping_and_is_required(): void {
@@ -836,6 +849,7 @@ class UcpCheckout extends ControllerTestCase {
 		);
 		$updated = $this->request( 'PUT', '/checkout-sessions/' . $created['id'], array( 'buyer' => $buyer ) )->get_data();
 		$this->assertSame( 'ready_for_complete', $updated['status'] );
+		$this->assertSame( $buyer, $updated['buyer'], 'Only the fields this request set are confirmed.' );
 
 		$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
 		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );

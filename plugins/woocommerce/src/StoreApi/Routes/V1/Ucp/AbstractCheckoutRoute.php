@@ -410,6 +410,30 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	}
 
 	/**
+	 * Name the `buyer` fields the request set, for the response to confirm.
+	 *
+	 * An empty value is left out: the other address may fill it, and that value is not the request's.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return string[]
+	 */
+	protected function buyer_fields_set( \WP_REST_Request $request ): array {
+		$buyer = Utils::json_param( $request, 'buyer' );
+
+		return array_keys(
+			array_filter(
+				is_array( $buyer ) ? $buyer : array(),
+				static function ( $value ): bool {
+					return is_scalar( $value ) && '' !== (string) $value;
+				}
+			)
+		);
+	}
+
+	/**
 	 * Let one address supply what the other lacks, as the storefront's "same address for billing" does.
 	 *
 	 * Billing follows a shipping change while the two still match and the request names no billing

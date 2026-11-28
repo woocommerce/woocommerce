@@ -119,7 +119,7 @@ class CheckoutSessionsById extends AbstractCheckoutRoute {
 		}
 
 		$error   = $this->update_line_items( $request ) ?? $this->update_customer( $request );
-		$context = null === $error ? $this->apply_discount_codes( $codes ) : array();
+		$context = null === $error ? array_merge( $this->apply_discount_codes( $codes ), array( 'buyer_fields' => $this->buyer_fields_set( $request ) ) ) : array();
 
 		if ( ( $state['fingerprint'] ?? '' ) !== $this->hand_off_fingerprint() ) {
 			$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session changed after payment was handed off.', 'woocommerce' ) );
