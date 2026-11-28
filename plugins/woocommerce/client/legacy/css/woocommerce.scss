@@ -2034,6 +2034,12 @@ p.demo_store,
 			vertical-align: middle;
 		}
 
+		// Line totals line up on their right edge, like the totals below the table.
+		th.product-subtotal,
+		td.product-subtotal {
+			text-align: end;
+		}
+
 		td.actions .coupon .input-text {
 			float: left;
 			box-sizing: border-box;

@@ -206,6 +206,6 @@ test.describe( 'Shopper → Tax', () => {
 		await wpCLI( 'option set woocommerce_tax_display_cart excl' );
 		await page.reload();
 
-		await expect( miniCartLocator ).toContainText( '(ex. tax)' );
+		await expect( miniCartLocator ).toContainText( '(excl. tax)' );
 	} );
 } );
