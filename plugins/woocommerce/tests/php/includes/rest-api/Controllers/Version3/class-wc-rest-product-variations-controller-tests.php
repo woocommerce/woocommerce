@@ -267,7 +267,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 			$variation->set_image_id( 0 );
 			$variation->set_gallery_image_ids( array( $image_id ) );
 			$variation->save();
-			$images[] = $image_id;
+			$images[ $id ] = $image_id;
 			clean_post_cache( $image_id );
 		}
 		$attachment_queries = array();
@@ -297,7 +297,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 		);
 		$this->assertCount( count( $images ), $result['objects'] );
 		foreach ( $result['objects'] as $variation ) {
-			$this->assertContains( $variation->get_image_id(), $images, 'Every REST item must use its own gallery photo.' );
+			$this->assertSame( $images[ $variation->get_id() ], $variation->get_image_id(), 'Every REST item must use its own gallery photo.' );
 		}
 		$this->assertCount( 1, $attachment_queries, 'Cold attachment posts must load in one batch instead of one query per variation.' );
 	}

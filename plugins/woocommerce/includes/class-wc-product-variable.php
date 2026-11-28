@@ -455,7 +455,7 @@ class WC_Product_Variable extends WC_Product {
 
 		$parent_gallery_ids = array_map( 'intval', $this->get_gallery_image_ids() );
 		if ( $parent_gallery_ids ) {
-			_prime_post_caches( $parent_gallery_ids );
+			GalleryImageResolver::prime_attachment_caches( $parent_gallery_ids );
 		}
 		$parent_gallery_ids = array_values( array_filter( $parent_gallery_ids, array( GalleryImageResolver::class, 'has_image_preview' ) ) );
 		$display_image_ids  = GalleryImageResolver::resolve(

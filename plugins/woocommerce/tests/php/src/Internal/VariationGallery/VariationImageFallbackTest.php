@@ -227,16 +227,53 @@ class VariationImageFallbackTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should not repeat database queries for missing gallery attachments within the same request.
+	 * @testWith [["missing"], "parent"]
+	 *           [["front", "missing"], "front"]
+	 *           [["missing", "front"], "front"]
+	 *
+	 * @param string[] $gallery Gallery photo names, or missing.
+	 * @param string   $expected Expected main photo name.
 	 */
-	public function test_missing_gallery_attachment_queries_are_not_repeated(): void {
+	public function test_missing_gallery_attachment_queries_are_not_repeated( array $gallery, string $expected ): void {
 		global $wpdb;
-		$this->sut->set_gallery_image_ids( array( 999999999 ) );
-		$this->assertSame( $this->images['parent'], $this->sut->get_image_id() );
+		$gallery_ids = array_map( fn( $name ) => 'missing' === $name ? 999999999 : $this->images[ $name ], $gallery );
+		$this->sut->set_gallery_image_ids( $gallery_ids );
+		$this->assertSame( $this->images[ $expected ], $this->sut->get_image_id() );
 		$before = $wpdb->num_queries;
 		foreach ( range( 1, 10 ) as $index ) {
-			$this->assertSame( $this->images['parent'], $this->sut->get_image_id(), 'Read ' . $index . ' must retain the parent fallback.' );
+			$this->assertSame( $this->images[ $expected ], $this->sut->get_image_id(), 'Read ' . $index . ' must retain the selected fallback.' );
 		}
 		$this->assertSame( $before, $wpdb->num_queries, 'A missing attachment must not trigger another query until post data changes.' );
+	}
+
+	/**
+	 * @testdox Should not repeat missing parent-gallery attachment queries when reading variation data.
+	 */
+	public function test_missing_parent_gallery_attachment_queries_are_not_repeated(): void {
+		global $wpdb;
+		$this->parent->set_gallery_image_ids( array( $this->images['back'], $this->images['front'] ) );
+		$this->sut->set_image_id( $this->images['back'] );
+		$this->sut->set_gallery_image_ids( array() );
+		wp_delete_attachment( $this->images['front'], true );
+		$this->parent->get_available_variation( $this->sut );
+		$before = $wpdb->num_queries;
+
+		foreach ( range( 1, 10 ) as $index ) {
+			$data = $this->parent->get_available_variation( $this->sut );
+			$this->assertSame( $this->images['back'], $data['image_id'], 'Read ' . $index . ' must retain the variation main photo.' );
+		}
+		$this->assertSame( $before, $wpdb->num_queries, 'A missing parent-gallery attachment must not be primed again until post data changes.' );
+
+		$restored_id = wp_insert_attachment(
+			array(
+				'import_id'      => $this->images['front'],
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		update_post_meta( $restored_id, '_wp_attached_file', 'fallback-restored-parent.jpg' );
+		$this->assertSame( $this->images['front'], $restored_id, 'The fixture must restore the previously missing parent-gallery photo.' );
+		$data = $this->parent->get_available_variation( $this->sut );
+		$this->assertStringContainsString( 'fallback-restored-parent.jpg', $data['gallery_images_html'], 'Restoring a parent-gallery attachment must invalidate the missing-image cache.' );
 	}
 
 	/**

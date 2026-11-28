@@ -68,18 +68,36 @@ final class GalleryImageResolver {
 		if ( empty( $image_ids ) ) {
 			return 0;
 		}
-		$missing_ids = self::get_missing_attachment_ids();
-		$image_ids   = array_filter( ArrayUtil::unique_truthy_values( $image_ids ), static fn( $id ) => ! isset( $missing_ids[ $id ] ) );
-		if ( ! empty( $image_ids ) ) {
-			// Prime caches to reduce future queries.
-			_prime_post_caches( $image_ids );
-		}
+		self::prime_attachment_caches( $image_ids );
 		foreach ( $image_ids as $image_id ) {
 			if ( self::has_image_preview( $image_id ) ) {
 				return $image_id;
 			}
 		}
 		return 0;
+	}
+
+	/**
+	 * Load attachment caches together and remember every missing post in the batch.
+	 *
+	 * @since 11.5.0
+	 *
+	 * @param int[] $image_ids Attachment IDs.
+	 * @return void
+	 */
+	public static function prime_attachment_caches( array $image_ids ): void {
+		$missing_ids = self::get_missing_attachment_ids();
+		$image_ids   = array_filter( ArrayUtil::unique_truthy_values( $image_ids ), static fn( $id ) => $id > 0 && ! isset( $missing_ids[ $id ] ) );
+		if ( ! empty( $image_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $image_ids );
+		}
+		foreach ( $image_ids as $image_id ) {
+			// WordPress does not cache missing posts; do not query them again through get_post().
+			if ( false === wp_cache_get( $image_id, 'posts' ) ) {
+				self::$missing_attachment_ids[ $image_id ] = true;
+			}
+		}
 	}
 
 	/**
