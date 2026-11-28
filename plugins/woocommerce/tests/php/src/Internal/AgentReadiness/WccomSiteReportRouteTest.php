@@ -30,7 +30,7 @@ class WccomSiteReportRouteTest extends WC_REST_Unit_Test_Case {
 		$response = rest_get_server()->dispatch( new WP_REST_Request( 'GET', self::ROUTE ) );
 
 		$this->assertSame( 401, $response->get_status() );
-		$this->assertArrayNotHasKey( 'data', (array) $response->get_data() );
+		$this->assertSame( 'not_authenticated', $response->get_data()['code'] );
 	}
 
 	/**
@@ -42,6 +42,7 @@ class WccomSiteReportRouteTest extends WC_REST_Unit_Test_Case {
 		$response = rest_get_server()->dispatch( new WP_REST_Request( 'GET', self::ROUTE ) );
 
 		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 'forbidden', $response->get_data()['code'] );
 	}
 
 	/**
