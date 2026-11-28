@@ -5,18 +5,23 @@ sidebar_label: 'Submitting your product'
 
 # Submitting your product to the Woo Marketplace
 
-We look forward to reviewing your extension, theme, or integration for listing in the WooCommerce.com Marketplace. Before getting started, make sure you have [applied for a Marketplace vendor account](https://woocommerce.com/partners/) and your application has been approved.
+We look forward to reviewing your extension, theme, or integration for listing in the WooCommerce.com Marketplace. Before getting started, make sure you have [applied for a Marketplace vendor account](https://woocommerce.com/partners/) and your application has been approved. Applications are reviewed, and approval isn't automatic.
 
 ## Pre-submission checklist
 
 <details>
 <summary>Business review</summary>
 
-This includes an analysis of the product's business model and revenue share structure with Woo, as well as product rationale, competition, and developer/company history.
+The business review checks that your product is a good fit for the Marketplace and that there is a business model that shares revenue with Woo. This includes an analysis of the product's business model and revenue share structure with Woo, as well as product rationale, competition, merchant demand, and developer/company history.
 
+- **Merchant traction**: We look for evidence that merchants already trust the product, especially for SaaS and other integration products, ideally WooCommerce merchants. Installs, paying customers, reviews, and feedback all count. If your product is new, build a user base first, for example with a free connector plugin on WordPress.org, then apply. 
+- **Vendor identity and history**: We look at who is behind the product, including your company or developer profile, your track record, other products you maintain, and how you plan to support merchants.
+- **Product readiness**: The product should be ready for merchants and should do what the listing says. Prototypes, features that are planned but not built, and descriptions that overstate what the product does are common reasons for a decline.
+- **Category and competition**: We consider what the Marketplace already offers, and what merchants can get for free. Products in a well-served category need to show a clear difference in value, not just a different name or interface.
 - **Mutually beneficial partnership**: Products must share revenue with Woo, exclude spam links, affiliate links, or links to upsell products outside of the Woo Marketplace. See our [monetization expectations](/docs/woo-marketplace/monetization-expectations/).
 - **Trademark compliance**: Ensure that product names do not violate Woo's [trademark guidelines](https://woocommerce.com/trademark-guidelines/#sg-trademarks). Select a unique name that builds your brand and sets your product apart from others. [Review our product name guidelines](/docs/woo-marketplace/product-page-content-and-assets/#naming-guidelines).
 - **Competitive pricing**: Is the proposed price equal to or less than the price of the product sold in other environments? Select a suggested price that matches the price you sell elsewhere.
+
 
 </details>
 
@@ -32,7 +37,8 @@ PHP 7.4 reached [End of Life](https://www.php.net/supported-versions.php) (EOL) 
 
 - Products must support the two latest **major releases** of both [WooCommerce](https://wordpress.org/plugins/woocommerce/) and [WordPress](https://wordpress.org/download/).
 - Products must adhere to foundational guidelines outlined in our [developer hub](https://developer.woocommerce.com/).
-- If your pricing model is based on a standard, tiered monthly subscription, you will be required to implement the [SaaS Billing API](/docs/woo-marketplace/billing-api-saas/) before launch. API keys and sandbox access are granted manually after products are submitted for Marketplace consideration.
+- If your pricing model is based on a standard, tiered monthly subscription, you may be required to implement the [SaaS Billing API](/docs/woo-marketplace/billing-api-saas/) before launch. API keys and sandbox access are granted manually after products are submitted for Marketplace consideration.
+- SaaS products should integrate with WooCommerce through a connector plugin that links the merchant's store to your service.
 - Products must be able to pass the following [Quality Insights Toolkit](https://qit.woo.com/docs/) (QIT) tests:
     - [API](https://qit.woo.com/docs/managed-tests/woo-api)
     - [End-to-end](https://qit.woo.com/docs/managed-tests/woo-e2e) (E2E)
@@ -125,7 +131,7 @@ From your vendor dashboard, navigate to **Submissions > Submit Product** and sel
 ![Submit product type selection](./_media/submit-product-type.png)
 
 :::note Freemium products
-Freemium products — products with both free and paid versions — require **two separate submissions**, one for each model. These will later be merged into a single product page where users can choose between versions.
+Freemium products — products with both free and paid versions — require **two separate submissions**, one for each model. These will later be merged into a single product page where users can choose between versions. Submit the paid version first.
 :::
 
 ### File upload and submission info
@@ -163,12 +169,25 @@ A review consists of the following steps:
 3. **User experience (UX) review**: to ensure the product works as expected and its look and feel aligns with our UX guidelines.
 4. **Launch preparations**: once a submission successfully passes these review phases, it will be formally approved and proceed to onboarding for launch.
 
+## Why submissions are declined
+
+Not every marketplace submission is accepted. The most common reasons are:
+
+- Limited merchant adoption, especially among WooCommerce merchants
+- A category that is already well served, without a clear difference in value
+- A product name that conflicts with existing products or trademarks
+- Features that are incomplete, or described in a way that doesn't match the product
+- A shallow integration with WooCommerce
+- Company or developer details that we couldn't verify
+
+Code and UX reviews can also lead to a decline. Where possible, we explain the reasons in the feedback on your submission.
+
 ## FAQs
 
 <details>
 <summary>How long will it take for my product to be reviewed?</summary>
 
-Once the submission is in business review, you can expect a formal decision from a reviewer within 30 days. Throughout the review process, we may provide feedback and request changes before rejecting or approving a submission.
+Review times vary, and we can't guarantee a specific timeline. Once your submission reaches business review, you can follow its status in the Submission progress tab of your vendor dashboard. We may request changes before approving or rejecting a submission, and each round of changes adds to the total time. A complete submission, with clear testing instructions and business details, means fewer rounds of back and forth and a shorter review overall.
 
 </details>
 
@@ -176,6 +195,8 @@ Once the submission is in business review, you can expect a formal decision from
 <summary>Can I resubmit a previously rejected product?</summary>
 
 Yes. You are welcome to resubmit products, providing the previously-received feedback was incorporated and your product was improved to comply with our guidelines and quality standards.
+
+If a submission was declined because of limited merchant use or category fit, the most useful change is evidence of growth. For example, build installs and reviews on WordPress.org, add merchant testimonials, or show how the product differs from existing options. Reapplying without changes is unlikely to lead to a different result.
 
 </details>
 
@@ -189,6 +210,6 @@ Yes. You are welcome to resubmit products, providing the previously-received fee
 
 ## Submission support
 
-For additional questions related to your submission, please use the discussion box below the **Submission Bot** results table in the **Submission progress** tab within your vendor dashboard.
+For additional questions related to your submission, please use the discussion box below the **Submission Bot** results table in the **Submission progress** tab within your vendor dashboard. Avoid opening an additional ticket.
 
 ![Submission support discussion box](./_media/submission-support.png)
