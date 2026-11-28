@@ -118,6 +118,42 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A product and each variation say whether they are virtual or downloadable.
+	 */
+	public function test_get_item_returns_virtual_and_downloadable() {
+		$get      = static fn( int $id ): array => rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $id ) )->get_data();
+		$physical = $get( $this->products[0]->get_id() );
+		$this->assertFalse( $physical['is_virtual'] );
+		$this->assertFalse( $physical['is_downloadable'] );
+
+		$product = $this->products[1];
+		$product->set_virtual( true );
+		$product->save();
+		$data = $get( $product->get_id() );
+		$this->assertTrue( $data['is_virtual'] );
+		$this->assertFalse( $data['is_downloadable'], 'Virtual alone is not downloadable' );
+
+		$product->set_virtual( false );
+		$product->set_downloadable( true );
+		$product->save();
+		$data = $get( $product->get_id() );
+		$this->assertFalse( $data['is_virtual'], 'Downloadable alone is not virtual' );
+		$this->assertTrue( $data['is_downloadable'] );
+		$product->set_downloadable( false );
+		$product->save();
+
+		$variable  = \WC_Helper_Product::create_variation_product();
+		$children  = $variable->get_children();
+		$variation = wc_get_product( $children[0] );
+		$variation->set_virtual( true );
+		$variation->save();
+		$this->assertTrue( $get( $children[0] )['is_virtual'], 'A variation returns its own value' );
+		$this->assertFalse( $get( $children[1] )['is_virtual'] );
+		$this->assertFalse( $get( $variable->get_id() )['is_virtual'], 'A virtual variation does not make its parent virtual' );
+		$variable->delete( true );
+	}
+
+	/**
 	 * Test getting item.
 	 */
 	public function test_get_item() {
@@ -241,6 +277,8 @@ class Products extends ControllerTestCase {
 		$this->assertArrayHasKey( 'on_sale', $data[0] );
 		$this->assertArrayHasKey( 'sku', $data[0] );
 		$this->assertArrayHasKey( 'global_unique_id', $data[0] );
+		$this->assertArrayHasKey( 'is_virtual', $data[0] );
+		$this->assertArrayHasKey( 'is_downloadable', $data[0] );
 		$this->assertArrayHasKey( 'prices', $data[0] );
 		$this->assertArrayHasKey( 'average_rating', $data[0] );
 		$this->assertArrayHasKey( 'review_count', $data[0] );

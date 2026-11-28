@@ -99,6 +99,8 @@ export interface ProductResponseItem {
 		class: string;
 	};
 	sold_individually: boolean;
+	is_virtual?: boolean;
+	is_downloadable?: boolean;
 	weight: string;
 	dimensions: {
 		length: string;
