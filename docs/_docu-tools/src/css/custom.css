@@ -427,3 +427,29 @@ html[class*='docs-doc-id-getting-started/README'] .markdown-copy-button {
     margin-top: 2.8rem;
   }
 }
+
+/* Woo Marketplace landing page: linked cards */
+.woo-docs-homepage__capability-card--linked {
+  position: relative;
+}
+
+.woo-docs-homepage__capability-card--linked p:last-child a::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.woo-docs-homepage__capability-card--linked:hover {
+  border-color: var(--woo-home-accent);
+}
+
+.woo-docs-homepage__capability-card--linked:focus-within {
+  outline: 2px solid #873eff;
+  outline-offset: 3px;
+}
+
+/* Cap width on very large screens (landing page only) */
+html[class*='docs-doc-id-woo-marketplace/index'] main .container {
+  max-width: 1440px;
+}
